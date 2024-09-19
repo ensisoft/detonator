@@ -1239,14 +1239,14 @@
         <bool>true</bool>
        </property>
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>440</width>
          <height>0</height>
         </size>
        </property>
@@ -1276,7 +1276,7 @@
         <item>
          <widget class="QListWidget" name="textures">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1325,7 +1325,7 @@
           <x>0</x>
           <y>0</y>
           <width>440</width>
-          <height>1003</height>
+          <height>1000</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -1344,7 +1344,7 @@
          <item>
           <widget class="QGroupBox" name="textureMap">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -1355,20 +1355,16 @@
            <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
              <layout class="QGridLayout" name="gridLayout_8">
-              <item row="3" column="1">
-               <widget class="QComboBox" name="textureMapType">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QLineEdit" name="textureMapID">
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_34">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>ID</string>
                 </property>
                </widget>
               </item>
@@ -1382,14 +1378,7 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_22">
-                <property name="text">
-                 <string>Name</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="0" colspan="2">
+              <item row="7" column="0" colspan="2">
                <widget class="QGroupBox" name="spriteSheet">
                 <property name="title">
                  <string>Use single spritesheet</string>
@@ -1451,6 +1440,58 @@
                   </widget>
                  </item>
                 </layout>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QDoubleSpinBox" name="spriteFps">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="suffix">
+                 <string/>
+                </property>
+                <property name="maximum">
+                 <double>100.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+                <property name="stepType">
+                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
+                <property name="value">
+                 <double>0.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QComboBox" name="textureMapType">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>Texture(s)</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="textureMapID">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                </widget>
               </item>
               <item row="3" column="0">
@@ -1538,49 +1579,10 @@
                 </item>
                </layout>
               </item>
-              <item row="4" column="0">
-               <widget class="QLabel" name="label_3">
-                <property name="text">
-                 <string>Texture(s)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="0">
-               <widget class="QLabel" name="lblFps">
-                <property name="text">
-                 <string>FPS</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_34">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>ID</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="1">
-               <widget class="QDoubleSpinBox" name="textureMapFps">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
+              <item row="6" column="1">
+               <widget class="QDoubleSpinBox" name="spriteDuration">
                 <property name="suffix">
-                 <string> fps</string>
-                </property>
-                <property name="maximum">
-                 <double>100.000000000000000</double>
+                 <string> s</string>
                 </property>
                 <property name="singleStep">
                  <double>0.100000000000000</double>
@@ -1588,13 +1590,31 @@
                 <property name="stepType">
                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
                 </property>
-                <property name="value">
-                 <double>0.000000000000000</double>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QLabel" name="lblSpriteDuration">
+                <property name="text">
+                 <string>Duration</string>
                 </property>
                </widget>
               </item>
-              <item row="7" column="0" colspan="2">
-               <widget class="QGroupBox" name="groupBox_5">
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_22">
+                <property name="text">
+                 <string>Name</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="lblSpriteFps">
+                <property name="text">
+                 <string>FPS</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="0" colspan="2">
+               <widget class="QGroupBox" name="textureMapFlags">
                 <property name="title">
                  <string>Flags</string>
                 </property>
@@ -1632,7 +1652,7 @@
             <bool>true</bool>
            </property>
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -1643,6 +1663,89 @@
            <layout class="QVBoxLayout" name="verticalLayout_12">
             <item>
              <layout class="QGridLayout" name="gridLayout_3">
+              <item row="6" column="2">
+               <widget class="QLineEdit" name="textureDepth">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="2">
+               <widget class="QLineEdit" name="textureHeight">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QLabel" name="label_36">
+                <property name="text">
+                 <string>Width</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QLabel" name="label_37">
+                <property name="text">
+                 <string>Height</string>
+                </property>
+               </widget>
+              </item>
+              <item row="12" column="2">
+               <widget class="QCheckBox" name="chkBlurTexture">
+                <property name="text">
+                 <string>Apply blur</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="2">
+               <widget class="QCheckBox" name="chkAllowPacking">
+                <property name="text">
+                 <string>Allow combining</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="2">
+               <widget class="QComboBox" name="cmbColorSpace"/>
+              </item>
+              <item row="11" column="2">
+               <widget class="QCheckBox" name="chkPreMulAlpha">
+                <property name="text">
+                 <string>Premultipy alpha</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2" colspan="2">
+               <widget class="QLineEdit" name="textureSourceFile">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
               <item row="4" column="2">
                <widget class="QLineEdit" name="textureWidth">
                 <property name="sizePolicy">
@@ -1653,6 +1756,20 @@
                 </property>
                 <property name="readOnly">
                  <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QLabel" name="label_38">
+                <property name="text">
+                 <string>Depth</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="1">
+               <widget class="QLabel" name="label_15">
+                <property name="text">
+                 <string>Flags</string>
                 </property>
                </widget>
               </item>
@@ -1684,10 +1801,72 @@
                 </property>
                </widget>
               </item>
-              <item row="11" column="2">
-               <widget class="QCheckBox" name="chkPreMulAlpha">
+              <item row="3" column="2" colspan="2">
+               <widget class="QLineEdit" name="textureSourceName">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="3">
+               <widget class="QPushButton" name="btnEditTexture">
                 <property name="text">
-                 <string>Premultipy alpha</string>
+                 <string>Edit Texture ...</string>
+                </property>
+               </widget>
+              </item>
+              <item row="14" column="2">
+               <widget class="QCheckBox" name="chkDetectEdges">
+                <property name="text">
+                 <string>Edge detection</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLabel" name="label_13">
+                <property name="text">
+                 <string>ID</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="2">
+               <widget class="QCheckBox" name="chkAllowResizing">
+                <property name="text">
+                 <string>Allow resizing</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="3">
+               <widget class="QPushButton" name="btnSelectTextureRect">
+                <property name="text">
+                 <string>Select Area ...</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="1">
+               <widget class="QLabel" name="label_26">
+                <property name="text">
+                 <string>Color Space</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLabel" name="label_17">
+                <property name="text">
+                 <string>Name</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2" colspan="2">
+               <widget class="QLineEdit" name="textureSourceID">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
                </widget>
               </item>
@@ -1704,169 +1883,23 @@
                 </property>
                </widget>
               </item>
-              <item row="6" column="1">
-               <widget class="QLabel" name="label_38">
-                <property name="text">
-                 <string>Depth</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="1">
-               <widget class="QLabel" name="label_37">
-                <property name="text">
-                 <string>Height</string>
-                </property>
-               </widget>
-              </item>
-              <item row="9" column="2">
-               <widget class="QCheckBox" name="chkAllowResizing">
-                <property name="text">
-                 <string>Allow resizing</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="1">
-               <widget class="QLabel" name="label_36">
-                <property name="text">
-                 <string>Width</string>
-                </property>
-               </widget>
-              </item>
-              <item row="12" column="2">
-               <widget class="QCheckBox" name="chkBlurTexture">
-                <property name="text">
-                 <string>Apply blur</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="2">
-               <widget class="QLineEdit" name="textureDepth">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="1">
-               <widget class="QLabel" name="label_15">
-                <property name="text">
-                 <string>Flags</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="2" colspan="2">
-               <widget class="QLineEdit" name="textureSourceID">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QLabel" name="label_17">
-                <property name="text">
-                 <string>Name</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="2">
-               <widget class="QLineEdit" name="textureHeight">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="14" column="2">
-               <widget class="QCheckBox" name="chkDetectEdges">
-                <property name="text">
-                 <string>Edge detection</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="2">
-               <widget class="QCheckBox" name="chkAllowPacking">
-                <property name="text">
-                 <string>Allow combining</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QLabel" name="label_13">
-                <property name="text">
-                 <string>ID</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2" colspan="2">
-               <widget class="QLineEdit" name="textureSourceFile">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="2" colspan="2">
-               <widget class="QLineEdit" name="textureSourceName">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="2">
-               <widget class="QComboBox" name="cmbColorSpace"/>
-              </item>
-              <item row="7" column="1">
-               <widget class="QLabel" name="label_26">
-                <property name="text">
-                 <string>Color Space</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="3">
-               <widget class="QPushButton" name="btnEditTexture">
-                <property name="text">
-                 <string>Edit Texture ...</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="3">
-               <widget class="QPushButton" name="btnSelectTextureRect">
-                <property name="text">
-                 <string>Select Area ...</string>
-                </property>
-               </widget>
-              </item>
              </layout>
             </item>
            </layout>
           </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
          </item>
          <item>
           <widget class="QGroupBox" name="textureRect">
@@ -2329,7 +2362,8 @@
   <tabstop>textureMapTextures</tabstop>
   <tabstop>btnAddTextureMap</tabstop>
   <tabstop>btnResetTextureMap</tabstop>
-  <tabstop>textureMapFps</tabstop>
+  <tabstop>spriteFps</tabstop>
+  <tabstop>spriteDuration</tabstop>
   <tabstop>spriteSheet</tabstop>
   <tabstop>spriteRows</tabstop>
   <tabstop>spriteCols</tabstop>

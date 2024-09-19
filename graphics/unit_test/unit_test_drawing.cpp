@@ -64,8 +64,8 @@ bool operator==(const gfx::Geometry::DrawCommand& lhs, const gfx::Geometry::Draw
 class TestShader : public gfx::Shader
 {
 public:
-    TestShader(const std::string& source)
-      : mSource(source)
+    explicit TestShader(std::string source) noexcept
+      : mSource(std::move(source))
     {}
 
     virtual bool IsValid() const override
@@ -84,60 +84,60 @@ private:
 class TestTexture : public gfx::Texture
 {
 public:
-    virtual void SetFlag(Flags flag, bool on_off) override
+    void SetFlag(Flags flag, bool on_off) override
     {}
-    virtual void SetFilter(MinFilter filter) override
+    void SetFilter(MinFilter filter) override
     { mMinFilter = filter; }
-    virtual void SetFilter(MagFilter filter) override
+    void SetFilter(MagFilter filter) override
     { mMagFilter = filter; }
-    virtual MinFilter GetMinFilter() const override
+    MinFilter GetMinFilter() const override
     { return mMinFilter; }
-    virtual MagFilter GetMagFilter() const override
+    MagFilter GetMagFilter() const override
     { return mMagFilter; }
-    virtual void SetWrapX(Wrapping w) override
+    void SetWrapX(Wrapping w) override
     { mWrapX = w; }
-    virtual void SetWrapY(Wrapping w) override
+    void SetWrapY(Wrapping w) override
     { mWrapY = w; }
-    virtual Wrapping GetWrapX() const override
+    Wrapping GetWrapX() const override
     { return mWrapX; }
-    virtual Wrapping GetWrapY() const override
+    Wrapping GetWrapY() const override
     { return mWrapY; }
-    virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips) override
+    void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips) override
     {
         mWidth  = xres;
         mHeight = yres;
         mFormat = format;
     }
-    virtual unsigned GetWidth() const override
+    unsigned GetWidth() const override
     { return mWidth; }
-    virtual unsigned GetHeight() const override
+    unsigned GetHeight() const override
     { return mHeight; }
-    virtual Format GetFormat() const override
+    Format GetFormat() const override
     { return mFormat; }
-    virtual void SetContentHash(size_t hash) override
+    void SetContentHash(size_t hash) override
     { mHash = hash; }
-    virtual size_t GetContentHash() const override
+    size_t GetContentHash() const override
     { return mHash; }
-    virtual void SetName(const std::string&) override
+    void SetName(const std::string&) override
     {}
-    virtual void SetGroup(const std::string&) override
+    void SetGroup(const std::string&) override
     {}
-    virtual bool TestFlag(Flags flag) const override
+    bool TestFlag(Flags flag) const override
     { return false; }
 
-    virtual bool GenerateMips() override
+    bool GenerateMips() override
     {
         return false;
     }
-    virtual bool HasMips() const override
+    bool HasMips() const override
     {
         return false;
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return ""; }
-    virtual std::string GetGroup() const override
+    std::string GetGroup() const override
     { return ""; }
-    virtual std::string GetId() const override
+    std::string GetId() const override
     { return "";}
 private:
     unsigned mWidth  = 0;
@@ -153,7 +153,7 @@ private:
 class TestProgram : public gfx::Program
 {
 public:
-    virtual bool IsValid() const override
+    bool IsValid() const override
     { return true; }
 private:
 
@@ -163,15 +163,15 @@ private:
 class TestGeometry : public gfx::Geometry
 {
 public:
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return ""; }
-    virtual Usage GetUsage() const override
+    Usage GetUsage() const override
     { return Usage::Static; }
-    virtual size_t GetNumDrawCmds() const override
+    size_t GetNumDrawCmds() const override
     { return 0; }
-    virtual size_t GetContentHash() const override
+    size_t GetContentHash() const override
     { return 0; }
-    virtual DrawCommand GetDrawCmd(size_t index) const override
+    DrawCommand GetDrawCmd(size_t index) const override
     { return {}; }
 private:
 };
@@ -179,140 +179,140 @@ private:
 class TestDevice : public gfx::Device
 {
 public:
-    virtual void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* ) const override
+    void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* ) const override
     {}
-    virtual void ClearStencil(int value, gfx::Framebuffer* fbo) const override
+    void ClearStencil(int value, gfx::Framebuffer* fbo) const override
     {}
-    virtual void ClearDepth(float value, gfx::Framebuffer* fbo) const override
+    void ClearDepth(float value, gfx::Framebuffer* fbo) const override
     {}
-    virtual void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo) const override
+    void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo) const override
     {}
-    virtual void ClearColorDepthStencil(const gfx::Color4f& color, float depth, int stencil, gfx::Framebuffer* fbo) const override
+    void ClearColorDepthStencil(const gfx::Color4f& color, float depth, int stencil, gfx::Framebuffer* fbo) const override
     {}
 
-    virtual void SetDefaultTextureFilter(MinFilter filter) override
+    void SetDefaultTextureFilter(MinFilter filter) override
     {}
-    virtual void SetDefaultTextureFilter(MagFilter filter) override
+    void SetDefaultTextureFilter(MagFilter filter) override
     {}
 
     // resource creation APIs
-    virtual gfx::ShaderPtr FindShader(const std::string& id) override
+    gfx::ShaderPtr FindShader(const std::string& id) override
     {
         auto it = mShaderIndexMap.find(id);
         if (it == mShaderIndexMap.end())
             return nullptr;
         return mShaders[it->second];
     }
-    virtual gfx::ShaderPtr CreateShader(const std::string& id, const gfx::Shader::CreateArgs& args) override
+    gfx::ShaderPtr CreateShader(const std::string& id, const gfx::Shader::CreateArgs& args) override
     {
         const size_t index = mShaders.size();
         mShaders.emplace_back(new TestShader(args.source));
         mShaderIndexMap[id] = index;
         return mShaders.back();
     }
-    virtual gfx::ProgramPtr FindProgram(const std::string& id) override
+    gfx::ProgramPtr FindProgram(const std::string& id) override
     {
        auto it = mProgramIndexMap.find(id);
        if (it == mProgramIndexMap.end())
            return nullptr;
        return mPrograms[it->second];
     }
-    virtual gfx::ProgramPtr CreateProgram(const std::string& id, const gfx::Program::CreateArgs&) override
+    gfx::ProgramPtr CreateProgram(const std::string& id, const gfx::Program::CreateArgs&) override
     {
        const size_t index = mPrograms.size();
        mPrograms.emplace_back(new TestProgram);
        mProgramIndexMap[id] = index;
        return mPrograms.back();
     }
-    virtual gfx::GeometryPtr FindGeometry(const std::string& id) override
+    gfx::GeometryPtr FindGeometry(const std::string& id) override
     {
         auto it = mGeomIndexMap.find(id);
         if (it == mGeomIndexMap.end())
             return nullptr;
         return mGeoms[it->second];
     }
-    virtual gfx::GeometryPtr CreateGeometry(const std::string& id, gfx::Geometry::CreateArgs args) override
+    gfx::GeometryPtr CreateGeometry(const std::string& id, gfx::Geometry::CreateArgs args) override
     {
         const size_t index = mGeoms.size();
         mGeoms.emplace_back(new TestGeometry);
         mGeomIndexMap[id] = index;
         return mGeoms.back();
     }
-    virtual gfx::Texture* FindTexture(const std::string& name) override
+    gfx::Texture* FindTexture(const std::string& name) override
     {
         auto it = mTextureIndexMap.find(name);
         if (it == mTextureIndexMap.end())
             return nullptr;
         return mTextures[it->second].get();
     }
-    virtual gfx::Texture* MakeTexture(const std::string& name) override
+    gfx::Texture* MakeTexture(const std::string& name) override
     {
         const size_t index = mTextures.size();
         mTextures.emplace_back(new TestTexture);
         mTextureIndexMap[name] = index;
         return mTextures.back().get();
     }
-    virtual gfx::Framebuffer* FindFramebuffer(const std::string& name) override
+    gfx::Framebuffer* FindFramebuffer(const std::string& name) override
     {
         return nullptr;
     }
-    virtual gfx::Framebuffer* MakeFramebuffer(const std::string& name) override
-    {
-        return nullptr;
-    }
-
-    virtual gfx::GeometryInstancePtr FindGeometryInstance(const std::string& id) override
+    gfx::Framebuffer* MakeFramebuffer(const std::string& name) override
     {
         return nullptr;
     }
 
-    virtual gfx::GeometryInstancePtr CreateGeometryInstance(const std::string& id,gfx::GeometryInstance::CreateArgs args) override
+    gfx::GeometryInstancePtr FindGeometryInstance(const std::string& id) override
+    {
+        return nullptr;
+    }
+
+    gfx::GeometryInstancePtr CreateGeometryInstance(const std::string& id,gfx::GeometryInstance::CreateArgs args) override
     {
         return nullptr;
     }
 
     // Resource deletion APIs
-    virtual void DeleteShaders() override
+    void DeleteShaders() override
     {}
-    virtual void DeletePrograms() override
+    void DeletePrograms() override
     {}
-    virtual void DeleteGeometries() override
+    void DeleteGeometries() override
     {}
-    virtual void DeleteTextures() override
+    void DeleteTextures() override
     {}
-    virtual void DeleteFramebuffers() override
+    void DeleteFramebuffers() override
     {}
-    virtual void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
+    void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
                       const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) const override
     {}
 
-    virtual void CleanGarbage(size_t, unsigned) override
+    void CleanGarbage(size_t, unsigned) override
     {}
 
-    virtual void BeginFrame() override
+    void BeginFrame() override
     {}
-    virtual void EndFrame(bool display) override
+    void EndFrame(bool display) override
     {}
-    virtual gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
+    gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
         gfx::Bitmap<gfx::Pixel_RGBA> bitmap;
         bitmap.Resize(width, height);
         bitmap.Fill(gfx::Color::DarkGreen);
         return bitmap;
     }
-    virtual gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned x, unsigned y,
-                                                         unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
+    gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned x, unsigned y,
+                                                 unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
         gfx::Bitmap<gfx::Pixel_RGBA> bitmap;
         bitmap.Resize(width, height);
         bitmap.Fill(gfx::Color::DarkGreen);
         return bitmap;
     }
-    virtual void GetResourceStats(ResourceStats* stats) const override
+    void GetResourceStats(ResourceStats* stats) const override
     {
 
     }
-    virtual void GetDeviceCaps(DeviceCaps* caps) const override
+    void GetDeviceCaps(DeviceCaps* caps) const override
     {
 
     }
@@ -805,7 +805,7 @@ void unit_test_material_textures()
         gfx::RgbBitmap bitmap;
         bitmap.Resize(10, 10);
         test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
-        test.GetTextureMap(0)->SetFps(1.0f);
+        test.GetTextureMap(0)->SetSpriteFrameRate(1.0f);
 
         TestDevice device;
         gfx::ProgramState program;
@@ -853,7 +853,7 @@ void unit_test_material_textures()
 
         test.AddTexture(gfx::CreateTextureFromBitmap(one));
         test.AddTexture(gfx::CreateTextureFromBitmap(two));
-        test.GetTextureMap(0)->SetFps(1.0f); // 1 frame per second.
+        test.GetTextureMap(0)->SetSpriteFrameRate(1.0f); // 1 frame per second.
 
         TestDevice device;
         gfx::ProgramState program;
@@ -901,7 +901,7 @@ void unit_test_material_textures()
         test.AddTexture(gfx::CreateTextureFromBitmap(one));
         test.AddTexture(gfx::CreateTextureFromBitmap(two));
         test.AddTexture(gfx::CreateTextureFromBitmap(three));
-        test.GetTextureMap(0)->SetFps(1.0f); // 1 frame per second.
+        test.GetTextureMap(0)->SetSpriteFrameRate(1.0f); // 1 frame per second.
 
         TestDevice device;
         gfx::ProgramState program;
@@ -964,8 +964,8 @@ void unit_test_material_textures()
         test.AddTexture(gfx::CreateTextureFromBitmap(one));
         test.AddTexture(gfx::CreateTextureFromBitmap(two));
         test.AddTexture(gfx::CreateTextureFromBitmap(three));
-        test.GetTextureMap(0)->SetFps(1.0f);
-        test.GetTextureMap(0)->SetLooping(false);
+        test.GetTextureMap(0)->SetSpriteFrameRate(1.0f);
+        test.GetTextureMap(0)->SetSpriteLooping(false);
 
         TestDevice device;
         gfx::ProgramState program;
@@ -1212,7 +1212,7 @@ void unit_test_custom_textures()
         gfx::TextureMap sprite;
         sprite.SetName("sprite");
         sprite.SetType(gfx::TextureMap::Type::Sprite);
-        sprite.SetFps(10.0f);
+        sprite.SetSpriteFrameRate(10.0f);
         sprite.SetNumTextures(2);
         sprite.SetTextureSource(0, gfx::CreateTextureFromBitmap(frame0));
         sprite.SetTextureSource(1, gfx::CreateTextureFromBitmap(frame1));
@@ -1339,7 +1339,7 @@ void unit_test_polygon_mesh()
     gfx::Index16 indices[3];
     indices[0] = 123;
     indices[1] = 100;
-    indices[3] = 1;
+    indices[2] = 1;
 
     gfx::Geometry::DrawCommand cmds[1];
     cmds[0].type   = gfx::Geometry::DrawType::TriangleFan;

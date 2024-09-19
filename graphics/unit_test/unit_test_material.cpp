@@ -76,7 +76,7 @@ void unit_test_maps()
         sprite.SetSamplerName("kTexture1", 1);
         sprite.SetRectUniformName("kTextureRect0", 0);
         sprite.SetRectUniformName("kTextureRect1", 1);
-        sprite.SetFps(10.0f);
+        sprite.SetSpriteFrameRate(10.0f);
 
         data::JsonObject json;
         sprite.IntoJson(json);
@@ -85,7 +85,7 @@ void unit_test_maps()
         TEST_REQUIRE(other.FromJson(json));
         TEST_REQUIRE(other.GetName() == "sprite0");
         TEST_REQUIRE(other.GetHash() == sprite.GetHash());
-        TEST_REQUIRE(other.GetFps() == real::float32(10.0f));
+        TEST_REQUIRE(other.GetSpriteFrameRate() == real::float32(10.0f));
         TEST_REQUIRE(other.GetSamplerName(0) == "kTexture0");
         TEST_REQUIRE(other.GetSamplerName(1) == "kTexture1");
         TEST_REQUIRE(other.GetRectUniformName(0) == "kTextureRect0");
@@ -96,7 +96,7 @@ void unit_test_maps()
 
         gfx::TextureMap copy(other);
         TEST_REQUIRE(copy.GetHash() == sprite.GetHash());
-        TEST_REQUIRE(copy.GetFps() == real::float32(10.0f));
+        TEST_REQUIRE(copy.GetSpriteFrameRate() == real::float32(10.0f));
         TEST_REQUIRE(copy.GetSamplerName(0) == "kTexture0");
         TEST_REQUIRE(copy.GetSamplerName(1) == "kTexture1");
         TEST_REQUIRE(copy.GetRectUniformName(0) == "kTextureRect0");
@@ -107,7 +107,7 @@ void unit_test_maps()
 
         copy = sprite;
         TEST_REQUIRE(copy.GetHash() == sprite.GetHash());
-        TEST_REQUIRE(copy.GetFps() == real::float32(10.0f));
+        TEST_REQUIRE(copy.GetSpriteFrameRate() == real::float32(10.0f));
         TEST_REQUIRE(copy.GetSamplerName(0) == "kTexture0");
         TEST_REQUIRE(copy.GetSamplerName(1) == "kTexture1");
         TEST_REQUIRE(copy.GetRectUniformName(0) == "kTextureRect0");
@@ -120,7 +120,7 @@ void unit_test_maps()
         TEST_REQUIRE(x->GetHash() == sprite.GetHash());
         x = sprite.Clone();
         TEST_REQUIRE(x->GetHash() != sprite.GetHash());
-        TEST_REQUIRE(x->AsSpriteMap()->GetFps() == real::float32(10.0f));
+        TEST_REQUIRE(x->AsSpriteMap()->GetSpriteFrameRate() == real::float32(10.0f));
         TEST_REQUIRE(x->AsSpriteMap()->GetSamplerName(0) == "kTexture0");
         TEST_REQUIRE(x->AsSpriteMap()->GetSamplerName(1) == "kTexture1");
         TEST_REQUIRE(x->AsSpriteMap()->GetRectUniformName(0) == "kTextureRect0");

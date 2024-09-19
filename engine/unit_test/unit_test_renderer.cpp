@@ -242,7 +242,7 @@ public:
             green_bitmap_src.SetBitmap(green);
             sprite.AddTexture(green_bitmap_src.Copy());
 
-            sprite.GetTextureMap(0)->SetFps(1.0f);
+            sprite.GetTextureMap(0)->SetSpriteFrameRate(1.0f);
             sprite.SetBlendFrames(false);
             return std::make_shared<gfx::SpriteClass>(sprite);
         }

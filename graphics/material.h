@@ -612,7 +612,7 @@ namespace gfx
             unsigned rows = 0;
         };
 
-        TextureMap(std::string id = base::RandomString(10))
+        explicit TextureMap(std::string id = base::RandomString(10))
           : mName("Default")
           , mId(std::move(id))
         {}
@@ -622,9 +622,9 @@ namespace gfx
         // Get the type of the texture map.
         inline Type GetType() const noexcept
         { return mType; }
-        inline float GetFps() const noexcept
+        inline float GetSpriteFrameRate() const noexcept
         { return mFps; }
-        inline bool IsLooping() const noexcept
+        inline bool IsSpriteLooping() const noexcept
         { return mLooping; }
         inline bool HasSpriteSheet() const noexcept
         { return mSpriteSheet.has_value(); }
@@ -632,6 +632,9 @@ namespace gfx
         { return mId; }
         inline std::string GetName() const noexcept
         { return mName; }
+
+        inline bool IsSpriteMap() const noexcept
+        { return mType == Type::Sprite; }
 
         // Reset all texture objects. After this the texture map contains no textures.
         inline void ResetTextures() noexcept
@@ -645,14 +648,16 @@ namespace gfx
         // Get the number of textures.
         inline size_t GetNumTextures() const noexcept
         { return mTextures.size(); }
-        inline void SetFps(float fps) noexcept
+
+        inline void SetSpriteFrameRate(float fps) noexcept
         { mFps = fps; }
-        inline void SetLooping(bool looping) noexcept
+        inline void SetSpriteLooping(bool looping) noexcept
         { mLooping = looping; }
         inline void SetSpriteSheet(const SpriteSheet& sheet) noexcept
         { mSpriteSheet = sheet; }
         inline void ResetSpriteSheet() noexcept
         { mSpriteSheet.reset(); }
+
         inline const SpriteSheet* GetSpriteSheet() const noexcept
         { return base::GetOpt(mSpriteSheet); }
         inline void SetSamplerName(std::string name, size_t index = 0) noexcept
@@ -717,7 +722,10 @@ namespace gfx
         std::unique_ptr<TextureMap> Clone() const
         { return std::make_unique<TextureMap>(*this, false); }
 
-        unsigned GetSpriteSpriteFrameCount() const;
+        unsigned GetSpriteFrameCount() const;
+
+        float GetSpriteCycleDuration() const;
+        void SetSpriteFrameRateFromDuration(float duration);
 
         TextureMap& operator=(const TextureMap& other);
     private:
@@ -858,7 +866,7 @@ namespace gfx
             const UniformMap* uniforms = nullptr;
         };
 
-        MaterialClass(Type type, std::string id = base::RandomString(10));
+        explicit MaterialClass(Type type, std::string id = base::RandomString(10));
         MaterialClass(const MaterialClass& other, bool copy=true);
 
         // Set the surface type of the material.
