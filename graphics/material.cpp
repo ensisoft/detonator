@@ -592,7 +592,7 @@ bool TextureMap::BindTextures(const BindingState& state, Device& device, BoundSt
         const auto frame_fraction = std::fmod(state.current_time, frame_interval);
         const auto blend_coeff = frame_fraction/frame_interval;
         const auto first_index = (unsigned)(state.current_time/frame_interval);
-        const auto frame_count =  GetSpriteSpriteFrameCount();
+        const auto frame_count =  GetSpriteFrameCount();
         const auto max_index = frame_count - 1;
         const auto texture_count = std::min(frame_count, 2u);
         const auto first_frame  = mLooping
@@ -846,9 +846,9 @@ const TextureMap* TextureMap::AsTextureMap2D() const
     return nullptr;
 }
 
-unsigned TextureMap::GetSpriteSpriteFrameCount() const
+unsigned TextureMap::GetSpriteFrameCount() const
 {
-    if (mType != Type::Sprite)
+    if (!IsSpriteMap())
         return 0;
 
     if (const auto* ptr = GetSpriteSheet())
@@ -856,6 +856,31 @@ unsigned TextureMap::GetSpriteSpriteFrameCount() const
 
     return mTextures.size();
 }
+
+float TextureMap::GetSpriteCycleDuration() const
+{
+    if (!IsSpriteMap())
+        return 0.0f;
+
+    const auto sprite_frame_count = (float)GetSpriteFrameCount();
+    const auto sprite_fps = GetSpriteFrameRate();
+    return sprite_frame_count  / sprite_fps;
+}
+
+void TextureMap::SetSpriteFrameRateFromDuration(float duration)
+{
+    if (duration <= 0.0f)
+        return;
+
+    if (!IsSpriteMap())
+        return;
+
+    const auto sprite_fps = (float)GetSpriteFrameRate();
+    const auto texture_count = (float)GetSpriteFrameCount();
+    const auto target_fps = texture_count / duration;
+    SetSpriteFrameRate(target_fps);
+}
+
 
 TextureMap& TextureMap::operator=(const TextureMap& other)
 {

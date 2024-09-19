@@ -1092,7 +1092,7 @@ public:
         mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-7.png"));
         mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-8.png"));
         mMaterial->SetBlendFrames(false);
-        mMaterial->GetTextureMap(0)->SetFps(10.0f);
+        mMaterial->GetTextureMap(0)->SetSpriteFrameRate(10.0f);
     }
 
     virtual void Render(gfx::Painter& painter) override
@@ -1306,8 +1306,8 @@ public:
         auto* map = mMaterial->GetTextureMap(0);
         map->SetTextureRect(0, rect);
         map->SetSpriteSheet(sheet);
-        map->SetLooping(true);
-        map->SetFps(15.0f);
+        map->SetSpriteLooping(true);
+        map->SetSpriteFrameRate(15.0f);
     }
 
     virtual void Render(gfx::Painter& painter) override

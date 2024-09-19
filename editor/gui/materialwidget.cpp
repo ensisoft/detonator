@@ -813,7 +813,7 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         auto map = std::make_unique<gfx::TextureMap>();
         map->SetType(gfx::TextureMap::Type::Sprite);
         map->SetName("Sprite");
-        map->SetFps(10.0f);
+        map->SetSpriteFrameRate(10.0f);
         other.SetActiveTextureMap(map->GetId());
         other.SetNumTextureMaps(1);
         other.SetTextureMap(0, std::move(map));
@@ -864,7 +864,7 @@ void MaterialWidget::on_baseColor_colorChanged(QColor color)
 { SetMaterialProperties(); }
 void MaterialWidget::on_particleAction_currentIndexChanged(int)
 { SetMaterialProperties(); }
-void MaterialWidget::on_textureMapFps_valueChanged(double)
+void MaterialWidget::on_spriteFps_valueChanged(double)
 { SetMaterialProperties(); }
 void MaterialWidget::on_chkBlendPreMulAlpha_stateChanged(int)
 { SetMaterialProperties(); }
@@ -890,6 +890,14 @@ void MaterialWidget::on_spriteSheet_toggled(bool)
     {
         SetEnabled(mUI.spriteRows, false);
         SetEnabled(mUI.spriteCols, false);
+    }
+}
+void MaterialWidget::on_spriteDuration_valueChanged(double)
+{
+    if (auto* map = GetSelectedTextureMap())
+    {
+        map->SetSpriteFrameRateFromDuration(GetValue(mUI.spriteDuration));
+        SetValue(mUI.spriteFps, map->GetSpriteFrameRate());
     }
 }
 void MaterialWidget::on_colorMap0_colorChanged(QColor)
@@ -1847,8 +1855,11 @@ void MaterialWidget::SetMaterialProperties()
 
     if (auto* map = GetSelectedTextureMap())
     {
-        map->SetFps(GetValue(mUI.textureMapFps));
-        map->SetLooping(GetValue(mUI.chkLooping));
+        map->SetSpriteFrameRate(GetValue(mUI.spriteFps));
+        map->SetSpriteLooping(GetValue(mUI.chkLooping));
+
+        SetValue(mUI.spriteDuration, map->GetSpriteCycleDuration());
+
         if (GetValue(mUI.spriteSheet))
         {
             gfx::TextureMap::SpriteSheet sheet;
@@ -2158,37 +2169,47 @@ void MaterialWidget::ShowTextureMapProperties()
     SetValue(mUI.textureMapName,     QString(""));
     SetValue(mUI.textureMapType,     gfx::TextureMap::Type::Texture2D);
     SetValue(mUI.textureMapTextures, QString(""));
-    SetValue(mUI.textureMapFps,      0.0f);
-    SetValue(mUI.spriteRows,         1);
-    SetValue(mUI.spriteSheet,        1);
-    SetValue(mUI.spriteSheet,  false);
-    SetValue(mUI.chkLooping,   false);
-    SetVisible(mUI.chkLooping, false);
-    SetEnabled(mUI.textureMapFps, false);
-    SetEnabled(mUI.spriteSheet,   false);
-    SetVisible(mUI.spriteSheet,   false);
-    SetVisible(mUI.lblFps,        false);
-    SetVisible(mUI.textureMapFps, false);
+    SetValue(mUI.spriteFps,          0.0f);
+    SetValue(mUI.spriteDuration,     0.0f);
+    SetValue(mUI.spriteRows,         0);
+    SetValue(mUI.spriteCols,         0);
+    SetValue(mUI.spriteSheet,         false);
+    SetValue(mUI.chkLooping,          false);
+    SetVisible(mUI.chkLooping,        false);
+    SetEnabled(mUI.spriteFps,         false);
+    SetEnabled(mUI.spriteSheet,       false);
+    SetEnabled(mUI.spriteDuration,    false);
+    SetVisible(mUI.spriteSheet,       false);
+    SetVisible(mUI.lblSpriteFps,      false);
+    SetVisible(mUI.spriteFps,         false);
+    SetVisible(mUI.lblSpriteDuration, false);
+    SetVisible(mUI.spriteDuration,    false);
+    SetVisible(mUI.textureMapFlags,   false);
 
     const auto* map = GetSelectedTextureMap();
     if (map == nullptr)
         return;
 
     SetEnabled(mUI.textureMap, true);
-    SetValue(mUI.textureMapID,   map->GetId());
-    SetValue(mUI.textureMapName, map->GetName());
-    SetValue(mUI.textureMapType, map->GetType());
-    SetValue(mUI.textureMapFps,  map->GetFps());
-    SetValue(mUI.chkLooping,     map->IsLooping());
+    SetValue(mUI.textureMapID,    map->GetId());
+    SetValue(mUI.textureMapName,  map->GetName());
+    SetValue(mUI.textureMapType,  map->GetType());
+    SetValue(mUI.spriteDuration,  map->GetSpriteCycleDuration());
+    SetValue(mUI.spriteFps,       map->GetSpriteFrameRate());
+    SetValue(mUI.chkLooping,      map->IsSpriteLooping());
 
     if (map->GetType() == gfx::TextureMap::Type::Sprite)
     {
-        SetEnabled(mUI.textureMapFps, true);
-        SetEnabled(mUI.spriteSheet,   true);
-        SetVisible(mUI.chkLooping,    true);
-        SetVisible(mUI.lblFps,        true);
-        SetVisible(mUI.textureMapFps, true);
-        SetVisible(mUI.spriteSheet,   true);
+        SetEnabled(mUI.spriteDuration,    true);
+        SetEnabled(mUI.spriteFps,         true);
+        SetEnabled(mUI.spriteSheet,       true);
+        SetVisible(mUI.chkLooping,        true);
+        SetVisible(mUI.lblSpriteFps,      true);
+        SetVisible(mUI.spriteFps,         true);
+        SetVisible(mUI.spriteSheet,       true);
+        SetVisible(mUI.spriteDuration,    true);
+        SetVisible(mUI.lblSpriteDuration, true);
+        SetVisible(mUI.textureMapFlags,   true);
     }
 
     if (const auto* sheet = map->GetSpriteSheet())

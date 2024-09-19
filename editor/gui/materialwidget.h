@@ -112,7 +112,7 @@ namespace gui
         void on_alphaCutoff_valueChanged(double value);
         void on_baseColor_colorChanged(QColor color);
         void on_particleAction_currentIndexChanged(int);
-        void on_textureMapFps_valueChanged(double);
+        void on_spriteFps_valueChanged(double);
         void on_chkBlendPreMulAlpha_stateChanged(int);
         void on_chkStaticInstance_stateChanged(int);
         void on_chkBlendFrames_stateChanged(int);
@@ -120,6 +120,7 @@ namespace gui
         void on_spriteCols_valueChanged(int);
         void on_spriteRows_valueChanged(int);
         void on_spriteSheet_toggled(bool);
+        void on_spriteDuration_valueChanged(double);
         void on_colorMap0_colorChanged(QColor);
         void on_colorMap1_colorChanged(QColor);
         void on_colorMap2_colorChanged(QColor);

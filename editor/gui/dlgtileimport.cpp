@@ -306,7 +306,7 @@ void DlgTileImport::on_btnImport_clicked()
             auto map = std::make_unique<gfx::TextureMap>();
             map->SetName(app::ToUtf8(texture_map_name));
             map->SetType(gfx::TextureMap::Type::Sprite);
-            map->SetFps(GetValue(mUI.spriteFps));
+            map->SetSpriteFrameRate(GetValue(mUI.spriteFps));
 
             // if the selected images / tiles are in one contiguous region
             // with regular size then the sprite can be optimized to use a single
