@@ -217,6 +217,8 @@ namespace gui
         game::EntityPlacement* SelectNode(const QPoint& click_point);
         game::EntityPlacement* GetCurrentNode();
         const game::EntityPlacement* GetCurrentNode() const;
+
+        void PrintMousePos(gfx::Painter& painter) const;
     private:
         Ui::SceneWidget mUI;
         // there doesn't seem to be a way to do this in the designer

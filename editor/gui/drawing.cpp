@@ -589,7 +589,7 @@ void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* w
     const auto& view_to_scene = glm::inverse(view.GetAsMatrix());
     const auto& mouse_in_scene = view_to_scene * ToVec4(mickey);
     char hallelujah[128] = {};
-    std::snprintf(hallelujah, sizeof(hallelujah), "%.2f, %.2f", mouse_in_scene.x, mouse_in_scene.y);
+    std::snprintf(hallelujah, sizeof(hallelujah), "W: %.2f, %.2f", mouse_in_scene.x, mouse_in_scene.y);
     ShowMessage(hallelujah, painter);
 }
 
@@ -615,7 +615,7 @@ void PrintMousePos(const glm::mat4& view_to_clip,
                                                               glm::vec2{mickey.x(), mickey.y()},
                                                               glm::vec2{width, height});
     char hallelujah[128] = {};
-    std::snprintf(hallelujah, sizeof(hallelujah), "%.2f, %.2f", world_pos.x, world_pos.y);
+    std::snprintf(hallelujah, sizeof(hallelujah), "W: %.2f, %.2f", world_pos.x, world_pos.y);
     ShowMessage(hallelujah, painter);
 }
 
