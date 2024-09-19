@@ -2064,8 +2064,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         const float game_height = settings.viewport_height;
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
-    PrintMousePos(mUI, mState, painter, view,
-                  engine::Projection::Orthographic);
+    PrintMousePos(painter);
 }
 
 void SceneWidget::MouseMove(QMouseEvent* event)
@@ -2743,6 +2742,48 @@ const game::EntityPlacement* SceneWidget::GetCurrentNode() const
     else if (!item->GetUserData())
         return nullptr;
     return static_cast<const game::EntityPlacement*>(item->GetUserData());
+}
+
+void SceneWidget::PrintMousePos(gfx::Painter& painter) const
+{
+    // where's the mouse in the widget
+    const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
+    // can't use underMouse here because of the way the gfx widget
+    // is constructed i.e. QWindow and Widget as container
+    if (mickey.x() < 0 || mickey.y() < 0 ||
+        mickey.x() > mUI.widget->width() || mickey.y() > mUI.widget->height())
+        return;
+
+    const auto width = mUI.widget->width();
+    const auto height = mUI.widget->height();
+
+    const auto perspective = (engine::GameView::EnumValue)GetValue(mUI.cmbPerspective);
+    const auto projection  = (engine::Projection)engine::Projection::Orthographic;
+    const glm::mat4& view_to_clip  = gui::CreateProjectionMatrix(mUI, projection);
+    const glm::mat4& world_to_view = gui::CreateViewMatrix(mUI, mState, perspective);
+
+    const auto& world_pos = engine::MapFromWindowToWorldPlane(view_to_clip,
+                                                              world_to_view,
+                                                              glm::vec2{mickey.x(), mickey.y()},
+                                                              glm::vec2{width, height});
+    const auto* selected = GetCurrentNode();
+    if (selected)
+    {
+        const auto& model_to_world = mState.scene->FindEntityTransform(selected);
+        const auto& world_to_model = glm::inverse(model_to_world);
+        const auto& local_pos = world_to_model * world_pos;
+        char hallelujah[128] = {};
+        std::snprintf(hallelujah, sizeof(hallelujah),
+                      "W: %.2f, %.2f  L: %.2f, %.2f",
+                      world_pos.x, world_pos.y, local_pos.x, local_pos.y);
+        ShowMessage(hallelujah, painter);
+    }
+    else
+    {
+        char hallelujah[128] = {};
+        std::snprintf(hallelujah, sizeof(hallelujah), "W: %.2f, %.2f", world_pos.x, world_pos.y);
+        ShowMessage(hallelujah, painter);
+    }
 }
 
 QString GenerateSceneScriptSource(QString scene)
