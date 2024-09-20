@@ -227,6 +227,9 @@ namespace gui
         std::unique_ptr<base::TraceLog> mTraceLogger;
         std::unique_ptr<base::TraceWriter> mTraceWriter;
         std::vector<bool> mEnableTrace;
+
+        bool mReloadShaders = false;
+        bool mReloadTextures = false;
     };
 
 } // namespace

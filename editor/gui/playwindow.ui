@@ -262,7 +262,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
      <x>0</x>
      <y>0</y>
      <width>1053</width>
-     <height>29</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -684,7 +684,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
    </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/refresh.png</normaloff>:/16x16_ico_png/refresh.png</iconset>
+     <normaloff>:/32x32_ico_png/refresh.png</normaloff>:/32x32_ico_png/refresh.png</iconset>
    </property>
    <property name="text">
     <string>Reload Shaders</string>
@@ -699,7 +699,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
    </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/refresh.png</normaloff>:/16x16_ico_png/refresh.png</iconset>
+     <normaloff>:/32x32_ico_png/refresh.png</normaloff>:/32x32_ico_png/refresh.png</iconset>
    </property>
    <property name="text">
     <string>Reload Textures</string>
