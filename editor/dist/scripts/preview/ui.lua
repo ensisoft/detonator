@@ -20,3 +20,15 @@ end
 function OnRenderingSurfaceResized(width, height)
     Game:SetViewport(base.FRect:new(-width*0.5, -height*0.5, width, height))
 end
+
+-- special function, only called in editing mode
+function OnContentClassUpdate(type, name, id, action)
+    -- action is 'save' on content save and 'delete' on content delete
+
+    -- todo: probably need a different API here just to run
+    -- a different code path since this is the development time
+    -- and we're probably not interested in doing the closing
+    -- animations etc. (except maybe that's exactly what it is?)
+    Game:CloseUI(0)
+    Game:OpenUI('_ui_preview_')
+end

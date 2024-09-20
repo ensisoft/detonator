@@ -1353,6 +1353,11 @@ void UIWidget::on_actionSave_triggered()
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.window->GetHash();
+
+    if (mPreview)
+    {
+        mPreview->NotifyClassUpdate(mState.window);
+    }
 }
 
 void UIWidget::on_actionPreview_triggered()
