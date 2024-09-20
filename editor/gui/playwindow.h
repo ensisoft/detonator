@@ -85,6 +85,8 @@ namespace gui
         bool LoadPreview(const std::shared_ptr<const game::SceneClass>& scene);
         bool LoadPreview(const std::shared_ptr<const uik::Window>& window);
 
+        void NotifyClassUpdate(const std::shared_ptr<const uik::Window>& window);
+
         // Shut down the game and unload the library.
         void Shutdown();
 
@@ -103,6 +105,7 @@ namespace gui
         void SaveState(const QString& key_prefix);
 
         void ShowWithWAR();
+
     public slots:
         void ActivateWindow();
 

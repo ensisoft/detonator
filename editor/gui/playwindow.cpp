@@ -948,6 +948,20 @@ bool PlayWindow::LoadPreview(const std::shared_ptr<const uik::Window>& window)
     return true;
 }
 
+void PlayWindow::NotifyClassUpdate(const std::shared_ptr<const uik::Window>& window)
+{
+    if (!mEngine || !mInitDone)
+        return;
+
+    TemporaryCurrentDirChange cwd(mGameWorkingDir);
+
+    engine::Engine::ContentClass klass;
+    klass.type = engine::ClassLibrary::ClassType::UI;
+    klass.name = window->GetName();
+    klass.id   = window->GetId();
+    mEngine->NotifyClassUpdate(klass);
+}
+
 void PlayWindow::Shutdown()
 {
     mContext.makeCurrent(mSurface);

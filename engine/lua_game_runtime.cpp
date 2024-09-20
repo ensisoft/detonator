@@ -1231,7 +1231,7 @@ void LuaRuntime::OnContentClassUpdate(const engine::GameRuntime::ContentClass& k
     {
         // todo: might want to expand on this so for example
         // when a class was deleted the action would be 'delete' instead of 'save'
-        CallLua(*mGameEnv, "OnContentClassUpdate", base::ToString(klass.type), klass.name, klass.id, 'save');
+        CallLua(*mGameEnv, "OnContentClassUpdate", base::ToString(klass.type), klass.name, klass.id, "save");
     }
 }
 
