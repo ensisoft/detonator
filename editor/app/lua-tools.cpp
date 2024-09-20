@@ -189,6 +189,13 @@ void LuaParser::ClearParseState()
 
 bool LuaParser::ParseSource(const QString& source)
 {
+    // treeshitter randomly failing on very short source strigs.
+    // happens when for example creating a new empty lua script
+    // document (without any content) and starting to type first
+    // input...
+    if (source.size() < 10)
+        return false;
+
     ts_parser_reset(mParser);
 
     struct BufferReader {
