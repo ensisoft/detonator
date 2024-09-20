@@ -333,6 +333,11 @@ namespace engine
 
         virtual void PreloadClass(const ContentClass& klass, size_t index, size_t last, LoadingScreen* screen) {}
 
+        // A content class has changed (typically it was edited and then saved in the editor).
+        // This is used to have a chance for refreshing the (live preview) game contents
+        // automatically when something was done in the editor.
+        virtual void NotifyClassUpdate(const ContentClass& klass) {};
+
         // Load the game and its data and/or previous state.
         // Called once before entering the main game update/render loop.
         // Should return true if successful,otherwise false on error.

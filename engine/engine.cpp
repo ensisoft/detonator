@@ -354,6 +354,17 @@ public:
         mDevice->EndFrame(true);
     }
 
+    virtual void NotifyClassUpdate(const ContentClass& klass) override
+    {
+        DEBUG("Content class was updated. [type=%1, name='%2', id='%2]", klass.type, klass.name, klass.id);
+
+        engine::GameRuntime::ContentClass k;
+        k.type = klass.type;
+        k.name = klass.name;
+        k.id   = klass.id;
+        mRuntime->OnContentClassUpdate(k);
+    }
+
     virtual bool Load() override
     {
         DEBUG("Loading game state.");
