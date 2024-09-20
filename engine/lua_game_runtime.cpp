@@ -1222,6 +1222,19 @@ void LuaRuntime::UpdateUI(uik::Window* ui, double game_time, double dt)
     }
 }
 
+void LuaRuntime::OnContentClassUpdate(const engine::GameRuntime::ContentClass& klass)
+{
+    if (!mEditingMode)
+        return;
+
+    if (mGameEnv)
+    {
+        // todo: might want to expand on this so for example
+        // when a class was deleted the action would be 'delete' instead of 'save'
+        CallLua(*mGameEnv, "OnContentClassUpdate", base::ToString(klass.type), klass.name, klass.id, 'save');
+    }
+}
+
 void LuaRuntime::OnUIOpen(uik::Window* ui)
 {
     if (mGameEnv)

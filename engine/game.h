@@ -170,7 +170,16 @@ namespace engine
 
         virtual Camera GetCamera() const = 0;
 
+        struct ContentClass {
+            ClassLibrary::ClassType type;
+            std::string name;
+            std::string id;
+        };
+
+        virtual void OnContentClassUpdate(const ContentClass& klass) {}
+
         // Event listeners.
+
 
         // Called when a new UI has been opened onto the UI stack.
         virtual void OnUIOpen(uik::Window* ui) {}

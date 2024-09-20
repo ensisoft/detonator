@@ -85,6 +85,8 @@ namespace engine
         virtual void OnUIOpen(uik::Window* ui) override;
         virtual void OnUIClose(uik::Window* ui, int result) override;
         virtual void OnUIAction(uik::Window* ui, const WidgetActionList& actions) override;
+        virtual void OnContentClassUpdate(const ContentClass& klass) override;
+
         virtual Camera GetCamera() const override
         { return mCamera; }
 
