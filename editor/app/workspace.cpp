@@ -1579,6 +1579,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "wasm_audio_io_strategy"  , mSettings.wasm_audio_io_strategy);
     JsonWrite(project, "preview_entity_script"   , mSettings.preview_entity_script);
     JsonWrite(project, "preview_scene_script"    , mSettings.preview_scene_script);
+    JsonWrite(project, "preview_ui_script"       , mSettings.preview_ui_script);
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -1705,6 +1706,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "wasm_audio_io_strategy"  , &mSettings.wasm_audio_io_strategy);
     JsonReadSafe(project, "preview_entity_script"   , &mSettings.preview_entity_script);
     JsonReadSafe(project, "preview_scene_script"    , &mSettings.preview_scene_script);
+    JsonReadSafe(project, "preview_ui_script"       , &mSettings.preview_ui_script);
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();

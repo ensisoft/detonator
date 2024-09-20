@@ -637,6 +637,8 @@ namespace app
             QString preview_entity_script = "app://scripts/preview/entity.lua";
             // Which script to run when previewing a scene.
             QString preview_scene_script = "app://scripts/preview/scene.lua";
+            // Which script to run when previewing a UI
+            QString preview_ui_script = "app://scripts/preview/ui.lua";
         };
 
         const ProjectSettings& GetProjectSettings() const

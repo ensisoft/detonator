@@ -43,6 +43,7 @@ namespace gui
         void on_btnSelectMaterial_clicked();
         void on_btnSelectPreviewEntityScript_clicked();
         void on_btnSelectPreviewSceneScript_clicked();
+        void on_btnSelectPreviewUIScript_clicked();
     private:
         Ui::DlgProject mUI;
     private:

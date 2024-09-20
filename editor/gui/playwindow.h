@@ -48,6 +48,10 @@ namespace engine {
     class Engine;
 } //
 
+namespace uik {
+    class Window;
+} // namespace
+
 namespace gui
 {
     // PlayWindow is an OpenGL enabled window that will display
@@ -79,6 +83,7 @@ namespace gui
         // "preview script" instead.
         bool LoadPreview(const std::shared_ptr<const game::EntityClass>& entity);
         bool LoadPreview(const std::shared_ptr<const game::SceneClass>& scene);
+        bool LoadPreview(const std::shared_ptr<const uik::Window>& window);
 
         // Shut down the game and unload the library.
         void Shutdown();

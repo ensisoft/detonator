@@ -52,6 +52,7 @@
 #include "editor/gui/main.h"
 #include "editor/gui/uiwidget.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/playwindow.h"
 #include "graphics/drawing.h"
 #include "graphics/utility.h"
 #include "uikit/op.h"
@@ -251,10 +252,10 @@ public:
             unsigned mLevel = 0;
             std::vector<TreeWidget::TreeItem>& mList;
         };
-        if (!mState.window.GetNumWidgets())
+        if (!mState.window->GetNumWidgets())
             return;
         Visitor visitor(list);
-        mState.window.Visit(visitor);
+        mState.window->Visit(visitor);
     }
 private:
     State& mState;
@@ -306,20 +307,20 @@ public:
         }
         uik::Widget* child = nullptr;
         uik::FPoint hit_point;
-        auto* parent =  mState.window.HitTest(uik::FPoint(mWidgetPos.x, mWidgetPos.y), &hit_point);
+        auto* parent =  mState.window->HitTest(uik::FPoint(mWidgetPos.x, mWidgetPos.y), &hit_point);
         if (parent && parent->IsContainer())
         {
             mWidget->SetName(CreateName());
             mWidget->SetPosition(hit_point);
-            child = mState.window.AddWidget(std::move(mWidget));
-            mState.window.LinkChild(parent, child);
+            child = mState.window->AddWidget(std::move(mWidget));
+            mState.window->LinkChild(parent, child);
         }
         else
         {
             mWidget->SetName(CreateName());
             mWidget->SetPosition(mWidgetPos.x , mWidgetPos.y);
-            child = mState.window.AddWidget(std::move(mWidget));
-            mState.window.LinkChild(nullptr, child);
+            child = mState.window->AddWidget(std::move(mWidget));
+            mState.window->LinkChild(nullptr, child);
         }
         mState.tree->Rebuild();
         mState.tree->SelectItemById(app::FromUtf8(child->GetId()));
@@ -342,7 +343,7 @@ private:
     std::string CreateName() const
     {
         unsigned count = 1;
-        mState.window.ForEachWidget([&count, this](const uik::Widget* widget) {
+        mState.window->ForEachWidget([&count, this](const uik::Widget* widget) {
             if (widget->GetType() == mWidget->GetType())
                 ++count;
         });
@@ -479,7 +480,7 @@ private:
 UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
 {
     DEBUG("Create UIWidget");
-
+    mState.window = std::make_shared<uik::Window>();
     mWidgetTree.reset(new TreeModel(mState));
 
     mUI.setupUi(this);
@@ -528,7 +529,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.painter.reset(new engine::UIPainter);
     mState.painter->SetStyle(mState.style.get());
     mState.painter->SetClassLib(mState.workspace);
-    mState.window.SetName("My UI");
+    mState.window->SetName("My UI");
 
     LoadStyleQuiet("app://ui/style/default.json");
     LoadKeysQuiet("app://ui/keymap/default.json");
@@ -540,27 +541,27 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<uik::CheckBox::Check>(mUI.chkPlacement);
     PopulateFromEnum<uik::RadioButton::Check>(mUI.rbPlacement);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
-    SetValue(mUI.windowID, mState.window.GetId());
-    SetValue(mUI.windowName, mState.window.GetName());
-    SetValue(mUI.windowKeyMap, mState.window.GetKeyMapFile());
-    SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
-    SetValue(mUI.windowStyleString, mState.window.GetStyleString());
-    SetValue(mUI.windowScriptFile, ListItemId(mState.window.GetScriptFile()));
-    SetValue(mUI.chkEnableKeyMap, mState.window.TestFlag(uik::Window::Flags::EnableVirtualKeys));
-    SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
-    SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
+    SetValue(mUI.windowID, mState.window->GetId());
+    SetValue(mUI.windowName, mState.window->GetName());
+    SetValue(mUI.windowKeyMap, mState.window->GetKeyMapFile());
+    SetValue(mUI.windowStyleFile, mState.window->GetStyleName());
+    SetValue(mUI.windowStyleString, mState.window->GetStyleString());
+    SetValue(mUI.windowScriptFile, ListItemId(mState.window->GetScriptFile()));
+    SetValue(mUI.chkEnableKeyMap, mState.window->TestFlag(uik::Window::Flags::EnableVirtualKeys));
+    SetValue(mUI.chkRecvMouseEvents, mState.window->TestFlag(uik::Window::Flags::WantsMouseEvents));
+    SetValue(mUI.chkRecvKeyEvents, mState.window->TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.zoom, 1.0f);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
     SetEnabled(mUI.actionClose, false);
-    SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
+    SetEnabled(mUI.btnEditScript, mState.window->HasScriptFile());
     SetVisible(mUI.transform, false);
     setWindowTitle(GetValue(mUI.windowName));
 
     RebuildCombos();
     DisplayCurrentWidgetProperties();
-    mOriginalHash = mState.window.GetHash();
+    mOriginalHash = mState.window->GetHash();
 
     mUI.windowKeyMap->lineEdit()->setReadOnly(true);
     mUI.windowStyleFile->lineEdit()->setReadOnly(true);
@@ -574,8 +575,8 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     const uik::Window* window = nullptr;
     resource.GetContent(&window);
 
-    mState.window = *window;
-    mOriginalHash = mState.window.GetHash();
+    *mState.window = *window;
+    mOriginalHash = mState.window->GetHash();
 
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
@@ -594,8 +595,8 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
                        GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
-    if (!LoadStyleQuiet(mState.window.GetStyleName()))
-        mState.window.SetStyleName("");
+    if (!LoadStyleQuiet(mState.window->GetStyleName()))
+        mState.window->SetStyleName("");
 
     SetValue(mUI.windowName, window->GetName());
     SetValue(mUI.windowID, window->GetId());
@@ -603,9 +604,9 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     SetValue(mUI.windowStyleFile, window->GetStyleName());
     SetValue(mUI.windowStyleString, window->GetStyleString());
     SetValue(mUI.windowScriptFile, ListItemId(window->GetScriptFile()));
-    SetValue(mUI.chkEnableKeyMap, mState.window.TestFlag(uik::Window::Flags::EnableVirtualKeys));
-    SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
-    SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
+    SetValue(mUI.chkEnableKeyMap, mState.window->TestFlag(uik::Window::Flags::EnableVirtualKeys));
+    SetValue(mUI.chkRecvMouseEvents, mState.window->TestFlag(uik::Window::Flags::WantsMouseEvents));
+    SetValue(mUI.chkRecvKeyEvents, mState.window->TestFlag(uik::Window::Flags::WantsKeyEvents));
     SetEnabled(mUI.btnEditScript, window->HasScriptFile());
 
     UpdateDeletedResourceReferences();
@@ -653,15 +654,15 @@ void UIWidget::InitializeContent()
     button.SetPosition(450.0f, 650.0f);
     button.SetSize(150.0f, 50.0f);
 
-    mState.window.AddWidget(form);
-    mState.window.AddWidget(label);
-    mState.window.AddWidget(button);
-    mState.window.LinkChild(nullptr, &mState.window.GetWidget(0));
-    mState.window.LinkChild(mState.window.FindWidgetByName("Form"),
-                            mState.window.FindWidgetByName("Label"));
-    mState.window.LinkChild(mState.window.FindWidgetByName("Form"),
-                            mState.window.FindWidgetByName("Button"));
-    mOriginalHash = mState.window.GetHash();
+    mState.window->AddWidget(form);
+    mState.window->AddWidget(label);
+    mState.window->AddWidget(button);
+    mState.window->LinkChild(nullptr, &mState.window->GetWidget(0));
+    mState.window->LinkChild(mState.window->FindWidgetByName("Form"),
+                            mState.window->FindWidgetByName("Label"));
+    mState.window->LinkChild(mState.window->FindWidgetByName("Form"),
+                            mState.window->FindWidgetByName("Button"));
+    mOriginalHash = mState.window->GetHash();
 
     // try to make the default splitter partitions sane.
     // looks like this garbage needs to be done *after* the
@@ -705,10 +706,11 @@ void UIWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
     bar.addAction(mUI.actionPause);
-    bar.addSeparator();
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
     bar.addAction(mUI.actionClose);
+    bar.addSeparator();
+    bar.addAction(mUI.actionPreview);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
@@ -729,10 +731,11 @@ void UIWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
-    menu.addSeparator();
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
     menu.addAction(mUI.actionClose);
+    menu.addSeparator();
+    menu.addAction(mUI.actionPreview);
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
@@ -752,7 +755,7 @@ void UIWidget::AddActions(QMenu& menu)
 bool UIWidget::SaveState(Settings& settings) const
 {
     data::JsonObject json;
-    mState.window.IntoJson(json);
+    mState.window->IntoJson(json);
     settings.SetValue("UI", "content", json);
     settings.SetValue("UI", "hash", mOriginalHash);
     settings.SetValue("UI", "camera_offset_x", mState.camera_offset_x);
@@ -797,22 +800,22 @@ bool UIWidget::LoadState(const Settings& settings)
     settings.LoadWidget("UI", mUI.mainSplitter);
     settings.LoadWidget("UI", mUI.rightSplitter);
 
-    if (!mState.window.FromJson(json))
+    if (!mState.window->FromJson(json))
         WARN("Failed to restore window state.");
 
-    if (!LoadStyleQuiet(mState.window.GetStyleName()))
-        mState.window.SetStyleName("");
+    if (!LoadStyleQuiet(mState.window->GetStyleName()))
+        mState.window->SetStyleName("");
 
-    SetValue(mUI.windowID, mState.window.GetId());
-    SetValue(mUI.windowName, mState.window.GetName());
-    SetValue(mUI.windowKeyMap, mState.window.GetKeyMapFile());
-    SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
-    SetValue(mUI.windowStyleString, mState.window.GetStyleString());
-    SetValue(mUI.windowScriptFile, ListItemId(mState.window.GetScriptFile()));
-    SetValue(mUI.chkEnableKeyMap, mState.window.TestFlag(uik::Window::Flags::EnableVirtualKeys));
-    SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
-    SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
-    SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
+    SetValue(mUI.windowID, mState.window->GetId());
+    SetValue(mUI.windowName, mState.window->GetName());
+    SetValue(mUI.windowKeyMap, mState.window->GetKeyMapFile());
+    SetValue(mUI.windowStyleFile, mState.window->GetStyleName());
+    SetValue(mUI.windowStyleString, mState.window->GetStyleString());
+    SetValue(mUI.windowScriptFile, ListItemId(mState.window->GetScriptFile()));
+    SetValue(mUI.chkEnableKeyMap, mState.window->TestFlag(uik::Window::Flags::EnableVirtualKeys));
+    SetValue(mUI.chkRecvMouseEvents, mState.window->TestFlag(uik::Window::Flags::WantsMouseEvents));
+    SetValue(mUI.chkRecvKeyEvents, mState.window->TestFlag(uik::Window::Flags::WantsKeyEvents));
+    SetEnabled(mUI.btnEditScript, mState.window->HasScriptFile());
 
     DisplayCurrentCameraLocation();
     DisplayCurrentWidgetProperties();
@@ -852,7 +855,7 @@ void UIWidget::Cut(Clipboard& clipboard)
     if (const auto* widget = GetCurrentWidget())
     {
         data::JsonObject json;
-        const auto& tree = mState.window.GetRenderTree();
+        const auto& tree = mState.window->GetRenderTree();
         uik::RenderTreeIntoJson(tree, json, widget);
 
         clipboard.Clear();
@@ -860,7 +863,7 @@ void UIWidget::Cut(Clipboard& clipboard)
         clipboard.SetType("application/json/ui");
         NOTE("Copied JSON to application clipboard.");
 
-        mState.window.DeleteWidget(widget);
+        mState.window->DeleteWidget(widget);
         mUI.tree->Rebuild();
         mUI.tree->ClearSelection();
     }
@@ -870,7 +873,7 @@ void UIWidget::Copy(Clipboard& clipboard)  const
     if (const auto* widget = GetCurrentWidget())
     {
         data::JsonObject json;
-        const auto& tree = mState.window.GetRenderTree();
+        const auto& tree = mState.window->GetRenderTree();
         uik::RenderTreeIntoJson(tree, json, widget);
 
         clipboard.Clear();
@@ -944,16 +947,16 @@ void UIWidget::Paste(const Clipboard& clipboard)
     auto* paste_root = nodes[0].get();
 
     uik::FPoint hit_point;
-    auto* widget = mState.window.HitTest(uik::FPoint(mouse_in_scene.x, mouse_in_scene.y), &hit_point);
+    auto* widget = mState.window->HitTest(uik::FPoint(mouse_in_scene.x, mouse_in_scene.y), &hit_point);
     if (widget && widget->IsContainer())
     {
         paste_root->SetPosition(hit_point);
-        mState.window.LinkChild(widget, paste_root);
+        mState.window->LinkChild(widget, paste_root);
     }
     else
     {
         paste_root->SetPosition(mouse_in_scene.x, mouse_in_scene.y);
-        mState.window.LinkChild(nullptr, paste_root);
+        mState.window->LinkChild(nullptr, paste_root);
     }
     // if we got this far, nodes should contain the nodes to be added
     // into the scene and tree should contain their hierarchy.
@@ -961,7 +964,7 @@ void UIWidget::Paste(const Clipboard& clipboard)
     {
         // moving the unique ptr means that node address stays the same
         // thus the tree is still valid!
-        mState.window.AddWidget(std::move(node));
+        mState.window->AddWidget(std::move(node));
     }
     nodes.clear();
 
@@ -972,12 +975,12 @@ void UIWidget::Paste(const Clipboard& clipboard)
         auto* parent = tree.GetParent(node);
         if (parent == nullptr)
             return;
-        mState.window.LinkChild(parent, node);
+        mState.window->LinkChild(parent, node);
     });
 
     mUI.tree->Rebuild();
     mUI.tree->SelectItemById(app::FromUtf8(paste_root->GetId()));
-    mState.window.Style(*mState.painter);
+    mState.window->Style(*mState.painter);
 
 }
 
@@ -1007,10 +1010,35 @@ void UIWidget::ReloadTextures()
     // instances are re-created and thus any changes in packed images
     // (and their JSON) are realized.
     mState.painter->DeleteMaterialInstances();
-
 }
+void UIWidget::RunGameLoopOnce()
+{
+    // WARNING: Calling into PlayWindow will change the OpenGL context on *this* thread
+    if (!mPreview)
+        return;
+
+    if (mPreview->IsClosed())
+    {
+        mPreview->SaveState("preview_window");
+        mPreview->Shutdown();
+        mPreview->close();
+        mPreview.reset();
+    }
+    else
+    {
+        mPreview->RunGameLoopOnce();
+    }
+}
+
 void UIWidget::Shutdown()
 {
+    if (mPreview)
+    {
+        mPreview->Shutdown();
+        mPreview->close();
+        mPreview.reset();
+    }
+
     mUI.widget->dispose();
 }
 void UIWidget::Update(double dt)
@@ -1056,35 +1084,35 @@ void UIWidget::Undo()
 
     // if the timer has run the top of the undo stack
     // is the same copy as the actual scene object.
-    if (mUndoStack.back().GetHash() == mState.window.GetHash())
+    if (mUndoStack.back().GetHash() == mState.window->GetHash())
         mUndoStack.pop_back();
 
     // bring back an older version.
-    mState.window = mUndoStack.back();
+    *mState.window = mUndoStack.back();
 
     mState.tree->Rebuild();
 
     mState.painter->DeleteMaterialInstances();
     // since it's possible that the styling properties were modified
     // a brute force approach is to force a reload of styling for widgets.
-    mState.window.ForEachWidget([this](const uik::Widget* widget) {
+    mState.window->ForEachWidget([this](const uik::Widget* widget) {
         mState.style->DeleteMaterials(widget->GetId());
         mState.style->DeleteProperties(widget->GetId());
     });
-    mState.window.Style(*mState.painter);
+    mState.window->Style(*mState.painter);
 
     mUndoStack.pop_back();
 
     DisplayCurrentWidgetProperties();
-    SetValue(mUI.windowName, mState.window.GetName());
-    SetValue(mUI.windowKeyMap, mState.window.GetKeyMapFile());
-    SetValue(mUI.windowStyleFile, mState.window.GetStyleName());
-    SetValue(mUI.windowStyleString, mState.window.GetStyleString());
-    SetValue(mUI.windowScriptFile, ListItemId(mState.window.GetScriptFile()));
-    SetValue(mUI.chkEnableKeyMap, mState.window.TestFlag(uik::Window::Flags::EnableVirtualKeys));
-    SetValue(mUI.chkRecvMouseEvents, mState.window.TestFlag(uik::Window::Flags::WantsMouseEvents));
-    SetValue(mUI.chkRecvKeyEvents, mState.window.TestFlag(uik::Window::Flags::WantsKeyEvents));
-    SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
+    SetValue(mUI.windowName, mState.window->GetName());
+    SetValue(mUI.windowKeyMap, mState.window->GetKeyMapFile());
+    SetValue(mUI.windowStyleFile, mState.window->GetStyleName());
+    SetValue(mUI.windowStyleString, mState.window->GetStyleString());
+    SetValue(mUI.windowScriptFile, ListItemId(mState.window->GetScriptFile()));
+    SetValue(mUI.chkEnableKeyMap, mState.window->TestFlag(uik::Window::Flags::EnableVirtualKeys));
+    SetValue(mUI.chkRecvMouseEvents, mState.window->TestFlag(uik::Window::Flags::WantsMouseEvents));
+    SetValue(mUI.chkRecvKeyEvents, mState.window->TestFlag(uik::Window::Flags::WantsKeyEvents));
+    SetEnabled(mUI.btnEditScript, mState.window->HasScriptFile());
     NOTE("Undo!");
 }
 
@@ -1092,7 +1120,7 @@ bool UIWidget::HasUnsavedChanges() const
 {
     if (!mOriginalHash)
         return false;
-    const auto hash = mState.window.GetHash();
+    const auto hash = mState.window->GetHash();
     if (hash != mOriginalHash)
         return true;
     return false;
@@ -1134,6 +1162,11 @@ bool UIWidget::GetStats(Stats* stats) const
 
 void UIWidget::Refresh()
 {
+    if (mPreview && !mPreview->IsClosed())
+    {
+        mPreview->NonGameTick();
+    }
+
     // use a simple tick counter to purge the event
     // messages when we're playing the ui system.
     mRefreshTick++;
@@ -1177,15 +1210,26 @@ void UIWidget::Refresh()
     }
 
     if (mUndoStack.empty())
-        mUndoStack.push_back(mState.window);
+        mUndoStack.push_back(*mState.window);
 
-    const auto curr_hash = mState.window.GetHash();
+    const auto curr_hash = mState.window->GetHash();
     const auto undo_hash = mUndoStack.back().GetHash();
     if (curr_hash == undo_hash)
         return;
 
-    mUndoStack.push_back(mState.window);
+    mUndoStack.push_back(*mState.window);
     DEBUG("Created undo copy. stack size: %1", mUndoStack.size());
+}
+
+bool UIWidget::LaunchScript(const app::AnyString& id)
+{
+    const auto& script_id = mState.window->GetScriptFile();
+    if (script_id == id)
+    {
+        on_actionPreview_triggered();
+        return true;
+    }
+    return false;
 }
 
 void UIWidget::on_widgetColor_colorChanged(QColor color)
@@ -1196,7 +1240,7 @@ void UIWidget::on_widgetColor_colorChanged(QColor color)
 void UIWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
-    mState.active_window   = std::make_unique<uik::Window>(mState.window);
+    mState.active_window   = std::make_unique<uik::Window>(*mState.window);
     mState.active_state    = std::make_unique<uik::TransientState>();
     mState.animation_state = std::make_unique<uik::AnimationStateArray>();
     mState.active_window->Open(*mState.active_state, mState.animation_state.get());
@@ -1308,7 +1352,23 @@ void UIWidget::on_actionSave_triggered()
     SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
 
     mState.workspace->SaveResource(resource);
-    mOriginalHash = mState.window.GetHash();
+    mOriginalHash = mState.window->GetHash();
+}
+
+void UIWidget::on_actionPreview_triggered()
+{
+    if (mPreview)
+    {
+        mPreview->ActivateWindow();
+    }
+    else
+    {
+        auto preview = std::make_unique<PlayWindow>(*mState.workspace);
+        preview->LoadState("preview_window", this);
+        preview->ShowWithWAR();
+        preview->LoadPreview(mState.window);
+        mPreview = std::move(preview);
+    }
 }
 
 void UIWidget::on_actionNewForm_triggered()
@@ -1375,7 +1435,7 @@ void UIWidget::on_actionWidgetDelete_triggered()
 {
     if (auto* widget = GetCurrentWidget())
     {
-        mState.window.DeleteWidget(widget);
+        mState.window->DeleteWidget(widget);
         mUI.tree->Rebuild();
         mUI.tree->ClearSelection();
     }
@@ -1384,28 +1444,28 @@ void UIWidget::on_actionWidgetDuplicate_triggered()
 {
     if (auto* widget = GetCurrentWidget())
     {
-        auto* dupe = mState.window.DuplicateWidget(widget);
+        auto* dupe = mState.window->DuplicateWidget(widget);
         // update the translation for the parent of the new hierarchy
         // so that it's possible to tell it apart from the source of the copy.
         dupe->Translate(10.0f, 10.0f);
 
-        mState.window.VisitEach([](uik::Widget* widget) {
+        mState.window->VisitEach([](uik::Widget* widget) {
             const auto& name = widget->GetName();
             widget->SetName(base::FormatString("Copy of %1", name));
         }, dupe);
 
         mUI.tree->Rebuild();
         mUI.tree->SelectItemById(app::FromUtf8(dupe->GetId()));
-        mState.window.Style(*mState.painter);
+        mState.window->Style(*mState.painter);
     }
 }
 
 void UIWidget::on_actionWidgetOrder_triggered()
 {
     std::vector<uik::Widget*> taborder;
-    for (size_t i=0; i<mState.window.GetNumWidgets(); ++i)
+    for (size_t i=0; i<mState.window->GetNumWidgets(); ++i)
     {
-        auto& widget = mState.window.GetWidget(i);
+        auto& widget = mState.window->GetWidget(i);
         if (!widget.CanFocus())
             continue;
         const auto index = widget.GetTabIndex();
@@ -1430,12 +1490,12 @@ void UIWidget::on_actionWidgetOrder_triggered()
 
 void UIWidget::on_windowName_textChanged(const QString& text)
 {
-    mState.window.SetName(app::ToUtf8(text));
+    mState.window->SetName(app::ToUtf8(text));
 }
 
 void UIWidget::on_windowKeyMap_currentIndexChanged(int)
 {
-    const auto& file = mState.window.GetKeyMapFile();
+    const auto& file = mState.window->GetKeyMapFile();
 
     if (!LoadKeysVerbose(GetValue(mUI.windowKeyMap)))
         SetValue(mUI.windowKeyMap, file);
@@ -1443,7 +1503,7 @@ void UIWidget::on_windowKeyMap_currentIndexChanged(int)
 
 void UIWidget::on_windowStyleFile_currentIndexChanged(int)
 {
-    const auto& name = mState.window.GetStyleName();
+    const auto& name = mState.window->GetStyleName();
 
     if (!LoadStyleVerbose(GetValue(mUI.windowStyleFile)))
         SetValue(mUI.windowStyleFile, name);
@@ -1451,22 +1511,22 @@ void UIWidget::on_windowStyleFile_currentIndexChanged(int)
 
 void UIWidget::on_windowScriptFile_currentIndexChanged(int index)
 {
-    mState.window.SetScriptFile(GetItemId(mUI.windowScriptFile));
+    mState.window->SetScriptFile(GetItemId(mUI.windowScriptFile));
     SetEnabled(mUI.btnEditScript, true);
 }
 
 void UIWidget::on_chkEnableKeyMap_stateChanged(int)
 {
-    mState.window.SetFlag(uik::Window::Flags::EnableVirtualKeys, GetValue(mUI.chkEnableKeyMap));
+    mState.window->SetFlag(uik::Window::Flags::EnableVirtualKeys, GetValue(mUI.chkEnableKeyMap));
 }
 
 void UIWidget::on_chkRecvMouseEvents_stateChanged(int)
 {
-    mState.window.SetFlag(uik::Window::Flags::WantsMouseEvents, GetValue(mUI.chkRecvMouseEvents));
+    mState.window->SetFlag(uik::Window::Flags::WantsMouseEvents, GetValue(mUI.chkRecvMouseEvents));
 }
 void UIWidget::on_chkRecvKeyEvents_stateChanged(int)
 {
-    mState.window.SetFlag(uik::Window::Flags::WantsKeyEvents, GetValue(mUI.chkRecvKeyEvents));
+    mState.window->SetFlag(uik::Window::Flags::WantsKeyEvents, GetValue(mUI.chkRecvKeyEvents));
 }
 
 void UIWidget::on_widgetName_textChanged(const QString& text)
@@ -1574,7 +1634,7 @@ void UIWidget::on_btnResetProgVal_clicked()
 
 void UIWidget::on_btnReloadKeyMap_clicked()
 {
-    const auto& map = mState.window.GetKeyMapFile();
+    const auto& map = mState.window->GetKeyMapFile();
     if (map.empty())
         return;
     LoadKeysVerbose(map);
@@ -1593,7 +1653,7 @@ void UIWidget::on_btnSelectKeyMap_clicked()
 
 void UIWidget::on_btnReloadStyle_clicked()
 {
-    const auto& style = mState.window.GetStyleName();
+    const auto& style = mState.window->GetStyleName();
     if (style.empty())
         return;
     LoadStyleVerbose(app::FromUtf8(style));
@@ -1869,7 +1929,7 @@ void UIWidget::on_btnShapeContentMinus90_clicked()
 
 void UIWidget::on_btnEditWindowStyle_clicked()
 {
-    std::string style_string = mState.window.GetStyleString();
+    std::string style_string = mState.window->GetStyleString();
 
     DlgWidgetStyleProperties dlg(this, mState.style.get(), mState.workspace);
     dlg.SetPainter(mState.painter.get());
@@ -1887,7 +1947,7 @@ void UIWidget::on_btnEditWindowStyle_clicked()
             mState.style->ParseStyleString("window", style_string);
 
         // restore old style string.
-        mState.window.SetStyleString(std::move(style_string));
+        mState.window->SetStyleString(std::move(style_string));
         return;
     }
 
@@ -1904,13 +1964,13 @@ void UIWidget::on_btnEditWindowStyle_clicked()
     // b) makes the style string copyable from one widget to another as-s
     boost::erase_all(style_string, "window/");
     // set the actual style string.
-    mState.window.SetStyleString(std::move(style_string));
-    mState.window.Style(*mState.painter);
+    mState.window->SetStyleString(std::move(style_string));
+    mState.window->Style(*mState.painter);
 }
 
 void UIWidget::on_btnEditWindowStyleString_clicked()
 {
-    std::string old_style_string = mState.window.GetStyleString();
+    std::string old_style_string = mState.window->GetStyleString();
 
     boost::erase_all(old_style_string, "window/");
 
@@ -1928,22 +1988,22 @@ void UIWidget::on_btnEditWindowStyleString_clicked()
 
     if (!mState.style->ParseStyleString("window", new_style_string))
     {
-        ERROR("Window style string contains errors and cannot be used. [window='%1']", mState.window.GetName());
+        ERROR("Window style string contains errors and cannot be used. [window='%1']", mState.window->GetName());
         mState.style->ParseStyleString("window", old_style_string);
         return;
     }
-    mState.window.SetStyleString(new_style_string);
-    mState.window.Style(*mState.painter);
+    mState.window->SetStyleString(new_style_string);
+    mState.window->Style(*mState.painter);
     SetValue(mUI.windowStyleString, new_style_string);
 }
 
 void UIWidget::on_btnResetWindowStyle_clicked()
 {
-    mState.window.ResetStyleString();
+    mState.window->ResetStyleString();
     mState.style->DeleteMaterials("window");
     mState.style->DeleteProperties("window");
     mState.painter->DeleteMaterialInstances("window");
-    mState.window.Style(*mState.painter);
+    mState.window->Style(*mState.painter);
 
     SetValue(mUI.windowStyleString, QString(""));
 }
@@ -1995,7 +2055,7 @@ void UIWidget::on_btnAddScript_clicked()
     script.SetFileURI(uri);
     app::ScriptResource resource(script, name);
     mState.workspace->SaveResource(resource);
-    mState.window.SetScriptFile(script.GetId());
+    mState.window->SetScriptFile(script.GetId());
 
     ScriptWidget* widget = new ScriptWidget(mState.workspace, resource);
     emit OpenNewWidget(widget);
@@ -2006,7 +2066,7 @@ void UIWidget::on_btnAddScript_clicked()
 
 void UIWidget::on_btnResetScript_clicked()
 {
-    mState.window.ResetScriptFile();
+    mState.window->ResetScriptFile();
     SetValue(mUI.windowScriptFile, -1);
     SetEnabled(mUI.btnEditScript, false);
 }
@@ -2035,7 +2095,7 @@ void UIWidget::on_tree_customContextMenuRequested(QPoint)
         SetEnabled(mUI.actionWidgetDelete , true);
         SetEnabled(mUI.actionWidgetDuplicate , true);
     }
-    if (mState.window.GetNumWidgets())
+    if (mState.window->GetNumWidgets())
     {
         SetEnabled(mUI.actionWidgetOrder, true);
     }
@@ -2068,7 +2128,7 @@ void UIWidget::TreeCurrentWidgetChangedEvent()
 
 void UIWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
 {
-    auto& tree = mState.window.GetRenderTree();
+    auto& tree = mState.window->GetRenderTree();
 
     auto* src_widget = static_cast<uik::Widget*>(item->GetUserData());
     auto* dst_widget = static_cast<uik::Widget*>(target->GetUserData());
@@ -2094,8 +2154,8 @@ void UIWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* t
     if (base::SearchChild(tree, dst_widget, src_widget))
         return;
 
-    const auto& parent_rect = mState.window.FindWidgetRect(dst_widget);
-    const auto& child_rect  = mState.window.FindWidgetRect(src_widget);
+    const auto& parent_rect = mState.window->FindWidgetRect(dst_widget);
+    const auto& child_rect  = mState.window->FindWidgetRect(src_widget);
     const auto& parent_pos  = parent_rect.GetPosition();
     const auto& child_pos   = child_rect.GetPosition();
     src_widget->SetPosition(child_pos - parent_pos);
@@ -2177,7 +2237,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         DrawBasisVectors(painter , view);
     }
 
-    if (mState.window.GetNumWidgets() == 0)
+    if (mState.window->GetNumWidgets() == 0)
     {
         ShowInstruction(
             "Create a new game User Interface (UI).\n\n"
@@ -2311,7 +2371,7 @@ void FragmentShaderMain()
                     if (const auto* scroll_area = uik::WidgetCast<uik::ScrollArea>(widget))
                     {
                         uik::FRect content_rect;
-                        content_rect = mState.window.FindContentRect(scroll_area,
+                        content_rect = mState.window->FindContentRect(scroll_area,
                             uik::Window::FindRectFlags::IncludeChildren |
                             uik::Window::FindRectFlags::ClipChildren |
                             uik::Window::FindRectFlags::ExcludeHidden);
@@ -2342,8 +2402,8 @@ void FragmentShaderMain()
         s.SetValue("design-mode", true);
         mState.painter->SetFlag(engine::UIPainter::Flags::ClipWidgets, GetValue(mUI.chkClipWidgets));
         mState.painter->SetFlag(engine::UIPainter::Flags::DesignMode, true);
-        mState.window.InitDesignTime(s);
-        mState.window.Paint(s , *mState.painter, 0.0, &hook);
+        mState.window->InitDesignTime(s);
+        mState.window->Paint(s , *mState.painter, 0.0, &hook);
 
         // draw the window outline
         if (GetValue(mUI.chkShowBounds))
@@ -2358,7 +2418,7 @@ void FragmentShaderMain()
 
     if (const auto* widget = GetCurrentWidget())
     {
-        const auto& widget_rect = mState.window.FindWidgetRect(widget);
+        const auto& widget_rect = mState.window->FindWidgetRect(widget);
         gfx::FRect size_box;
         size_box.Resize(10.0f, 10.0f);
         size_box.Move(widget_rect.GetPosition());
@@ -2467,7 +2527,7 @@ void UIWidget::MousePress(QMouseEvent* mickey)
         // an overlapping widget ends up selecting another widget.
         if (auto* current = GetCurrentWidget())
         {
-            const auto& rect = mState.window.FindWidgetRect(current);
+            const auto& rect = mState.window->FindWidgetRect(current);
             gfx::FRect size_box;
             size_box.Resize(10.0f, 10.0f);
             size_box.Move(rect.GetPosition());
@@ -2484,10 +2544,10 @@ void UIWidget::MousePress(QMouseEvent* mickey)
             // if there's no current selection then perform hit testing
             // and select a new widget and start a tool
             uik::FPoint widget_hit_point;
-            auto* widget = mState.window.HitTest(uik::FPoint(mouse_in_scene.x, mouse_in_scene.y), &widget_hit_point);
+            auto* widget = mState.window->HitTest(uik::FPoint(mouse_in_scene.x, mouse_in_scene.y), &widget_hit_point);
             if (widget)
             {
-                const auto& widget_rect = mState.window.FindWidgetRect(widget);
+                const auto& widget_rect = mState.window->FindWidgetRect(widget);
                 gfx::FRect size_box;
                 size_box.Resize(10.0f, 10.0f);
                 size_box.Move(widget_rect.GetPosition());
@@ -2738,7 +2798,7 @@ void UIWidget::UpdateCurrentWidgetProperties()
             if (radio->IsSelected())
             {
                 std::vector<uik::Widget*> siblings;
-                auto& tree = mState.window.GetRenderTree();
+                auto& tree = mState.window->GetRenderTree();
                 base::ListSiblings(tree, widget, &siblings);
                 for (auto* sibling : siblings)
                 {
@@ -3126,8 +3186,8 @@ bool UIWidget::LoadStyleVerbose(const QString& name)
     mState.style = std::move(style);
     mState.painter->SetStyle(mState.style.get());
     mState.painter->DeleteMaterialInstances();
-    mState.window.Style(*mState.painter);
-    mState.window.SetStyleName(app::ToUtf8(name));
+    mState.window->Style(*mState.painter);
+    mState.window->SetStyleName(app::ToUtf8(name));
     INFO("Loaded UI style '%1'.", name);
     NOTE("Loaded UI style '%1'.", name);
     return true;
@@ -3152,8 +3212,8 @@ bool UIWidget::LoadStyleQuiet(const std::string& uri)
     mState.style = std::move(style);
     mState.painter->SetStyle(mState.style.get());
     mState.painter->DeleteMaterialInstances();
-    mState.window.Style(*mState.painter);
-    mState.window.SetStyleName(uri);
+    mState.window->Style(*mState.painter);
+    mState.window->SetStyleName(uri);
     INFO("Loaded UI style '%1'.", uri);
     return true;
 }
@@ -3183,7 +3243,7 @@ bool UIWidget::LoadKeysVerbose(const std::string& uri)
             return false;
     }
     mState.keymap = std::move(keymap);
-    mState.window.SetKeyMapFile(uri);
+    mState.window->SetKeyMapFile(uri);
     INFO("Loaded UI keymap '%1'.", uri);
     NOTE("Loaded UI keymap '%1'.", uri);
     return true;
@@ -3204,7 +3264,7 @@ bool UIWidget::LoadKeysQuiet(const std::string& uri)
         return false;
     }
     mState.keymap = std::move(keymap);
-    mState.window.SetKeyMapFile(uri);
+    mState.window->SetKeyMapFile(uri);
     INFO("Loaded UI keymap '%1'.", uri);
     return true;
 }
@@ -3234,7 +3294,7 @@ void UIWidget::UpdateDeletedResourceReferences()
     // it back to default.
     if (mState.style->PurgeUnavailableMaterialReferences())
     {
-        mState.window.ForEachWidget([this](uik::Widget* widget) {
+        mState.window->ForEachWidget([this](uik::Widget* widget) {
             auto style = mState.style->MakeStyleString(widget->GetId());
             widget->SetStyleString(style);
         });
@@ -3242,9 +3302,9 @@ void UIWidget::UpdateDeletedResourceReferences()
         WARN("Some UI material references are no longer available and have been defaulted.");
     }
 
-    for (size_t i=0; i<mState.window.GetNumWidgets(); ++i)
+    for (size_t i=0; i<mState.window->GetNumWidgets(); ++i)
     {
-        auto* widget = &mState.window.GetWidget(i);
+        auto* widget = &mState.window->GetWidget(i);
         if (auto* shape = uik::WidgetCast<uik::ShapeWidget>(widget))
         {
             if (!mState.workspace->IsValidMaterial(shape->GetMaterialId()))
@@ -3254,13 +3314,13 @@ void UIWidget::UpdateDeletedResourceReferences()
         }
     }
 
-    if (mState.window.HasScriptFile())
+    if (mState.window->HasScriptFile())
     {
-        const auto& script = mState.window.GetScriptFile();
+        const auto& script = mState.window->GetScriptFile();
         if (!mState.workspace->IsValidScript(script))
         {
-            WARN("Window '%1' script is no longer available.", mState.window.GetName());
-            mState.window.ResetScriptFile();
+            WARN("Window '%1' script is no longer available.", mState.window->GetName());
+            mState.window->ResetScriptFile();
             SetValue(mUI.windowScriptFile, -1);
             SetEnabled(mUI.btnEditScript, false);
         }
@@ -3269,8 +3329,8 @@ void UIWidget::UpdateDeletedResourceReferences()
 
 uik::FSize UIWidget::GetFormSize() const
 {
-    //return mState.window.FindWidgetByType(uik::Widget::Type::Form)->GetSize();
-    return mState.window.GetBoundingRect().GetSize();
+    //return mState.window->FindWidgetByType(uik::Widget::Type::Form)->GetSize();
+    return mState.window->GetBoundingRect().GetSize();
 }
 
 QString GenerateUIScriptSource(QString window)

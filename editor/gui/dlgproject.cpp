@@ -125,6 +125,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.chkDebugPrintFps, mSettings.debug_print_fps);
     SetUIValue(mUI.edtPreviewEntityScript, mSettings.preview_entity_script);
     SetUIValue(mUI.edtPreviewSceneScript, mSettings.preview_scene_script);
+    SetUIValue(mUI.edtPreviewUIScript, mSettings.preview_ui_script);
 }
 
 void DlgProject::on_btnAccept_clicked()
@@ -195,6 +196,7 @@ void DlgProject::on_btnAccept_clicked()
     mSettings.mouse_pointer_drawable = GetItemId(mUI.mouseDrawable);
     GetUIValue(mUI.edtPreviewEntityScript, &mSettings.preview_entity_script);
     GetUIValue(mUI.edtPreviewSceneScript, &mSettings.preview_scene_script);
+    GetUIValue(mUI.edtPreviewUIScript, &mSettings.preview_ui_script);
 
     QString library;
     GetUIValue(mUI.edtAppLibrary, &library);
@@ -256,6 +258,16 @@ void DlgProject::on_btnSelectPreviewSceneScript_clicked()
     if (file.isEmpty())
         return;
     SetValue(mUI.edtPreviewSceneScript, mWorkspace.MapFileToWorkspace(file));
+}
+
+void DlgProject::on_btnSelectPreviewUIScript_clicked()
+{
+    const auto& file = QFileDialog::getOpenFileName(this,
+        tr("Select Script"), "",
+        tr("Lua scripts (*.lua)"));
+    if (file.isEmpty())
+        return;
+    SetValue(mUI.edtPreviewUIScript, mWorkspace.MapFileToWorkspace(file));
 }
 
 } // namespace
