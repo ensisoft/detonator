@@ -23,6 +23,7 @@
 #  include <QImage>
 #include "warnpop.h"
 
+#include "editor/app/types.h"
 #include "editor/gui/drawing.h"
 
 namespace app {
@@ -215,7 +216,7 @@ namespace gui
         virtual void Save()
         {}
 
-        virtual bool LaunchScript(const QString& script_id)
+        virtual bool LaunchScript(const app::AnyString& id)
         { return false; }
 
         // Returns true if the widget wants to close itself. The caller should

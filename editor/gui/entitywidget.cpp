@@ -1388,10 +1388,10 @@ bool EntityWidget::OnEscape()
     return true;
 }
 
-bool EntityWidget::LaunchScript(const QString& id)
+bool EntityWidget::LaunchScript(const app::AnyString& id)
 {
     const auto& entity_script_id = mState.entity->GetScriptFileId();
-    if (!entity_script_id.empty())
+    if (entity_script_id == id)
     {
         on_actionPreview_triggered();
         return true;
@@ -1400,12 +1400,12 @@ bool EntityWidget::LaunchScript(const QString& id)
         return false;
 
     const auto& entity_controller_script_id = mState.entity->GetController(0).GetScriptId();
-    if (entity_controller_script_id.empty())
-        return false;
-
-
-    on_actionPreview_triggered();
-    return true;
+    if (entity_controller_script_id == id)
+    {
+        on_actionPreview_triggered();
+        return true;
+    }
+    return false;
 }
 
 void EntityWidget::SaveAnimation(const game::AnimationClass& track, const QVariantMap& properties)
