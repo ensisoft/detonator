@@ -896,11 +896,40 @@ void EntityWidget::AddActions(QToolBar& bar)
     bar.addAction(mCustomShapes->menuAction());
     bar.addSeparator();
     bar.addAction(mParticleSystems->menuAction());
-    bar.addSeparator();
-    bar.addAction(mUI.actionNewJoint);
 }
+
 void EntityWidget::AddActions(QMenu& menu)
 {
+    auto* create_menu = new QMenu(&menu);
+    create_menu->setTitle(tr("Create"));
+    create_menu->addAction(mUI.actionJointAdd);
+    create_menu->addAction(mUI.actionScriptVarAdd);
+    create_menu->addAction(mUI.actionAnimationAdd);
+
+    auto* place_shape_menu =new QMenu(&menu);
+    place_shape_menu->setTitle(tr("Place New Shape"));
+    place_shape_menu->addAction(mUI.actionNewRect);
+    place_shape_menu->addAction(mUI.actionNewRoundRect);
+    place_shape_menu->addAction(mUI.actionNewCircle);
+    place_shape_menu->addAction(mUI.actionNewSemiCircle);
+    place_shape_menu->addAction(mUI.actionNewIsoscelesTriangle);
+    place_shape_menu->addAction(mUI.actionNewRightTriangle);
+    place_shape_menu->addAction(mUI.actionNewTrapezoid);
+    place_shape_menu->addAction(mUI.actionNewParallelogram);
+    place_shape_menu->addAction(mUI.actionNewCapsule);
+    place_shape_menu->addAction(mCustomShapes->menuAction());
+    place_shape_menu->addAction(mParticleSystems->menuAction());
+
+    auto* tool_menu = new QMenu(this);
+    tool_menu->setTitle(tr("Apply Tool"));
+    tool_menu->addAction(mUI.actionNewJoint);
+
+    auto* edit_menu = new QMenu(this);
+    edit_menu->setTitle(tr("Edit Script"));
+    edit_menu->addAction(mUI.actionEditEntityScript);
+    edit_menu->addAction(mUI.actionEditControllerScript);
+
+
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
     menu.addAction(mUI.actionStop);
@@ -909,21 +938,10 @@ void EntityWidget::AddActions(QMenu& menu)
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
-    menu.addAction(mUI.actionNewRect);
-    menu.addAction(mUI.actionNewRoundRect);
-    menu.addAction(mUI.actionNewCircle);
-    menu.addAction(mUI.actionNewSemiCircle);
-    menu.addAction(mUI.actionNewIsoscelesTriangle);
-    menu.addAction(mUI.actionNewRightTriangle);
-    menu.addAction(mUI.actionNewTrapezoid);
-    menu.addAction(mUI.actionNewParallelogram);
-    menu.addAction(mUI.actionNewCapsule);
-    menu.addSeparator();
-    menu.addAction(mCustomShapes->menuAction());
-    menu.addSeparator();
-    menu.addAction(mParticleSystems->menuAction());
-    menu.addSeparator();
-    menu.addAction(mUI.actionNewJoint);
+    menu.addMenu(create_menu);
+    menu.addMenu(place_shape_menu);
+    menu.addMenu(tool_menu);
+    menu.addMenu(edit_menu);
 }
 
 bool EntityWidget::SaveState(Settings& settings) const
@@ -2979,6 +2997,26 @@ void EntityWidget::on_actionAddSpatialNode_triggered()
 void EntityWidget::on_actionAddTransformer_triggered()
 {
     ToggleTransformer(true);
+}
+
+void EntityWidget::on_actionEditEntityScript_triggered()
+{
+    on_btnEditScript_clicked();
+}
+void EntityWidget::on_actionEditControllerScript_triggered()
+{
+    if (mState.entity->GetNumAnimators() == 0)
+        return;
+
+    const auto& controller = mState.entity->GetController(0);
+
+    const auto& id = controller.GetScriptId();
+    if (id.empty())
+        return;
+
+    ActionEvent::OpenResource open;
+    open.id = app::FromUtf8(id);
+    ActionEvent::Post(open);
 }
 
 

@@ -1438,6 +1438,9 @@
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOn</enum>
+       </property>
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
@@ -4572,13 +4575,16 @@
   <action name="actionScriptVarAdd">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/add.png</normaloff>:/32x32_ico_png/add.png</iconset>
    </property>
    <property name="text">
-    <string>Add ...</string>
+    <string>New Scripting Variable</string>
    </property>
    <property name="toolTip">
     <string>Add new scripting variable</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+V</string>
    </property>
   </action>
   <action name="actionScriptVarDel">
@@ -4632,10 +4638,10 @@
   <action name="actionJointAdd">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/add.png</normaloff>:/32x32_ico_png/add.png</iconset>
    </property>
    <property name="text">
-    <string>Add ...</string>
+    <string>New Rigid Body Joint</string>
    </property>
    <property name="toolTip">
     <string>Add new rigid body physics joint</string>
@@ -4647,7 +4653,7 @@
      <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
    </property>
    <property name="text">
-    <string>Add ...</string>
+    <string>New Animation</string>
    </property>
    <property name="toolTip">
     <string>Add new animation</string>
@@ -4737,7 +4743,7 @@
      <normaloff>:/32x32_ico_png/connect.png</normaloff>:/32x32_ico_png/connect.png</iconset>
    </property>
    <property name="text">
-    <string>Joint Bodies</string>
+    <string>Joint Tool</string>
    </property>
    <property name="toolTip">
     <string>Connect rigid bodies by a joint</string>
@@ -4807,6 +4813,33 @@
    </property>
    <property name="text">
     <string>Node Transformer</string>
+   </property>
+  </action>
+  <action name="actionEditEntityScript">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/script.png</normaloff>:/32x32_ico_png/script.png</iconset>
+   </property>
+   <property name="text">
+    <string>Entity Script</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit entity script</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Shift+E</string>
+   </property>
+  </action>
+  <action name="actionEditControllerScript">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/script.png</normaloff>:/32x32_ico_png/script.png</iconset>
+   </property>
+   <property name="text">
+    <string>Controller Script</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit state controller script</string>
    </property>
   </action>
  </widget>

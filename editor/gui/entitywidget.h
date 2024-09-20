@@ -278,6 +278,8 @@ namespace gui
         void on_actionAddTilemapNode_triggered();
         void on_actionAddSpatialNode_triggered();
         void on_actionAddTransformer_triggered();
+        void on_actionEditEntityScript_triggered();
+        void on_actionEditControllerScript_triggered();
 
         void on_animator_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);
