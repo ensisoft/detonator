@@ -667,6 +667,19 @@ void PlayWindow::RunGameLoopOnce()
     }
     try
     {
+        if (mReloadShaders)
+        {
+            mEngine->ReloadResources((unsigned)engine::Engine::ResourceType::Shaders);
+            mResourceLoader->BlowCaches();
+            mReloadShaders = false;
+        }
+        if (mReloadTextures)
+        {
+            mEngine->ReloadResources((unsigned)engine::Engine::ResourceType::Textures);
+            mResourceLoader->BlowCaches();
+            mReloadTextures = false;
+        }
+
         // Remember that the tracing state cannot be changed while the
         // tracing stack has entries. I.e. the state can only change before
         // any tracing statements are ever entered on the trace stack!
@@ -685,7 +698,7 @@ void PlayWindow::RunGameLoopOnce()
                 else WARN("Incorrect number of tracing enable/disable requests detected.");
             }
             mEnableTrace.clear();
-            DEBUG("Performance tracing update. [value=%1", mTraceEnabledCounter ? "ON" : "OFF");
+            DEBUG("Performance tracing update. [value=%1]", mTraceEnabledCounter ? "ON" : "OFF");
             ToggleTracing(mTraceEnabledCounter > 0);
         }
 
@@ -1496,15 +1509,20 @@ void PlayWindow::on_actionReloadShaders_triggered()
 {
     if (!mEngine || !mInitDone)
         return;
-    mEngine->ReloadResources((unsigned)engine::Engine::ResourceType::Shaders);
-    mResourceLoader->BlowCaches();
+
+    // don't actually do this operation here, but defer to the game
+    // loop when the context is valid and current.
+    mReloadShaders = true;
 }
+
 void PlayWindow::on_actionReloadTextures_triggered()
 {
     if (!mEngine || !mInitDone)
         return;
-    mEngine->ReloadResources((unsigned)engine::Engine::ResourceType::Textures);
-    mResourceLoader->BlowCaches();
+
+    // don't actually do this operation here but defer to the game
+    // loop when the context is valid and current.
+    mReloadTextures = true;
 }
 
 void PlayWindow::on_btnApplyFilter_clicked()
