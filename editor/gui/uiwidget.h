@@ -38,15 +38,16 @@ namespace app {
 namespace gui
 {
     class MouseTool;
+    class PlayWindow;
 
     class UIWidget : public MainWidget
     {
         Q_OBJECT
 
     public:
-        UIWidget(app::Workspace* workspace);
+        explicit UIWidget(app::Workspace* workspace);
         UIWidget(app::Workspace* workspace, const app::Resource& resource);
-       ~UIWidget();
+       ~UIWidget() override;
 
         virtual QString GetId() const override;
         virtual void InitializeSettings(const UISettings& settings) override;
@@ -64,6 +65,7 @@ namespace gui
         virtual void ZoomOut() override;
         virtual void ReloadShaders() override;
         virtual void ReloadTextures() override;
+        virtual void RunGameLoopOnce() override;
         virtual void Shutdown() override;
         virtual void Update(double dt) override;
         virtual void Render() override;
@@ -73,6 +75,7 @@ namespace gui
         virtual bool OnEscape() override;
         virtual bool GetStats(Stats* stats) const override;
         virtual void Refresh() override;
+        virtual bool LaunchScript(const app::AnyString& id) override;
     private slots:
         void on_widgetColor_colorChanged(QColor color);
         void on_actionPlay_triggered();
@@ -80,6 +83,7 @@ namespace gui
         void on_actionStop_triggered();
         void on_actionClose_triggered();
         void on_actionSave_triggered();
+        void on_actionPreview_triggered();
         void on_actionNewForm_triggered();
         void on_actionNewLabel_triggered();
         void on_actionNewPushButton_triggered();
@@ -212,7 +216,7 @@ namespace gui
             // current workspace.
             app::Workspace* workspace = nullptr;
             // design time window that is used to create the widget hierarchy
-            uik::Window window;
+            std::shared_ptr<uik::Window> window;
             // transient window state that only exists when we're playing
             // the window, i.e. passing events such as mouse events to it.
             std::unique_ptr<uik::TransientState> active_state;
@@ -239,6 +243,9 @@ namespace gui
         std::deque<std::string> mMessageQueue;
         std::size_t mOriginalHash = 0;
         boost::circular_buffer<uik::Window> mUndoStack;
+
+        // the preview window if any.
+        std::unique_ptr<PlayWindow> mPreview;
     };
 
     QString GenerateUIScriptSource(QString window);

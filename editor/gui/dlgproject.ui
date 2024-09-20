@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>852</width>
-    <height>708</height>
+    <height>740</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -974,8 +974,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>798</width>
-            <height>875</height>
+            <width>818</width>
+            <height>836</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -1890,6 +1890,41 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_15">
+            <item>
+             <widget class="QLineEdit" name="edtPreviewUIScript">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>app://scripts/preview/ui.lua</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnSelectPreviewUIScript">
+              <property name="text">
+               <string>Browse ...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_42">
+            <property name="text">
+             <string>UI script</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -2132,6 +2167,8 @@
   <tabstop>btnSelectPreviewEntityScript</tabstop>
   <tabstop>edtPreviewSceneScript</tabstop>
   <tabstop>btnSelectPreviewSceneScript</tabstop>
+  <tabstop>edtPreviewUIScript</tabstop>
+  <tabstop>btnSelectPreviewUIScript</tabstop>
   <tabstop>viewportWidth</tabstop>
   <tabstop>viewportHeight</tabstop>
   <tabstop>btnAccept</tabstop>

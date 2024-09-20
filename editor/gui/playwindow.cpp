@@ -454,10 +454,16 @@ public:
     }
     virtual ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override
     {
+        if (name == "_ui_preview_")
+            return mUIPreview;
+
         return mWorkspace.FindUIByName(name);
     }
     virtual ClassHandle<const uik::Window> FindUIById(const std::string& id) const override
     {
+        if (id == "_ui_preview_")
+            return mUIPreview;
+
         return mWorkspace.FindUIById(id);
     }
     virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override
@@ -504,6 +510,8 @@ public:
     {
         return mWorkspace.FindTilemapClassById(id);
     }
+    void SetUIPreview(const std::shared_ptr<const uik::Window>& window)
+    { mUIPreview = window; }
     void SetScenePreview(const std::shared_ptr<const game::SceneClass>& scene)
     { mScenePreview = scene; }
     void SetEntityPreviewScene(const std::shared_ptr<const game::SceneClass>& klass)
@@ -516,6 +524,7 @@ private:
     std::shared_ptr<const game::SceneClass> mEntityPreviewScene;
     std::shared_ptr<const game::EntityClass> mEntityPreview;
     std::shared_ptr<const game::SceneClass> mScenePreview;
+    std::shared_ptr<const uik::Window> mUIPreview;
 };
 
 
@@ -919,6 +928,23 @@ bool PlayWindow::LoadPreview(const std::shared_ptr<const game::SceneClass>& scen
 
     const auto& settings = mWorkspace.GetProjectSettings();
     InitPreview(settings.preview_scene_script);
+    return true;
+}
+
+bool PlayWindow::LoadPreview(const std::shared_ptr<const uik::Window>& window)
+{
+    if (!LoadLibrary())
+        return false;
+
+    mClassLibrary = std::make_unique<ClassLibrary>(mWorkspace);
+    mClassLibrary->SetUIPreview(window);
+
+    QTimer::singleShot(10, [window, this]() {
+        SetWindowTitle(this, window->GetName());
+    });
+
+    const auto& settings = mWorkspace.GetProjectSettings();
+    InitPreview(settings.preview_ui_script);
     return true;
 }
 
