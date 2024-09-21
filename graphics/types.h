@@ -28,6 +28,12 @@
 
 namespace gfx
 {
+    enum class RenderPass {
+        ColorPass,
+        StencilPass,
+        CustomPass = 100
+    };
+
     // Text alignment inside a rect
     enum TextAlign {
         // Vertical text alignment

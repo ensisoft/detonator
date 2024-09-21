@@ -1105,6 +1105,11 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     // todo: fix this, point rendering could be used without particles.
     program.SetUniform("kParticleEffect", state.render_points ? (int)mParticleAction : 0);
 
+    // for the future... for different render passes we got two options
+    // either the single shader implements the different render pass
+    // functionality or then there are different shaders for different passes
+    // program.SetUniform("kRenderPass", (int)state.renderpass);
+
     if (mType == Type::Color)
     {
         if (!IsStatic())
@@ -1695,6 +1700,8 @@ ShaderSource MaterialClass::CreateShaderStub(Type type)
         source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
     if (!source.HasUniform("kParticleEffect"))
         source.AddUniform("kParticleEffect", ShaderSource::UniformType::Int);
+    //if (!source.HasUniform("kRenderPass"))
+    //    source.AddUniform("kRenderPass", ShaderSource::UniformType::Int);
 
     if (!source.HasVarying("vTexCoord"))
         source.AddVarying("vTexCoord",  ShaderSource::VaryingType::Vec2f);
@@ -1705,6 +1712,7 @@ ShaderSource MaterialClass::CreateShaderStub(Type type)
     if (!source.HasVarying("vParticleTime"))
         source.AddVarying("vParticleTime", ShaderSource::VaryingType::Float);
 
+    //source.SetComment("kRenderPass", "Render pass identifier.");
     source.SetComment("kTime", "Material instance time in seconds.");
     source.SetComment("kEditingMode", "Flag to indicate whether we're in editing mode, i.e. running editor or not.\n"
                       "0 = editing mode is off, i.e. we're running in production/deployment\n"
@@ -2656,6 +2664,7 @@ bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device,
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
+    state.renderpass    = env.renderpass;
     state.material_time = mRuntime;
     state.uniforms      = &mUniforms;
     state.first_render  = mFirstRender;
