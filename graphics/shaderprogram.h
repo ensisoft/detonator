@@ -27,6 +27,7 @@
 #include "graphics/types.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
+#include "graphics/types.h"
 
 namespace gfx
 {
@@ -39,7 +40,12 @@ namespace gfx
     class ShaderProgram
     {
     public:
+        using RenderPass = gfx::RenderPass;
+
         virtual ~ShaderProgram() = default;
+
+        virtual RenderPass GetRenderPass() const { return RenderPass::ColorPass; }
+
         // Inspect the current draw and its associated user object.
         // The void* user maps to void* user in the Painter's DrawCommand.
         // If the function returns false the draw is skipped.
@@ -83,6 +89,8 @@ namespace gfx
         class StencilShaderProgram : public ShaderProgram
         {
         public:
+            virtual RenderPass GetRenderPass() const override { return RenderPass::StencilPass; }
+
             virtual std::string GetName() const override
             { return "StencilShaderProgram"; }
         private:

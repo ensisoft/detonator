@@ -864,6 +864,8 @@ namespace gfx
             // The instance uniforms will take precedence over the uniforms
             // set in the class whenever they're set.
             const UniformMap* uniforms = nullptr;
+            // Current render pass the material is used in
+            RenderPass renderpass = RenderPass::ColorPass;
         };
 
         explicit MaterialClass(Type type, std::string id = base::RandomString(10));
@@ -1206,7 +1208,7 @@ namespace gfx
     public:
         using Uniform    = MaterialClass::Uniform;
         using UniformMap = MaterialClass::UniformMap;
-        virtual ~Material() = default;
+        using RenderPass = gfx::RenderPass;
 
         struct Environment {
             // true if running in an "editing mode", which means that even
@@ -1214,12 +1216,15 @@ namespace gfx
             // in case it has been modified and should be re-uploaded.
             bool editing_mode  = false;
             bool render_points = false;
+            RenderPass renderpass = RenderPass::ColorPass;
         };
         struct RasterState {
             using Blending = Device::State::BlendOp;
             Blending blending = Blending::None;
             bool premultiplied_alpha = false;
         };
+
+        virtual ~Material() = default;
         // Apply the dynamic material properties to the given program object
         // and set the rasterizer state. Dynamic properties are the properties
         // that can change between one material instance to another even when
