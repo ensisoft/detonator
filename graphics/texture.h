@@ -181,6 +181,11 @@ namespace gfx
         virtual std::string GetId() const = 0;
 
         // helpers.
+        inline float GetWidthF() const noexcept
+        { return (float)GetWidth(); }
+        inline float GetHeightF() const noexcept
+        { return (float)GetHeight(); }
+
         inline void SetTransient(bool on_off)
         { SetFlag(Flags::Transient, on_off); }
         inline void SetGarbageCollection(bool on_off)
