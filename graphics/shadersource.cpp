@@ -23,6 +23,11 @@
 #include "graphics/shadersource.h"
 
 namespace {
+    std::string ToConst(int value)
+    {
+        return base::ToChars(value);
+    }
+
     std::string ToConst(float value)
     {
         return base::ToChars(value);
@@ -231,8 +236,41 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
     ss << "\n// Warning. Do not delete the below line.";
     ss << "\n// shader_uniform_api_version=" << mShaderUniformAPIVersion << "\n\n";
 
+    // deal with preprocessor definitions
+    // expect to produce something like
+    // #define PI 3.123441
     for (const auto& data : mData)
     {
+        if (data.decl_type != ShaderDataDeclarationType::PreprocessorDefine)
+            continue;
+
+        const auto& lines = base::SplitString(data.comment, '\n');
+        for (const auto& line: lines)
+        {
+            ss << "// " << line << "\n";
+        }
+        ASSERT(data.constant_value.has_value());
+        const auto& value = data.constant_value.value();
+
+        if (const auto* ptr = std::get_if<int>(&value))
+        {
+            ss << "#define " << data.name << " " << ToConst(*ptr);
+            ss << "\n";
+        }
+        else if (const auto* ptr = std::get_if<float>(&value))
+        {
+            ss << "#define " << data.name << " " << ToConst(*ptr);
+            ss << "\n";
+        }
+        else BUG("Unsupported preprocessor definition type.");
+    }
+    ss << "\n";
+
+    for (const auto& data : mData)
+    {
+        if (data.decl_type == ShaderDataDeclarationType::PreprocessorDefine)
+            continue;
+
         if (variant == SourceVariant::ShaderStub)
         {
             const auto& lines = base::SplitString(data.comment, '\n');
@@ -286,7 +324,6 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
             ss << "sampler2D ";
         }
         else BUG("Missing GLSL data type handling.");
-
 
         if (data.decl_type == ShaderDataDeclarationType::Constant)
         {

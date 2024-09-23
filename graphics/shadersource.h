@@ -56,7 +56,11 @@ namespace gfx
         using ConstantType  = ShaderDataType;
 
         enum class ShaderDataDeclarationType {
-            Attribute, Uniform, Varying, Constant
+            Attribute, Uniform, Varying, Constant,
+            // technically not part of the GLSL data types itself
+            // since it's preprocessor #define BLAH 1
+            // but combining it in the same enum for convenience.
+            PreprocessorDefine
         };
 
         using ShaderDataDeclarationValue = std::variant<
@@ -131,6 +135,26 @@ namespace gfx
                     return &data;
             }
             return nullptr;
+        }
+        void AddPreprocessorDefinition(std::string name, int value, std::string  comment = "")
+        {
+            ShaderDataDeclaration decl;
+            decl.decl_type      = ShaderDataDeclarationType::PreprocessorDefine;
+            decl.data_type      = ShaderDataType::Int;
+            decl.name           = std::move(name);
+            decl.comment        = std::move(comment);
+            decl.constant_value = value;
+            AddData(std::move(decl));
+        }
+        void AddPreprocessorDefinition(std::string name, float value, std::string  comment = "")
+        {
+            ShaderDataDeclaration decl;
+            decl.decl_type      = ShaderDataDeclarationType::PreprocessorDefine;
+            decl.data_type      = ShaderDataType::Float;
+            decl.name           = std::move(name);
+            decl.comment        = std::move(comment);
+            decl.constant_value = value;
+            AddData(std::move(decl));
         }
 
         void AddAttribute(std::string name, AttributeType type, std::string comment = "")
