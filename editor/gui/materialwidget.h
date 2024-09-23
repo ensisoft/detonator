@@ -109,7 +109,7 @@ namespace gui
         void on_tileLeftPadding_valueChanged(int);
         void on_tileTopPadding_valueChanged(int);
         void on_activeMap_currentIndexChanged(int);
-        void on_alphaCutoff_valueChanged(double value);
+        void on_alphaCutoff_valueChanged(bool, double);
         void on_baseColor_colorChanged(QColor color);
         void on_particleAction_currentIndexChanged(int);
         void on_spriteFps_valueChanged(double);
