@@ -1446,13 +1446,33 @@
     <property name="title">
      <string>Tools</string>
     </property>
+    <widget class="QMenu" name="menuBitmap_Tools">
+     <property name="title">
+      <string>Bitmap Tools</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../resource/resource.qrc">
+       <normaloff>:/16x16_ico_png/bitmap.png</normaloff>:/16x16_ico_png/bitmap.png</iconset>
+     </property>
+     <addaction name="actionImagePacker"/>
+     <addaction name="actionImageViewer"/>
+     <addaction name="actionTilemap"/>
+     <addaction name="actionFontMap"/>
+    </widget>
+    <widget class="QMenu" name="menuVector_Tools">
+     <property name="title">
+      <string>Vector Tools</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../resource/resource.qrc">
+       <normaloff>:/16x16_ico_png/svg_logo.png</normaloff>:/16x16_ico_png/svg_logo.png</iconset>
+     </property>
+     <addaction name="actionSvgViewer"/>
+    </widget>
     <addaction name="actionSettings"/>
     <addaction name="separator"/>
-    <addaction name="actionImagePacker"/>
-    <addaction name="actionImageViewer"/>
-    <addaction name="actionSvgViewer"/>
-    <addaction name="actionFontMap"/>
-    <addaction name="actionTilemap"/>
+    <addaction name="menuBitmap_Tools"/>
+    <addaction name="menuVector_Tools"/>
     <addaction name="separator"/>
     <addaction name="actionLaunchViewer"/>
    </widget>
@@ -1840,7 +1860,7 @@
      <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
    </property>
    <property name="text">
-    <string>Image Packer...</string>
+    <string>Image Packer</string>
    </property>
   </action>
   <action name="actionLoadWorkspace">
@@ -2298,7 +2318,7 @@
      <normaloff>:/16x16_ico_png/application.png</normaloff>:/16x16_ico_png/application.png</iconset>
    </property>
    <property name="text">
-    <string>Workspace Viewer ...</string>
+    <string>Workspace Viewer </string>
    </property>
   </action>
   <action name="actionImageViewer">
@@ -2307,7 +2327,7 @@
      <normaloff>:/16x16_ico_png/image.png</normaloff>:/16x16_ico_png/image.png</iconset>
    </property>
    <property name="text">
-    <string>Image Viewer ...</string>
+    <string>Image Viewer</string>
    </property>
   </action>
   <action name="actionFontMap">
@@ -2316,7 +2336,7 @@
      <normaloff>:/16x16_ico_png/font.png</normaloff>:/16x16_ico_png/font.png</iconset>
    </property>
    <property name="text">
-    <string>Font Map...</string>
+    <string>Fontmap JSON Generator</string>
    </property>
   </action>
   <action name="actionProjectSync">
@@ -2337,7 +2357,7 @@
      <normaloff>:/16x16_ico_png/svg_logo.png</normaloff>:/16x16_ico_png/svg_logo.png</iconset>
    </property>
    <property name="text">
-    <string>SVG Viewer...</string>
+    <string>SVG Rasterizer</string>
    </property>
    <property name="toolTip">
     <string>Launch SVG viewer</string>
@@ -2349,7 +2369,7 @@
      <normaloff>:/16x16_ico_png/image.png</normaloff>:/16x16_ico_png/image.png</iconset>
    </property>
    <property name="text">
-    <string>Tilemap...</string>
+    <string>Tilesheet JSON Generator</string>
    </property>
   </action>
   <action name="actionNewAnimatorScript">

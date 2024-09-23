@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>650</width>
-    <height>800</height>
+    <width>1000</width>
+    <height>840</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,9 +21,21 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Font map</string>
+      <string>Assign key codes to character glyphs</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="leftMargin">
+       <number>10</number>
+      </property>
+      <property name="topMargin">
+       <number>10</number>
+      </property>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <property name="bottomMargin">
+       <number>10</number>
+      </property>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
-    <height>800</height>
+    <width>1089</width>
+    <height>840</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,9 +17,21 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Tilemap image file</string>
+      <string>Create a JSON descriptor for a tilesheet</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="leftMargin">
+       <number>10</number>
+      </property>
+      <property name="topMargin">
+       <number>10</number>
+      </property>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <property name="bottomMargin">
+       <number>10</number>
+      </property>
       <item>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="1">
