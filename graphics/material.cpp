@@ -123,6 +123,22 @@ bool detail::TextureTextureSource::FromJson(const data::Reader& data)
     return ok;
 }
 
+std::string detail::TextureFileSource::GetGpuId() const
+{
+    // using the mFile URI is *not* enough to uniquely
+    // identify this texture object on the GPU because it's
+    // possible that the *same* texture object (same underlying file)
+    // is used with *different* flags in another material.
+    // in other words, "foo.png with pre-multiplied alpha" must be
+    // a different GPU texture object than "foo.png with straight alpha".
+    size_t gpu_hash = 0;
+    gpu_hash = base::hash_combine(gpu_hash, mFile);
+    gpu_hash = base::hash_combine(gpu_hash, mColorSpace);
+    gpu_hash = base::hash_combine(gpu_hash, mFlags);
+    gpu_hash = base::hash_combine(gpu_hash, mEffects);
+    return std::to_string(gpu_hash);
+}
+
 size_t detail::TextureFileSource::GetHash() const
 {
     size_t hash = 0;
@@ -137,19 +153,7 @@ size_t detail::TextureFileSource::GetHash() const
 
 Texture* detail::TextureFileSource::Upload(const Environment& env, Device& device) const
 {
-    // using the mFile URI is *not* enough to uniquely
-    // identify this texture object on the GPU because it's
-    // possible that the *same* texture object (same underlying file)
-    // is used with *different* flags in another material.
-    // in other words, "foo.png with pre-multiplied alpha" must be
-    // a different GPU texture object than "foo.png with straight alpha".
-    size_t gpu_hash = 0;
-    gpu_hash = base::hash_combine(gpu_hash, mFile);
-    gpu_hash = base::hash_combine(gpu_hash, mColorSpace);
-    gpu_hash = base::hash_combine(gpu_hash, mFlags);
-    gpu_hash = base::hash_combine(gpu_hash, mEffects);
-    const auto& gpu_id = std::to_string(gpu_hash);
-
+    const auto& gpu_id = GetGpuId();
     auto* texture = device.FindTexture(gpu_id);
     if (texture && !env.dynamic_content)
         return texture;
@@ -275,7 +279,7 @@ bool detail::TextureFileSource::FromJson(const data::Reader& data)
 
 Texture* detail::TextureBitmapBufferSource::Upload(const Environment& env, Device& device) const
 {
-    auto* texture = device.FindTexture(mId);
+    auto* texture = device.FindTexture(GetGpuId());
     if (texture && !env.dynamic_content)
         return texture;
 
@@ -348,7 +352,7 @@ bool detail::TextureBitmapBufferSource::FromJson(const data::Reader& data)
 
 Texture* detail::TextureBitmapGeneratorSource::Upload(const Environment& env, Device& device) const
 {
-    auto* texture = device.FindTexture(mId);
+    auto* texture = device.FindTexture(GetGpuId());
     if (texture && !env.dynamic_content)
         return texture;
 
@@ -437,7 +441,7 @@ std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
 
 Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device& device) const
 {
-    auto* texture = device.FindTexture(mId);
+    auto* texture = device.FindTexture(GetGpuId());
     if (texture && !env.dynamic_content)
         return texture;
 

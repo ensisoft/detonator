@@ -86,7 +86,11 @@ namespace gfx
         { return base::bitflag<Effect>(0); }
         // Get the type of the source of the texture data.
         virtual Source GetSourceType() const = 0;
-        // Get texture source class/resource id.
+        // Get the texture ID on the GPU, i.e. the ID that uniquely
+        // identifies the texture object ont he GPU.
+        virtual std::string GetGpuId() const = 0;
+        // Get texture source class/resource id. This is *this*
+        // object ID. Not to be confused with the GpuID
         virtual std::string GetId() const = 0;
         // Get the human-readable / and settable name.
         virtual std::string GetName() const = 0;
@@ -146,7 +150,7 @@ namespace gfx
               : mId(base::RandomString(10))
             {}
             //  Persistence only works with a known GPU texture ID.
-            TextureTextureSource(std::string gpu_id, gfx::Texture* texture =  nullptr, std::string id = base::RandomString(10))
+            explicit TextureTextureSource(std::string gpu_id, gfx::Texture* texture =  nullptr, std::string id = base::RandomString(10))
                : mId(std::move(id))
                , mGpuId(std::move(gpu_id))
                , mTexture(texture)
@@ -157,6 +161,8 @@ namespace gfx
             { return Source::Texture; }
             virtual std::string GetId() const override
             { return mId; }
+            virtual std::string GetGpuId() const override
+            { return mGpuId; }
             virtual std::string GetName() const override
             { return mName; }
             virtual std::size_t GetHash() const override
@@ -206,7 +212,7 @@ namespace gfx
                 mFlags.set(Flags::AllowResizing, true);
                 mFlags.set(Flags::AllowPacking, true);
             }
-            TextureFileSource(std::string file, std::string id = base::RandomString(10))
+            explicit TextureFileSource(std::string file, std::string id = base::RandomString(10))
               : mId(std::move(id))
               , mFile(std::move(file))
             {
@@ -227,6 +233,8 @@ namespace gfx
             { mName = name; }
             virtual void SetEffect(Effect effect, bool on_off) override
             { mEffects.set(effect, on_off); }
+
+            virtual std::string GetGpuId() const override;
 
             virtual std::size_t GetHash() const override;
 
@@ -284,19 +292,19 @@ namespace gfx
               : mId(base::RandomString(10))
             {}
 
-            TextureBitmapBufferSource(std::unique_ptr<IBitmap>&& bitmap, std::string id = base::RandomString(10))
+            explicit TextureBitmapBufferSource(std::unique_ptr<IBitmap>&& bitmap, std::string id = base::RandomString(10))
               : mId(std::move(id))
               , mBitmap(std::move(bitmap))
             {}
 
             template<typename T>
-            TextureBitmapBufferSource(const Bitmap<T>& bmp, std::string id = base::RandomString(10))
+            explicit TextureBitmapBufferSource(const Bitmap<T>& bmp, std::string id = base::RandomString(10))
               : mId(std::move(id))
               , mBitmap(new Bitmap<T>(bmp))
             {}
 
             template<typename T>
-            TextureBitmapBufferSource(Bitmap<T>&& bmp, std::string id = base::RandomString(10))
+            explicit TextureBitmapBufferSource(Bitmap<T>&& bmp, std::string id = base::RandomString(10))
               : mId(std::move(id))
               , mBitmap(new Bitmap<T>(std::move(bmp)))
             {}
@@ -311,6 +319,8 @@ namespace gfx
             { return mEffects; }
             virtual Source GetSourceType() const override
             { return Source::BitmapBuffer; }
+            virtual std::string GetGpuId() const override
+            { return mId; }
             virtual std::string GetId() const override
             { return mId; }
             virtual std::size_t GetHash()  const override
@@ -389,7 +399,7 @@ namespace gfx
               : mId(base::RandomString(10))
             {}
 
-            TextureBitmapGeneratorSource(std::unique_ptr<IBitmapGenerator>&& generator, std::string id = base::RandomString(10))
+            explicit TextureBitmapGeneratorSource(std::unique_ptr<IBitmapGenerator>&& generator, std::string id = base::RandomString(10))
               : mId(std::move(id))
               , mGenerator(std::move(generator))
             {}
@@ -405,6 +415,8 @@ namespace gfx
             virtual Source GetSourceType() const override
             { return Source::BitmapGenerator; }
             virtual std::string GetId() const override
+            { return mId; }
+            virtual std::string GetGpuId() const override
             { return mId; }
             virtual std::size_t GetHash() const override
             {
@@ -480,6 +492,8 @@ namespace gfx
             virtual Source GetSourceType() const override
             { return Source::TextBuffer; }
             virtual std::string GetId() const override
+            { return mId; }
+            virtual std::string GetGpuId() const override
             { return mId; }
             virtual std::size_t GetHash() const override
             {
