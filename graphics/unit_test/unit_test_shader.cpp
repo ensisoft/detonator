@@ -27,7 +27,7 @@ void unit_test_raw_source()
     using dt = gfx::ShaderSource::ShaderDataType;
 
     {
-        const auto ret = gfx::ShaderSource::FromRawSource(R"(
+        const auto& ret = gfx::ShaderSource::FromRawSource(R"(
 #version 100
 
 attribute vec2 aVec2;
@@ -93,6 +93,23 @@ void main() {
   gl_FragColor = vec4(1.0);
 }
 )");
+        const auto& sauce = ret.GetSource();
+        TEST_REQUIRE(base::Contains(sauce, "#version 100"));
+        TEST_REQUIRE(base::Contains(sauce, "attribute vec2 aVec2;"));
+        TEST_REQUIRE(base::Contains(sauce, "attribute vec3 aVec3;"));
+        TEST_REQUIRE(base::Contains(sauce, "attribute vec4 aVec4;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform int kInt;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform float kFloat;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec2 kVec2;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec3 kVec3;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kVec4;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform mat2 kMat2;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform mat3 kMat3;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform mat4 kMat4;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform sampler2D kSampler;"));
+        TEST_REQUIRE(base::Contains(sauce, "varying vec2 vVec2;"));
+        TEST_REQUIRE(base::Contains(sauce, "varying vec3 vVec3;"));
+        TEST_REQUIRE(base::Contains(sauce, "varying vec4 vVec4;"));
     }
 }
 

@@ -1077,9 +1077,10 @@ void unit_test_material_uniform_folding()
         gfx::ColorClass klass(gfx::MaterialClass::Type::Color);
         klass.SetBaseColor(gfx::Color::White);
         klass.SetStatic(true);
-        auto source = klass.GetShader(state, device);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kBaseColor;") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));
+        const auto& source = klass.GetShader(state, device);
+        const auto& sauce = source.GetSource();
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kBaseColor;") == false);
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));     
     }
 
     {
@@ -1091,15 +1092,16 @@ void unit_test_material_uniform_folding()
         klass.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::BottomRight);
         klass.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
         klass.SetStatic(true);
-        auto source = klass.GetShader(state, device);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kColor0;") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kColor1;") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kColor2;") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kColor3;") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kColor0 = vec4(0.00,1.00,0.00,1.00);"));
-        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kColor1 = vec4(1.00,1.00,1.00,1.00);"));
-        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kColor2 = vec4(0.00,0.00,1.00,1.00);"));
-        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kColor3 = vec4(1.00,0.00,0.00,1.00);"));
+        const auto& source = klass.GetShader(state, device);
+        const auto& sauce = source.GetSource();
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kColor0;") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kColor1;") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kColor2;") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kColor3;") == false);
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kColor0 = vec4(0.00,1.00,0.00,1.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kColor1 = vec4(1.00,1.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kColor2 = vec4(0.00,0.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kColor3 = vec4(1.00,0.00,0.00,1.00);"));
     }
 
     {
@@ -1113,14 +1115,15 @@ void unit_test_material_uniform_folding()
         klass.SetTextureVelocityZ(-1.0f);
         klass.SetTextureScaleX(2.0);
         klass.SetTextureScaleY(3.0);
-        auto source = klass.GetShader(state, device);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kBaseColor;") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec2 kTextureScale") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec2 kTextureVelocityXY") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform float kTextureVelocityZ") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));
-        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec2 kTextureScale = vec2(2.00,3.00);"));
-        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec3 kTextureVelocity = vec3(4.00,5.00,-1.00);"));
+        const auto& source = klass.GetShader(state, device);
+        const auto& sauce = source.GetSource();
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kBaseColor;") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec2 kTextureScale") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec2 kTextureVelocityXY") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform float kTextureVelocityZ") == false);
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const vec2 kTextureScale = vec2(2.00,3.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const vec3 kTextureVelocity = vec3(4.00,5.00,-1.00);"));
     }
 
     {
@@ -1133,13 +1136,69 @@ void unit_test_material_uniform_folding()
         klass.SetTextureVelocityZ(-1.0f);
         klass.SetTextureScaleX(2.0);
         klass.SetTextureScaleY(3.0);
-        auto source = klass.GetShader(state, device);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec2 kTextureScale") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec2 kTextureVelocityXY") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform float kTextureVelocityZ") == false);
-        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec2 kTextureScale = vec2(2.00,3.00);"));
-        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec3 kTextureVelocity = vec3(4.00,5.00,-1.00);"));
+        const auto& source = klass.GetShader(state, device);
+        const auto& sauce = source.GetSource();
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec2 kTextureScale") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec2 kTextureVelocityXY") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform float kTextureVelocityZ") == false);
+        TEST_REQUIRE(base::Contains(sauce, "const vec2 kTextureScale = vec2(2.00,3.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const vec3 kTextureVelocity = vec3(4.00,5.00,-1.00);"));
     }
+}
+
+void unit_test_custom_shader_source()
+{
+    TEST_CASE(test::Type::Feature)
+
+    gfx::MaterialClass klass(gfx::MaterialClass::Type::Custom);
+    klass.SetShaderSrc(R"(
+#version 100
+
+attribute vec2 aVec2;
+attribute vec3 aVec3;
+attribute vec4 aVec4;
+
+uniform int kInt;
+uniform float kFloat;
+uniform vec2 kVec2;
+uniform vec3 kVec3;
+uniform vec4 kVec4;
+
+uniform mat2 kMat2;
+uniform mat3 kMat3;
+uniform mat4 kMat4;
+
+uniform sampler2D kSampler;
+
+varying vec2 vVec2;
+varying vec3 vVec3;
+varying vec4 vVec4;
+
+void FragmentShaderMain() {
+  fs_out.color = vec4(1.0);
+}
+        )");
+
+    TestDevice device;
+    gfx::MaterialClass::State state;
+    const auto& source = klass.GetShader(state, device);
+    const auto& sauce = source.GetSource();
+    TEST_REQUIRE(base::Contains(sauce, "#version 100"));
+    TEST_REQUIRE(base::Contains(sauce, "attribute vec2 aVec2;"));
+    TEST_REQUIRE(base::Contains(sauce, "attribute vec3 aVec3;"));
+    TEST_REQUIRE(base::Contains(sauce, "attribute vec4 aVec4;"));
+    TEST_REQUIRE(base::Contains(sauce, "uniform int kInt;"));
+    TEST_REQUIRE(base::Contains(sauce, "uniform float kFloat;"));
+    TEST_REQUIRE(base::Contains(sauce, "uniform vec2 kVec2;"));
+    TEST_REQUIRE(base::Contains(sauce, "uniform vec3 kVec3;"));
+    TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kVec4;"));
+    TEST_REQUIRE(base::Contains(sauce, "uniform mat2 kMat2;"));
+    TEST_REQUIRE(base::Contains(sauce, "uniform mat3 kMat3;"));
+    TEST_REQUIRE(base::Contains(sauce, "uniform mat4 kMat4;"));
+    TEST_REQUIRE(base::Contains(sauce, "uniform sampler2D kSampler;"));
+    TEST_REQUIRE(base::Contains(sauce, "varying vec2 vVec2;"));
+    TEST_REQUIRE(base::Contains(sauce, "varying vec3 vVec3;"));
+    TEST_REQUIRE(base::Contains(sauce, "varying vec4 vVec4;"));
 }
 
 void unit_test_custom_uniforms()
@@ -1993,6 +2052,7 @@ int test_main(int argc, char* argv[])
     unit_test_material_textures();
     unit_test_material_textures_bind_fail();
     unit_test_material_uniform_folding();
+    unit_test_custom_shader_source();
     unit_test_custom_uniforms();
     unit_test_custom_textures();
     unit_test_polygon_inline_data();
