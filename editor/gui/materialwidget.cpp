@@ -2244,66 +2244,100 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
-
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    const float zoom = GetValue(mUI.zoom);
-    const auto content_width  = width * zoom;
-    const auto content_height = width * zoom;
-    const auto xpos = (width - content_width) * 0.5f;
-    const auto ypos = (height - content_height) * 0.5f;
+    // check whether we have all the textures that are needed.
+    for (unsigned i=0; i<mMaterial->GetNumTextureMaps(); ++i)
+    {
+        const auto& map = mMaterial->GetTextureMap(i);
+        if (map->GetNumTextures() > 0)
+            continue;
 
-    if (!mDrawable)
-        mDrawable = mWorkspace->MakeDrawableByName(GetValue(mUI.cmbModel));
+        ShowMessage(base::FormatString("Missing texture map '%1' texture", map->GetName()), painter);
+        return;
+    }
 
-    // use the material to fill a model shape in the middle of the screen.
-    gfx::Transform transform;
-    transform.MoveTo(xpos, ypos);
-    transform.Resize(content_width, content_height);
-
-    std::string message;
-    bool dummy   = false;
-    bool success = true;
-
+    // check we have shader
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
     {
         const auto& uri = mMaterial->GetShaderUri();
         if (uri.empty())
         {
-            message = "No shader has been selected.";
-            success = false;
+            ShowMessage("No shader has been selected.", painter);
+            return;
         }
     }
 
-    for (unsigned i=0; i<mMaterial->GetNumTextureMaps(); ++i)
+    // try to figure out aspect ratio... dunno with multiple textures
+    // we could theoretically have different sizes.. so?
+    float texture_width_sum  = 0;
+    float texture_height_sum = 0;
+    unsigned texture_count = 0;
+    const auto& active_texture_map_id = mMaterial->GetActiveTextureMap();
+    if (const auto* active_texture_map = mMaterial->FindTextureMapById(active_texture_map_id))
     {
-        const auto& map = mMaterial->GetTextureMap(i);
-        if (map->GetNumTextures() == 0)
+        unsigned sprite_rows = 0;
+        unsigned sprite_cols = 0;
+        if (const auto* sprite_sheet = active_texture_map->GetSpriteSheet())
         {
-            dummy = true;
-            success = false;
-            message = base::FormatString("Missing texture map on '%1'", map->GetName());
-            break;
+            sprite_rows = sprite_sheet->rows;
+            sprite_cols = sprite_sheet->cols;
         }
+
+        for (size_t i=0; i<active_texture_map->GetNumTextures(); ++i)
+        {
+            const auto& texture_source = active_texture_map->GetTextureSource(i);
+            const auto& texture_rect = active_texture_map->GetTextureRect(i);
+            const auto& texture_gpu_id = texture_source->GetGpuId();
+            if (const auto* texture = painter.GetDevice()->FindTexture(texture_gpu_id))
+            {
+                const auto rect_width = texture_rect.GetWidth();
+                const auto rect_height = texture_rect.GetHeight();
+                const auto frame_width  = sprite_cols ? rect_width / (float)sprite_cols : rect_width;
+                const auto frame_height = sprite_rows ? rect_height / (float)sprite_rows : rect_height;
+
+                texture_width_sum  += (texture->GetWidthF() * frame_width);
+                texture_height_sum += (texture->GetHeightF() * frame_height);
+                texture_count++;
+            }
+        }
+    }
+    if (texture_width_sum == 0 || texture_height_sum == 0)
+    {
+        texture_width_sum  = width;
+        texture_height_sum = height;
     }
 
-    if (!success)
+    float aspect_ratio = 1.0f;
+    if (texture_count)
     {
-        if (dummy)
-        {
-            static auto dummy = gfx::CreateMaterialClassFromImage("app://textures/Checkerboard.png");
-            painter.Draw(*mDrawable, transform, gfx::MaterialInstance(dummy));
-        }
-        ShowMessage(message, painter);
-        return;
+        const auto avg_width = texture_width_sum / float(texture_count);
+        const auto avg_height = texture_height_sum / float(texture_count);
+        aspect_ratio = avg_width / avg_height;
     }
+    const auto time = mState == PlayState::Playing ? mTime : GetValue(mUI.kTime);
+    const auto zoom = (float)GetValue(mUI.zoom);
+    const auto content_width  = texture_width_sum * aspect_ratio;
+    const auto content_height = texture_width_sum;
+    const auto window_scaler = std::min((float)width/content_width, (float)height/content_height);
+    const auto actual_width  = content_width * window_scaler * zoom;
+    const auto actual_height = content_height * window_scaler * zoom;
+
+    const auto xpos = (width - actual_width) * 0.5f;
+    const auto ypos = (height - actual_height) * 0.5f;
+
+    if (!mDrawable)
+        mDrawable = mWorkspace->MakeDrawableByName(GetValue(mUI.cmbModel));
 
     if (!mMaterialInst)
         mMaterialInst = std::make_unique<gfx::MaterialInstance>(mMaterial);
 
-    const auto time = mState == PlayState::Playing ? mTime : GetValue(mUI.kTime);
     mMaterialInst->SetRuntime(time);
     mMaterialInst->SetUniform("kTileIndex", (float)GetValue(mUI.kTileIndex)+1.0f);
+
+    gfx::Transform transform;
+    transform.MoveTo(xpos, ypos);
+    transform.Resize(actual_width, actual_height);
     painter.Draw(*mDrawable, transform, *mMaterialInst);
 
     if (mMaterialInst->HasError())
