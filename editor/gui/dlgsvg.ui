@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1053</width>
-    <height>838</height>
+    <width>1012</width>
+    <height>840</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SVG Viewer</string>
+   <string>SVG Viewer &amp; Rasterizer</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resource/resource.qrc">
@@ -21,7 +21,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>SVG Image</string>
+      <string>SVG image viewer &amp;&amp; rasterizer</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
