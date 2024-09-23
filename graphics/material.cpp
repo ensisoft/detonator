@@ -1747,7 +1747,7 @@ ShaderSource MaterialClass::CreateShaderStub(Type type)
                                     "0.0 = texture is normal color data and has all RGBA channels\n"
                                     "1.0 = texture is an alpha mask and only has A channel");
     source.SetComment("kAlphaCutoff", "Alpha cutoff value to support alpha based cutouts such as sprites\n"
-                                      "that aren't really transparent but just cutouts. Cutoff value is the\n"
+                                      "that aren't really transparent but just cutouts. Cutoff value is the value\n"
                                       "to test against in order to discard the fragments.");
     source.SetComment("kParticleEffect", "Particle effect enumerator value.");
 
@@ -2121,7 +2121,7 @@ void FragmentShaderMain()
     vec4 color = mix(col0, col1, kBlendCoeff);
     color.a *= vParticleAlpha;
 
-    if (color.a < kAlphaCutoff)
+    if (color.a <= kAlphaCutoff)
         discard;
 
     fs_out.color = color;
@@ -2342,7 +2342,7 @@ void FragmentShaderMain()
     vec4 color = mix(kBaseColor * texel, vec4(kBaseColor.rgb, kBaseColor.a * texel.a), kAlphaMask);
     color.a *= vParticleAlpha;
 
-    if (color.a < kAlphaCutoff)
+    if (color.a <= kAlphaCutoff)
         discard;
 
     fs_out.color = color;
@@ -2451,7 +2451,7 @@ void FragmentShaderMain()
     // produce color value.
     vec4 color = texture_sample * kBaseColor;
 
-    if (color.a < kAlphaCutoff)
+    if (color.a <= kAlphaCutoff)
         discard;
 
     fs_out.color = color;

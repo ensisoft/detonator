@@ -858,7 +858,7 @@ void MaterialWidget::on_tileTopPadding_valueChanged(int)
 
 void MaterialWidget::on_activeMap_currentIndexChanged(int)
 { SetMaterialProperties(); }
-void MaterialWidget::on_alphaCutoff_valueChanged(double value)
+void MaterialWidget::on_alphaCutoff_valueChanged(bool, double value)
 { SetMaterialProperties(); }
 void MaterialWidget::on_baseColor_colorChanged(QColor color)
 { SetMaterialProperties(); }
@@ -1785,9 +1785,9 @@ void MaterialWidget::SetMaterialProperties()
     // of the material class. refactor these names away and the
     // default values away
 
-    if (math::equals((float)GetValue(mUI.alphaCutoff), 0.0f))
-        mMaterial->DeleteUniform("kAlphaCutoff");
-    else  mMaterial->SetAlphaCutoff(GetValue(mUI.alphaCutoff));
+    if (auto cutoff = mUI.alphaCutoff->GetValue())
+        mMaterial->SetAlphaCutoff(cutoff.value());
+    else mMaterial->DeleteUniform("kAlphaCutoff");
 
     glm::vec2 texture_scale;
     texture_scale.x = GetValue(mUI.scaleX);
@@ -1941,6 +1941,10 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.tileLeftOffset,      mMaterial->GetTileOffset().x);
     SetValue(mUI.tileTopOffset,       mMaterial->GetTileOffset().y);
     ClearList(mUI.activeMap);
+
+    mUI.alphaCutoff->ClearValue();
+    if (mMaterial->HasUniform("kAlphaCutoff"))
+        SetValue(mUI.alphaCutoff, mMaterial->GetAlphaCutoff());
 
     SetVisible(mUI.lblTileIndex, false);
     SetVisible(mUI.kTileIndex,   false);

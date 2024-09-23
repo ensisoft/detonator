@@ -971,7 +971,7 @@ namespace gfx
         { GetUniformValue<glm::vec2>("kTilePadding", {0.0f, 0.0f}) = padding; }
 
         inline float GetAlphaCutoff() const noexcept
-        { return GetUniformValue<float>("kAlphaCutoff", 0.0f); }
+        { return GetUniformValue<float>("kAlphaCutoff", -1.0f); }
         inline Color4f GetColor(ColorIndex index) const noexcept
         { return GetUniformValue<Color4f>(GetColorUniformName(index), Color::White); }
         inline Color4f GetBaseColor() const noexcept
