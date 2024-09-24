@@ -1268,6 +1268,7 @@ bool Workspace::SaveWorkspace()
     SaveUserSettings(JoinPath(mWorkspaceDir, ".workspace_private.json"));
 
     INFO("Saved workspace '%1'", mWorkspaceDir);
+    NOTE("Workspace was saved.");
     return true;
 }
 

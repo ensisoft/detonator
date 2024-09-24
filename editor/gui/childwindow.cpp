@@ -343,6 +343,12 @@ void ChildWindow::on_actionTakeScreenshot_triggered()
     NOTE("Wrote screenshot file '%1'", filename);
 }
 
+void ChildWindow::on_actionSaveWorkspace_triggered()
+{
+    ActionEvent::SaveWorkspace save;
+    ActionEvent::Post(save);
+}
+
 void ChildWindow::keyPressEvent(QKeyEvent* key)
 {
     if (key->key() != Qt::Key_Escape)

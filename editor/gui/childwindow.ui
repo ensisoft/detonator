@@ -179,7 +179,7 @@
      <x>0</x>
      <y>0</y>
      <width>832</width>
-     <height>29</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTemp">
@@ -194,6 +194,8 @@
     <addaction name="separator"/>
     <addaction name="actionPopIn"/>
     <addaction name="actionClose"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveWorkspace"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -371,6 +373,18 @@
    </property>
    <property name="shortcut">
     <string>F9</string>
+   </property>
+  </action>
+  <action name="actionSaveWorkspace">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/workspace_save.png</normaloff>:/16x16_ico_png/workspace_save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Workspace</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
  </widget>
