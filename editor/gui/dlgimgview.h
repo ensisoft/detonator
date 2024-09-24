@@ -74,10 +74,13 @@ namespace gui
     private slots:
         void on_btnSelectImage_clicked();
         void on_btnSelectJson_clicked();
+        void on_btnResetImage_clicked();
+        void on_btnResetJson_clicked();
         void on_btnClose_clicked();
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnSave_clicked();
+        void on_btnExport_clicked();
         void on_btnCutImages_clicked();
         void on_btnPackTiles_clicked();
         void on_btnSelectOut_clicked();
@@ -101,6 +104,8 @@ namespace gui
         void OnMouseDoubleClick(QMouseEvent* mickey);
         bool OnKeyPress(QKeyEvent* event);
         void ToggleMouseSelection();
+        void MagicMouseSelect();
+        QPoint MapToImage(const QPoint& point) const;
 
     private:
         Ui::DlgImgView mUI;
@@ -121,11 +126,15 @@ namespace gui
         ImagePack mPack;
         std::size_t mIndexUnderMouse = 0;
         enum class Mode {
-            Nada, Tracking, Selecting
+            Nada, Tracking, Selecting, Defining
         };
         Mode mMode = Mode::Nada;
         std::set<size_t> mTilesTouched;
 
         QString mLastTileWriteFile;
+
+        enum class ToolMode {
+            SelectMode, DefineMode
+        };
     };
 } // namespace

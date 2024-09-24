@@ -22,8 +22,10 @@
 #  include <QPixmap>
 #  include <QMessageBox>
 #  include <QFile>
+#  include <QFileInfo>
 #  include <QImageWriter>
 #  include <QEventLoop>
+#  include <QInputDialog>
 #  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
@@ -32,6 +34,7 @@
 #include "base/json.h"
 #include "graphics/painter.h"
 #include "graphics/drawing.h"
+#include "graphics/bitmap.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
@@ -88,8 +91,10 @@ DlgImgView::DlgImgView(QWidget* parent) : QDialog(parent)
     SetValue(mUI.cmbColorSpace, gfx::detail::TextureFileSource::ColorSpace::sRGB);
     PopulateFromEnum<TilePackVerticalAlignment>(mUI.tilePackerVerticalAlign);
     PopulateFromEnum<TilePackHorizontalAlignment>(mUI.tilePackerHorizontalAlign);
+    PopulateFromEnum<ToolMode>(mUI.cmbToolMode);
     SetValue(mUI.tilePackerVerticalAlign, TilePackVerticalAlignment::Center);
     SetValue(mUI.tilePackerHorizontalAlign, TilePackHorizontalAlignment::Center);
+    SetValue(mUI.cmbToolMode, ToolMode::DefineMode);
 
     mUI.zoom->installEventFilter(this);
     mUI.cmbColorSpace->installEventFilter(this);
@@ -185,6 +190,8 @@ void DlgImgView::LoadJson(const QString& file)
     on_cmbColorSpace_currentIndexChanged(0);
     on_cmbMinFilter_currentIndexChanged(0);
     on_cmbMagFilter_currentIndexChanged(0);
+
+    SetValue(mUI.cmbToolMode, ToolMode::SelectMode);
 }
 void DlgImgView::SetDialogMode()
 {
@@ -195,10 +202,13 @@ void DlgImgView::SetDialogMode()
     SetVisible(mUI.btnSave, false);
     SetVisible(mUI.rename, false);
     SetVisible(mUI.retag,  false);
+    SetValue(mUI.cmbToolMode, ToolMode::SelectMode);
+    SetEnabled(mUI.cmbToolMode, false);
 
     QSignalBlocker s(mUI.tabWidget);
     mUI.tabWidget->removeTab(2); // cutter tab
-    mUI.tabWidget->removeTab(3); // tile packer tab
+    mUI.tabWidget->removeTab(2); // tile packer tab YES THE INDEX REPEATS NOW
+
 
     mUI.listWidget->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
     mDialogMode = true;
@@ -225,6 +235,8 @@ void DlgImgView::LoadState()
     if (!jsonfile.isEmpty())
         LoadJson(jsonfile);
 
+    GetUserProperty(*mWorkspace, "dlg-img-view-tool", mUI.cmbToolMode);
+    GetUserProperty(*mWorkspace, "dlg-img-view-draw-rects", mUI.chkShowRects);
     GetUserProperty(*mWorkspace, "dlg-img-view-image-file", mUI.imageFile);
     GetUserProperty(*mWorkspace, "dlg-img-view-json-file", mUI.jsonFile);
     GetUserProperty(*mWorkspace, "dlg-img-view-widget", mUI.widget);
@@ -279,6 +291,8 @@ void DlgImgView::SaveState() const
     if (!mWorkspace)
         return;
 
+    SetUserProperty(*mWorkspace, "dlg-img-view-tool", mUI.cmbToolMode);
+    SetUserProperty(*mWorkspace, "dlg-img-view-draw-rects", mUI.chkShowRects);
     SetUserProperty(*mWorkspace, "dlg-img-view-geometry", saveGeometry());
     SetUserProperty(*mWorkspace, "dlg-img-view-image-file", mUI.imageFile);
     SetUserProperty(*mWorkspace, "dlg-img-view-json-file", mUI.jsonFile);
@@ -395,6 +409,20 @@ void DlgImgView::on_btnSelectJson_clicked()
     }
 }
 
+void DlgImgView::on_btnResetImage_clicked()
+{
+    mMaterial.reset();
+    SetValue(mUI.imageFile, QString(""));
+}
+
+void DlgImgView::on_btnResetJson_clicked()
+{
+    mPack = ImagePack {};
+
+    ClearTable(mUI.listWidget);
+    SetValue(mUI.jsonFile, QString(""));
+}
+
 void DlgImgView::on_btnClose_clicked()
 {
     if (mUI.btnSave->isEnabled())
@@ -471,6 +499,46 @@ void DlgImgView::on_btnSave_clicked()
         return;
     }
     SetEnabled(mUI.btnSave, false);
+}
+void DlgImgView::on_btnExport_clicked()
+{
+    if (mPack.images.empty())
+        return;
+
+    const QString image_file = GetValue(mUI.imageFile);
+    if (image_file.isEmpty())
+        return;
+
+    const QFileInfo image_file_info(image_file);
+    QString json_file = image_file;
+    json_file.remove(image_file_info.suffix());
+    json_file.append("json");
+
+    json_file = QFileDialog::getSaveFileName(this,
+        tr("Select Save File"), json_file, "JSON (*.json)");
+    if (json_file.isEmpty())
+        return;
+
+    mPack.color_space  = GetValue(mUI.cmbColorSpace);
+    mPack.min_filter   = GetValue(mUI.cmbMinFilter);
+    mPack.mag_filter   = GetValue(mUI.cmbMagFilter);
+    mPack.image_width  = mWidth;
+    mPack.image_height = mHeight;
+    mPack.padding      = 0;
+    mPack.image_file   = image_file_info.fileName();
+    mPack.app_name     = APP_TITLE;
+    mPack.app_version  = APP_VERSION;
+
+    if (!WriteImagePack(json_file, mPack))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setText(tr("Failed to write the JSON description file."));
+        msg.exec();
+        return;
+    }
+    INFO("Wrote JSON file '%1'.", json_file);
 }
 
 void DlgImgView::on_btnCutImages_clicked()
@@ -1054,10 +1122,12 @@ void DlgImgView::OnPaintScene(gfx::Painter& painter, double secs)
     selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
     static auto selection_material = gfx::MaterialInstance(selection_material_class);
 
+    const bool draw_rects = GetValue(mUI.chkShowRects);
+
     for (size_t index=0; index<mPack.images.size(); ++index)
     {
         const auto& img = mPack.images[index];
-        if (!img.selected && index != mIndexUnderMouse)
+        if (!img.selected && index != mIndexUnderMouse && !draw_rects)
             continue;
 
         gfx::FRect rect(0.0f, 0.0f, img.width*zoom, img.height*zoom);
@@ -1065,9 +1135,14 @@ void DlgImgView::OnPaintScene(gfx::Painter& painter, double secs)
         rect.Translate(mTrackingOffset.x(), mTrackingOffset.y());
         rect.Translate(img.xpos * zoom, img.ypos * zoom);
 
-        if (index == mIndexUnderMouse)
+        if (draw_rects)
         {
             gfx::DrawRectOutline(painter, rect, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+        }
+
+        if (index == mIndexUnderMouse)
+        {
+            gfx::DrawRectOutline(painter, rect, gfx::CreateMaterialFromColor(gfx::Color::Green));
         }
         if (img.selected)
         {
@@ -1088,8 +1163,20 @@ void DlgImgView::OnMousePress(QMouseEvent* mickey)
         mMode = Mode::Tracking;
     else if (mickey->button() == Qt::LeftButton)
     {
-        mMode = Mode::Selecting;
-        ToggleMouseSelection();
+        if (!mMaterial)
+            return;
+
+        const ToolMode mode = GetValue(mUI.cmbToolMode);
+        if (mode == ToolMode::DefineMode)
+        {
+            MagicMouseSelect();
+        }
+        else if (mode == ToolMode::SelectMode)
+        {
+            mMode = Mode::Selecting;
+            ToggleMouseSelection();
+        }
+        else BUG("Bug on image tool mode.");
     }
 }
 
@@ -1107,22 +1194,17 @@ void DlgImgView::OnMouseMove(QMouseEvent* mickey)
     if (mPack.images.empty() || !mMaterial)
         return;
 
-    const float width = mUI.widget->width();
-    const float height = mUI.widget->height();
-    const float zoom   = GetValue(mUI.zoom);
-    const float img_width = mWidth * zoom;
-    const float img_height = mHeight * zoom;
-    const auto xpos = (width - img_width) * 0.5f;
-    const auto ypos = (height - img_height) * 0.5f;
-    const int mouse_posx = (mCurrentPoint.x() - mTrackingOffset.x() - xpos) / zoom;
-    const int mouse_posy = (mCurrentPoint.y() - mTrackingOffset.y() - ypos) / zoom;
+    const auto current_image_pixel = MapToImage(mCurrentPoint);
+    const auto current_posx = current_image_pixel.x();
+    const auto current_posy = current_image_pixel.y();
 
+    // update the current index under mouse
     for (mIndexUnderMouse=0; mIndexUnderMouse<mPack.images.size(); ++mIndexUnderMouse)
     {
         const auto& img = mPack.images[mIndexUnderMouse];
-        if (mouse_posx < img.xpos || mouse_posx > img.xpos+img.width)
+        if (current_posx < img.xpos || current_posx > img.xpos+img.width)
             continue;
-        if (mouse_posy < img.ypos || mouse_posy > img.ypos+img.height)
+        if (current_posy < img.ypos || current_posy > img.ypos+img.height)
             continue;
         break;
     }
@@ -1220,6 +1302,70 @@ void DlgImgView::ToggleMouseSelection()
     }
 }
 
+void DlgImgView::MagicMouseSelect()
+{
+    const auto* texture_source = mClass->GetTextureMap(0)->GetTextureSource(0);
+    const auto& bitmap = texture_source->GetData();
+    const auto& view = bitmap->GetReadView();
+    const auto& point = MapToImage(mStartPoint);
+    const auto point_x = point.x();
+    const auto point_y = point.y();
+    auto ret = gfx::FindImageRectangle(*view, gfx::IPoint(point_x, point_y));
+    if (ret.IsEmpty())
+        return;
+
+    // dupe?
+    for (const auto& i : mPack.images)
+    {
+        if (i.width == ret.GetWidth() && i.height == ret.GetHeight() && i.xpos == ret.GetX() && i.ypos == ret.GetY())
+            return;
+    }
+
+    bool accepted = false;
+    const auto& name = QInputDialog::getText(this,
+        tr("Rename Image"),
+        tr("Image Name:"), QLineEdit::Normal, "", &accepted);
+    if (!accepted)
+        return;
+
+    const auto row = mPack.images.size();
+
+    ImagePack::Image img;
+    img.height = ret.GetHeight();
+    img.width  = ret.GetWidth();
+    img.xpos   = ret.GetX();
+    img.ypos   = ret.GetY();
+    img.name   = name;
+    mPack.images.push_back(img);
+
+    ResizeTable(mUI.listWidget,  row+1, 8);
+    mUI.listWidget->setHorizontalHeaderLabels({"Name", "Char", "Tag", "Width", "Height", "X Pos", "Y Pos", "Index"});
+
+    SetTableItem(mUI.listWidget, row, 0, img.name);
+    SetTableItem(mUI.listWidget, row, 1, img.character);
+    SetTableItem(mUI.listWidget, row, 2, img.tag);
+    SetTableItem(mUI.listWidget, row, 3, img.width);
+    SetTableItem(mUI.listWidget, row, 4, img.height);
+    SetTableItem(mUI.listWidget, row, 5, img.xpos);
+    SetTableItem(mUI.listWidget, row, 6, img.ypos);
+    SetTableItem(mUI.listWidget, row, 7, img.index);
+}
+
+QPoint DlgImgView::MapToImage(const QPoint& point) const
+{
+    const float width = mUI.widget->width();
+    const float height = mUI.widget->height();
+    const float zoom   = GetValue(mUI.zoom);
+    const float img_width = mWidth * zoom;
+    const float img_height = mHeight * zoom;
+    const auto xpos = (width - img_width) * 0.5f;
+    const auto ypos = (height - img_height) * 0.5f;
+    const int mouse_posx = (point.x() - mTrackingOffset.x() - xpos) / zoom;
+    const int mouse_posy = (point.y() - mTrackingOffset.y() - ypos) / zoom;
+
+    return {mouse_posx, mouse_posy};
+
+}
 
 
 } // namespace
