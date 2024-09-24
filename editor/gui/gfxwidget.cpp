@@ -398,26 +398,7 @@ void GfxWindow::doInit()
         setCursor(Qt::BlankCursor);
     }
 
-    if (should_have_vsync)
-    {
-        bool have_vsync = false;
-        for (const auto* surf  : surfaces)
-        {
-            if (surf == this)
-                continue;
-
-            if (surf->mVsync)
-            {
-                have_vsync = true;
-                break;
-            }
-        }
-        CreateRenderingSurface(!have_vsync);
-    }
-    else
-    {
-        CreateRenderingSurface(false);
-    }
+    CreateRenderingSurface(false);
 
     auto context = shared_context.lock();
     if (!context)
@@ -555,32 +536,53 @@ void GfxWindow::BeginFrame()
 {
     if (should_have_vsync)
     {
+        // look for any vsync windows.
         bool have_vsync = false;
         for (auto* window : surfaces)
         {
-            if (window->mVsync && window->mInitDone)
+            if (!window->mInitDone)
+                continue;
+
+            if (window->mVsync && window->isExposed())
             {
                 have_vsync = true;
                 break;
             }
         }
-        if (!have_vsync)
+        // got on, ok done!
+        if (have_vsync)
+            return;
+
+        for (auto* window : surfaces)
         {
-            for (auto* window : surfaces)
+            if (!window->mInitDone)
+                continue;
+
+            if (window->mVsync)
+                window->CreateRenderingSurface(false);
+        }
+
+        // find first window that has been initialized
+        // and re-create the rendering surface with the
+        // vsync flag.
+        for (auto* window : surfaces)
+        {
+            if (!window->mInitDone)
+                continue;
+
+            if (window->isExposed())
             {
-                if (window->mInitDone)
-                {
-                    window->CreateRenderingSurface(true);
-                    break;
-                }
+                window->CreateRenderingSurface(true);
+                break;
             }
         }
     }
     else
     {
+        // recreate any vsynced windows.
         for (auto* window : surfaces)
         {
-            if (window->mVsync && window->mInitDone)
+            if (window->mVsync && window->mInitDone && window->isExposed())
                 window->CreateRenderingSurface(false);
         }
     }
