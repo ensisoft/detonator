@@ -1636,7 +1636,6 @@ void MainWindow::on_actionSaveWorkspace_triggered()
         msg.exec();
         return;
     }
-    NOTE("Workspace saved.");
 }
 
 void MainWindow::on_actionLoadWorkspace_triggered()
@@ -2797,6 +2796,9 @@ bool MainWindow::event(QEvent* event)
         const auto& action_data = action_event->GetAction();
         if (const auto* ptr = std::get_if<ActionEvent::OpenResource>(&action_data)) {
             OpenResource(ptr->id);
+        }
+        else if (const auto* ptr = std::get_if<ActionEvent::SaveWorkspace>(&action_data)) {
+            SaveWorkspace();
         }
     }
     return QMainWindow::event(event);

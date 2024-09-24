@@ -103,6 +103,7 @@ namespace gui
         void on_actionZoomIn_triggered();
         void on_actionZoomOut_triggered();
         void on_actionTakeScreenshot_triggered();
+        void on_actionSaveWorkspace_triggered();
 
     private:
         virtual void keyPressEvent(QKeyEvent* key) override;

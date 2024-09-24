@@ -73,9 +73,10 @@ namespace gui
         struct OpenResource {
             QString id;
         };
-        using Action = std::variant<OpenResource>;
+        struct SaveWorkspace {};
+        using Action = std::variant<OpenResource, SaveWorkspace>;
 
-        explicit ActionEvent(OpenResource action)
+        explicit ActionEvent(Action action)
            : QEvent(GetIdentity())
            , mAction(std::move(action))
         {}
