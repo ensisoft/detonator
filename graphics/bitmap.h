@@ -1141,6 +1141,9 @@ namespace gfx
     Bitmap<Pixel_RGBA> PremultiplyAlpha(const BitmapReadView<Pixel_RGBA>& src, bool srgb);
     Bitmap<Pixel_RGBA> PremultiplyAlpha(const Bitmap<Pixel_RGBA>& src, bool srgb);
 
+    URect FindImageRectangle(const IBitmapReadView& src, const IPoint& start);
+
+
     // Interface for accessing / generating bitmaps procedurally.
     // Each implementation implements some procedural method for
     // creating a bitmap and generating its content.

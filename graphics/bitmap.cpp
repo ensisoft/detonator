@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <fstream>
 #include <cmath>
+#include <set>
 
 #include "base/hash.h"
 #include "base/math.h"
@@ -256,7 +257,8 @@ Pixel_RGBA::Pixel_RGBA(Color name, u8 alpha)
     r = tmp.r;
     g = tmp.g;
     b = tmp.b;
-    a = alpha;
+    a = name == Color::Transparent ? 0 : alpha;
+
 }
 
 bool operator==(const Pixel_A& lhs, const Pixel_A& rhs)
@@ -294,7 +296,9 @@ bool operator==(const Pixel_RGB& lhs, const Pixel_RGB& rhs)
            lhs.b == rhs.b;
 }
 bool operator!=(const Pixel_RGB& lhs, const Pixel_RGB& rhs)
-{ return !(lhs == rhs); }
+{
+    return !(lhs == rhs);
+}
 
 Pixel_RGB operator & (const Pixel_RGB& lhs, const Pixel_RGB& rhs)
 {
@@ -669,6 +673,114 @@ Bitmap<Pixel_RGBA> PremultiplyAlpha(const Bitmap<Pixel_RGBA>& src, bool srgb)
     return PremultiplyAlpha(src.GetPixelReadView(), srgb);
 }
 
+URect FindImageRectangle(const IBitmapReadView& img, const IPoint& start)
+{
+    URect ret;
+
+    if (img.GetDepthBits() != 32)
+        return ret;
+
+    using BitmapReadViewRGBA = BitmapReadView<Pixel_RGBA>;
+
+    const auto* rgba_view = dynamic_cast<const BitmapReadViewRGBA*>(&img);
+    ASSERT(rgba_view);
+
+    // explorer all adjacent pixels and their adjacent pixels etc
+    // with a breadth first search until the alpha value is 0.0.
+    struct Compare {
+        bool operator ()(const IPoint& lhs, const IPoint& rhs) const
+        {
+            if (lhs.GetX() < rhs.GetX())
+                return true;
+            else if (lhs.GetX() == rhs.GetX())
+                if (lhs.GetY() < rhs.GetY())
+                return true;
+            return false;
+        }
+    };
+
+    auto ReadPixel = [](const BitmapReadViewRGBA& img, const IPoint& point, Pixel_RGBA* pixel) {
+        const auto w = img.GetWidth();
+        const auto h = img.GetHeight();
+        if (point.GetX() >= w || point.GetX() < 0)
+            return false;
+        else if (point.GetY() >= h || point.GetY() < 0)
+            return false;
+
+        img.ReadPixel(point.GetY(), point.GetX(), pixel);
+        return true;
+    };
+
+    Pixel_RGBA pixel;
+    std::set<IPoint, Compare> pixels_visited;
+    std::set<IPoint, Compare> pixels_to_explore;
+    pixels_to_explore.insert(start);
+
+    int min_x = std::numeric_limits<int>::max();
+    int min_y = std::numeric_limits<int>::max();
+    int max_x = 0;
+    int max_y = 0;
+
+    struct PixelOffset {
+        int x, y;
+    };
+    static PixelOffset neighbors[] = {
+        {-1, 0}, // left
+        {-1, -1}, // left up
+        {0, -1},  // up
+        {1, -1},  // up right
+        {1, 0}, // right
+        {1, 1}, // right down
+        {0, 1}, // down
+        {-1, 1} // down left
+    };
+
+    while (!pixels_to_explore.empty())
+    {
+        auto beg = pixels_to_explore.begin();
+        auto this_pixel = *beg;
+        pixels_to_explore.erase(beg);
+
+        if (!ReadPixel(*rgba_view, this_pixel, &pixel))
+            continue;
+
+        pixels_visited.insert(this_pixel);
+
+        if (pixel.a == 0)
+            continue;
+
+        min_x = std::min(min_x, this_pixel.GetX());
+        max_x = std::max(max_x, this_pixel.GetX());
+        min_y = std::min(min_y, this_pixel.GetY());
+        max_y = std::max(max_y, this_pixel.GetY());
+
+        for (size_t i=0; i<8; ++i)
+        {
+            const auto neighbor = neighbors[i];
+            const auto neighbor_pixel = this_pixel.TranslateCopy(neighbor.x, neighbor.y);
+            if (auto it = pixels_visited.find(neighbor_pixel); it != pixels_visited.end())
+                continue;
+
+            if (!ReadPixel(*rgba_view, neighbor_pixel, &pixel) || pixel.a == 0)
+                continue;
+
+            pixels_to_explore.insert(neighbor_pixel);
+        }
+    }
+    if (min_x == std::numeric_limits<int>::max() || min_y == std::numeric_limits<int>::max())
+        return ret;
+
+    const auto found_width  = max_x - min_x + 1;
+    const auto found_height = max_y - min_y + 1;
+
+    ASSERT(min_x >= 0 && (min_x + found_width <= img.GetWidth()));
+    ASSERT(min_y >= 0 && (min_y + found_height <= img.GetHeight()));
+    ret.SetX(min_x);
+    ret.SetY(min_y);
+    ret.SetWidth(found_width);
+    ret.SetHeight(found_height);
+    return ret;
+}
 
 void NoiseBitmapGenerator::Randomize(unsigned min_prime_index, unsigned max_prime_index, unsigned layers)
 {
