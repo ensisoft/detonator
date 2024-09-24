@@ -153,6 +153,10 @@ namespace base
         { mX += dx; mY += dy; }
         inline void Translate(const Point& p) noexcept
         { mX += p.mX; mY += p.mY; }
+        inline Point TranslateCopy(T dx, T dy) noexcept
+        { return {mX + dx, mY + dy}; }
+        inline Point TranslateCopy(const Point& p) noexcept
+        { return {mX + p.mX, mY + p.mY }; }
 
         Point& operator+=(const Point& other) noexcept
         {
