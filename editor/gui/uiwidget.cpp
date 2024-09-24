@@ -521,6 +521,12 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(mUI.widgetMoused,   &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
     connect(mUI.widgetPressed,  &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
 
+    mUI.widgetNormal->SetParentWAR(this);
+    mUI.widgetDisabled->SetParentWAR(this);
+    mUI.widgetFocused->SetParentWAR(this);
+    mUI.widgetMoused->SetParentWAR(this);
+    mUI.widgetPressed->SetParentWAR(this);
+
     mState.tree  = mUI.tree;
     mState.style = std::make_unique<engine::UIStyle>();
     mState.style->SetClassLibrary(workspace);
