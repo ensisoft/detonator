@@ -49,6 +49,8 @@ namespace gui
         WidgetStyleWidget(QWidget* parent);
 
         void SetWidget(uik::Widget* widget);
+        void SetParentWAR(QWidget* parent)
+        { mParent = parent; }
 
         void SetWorkspace(app::Workspace* workspace)
         { mWorkspace = workspace;}
@@ -116,5 +118,6 @@ namespace gui
         engine::UIStyle* mStyle      = nullptr;
         engine::UIPainter* mPainter  = nullptr;
         std::string mSelector;
+        QWidget* mParent = nullptr;
     };
 } // namespace

@@ -199,7 +199,7 @@ void WidgetStyleWidget::on_btnSelectAppFont_clicked()
             disp.text_color = FromGfx(prop.GetValue<engine::Color4f>());
     } else  disp.text_color = GetValue(mUI.widgetTextColor);
 
-    DlgFont dlg(this, mWorkspace, font, disp);
+    DlgFont dlg(mParent, mWorkspace, font, disp);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -257,7 +257,7 @@ void WidgetStyleWidget::SetBackgroundMaterial()
 {
     if (mWidget)
     {
-        DlgMaterial dlg(this, mWorkspace, GetItemId(mUI.widgetBackground));
+        DlgMaterial dlg(mParent, mWorkspace, GetItemId(mUI.widgetBackground));
         if (dlg.exec() == QDialog::Rejected)
             return;
         SetValue(mUI.widgetBackground, ListItemId(dlg.GetSelectedMaterialId()));
@@ -292,7 +292,7 @@ void WidgetStyleWidget::SetBorderMaterial()
 {
     if (mWidget)
     {
-        DlgMaterial dlg(this, mWorkspace, GetItemId(mUI.widgetBorder));
+        DlgMaterial dlg(mParent, mWorkspace, GetItemId(mUI.widgetBorder));
         if (dlg.exec() == QDialog::Rejected)
             return;
         SetValue(mUI.widgetBorder, ListItemId(dlg.GetSelectedMaterialId()));
@@ -583,7 +583,7 @@ void WidgetStyleWidget::SetMaterialImage(const char* key)
         json_file = app::FindImageJsonFile(image_file);
         if (!json_file.isEmpty())
         {
-            DlgImgView dlg(this);
+            DlgImgView dlg(mParent);
             dlg.SetDialogMode();
             dlg.show();
             dlg.LoadImage(image_file);
