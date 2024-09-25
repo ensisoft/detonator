@@ -336,6 +336,9 @@
        <property name="currentText">
         <string/>
        </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+       </property>
        <property name="placeholderText">
         <string>Default</string>
        </property>
@@ -425,6 +428,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+       </property>
        <property name="placeholderText">
         <string>Default</string>
        </property>
@@ -470,6 +476,9 @@
        </property>
        <property name="editable">
         <bool>true</bool>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToMinimumContentsLength</enum>
        </property>
        <property name="placeholderText">
         <string>Default</string>
