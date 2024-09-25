@@ -1499,8 +1499,8 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>26</width>
-     <height>26</height>
+     <width>16</width>
+     <height>16</height>
     </size>
    </property>
    <property name="toolButtonStyle">
@@ -1620,6 +1620,9 @@
    <property name="text">
     <string>Exit</string>
    </property>
+   <property name="toolTip">
+    <string>Exit the application</string>
+   </property>
   </action>
   <action name="actionWindowClose">
    <property name="icon">
@@ -1670,6 +1673,9 @@
    <property name="text">
     <string>Toolbar</string>
    </property>
+   <property name="toolTip">
+    <string>Toggle the application toolbar on or off</string>
+   </property>
   </action>
   <action name="actionViewStatusbar">
    <property name="checkable">
@@ -1680,6 +1686,9 @@
    </property>
    <property name="text">
     <string>Statusbar</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle the application status bar on or off</string>
    </property>
   </action>
   <action name="actionZoomIn">
@@ -1693,6 +1702,9 @@
    <property name="text">
     <string>Zoom In</string>
    </property>
+   <property name="toolTip">
+    <string>Zoom in</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl++</string>
    </property>
@@ -1705,6 +1717,9 @@
    <property name="text">
     <string>Zoom Out</string>
    </property>
+   <property name="toolTip">
+    <string>Zoom out</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+-</string>
    </property>
@@ -1716,6 +1731,9 @@
    </property>
    <property name="text">
     <string>Reload Shaders</string>
+   </property>
+   <property name="toolTip">
+    <string>Reload shaders</string>
    </property>
    <property name="shortcut">
     <string>Alt+Shift+S</string>
@@ -1731,6 +1749,9 @@
    <property name="text">
     <string>Eventlog</string>
    </property>
+   <property name="toolTip">
+    <string>Toggle application event log on or off</string>
+   </property>
   </action>
   <action name="actionViewWorkspace">
    <property name="checkable">
@@ -1742,6 +1763,9 @@
    <property name="text">
     <string>Workspace</string>
    </property>
+   <property name="toolTip">
+    <string>Toggle workspace view on or off</string>
+   </property>
   </action>
   <action name="actionDeleteResource">
    <property name="icon">
@@ -1752,7 +1776,7 @@
     <string>Delete</string>
    </property>
    <property name="toolTip">
-    <string>Delete resource object</string>
+    <string>Delete a resource from the workspace</string>
    </property>
   </action>
   <action name="actionNewMaterial">
@@ -1778,6 +1802,9 @@
    <property name="text">
     <string>New Particle System</string>
    </property>
+   <property name="toolTip">
+    <string>Create new particle system</string>
+   </property>
   </action>
   <action name="actionEditResource">
    <property name="icon">
@@ -1788,7 +1815,7 @@
     <string>Open</string>
    </property>
    <property name="toolTip">
-    <string>Open resource</string>
+    <string>Open resource for editing</string>
    </property>
   </action>
   <action name="actionSaveWorkspace">
@@ -1801,6 +1828,9 @@
    </property>
    <property name="text">
     <string>Save Workspace</string>
+   </property>
+   <property name="toolTip">
+    <string>Save workspace and all resources</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
@@ -1841,6 +1871,9 @@
    <property name="text">
     <string>Editor Settings...</string>
    </property>
+   <property name="toolTip">
+    <string>Open editor settings</string>
+   </property>
   </action>
   <action name="actionReloadTextures">
    <property name="icon">
@@ -1849,6 +1882,9 @@
    </property>
    <property name="text">
     <string>Reload Textures</string>
+   </property>
+   <property name="toolTip">
+    <string>Reload textures</string>
    </property>
    <property name="shortcut">
     <string>Alt+Shift+T</string>
@@ -1862,6 +1898,9 @@
    <property name="text">
     <string>Image Packer</string>
    </property>
+   <property name="toolTip">
+    <string>Open image packer tool</string>
+   </property>
   </action>
   <action name="actionLoadWorkspace">
    <property name="icon">
@@ -1870,6 +1909,9 @@
    </property>
    <property name="text">
     <string>Open Workspace...</string>
+   </property>
+   <property name="toolTip">
+    <string>Load previous workspace</string>
    </property>
   </action>
   <action name="actionNewWorkspace">
@@ -1880,10 +1922,16 @@
    <property name="text">
     <string>New Workspace ...</string>
    </property>
+   <property name="toolTip">
+    <string>Create new workspace</string>
+   </property>
   </action>
   <action name="actionCloseWorkspace">
    <property name="text">
     <string>Close Workspace</string>
+   </property>
+   <property name="toolTip">
+    <string>Close the current workspace</string>
    </property>
   </action>
   <action name="actionPackageResources">
@@ -1909,6 +1957,9 @@
    <property name="text">
     <string>Open Resource...</string>
    </property>
+   <property name="toolTip">
+    <string>Open resource for editing</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+Shift+O</string>
    </property>
@@ -1916,10 +1967,13 @@
   <action name="actionNewResource">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/add.png</normaloff>:/32x32_ico_png/add.png</iconset>
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
    </property>
    <property name="text">
     <string>New Resource...</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new resource</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+N</string>
@@ -1934,7 +1988,7 @@
     <string>Edit Game Settings...</string>
    </property>
    <property name="toolTip">
-    <string>Workspace settings</string>
+    <string>Open project settings</string>
    </property>
   </action>
   <action name="actionProjectPlay">
@@ -1960,6 +2014,9 @@
    <property name="text">
     <string>New Shape</string>
    </property>
+   <property name="toolTip">
+    <string>Create new custom shape</string>
+   </property>
   </action>
   <action name="actionWindowPopOut">
    <property name="icon">
@@ -1984,6 +2041,9 @@
    <property name="text">
     <string>Duplicate</string>
    </property>
+   <property name="toolTip">
+    <string>Duplicate the selected resource(s)</string>
+   </property>
   </action>
   <action name="actionNewEntity">
    <property name="icon">
@@ -1994,7 +2054,7 @@
     <string>New Entity</string>
    </property>
    <property name="toolTip">
-    <string> New entity</string>
+    <string>Create new entity</string>
    </property>
   </action>
   <action name="actionClearLog">
@@ -2006,7 +2066,7 @@
     <string>Clear Log</string>
    </property>
    <property name="toolTip">
-    <string>Clear log events</string>
+    <string>Clear application event log</string>
    </property>
   </action>
   <action name="actionLogShowInfo">
@@ -2020,6 +2080,9 @@
    <property name="text">
     <string>Show Info</string>
    </property>
+   <property name="toolTip">
+    <string>Toggle show info level events</string>
+   </property>
   </action>
   <action name="actionLogShowWarning">
    <property name="checkable">
@@ -2031,6 +2094,9 @@
    </property>
    <property name="text">
     <string>Show Warnings</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle show warning level events</string>
    </property>
   </action>
   <action name="actionLogShowError">
@@ -2044,6 +2110,9 @@
    <property name="text">
     <string>Show Errors</string>
    </property>
+   <property name="toolTip">
+    <string>Toggle show warning level events</string>
+   </property>
   </action>
   <action name="actionNewScene">
    <property name="icon">
@@ -2054,7 +2123,7 @@
     <string>New Scene</string>
    </property>
    <property name="toolTip">
-    <string>New scene</string>
+    <string>Create new scene</string>
    </property>
   </action>
   <action name="actionNewScript">
@@ -2064,6 +2133,9 @@
    </property>
    <property name="text">
     <string>New Script</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new script</string>
    </property>
   </action>
   <action name="actionCut">
@@ -2081,7 +2153,7 @@
     <string>Cut</string>
    </property>
    <property name="toolTip">
-    <string>Cut the current object and place into clipboard</string>
+    <string>Cut the selected object and place to the clipboard</string>
    </property>
   </action>
   <action name="actionCopy">
@@ -2093,7 +2165,7 @@
     <string>Copy</string>
    </property>
    <property name="toolTip">
-    <string>Copy the currently selected object to clipboard</string>
+    <string>Copy the selected object to the clipboard</string>
    </property>
   </action>
   <action name="actionPaste">
@@ -2129,7 +2201,7 @@
     <string>From Audio File</string>
    </property>
    <property name="toolTip">
-    <string>Import new audio resource from file</string>
+    <string>Import new audio resource from audio file</string>
    </property>
   </action>
   <action name="actionNewUI">
@@ -2153,7 +2225,7 @@
     <string>To JSON</string>
    </property>
    <property name="toolTip">
-    <string>Export resources as JSON</string>
+    <string>Export resource(s) as JSON</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -2189,7 +2261,7 @@
     <string>New Audio Graph</string>
    </property>
    <property name="toolTip">
-    <string>New audio graph</string>
+    <string>Create new audio graph</string>
    </property>
   </action>
   <action name="actionRenameResource">
@@ -2201,7 +2273,7 @@
     <string>Rename ...</string>
    </property>
    <property name="toolTip">
-    <string>Rename selected resources</string>
+    <string>Rename selected resource(s)</string>
    </property>
   </action>
   <action name="actionImportJSON">
@@ -2213,7 +2285,7 @@
     <string>From Raw JSON</string>
    </property>
    <property name="toolTip">
-    <string>Import resources from JSON</string>
+    <string>Import resource(s) from JSON</string>
    </property>
   </action>
   <action name="actionNewBlankScript">
@@ -2272,6 +2344,9 @@
    <property name="text">
     <string>New Tilemap</string>
    </property>
+   <property name="toolTip">
+    <string>Create new tilemap</string>
+   </property>
   </action>
   <action name="actionImportTiles">
    <property name="icon">
@@ -2279,10 +2354,10 @@
      <normaloff>:/32x32_ico_png/tileset.png</normaloff>:/32x32_ico_png/tileset.png</iconset>
    </property>
    <property name="text">
-    <string>From Tileset</string>
+    <string>From Image Pack</string>
    </property>
    <property name="toolTip">
-    <string>Import new tiles from a packed tileset</string>
+    <string>Import images from packed image file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+T</string>
@@ -2309,7 +2384,7 @@
     <string>To Resource Pack</string>
    </property>
    <property name="toolTip">
-    <string>Export selected resources to a resource package</string>
+    <string>Export selected resource(s) to a resource package</string>
    </property>
   </action>
   <action name="actionLaunchViewer">
@@ -2320,6 +2395,9 @@
    <property name="text">
     <string>Workspace Viewer </string>
    </property>
+   <property name="toolTip">
+    <string>Launch workspace viewer</string>
+   </property>
   </action>
   <action name="actionImageViewer">
    <property name="icon">
@@ -2329,6 +2407,9 @@
    <property name="text">
     <string>Image Viewer</string>
    </property>
+   <property name="toolTip">
+    <string>Open image viewer &amp;&amp; edit tool</string>
+   </property>
   </action>
   <action name="actionFontMap">
    <property name="icon">
@@ -2337,6 +2418,9 @@
    </property>
    <property name="text">
     <string>Fontmap JSON Generator</string>
+   </property>
+   <property name="toolTip">
+    <string>Open fontmap JSON generator tool</string>
    </property>
   </action>
   <action name="actionProjectSync">
@@ -2348,7 +2432,7 @@
     <string>Commit Changes...</string>
    </property>
    <property name="toolTip">
-    <string>Commit changes in the project to version con</string>
+    <string>Open version control sync tool</string>
    </property>
   </action>
   <action name="actionSvgViewer">
@@ -2360,7 +2444,7 @@
     <string>SVG Rasterizer</string>
    </property>
    <property name="toolTip">
-    <string>Launch SVG viewer</string>
+    <string>Open SVG viewer and rasterizer tool</string>
    </property>
   </action>
   <action name="actionTilemap">
@@ -2370,6 +2454,9 @@
    </property>
    <property name="text">
     <string>Tilesheet JSON Generator</string>
+   </property>
+   <property name="toolTip">
+    <string>Open tilesheet JSON generator tool</string>
    </property>
   </action>
   <action name="actionNewAnimatorScript">
@@ -2381,7 +2468,7 @@
     <string>New Animator Script</string>
    </property>
    <property name="toolTip">
-    <string>Create new entity animator script</string>
+    <string>Create new entity controller  script</string>
    </property>
   </action>
   <action name="actionDependencies">
@@ -2404,6 +2491,9 @@
    <property name="text">
     <string>Take Screenshot</string>
    </property>
+   <property name="toolTip">
+    <string>Take screenshot of the current widget</string>
+   </property>
    <property name="shortcut">
     <string>F9</string>
    </property>
@@ -2417,7 +2507,7 @@
     <string>Play Game (Clean Game Home)</string>
    </property>
    <property name="toolTip">
-    <string>Clean game home and then play</string>
+    <string>Play game with clean game home</string>
    </property>
    <property name="shortcut">
     <string>Shift+F4</string>
