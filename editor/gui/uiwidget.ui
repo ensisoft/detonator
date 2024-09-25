@@ -808,7 +808,7 @@
      </widget>
      <widget class="QWidget" name="qtFuckingHatesYou" native="true">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -830,7 +830,7 @@
         <widget class="QSplitter" name="rightSplitter">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-           <horstretch>2</horstretch>
+           <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
@@ -845,14 +845,14 @@
          </property>
          <widget class="QGroupBox" name="widgetTree">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>440</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>
@@ -923,7 +923,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>440</width>
+             <width>366</width>
              <height>988</height>
             </rect>
            </property>
@@ -1847,7 +1847,7 @@
                    <item row="0" column="0">
                     <widget class="QLabel" name="label_22">
                      <property name="sizePolicy">
-                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                        <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
@@ -1924,7 +1924,7 @@
                      <item>
                       <widget class="QComboBox" name="shapeDrawable">
                        <property name="sizePolicy">
-                        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                          <horstretch>0</horstretch>
                          <verstretch>0</verstretch>
                         </sizepolicy>
