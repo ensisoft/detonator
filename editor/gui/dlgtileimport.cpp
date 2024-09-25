@@ -259,6 +259,11 @@ void DlgTileImport::on_btnImport_clicked()
             klass.SetName(app::ToUtf8(img.name));
             klass.SetFlag(gfx::TextureMap2DClass::Flags::PremultipliedAlpha, premul_alpha_blend);
 
+            if (const auto& cutoff = mUI.alphaCutoff->GetValue())
+            {
+                klass.SetAlphaCutoff(cutoff.value());
+            }
+
             ASSERT(klass.GetNumTextureMaps());
             for (unsigned i=0; i<klass.GetNumTextureMaps(); ++i)
                 ASSERT(klass.GetTextureMap(i)->GetNumTextures());
@@ -300,6 +305,11 @@ void DlgTileImport::on_btnImport_clicked()
         klass.SetFlag(gfx::TextureMap2DClass::Flags::PremultipliedAlpha, premul_alpha_blend);
         klass.SetName(GetValue(mUI.spriteName));
         klass.SetBlendFrames(GetValue(mUI.chkBlendFrames));
+
+        if (const auto& cutoff = mUI.alphaCutoff->GetValue())
+        {
+            klass.SetAlphaCutoff(cutoff.value());
+        }
 
         for (const auto& [texture_map_name, image_list] : mapping)
         {
@@ -444,8 +454,15 @@ void DlgTileImport::on_tabWidget_currentChanged(int tab)
 {
     SetEnabled(mUI.btnImport, false);
 
-    if (tab != 1)
-        return;
+    // clear the layout previous widgets
+    while (auto* item = mUI.layout->takeAt(0))
+    {
+        delete item->widget();
+        delete item;
+    }
+
+    for (auto& img : mPack.images)
+        img.widget = nullptr;
 
     if (!mMaterial)
         return;
@@ -525,7 +542,7 @@ void DlgTileImport::on_renameTemplate_returnPressed()
             continue;
 
         QString out_name = GetValue(mUI.renameTemplate);
-        out_name.replace("%c", QString::number(counter++));
+        out_name.replace("%c", QString::number(counter));
         out_name.replace("%i", QString::number(img.index));
         out_name.replace("%w", QString::number(img.width));
         out_name.replace("%h", QString::number(img.height));
@@ -777,6 +794,12 @@ void DlgTileImport::LoadState()
     GetUserProperty(*mWorkspace, "dlg-tile-import-xpos", &xpos);
     GetUserProperty(*mWorkspace, "dlg-tile-import-ypos", &ypos);
     GetUserProperty(*mWorkspace, "dlg-tile-import-sprite-name-str", &mSpriteName);
+
+    if (mWorkspace->HasUserProperty("dlg-tile-import-alpha-cutoff"))
+    {
+        GetUserProperty(*mWorkspace, "dlg-tile-import-alpha-cutoff", &mUI.alphaCutoff);
+    }
+
     mTrackingOffset = QPoint(xpos, ypos);
 
     on_materialType_currentIndexChanged(0);
@@ -821,6 +844,15 @@ void DlgTileImport::SaveState()
     SetUserProperty(*mWorkspace, "dlg-tile-import-image-file", imagefile);
     SetUserProperty(*mWorkspace, "dlg-tile-import-json-file", jsonfile);
     SetUserProperty(*mWorkspace, "dlg-tile-import-sprite-name-str", mSpriteName);
+
+    if (const auto& cutoff = mUI.alphaCutoff->GetValue())
+    {
+        SetUserProperty(*mWorkspace, "dlg-tile-import-alpha-cutoff", cutoff.value());
+    }
+    else
+    {
+        mWorkspace->DeleteUserProperty("dlg-tile-import-alpha-cutoff");
+    }
 }
 
 void DlgTileImport::OnPaintScene(gfx::Painter& painter, double secs)
