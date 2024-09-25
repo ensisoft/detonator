@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1080</width>
-    <height>1056</height>
+    <width>1000</width>
+    <height>986</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Import Tileset</string>
+   <string>Import Images to Materials</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
@@ -21,13 +21,13 @@
      </property>
      <widget class="QWidget" name="tabSelect">
       <attribute name="title">
-       <string>1. Select Tiles</string>
+       <string>1. Select Images</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>Tileset</string>
+          <string>Image pack</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
@@ -222,24 +222,36 @@
      </widget>
      <widget class="QWidget" name="tabImport">
       <attribute name="title">
-       <string>2. Import Tiles</string>
+       <string>2. Import Images</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string>Selected tiles</string>
+          <string>Selected images</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
            <widget class="QGroupBox" name="groupBox_9">
             <property name="title">
-             <string>Rename tiles</string>
+             <string>Batch rename images</string>
             </property>
             <property name="flat">
              <bool>true</bool>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_12">
+             <property name="leftMargin">
+              <number>10</number>
+             </property>
+             <property name="topMargin">
+              <number>10</number>
+             </property>
+             <property name="rightMargin">
+              <number>10</number>
+             </property>
+             <property name="bottomMargin">
+              <number>10</number>
+             </property>
              <item>
               <widget class="QLineEdit" name="renameTemplate">
                <property name="placeholderText">
@@ -269,8 +281,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>633</width>
-               <height>860</height>
+               <width>553</width>
+               <height>778</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -322,6 +334,18 @@
                <bool>true</bool>
               </property>
               <layout class="QGridLayout" name="gridLayout_4">
+               <property name="leftMargin">
+                <number>10</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>10</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_10">
                  <property name="sizePolicy">
@@ -438,6 +462,18 @@
                <bool>true</bool>
               </property>
               <layout class="QGridLayout" name="gridLayout">
+               <property name="leftMargin">
+                <number>10</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>10</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
                <item row="0" column="0">
                 <widget class="QLabel" name="label">
                  <property name="text">
@@ -490,6 +526,18 @@
                <bool>true</bool>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_11">
+               <property name="leftMargin">
+                <number>10</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>10</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QCheckBox" name="chkPremulAlphaBlend">
                  <property name="text">
@@ -523,6 +571,18 @@
                <bool>true</bool>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_8">
+               <property name="leftMargin">
+                <number>10</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>10</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QComboBox" name="materialType"/>
                </item>
@@ -538,6 +598,18 @@
                <bool>true</bool>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_9">
+               <property name="leftMargin">
+                <number>10</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>10</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QComboBox" name="surfaceType">
                  <property name="sizePolicy">
@@ -560,6 +632,18 @@
                <bool>true</bool>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_10">
+               <property name="leftMargin">
+                <number>10</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>10</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QLineEdit" name="spriteName">
                  <property name="sizePolicy">
@@ -579,12 +663,24 @@
             <item row="8" column="0">
              <widget class="QGroupBox" name="groupBox_14">
               <property name="title">
-               <string>Sprite fps</string>
+               <string>Sprite frame rate</string>
               </property>
               <property name="flat">
                <bool>true</bool>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_18">
+               <property name="leftMargin">
+                <number>10</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>10</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
                <item>
                 <widget class="QDoubleSpinBox" name="spriteFps">
                  <property name="enabled">
@@ -646,6 +742,50 @@
               </property>
              </spacer>
             </item>
+            <item row="9" column="0">
+             <widget class="QGroupBox" name="groupBox_11">
+              <property name="title">
+               <string>Alpha cutoff</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_13">
+               <property name="leftMargin">
+                <number>10</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>10</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
+               <item>
+                <widget class="gui::DoubleSpinBox" name="alphaCutoff">
+                 <property name="focusPolicy">
+                  <enum>Qt::WheelFocus</enum>
+                 </property>
+                 <property name="specialValueText" stdset="0">
+                  <string>Disabled</string>
+                 </property>
+                 <property name="maximum" stdset="0">
+                  <double>1.000000000000000</double>
+                 </property>
+                 <property name="singleStep" stdset="0">
+                  <double>0.100000000000000</double>
+                 </property>
+                 <property name="clearButtonIcon" stdset="0">
+                  <iconset resource="../resource/resource.qrc">
+                   <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -693,6 +833,11 @@
    <header>color_selector.hpp</header>
   </customwidget>
   <customwidget>
+   <class>gui::DoubleSpinBox</class>
+   <extends>QWidget</extends>
+   <header>spinboxwidget.h</header>
+  </customwidget>
+  <customwidget>
    <class>gui::GfxWidget</class>
    <extends>QWidget</extends>
    <header>gfxwidget.h</header>
@@ -718,6 +863,7 @@
   <tabstop>surfaceType</tabstop>
   <tabstop>spriteName</tabstop>
   <tabstop>spriteFps</tabstop>
+  <tabstop>alphaCutoff</tabstop>
   <tabstop>minFilter</tabstop>
   <tabstop>magFilter</tabstop>
   <tabstop>topMargin</tabstop>
