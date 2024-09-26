@@ -602,7 +602,7 @@ namespace app
             // in the editor.
             unsigned viewport_height = 768;
             // The default engine clear color.
-            QColor clear_color = {50, 77, 100, 255};
+            QColor clear_color = {0x23, 0x23, 0x23, 255};
             // Whether the game should render a custom mouse pointer or not.
             bool mouse_pointer_visible = true;
             // What is the drawable shape of the game's custom mouse pointer.
