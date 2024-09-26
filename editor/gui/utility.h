@@ -445,6 +445,8 @@ inline void SetPlaceholderText(QComboBox* cmb, const app::AnyString& text)
 {
     QSignalBlocker s(cmb);
     cmb->setPlaceholderText(text);
+    if (auto* edit = cmb->lineEdit())
+        edit->setPlaceholderText(text);
 }
 
 inline void SetPlaceholderText(QLineEdit* edit, const QString& text)
