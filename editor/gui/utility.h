@@ -441,7 +441,7 @@ inline void SetValue(QAction* action, bool on_off)
     action->setChecked(on_off);
 }
 
-inline void SetPlaceholderText(QComboBox* cmb, const QString& text)
+inline void SetPlaceholderText(QComboBox* cmb, const app::AnyString& text)
 {
     QSignalBlocker s(cmb);
     cmb->setPlaceholderText(text);
@@ -478,6 +478,8 @@ struct ListItemId {
     ListItemId(const std::string& str) : id(app::FromUtf8(str))
     {}
     ListItemId(const app::AnyString& str) : id(str)
+    {}
+    ListItemId(const char* id) : id(id)
     {}
 };
 
@@ -1906,6 +1908,9 @@ QPixmap ToGrayscale(QPixmap pixmap);
 // returns a list of font uris, i.e. app://fonts/foo.otf
 std::vector<QString> ListAppFonts();
 
+std::vector<ResourceListItem> ListParticles();
+
+void PopulateParticleList(QComboBox* cmb);
 void PopulateFontNames(QComboBox* cmb);
 void PopulateFontSizes(QComboBox* cmb);
 void PopulateUIStyles(QComboBox* cmb);

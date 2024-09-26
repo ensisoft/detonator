@@ -81,6 +81,12 @@ namespace gui
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnSelectMaterial_clicked();
+        void on_btnCreateMaterial_clicked();
+        void on_materials_currentIndexChanged(int);
+        void on_cmbSurface_currentIndexChanged(int);
+        void on_cmbParticle_currentIndexChanged(int);
+        void on_cmbEffect_currentIndexChanged(int);
+        void on_baseColor_colorChanged(QColor);
         void on_space_currentIndexChanged(int);
         void on_motion_currentIndexChanged(int);
         void on_boundary_currentIndexChanged(int);
@@ -136,6 +142,9 @@ namespace gui
         void ResourceAdded(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
         void ResourceRemoved(const app::Resource* resource);
+        void CreateMaterial();
+        bool FindMaterialClass(const std::string& id);
+        size_t GetHash() const;
     private:
         void SetParams();
         void ShowParams();
@@ -156,6 +165,7 @@ namespace gui
         std::shared_ptr<gfx::ParticleEngineClass> mClass;
         std::unique_ptr<gfx::ParticleEngineInstance> mEngine;
         std::unique_ptr<gfx::Material> mMaterial;
+        std::shared_ptr<gfx::MaterialClass> mMaterialClass;
         std::unique_ptr<MouseTool> mMouseTool;
         std::unique_ptr<UIState> mState;
         bool mPaused = false;

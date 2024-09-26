@@ -1551,7 +1551,7 @@ void MainWindow::on_actionDeleteResource_triggered()
             QMessageBox msg(this);
             msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel | QMessageBox::No | QMessageBox::YesAll);
             msg.setWindowTitle("Delete File?");
-            msg.setText(tr("Do you want to delete the ile? [%1]").arg(dead_file));
+            msg.setText(tr("Do you want to delete the file? [%1]").arg(dead_file));
             msg.setIcon(QMessageBox::Icon::Warning);
             const auto ret = msg.exec();
             if (ret == QMessageBox::Cancel)

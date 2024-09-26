@@ -100,6 +100,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     }
 
     connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, this, &MaterialWidget::ShaderFileChanged);
+    connect(mWorkspace, &app::Workspace::ResourceUpdated, this, &MaterialWidget::ResourceUpdated);
 
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.minFilter);
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.magFilter);
@@ -1239,6 +1240,21 @@ void MaterialWidget::ShaderFileChanged()
     on_actionReloadShaders_triggered();
 }
 
+void MaterialWidget::ResourceUpdated(const app::Resource* resource)
+{
+    if (resource->GetIdUtf8() != mMaterial->GetId())
+        return;
+
+    mMaterial = resource->GetContent<gfx::MaterialClass>()->Copy();
+    mMaterialInst.reset();
+
+    ShowMaterialProperties();
+    ShowTextureProperties();
+    ShowTextureProperties();
+
+    mOriginalHash = mMaterial->GetHash();
+}
+
 void MaterialWidget::CreateCustomShaderStub()
 {
     QString name = GetValue(mUI.materialName);
@@ -1914,6 +1930,7 @@ void MaterialWidget::ShowMaterialProperties()
     SetVisible(mUI.textureFilters,     false);
     SetVisible(mUI.customUniforms,     false);
 
+    SetValue(mUI.materialName,        mMaterial->GetName());
     SetValue(mUI.materialID,          mMaterial->GetId());
     SetValue(mUI.materialType,        mMaterial->GetType());
     SetValue(mUI.surfaceType,         mMaterial->GetSurfaceType());
@@ -2077,9 +2094,13 @@ void MaterialWidget::ShowMaterialProperties()
             if (map->GetType() == gfx::TextureMap::Type::Sprite)
                 SetVisible(mUI.chkBlendFrames, true);
 
+            auto name = map->GetName();
+            if (name.empty())
+                name = "--unnamed";
+
             ResourceListItem item;
             item.id   = map->GetId();
-            item.name = map->GetName();
+            item.name = name;
             item.tag  = "map";
             maps.push_back(item);
             items.push_back(item);
@@ -2087,9 +2108,14 @@ void MaterialWidget::ShowMaterialProperties()
             for (unsigned j=0; j<map->GetNumTextures(); ++j)
             {
                 const auto* source = map->GetTextureSource(j);
+
+                std::string name = source->GetName();
+                if (name.empty())
+                    "--unnamed";
+
                 ResourceListItem item;
                 item.id   = source->GetId();
-                item.name = "    " + source->GetName();
+                item.name = "    " + name;
                 item.tag  = "texture";
                 items.push_back(item);
             }

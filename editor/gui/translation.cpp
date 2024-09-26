@@ -299,3 +299,43 @@ std::string TranslateEnum(Interpolation i)
     return "???";
 }
 } // namespace
+
+namespace gfx
+{
+std::string TranslateEnum(gfx::ParticleEngineClass::CoordinateSpace space)
+{
+    using S = gfx::ParticleEngineClass::CoordinateSpace;
+    if (space == S::Global)
+        return "Global Coordinate Space";
+    else if (space == S::Local)
+        return "Local Coordinate Space";
+    else BUG("Missing translation");
+    return "???";
+}
+std::string TranslateEnum(gfx::ParticleEngineClass::Motion motion)
+{
+    using M = gfx::ParticleEngineClass::Motion;
+    if (motion == M::Linear)
+        return "Kinematic Linear Motion";
+    else if (motion == M::Projectile)
+        return "Projectile Motion";
+    else BUG("Missing translation");
+    return "???";
+}
+
+std::string TranslateEnum(gfx::ParticleEngineClass::SpawnPolicy spawn)
+{
+    using S = gfx::ParticleEngineClass::SpawnPolicy;
+    if (spawn == S::Once)
+        return "Spawn Once";
+    else if (spawn == S::Continuous)
+        return "Spawn Continuously";
+    else if (spawn == S::Maintain)
+        return "Maintain Particle Count";
+    else if (spawn == S::Command)
+        return "Spawn On Command Only";
+    else BUG("Missing translation");
+    return "???";
+}
+
+} // namespace

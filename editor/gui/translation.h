@@ -23,6 +23,7 @@
 #include "base/math.h"
 #include "editor/app/workspace.h"
 #include "engine/loader.h"
+#include "graphics/drawable.h"
 #include "game/animator.h"
 #include "game/property_animator.h"
 #include "game/kinematic_animator.h"
@@ -53,4 +54,10 @@ namespace game {
 
 namespace math {
     std::string TranslateEnum(Interpolation);
+}
+
+namespace gfx {
+    std::string TranslateEnum(gfx::ParticleEngineClass::CoordinateSpace space);
+    std::string TranslateEnum(gfx::ParticleEngineClass::Motion motion);
+    std::string TranslateEnum(gfx::ParticleEngineClass::SpawnPolicy spawn);
 }
