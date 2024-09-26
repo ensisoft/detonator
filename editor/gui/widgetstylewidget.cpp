@@ -31,6 +31,7 @@
 #include "uikit/widget.h"
 #include "engine/ui.h"
 #include "engine/color.h"
+#include "editor/app/resource-uri.h"
 #include "editor/app/utility.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/widgetstylewidget.h"
@@ -133,7 +134,7 @@ void WidgetStyleWidget::on_widgetBackground_currentIndexChanged(int)
     else if (mUI.widgetBackground->currentIndex() == 2)
         SetMaterial(MapProperty("/background"), engine::detail::UIGradient());
     else if (mUI.widgetBackground->currentIndex() == 3)
-        SetMaterial(MapProperty("/background"), engine::detail::UITexture("app://textures/Checkerboard.png"));
+        SetMaterial(MapProperty("/background"), engine::detail::UITexture(res::Checkerboard));
     else SetMaterial(MapProperty("/background"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBackground)));
 
     UpdateWidgetStyleString();
@@ -149,7 +150,7 @@ void WidgetStyleWidget::on_widgetBorder_currentIndexChanged(int)
     else if (mUI.widgetBorder->currentIndex() == 2)
         SetMaterial(MapProperty("/border"), engine::detail::UIGradient());
     else if (mUI.widgetBorder->currentIndex() == 3)
-        SetMaterial(MapProperty("/border"), engine::detail::UITexture("app://textures/Checkerboard.png"));
+        SetMaterial(MapProperty("/border"), engine::detail::UITexture(res::Checkerboard));
     else SetMaterial(MapProperty("/border"), engine::detail::UIMaterialReference(GetItemId(mUI.widgetBorder)));
 
     UpdateWidgetStyleString();

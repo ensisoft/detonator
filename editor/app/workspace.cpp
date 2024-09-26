@@ -54,6 +54,7 @@
 #include "engine/data.h"
 #include "data/json.h"
 #include "base/json.h"
+#include "editor/app/resource-uri.h"
 #include "editor/app/packer.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
@@ -781,7 +782,7 @@ Workspace::Workspace(const QString& dir)
     // anything or when the material referenced by some object is deleted
     // the material reference can be updated to Checkerboard.
     auto checkerboard = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture, std::string("_checkerboard"));
-    checkerboard->SetTexture(gfx::LoadTextureFromFile("app://textures/Checkerboard.png"));
+    checkerboard->SetTexture(gfx::LoadTextureFromFile(res::Checkerboard));
     checkerboard->SetName("Checkerboard");
     mResources.emplace_back(new MaterialResource(checkerboard, "Checkerboard"));
 

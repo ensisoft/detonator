@@ -32,6 +32,7 @@
 #include "uikit/widget.h"
 #include "engine/ui.h"
 #include "engine/color.h"
+#include "editor/app/resource-uri.h"
 #include "editor/app/utility.h"
 #include "editor/gui/dlgimgview.h"
 #include "editor/gui/dlgstyleproperties.h"
@@ -721,7 +722,7 @@ void DlgWidgetStyleProperties::SetPropertyValue()
         else if (mUI.widgetMaterial->currentIndex() == 2)
             mStyle->SetMaterial(property_key, engine::detail::UIGradient());
         else if (mUI.widgetMaterial->currentIndex() == 3)
-            mStyle->SetMaterial(property_key, engine::detail::UITexture("app://textures/Checkerboard.png"));
+            mStyle->SetMaterial(property_key, engine::detail::UITexture(res::Checkerboard));
         else mStyle->SetMaterial(property_key, engine::detail::UIMaterialReference(GetItemId(mUI.widgetMaterial)));
 
         mPainter->DeleteMaterialInstanceByKey(property_key);
