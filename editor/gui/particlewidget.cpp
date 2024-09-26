@@ -324,6 +324,11 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetUserProperty(resource, "show_emitter", mUI.chkShowEmitter);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    GetUserProperty(resource, "emission_group", mUI.particleEmissionGroup);
+    GetUserProperty(resource, "simulation_space_group", mUI.simulationSpaceGroup);
+    GetUserProperty(resource, "local_emitter_group", mUI.localEmitterGroup);
+    GetUserProperty(resource, "viz_group", mUI.vizGroup);
+
     if (mWorkspace->IsValidMaterial(material))
     {
         SetValue(mUI.materials, ListItemId(material));
@@ -428,6 +433,10 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Particle", mUI.zoom);
     settings.SaveWidget("Particle", mUI.widget);
     settings.SaveWidget("Particle", mUI.mainSplitter);
+    settings.SaveWidget("Particle", mUI.particleEmissionGroup);
+    settings.SaveWidget("Particle", mUI.simulationSpaceGroup);
+    settings.SaveWidget("Particle", mUI.localEmitterGroup);
+    settings.SaveWidget("Particle", mUI.vizGroup);
     return true;
 }
 
@@ -456,6 +465,10 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Particle", mUI.zoom);
     settings.LoadWidget("Particle", mUI.widget);
     settings.LoadWidget("Particle", mUI.mainSplitter);
+    settings.LoadWidget("Particle", mUI.particleEmissionGroup);
+    settings.LoadWidget("Particle", mUI.simulationSpaceGroup);
+    settings.LoadWidget("Particle", mUI.localEmitterGroup);
+    settings.LoadWidget("Particle", mUI.vizGroup);
 
     mClass = std::make_shared<gfx::ParticleEngineClass>();
     if (!mClass->FromJson(json))
@@ -629,6 +642,10 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetUserProperty(particle_resource, "show_emitter", mUI.chkShowEmitter);
     SetUserProperty(particle_resource, "widget", mUI.widget);
     SetUserProperty(particle_resource, "main_splitter", mUI.mainSplitter);
+    SetUserProperty(particle_resource, "emission_group", mUI.particleEmissionGroup);
+    SetUserProperty(particle_resource, "simulation_space_group", mUI.simulationSpaceGroup);
+    SetUserProperty(particle_resource, "local_emitter_group", mUI.localEmitterGroup);
+    SetUserProperty(particle_resource, "viz_group", mUI.vizGroup);
 
     mWorkspace->SaveResource(particle_resource);
     mOriginalHash = mClass->GetHash();
@@ -1301,6 +1318,8 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // Draw the visualization for the particle direction sector
     // we draw this in the widget/window coordinates in the top right
+    const gfx::ParticleEngineClass::Direction particle_direction = GetValue(mUI.direction);
+    if (particle_direction == gfx::ParticleEngineClass::Direction::Sector)
     {
         const float dir_angle_start = GetValue(mUI.dirStartAngle);
         const float dir_angle_size  = GetValue(mUI.dirSizeAngle);
@@ -1311,7 +1330,7 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
             transform.Scale(100.0f, 100.0f);
             transform.Translate(-50.0f, -50.0f);
             painter.Draw(gfx::Rectangle(), transform,
-                         gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::Black, 0.6f)));
+                         gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::Black, 0.2f)));
         transform.Pop();
         transform.Push();
         transform.RotateAroundZ(qDegreesToRadians(dir_angle_start));
@@ -1319,7 +1338,7 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
                 transform.Scale(50.0f, 5.0f);
                 transform.Translate(0.0f, -2.5f);
                 transform.RotateAroundZ(qDegreesToRadians(dir_angle_size));
-                painter.Draw(gfx::Rectangle(), transform,
+                painter.Draw(gfx::Arrow(), transform,
                              gfx::CreateMaterialFromColor(gfx::Color::Yellow));
             transform.Pop();
             transform.Push();
