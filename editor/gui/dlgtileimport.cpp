@@ -30,6 +30,7 @@
 #include "base/assert.h"
 #include "base/utility.h"
 #include "base/json.h"
+#include "editor/app/resource-uri.h"
 #include "editor/app/resource.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
@@ -890,7 +891,7 @@ void DlgTileImport::OnPaintScene(gfx::Painter& painter, double secs)
     if (mPack.images.empty())
         return;
 
-    static auto selection_material_class = gfx::CreateMaterialClassFromImage("app://textures/accept_icon.png");
+    static auto selection_material_class = gfx::CreateMaterialClassFromImage(res::AcceptIcon);
     selection_material_class.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
     static auto selection_material = gfx::MaterialInstance(selection_material_class);

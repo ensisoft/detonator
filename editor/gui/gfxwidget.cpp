@@ -30,6 +30,7 @@
 #include "graphics/drawing.h"
 #include "graphics/transform.h"
 #include "graphics/utility.h"
+#include "editor/app/resource-uri.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
@@ -312,7 +313,7 @@ void GfxWindow::paintGL()
         static std::shared_ptr<gfx::TextureMap2DClass> crosshair_cursor_material;
         if (!crosshair_cursor_material)
         {
-            crosshair_cursor_material = std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromImage("app://textures/crosshair009.png"));
+            crosshair_cursor_material = std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromImage(res::CrosshairCursor));
             crosshair_cursor_material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
             crosshair_cursor_material->SetBaseColor(gfx::Color::HotPink);
         }

@@ -30,6 +30,7 @@
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/drawing.h"
+#include "editor/app/resource-uri.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
@@ -336,7 +337,7 @@ void DlgFontMap::OnPaintScene(gfx::Painter& painter, double secs)
     const int current_col = (mouse_posx-tile_xoffset) / tile_width;
 
     const gfx::Color4f grid_color(gfx::Color::HotPink, 0.2);
-    auto selection_material_class = gfx::CreateMaterialClassFromImage("app://textures/accept_icon.png");
+    auto selection_material_class = gfx::CreateMaterialClassFromImage(res::AcceptIcon);
     selection_material_class.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
     auto selection_material = gfx::MaterialInstance(selection_material_class);
