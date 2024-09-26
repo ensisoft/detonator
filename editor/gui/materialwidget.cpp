@@ -595,6 +595,7 @@ void MaterialWidget::on_btnResetShader_clicked()
         SetEnabled(mUI.actionEditShader, false);
         SetEnabled(mUI.btnResetShader, false);
         SetValue(mUI.shaderFile, QString(""));
+        ClearCustomUniforms();
         ShowMaterialProperties();
     }
 }
@@ -789,6 +790,8 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         return;
 
     gfx::MaterialClass other(type, mMaterial->GetId());
+    other.SetName(mMaterial->GetName());
+
     if (type == gfx::MaterialClass::Type::Texture)
     {
         auto map = std::make_unique<gfx::TextureMap>();
@@ -1987,6 +1990,8 @@ void MaterialWidget::ShowMaterialProperties()
     }
     else
     {
+        ClearCustomUniforms();
+
         SetPlaceholderText(mUI.shaderFile, "Using The Built-in Shader");
         SetEnabled(mUI.btnAddShader,    true);
         SetEnabled(mUI.shaderFile,      true);
@@ -2123,6 +2128,10 @@ void MaterialWidget::ShowMaterialProperties()
         SetList(mUI.textures,  items);
         SetList(mUI.activeMap, maps);
         SetValue(mUI.activeMap, ListItemId(mMaterial->GetActiveTextureMap()));
+    }
+    else
+    {
+        ClearList(mUI.textures);
     }
 }
 
