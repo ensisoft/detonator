@@ -97,10 +97,47 @@ std::vector<ResourceListItem> ListParticles()
     return ret;
 }
 
+std::vector<ResourceListItem> ListShaders()
+{
+    std::vector<ResourceListItem> ret;
+
+    QStringList filters;
+    filters << "*.glsl";
+    const auto& appdir = QCoreApplication::applicationDirPath();
+    const auto& fontdir = app::JoinPath(appdir , "shaders/es2");
+    QDir dir;
+    dir.setPath(fontdir);
+    dir.setNameFilters(filters);
+    const QStringList& files = dir.entryList();
+    for (const auto& file : files)
+    {
+        const QFileInfo info(file);
+
+        ResourceListItem item;
+        item.name = info.baseName();
+        item.id   = app::toString("app://shaders/es2/%1", info.fileName());
+        ret.push_back(item);
+    }
+    return ret;
+}
+
+void PopulateShaderList(QComboBox* cmb)
+{
+    QSignalBlocker s(cmb);
+    cmb->clear();
+    cmb->setProperty("__is_id_list__", true);
+
+    for (const auto& shader : ListShaders())
+    {
+        cmb->addItem(shader.name, shader.id);
+    }
+}
+
 void PopulateParticleList(QComboBox* cmb)
 {
     QSignalBlocker s(cmb);
     cmb->clear();
+    cmb->setProperty("__is_id_list__", true);
 
     for (const auto& particle : ListParticles())
     {
@@ -134,6 +171,7 @@ void PopulateUIStyles(QComboBox* cmb)
 {
     QSignalBlocker s(cmb);
     cmb->clear();
+    cmb->setProperty("__is_string_list__", true);
 
     QStringList filters;
     filters << "*.json";
@@ -156,6 +194,7 @@ void PopulateUIKeyMaps(QComboBox* cmb)
 {
     QSignalBlocker s(cmb);
     cmb->clear();
+    cmb->setProperty("__is_string_list__", true);
 
     QStringList filters;
     filters << "*.json";

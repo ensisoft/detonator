@@ -113,7 +113,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
 
     SetList(mUI.cmbModel, workspace->ListPrimitiveDrawables());
-    SetValue(mUI.cmbModel, "Rectangle");
+    SetValue(mUI.cmbModel, ListItemId("_rect"));
     SetValue(mUI.materialID, mMaterial->GetId());
     SetValue(mUI.materialName, mMaterial->GetName());
     setWindowTitle(GetValue(mUI.materialName));
@@ -2362,7 +2362,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto ypos = (height - actual_height) * 0.5f;
 
     if (!mDrawable)
-        mDrawable = mWorkspace->MakeDrawableByName(GetValue(mUI.cmbModel));
+        mDrawable = mWorkspace->MakeDrawableById(GetItemId(mUI.cmbModel));
 
     if (!mMaterialInst)
         mMaterialInst = std::make_unique<gfx::MaterialInstance>(mMaterial);
