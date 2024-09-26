@@ -28,6 +28,7 @@
 #  include <QStyleFactory>
 #include "warnpop.h"
 
+#include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/gui/utility.h"
 
@@ -69,6 +70,42 @@ std::vector<QString> ListAppFonts()
         ret.push_back(QString("app://fonts/" + info.fileName()));
     }
     return ret;
+}
+
+std::vector<ResourceListItem> ListParticles()
+{
+    std::vector<ResourceListItem> ret;
+
+    QStringList filters;
+    filters << "*.png";
+    const auto& appdir = QCoreApplication::applicationDirPath();
+    const auto& fontdir = app::JoinPath(appdir , "textures/particles");
+    QDir dir;
+    dir.setPath(fontdir);
+    dir.setNameFilters(filters);
+    const QStringList& files = dir.entryList();
+    for (const auto& file : files)
+    {
+        const QFileInfo info(file);
+
+        ResourceListItem item;
+        item.name = info.baseName();
+        item.id   = app::toString("app://textures/particles/%1", info.fileName());
+        item.icon = QIcon(dir.absoluteFilePath(file));
+        ret.push_back(item);
+    }
+    return ret;
+}
+
+void PopulateParticleList(QComboBox* cmb)
+{
+    QSignalBlocker s(cmb);
+    cmb->clear();
+
+    for (const auto& particle : ListParticles())
+    {
+        cmb->addItem(particle.icon, particle.name, particle.id);
+    }
 }
 
 void PopulateFontNames(QComboBox* cmb)

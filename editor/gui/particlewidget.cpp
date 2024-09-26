@@ -44,6 +44,7 @@
 #include "editor/gui/particlewidget.h"
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/tool.h"
+#include "editor/gui/translation.h"
 
 namespace gui
 {
@@ -250,6 +251,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.alpha->SetScale(1.0f);
     mUI.alpha->SetExponent(1.0f);
 
+    PopulateFromEnum<gfx::MaterialClass::SurfaceType>(mUI.cmbSurface);
+    PopulateFromEnum<gfx::MaterialClass::ParticleAction>(mUI.cmbEffect);
     PopulateFromEnum<gfx::ParticleEngineClass::CoordinateSpace>(mUI.space);
     PopulateFromEnum<gfx::ParticleEngineClass::Motion>(mUI.motion);
     PopulateFromEnum<gfx::ParticleEngineClass::BoundaryPolicy>(mUI.boundary);
@@ -258,13 +261,15 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::ParticleEngineClass::Placement>(mUI.placement);
     PopulateFromEnum<gfx::ParticleEngineClass::Direction>(mUI.direction);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
+    PopulateParticleList(mUI.cmbParticle);
+
     SetList(mUI.materials, workspace->ListAllMaterials());
     SetValue(mUI.name, QString("My Particle System"));
     SetValue(mUI.ID, mClass->GetId());
     SetValue(mUI.scaleX, 500.0f);
     SetValue(mUI.scaleY, 500.0f);
     SetValue(mUI.rotation, 0.0f);
-    SetValue(mUI.materials, ListItemId(QString("_White")));
+    SetValue(mUI.materials, ListItemId("_White"));
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.zoom, 1.0f);
     SetEnabled(mUI.actionPause, false);
@@ -288,8 +293,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     connect(mUI.pointsize, &gui::RangeWidget::RangeChanged, this, &ParticleEditorWidget::PointsizeChanged);
     connect(mUI.alpha,     &gui::RangeWidget::RangeChanged, this, &ParticleEditorWidget::AlphaChanged);
     setWindowTitle("My Particle System");
-    mOriginalHash = mClass->GetHash();
 
+    mOriginalHash = GetHash();
 }
 
 ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -299,7 +304,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     const auto* klass  = resource.GetContent<gfx::ParticleEngineClass>();
     const auto& params = klass->GetParams();
     mClass = std::make_shared<gfx::ParticleEngineClass>(*klass);
-    mOriginalHash = mClass->GetHash();
+
     DEBUG("Editing particle system: '%1'", name);
 
     SetValue(mUI.name, name);
@@ -324,19 +329,27 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetUserProperty(resource, "show_emitter", mUI.chkShowEmitter);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    GetUserProperty(resource, "material_group", mUI.materialGroup);
     GetUserProperty(resource, "emission_group", mUI.particleEmissionGroup);
     GetUserProperty(resource, "simulation_space_group", mUI.simulationSpaceGroup);
     GetUserProperty(resource, "local_emitter_group", mUI.localEmitterGroup);
     GetUserProperty(resource, "viz_group", mUI.vizGroup);
 
-    if (mWorkspace->IsValidMaterial(material))
+    if (FindMaterialClass(""))
     {
-        SetValue(mUI.materials, ListItemId(material));
+        SetValue(mUI.materials, ListItemId(mMaterialClass->GetId()));
     }
     else
     {
-        WARN("Material '%1' is no longer available.", material);
-        SetValue(mUI.materials, QString("White"));
+        if (mWorkspace->IsValidMaterial(material))
+        {
+            SetValue(mUI.materials, ListItemId(material));
+        }
+        else
+        {
+            WARN("Material '%1' is no longer available.", material);
+            SetValue(mUI.materials, ListItemId("_White"));
+        }
     }
     MinMax();
     ShowParams();
@@ -345,6 +358,8 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     on_direction_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
     on_when_currentIndexChanged(0);
+
+    mOriginalHash = GetHash();
 }
 
 ParticleEditorWidget::~ParticleEditorWidget()
@@ -433,10 +448,18 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Particle", mUI.zoom);
     settings.SaveWidget("Particle", mUI.widget);
     settings.SaveWidget("Particle", mUI.mainSplitter);
+    settings.SaveWidget("Particle", mUI.materialGroup);
     settings.SaveWidget("Particle", mUI.particleEmissionGroup);
     settings.SaveWidget("Particle", mUI.simulationSpaceGroup);
     settings.SaveWidget("Particle", mUI.localEmitterGroup);
     settings.SaveWidget("Particle", mUI.vizGroup);
+
+    if (mMaterialClass)
+    {
+        data::JsonObject json;
+        mMaterialClass->IntoJson(json);
+        settings.SetValue("Particle", "material-class", json);
+    }
     return true;
 }
 
@@ -465,6 +488,7 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Particle", mUI.zoom);
     settings.LoadWidget("Particle", mUI.widget);
     settings.LoadWidget("Particle", mUI.mainSplitter);
+    settings.LoadWidget("Particle", mUI.materialGroup);
     settings.LoadWidget("Particle", mUI.particleEmissionGroup);
     settings.LoadWidget("Particle", mUI.simulationSpaceGroup);
     settings.LoadWidget("Particle", mUI.localEmitterGroup);
@@ -477,13 +501,39 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     SetValue(mUI.ID, mClass->GetId());
     SetValue(mUI.materials, ListItemId(material));
 
-    ShowParams();
+    auto RestoreMaterial = [this, &settings]() {
+        data::JsonObject json;
+        if (!settings.GetValue("Particle", "material-class", &json))
+            return;
+
+        mMaterialClass = gfx::MaterialClass::ClassFromJson(json);
+        if (!mMaterialClass)
+        {
+            WARN("Failed to restore material class state.");
+            SetValue(mUI.materials, ListItemId("_White"));
+        }
+
+        if (mWorkspace->IsValidMaterial(mMaterialClass->GetId()))
+        {
+            SetValue(mUI.materials, ListItemId(mMaterialClass->GetId()));
+        }
+        else
+        {
+            SetPlaceholderText(mUI.materials, mMaterialClass->GetName());
+        }
+        DEBUG("Restored particle engine material state.");
+    };
+
+    RestoreMaterial();
+
     MinMax();
+    ShowParams();
     on_motion_currentIndexChanged(0);
     on_space_currentIndexChanged(0);
     on_direction_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
     on_when_currentIndexChanged(0);
+
     return true;
 }
 
@@ -590,7 +640,7 @@ void ParticleEditorWidget::Save()
 
 bool ParticleEditorWidget::HasUnsavedChanges() const
 {
-    if (mOriginalHash != mClass->GetHash())
+    if (mOriginalHash != GetHash())
         return true;
     return false;
 }
@@ -623,6 +673,15 @@ void ParticleEditorWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.name))
         return;
 
+    if (mMaterialClass)
+    {
+        app::MaterialResource resource(mMaterialClass, (QString)GetValue(mUI.name) + " Particle");
+        resource.SetProperty("particle-engine-class-id", (QString)GetValue(mUI.ID));
+        mWorkspace->SaveResource(resource);
+
+        SetValue(mUI.materials, ListItemId(mMaterialClass->GetId()));
+    }
+
     app::ParticleSystemResource particle_resource(*mClass, GetValue(mUI.name));
     SetProperty(particle_resource, "material", (QString)GetItemId(mUI.materials));
     SetProperty(particle_resource, "transform_xpos", mUI.translateX);
@@ -642,13 +701,14 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetUserProperty(particle_resource, "show_emitter", mUI.chkShowEmitter);
     SetUserProperty(particle_resource, "widget", mUI.widget);
     SetUserProperty(particle_resource, "main_splitter", mUI.mainSplitter);
+    SetUserProperty(particle_resource, "material_group", mUI.materialGroup);
     SetUserProperty(particle_resource, "emission_group", mUI.particleEmissionGroup);
     SetUserProperty(particle_resource, "simulation_space_group", mUI.simulationSpaceGroup);
     SetUserProperty(particle_resource, "local_emitter_group", mUI.localEmitterGroup);
     SetUserProperty(particle_resource, "viz_group", mUI.vizGroup);
-
     mWorkspace->SaveResource(particle_resource);
-    mOriginalHash = mClass->GetHash();
+
+    mOriginalHash = GetHash();
 }
 
 void ParticleEditorWidget::on_actionEmit_triggered()
@@ -806,6 +866,53 @@ void ParticleEditorWidget::ShowParams()
     else SetValue(mUI.maxTime, params.max_time);
 
     SetValue(mUI.delay, params.delay);
+
+    SetEnabled(mUI.cmbSurface, false);
+    SetEnabled(mUI.cmbParticle, false);
+    SetEnabled(mUI.baseColor, false);
+    SetValue(mUI.cmbSurface, -1);
+    SetValue(mUI.cmbParticle, -1);
+    SetValue(mUI.cmbEffect, -1);
+    SetValue(mUI.baseColor, gfx::Color::White);
+    SetImage(mUI.preview, QPixmap(":texture.png"));
+
+    if (!mMaterialClass)
+        return;
+
+    // do a breakdown here, but only if the contents are as
+    // we might expect, after all this is just a normal material
+    // so the user can change this shit to whatever they want!
+    if (mMaterialClass->GetNumTextureMaps() != 1)
+        return;
+    if (mMaterialClass->GetType() != gfx::MaterialClass::Type::Texture)
+        return;
+
+    const auto& texture_map = mMaterialClass->GetTextureMap(0);
+    if (texture_map->GetNumTextures() != 1)
+        return;
+
+    const auto* texture_src = texture_map->GetTextureSource(0);
+    if (texture_src->GetSourceType() != gfx::TextureSource::Source::Filesystem)
+        return;
+    const auto* file_texture_src = dynamic_cast<const gfx::detail::TextureFileSource*>(texture_src);
+
+    SetValue(mUI.cmbSurface, mMaterialClass->GetSurfaceType());
+    SetValue(mUI.cmbEffect, mMaterialClass->GetParticleAction());
+    SetValue(mUI.baseColor, mMaterialClass->GetBaseColor());
+    SetValue(mUI.cmbParticle, ListItemId(file_texture_src->GetFilename()));
+    if (const auto bitmap = texture_src->GetData())
+    {
+        // hah, of course this is broken when loading the widget
+        // effin Qt bugs again...
+        QTimer::singleShot(0, this, [this, bitmap]() {
+            SetImage(mUI.preview, *bitmap);
+        });
+    }
+
+    SetEnabled(mUI.cmbSurface, true);
+    SetEnabled(mUI.cmbParticle, true);
+    SetEnabled(mUI.cmbEffect, true);
+    SetEnabled(mUI.baseColor, true);
 }
 
 void ParticleEditorWidget::MinMax()
@@ -866,7 +973,6 @@ void ParticleEditorWidget::on_actionPlay_triggered()
 void ParticleEditorWidget::on_actionStop_triggered()
 {
     mEngine.reset();
-    mMaterial.reset();
     SetEnabled(mUI.actionStop, false);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionPlay, true);
@@ -908,7 +1014,139 @@ void ParticleEditorWidget::on_btnSelectMaterial_clicked()
     DlgMaterial dlg(this, mWorkspace, material);
     if (dlg.exec() == QDialog::Rejected)
         return;
+
     SetValue(mUI.materials, ListItemId(dlg.GetSelectedMaterialId()));
+
+    std::string id = GetItemId(mUI.materials);
+    if (mMaterialClass && mMaterialClass->GetId() == id)
+        return;
+
+    mMaterialClass.reset();
+    mMaterial.reset();
+
+    FindMaterialClass(id);
+
+    ShowParams();
+}
+
+void ParticleEditorWidget::on_btnCreateMaterial_clicked()
+{
+    if (!MustHaveInput(mUI.name))
+        return;
+
+    const QString name = GetValue(mUI.name);
+    const QString id   = GetValue(mUI.ID);
+
+    std::string materialId = base::RandomString(10);
+
+    // if we already have a previous material created for this
+    // particle engine then find it and re-use the ID
+    // so that when saved the previous material is overwritten.
+    const auto& materials = mWorkspace->ListUserDefinedMaterials();
+    for (const auto& material : materials)
+    {
+        std::string particleId;
+        if (material.resource->GetProperty("particle-engine-class-id", &particleId))
+        {
+            materialId = material.resource->GetIdUtf8();
+            break;
+        }
+    }
+
+    auto texture = std::make_unique<gfx::detail::TextureFileSource>();
+    texture->SetColorSpace(gfx::TextureSource::ColorSpace::sRGB);
+    texture->SetFileName("app://textures/particles/circle_02.png");
+    texture->SetName("Texture");
+
+    auto map = std::make_unique<gfx::TextureMap>(base::RandomString(10));
+    map->SetName("Particle Alpha Texture");
+    map->SetNumTextures(1);
+    map->SetTextureSource(0, std::move(texture));
+
+    mMaterialClass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture, materialId);
+    mMaterialClass->SetSurfaceType(GetValue(mUI.cmbSurface));
+    mMaterialClass->SetBaseColor(GetValue(mUI.baseColor));
+    mMaterialClass->SetParticleAction(GetValue(mUI.cmbEffect));
+    mMaterialClass->SetNumTextureMaps(1);
+    mMaterialClass->SetActiveTextureMap(map->GetId());
+    mMaterialClass->SetTextureMap(0, std::move(map));
+    mMaterialClass->SetName((std::string)GetValue(mUI.name) + std::string(" Particle"));
+
+    //app::MaterialResource resource(material, name);
+    //resource.SetProperty("particle-engine-class-id", id);
+
+    // save resource will update the list in the terrible callback
+    // that happens from the workspace back to us.
+    //mWorkspace->SaveResource(resource);
+
+    // Now the material we just created should be in our
+    // material list so select it.
+    //SetValue(mUI.materials, ListItemId(material->GetId()));
+    SetValue(mUI.materials, -1);
+    SetPlaceholderText(mUI.materials, mMaterialClass->GetName());
+
+    //SelectMaterial();
+    ShowParams();
+}
+
+void ParticleEditorWidget::on_materials_currentIndexChanged(int)
+{
+    std::string id = GetItemId(mUI.materials);
+    if (mMaterialClass && mMaterialClass->GetId() == id)
+        return;
+
+    mMaterialClass.reset();
+    mMaterial.reset();
+
+    FindMaterialClass(id);
+
+    ShowParams();
+}
+
+void ParticleEditorWidget::on_cmbSurface_currentIndexChanged(int)
+{
+    if (!mMaterialClass)
+        return;
+
+    mMaterialClass->SetSurfaceType(GetValue(mUI.cmbSurface));
+}
+void ParticleEditorWidget::on_cmbParticle_currentIndexChanged(int)
+{
+    if (!mMaterialClass)
+        return;
+
+    auto* texture_map = mMaterialClass->GetTextureMap(0);
+    if (texture_map->GetNumTextures() != 1)
+        return;
+
+    auto* texture_src = texture_map->GetTextureSource(0);
+    if (texture_src->GetSourceType() != gfx::TextureSource::Source::Filesystem)
+        return;
+    auto* file_texture_src = dynamic_cast<gfx::detail::TextureFileSource*>(texture_src);
+
+    // this is an URI
+    file_texture_src->SetFileName(GetItemId(mUI.cmbParticle));
+
+    if (const auto bitmap = file_texture_src->GetData())
+    {
+        SetImage(mUI.preview, *bitmap);
+    }
+}
+
+void ParticleEditorWidget::on_cmbEffect_currentIndexChanged(int)
+{
+    if (!mMaterialClass)
+        return;
+
+    mMaterialClass->SetParticleAction(GetValue(mUI.cmbEffect));
+}
+
+void ParticleEditorWidget::on_baseColor_colorChanged(QColor)
+{
+    if (!mMaterialClass)
+        return;
+
+    mMaterialClass->SetBaseColor(GetValue(mUI.baseColor));
 }
 
 void ParticleEditorWidget::on_space_currentIndexChanged(int)
@@ -1276,12 +1514,8 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
 
     if (mEngine)
     {
-        const auto& id = (std::string)GetItemId(mUI.materials);
-        if (!mMaterial || (mMaterial->GetClassId() != id))
-        {
-            auto klass = mWorkspace->GetMaterialClassById(GetItemId(mUI.materials));
-            mMaterial = gfx::CreateMaterialInstance(klass);
-        }
+        CreateMaterial();
+
         painter.Draw(*mEngine, model, *mMaterial);
     }
 
@@ -1550,8 +1784,19 @@ void ParticleEditorWidget::ResourceUpdated(const app::Resource* resource)
 {
     if (resource->GetType() == app::Resource::Type::Material)
     {
-        if (mMaterial && mMaterial->GetClassId() == resource->GetIdUtf8())
+        SetList(mUI.materials, mWorkspace->ListAllMaterials());
+
+        if (mMaterialClass && mMaterialClass->GetId() == resource->GetIdUtf8())
+        {
+            mMaterialClass = resource->GetContent<gfx::MaterialClass>()->Copy();
             mMaterial.reset();
+            DEBUG("Particle editor material was changed!");
+            ShowParams();
+        }
+        else if (mMaterial && mMaterial->GetClassId() == resource->GetIdUtf8())
+        {
+            mMaterial.reset();
+        }
     }
 }
 
@@ -1560,12 +1805,70 @@ void ParticleEditorWidget::ResourceRemoved(const app::Resource* resource)
     if (resource->GetType() == app::Resource::Type::Material)
     {
         SetList(mUI.materials, mWorkspace->ListAllMaterials());
-        if (mMaterial && mMaterial->GetClassId() == resource->GetIdUtf8())
+
+        if (mMaterialClass && mMaterialClass->GetId() == resource->GetIdUtf8())
+        {
+            // nothing to do here, if we have our own material class.
+            // it was already saved, but then deleted, but ok, we still
+            // keep our reference and if there's no save then it's gone
+            // for ever.
+            DEBUG("Particle engine material was deleted.");
+        }
+        else if (mMaterial && mMaterial->GetClassId() == resource->GetIdUtf8())
         {
             mMaterial.reset();
             SetValue(mUI.materials, ListItemId(QString("_White")));
         }
     }
+}
+void ParticleEditorWidget::CreateMaterial()
+{
+    if (mMaterial)
+        return;
+
+    if (mMaterialClass)
+    {
+        mMaterial = gfx::CreateMaterialInstance(mMaterialClass);
+    }
+    else
+    {
+        const auto& klass = mWorkspace->FindMaterialClassById(GetItemId(mUI.materials));
+        mMaterial = gfx::CreateMaterialInstance(klass);
+    }
+}
+
+bool ParticleEditorWidget::FindMaterialClass(const std::string& id)
+{
+    const auto& materials = mWorkspace->ListUserDefinedMaterials();
+    for (const auto& material : materials)
+    {
+        if (!id.empty())
+        {
+            if (id != material.resource->GetIdUtf8())
+                continue;
+        }
+
+        std::string particleId;
+        if (!material.resource->GetProperty("particle-engine-class-id", &particleId))
+            continue;
+
+        if (particleId != mClass->GetId())
+            continue;
+
+        mMaterialClass = material.resource->GetContent<gfx::MaterialClass>()->Copy();
+        DEBUG("Found previous material assignment for particle engine.");
+        return true;
+    }
+    DEBUG("No material specific to this particle engine was found.");
+    return false;
+}
+
+size_t ParticleEditorWidget::GetHash() const
+{
+    size_t hash = mClass->GetHash();
+    if (mMaterialClass)
+        hash = base::hash_combine(hash, mMaterialClass->GetHash());
+    return hash;
 }
 
 } // namespace

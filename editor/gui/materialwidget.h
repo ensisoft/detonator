@@ -156,6 +156,7 @@ namespace gui
         void AddNewTextureMapFromBitmap();
         void UniformValueChanged(const Uniform* uniform);
         void ShaderFileChanged();
+        void ResourceUpdated(const app::Resource* resource);
 
     private:
         void CreateCustomShaderStub();
