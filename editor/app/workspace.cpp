@@ -896,6 +896,10 @@ std::unique_ptr<gfx::Drawable> Workspace::MakeDrawableByName(const AnyString& na
 {
     return gfx::CreateDrawableInstance(GetDrawableClassByName(name));
 }
+std::unique_ptr<gfx::Drawable> Workspace::MakeDrawableById(const AnyString& id) const
+{
+    return gfx::CreateDrawableInstance(GetDrawableClassById(id));
+}
 
 std::shared_ptr<const gfx::MaterialClass> Workspace::GetMaterialClassByName(const AnyString& name) const
 {

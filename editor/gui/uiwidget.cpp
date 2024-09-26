@@ -540,6 +540,8 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     LoadStyleQuiet("app://ui/style/default.json");
     LoadKeysQuiet("app://ui/keymap/default.json");
 
+    SetList(mUI.windowScriptFile, mState.workspace->ListUserDefinedScripts());
+
     PopulateUIStyles(mUI.windowStyleFile);
     PopulateUIKeyMaps(mUI.windowKeyMap);
     PopulateFromEnum<uik::ScrollArea::ScrollBarMode>(mUI.cmbScrollAreaVerticalScrollbarMode);

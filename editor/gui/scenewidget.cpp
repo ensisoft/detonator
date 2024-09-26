@@ -2248,10 +2248,10 @@ void SceneWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.nodeScaleX, 1.0f);
     SetValue(mUI.nodeScaleY, 1.0f);
     SetValue(mUI.nodeRotation, 0.0f);
-    SetValue(mUI.nodeEntity, "");
+    SetValue(mUI.nodeEntity, -1);
     SetValue(mUI.nodeLayer, 0);
-    SetList(mUI.nodeLink, QStringList());
-    SetValue(mUI.nodeLink, QString(""));
+    ClearList(mUI.nodeLink);
+    SetValue(mUI.nodeLink, -1);
 
     SetEnabled(mUI.nodeProperties, false);
     SetEnabled(mUI.nodeTransform, false);

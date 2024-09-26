@@ -190,6 +190,7 @@ namespace app
         // condition or what.
         std::unique_ptr<gfx::Material> MakeMaterialByName(const AnyString& name) const;
         std::unique_ptr<gfx::Drawable> MakeDrawableByName(const AnyString& name) const;
+        std::unique_ptr<gfx::Drawable> MakeDrawableById(const AnyString& id) const;
         std::shared_ptr<const gfx::MaterialClass> GetMaterialClassByName(const AnyString& name) const;
         std::shared_ptr<const gfx::MaterialClass> GetMaterialClassById(const AnyString& id) const;
         std::shared_ptr<const gfx::DrawableClass> GetDrawableClassByName(const AnyString& name) const;

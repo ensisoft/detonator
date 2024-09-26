@@ -511,14 +511,30 @@ inline void SetValue(QComboBox* combo, const QString& str)
     ASSERT(combo->property("__is_enum__").toBool() == false);
 
     QSignalBlocker s(combo);
-    const auto index = combo->findText(str);
-    combo->setCurrentIndex(index);
-    if (combo->isEditable())
+
+    const auto id_list = combo->property("__is_id_list__").toBool();
+    if (id_list)
     {
-        combo->setEditText(str);
-        combo->lineEdit()->setCursorPosition(0);
+        if (combo->isEditable())
+        {
+            combo->setEditText(str);
+            combo->lineEdit()->setCursorPosition(0);
+        }
+    }
+    else
+    {
+        //ASSERT(combo->count() == 0 ||
+        //       combo->property("__is_string_list__").toBool());
+        const auto index = combo->findText(str);
+        combo->setCurrentIndex(index);
+        if (index == -1 && combo->isEditable())
+        {
+            combo->setEditText(str);
+            combo->lineEdit()->setCursorPosition(0);
+        }
     }
 }
+
 
 template<typename T>
 void SetValue(QComboBox* combo, T value)
@@ -555,6 +571,7 @@ void SetValue(QComboBox* combo, T value)
 inline bool SetValue(QComboBox* combo, const ListItemId& id)
 {
     ASSERT(combo->property("__is_enum__").toBool() == false);
+    ASSERT(combo->property("__is_id_list__").toBool() == true);
 
     QSignalBlocker s(combo);
     combo->setCurrentIndex(-1);
@@ -567,11 +584,6 @@ inline bool SetValue(QComboBox* combo, const ListItemId& id)
         if (data.toString() == id.id)
         {
             combo->setCurrentIndex(i);
-            if (combo->isEditable())
-            {
-                combo->setEditText(combo->itemText(i));
-                combo->lineEdit()->setCursorPosition(0);
-            }
             return true;
         }
     }
@@ -777,6 +789,7 @@ void SetList(QComboBox* combo, const std::vector<Type>& list)
 {
     QSignalBlocker s(combo);
     QString current = combo->currentData(Qt::UserRole).toString();
+    combo->setProperty("__is_id_list__", true);
 
     combo->clear();
     for (const auto& item : list)
@@ -792,11 +805,6 @@ void SetList(QComboBox* combo, const std::vector<Type>& list)
         if (data.toString() == current)
         {
             combo->setCurrentIndex(i);
-            if (combo->isEditable())
-            {
-                combo->setEditText(combo->itemText(i));
-                combo->lineEdit()->setCursorPosition(0);
-            }
             return;
         }
     }
@@ -816,6 +824,7 @@ inline int GetIndex(QComboBox* combo)
 inline void SetList(QComboBox* combo, const QStringList& items)
 {
     QSignalBlocker s(combo);
+    combo->setProperty("__is_string_list__", true);
     combo->clear();
     combo->addItems(items);
 }
@@ -1363,7 +1372,16 @@ inline ActionValueGetter GetValue(const QAction* action)
 inline ComboBoxValueGetter GetValue(const QComboBox* cmb)
 { return ComboBoxValueGetter {cmb}; }
 inline ComboBoxItemIdGetter GetItemId(const QComboBox* cmb)
-{ return ComboBoxItemIdGetter { cmb }; }
+{
+    ASSERT(cmb->property("__is_enum__").toBool() == false);
+    ASSERT(cmb->property("__is_string_list__").toBool() == false);
+    if (cmb->count())
+    {
+        ASSERT(cmb->property("__is_id_list__").toBool());
+    }
+
+    return ComboBoxItemIdGetter { cmb };
+}
 inline ListWidgetItemIdGetter GetItemId(const QListWidget* list)
 { return ListWidgetItemIdGetter { GetSelectedItem(list) }; }
 inline ListWidgetItemIdGetter GetItemId(const QListWidgetItem* item)
@@ -1911,7 +1929,9 @@ QPixmap ToGrayscale(QPixmap pixmap);
 std::vector<QString> ListAppFonts();
 
 std::vector<ResourceListItem> ListParticles();
+std::vector<ResourceListItem> ListShaders();
 
+void PopulateShaderList(QComboBox* cmb);
 void PopulateParticleList(QComboBox* cmb);
 void PopulateFontNames(QComboBox* cmb);
 void PopulateFontSizes(QComboBox* cmb);

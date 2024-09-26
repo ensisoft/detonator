@@ -3822,8 +3822,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.nodeScaleX, 1.0f);
     SetValue(mUI.nodeScaleY, 1.0f);
     SetValue(mUI.nodeRotation, 0.0f);
-    SetValue(mUI.dsMaterial, QString(""));
-    SetValue(mUI.dsDrawable, QString(""));
+    SetValue(mUI.dsMaterial, -1);
+    SetValue(mUI.dsDrawable, -1);
     SetValue(mUI.dsLayer, 0);
     SetValue(mUI.dsRenderPass, -1);
     SetValue(mUI.dsRenderView, -1);
@@ -3849,7 +3849,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.rbIsEnabled, false);
     SetValue(mUI.rbCanSleep, false);
     SetValue(mUI.rbDiscardRotation, false);
-    SetValue(mUI.tiFontName, QString(""));
+    SetValue(mUI.tiFontName, -1);
     SetValue(mUI.tiFontSize, 16);
     SetValue(mUI.tiVAlign, -1);
     SetValue(mUI.tiHAlign, -1);
@@ -3866,9 +3866,9 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiBloom, false);
     SetValue(mUI.spnShape, -1);
     SetValue(mUI.spnEnabled, true);
-    SetValue(mUI.fxBody, QString(""));
+    SetValue(mUI.fxBody, -1);
     SetValue(mUI.fxShape, -1);
-    SetValue(mUI.fxPolygon, QString(""));
+    SetValue(mUI.fxPolygon, -1);
     SetValue(mUI.fxFriction, mUI.fxFriction->minimum());
     SetValue(mUI.fxBounciness, mUI.fxBounciness->minimum());
     SetValue(mUI.fxDensity, mUI.fxDensity->minimum());
