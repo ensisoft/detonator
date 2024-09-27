@@ -30,6 +30,9 @@ void unit_test_raw_source()
         const auto& ret = gfx::ShaderSource::FromRawSource(R"(
 #version 100
 
+#define PI 3.145
+#define MY_SHADER_FOO
+
 attribute vec2 aVec2;
 attribute vec3 aVec3;
 attribute vec4 aVec4;
@@ -56,6 +59,11 @@ void main() {
         )");
 
         TEST_REQUIRE(ret.GetVersion() == gfx::ShaderSource::Version::GLSL_100);
+
+        TEST_REQUIRE(ret.FindDataDeclaration("PI")->data_type == dt::PreprocessorString);
+        TEST_REQUIRE(ret.FindDataDeclaration("PI")->decl_type == ddt::PreprocessorDefine);
+        TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->data_type == dt::PreprocessorString);
+        TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->decl_type == ddt::PreprocessorDefine);
 
         TEST_REQUIRE(ret.FindDataDeclaration("aVec2")->data_type == dt::Vec2f);
         TEST_REQUIRE(ret.FindDataDeclaration("aVec2")->decl_type == ddt::Attribute);
@@ -95,6 +103,9 @@ void main() {
 )");
         const auto& sauce = ret.GetSource();
         TEST_REQUIRE(base::Contains(sauce, "#version 100"));
+        TEST_REQUIRE(base::Contains(sauce, "#define PI 3.145"));
+        TEST_REQUIRE(base::Contains(sauce, "#define MY_SHADER_FOO"));
+
         TEST_REQUIRE(base::Contains(sauce, "attribute vec2 aVec2;"));
         TEST_REQUIRE(base::Contains(sauce, "attribute vec3 aVec3;"));
         TEST_REQUIRE(base::Contains(sauce, "attribute vec4 aVec4;"));
