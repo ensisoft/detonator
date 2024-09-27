@@ -20,8 +20,6 @@
 
 #include "warnpush.h"
 #  include "ui_dlgfont.h"
-#  include <QElapsedTimer>
-#  include <QTimer>
 #  include <QDialog>
 #  include <QString>
 #  include <QColor>
@@ -68,8 +66,6 @@ namespace gui
     private:
         const app::Workspace* mWorkspace = nullptr;
         const DisplaySettings& mDisplay;
-        QTimer mTimer;
-        QElapsedTimer mElapsedTimer;
         unsigned mScrollOffsetRow = 0;
         unsigned mNumVisibleRows = 0;
         unsigned mBoxWidth = 0;

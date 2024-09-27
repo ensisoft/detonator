@@ -71,8 +71,6 @@ DlgFont::DlgFont(QWidget* parent, const app::Workspace* workspace, const app::An
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
     connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
-    // render on timer
-    connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::triggerPaint);
 
     mUI.widget->onPaintScene = std::bind(&DlgFont::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
@@ -85,9 +83,7 @@ DlgFont::DlgFont(QWidget* parent, const app::Workspace* workspace, const app::An
             const auto ys = height / (mBoxHeight + BoxMargin);
             SetValue(mUI.zoom, std::min(xs, ys));
         }
-
-        mTimer.setInterval(1000.0/60.0);
-        mTimer.start();
+        mUI.widget->StartPaintTimer();
     };
     mUI.widget->onKeyPress = std::bind(&DlgFont::KeyPress, this, std::placeholders::_1);
     mUI.widget->onMousePress = std::bind(&DlgFont::MousePress, this, std::placeholders::_1);
@@ -95,8 +91,6 @@ DlgFont::DlgFont(QWidget* parent, const app::Workspace* workspace, const app::An
     mUI.widget->onMouseDoubleClick = std::bind(&DlgFont::MouseDoubleClick, this, std::placeholders::_1);
 
     SetValue(mUI.zoom, 1.0f);
-
-    mElapsedTimer.start();
 }
 
 void DlgFont::on_btnAccept_clicked()
@@ -135,7 +129,6 @@ void DlgFont::on_filter_textChanged(const QString& text)
 
 void DlgFont::PaintScene(gfx::Painter& painter, double secs)
 {
-    const auto time_milliseconds = mElapsedTimer.elapsed();
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     const float zoom = GetValue(mUI.zoom);
@@ -175,7 +168,7 @@ void DlgFont::PaintScene(gfx::Painter& painter, double secs)
         text.SetBufferSize(box_width, box_height);
         text.SetText(std::move(text_and_style));
         gfx::TextMaterial material(std::move(text));
-        material.SetRuntime(time_milliseconds / 1000.0);
+        material.SetRuntime(mUI.widget->GetTime());
         material.SetPointSampling(true);
         material.SetColor(ToGfx(mDisplay.text_color));
 
