@@ -1027,6 +1027,12 @@ void MainWindow::on_mainTab_tabCloseRequested(int index)
     QTimer::singleShot(1000, this, &MainWindow::CleanGarbage);
 }
 
+void MainWindow::on_actionClearGraphicsCache_triggered()
+{
+    app::Workspace::ClearAppGraphicsCache();
+    NOTE("Cleared the editor graphics asset cache.");
+}
+
 void MainWindow::on_actionExit_triggered()
 {
     this->close();
@@ -1161,6 +1167,12 @@ void MainWindow::on_actionReloadShaders_triggered()
 {
     if (!mCurrentWidget)
         return;
+
+    if (Editor::DevEditor())
+    {
+        app::Workspace::ClearAppGraphicsCache();
+    }
+
     mCurrentWidget->ReloadShaders();
     INFO("'%1' shaders reloaded.", mCurrentWidget->windowTitle());
 }

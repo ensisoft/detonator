@@ -499,6 +499,17 @@ void MaterialWidget::on_actionRemoveTexture_triggered()
 
 void MaterialWidget::on_actionReloadShaders_triggered()
 {
+    if (Editor::DevEditor())
+    {
+        app::Workspace::ClearAppGraphicsCache();
+    }
+    else
+    {
+        const auto& uri = mMaterial->GetShaderUri();
+        if (base::StartsWith(uri, "app://"))
+            WARN("Editor's shaders will not reload without --editor-dev option.");
+    }
+
     QString selected_item;
     if (const auto* item = GetSelectedItem(mUI.textures))
         selected_item = GetItemId(item);
@@ -516,6 +527,26 @@ void MaterialWidget::on_actionReloadTextures_triggered()
     if (Editor::DevEditor())
     {
         app::Workspace::ClearAppGraphicsCache();
+    }
+    else
+    {
+        for (unsigned i=0; i<mMaterial->GetNumTextureMaps(); ++i)
+        {
+            const auto* map = mMaterial->GetTextureMap(i);
+            for (unsigned j=0; j<map->GetNumTextures(); ++j)
+            {
+                const auto* texture = map->GetTextureSource(j);
+                if (const auto* file = dynamic_cast<const gfx::detail::TextureFileSource*>(texture))
+                {
+                    const auto& uri = file->GetFilename();
+                    if (base::StartsWith(uri, "app://"))
+                    {
+                        WARN("Editor's textures will not reload without --editor-dev option.");
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     this->ReloadTextures();
