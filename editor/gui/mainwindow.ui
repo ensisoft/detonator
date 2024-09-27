@@ -1340,6 +1340,8 @@
     <addaction name="separator"/>
     <addaction name="actionSaveWorkspace"/>
     <addaction name="separator"/>
+    <addaction name="actionClearGraphicsCache"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
@@ -2538,6 +2540,14 @@
    </property>
    <property name="toolTip">
     <string>Import new image resource from file</string>
+   </property>
+  </action>
+  <action name="actionClearGraphicsCache">
+   <property name="text">
+    <string>Clear Graphics Cache</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear the graphics cache on editor's assets</string>
    </property>
   </action>
  </widget>

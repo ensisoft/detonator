@@ -95,6 +95,7 @@ namespace gui
         void on_menuEdit_aboutToShow();
         void on_mainTab_currentChanged(int index);
         void on_mainTab_tabCloseRequested(int index);
+        void on_actionClearGraphicsCache_triggered();
         void on_actionExit_triggered();
         void on_actionHelp_triggered();
         void on_actionAbout_triggered();
