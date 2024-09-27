@@ -316,7 +316,7 @@ std::string TranslateEnum(gfx::ParticleEngineClass::Motion motion)
 {
     using M = gfx::ParticleEngineClass::Motion;
     if (motion == M::Linear)
-        return "Kinematic Linear Motion";
+        return "Kinematic Motion";
     else if (motion == M::Projectile)
         return "Projectile Motion";
     else BUG("Missing translation");

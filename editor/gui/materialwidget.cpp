@@ -112,6 +112,9 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::TextureMap::Type>(mUI.textureMapType);
     PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
 
+    // leave this out for now. particle UI can take care
+    // PopulateShaderList(mUI.shaderFile);
+
     SetList(mUI.cmbModel, workspace->ListPrimitiveDrawables());
     SetValue(mUI.cmbModel, ListItemId("_rect"));
     SetValue(mUI.materialID, mMaterial->GetId());
@@ -834,6 +837,22 @@ void MaterialWidget::on_surfaceType_currentIndexChanged(int)
     SetMaterialProperties();
     ShowMaterialProperties();
 }
+void MaterialWidget::on_shaderFile_currentIndexChanged(int)
+{
+    const std::string uri = GetItemId(mUI.shaderFile);
+
+    // this changes the type to custom shader.
+    SetValue(mUI.materialType, gfx::MaterialClass::Type::Custom);
+    on_materialType_currentIndexChanged(0);
+
+    // use the URI from the shader list.
+    mMaterial->SetShaderUri(uri);
+
+    ApplyShaderDescription();
+    ReloadShaders();
+    ShowMaterialProperties();
+}
+
 void MaterialWidget::on_tileWidth_valueChanged(int)
 {
     SetMaterialProperties();
@@ -1975,6 +1994,8 @@ void MaterialWidget::ShowMaterialProperties()
         const auto& file = mWorkspace->MapFileToFilesystem(uri);
         // ignores duplicates
         mFileWatcher.addPath(file);
+        if (auto* edit = mUI.shaderFile->lineEdit())
+            edit->setReadOnly(true);
     }
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
