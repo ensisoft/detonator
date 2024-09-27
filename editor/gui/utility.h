@@ -1931,7 +1931,7 @@ std::vector<QString> ListAppFonts();
 std::vector<ResourceListItem> ListParticles();
 std::vector<ResourceListItem> ListShaders();
 
-void PopulateShaderList(QComboBox* cmb);
+void PopulateShaderList(QComboBox* cmb, const QString& filter);
 void PopulateParticleList(QComboBox* cmb);
 void PopulateFontNames(QComboBox* cmb);
 void PopulateFontSizes(QComboBox* cmb);

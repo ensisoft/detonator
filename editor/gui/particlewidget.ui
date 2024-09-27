@@ -329,15 +329,8 @@
               <layout class="QVBoxLayout" name="verticalLayout_7">
                <item>
                 <layout class="QGridLayout" name="gridLayout_6">
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_13">
-                   <property name="text">
-                    <string>Particle</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1" colspan="2">
-                  <widget class="color_widgets::ColorSelector" name="baseColor">
+                 <item row="3" column="1" colspan="2">
+                  <widget class="color_widgets::ColorSelector" name="startColor">
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -347,12 +340,36 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
+                   <property name="hascolor" stdset="0">
+                    <bool>false</bool>
+                   </property>
                   </widget>
                  </item>
-                 <item row="4" column="0">
+                 <item row="6" column="0">
+                  <widget class="QLabel" name="label_34">
+                   <property name="text">
+                    <string>Shader</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_13">
+                   <property name="text">
+                    <string>Particle</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
                   <widget class="QLabel" name="label_18">
                    <property name="text">
-                    <string>Base color</string>
+                    <string>Start color</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="0">
+                  <widget class="QLabel" name="label_41">
+                   <property name="text">
+                    <string>End color</string>
                    </property>
                   </widget>
                  </item>
@@ -380,7 +397,7 @@
                       </sizepolicy>
                      </property>
                      <property name="editable">
-                      <bool>false</bool>
+                      <bool>true</bool>
                      </property>
                      <property name="placeholderText">
                       <string/>
@@ -420,13 +437,29 @@
                    </item>
                   </layout>
                  </item>
-                 <item row="1" column="3" rowspan="4">
+                 <item row="1" column="3" rowspan="3">
                   <widget class="QLabel" name="preview">
                    <property name="text">
                     <string/>
                    </property>
                    <property name="pixmap">
                     <pixmap resource="../resource/resource.qrc">:/texture.png</pixmap>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="5" column="1" colspan="2">
+                  <widget class="color_widgets::ColorSelector" name="endColor">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>30</height>
+                    </size>
+                   </property>
+                   <property name="focusPolicy">
+                    <enum>Qt::TabFocus</enum>
+                   </property>
+                   <property name="hascolor" stdset="0">
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
@@ -443,15 +476,12 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_33">
-                   <property name="text">
-                    <string>Effect</string>
+                 <item row="6" column="1" colspan="3">
+                  <widget class="QComboBox" name="cmbShader">
+                   <property name="placeholderText">
+                    <string/>
                    </property>
                   </widget>
-                 </item>
-                 <item row="3" column="1" colspan="2">
-                  <widget class="QComboBox" name="cmbEffect"/>
                  </item>
                 </layout>
                </item>
@@ -1959,10 +1989,12 @@
   <tabstop>materialGroup</tabstop>
   <tabstop>materials</tabstop>
   <tabstop>btnSelectMaterial</tabstop>
+  <tabstop>btnCreateMaterial</tabstop>
   <tabstop>cmbSurface</tabstop>
   <tabstop>cmbParticle</tabstop>
-  <tabstop>cmbEffect</tabstop>
-  <tabstop>baseColor</tabstop>
+  <tabstop>startColor</tabstop>
+  <tabstop>endColor</tabstop>
+  <tabstop>cmbShader</tabstop>
   <tabstop>particleEmissionGroup</tabstop>
   <tabstop>shape</tabstop>
   <tabstop>when</tabstop>
@@ -2025,7 +2057,6 @@
   <tabstop>distAlphaDerivative</tabstop>
   <tabstop>btnResetAlphaDerivativeDist</tabstop>
   <tabstop>daPerDist</tabstop>
-  <tabstop>btnCreateMaterial</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

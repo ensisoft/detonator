@@ -85,8 +85,9 @@ namespace gui
         void on_materials_currentIndexChanged(int);
         void on_cmbSurface_currentIndexChanged(int);
         void on_cmbParticle_currentIndexChanged(int);
-        void on_cmbEffect_currentIndexChanged(int);
-        void on_baseColor_colorChanged(QColor);
+        void on_cmbShader_currentIndexChanged(int);
+        void on_startColor_colorChanged(QColor);
+        void on_endColor_colorChanged(QColor);
         void on_space_currentIndexChanged(int);
         void on_motion_currentIndexChanged(int);
         void on_boundary_currentIndexChanged(int);

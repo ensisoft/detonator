@@ -121,7 +121,7 @@ std::vector<ResourceListItem> ListShaders()
     return ret;
 }
 
-void PopulateShaderList(QComboBox* cmb)
+void PopulateShaderList(QComboBox* cmb, const QString& filter)
 {
     QSignalBlocker s(cmb);
     cmb->clear();
@@ -129,6 +129,9 @@ void PopulateShaderList(QComboBox* cmb)
 
     for (const auto& shader : ListShaders())
     {
+        if (!filter.isEmpty() && !shader.id.Contains(filter))
+            continue;
+
         cmb->addItem(shader.name, shader.id);
     }
 }

@@ -252,7 +252,6 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.alpha->SetExponent(1.0f);
 
     PopulateFromEnum<gfx::MaterialClass::SurfaceType>(mUI.cmbSurface);
-    PopulateFromEnum<gfx::MaterialClass::ParticleAction>(mUI.cmbEffect);
     PopulateFromEnum<gfx::ParticleEngineClass::CoordinateSpace>(mUI.space);
     PopulateFromEnum<gfx::ParticleEngineClass::Motion>(mUI.motion);
     PopulateFromEnum<gfx::ParticleEngineClass::BoundaryPolicy>(mUI.boundary);
@@ -262,6 +261,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::ParticleEngineClass::Direction>(mUI.direction);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     PopulateParticleList(mUI.cmbParticle);
+    PopulateShaderList(mUI.cmbShader, "particle");
 
     SetList(mUI.materials, workspace->ListAllMaterials());
     SetValue(mUI.name, QString("My Particle System"));
@@ -295,6 +295,12 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     setWindowTitle("My Particle System");
 
     mOriginalHash = GetHash();
+
+    // hah, of course this is broken when loading the widget
+    // effin Qt bugs again...
+    QTimer::singleShot(0, this, [this]() {
+        SetImage(mUI.preview, QPixmap(":texture.png"));
+    });
 }
 
 ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -519,7 +525,7 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
         }
         else
         {
-            SetPlaceholderText(mUI.materials, mMaterialClass->GetName());
+            SetValue(mUI.materials, mMaterialClass->GetName());
         }
         DEBUG("Restored particle engine material state.");
     };
@@ -869,12 +875,19 @@ void ParticleEditorWidget::ShowParams()
 
     SetEnabled(mUI.cmbSurface, false);
     SetEnabled(mUI.cmbParticle, false);
-    SetEnabled(mUI.baseColor, false);
+    SetEnabled(mUI.startColor, false);
+    SetEnabled(mUI.endColor, false);
+    SetEnabled(mUI.cmbShader, false);
     SetValue(mUI.cmbSurface, -1);
     SetValue(mUI.cmbParticle, -1);
-    SetValue(mUI.cmbEffect, -1);
-    SetValue(mUI.baseColor, gfx::Color::White);
+    SetValue(mUI.cmbShader, -1);
+    mUI.startColor->clearColor();
+    mUI.endColor->clearColor();
+
     SetImage(mUI.preview, QPixmap(":texture.png"));
+
+    if (auto* edit = mUI.materials->lineEdit())
+        edit->setReadOnly(true);
 
     if (!mMaterialClass)
         return;
@@ -884,7 +897,7 @@ void ParticleEditorWidget::ShowParams()
     // so the user can change this shit to whatever they want!
     if (mMaterialClass->GetNumTextureMaps() != 1)
         return;
-    if (mMaterialClass->GetType() != gfx::MaterialClass::Type::Texture)
+    if (mMaterialClass->GetType() != gfx::MaterialClass::Type::Custom)
         return;
 
     const auto& texture_map = mMaterialClass->GetTextureMap(0);
@@ -897,9 +910,10 @@ void ParticleEditorWidget::ShowParams()
     const auto* file_texture_src = dynamic_cast<const gfx::detail::TextureFileSource*>(texture_src);
 
     SetValue(mUI.cmbSurface, mMaterialClass->GetSurfaceType());
-    SetValue(mUI.cmbEffect, mMaterialClass->GetParticleAction());
-    SetValue(mUI.baseColor, mMaterialClass->GetBaseColor());
+    SetValue(mUI.startColor, mMaterialClass->GetUniformValue("kStartColor", gfx::Color4f(gfx::Color::White)));
+    SetValue(mUI.endColor, mMaterialClass->GetUniformValue("kEndColor", gfx::Color4f(gfx::Color::White)));
     SetValue(mUI.cmbParticle, ListItemId(file_texture_src->GetFilename()));
+    SetValue(mUI.cmbShader, ListItemId(mMaterialClass->GetShaderUri()));
     if (const auto bitmap = texture_src->GetData())
     {
         // hah, of course this is broken when loading the widget
@@ -911,8 +925,9 @@ void ParticleEditorWidget::ShowParams()
 
     SetEnabled(mUI.cmbSurface, true);
     SetEnabled(mUI.cmbParticle, true);
-    SetEnabled(mUI.cmbEffect, true);
-    SetEnabled(mUI.baseColor, true);
+    SetEnabled(mUI.startColor, true);
+    SetEnabled(mUI.endColor, true);
+    SetEnabled(mUI.cmbShader, true);
 }
 
 void ParticleEditorWidget::MinMax()
@@ -1053,39 +1068,40 @@ void ParticleEditorWidget::on_btnCreateMaterial_clicked()
         }
     }
 
+    SetValue(mUI.cmbShader, 0);
+    SetValue(mUI.cmbSurface, gfx::MaterialClass::SurfaceType::Transparent);
+
     auto texture = std::make_unique<gfx::detail::TextureFileSource>();
     texture->SetColorSpace(gfx::TextureSource::ColorSpace::sRGB);
     texture->SetFileName("app://textures/particles/circle_02.png");
     texture->SetName("Texture");
 
     auto map = std::make_unique<gfx::TextureMap>(base::RandomString(10));
-    map->SetName("Particle Alpha Texture");
+    map->SetType(gfx::TextureMap::Type::Texture2D);
+    map->SetName("kMask");
+    map->SetSamplerName("kMask");
+    map->SetRectUniformName("kMaskRect");
     map->SetNumTextures(1);
     map->SetTextureSource(0, std::move(texture));
 
-    mMaterialClass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture, materialId);
+    mMaterialClass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Custom, materialId);
     mMaterialClass->SetSurfaceType(GetValue(mUI.cmbSurface));
-    mMaterialClass->SetBaseColor(GetValue(mUI.baseColor));
-    mMaterialClass->SetParticleAction(GetValue(mUI.cmbEffect));
     mMaterialClass->SetNumTextureMaps(1);
     mMaterialClass->SetActiveTextureMap(map->GetId());
     mMaterialClass->SetTextureMap(0, std::move(map));
     mMaterialClass->SetName((std::string)GetValue(mUI.name) + std::string(" Particle"));
+    mMaterialClass->SetShaderUri(GetItemId(mUI.cmbShader));
+    mMaterialClass->SetUniform("kStartColor", GetValue(mUI.startColor));
+    mMaterialClass->SetUniform("kEndColor", GetValue(mUI.endColor));
+    mMaterialClass->SetUniform("kRotationalVelocity", 0.0f);
+    mMaterialClass->SetUniform("kRotate", 0.0f);
+    mMaterialClass->SetUniform("kBaseRotation", 0.0f);
 
-    //app::MaterialResource resource(material, name);
-    //resource.SetProperty("particle-engine-class-id", id);
+    mMaterial.reset();
 
-    // save resource will update the list in the terrible callback
-    // that happens from the workspace back to us.
-    //mWorkspace->SaveResource(resource);
-
-    // Now the material we just created should be in our
-    // material list so select it.
-    //SetValue(mUI.materials, ListItemId(material->GetId()));
     SetValue(mUI.materials, -1);
-    SetPlaceholderText(mUI.materials, mMaterialClass->GetName());
+    SetValue(mUI.materials, mMaterialClass->GetName());
 
-    //SelectMaterial();
     ShowParams();
 }
 
@@ -1133,20 +1149,28 @@ void ParticleEditorWidget::on_cmbParticle_currentIndexChanged(int)
     }
 }
 
-void ParticleEditorWidget::on_cmbEffect_currentIndexChanged(int)
+void ParticleEditorWidget::on_cmbShader_currentIndexChanged(int)
 {
     if (!mMaterialClass)
         return;
 
-    mMaterialClass->SetParticleAction(GetValue(mUI.cmbEffect));
+    mMaterialClass->SetShaderUri(GetItemId(mUI.cmbShader));
 }
 
-void ParticleEditorWidget::on_baseColor_colorChanged(QColor)
+void ParticleEditorWidget::on_startColor_colorChanged(QColor)
 {
     if (!mMaterialClass)
         return;
 
-    mMaterialClass->SetBaseColor(GetValue(mUI.baseColor));
+    mMaterialClass->SetUniform("kStartColor", GetValue(mUI.startColor));
+}
+
+void ParticleEditorWidget::on_endColor_colorChanged(QColor)
+{
+    if (!mMaterialClass)
+        return;
+
+    mMaterialClass->SetUniform("kEndColor", GetValue(mUI.endColor));
 }
 
 void ParticleEditorWidget::on_space_currentIndexChanged(int)
@@ -1813,6 +1837,7 @@ void ParticleEditorWidget::ResourceRemoved(const app::Resource* resource)
             // keep our reference and if there's no save then it's gone
             // for ever.
             DEBUG("Particle engine material was deleted.");
+            SetValue(mUI.materials, mMaterialClass->GetName());
         }
         else if (mMaterial && mMaterial->GetClassId() == resource->GetIdUtf8())
         {
