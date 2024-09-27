@@ -4,7 +4,7 @@ Particles = {
     'Basic Flame + Sparks + Smoke',
     'Pixel Flame',
     'Basic Explosion',
-    'Energy Explosion',
+    'Energy Implosion',
     'Magic',
     'Dark Magic',
     'Basic Snow',

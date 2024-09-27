@@ -48,9 +48,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -181,9 +180,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -257,9 +255,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -332,9 +329,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -454,9 +450,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -530,9 +525,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -585,9 +579,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -707,9 +700,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -783,9 +775,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -920,9 +911,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -996,9 +986,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1071,9 +1060,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1193,9 +1181,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1247,6 +1234,7 @@
                   "StaticInstance": false
                 },
                 "id": "4YB78hLjoJ",
+                "joint_id": "",
                 "name": "Actuator_0",
                 "node": "lvqGGnspNa",
                 "starttime": 0.0,
@@ -1280,7 +1268,7 @@
       "id": "7D4iRC0ogE",
       "idle_track": "",
       "lifetime": 0.0,
-      "name": "Energy Explosion",
+      "name": "Energy Implosion",
       "nodes": [
         {
           "class": "A9mXREDDlQ",
@@ -1332,9 +1320,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1387,9 +1374,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1462,9 +1448,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1517,7 +1502,7 @@
         "node": null
       },
       "resource_id": "7D4iRC0ogE",
-      "resource_name": "Energy Explosion",
+      "resource_name": "Energy Implosion",
       "resource_ver": 1,
       "script_file": "",
       "tag": ""
@@ -1591,9 +1576,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1666,9 +1650,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1741,9 +1724,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1873,9 +1855,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1948,9 +1929,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2013,9 +1993,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2156,9 +2135,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2211,9 +2189,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2266,9 +2243,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2367,9 +2343,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2422,9 +2397,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2510,12 +2484,21 @@
             "material": "J8J3JM8rC8",
             "material_params": [
               {
+                "name": "kEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.774563193321228,
+                  "g": 0.5324482917785645,
+                  "r": 0.48238345980644226
+                }
+              },
+              {
                 "name": "kStartColor",
                 "value": {
                   "a": 1.0,
-                  "b": 0.7930113673210144,
-                  "g": 0.6070038676261902,
-                  "r": 0.5258869528770447
+                  "b": 0.8694896101951599,
+                  "g": 0.6494544744491577,
+                  "r": 0.5511406064033508
                 }
               }
             ],
@@ -2529,9 +2512,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2550,7 +2532,7 @@
             "y": 1.0
           },
           "size": {
-            "x": 299.2841491699219,
+            "x": 205.40625,
             "y": 19.44164276123047
           },
           "tag": ""
@@ -2595,9 +2577,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2715,9 +2696,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2811,9 +2791,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2928,9 +2907,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3003,9 +2981,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3127,9 +3104,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3223,9 +3199,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3284,9 +3259,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3392,9 +3366,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3458,9 +3431,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3554,9 +3526,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3609,9 +3580,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3675,9 +3645,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3837,9 +3806,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3929,9 +3897,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4130,9 +4097,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4185,9 +4151,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4301,9 +4266,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4376,9 +4340,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4483,9 +4446,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4558,9 +4520,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4654,9 +4615,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4759,10 +4719,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kBaseRotation",
-          "value": 0.20000000298023224
-        },
-        {
           "name": "kEndColor",
           "value": {
             "a": 1.0,
@@ -4787,10 +4743,6 @@
             "g": 1.0,
             "r": 1.0
           }
-        },
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
         }
       ]
     },
@@ -4854,10 +4806,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kBaseRotation",
-          "value": 0.3100000023841858
-        },
-        {
           "name": "kEndColor",
           "value": {
             "a": 0.0,
@@ -4882,10 +4830,6 @@
             "g": 0.7711299061775208,
             "r": 0.7024185657501221
           }
-        },
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
         }
       ]
     },
@@ -4949,10 +4893,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kBaseRotation",
-          "value": -0.30000001192092896
-        },
-        {
           "name": "kEndColor",
           "value": {
             "a": 1.0,
@@ -4977,10 +4917,6 @@
             "g": 0.7101243734359741,
             "r": 0.6085145473480225
           }
-        },
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
         }
       ]
     },
@@ -5044,10 +4980,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kBaseRotation",
-          "value": 0.0
-        },
-        {
           "name": "kEndColor",
           "value": {
             "a": 1.0,
@@ -5058,7 +4990,7 @@
         },
         {
           "name": "kRotate",
-          "value": 0.0
+          "value": 1.0
         },
         {
           "name": "kRotationalVelocity",
@@ -5072,10 +5004,6 @@
             "g": 0.0,
             "r": 0.7921263575553894
           }
-        },
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
         }
       ]
     },
@@ -5139,10 +5067,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kBaseRotation",
-          "value": 0.0
-        },
-        {
           "name": "kEndColor",
           "value": {
             "a": 1.0,
@@ -5167,10 +5091,6 @@
             "g": 1.0,
             "r": 1.0
           }
-        },
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
         }
       ]
     },
@@ -5234,10 +5154,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kBaseRotation",
-          "value": 0.0
-        },
-        {
           "name": "kEndColor",
           "value": {
             "a": 0.37254902720451355,
@@ -5262,10 +5178,6 @@
             "g": 0.5719996690750122,
             "r": 0.5306172370910645
           }
-        },
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
         }
       ]
     },
@@ -5329,10 +5241,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kBaseRotation",
-          "value": 0.0
-        },
-        {
           "name": "kEndColor",
           "value": {
             "a": 1.0,
@@ -5357,10 +5265,6 @@
             "g": 0.13333334028720856,
             "r": 0.13333334028720856
           }
-        },
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
         }
       ]
     },
@@ -5424,10 +5328,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kBaseRotation",
-          "value": 0.0
-        },
-        {
           "name": "kEndColor",
           "value": {
             "a": 1.0,
@@ -5452,10 +5352,6 @@
             "g": 0.13453879952430725,
             "r": 0.8406347632408142
           }
-        },
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
         }
       ]
     },
@@ -5519,10 +5415,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kBaseRotation",
-          "value": 0.0
-        },
-        {
           "name": "kEndColor",
           "value": {
             "a": 1.0,
@@ -5547,15 +5439,11 @@
             "g": 0.13453879952430725,
             "r": 0.8406347632408142
           }
-        },
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
         }
       ]
     },
     {
-      "active_texture_map": "",
+      "active_texture_map": "9GKYPtjwHZ",
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
@@ -5611,16 +5499,10 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture",
-      "uniforms": [
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
-        }
-      ]
+      "type": "Texture"
     },
     {
-      "active_texture_map": "",
+      "active_texture_map": "w5Ddxdddt7",
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
@@ -5679,15 +5561,11 @@
       "type": "Texture",
       "uniforms": [
         {
-          "name": "kTextureRotation",
-          "value": 0.0
-        },
-        {
           "name": "kTextureVelocity",
           "value": {
             "x": 0.0,
             "y": 0.0,
-            "z": 0.20000000298023224
+            "z": 0.20001472532749176
           }
         }
       ]
@@ -5752,10 +5630,6 @@
       "type": "Custom",
       "uniforms": [
         {
-          "name": "kBaseRotation",
-          "value": 0.0
-        },
-        {
           "name": "kEndColor",
           "value": {
             "a": 1.0,
@@ -5780,15 +5654,11 @@
             "g": 0.0,
             "r": 1.0
           }
-        },
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
         }
       ]
     },
     {
-      "active_texture_map": "",
+      "active_texture_map": "uDy3rMK6ZK",
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
@@ -5844,16 +5714,10 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture",
-      "uniforms": [
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
-        }
-      ]
+      "type": "Texture"
     },
     {
-      "active_texture_map": "",
+      "active_texture_map": "aTJ3n0lhty",
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
@@ -5909,13 +5773,7 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture",
-      "uniforms": [
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
-        }
-      ]
+      "type": "Texture"
     }
   ],
   "particles": [
