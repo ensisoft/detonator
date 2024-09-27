@@ -25,6 +25,7 @@
 #  include <QElapsedTimer>
 #  include <QPalette>
 #  include <QImage>
+#  include <QTimer>
 #include "warnpop.h"
 
 #include <memory>
@@ -101,6 +102,9 @@ namespace gui
                 mCustomGraphicsDevice->GetResourceStats(&stats);
             return stats;
         }
+
+        double GetTime() const noexcept
+        { return mTimeAccum; }
 
         void SetClearColor(const gfx::Color4f& color)
         { mClearColor = color; }
@@ -189,7 +193,10 @@ namespace gui
     private:
         quint64 mNumFrames = 0;
         float mCurrentFps  = 0.0f;
+        double mTimeStamp = 0.0;
+        double mTimeAccum = 0.0;
         CursorShape mCursorShape = CursorShape::ArrowCursor;
+
     private:
         std::shared_ptr<QOpenGLContext> mContext;
     private:
@@ -210,8 +217,8 @@ namespace gui
     public:
         using CursorShape = GfxWindow::CursorShape;
 
-        GfxWidget(QWidget* parent);
-       ~GfxWidget();
+        explicit GfxWidget(QWidget* parent);
+       ~GfxWidget() override;
 
         bool hasInputFocus() const
         { return mWindow->hasInputFocus(); }
@@ -219,6 +226,9 @@ namespace gui
         { return mWindow->haveVSYNC(); }
         float getCurrentFPS() const
         { return mWindow->getCurrentFPS(); }
+
+        double GetTime() const noexcept
+        { return mWindow->GetTime(); }
 
         gfx::Color4f GetCurrentClearColor() const
         { return mWindow->GetCurrentClearColor(); }
@@ -235,9 +245,14 @@ namespace gui
         void SetClearColor(const QColor& color);
 
         void SetClearColor(const gfx::Color4f& color)
-        { mWindow->SetClearColor(color); }
+        {
+            mWindow->SetClearColor(color);
+        }
+
         void ResetClearColor()
-        { mWindow->ResetClearColor(); }
+        {
+            mWindow->ResetClearColor();
+        }
         QImage TakeSreenshot() const
         { return mWindow->TakeScreenshot(); }
         // callback to invoke when paint must be done.
@@ -268,6 +283,11 @@ namespace gui
         void ShowColorDialog();
 
         void SetCursorShape(CursorShape shape);
+
+        // start low frequency paint timer. used with dialogs.
+        // Tries to run at 60 fps
+        void StartPaintTimer();
+
     public slots:
         void dispose();
         void reloadShaders();
@@ -289,6 +309,7 @@ namespace gui
     private:
         GfxWindow* mWindow = nullptr;
         QWidget* mContainer = nullptr;
+        QTimer mTimer;
     };
 
 } // namespace
