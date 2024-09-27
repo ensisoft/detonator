@@ -3108,9 +3108,9 @@ int main(int argc, char* argv[])
                 const gfx::Bitmap<gfx::Pixel_RGBA>& result = gfx_device->ReadColorBuffer(window.GetSurfaceWidth(),
                                                                                          window.GetSurfaceHeight());
 
-                const auto& resultfile = base::FormatString("Result_%1_%2_%3_.png", test->GetName(), i, sampling);
-                const auto& goldfile   = base::FormatString("Gold_%1_%2_%3_.png", test->GetName(), i, sampling);
-                const auto& deltafile  = base::FormatString("Delta_%1_%2_%3_.png", test->GetName(), i, sampling);
+                const auto& resultfile = base::FormatString("%1_%2_%3_Result.png", test->GetName(), i, sampling);
+                const auto& goldfile   = base::FormatString("%1_%2_%3_Gold.png", test->GetName(), i, sampling);
+                const auto& deltafile  = base::FormatString("%1_%2_%3_Delta.png", test->GetName(), i, sampling);
                 if (!base::FileExists(goldfile) || issue_gold)
                 {
                     gfx_device->EndFrame(true /*display*/);
