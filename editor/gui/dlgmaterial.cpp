@@ -55,21 +55,16 @@ DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace)
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
     connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
-    // render on timer
-    connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::triggerPaint);
 
     mUI.widget->onPaintScene = std::bind(&DlgMaterial::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onInitScene = [&](unsigned, unsigned) {
-        mTimer.setInterval(1000.0/60.0);
-        mTimer.start();
+        mUI.widget->StartPaintTimer();
     };
     mUI.widget->onKeyPress = std::bind(&DlgMaterial::KeyPress, this, std::placeholders::_1);
     mUI.widget->onMousePress = std::bind(&DlgMaterial::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseWheel = std::bind(&DlgMaterial::MouseWheel, this, std::placeholders::_1);
     mUI.widget->onMouseDoubleClick = std::bind(&DlgMaterial::MouseDoubleClick, this, std::placeholders::_1);
-
-    mElapsedTimer.start();
 
     QByteArray geometry;
     if (mWorkspace->GetUserProperty("dlg_material_geometry", &geometry))
@@ -150,9 +145,8 @@ void DlgMaterial::on_filter_textChanged(const QString& text)
     mSelectedMaterialId.clear();
 }
 
-void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
+void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
 {
-    const auto time_milliseconds = mElapsedTimer.elapsed();
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
@@ -214,7 +208,7 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
             continue;
 
         gfx::MaterialInstance material(klass);
-        material.SetRuntime(time_milliseconds / 1000.0);
+        material.SetRuntime(mUI.widget->GetTime());
         material.SetUniform("kTileIndex", (float)GetValue(mUI.tileIndex) + 1.0f);
 
         gfx::FillRect(painter, rect, material);
