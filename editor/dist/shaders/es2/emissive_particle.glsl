@@ -24,8 +24,6 @@ uniform float kRotationalVelocity;
 // Set to 1.0 for rotation and 0.0 for no rotation.
 uniform float kRotate;
 
-uniform float kBaseRotation;
-
 // Vertex input
 // ---------------------------------------------------
 // Vertex texture coordinates.
@@ -37,9 +35,13 @@ varying float vParticleAlpha;
 // Particle random value. [0.0, 1.0]
 varying float vParticleRandomValue;
 
+#define PI 3.1415926
+
 void FragmentShaderMain()
 {
-    float angle = kTime * kRotationalVelocity + kBaseRotation;
+    float base_rotation = vParticleRandomValue * PI * 2.0;
+    float time_rotation = kRotationalVelocity * (vParticleRandomValue-0.5) * kTime;
+    float angle =  base_rotation + time_rotation;
 
     // either read varying texture coords from the vertex shader
     // or use gl_PointCoord which when rendering GL_POINTS
@@ -52,10 +54,13 @@ void FragmentShaderMain()
         discard;
 
     // rotate texture coords.
-    coord -= vec2(0.5, 0.5);
-    coord = mat2(cos(angle), -sin(angle),
-                 sin(angle),  cos(angle)) * coord;
-    coord += vec2(0.5, 0.5);
+    if (kRotate >= 1.0)
+    {
+        coord -= vec2(0.5, 0.5);
+        coord  = mat2(cos(angle), -sin(angle),
+                      sin(angle), cos(angle)) * coord;
+        coord += vec2(0.5, 0.5);
+    }
 
     // apply texture rect transform to get the final coordinates
     // for sampling the texture. this transformation allows for

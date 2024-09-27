@@ -12,17 +12,12 @@
         },
         {
             "name": "kRotationalVelocity",
-            "desc": "Rotatation Velocity",
+            "desc": "Rotation Velocity",
             "type": "Float"
         },
         {
             "name": "kRotate",
             "desc": "Enable rotation",
-            "type": "Float"
-        },
-        {
-            "name": "kBaseRotation",
-            "desc": "Texture rotation",
             "type": "Float"
         }
     ],

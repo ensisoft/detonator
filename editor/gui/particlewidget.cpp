@@ -1095,7 +1095,6 @@ void ParticleEditorWidget::on_btnCreateMaterial_clicked()
     mMaterialClass->SetUniform("kEndColor", GetValue(mUI.endColor));
     mMaterialClass->SetUniform("kRotationalVelocity", 0.0f);
     mMaterialClass->SetUniform("kRotate", 0.0f);
-    mMaterialClass->SetUniform("kBaseRotation", 0.0f);
 
     mMaterial.reset();
 
