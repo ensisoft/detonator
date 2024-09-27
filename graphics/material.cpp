@@ -1077,6 +1077,13 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     if (source.IsEmpty())
         return source;
 
+    if (!source.HasDataDeclaration("PI", ShaderSource::ShaderDataDeclarationType::PreprocessorDefine))
+        source.AddPreprocessorDefinition("PI", float(3.1415926));
+
+    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_OPAQUE", static_cast<int>(SurfaceType::Opaque));
+    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_TRANSPARENT", static_cast<int>(SurfaceType::Transparent));
+    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_EMISSIVE", static_cast<int>(SurfaceType::Emissive));
+
     if (IsStatic())
     {
         // fold a set of known uniforms to constants in the shader

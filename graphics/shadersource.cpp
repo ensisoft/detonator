@@ -262,6 +262,11 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
             ss << "#define " << data.name << " " << ToConst(*ptr);
             ss << "\n";
         }
+        else if (const auto* ptr = std::get_if<std::string>(&value))
+        {
+            ss << "#define " << data.name << " " << *ptr;
+            ss << "\n";
+        }
         else BUG("Unsupported preprocessor definition type.");
     }
     ss << "\n";
@@ -430,6 +435,24 @@ ShaderSource ShaderSource::FromRawSource(std::string raw_source)
             else if (base::Contains(trimmed, "300 es"))
                 source.SetVersion(ShaderSource::Version::GLSL_300);
             else WARN("Unsupported GLSL version '%1'.", trimmed);
+        }
+        else if (base::StartsWith(trimmed, "#define"))
+        {
+            const auto& parts = base::SplitString(trimmed);
+            const auto& name = GetToken(parts, 1);
+            const auto& value = GetToken(parts, 2);
+            if (name.empty())
+            {
+                WARN("Failed to parse GLSL #define '%1'", trimmed);
+                glsl_code.append(trimmed);
+                continue;
+            }
+            ShaderDataDeclaration decl;
+            decl.decl_type      = ShaderDataDeclarationType::PreprocessorDefine;
+            decl.data_type      = ShaderDataType::PreprocessorString;
+            decl.name           = name;
+            decl.constant_value = value;
+            source.AddData(std::move(decl));
         }
         else if (base::StartsWith(trimmed, "precision"))
         {

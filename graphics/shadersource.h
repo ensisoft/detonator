@@ -48,7 +48,10 @@ namespace gfx
             Vec2i, Vec3i, Vec4i,
             Mat2f, Mat3f, Mat4f,
             Color4f,
-            Sampler2D
+            Sampler2D,
+            // todo: should refactor this away, using it here for convenience
+            // when dealing with preprocessor strings
+            PreprocessorString
         };
         using AttributeType = ShaderDataType;
         using UniformType   = ShaderDataType;
@@ -68,7 +71,7 @@ namespace gfx
                 Color4f,
                 glm::vec2, glm::vec3, glm::vec4,
                 glm::ivec2, glm::ivec3, glm::ivec4,
-                glm::mat2, glm::mat3, glm::mat4>;
+                glm::mat2, glm::mat3, glm::mat4, std::string>;
 
         enum class Type {
             NotSet, Vertex, Fragment
