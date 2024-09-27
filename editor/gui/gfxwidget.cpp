@@ -228,13 +228,20 @@ void GfxWindow::initializeGL()
 
 void GfxWindow::paintGL()
 {
-    if (!mInitDone)
+    if (!mInitDone || !mContext || !isExposed())
+    {
+        // avoid taking large jumps if the window was previous
+        // not exposed and then becomes exposed again.
+        mTimeStamp = 0.0;
         return;
+    }
 
-    if (!mContext)
-        return;
-    else if (!isExposed())
-        return;
+    if (mTimeStamp == 0.0)
+        mTimeStamp = base::GetTime();
+
+    const auto now = base::GetTime();
+    const auto dt = now - mTimeStamp;
+    mTimeStamp = now;
 
     ASSERT(mCustomGraphicsDevice);
     ASSERT(mCustomGraphicsPainter);
@@ -256,7 +263,7 @@ void GfxWindow::paintGL()
         mCustomGraphicsPainter->SetViewport(0, 0, surface_width, surface_height);
         mCustomGraphicsPainter->SetSurfaceSize(surface_width, surface_height);
         mCustomGraphicsPainter->ResetViewMatrix();
-        onPaintScene(*mCustomGraphicsPainter, 0.0);
+        onPaintScene(*mCustomGraphicsPainter, dt);
 
         // reset these for subsequent drawing (below) since the widget's paint function
         // might have changed these unexpectedly.
@@ -265,6 +272,8 @@ void GfxWindow::paintGL()
         mCustomGraphicsPainter->SetSurfaceSize(surface_width, surface_height);
         mCustomGraphicsPainter->ResetViewMatrix();
     }
+
+    mTimeAccum += dt;
 
     mNumFrames++;
     const auto elapsed = mClock.elapsed();
@@ -798,8 +807,13 @@ void GfxWidget::ShowColorDialog()
 void GfxWidget::SetCursorShape(CursorShape shape)
 {
     mWindow->SetCursorShape(shape);
+}
 
-
+void GfxWidget::StartPaintTimer()
+{
+    connect(&mTimer, &QTimer::timeout, this, &GfxWidget::triggerPaint);
+    mTimer.setInterval(1000.0 / 60.0);
+    mTimer.start();
 }
 
 void GfxWidget::TranslateZoomInOut(QWheelEvent* wheel)
