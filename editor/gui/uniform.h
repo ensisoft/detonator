@@ -67,6 +67,10 @@ namespace gui
         { return mName; }
         Type GetType() const
         { return mType;}
+
+        void ShowIntAsCombo();
+        void AddComboValue(const app::AnyString& str, int value);
+        void SetComboValue(int value);
     private:
         void HideEverything();
 
@@ -80,6 +84,7 @@ namespace gui
         void on_color_colorChanged(QColor);
         void on_string_editingFinished();
         void on_value_i_valueChanged(int);
+        void on_combo_i_currentIndexChanged(int);
     private:
         Ui::Uniform* mUI = nullptr;
     private:
