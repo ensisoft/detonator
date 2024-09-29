@@ -570,7 +570,10 @@ namespace app
             chunk->Write("resource_ver",  1);
 
             if constexpr (TypeValue == Resource::Type::Material)
+            {
+                chunk->Write("resource_ver", 2);
                 data.AppendChunk("materials", std::move(chunk));
+            }
             else if (TypeValue == Resource::Type::ParticleSystem)
                 data.AppendChunk("particles", std::move(chunk));
             else if (TypeValue == Resource::Type::Shape)
@@ -624,11 +627,11 @@ namespace app
         {
             if constexpr (TypeValue == Resource::Type::Material)
             {
-                unsigned next_version = 1;
-                unsigned saved_version = 0;
+                unsigned current_version = 2;
+                unsigned saved_version;
                 ASSERT(Resource::GetProperty("__version", &saved_version));
-                if (saved_version < next_version)
-                    detail::MigrateResource(*mContent, log, saved_version, next_version);
+                if (saved_version < current_version)
+                    detail::MigrateResource(*mContent, log, saved_version, current_version);
             }
         }
 

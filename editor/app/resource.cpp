@@ -888,6 +888,18 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         }
     }
 
+    // we're squashing the particle shaders into one in order
+    // to simplify the shader maintenance
+    if (old_version < 2)
+    {
+        std::string shader_uri = material.GetShaderUri();
+        if (shader_uri == "app://shaders/es2/emissive_particle.glsl")
+        {
+            material.SetShaderUri("app://shaders/es2/basic_particle.glsl");
+            log->Log(material, "Material", "Changed emissive particle to basic particle that does the same thing.");
+        }
+    }
+
     // the uniform values were refactored inside the material class
     // and they only exist now if they have been set explicitly.
     // we can clean away the uniforms that have *not* been set by the

@@ -6,6 +6,8 @@ uniform float kTime;
 // or  normal vertex coordinates from vertex shader.
 uniform float kRenderPoints;
 
+// Surface type enum
+uniform int kSurfaceType;
 
 // Custom uniforms
 // -------------------------------------------------
@@ -73,8 +75,23 @@ void FragmentShaderMain()
 
     vec4 color = mix(kStartColor, kEndColor, vParticleTime);
 
-    // blend with straight alpha and with transparent surface
-    fs_out.color.rgb = color.rgb;
-    fs_out.color.a   = (alpha * vParticleAlpha * color.a);
+    if (kSurfaceType == MATERIAL_SURFACE_TYPE_TRANSPARENT)
+    {
+        // blend with straight alpha and with transparent surface
+        // alpha is the particle transparency value
+        fs_out.color.rgb = color.rgb;
+        fs_out.color.a   = (alpha * vParticleAlpha * color.a);
+    }
+    else if (kSurfaceType == MATERIAL_SURFACE_TYPE_EMISSIVE)
+    {
+        // not blending transparently, alpha does not control
+        // transparency but modulates the intensity of the color
+        fs_out.color.rgb = color.rgb * alpha * vParticleAlpha;
+        fs_out.color.a = 1.0;
+    }
+    else
+    {
+        fs_out.color.rgb = color.rgb;
+    }
 }
 
