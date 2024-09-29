@@ -1453,6 +1453,7 @@ void unit_test_local_particles()
 
     struct ParticleVertex {
         gfx::Vec2 aPosition;
+        gfx::Vec2 aDirection;
         gfx::Vec4 aData;
     };
 
