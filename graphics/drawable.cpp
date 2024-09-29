@@ -102,6 +102,7 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device)
     source.AddVarying("vParticleRandomValue", gfx::ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleAlpha", gfx::ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAngle", gfx::ShaderSource::VaryingType::Float);
 
     source.AddSource(R"(
 void VertexShaderMain()
@@ -111,6 +112,7 @@ void VertexShaderMain()
     vParticleRandomValue = 0.0;
     vParticleAlpha       = 1.0;
     vParticleTime        = 0.0;
+    vParticleAngle       = 0.0;
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
 )");
@@ -132,6 +134,7 @@ gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device)
     source.AddVarying("vParticleRandomValue", gfx::ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleAlpha", gfx::ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAngle", gfx::ShaderSource::VaryingType::Float);
 
     source.AddSource(R"(
 void VertexShaderMain()
@@ -140,6 +143,7 @@ void VertexShaderMain()
     vParticleRandomValue = 0.0;
     vParticleAlpha       = 1.0;
     vParticleTime        = 0.0;
+    vParticleAngle       = 0.0;
     gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
 }
 )");
@@ -162,6 +166,7 @@ gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device)
     source.AddVarying("vParticleRandomValue", gfx::ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleAlpha", gfx::ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAngle", gfx::ShaderSource::VaryingType::Float);
 
     source.AddSource(R"(
 void VertexShaderMain()
@@ -170,6 +175,7 @@ void VertexShaderMain()
     vParticleRandomValue = 0.0;
     vParticleAlpha       = 1.0;
     vParticleTime        = 0.0;
+    vParticleAngle       = 0.0;
     gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
 }
 )");
@@ -2109,12 +2115,14 @@ ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device
     source.SetType(gfx::ShaderSource::Type::Vertex);
     source.AddAttribute("aPosition", ShaderSource::AttributeType::Vec2f);
     source.AddAttribute("aData", ShaderSource::AttributeType::Vec4f);
+    source.AddAttribute("aDirection", ShaderSource::AttributeType::Vec2f);
     source.AddUniform("kProjectionMatrix", ShaderSource::UniformType::Mat4f);
     source.AddUniform("kModelViewMatrix", ShaderSource::UniformType::Mat4f);
     source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
     source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleTime", ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAngle", ShaderSource::VaryingType::Float);
     // this shader doesn't actually write to vTexCoord because when
     // particle (GL_POINTS) rasterization is done the fragment shader
     // must use gl_PointCoord instead.
@@ -2123,6 +2131,16 @@ void VertexShaderMain()
 {
     vec4 vertex = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
     gl_PointSize = aData.x;
+
+    // angle of the direction vector relative to the x axis
+    float cosine = dot(vec2(1.0, 0.0), normalize(aDirection));
+
+    float angle = 0.0;
+    if (aDirection.y < 0.0)
+        angle = -acos(cosine);
+    else angle = acos(cosine);
+
+    vParticleAngle       = angle;
     vParticleRandomValue = aData.y;
     vParticleAlpha       = aData.z;
     vParticleTime        = aData.w;
@@ -2153,11 +2171,13 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
 
     struct ParticleVertex {
         Vec2 aPosition;
+        Vec2 aDirection;
         Vec4 aData;
     };
     static const VertexLayout layout(sizeof(ParticleVertex), {
-        {"aPosition", 0, 2, 0, offsetof(ParticleVertex, aPosition)},
-        {"aData",     0, 4, 0, offsetof(ParticleVertex, aData)}
+        {"aPosition",  0, 2, 0, offsetof(ParticleVertex, aPosition)},
+        {"aDirection", 0, 2, 0, offsetof(ParticleVertex, aDirection)},
+        {"aData",      0, 4, 0, offsetof(ParticleVertex, aData)}
     });
 
     std::vector<ParticleVertex> verts;
@@ -2171,6 +2191,7 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
         ParticleVertex v;
         v.aPosition.x = p.position.x / mParams->max_xpos;
         v.aPosition.y = p.position.y / mParams->max_ypos;
+        v.aDirection  = ToVec(p.direction);
         // copy the per particle data into the data vector for the fragment shader.
         v.aData.x = p.pointsize >= 0.0f ? p.pointsize * pixel_scaler : 0.0f;
         // abusing texcoord here to provide per particle random value.
