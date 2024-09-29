@@ -178,11 +178,12 @@ namespace gfx
             decl.comment   = std::move(comment);
             AddData(std::move(decl));
         }
-        void AddConstant(std::string name, ConstantType type, std::string comment = "")
+        void AddConstant(std::string name, ShaderDataDeclarationValue value, std::string comment = "")
         {
             ShaderDataDeclaration decl;
             decl.decl_type = ShaderDataDeclarationType::Constant;
-            decl.data_type = type;
+            decl.data_type = DataTypeFromValue(value);
+            decl.constant_value = value;
             decl.name      = std::move(name);
             decl.comment   = std::move(comment);
             AddData(std::move(decl));
@@ -235,6 +236,8 @@ namespace gfx
         bool IsCompatible(const ShaderSource& other) const noexcept;
 
         static ShaderSource FromRawSource(std::string source);
+
+        static ShaderDataType DataTypeFromValue(ShaderDataDeclarationValue value) noexcept;
 
     private:
         unsigned mShaderUniformAPIVersion = 1;

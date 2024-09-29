@@ -1104,6 +1104,7 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
         source.FoldUniform("kTileSize", GetTileSize());
         source.FoldUniform("kTileOffset", GetTileOffset());
         source.FoldUniform("kTilePadding", GetTilePadding());
+        source.FoldUniform("kSurfaceType", (int)mSurfaceType);
     }
     return source;
 }
@@ -1120,6 +1121,8 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     // either the single shader implements the different render pass
     // functionality or then there are different shaders for different passes
     // program.SetUniform("kRenderPass", (int)state.renderpass);
+
+    program.SetUniform("kSurfaceType", (int)mSurfaceType);
 
     if (mType == Type::Color)
     {
@@ -1711,6 +1714,8 @@ ShaderSource MaterialClass::CreateShaderStub(Type type)
         source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
     if (!source.HasUniform("kParticleEffect"))
         source.AddUniform("kParticleEffect", ShaderSource::UniformType::Int);
+    if (!source.HasUniform("kSurfaceType"))
+        source.AddUniform("kSurfaceType", ShaderSource::UniformType::Int);
     //if (!source.HasUniform("kRenderPass"))
     //    source.AddUniform("kRenderPass", ShaderSource::UniformType::Int);
 
@@ -1761,6 +1766,7 @@ ShaderSource MaterialClass::CreateShaderStub(Type type)
                                       "that aren't really transparent but just cutouts. Cutoff value is the value\n"
                                       "to test against in order to discard the fragments.");
     source.SetComment("kParticleEffect", "Particle effect enumerator value.");
+    source.SetComment("kSurfaceType", "Material surface type enumerator value.");
 
     source.SetComment("vTileData", "Fragment's tile data coming from the vertex shader.\n"
                                    ".x = the material tile index. the product of 'row * cols_per_row + col'\n"

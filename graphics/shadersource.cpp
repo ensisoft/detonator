@@ -404,6 +404,40 @@ bool ShaderSource::IsCompatible(const ShaderSource& other) const noexcept
 }
 
 // static
+ShaderSource::ShaderDataType ShaderSource::DataTypeFromValue(gfx::ShaderSource::ShaderDataDeclarationValue value) noexcept
+{
+    if (std::holds_alternative<int>(value))
+        return ShaderDataType::Int;
+    else if (std::holds_alternative<float>(value))
+        return ShaderDataType::Float;
+    else if (std::holds_alternative<Color4f>(value))
+        return ShaderDataType::Color4f;
+    else if (std::holds_alternative<glm::vec2>(value))
+        return ShaderDataType::Vec2f;
+    else if (std::holds_alternative<glm::vec3>(value))
+        return ShaderDataType::Vec3f;
+    else if (std::holds_alternative<glm::vec4>(value))
+        return ShaderDataType::Vec4f;
+    else if (std::holds_alternative<glm::ivec2>(value))
+        return ShaderDataType::Vec2i;
+    else if (std::holds_alternative<glm::ivec3>(value))
+        return ShaderDataType::Vec3i;
+    else if (std::holds_alternative<glm::ivec4>(value))
+        return ShaderDataType::Vec4i;
+    else if (std::holds_alternative<glm::mat2>(value))
+        return ShaderDataType::Mat2f;
+    else if (std::holds_alternative<glm::mat3>(value))
+        return ShaderDataType::Mat3f;
+    else if (std::holds_alternative<glm::mat4>(value))
+        return ShaderDataType::Mat4f;
+    else if (std::holds_alternative<std::string>(value))
+        BUG("String is not a valid GLSL shader constant value type.");
+    else
+        BUG("Missing shader source type.");
+    return ShaderDataType::Int;
+}
+
+// static
 ShaderSource ShaderSource::FromRawSource(std::string raw_source)
 {
     // Go over the raw GLSL source and try to extract higher
@@ -483,6 +517,14 @@ ShaderSource ShaderSource::FromRawSource(std::string raw_source)
             decl.decl_type = decl_type.value();
             decl.name      = name.value();
             source.AddData(std::move(decl));
+        }
+        else if (base::StartsWith(trimmed, "const"))
+        {
+            // todo: for correct behaviour would need to parse
+            // const int foo=123;
+            // const int foo = 123;
+            // const int foo= 123;
+            // const int foo =123;
         }
         else if (!base::StartsWith(trimmed, "//"))
         {
