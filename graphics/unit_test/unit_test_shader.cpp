@@ -16,6 +16,8 @@
 
 #include "config.h"
 
+#include <iostream>
+
 #include "base/test_minimal.h"
 #include "graphics/shadersource.h"
 
@@ -32,6 +34,8 @@ void unit_test_raw_source()
 
 #define PI 3.145
 #define MY_SHADER_FOO
+
+const int cInt = 1;
 
 attribute vec2 aVec2;
 attribute vec3 aVec3;
@@ -64,6 +68,9 @@ void main() {
         TEST_REQUIRE(ret.FindDataDeclaration("PI")->decl_type == ddt::PreprocessorDefine);
         TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->data_type == dt::PreprocessorString);
         TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->decl_type == ddt::PreprocessorDefine);
+
+        //TEST_REQUIRE(ret.FindDataDeclaration("cInt")->data_type == dt::Int);
+        //TEST_REQUIRE(ret.FindDataDeclaration("cInt")->decl_type == ddt::Constant);
 
         TEST_REQUIRE(ret.FindDataDeclaration("aVec2")->data_type == dt::Vec2f);
         TEST_REQUIRE(ret.FindDataDeclaration("aVec2")->decl_type == ddt::Attribute);
@@ -124,10 +131,36 @@ void main() {
     }
 }
 
+void unit_test_generation()
+{
+    TEST_CASE(test::Type::Feature)
+
+    gfx::ShaderSource source;
+    source.SetPrecision(gfx::ShaderSource::Precision::High);
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
+    source.SetType(gfx::ShaderSource::Type::Fragment);
+    source.AddPreprocessorDefinition("PI", 3.143f);
+    source.AddConstant("kFoobar", 123);
+
+    source.AddSource(R"(
+void main() {
+    gl_FragColor = vec4(1.0)
+}
+    )");
+
+    const auto& sauce = source.GetSource();
+    //std::cout << sauce;
+    TEST_REQUIRE(base::Contains(sauce, "#version 300 es"));
+    TEST_REQUIRE(base::Contains(sauce, "precision highp float;"));
+    TEST_REQUIRE(base::Contains(sauce, "const int kFoobar = 123;"));
+
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_raw_source();
+    unit_test_generation();
 
     return 0;
 }
