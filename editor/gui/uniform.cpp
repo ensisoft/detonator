@@ -106,6 +106,7 @@ void Uniform::SetValue(float value)
 }
 void Uniform::SetValue(int value)
 {
+    SetComboValue(value);
     gui::SetValue(mUI->value_i, value);
 }
 
@@ -137,8 +138,16 @@ void Uniform::SetValue(const std::string& str)
 { gui::SetValue(mUI->string, str); }
 float Uniform::GetAsFloat() const
 { return gui::GetValue(mUI->value_x); }
+
 int Uniform::GetAsInt() const
-{ return gui::GetValue(mUI->value_i); }
+{
+    if (mUI->combo_i->isVisible())
+    {
+        return mUI->combo_i->currentData().toInt();
+    }
+
+    return gui::GetValue(mUI->value_i);
+}
 glm::vec2 Uniform::GetAsVec2() const
 {
     return {gui::GetValue(mUI->value_x),
@@ -176,6 +185,41 @@ void Uniform::HideEverything()
     SetVisible(mUI->color,   false);
     SetVisible(mUI->string,  false);
     SetVisible(mUI->value_i, false);
+    SetVisible(mUI->combo_i, false);
+}
+
+void Uniform::ShowIntAsCombo()
+{
+    SetVisible(mUI->value_i, false);
+    SetVisible(mUI->combo_i, true);
+}
+
+void Uniform::AddComboValue(const app::AnyString& str, int value)
+{
+    QSignalBlocker s(mUI->combo_i);
+    mUI->combo_i->addItem(str, value);
+}
+
+void Uniform::SetComboValue(int value)
+{
+    QSignalBlocker s(mUI->combo_i);
+
+    for (int i=0; i<mUI->combo_i->count(); ++i)
+    {
+        auto item = mUI->combo_i->itemData(i).toInt();
+        if (item == value)
+        {
+            mUI->combo_i->setCurrentIndex(i);
+            break;
+        }
+    }
+}
+
+void Uniform::on_combo_i_currentIndexChanged(int)
+{
+    int value = mUI->combo_i->currentData().toInt();
+    emit ValueChanged(this);
+    mUI->combo_i->setFocus();
 }
 
 void Uniform::on_value_x_valueChanged(double)

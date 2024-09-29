@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>395</width>
-    <height>78</height>
+    <width>623</width>
+    <height>104</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -179,6 +179,9 @@
         <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
        </property>
       </widget>
+     </item>
+     <item row="1" column="5">
+      <widget class="QComboBox" name="combo_i"/>
      </item>
     </layout>
    </item>

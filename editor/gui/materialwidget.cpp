@@ -1566,14 +1566,14 @@ void MaterialWidget::ApplyShaderDescription()
     }
 
     boost::replace_all(uri, ".glsl", ".json");
-    const auto [parse_success, json, error] = base::JsonParseFile(mWorkspace->MapFileToFilesystem(uri));
+    const auto [parse_success, json_root, error] = base::JsonParseFile(mWorkspace->MapFileToFilesystem(uri));
     if (!parse_success)
     {
         ERROR("Failed to parse the shader description file '%1' %2", uri, error);
         return;
     }
 
-    if (json.contains("uniforms"))
+    if (json_root.contains("uniforms"))
     {
         if (!mUI.customUniforms->layout())
             mUI.customUniforms->setLayout(new QGridLayout);
@@ -1582,7 +1582,7 @@ void MaterialWidget::ApplyShaderDescription()
         auto uniforms = mMaterial->GetUniforms();
         auto widget_row = 0;
         auto widget_col = 0;
-        for (const auto& json : json["uniforms"].items())
+        for (const auto& json : json_root["uniforms"].items())
         {
             Uniform::Type type = Uniform::Type::Float;
             std::string name = "kUniform";
@@ -1604,6 +1604,32 @@ void MaterialWidget::ApplyShaderDescription()
             widget->SetName(app::FromUtf8(name));
             layout->addWidget(widget, widget_row, 1);
             mUniforms.push_back(widget);
+
+            if (type == Uniform::Type::Int)
+            {
+                if (json_root.contains("meta"))
+                {
+                    const auto& meta = json_root["meta"];
+                    if (meta.contains(name))
+                    {
+                        const auto& uniform_meta = meta[name];
+                        std::string display;
+                        base::JsonReadSafe(uniform_meta, "display", &display);
+                        if (display == "combobox")
+                        {
+                            for (const auto& item : uniform_meta["values"].items())
+                            {
+                                std::string name;
+                                int value = 0;
+                                base::JsonReadSafe(item.value(), "name", &name);
+                                base::JsonReadSafe(item.value(), "value", &value);
+                                widget->AddComboValue(name, value);
+                            }
+                            widget->ShowIntAsCombo();
+                        }
+                    }
+                }
+            }
 
             widget_row++;
             DEBUG("Read uniform description '%1'", name);
@@ -1669,7 +1695,7 @@ void MaterialWidget::ApplyShaderDescription()
         mMaterial->DeleteUniforms();
     }
 
-    if (json.contains("maps"))
+    if (json_root.contains("maps"))
     {
         std::set<std::string> texture_map_names;
         for (size_t i=0; i<mMaterial->GetNumTextureMaps(); ++i)
@@ -1680,7 +1706,7 @@ void MaterialWidget::ApplyShaderDescription()
 
         auto widget_row = 0;
         auto widget_col = 0;
-        for (const auto& json : json["maps"].items())
+        for (const auto& json : json_root["maps"].items())
         {
             std::string desc = "Texture";
             std::string name = "kTexture";
