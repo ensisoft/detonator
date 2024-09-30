@@ -48,6 +48,7 @@
 #include "editor/gui/scriptwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
+#include "editor/gui/dlgparticle.h"
 #include "editor/gui/dlgscriptvarname.h"
 #include "editor/gui/dlgscriptvar.h"
 #include "editor/gui/dlgmaterial.h"
@@ -493,8 +494,8 @@ class EntityWidget::PlaceShapeTool : public MouseTool
 public:
     PlaceShapeTool(EntityWidget::State& state, QString material, QString drawable, glm::vec2 mouse_pos)
         : mState(state)
-        , mMaterialId(material)
-        , mDrawableId(drawable)
+        , mMaterialId(std::move(material))
+        , mDrawableId(std::move(drawable))
     {
         mDrawableClass = mState.workspace->GetDrawableClassById(mDrawableId);
         mMaterialClass = mState.workspace->GetMaterialClassById(mMaterialId);
@@ -502,6 +503,19 @@ public:
         mDrawable = gfx::CreateDrawableInstance(mDrawableClass);
         mCurrent  = mouse_pos;
     }
+    PlaceShapeTool(EntityWidget::State& state,
+                   std::shared_ptr<const gfx::ParticleEngineClass> preset_particle_engine,
+                   std::shared_ptr<const gfx::MaterialClass> preset_particle_engine_material,
+                   glm::vec2 mouse_pos)
+        : mState(state)
+        , mPresetParticleEngine(std::move(preset_particle_engine))
+        , mPresetParticleEngineMaterial(std::move(preset_particle_engine_material))
+    {
+        mMaterial = gfx::CreateMaterialInstance(mPresetParticleEngineMaterial);
+        mDrawable = gfx::CreateDrawableInstance(mPresetParticleEngine);
+        mCurrent = mouse_pos;
+    }
+
     virtual void Render(gfx::Painter&, gfx::Painter& entity) const override
     {
         if (!mEngaged)
@@ -552,6 +566,8 @@ public:
         const auto button = mickey->button();
         if (button != Qt::LeftButton)
             return false;
+
+        CommitPresetParticleEngine();
 
         ASSERT(mEngaged);
 
@@ -604,6 +620,43 @@ public:
         return true;
     }
 private:
+    void CommitPresetParticleEngine()
+    {
+        if (!mPresetParticleEngine)
+            return;
+
+        // this checks whether the resources already exist or not.
+        // if they don't then then they are are created that.
+        // this means however that if the particle engine is modified
+        // the subsequence preset particle placements also use the
+        // modified particle engine class.
+        //
+        // Not using it and creating a clone of the preset would make
+        // it super difficult to check later on subsequence preset
+        // placement whether a non modified preset of the particle engine
+        // exists but under a different resource ID. This check could be
+        // done with a hash check but that would be a bit involved as well
+        // since the ID contributes to the hash, so the hash computation
+        // would have to ignore the ID.
+        //
+
+        if (!mState.workspace->IsValidDrawable(mPresetParticleEngine->GetId()))
+        {
+            app::ParticleSystemResource resource(mPresetParticleEngine->Copy(), mPresetParticleEngine->GetName());
+            mState.workspace->SaveResource(resource);
+        }
+        mDrawableClass = mPresetParticleEngine;
+
+        if (!mState.workspace->IsValidMaterial(mPresetParticleEngineMaterial->GetId()))
+        {
+            app::MaterialResource resource(mPresetParticleEngineMaterial->Copy(),
+                                           mPresetParticleEngineMaterial->GetName());
+            resource.SetProperty("particle-engine-class-id", mDrawableClass->GetId());
+            mState.workspace->SaveResource(resource);
+        }
+        mMaterialClass = mPresetParticleEngineMaterial;
+    }
+private:
     EntityWidget::State& mState;
     // the starting object position in model coordinates of the placement
     // based on the mouse position at the time.
@@ -621,6 +674,9 @@ private:
     std::shared_ptr<const gfx::MaterialClass> mMaterialClass;
     std::unique_ptr<gfx::Material> mMaterial;
     std::unique_ptr<gfx::Drawable> mDrawable;
+private:
+    std::shared_ptr<const gfx::ParticleEngineClass> mPresetParticleEngine;
+    std::shared_ptr<const gfx::MaterialClass> mPresetParticleEngineMaterial;
 };
 
 
@@ -1847,6 +1903,19 @@ void EntityWidget::on_actionAnimationDel_triggered()
 void EntityWidget::on_actionAnimationEdit_triggered()
 {
     on_btnEditTrack_clicked();
+}
+
+void EntityWidget::on_actionAddPresetParticle_triggered()
+{
+    DlgParticle dlg(this, mState.workspace);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    mCurrentTool.reset(new PlaceShapeTool(mState,
+                                          dlg.GetParticleClass(),
+                                          dlg.GetMaterialClass(),
+                                          MapMouseCursorToWorld()));
+    mParticleSystems->menuAction()->setChecked(true);
 }
 
 void EntityWidget::on_entityName_textChanged(const QString& text)
@@ -4315,6 +4384,8 @@ void EntityWidget::RebuildMenus()
             connect(action, &QAction::triggered,this, &EntityWidget::PlaceNewCustomShape);
         }
     }
+    mParticleSystems->addSeparator();
+    mParticleSystems->addAction(mUI.actionAddPresetParticle);
 }
 
 void EntityWidget::RebuildCombos()

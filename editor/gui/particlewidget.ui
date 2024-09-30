@@ -309,7 +309,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>489</width>
+            <width>460</width>
             <height>972</height>
            </rect>
           </property>
@@ -1940,6 +1940,26 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Space</string>
+   </property>
+  </action>
+  <action name="actionSavePreset">
+   <property name="text">
+    <string>Save Preset</string>
+   </property>
+   <property name="toolTip">
+    <string>Save as preset particle system</string>
+   </property>
+  </action>
+  <action name="actionLoadPreset">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/particle.png</normaloff>:/16x16_ico_png/particle.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Preset</string>
+   </property>
+   <property name="toolTip">
+    <string>Load particle system from a preset</string>
    </property>
   </action>
  </widget>

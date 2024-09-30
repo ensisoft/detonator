@@ -76,6 +76,8 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionSave_triggered();
         void on_actionEmit_triggered();
+        void on_actionSavePreset_triggered();
+        void on_actionLoadPreset_triggered();
         void on_resetEmitter_clicked();
         void on_resetTransform_clicked();
         void on_btnViewPlus90_clicked();

@@ -121,6 +121,43 @@ std::vector<ResourceListItem> ListShaders()
     return ret;
 }
 
+
+std::vector<ResourceListItem> ListPresetParticles()
+{
+    std::vector<ResourceListItem> ret;
+
+    QStringList filters;
+    filters << "*.json";
+    const auto& appdir = QCoreApplication::applicationDirPath();
+    const auto& fontdir = app::JoinPath(appdir , "presets/particles");
+    QDir dir;
+    dir.setPath(fontdir);
+    dir.setNameFilters(filters);
+    const QStringList& files = dir.entryList();
+    for (const auto& file : files)
+    {
+        const QFileInfo info(file);
+
+        ResourceListItem item;
+        item.name = info.baseName();
+        item.id   = app::toString("app://presets/particles/%1", info.fileName());
+        ret.push_back(item);
+    }
+    return ret;
+}
+
+void PopulatePresetParticleList(QComboBox* cmb)
+{
+    QSignalBlocker s(cmb);
+    cmb->clear();
+    cmb->setProperty("__is_id_list__", true);
+
+    for (const auto& shader : ListPresetParticles())
+    {
+        cmb->addItem(shader.name, shader.id);
+    }
+}
+
 void PopulateShaderList(QComboBox* cmb, const QString& filter)
 {
     QSignalBlocker s(cmb);

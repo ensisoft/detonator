@@ -127,6 +127,7 @@ namespace gui
         void on_actionAnimationAdd_triggered();
         void on_actionAnimationDel_triggered();
         void on_actionAnimationEdit_triggered();
+        void on_actionAddPresetParticle_triggered();
         void on_entityName_textChanged(const QString& text);
         void on_entityTag_textChanged(const QString& text);
         void on_entityLifetime_valueChanged(double value);
