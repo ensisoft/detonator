@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1816</width>
+    <width>1900</width>
     <height>1064</height>
    </rect>
   </property>
@@ -264,7 +264,7 @@
                <x>0</x>
                <y>0</y>
                <width>353</width>
-               <height>563</height>
+               <height>431</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -881,7 +881,7 @@
                      <bool>false</bool>
                     </attribute>
                     <attribute name="verticalHeaderDefaultSectionSize">
-                     <number>24</number>
+                     <number>26</number>
                     </attribute>
                    </widget>
                   </item>
@@ -1449,8 +1449,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>440</width>
-          <height>920</height>
+          <width>426</width>
+          <height>1251</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -4840,6 +4840,14 @@
    </property>
    <property name="toolTip">
     <string>Edit state controller script</string>
+   </property>
+  </action>
+  <action name="actionAddPresetParticle">
+   <property name="text">
+    <string>Create From Preset</string>
+   </property>
+   <property name="toolTip">
+    <string>Add particle system from preset</string>
    </property>
   </action>
  </widget>

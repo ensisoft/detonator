@@ -2229,6 +2229,10 @@ private:
                 const auto& value = setting.value;
                 const auto location = uniform.location;
 
+                // if the glUnifromXYZ gives GL_INVALID_OPERATION a possible
+                // cause is using wrong API for the uniform. for example
+                // calling glUniform1f when the uniform is an int.
+
                 if (const auto* ptr = std::get_if<int>(&value))
                     GL_CALL(glUniform1i(location, *ptr));
                 else if (const auto* ptr = std::get_if<float>(&value))

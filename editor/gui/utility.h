@@ -1930,8 +1930,10 @@ std::vector<QString> ListAppFonts();
 
 std::vector<ResourceListItem> ListParticles();
 std::vector<ResourceListItem> ListShaders();
+std::vector<ResourceListItem> ListPresetParticles();
 
 void PopulateShaderList(QComboBox* cmb, const QString& filter);
+void PopulatePresetParticleList(QComboBox* cmb);
 void PopulateParticleList(QComboBox* cmb);
 void PopulateFontNames(QComboBox* cmb);
 void PopulateFontSizes(QComboBox* cmb);

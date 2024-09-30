@@ -37,12 +37,14 @@
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
 #include "editor/app/workspace.h"
+#include "editor/gui/main.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/particlewidget.h"
 #include "editor/gui/dlgmaterial.h"
+#include "editor/gui/dlgparticle.h"
 #include "editor/gui/tool.h"
 #include "editor/gui/translation.h"
 
@@ -415,6 +417,8 @@ void ParticleEditorWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
     bar.addAction(mUI.actionEmit);
+    bar.addSeparator();
+    bar.addAction(mUI.actionLoadPreset);
 }
 
 void ParticleEditorWidget::AddActions(QMenu& menu)
@@ -427,6 +431,14 @@ void ParticleEditorWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
     menu.addAction(mUI.actionEmit);
+    menu.addSeparator();
+    menu.addAction(mUI.actionLoadPreset);
+
+    if (Editor::DevEditor())
+    {
+        menu.addSeparator();
+        menu.addAction(mUI.actionSavePreset);
+    }
 }
 
 bool ParticleEditorWidget::SaveState(Settings& settings) const
@@ -747,6 +759,107 @@ void ParticleEditorWidget::on_actionEmit_triggered()
     cmd.name = "EmitParticles";
     // no count here.
     mEngine->Execute(env, cmd);
+}
+
+void ParticleEditorWidget::on_actionLoadPreset_triggered()
+{
+    DlgParticle dlg(this, mWorkspace);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    const auto& particle = dlg.GetParticleClass();
+    const auto& material = dlg.GetMaterialClass();
+
+    if (HasUnsavedChanges() && mWorkspace->IsValidDrawable(mClass->GetId()))
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::Cancel);
+        msg.setIcon(QMessageBox::Icon::Question);
+        msg.setWindowTitle(tr("Load Preset?"));
+        msg.setText(tr("The changes made in this particle engine will be lost. Do you want to proceed?"));
+        if (msg.exec() == QMessageBox::Rejected)
+            return;
+    }
+    mClass->SetParams(particle->GetParams());
+
+    if (mWorkspace->IsValidMaterial(material->GetId()))
+    {
+        SetValue(mUI.materials, ListItemId(material->GetId()));
+        mMaterial.reset();
+        mMaterialClass.reset();
+    }
+    else
+    {
+        mMaterial.reset();
+        mMaterialClass = material->Clone();
+    }
+
+    ShowParams();
+
+    on_motion_currentIndexChanged(0);
+    on_space_currentIndexChanged(0);
+    on_direction_currentIndexChanged(0);
+    on_canExpire_stateChanged(0);
+    on_when_currentIndexChanged(0);
+}
+
+void ParticleEditorWidget::on_actionSavePreset_triggered()
+{
+    if (!MustHaveInput(mUI.name))
+        return;
+
+    QString filename = mWorkspace->MapFileToFilesystem("app://presets/particles/preset.json");
+    filename = QFileDialog::getSaveFileName(this,
+        tr("Export Preset"),
+        filename,
+        tr("JSON (*.json)"));
+    if (filename.isEmpty())
+        return;
+
+    data::JsonObject data;
+    auto particle = data.NewWriteChunk();
+
+    mClass->SetName(GetValue(mUI.name));
+    mClass->IntoJson(*particle);
+    data.Write("particle", std::move(particle));
+    data.Write("viz_width", (float)GetValue(mUI.scaleX));
+    data.Write("viz_height", (float)GetValue(mUI.scaleY));
+
+    if (mMaterialClass)
+    {
+        auto material = data.NewWriteChunk();
+        mMaterialClass->IntoJson(*material);
+        data.Write("material", std::move(material));
+    }
+    else
+    {
+        const QString materialId = GetItemId(mUI.materials);
+        const auto& resource = mWorkspace->GetResourceById(materialId);
+        if (resource.IsPrimitive())
+        {
+            data.Write("material-id", resource.GetIdUtf8());
+        }
+        else
+        {
+            const auto* klass = resource.GetContent<gfx::MaterialClass>();
+            auto material = data.NewWriteChunk();
+            klass->IntoJson(*material);
+            data.Write("material", std::move(material));
+        }
+    }
+
+    data::JsonFile file;
+    file.SetRootObject(data);
+    const auto [success, error] = file.Save(app::ToUtf8(filename));
+    if (!success)
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Icon::Critical);
+        msg.setText("Failed to save the preset file.");
+        msg.setStandardButtons(QMessageBox::StandardButton::Ok);
+        msg.exec();
+        return;
+    }
 }
 
 void ParticleEditorWidget::SetParams()
@@ -1093,8 +1206,11 @@ void ParticleEditorWidget::on_btnCreateMaterial_clicked()
     mMaterialClass->SetShaderUri(GetItemId(mUI.cmbShader));
     mMaterialClass->SetUniform("kStartColor", GetValue(mUI.startColor));
     mMaterialClass->SetUniform("kEndColor", GetValue(mUI.endColor));
-    mMaterialClass->SetUniform("kRotationalVelocity", 0.0f);
-    mMaterialClass->SetUniform("kRotate", 0.0f);
+    mMaterialClass->SetUniform("kRotationValue", 0.0f);
+    // todo: this magic 3 here maps to the value in the basic_particle.json, "base + from direction"
+    // which says that particle texture coordinate rotation is derived from base texture
+    // rotation combined with the particle angle
+    mMaterialClass->SetUniform("kRotate", 3);
 
     mMaterial.reset();
 

@@ -497,6 +497,9 @@ add_executable(Detonator
     editor/gui/dlgimgpack.ui
     editor/gui/dlgimgpack.h
     editor/gui/dlgimgpack.cpp
+    editor/gui/dlgparticle.h
+    editor/gui/dlgparticle.ui
+    editor/gui/dlgparticle.cpp
     editor/gui/dlgmaterial.h
     editor/gui/dlgmaterial.ui
     editor/gui/dlgmaterial.cpp
