@@ -899,6 +899,31 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
             log->Log(material, "Material", "Changed emissive particle to basic particle that does the same thing.");
         }
     }
+    if (old_version < 3)
+    {
+        const auto& shader_uri = material.GetShaderUri();
+        if (shader_uri == "app://shaders/es2/basic_particle.glsl")
+        {
+            if (material.HasUniform("kRotate") && material.CheckUniformType<float>("kRotate"))
+            {
+                const auto value = material.GetUniformValue<float>("kRotate", 0.0);
+                material.DeleteUniform("kRotate");
+                if (value == 0.0f)
+                    material.SetUniform("kRotate", 0);
+                else if (value == 1.0f)
+                    material.SetUniform("kRotate", 1); // random rotation
+
+                log->Log(material, "Material", "Changed kRotate uniform from float to int.");
+            }
+            if (material.HasUniform("kRotationalVelocity") && material.CheckUniformType<float>("kRotationalVelocity"))
+            {
+                const auto value = material.GetUniformValue<float>("kRotationalVelocity", 0.0f);
+                material.DeleteUniform("kRotationalVelocity");
+                material.SetUniform("kRotationValue", value);
+                log->Log(material, "Material", "Changed kRotationVelocity uniform to kRotationValue uniform");
+            }
+        }
+    }
 
     // the uniform values were refactored inside the material class
     // and they only exist now if they have been set explicitly.

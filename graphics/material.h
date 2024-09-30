@@ -1060,6 +1060,14 @@ namespace gfx
             }
             return init;
         }
+        template<typename T>
+        inline bool CheckUniformType(const std::string& name) const noexcept
+        {
+            if (const auto* ptr = base::SafeFind(mUniforms, name)) {
+                return std::holds_alternative<T>(*ptr);
+            }
+            return false;
+        }
 
         inline void DeleteUniforms() noexcept
         { mUniforms.clear(); }

@@ -11,14 +11,14 @@
             "type": "Color"
         },
         {
-            "name": "kRotationalVelocity",
-            "desc": "Rotation Velocity",
+            "name": "kRotationValue",
+            "desc": "Rotation Value",
             "type": "Float"
         },
         {
             "name": "kRotate",
-            "desc": "Enable rotation",
-            "type": "Float"
+            "desc": "Rotation",
+            "type": "Int"
         }
     ],
     "maps": [
@@ -27,5 +27,28 @@
             "name": "kMask",
             "type": "Texture2D"
         }
-    ]
+    ],
+    "meta": {
+        "kRotate": {
+            "display": "combobox",
+            "values": [
+                {
+                    "name": "Off",
+                    "value": 0
+                },
+                {
+                    "name": "Random",
+                    "value": 1
+                },
+                {
+                    "name": "Particle Direction",
+                    "value": 2
+                },
+                {
+                    "name": "Particle Direction + Base",
+                    "value": 3
+                }
+            ]
+        }
+    }
 }
