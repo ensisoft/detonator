@@ -19,12 +19,16 @@ uniform vec4 kMaskRect;
 uniform vec4 kStartColor;
 // Particle end color when time is 1.0
 uniform vec4 kEndColor;
-// Velocity of texture coordinate rotation about the z axis
+
+// if the rotation is random then the rotation value
+// is texture coordinate rotation velocity (about the z axis)
 // in radians per second.
-uniform float kRotationalVelocity;
+// if the rotation is based on particle direction then this
+// is the base rotation onto which the particle direction
+// rotation angle is added
+uniform float kRotationValue;
 // Flag to control whether or not to rotate texture coordinates.
-// Set to 1.0 for rotation and 0.0 for no rotation.
-uniform float kRotate;
+uniform int kRotate;
 
 // Vertex input
 // ---------------------------------------------------
@@ -36,28 +40,49 @@ varying float vParticleTime;
 varying float vParticleAlpha;
 // Particle random value. [0.0, 1.0]
 varying float vParticleRandomValue;
+// Angle of the particle's direction vector
+// relative to the x axis
+varying float vParticleAngle;
 
 #define PI 3.1415926
+#define ROTATE_OFF 0
+#define ROTATE_RANDOM 1
+#define ROTATE_USE_PARTICLE_ANGLE 2
+#define ROTATE_USE_PARTICLE_ANGLE_AND_BASE 3
 
 void FragmentShaderMain()
 {
-    float base_rotation = vParticleRandomValue * PI * 2.0;
-    float time_rotation = kRotationalVelocity * (vParticleRandomValue-0.5) * kTime;
-    float angle =  base_rotation + time_rotation;
+    float angle = 0.0;
+
+    if (kRotate == ROTATE_RANDOM)
+    {
+        float base_rotation = vParticleRandomValue * PI * 2.0;
+        float time_rotation = kRotationValue * (vParticleRandomValue-0.5) * kTime;
+        angle = base_rotation + time_rotation;
+    }
+    else if (kRotate == ROTATE_USE_PARTICLE_ANGLE)
+    {
+        angle = vParticleAngle;
+    }
+    else if (kRotate == ROTATE_USE_PARTICLE_ANGLE_AND_BASE)
+    {
+        float base_rotation = kRotationValue * PI * 2.0;
+        angle = base_rotation + vParticleAngle;
+    }
 
     // either read varying texture coords from the vertex shader
     // or use gl_PointCoord which when rendering GL_POINTS
     vec2 coord = mix(vTexCoord, gl_PointCoord, kRenderPoints);
 
-    // discard fragments if the rotated texture coordinates would
-    // fall outside of the 0.0-1.0 range.
-    float len = length(coord - vec2(0.5, 0.5)) * kRotate;
-    if (len > 0.5)
-        discard;
-
-    // rotate texture coords.
-    if (kRotate >= 1.0)
+    // rotate texture coords
+    if (kRotate != ROTATE_OFF)
     {
+        // discard fragments if the rotated texture coordinates would
+        // fall outside of the 0.0-1.0 range.
+        float len = length(coord - vec2(0.5, 0.5));
+        if (len > 0.5)
+            discard;
+
         coord -= vec2(0.5, 0.5);
         coord  = mat2(cos(angle), -sin(angle),
                       sin(angle),  cos(angle)) * coord;

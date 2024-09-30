@@ -571,7 +571,7 @@ namespace app
 
             if constexpr (TypeValue == Resource::Type::Material)
             {
-                chunk->Write("resource_ver", 2);
+                chunk->Write("resource_ver", 3);
                 data.AppendChunk("materials", std::move(chunk));
             }
             else if (TypeValue == Resource::Type::ParticleSystem)
@@ -627,7 +627,7 @@ namespace app
         {
             if constexpr (TypeValue == Resource::Type::Material)
             {
-                unsigned current_version = 2;
+                unsigned current_version = 3;
                 unsigned saved_version;
                 ASSERT(Resource::GetProperty("__version", &saved_version));
                 if (saved_version < current_version)
