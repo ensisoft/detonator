@@ -90,6 +90,7 @@ namespace gui
         void on_cmbShader_currentIndexChanged(int);
         void on_startColor_colorChanged(QColor);
         void on_endColor_colorChanged(QColor);
+        void on_primitive_currentIndexChanged(int);
         void on_space_currentIndexChanged(int);
         void on_motion_currentIndexChanged(int);
         void on_boundary_currentIndexChanged(int);

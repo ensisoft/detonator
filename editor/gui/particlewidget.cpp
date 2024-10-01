@@ -253,6 +253,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.alpha->SetScale(1.0f);
     mUI.alpha->SetExponent(1.0f);
 
+    PopulateFromEnum<gfx::ParticleEngineClass::DrawPrimitive>(mUI.primitive);
     PopulateFromEnum<gfx::MaterialClass::SurfaceType>(mUI.cmbSurface);
     PopulateFromEnum<gfx::ParticleEngineClass::CoordinateSpace>(mUI.space);
     PopulateFromEnum<gfx::ParticleEngineClass::Motion>(mUI.motion);
@@ -865,6 +866,7 @@ void ParticleEditorWidget::on_actionSavePreset_triggered()
 void ParticleEditorWidget::SetParams()
 {
     gfx::ParticleEngineClass::Params params;
+    params.primitive                        = GetValue(mUI.primitive);
     params.coordinate_space                 = GetValue(mUI.space);
     params.motion                           = GetValue(mUI.motion);
     params.shape                            = GetValue(mUI.shape);
@@ -927,6 +929,7 @@ void ParticleEditorWidget::SetParams()
 void ParticleEditorWidget::ShowParams()
 {
     const auto& params = mClass->GetParams();
+    SetValue(mUI.primitive,           params.primitive);
     SetValue(mUI.space,               params.coordinate_space);
     SetValue(mUI.motion,              params.motion);
     SetValue(mUI.shape,               params.shape);
@@ -1286,6 +1289,11 @@ void ParticleEditorWidget::on_endColor_colorChanged(QColor)
         return;
 
     mMaterialClass->SetUniform("kEndColor", GetValue(mUI.endColor));
+}
+
+void ParticleEditorWidget::on_primitive_currentIndexChanged(int)
+{
+    SetParams();
 }
 
 void ParticleEditorWidget::on_space_currentIndexChanged(int)
