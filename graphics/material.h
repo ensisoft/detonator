@@ -867,11 +867,8 @@ namespace gfx
             // content marked static might have changed and should be checked
             // in case it has been modified and should be re-uploaded.
             bool editing_mode = false;
-            // True when rendering points, i.e. the material is being applied
-            // on anything that rasterizes as GL_POINTS. When this is true
-            // the shader must use the built-in gl_PointCoord variable instead
-            // of the texture coordinates coming from the vertex shader.
-            bool render_points = false;
+            // what primitives will be drawn with this material.
+            DrawPrimitive draw_primitive = DrawPrimitive::Triangles;
             // The current material instance time.
             double material_time = 0.0f;
             // The uniform parameters set on the material instance (if any).
@@ -1237,7 +1234,7 @@ namespace gfx
             // content marked static might have changed and should be checked
             // in case it has been modified and should be re-uploaded.
             bool editing_mode  = false;
-            bool render_points = false;
+            DrawPrimitive draw_primitive = DrawPrimitive::Triangles;
             RenderPass renderpass = RenderPass::ColorPass;
         };
         struct RasterState {

@@ -1083,6 +1083,9 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_OPAQUE", static_cast<int>(SurfaceType::Opaque));
     source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_TRANSPARENT", static_cast<int>(SurfaceType::Transparent));
     source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_EMISSIVE", static_cast<int>(SurfaceType::Emissive));
+    source.AddPreprocessorDefinition("DRAW_PRIMITIVE_POINTS", static_cast<int>(DrawPrimitive::Points));
+    source.AddPreprocessorDefinition("DRAW_PRIMITIVE_LINES", static_cast<int>(DrawPrimitive::Lines));
+    source.AddPreprocessorDefinition("DRAW_PRIMITIVE_TRIANGLES", static_cast<int>(DrawPrimitive::Triangles));
 
     if (IsStatic())
     {
@@ -1111,18 +1114,21 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
 
 bool MaterialClass::ApplyDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
 {
-    program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
+    const bool render_points = state.draw_primitive == DrawPrimitive::Points;
+    // todo: kill the kRenderPoints uniform
+    program.SetUniform("kRenderPoints", render_points ? 1.0f : 0.0f);
     program.SetUniform("kTime", (float)state.material_time);
     program.SetUniform("kEditingMode", (int)state.editing_mode);
     // todo: fix this, point rendering could be used without particles.
-    program.SetUniform("kParticleEffect", state.render_points ? (int)mParticleAction : 0);
+    program.SetUniform("kParticleEffect", render_points ? (int)mParticleAction : 0);
 
     // for the future... for different render passes we got two options
     // either the single shader implements the different render pass
     // functionality or then there are different shaders for different passes
     // program.SetUniform("kRenderPass", (int)state.renderpass);
 
-    program.SetUniform("kSurfaceType", (int)mSurfaceType);
+    program.SetUniform("kSurfaceType", static_cast<int>(mSurfaceType));
+    program.SetUniform("kDrawPrimitive", static_cast<int>(state.draw_primitive));
 
     if (mType == Type::Color)
     {
@@ -1716,6 +1722,8 @@ ShaderSource MaterialClass::CreateShaderStub(Type type)
         source.AddUniform("kParticleEffect", ShaderSource::UniformType::Int);
     if (!source.HasUniform("kSurfaceType"))
         source.AddUniform("kSurfaceType", ShaderSource::UniformType::Int);
+    if (!source.HasUniform("kDrawPrimitive"))
+        source.AddUniform("kDrawPrimitive", ShaderSource::UniformType::Int);
     //if (!source.HasUniform("kRenderPass"))
     //    source.AddUniform("kRenderPass", ShaderSource::UniformType::Int);
 
@@ -2679,12 +2687,12 @@ bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, 
 bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const
 {
     MaterialClass::State state;
-    state.editing_mode  = env.editing_mode;
-    state.render_points = env.render_points;
-    state.renderpass    = env.renderpass;
-    state.material_time = mRuntime;
-    state.uniforms      = &mUniforms;
-    state.first_render  = mFirstRender;
+    state.editing_mode   = env.editing_mode;
+    state.draw_primitive = env.draw_primitive;
+    state.renderpass     = env.renderpass;
+    state.material_time  = mRuntime;
+    state.uniforms       = &mUniforms;
+    state.first_render   = mFirstRender;
 
     mFirstRender = false;
 
@@ -2710,34 +2718,34 @@ bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device,
 void MaterialInstance::ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const
 {
     MaterialClass::State state;
-    state.editing_mode  = env.editing_mode;
-    state.render_points = env.render_points;
+    state.editing_mode   = env.editing_mode;
+    state.draw_primitive = env.draw_primitive;
     return mClass->ApplyStaticState(state, device, program);
 }
 
 std::string MaterialInstance::GetShaderId(const Environment& env) const
 {
     MaterialClass::State state;
-    state.editing_mode  = env.editing_mode;
-    state.render_points = env.render_points;
+    state.editing_mode   = env.editing_mode;
+    state.draw_primitive = env.draw_primitive;
     return mClass->GetShaderId(state);
 }
 
 std::string MaterialInstance::GetShaderName(const Environment& env) const
 {
     MaterialClass::State state;
-    state.editing_mode  = env.editing_mode;
-    state.render_points = env.render_points;
+    state.editing_mode   = env.editing_mode;
+    state.draw_primitive = env.draw_primitive;
     return mClass->GetShaderName(state);
 }
 
 ShaderSource MaterialInstance::GetShader(const Environment& env, const Device& device) const
 {
     MaterialClass::State state;
-    state.editing_mode  = env.editing_mode;
-    state.render_points = env.render_points;
-    state.material_time = mRuntime;
-    state.uniforms      = &mUniforms;
+    state.editing_mode   = env.editing_mode;
+    state.draw_primitive = env.draw_primitive;
+    state.material_time  = mRuntime;
+    state.uniforms       = &mUniforms;
     return mClass->GetShader(state, device);
 }
 

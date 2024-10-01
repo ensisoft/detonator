@@ -23,6 +23,8 @@
 #  include <glm/mat4x4.hpp>
 #include "warnpop.h"
 
+#include <cstdint>
+
 #include "base/assert.h"
 #include "base/types.h"
 
@@ -61,6 +63,12 @@ namespace gfx
         Stream,
         // The buffer is updated multiple times and used multiple times.
         Dynamic
+    };
+
+    // Style of the drawable's geometry determines how the geometry
+    // is to be rasterized.
+    enum class DrawPrimitive {
+        Points, Lines, Triangles
     };
 
     // type aliases for base types for gfx.

@@ -607,7 +607,6 @@ void MaterialWidget::on_actionShowShader_triggered()
     gfx::detail::GenericShaderProgram program;
 
     gfx::Material::Environment environment;
-    environment.render_points = false;
     environment.editing_mode  = false; // we want to see the shader as it will be, so using false here
     const auto& source = program.GetShader(gfx::MaterialInstance(mMaterial), environment, *device);
 
