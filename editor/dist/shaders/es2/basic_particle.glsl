@@ -2,12 +2,11 @@
 // -------------------------------------------------
 // the monotonic material instance time in seconds.
 uniform float kTime;
-// Flag to control whether to use point coordinates (gl_PointCoord)
-// or  normal vertex coordinates from vertex shader.
-uniform float kRenderPoints;
 
 // Surface type enum
 uniform int kSurfaceType;
+
+uniform int kDrawPrimitive;
 
 // Custom uniforms
 // -------------------------------------------------
@@ -50,7 +49,31 @@ varying float vParticleAngle;
 #define ROTATE_USE_PARTICLE_ANGLE 2
 #define ROTATE_USE_PARTICLE_ANGLE_AND_BASE 3
 
-void FragmentShaderMain()
+void MixColors(float alpha)
+{
+    vec4 color = mix(kStartColor, kEndColor, vParticleTime);
+
+    if (kSurfaceType == MATERIAL_SURFACE_TYPE_TRANSPARENT)
+    {
+        // blend with straight alpha and with transparent surface
+        // alpha is the particle transparency value
+        fs_out.color.rgb = color.rgb;
+        fs_out.color.a   = (alpha * vParticleAlpha * color.a);
+    }
+    else if (kSurfaceType == MATERIAL_SURFACE_TYPE_EMISSIVE)
+    {
+        // not blending transparently, alpha does not control
+        // transparency but modulates the intensity of the color
+        fs_out.color.rgb = color.rgb * alpha * vParticleAlpha;
+        fs_out.color.a = 1.0;
+    }
+    else
+    {
+        fs_out.color.rgb = color.rgb;
+    }
+}
+
+float ReadTextureAlpha(vec2 coord)
 {
     float angle = 0.0;
 
@@ -69,10 +92,6 @@ void FragmentShaderMain()
         float base_rotation = kRotationValue * PI * 2.0;
         angle = base_rotation + vParticleAngle;
     }
-
-    // either read varying texture coords from the vertex shader
-    // or use gl_PointCoord which when rendering GL_POINTS
-    vec2 coord = mix(vTexCoord, gl_PointCoord, kRenderPoints);
 
     // rotate texture coords
     if (kRotate != ROTATE_OFF)
@@ -97,26 +116,46 @@ void FragmentShaderMain()
     coord = coord * texture_scale + texture_trans;
 
     float alpha = texture2D(kMask,  coord).r;
+    return alpha;
+}
 
-    vec4 color = mix(kStartColor, kEndColor, vParticleTime);
+void DrawTriangles()
+{
+    // this path is only taken when the material widget renders
+    // the preview, right now it doesn't know about point rendering
+    // yet so it uses a textured shape.
+    float alpha = ReadTextureAlpha(vTexCoord);
 
-    if (kSurfaceType == MATERIAL_SURFACE_TYPE_TRANSPARENT)
-    {
-        // blend with straight alpha and with transparent surface
-        // alpha is the particle transparency value
-        fs_out.color.rgb = color.rgb;
-        fs_out.color.a   = (alpha * vParticleAlpha * color.a);
-    }
-    else if (kSurfaceType == MATERIAL_SURFACE_TYPE_EMISSIVE)
-    {
-        // not blending transparently, alpha does not control
-        // transparency but modulates the intensity of the color
-        fs_out.color.rgb = color.rgb * alpha * vParticleAlpha;
-        fs_out.color.a = 1.0;
-    }
-    else
-    {
-        fs_out.color.rgb = color.rgb;
-    }
+    MixColors(alpha);
+}
+
+void DrawPoints()
+{
+    // this is the normal particle rendering path
+    // using point rendering. texture sampling works
+    // but since the geometry is points the texture
+    // coordinates are not from vertex data but provided
+    // by the rasterizer in gl_PointCoord
+    float alpha = ReadTextureAlpha(gl_PointCoord);
+
+    MixColors(alpha);
+}
+
+void DrawLines()
+{
+    // right now we're not supporting texture sampling
+    // or rather.. the particle engine doesn't provide
+    // texture coordinates for non point geometry (lines)
+    MixColors(1.0);
+}
+
+void FragmentShaderMain()
+{
+    if (kDrawPrimitive == DRAW_PRIMITIVE_POINTS)
+        DrawPoints();
+    else if (kDrawPrimitive == DRAW_PRIMITIVE_LINES)
+       DrawLines();
+    else if (kDrawPrimitive == DRAW_PRIMITIVE_TRIANGLES)
+        DrawTriangles();
 }
 
