@@ -1090,8 +1090,14 @@ namespace gfx
             Sector
         };
 
+        enum class DrawPrimitive {
+            Point, FullLine, PartialLineBackward, PartialLineForward
+        };
+
         // initial engine configuration params
         struct Params {
+            DrawPrimitive primitive = DrawPrimitive::Point;
+
             Direction direction = Direction::Sector;
             // Placement of particles wrt. the emitter shape
             Placement placement = Placement::Inside;
@@ -1285,10 +1291,10 @@ namespace gfx
         virtual bool IsAlive() const override;
         virtual void Restart(const Environment& env) override;
         virtual void Execute(const Environment& env, const Command& cmd) override;
+        virtual Primitive  GetPrimitive() const override;
+
         virtual Type GetType() const override
         { return Type::ParticleEngine; }
-        virtual Primitive  GetPrimitive() const override
-        { return Primitive::Points; }
         virtual Usage GetUsage() const override
         { return Usage::Stream; }
         virtual const DrawableClass* GetClass() const override

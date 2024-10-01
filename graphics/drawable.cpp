@@ -2180,40 +2180,131 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
         {"aData",      0, 4, 0, offsetof(ParticleVertex, aData)}
     });
 
-    std::vector<ParticleVertex> verts;
-    for (const auto& p : state.particles)
-    {
-        // When using local coordinate space the max x/y should
-        // be the extents of the simulation in which case the
-        // particle x,y become normalized on the [0.0f, 1.0f] range.
-        // when using global coordinate space max x/y should be 1.0f
-        // and particle coordinates are left in the global space
-        ParticleVertex v;
-        v.aPosition.x = p.position.x / mParams->max_xpos;
-        v.aPosition.y = p.position.y / mParams->max_ypos;
-        v.aDirection  = ToVec(p.direction);
-        // copy the per particle data into the data vector for the fragment shader.
-        v.aData.x = p.pointsize >= 0.0f ? p.pointsize * pixel_scaler : 0.0f;
-        // abusing texcoord here to provide per particle random value.
-        // we can use this to simulate particle rotation for example
-        // (if the material supports it)
-        v.aData.y = p.randomizer;
-        // Use the particle data to pass the per particle alpha.
-        v.aData.z = p.alpha;
-        // use the particle data to pass the per particle time.
-        v.aData.w = p.time / (p.time_scale * mParams->max_lifetime);
-        verts.push_back(v);
-    }
-
     auto& geometry = create.buffer;
     ASSERT(geometry.GetNumDrawCmds() == 0);
-
     create.usage = Geometry::Usage::Stream;
     create.content_name = mName;
 
-    geometry.SetVertexBuffer(std::move(verts));
-    geometry.SetVertexLayout(layout);
-    geometry.AddDrawCmd(Geometry::DrawType::Points);
+    if (mParams->primitive == DrawPrimitive::Point)
+    {
+        std::vector<ParticleVertex> verts;
+        for (const auto& p: state.particles)
+        {
+            // When using local coordinate space the max x/y should
+            // be the extents of the simulation in which case the
+            // particle x,y become normalized on the [0.0f, 1.0f] range.
+            // when using global coordinate space max x/y should be 1.0f
+            // and particle coordinates are left in the global space
+            ParticleVertex v;
+            v.aPosition.x = p.position.x / mParams->max_xpos;
+            v.aPosition.y = p.position.y / mParams->max_ypos;
+            v.aDirection = ToVec(p.direction);
+            // copy the per particle data into the data vector for the fragment shader.
+            v.aData.x = p.pointsize >= 0.0f ? p.pointsize * pixel_scaler : 0.0f;
+            // abusing texcoord here to provide per particle random value.
+            // we can use this to simulate particle rotation for example
+            // (if the material supports it)
+            v.aData.y = p.randomizer;
+            // Use the particle data to pass the per particle alpha.
+            v.aData.z = p.alpha;
+            // use the particle data to pass the per particle time.
+            v.aData.w = p.time / (p.time_scale * mParams->max_lifetime);
+            verts.push_back(v);
+        }
+
+        geometry.SetVertexBuffer(std::move(verts));
+        geometry.SetVertexLayout(layout);
+        geometry.AddDrawCmd(Geometry::DrawType::Points);
+    }
+    else if (mParams->primitive == DrawPrimitive::FullLine ||
+             mParams->primitive == DrawPrimitive::PartialLineBackward ||
+             mParams->primitive == DrawPrimitive::PartialLineForward)
+    {
+        // when the coordinate space is local we must be able to
+        // determine what is the length of the line (that is expressed
+        // in world units) in local units.
+        // so we're going to take the point size (that is used to express
+        // the line length), create a vector in global coordinates and map
+        // that back to the local coordinate system to see what it maps to
+        //
+        // then the line geometry generation will take the particle point
+        // and create a line that extends through that point half the line
+        // length in both directions (forward and backward)
+
+        // there's a bunch of things to improve here.
+        //
+        // - the speed of the particle is baked into the direction vector
+        //   this complicates the line end point computation since we need
+        //   just the direction which now requires normalizing the direction
+        //   which is expensive.
+        //
+        // - computing the line length in local coordinate space is expensive
+        //   this that requires inverse mapping
+        //
+        // - the boundary conditions on local coordinate space only consider
+        //   the center point of the particle. on large particle sizes this
+        //   might make the particle visually ugly since the extents of the
+        //   rasterized area will then poke beyond the boundary. This problem
+        //   is not just with lines but also with points.
+
+        const auto& model_to_world = *env.model_matrix;
+        const auto& world_to_model = mParams->coordinate_space == CoordinateSpace::Local
+                                     ? glm::inverse(model_to_world) : glm::mat4(1.0f);
+
+        const auto primitive = mParams->primitive;
+
+        std::vector<ParticleVertex> verts;
+        for (const auto& p: state.particles)
+        {
+            const auto line_length = mParams->coordinate_space == CoordinateSpace::Local
+                                     ? glm::length(world_to_model * glm::vec4(p.pointsize, 0.0f, 0.0f, 0.0f)) : p.pointsize;
+
+            const auto& pos = p.position;
+            // todo: the velocity is baked in the direction vector
+            // so computing the end points for the line based on the
+            // position and direction is expensive since need to
+            // normalize...
+            const auto& dir = glm::normalize(p.direction);
+            glm::vec2 start;
+            glm::vec2 end;
+            if (primitive == DrawPrimitive::FullLine)
+            {
+                start = pos + dir * line_length * 0.5f;
+                end   = pos - dir * line_length * 0.5f;
+            }
+            else if (primitive == DrawPrimitive::PartialLineForward)
+            {
+                start = pos;
+                end   = pos + dir * line_length * 0.5f;
+            }
+            else if (primitive == DrawPrimitive::PartialLineBackward)
+            {
+                start = pos - dir * line_length * 0.5f;
+                end   = pos;
+            }
+
+            ParticleVertex v;
+            v.aPosition = ToVec(start / glm::vec2(mParams->max_xpos, mParams->max_ypos));
+            v.aDirection = ToVec(p.direction);
+            // copy the per particle data into the data vector for the fragment shader.
+            v.aData.x = p.pointsize >= 0.0f ? p.pointsize * pixel_scaler : 0.0f;
+            // abusing texcoord here to provide per particle random value.
+            // we can use this to simulate particle rotation for example
+            // (if the material supports it)
+            v.aData.y = p.randomizer;
+            // Use the particle data to pass the per particle alpha.
+            v.aData.z = p.alpha;
+            // use the particle data to pass the per particle time.
+            v.aData.w = p.time / (p.time_scale * mParams->max_lifetime);
+            verts.push_back(v);
+
+            v.aPosition = ToVec(end / glm::vec2(mParams->max_xpos, mParams->max_ypos));
+            verts.push_back(v);
+        }
+        geometry.SetVertexBuffer(std::move(verts));
+        geometry.SetVertexLayout(layout);
+        geometry.AddDrawCmd(Geometry::DrawType::Lines);
+    }
     return true;
 }
 
@@ -2467,6 +2558,7 @@ void ParticleEngineClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",                           mId);
     data.Write("name",                         mName);
+    data.Write("primitive",                    mParams->primitive);
     data.Write("direction",                    mParams->direction);
     data.Write("placement",                    mParams->placement);
     data.Write("shape",                        mParams->shape);
@@ -2508,6 +2600,7 @@ bool ParticleEngineClass::FromJson(const data::Reader& data)
     bool ok = true;
     ok &= data.Read("id",                           &mId);
     ok &= data.Read("name",                         &mName);
+    ok &= data.Read("primitive",                    &params.primitive);
     ok &= data.Read("direction",                    &params.direction);
     ok &= data.Read("placement",                    &params.placement);
     ok &= data.Read("shape",                        &params.shape);
@@ -3022,7 +3115,7 @@ bool ParticleEngineClass::UpdateParticle(const Environment& env, const Params& p
 
 void ParticleEngineInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
-    state.line_width = 1.0;
+    // state.line_width = 1.0; // don't change the line width
     state.culling    = Culling::None;
     mClass->ApplyDynamicState(env, program);
 }
@@ -3080,6 +3173,19 @@ void ParticleEngineInstance::Execute(const Environment& env, const Command& cmd)
         }
     }
     else WARN("No such particle engine command. [cmd='%1']", cmd.name);
+}
+
+Drawable::Primitive ParticleEngineInstance::GetPrimitive() const
+{
+    const auto p = mClass->GetParams().primitive;
+    if (p == ParticleEngineClass::DrawPrimitive::Point)
+        return Primitive::Points;
+    else if (p == ParticleEngineClass::DrawPrimitive::FullLine ||
+             p == ParticleEngineClass::DrawPrimitive::PartialLineBackward ||
+             p == ParticleEngineClass::DrawPrimitive::PartialLineForward)
+        return Primitive ::Lines;
+    else BUG("Bug on particle engine draw primitive.");
+    return Primitive::Points;
 }
 
 void TileBatch::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& raster) const
