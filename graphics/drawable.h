@@ -43,6 +43,7 @@
 #include "graphics/geometry.h"
 #include "graphics/device.h"
 #include "graphics/program.h"
+#include "graphics/types.h"
 
 namespace gfx
 {
@@ -71,9 +72,8 @@ namespace gfx
         };
         // Style of the drawable's geometry determines how the geometry
         // is to be rasterized.
-        enum class Primitive {
-            Points, Lines, Triangles
-        };
+        using Primitive = DrawPrimitive;
+
         struct Environment {
             // true if running in an "editor mode", which means that even
             // content marked static might have changed and should be checked
@@ -1025,7 +1025,6 @@ namespace gfx
             // Reflect the particle at the boundary
             Reflect
         };
-
 
         // Control when to spawn particles.
         enum class SpawnPolicy {

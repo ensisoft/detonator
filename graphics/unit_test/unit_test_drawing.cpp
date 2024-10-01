@@ -375,7 +375,6 @@ void unit_test_material_uniforms()
         // uniforms are set.
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.render_points = false;
         env.material_time = 0.0f;
         test.ApplyDynamicState(env, device, program);
 
@@ -397,7 +396,6 @@ void unit_test_material_uniforms()
 
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.render_points = false;
         env.material_time = 0.0f;
         test.ApplyDynamicState(env, device, program);
 
@@ -433,7 +431,6 @@ void unit_test_material_uniforms()
 
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.render_points = false;
         env.material_time = 2.0f;
         test.ApplyDynamicState(env, device, program);
 
@@ -475,7 +472,6 @@ void unit_test_material_uniforms()
 
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.render_points = false;
         env.material_time = 2.0f;
         test.ApplyDynamicState(env, device, program);
 
@@ -512,7 +508,6 @@ void unit_test_material_uniforms()
 
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.render_points = false;
         env.material_time = 0.0f;
 
         test.ApplyStaticState(env, device, program);
@@ -538,7 +533,6 @@ void unit_test_material_uniforms()
 
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.render_points = false;
         env.material_time = 0.0f;
 
         test.ApplyStaticState(env, device, program);
@@ -582,7 +576,6 @@ void unit_test_material_uniforms()
 
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.render_points = false;
         env.material_time = 2.0f;
 
         test.ApplyStaticState(env, device, program);
@@ -624,7 +617,6 @@ void unit_test_material_uniforms()
 
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.render_points = false;
         env.material_time = 2.0f;
 
         test.ApplyStaticState(env, device, program);
