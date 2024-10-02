@@ -21,6 +21,9 @@
 #include "warnpush.h"
 #  if defined(MATH_SUPPORT_GLM)
 #    include <glm/glm.hpp>
+#    include <glm/gtx/matrix_decompose.hpp>
+#    include <glm/gtx/euler_angles.hpp>
+#    include <glm/gtx/fast_square_root.hpp>
 #  endif
 #include "warnpop.h"
 
@@ -50,6 +53,17 @@ namespace math
             return (T(0) < x) - (x < T(0));
         }
     } // namespace
+
+    template<typename Float> inline constexpr
+    Float DegreesToRadians(Float degrees) noexcept
+    {
+        return degrees * (Pi / 180.0);
+    }
+    template<typename Float> inline constexpr
+    Float RadiansToDegrees(Float radians) noexcept
+    {
+        return radians * (180.0 / Pi);
+    }
 
     template <typename T> inline constexpr
     int signum(T x) noexcept {
@@ -357,6 +371,114 @@ namespace math
                equals(lhs.y, rhs.y, epsilon) &&
                equals(lhs.z, rhs.z, epsilon) &&
                equals(lhs.w, rhs.w, epsilon);
+    }
+
+    // Rotate a vector on the xy plane around the Z axis.
+    inline glm::vec2 RotateVectorAroundZ(const glm::vec2& vec, float angle) noexcept
+    {
+        return glm::eulerAngleZ(angle) * glm::vec4(vec.x, vec.y, 0.0f, 0.0f);
+    }
+    // transform a direction vector (such as a normal) safely even if the
+    // transformation matrix contains a non-uniform scale.
+    inline glm::vec4 TransformNormalVector(const glm::mat4& matrix, const glm::vec4& vector) noexcept
+    {
+        return glm::transpose(glm::inverse(matrix)) * vector;
+    }
+    // transform a direction vector (such as a normal) safely even if the
+    // transformation matrix contains a non-uniform scale.
+    inline glm::vec2 TransformNormalVector(const glm::mat4& matrix, const glm::vec2& vector) noexcept
+    {
+        return TransformNormalVector(matrix, glm::vec4(vector, 0.0f, 0.0f));
+    }
+
+    inline glm::vec4 TransformVector(const glm::mat4& matrix, const glm::vec4& vector) noexcept
+    {
+        return glm::normalize(matrix * glm::vec4(vector.x, vector.y, vector.z, 0.0f)); // disregard translation
+    }
+    inline glm::vec4 TransformVector(const glm::mat4& matrix, const glm::vec2& vector) noexcept
+    {
+        return glm::normalize(matrix * glm::vec4(vector.x, vector.y, 0.0f, 0.0f));
+    }
+
+    inline glm::vec4 TransformPoint(const glm::mat4& matrix, const glm::vec4& point) noexcept
+    {
+        return matrix * point;
+    }
+
+    inline glm::vec4 TransformPoint(const glm::mat4& matrix, const glm::vec2& point) noexcept
+    {
+        return matrix * glm::vec4(point.x, point.y, 0.0f, 1.0f);
+    }
+
+    // Find the angle that rotates the basis vector X such that
+    // it's collinear with the parameter vector.
+    // returns the angle in radians.
+    inline float FindVectorRotationAroundZ(const glm::vec2& vec) noexcept
+    {
+        const auto cosine = glm::dot(glm::normalize(vec), glm::vec2(1.0f, 0.0f));
+        if (vec.y > 0.0f)
+            return std::acos(cosine);
+        return -std::acos(cosine);
+    }
+
+    inline float GetRotationFromMatrix(const glm::mat4& mat) noexcept
+    {
+        glm::vec3 scale;
+        glm::vec3 translation;
+        glm::vec3 skew;
+        glm::vec4 perspective;
+        glm::quat orientation;
+        glm::decompose(mat, scale, orientation, translation, skew, perspective);
+        return glm::angle(orientation);
+    }
+
+    inline glm::vec2 GetScaleFromMatrix(const glm::mat4& mat) noexcept
+    {
+        glm::vec3 scale;
+        glm::vec3 translation;
+        glm::vec3 skew;
+        glm::vec4 perspective;
+        glm::quat orientation;
+        glm::decompose(mat, scale, orientation, translation, skew, perspective);
+        return scale;
+    }
+
+    inline glm::vec2 GetTranslationFromMatrix(const glm::mat4& mat) noexcept
+    {
+        glm::vec3 scale;
+        glm::vec3 translation;
+        glm::vec3 skew;
+        glm::vec4 perspective;
+        glm::quat orientation;
+        glm::decompose(mat, scale, orientation, translation, skew, perspective);
+        return translation;
+    }
+
+    inline glm::vec3 ComputeNormal(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c) noexcept
+    {
+        // https://github.com/g-truc/glm/blob/master/manual.md#section1
+        // code samples
+        return glm::normalize(glm::cross(c - a, b - a));
+    }
+    inline glm::vec2 ComputeNormal(const glm::vec2& a, const glm::vec2& b) noexcept
+    {
+        // https://github.com/g-truc/glm/blob/master/manual.md#section1
+        // code samples
+        //return glm::normalize(glm::cross(glm::vec3(c, 0.0f) - glm::vec3(a, 0.0f),
+        //                                 glm::vec3(b, 0.0f) - glm::vec3(a, 0.0f)));
+        const auto direction = b - a;
+        const auto angle = FindVectorRotationAroundZ(direction);
+        const auto perpendicular_angle = angle - DegreesToRadians(90.0f);
+        return RotateVectorAroundZ(glm::vec2(1.0f, 0.0f), perpendicular_angle);
+    }
+
+    inline glm::vec3 ComputeNormalFast(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c) noexcept
+    {
+        return glm::fastNormalize(glm::cross(c - a, b - a));
+    }
+    inline glm::vec2 ComputeNormalFast(const glm::vec2& a, const glm::vec2& b) noexcept
+    {
+        return ComputeNormal(a, b);
     }
 
 #endif
