@@ -25,6 +25,7 @@
 #include <string>
 #include <any>
 
+#include "base/math.h"
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "base/test_help.h"
@@ -1072,7 +1073,7 @@ void unit_test_material_uniform_folding()
         const auto& source = klass.GetShader(state, device);
         const auto& sauce = source.GetSource();
         TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kBaseColor;") == false);
-        TEST_REQUIRE(base::Contains(sauce, "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));     
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));
     }
 
     {
@@ -1709,6 +1710,61 @@ void unit_test_local_particles()
 void unit_test_global_particles()
 {
     TEST_CASE(test::Type::Feature)
+
+    struct ParticleVertex {
+        gfx::Vec2 aPosition;
+        gfx::Vec2 aDirection;
+        gfx::Vec4 aData;
+    };
+
+
+    // global sector direction
+    {
+        gfx::ParticleEngineClass::Params p;
+        p.coordinate_space = gfx::ParticleEngineClass::CoordinateSpace::Global;
+        p.init_rect_width  = 1.0;
+        p.init_rect_height = 1.0;
+        p.init_rect_xpos   = 0;
+        p.init_rect_ypos   = 0;
+        p.num_particles    = 10;
+        p.mode             = gfx::ParticleEngineClass::SpawnPolicy::Once;
+        p.direction        = gfx::ParticleEngineClass::Direction::Sector;
+        p.placement        = gfx::ParticleEngineClass::Placement::Center;
+        p.direction_sector_start_angle = math::DegreesToRadians(135.0);
+        p.direction_sector_size = 0.0;
+        gfx::ParticleEngineClass klass(p);
+        gfx::ParticleEngineInstance eng(klass);
+
+        TestDevice dev;
+        gfx::detail::GenericShaderProgram pass;
+        gfx::DrawableClass::Environment env;
+        gfx::Geometry::CreateArgs args;
+
+        base::Transform transform;
+        transform.Resize(200.0f, 6.0f);
+        const auto& model_to_world = transform.GetAsMatrix();
+
+        env.model_matrix = &model_to_world;
+
+        eng.Restart(env);
+        eng.Update(env, 1.0/60.0f);
+
+        TEST_REQUIRE(eng.Construct(env, args));
+        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+
+        for (size_t i=0; i<p.num_particles; ++i)
+        {
+            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
+            TEST_REQUIRE(math::equals(100.0f, v.aPosition.x, 0.1f));
+            TEST_REQUIRE(math::equals(3.0f, v.aPosition.y, 0.1f));
+
+            const auto result_angle = math::FindVectorRotationAroundZ(gfx::ToVec(v.aDirection));
+            const auto target_angle = math::DegreesToRadians(135.0f);
+            const auto epsilon = 0.1f;
+            TEST_REQUIRE(math::equals(target_angle, result_angle, epsilon));
+        }
+    }
+
 }
 
 void unit_test_particles()
