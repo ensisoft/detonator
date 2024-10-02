@@ -30,6 +30,8 @@
 #define BASE_FORMAT_SUPPORT_GLM
 #define BASE_FORMAT_SUPPORT_MAGIC_ENUM
 
+#define MATH_SUPPORT_GLM
+
 // only enable tracing universally for the game engine build
 #if defined(DETONATOR_GAME_ENGINE_WASM_BUILD)
 #  define BASE_TRACING_ENABLE_TRACING

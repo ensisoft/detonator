@@ -29,10 +29,19 @@
 #include <string>
 #include <cmath> // for acos
 
+#include "base/math.h"
 #include "game/types.h"
 
 namespace game
 {
+    using math::RotateVectorAroundZ;
+    using math::TransformNormalVector;
+    using math::TransformVector;
+    using math::TransformPoint;
+    using math::FindVectorRotationAroundZ;
+    using math::GetRotationFromMatrix;
+    using math::GetScaleFromMatrix;
+    using math::GetTranslationFromMatrix;
 
 inline FRect ComputeBoundingRect(const glm::mat4& mat) noexcept
 {
@@ -55,88 +64,7 @@ inline FRect ComputeBoundingRect(const glm::mat4& mat) noexcept
     return {left, top, right - left, bottom - top};
 }
 
-inline float GetRotationFromMatrix(const glm::mat4& mat) noexcept
-{
-    glm::vec3 scale;
-    glm::vec3 translation;
-    glm::vec3 skew;
-    glm::vec4 perspective;
-    glm::quat orientation;
-    glm::decompose(mat, scale, orientation, translation, skew, perspective);
-    return glm::angle(orientation);
-}
 
-inline glm::vec2 GetScaleFromMatrix(const glm::mat4& mat) noexcept
-{
-    glm::vec3 scale;
-    glm::vec3 translation;
-    glm::vec3 skew;
-    glm::vec4 perspective;
-    glm::quat orientation;
-    glm::decompose(mat, scale, orientation, translation, skew, perspective);
-    return scale;
-}
-
-inline glm::vec2 GetTranslationFromMatrix(const glm::mat4& mat) noexcept
-{
-    glm::vec3 scale;
-    glm::vec3 translation;
-    glm::vec3 skew;
-    glm::vec4 perspective;
-    glm::quat orientation;
-    glm::decompose(mat, scale, orientation, translation, skew, perspective);
-    return translation;
-}
-
-// Rotate a vector on the xy plane around the Z axis.
-inline glm::vec2 RotateVectorAroundZ(const glm::vec2& vec, float angle) noexcept
-{
-    return glm::eulerAngleZ(angle) * glm::vec4(vec.x, vec.y, 0.0f, 0.0f);
-}
-
-
-// transform a direction vector (such as a normal) safely even if the
-// transformation matrix contains a non-uniform scale.
-inline glm::vec4 TransformNormalVector(const glm::mat4& matrix, const glm::vec4& vector) noexcept
-{
-    return glm::transpose(glm::inverse(matrix)) * vector;
-}
-// transform a direction vector (such as a normal) safely even if the
-// transformation matrix contains a non-uniform scale.
-inline glm::vec2 TransformNormalVector(const glm::mat4& matrix, const glm::vec2& vector) noexcept
-{
-    return TransformNormalVector(matrix, glm::vec4(vector, 0.0f, 0.0f));
-}
-
-inline glm::vec4 TransformVector(const glm::mat4& matrix, const glm::vec4& vector) noexcept
-{
-    return glm::normalize(matrix * glm::vec4(vector.x, vector.y, vector.z, 0.0f)); // disregard translation
-}
-inline glm::vec4 TransformVector(const glm::mat4& matrix, const glm::vec2& vector) noexcept
-{
-    return glm::normalize(matrix * glm::vec4(vector.x, vector.y, 0.0f, 0.0f));
-}
-
-inline glm::vec4 TransformPoint(const glm::mat4& matrix, const glm::vec4& point) noexcept
-{
-    return matrix * point;
-}
-
-inline glm::vec4 TransformPoint(const glm::mat4& matrix, const glm::vec2& point) noexcept
-{
-    return matrix * glm::vec4(point.x, point.y, 0.0f, 1.0f);
-}
-
-// Find the angle that rotates the basis vector X such that
-// it's collinear with the parameter vector.
-// returns the angle in radians.
-inline float FindVectorRotationAroundZ(const glm::vec2& vec) noexcept
-{
-    const auto cosine = glm::dot(glm::normalize(vec), glm::vec2(1.0f, 0.0f));
-    if (vec.y > 0.0f)
-        return std::acos(cosine);
-    return -std::acos(cosine);
-}
 
 inline FBox TransformRect(const FRect& rect, const glm::mat4& mat) noexcept
 {
