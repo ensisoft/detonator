@@ -2777,8 +2777,8 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
     {
         Transform transform(*env.model_matrix);
         transform.Push();
-        transform.Scale(params.init_rect_width, params.init_rect_height);
-        transform.Translate(params.init_rect_xpos, params.init_rect_ypos);
+            transform.Scale(params.init_rect_width, params.init_rect_height);
+            transform.Translate(params.init_rect_xpos, params.init_rect_ypos);
         const auto& particle_to_world = transform.GetAsMatrix();
         const auto emitter_radius = 0.5f;
         const auto emitter_center = glm::vec2(0.5f, 0.5f);
@@ -2831,15 +2831,12 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
 
             if (params.direction == Direction::Sector)
             {
-                Transform local_transform;
-                local_transform.RotateAroundZ(params.direction_sector_start_angle +
-                                              math::rand(0.0f, params.direction_sector_size));
+                const auto direction_angle = params.direction_sector_start_angle +
+                                                 math::rand(0.0f, params.direction_sector_size);
 
-                const auto local_direction = local_transform * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
-                const auto world_direction = glm::normalize(particle_to_world * local_direction);
-                const auto world_angle_cos = glm::dot(world_direction, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-                const auto world_angle = std::atan2(world_direction.y, world_direction.x);
-                direction = glm::vec2(std::cos(world_angle), std::sin(world_angle));
+                const float model_to_world_rotation = math::GetRotationFromMatrix(*env.model_matrix);
+                const auto world_direction =  math::RotateVectorAroundZ(glm::vec2(1.0f, 0.0f), model_to_world_rotation + direction_angle);
+                direction = world_direction;
             }
             else if (params.placement == Placement::Center)
             {
