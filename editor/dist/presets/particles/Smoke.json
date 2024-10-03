@@ -1,0 +1,128 @@
+{
+  "material": {
+    "active_texture_map": "5XMC29STn4",
+    "flags": {
+      "BlendFrames": true,
+      "PremultipliedAlpha": false,
+      "Static": false
+    },
+    "id": "TDggthMzAR",
+    "name": "Smoke Particle",
+    "particle_action": "None",
+    "shader_src": "",
+    "shader_uri": "app://shaders/es2/basic_particle.glsl",
+    "surface": "Transparent",
+    "texture_mag_filter": "Default",
+    "texture_maps": [
+      {
+        "fps": 0.0,
+        "id": "5XMC29STn4",
+        "looping": true,
+        "name": "kMask",
+        "rect_name0": "kMaskRect",
+        "rect_name1": "",
+        "sampler_name0": "kMask",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "sRGB",
+            "effects": {
+              "Blur": false,
+              "Edges": false
+            },
+            "file": "app://textures/particles/smoke_04.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "uXRQ3ZyNNt",
+            "name": "Texture",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      }
+    ],
+    "texture_min_filter": "Default",
+    "texture_wrap_x": "Clamp",
+    "texture_wrap_y": "Clamp",
+    "type": "Custom",
+    "uniforms": [
+      {
+        "name": "kEndColor",
+        "value": {
+          "a": 0.0,
+          "b": 0.0784313753247261,
+          "g": 0.0784313753247261,
+          "r": 0.1411764770746231
+        }
+      },
+      {
+        "name": "kRotate",
+        "value": 1
+      },
+      {
+        "name": "kRotationValue",
+        "value": 0.0
+      },
+      {
+        "name": "kStartColor",
+        "value": {
+          "a": 1.0,
+          "b": 0.687281608581543,
+          "g": 0.687281608581543,
+          "r": 0.7410544157028198
+        }
+      }
+    ]
+  },
+  "particle": {
+    "alpha_over_dist": 0.0,
+    "alpha_over_time": 0.0,
+    "boundary": "Clamp",
+    "coordinate_space": "Global",
+    "delay": 0.0,
+    "direction": "Sector",
+    "direction_sector_size": 0.36651915311813354,
+    "direction_sector_start_angle": -1.7453292608261108,
+    "gravity": {
+      "x": 0.0,
+      "y": 0.30000001192092896
+    },
+    "growth_over_dist": 0.0,
+    "growth_over_time": 56.0,
+    "id": "3pIG6I82yO",
+    "init_rect_height": 1.0,
+    "init_rect_width": 1.0,
+    "init_rect_xpos": 0.0,
+    "init_rect_ypos": 0.0,
+    "max_alpha": 1.0,
+    "max_lifetime": 3.0,
+    "max_point_size": 83.0,
+    "max_time": 3.4028234663852886e+38,
+    "max_velocity": 169.4600067138672,
+    "max_xpos": 1.0,
+    "max_ypos": 1.0,
+    "min_alpha": 1.0,
+    "min_lifetime": 1.0,
+    "min_point_size": 33.0,
+    "min_time": 0.0,
+    "min_velocity": 105.73999786376953,
+    "mode": "Continuous",
+    "motion": "Linear",
+    "name": "Smoke",
+    "num_particles": 30.0,
+    "placement": "Center",
+    "primitive": "Point",
+    "shape": "Rectangle"
+  },
+  "viz_height": 78.0,
+  "viz_width": 60.0
+}

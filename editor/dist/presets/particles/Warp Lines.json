@@ -1,0 +1,128 @@
+{
+  "material": {
+    "active_texture_map": "Gz3DfEwNwl",
+    "flags": {
+      "BlendFrames": true,
+      "PremultipliedAlpha": false,
+      "Static": false
+    },
+    "id": "quun8rd0La",
+    "name": "Warp Lines Particle",
+    "particle_action": "None",
+    "shader_src": "",
+    "shader_uri": "app://shaders/es2/basic_particle.glsl",
+    "surface": "Transparent",
+    "texture_mag_filter": "Default",
+    "texture_maps": [
+      {
+        "fps": 0.0,
+        "id": "Gz3DfEwNwl",
+        "looping": true,
+        "name": "kMask",
+        "rect_name0": "kMaskRect",
+        "rect_name1": "",
+        "sampler_name0": "kMask",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "sRGB",
+            "effects": {
+              "Blur": false,
+              "Edges": false
+            },
+            "file": "app://textures/particles/circle_02.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "rTmuZkuKEn",
+            "name": "Texture",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      }
+    ],
+    "texture_min_filter": "Default",
+    "texture_wrap_x": "Clamp",
+    "texture_wrap_y": "Clamp",
+    "type": "Custom",
+    "uniforms": [
+      {
+        "name": "kEndColor",
+        "value": {
+          "a": 1.0,
+          "b": 0.8327916264533997,
+          "g": 0.6499580144882202,
+          "r": 0.20053406059741974
+        }
+      },
+      {
+        "name": "kRotate",
+        "value": 3
+      },
+      {
+        "name": "kRotationValue",
+        "value": 0.0
+      },
+      {
+        "name": "kStartColor",
+        "value": {
+          "a": 1.0,
+          "b": 0.9176012873649597,
+          "g": 0.9176012873649597,
+          "r": 0.9391164779663086
+        }
+      }
+    ]
+  },
+  "particle": {
+    "alpha_over_dist": 0.0,
+    "alpha_over_time": 0.0,
+    "boundary": "Clamp",
+    "coordinate_space": "Global",
+    "delay": 0.0,
+    "direction": "Outwards",
+    "direction_sector_size": 6.2831854820251465,
+    "direction_sector_start_angle": 0.0,
+    "gravity": {
+      "x": 0.0,
+      "y": 0.30000001192092896
+    },
+    "growth_over_dist": 0.0,
+    "growth_over_time": 0.0,
+    "id": "jdjNl1Joh3",
+    "init_rect_height": 1.0,
+    "init_rect_width": 1.0,
+    "init_rect_xpos": 0.0,
+    "init_rect_ypos": 0.0,
+    "max_alpha": 1.0,
+    "max_lifetime": 1.0,
+    "max_point_size": 158.0,
+    "max_time": 3.4028234663852886e+38,
+    "max_velocity": 537.7000122070313,
+    "max_xpos": 1.0,
+    "max_ypos": 1.0,
+    "min_alpha": 1.0,
+    "min_lifetime": 0.5,
+    "min_point_size": 101.0,
+    "min_time": 0.0,
+    "min_velocity": 411.8399963378906,
+    "mode": "Continuous",
+    "motion": "Linear",
+    "name": "Warp Lines",
+    "num_particles": 100.0,
+    "placement": "Center",
+    "primitive": "FullLine",
+    "shape": "Rectangle"
+  },
+  "viz_height": 500.0,
+  "viz_width": 500.0
+}

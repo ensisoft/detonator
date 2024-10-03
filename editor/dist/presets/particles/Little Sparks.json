@@ -1,0 +1,128 @@
+{
+  "material": {
+    "active_texture_map": "5z688AwrKf",
+    "flags": {
+      "BlendFrames": true,
+      "PremultipliedAlpha": false,
+      "Static": false
+    },
+    "id": "9seUDjyOEs",
+    "name": "My Particle System Particle",
+    "particle_action": "None",
+    "shader_src": "",
+    "shader_uri": "app://shaders/es2/basic_particle.glsl",
+    "surface": "Emissive",
+    "texture_mag_filter": "Default",
+    "texture_maps": [
+      {
+        "fps": 0.0,
+        "id": "5z688AwrKf",
+        "looping": true,
+        "name": "kMask",
+        "rect_name0": "kMaskRect",
+        "rect_name1": "",
+        "sampler_name0": "kMask",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "sRGB",
+            "effects": {
+              "Blur": false,
+              "Edges": false
+            },
+            "file": "app://textures/particles/circle_05.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "R4WzuojUzy",
+            "name": "Texture",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      }
+    ],
+    "texture_min_filter": "Default",
+    "texture_wrap_x": "Clamp",
+    "texture_wrap_y": "Clamp",
+    "type": "Custom",
+    "uniforms": [
+      {
+        "name": "kEndColor",
+        "value": {
+          "a": 1.0,
+          "b": 0.06663614511489868,
+          "g": 0.4588693082332611,
+          "r": 0.7604333758354187
+        }
+      },
+      {
+        "name": "kRotate",
+        "value": 3
+      },
+      {
+        "name": "kRotationValue",
+        "value": 0.0
+      },
+      {
+        "name": "kStartColor",
+        "value": {
+          "a": 1.0,
+          "b": 0.0,
+          "g": 0.9226672649383545,
+          "r": 1.0
+        }
+      }
+    ]
+  },
+  "particle": {
+    "alpha_over_dist": 0.0,
+    "alpha_over_time": 0.0,
+    "boundary": "Clamp",
+    "coordinate_space": "Global",
+    "delay": 0.0,
+    "direction": "Sector",
+    "direction_sector_size": 0.41887903213500977,
+    "direction_sector_start_angle": -1.7976890802383423,
+    "gravity": {
+      "x": 0.0,
+      "y": 30.0
+    },
+    "growth_over_dist": 0.0,
+    "growth_over_time": 0.0,
+    "id": "xghbGXzdLv",
+    "init_rect_height": 1.0,
+    "init_rect_width": 1.0,
+    "init_rect_xpos": 0.0,
+    "init_rect_ypos": 0.0,
+    "max_alpha": 1.0,
+    "max_lifetime": 2.0,
+    "max_point_size": 4.0,
+    "max_time": 3.4028234663852886e+38,
+    "max_velocity": 81.08999633789063,
+    "max_xpos": 1.0,
+    "max_ypos": 1.0,
+    "min_alpha": 1.0,
+    "min_lifetime": 1.0,
+    "min_point_size": 2.0,
+    "min_time": 0.0,
+    "min_velocity": 26.90999984741211,
+    "mode": "Continuous",
+    "motion": "Linear",
+    "name": "Little Sparks",
+    "num_particles": 25.0,
+    "placement": "Center",
+    "primitive": "Point",
+    "shape": "Rectangle"
+  },
+  "viz_height": 32.0,
+  "viz_width": 22.0
+}
