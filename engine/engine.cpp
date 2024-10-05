@@ -464,10 +464,12 @@ public:
             mRenderer.SetSurface(surface);
 
             engine::Renderer::Camera camera;
-            camera.viewport = game_view;
-            camera.scale    = game_camera.scale;
-            camera.position = game_camera.position;
-            camera.rotation = 0.0f;
+            camera.viewport   = game_view;
+            camera.scale      = game_camera.scale;
+            camera.position   = game_camera.position;
+            camera.rotation   = 0.0f;
+            camera.ppa        = engine::ComputePerspectiveProjection(game_view);
+
             mRenderer.SetCamera(camera);
 
             if (mFlags.test(Flags::EditingMode))

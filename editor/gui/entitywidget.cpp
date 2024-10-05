@@ -3425,6 +3425,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     camera.scale.x    = xs * zoom;
     camera.scale.y    = ys * zoom;
     camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);
+    camera.ppa        = engine::ComputePerspectiveProjection(camera.viewport);
     mState.renderer.SetCamera(camera);
 
     engine::Renderer::Surface surface;
