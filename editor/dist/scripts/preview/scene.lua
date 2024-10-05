@@ -19,7 +19,7 @@ function StartGame()
     Game:Play('_scene_preview_')
 
     Game:SetViewport(-SurfaceWidth*0.5, -SurfaceHeight*0.5, SurfaceWidth, SurfaceHeight)
-    viewport_translate = glm.vec2:new(-SurfaceWidth*0.5, -SurfaceWidth*0.5)
+    viewport_translate = glm.vec2:new(0.0, 0.0)
 end
 
 function Update(game_time, dt)
@@ -34,8 +34,7 @@ function Update(game_time, dt)
     vector = glm.normalize(velocity)
 
     viewport_translate = viewport_translate + velocity * dt * 750.0
-
-    Game:SetViewport(viewport_translate.x, viewport_translate.y, SurfaceWidth, SurfaceHeight)
+    Game:SetCameraPosition(viewport_translate.x, viewport_translate.y)
 
     up_velocity = up_velocity + up_acceleration * dt
     if up_velocity > 0 then
@@ -66,7 +65,8 @@ function OnKeyDown(symbol, modifier_bits)
     if symbol == wdk.Keys.Escape then
         Game:Play('_scene_preview_')
         Game:SetViewport(-SurfaceWidth*0.5, -SurfaceHeight*0.5, SurfaceWidth, SurfaceHeight)
-        viewport_translate  = glm.vec2:new(-SurfaceWidth*0.5, -SurfaceHeight*0.5)
+        Game:SetCameraPosition(0.0, 0.0)
+        viewport_translate  = glm.vec2:new(0.0, 0.0)
     elseif symbol == wdk.Keys.KeyW then
         up_velocity     = -1.0
         up_acceleration =  0.0
@@ -96,10 +96,5 @@ end
 
 -- Special function, only called in editing/preview mode.
 function OnRenderingSurfaceResized(width, height)
-    if viewport_translate == nil then
-        Game:SetViewport(-width*0.5, -height*0.5, width, height)
-        return
-    end
-
-    Game:SetViewport(viewport_translate.x, viewport_translate.y, width, height)
+    Game:SetViewport(-width*0.5, -height*0.5, width, height)
 end

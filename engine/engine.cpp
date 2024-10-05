@@ -435,9 +435,9 @@ public:
         // rendering surface dimensions.
         const float surf_width  = (float)mSurfaceWidth;
         const float surf_height = (float)mSurfaceHeight;
-        const auto& camera = mRuntime->GetCamera();
+        const auto& game_camera = mRuntime->GetCamera();
         // get the game's logical viewport into the game world.
-        const auto& game_view = camera.viewport;
+        const auto& game_view = game_camera.viewport;
         // map the logical viewport to some area in the rendering surface
         // so that the rendering area (the device viewport) has the same
         // aspect ratio as the logical viewport.
@@ -465,9 +465,9 @@ public:
 
             engine::Renderer::Camera camera;
             camera.viewport = game_view;
+            camera.scale    = game_camera.scale;
+            camera.position = game_camera.position;
             camera.rotation = 0.0f;
-            camera.scale    = camera.scale;
-            camera.position = camera.position;
             mRenderer.SetCamera(camera);
 
             if (mFlags.test(Flags::EditingMode))

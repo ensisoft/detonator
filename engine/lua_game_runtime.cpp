@@ -524,7 +524,7 @@ void LuaRuntime::Init()
         self.mActionQueue.push(action);
     };
 
-    engine["MoveCamera"] = sol::overload(
+    engine["SetCameraPosition"] = sol::overload(
          [](LuaRuntime& self, float x, float y) {
              self.mCamera.position = glm::vec2 { x, y };
          },
@@ -534,6 +534,13 @@ void LuaRuntime::Init()
          [](LuaRuntime& self, const base::FPoint& point) {
              self.mCamera.position = glm::vec2 { point.GetX(), point.GetY() };
          });
+    engine["TranslateCamera"] = sol::overload(
+        [](LuaRuntime& self, float dx, float dy) {
+            self.mCamera.position += glm::vec2(dx, dy);
+        },
+        [](LuaRuntime& self, const glm::vec2& dt) {
+            self.mCamera.position += dt;
+        });
 
     engine["SetViewport"] = sol::overload(
         [](LuaRuntime& self, const FRect& view) {
