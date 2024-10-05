@@ -133,6 +133,8 @@ namespace engine
             glm::vec2 scale    = {1.0f, 1.0f};
             game::FRect viewport;
             float rotation = 0.0f;
+
+            PerspectiveProjectionArgs ppa;
         };
 
         // The rendering window/surface details.

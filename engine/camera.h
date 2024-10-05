@@ -132,6 +132,16 @@ namespace engine
     glm::mat4 CreateProjectionMatrix(Projection projection, const glm::vec2& surface_size);
     glm::mat4 CreateProjectionMatrix(Projection projection, float surface_width, float surface_height);
 
+    struct PerspectiveProjectionArgs {
+        float near_plane = 1.0f;
+        float far_plane  = 10000.0f;
+        float fov        = 45.0f;
+        float aspect     = 1.0f;
+    };
+    PerspectiveProjectionArgs ComputePerspectiveProjection(const game::FRect& viewport);
+
+    glm::mat4 CreateProjectionMatrix(const game::FRect& viewport, const PerspectiveProjectionArgs& args);
+
     // Create model transformation matrix for a certain type of game perspective.
     // This matrix adds a perspective specific rotation to the model transformation.
     glm::mat4 CreateModelMatrix(GameView view);

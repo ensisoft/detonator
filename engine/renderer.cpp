@@ -1329,7 +1329,7 @@ void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& pa
 
     const auto& model_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation);
     const auto& orthographic = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-    const auto& perspective  = CreateProjectionMatrix(Projection::Perspective, mCamera.viewport);
+    const auto& perspective  = CreateProjectionMatrix(mCamera.viewport, mCamera.ppa);
 
     gfx::Painter painter(&device);
     painter.SetViewport(mSurface.viewport);

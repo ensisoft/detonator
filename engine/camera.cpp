@@ -85,10 +85,7 @@ namespace engine
 
 glm::mat4 CreateProjectionMatrix(Projection projection, const game::FRect& viewport)
 {
-    constexpr auto zFar  = 10000.0f;
-    constexpr auto zNear = 1.0f;
-    constexpr auto Fov   = 45.0f;
-    // glm::ortho, left, right, bottom, top, near, far
+    ASSERT(projection == Projection::Orthographic);
 
     const auto width  = viewport.GetWidth();
     const auto height = viewport.GetHeight();
@@ -113,48 +110,9 @@ glm::mat4 CreateProjectionMatrix(Projection projection, const game::FRect& viewp
     const auto right = xpos + width;
     const auto top = ypos;
     const auto bottom = ypos + height;
-    auto ortho = glm::ortho(left, right, -bottom, -top, -10000.0f, 10000.0f);
 
-    if (projection == Projection::Orthographic)
-    {
-        return ortho;
-    }
-    else if (projection == Projection::Perspective)
-    {
-        // with perspective projection we want to map the drawable shape to the screen so
-        // that the center of the shape aligns at the same screen coordinate in both
-        // orthographic and perspective projections. The way we can achieve this (without
-        // changing the objects X,Y position and only manipulating the the Z, i.e. the
-        // distance from the camera) is by setting up the projection transformation so
-        // that the near plane half height equals the half height of the orthographic
-        // projection plane and then by translating the object to a depth value which maps
-        // it to the near plane.
-        //
-        // tan(f)     = h / x
-        // tan(f) * x = h
-        //          x = h / tan(f)
-        //
-        // Remember that the FOV (Field of View) angle includes above and below the "horizon"
-        // i.e. above and below y=0.0f.
-        //
-        // This all works except that placing objects at the near plane has a problem with
-        // clipping since the front part of the object might get clipped.
-        // So this fix this we transform the vertices from clipping space back into world
-        // space and add another translate and then perform the clip space mapping again.
-        // Using an orthographic transformation avoids issues with perspective transformation
-        // since we just want to offset on the Z axis after all perspective transformation
-        // has already been done!
-
-        const auto aspect = width / height;
-        const auto near = (height*0.5f) / std::tan(glm::radians(Fov*0.5f));
-        return ortho *
-                 glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -10000} ) *
-                   glm::inverse(ortho) *
-                     glm::perspective(glm::radians(Fov), aspect, near, zFar) *
-                       glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -near });
-    }
-    else BUG("Missing projection matrix setup.");
-    return glm::mat4(1.0f);
+    // glm::ortho, left, right, bottom, top, near, far
+    return glm::ortho(left, right, -bottom, -top, -10000.0f, 10000.0f);
 }
 
 glm::mat4 CreateProjectionMatrix(Projection projection, const glm::vec2& surface_size)
@@ -170,6 +128,71 @@ glm::mat4 CreateProjectionMatrix(Projection projection, float surface_width, flo
 {
     return CreateProjectionMatrix(projection, glm::vec2{surface_width, surface_height});
 }
+
+PerspectiveProjectionArgs ComputePerspectiveProjection(const game::FRect& viewport)
+{
+    const auto width  = viewport.GetWidth();
+    const auto height = viewport.GetHeight();
+
+    const auto Fov = 45.0f;
+    const auto zFar = 10000.0f;
+
+    PerspectiveProjectionArgs args;
+    args.fov        = Fov;
+    args.aspect     = width / height;
+    args.far_plane  = zFar;
+    args.near_plane = (height*0.5f) / std::tan(glm::radians(Fov*0.5f));
+    return args;
+}
+
+
+glm::mat4 CreateProjectionMatrix(const game::FRect& viewport, const PerspectiveProjectionArgs& args)
+{
+    const auto& ortho = CreateProjectionMatrix(Projection::Orthographic, viewport);
+
+    const auto zFar  = args.far_plane; //10000.0f;
+    const auto zNear = args.near_plane; //1.0f;
+    const auto Fov   = args.fov; //45.0f;
+
+    // with perspective projection we want to map the drawable shape to the screen so
+    // that the center of the shape aligns at the same screen coordinate in both
+    // orthographic and perspective projections. The way we can achieve this (without
+    // changing the objects X,Y position and only manipulating the the Z, i.e. the
+    // distance from the camera) is by setting up the projection transformation so
+    // that the near plane half height equals the half height of the orthographic
+    // projection plane and then by translating the object to a depth value which maps
+    // it to the near plane.
+    //
+    // tan(f)     = y / x
+    // tan(f) * x = y
+    //          x = y / tan(f)
+    //
+    // Remember that the FOV (Field of View) angle includes above and below the "horizon"
+    // i.e. above and below y=0.0f.
+    //
+    // This all works except that placing objects at the near plane has a problem with
+    // clipping since the front part of the object might get clipped.
+    // So this fix this we transform the vertices from clipping space back into world
+    // space and add another translate and then perform the clip space mapping again.
+    // Using an orthographic transformation avoids issues with perspective transformation
+    // since we just want to offset on the Z axis after all perspective transformation
+    // has already been done!
+
+    const auto width  = viewport.GetWidth();
+    const auto height = viewport.GetHeight();
+
+    //const auto aspect = width / height;
+    //const auto near = (height*0.5f) / std::tan(glm::radians(Fov*0.5f));
+    const auto aspect = args.aspect;
+    const auto near = args.near_plane;
+
+    return ortho *
+             glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -10000} ) *
+               glm::inverse(ortho) *
+                 glm::perspective(glm::radians(Fov), aspect, near, zFar) *
+                   glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -near });
+}
+
 
 glm::mat4 CreateModelMatrix(GameView view)
 {
