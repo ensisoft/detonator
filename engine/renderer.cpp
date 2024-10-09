@@ -71,20 +71,44 @@ void Renderer::CreateRenderState(const game::Scene& scene, const game::Tilemap* 
 
     const auto& nodes = scene.CollectNodes();
 
-    gfx::Transform transform;
-
     for (const auto& p : nodes)
     {
         const Entity* entity = p.entity;
         if (!entity->HasRenderableItems())
             continue;
-        transform.Push(p.node_to_scene);
-            MapEntity<Entity, EntityNode>(*p.entity, transform);
-        transform.Pop();
+
+        gfx::Transform transform(p.node_to_scene);
+        MapEntity<Entity, EntityNode>(*p.entity, transform);
     }
 }
 
 void Renderer::UpdateRenderState(const game::Scene& scene, const game::Tilemap* map, double time, float dt)
+{
+    const auto& nodes = scene.CollectNodes();
+
+    for (const auto& node : nodes)
+    {
+        const Entity* entity = node.entity;
+        if (!entity->HasRenderableItems())
+            continue;
+
+        if (entity->HasBeenKilled())
+        {
+            for (size_t i=0; i<entity->GetNumNodes(); ++i)
+            {
+                const auto& node = entity->GetNode(i);
+                mPaintNodes.erase(node.GetId());
+            }
+        }
+        else
+        {
+            gfx::Transform transform(node.node_to_scene);
+            MapEntity<Entity, EntityNode>(*node.entity, transform);
+        }
+    }
+}
+
+void Renderer::CreateRenderPackets(const game::Scene& scene, const game::Tilemap* map, double time, float dt)
 {
     std::vector<DrawPacket> packets;
 
@@ -100,48 +124,28 @@ void Renderer::UpdateRenderState(const game::Scene& scene, const game::Tilemap* 
         TRACE_CALL("GenerateMapDrawPackets", GenerateMapDrawPackets(*map, batches, packets));
     }
 
+    const auto scene_packet_start_index = packets.size();
+
     {
         TRACE_SCOPE("UpdateRenderState");
 
-        const auto& nodes = scene.CollectNodes();
-
-        gfx::Transform transform;
-        for (const auto& p : nodes)
+        for (size_t i=0; i<scene.GetNumEntities(); ++i)
         {
-            const Entity* entity = p.entity;
-            if (entity->HasBeenKilled())
+            const auto& entity = scene.GetEntity(i);
+            for (size_t j=0; j<entity->GetNumNodes(); ++j)
             {
-                for (size_t i = 0; i < entity->GetNumNodes(); ++i)
-                {
-                    const EntityNode& node = entity->GetNode(i);
-                    mPaintNodes.erase(node.GetId());
-                }
-                continue;
-            }
-
-            if (!entity->HasRenderableItems())
-                continue;
-
-            transform.Push(p.node_to_scene);
-                MapEntity<Entity, EntityNode>(*p.entity, transform);
-            transform.Pop();
-
-            for (size_t i = 0; i < entity->GetNumNodes(); ++i)
-            {
-                const auto& node = entity->GetNode(i);
+                const auto& node = entity.GetNode(j);
                 if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
                 {
-                    CreateDrawResources<Entity, EntityNode>(*entity, node, *paint);
-                    UpdateNode<Entity, EntityNode>(*entity, node, *paint, time, dt);
-                    GenerateDrawPackets<Entity, EntityNode>(*entity, node, *paint, packets, nullptr /*entity hook*/);
+                    CreateDrawResources<Entity, EntityNode>(entity, node, *paint);
+                    UpdateNode<Entity, EntityNode>(entity, node, *paint, time, dt);
+                    GenerateDrawPackets<Entity, EntityNode>(entity, node, *paint, packets, nullptr /* entity hook*/);
                     paint->visited = true;
                 }
             }
         }
 
     } // update render state
-
-    const auto scene_packet_start_index = packets.size();
 
     if (map)
     {
@@ -158,13 +162,15 @@ void Renderer::UpdateRenderState(const game::Scene& scene, const game::Tilemap* 
         TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets));
     }
 
+    // this is the outcome that the draw function will then actually draw
     std::swap(mRenderBuffer, packets);
-
 }
-
 
 void Renderer::Draw(gfx::Device& device) const
 {
+    if (mRenderBuffer.empty())
+        return;
+
     TRACE_CALL("DrawScenePackets", DrawScenePackets(device, mRenderBuffer));
 }
 
@@ -819,15 +825,11 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
             if (item || text)
             {
                 const game::FBox box(mTransform.GetAsMatrix());
-
                 auto& paint_node = mRenderer.mPaintNodes[node->GetId()];
                 paint_node.visited        = true;
                 paint_node.world_pos      = box.GetTopLeft();
                 paint_node.world_scale    = box.GetSize();
                 paint_node.world_rotation = box.GetRotation();
-#if !defined(NDEBUG)
-                paint_node.debug_name     = mEntity.GetName() + "/" + node->GetName();
-#endif
             }
         }
         virtual void LeaveNode(const NodeType* node) override

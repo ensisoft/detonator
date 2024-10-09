@@ -698,30 +698,29 @@ void unit_test_entity_lifecycle()
         {
             scene->Update(dt, nullptr);
 
-            renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
-            TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
-
             // simulate game update here. entity gets killed.
             auto* ent = scene->FindEntityByInstanceName("1");
             ent->Die();
 
+            TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
             renderer.BeginFrame();
             {
-                renderer.Draw(*device);
+                renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
             }
             renderer.EndFrame();
+            TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
         }
         scene->EndLoop();
     }
 
-    // entity 1 was killed, entity 2 gets spawned.
+    // entity 1 gets killed
     {
         scene->BeginLoop();
         {
             scene->Update(dt, nullptr);
 
-            renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
-            TEST_REQUIRE(renderer.GetNumPaintNodes() == 0);
+            auto* ent = scene->FindEntityByInstanceName("1");
+            TEST_REQUIRE(ent->HasBeenKilled());
 
             // simulate game update here, entity gets spawned.
             game::EntityArgs args;
@@ -730,30 +729,35 @@ void unit_test_entity_lifecycle()
             args.id = "2";
             scene->SpawnEntity(args);
 
+            TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
             renderer.BeginFrame();
             {
-                renderer.Draw(*device);
+                renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
             }
             renderer.EndFrame();
+            TEST_REQUIRE(renderer.GetNumPaintNodes() == 0);
         }
         scene->EndLoop();
     }
 
-    //
+    // entity 2 gets spawned.
     {
         scene->BeginLoop();
         {
             scene->Update(dt, nullptr);
 
-            renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
-            TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
+            auto* ent = scene->FindEntityByInstanceName("2");
+            TEST_REQUIRE(ent->HasBeenSpawned());
 
+            TEST_REQUIRE(renderer.GetNumPaintNodes() == 0);
             renderer.BeginFrame();
             {
-                renderer.Draw(*device);
+                renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
             }
             renderer.EndFrame();
+            TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
         }
+        scene->EndLoop();
     }
 }
 

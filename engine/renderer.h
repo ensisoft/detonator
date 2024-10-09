@@ -27,6 +27,7 @@
 #include <variant>
 #include <vector>
 #include <unordered_map>
+#include <mutex>
 
 #include "base/bitflag.h"
 #include "graphics/fwd.h"
@@ -180,6 +181,9 @@ namespace engine
 
         void UpdateRenderState(const game::Scene& scene, const game::Tilemap* map,
                                double time, float dt);
+
+        void CreateRenderPackets(const game::Scene& scene, const game::Tilemap* map,
+                                 double time, float dt);
 
         // Draw the current rendering state.
         void Draw(gfx::Device& painter) const;
@@ -350,9 +354,6 @@ namespace engine
             glm::vec2 world_scale;
             glm::vec2 world_pos;
             float world_rotation = 0.0f;
-#if !defined(NDEBUG)
-            std::string debug_name;
-#endif
         };
         std::unordered_map<std::string, PaintNode> mPaintNodes;
 
@@ -381,6 +382,7 @@ namespace engine
         PacketFilter* mPacketFilter = nullptr;
 
         mutable std::vector<DrawPacket> mRenderBuffer;
+
     };
 
 } // namespace
