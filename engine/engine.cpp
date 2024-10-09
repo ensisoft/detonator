@@ -19,6 +19,8 @@
 // this translation unit implements the engine library interface.
 #define GAMESTUDIO_GAMELIB_IMPLEMENTATION
 
+#define ENGINE_USE_UPDATE_THREAD
+
 #include "warnpush.h"
 #  include <neargye/magic_enum.hpp>
 #  include <boost/circular_buffer.hpp>
@@ -32,6 +34,7 @@
 #include "base/bitflag.h"
 #include "base/logging.h"
 #include "base/trace.h"
+#include "base/threadpool.h"
 #include "audio/graph.h"
 #include "game/entity.h"
 #include "game/entity_node_drawable_item.h"
@@ -432,63 +435,82 @@ public:
         mDevice->BeginFrame();
         mDevice->ClearColor(mClearColor);
         mDevice->ClearDepth(1.0f);
-        // rendering surface dimensions.
-        const auto surf_width  = (float)mSurfaceWidth;
-        const auto surf_height = (float)mSurfaceHeight;
-        const auto& game_camera = mRuntime->GetCamera();
-        // get the game's logical viewport into the game world.
-        const auto& game_view = game_camera.viewport;
-        // map the logical viewport to some area in the rendering surface
-        // so that the rendering area (the device viewport) has the same
-        // aspect ratio as the logical viewport.
-        const float game_view_width  = game_view.GetWidth();
-        const float game_view_height = game_view.GetHeight();
 
-        // if the game hasn't set the viewport... then don't draw!
-        if (game_view_width <= 0.0f || game_view_height <= 0.0f)
+        // Do the main drawing here based on previously generated
+        // draw packets that are stored in the renderer.
+        // this state is rebuilt in the the call to renderer's
+        // CreateRenderPackets, which is an operation that cannot
+        // run at the same time when we're drawing.
+        TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mDevice));
+
+        // if we had updates running in parallel then complete (wait)
+        // the tasks here. This is unfortunately needed in order to
+        // make sure that the update thread is no longer touching
+        // the UI system or the scene.
+#if defined(ENGINE_USE_UPDATE_THREAD)
+        base::TaskHandle update_renderer_task;
+
+        if (!mUpdateTasks.empty())
         {
-            WARN("Game viewport is invalid. [width=%1, height=%2]", game_view_width, game_view_height);
-            return;
-        }
-
-        // the scaling factor for mapping game units to rendering surface (pixel) units.
-        const float game_scale  = std::min(surf_width / game_view_width, surf_height / game_view_height);
-
-        if (mScene)
-        {
-            TRACE_SCOPE("DrawScene");
-
-            engine::Renderer::Surface surface;
-            surface.viewport = GetViewport();
-            surface.size     = base::USize(mSurfaceWidth, mSurfaceHeight);
-            mRenderer.SetSurface(surface);
-
-            engine::Renderer::Camera camera;
-            camera.viewport   = game_view;
-            camera.scale      = game_camera.scale;
-            camera.position   = game_camera.position;
-            camera.rotation   = 0.0f;
-            camera.ppa        = engine::ComputePerspectiveProjection(game_view);
-            mRenderer.SetCamera(camera);
-
-            if (mFlags.test(Flags::EditingMode))
+            for (auto& task: mUpdateTasks)
             {
-                ConfigureRendererForScene();
+                task.Wait();
             }
+            mUpdateTasks.clear();
 
-            //TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
-            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mDevice));
-            //TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
-            TRACE_CALL("Engine::DrawDebugObjects", DrawDebugObjects());
+            class UpdateRendererStateTask : public base::ThreadTask {
+            public:
+                explicit UpdateRendererStateTask(GameStudioEngine* engine)
+                  : mEngine(engine)
+                {}
+            protected:
+                void DoTask() override
+                {
+                    mEngine->CreateRenderPackets();
+                }
+
+            private:
+                GameStudioEngine* mEngine = nullptr;
+            };
+
+            auto* thread_pool = base::GetGlobalThreadPool();
+            auto thread_task = std::make_unique<UpdateRendererStateTask>(this);
+            update_renderer_task = thread_pool->SubmitTask(std::move(thread_task), base::ThreadPool::UpdateThreadID);
+
+            // update the debug draws only after updating the game
+            // if this is done per each frame they will not be seen
+            // by the user if the rendering is running very fast.
+            std::vector<engine::DebugDrawCmd> debug_draws;
+            mRuntime->TransferDebugQueue(&debug_draws);
+            std::swap(mDebugDraws, debug_draws);
         }
-
-        TRACE_CALL("Engine::DrawGameUI", DrawGameUI());
+#else
+        CreateRenderPackets();
+#endif
+        // Continue drawing more stuff while the renderer update
+        // task runs in parallel.
+        TRACE_CALL("Engine::DrawGameUI",        DrawGameUI());
+        TRACE_CALL("Engine::DrawDebugObjects",  DrawDebugObjects());
         TRACE_CALL("Engine::DrawDebugMessages", DrawDebugMessages());
-        TRACE_CALL("Engine::DrawMousePointer", DrawMousePointer(dt));
+        TRACE_CALL("Engine::DrawMousePointer",  DrawMousePointer(dt));
 
         TRACE_CALL("Device::EndFrame", mDevice->EndFrame(true));
         // Note that we *don't* call CleanGarbage here since currently there should
         // be nothing that is creating needless GPU resources.
+
+#if defined(ENGINE_USE_UPDATE_THREAD)
+        // complete the update/render loop, wait this task here
+        // so that the update/rendering stay in sync.
+        if (update_renderer_task)
+        {
+            update_renderer_task.Wait();
+        }
+#endif
+
+        if (mDebug.debug_pause && !mStepForward)
+            return;
+
+        TRACE_CALL("HandleGameActions", PerformGameActions(dt));
     }
 
     virtual void BeginMainLoop() override
@@ -522,24 +544,57 @@ public:
         // Game Engine Architecture by Jason Gregory
         mTimeAccum += dt;
 
+#if defined(ENGINE_USE_UPDATE_THREAD)
+        auto* thread_pool = base::GetGlobalThreadPool();
+
+        class UpdateTask : public base::ThreadTask {
+        public:
+            explicit UpdateTask(GameStudioEngine* engine, double total_time, float time_step) noexcept
+              : mGameTimeTotal(total_time)
+              , mGameTimeStep(time_step)
+              , mEngine(engine)
+            {}
+        protected:
+            void DoTask() override
+            {
+                TRACE_CALL("UpdateGame", mEngine->UpdateGame(mGameTimeTotal, mGameTimeStep));
+                TRACE_CALL("UpdateGameUI", mEngine->UpdateGameUI(mGameTimeTotal, mGameTimeStep));
+            }
+        private:
+            const double mGameTimeTotal = 0.0;
+            const double mGameTimeStep  = 0.0;
+            GameStudioEngine* mEngine = nullptr;
+        };
+#endif
+
         // do simulation/animation update steps.
         while (mTimeAccum >= mGameTimeStep)
         {
             // Call UpdateGame with the *current* time. I.e. the game
             // is advancing one time step from current mGameTimeTotal.
             // this is consistent with the tick time accumulation below.
+#if defined(ENGINE_USE_UPDATE_THREAD)
+            auto task = std::make_unique<UpdateTask>(this, mGameTimeTotal, mGameTimeStep);
+            mUpdateTasks.push_back(thread_pool->SubmitTask(std::move(task), base::ThreadPool::UpdateThreadID));
+#else
             TRACE_CALL("UpdateGame", UpdateGame(mGameTimeTotal, mGameTimeStep));
-
             TRACE_CALL("UpdateGameUI", UpdateGameUI(mGameTimeTotal, mGameTimeStep));
-
+#endif
             mGameTimeTotal += mGameTimeStep;
             mTimeAccum -= mGameTimeStep;
 
             // if we're paused for debugging stop after one step forward.
             mStepForward = false;
         }
+#if !defined(ENGINE_USE_UPDATE_THREAD)
+        // update the debug draws only after updating the game
+        // if this is done per each frame they will not be seen
+        // by the user if the rendering is running very fast.
+        std::vector<engine::DebugDrawCmd> debug_draws;
+        mRuntime->TransferDebugQueue(&debug_draws);
+        std::swap(mDebugDraws, debug_draws);
+#endif
 
-        TRACE_CALL("HandleGameActions", PerformGameActions(dt));
     }
     virtual void EndMainLoop() override
     {
@@ -1020,9 +1075,7 @@ private:
             // that have been spawned etc. This needs to be done inside
             // the begin/end loop in order to have the correct signalling
             // i.e. entity control flags.
-            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRenderState(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
-
-            mRenderTimeTotal += dt;
+            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRenderState(*mScene, mTilemap.get(), game_time, dt));
 
             // make sure to do this first in order to allow the scene to rebuild
             // the spatial indices etc. before the game's PostUpdate runs.
@@ -1034,10 +1087,70 @@ private:
             TRACE_CALL("Runtime::EndLoop", mRuntime->EndLoop());
             TRACE_CALL("Scene::EndLoop", mScene->EndLoop());
         }
+    }
 
-        std::vector<engine::DebugDrawCmd> debug_draws;
-        mRuntime->TransferDebugQueue(&debug_draws);
-        std::swap(mDebugDraws, debug_draws);
+    void CreateRenderPackets()
+    {
+        const auto now = mGameTimeTotal;
+        if (mRenderTimeStamp == 0.0)
+            mRenderTimeStamp = now;
+
+        const auto dt  = now - mRenderTimeStamp;
+
+        if (mScene)
+        {
+            if (SetRendererState())
+            {
+                // Rebuild the renderer data structures and prepare the
+                // draw packets for the next draw(s)
+                TRACE_CALL("Renderer::CreateRenderPackets",
+                           mRenderer.CreateRenderPackets(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
+                if (mFlags.test(GameStudioEngine::Flags::EditingMode))
+                {
+                    ConfigureRendererForScene();
+                }
+            }
+        }
+        mRenderTimeTotal += dt;
+        mRenderTimeStamp = now;
+    }
+
+    bool SetRendererState()
+    {
+        // configure renderer
+        const auto surf_width  = (float)mSurfaceWidth;
+        const auto surf_height = (float)mSurfaceHeight;
+        const auto& game_camera = mRuntime->GetCamera();
+        // get the game's logical viewport into the game world.
+        const auto& game_view = game_camera.viewport;
+        // map the logical viewport to some area in the rendering surface
+        // so that the rendering area (the device viewport) has the same
+        // aspect ratio as the logical viewport.
+        const float game_view_width  = game_view.GetWidth();
+        const float game_view_height = game_view.GetHeight();
+        // the scaling factor for mapping game units to rendering surface (pixel) units.
+        const float game_scale  = std::min(surf_width / game_view_width, surf_height / game_view_height);
+
+        // if the game hasn't set the viewport... then don't draw!
+        if (game_view_width <= 0.0f || game_view_height <= 0.0f)
+        {
+            WARN("Game viewport is invalid. [width=%1, height=%2]", game_view_width, game_view_height);
+            return false;
+        }
+
+        engine::Renderer::Surface surface;
+        surface.viewport = GetViewport();
+        surface.size     = base::USize(mSurfaceWidth, mSurfaceHeight);
+        mRenderer.SetSurface(surface);
+
+        engine::Renderer::Camera camera;
+        camera.viewport   = game_view;
+        camera.scale      = game_camera.scale;
+        camera.position   = game_camera.position;
+        camera.rotation   = 0.0f;
+        camera.ppa        = engine::ComputePerspectiveProjection(game_view);
+        mRenderer.SetCamera(camera);
+        return true;
     }
 
     void UpdateGameUI(double game_time, float dt)
@@ -1400,6 +1513,9 @@ private:
     // Total accumulated game time so far.
     double mGameTimeTotal = 0.0f;
     double mRenderTimeTotal = 0.0;
+    double mRenderTimeStamp = 0.0;
+
+    std::vector<base::TaskHandle> mUpdateTasks;
 
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
