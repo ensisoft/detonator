@@ -1237,7 +1237,7 @@ public:
         mSurfaceHeight = init.surface_height;
     }
 
-    virtual void Draw() override
+    virtual void Draw(float dt) override
     {
         mDevice->BeginFrame();
         mDevice->ClearColor(gfx::Color4f(0.2, 0.3, 0.4, 1.0f));

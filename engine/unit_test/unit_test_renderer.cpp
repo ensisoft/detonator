@@ -680,7 +680,7 @@ void unit_test_entity_lifecycle()
 
     const float dt = 1.0f/60.0f;
 
-    renderer.CreateRenderStateFromScene(*scene);
+    renderer.CreateRenderState(*scene, nullptr);
     TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
 
     engine::Renderer::Surface surface;
@@ -698,9 +698,8 @@ void unit_test_entity_lifecycle()
         {
             scene->Update(dt, nullptr);
 
-            renderer.UpdateRenderStateFromScene(*scene);
+            renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
-            renderer.Update(0.0f, dt);
 
             // simulate game update here. entity gets killed.
             auto* ent = scene->FindEntityByInstanceName("1");
@@ -721,9 +720,8 @@ void unit_test_entity_lifecycle()
         {
             scene->Update(dt, nullptr);
 
-            renderer.UpdateRenderStateFromScene(*scene);
+            renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 0);
-            renderer.Update(0.0f, dt);
 
             // simulate game update here, entity gets spawned.
             game::EntityArgs args;
@@ -747,9 +745,8 @@ void unit_test_entity_lifecycle()
         {
             scene->Update(dt, nullptr);
 
-            renderer.UpdateRenderStateFromScene(*scene);
+            renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
-            renderer.Update(0.0f, dt);
 
             renderer.BeginFrame();
             {

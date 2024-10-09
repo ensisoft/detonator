@@ -65,7 +65,7 @@ void Renderer::BeginFrame()
     }
 }
 
-void Renderer::CreateRenderStateFromScene(const game::Scene& scene)
+void Renderer::CreateRenderState(const game::Scene& scene, const game::Tilemap* map)
 {
     mPaintNodes.clear();
 
@@ -82,46 +82,9 @@ void Renderer::CreateRenderStateFromScene(const game::Scene& scene)
             MapEntity<Entity, EntityNode>(*p.entity, transform);
         transform.Pop();
     }
-
 }
 
-void Renderer::UpdateRenderStateFromScene(const game::Scene& scene)
-{
-    const auto& nodes = scene.CollectNodes();
-
-    gfx::Transform transform;
-
-    for (const auto& p : nodes)
-    {
-        const Entity* entity = p.entity;
-
-        // either delete dead entites here or create a "BeginLoop" type of function
-        // and do the pruning there.
-        if (entity->HasBeenKilled())
-        {
-            for (size_t i=0; i<entity->GetNumNodes(); ++i)
-            {
-                const EntityNode& node = entity->GetNode(i);
-                mPaintNodes.erase(node.GetId());
-            }
-            continue;
-        }
-
-        transform.Push(p.node_to_scene);
-            MapEntity<Entity, EntityNode>(*p.entity, transform);
-        transform.Pop();
-    }
-}
-
-void Renderer::Update(float time, float dt)
-{
-    for (auto& [key, node] : mPaintNodes)
-    {
-        UpdateNode<EntityNode>(node, time, dt);
-    }
-}
-
-void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
+void Renderer::UpdateRenderState(const game::Scene& scene, const game::Tilemap* map, double time, float dt)
 {
     std::vector<DrawPacket> packets;
 
@@ -132,35 +95,59 @@ void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
         constexpr auto obey_klass_flags   = false;
         constexpr auto draw_render_layers = true;
         constexpr auto draw_data_layers   = false;
-        constexpr auto use_tile_batching = true;
+        constexpr auto use_tile_batching  = true;
         TRACE_CALL("PrepareMapTileBatches", PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching));
         TRACE_CALL("GenerateMapDrawPackets", GenerateMapDrawPackets(*map, batches, packets));
     }
 
-    const auto scene_packet_start_index = packets.size();
-
-    // create the draw packets based on the scene's paint nodes.
     {
-        TRACE_SCOPE("IteratePaintNodes");
-        for (auto& [key, paint] : mPaintNodes)
+        TRACE_SCOPE("UpdateRenderState");
+
+        const auto& nodes = scene.CollectNodes();
+
+        gfx::Transform transform;
+        for (const auto& p : nodes)
         {
+            const Entity* entity = p.entity;
+            if (entity->HasBeenKilled())
             {
-                TRACE_SCOPE("CreateDrawResources");
-                CreateDrawResources<Entity, EntityNode>(paint);
+                for (size_t i = 0; i < entity->GetNumNodes(); ++i)
+                {
+                    const EntityNode& node = entity->GetNode(i);
+                    mPaintNodes.erase(node.GetId());
+                }
+                continue;
             }
+
+            if (!entity->HasRenderableItems())
+                continue;
+
+            transform.Push(p.node_to_scene);
+                MapEntity<Entity, EntityNode>(*p.entity, transform);
+            transform.Pop();
+
+            for (size_t i = 0; i < entity->GetNumNodes(); ++i)
             {
-                TRACE_SCOPE("GenerateDrawPackets");
-                GenerateDrawPackets<Entity, EntityNode>(paint, packets, nullptr);
+                const auto& node = entity->GetNode(i);
+                if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+                {
+                    CreateDrawResources<Entity, EntityNode>(*entity, node, *paint);
+                    UpdateNode<Entity, EntityNode>(*entity, node, *paint, time, dt);
+                    GenerateDrawPackets<Entity, EntityNode>(*entity, node, *paint, packets, nullptr /*entity hook*/);
+                    paint->visited = true;
+                }
             }
-            paint.visited = true;
-        };
-    }
+        }
+
+    } // update render state
+
+    const auto scene_packet_start_index = packets.size();
 
     if (map)
     {
         // Compute map coordinates for all packets coming from scene rendering.
         // In other words, whenever a draw packet is generated from a scene's paint
-        // node map that node to a position on the map tile grid for combining it
+        // node, map that node to a position on the map tile grid for combining it
         // with the map's tile rendering.
         TRACE_CALL("ComputeTileCoordinates", ComputeTileCoordinates(*map, scene_packet_start_index, packets));
         // Sort all packets based on the map based sorting criteria
@@ -171,7 +158,14 @@ void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
         TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets));
     }
 
-    TRACE_CALL("DrawScenePackets", DrawScenePackets(device, packets));
+    std::swap(mRenderBuffer, packets);
+
+}
+
+
+void Renderer::Draw(gfx::Device& device) const
+{
+    TRACE_CALL("DrawScenePackets", DrawScenePackets(device, mRenderBuffer));
 }
 
 void Renderer::Draw(const Entity& entity,
@@ -456,14 +450,8 @@ void Renderer::Update(const EntityClass& entity, float time, float dt)
     {
         const auto& node = entity.GetNode(i);
         if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
-            UpdateNode<EntityNodeClass>(*paint, time, dt);
+            UpdateNode<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
     }
-}
-
-void Renderer::Update(const EntityNodeClass& node, float time, float dt)
-{
-    if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
-        UpdateNode<EntityNodeClass>(*paint, time, dt);
 }
 
 void Renderer::Update(const Entity& entity, float time, float dt)
@@ -472,14 +460,8 @@ void Renderer::Update(const Entity& entity, float time, float dt)
     {
         const auto& node = entity.GetNode(i);
         if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
-            UpdateNode<EntityNode>(*paint, time, dt);
+            UpdateNode<Entity, EntityNode>(entity, node, *paint, time, dt);
     }
-}
-
-void Renderer::Update(const EntityNode& node, float time, float dt)
-{
-    if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
-        UpdateNode<EntityNode>(*paint, time, dt);
 }
 
 void Renderer::Update(const SceneClass& scene, float time, float dt)
@@ -535,14 +517,13 @@ void Renderer::ClearPaintState()
     mTilemapPalette.clear();
 }
 
-template<typename EntityNodeType>
-void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
+template<typename EntityType, typename EntityNodeType>
+void Renderer::UpdateNode(const EntityType& entity, const EntityNodeType& entity_node,
+                          PaintNode& paint_node, double time, float dt) const
 {
     using DrawableItemType = typename EntityNodeType::DrawableItemType;
-
-    const auto& node = *std::get<const EntityNodeType*>(paint_node.entity_node);
-    const auto* item = node.GetDrawable();
-    const auto* text = node.GetTextItem();
+    const auto* item = entity_node.GetDrawable();
+    const auto* text = entity_node.GetTextItem();
 
     gfx::Transform transform;
     transform.Scale(paint_node.world_scale);
@@ -576,7 +557,7 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
         const auto& shape = paint_node.item_drawable;
         const auto view = item->GetRenderView();
-        const auto size = node.GetSize();
+        const auto size = entity_node.GetSize();
         const auto is3d = Is3DShape(*shape);
 
         if (view == game::RenderView::Dimetric)
@@ -667,7 +648,7 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
     if (text && paint_node.text_drawable)
     {
         // push the actual model transform
-        transform.Push(node.GetModelTransform());
+        transform.Push(entity_node.GetModelTransform());
 
         const auto& model = transform.GetAsMatrix();
         gfx::Drawable::Environment env;
@@ -761,8 +742,8 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
                 const auto& node = entity->GetNode(i);
                 if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
                 {
-                    CreateDrawResources<EntityType, EntityNodeType>(*paint);
-                    GenerateDrawPackets<EntityType, EntityNodeType>(*paint, entity_packets, nullptr /*entity hook */);
+                    CreateDrawResources<EntityType, EntityNodeType>(*entity, node, *paint);
+                    GenerateDrawPackets<EntityType, EntityNodeType>(*entity, node, *paint, entity_packets, nullptr /*entity hook */);
                 }
             }
             // generate draw packets uses the entity to ask for the scene layer index.
@@ -844,8 +825,6 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
                 paint_node.world_pos      = box.GetTopLeft();
                 paint_node.world_scale    = box.GetSize();
                 paint_node.world_rotation = box.GetRotation();
-                paint_node.entity_node    = node;
-                paint_node.entity         = &mEntity;
 #if !defined(NDEBUG)
                 paint_node.debug_name     = mEntity.GetName() + "/" + node->GetName();
 #endif
@@ -881,8 +860,8 @@ void Renderer::DrawEntity(const EntityType& entity,
         const auto& node = entity.GetNode(i);
         if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
         {
-            CreateDrawResources<EntityType, NodeType>(*paint);
-            GenerateDrawPackets<EntityType, NodeType>(*paint, packets, hook);
+            CreateDrawResources<EntityType, NodeType>(entity, node, *paint);
+            GenerateDrawPackets<EntityType, NodeType>(entity, node, *paint, packets, hook);
         }
         else if (hook)
         {
@@ -898,16 +877,11 @@ void Renderer::DrawEntity(const EntityType& entity,
 }
 
 template<typename EntityType, typename EntityNodeType>
-void Renderer::CreateDrawResources(PaintNode& paint_node)
+void Renderer::CreateDrawResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const
 {
-    using DrawableItemType = typename EntityNodeType::DrawableItemType;
-
-    const auto& entity = *std::get<const EntityType*>(paint_node.entity);
-    const auto& node   = *std::get<const EntityNodeType*>(paint_node.entity_node);
-
-    if (const auto* text = node.GetTextItem())
+    if (const auto* text = entity_node.GetTextItem())
     {
-        const auto& node_size = node.GetSize();
+        const auto& node_size = entity_node.GetSize();
         const auto text_raster_width  = text->GetRasterWidth();
         const auto text_raster_height = text->GetRasterHeight();
         const auto raster_width  = text_raster_width ? text_raster_width : node_size.x;
@@ -959,7 +933,7 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
             paint_node.text_drawable = gfx::CreateDrawableInstance(klass);
         }
     }
-    if (const auto* item = node.GetDrawable())
+    if (const auto* item = entity_node.GetDrawable())
     {
         const auto& material = item->GetMaterialId();
         const auto& drawable = item->GetDrawableId();
@@ -971,7 +945,7 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
             if (klass)
                 paint_node.item_material = gfx::CreateMaterialInstance(klass);
             if (!paint_node.item_material)
-                WARN("No such material class found. [material='%1', entity='%2', node='%3']", material, entity.GetName(), node.GetName());
+                WARN("No such material class found. [material='%1', entity='%2', node='%3']", material, entity.GetName(), entity_node.GetName());
         }
         if (paint_node.item_drawable_id != drawable)
         {
@@ -983,7 +957,7 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
                 paint_node.item_drawable = gfx::CreateDrawableInstance(klass);
 
             if (!paint_node.item_drawable)
-                WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", drawable, entity.GetName(), node.GetName());
+                WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", drawable, entity.GetName(), entity_node.GetName());
             if (paint_node.item_drawable)
             {
                 gfx::Transform transform;
@@ -991,7 +965,7 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
                 transform.RotateAroundZ(paint_node.world_rotation);
                 transform.Translate(paint_node.world_pos);
 
-                transform.Push(node.GetModelTransform());
+                transform.Push(entity_node.GetModelTransform());
 
                 const auto& model = transform.GetAsMatrix();
                 gfx::Drawable::Environment env; // todo:
@@ -1025,14 +999,15 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
 }
 
 template<typename EntityType, typename EntityNodeType>
-void Renderer::GenerateDrawPackets(PaintNode& paint_node,
+void Renderer::GenerateDrawPackets(const EntityType& entity,
+                                   const EntityNodeType& entity_node,
+                                   const PaintNode& paint_node,
                                    std::vector<DrawPacket>& packets,
-                                   EntityDrawHook<EntityNodeType>* hook)
+                                   EntityDrawHook<EntityNodeType>* hook) const
 {
     using DrawableItemType = typename EntityNodeType::DrawableItemType;
 
-    const auto& entity = *std::get<const EntityType*>(paint_node.entity);
-    const auto& node   = *std::get<const EntityNodeType*>(paint_node.entity_node);
+
     const bool entity_visible = entity.TestFlag(EntityType::Flags::VisibleInGame);
 
     gfx::Transform transform;
@@ -1041,10 +1016,10 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
     transform.Translate(paint_node.world_pos);
 
     glm::vec2 sort_point = {0.5f, 1.0f};
-    if (const auto* map = node.GetMapNode())
+    if (const auto* map = entity_node.GetMapNode())
         sort_point = map->GetSortPoint();
 
-    if (const auto* text = node.GetTextItem())
+    if (const auto* text = entity_node.GetTextItem())
     {
         bool visible_now = true;
         if (text->TestFlag(TextItemClass::Flags::BlinkText))
@@ -1059,7 +1034,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
         if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && entity_visible && visible_now)
         {
             // push the actual model transform
-            transform.Push(node.GetModelTransform());
+            transform.Push(entity_node.GetModelTransform());
 
             DrawPacket packet;
             packet.flags.set(DrawPacket::Flags::PP_Bloom, text->TestFlag(TextItemClass::Flags::PP_EnableBloom));
@@ -1072,7 +1047,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             packet.pass         = RenderPass::DrawColor;
             packet.packet_index = text->GetLayer();
             packet.render_layer = entity.GetLayer();
-            if (!hook || hook->InspectPacket(&node, packet))
+            if (!hook || hook->InspectPacket(&entity_node, packet))
                 packets.push_back(std::move(packet));
 
             // pop model transform
@@ -1080,14 +1055,14 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
         }
     }
 
-    if (const auto* item = node.GetDrawable())
+    if (const auto* item = entity_node.GetDrawable())
     {
         const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
         const auto double_sided    = item->TestFlag(DrawableItemType::Flags::DoubleSided);
         const auto depth_test      = item->TestFlag(DrawableItemType::Flags::DepthTest);
         const auto& shape = paint_node.item_drawable;
-        const auto size = node.GetSize();
+        const auto size = entity_node.GetSize();
         const auto is3d = Is3DShape(*shape);
         const auto view = item->GetRenderView();
 
@@ -1178,7 +1153,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             if (depth_test)
                 packet.depth_test = DrawPacket::DepthTest::LessOrEQual;
 
-            if (!hook || hook->InspectPacket(&node , packet))
+            if (!hook || hook->InspectPacket(&entity_node , packet))
                 packets.push_back(std::move(packet));
         }
 
@@ -1197,7 +1172,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
     if (hook)
     {
         // Allow the draw hook to append any extra draw packets for this node.
-        hook->AppendPackets(&node, transform, packets);
+        hook->AppendPackets(&entity_node, transform, packets);
     }
 }
 

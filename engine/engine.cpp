@@ -427,7 +427,7 @@ public:
         DEBUG("User home: '%1'.", env.user_home);
     }
 
-    virtual void Draw() override
+    virtual void Draw(float dt) override
     {
         mDevice->BeginFrame();
         mDevice->ClearColor(mClearColor);
@@ -476,20 +476,15 @@ public:
                 ConfigureRendererForScene();
             }
 
-            TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
-            // Update the rendering state, animate materials and drawables.
-            TRACE_CALL("Renderer::Update", mRenderer.Update(mRenderTimeTotal, mRenderStep));
-            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mDevice, mTilemap.get()));
-            TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
+            //TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
+            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mDevice));
+            //TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
             TRACE_CALL("Engine::DrawDebugObjects", DrawDebugObjects());
-
-            mRenderTimeTotal += mRenderStep;
-            mRenderStep = 0;
         }
 
         TRACE_CALL("Engine::DrawGameUI", DrawGameUI());
         TRACE_CALL("Engine::DrawDebugMessages", DrawDebugMessages());
-        TRACE_CALL("Engine::DrawMousePointer", DrawMousePointer());
+        TRACE_CALL("Engine::DrawMousePointer", DrawMousePointer(dt));
 
         TRACE_CALL("Device::EndFrame", mDevice->EndFrame(true));
         // Note that we *don't* call CleanGarbage here since currently there should
@@ -831,8 +826,6 @@ private:
             mPhysics.DeleteAll();
             mPhysics.CreateWorld(*mScene);
         }
-        TRACE_CALL("Renderer::CreateState", mRenderer.CreateRenderStateFromScene(*mScene));
-        ConfigureRendererForScene();
 
         const auto& klass = mScene->GetClass();
         if (klass.HasTilemap())
@@ -850,7 +843,12 @@ private:
                 DEBUG("Created tilemap instance");
             }
         } else mTilemap.reset();
+
         mScene->SetMap(mTilemap.get());
+
+        TRACE_CALL("Renderer::CreateState", mRenderer.CreateRenderState(*mScene, mTilemap.get()));
+        ConfigureRendererForScene();
+
         TRACE_CALL("Runtime::BeginPlay", mRuntime->BeginPlay(mScene.get(), mTilemap.get()));
     }
     void OnAction(const engine::SuspendAction& action)
@@ -956,7 +954,7 @@ private:
         mRequests.EnableDebugDraw(action.enabled);
     }
 
-    void UpdateGame(double game_time,  double dt)
+    void UpdateGame(double game_time, float dt)
     {
         if (mScene)
         {
@@ -985,10 +983,6 @@ private:
         }
 
         TRACE_CALL("Runtime::Update", mRuntime->Update(game_time, dt));
-
-        std::vector<engine::DebugDrawCmd> debug_draws;
-        mRuntime->TransferDebugQueue(&debug_draws);
-        std::swap(mDebugDraws, debug_draws);
 
         // Tick game
         {
@@ -1024,10 +1018,11 @@ private:
             // Update renderers data structures from the scene.
             // This involves creating new render nodes for new entities
             // that have been spawned etc. This needs to be done inside
-            // the begin/end loop in order to have the correct singalling
+            // the begin/end loop in order to have the correct signalling
             // i.e. entity control flags.
-            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRenderStateFromScene(*mScene));
-            mRenderStep += dt;
+            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRenderState(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
+
+            mRenderTimeTotal += dt;
 
             // make sure to do this first in order to allow the scene to rebuild
             // the spatial indices etc. before the game's PostUpdate runs.
@@ -1040,12 +1035,9 @@ private:
             TRACE_CALL("Scene::EndLoop", mScene->EndLoop());
         }
 
-        // update mouse pointer
-        {
-            gfx::Drawable::Environment env; // todo:
-            mMouseMaterial->Update(dt);
-            mMouseDrawable->Update(env, dt);
-        }
+        std::vector<engine::DebugDrawCmd> debug_draws;
+        mRuntime->TransferDebugQueue(&debug_draws);
+        std::swap(mDebugDraws, debug_draws);
     }
 
     void UpdateGameUI(double game_time, float dt)
@@ -1113,10 +1105,14 @@ private:
         }
     }
 
-    void DrawMousePointer()
+    void DrawMousePointer(float dt)
     {
         if (!mFlags.test(Flags::ShowMouseCursor))
             return;
+
+        gfx::Drawable::Environment env; // todo:
+        mMouseMaterial->Update(dt);
+        mMouseDrawable->Update(env, dt);
 
         const auto surf_width  = (float)mSurfaceWidth;
         const auto surf_height = (float)mSurfaceHeight;
@@ -1400,8 +1396,6 @@ private:
     // available for taking update and tick steps.
     float mTickAccum = 0.0f;
     float mTimeAccum = 0.0f;
-
-    float mRenderStep = 0.0;
 
     // Total accumulated game time so far.
     double mGameTimeTotal = 0.0f;
