@@ -433,8 +433,8 @@ public:
         mDevice->ClearColor(mClearColor);
         mDevice->ClearDepth(1.0f);
         // rendering surface dimensions.
-        const float surf_width  = (float)mSurfaceWidth;
-        const float surf_height = (float)mSurfaceHeight;
+        const auto surf_width  = (float)mSurfaceWidth;
+        const auto surf_height = (float)mSurfaceHeight;
         const auto& game_camera = mRuntime->GetCamera();
         // get the game's logical viewport into the game world.
         const auto& game_view = game_camera.viewport;
@@ -469,7 +469,6 @@ public:
             camera.position   = game_camera.position;
             camera.rotation   = 0.0f;
             camera.ppa        = engine::ComputePerspectiveProjection(game_view);
-
             mRenderer.SetCamera(camera);
 
             if (mFlags.test(Flags::EditingMode))
@@ -482,77 +481,15 @@ public:
             TRACE_CALL("Renderer::Update", mRenderer.Update(mRenderTimeTotal, mRenderStep));
             TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mDevice, mTilemap.get()));
             TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
-            TRACE_CALL("DebugDraw", DrawDebugObjects());
+            TRACE_CALL("Engine::DrawDebugObjects", DrawDebugObjects());
 
             mRenderTimeTotal += mRenderStep;
             mRenderStep = 0;
         }
 
-        {
-            TRACE_SCOPE("DrawUI");
-            mUIEngine.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
-            mUIEngine.Draw(*mDevice);
-        }
-
-        // this painter will be configured to draw directly in the window
-        // coordinates. Used to draw debug text and the mouse cursor.
-        gfx::Painter painter;
-
-        TRACE_ENTER(DebugDrawing);
-        if (mDebug.debug_show_fps || mDebug.debug_show_msg || mDebug.debug_draw || mFlags.test(Flags::ShowMouseCursor))
-        {
-            painter.SetDevice(mDevice);
-            painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
-            painter.SetPixelRatio(glm::vec2(1.0f, 1.0f));
-            painter.SetViewport(0, 0, surf_width, surf_height);
-            painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, surf_width, surf_height));
-            painter.SetEditingMode(mFlags.test(Flags::EditingMode));
-        }
-        if (mDebug.debug_show_fps && !mDebug.debug_font.empty())
-        {
-            char hallelujah[512] = {0};
-            std::snprintf(hallelujah, sizeof(hallelujah) - 1,
-            "FPS: %.2f wall time: %.2f frames: %u",
-                mLastStats.current_fps, mLastStats.total_wall_time, mLastStats.num_frames_rendered);
-
-            const gfx::FRect rect(10, 10, 500, 20);
-            gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.6f));
-            gfx::DrawTextRect(painter, hallelujah,
-                mDebug.debug_font, 14, rect, gfx::Color::HotPink,
-                gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
-        }
-        if (mDebug.debug_show_msg && mFlags.test(Flags::ShowDebugs) && !mDebug.debug_font.empty())
-        {
-            gfx::FRect rect(10, 30, 500, 20);
-            for (const auto& print : mDebugPrints)
-            {
-                gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.6f));
-                gfx::DrawTextRect(painter, print.message,
-                    mDebug.debug_font, 14, rect, gfx::Color::HotPink,
-                   gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
-                rect.Translate(0, 20);
-            }
-        }
-        if (mDebug.debug_draw)
-        {
-            // visualize the game's logical viewport in the window.
-            gfx::DrawRectOutline(painter, gfx::FRect(GetViewport()), gfx::Color::Green, 1.0f);
-        }
-        TRACE_LEAVE(DebugDrawing);
-
-        if (mFlags.test(Flags::ShowMouseCursor))
-        {
-            // scale the cursor size based on the requested units of the cursor size.
-            const auto& size   = mCursorUnits == EngineConfig::MouseCursorUnits::Units
-                                 ? mCursorSize * game_scale
-                                 : mCursorSize;
-            const auto& offset = -mCursorHotspot*size;
-            gfx::FRect rect;
-            rect.Resize(size.x, size.y);
-            rect.Move(mCursorPos.x, mCursorPos.y);
-            rect.Translate(offset.x, offset.y);
-            gfx::FillShape(painter, rect, *mMouseDrawable, *mMouseMaterial);
-        }
+        TRACE_CALL("Engine::DrawGameUI", DrawGameUI());
+        TRACE_CALL("Engine::DrawDebugMessages", DrawDebugMessages());
+        TRACE_CALL("Engine::DrawMousePointer", DrawMousePointer());
 
         TRACE_CALL("Device::EndFrame", mDevice->EndFrame(true));
         // Note that we *don't* call CleanGarbage here since currently there should
@@ -1176,6 +1113,107 @@ private:
         }
     }
 
+    void DrawMousePointer()
+    {
+        if (!mFlags.test(Flags::ShowMouseCursor))
+            return;
+
+        const auto surf_width  = (float)mSurfaceWidth;
+        const auto surf_height = (float)mSurfaceHeight;
+        const auto& game_camera = mRuntime->GetCamera();
+        // get the game's logical viewport into the game world.
+        const auto& game_view = game_camera.viewport;
+        // map the logical viewport to some area in the rendering surface
+        // so that the rendering area (the device viewport) has the same
+        // aspect ratio as the logical viewport.
+        const float game_view_width  = game_view.GetWidth();
+        const float game_view_height = game_view.GetHeight();
+
+        // the scaling factor for mapping game units to rendering surface (pixel) units.
+        const float game_scale  = std::min(surf_width / game_view_width, surf_height / game_view_height);
+
+        // scale the cursor size based on the requested units of the cursor size.
+        const auto& size   = mCursorUnits == EngineConfig::MouseCursorUnits::Units
+                             ? mCursorSize * game_scale
+                             : mCursorSize;
+        const auto& offset = -mCursorHotspot*size;
+
+        // this painter will be configured to draw directly in the window
+        // coordinates. Used to draw debug text and the mouse cursor.
+        gfx::Painter painter;
+        painter.SetDevice(mDevice);
+        painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+        painter.SetPixelRatio(glm::vec2(1.0f, 1.0f));
+        painter.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
+        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, surf_width, surf_height));
+        painter.SetEditingMode(mFlags.test(Flags::EditingMode));
+
+        gfx::FRect rect;
+        rect.Resize(size.x, size.y);
+        rect.Move(mCursorPos.x, mCursorPos.y);
+        rect.Translate(offset.x, offset.y);
+        gfx::FillShape(painter, rect, *mMouseDrawable, *mMouseMaterial);
+    }
+
+    void DrawGameUI()
+    {
+        mUIEngine.SetSurfaceSize((float)mSurfaceWidth, (float)mSurfaceHeight);
+        mUIEngine.Draw(*mDevice);
+    }
+
+    void DrawDebugMessages()
+    {
+        const auto draw_any_debug = mDebug.debug_show_fps ||
+                                    mDebug.debug_show_msg ||
+                                    mDebug.debug_draw;
+        if  (!draw_any_debug)
+            return;
+
+        const auto surf_width  = (float)mSurfaceWidth;
+        const auto surf_height = (float)mSurfaceHeight;
+
+        // this painter will be configured to draw directly in the window
+        // coordinates. Used to draw debug text and the mouse cursor.
+        gfx::Painter painter;
+        painter.SetDevice(mDevice);
+        painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+        painter.SetPixelRatio(glm::vec2(1.0f, 1.0f));
+        painter.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
+        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, surf_width, surf_height));
+        painter.SetEditingMode(mFlags.test(Flags::EditingMode));
+
+        if (mDebug.debug_show_fps && !mDebug.debug_font.empty())
+        {
+            char hallelujah[512] = {0};
+            std::snprintf(hallelujah, sizeof(hallelujah) - 1,
+                          "FPS: %.2f wall time: %.2f frames: %u",
+                          mLastStats.current_fps, mLastStats.total_wall_time, mLastStats.num_frames_rendered);
+
+            const gfx::FRect rect(10, 10, 500, 20);
+            gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.6f));
+            gfx::DrawTextRect(painter, hallelujah,
+                              mDebug.debug_font, 14, rect, gfx::Color::HotPink,
+                              gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+        }
+        if (mDebug.debug_show_msg && mFlags.test(Flags::ShowDebugs) && !mDebug.debug_font.empty())
+        {
+            gfx::FRect rect(10, 30, 500, 20);
+            for (const auto& print : mDebugPrints)
+            {
+                gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.6f));
+                gfx::DrawTextRect(painter, print.message,
+                                  mDebug.debug_font, 14, rect, gfx::Color::HotPink,
+                                  gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+                rect.Translate(0, 20);
+            }
+        }
+        if (mDebug.debug_draw)
+        {
+            // visualize the game's logical viewport in the window.
+            gfx::DrawRectOutline(painter, gfx::FRect(GetViewport()), gfx::Color::Green, 1.0f);
+        }
+    }
+
 
     void DrawDebugObjects()
     {
@@ -1200,7 +1238,7 @@ private:
         painter.SetEditingMode(mFlags.test(Flags::EditingMode));
         painter.SetPixelRatio(glm::vec2 { 1.0f, 1.0f });
 
-         TRACE_BLOCK("DebugDrawLines",
+        TRACE_BLOCK("DebugDrawLines",
             if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::GameDebugDraw))
             {
                 for (const auto& draw: mDebugDraws)
@@ -1208,8 +1246,7 @@ private:
                     if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw))
                         gfx::DebugDrawLine(painter, ptr->a, ptr->b, ptr->color, ptr->width);
                     else if (const auto* ptr = std::get_if<engine::DebugDrawRect>(&draw))
-                        gfx::DebugDrawRect(painter, gfx::FRect(ptr->top_left, ptr->bottom_right), ptr->color,
-                                           ptr->width);
+                        gfx::DebugDrawRect(painter, gfx::FRect(ptr->top_left, ptr->bottom_right), ptr->color, ptr->width);
                     else if (const auto* ptr = std::get_if<engine::DebugDrawCircle>(&draw))
                         gfx::DebugDrawCircle(painter, gfx::FCircle(ptr->center, ptr->radius), ptr->color, ptr->width);
                     else BUG("Missing debug draw implementation");
