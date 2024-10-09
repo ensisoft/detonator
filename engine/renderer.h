@@ -145,7 +145,7 @@ namespace engine
             USize size;
         };
 
-        Renderer(const ClassLibrary* classlib = nullptr);
+        explicit Renderer(const ClassLibrary* classlib = nullptr);
 
         inline void SetBloom(const BloomParams& bloom) noexcept
         { mBloom = bloom; }
@@ -176,14 +176,13 @@ namespace engine
 
         // Create the internal renderer data structures for visually representing
         // the contents of the given scene.
-        void CreateRenderStateFromScene(const game::Scene& scene);
-        // Create and update the internal renderer data structures for visually
-        // representing the contents of the given scene.
-        void UpdateRenderStateFromScene(const game::Scene& scene);
+        void CreateRenderState(const game::Scene& scene, const game::Tilemap* map);
+
+        void UpdateRenderState(const game::Scene& scene, const game::Tilemap* map,
+                               double time, float dt);
+
         // Draw the current rendering state.
-        void Draw(gfx::Device& painter, const game::Tilemap* map = nullptr);
-        // Update the renderer state, i.e. update/animate materials etc.
-        void Update(float time, float dt);
+        void Draw(gfx::Device& painter) const;
 
         // The following API methods used by the editor to draw some
         // edit time representations of things.
@@ -225,9 +224,7 @@ namespace engine
 
         // Update the visual representation of the renderer's paint node
         // based on the given animation node.
-        void Update(const game::EntityNodeClass& node, float time, float dt);
         void Update(const game::EntityClass& entity, float time, float dt);
-        void Update(const game::EntityNode& node, float time, float dt);
         void Update(const game::Entity& entity, float time, float dt);
         void Update(const game::SceneClass& scene, float time, float dt);
         void Update(const game::Scene& scene, float time, float dt);
@@ -273,16 +270,21 @@ namespace engine
                         EntityDrawHook<NodeType>* hook);
 
         struct PaintNode;
-        template<typename EntityNodeType>
-        void UpdateNode(PaintNode& paint_node, float time, float dt);
 
         template<typename EntityType, typename EntityNodeType>
-        void CreateDrawResources(PaintNode& paint_node);
+        void UpdateNode(const EntityType& entity,
+                        const EntityNodeType& entity_node,
+                        PaintNode& paint_node, double time, float dt) const;
 
         template<typename EntityType, typename EntityNodeType>
-        void GenerateDrawPackets(PaintNode& paint_node,
+        void CreateDrawResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const;
+
+        template<typename EntityType, typename EntityNodeType>
+        void GenerateDrawPackets(const EntityType& entity,
+                                 const EntityNodeType& entity_node,
+                                 const PaintNode& paint_node,
                                  std::vector<DrawPacket>& packets,
-                                 EntityDrawHook<EntityNodeType>* hook);
+                                 EntityDrawHook<EntityNodeType>* hook) const;
 
         void OffsetPacketLayers(std::vector<DrawPacket>& packets) const;
         void DrawTilemapPackets(gfx::Device& device, const std::vector<DrawPacket>& packets,
@@ -335,12 +337,6 @@ namespace engine
 
     private:
         const ClassLibrary* mClassLib = nullptr;
-        using EntityRef = std::variant<
-                const game::Entity*,
-                const game::EntityClass*>;
-        using EntityNodeRef = std::variant<
-                const game::EntityNode*,
-                const game::EntityNodeClass*>;
 
         struct PaintNode {
             bool visited = false;
@@ -354,8 +350,6 @@ namespace engine
             glm::vec2 world_scale;
             glm::vec2 world_pos;
             float world_rotation = 0.0f;
-            EntityRef     entity;
-            EntityNodeRef entity_node;
 #if !defined(NDEBUG)
             std::string debug_name;
 #endif
@@ -385,6 +379,8 @@ namespace engine
         float mTileSizeFudge = 0.5f;
 
         PacketFilter* mPacketFilter = nullptr;
+
+        mutable std::vector<DrawPacket> mRenderBuffer;
     };
 
 } // namespace
