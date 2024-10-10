@@ -34,15 +34,12 @@ void unit_test_pool()
     class TestTask : public base::ThreadTask
     {
     public:
-        using Affinity = base::ThreadTask::Affinity;
-
-        TestTask(Affinity affinity, std::atomic_int& c)
-          : base::ThreadTask(affinity, 0)
-          , counter_(c)
+        explicit TestTask(std::atomic_int& c) noexcept
+          : counter_(c)
         {}
 
     protected:
-        virtual void DoTask() override
+        void DoTask() override
         {
             static math::RandomGenerator<unsigned, 0x33abc33f> random_wait {1u, 2u};
             static std::mutex mutex;
@@ -62,22 +59,22 @@ void unit_test_pool()
     };
 
     base::ThreadPool threads;
-    threads.AddRealThread();
-    threads.AddRealThread();
-    threads.AddRealThread();
+    threads.AddRealThread(base::ThreadPool::Worker0ThreadID);
+    threads.AddRealThread(base::ThreadPool::Worker1ThreadID);
+    threads.AddRealThread(base::ThreadPool::Worker2ThreadID);
     threads.AddMainThread();
 
-    constexpr base::ThreadTask::Affinity affinity[] = {
-        base::ThreadTask::Affinity::MainThread,
-        base::ThreadTask::Affinity::AnyThread
+    constexpr size_t ThreadIds[] = {
+        base::ThreadPool::MainThreadID,
+        base::ThreadPool::AnyWorkerThreadID
     };
 
     std::printf("\n");
     for (int i=0; i<1000; ++i)
     {
-        const auto aff = affinity[i % 1];
+        const auto threadId = ThreadIds[i % 1];
 
-        auto handle = threads.SubmitTask(std::make_unique<TestTask>(aff, counter));
+        auto handle = threads.SubmitTask(std::make_unique<TestTask>(counter), threadId);
         TEST_REQUIRE(!handle.IsComplete());
         TEST_REQUIRE(handle.GetTask() == nullptr);
 
@@ -94,6 +91,10 @@ void unit_test_pool()
         std::printf("\rTesting ...%d%%", done_percent);
 #endif
     }
+#if !defined(__EMSCRIPTEN__)
+    std::printf("\rTesting ...100%%");
+#endif
+
     std::printf("\n");
     threads.WaitAll();
     threads.Shutdown();

@@ -305,8 +305,8 @@ public:
         mResourceLoader->PreloadFiles();
 
         mThreadPool = std::make_unique<base::ThreadPool>();
-        mThreadPool->AddRealThread();
-        mThreadPool->AddRealThread();
+        mThreadPool->AddRealThread(base::ThreadPool::UpdateThreadID);
+        mThreadPool->AddRealThread(base::ThreadPool::Worker0ThreadID);
         mThreadPool->AddMainThread();
         base::SetGlobalThreadPool(mThreadPool.get());
 

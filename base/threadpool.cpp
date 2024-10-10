@@ -42,6 +42,7 @@ class ThreadPool::Thread
 public:
     virtual ~Thread() = default;
     virtual void Submit(std::shared_ptr<ThreadTask> task) = 0;
+    virtual size_t GetThreadId() const = 0;
 };
 
 class ThreadPool::RealThread : public ThreadPool::Thread
@@ -52,12 +53,18 @@ public:
        , mThreadId(id)
     {}
 
-    virtual void Submit(std::shared_ptr<ThreadTask> task) override
+    void Submit(std::shared_ptr<ThreadTask> task) override
     {
         std::lock_guard<std::mutex> lock(mMutex);
         mTaskQueue.push(std::move(task));
         mCondition.notify_one();
     }
+
+    size_t GetThreadId() const override
+    {
+        return mThreadId;
+    }
+
     void Shutdown()
     {
         {
@@ -187,7 +194,7 @@ private:
     std::unique_ptr<std::thread> mThread;
     std::queue<std::shared_ptr<ThreadTask>> mTaskQueue;
 
-    base::TraceWriter* mTraceWriter;
+    base::TraceWriter* mTraceWriter = nullptr;
     bool mEnableTrace = false;
     bool mRunThread = true;
     std::size_t mThreadId = 0;
@@ -200,9 +207,13 @@ public:
       : state_(std::move(state))
     {}
 
-    virtual void Submit(std::shared_ptr<ThreadTask> task) override
+    void Submit(std::shared_ptr<ThreadTask> task) override
     {
         queue_.push(std::move(task));
+    }
+    size_t GetThreadId() const override
+    {
+        return ThreadPool::MainThreadID;
     }
 
     void ExecuteMainThread()
@@ -244,14 +255,18 @@ void TaskHandle::Wait() noexcept
     // indefinitely since the current thread would then
     // have to call the execute main thread.
 
-    if (mTask->GetAffinity() == ThreadTask::Affinity::MainThread)
+    if (mThreadId == ThreadPool::MainThreadID)
     {
         if (!IsComplete())
+        {
             mTask->Execute();
+        }
     }
 
     while (!IsComplete())
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    {
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+    }
 }
 
 
@@ -264,9 +279,9 @@ ThreadPool::~ThreadPool()
     Shutdown();
 }
 
-void ThreadPool::AddRealThread()
+void ThreadPool::AddRealThread(size_t threadId)
 {
-    auto thread = std::make_unique<RealThread>(mState, mRealThreads.size());
+    auto thread = std::make_unique<RealThread>(mState, threadId);
     thread->Start();
     mRealThreads.push_back(std::move(thread));
     DEBUG("Added real thread pool thread.");
@@ -279,47 +294,46 @@ void ThreadPool::AddMainThread()
     DEBUG("Added thread pool main thread.");
 }
 
-TaskHandle ThreadPool::SubmitTask(std::unique_ptr<ThreadTask> task)
+TaskHandle ThreadPool::SubmitTask(std::unique_ptr<ThreadTask> task, size_t threadId)
 {
-    const auto num_threads  = mRealThreads.size();
-    const auto affinity = task->GetAffinity();
     Thread* thread = nullptr;
 
-    if (affinity == ThreadTask::Affinity::MainThread)
+    if (threadId == ThreadPool::MainThreadID)
     {
-        ASSERT(mMainThread);
+        ASSERT(mMainThread && "Main thread has not been added to the thread pool");
         thread = mMainThread.get();
     }
-    else if (affinity == ThreadTask::Affinity::AnyThread)
+    else if (threadId == ThreadPool::AnyWorkerThreadID)
     {
-        if (num_threads == 0)
+        std::vector<RealThread*> workers;
+        for (auto& t : mRealThreads)
         {
-            ASSERT(mMainThread);
-            thread = mMainThread.get();
+            if (t->GetThreadId() & 0xff00)
+                workers.push_back(t.get());
+
         }
-        else
-        {
-            thread = mRealThreads[mRoundRobin % num_threads].get();
-            mRoundRobin++;
-        }
+
+        ASSERT(!workers.empty() && "The thread pool has no worker threads.");
+        thread = workers[mRoundRobin % workers.size()];
+        mRoundRobin++;
+
     }
-    else if (affinity == ThreadTask::Affinity::SingleThread)
+    else
     {
-        if (num_threads == 0)
+        for (auto& t : mRealThreads)
         {
-            ASSERT(mMainThread);
-            thread = mMainThread.get();
+            if (t->GetThreadId() == threadId)
+            {
+                thread = t.get();
+                break;
+            }
         }
-        else
-        {
-            const auto id = task->GetThreadId();
-            thread = mRealThreads[id % num_threads].get();
-        }
+        ASSERT(thread && "No such named thread has been added to the thread pool.");
     }
 
     std::shared_ptr<ThreadTask> shared(std::move(task));
 
-    TaskHandle handle(shared);
+    TaskHandle handle(shared, threadId);
 
     thread->Submit(std::move(shared));
 

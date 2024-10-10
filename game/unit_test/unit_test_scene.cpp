@@ -1229,8 +1229,8 @@ void unit_test_async_spawn()
 #endif
 
     base::ThreadPool threadpool;
-    threadpool.AddRealThread();
-    threadpool.AddRealThread();
+    threadpool.AddRealThread(base::ThreadPool::UpdateThreadID);
+    threadpool.AddRealThread(base::ThreadPool::Worker0ThreadID);
     base::SetGlobalThreadPool(&threadpool);
 
     auto entity = std::make_shared<game::EntityClass>();
