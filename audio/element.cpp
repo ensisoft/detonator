@@ -999,7 +999,7 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
             {
                 auto* pool = base::GetGlobalThreadPool();
                 auto task = std::make_unique<OpenDecoderTask>(std::move(mpg123_decoder), std::move(source), mFormat.sample_type);
-                mOpenDecoderTask = pool->SubmitTask(std::move(task));
+                mOpenDecoderTask = pool->SubmitTask(std::move(task), base::ThreadPool::AnyWorkerThreadID);
                 DEBUG("Submitted new audio decoder open task. [file='%1']", mFile);
             }
             else
@@ -1044,7 +1044,7 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
             {
                 auto* pool = base::GetGlobalThreadPool();
                 auto task = std::make_unique<OpenDecoderTask>(std::move(snd_file_decoder), std::move(source));
-                mOpenDecoderTask = pool->SubmitTask(std::move(task));
+                mOpenDecoderTask = pool->SubmitTask(std::move(task), base::ThreadPool::AnyWorkerThreadID);
                 DEBUG("Submitted new audio decoder open task. [file='%1']", mFile);
             }
             else

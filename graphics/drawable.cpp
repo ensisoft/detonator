@@ -2435,9 +2435,7 @@ void ParticleEngineClass::Update(const Environment& env, InstanceStatePtr ptr, f
             ptr->task_count++;
 
             auto task = std::make_unique<MaintainParticlesTask>(env, ptr, mParams);
-            task->SetAffinity(base::ThreadTask::Affinity::SingleThread);
-            task->SetThreadId((size_t)ptr.get());
-            pool->SubmitTask(std::move(task));
+            pool->SubmitTask(std::move(task), base::ThreadPool::Worker0ThreadID);
 
         }
         else
@@ -2526,9 +2524,7 @@ void ParticleEngineClass::Restart(const Environment& env, InstanceStatePtr ptr) 
         ptr->task_count++;
 
         auto task = std::make_unique<ClearParticlesTask>(ptr);
-        task->SetAffinity(base::ThreadTask::Affinity::SingleThread);
-        task->SetThreadId((size_t)ptr.get());
-        pool->SubmitTask(std::move(task));
+        pool->SubmitTask(std::move(task), base::ThreadPool::Worker0ThreadID);
     }
     else
     {
@@ -2702,9 +2698,7 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceStatePtr
         state->task_count++;
 
         auto task = std::make_unique<InitParticlesTask>(env, std::move(state), mParams, num);
-        task->SetAffinity(base::ThreadTask::Affinity::SingleThread);
-        task->SetThreadId((size_t)state.get());
-        pool->SubmitTask(std::move(task));
+        pool->SubmitTask(std::move(task), base::ThreadPool::Worker0ThreadID);
     }
     else
     {
@@ -2757,9 +2751,7 @@ void ParticleEngineClass::UpdateParticles(const Environment& env, InstanceStateP
         state->task_count++;
 
         auto task = std::make_unique<UpdateParticlesTask>(env, std::move(state), mParams, dt);
-        task->SetAffinity(base::ThreadTask::Affinity::SingleThread);
-        task->SetThreadId((size_t)state.get());
-        pool->SubmitTask(std::move(task));
+        pool->SubmitTask(std::move(task), base::ThreadPool::Worker0ThreadID);
     }
     else
     {

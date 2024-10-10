@@ -1254,7 +1254,7 @@ Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
         };
 
         auto task = std::make_unique<SpawnEntityTask>(args, mAsyncSpawnState, mCurrentTime);
-        task_pool->SubmitTask(std::move(task));
+        task_pool->SubmitTask(std::move(task), base::ThreadPool::AnyWorkerThreadID);
         return nullptr;
     }
 
@@ -1400,7 +1400,7 @@ void Scene::EndLoop()
             std::vector<std::unique_ptr<Entity>> mCarcasses;
         };
         auto task = std::make_unique<DeleteEntitiesTask>(std::move(carcasses));
-        task_pool->SubmitTask(std::move(task));
+        task_pool->SubmitTask(std::move(task), base::ThreadPool::AnyWorkerThreadID);
     }
     else
     {

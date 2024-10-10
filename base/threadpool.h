@@ -39,37 +39,14 @@ namespace base
             Error, Tracing
         };
 
-        enum class Affinity {
-            // The task is to be executed by the main "gui" thread only.
-            MainThread,
-            // The task can be executed by any thread in any order.
-            AnyThread,
-            // The task can be executed only by a certain thread with
-            // a mapping to the task id. this means that all tasks with
-            // the same parent id will be submitted to the same thread.
-            SingleThread
-        };
-        explicit ThreadTask(Affinity affinity = Affinity::AnyThread, size_t thread = 0) noexcept
-          : mAffinity(affinity)
-          , mTaskId(GetNextTaskId())
-          , mThreadId(thread)
+        explicit ThreadTask() noexcept
+          : mTaskId(GetNextTaskId())
         {}
         virtual ~ThreadTask() = default;
-
-        inline void SetAffinity(Affinity affinity) noexcept
-        { mAffinity = affinity; }
-        inline void SetThreadId(size_t thread) noexcept
-        { mThreadId = thread; }
-
-        inline Affinity GetAffinity() const noexcept
-        { return mAffinity; }
 
         // Get the ID of the task
         inline size_t GetTaskId() const noexcept
         { return mTaskId; }
-
-        inline size_t GetThreadId() const noexcept
-        { return mThreadId; }
 
         inline bool IsComplete() const noexcept
         { return mDone.load(std::memory_order_acquire); }
@@ -109,12 +86,9 @@ namespace base
         }
 
     private:
-        Affinity mAffinity;
         std::size_t mTaskId = 0;
-        std::size_t mThreadId = 0;
         std::exception_ptr mException;
         std::atomic<bool> mDone = {false};
-
     };
 
 
@@ -123,8 +97,9 @@ namespace base
     public:
         TaskHandle() = default;
 
-        explicit TaskHandle(std::shared_ptr<ThreadTask> task)
+        explicit TaskHandle(std::shared_ptr<ThreadTask> task, size_t threadId)
           : mTask(std::move(task))
+          , mThreadId(threadId)
         {}
 
         inline bool IsComplete() const noexcept
@@ -165,9 +140,14 @@ namespace base
         {
             mTask.reset();
         }
+        inline operator bool () const noexcept
+        {
+            return IsValid();
+        }
 
     private:
         std::shared_ptr<ThreadTask> mTask;
+        std::size_t mThreadId = 0;
     };
 
     class ThreadPool
@@ -175,13 +155,26 @@ namespace base
     public:
         class Thread;
 
+        static constexpr size_t MainThreadID      = 0;
+        static constexpr size_t AudioThreadID     = 1;
+        static constexpr size_t UpdateThreadID    = 2;
+        static constexpr size_t RenderThreadID    = 3;
+
+        static constexpr size_t Worker0ThreadID   = 1 << 8;
+        static constexpr size_t Worker1ThreadID   = 2 << 8;
+        static constexpr size_t Worker2ThreadID   = 3 << 8;
+        static constexpr size_t Worker3ThreadId   = 4 << 8;
+
+        static constexpr size_t AnyWorkerThreadID = 0xffff;
+
         ThreadPool();
        ~ThreadPool();
 
-        void AddRealThread();
+        void AddRealThread(size_t threadId);
         void AddMainThread();
 
-        TaskHandle SubmitTask(std::unique_ptr<ThreadTask> task);
+        TaskHandle SubmitTask(std::unique_ptr<ThreadTask> task,
+                              std::size_t threadID = AnyWorkerThreadID);
 
         void Shutdown();
 

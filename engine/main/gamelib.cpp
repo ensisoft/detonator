@@ -49,9 +49,9 @@ GAMESTUDIO_EXPORT void Gamestudio_CreateRuntime(interop::IRuntime** factory)
             DEBUG("Created library binary interop runtime.");
             base::SetGlobalThreadPool(&mThreadPool);
         }
-        virtual void AddRealThread() override
+        virtual void AddRealThread(size_t threadId) override
         {
-            mThreadPool.AddRealThread();
+            mThreadPool.AddRealThread(threadId);
         }
         virtual void AddMainThread() override
         {

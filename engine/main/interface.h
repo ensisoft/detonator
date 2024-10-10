@@ -520,7 +520,7 @@ namespace interop {
     class IRuntime
     {
     public:
-        virtual void AddRealThread() = 0;
+        virtual void AddRealThread(size_t threadId) = 0;
         virtual void AddMainThread() = 0;
         virtual void ShutdownThreads() = 0;
         virtual void ExecuteMainThread() = 0;

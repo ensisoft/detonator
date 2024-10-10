@@ -47,6 +47,7 @@
 #  pragma comment(lib, "Winmm.lib")
 #endif
 
+#include "base/threadpool.h"
 #include "base/platform.h"
 #include "base/logging.h"
 #include "base/format.h"
@@ -704,8 +705,8 @@ int main(int argc, char* argv[])
         runtime->EnableLogEvent(base::LogEvent::Info, global_log_info);
         runtime->EnableLogEvent(base::LogEvent::Error, global_log_error);
 
-        runtime->AddRealThread();
-        runtime->AddRealThread();
+        runtime->AddRealThread(base::ThreadPool::UpdateThreadID);
+        runtime->AddRealThread(base::ThreadPool::Worker0ThreadID);
         runtime->AddMainThread();
 
         // The implementations of these types are built into the engine
