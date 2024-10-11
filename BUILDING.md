@@ -10,29 +10,25 @@ Build Instructions 👨🏼‍💻
 ![Screenshot](logo/emscripten.png)
 
 ## Getting Started 👈
+
+> [!TIP]
+> The build process assumes some familiarity with building C++ based projects using
+> toolchains and tools such as GCC, MSVS, Emscripten💩 and CMake.
+
+> [!TIP]
+> You'll need to have Qt5 in order to build the Editor.
+
+
+### Build Steps:
 1. First build the engine and editor for your target platform.
 2. If you want to deploy / package your game for web then build the engine for HTML5/WASM
 3. If you want to work on the engine itself it's advisory to also run the (unit) tests.
 
-<i>
-<strong>
-The build process assumes some familiarity with building C++ based projects using
-toolchains and tools such as GCC, MSVS, Emscripten💩 and CMake.
-<br><br>
-You'll need to have Qt5 in order to build the Editor.
-</strong>
-</i>
-
-* If you're using Linux you can get Qt from your distribution's repositories.
-  * `sudo pacman -S qt5-base`
-* If you're using Windows you'll need to download a prebuilt Qt5 package (installer) from the Qt Company's website.<br>
-You can try the link below. If that doesn't work  you'll need an account with the Qt Company
-* http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
-
 
 ## Step 1) Building the Editor & Engine for Desktop Windows 🪟
 
-These build instructions are for MSVS 2019 Community Edition 64bit build.
+> [!IMPORTANT]
+> These build instructions are for MSVS 2019 Community Edition 64bit build.
 
 <details><summary>How to install dependencies</summary>
 
@@ -45,8 +41,10 @@ These build instructions are for MSVS 2019 Community Edition 64bit build.
 
 
 - Install prebuilt Qt 5.15.2<br>
+  If the link doesn't work you'll need to create an account with the Qt company<br>
+  and download the installer for the LGPL version (they like to hide this) from their site.<br>
   http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
-  
+
 
 - Install Conan package manager (VERSION 2)<br>
   https://docs.conan.io/en/latest/installation.html
@@ -78,11 +76,9 @@ These build instructions are for MSVS 2019 Community Edition 64bit build.
 
 <details><summary>How to build the project in DEBUG [OPTIONAL]</summary>
 
-<br><i>
-Note that on MSVS the library interfaces change between debug/release build configs. (e.g. iterator debug levels).
-This means that in order to link to 3rd party libraries the debug versions of those libraries must be used.
-</i>
-</br>
+> Note that on MSVS the library interfaces change between debug/release build configs. (e.g. iterator debug levels).
+> This means that in order to link to 3rd party libraries the debug versions of those libraries must be used.
+
 
 - Open `Developer Command Prompt for VS 2019`
 
@@ -126,7 +122,7 @@ Install these packages:
 - CMake build tool
 - Conan💩💩 package manager (VERSION 2)
   - On Archlinux you can use 'yay' to install conan + its dependencies from AUR*
-  - See below for installing yay + conan💩💩 
+  - See below for installing yay + conan💩💩
 - Git version control system
 - Qt5 application framework
 
@@ -229,24 +225,21 @@ you can try edit ~/.conan/settings.yaml. Search for the GCC versions and edit th
 
 </details>
 
-
-
 ## Step 2) Building the Engine for HTML5/WASM 💩
 
-<strong>
-<i>HTML5/WASM build is only required if you want to build and package  your game for the web.<br>
-If you just want to try the editor or build native games you don't need this.
-</i>
-</strong>
-<br><br>
+> [!NOTE]
+> HTML5/WASM build is only required if you want to build and package  your game for the web.<br>
+> If you just want to try the editor or build native games you don't need this.
+
+<br>
 Some notes about building to HTML5/WASM.
 
 * Building to HTML5/WASM is currently supported only for the engine but not the editor.
-* Current Emscripten💩 version is 3.1.10. Using other version will likely break things.
+* Current Emscripten💩 version is 3.1.50. Using other version will likely break things.
 * Building to HTML5/WASM will produce the required JS and WASM files to run games in the browser,<br>
   but you still need to build the editor in order to develop the game and package it.<br>
-  * When you package your game through the editor, the HTML5/WASM game files are copied by the editor<br>
-    during the packaging process in order to produce the final deployable game package.
+* When you package your game with the editor, the HTML5/WASM game files are copied by the editor<br>
+  during the packaging process in order to produce the final deployable game package.
 
 <details><summary>How to build on Linux 🐧</summary>
 
@@ -256,8 +249,8 @@ Some notes about building to HTML5/WASM.
   $ git clone https://github.com/emscripten-core/emsdk.git
   $ cd emsdk
   $ git pull
-  $ ./emsdk install 3.1.10
-  $ ./emsdk activate 3.1.10
+  $ ./emsdk install 3.1.50
+  $ ./emsdk activate 3.1.50
   $ source ./emsdk_env.sh
 ```
 - Check your Emscripten💩 installation
@@ -265,7 +258,7 @@ Some notes about building to HTML5/WASM.
   $ which emcc
   $ /home/user/emsdk/upstream/emscripten/emcc
   $ emcc --version
-  $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.0.0 (3fd52e107187b8a169bb04a02b9f982c8a075205)
+  $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.50 (047b82506d6b471873300a5e4d1e690420b582d0)
 ```
 - Build the DETONATOR 2D engine into a WASM blob. Make sure that you have the Emscripten💩 tools in your path,
   i.e. you have sourced emsdk_env.sh in your current shell.
@@ -294,8 +287,8 @@ Some notes about building to HTML5/WASM.
   $ git clone https://github.com/emscripten-core/emsdk.git
   $ cd emsdk
   $ git pull
-  $ emsdk.bat install 3.1.10
-  $ emsdk.bat activate 3.1.10
+  $ emsdk.bat install 3.1.50
+  $ emsdk.bat activate 3.1.50
   $ emsdk_env.bat
 ```
 - Check your Emscripten💩 and Ninja🥷 installation
@@ -304,7 +297,7 @@ Some notes about building to HTML5/WASM.
   $ C:\coding\detonator\emsdk\upstream\emscripten\emcc
   $ C:\coding\detonator\emsdk\upstream\emscripten\emcc.bat
   $ emcc --version
-  $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.10 (c3fe57af0504fe24fc4ba697feb8c204f3c80022)
+  $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.50 (047b82506d6b471873300a5e4d1e690420b582d0)
   $ where ninja
   $ C:\coding\detonator\emsdk\ninja.exe
   $ ninja --version
@@ -327,7 +320,7 @@ Some notes about building to HTML5/WASM.
 
 <details><summary>Build troubleshooting 💩</summary>
 
-Windows: Emscripten💩 3.0.0 build fails with 
+Windows: Emscripten💩 3.0.0 build fails with
 
 ```
 error: undefined symbol: _get_daylight (referenced by tzset_impl__deps: ['_get_daylight','_get_timezone','_get_tzname'], referenced by tzset__deps: ['tzset_impl'], referenced by localtime_r__deps: ['tzset'], referenced by __localtime_r__deps: ['localtime_r'], referenced by top-level compiled C/C++ code)
@@ -341,7 +334,7 @@ warning: __get_tzname may need to be added to EXPORTED_FUNCTIONS if it arrives f
  * https://github.com/emscripten-core/emscripten/issues/15958
  * Current fix is to upgrade to Emscripten💩 3.1.10
 
-Build fails with 
+Build fails with
 ```
 wasm-ld: error: --shared-memory is disallowed by ldo.c.o because it was not compiled with 'atomics' or 'bulk-memory' features.
 ```
@@ -349,7 +342,7 @@ wasm-ld: error: --shared-memory is disallowed by ldo.c.o because it was not comp
  * https://github.com/emscripten-core/emsdk/issues/790
  * This is trying to communicate that something was built without thread support when thread support should be enabled.<br>
    In other words trying to mix + match translation units / libs built with different build configuration.
- * Make sure to double check the build flags including `third_party/CMakeLists.txt`  
+ * Make sure to double check the build flags including `third_party/CMakeLists.txt`
 
 </details>
 
@@ -357,28 +350,35 @@ If your build was successful there should now be `GameEngine.js`, `GameEngine.wa
 
 ### Step 2.1) Deploying the Game for the Web 💩
 
-When you package your game for the web the editor will copy all the required files to your chosen output directory. 
+When you package your game for the web the editor will copy all the required files to your chosen output directory.
 
 * GameEngine.js
 * GameEngine.wasm
 * GameEngine.worker.js
 * FILESYSTEM
-* FILESYSTEM.js 
-* game.html 
+* FILESYSTEM.js
+* game.html
 
 These 6 files are then all the files that you need to deploy/copy over to your web server.<br><br>
-<i>Hint: You can rename `game.html` to whatever you want, for example  `my-amazing-game.html`. Just don't change the names of any other files</i>
- 
+
+> [!TIP]<br>
+> You can rename `game.html` to whatever you want, for example  `my-amazing-game.html`. Just don't change the names of any other files
+
+
 <details><summary>1. Configure Your Web Server</summary>
 
-<strong><i>You must enable the correct web policies💩 in order to enable SharedArrayBuffer💩 in order to enable threads !! </i>💩💩</strong><br>
-<strong><i>Without SharedArrayBuffer web worker threads can't run and the engine cannot work. </i>💩💩</strong><br>
-https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
+<br>
 
-You must set the HTTP `Cross-Origin-Opener-Policy` to `same-origin` and `Cross-Origin-Embedder-Policy` to `require-corp`.<br>
+> [!IMPORTANT]<br>
+> You must enable the correct web policies💩 in order to enable SharedArrayBuffer💩 in order to enable threads !! 💩💩<br>
+> Without SharedArrayBuffer web worker threads can't run and the engine cannot work. 💩💩<br>
+> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
 
-You can achieve this with a `.htaccess` file.<br>
 
+> [!IMPORTANT]<br>
+> You must set the HTTP `Cross-Origin-Opener-Policy` to `same-origin`<br>
+> You must set the HTTP `Cross-Origin-Embedder-Policy` to `require-corp`<br>
+> You can achieve this with a `.htaccess` file.<br>
 
 ```
 Header set Access-Control-Allow-Origin  "https://your-domain.com"
@@ -387,9 +387,12 @@ Header set Cross-Origin-Resource-Policy "same-site"
 Header set Cross-Origin-Opener-Policy   "same-origin"
 Header set Access-Control-Allow-Headers "range"
 ```
+
 </details>
 
 <details><summary>2. Deploy Your Game to Your Web Server</summary>
+
+<br>
 
 Copy the following files to your webserver using `sftp`or similar mechanism.<br>
 You'll find these in your package output folder after the successful completion of your game packaging
@@ -507,7 +510,7 @@ to indicate completion.
 
 Download the yay package from AUR<br>
 https://aur.archlinux.org/packages/yay
-  
+
 WARNING! BOTH YAY AND CONAN💩💩 WILL LIKELY HAVE MISSING DEPENDENCIES
 
  install missing yay dependencies
@@ -515,7 +518,7 @@ WARNING! BOTH YAY AND CONAN💩💩 WILL LIKELY HAVE MISSING DEPENDENCIES
 $ sudo pacman -S debugedit
 ```
 
-build yay 
+build yay
 ```
 $ cd yay
 $ makepkg
@@ -530,8 +533,8 @@ use yay to install Conan💩💩
 ```
 $ yay -S conan
 $ yay -S python-patch-ng
-$ ... 
+$ ...
 $ conan --version
 $ Conan version 2.6.0
-$ 
+$
 ```

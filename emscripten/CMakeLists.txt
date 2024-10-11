@@ -25,6 +25,9 @@ include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/../third_party/libsamplera
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/../third_party/lua/src")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../third_party "whatever")
 
+add_link_options(-sMALLOC=mimalloc)
+add_link_options(-sSTACK_SIZE=5MB)
+
 add_executable(UnitTest
     ../base/test_minimal.cpp
     ../base/unit_test/unit_test_math.cpp

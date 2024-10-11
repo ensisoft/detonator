@@ -19400,7 +19400,11 @@ namespace sol { namespace function_detail {
 	struct upvalue_this_member_variable {
 		typedef std::remove_pointer_t<std::decay_t<Function>> function_type;
 
+#if SOL_IS_ON(SOL_COMPILER_CLANG)
+        static int real_call(lua_State* L) noexcept {
+#else
 		static int real_call(lua_State* L) noexcept(std::is_nothrow_copy_assignable_v<T>) {
+#endif
 			// Layout:
 			// idx 1...n: verbatim data of member variable pointer
 			auto memberdata = stack::stack_detail::get_as_upvalues<function_type>(L);
@@ -19416,7 +19420,11 @@ namespace sol { namespace function_detail {
 		}
 
 		template <bool is_yielding, bool no_trampoline>
-		static int call(lua_State* L) noexcept(std::is_nothrow_copy_assignable_v<T>) {
+#if SOL_IS_ON(SOL_COMPILER_CLANG)
+            static int call(lua_State* L) noexcept {
+#else
+            static int call(lua_State* L) noexcept(std::is_nothrow_copy_assignable_v<T>) {
+#endif
 			int nr;
 			if constexpr (no_trampoline) {
 				nr = real_call(L);
