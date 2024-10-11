@@ -433,7 +433,6 @@
         "checked_for_packing": true
     },
     "Oazs2C0TQF": {
-        "__version": 1,
         "animator_guvf6HEfso": {
             "dst_point_x:3IsUSuxo1Q": -159,
             "dst_point_x:GUUhZhDRw7": -425,
@@ -486,7 +485,6 @@
             "src_point_y:RpEAwQ6xoZ": -420,
             "src_point_y:qsDSrPBIf3": -568
         },
-        "checked_for_packing": true,
         "comment_1RZ8lBNXjt": "",
         "comment_1bsLLoRZMT": "",
         "comment_qUZBodNR4l": ""
@@ -1152,6 +1150,7 @@
         "phys_scale_y": 100,
         "preview_entity_script": "app://scripts/preview/entity.lua",
         "preview_scene_script": "app://scripts/preview/scene.lua",
+        "preview_ui_script": "app://scripts/preview/ui.lua",
         "save_window_geometry": false,
         "ticks_per_second": 1,
         "updates_per_second": 60,

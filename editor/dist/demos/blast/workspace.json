@@ -56,7 +56,7 @@
         "mapping_count": 6
     },
     "2a488SIQsU": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "4Ckmwoylp6": {
@@ -88,7 +88,7 @@
         "comment_UIG3lUtmPm": ""
     },
     "5YQ8ZqObX7": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "6Smomrh9yG": {
@@ -168,15 +168,15 @@
         "checked_for_packing": true
     },
     "CeOxBBO4ib": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "CopZZzjQd4": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "EuyGHU1pbR": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "FF0aZIpHbj": {
@@ -214,11 +214,11 @@
         "use_lifetime": 1
     },
     "HDUIR1Bb7G": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "HJjE3ufNfH": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "HSH0115zhS": {
@@ -226,7 +226,7 @@
         "checked_for_packing": true
     },
     "HyJsrevpdz": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "IAJrgwvwpO": {
@@ -280,7 +280,7 @@
         "mapping_count": 0
     },
     "Kb5sHrP5bL": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "LZ34N4wOGn": {
@@ -299,7 +299,7 @@
         "use_lifetime": 1
     },
     "MHJxCtplnp": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "N3a4mW4y8f": {
@@ -388,7 +388,7 @@
         "use_lifetime": 1
     },
     "PIhms7PpQT": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "PPXCoUzFFy": {
@@ -455,7 +455,7 @@
         "checked_for_packing": true
     },
     "XLy89MFMgb": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "XSYiC5gMBy": {
@@ -488,11 +488,11 @@
         }
     },
     "YJynSu6nqw": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "YL23jp6zHS": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "YklMT5UMdu": {
@@ -530,7 +530,7 @@
         "checked_for_packing": true
     },
     "Z3Pe1h4eXI": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "ZThqHZKgHj": {
@@ -680,11 +680,11 @@
         "comment_J6Iz1GtmLH": ""
     },
     "gnzE0pkeXX": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "hCinu6wgaC": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "iH79uGdYNY": {
@@ -712,15 +712,15 @@
         "use_lifetime": 1
     },
     "lLinWqCv1M": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "lOfMr3YBtI": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "miMdq5hPLK": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "n1HW3heypW": {
@@ -746,7 +746,7 @@
         "comment_unlprExuKx": ""
     },
     "pGHzP0FH33": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "pNT0bA0bpw": {
@@ -771,7 +771,7 @@
         }
     },
     "pa1NoWe1Op": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "project": {
@@ -786,13 +786,13 @@
         "audio_sample_type": "Float32",
         "canvas_fs_strategy": "SoftFullScreen",
         "canvas_height": 800,
-        "canvas_mode": "Normal",
+        "canvas_mode": "FullScreen",
         "canvas_width": 1200,
         "clear_color": "4278190080",
         "command_line_arguments": "",
         "config_srgb": true,
         "debug_draw": false,
-        "debug_font": "app://fonts/orbitron-light.otf",
+        "debug_font": "app://fonts/ethnocentric rg.otf",
         "debug_print_fps": false,
         "debug_show_fps": false,
         "debug_show_msg": false,
@@ -833,6 +833,7 @@
         "phys_scale_y": 100,
         "preview_entity_script": "app://scripts/preview/entity.lua",
         "preview_scene_script": "app://scripts/preview/scene.lua",
+        "preview_ui_script": "app://scripts/preview/ui.lua",
         "save_window_geometry": true,
         "ticks_per_second": 1,
         "updates_per_second": 60,
@@ -985,7 +986,7 @@
         }
     },
     "sg20xzpylY": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "u7zlrYWxAM": {
@@ -1001,11 +1002,11 @@
         "checked_for_packing": true
     },
     "vg5yQskPIv": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "wEBG4Nwt8g": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "wXtbrxNRpX": {
@@ -1033,11 +1034,11 @@
         "packing_param_write_content": true
     },
     "wyzMKbLQ8x": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "x6FkDk0TOK": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "yk8YmvFHRn": {
@@ -1052,7 +1053,7 @@
         "comment_HD1PD8eh87": ""
     },
     "ztFYdG5FDv": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     }
 }

@@ -161,6 +161,7 @@
         "phys_scale_y": 100,
         "preview_entity_script": "app://scripts/preview/entity.lua",
         "preview_scene_script": "app://scripts/preview/scene.lua",
+        "preview_ui_script": "app://scripts/preview/ui.lua",
         "save_window_geometry": false,
         "ticks_per_second": 1,
         "updates_per_second": 60,

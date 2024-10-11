@@ -148,15 +148,15 @@
         "comment_FXED8Wa7Of": ""
     },
     "6XbPDf5din": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "8v8KMi39RJ": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "91zq35Pw74": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "9jMLWUyAWj": {
@@ -227,11 +227,11 @@
         "checked_for_packing": true
     },
     "LeswpwTmim": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "Od4ASPzqb7": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "P6qp0Clu3U": {
@@ -243,7 +243,7 @@
         "checked_for_packing": true
     },
     "SDWDwiNlOp": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "UWnXOsuD6o": {
@@ -251,7 +251,7 @@
         "checked_for_packing": true
     },
     "WiBLRaLxr6": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "Xg0GdRiaQU": {
@@ -316,15 +316,15 @@
         "checked_for_packing": true
     },
     "isAzfBPIpr": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "j2ofYbIJ19": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "j3IkLhQmfq": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "k4Stm2rLJJ": {
@@ -443,6 +443,7 @@
         "phys_scale_y": 100,
         "preview_entity_script": "app://scripts/preview/entity.lua",
         "preview_scene_script": "app://scripts/preview/scene.lua",
+        "preview_ui_script": "app://scripts/preview/ui.lua",
         "save_window_geometry": false,
         "ticks_per_second": 1,
         "updates_per_second": 60,
@@ -460,11 +461,11 @@
         "working_folder": "${workspace}"
     },
     "rFu8E6tjzf": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "sCQDCzRWej": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "sTGqtln7OZ": {
@@ -510,7 +511,7 @@
         "checked_for_packing": true
     },
     "xlPb8LHBFS": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "zFZFKpipES": {

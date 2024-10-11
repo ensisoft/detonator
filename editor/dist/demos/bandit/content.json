@@ -94,9 +94,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -238,9 +237,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -346,9 +344,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -454,9 +451,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -562,9 +558,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -670,9 +665,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -761,9 +755,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -869,9 +862,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -977,9 +969,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1085,9 +1076,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1193,9 +1183,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1301,9 +1290,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1409,9 +1397,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1517,9 +1504,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1625,9 +1611,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1733,9 +1718,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1841,9 +1825,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1949,9 +1932,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2040,9 +2022,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2148,9 +2129,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2239,9 +2219,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2330,9 +2309,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2421,9 +2399,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2550,9 +2527,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2605,9 +2581,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2660,9 +2635,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2715,9 +2689,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2770,9 +2743,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2825,9 +2797,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2979,6 +2950,7 @@
                   "StaticInstance": true
                 },
                 "id": "06gyuPzb5f",
+                "joint_id": "",
                 "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0,
@@ -2995,6 +2967,7 @@
                   "StaticInstance": true
                 },
                 "id": "JC3lUWX3Ql",
+                "joint_id": "",
                 "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0,
@@ -3011,6 +2984,7 @@
                   "StaticInstance": true
                 },
                 "id": "Ai9eUuSfLT",
+                "joint_id": "",
                 "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0,
@@ -3027,6 +3001,7 @@
                   "StaticInstance": true
                 },
                 "id": "s1avLU11xY",
+                "joint_id": "",
                 "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0,
@@ -3043,6 +3018,7 @@
                   "StaticInstance": true
                 },
                 "id": "vE0jOzB9Al",
+                "joint_id": "",
                 "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0,
@@ -3059,6 +3035,7 @@
                   "StaticInstance": true
                 },
                 "id": "E1aDIr8lKY",
+                "joint_id": "",
                 "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0,
@@ -3084,6 +3061,7 @@
                   "StaticInstance": true
                 },
                 "id": "op5x2NvFOx",
+                "joint_id": "",
                 "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0,
@@ -3100,6 +3078,7 @@
                   "StaticInstance": true
                 },
                 "id": "yqnECxRbfe",
+                "joint_id": "",
                 "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0,
@@ -3116,6 +3095,7 @@
                   "StaticInstance": true
                 },
                 "id": "HIiYvFjrt5",
+                "joint_id": "",
                 "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0,
@@ -3132,6 +3112,7 @@
                   "StaticInstance": true
                 },
                 "id": "tyr8CZjEKL",
+                "joint_id": "",
                 "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0,
@@ -3148,6 +3129,7 @@
                   "StaticInstance": true
                 },
                 "id": "W7wHPdMQPU",
+                "joint_id": "",
                 "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0,
@@ -3164,6 +3146,7 @@
                   "StaticInstance": true
                 },
                 "id": "v5XjD51HyC",
+                "joint_id": "",
                 "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0,
@@ -3189,6 +3172,7 @@
                   "StaticInstance": true
                 },
                 "id": "eHsXYXnOSm",
+                "joint_id": "",
                 "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0,
@@ -3205,6 +3189,7 @@
                   "StaticInstance": true
                 },
                 "id": "4GO5ossMne",
+                "joint_id": "",
                 "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0,
@@ -3221,6 +3206,7 @@
                   "StaticInstance": true
                 },
                 "id": "v2lpIPoSS5",
+                "joint_id": "",
                 "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0,
@@ -3237,6 +3223,7 @@
                   "StaticInstance": true
                 },
                 "id": "MJH6wGdHim",
+                "joint_id": "",
                 "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0,
@@ -3253,6 +3240,7 @@
                   "StaticInstance": true
                 },
                 "id": "rF7YiWpIw4",
+                "joint_id": "",
                 "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0,
@@ -3269,6 +3257,7 @@
                   "StaticInstance": true
                 },
                 "id": "7Lzy2z4gXA",
+                "joint_id": "",
                 "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0,
@@ -3294,6 +3283,7 @@
                   "StaticInstance": true
                 },
                 "id": "DwhRxYGReS",
+                "joint_id": "",
                 "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0,
@@ -3310,6 +3300,7 @@
                   "StaticInstance": true
                 },
                 "id": "7fHrPoitWh",
+                "joint_id": "",
                 "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0,
@@ -3326,6 +3317,7 @@
                   "StaticInstance": true
                 },
                 "id": "kOMtBqgmNz",
+                "joint_id": "",
                 "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0,
@@ -3342,6 +3334,7 @@
                   "StaticInstance": true
                 },
                 "id": "zArZ66mIS4",
+                "joint_id": "",
                 "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0,
@@ -3358,6 +3351,7 @@
                   "StaticInstance": true
                 },
                 "id": "YjgFLgRgGR",
+                "joint_id": "",
                 "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0,
@@ -3374,6 +3368,7 @@
                   "StaticInstance": true
                 },
                 "id": "HgA8F8j3t1",
+                "joint_id": "",
                 "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0,
@@ -3399,6 +3394,7 @@
                   "StaticInstance": true
                 },
                 "id": "XnRGMMR7jE",
+                "joint_id": "",
                 "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0,
@@ -3415,6 +3411,7 @@
                   "StaticInstance": true
                 },
                 "id": "iP8hmKsLaR",
+                "joint_id": "",
                 "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0,
@@ -3431,6 +3428,7 @@
                   "StaticInstance": true
                 },
                 "id": "OD52kANM1i",
+                "joint_id": "",
                 "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0,
@@ -3447,6 +3445,7 @@
                   "StaticInstance": true
                 },
                 "id": "JByFlM7KOG",
+                "joint_id": "",
                 "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0,
@@ -3463,6 +3462,7 @@
                   "StaticInstance": true
                 },
                 "id": "ms9sT29MFj",
+                "joint_id": "",
                 "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0,
@@ -3479,6 +3479,7 @@
                   "StaticInstance": true
                 },
                 "id": "hS7rTubFpi",
+                "joint_id": "",
                 "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0,
@@ -3504,6 +3505,7 @@
                   "StaticInstance": true
                 },
                 "id": "N2JkMyiHk9",
+                "joint_id": "",
                 "name": "",
                 "node": "E5g8vRsJGU",
                 "starttime": 0.0,
@@ -3520,6 +3522,7 @@
                   "StaticInstance": true
                 },
                 "id": "6ZAjJr1plq",
+                "joint_id": "",
                 "name": "",
                 "node": "lLQQND6Zx7",
                 "starttime": 0.0,
@@ -3536,6 +3539,7 @@
                   "StaticInstance": true
                 },
                 "id": "OYeWJs9j6z",
+                "joint_id": "",
                 "name": "",
                 "node": "KWkjjMvdpN",
                 "starttime": 0.0,
@@ -3552,6 +3556,7 @@
                   "StaticInstance": true
                 },
                 "id": "SvC7JwLtel",
+                "joint_id": "",
                 "name": "",
                 "node": "yF3GzMv8OR",
                 "starttime": 0.0,
@@ -3568,6 +3573,7 @@
                   "StaticInstance": true
                 },
                 "id": "yuYiHj1dJx",
+                "joint_id": "",
                 "name": "",
                 "node": "ysQmAZ8shT",
                 "starttime": 0.0,
@@ -3584,6 +3590,7 @@
                   "StaticInstance": true
                 },
                 "id": "8ozpAa96iF",
+                "joint_id": "",
                 "name": "",
                 "node": "uEzZkNIIJv",
                 "starttime": 0.0,
@@ -3736,9 +3743,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3791,9 +3797,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3846,9 +3851,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3901,9 +3905,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4163,9 +4166,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4218,9 +4220,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4273,9 +4274,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4328,9 +4328,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4661,9 +4660,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4807,9 +4805,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4862,9 +4859,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4917,9 +4913,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4972,9 +4967,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5027,9 +5021,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5082,9 +5075,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5205,9 +5197,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5296,9 +5287,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5387,9 +5377,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5442,9 +5431,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5497,9 +5485,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5552,9 +5539,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5607,9 +5593,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5662,9 +5647,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5717,9 +5701,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5772,9 +5755,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5827,9 +5809,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5882,9 +5863,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5975,9 +5955,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -6030,9 +6009,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -6085,9 +6063,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -6140,9 +6117,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -6195,9 +6171,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -6363,9 +6338,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -6454,9 +6428,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -6545,9 +6518,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -6600,9 +6572,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -6655,9 +6626,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -6782,9 +6752,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -6956,9 +6925,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -7047,9 +7015,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -7155,9 +7122,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -7255,9 +7221,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -7372,7 +7337,7 @@
       "particle_action": "None",
       "resource_id": "gzjp7PwMQd",
       "resource_name": "StoneBlock",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7437,7 +7402,7 @@
       "particle_action": "None",
       "resource_id": "ezvBTHxrAX",
       "resource_name": "tile1",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7502,7 +7467,7 @@
       "particle_action": "None",
       "resource_id": "tdYbKt5I5Q",
       "resource_name": "tile2",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7567,7 +7532,7 @@
       "particle_action": "None",
       "resource_id": "WTNfneUmHx",
       "resource_name": "tile3",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7632,7 +7597,7 @@
       "particle_action": "None",
       "resource_id": "NY4Of7DfnI",
       "resource_name": "tile4",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7697,7 +7662,7 @@
       "particle_action": "None",
       "resource_id": "PiCFlSf9Gm",
       "resource_name": "tile5",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7762,7 +7727,7 @@
       "particle_action": "None",
       "resource_id": "5GPKkIzzUf",
       "resource_name": "tile6",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7827,7 +7792,7 @@
       "particle_action": "None",
       "resource_id": "uLZlHEU5XW",
       "resource_name": "tile7",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7892,7 +7857,7 @@
       "particle_action": "None",
       "resource_id": "7uTDp9S0mt",
       "resource_name": "tile8",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7957,7 +7922,7 @@
       "particle_action": "None",
       "resource_id": "kyLTH2YAJY",
       "resource_name": "tile9",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8022,7 +7987,7 @@
       "particle_action": "None",
       "resource_id": "FW5N4w5d3Z",
       "resource_name": "tile10",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8087,7 +8052,7 @@
       "particle_action": "None",
       "resource_id": "jqIuU0kASH",
       "resource_name": "tile11",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8152,7 +8117,7 @@
       "particle_action": "None",
       "resource_id": "sX94tG9WhR",
       "resource_name": "tile12",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8217,7 +8182,7 @@
       "particle_action": "None",
       "resource_id": "MBEoxQ9SGX",
       "resource_name": "tile13",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8282,7 +8247,7 @@
       "particle_action": "None",
       "resource_id": "UJKQNRymuO",
       "resource_name": "tile14",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8347,7 +8312,7 @@
       "particle_action": "None",
       "resource_id": "UTfmL76ml0",
       "resource_name": "tile15",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8412,7 +8377,7 @@
       "particle_action": "None",
       "resource_id": "QCvtiZTp3b",
       "resource_name": "tile16",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8477,7 +8442,7 @@
       "particle_action": "None",
       "resource_id": "zgwqXHtABU",
       "resource_name": "Bush (1)",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8542,7 +8507,7 @@
       "particle_action": "None",
       "resource_id": "MYaj1na7M4",
       "resource_name": "Bush (2)",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8607,7 +8572,7 @@
       "particle_action": "None",
       "resource_id": "wrSRezqUfj",
       "resource_name": "Cactus (1)",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8672,7 +8637,7 @@
       "particle_action": "None",
       "resource_id": "QR14nEb7T3",
       "resource_name": "Cactus (2)",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8737,7 +8702,7 @@
       "particle_action": "None",
       "resource_id": "IPqp1SooOX",
       "resource_name": "Cactus (3)",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8802,7 +8767,7 @@
       "particle_action": "None",
       "resource_id": "RhslGRtQQR",
       "resource_name": "Crate",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8867,7 +8832,7 @@
       "particle_action": "None",
       "resource_id": "bvJqe9fGu5",
       "resource_name": "Grass (1)",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8932,7 +8897,7 @@
       "particle_action": "None",
       "resource_id": "IM3dwFG7wS",
       "resource_name": "Grass (2)",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8997,7 +8962,7 @@
       "particle_action": "None",
       "resource_id": "bBSpmT5CN0",
       "resource_name": "Sign",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9062,7 +9027,7 @@
       "particle_action": "None",
       "resource_id": "MDomkaGQRL",
       "resource_name": "SignArrow",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9127,7 +9092,7 @@
       "particle_action": "None",
       "resource_id": "Ca4GgRWjP2",
       "resource_name": "Skeleton",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9192,7 +9157,7 @@
       "particle_action": "None",
       "resource_id": "xrUzM3pdBZ",
       "resource_name": "Stone",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9257,7 +9222,7 @@
       "particle_action": "None",
       "resource_id": "pQ2O7Ekypd",
       "resource_name": "Tree",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9322,7 +9287,7 @@
       "particle_action": "None",
       "resource_id": "AgxrO05Kqg",
       "resource_name": "BG_Layer_0",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9395,7 +9360,7 @@
       "particle_action": "None",
       "resource_id": "RnL44evfW5",
       "resource_name": "Bandit Idle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9702,7 +9667,7 @@
       "particle_action": "None",
       "resource_id": "w26YsP04pJ",
       "resource_name": "Bandit Walk",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9921,7 +9886,7 @@
       "particle_action": "None",
       "resource_id": "f2rOXhvzDy",
       "resource_name": "Bandit Jump",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10140,7 +10105,7 @@
       "particle_action": "None",
       "resource_id": "mgo2XI2toK",
       "resource_name": "Bandit Attack",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10359,7 +10324,7 @@
       "particle_action": "None",
       "resource_id": "90E8gRgYDP",
       "resource_name": "Bandit Fall",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10578,7 +10543,7 @@
       "particle_action": "None",
       "resource_id": "fmxJ24RhUE",
       "resource_name": "Bandit Hurt",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10797,7 +10762,7 @@
       "particle_action": "None",
       "resource_id": "9aRwE7zov7",
       "resource_name": "Bandit Die",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11016,7 +10981,7 @@
       "particle_action": "None",
       "resource_id": "l6vR7abMmW",
       "resource_name": "BG_Layer_1",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11089,7 +11054,7 @@
       "particle_action": "None",
       "resource_id": "X6Q2aN3uWm",
       "resource_name": "BG_Layer_2",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11162,7 +11127,7 @@
       "particle_action": "None",
       "resource_id": "2ynNMbWOK3",
       "resource_name": "Coin Spin",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11337,7 +11302,7 @@
       "particle_action": "None",
       "resource_id": "nLUoQRjXrg",
       "resource_name": "Violet Diamond",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11402,7 +11367,7 @@
       "particle_action": "None",
       "resource_id": "oTLKJxJ07d",
       "resource_name": "Background",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -11494,6 +11459,7 @@
       "name": "Coins",
       "num_particles": 5.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "nnXiuEEnwL",
       "resource_name": "Coins",
       "resource_ver": 1,

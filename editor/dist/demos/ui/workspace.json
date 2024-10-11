@@ -15,15 +15,15 @@
         "use_lifetime": true
     },
     "1zSKHEEMX8": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "26yFL7iuTt": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "2a9dGQ8L9R": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "2xdUYgjtvl": {
@@ -31,7 +31,7 @@
         "checked_for_packing": true
     },
     "3vHBKZi4PZ": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "4pCEHuZXY0": {
@@ -46,23 +46,23 @@
         "mapping_count": 0
     },
     "6FH0rTKGMv": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "CKyBnR2qsM": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "CYmQaZ42Q9": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "DdXp2xRthF": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "Hee8rxTCrr": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "PJjQktY8ud": {
@@ -70,19 +70,19 @@
         "checked_for_packing": true
     },
     "QmmO5gXYjv": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "SNExgliw9W": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "SPlS2A5D4Y": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "Uy6jWgursh": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "WE8iUAEdzI": {
@@ -103,7 +103,7 @@
         "mapping_count": 2
     },
     "WG0kYpqr3q": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "Xg0GdRiaQU": {
@@ -119,7 +119,7 @@
         "checked_for_packing": true
     },
     "lqOQq8yDtn": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "oTENvjff4e": {
@@ -185,6 +185,7 @@
         "phys_scale_y": 100,
         "preview_entity_script": "app://scripts/preview/entity.lua",
         "preview_scene_script": "app://scripts/preview/scene.lua",
+        "preview_ui_script": "app://scripts/preview/ui.lua",
         "save_window_geometry": false,
         "ticks_per_second": 1,
         "updates_per_second": 60,
@@ -231,15 +232,15 @@
         "checked_for_packing": true
     },
     "y8X809gLGr": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "yA7p0YO8u3": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "yTsaLXKonJ": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "zNOWw04fYZ": {
