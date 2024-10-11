@@ -1,10 +1,10 @@
 {
     "10togPdjU7": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "1Oau6Iem5r": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "2yOBoPmBaI": {
@@ -45,7 +45,7 @@
         "mapping_count": 0
     },
     "4zi9n5RIXq": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "5xCJbUrrKL": {
@@ -83,7 +83,7 @@
         "comment_w9atEDaYRN": ""
     },
     "9wG7A0qhYE": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "A37AEUMH3I": {
@@ -91,11 +91,11 @@
         "checked_for_packing": true
     },
     "AOdUyA9mYj": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "AdiJbNNuTp": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "Bl5XaXGkl0": {
@@ -116,7 +116,7 @@
         "checked_for_packing": true
     },
     "EtyRugQve2": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "Gou7Wgfk1C": {
@@ -157,15 +157,15 @@
         "comment_Ez48JJPwlB": ""
     },
     "KeITJIrx1I": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "MUQDA03a25": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "OgRnbBquEI": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "REfs8QQaG3": {
@@ -265,11 +265,11 @@
         "comment_YmSfngBxpE": ""
     },
     "gRY0JNbDCj": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "hhgetGS5Y3": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "hu9jOD5B5Z": {
@@ -394,7 +394,7 @@
         "mapping_count": 0
     },
     "mJ0wHRoy15": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "mSF0NAZ4A5": {
@@ -483,6 +483,7 @@
         "phys_scale_y": 100,
         "preview_entity_script": "app://scripts/preview/entity.lua",
         "preview_scene_script": "app://scripts/preview/scene.lua",
+        "preview_ui_script": "app://scripts/preview/ui.lua",
         "save_window_geometry": true,
         "ticks_per_second": 1,
         "updates_per_second": 60,
@@ -504,7 +505,7 @@
         "checked_for_packing": true
     },
     "rAn0G88CKj": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "vH008bpGRC": {
@@ -525,7 +526,7 @@
         "mapping_count": 2
     },
     "vSs0xqS3fS": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "viXTDKHRIB": {
@@ -550,7 +551,7 @@
         "packing_param_write_content": true
     },
     "xAdKk03Llg": {
-        "__version": 1,
+        "__version": 3,
         "checked_for_packing": true
     },
     "xZLaeqWePM": {

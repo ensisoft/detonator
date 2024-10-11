@@ -287,6 +287,10 @@
     {
       "animators": [
         {
+          "flags": {
+            "ReceiveKeyboardInput": false,
+            "ReceiveMouseInput": false
+          },
           "id": "LLpPNnW7Up",
           "initial_state": "NyoiMIp6ms",
           "name": "My Animator",
@@ -301,6 +305,7 @@
               "name": "Idle"
             }
           ],
+          "transition_mode": "Continuous",
           "transitions": [
             {
               "dst_state_id": "NyoiMIp6ms",
@@ -372,9 +377,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -427,9 +431,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -514,9 +517,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -603,6 +605,10 @@
     {
       "animators": [
         {
+          "flags": {
+            "ReceiveKeyboardInput": false,
+            "ReceiveMouseInput": false
+          },
           "id": "ZgT9qKps6b",
           "initial_state": "Zqve6DOvh1",
           "name": "My Animator",
@@ -625,6 +631,7 @@
               "name": "Idle"
             }
           ],
+          "transition_mode": "Continuous",
           "transitions": [
             {
               "dst_state_id": "6FJhzdZKS3",
@@ -711,9 +718,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -766,9 +772,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -821,9 +826,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -876,9 +880,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -942,9 +945,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1027,9 +1029,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1331,9 +1332,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1386,9 +1386,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1548,9 +1547,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1603,9 +1601,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1664,9 +1661,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1769,6 +1765,10 @@
     {
       "animators": [
         {
+          "flags": {
+            "ReceiveKeyboardInput": false,
+            "ReceiveMouseInput": false
+          },
           "id": "ACiqyjSOBK",
           "initial_state": "DTu0oujhw2",
           "name": "My Animator",
@@ -1791,6 +1791,7 @@
               "name": "Dead"
             }
           ],
+          "transition_mode": "Continuous",
           "transitions": [
             {
               "dst_state_id": "W8i3KO2bSA",
@@ -1891,9 +1892,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -1946,9 +1946,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2007,9 +2006,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2090,9 +2088,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2321,9 +2318,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2376,9 +2372,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2431,9 +2426,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2486,9 +2480,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2547,6 +2540,10 @@
     {
       "animators": [
         {
+          "flags": {
+            "ReceiveKeyboardInput": false,
+            "ReceiveMouseInput": false
+          },
           "id": "guvf6HEfso",
           "initial_state": "468yaoYZ51",
           "name": "My Animator",
@@ -2569,6 +2566,7 @@
               "name": "Attack"
             }
           ],
+          "transition_mode": "Continuous",
           "transitions": [
             {
               "dst_state_id": "R0zvZ900Ox",
@@ -2707,9 +2705,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2773,9 +2770,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -2900,9 +2896,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3008,9 +3003,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3197,9 +3191,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3305,9 +3298,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3496,9 +3488,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3622,9 +3613,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3691,6 +3681,7 @@
                   "StaticInstance": false
                 },
                 "id": "tCe7Cgogje",
+                "joint_id": "",
                 "method": "Linear",
                 "name": "Transformer_LinearVelocity",
                 "node": "WLST0ZxIsj",
@@ -3778,9 +3769,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3904,9 +3894,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -3959,9 +3948,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4014,9 +4002,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4115,9 +4102,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4214,9 +4200,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4296,9 +4281,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4374,6 +4358,7 @@
                   "StaticInstance": false
                 },
                 "id": "QSAY7zH8xD",
+                "joint_id": "",
                 "name": "Actuator_0",
                 "node": "jW0eLXKfWl",
                 "starttime": 0.0,
@@ -4390,6 +4375,7 @@
                   "StaticInstance": false
                 },
                 "id": "TpnxlwGtzj",
+                "joint_id": "",
                 "name": "Actuator_1",
                 "node": "jW0eLXKfWl",
                 "starttime": 0.0,
@@ -4454,9 +4440,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4636,9 +4621,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -4693,7 +4677,7 @@
       "particle_action": "None",
       "resource_id": "t1YfjyevnO",
       "resource_name": "8-dir-char-template/Dummy/Idle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5019,7 +5003,7 @@
       "particle_action": "None",
       "resource_id": "6UXWgkX59N",
       "resource_name": "8-dir-char-template/Dummy/Run",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5345,7 +5329,7 @@
       "particle_action": "None",
       "resource_id": "f85ZCt9KqW",
       "resource_name": "LPC/Character/Human/Walk",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5523,7 +5507,7 @@
       "particle_action": "None",
       "resource_id": "qiYGxNXLTv",
       "resource_name": "LPC/Character/Human/Slash",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5701,7 +5685,7 @@
       "particle_action": "None",
       "resource_id": "FSj7l9Dgwl",
       "resource_name": "LPC/Character/Human/Shoot",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5879,7 +5863,7 @@
       "particle_action": "None",
       "resource_id": "XOtk86rK7p",
       "resource_name": "LPC/Character/Human/Thrust",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6057,7 +6041,7 @@
       "particle_action": "None",
       "resource_id": "vSNBrbf7Uu",
       "resource_name": "LPC/Clothing/Shirt+Pants/Thrust",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6235,7 +6219,7 @@
       "particle_action": "None",
       "resource_id": "2ohLK3pIux",
       "resource_name": "LPC/Clothing/Shirt+Pants/Walk",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6413,7 +6397,7 @@
       "particle_action": "None",
       "resource_id": "LLq889I6UO",
       "resource_name": "LPC/Weapon/Spear/Thrust",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6591,7 +6575,7 @@
       "particle_action": "None",
       "resource_id": "MaeqFLv5eg",
       "resource_name": "LPC/Clothing/Shirt+Pants/Shoot",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6769,7 +6753,7 @@
       "particle_action": "None",
       "resource_id": "u9p9Izh8rv",
       "resource_name": "LPC/Weapon/Bow+Arrow/Shoot",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6947,7 +6931,7 @@
       "particle_action": "None",
       "resource_id": "57djXhQN4Z",
       "resource_name": "LPC/Prop/Arrow",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7012,7 +6996,7 @@
       "particle_action": "None",
       "resource_id": "wrQHZ3iizg",
       "resource_name": "LPC/Character/CombatDummy/Spin",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7079,7 +7063,7 @@
       "particle_action": "None",
       "resource_id": "r7XlZHD5We",
       "resource_name": "LPC/Health Bar",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "ws://shaders/es2/health_bar.glsl",
       "surface": "Transparent",
@@ -7125,7 +7109,7 @@
       "particle_action": "None",
       "resource_id": "Ne7xKkxWtm",
       "resource_name": "LPC/Character/CombatDummy/Die",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7192,7 +7176,7 @@
       "particle_action": "None",
       "resource_id": "rDpZrE3UuD",
       "resource_name": "LPC/Character/Skeleton/Walk",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7370,7 +7354,7 @@
       "particle_action": "None",
       "resource_id": "kYDARs1JwJ",
       "resource_name": "LPC/Character/Skeleton/Slash",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7548,7 +7532,7 @@
       "particle_action": "None",
       "resource_id": "NaRoLPQ4E5",
       "resource_name": "LPC/Character/Skeleton/Die",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7615,7 +7599,7 @@
       "particle_action": "None",
       "resource_id": "KnPvBZqDs4",
       "resource_name": "LPC/Weapon/Dagger/Slash",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7793,7 +7777,7 @@
       "particle_action": "None",
       "resource_id": "528LJjXXAA",
       "resource_name": "LPC/Clothing/Shirt+Pants/Slash",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7971,7 +7955,7 @@
       "particle_action": "None",
       "resource_id": "jS7kGm3IkK",
       "resource_name": "LPC/Grass",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8062,7 +8046,7 @@
       "particle_action": "None",
       "resource_id": "zRjZSLqKyS",
       "resource_name": "Bandit/Bandit",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -9314,7 +9298,7 @@
       "particle_action": "None",
       "resource_id": "KEChSTgnxU",
       "resource_name": "Bandit/Crate",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -9373,7 +9357,7 @@
       "particle_action": "None",
       "resource_id": "3im7gYgEte",
       "resource_name": "BanditStoneBlock",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -9438,7 +9422,7 @@
       "particle_action": "None",
       "resource_id": "Hxhn1HHoak",
       "resource_name": "Bandit/IceBlock",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9497,7 +9481,7 @@
       "particle_action": "None",
       "resource_id": "8N7BmAmgYL",
       "resource_name": "Merc/Hero",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "ws://shaders/es2/merc_sprite_shader.glsl",
       "surface": "Transparent",
@@ -9566,7 +9550,7 @@
       "particle_action": "None",
       "resource_id": "vlTIdw4iq5",
       "resource_name": "Merc/Projectile/Laser",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9625,7 +9609,7 @@
       "particle_action": "None",
       "resource_id": "XFu97RXb8t",
       "resource_name": "Merc/Projectile/Slime",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9684,7 +9668,7 @@
       "particle_action": "None",
       "resource_id": "M8Cqt8qtGb",
       "resource_name": "Merc/Projectile/Flame",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9745,7 +9729,7 @@
       "particle_action": "None",
       "resource_id": "AFmNqXIZB4",
       "resource_name": "Merc/Space/Background/Layer0",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9804,7 +9788,7 @@
       "particle_action": "None",
       "resource_id": "sUFADPSjD3",
       "resource_name": "Merc/Space/Background/Layer1",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9863,7 +9847,7 @@
       "particle_action": "None",
       "resource_id": "Li1gMjv4ev",
       "resource_name": "Merc/Space/Background/Layer2",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9922,7 +9906,7 @@
       "particle_action": "None",
       "resource_id": "X6jH7ZUDrO",
       "resource_name": "Merc/Enemy/SOB Flame Gun",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9983,7 +9967,7 @@
       "particle_action": "None",
       "resource_id": "v3gahEDshf",
       "resource_name": "Merc/Enemy/Big SOB",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10044,7 +10028,7 @@
       "particle_action": "None",
       "resource_id": "EOzBPYNSQj",
       "resource_name": "Merc/Tile 0",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10103,7 +10087,7 @@
       "particle_action": "None",
       "resource_id": "BH5y29ivk0",
       "resource_name": "Merc/Tile 1",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10162,7 +10146,7 @@
       "particle_action": "None",
       "resource_id": "x5rT0OEsQs",
       "resource_name": "Merc/Tile 2",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10221,7 +10205,7 @@
       "particle_action": "None",
       "resource_id": "PNY7DAf1xN",
       "resource_name": "Merc/Tile 3",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10280,7 +10264,7 @@
       "particle_action": "None",
       "resource_id": "2DIHwO8Cqo",
       "resource_name": "Merc/Tile 4",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10339,7 +10323,7 @@
       "particle_action": "None",
       "resource_id": "qF9KeKKQdL",
       "resource_name": "Merc/Tile 5",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10398,7 +10382,7 @@
       "particle_action": "None",
       "resource_id": "DXCitfLk68",
       "resource_name": "Merc/Tile 6",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10457,7 +10441,7 @@
       "particle_action": "None",
       "resource_id": "sSPaqjs9ZF",
       "resource_name": "Merc/Tile 7",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10516,7 +10500,7 @@
       "particle_action": "None",
       "resource_id": "0dTWpI1Me5",
       "resource_name": "Merc/Tile 8",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10575,7 +10559,7 @@
       "particle_action": "None",
       "resource_id": "TkkzDE08h4",
       "resource_name": "Merc/Tile 9",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10634,7 +10618,7 @@
       "particle_action": "None",
       "resource_id": "hBXgLe8Alw",
       "resource_name": "Merc/Tile 10",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10693,7 +10677,7 @@
       "particle_action": "None",
       "resource_id": "Dv3En2rQaH",
       "resource_name": "Merc/Tile 11",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10752,7 +10736,7 @@
       "particle_action": "None",
       "resource_id": "5N6rzKovar",
       "resource_name": "Merc/Tile 12",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10811,7 +10795,7 @@
       "particle_action": "None",
       "resource_id": "1hZL9xquTo",
       "resource_name": "Merc/Tile 13",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10870,7 +10854,7 @@
       "particle_action": "None",
       "resource_id": "t6moJJH0Jb",
       "resource_name": "Merc/Tile 14",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10929,7 +10913,7 @@
       "particle_action": "None",
       "resource_id": "lKWarvA3wS",
       "resource_name": "Merc/Tile 15",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -10988,7 +10972,7 @@
       "particle_action": "None",
       "resource_id": "qQzzv1O6qU",
       "resource_name": "Merc/Tile 16",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11047,7 +11031,7 @@
       "particle_action": "None",
       "resource_id": "XQugyzOWnA",
       "resource_name": "Merc/Tile 17",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11106,7 +11090,7 @@
       "particle_action": "None",
       "resource_id": "TMWEz9PpPm",
       "resource_name": "Merc/Tile 18",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11165,7 +11149,7 @@
       "particle_action": "None",
       "resource_id": "xhP9qWugC0",
       "resource_name": "Merc/Tile 19",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11224,7 +11208,7 @@
       "particle_action": "None",
       "resource_id": "2FZsU62h53",
       "resource_name": "Merc/Tile 20",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11283,7 +11267,7 @@
       "particle_action": "None",
       "resource_id": "O6o4pdfxGl",
       "resource_name": "Merc/Tile 21",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11342,7 +11326,7 @@
       "particle_action": "None",
       "resource_id": "PFHeR5z8le",
       "resource_name": "Merc/Tile 22",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11401,7 +11385,7 @@
       "particle_action": "None",
       "resource_id": "BdMfIzkp2d",
       "resource_name": "Merc/Tile 23",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11460,7 +11444,7 @@
       "particle_action": "None",
       "resource_id": "Nlom5D8fDK",
       "resource_name": "Merc/Tile 24",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11519,7 +11503,7 @@
       "particle_action": "None",
       "resource_id": "l78iKUxYpt",
       "resource_name": "Merc/Tile 25",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11578,7 +11562,7 @@
       "particle_action": "None",
       "resource_id": "zCpu7JKpe1",
       "resource_name": "Merc/Tile 26",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11637,7 +11621,7 @@
       "particle_action": "None",
       "resource_id": "nneqd4aFlL",
       "resource_name": "Merc/Tile 27",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11696,7 +11680,7 @@
       "particle_action": "None",
       "resource_id": "QOPlhzDfx4",
       "resource_name": "Merc/Tile 28",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11755,7 +11739,7 @@
       "particle_action": "None",
       "resource_id": "XPpuj13v1f",
       "resource_name": "Merc/Tile 29",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11814,7 +11798,7 @@
       "particle_action": "None",
       "resource_id": "LquUtSSpdP",
       "resource_name": "Merc/Tile 30",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11873,7 +11857,7 @@
       "particle_action": "None",
       "resource_id": "0QYMqlEbml",
       "resource_name": "Merc/Tile 31",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11932,7 +11916,7 @@
       "particle_action": "None",
       "resource_id": "UUx4b6WsuW",
       "resource_name": "Merc/Tile 32",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -11991,7 +11975,7 @@
       "particle_action": "None",
       "resource_id": "2UQn9OXvxx",
       "resource_name": "Merc/Tile 33",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12050,7 +12034,7 @@
       "particle_action": "None",
       "resource_id": "as8Mninqp2",
       "resource_name": "Merc/Tile 34",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12109,7 +12093,7 @@
       "particle_action": "None",
       "resource_id": "3gXOD2IhGi",
       "resource_name": "Merc/Tile 35",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12168,7 +12152,7 @@
       "particle_action": "None",
       "resource_id": "DDrxI60R5y",
       "resource_name": "Merc/Tile 36",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12227,7 +12211,7 @@
       "particle_action": "None",
       "resource_id": "9iqRAxeiDj",
       "resource_name": "Merc/Tile 37",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12286,7 +12270,7 @@
       "particle_action": "None",
       "resource_id": "YAX7F8rFl4",
       "resource_name": "Merc/Tile 38",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12345,7 +12329,7 @@
       "particle_action": "None",
       "resource_id": "OL0Gut1pfN",
       "resource_name": "Merc/Tile 39",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12404,7 +12388,7 @@
       "particle_action": "None",
       "resource_id": "J464Qen2qv",
       "resource_name": "Merc/Tile 40",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12463,7 +12447,7 @@
       "particle_action": "None",
       "resource_id": "y6r2LiZguT",
       "resource_name": "Merc/Tile 41",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12522,7 +12506,7 @@
       "particle_action": "None",
       "resource_id": "QXmpKL7qTd",
       "resource_name": "Merc/Tile 42",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12581,7 +12565,7 @@
       "particle_action": "None",
       "resource_id": "SZnUCxYHWO",
       "resource_name": "Merc/Tile 43",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12640,7 +12624,7 @@
       "particle_action": "None",
       "resource_id": "LFeXxgYAwG",
       "resource_name": "Merc/Tile 44",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12699,7 +12683,7 @@
       "particle_action": "None",
       "resource_id": "io73OI74FB",
       "resource_name": "Merc/Tile 45",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12758,7 +12742,7 @@
       "particle_action": "None",
       "resource_id": "YBFOUKbHlT",
       "resource_name": "Merc/Tile 46",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12817,7 +12801,7 @@
       "particle_action": "None",
       "resource_id": "fW04Lutwft",
       "resource_name": "Merc/Tile 47",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12876,7 +12860,7 @@
       "particle_action": "None",
       "resource_id": "HwSMq307AY",
       "resource_name": "Merc/Tile 48",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12935,7 +12919,7 @@
       "particle_action": "None",
       "resource_id": "3RzyKnnELb",
       "resource_name": "Merc/Tile 49",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -12994,7 +12978,7 @@
       "particle_action": "None",
       "resource_id": "lgormkkAP8",
       "resource_name": "Merc/Tile 50",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13053,7 +13037,7 @@
       "particle_action": "None",
       "resource_id": "ZWBeBgNUhB",
       "resource_name": "Merc/Tile 51",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13112,7 +13096,7 @@
       "particle_action": "None",
       "resource_id": "eMopCf3otI",
       "resource_name": "Merc/Tile 52",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13171,7 +13155,7 @@
       "particle_action": "None",
       "resource_id": "pnKj8mixy5",
       "resource_name": "Merc/Tile 53",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13230,7 +13214,7 @@
       "particle_action": "None",
       "resource_id": "2zTJ4peMyW",
       "resource_name": "Merc/Tile 54",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13289,7 +13273,7 @@
       "particle_action": "None",
       "resource_id": "UFwmx9qGQs",
       "resource_name": "Merc/Tile 55",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13348,7 +13332,7 @@
       "particle_action": "None",
       "resource_id": "UDj60sAMma",
       "resource_name": "Merc/Tile 56",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13407,7 +13391,7 @@
       "particle_action": "None",
       "resource_id": "ayNiGRKsSq",
       "resource_name": "Merc/Tile 57",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13466,7 +13450,7 @@
       "particle_action": "None",
       "resource_id": "RGER2xwOqi",
       "resource_name": "Merc/Tile 58",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13525,7 +13509,7 @@
       "particle_action": "None",
       "resource_id": "Bwf3rgPN6j",
       "resource_name": "Merc/Tile 59",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13584,7 +13568,7 @@
       "particle_action": "None",
       "resource_id": "gfsYMKiqmg",
       "resource_name": "Merc/Tile 60",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13643,7 +13627,7 @@
       "particle_action": "None",
       "resource_id": "FHBTAflmre",
       "resource_name": "Merc/Tile 61",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13702,7 +13686,7 @@
       "particle_action": "None",
       "resource_id": "5qonmrw7px",
       "resource_name": "Merc/Tile 62",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13761,7 +13745,7 @@
       "particle_action": "None",
       "resource_id": "6AvH8rBpLR",
       "resource_name": "Merc/Tile 63",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13820,7 +13804,7 @@
       "particle_action": "None",
       "resource_id": "nLBr9A3FhH",
       "resource_name": "Merc/Tile 64",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13879,7 +13863,7 @@
       "particle_action": "None",
       "resource_id": "GyAWxHouEY",
       "resource_name": "Merc/Tile 65",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13938,7 +13922,7 @@
       "particle_action": "None",
       "resource_id": "lv1MSXu1NU",
       "resource_name": "Merc/Tile 66",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -13997,7 +13981,7 @@
       "particle_action": "None",
       "resource_id": "BT2F7Z5hGL",
       "resource_name": "Merc/Tile 67",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14056,7 +14040,7 @@
       "particle_action": "None",
       "resource_id": "5qR2nFLdOr",
       "resource_name": "Merc/Tile 68",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14115,7 +14099,7 @@
       "particle_action": "None",
       "resource_id": "a5192ODHlI",
       "resource_name": "Merc/Tile 69",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14174,7 +14158,7 @@
       "particle_action": "None",
       "resource_id": "2zni47uP4d",
       "resource_name": "Merc/Tile 70",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14233,7 +14217,7 @@
       "particle_action": "None",
       "resource_id": "kyGFRsxBfR",
       "resource_name": "Merc/Tile 71",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14292,7 +14276,7 @@
       "particle_action": "None",
       "resource_id": "WZBr22zLiC",
       "resource_name": "Merc/Tile 72",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14351,7 +14335,7 @@
       "particle_action": "None",
       "resource_id": "LrOeQkw47I",
       "resource_name": "Merc/Tile 73",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14410,7 +14394,7 @@
       "particle_action": "None",
       "resource_id": "rHEFZtfFL0",
       "resource_name": "Merc/Tile 74",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14469,7 +14453,7 @@
       "particle_action": "None",
       "resource_id": "59WubFuFwk",
       "resource_name": "Merc/Tile 75",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14528,7 +14512,7 @@
       "particle_action": "None",
       "resource_id": "UhUGHLBsDK",
       "resource_name": "Merc/Tile 76",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14587,7 +14571,7 @@
       "particle_action": "None",
       "resource_id": "kIu4EZyf2O",
       "resource_name": "Merc/Tile 77",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14646,7 +14630,7 @@
       "particle_action": "None",
       "resource_id": "iMP1G8Nztj",
       "resource_name": "Merc/Tile_32_0",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14705,7 +14689,7 @@
       "particle_action": "None",
       "resource_id": "UsOj3ea7Sf",
       "resource_name": "Merc/Tile_128_0",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14764,7 +14748,7 @@
       "particle_action": "None",
       "resource_id": "rUR1h8fyjX",
       "resource_name": "Merc/Tile_160_0",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14823,7 +14807,7 @@
       "particle_action": "None",
       "resource_id": "jDu24bf6rJ",
       "resource_name": "Merc/Tile_32_32",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14882,7 +14866,7 @@
       "particle_action": "None",
       "resource_id": "GEqGx5T87e",
       "resource_name": "Merc/Tile_160_32",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -14941,7 +14925,7 @@
       "particle_action": "None",
       "resource_id": "vHygmkluU4",
       "resource_name": "Merc/Tile_256_32",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -15000,7 +14984,7 @@
       "particle_action": "None",
       "resource_id": "1Lmrz5nn9j",
       "resource_name": "Merc/Tile_288_32",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -15059,7 +15043,7 @@
       "particle_action": "None",
       "resource_id": "n6HabgDMgi",
       "resource_name": "Merc/Tile_32_64",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -15118,7 +15102,7 @@
       "particle_action": "None",
       "resource_id": "w8RHEQyKd0",
       "resource_name": "Merc/Tile_64_64",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -15177,7 +15161,7 @@
       "particle_action": "None",
       "resource_id": "mJS7uninPD",
       "resource_name": "Merc/Tile_64_96",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -15236,7 +15220,7 @@
       "particle_action": "None",
       "resource_id": "wswjut7TuG",
       "resource_name": "Merc/Skull",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",

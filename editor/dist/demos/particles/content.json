@@ -4671,7 +4671,7 @@
       "particle_action": "None",
       "resource_id": "N5AZXzLO89",
       "resource_name": "Star Particle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Transparent",
@@ -4729,10 +4729,10 @@
         },
         {
           "name": "kRotate",
-          "value": 1.0
+          "value": 1
         },
         {
-          "name": "kRotationalVelocity",
+          "name": "kRotationValue",
           "value": 0.5
         },
         {
@@ -4758,9 +4758,9 @@
       "particle_action": "None",
       "resource_id": "0xydhM7UqW",
       "resource_name": "Lightning Particle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
+      "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -4816,10 +4816,10 @@
         },
         {
           "name": "kRotate",
-          "value": 0.0
+          "value": 0
         },
         {
-          "name": "kRotationalVelocity",
+          "name": "kRotationValue",
           "value": 0.0
         },
         {
@@ -4845,7 +4845,7 @@
       "particle_action": "None",
       "resource_id": "bBESp9pEw3",
       "resource_name": "Rain Particle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Transparent",
@@ -4903,10 +4903,10 @@
         },
         {
           "name": "kRotate",
-          "value": 1.0
+          "value": 1
         },
         {
-          "name": "kRotationalVelocity",
+          "name": "kRotationValue",
           "value": 0.0
         },
         {
@@ -4932,9 +4932,9 @@
       "particle_action": "None",
       "resource_id": "eySa2QEq4I",
       "resource_name": "Magic Particle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
+      "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -4990,10 +4990,10 @@
         },
         {
           "name": "kRotate",
-          "value": 1.0
+          "value": 1
         },
         {
-          "name": "kRotationalVelocity",
+          "name": "kRotationValue",
           "value": 0.0
         },
         {
@@ -5019,9 +5019,9 @@
       "particle_action": "None",
       "resource_id": "EJtsMLLYa9",
       "resource_name": "Energy Particle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
+      "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -5077,10 +5077,10 @@
         },
         {
           "name": "kRotate",
-          "value": 0.0
+          "value": 0
         },
         {
-          "name": "kRotationalVelocity",
+          "name": "kRotationValue",
           "value": 0.0
         },
         {
@@ -5106,7 +5106,7 @@
       "particle_action": "None",
       "resource_id": "J8J3JM8rC8",
       "resource_name": "Water Particle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Transparent",
@@ -5164,10 +5164,10 @@
         },
         {
           "name": "kRotate",
-          "value": 1.0
+          "value": 1
         },
         {
-          "name": "kRotationalVelocity",
+          "name": "kRotationValue",
           "value": 2.0
         },
         {
@@ -5193,9 +5193,9 @@
       "particle_action": "None",
       "resource_id": "8qJeAKQFtw",
       "resource_name": "Smoke Particle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
+      "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -5251,10 +5251,10 @@
         },
         {
           "name": "kRotate",
-          "value": 0.0
+          "value": 0
         },
         {
-          "name": "kRotationalVelocity",
+          "name": "kRotationValue",
           "value": 0.0
         },
         {
@@ -5280,9 +5280,9 @@
       "particle_action": "None",
       "resource_id": "SXaZ6dfqlS",
       "resource_name": "Blocky Particle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
+      "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -5338,10 +5338,10 @@
         },
         {
           "name": "kRotate",
-          "value": 0.0
+          "value": 0
         },
         {
-          "name": "kRotationalVelocity",
+          "name": "kRotationValue",
           "value": 0.0
         },
         {
@@ -5367,9 +5367,9 @@
       "particle_action": "None",
       "resource_id": "dZDA63fz8X",
       "resource_name": "Round Particle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
+      "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -5425,10 +5425,10 @@
         },
         {
           "name": "kRotate",
-          "value": 0.0
+          "value": 0
         },
         {
-          "name": "kRotationalVelocity",
+          "name": "kRotationValue",
           "value": 0.0
         },
         {
@@ -5454,7 +5454,7 @@
       "particle_action": "None",
       "resource_id": "y6vxOLdMaI",
       "resource_name": "Background",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -5513,7 +5513,7 @@
       "particle_action": "Rotate",
       "resource_id": "sv05U2SGGE",
       "resource_name": "Snowflake",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5582,9 +5582,9 @@
       "particle_action": "None",
       "resource_id": "HA5M7RGQpK",
       "resource_name": "Summoning Circle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/emissive_particle.glsl",
+      "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -5640,10 +5640,10 @@
         },
         {
           "name": "kRotate",
-          "value": 1.0
+          "value": 1
         },
         {
-          "name": "kRotationalVelocity",
+          "name": "kRotationValue",
           "value": 1.0
         },
         {
@@ -5669,7 +5669,7 @@
       "particle_action": "None",
       "resource_id": "K9D27CRUwq",
       "resource_name": "Blood Splatter",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5728,7 +5728,7 @@
       "particle_action": "None",
       "resource_id": "pEBDeuBGgb",
       "resource_name": "Spaceship",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5814,6 +5814,7 @@
       "name": "Basic Explosion Smoke",
       "num_particles": 10.0,
       "placement": "Edge",
+      "primitive": "Point",
       "resource_id": "DX5iTPFmEZ",
       "resource_name": "Basic Explosion Smoke",
       "resource_ver": 1,
@@ -5856,6 +5857,7 @@
       "name": "Basic Flame Smoke",
       "num_particles": 10.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "vIf7bfadSt",
       "resource_name": "Basic Flame Smoke",
       "resource_ver": 1,
@@ -5898,6 +5900,7 @@
       "name": "Basic Explosion Sparks",
       "num_particles": 40.0,
       "placement": "Edge",
+      "primitive": "Point",
       "resource_id": "q2YkyQYmdd",
       "resource_name": "Basic Explosion Sparks",
       "resource_ver": 1,
@@ -5940,6 +5943,7 @@
       "name": "Basic Flame Sparks",
       "num_particles": 40.0,
       "placement": "Edge",
+      "primitive": "Point",
       "resource_id": "OpgNJAMhhQ",
       "resource_name": "Basic Flame Sparks",
       "resource_ver": 1,
@@ -5982,6 +5986,7 @@
       "name": "Fireworks Explosion",
       "num_particles": 10.0,
       "placement": "Center",
+      "primitive": "Point",
       "resource_id": "02kw3C4wix",
       "resource_name": "Fireworks Explosion",
       "resource_ver": 1,
@@ -6024,6 +6029,7 @@
       "name": "Basic Explosion",
       "num_particles": 50.0,
       "placement": "Edge",
+      "primitive": "Point",
       "resource_id": "yMhrtzh9Pp",
       "resource_name": "Basic Explosion",
       "resource_ver": 1,
@@ -6066,6 +6072,7 @@
       "name": "Basic Flame",
       "num_particles": 200.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "w3S1bxiRIU",
       "resource_name": "Basic Flame",
       "resource_ver": 1,
@@ -6108,6 +6115,7 @@
       "name": "Energy Explosion Plasma",
       "num_particles": 1.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "obukJs0rJC",
       "resource_name": "Energy Explosion Plasma",
       "resource_ver": 1,
@@ -6150,6 +6158,7 @@
       "name": "Energy Explosion",
       "num_particles": 100.0,
       "placement": "Edge",
+      "primitive": "Point",
       "resource_id": "R0XaXuWEBU",
       "resource_name": "Energy Explosion",
       "resource_ver": 1,
@@ -6192,6 +6201,7 @@
       "name": "Energy Explosion Smoke",
       "num_particles": 10.0,
       "placement": "Edge",
+      "primitive": "Point",
       "resource_id": "0BT4ANr30T",
       "resource_name": "Energy Explosion Smoke",
       "resource_ver": 1,
@@ -6234,6 +6244,7 @@
       "name": "Magic",
       "num_particles": 4.0,
       "placement": "Edge",
+      "primitive": "Point",
       "resource_id": "K5fmwRUujU",
       "resource_name": "Magic",
       "resource_ver": 1,
@@ -6276,6 +6287,7 @@
       "name": "Magic Core",
       "num_particles": 40.0,
       "placement": "Center",
+      "primitive": "Point",
       "resource_id": "6PwXHnbnzY",
       "resource_name": "Magic Core",
       "resource_ver": 1,
@@ -6318,6 +6330,7 @@
       "name": "Water Vapor",
       "num_particles": 50.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "y7WyC5UeQM",
       "resource_name": "Water Vapor",
       "resource_ver": 1,
@@ -6360,6 +6373,7 @@
       "name": "Magic Smoke",
       "num_particles": 10.0,
       "placement": "Center",
+      "primitive": "Point",
       "resource_id": "X983sNLRSh",
       "resource_name": "Magic Smoke",
       "resource_ver": 1,
@@ -6402,6 +6416,7 @@
       "name": "Snow Flakes",
       "num_particles": 10.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "DEnBflg7Re",
       "resource_name": "Snow Flakes",
       "resource_ver": 1,
@@ -6444,6 +6459,7 @@
       "name": "Basic Snow",
       "num_particles": 100.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "3Y7QCvLmnD",
       "resource_name": "Basic Snow",
       "resource_ver": 1,
@@ -6486,6 +6502,7 @@
       "name": "Basic Waterfall",
       "num_particles": 1500.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "n6ykHi9xRi",
       "resource_name": "Basic Waterfall",
       "resource_ver": 1,
@@ -6528,6 +6545,7 @@
       "name": "Summoning Circle",
       "num_particles": 1.0,
       "placement": "Center",
+      "primitive": "Point",
       "resource_id": "y0ZBwlFRes",
       "resource_name": "Summoning Circle",
       "resource_ver": 1,
@@ -6570,6 +6588,7 @@
       "name": "Blood Splatter",
       "num_particles": 1.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "KSwh4OhJxA",
       "resource_name": "Blood Splatter",
       "resource_ver": 1,
@@ -6612,6 +6631,7 @@
       "name": "Blood",
       "num_particles": 10.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "LnUnRULvIo",
       "resource_name": "Blood",
       "resource_ver": 1,
@@ -6654,6 +6674,7 @@
       "name": "Spaceship Exhaust",
       "num_particles": 100.0,
       "placement": "Center",
+      "primitive": "Point",
       "resource_id": "HG7v1manRC",
       "resource_name": "Spaceship Exhaust",
       "resource_ver": 1,
@@ -6696,6 +6717,7 @@
       "name": "Star Field",
       "num_particles": 100.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "MSCSkjl4Su",
       "resource_name": "Star Field",
       "resource_ver": 1,
@@ -6738,6 +6760,7 @@
       "name": "Rain",
       "num_particles": 200.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "Jv6CJCIheq",
       "resource_name": "Rain",
       "resource_ver": 1,
@@ -6780,6 +6803,7 @@
       "name": "Lightning",
       "num_particles": 1.0,
       "placement": "Inside",
+      "primitive": "Point",
       "resource_id": "28lGaDWqAm",
       "resource_name": "Lightning",
       "resource_ver": 1,
@@ -6822,6 +6846,7 @@
       "name": "Fireworks Sparks",
       "num_particles": 1000.0,
       "placement": "Edge",
+      "primitive": "Point",
       "resource_id": "rBqJ2LlkXC",
       "resource_name": "Fireworks Sparks",
       "resource_ver": 1,
@@ -6864,6 +6889,7 @@
       "name": "Rocket Sparks",
       "num_particles": 100.0,
       "placement": "Center",
+      "primitive": "Point",
       "resource_id": "6604Fhgq27",
       "resource_name": "Rocket Sparks",
       "resource_ver": 1,
