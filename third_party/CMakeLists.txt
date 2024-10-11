@@ -35,8 +35,10 @@ if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
 
     message(STATUS " -pthread")
     add_compile_options(-pthread)
-    add_link_options(-pthread)
 
+    add_link_options(-pthread)
+    add_link_options(-sMALLOC=mimalloc)
+    add_link_options(-sSTACK_SIZE=5MB)
 endif()
 # Lua 5.4.3
 add_library(Lua
