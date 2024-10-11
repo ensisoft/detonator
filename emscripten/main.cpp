@@ -307,6 +307,7 @@ public:
         mThreadPool = std::make_unique<base::ThreadPool>();
         mThreadPool->AddRealThread(base::ThreadPool::UpdateThreadID);
         mThreadPool->AddRealThread(base::ThreadPool::Worker0ThreadID);
+        mThreadPool->AddRealThread(base::ThreadPool::AudioThreadID);
         mThreadPool->AddMainThread();
         base::SetGlobalThreadPool(mThreadPool.get());
 

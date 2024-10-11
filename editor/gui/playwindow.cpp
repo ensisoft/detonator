@@ -1859,6 +1859,7 @@ bool PlayWindow::LoadLibrary()
     runtime->EnableLogEvent(base::LogEvent::Error, log_error);
     runtime->AddRealThread(base::ThreadPool::UpdateThreadID);
     runtime->AddRealThread(base::ThreadPool::Worker0ThreadID);
+    runtime->AddRealThread(base::ThreadPool::AudioThreadID);
     runtime->AddMainThread();
 
     std::unique_ptr<engine::Engine> engine(CreateEngine());
