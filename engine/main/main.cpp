@@ -707,6 +707,7 @@ int main(int argc, char* argv[])
 
         runtime->AddRealThread(base::ThreadPool::UpdateThreadID);
         runtime->AddRealThread(base::ThreadPool::Worker0ThreadID);
+        runtime->AddRealThread(base::ThreadPool::AudioThreadID);
         runtime->AddMainThread();
 
         // The implementations of these types are built into the engine
