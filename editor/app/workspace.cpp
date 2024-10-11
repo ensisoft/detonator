@@ -3072,9 +3072,8 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         }
         else
         {
-            DEBUG("Generating HTML5 filesystem image. [emsdk='%1', python='%2']", options.emsdk_path,
-                  options.python_executable);
-            QString filesystem_image_name = "FILESYSTEM";
+            const char* filesystem_image_name = "FILESYSTEM";
+
             QStringList args;
             args << package_script;
             args << filesystem_image_name;
@@ -3082,6 +3081,11 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
             args << options.package_name;
             args << "config.json";
             args << QString("--js-output=%1.js").arg(filesystem_image_name);
+
+            DEBUG("Generating HTML5 filesystem image. [emsdk='%1', python='%2']", options.emsdk_path,
+                  options.python_executable);
+            DEBUG("%1", args.join(" "));
+
             Process::Error error_code = Process::Error::None;
             QStringList stdout_buffer;
             QStringList stderr_buffer;
