@@ -185,6 +185,10 @@ namespace gfx
         { return (float)GetWidth(); }
         inline float GetHeightF() const noexcept
         { return (float)GetHeight(); }
+        inline int GetWidthI() const noexcept
+        { return (int)GetWidth(); }
+        inline int GetHeightI() const noexcept
+        { return (int)GetHeight(); }
 
         inline void SetTransient(bool on_off)
         { SetFlag(Flags::Transient, on_off); }

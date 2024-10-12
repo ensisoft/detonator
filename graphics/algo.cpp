@@ -33,8 +33,7 @@
 #include "graphics/framebuffer.h"
 #include "graphics/utility.h"
 
-namespace gfx {
-namespace algo {
+namespace gfx::algo {
 
 void ExtractColor(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device,
                   const gfx::Color4f& color, float threshold)
@@ -130,7 +129,7 @@ void main() {
     state.stencil_func = Device::State::StencilFunc::Disabled;
     state.culling      = Device::State::Culling::None;
     state.blending     = Device::State::BlendOp::None;
-    state.viewport     = IRect(0, 0, dst->GetWidth(), dst->GetHeight());
+    state.viewport     = IRect(0, 0, dst->GetWidthI(), dst->GetHeightI());
 
     device->Draw(*program, *quad, state, fbo);
 
@@ -341,7 +340,7 @@ void main() {
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
     state.culling      = gfx::Device::State::Culling::None;
     state.blending     = gfx::Device::State::BlendOp::None;
-    state.viewport     = gfx::IRect(0, 0, src_width, src_height);
+    state.viewport     = gfx::IRect(0, 0, (int)src_width, (int)src_height);
 
     gfx::Texture* textures[] = {tmp, texture};
     for (unsigned i=0; i<iterations; ++i)
@@ -460,16 +459,16 @@ void main() {
     if (!program)
         program = MakeProgram(vertex_src, fragment_src, "EdgeProgram", *device);
 
-    const float src_width  = src->GetWidth();
-    const float src_height = src->GetHeight();
+    const float src_width  = src->GetWidthF();
+    const float src_height = src->GetHeightF();
     program->SetTextureCount(1);
     program->SetTexture("kSrcTexture", 0, *src);
     program->SetUniform("kTextureSize", src_width, src_height);
     program->SetUniform("kEdgeColor", edge_color);
 
     auto quad = MakeFullscreenQuad(*device);
-    const auto dst_width  = dst->GetWidth();
-    const auto dst_height = dst->GetHeight();
+    const auto dst_width  = dst->GetWidthI();
+    const auto dst_height = dst->GetHeightI();
 
     gfx::Device::State state;
     state.bWriteColor  = true;
@@ -557,8 +556,8 @@ void main() {
     program->SetTextureCount(1);
 
     auto quad = MakeFullscreenQuad(*device);
-    const auto dst_width  = dst->GetWidth();
-    const auto dst_height = dst->GetHeight();
+    const auto dst_width  = dst->GetWidthI();
+    const auto dst_height = dst->GetHeightI();
 
     gfx::Device::State state;
     state.bWriteColor  = true;
@@ -685,5 +684,4 @@ void ClearTexture(gfx::Texture* texture, gfx::Device* device, const gfx::Color4f
     device->ClearColor(clear_color, fbo);
 }
 
-} // namespace
 } // namespace
