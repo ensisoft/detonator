@@ -479,7 +479,9 @@ void main() {
     state.blending     = gfx::Device::State::BlendOp::None;
     state.viewport     = gfx::IRect(0, 0, dst_width, dst_height);
     device->Draw(*program, *quad, state, fbo);
+
     fbo->Resolve(nullptr);
+    fbo->SetColorTarget(nullptr);
 }
 
 void DetectSpriteEdges(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device, const gfx::Color4f& edge_color)
@@ -568,6 +570,8 @@ void main() {
     state.blending     = gfx::Device::State::BlendOp::None;
     state.viewport     = gfx::IRect(0, 0, dst_width, dst_height);
     device->Draw(*program, *quad, state, fbo);
+
+    fbo->SetColorTarget(nullptr);
 }
 
 void FlipTexture(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device, FlipDirection direction)
@@ -655,6 +659,8 @@ std::unique_ptr<IBitmap> ReadTexture(const gfx::Texture* texture, gfx::Device* d
 
     auto bmp = device->ReadColorBuffer(width, height, fbo);
 
+    fbo->SetColorTarget(nullptr);
+
     return std::make_unique<RgbaBitmap>(std::move(bmp));
 }
 
@@ -682,6 +688,8 @@ void ClearTexture(gfx::Texture* texture, gfx::Device* device, const gfx::Color4f
     fbo->SetColorTarget(texture);
 
     device->ClearColor(clear_color, fbo);
+
+    fbo->SetColorTarget(nullptr);
 }
 
 } // namespace

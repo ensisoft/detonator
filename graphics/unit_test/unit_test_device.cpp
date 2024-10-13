@@ -1945,6 +1945,8 @@ void unit_test_algo_texture_read()
 
 void unit_test_instanced_rendering()
 {
+    TEST_CASE(test::Type::Feature)
+
     auto dev = CreateDevice(200, 200);
 
     constexpr const char* fragment_src =
