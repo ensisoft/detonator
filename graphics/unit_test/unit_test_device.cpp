@@ -2099,6 +2099,139 @@ void main() {
     }
 }
 
+void unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format format,
+                                                 gfx::Framebuffer::MSAA msaa)
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto dev = CreateDevice();
+
+    auto geom = MakeQuad(*dev);
+
+    auto p0 = MakeTestProgram(*dev,
+R"(#version 300 es
+
+in vec2 aPosition;
+
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+}
+)",
+
+R"(#version 300 es
+precision highp float;
+
+layout(location = 0) out vec4 fragOutColor0;
+layout(location = 1) out vec4 fragOutColor1;
+
+void main() {
+  fragOutColor0 = vec4(1.0, 0.0, 0.0, 1.0);
+  fragOutColor1 = vec4(0.0, 1.0, 0.0, 1.0);
+}
+)", "p0");
+
+    gfx::Device::State state;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.bWriteColor  = true;
+    state.viewport     = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    // let the FBO allocate the color target buffers.
+    {
+        gfx::Framebuffer::Config conf;
+        conf.format = format;
+        conf.width  = 10;
+        conf.height = 10;
+        conf.msaa   = msaa;
+        conf.color_target_count = 2;
+        auto* fbo = dev->MakeFramebuffer("test");
+        fbo->SetConfig(conf);
+
+        dev->BeginFrame();
+        dev->ClearColor(gfx::Color::Blue, fbo);
+        dev->Draw(*p0, *geom, state, fbo);
+
+        {
+            gfx::Texture* color0 = nullptr;
+            fbo->Resolve(&color0, 0);
+            const auto& ret = gfx::algo::ReadTexture(color0, dev.get());
+            TEST_REQUIRE(ret);
+            TEST_REQUIRE(ret->GetDepthBits() == 32);
+            TEST_REQUIRE(ret->GetWidth() == 10);
+            TEST_REQUIRE(ret->GetHeight() == 10);
+            const auto* rgba_ret = dynamic_cast<const gfx::RgbaBitmap*>(ret.get());
+            TEST_REQUIRE(rgba_ret->Compare(gfx::Color::Red));
+        }
+
+        {
+            gfx::Texture* color1 = nullptr;
+            fbo->Resolve(&color1, 1);
+            const auto& ret = gfx::algo::ReadTexture(color1, dev.get());
+            TEST_REQUIRE(ret);
+            TEST_REQUIRE(ret->GetDepthBits() == 32);
+            TEST_REQUIRE(ret->GetWidth() == 10);
+            TEST_REQUIRE(ret->GetHeight() == 10);
+            const auto* rgba_ret = dynamic_cast<const gfx::RgbaBitmap*>(ret.get());
+            gfx::WritePNG(*rgba_ret, "/tmp/paska.png");
+            TEST_REQUIRE(rgba_ret->Compare(gfx::Color::Green));
+        }
+
+        dev->EndFrame();
+        dev->DeleteFramebuffers();
+    }
+
+    {
+        auto* color0 = dev->MakeTexture("color0");
+        color0->Allocate(10, 10, gfx::Texture::Format::RGBA);
+        color0->SetName("FBO-color-target");
+
+        auto* color1 = dev->MakeTexture("color1");
+        color1->Allocate(10, 10, gfx::Texture::Format::RGBA);
+        color1->SetName("FBO-color-target");
+
+        auto* fbo = dev->MakeFramebuffer("test");
+        gfx::Framebuffer::Config conf;
+        conf.format = format;
+        conf.width  = 10;
+        conf.height = 10;
+        conf.msaa   = msaa;
+        conf.color_target_count = 2;
+        fbo->SetConfig(conf);
+        fbo->SetColorTarget(color0, 0);
+        fbo->SetColorTarget(color1, 1);
+
+        dev->BeginFrame();
+        dev->ClearColor(gfx::Color::Blue, fbo);
+        dev->Draw(*p0, *geom, state, fbo);
+
+        {
+            fbo->Resolve(nullptr, 0);
+            const auto& ret = gfx::algo::ReadTexture(color0, dev.get());
+            TEST_REQUIRE(ret);
+            TEST_REQUIRE(ret->GetDepthBits() == 32);
+            TEST_REQUIRE(ret->GetWidth() == 10);
+            TEST_REQUIRE(ret->GetHeight() == 10);
+            const auto* rgba_ret = dynamic_cast<const gfx::RgbaBitmap*>(ret.get());
+            TEST_REQUIRE(rgba_ret->Compare(gfx::Color::Red));
+        }
+
+        {
+            fbo->Resolve(nullptr, 1);
+            const auto& ret = gfx::algo::ReadTexture(color1, dev.get());
+            TEST_REQUIRE(ret);
+            TEST_REQUIRE(ret->GetDepthBits() == 32);
+            TEST_REQUIRE(ret->GetWidth() == 10);
+            TEST_REQUIRE(ret->GetHeight() == 10);
+            const auto* rgba_ret = dynamic_cast<const gfx::RgbaBitmap*>(ret.get());
+            TEST_REQUIRE(rgba_ret->Compare(gfx::Color::Green));
+        }
+
+        dev->EndFrame();
+        dev->DeleteFramebuffers();
+    }
+
+}
+
 
 // When drawing multiple times within a single frame with either
 // a single material or multiple materials that all map to the same
@@ -2442,6 +2575,14 @@ int test_main(int argc, char* argv[])
     if (TestContext::GL_ES_Version == 3)
     {
         unit_test_instanced_rendering();
+
+        unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8, gfx::Framebuffer::MSAA::Disabled);
+        unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8_Depth16, gfx::Framebuffer::MSAA::Disabled);
+        unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8_Depth24_Stencil8, gfx::Framebuffer::MSAA::Disabled);
+        unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8, gfx::Framebuffer::MSAA::Enabled);
+        unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8_Depth16, gfx::Framebuffer::MSAA::Enabled);
+        unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8_Depth24_Stencil8, gfx::Framebuffer::MSAA::Enabled);
+
     }
 
     // bugs

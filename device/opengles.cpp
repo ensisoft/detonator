@@ -149,6 +149,10 @@ typedef  void (GL_APIENTRY *PFNGLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC proc, con
 // #define RENDERBUFFER_KHR                                  ????
 // #define FRAMEBUFFER_KHR                                   ????
 
+
+// GL_EXT_draw_buffers
+#define MAX_COLOR_ATTACHMENTS_EXT             0x8CDF
+
 #if !defined(GRAPHICS_CHECK_OPENGL)
 #  pragma message "OpenGL calls are NOT checked!"
 #  define GL_CALL(x) mGL.x
@@ -332,6 +336,8 @@ struct OpenGLFunctions
     PFNGLFRAMEBUFFERTEXTURE2DPROC    glFramebufferTexture2D;
     PFNGLCHECKFRAMEBUFFERSTATUSPROC  glCheckFramebufferStatus;
     PFNGLBLITFRAMEBUFFERPROC         glBlitFramebuffer;
+    PFNGLDRAWBUFFERSPROC             glDrawBuffers;
+    PFNGLREADBUFFERPROC              glReadBuffer;
 
     // KHR_debug
     PFNGLDEBUGMESSAGECALLBACKPROC    glDebugMessageCallback;
@@ -432,6 +438,8 @@ public:
         RESOLVE(glBlitFramebuffer);
         RESOLVE(glFramebufferTexture2D);
         RESOLVE(glCheckFramebufferStatus);
+        RESOLVE(glDrawBuffers)
+        RESOLVE(glReadBuffer)
         // KHR_debug
         RESOLVE(glDebugMessageCallback);
     #undef RESOLVE
@@ -493,7 +501,51 @@ public:
             INFO("Fragment shader texture units: %1", max_texture_units);
             INFO("Maximum render buffer size %1x%2", max_rbo_size, max_rbo_size);
             INFO("FBO MSAA samples: %1", max_samples);
-            have_printed_info = true;
+        }
+
+        const char* extensions = (const char*)mGL.glGetString(GL_EXTENSIONS);
+        std::stringstream ss(extensions);
+        std::string extension;
+        while (std::getline(ss, extension, ' '))
+        {
+            if (extension == "GL_EXT_sRGB")
+                mExtensions.EXT_sRGB = true;
+            else if (extension == "GL_OES_packed_depth_stencil")
+                mExtensions.OES_packed_depth_stencil = true;
+            else if (extension == "GL_EXT_draw_buffers")
+                mExtensions.GL_EXT_draw_buffers;
+
+            VERBOSE("Found extension '%1'", extension);
+        }
+        INFO("sRGB textures: %1", mExtensions.EXT_sRGB ? "YES" : "NO");
+        INFO("FBO packed depth+stencil: %1", mExtensions.OES_packed_depth_stencil ? "YES" : "NO");
+        INFO("EXT draw buffers: %1", mExtensions.GL_EXT_draw_buffers ? "YES" : "NO");
+
+        if (context->IsDebug() && mGL.glDebugMessageCallback)
+        {
+            GL_CALL(glDebugMessageCallback(DebugCallback, nullptr));
+            GL_CALL(glEnable(GL_DEBUG_OUTPUT_KHR));
+            INFO("Debug output is enabled.");
+        }
+
+        const auto version = context->GetVersion();
+        if (version == dev::Context::Version::OpenGL_ES3 ||
+            version == dev::Context::Version::WebGL_2)
+        {
+            GLint max_color_attachments = 0;
+            GL_CALL(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &max_color_attachments));
+            if (have_printed_info)
+            {
+                DEBUG("Maximum color attachments: %1", max_color_attachments);
+            }
+            else
+            {
+                INFO("Maximum color attachments: %1", max_color_attachments);
+            }
+        }
+        else if (version == dev::Context::Version::OpenGL_ES2 ||
+                    version == dev::Context::Version::WebGL_1)
+        {
         }
 
         mTextureUnits.resize(max_texture_units);
@@ -505,26 +557,7 @@ public:
         GL_CALL(glCullFace(GL_BACK));
         GL_CALL(glFrontFace(GL_CCW));
 
-        const char* extensions = (const char*)mGL.glGetString(GL_EXTENSIONS);
-        std::stringstream ss(extensions);
-        std::string extension;
-        while (std::getline(ss, extension, ' '))
-        {
-            if (extension == "GL_EXT_sRGB")
-                mExtensions.EXT_sRGB = true;
-            else if (extension == "GL_OES_packed_depth_stencil")
-                mExtensions.OES_packed_depth_stencil = true;
-            //DEBUG("Found extension '%1'", extension);
-        }
-        INFO("sRGB textures: %1", mExtensions.EXT_sRGB ? "YES" : "NO");
-        INFO("FBO packed depth+stencil: %1", mExtensions.OES_packed_depth_stencil ? "YES" : "NO");
-
-        if (context->IsDebug() && mGL.glDebugMessageCallback)
-        {
-            GL_CALL(glDebugMessageCallback(DebugCallback, nullptr));
-            GL_CALL(glEnable(GL_DEBUG_OUTPUT_KHR));
-            INFO("Debug output is enabled.");
-        }
+        have_printed_info = true;
     }
     OpenGLES2GraphicsDevice(std::shared_ptr<dev::Context> context)
         : OpenGLES2GraphicsDevice(context.get())
@@ -1451,7 +1484,15 @@ public:
         const auto version = mContext->GetVersion();
         if (version == dev::Context::Version::WebGL_2 ||
             version == dev::Context::Version::OpenGL_ES3)
+        {
             caps->instanced_rendering = true;
+            caps->multiple_color_attachments = true;
+        }
+        else if (version == dev::Context::Version::OpenGL_ES2 ||
+                version == dev::Context::Version::WebGL_1)
+        {
+
+        }
     }
 
     virtual gfx::Device* AsGraphicsDevice() override
@@ -1614,8 +1655,14 @@ private:
         for (const auto& pair : mFBOs)
         {
             const auto* fbo = static_cast<const FramebufferImpl*>(pair.second.get());
-            if (fbo->GetClientTexture() == texture)
-                return true;
+            for (unsigned i=0; i<fbo->GetClientTextureCount(); ++i)
+            {
+                const auto* client_texture = fbo->GetClientTexture(i);
+                if (client_texture == nullptr)
+                    continue;
+                if (client_texture == texture)
+                    return true;
+            }
         }
         return false;
     }
@@ -2427,26 +2474,29 @@ private:
         {}
        ~FramebufferImpl() override
         {
-            if (mTexture)
+            for (auto& texture : mTextures)
             {
-                for (size_t unit=0; unit<mDevice.mTextureUnits.size(); ++unit)
+                if (!texture)
+                    continue;
+
+                for (size_t unit = 0; unit < mDevice.mTextureUnits.size(); ++unit)
                 {
-                    if (mDevice.mTextureUnits[unit].texture == mTexture.get())
+                    if (mDevice.mTextureUnits[unit].texture == texture.get())
                     {
                         mDevice.mTextureUnits[unit].texture = nullptr;
                         break;
                     }
                 }
-                mTexture.reset();
+                mTextures.clear();
             }
 
             if (mDepthBuffer)
             {
                 GL_CALL(glDeleteRenderbuffers(1, &mDepthBuffer));
             }
-            if (mMultiSampleColorBuffer)
+            for (auto buffer : mMultisampleColorBuffers)
             {
-                GL_CALL(glDeleteRenderbuffers(1, &mMultiSampleColorBuffer));
+                GL_CALL(glDeleteRenderbuffers(1, &buffer.handle));
             }
 
             if (mHandle)
@@ -2457,6 +2507,8 @@ private:
         }
         virtual void SetConfig(const Config& conf) override
         {
+            ASSERT(conf.color_target_count >= 1);
+
             // we don't allow the config to be changed after it has been created.
             // todo: delete the SetConfig API and take the FBO config in the
             // device level API to create the FBO.
@@ -2464,6 +2516,7 @@ private:
             {
                 ASSERT(mConfig.format == conf.format);
                 ASSERT(mConfig.msaa   == conf.msaa);
+                ASSERT(mConfig.color_target_count == conf.color_target_count);
 
                 // the size can change after the FBO has been created
                 // but only when the format is ColorRGBA8.
@@ -2471,14 +2524,18 @@ private:
             }
 
             mConfig = conf;
+            mClientTextures.resize(mConfig.color_target_count);
+            mTextures.resize(mConfig.color_target_count);
         }
 
-        virtual void SetColorTarget(gfx::Texture* texture) override
+        virtual void SetColorTarget(gfx::Texture* texture, unsigned index) override
         {
-            if (texture == mClientTexture)
+            ASSERT(index < mConfig.color_target_count);
+
+            if (texture == mClientTextures[index])
                 return;
 
-            mClientTexture = static_cast<TextureImpl*>(texture);
+            mClientTextures[index] = static_cast<TextureImpl*>(texture);
 
             // if we have a client texture the client texture drives the FBO size.
             // Otherwise the FBO size is based on the size set in the FBO config.
@@ -2488,10 +2545,10 @@ private:
             // changed after the FBO has been created the texture size must match
             // the size used to create the other attachments (if any)
 
-            if (mClientTexture)
+            if (mClientTextures[index])
             {
-                const auto width  = mClientTexture->GetWidth();
-                const auto height = mClientTexture->GetHeight();
+                const auto width  = mClientTextures[index]->GetWidth();
+                const auto height = mClientTextures[index]->GetHeight();
 
                 // don't allow zero size texture.
                 ASSERT(width && height);
@@ -2506,16 +2563,36 @@ private:
                     ASSERT(height == mConfig.height);
                 }
             }
+
+            // check that every client provided texture has the same size.
+            unsigned width  = 0;
+            unsigned height = 0;
+            for (size_t i=0; i<mClientTextures.size(); ++i)
+            {
+                if (!mClientTextures[i])
+                    continue;
+
+                if (width == 0 && height == 0)
+                {
+                    width = mClientTextures[i]->GetWidth();
+                    height = mClientTextures[i]->GetHeight();
+                }
+                else
+                {
+                    ASSERT(mClientTextures[i]->GetWidth() == width);
+                    ASSERT(mClientTextures[i]->GetHeight() == height);
+                }
+            }
         }
 
-        virtual void Resolve(gfx::Texture** color) const override
+        virtual void Resolve(gfx::Texture** color, unsigned index) const override
         {
             // resolve the MSAA render buffer into a texture target with glBlitFramebuffer
             // the insane part here is that we need a *another* frame buffer for resolving
             // the multisampled color attachment into a texture.
             if (const auto samples = GetSamples())
             {
-                auto* resolve_target = GetColorBufferTexture();
+                auto* resolve_target = GetColorBufferTexture(index);
 
                 FramebufferImpl* fbo = static_cast<FramebufferImpl*>(mDevice.FindFramebuffer("ResolveFBO"));
                 if (fbo == nullptr)
@@ -2526,33 +2603,46 @@ private:
                     config.height = 0;
                     config.format = gfx::Framebuffer::Format::ColorRGBA8;
                     config.msaa   = gfx::Framebuffer::MSAA::Disabled;
+                    config.color_target_count = 1;
                     fbo->SetConfig(config);
-                    fbo->SetColorTarget(resolve_target);
+                    fbo->SetColorTarget(resolve_target, 0);
                     fbo->Create();
                     fbo->Complete();
                 }
                 else
                 {
-                    fbo->SetColorTarget(resolve_target);
+                    fbo->SetColorTarget(resolve_target, 0);
                     fbo->Complete();
                 }
 
                 const auto width  = resolve_target->GetWidth();
                 const auto height = resolve_target->GetHeight();
                 GL_CALL(glBindFramebuffer(GL_READ_FRAMEBUFFER, mHandle));
+
+                if (index > 0)
+                {
+                    // See the comments in Complete() regarding the glDrawBuffers which is
+                    // the other half required to deal with multiple color attachments
+                    // in multisampled FBO
+                    ASSERT(mGL.glReadBuffer);
+
+                    // select the attachment index for reading.
+                    GL_CALL(glReadBuffer(GL_COLOR_ATTACHMENT0 + index));
+                }
+
                 GL_CALL(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo->mHandle));
                 GL_CALL(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 
                 fbo->SetFrameStamp(mFrameNumber);
-                fbo->Resolve(nullptr);
-                fbo->SetColorTarget(nullptr);
+                fbo->Resolve(nullptr, 0);
+                fbo->SetColorTarget(nullptr, 0);
 
                 if (color)
                     *color = resolve_target;
             }
             else
             {
-                auto* texture = GetColorBufferTexture();
+                auto* texture = GetColorBufferTexture(index);
                 if (color)
                     *color = texture;
             }
@@ -2560,11 +2650,17 @@ private:
 
         virtual unsigned GetWidth() const override
         {
-            return mClientTexture ? mClientTexture->GetWidth() : mConfig.width;
+            if (mClientTextures.empty())
+                return mConfig.width;
+
+            return mClientTextures[0]->GetWidth();
         }
         virtual unsigned GetHeight() const override
         {
-            return mClientTexture ? mClientTexture->GetHeight() : mConfig.height;
+            if (mClientTextures.empty())
+                return mConfig.height;
+
+            return mClientTextures[0]->GetHeight();
         }
         virtual Format GetFormat() const override
         {
@@ -2577,39 +2673,77 @@ private:
             // and the resolve client texture will be the *resolve* target in the blit framebuffer operation.
             if (const auto samples = GetSamples())
             {
-                const auto* resolve_target = CreateColorBufferTexture();
+                CreateColorBufferTextures();
+                const auto* resolve_target = GetColorBufferTexture(0);
                 const unsigned width  = resolve_target->GetWidth();
                 const unsigned height = resolve_target->GetHeight();
 
-                if (!mMultiSampleColorBuffer)
-                    GL_CALL(glGenRenderbuffers(1, &mMultiSampleColorBuffer));
+                // this should not leak anything since we only allow the
+                // number of color targets to be set once in the SetConfig
+                // thus this vector is only ever resized once.
+                mMultisampleColorBuffers.resize(mConfig.color_target_count);
 
-                GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mMultiSampleColorBuffer));
-
-                // GL ES3 reference pages under glRenderBufferStorageMultiple lists the table of formats but
-                // this table doesn't include the information about which formats are "color renderable".
-                // Check the ES3 spec under "3.3 TEXTURES" (p.180) or the ES3 reference pages under glTexStorage2D.
-                // https://registry.khronos.org/OpenGL-Refpages/es3.0/
-
-                if ((mMultiSampleColorBufferWidth != width) || (mMultiSampleColorBufferHeight != height))
+                for (unsigned i=0; i<mConfig.color_target_count; ++i)
                 {
-                    GL_CALL(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_SRGB8_ALPHA8, width, height));
-                    mMultiSampleColorBufferWidth  = width;
-                    mMultiSampleColorBufferHeight = height;
-                    DEBUG("Allocated multi-sampled render buffer storage. [vbo='%1', size=%2x%3]", mName, mConfig.width, mConfig.height);
-                }
+                    auto& buff = mMultisampleColorBuffers[i];
+                    if (!buff.handle)
+                        GL_CALL(glGenRenderbuffers(1, &buff.handle));
 
-                GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
-                GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mMultiSampleColorBuffer));
+                    GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, buff.handle));
+
+                    // GL ES3 reference pages under glRenderBufferStorageMultiple lists the table of formats but
+                    // this table doesn't include the information about which formats are "color renderable".
+                    // Check the ES3 spec under "3.3 TEXTURES" (p.180) or the ES3 reference pages under glTexStorage2D.
+                    // https://registry.khronos.org/OpenGL-Refpages/es3.0/
+
+                    if ((buff.width != width) || (buff.height != height))
+                    {
+                        GL_CALL(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_SRGB8_ALPHA8, width, height));
+                        buff.width  = width;
+                        buff.height = height;
+                        DEBUG("Allocated multi-sampled render buffer storage. [vbo='%1', size=%2x%3]", mName, width, height);
+                    }
+                    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
+                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_RENDERBUFFER, buff.handle));
+                }
             }
             else
             {
-                auto* color_target = CreateColorBufferTexture();
+                CreateColorBufferTextures();
+                for (unsigned i=0; i<mConfig.color_target_count; ++i)
+                {
+                    auto* color_target = GetColorBufferTexture(i);
+                    // in case of a single sampled FBO the resolve target can be used directly
+                    // as the color attachment in the FBO.
+                    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
+                    GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, color_target->GetHandle(), 0));
+                }
+            }
 
-                // in case of a single sampled FBO the resolve target can be used directly
-                // as the color attachment in the FBO.
-                GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_target->GetHandle(), 0));
+            if (mConfig.color_target_count > 1)
+            {
+                // trying to render to multiple color attachments without platform
+                // support is a BUG. The device client is responsible for taking
+                // an alternative rendering path when there's no support
+                // for multiple color attachments.
+                // This API is only available starting from GL ES3 or WebGL2.
+                //
+                // It's also available with GL_EXT_draw_buffers extension but
+                // the problem is that there's no support for *glReadBuffer*
+                //
+                // We could choose to have single sampled FBO with ES2 / WebGL1
+                // with the GL_EXT_draw_buffers extension however.  But this
+                // isn't done now since the idea is to move forward to ES3 and
+                // ES3 shaders too (where not yet done)
+
+                ASSERT(mGL.glDrawBuffers);
+
+                std::vector<GLenum> buffers;
+                for (unsigned i = 0; i < mConfig.color_target_count; ++i)
+                {
+                    buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
+                }
+                GL_CALL(glDrawBuffers(buffers.size(), &buffers[0]));
             }
 
             // possible FBO *error* statuses are: INCOMPLETE_ATTACHMENT, INCOMPLETE_DIMENSIONS and INCOMPLETE_MISSING_ATTACHMENT
@@ -2682,7 +2816,9 @@ private:
             // * MIP generation
             // * sRGB encoding
 
-            auto* texture = CreateColorBufferTexture();
+            CreateColorBufferTextures();
+
+            auto* texture = GetColorBufferTexture(0);
 
             const auto version = mDevice.mContext->GetVersion();
             const auto xres = texture->GetWidth();
@@ -2759,11 +2895,17 @@ private:
         }
         void SetFrameStamp(size_t stamp)
         {
-            if (mClientTexture)
-                mClientTexture->SetFrameStamp(stamp);
+            for (auto& texture : mTextures)
+            {
+                if (texture)
+                    texture->SetFrameStamp(stamp);
+            }
 
-            if (mTexture)
-                mTexture->SetFrameStamp(stamp);
+            for (auto* texture : mClientTextures)
+            {
+                if (texture)
+                    texture->SetFrameStamp(stamp);
+            }
 
             mFrameNumber = stamp;
         }
@@ -2796,48 +2938,59 @@ private:
             return 0;
         }
 
-        TextureImpl* CreateColorBufferTexture()
+        void CreateColorBufferTextures()
         {
-            if (mClientTexture)
-                return mClientTexture;
+            mClientTextures.resize(mConfig.color_target_count);
+            mTextures.resize(mConfig.color_target_count);
 
-            // we must have FBO width and height for creating
-            // the color buffer texture.
-            ASSERT(mConfig.width && mConfig.height);
+            for (unsigned i=0; i<mConfig.color_target_count; ++i)
+            {
+                if (mClientTextures[i])
+                    continue;
 
-            if (!mTexture)
-            {
-                mTexture = std::make_unique<TextureImpl>(mName + "/Color0", mGL, mDevice);
-                mTexture->SetName("FBO/" + mName + "/color0");
-                mTexture->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::sRGBA);
-                mTexture->SetFilter(gfx::Texture::MinFilter::Linear);
-                mTexture->SetFilter(gfx::Texture::MagFilter::Linear);
-                mTexture->SetWrapX(gfx::Texture::Wrapping::Clamp);
-                mTexture->SetWrapY(gfx::Texture::Wrapping::Clamp);
-                DEBUG("Allocated new FBO color buffer (texture) target. [name='%1', width=%2, height=%3]]", mName,
-                      mConfig.width, mConfig.height);
+                // we must have FBO width and height for creating
+                // the color buffer texture.
+                ASSERT(mConfig.width && mConfig.height);
+
+                if (!mTextures[i])
+                {
+                    const auto& name = "FBO/" + mName + "/Color" + std::to_string(i);
+                    mTextures[i] = std::make_unique<TextureImpl>(name, mGL, mDevice);
+                    mTextures[i]->SetName(name);
+                    mTextures[i]->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::sRGBA);
+                    mTextures[i]->SetFilter(gfx::Texture::MinFilter::Linear);
+                    mTextures[i]->SetFilter(gfx::Texture::MagFilter::Linear);
+                    mTextures[i]->SetWrapX(gfx::Texture::Wrapping::Clamp);
+                    mTextures[i]->SetWrapY(gfx::Texture::Wrapping::Clamp);
+                    DEBUG("Allocated new FBO color buffer (texture) target. [name='%1', width=%2, height=%3]]", mName,
+                          mConfig.width, mConfig.height);
+                }
+                else
+                {
+                    const auto width  = mTextures[i]->GetWidth();
+                    const auto height = mTextures[i]->GetHeight();
+                    if (width != mConfig.width || height != mConfig.height)
+                        mTextures[i]->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::sRGBA);
+                }
+
             }
-            else
-            {
-                const auto width  = mTexture->GetWidth();
-                const auto height = mTexture->GetHeight();
-                if (width != mConfig.width || height != mConfig.height)
-                    mTexture->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::sRGBA);
-            }
-            return mTexture.get();
         }
 
-        TextureImpl* GetColorBufferTexture() const
+        TextureImpl* GetColorBufferTexture(unsigned index) const
         {
-            if (mClientTexture)
-                return mClientTexture;
+            if (mClientTextures[index])
+                return mClientTextures[index];
 
-            return mTexture.get();
+            return mTextures[index].get();
         }
 
-        const gfx::Texture* GetClientTexture() const
+        const gfx::Texture* GetClientTexture(unsigned index) const
         {
-            return mClientTexture;
+            return mClientTextures[index];
+        }
+        unsigned GetClientTextureCount() const
+        {
+            return mConfig.color_target_count;
         }
 
     private:
@@ -2850,11 +3003,11 @@ private:
         // FBO this is used directly as the color attachment
         // in case of multiple sampled this will be used as the
         // resolve target.
-        std::unique_ptr<TextureImpl> mTexture;
+        std::vector<std::unique_ptr<TextureImpl>> mTextures;
 
-        // Client provided texture that will ultimately contain
+        // Client provided texture(s) that will ultimately contain
         // the rendered result.
-        TextureImpl* mClientTexture = nullptr;
+        std::vector<TextureImpl*> mClientTextures;
 
         GLuint mHandle = 0;
         // this is either only depth or packed depth+stencil
@@ -2862,9 +3015,12 @@ private:
         // In case of multisampled FBO the color buffer is a MSAA
         // render buffer which then gets resolved (blitted) into the
         // associated color target texture.
-        GLuint mMultiSampleColorBuffer = 0;
-        GLuint mMultiSampleColorBufferWidth  = 0;
-        GLuint mMultiSampleColorBufferHeight = 0;
+        struct MSAARenderBuffer {
+            GLuint handle = 0;
+            GLuint width  = 0;
+            GLuint height = 0;
+        };
+        std::vector<MSAARenderBuffer> mMultisampleColorBuffers;
 
         Config mConfig;
         std::size_t mFrameNumber = 0;
@@ -2897,6 +3053,8 @@ private:
     struct Extensions {
         bool EXT_sRGB = false;
         bool OES_packed_depth_stencil = false;
+        // support multiple color attachments in GL ES2.
+        bool GL_EXT_draw_buffers = false;
     } mExtensions;
 };
 
