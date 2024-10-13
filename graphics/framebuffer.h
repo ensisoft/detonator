@@ -48,6 +48,8 @@ namespace gfx
             // The height of the fbo in pixels.
             unsigned height = 0;
 
+            unsigned color_target_count = 1;
+
             MSAA msaa = MSAA::Disabled;
         };
         // Set the framebuffer configuration that will be used when drawing.
@@ -57,10 +59,10 @@ namespace gfx
         // set in the FBO config.
         // The texture format must match the FBO config, i.e. the dimension
         // of any other buffers and the configured color format.
-        virtual void SetColorTarget(Texture* texture) = 0;
+        virtual void SetColorTarget(Texture* texture, unsigned index = 0) = 0;
         // Resolve the framebuffer color buffer contents into a texture that can be
         // used to sample the rendered image.
-        virtual void Resolve(Texture** color) const = 0;
+        virtual void Resolve(Texture** color, unsigned index = 0) const = 0;
         // Get the framebuffer width in pixels.
         virtual unsigned GetWidth() const = 0;
         // Get the framebuffer height in pixels.

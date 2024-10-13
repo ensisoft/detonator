@@ -259,6 +259,7 @@ namespace gfx
             unsigned max_fbo_width = 0;
             unsigned max_fbo_height = 0;
             bool instanced_rendering = false;
+            bool multiple_color_attachments = false;
         };
         virtual void GetDeviceCaps(DeviceCaps* caps) const = 0;
     private:
