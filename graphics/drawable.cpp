@@ -3312,9 +3312,9 @@ void VertexShaderMain()
 }
 )";
     if (shape == TileShape::Square)
-        return ShaderSource::FromRawSource(square_tile_source);
+        return ShaderSource::FromRawSource(square_tile_source, ShaderSource::Type::Vertex);
     else if (shape == TileShape::Rectangle)
-        return ShaderSource::FromRawSource(rectangle_tile_source);
+        return ShaderSource::FromRawSource(rectangle_tile_source, ShaderSource::Type::Vertex);
     else BUG("Missing tile batch shader source.");
     return ShaderSource();
 }

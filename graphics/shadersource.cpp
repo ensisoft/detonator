@@ -115,7 +115,7 @@ namespace {
         return false;
     }
 
-    std::optional<gfx::ShaderSource::ShaderDataDeclarationType> DeclTypeFromString(const std::string& str)
+    std::optional<gfx::ShaderSource::ShaderDataDeclarationType> DeclTypeFromString(const std::string& str, gfx::ShaderSource::Type type)
     {
         using t = gfx::ShaderSource::ShaderDataDeclarationType;
 
@@ -127,6 +127,12 @@ namespace {
             return t::Varying;
         else if (str == "const")
             return t::Constant;
+        else if (str == "in" && type == gfx::ShaderSource::Type::Vertex)
+            return t::Attribute;
+        else if (str == "out" && type == gfx::ShaderSource::Type::Vertex)
+            return t::Varying;
+        else if (str == "in" && type == gfx::ShaderSource::Type::Fragment)
+            return t::Varying;
 
         return std::nullopt;
     }
@@ -286,13 +292,38 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
         }
 
         if (data.decl_type == ShaderDataDeclarationType::Attribute)
-            ss << "attribute ";
+        {
+            if (mVersion == Version::GLSL_100)
+            {
+                ss << "attribute ";
+            }
+            else if (mVersion == Version::GLSL_300)
+            {
+                ss << "in ";
+            }
+            else BUG("Missing shader version handling.");
+        }
         else if (data.decl_type == ShaderDataDeclarationType::Uniform)
             ss << "uniform ";
         else if (data.decl_type == ShaderDataDeclarationType::Constant)
             ss << "const ";
         else if (data.decl_type == ShaderDataDeclarationType::Varying)
-            ss << "varying ";
+        {
+            if (mVersion == Version::GLSL_100)
+            {
+                ss << "varying ";
+            }
+            else if (mVersion == Version::GLSL_300)
+            {
+                if (mType == Type::Fragment)
+                    ss << "in ";
+                else if (mType == Type::Vertex)
+                    ss << "out ";
+                else BUG("Missing vertex type handling.");
+            }
+            else BUG("Missing shader version handling.");
+
+        }
         else BUG("Missing GLSL data declaration type handling.");
 
         if (data.data_type == ShaderDataType::Int)
@@ -438,7 +469,7 @@ ShaderSource::ShaderDataType ShaderSource::DataTypeFromValue(gfx::ShaderSource::
 }
 
 // static
-ShaderSource ShaderSource::FromRawSource(std::string raw_source)
+ShaderSource ShaderSource::FromRawSource(const std::string& raw_source, Type type)
 {
     // Go over the raw GLSL source and try to extract higher
     // level information out of it so that more reasoning
@@ -452,6 +483,7 @@ ShaderSource ShaderSource::FromRawSource(std::string raw_source)
     };
 
     ShaderSource source;
+    source.SetType(type);
 
     std::string glsl_code;
 
@@ -500,10 +532,12 @@ ShaderSource ShaderSource::FromRawSource(std::string raw_source)
         }
         else if (base::StartsWith(trimmed, "attribute") ||
                  base::StartsWith(trimmed, "uniform") ||
-                 base::StartsWith(trimmed, "varying"))
+                 base::StartsWith(trimmed, "varying") ||
+                 base::StartsWith(trimmed, "in") ||
+                 base::StartsWith(trimmed, "out"))
         {
             const auto& parts = base::SplitString(trimmed);
-            const auto& decl_type = DeclTypeFromString(GetToken(parts, 0));
+            const auto& decl_type = DeclTypeFromString(GetToken(parts, 0), type);
             const auto& data_type = DataTypeFromString(GetToken(parts, 1));
             const auto& name = GetTokenName(GetToken(parts, 2));
             if (!decl_type.has_value() || !data_type.has_value() || !name.has_value())

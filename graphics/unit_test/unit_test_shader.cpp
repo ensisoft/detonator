@@ -21,13 +21,52 @@
 #include "base/test_minimal.h"
 #include "graphics/shadersource.h"
 
-void unit_test_raw_source()
+void unit_test_raw_source_es100()
 {
     TEST_CASE(test::Type::Feature)
 
     using ddt = gfx::ShaderSource::ShaderDataDeclarationType;
     using dt = gfx::ShaderSource::ShaderDataType;
 
+    // vertex shader
+    {
+        const auto& ret = gfx::ShaderSource::FromRawSource(R"(
+#version 100
+
+attribute vec2 aVec2;
+attribute vec3 aVec3;
+attribute vec4 aVec4;
+
+varying vec2 vVec2;
+varying vec3 vVec3;
+varying vec4 vVec4;
+
+void main() {
+  gl_Position = vec4(1.0);
+}
+        )", gfx::ShaderSource::Type::Vertex);
+        TEST_REQUIRE(ret.GetVersion() == gfx::ShaderSource::Version::GLSL_100);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec2")->data_type == dt::Vec2f);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec2")->decl_type == ddt::Attribute);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec3")->data_type == dt::Vec3f);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec3")->decl_type == ddt::Attribute);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec4")->data_type == dt::Vec4f);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec4")->decl_type == ddt::Attribute);
+
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec2")->data_type == dt::Vec2f);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec2")->decl_type == ddt::Varying);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec3")->data_type == dt::Vec3f);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec3")->decl_type == ddt::Varying);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->data_type == dt::Vec4f);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->decl_type == ddt::Varying);
+
+        TEST_REQUIRE(ret.GetSource(0) == R"(void main() {
+  gl_Position = vec4(1.0);
+}
+)");
+    }
+
+    // fragment shader
     {
         const auto& ret = gfx::ShaderSource::FromRawSource(R"(
 #version 100
@@ -36,10 +75,6 @@ void unit_test_raw_source()
 #define MY_SHADER_FOO
 
 const int cInt = 1;
-
-attribute vec2 aVec2;
-attribute vec3 aVec3;
-attribute vec4 aVec4;
 
 uniform int kInt;
 uniform float kFloat;
@@ -60,7 +95,7 @@ varying vec4 vVec4;
 void main() {
   gl_FragColor = vec4(1.0);
 }
-        )");
+        )", gfx::ShaderSource::Type::Fragment);
 
         TEST_REQUIRE(ret.GetVersion() == gfx::ShaderSource::Version::GLSL_100);
 
@@ -68,17 +103,6 @@ void main() {
         TEST_REQUIRE(ret.FindDataDeclaration("PI")->decl_type == ddt::PreprocessorDefine);
         TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->data_type == dt::PreprocessorString);
         TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->decl_type == ddt::PreprocessorDefine);
-
-        //TEST_REQUIRE(ret.FindDataDeclaration("cInt")->data_type == dt::Int);
-        //TEST_REQUIRE(ret.FindDataDeclaration("cInt")->decl_type == ddt::Constant);
-
-        TEST_REQUIRE(ret.FindDataDeclaration("aVec2")->data_type == dt::Vec2f);
-        TEST_REQUIRE(ret.FindDataDeclaration("aVec2")->decl_type == ddt::Attribute);
-        TEST_REQUIRE(ret.FindDataDeclaration("aVec3")->data_type == dt::Vec3f);
-        TEST_REQUIRE(ret.FindDataDeclaration("aVec3")->decl_type == ddt::Attribute);
-        TEST_REQUIRE(ret.FindDataDeclaration("aVec4")->data_type == dt::Vec4f);
-        TEST_REQUIRE(ret.FindDataDeclaration("aVec4")->decl_type == ddt::Attribute);
-
         TEST_REQUIRE(ret.FindDataDeclaration("kInt")->data_type == dt::Int);
         TEST_REQUIRE(ret.FindDataDeclaration("kInt")->decl_type == ddt::Uniform);
         TEST_REQUIRE(ret.FindDataDeclaration("kVec2")->data_type == dt::Vec2f);
@@ -112,10 +136,6 @@ void main() {
         TEST_REQUIRE(base::Contains(sauce, "#version 100"));
         TEST_REQUIRE(base::Contains(sauce, "#define PI 3.145"));
         TEST_REQUIRE(base::Contains(sauce, "#define MY_SHADER_FOO"));
-
-        TEST_REQUIRE(base::Contains(sauce, "attribute vec2 aVec2;"));
-        TEST_REQUIRE(base::Contains(sauce, "attribute vec3 aVec3;"));
-        TEST_REQUIRE(base::Contains(sauce, "attribute vec4 aVec4;"));
         TEST_REQUIRE(base::Contains(sauce, "uniform int kInt;"));
         TEST_REQUIRE(base::Contains(sauce, "uniform float kFloat;"));
         TEST_REQUIRE(base::Contains(sauce, "uniform vec2 kVec2;"));
@@ -131,35 +151,204 @@ void main() {
     }
 }
 
+void unit_test_raw_source_es300()
+{
+    TEST_CASE(test::Type::Feature)
+
+    using ddt = gfx::ShaderSource::ShaderDataDeclarationType;
+    using dt = gfx::ShaderSource::ShaderDataType;
+
+    // vertex shader
+    {
+        const auto& ret = gfx::ShaderSource::FromRawSource(R"(
+#version 300 es
+
+in vec2 aVec2;
+in vec3 aVec3;
+in vec4 aVec4;
+
+varying vec2 vVec2;
+varying vec3 vVec3;
+varying vec4 vVec4;
+
+void main() {
+  gl_Position = vec4(1.0);
+}
+        )", gfx::ShaderSource::Type::Vertex);
+
+        TEST_REQUIRE(ret.GetVersion() == gfx::ShaderSource::Version::GLSL_300);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec2")->data_type == dt::Vec2f);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec2")->decl_type == ddt::Attribute);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec3")->data_type == dt::Vec3f);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec3")->decl_type == ddt::Attribute);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec4")->data_type == dt::Vec4f);
+        TEST_REQUIRE(ret.FindDataDeclaration("aVec4")->decl_type == ddt::Attribute);
+
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec2")->data_type == dt::Vec2f);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec2")->decl_type == ddt::Varying);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec3")->data_type == dt::Vec3f);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec3")->decl_type == ddt::Varying);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->data_type == dt::Vec4f);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->decl_type == ddt::Varying);
+
+        TEST_REQUIRE(ret.GetSourceCount() == 1);
+        TEST_REQUIRE(ret.GetSource(0) == R"(void main() {
+  gl_Position = vec4(1.0);
+}
+)");
+        const auto& sauce = ret.GetSource();
+        TEST_REQUIRE(base::Contains(sauce, "#version 300 es"));
+        TEST_REQUIRE(base::Contains(sauce, "in vec2 aVec2;"));
+        TEST_REQUIRE(base::Contains(sauce, "in vec3 aVec3;"));
+        TEST_REQUIRE(base::Contains(sauce, "in vec4 aVec4;"));
+        TEST_REQUIRE(base::Contains(sauce, "out vec2 vVec2;"));
+        TEST_REQUIRE(base::Contains(sauce, "out vec3 vVec3;"));
+        TEST_REQUIRE(base::Contains(sauce, "out vec4 vVec4;"));
+    }
+
+    // fragment shader
+    {
+        const auto& ret = gfx::ShaderSource::FromRawSource(R"(
+#version 300 es
+
+#define PI 3.145
+#define MY_SHADER_FOO
+
+const int cInt = 1;
+
+uniform int kInt;
+uniform float kFloat;
+uniform vec2 kVec2;
+uniform vec3 kVec3;
+uniform vec4 kVec4;
+
+uniform mat2 kMat2;
+uniform mat3 kMat3;
+uniform mat4 kMat4;
+
+uniform sampler2D kSampler;
+
+
+in vec2 vVec2;
+in vec3 vVec3;
+in vec4 vVec4;
+
+void main() {
+  gl_Position = vec4(1.0);
+}
+        )", gfx::ShaderSource::Type::Fragment);
+
+        TEST_REQUIRE(ret.GetVersion() == gfx::ShaderSource::Version::GLSL_300);
+        TEST_REQUIRE(ret.FindDataDeclaration("PI")->data_type == dt::PreprocessorString);
+        TEST_REQUIRE(ret.FindDataDeclaration("PI")->decl_type == ddt::PreprocessorDefine);
+        TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->data_type == dt::PreprocessorString);
+        TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->decl_type == ddt::PreprocessorDefine);
+
+        TEST_REQUIRE(ret.FindDataDeclaration("kInt")->data_type == dt::Int);
+        TEST_REQUIRE(ret.FindDataDeclaration("kInt")->decl_type == ddt::Uniform);
+        TEST_REQUIRE(ret.FindDataDeclaration("kVec2")->data_type == dt::Vec2f);
+        TEST_REQUIRE(ret.FindDataDeclaration("kVec2")->decl_type == ddt::Uniform);
+        TEST_REQUIRE(ret.FindDataDeclaration("kVec3")->data_type == dt::Vec3f);
+        TEST_REQUIRE(ret.FindDataDeclaration("kVec3")->decl_type == ddt::Uniform);
+        TEST_REQUIRE(ret.FindDataDeclaration("kVec4")->data_type == dt::Vec4f);
+        TEST_REQUIRE(ret.FindDataDeclaration("kVec4")->decl_type == ddt::Uniform);
+        TEST_REQUIRE(ret.FindDataDeclaration("kMat2")->data_type == dt::Mat2f);
+        TEST_REQUIRE(ret.FindDataDeclaration("kMat2")->decl_type == ddt::Uniform);
+        TEST_REQUIRE(ret.FindDataDeclaration("kMat3")->data_type == dt::Mat3f);
+        TEST_REQUIRE(ret.FindDataDeclaration("kMat3")->decl_type == ddt::Uniform);
+        TEST_REQUIRE(ret.FindDataDeclaration("kMat4")->data_type == dt::Mat4f);
+        TEST_REQUIRE(ret.FindDataDeclaration("kMat4")->decl_type == ddt::Uniform);
+        TEST_REQUIRE(ret.FindDataDeclaration("kSampler")->data_type == dt::Sampler2D);
+        TEST_REQUIRE(ret.FindDataDeclaration("kSampler")->decl_type == ddt::Uniform);
+
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec2")->data_type == dt::Vec2f);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec2")->decl_type == ddt::Varying);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec3")->data_type == dt::Vec3f);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec3")->decl_type == ddt::Varying);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->data_type == dt::Vec4f);
+        TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->decl_type == ddt::Varying);
+
+        TEST_REQUIRE(ret.GetSourceCount() == 1);
+        TEST_REQUIRE(ret.GetSource(0) == R"(void main() {
+  gl_Position = vec4(1.0);
+}
+)");
+        const auto& sauce = ret.GetSource();
+        TEST_REQUIRE(base::Contains(sauce, "#version 300 es"));
+        TEST_REQUIRE(base::Contains(sauce, "#define PI 3.145"));
+        TEST_REQUIRE(base::Contains(sauce, "#define MY_SHADER_FOO"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform int kInt;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform float kFloat;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec2 kVec2;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec3 kVec3;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kVec4;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform mat2 kMat2;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform mat3 kMat3;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform mat4 kMat4;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform sampler2D kSampler;"));
+        TEST_REQUIRE(base::Contains(sauce, "in vec2 vVec2;"));
+        TEST_REQUIRE(base::Contains(sauce, "in vec3 vVec3;"));
+        TEST_REQUIRE(base::Contains(sauce, "in vec4 vVec4;"));
+    }
+
+}
+
 void unit_test_generation()
 {
     TEST_CASE(test::Type::Feature)
 
-    gfx::ShaderSource source;
-    source.SetPrecision(gfx::ShaderSource::Precision::High);
-    source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
-    source.SetType(gfx::ShaderSource::Type::Fragment);
-    source.AddPreprocessorDefinition("PI", 3.143f);
-    source.AddConstant("kFoobar", 123);
+    {
+        gfx::ShaderSource source;
+        source.SetPrecision(gfx::ShaderSource::Precision::High);
+        source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
+        source.SetType(gfx::ShaderSource::Type::Fragment);
+        source.AddPreprocessorDefinition("PI", 3.143f);
+        source.AddConstant("kFoobar", 123);
+        source.AddVarying("vColor", gfx::ShaderSource::VaryingType::Vec4f);
 
-    source.AddSource(R"(
+        source.AddSource(R"(
 void main() {
     gl_FragColor = vec4(1.0)
 }
     )");
 
-    const auto& sauce = source.GetSource();
-    //std::cout << sauce;
-    TEST_REQUIRE(base::Contains(sauce, "#version 300 es"));
-    TEST_REQUIRE(base::Contains(sauce, "precision highp float;"));
-    TEST_REQUIRE(base::Contains(sauce, "const int kFoobar = 123;"));
+        const auto& sauce = source.GetSource();
+        //std::cout << sauce;
+        TEST_REQUIRE(base::Contains(sauce, "#version 300 es"));
+        TEST_REQUIRE(base::Contains(sauce, "precision highp float;"));
+        TEST_REQUIRE(base::Contains(sauce, "const int kFoobar = 123;"));
+        TEST_REQUIRE(base::Contains(sauce, "in vec4 vColor;"));
+    }
+
+    {
+        gfx::ShaderSource source;
+        source.SetPrecision(gfx::ShaderSource::Precision::High);
+        source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
+        source.SetType(gfx::ShaderSource::Type::Vertex);
+        source.AddPreprocessorDefinition("PI", 3.143f);
+        source.AddConstant("kFoobar", 123);
+        source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec4f);
+        source.AddVarying("vColor", gfx::ShaderSource::VaryingType::Vec4f);
+        source.AddSource(R"(
+void main() {
+    gl_Position = vec4(1.0);
+}
+        )");
+
+        const auto& sauce = source.GetSource();
+        TEST_REQUIRE(base::Contains(sauce, "#version 300 es"));
+        TEST_REQUIRE(base::Contains(sauce, "const int kFoobar = 123;"));
+        TEST_REQUIRE(base::Contains(sauce, "in vec4 aPosition;"));
+        TEST_REQUIRE(base::Contains(sauce, "out vec4 vColor;"));
+    }
 
 }
 
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
-    unit_test_raw_source();
+    unit_test_raw_source_es100();
+    unit_test_raw_source_es300();
     unit_test_generation();
 
     return 0;
