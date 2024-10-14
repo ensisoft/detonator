@@ -235,7 +235,7 @@ namespace gfx
         // version and precision qualifiers match.
         bool IsCompatible(const ShaderSource& other) const noexcept;
 
-        static ShaderSource FromRawSource(std::string source);
+        static ShaderSource FromRawSource(const std::string& source, Type type);
 
         static ShaderDataType DataTypeFromValue(ShaderDataDeclarationValue value) noexcept;
 

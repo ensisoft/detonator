@@ -1895,7 +1895,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     // use one of the built-in shaders!
 
     if (!mShaderSrc.empty())
-        return ShaderSource::FromRawSource(mShaderSrc);
+        return ShaderSource::FromRawSource(mShaderSrc, ShaderSource::Type::Fragment);
 
     if (!mShaderUri.empty())
     {
@@ -1911,7 +1911,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         }
         const char* beg = (const char*)buffer->GetData();
         const char* end = beg + buffer->GetByteSize();
-        return ShaderSource::FromRawSource(std::string(beg, end));
+        return ShaderSource::FromRawSource(std::string(beg, end), ShaderSource::Type::Fragment);
     }
 
     if (mType == Type::Color)
