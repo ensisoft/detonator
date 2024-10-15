@@ -144,6 +144,7 @@ void BloomPass::Draw(const SceneRenderLayerList& layers) const
         conf.width  = surface_width;
         conf.height = surface_height;
         bloom_fbo = device->MakeFramebuffer("BloomFBO");
+        bloom_fbo->SetConfig(conf);
         bloom_fbo->SetColorTarget(bloom_tex);
     }
     bloom_fbo->SetColorTarget(bloom_tex);
