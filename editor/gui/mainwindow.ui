@@ -1306,7 +1306,7 @@
        <bool>true</bool>
       </property>
       <property name="tabBarAutoHide">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
      </widget>
     </item>
