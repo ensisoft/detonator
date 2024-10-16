@@ -32,16 +32,16 @@ uniform int kRotate;
 // Vertex input
 // ---------------------------------------------------
 // Vertex texture coordinates.
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 // Normalized lifetime of the particle
-varying float vParticleTime;
+in float vParticleTime;
 // Particle alpha value.
-varying float vParticleAlpha;
+in float vParticleAlpha;
 // Particle random value. [0.0, 1.0]
-varying float vParticleRandomValue;
+in float vParticleRandomValue;
 // Angle of the particle's direction vector
 // relative to the x axis
-varying float vParticleAngle;
+in float vParticleAngle;
 
 #define PI 3.1415926
 #define ROTATE_OFF 0
@@ -115,7 +115,7 @@ float ReadTextureAlpha(vec2 coord)
     vec2 texture_scale = kMaskRect.zw;
     coord = coord * texture_scale + texture_trans;
 
-    float alpha = texture2D(kMask,  coord).r;
+    float alpha = texture(kMask,  coord).r;
     return alpha;
 }
 

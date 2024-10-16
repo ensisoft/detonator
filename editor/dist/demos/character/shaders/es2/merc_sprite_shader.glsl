@@ -1,4 +1,4 @@
-
+#version 300 es
 uniform sampler2D kSpriteSheet;
 
 uniform float kAlphaCutoff;
@@ -8,7 +8,7 @@ uniform int kState;
 uniform float kTime;
 
 // varyings from vertex stage.
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 #define TEX_WIDTH   276.0
 #define TEX_HEIGHT  2208.0
@@ -33,7 +33,7 @@ vec4 SampleCell(float col, float row,  vec2 coord)
 
     vec2 sample_pos = cell_pos + coord * cell_size;
 
-    return texture2D(kSpriteSheet, sample_pos);
+    return texture(kSpriteSheet, sample_pos);
 
 }
 

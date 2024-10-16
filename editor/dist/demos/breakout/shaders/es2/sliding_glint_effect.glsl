@@ -1,6 +1,8 @@
+#version 300 es
+
 uniform float kTime;
 
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 void FragmentShaderMain()
 {

@@ -5142,13 +5142,7 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom",
-      "uniforms": [
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
-        }
-      ]
+      "type": "Custom"
     },
     {
       "active_texture_map": "",

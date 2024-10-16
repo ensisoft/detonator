@@ -1944,7 +1944,7 @@ ShaderSource MaterialClass::GetColorShaderSource()
     source.SetShaderUniformAPIVersion(1);
     source.SetType(ShaderSource::Type::Fragment);
     source.SetPrecision(ShaderSource::Precision::High);
-    source.SetVersion(ShaderSource::Version::GLSL_100);
+    source.SetVersion(ShaderSource::Version::GLSL_300);
     source.AddUniform("kBaseColor",     ShaderSource::UniformType::Color4f);
     source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
     source.AddSource(R"(
@@ -1980,7 +1980,7 @@ ShaderSource MaterialClass::GetGradientShaderSource()
     source.SetShaderUniformAPIVersion(1);
     source.SetType(ShaderSource::Type::Fragment);
     source.SetPrecision(ShaderSource::Precision::High);
-    source.SetVersion(ShaderSource::Version::GLSL_100);
+    source.SetVersion(ShaderSource::Version::GLSL_300);
     source.AddUniform("kColor0", ShaderSource::UniformType::Color4f,
                       "The gradient top left color value.");
     source.AddUniform("kColor1", ShaderSource::UniformType::Color4f,
@@ -2045,7 +2045,7 @@ ShaderSource MaterialClass::GetSpriteShaderSource()
     source.SetShaderUniformAPIVersion(1);
     source.SetType(ShaderSource::Type::Fragment);
     source.SetPrecision(ShaderSource::Precision::High);
-    source.SetVersion(ShaderSource::Version::GLSL_100);
+    source.SetVersion(ShaderSource::Version::GLSL_300);
     source.AddUniform("kTexture0", ShaderSource::UniformType::Sampler2D);
     source.AddUniform("kTexture1", ShaderSource::UniformType::Sampler2D);
     source.AddUniform("kTextureBox0", ShaderSource::UniformType::Vec4f);
@@ -2137,8 +2137,8 @@ void FragmentShaderMain()
 
     // sample textures, if texture is a just an alpha mask we use
     // only the alpha channel later.
-    vec4 tex0 = texture2D(kTexture0, c1);
-    vec4 tex1 = texture2D(kTexture1, c2);
+    vec4 tex0 = texture(kTexture0, c1);
+    vec4 tex1 = texture(kTexture1, c2);
 
     vec4 col0 = mix(kBaseColor * tex0, vec4(kBaseColor.rgb, kBaseColor.a * tex0.a), kAlphaMask[0]);
     vec4 col1 = mix(kBaseColor * tex1, vec4(kBaseColor.rgb, kBaseColor.a * tex1.a), kAlphaMask[1]);
@@ -2158,8 +2158,8 @@ void FragmentShaderMain() {
 
     // your code here
 
-    fs_out.color = mix(texture2D(kTexture0, vTexCoord),
-                       texture2D(kTexture1, vTexCoord),
+    fs_out.color = mix(texture(kTexture0, vTexCoord),
+                       texture(kTexture1, vTexCoord),
                        kBlendCoeff) * kBaseColor;
 }
 )");
@@ -2275,7 +2275,7 @@ ShaderSource MaterialClass::GetTextureShaderSource()
     source.SetShaderUniformAPIVersion(1);
     source.SetType(ShaderSource::Type::Fragment);
     source.SetPrecision(ShaderSource::Precision::High);
-    source.SetVersion(ShaderSource::Version::GLSL_100);
+    source.SetVersion(ShaderSource::Version::GLSL_300);
     source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
     source.AddUniform("kTextureBox", ShaderSource::UniformType::Vec4f);
     source.AddUniform("kAlphaMask", ShaderSource::UniformType::Float);
@@ -2359,7 +2359,7 @@ void FragmentShaderMain()
 
     // sample textures, if texture is a just an alpha mask we use
     // only the alpha channel later.
-    vec4 texel = texture2D(kTexture, coords);
+    vec4 texel = texture(kTexture, coords);
 
     // either modulate/mask texture color with base color
     // or modulate base color with texture's alpha value if
@@ -2379,7 +2379,7 @@ void FragmentShaderMain() {
 
     // your code here
 
-    fs_out.color = texture2D(kTexture, vTexCoord) * kBaseColor;
+    fs_out.color = texture(kTexture, vTexCoord) * kBaseColor;
 
 }
 )");
@@ -2399,7 +2399,7 @@ ShaderSource MaterialClass::GetTilemapShaderSource()
     source.SetShaderUniformAPIVersion(1);
     source.SetType(ShaderSource::Type::Fragment);
     source.SetPrecision(ShaderSource::Precision::High);
-    source.SetVersion(ShaderSource::Version::GLSL_100);
+    source.SetVersion(ShaderSource::Version::GLSL_300);
     source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
     source.AddUniform("kTextureBox", ShaderSource::UniformType::Vec4f);
     source.AddUniform("kAlphaCutoff", ShaderSource::UniformType::Float);
@@ -2409,7 +2409,6 @@ ShaderSource MaterialClass::GetTilemapShaderSource()
     source.AddUniform("kTileSize", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kTileOffset", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kTilePadding", ShaderSource::UniformType::Vec2f);
-    source.AddUniform("kTextureSize", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
 
     source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
@@ -2436,9 +2435,11 @@ void FragmentShaderMain()
     vec2 texture_box_size      = kTextureBox.zw;
     vec2 texture_box_translate = kTextureBox.xy;
 
-    vec2 tile_texture_offset   = kTileOffset / kTextureSize;
-    vec2 tile_texture_size     = kTileSize / kTextureSize;
-    vec2 tile_texture_padding  = kTilePadding / kTextureSize;
+    vec2 texture_size = vec2(textureSize(kTexture, 0));
+
+    vec2 tile_texture_offset   = kTileOffset / texture_size;
+    vec2 tile_texture_size     = kTileSize / texture_size;
+    vec2 tile_texture_padding  = kTilePadding / texture_size;
     vec2 tile_texture_box_size = tile_texture_size + (tile_texture_padding * 2.0);
 
     vec2 tile_map_size = texture_box_size - tile_texture_offset;
@@ -2471,7 +2472,7 @@ void FragmentShaderMain()
     // add the frag coordinate relative to the tile's top left
     texture_coords += tile_texture_size * frag_texture_coords;
 
-    vec4 texture_sample = texture2D(kTexture, texture_coords);
+    vec4 texture_sample = texture(kTexture, texture_coords);
 
     // produce color value.
     vec4 color = texture_sample * kBaseColor;
@@ -2838,14 +2839,14 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
         ShaderSource source;
         source.SetType(ShaderSource::Type::Fragment);
         source.SetPrecision(ShaderSource::Precision::High);
-        source.SetVersion(ShaderSource::Version::GLSL_100);
+        source.SetVersion(ShaderSource::Version::GLSL_300);
         source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
         source.AddUniform("kColor", ShaderSource::UniformType::Color4f);
         source.AddUniform("kTime", ShaderSource::UniformType::Float);
         source.AddVarying("vTexCoord", ShaderSource::UniformType::Vec2f);
         source.AddSource(R"(
 void FragmentShaderMain() {
-   float alpha = texture2D(kTexture, vTexCoord).a;
+   float alpha = texture(kTexture, vTexCoord).a;
    vec4 color = vec4(kColor.r, kColor.g, kColor.b, kColor.a * alpha);
    fs_out.color = color;
 }
@@ -2857,7 +2858,7 @@ void FragmentShaderMain() {
         ShaderSource source;
         source.SetType(ShaderSource::Type::Fragment);
         source.SetPrecision(ShaderSource::Precision::High);
-        source.SetVersion(ShaderSource::Version::GLSL_100);
+        source.SetVersion(ShaderSource::Version::GLSL_300);
         source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
         source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
         source.AddSource(R"(
@@ -2866,7 +2867,7 @@ void FragmentShaderMain() {
                      vec3(0.0, -1.0, 0.0),
                      vec3(0.0,  1.0, 0.0));
     vec3 tex = flip * vec3(vTexCoord.xy, 1.0);
-    vec4 color = texture2D(kTexture, tex.xy);
+    vec4 color = texture(kTexture, tex.xy);
     fs_out.color = color;
 }
     )");

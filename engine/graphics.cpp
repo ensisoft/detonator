@@ -53,7 +53,7 @@ public:
     {
         gfx::ShaderSource source;
         source.SetType(gfx::ShaderSource::Type::Fragment);
-        source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+        source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
         source.SetPrecision(gfx::ShaderSource::Precision::High);
 
         source.AddSource(R"(
@@ -63,6 +63,8 @@ struct FS_OUT {
 
 uniform float kBloomThreshold;
 uniform vec4  kBloomColor;
+
+layout (location=0) out vec4 fragOutColor;
 
 vec4 Bloom(vec4 color) {
     float brightness = dot(color.rgb, kBloomColor.rgb); //vec3(0.2126, 0.7252, 0.0722));
@@ -78,7 +80,7 @@ void main() {
 
     vec4 color = Bloom(fs_out.color);
 
-    gl_FragColor = color;
+    fragOutColor = color;
 
 })");
         source.Merge(material.GetShader(env, device));

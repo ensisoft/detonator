@@ -1,3 +1,5 @@
+#version 300 es
+
 // build-in uniforms
 // material time in seconds.
 uniform float kTime;
@@ -38,7 +40,7 @@ void FragmentShaderMain() {
 
     float v = spiral(vTexCoord - vec2(0.5, 0.5));
 
-    vec4 tex = texture2D(kTexture, vTexCoord);
+    vec4 tex = texture(kTexture, vTexCoord);
 
     fs_out.color.rgb = mix(kBaseColor.rgb, tex.rgb, 1.0-v);
     //gl_FragColor.rgb = mix(tex.rgb, kBaseColor.rgb, 1.0-v);
