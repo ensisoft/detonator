@@ -921,6 +921,7 @@ private:
         mRuntime->EndPlay(mScene.get(), mTilemap.get());
         mScene.reset();
         mTilemap.reset();
+        mPhysics.DeleteAll();
     }
     void OnAction(const engine::QuitAction& action)
     {
