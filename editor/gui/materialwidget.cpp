@@ -2427,6 +2427,16 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         const auto avg_height = texture_height_sum / float(texture_count);
         aspect_ratio = avg_width / avg_height;
     }
+
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Tilemap)
+    {
+        const auto tile_size = mMaterial->GetTileSize();
+        const auto tile_width = tile_size.x > 0.0f ? (unsigned)tile_size.x : 0u;
+        const auto tile_height = tile_size.y > 0.0f ? (unsigned)tile_size.y : 0u;
+        aspect_ratio = tile_width / tile_height;
+    }
+
+
     const auto time = mState == PlayState::Playing ? mTime : GetValue(mUI.kTime);
     const auto zoom = (float)GetValue(mUI.zoom);
     const auto content_width  = texture_width_sum * aspect_ratio;
