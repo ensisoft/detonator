@@ -1,3 +1,4 @@
+#version 300 es
 // material system will provide these.
 // kTime will be the current material instance runtime in second.s
 uniform float kTime;
@@ -14,7 +15,7 @@ uniform sampler2D kTexture0;
 uniform vec4 kTextureRect;
 
 // data from vertex stage.
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 vec2 TransformTextureCoords(vec2 coord)
 {
@@ -51,13 +52,13 @@ void FragmentShaderMain()
 
     float alpha = clamp(disc_alpha - fadeout, 0.0, 1.0);
 
-    vec4 texture = texture2D(kTexture0, TransformTextureCoords(vTexCoord));
+    vec4 texture_sample = texture(kTexture0, TransformTextureCoords(vTexCoord));
     vec4 base_color = kBaseColor;
 
     float ring_alpha = ring_alpha(disc_radius, dist) * 0.3 * (1.0-s);
     vec4 ring_color = kColor0 * ring_alpha;
 
-    base_color.a = alpha * 0.8 * (1.0-s) * texture.r;
+    base_color.a = alpha * 0.8 * (1.0-s) * texture_sample.r;
 
     fs_out.color = base_color + ring_color;
 }

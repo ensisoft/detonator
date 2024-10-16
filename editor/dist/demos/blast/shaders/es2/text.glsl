@@ -1,10 +1,11 @@
+#version 300 es
 uniform float kTime;
 uniform float kRenderPoints;
 
 uniform sampler2D kTexture0;
 uniform vec4  kBaseColor;
 
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 float SlidingGlint()
 {
@@ -24,7 +25,7 @@ float SlidingGlint()
 
 void FragmentShaderMain()
 {
-    float a = texture2D(kTexture0, vTexCoord).a;
+    float a = texture(kTexture0, vTexCoord).a;
     float g = SlidingGlint();
     fs_out.color.rgb = kBaseColor.rgb*a + g*a;
 }

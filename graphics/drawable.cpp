@@ -104,15 +104,23 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device)
     source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleAngle", gfx::ShaderSource::VaryingType::Float);
 
+    source.AddVarying("vTileData", gfx::ShaderSource::VaryingType ::Vec2f);
+
     source.AddSource(R"(
 void VertexShaderMain()
 {
     vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 0.0, 1.0);
     vTexCoord    = aTexCoord;
+
+    // dummy data out.
     vParticleRandomValue = 0.0;
     vParticleAlpha       = 1.0;
     vParticleTime        = 0.0;
     vParticleAngle       = 0.0;
+
+    // dummy data
+    vTileData = vec2(0.0, 0.0);
+
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
 )");
@@ -136,14 +144,22 @@ gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device)
     source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleAngle", gfx::ShaderSource::VaryingType::Float);
 
+    source.AddVarying("vTileData", gfx::ShaderSource::VaryingType::Vec2f);
+
     source.AddSource(R"(
 void VertexShaderMain()
 {
     vTexCoord = aTexCoord;
+
+    // dummy out
     vParticleRandomValue = 0.0;
     vParticleAlpha       = 1.0;
     vParticleTime        = 0.0;
     vParticleAngle       = 0.0;
+
+    // dummy out
+    vTileData = vec2(0.0, 0.0);
+
     gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
 }
 )");
@@ -3230,10 +3246,10 @@ ShaderSource TileBatch::GetShader(const Environment& env, const Device& device) 
     const auto shape = ResolveTileShape();
 
     constexpr const auto*  square_tile_source = R"(
-#version 100
+#version 300 es
 
-attribute vec3 aTilePosition;
-attribute vec2 aTileData;
+in vec3 aTilePosition;
+in vec2 aTileData;
 
 uniform mat4 kTileTransform;
 uniform mat4 kTileCoordinateSpaceTransform;
@@ -3242,10 +3258,10 @@ uniform vec3 kTileWorldSize;
 uniform vec3 kTilePointOffset;
 uniform vec2 kTileRenderSize;
 
-varying float vParticleAlpha;
-varying float vParticleRandomValue;
-varying vec2 vTileData;
-varying vec2 vTexCoord;
+out float vParticleAlpha;
+out float vParticleRandomValue;
+out vec2 vTileData;
+out vec2 vTexCoord;
 
 void VertexShaderMain()
 {
@@ -3256,10 +3272,11 @@ void VertexShaderMain()
 
   gl_Position = kTileTransform * vertex;
   gl_Position.z = 0.0;
-
   gl_PointSize = kTileRenderSize.x;
 
   vTileData = aTileData;
+  // dummy, this shader requires gl_PointCoord
+  vTexCoord = vec2(0.0, 0.0);
 
   // dummy out.
   vParticleAlpha = 1.0;
@@ -3269,11 +3286,11 @@ void VertexShaderMain()
 
 
     constexpr const auto* rectangle_tile_source = R"(
-#version 100
+#version 300 es
 
-attribute vec3 aTilePosition;
-attribute vec2 aTileCorner;
-attribute vec2 aTileData;
+in vec3 aTilePosition;
+in vec2 aTileCorner;
+in vec2 aTileData;
 
 uniform mat4 kTileTransform;
 uniform mat4 kTileCoordinateSpaceTransform;
@@ -3282,10 +3299,10 @@ uniform vec3 kTileWorldSize;
 uniform vec3 kTilePointOffset;
 uniform vec2 kTileRenderSize;
 
-varying float vParticleAlpha;
-varying float vParticleRandomValue;
-varying vec2 vTileData;
-varying vec2 vTexCoord;
+out float vParticleAlpha;
+out float vParticleRandomValue;
+out vec2 vTileData;
+out vec2 vTexCoord;
 
 void VertexShaderMain()
 {

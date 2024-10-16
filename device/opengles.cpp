@@ -2260,9 +2260,15 @@ private:
             build_info.resize(length);
             GL_CALL(glGetProgramInfoLog(prog, length, nullptr, &build_info[0]));
 
-            if ((link_status == 0) || (valid_status == 0))
+            if (link_status == 0)
             {
-                ERROR("Program build error. [name='%1', error='%2']", mName, build_info);
+                ERROR("Program link error. [name='%1', info='%2']", mName, build_info);
+                GL_CALL(glDeleteProgram(prog));
+                return false;
+            }
+            else if (valid_status == 0)
+            {
+                ERROR("Program is not valid. [name='%1', info='%2']", mName, build_info);
                 GL_CALL(glDeleteProgram(prog));
                 return false;
             }

@@ -1,3 +1,4 @@
+#version 300 es
 #define EDGE_WIDTH  0.05
 
 // build-in uniforms
@@ -22,15 +23,15 @@ uniform vec4 kFColor;
 uniform vec4 kBColor;
 
 // varyings from vertex stage.
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 // per particle data.
 // these are only written when the drawable is a particle engine
-varying float vParticleAlpha;
+in float vParticleAlpha;
 // particle random value.
-varying float vParticleRandomValue;
+in float vParticleRandomValue;
 // normalized particle lifetime.
-varying float vParticleTime;
+in float vParticleTime;
 
 float VLine(float thickness, float position, float x)
 {

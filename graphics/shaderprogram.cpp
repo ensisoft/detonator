@@ -41,10 +41,12 @@ ShaderSource ShaderProgram::GetShader(const Material& material, const Material::
 
     ShaderSource source;
     source.SetType(ShaderSource::Type::Fragment);
-    source.SetVersion(ShaderSource::Version::GLSL_100);
+    source.SetVersion(ShaderSource::Version::GLSL_300);
     source.SetPrecision(ShaderSource::Precision::High);
 
     source.AddSource(R"(
+layout (location=0) out vec4 fragOutColor;
+
 struct FS_OUT {
    vec4 color;
 } fs_out;
@@ -70,7 +72,7 @@ vec4 sRGB_encode(vec4 color)
 void main() {
   FragmentShaderMain();
 
-  gl_FragColor = sRGB_encode(fs_out.color);
+  fragOutColor = sRGB_encode(fs_out.color);
 }
 )");
 
@@ -92,7 +94,7 @@ ShaderSource ShaderProgram::GetShader(const Drawable& drawable, const Drawable::
     // so that the vertex source (with varyings) comes after the main.
     ShaderSource source;
     source.SetType(ShaderSource::Type::Vertex);
-    source.SetVersion(ShaderSource::Version::GLSL_100);
+    source.SetVersion(ShaderSource::Version::GLSL_300);
 
     source.AddSource(R"(
 struct VS_OUT {

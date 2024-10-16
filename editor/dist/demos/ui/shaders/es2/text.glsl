@@ -1,4 +1,4 @@
-
+#version 300 es
 // warning. do not delete the below line.
 // MAPI=1
 
@@ -67,12 +67,12 @@ uniform float kAlphaCutoff;
 
 // particle specific values. only used / needed
 // when the material is used to render particles.
-varying float vParticleAlpha;
-varying float vParticleRandomValue;
-varying float vParticleTime;
+in float vParticleAlpha;
+in float vParticleRandomValue;
+in float vParticleTime;
 
 // texture coordinates
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 vec2 Motion(vec2 st)
 {
@@ -134,8 +134,8 @@ void FragmentShaderMain()
     vec2 texture_box_translate = kTextureBox.xy;
     vec2 texture_coord = vTexCoord * texture_box_scale + texture_box_translate;
 
-    float color_sample_alpha = texture2D(kTexture, texture_coord).a;
-    float shadow_sample_alpha = texture2D(kTexture, texture_coord - vec2(0.03, 0.04)).a;
+    float color_sample_alpha = texture(kTexture, texture_coord).a;
+    float shadow_sample_alpha = texture(kTexture, texture_coord - vec2(0.03, 0.04)).a;
 
     vec4 text_color   = vec4(src_text_color.rgb, color_sample_alpha);
     vec4 shadow_color = vec4(0.01, 0.01, 0.01, shadow_sample_alpha);

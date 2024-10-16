@@ -2313,16 +2313,15 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         klass->SetNumTextureMaps(1);
         klass->SetTextureMap(0, texture_map);
         klass->SetShaderSrc(R"(
-#version 100
+#version 300 es
 precision highp float;
 
 uniform sampler2D kTexture;
 uniform vec4 kTextureRect;
 uniform vec4 kBaseColor;
-
-varying vec2 vTexCoord;
-
 uniform mat4 kModelViewMatrix;
+
+in vec2 vTexCoord;
 
 vec2 RotateCoords(vec2 coords, float angle)
 {
@@ -2348,7 +2347,7 @@ void FragmentShaderMain()
 
     sample_pos /= vec2(200.0, 100.0);
 
-    fs_out.color = texture2D(kTexture, sample_pos).a * kBaseColor;
+    fs_out.color = texture(kTexture, sample_pos).a * kBaseColor;
 }
 )");
 

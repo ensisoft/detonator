@@ -1366,19 +1366,19 @@ uniform sampler2D kNoise;
 uniform vec2 kNoiseRect;
 
 // varyings from vertex stage.
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 // per particle data.
 // these are only written when the drawable is a particle engine
-varying float vParticleAlpha;
+in float vParticleAlpha;
 // particle random value.
-varying float vParticleRandomValue;
+in float vParticleRandomValue;
 // normalized particle lifetime.
-varying float vParticleTime;
+in float vParticleTime;
 
 void FragmentShaderMain() {
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-    float a = texture2D(kNoise, coords).a;
+    float a = texture(kNoise, coords).a;
     float r = coords.x + a + kTime;
     float g = coords.y + a;
     float b = kTime;
