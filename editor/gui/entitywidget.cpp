@@ -3408,24 +3408,31 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     entity_painter.SetViewport(0, 0, width, height);
     entity_painter.SetSurfaceSize(width, height);
 
-    // render endless background grid.
-    if (GetValue(mUI.chkShowGrid))
-    {
-        DrawCoordinateGrid(entity_painter, grid, zoom, xs, ys, width, height);
-    }
+    DrawHook draw_hook(GetCurrentNode());
+    draw_hook.SetDrawVectors(true);
+    draw_hook.SetIsPlaying(mPlayState == PlayState::Playing);
 
-    DrawHook hook(GetCurrentNode());
-    hook.SetDrawVectors(true);
-    hook.SetIsPlaying(mPlayState == PlayState::Playing);
+    const auto camera_position = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
+    const auto camera_scale    = glm::vec2{xs, ys};
+    const auto camera_rotation = (float)GetValue(mUI.rotation);
+
+    LowLevelRenderHook low_level_render_hook(
+            camera_position,
+            camera_scale,
+            view,
+            camera_rotation,
+            width, height,
+            zoom,
+            grid,
+            GetValue(mUI.chkShowGrid));
 
     engine::Renderer::Camera camera;
-    camera.position.x = mState.camera_offset_x;
-    camera.position.y = mState.camera_offset_y;
-    camera.rotation   = GetValue(mUI.rotation);
-    camera.scale.x    = xs * zoom;
-    camera.scale.y    = ys * zoom;
-    camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);
-    camera.ppa        = engine::ComputePerspectiveProjection(camera.viewport);
+    camera.clear_color = mUI.widget->GetCurrentClearColor();
+    camera.position    = camera_position;
+    camera.rotation    = camera_rotation;
+    camera.scale       = camera_scale * zoom;
+    camera.viewport    = game::FRect(-width*0.5f, -height*0.5f, width, height);
+    camera.ppa         = engine::ComputePerspectiveProjection(camera.viewport);
     mState.renderer.SetCamera(camera);
 
     engine::Renderer::Surface surface;
@@ -3433,13 +3440,14 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     surface.size     = gfx::USize(width, height);
     mState.renderer.SetSurface(surface);
 
+    mState.renderer.SetLowLevelRendererHook(&low_level_render_hook);
     mState.renderer.SetStyle(GetValue(mUI.cmbStyle));
     mState.renderer.SetClassLibrary(mState.workspace);
     mState.renderer.SetEditingMode(true);
     mState.renderer.SetName("EntityWidgetRenderer/" + mState.entity->GetId());
 
     mState.renderer.BeginFrame();
-    mState.renderer.Draw(*mState.entity, *device, &hook);
+    mState.renderer.Draw(*mState.entity, *device, &draw_hook);
     mState.renderer.EndFrame();
 
     // Draw joints, drawn in the entity space.

@@ -130,6 +130,7 @@ namespace engine
         };
 
         struct Camera {
+            gfx::Color4f clear_color;
             glm::vec2 position = {0.0f, 0.0f};
             glm::vec2 scale    = {1.0f, 1.0f};
             game::FRect viewport;
@@ -166,6 +167,8 @@ namespace engine
         { mSurface = surface; }
         inline void SetPacketFilter(PacketFilter* filter) noexcept
         { mPacketFilter = filter; }
+        inline void SetLowLevelRendererHook(LowLevelRendererHook* hook) noexcept
+        { mLowLevelRendererHook = hook; }
         inline void SetStyle(RenderingStyle style) noexcept
         { mStyle = style; }
         inline void SetTileSizeFudge(float fudge) noexcept
@@ -380,6 +383,7 @@ namespace engine
         float mTileSizeFudge = 0.5f;
 
         PacketFilter* mPacketFilter = nullptr;
+        LowLevelRendererHook* mLowLevelRendererHook = nullptr;
 
         mutable std::vector<DrawPacket> mRenderBuffer;
 

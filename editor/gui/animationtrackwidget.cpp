@@ -1806,6 +1806,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
+    const auto view   = engine::GameView::AxisAligned;
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
@@ -1818,19 +1819,26 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     entity_painter.SetSurfaceSize(width, height);
     entity_painter.SetEditingMode(true);
 
-    // render endless background grid.
-    if (mUI.chkShowGrid->isChecked())
-    {
-        DrawCoordinateGrid(entity_painter, grid, zoom, xs, ys, width, height);
-    }
+    const auto camera_position = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
+    const auto camera_scale    = glm::vec2{xs, ys};
+    const auto camera_rotation = (float)GetValue(mUI.rotation);
+
+    LowLevelRenderHook low_level_render_hook(
+            camera_position,
+            camera_scale,
+            view,
+            camera_rotation,
+            width, height,
+            zoom,
+            grid,
+            GetValue(mUI.chkShowGrid));
 
     engine::Renderer::Camera camera;
-    camera.position.x = mState.camera_offset_x;
-    camera.position.y = mState.camera_offset_y;
-    camera.rotation   = GetValue(mUI.rotation);
-    camera.scale.x    = xs * zoom;
-    camera.scale.y    = ys * zoom;
-    camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);
+    camera.clear_color = mUI.widget->GetCurrentClearColor();
+    camera.position    = camera_position;
+    camera.rotation    = camera_rotation;
+    camera.scale       = camera_scale * zoom;
+    camera.viewport    = game::FRect(-width*0.5f, -height*0.5f, width, height);
     mRenderer.SetCamera(camera);
 
     engine::Renderer::Surface surface;
@@ -1841,6 +1849,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     mRenderer.SetEditingMode(true);
     mRenderer.SetClassLibrary(mWorkspace);
     mRenderer.SetName("AnimationWidgetRenderer/" + mState.entity->GetId());
+    mRenderer.SetLowLevelRendererHook(&low_level_render_hook);
 
     mRenderer.BeginFrame();
     if (mPlaybackAnimation)

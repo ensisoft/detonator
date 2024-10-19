@@ -119,7 +119,7 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         device_state.bWriteColor   = draw.state.write_color;
         device_state.depth_test    = draw.state.depth_test;
 
-        program.ApplyDynamicState(*mDevice, gpu_program_state, device_state);
+        program.ApplyDynamicState(*mDevice, gpu_program_state, device_state, draw.user);
 
         // The drawable provides the draw command which identifies the
         // sequence of more primitive draw commands set on the geometry

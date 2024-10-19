@@ -234,10 +234,11 @@ public:
         engine.renderer->SetSurface(surface);
 
         engine::Renderer::Camera camera;
-        camera.viewport = gfx::FRect(0.0f, 0.0f, 1024.0f, 768.0f);
-        camera.rotation = 0.0f;
-        camera.scale    = glm::vec2{1.0f, 1.0f};
-        camera.position = glm::vec2{-50.0f, -50.0f};
+        camera.clear_color = gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f);
+        camera.viewport    = gfx::FRect(0.0f, 0.0f, 1024.0f, 768.0f);
+        camera.rotation    = 0.0f;
+        camera.scale       = glm::vec2{1.0f, 1.0f};
+        camera.position    = glm::vec2{-50.0f, -50.0f};
         engine.renderer->SetCamera(camera);
 
         TRACE_CALL("Update",     engine.renderer->Update(*mScene, 0.0f, 0.0f));
@@ -296,10 +297,11 @@ public:
         engine.renderer->SetSurface(surface);
 
         engine::Renderer::Camera camera;
-        camera.viewport = gfx::FRect(0.0f, 0.0f, 1024.0f, 768.0f);
-        camera.rotation = 0.0f;
-        camera.scale    = glm::vec2{1.0f, 1.0f};
-        camera.position = glm::vec2{-50.0f, -50.0f};
+        camera.clear_color = gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f);
+        camera.viewport    = gfx::FRect(0.0f, 0.0f, 1024.0f, 768.0f);
+        camera.rotation    = 0.0f;
+        camera.scale       = glm::vec2{1.0f, 1.0f};
+        camera.position    = glm::vec2{-50.0f, -50.0f};
         engine.renderer->SetCamera(camera);
 
         TRACE_CALL("Update",     engine.renderer->Update(*mScene, 0.0f, 0.0f));

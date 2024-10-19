@@ -1971,12 +1971,6 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     scene_painter.SetSurfaceSize(width, height);
     scene_painter.SetEditingMode(true);
 
-    // render endless background grid.
-    if (GetValue(mUI.chkShowGrid))
-    {
-        DrawCoordinateGrid(scene_painter, tile_painter, grid, zoom, xs, ys, width, height, view);
-    }
-
     // render the actual scene
     {
         if (mState.scene->HasTilemap())
@@ -1999,25 +1993,55 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         // todo: reimplement culling
         const game::FRect viewport(0, 0, 0, 0);
 
-        DrawHook hook(GetCurrentNode(), viewport);
-        hook.SetIsPlaying(mPlayState == PlayState::Playing);
-        hook.SetDrawVectors(true);
-        hook.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::GameView::AxisAligned));
+        DrawHook draw_hook(GetCurrentNode(), viewport);
+        draw_hook.SetIsPlaying(mPlayState == PlayState::Playing);
+        draw_hook.SetDrawVectors(true);
+        draw_hook.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::GameView::AxisAligned));
+
+        const auto camera_position = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
+        const auto camera_scale    = glm::vec2{xs, ys};
+        const auto camera_rotation = (float)GetValue(mUI.rotation);
+
+        LowLevelRenderHook low_level_render_hook(
+                camera_position,
+                camera_scale,
+                view,
+                camera_rotation,
+                width, height,
+                zoom,
+                grid,
+                GetValue(mUI.chkShowGrid));
 
         engine::Renderer::Camera camera;
-        camera.position.x = mState.camera_offset_x;
-        camera.position.y = mState.camera_offset_y;
-        camera.rotation   = GetValue(mUI.rotation);
-        camera.scale.x    = xs * zoom;
-        camera.scale.y    = ys * zoom;
-        camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);
-        camera.ppa        = engine::ComputePerspectiveProjection(camera.viewport);
+        camera.clear_color = mUI.widget->GetCurrentClearColor();
+        camera.position    = camera_position;
+        camera.rotation    = camera_rotation;
+        camera.scale       = camera_scale * zoom;
+        camera.viewport    = game::FRect(-width*0.5f, -height*0.5f, width, height);
+        camera.ppa         = engine::ComputePerspectiveProjection(camera.viewport);
         mState.renderer.SetCamera(camera);
 
         engine::Renderer::Surface surface;
         surface.viewport = gfx::IRect(0, 0, width, height);
         surface.size     = gfx::USize(width, height);
         mState.renderer.SetSurface(surface);
+
+        mState.renderer.SetLowLevelRendererHook(&low_level_render_hook);
+
+        if (auto* bloom = mState.scene->GetBloom())
+        {
+            engine::Renderer::BloomParams bloom_params;
+            bloom_params.threshold = bloom->threshold;
+            bloom_params.red       = bloom->red;
+            bloom_params.green     = bloom->green;
+            bloom_params.blue      = bloom->blue;
+            mState.renderer.SetBloom(bloom_params);
+            mState.renderer.EnableEffect(engine::Renderer::Effects::Bloom, true);
+        }
+        else
+        {
+            mState.renderer.EnableEffect(engine::Renderer::Effects::Bloom, false);
+        }
 
         // we don't have an UI to control the individual map layers in the
         // scene widget so only expose a "master" flag that controls the map
@@ -2028,7 +2052,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         const auto* map = show_map ? mTilemap.get() : nullptr;
 
         mState.renderer.BeginFrame();
-        mState.renderer.Draw(*mState.scene,  map, *device, &hook);
+        mState.renderer.Draw(*mState.scene,  map, *device, &draw_hook);
 
         if (mCurrentTool)
             mCurrentTool->Render(painter, scene_painter);
@@ -2699,6 +2723,8 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     surface.viewport = gfx::IRect(0, 0, width, height);
     surface.size     = gfx::USize(width, height);
     mState.renderer.SetSurface(surface);
+
+    mState.renderer.SetLowLevelRendererHook(nullptr);
 
     DrawHook hook(hit_nodes);
     mState.renderer.Draw(*mState.scene, nullptr, *device, &hook);
