@@ -1308,11 +1308,13 @@ void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& pa
     const auto& orthographic = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
     const auto& perspective  = CreateProjectionMatrix(mCamera.viewport, mCamera.ppa);
 
+    const auto& pixel_ratio = window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale;
+
     gfx::Painter painter(&device);
     painter.SetViewport(mSurface.viewport);
     painter.SetSurfaceSize(mSurface.size);
     painter.SetEditingMode(mEditingMode);
-    painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
+    painter.SetPixelRatio(pixel_ratio);
 
     // Each entity in the scene is assigned to a scene/entity layer and each
     // entity node within an entity is assigned to an entity layer.
@@ -1426,27 +1428,40 @@ void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& pa
     }
     TRACE_LEAVE(ArrangeLayers);
 
-    const gfx::Color4f bloom_color(mBloom.red, mBloom.green, mBloom.blue, 1.0f);
-    const BloomPass bloom(mRendererName,  bloom_color, mBloom.threshold, painter);
-
+    bool enable_bloom = false;
     if (mEditingMode)
     {
         if (mStyle == RenderingStyle::Normal)
         {
             if (IsEnabled(Effects::Bloom))
-                bloom.Draw(layers);
+                enable_bloom = true;
         }
     }
     else
     {
         if (IsEnabled(Effects::Bloom))
-            bloom.Draw(layers);
+            enable_bloom = true;
     }
 
-    MainRenderPass main(painter);
-    TRACE_CALL("MainRenderPass::Draw", main.Draw(layers));
-    TRACE_CALL("MainRenderPass::Composite", main.Composite(IsEnabled(Effects::Bloom) ? &bloom : nullptr));
+    LowLevelRenderer low_level_renderer(&mRendererName, device);
+    low_level_renderer.SetClearColor(mCamera.clear_color);
+    low_level_renderer.SetEditingMode(mEditingMode);
+    low_level_renderer.SetPixelRatio(pixel_ratio);
+    low_level_renderer.SetSurfaceSize(mSurface.size);
+    low_level_renderer.SetViewport(mSurface.viewport);
+    low_level_renderer.SetRenderHook(mLowLevelRendererHook);
 
+    if (enable_bloom)
+    {
+        low_level_renderer.EnableBloom(true);
+        low_level_renderer.SetBloomParams(gfx::Color4f(mBloom.red,
+                                                       mBloom.green,
+                                                       mBloom.blue, 1.0f),
+                                          mBloom.threshold);
+    }
+
+    TRACE_CALL("LowLevelRenderer::Draw", low_level_renderer.Draw(layers));
+    TRACE_CALL("LowLevelRenderer::Blit", low_level_renderer.Blit());
 }
 
 template<typename LayerType>

@@ -324,6 +324,7 @@ void unit_test_drawable_item()
     renderer.SetSurface(surface);
 
     engine::Renderer::Camera camera;
+    camera.clear_color = gfx::Color::Blue;
     camera.viewport = gfx::FRect(0.0f, 0.0f, 256.0f, 256.0f);
     renderer.SetCamera(camera);
 
@@ -333,7 +334,7 @@ void unit_test_drawable_item()
 
         device->BeginFrame();
         {
-            device->ClearColor(gfx::Color::Blue);
+            device->ClearColor(gfx::Color::Black);
             renderer.BeginFrame();
             {
                 renderer.Draw(*entity, *device);
@@ -348,7 +349,7 @@ void unit_test_drawable_item()
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::VisibleInGame, false);
         device->BeginFrame();
         {
-            device->ClearColor(gfx::Color::Blue);
+            device->ClearColor(gfx::Color::Black);
             renderer.BeginFrame();
             {
                 renderer.Draw(*entity, *device);

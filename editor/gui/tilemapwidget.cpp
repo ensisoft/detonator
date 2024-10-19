@@ -2300,11 +2300,16 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
 
         auto* device = painter.GetDevice();
 
+        const auto camera_position = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
+        const auto camera_scale    = glm::vec2{xs, ys};
+        const auto camera_rotation = (float)GetValue(mUI.rotation);
+
         engine::Renderer::Camera camera;
-        camera.position   = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
-        camera.scale      = glm::vec2{xs * zoom, ys * zoom };
-        camera.rotation   = GetValue(mUI.rotation);
-        camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);
+        camera.clear_color = mUI.widget->GetCurrentClearColor();
+        camera.position    = camera_position;
+        camera.scale       = camera_scale * zoom;
+        camera.rotation    = camera_rotation;
+        camera.viewport    = game::FRect(-width*0.5f, -height*0.5f, width, height);
         mState.renderer.SetCamera(camera);
 
         engine::Renderer::Surface surface;

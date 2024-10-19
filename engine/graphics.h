@@ -107,33 +107,99 @@ namespace engine
     using EntityRenderLayerList = std::vector<RenderLayer>;
     using SceneRenderLayerList  = std::vector<EntityRenderLayerList>;
 
-    class BloomPass
+    class LowLevelRendererHook
     {
     public:
-        BloomPass(const std::string& name, const gfx::Color4f& color, float threshold, const gfx::Painter& painter);
+        struct RenderSettings {
+            bool editing_mode = false;
+            bool enable_bloom = false;
+            float bloom_threshold = 0.0f;
+            gfx::Color4f bloom_color;
+            gfx::Color4f clear_color;
+            gfx::USize surface_size;
+            gfx::IRect viewport;
+            glm::vec2 pixel_ratio = {1.0f, 1.0f};
+        };
 
-        void Draw(const SceneRenderLayerList& layers) const;
-        std::string GetBloomTextureName() const;
+        struct GPUResources {
+            gfx::Device* device = nullptr;
+            gfx::Framebuffer* framebuffer = nullptr;
+            gfx::Texture* main_image = nullptr;
+        };
 
-        const gfx::Texture* GetBloomTexture() const;
-    private:
-        const std::string mName;
-        const gfx::Color4f mColor;
-        const float mThreshold = 1.0f;
-        mutable gfx::Painter mPainter;
-        mutable gfx::Texture* mBloomTexture = nullptr;
+        virtual void BeginDraw(const RenderSettings& settings, const GPUResources& gpu) {}
+        virtual void EndDraw(const RenderSettings& settings, const GPUResources& gpu) {}
     };
 
-    class MainRenderPass
+    class LowLevelRenderer
     {
     public:
-        MainRenderPass(gfx::Painter& painter)
-          : mPainter(painter)
-        {}
+        using RenderSettings = LowLevelRendererHook::RenderSettings;
+
+        LowLevelRenderer(const std::string* name, gfx::Device& device);
+
+        inline void SetSurfaceSize(const gfx::USize& size) noexcept
+        {
+            mSettings.surface_size = size;
+        }
+        inline void SetPixelRatio(const glm::vec2& ratio) noexcept
+        {
+            mSettings.pixel_ratio = ratio;
+        }
+        inline void SetViewport(const gfx::IRect& viewport) noexcept
+        {
+            mSettings.viewport = viewport;
+        }
+
+        inline void SetEditingMode(bool on_off) noexcept
+        {
+            mSettings.editing_mode = on_off;
+        }
+
+        inline void EnableBloom(bool on_off) noexcept
+        {
+            mSettings.enable_bloom = on_off;
+        }
+        inline void SetBloomParams(const gfx::Color4f& color, float threshold) noexcept
+        {
+            mSettings.bloom_color = color;
+            mSettings.bloom_threshold = threshold;
+        }
+        inline void SetClearColor(const gfx::Color4f& color) noexcept
+        {
+            mSettings.clear_color = color;
+        }
+
+        inline void SetRenderHook(LowLevelRendererHook* hook) noexcept
+        {
+            mRenderHook = hook;
+        }
+
         void Draw(const SceneRenderLayerList& layers) const;
-        void Composite(const BloomPass* bloom) const;
+        void Blit() const;
+
     private:
-        gfx::Painter& mPainter;
+        unsigned GetSurfaceWidth() const noexcept
+        {
+            return mSettings.surface_size.GetWidth();
+        }
+        unsigned GetSurfaceHeight() const noexcept
+        {
+            return mSettings.surface_size.GetHeight();
+        }
+
+    private:
+        gfx::Texture* CreateTextureTarget(const std::string& name) const;
+        gfx::Framebuffer* CreateFrameBuffer(const std::string& name) const;
+
+    private:
+        const std::string* mRendererName = nullptr;
+        LowLevelRendererHook* mRenderHook = nullptr;
+        RenderSettings mSettings;
+        mutable gfx::Texture* mMainImage = nullptr;
+        mutable gfx::Texture* mBloomImage = nullptr;
+        mutable gfx::Framebuffer* mMainFBO = nullptr;
+        gfx::Device& mDevice;
     };
 
 } // namespace

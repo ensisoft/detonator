@@ -134,6 +134,82 @@ void PrintMousePos(const UI& ui, const State& state, gfx::Painter& painter,
                   painter, ui.widget);
 }
 
+class LowLevelRenderHook : public engine::LowLevelRendererHook
+{
+public:
+    LowLevelRenderHook(const glm::vec2& camera_position,
+                       const glm::vec2& camera_scale,
+                       engine::GameView camera_view,
+                       float camera_rotation,
+                       unsigned surface_width,
+                       unsigned surface_height,
+                       float zoom,
+                       GridDensity grid,
+                       bool draw_grid)
+      : mCameraPosition(camera_position)
+      , mCameraScale(camera_scale)
+      , mCameraView(camera_view)
+      , mCameraRotation(camera_rotation)
+      , mSurfaceWidth(surface_width)
+      , mSurfaceHeight(surface_height)
+      , mZoom(zoom)
+      , mGridDensity(grid)
+      , mDrawGrid(draw_grid)
+    {}
+
+    void BeginDraw(const RenderSettings&, const GPUResources& gpu) override
+    {
+        if (!mDrawGrid)
+            return;
+
+        auto* device = gpu.device;
+
+        const auto pixel_ratio = mCameraScale * mZoom;
+        const auto surface_width  = (float)mSurfaceWidth;
+        const auto surface_height = (float)mSurfaceHeight;
+
+        // painter for drawing in the tile domain/space. If perspective is axis aligned
+        // then this is the same as the scene painter below, but these are always
+        // conceptually different painters in different domains.
+        gfx::Painter tile_painter(device);
+        tile_painter.SetViewMatrix(engine::CreateModelViewMatrix(mCameraView,
+                                                                 mCameraPosition,
+                                                                 mCameraScale * mZoom,
+                                                                 mCameraRotation));
+        tile_painter.SetProjectionMatrix(engine::CreateProjectionMatrix(engine::Projection::Orthographic, surface_width, surface_height));
+        tile_painter.SetPixelRatio(pixel_ratio);
+        tile_painter.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
+        tile_painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+        tile_painter.SetEditingMode(true);
+        tile_painter.SetFramebuffer(gpu.framebuffer);
+
+        gfx::Painter scene_painter(device);
+        scene_painter.SetViewMatrix(engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
+                                                                  mCameraPosition,
+                                                                  mCameraScale * mZoom,
+                                                                  mCameraRotation));
+        scene_painter.SetProjectionMatrix(engine::CreateProjectionMatrix(engine::Projection::Orthographic, surface_width, surface_height));
+        scene_painter.SetPixelRatio(pixel_ratio);
+        scene_painter.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
+        scene_painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+        scene_painter.SetEditingMode(true);
+        scene_painter.SetFramebuffer(gpu.framebuffer);
+
+        DrawCoordinateGrid(scene_painter, tile_painter, mGridDensity, mZoom, mCameraScale.x, mCameraScale.y, mSurfaceWidth, mSurfaceHeight, mCameraView);
+
+    }
+private:
+    const glm::vec2 mCameraPosition;
+    const glm::vec2 mCameraScale;
+    const engine::GameView mCameraView;
+    const float mCameraRotation;
+    const unsigned mSurfaceWidth;
+    const unsigned mSurfaceHeight;
+    const float mZoom;
+    const GridDensity mGridDensity;
+    const bool mDrawGrid;
+};
+
 // generic draw hook implementation for embellishing some nodes
 // with things such as selection rectangle in order to visually
 // indicate the selected node when editing a scene/animation.
@@ -142,12 +218,12 @@ class DrawHook : public engine::EntityClassDrawHook,
                  public engine::SceneClassDrawHook
 {
 public:
-    DrawHook()
-    {}
-    DrawHook(const game::EntityNode* selected)
+    DrawHook() = default;
+
+    explicit DrawHook(const game::EntityNode* selected)
       : mSelectedEntityNode(selected)
     {}
-    DrawHook(const game::EntityNodeClass* selected)
+    explicit DrawHook(const game::EntityNodeClass* selected)
       : mSelectedEntityClassNode(selected)
     {}
     DrawHook(const game::EntityPlacement* selected, const game::FRect& view)
@@ -307,7 +383,7 @@ private:
     const game::FRect mViewRect;
     bool mPlaying        = false;
     bool mDrawVectors    = false;
-    glm::mat4 mView;
+    glm::mat4 mView = glm::mat4(1.0f);
 };
 
 } // namespace
