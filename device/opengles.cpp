@@ -2628,22 +2628,20 @@ private:
                     fbo->Complete();
                 }
 
+                // See the comments in Complete() regarding the glDrawBuffers which is
+                // the other half required to deal with multiple color attachments
+                // in multisampled FBO
+                ASSERT(mGL.glReadBuffer);
+
                 const auto width  = resolve_target->GetWidth();
                 const auto height = resolve_target->GetHeight();
+
                 GL_CALL(glBindFramebuffer(GL_READ_FRAMEBUFFER, mHandle));
+                GL_CALL(glReadBuffer(GL_COLOR_ATTACHMENT0 + index));
 
-                if (index > 0)
-                {
-                    // See the comments in Complete() regarding the glDrawBuffers which is
-                    // the other half required to deal with multiple color attachments
-                    // in multisampled FBO
-                    ASSERT(mGL.glReadBuffer);
-
-                    // select the attachment index for reading.
-                    GL_CALL(glReadBuffer(GL_COLOR_ATTACHMENT0 + index));
-                }
-
+                const GLenum draw_buffers = GL_COLOR_ATTACHMENT0;
                 GL_CALL(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo->mHandle));
+                GL_CALL(glDrawBuffers(1, &draw_buffers));
                 GL_CALL(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 
                 fbo->SetFrameStamp(mFrameNumber);
