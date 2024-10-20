@@ -180,7 +180,7 @@ private:
 class TestDevice : public gfx::Device
 {
 public:
-    void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* ) const override
+    void ClearColor(const gfx::Color4f& color, gfx::Framebuffer*, std::optional<ColorAttachment>) const override
     {}
     void ClearStencil(int value, gfx::Framebuffer* fbo) const override
     {}
