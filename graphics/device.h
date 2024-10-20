@@ -21,6 +21,7 @@
 #include <memory>
 #include <cstdint>
 #include <string>
+#include <optional>
 
 #include "graphics/types.h"
 #include "graphics/color4f.h"
@@ -29,6 +30,7 @@
 #include "graphics/program.h"
 #include "graphics/geometry.h"
 #include "graphics/instance.h"
+#include "graphics/framebuffer.h"
 
 namespace gfx
 {
@@ -125,11 +127,12 @@ namespace gfx
             float line_width = 1.0f;
         };
 
-
-
         virtual ~Device() = default;
 
-        virtual void ClearColor(const Color4f& color, Framebuffer* fbo = nullptr) const = 0;
+        using ColorAttachment = gfx::Framebuffer::ColorAttachment;
+
+        virtual void ClearColor(const Color4f& color, Framebuffer* fbo = nullptr,
+                                std::optional<ColorAttachment> attachment = std::nullopt) const = 0;
         virtual void ClearStencil(int value, Framebuffer* fbo = nullptr) const = 0;
         virtual void ClearDepth(float value, Framebuffer* fbo = nullptr) const = 0;
         virtual void ClearColorDepth(const Color4f& color, float depth, Framebuffer* fbo = nullptr) const = 0;
