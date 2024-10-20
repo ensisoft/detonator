@@ -2534,8 +2534,10 @@ private:
             mTextures.resize(mConfig.color_target_count);
         }
 
-        virtual void SetColorTarget(gfx::Texture* texture, unsigned index) override
+        virtual void SetColorTarget(gfx::Texture* texture, ColorAttachment attachment) override
         {
+            const auto index = static_cast<uint8_t>(attachment);
+
             ASSERT(index < mConfig.color_target_count);
 
             if (texture == mClientTextures[index])
@@ -2591,8 +2593,10 @@ private:
             }
         }
 
-        virtual void Resolve(gfx::Texture** color, unsigned index) const override
+        virtual void Resolve(gfx::Texture** color, ColorAttachment attachment) const override
         {
+            const auto index = static_cast<uint8_t>(attachment);
+
             // resolve the MSAA render buffer into a texture target with glBlitFramebuffer
             // the insane part here is that we need a *another* frame buffer for resolving
             // the multisampled color attachment into a texture.
@@ -2611,13 +2615,13 @@ private:
                     config.msaa   = gfx::Framebuffer::MSAA::Disabled;
                     config.color_target_count = 1;
                     fbo->SetConfig(config);
-                    fbo->SetColorTarget(resolve_target, 0);
+                    fbo->SetColorTarget(resolve_target, gfx::Framebuffer::ColorAttachment::Attachment0);
                     fbo->Create();
                     fbo->Complete();
                 }
                 else
                 {
-                    fbo->SetColorTarget(resolve_target, 0);
+                    fbo->SetColorTarget(resolve_target, gfx::Framebuffer::ColorAttachment::Attachment0);
                     fbo->Complete();
                 }
 
@@ -2640,8 +2644,8 @@ private:
                 GL_CALL(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 
                 fbo->SetFrameStamp(mFrameNumber);
-                fbo->Resolve(nullptr, 0);
-                fbo->SetColorTarget(nullptr, 0);
+                fbo->Resolve(nullptr, gfx::Framebuffer::ColorAttachment::Attachment0);
+                fbo->SetColorTarget(nullptr, gfx::Framebuffer::ColorAttachment::Attachment0);
 
                 if (color)
                     *color = resolve_target;
