@@ -2153,7 +2153,7 @@ void main() {
 
         {
             gfx::Texture* color0 = nullptr;
-            fbo->Resolve(&color0, 0);
+            fbo->Resolve(&color0, gfx::Framebuffer::ColorAttachment::Attachment0);
             const auto& ret = gfx::algo::ReadTexture(color0, dev.get());
             TEST_REQUIRE(ret);
             TEST_REQUIRE(ret->GetDepthBits() == 32);
@@ -2165,7 +2165,7 @@ void main() {
 
         {
             gfx::Texture* color1 = nullptr;
-            fbo->Resolve(&color1, 1);
+            fbo->Resolve(&color1, gfx::Framebuffer::ColorAttachment::Attachment1);
             const auto& ret = gfx::algo::ReadTexture(color1, dev.get());
             TEST_REQUIRE(ret);
             TEST_REQUIRE(ret->GetDepthBits() == 32);
@@ -2197,15 +2197,15 @@ void main() {
         conf.msaa   = msaa;
         conf.color_target_count = 2;
         fbo->SetConfig(conf);
-        fbo->SetColorTarget(color0, 0);
-        fbo->SetColorTarget(color1, 1);
+        fbo->SetColorTarget(color0, gfx::Framebuffer::ColorAttachment::Attachment0);
+        fbo->SetColorTarget(color1, gfx::Framebuffer::ColorAttachment::Attachment1);
 
         dev->BeginFrame();
         dev->ClearColor(gfx::Color::Blue, fbo);
         dev->Draw(*p0, *geom, state, fbo);
 
         {
-            fbo->Resolve(nullptr, 0);
+            fbo->Resolve(nullptr, gfx::Framebuffer::ColorAttachment::Attachment0);
             const auto& ret = gfx::algo::ReadTexture(color0, dev.get());
             TEST_REQUIRE(ret);
             TEST_REQUIRE(ret->GetDepthBits() == 32);
@@ -2216,7 +2216,7 @@ void main() {
         }
 
         {
-            fbo->Resolve(nullptr, 1);
+            fbo->Resolve(nullptr, gfx::Framebuffer::ColorAttachment::Attachment1);
             const auto& ret = gfx::algo::ReadTexture(color1, dev.get());
             TEST_REQUIRE(ret);
             TEST_REQUIRE(ret->GetDepthBits() == 32);

@@ -18,6 +18,8 @@
 
 #include "config.h"
 
+#include <cstdint>
+
 namespace gfx
 {
     class Texture;
@@ -40,6 +42,13 @@ namespace gfx
             Disabled, Enabled
         };
 
+        enum class ColorAttachment : uint8_t {
+            Attachment0,
+            Attachment1,
+            Attachment2,
+            Attachment3
+        };
+
         // Framebuffer configuration.
         struct Config {
             Format format = Format::ColorRGBA8;
@@ -52,6 +61,7 @@ namespace gfx
 
             MSAA msaa = MSAA::Disabled;
         };
+
         // Set the framebuffer configuration that will be used when drawing.
         virtual void SetConfig(const Config& conf) = 0;
         // Set the color buffer texture target. If this is not set when the
@@ -59,16 +69,26 @@ namespace gfx
         // set in the FBO config.
         // The texture format must match the FBO config, i.e. the dimension
         // of any other buffers and the configured color format.
-        virtual void SetColorTarget(Texture* texture, unsigned index = 0) = 0;
+        virtual void SetColorTarget(Texture* texture, ColorAttachment attachment) = 0;
         // Resolve the framebuffer color buffer contents into a texture that can be
         // used to sample the rendered image.
-        virtual void Resolve(Texture** color, unsigned index = 0) const = 0;
+        virtual void Resolve(Texture** color, ColorAttachment attachment) const = 0;
         // Get the framebuffer width in pixels.
         virtual unsigned GetWidth() const = 0;
         // Get the framebuffer height in pixels.
         virtual unsigned GetHeight() const = 0;
         // Get the framebuffer format.
         virtual Format GetFormat() const = 0;
+
+        inline void SetColorTarget(Texture* texture)
+        {
+            SetColorTarget(texture, ColorAttachment::Attachment0);
+        }
+        inline void Resolve(Texture** color) const
+        {
+            Resolve(color, ColorAttachment::Attachment0);
+        }
+
     private:
     };
 } // namespace
