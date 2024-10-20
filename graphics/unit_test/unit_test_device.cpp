@@ -2232,6 +2232,86 @@ void main() {
 
 }
 
+void unit_test_fbo_clear_specific_attachment(gfx::Framebuffer::Format format, gfx::Framebuffer::MSAA msaa)
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto dev = CreateDevice();
+
+    {
+        gfx::Framebuffer::Config conf;
+        conf.format = format;
+        conf.width  = 10;
+        conf.height = 10;
+        conf.msaa   = msaa;
+        conf.color_target_count = 2;
+        auto* fbo = dev->MakeFramebuffer("test");
+        fbo->SetConfig(conf);
+
+        for (unsigned i=0; i<2; ++i)
+        {
+            dev->BeginFrame();
+            dev->ClearColor(gfx::Color::Red, fbo, gfx::Device::ColorAttachment::Attachment0);
+            dev->ClearColor(gfx::Color::Green, fbo, gfx::Device::ColorAttachment::Attachment1);
+
+            gfx::Texture* attachment0 = nullptr;
+            gfx::Texture* attachment1 = nullptr;
+            fbo->Resolve(&attachment0, gfx::Framebuffer::ColorAttachment::Attachment0);
+            fbo->Resolve(&attachment1, gfx::Framebuffer::ColorAttachment::Attachment1);
+
+            const auto& bmp0 = gfx::algo::ReadTexture(attachment0, dev.get());
+            const auto* rgba_ret0 = dynamic_cast<gfx::RgbaBitmap*>(bmp0.get());
+            TEST_REQUIRE(rgba_ret0->Compare(gfx::Color::Red));
+
+            const auto& bmp1 = gfx::algo::ReadTexture(attachment1, dev.get());
+            const auto* rgba_ret1 = dynamic_cast<gfx::RgbaBitmap*>(bmp1.get());
+            TEST_REQUIRE(rgba_ret1->Compare(gfx::Color::Green));
+
+            dev->EndFrame();
+        }
+    }
+
+    {
+        gfx::Framebuffer::Config conf;
+        conf.format = format;
+        conf.width  = 10;
+        conf.height = 10;
+        conf.msaa   = msaa;
+        conf.color_target_count = 2;
+        auto* fbo = dev->MakeFramebuffer("test");
+        fbo->SetConfig(conf);
+
+        auto* attachment0 = dev->MakeTexture("texture0");
+        attachment0->Allocate(10, 10, gfx::Texture::Format::sRGBA);
+
+        auto* attachment1 = dev->MakeTexture("texture1");
+        attachment1->Allocate(10, 10, gfx::Texture::Format::sRGBA);
+
+        fbo->SetColorTarget(attachment0, gfx::Framebuffer::ColorAttachment::Attachment0);
+        fbo->SetColorTarget(attachment1, gfx::Framebuffer::ColorAttachment::Attachment1);
+
+        for (unsigned i=0; i<2; ++i)
+        {
+            dev->BeginFrame();
+            dev->ClearColor(gfx::Color::Red, fbo, gfx::Device::ColorAttachment::Attachment0);
+            dev->ClearColor(gfx::Color::Green, fbo, gfx::Device::ColorAttachment::Attachment1);
+
+            fbo->Resolve(nullptr, gfx::Framebuffer::ColorAttachment::Attachment0);
+            fbo->Resolve(nullptr, gfx::Framebuffer::ColorAttachment::Attachment1);
+
+            const auto& bmp0 = gfx::algo::ReadTexture(attachment0, dev.get());
+            const auto* rgba_ret0 = dynamic_cast<gfx::RgbaBitmap*>(bmp0.get());
+            TEST_REQUIRE(rgba_ret0->Compare(gfx::Color::Red));
+
+            const auto& bmp1 = gfx::algo::ReadTexture(attachment1, dev.get());
+            const auto* rgba_ret1 = dynamic_cast<gfx::RgbaBitmap*>(bmp1.get());
+            TEST_REQUIRE(rgba_ret1->Compare(gfx::Color::Green));
+
+            dev->EndFrame();
+        }
+    }
+}
+
 
 // When drawing multiple times within a single frame with either
 // a single material or multiple materials that all map to the same
@@ -2583,6 +2663,12 @@ int test_main(int argc, char* argv[])
         unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8_Depth16, gfx::Framebuffer::MSAA::Enabled);
         unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8_Depth24_Stencil8, gfx::Framebuffer::MSAA::Enabled);
 
+        unit_test_fbo_clear_specific_attachment(gfx::Framebuffer::Format::ColorRGBA8, gfx::Framebuffer::MSAA::Disabled);
+        unit_test_fbo_clear_specific_attachment(gfx::Framebuffer::Format::ColorRGBA8_Depth16, gfx::Framebuffer::MSAA::Disabled);
+        unit_test_fbo_clear_specific_attachment(gfx::Framebuffer::Format::ColorRGBA8_Depth24_Stencil8, gfx::Framebuffer::MSAA::Disabled);
+        unit_test_fbo_clear_specific_attachment(gfx::Framebuffer::Format::ColorRGBA8, gfx::Framebuffer::MSAA::Enabled);
+        unit_test_fbo_clear_specific_attachment(gfx::Framebuffer::Format::ColorRGBA8_Depth16, gfx::Framebuffer::MSAA::Enabled);
+        unit_test_fbo_clear_specific_attachment(gfx::Framebuffer::Format::ColorRGBA8_Depth24_Stencil8, gfx::Framebuffer::MSAA::Enabled);
     }
 
     // bugs
