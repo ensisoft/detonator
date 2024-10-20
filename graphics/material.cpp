@@ -1911,7 +1911,12 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         }
         const char* beg = (const char*)buffer->GetData();
         const char* end = beg + buffer->GetByteSize();
-        return ShaderSource::FromRawSource(std::string(beg, end), ShaderSource::Type::Fragment);
+
+        DEBUG("Load shader source. [uri=%1', material='%2']", mShaderUri, mName);
+
+        auto source = ShaderSource::FromRawSource(std::string(beg, end), ShaderSource::Type::Fragment);
+        source.SetShaderSourceUri(mShaderUri);
+        return source;
     }
 
     if (mType == Type::Color)

@@ -242,6 +242,14 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
     ss << "\n// Warning. Do not delete the below line.";
     ss << "\n// shader_uniform_api_version=" << mShaderUniformAPIVersion << "\n\n";
 
+    // this could go to the beginning but I'm 100% sure it'll
+    // bug out with shitty buggy drivers.
+    if (!mShaderSourceUri.empty())
+    {
+        ss << "\n// shader source uri:";
+        ss << "\n// " << mShaderSourceUri << "\n\n";
+    }
+
     // deal with preprocessor definitions
     // expect to produce something like
     // #define PI 3.123441

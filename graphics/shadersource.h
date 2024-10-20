@@ -122,6 +122,8 @@ namespace gfx
         { mStubFunction = std::move(stub); }
         inline void SetShaderUniformAPIVersion(unsigned version)
         { mShaderUniformAPIVersion = version; }
+        inline void SetShaderSourceUri(std::string uri) noexcept
+        { mShaderSourceUri = std::move(uri); }
 
         inline Type GetType() const noexcept
         { return mType; }
@@ -255,5 +257,9 @@ namespace gfx
         // data declarations.
         std::vector<std::string> mSource;
         std::string mStubFunction;
+        // for debugging help, we can embed the shader source
+        // URI int he shader source as a comment so when it borks
+        // in production the user can easily see which shader it is.
+        std::string mShaderSourceUri;
     };
 } // namespace

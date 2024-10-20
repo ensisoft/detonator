@@ -2438,6 +2438,13 @@ private:
             {
                 GL_CALL(glDeleteShader(shader));
                 ERROR("Shader compile error. [name='%1', info='%2']", mName, compile_info);
+
+                std::stringstream ss(source);
+                std::string line;
+                while (std::getline(ss, line))
+                {
+                    DEBUG("%1", line);
+                }
                 mError = compile_info;
                 return;
             }
