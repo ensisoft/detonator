@@ -2881,6 +2881,8 @@ private:
             {
                 if (version == dev::Context::Version::OpenGL_ES2)
                 {
+                    ASSERT(samples == 0);
+
                     if (!mDevice.mExtensions.OES_packed_depth_stencil)
                     {
                         ERROR("Failed to create FBO. OES_packed_depth_stencil extension was not found. [name='%1']", mName);
@@ -2892,20 +2894,20 @@ private:
                     GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
                     GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
                 }
-                else if (version == dev::Context::Version::WebGL_1 || version == dev::Context::Version::WebGL_2)
+                else if (version == dev::Context::Version::WebGL_1)
                 {
+                    ASSERT(samples == 0);
+
                     // the WebGL spec doesn't actually mention the bit depths for the packed
                     // depth+stencil render buffer and the API exposed GLenum is GL_DEPTH_STENCIL 0x84F9
                     // which however is the same as GL_DEPTH_STENCIL_OES from OES_packed_depth_stencil
                     // So, I'm assuming here that the format is in fact 24bit depth with 8bit stencil.
                     GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
                     GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
-                    if (samples)
-                        GL_CALL(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, WEBGL_DEPTH_STENCIL, xres, yres));
-                    else GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, WEBGL_DEPTH_STENCIL, xres, yres));
+                    GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, WEBGL_DEPTH_STENCIL, xres, yres));
                     GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, WEBGL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
                 }
-                else if (version == dev::Context::Version::OpenGL_ES3)
+                else if (version == dev::Context::Version::OpenGL_ES3 || version == dev::Context::Version::WebGL_2)
                 {
                     GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
                     GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
