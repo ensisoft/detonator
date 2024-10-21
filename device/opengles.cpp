@@ -338,6 +338,7 @@ struct OpenGLFunctions
     PFNGLBLITFRAMEBUFFERPROC         glBlitFramebuffer;
     PFNGLDRAWBUFFERSPROC             glDrawBuffers;
     PFNGLREADBUFFERPROC              glReadBuffer;
+    PFNGLCLEARBUFFERFVPROC           glClearBufferfv;
 
     // KHR_debug
     PFNGLDEBUGMESSAGECALLBACKPROC    glDebugMessageCallback;
@@ -440,6 +441,7 @@ public:
         RESOLVE(glCheckFramebufferStatus);
         RESOLVE(glDrawBuffers)
         RESOLVE(glReadBuffer)
+        RESOLVE(glClearBufferfv)
         // KHR_debug
         RESOLVE(glDebugMessageCallback);
     #undef RESOLVE
@@ -589,11 +591,22 @@ public:
     virtual void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo,
                             std::optional<ColorAttachment> attachment) const override
     {
-        if (!SetupFBO(fbo, attachment))
+        if (!SetupFBO(fbo))
             return;
 
-        GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
-        GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
+        if (fbo)
+        {
+            const auto color_buffer_index = static_cast<GLint>(attachment.value_or(ColorAttachment::Attachment0));
+            const GLfloat value[] = {
+                    color.Red(), color.Green(), color.Blue(), color.Alpha()
+            };
+            GL_CALL(glClearBufferfv(GL_COLOR, color_buffer_index, value));
+        }
+        else
+        {
+            GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
+            GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
+        }
     }
     virtual void ClearStencil(int value, gfx::Framebuffer* fbo) const override
     {
@@ -1625,23 +1638,21 @@ public:
                   buffer.name, bytes, offset, percent_full, buffer.usage, GLEnumToStr(static_cast<GLenum>(type)));
         }
     }
-    bool SetupFBO(gfx::Framebuffer* fbo,
-                  std::optional<ColorAttachment> write_buffer = std::nullopt,
-                  std::optional<ColorAttachment> read_buffer = std::nullopt) const
+    bool SetupFBO(gfx::Framebuffer* fbo) const
     {
         if (fbo)
         {
             auto* impl = static_cast<FramebufferImpl*>(fbo);
             if (impl->IsReady())
             {
-                if (!impl->Complete(write_buffer, read_buffer))
+                if (!impl->Complete())
                     return false;
             }
             else
             {
                 if (!impl->Create())
                     return false;
-                if (!impl->Complete(write_buffer, read_buffer))
+                if (!impl->Complete())
                     return false;
             }
             impl->SetFrameStamp(mFrameNumber);
@@ -2685,8 +2696,7 @@ private:
             return mConfig.format;
         }
 
-        bool Complete(std::optional<ColorAttachment> write_buffer = std::nullopt,
-                      std::optional<ColorAttachment> read_buffer = std::nullopt)
+        bool Complete()
         {
             // in case of a multisampled FBO the color attachment is a multisampled render buffer
             // and the resolve client texture will be the *resolve* target in the blit framebuffer operation.
@@ -2739,43 +2749,29 @@ private:
                 }
             }
 
-            if (mConfig.color_target_count > 1)
+
+            // trying to render to multiple color attachments without platform
+            // support is a BUG. The device client is responsible for taking
+            // an alternative rendering path when there's no support
+            // for multiple color attachments.
+            // This API is only available starting from GL ES3 or WebGL2.
+            //
+            // It's also available with GL_EXT_draw_buffers extension but
+            // the problem is that there's no support for *glReadBuffer*
+            //
+            // We could choose to have single sampled FBO with ES2 / WebGL1
+            // with the GL_EXT_draw_buffers extension however.  But this
+            // isn't done now since the idea is to move forward to ES3 and
+            // ES3 shaders too (where not yet done)
+            ASSERT(mGL.glDrawBuffers);
+
+            std::vector<GLenum> draw_buffers;
+
+            for (unsigned i = 0; i < mConfig.color_target_count; ++i)
             {
-                // trying to render to multiple color attachments without platform
-                // support is a BUG. The device client is responsible for taking
-                // an alternative rendering path when there's no support
-                // for multiple color attachments.
-                // This API is only available starting from GL ES3 or WebGL2.
-                //
-                // It's also available with GL_EXT_draw_buffers extension but
-                // the problem is that there's no support for *glReadBuffer*
-                //
-                // We could choose to have single sampled FBO with ES2 / WebGL1
-                // with the GL_EXT_draw_buffers extension however.  But this
-                // isn't done now since the idea is to move forward to ES3 and
-                // ES3 shaders too (where not yet done)
-
-                ASSERT(mGL.glDrawBuffers);
-
-                std::vector<GLenum> draw_buffers;
-
-                if (write_buffer.has_value())
-                {
-                    const auto attachment_index = static_cast<uint8_t>(write_buffer.value());
-                    ASSERT(attachment_index < mConfig.color_target_count);
-
-                    draw_buffers.push_back(GL_COLOR_ATTACHMENT0 + attachment_index);
-                }
-                else
-                {
-                    for (unsigned i = 0; i < mConfig.color_target_count; ++i)
-                    {
-                        draw_buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
-                    }
-
-                }
-                GL_CALL(glDrawBuffers(draw_buffers.size(), &draw_buffers[0]));
+                draw_buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
             }
+            GL_CALL(glDrawBuffers(draw_buffers.size(), &draw_buffers[0]));
 
             // possible FBO *error* statuses are: INCOMPLETE_ATTACHMENT, INCOMPLETE_DIMENSIONS and INCOMPLETE_MISSING_ATTACHMENT
             // we're treating these status codes as BUGS in the engine code that is trying to create the
