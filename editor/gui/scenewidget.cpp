@@ -1231,6 +1231,25 @@ void SceneWidget::on_bloomBSlide_valueChanged(double value)
     }
 }
 
+void SceneWidget::on_btnResetBloom_clicked()
+{
+    game::SceneClass::BloomFilter defaults;
+
+    SetValue(mUI.bloomRSlide, defaults.red);
+    SetValue(mUI.bloomGSlide, defaults.green);
+    SetValue(mUI.bloomBSlide, defaults.blue);
+
+    SetValue(mUI.bloomRSpin, defaults.red);
+    SetValue(mUI.bloomGSpin, defaults.green);
+    SetValue(mUI.bloomBSpin, defaults.blue);
+
+    if (auto* bloom = mState.scene->GetBloom())
+    {
+        bloom->red   = defaults.red;
+        bloom->green = defaults.green;
+        bloom->blue  = defaults.blue;
+    }
+}
 
 void SceneWidget::on_actionPlay_triggered()
 {
