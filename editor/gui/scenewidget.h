@@ -137,6 +137,7 @@ namespace gui
         void on_bloomRSlide_valueChanged(double);
         void on_bloomGSlide_valueChanged(double);
         void on_bloomBSlide_valueChanged(double);
+        void on_btnResetBloom_clicked();
 
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
