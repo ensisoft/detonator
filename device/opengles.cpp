@@ -565,12 +565,12 @@ public:
 
         have_printed_info = true;
     }
-    OpenGLES2GraphicsDevice(std::shared_ptr<dev::Context> context)
+    explicit OpenGLES2GraphicsDevice(std::shared_ptr<dev::Context> context) noexcept
         : OpenGLES2GraphicsDevice(context.get())
     {
-        mContextImpl = context;
+        mContextImpl = std::move(context);
     }
-   ~OpenGLES2GraphicsDevice()
+   ~OpenGLES2GraphicsDevice() override
     {
         DEBUG("~OpenGLES2GraphicsDevice");
         // make sure our cleanup order is specific so that the
@@ -592,7 +592,7 @@ public:
         }
     }
 
-    virtual void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
+    void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -611,7 +611,7 @@ public:
             GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
         }
     }
-    virtual void ClearStencil(int value, gfx::Framebuffer* fbo) const override
+    void ClearStencil(int value, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -626,7 +626,7 @@ public:
             GL_CALL(glClear(GL_STENCIL_BUFFER_BIT));
         }
     }
-    virtual void ClearDepth(float value, gfx::Framebuffer* fbo) const override
+    void ClearDepth(float value, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -641,7 +641,7 @@ public:
             GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
         }
     }
-    virtual void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
+    void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -662,7 +662,7 @@ public:
             GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
         }
     }
-    virtual void ClearColorDepthStencil(const gfx::Color4f&  color, float depth, int stencil, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
+    void ClearColorDepthStencil(const gfx::Color4f&  color, float depth, int stencil, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -685,16 +685,16 @@ public:
         }
     }
 
-    virtual void SetDefaultTextureFilter(MinFilter filter) override
+    void SetDefaultTextureFilter(MinFilter filter) override
     {
         mDefaultMinTextureFilter = filter;
     }
-    virtual void SetDefaultTextureFilter(MagFilter filter) override
+    void SetDefaultTextureFilter(MagFilter filter) override
     {
         mDefaultMagTextureFilter = filter;
     }
 
-    virtual gfx::ShaderPtr FindShader(const std::string& name) override
+    gfx::ShaderPtr FindShader(const std::string& name) override
     {
         auto it = mShaders.find(name);
         if (it == std::end(mShaders))
@@ -702,7 +702,7 @@ public:
         return it->second;
     }
 
-    virtual gfx::ShaderPtr CreateShader(const std::string& id, const gfx::Shader::CreateArgs& args) override
+    gfx::ShaderPtr CreateShader(const std::string& id, const gfx::Shader::CreateArgs& args) override
     {
         auto shader = std::make_shared<ShaderImpl>(mGL);
         shader->SetName(args.name);
@@ -711,7 +711,7 @@ public:
         return shader;
     }
 
-    virtual gfx::ProgramPtr FindProgram(const std::string& id) override
+    gfx::ProgramPtr FindProgram(const std::string& id) override
     {
         auto it = mPrograms.find(id);
         if (it == std::end(mPrograms))
@@ -719,7 +719,7 @@ public:
         return it->second;
     }
 
-    virtual gfx::ProgramPtr CreateProgram(const std::string& id, const gfx::Program::CreateArgs& args) override
+    gfx::ProgramPtr CreateProgram(const std::string& id, const gfx::Program::CreateArgs& args) override
     {
         auto program = std::make_shared<ProgImpl>(mGL);
 
@@ -740,7 +740,7 @@ public:
         return program;
     }
 
-    virtual gfx::GeometryPtr FindGeometry(const std::string& id) override
+    gfx::GeometryPtr FindGeometry(const std::string& id) override
     {
         auto it = mGeoms.find(id);
         if (it == std::end(mGeoms))
@@ -748,7 +748,7 @@ public:
         return it->second;
     }
 
-    virtual gfx::GeometryPtr CreateGeometry(const std::string& id, gfx::Geometry::CreateArgs args) override
+    gfx::GeometryPtr CreateGeometry(const std::string& id, gfx::Geometry::CreateArgs args) override
     {
         auto geometry = std::make_shared<GeomImpl>(this);
         geometry->SetFrameStamp(mFrameNumber);
@@ -762,7 +762,7 @@ public:
         return geometry;
     }
 
-    virtual gfx::GeometryInstancePtr FindGeometryInstance(const std::string& id) override
+    gfx::GeometryInstancePtr FindGeometryInstance(const std::string& id) override
     {
         auto it = mInstances.find(id);
         if (it == std::end(mInstances))
@@ -770,7 +770,7 @@ public:
         return it->second;
     }
 
-    virtual gfx::GeometryInstancePtr CreateGeometryInstance(const std::string& id, gfx::GeometryInstance::CreateArgs args) override
+    gfx::GeometryInstancePtr CreateGeometryInstance(const std::string& id, gfx::GeometryInstance::CreateArgs args) override
     {
         auto instance = std::make_shared<GeometryInstanceImpl>(this);
         instance->SetFrameStamp(mFrameNumber);
@@ -783,7 +783,7 @@ public:
         return instance;
     }
 
-    virtual gfx::Texture* FindTexture(const std::string& name) override
+    gfx::Texture* FindTexture(const std::string& name) override
     {
         auto it = mTextures.find(name);
         if (it == std::end(mTextures))
@@ -791,7 +791,7 @@ public:
         return it->second.get();
     }
 
-    virtual gfx::Texture* MakeTexture(const std::string& name) override
+    gfx::Texture* MakeTexture(const std::string& name) override
     {
         auto texture = std::make_unique<TextureImpl>(name, mGL, *this);
         auto* ret = texture.get();
@@ -805,14 +805,14 @@ public:
         ret->SetFrameStamp(mFrameNumber);
         return ret;
     }
-    virtual gfx::Framebuffer* FindFramebuffer(const std::string& name) override
+    gfx::Framebuffer* FindFramebuffer(const std::string& name) override
     {
         auto it = mFBOs.find(name);
         if (it == std::end(mFBOs))
             return nullptr;
         return it->second.get();
     }
-    virtual gfx::Framebuffer* MakeFramebuffer(const std::string& name) override
+    gfx::Framebuffer* MakeFramebuffer(const std::string& name) override
     {
         auto fbo = std::make_unique<FramebufferImpl>(name, mGL, *this);
         auto* ret = fbo.get();
@@ -820,19 +820,19 @@ public:
         return ret;
     }
 
-    virtual void DeleteShaders() override
+    void DeleteShaders() override
     {
         mShaders.clear();
     }
-    virtual void DeletePrograms() override
+    void DeletePrograms() override
     {
         mPrograms.clear();
     }
-    virtual void DeleteGeometries() override
+    void DeleteGeometries() override
     {
         mGeoms.clear();
     }
-    virtual void DeleteTextures() override
+    void DeleteTextures() override
     {
         mTextures.clear();
 
@@ -841,13 +841,13 @@ public:
             unit.texture = nullptr;
         }
     }
-    virtual void DeleteFramebuffers() override
+    void DeleteFramebuffers() override
     {
         mFBOs.clear();
     }
-
-    virtual void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
-                      const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) const override
+    
+    void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
+              const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -1295,7 +1295,7 @@ public:
         TRACE_LEAVE(DrawGeometry);
     }
 
-    virtual void CleanGarbage(size_t max_num_idle_frames, unsigned flags) override
+    void CleanGarbage(size_t max_num_idle_frames, unsigned flags) override
     {
         if (flags &  GCFlags::FBOs)
         {
@@ -1389,7 +1389,7 @@ public:
         }
     }
 
-    virtual void BeginFrame() override
+    void BeginFrame() override
     {
         for (auto& pair : mPrograms)
         {
@@ -1423,7 +1423,7 @@ public:
             }
         }
     }
-    virtual void EndFrame(bool display) override
+    void EndFrame(bool display) override
     {
         mFrameNumber++;
         if (display)
@@ -1455,7 +1455,7 @@ public:
         }
     }
 
-    virtual gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
+    gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
         gfx::Bitmap<gfx::Pixel_RGBA> bmp;
 
@@ -1471,7 +1471,7 @@ public:
         return bmp;
     }
 
-    virtual gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
+    gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
         gfx::Bitmap<gfx::Pixel_RGBA> bmp;
         if (!SetupFBO(fbo))
@@ -1484,7 +1484,7 @@ public:
         bmp.FlipHorizontally();
         return bmp;
     }
-    virtual void GetResourceStats(ResourceStats* stats) const override
+    void GetResourceStats(ResourceStats* stats) const override
     {
         std::memset(stats, 0, sizeof(*stats));
         for (const auto& buffer : mBuffers[0])
@@ -1524,7 +1524,7 @@ public:
             }
         }
     }
-    virtual void GetDeviceCaps(DeviceCaps* caps) const override
+    void GetDeviceCaps(DeviceCaps* caps) const override
     {
         std::memset(caps, 0, sizeof(*caps));
         GLint num_texture_units = 0;
@@ -1550,9 +1550,9 @@ public:
         }
     }
 
-    virtual gfx::Device* AsGraphicsDevice() override
+    gfx::Device* AsGraphicsDevice() override
     { return this; }
-    virtual std::shared_ptr<gfx::Device> GetSharedGraphicsDevice() override
+    std::shared_ptr<gfx::Device> GetSharedGraphicsDevice() override
     { return shared_from_this(); }
 
     enum class BufferType {
@@ -1799,7 +1799,7 @@ private:
             }
         }
 
-        virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips) override
+        void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips) override
         {
             if (mHandle == 0)
             {
@@ -1915,52 +1915,52 @@ private:
             }
         }
 
-        virtual void SetFlag(Flags flag, bool on_off) override
+        void SetFlag(Flags flag, bool on_off) override
         { mFlags.set(flag, on_off); }
 
         // refer actual state setting to the point when
         // the texture is actually used in a program's sampler
-        virtual void SetFilter(MinFilter filter) override
+        void SetFilter(MinFilter filter) override
         { mMinFilter = filter; }
-        virtual void SetFilter(MagFilter filter) override
+        void SetFilter(MagFilter filter) override
         { mMagFilter = filter; }
-        virtual void SetWrapX(Wrapping w) override
+        void SetWrapX(Wrapping w) override
         { mWrapX = w; }
-        virtual void SetWrapY(Wrapping w) override
+        void SetWrapY(Wrapping w) override
         { mWrapY = w; }
 
-        virtual Texture::MinFilter GetMinFilter() const override
+        Texture::MinFilter GetMinFilter() const override
         { return mMinFilter; }
-        virtual Texture::MagFilter GetMagFilter() const override
+        Texture::MagFilter GetMagFilter() const override
         { return mMagFilter; }
-        virtual Texture::Wrapping GetWrapX() const override
+        Texture::Wrapping GetWrapX() const override
         { return mWrapX; }
-        virtual Texture::Wrapping GetWrapY() const override
+        Texture::Wrapping GetWrapY() const override
         { return mWrapY; }
-        virtual unsigned GetWidth() const override
+        unsigned GetWidth() const override
         { return mWidth; }
-        virtual unsigned GetHeight() const override
+        unsigned GetHeight() const override
         { return mHeight; }
-        virtual Texture::Format GetFormat() const override
+        Texture::Format GetFormat() const override
         { return mFormat; }
-        virtual void SetContentHash(size_t hash) override
+        void SetContentHash(size_t hash) override
         { mHash = hash; }
-        virtual void SetName(const std::string& name) override
+        void SetName(const std::string& name) override
         { mName = name; }
-        virtual void SetGroup(const std::string& group) override
+        void SetGroup(const std::string& group) override
         { mGroup = group; }
-        virtual size_t GetContentHash() const override
+        size_t GetContentHash() const override
         { return mHash; }
-        virtual bool TestFlag(Flags flag) const override
+        bool TestFlag(Flags flag) const override
         { return mFlags.test(flag); }
-        virtual std::string GetName() const override
+        std::string GetName() const override
         { return mName; }
-        virtual std::string GetGroup() const override
+        std::string GetGroup() const override
         { return mGroup; }
-        virtual std::string GetId() const override
+        std::string GetId() const override
         { return mGpuId; }
 
-        virtual bool GenerateMips() override
+        bool GenerateMips() override
         {
             if (mHasMips)
                 return true;
@@ -2016,7 +2016,7 @@ private:
             }
             return mHasMips;
         }
-        virtual bool HasMips() const override
+        bool HasMips() const override
         { return mHasMips; }
 
         // internal
@@ -2026,11 +2026,6 @@ private:
             mWarnOnce = false;
             return ret;
         }
-
-        bool IsTransient() const
-        { return mFlags.test(Flags::Transient); }
-        bool GarbageCollect() const
-        { return mFlags.test(Flags::GarbageCollect); }
 
         GLuint GetHandle() const
         { return mHandle; }
@@ -2080,7 +2075,7 @@ private:
         explicit GeometryInstanceImpl(OpenGLES2GraphicsDevice* device) noexcept
           : mDevice(device)
         {}
-       ~GeometryInstanceImpl()
+       ~GeometryInstanceImpl() override
         {
             if (mBufferSize)
             {
@@ -2153,9 +2148,10 @@ private:
     public:
         using BufferType = OpenGLES2GraphicsDevice::BufferType;
 
-        GeomImpl(OpenGLES2GraphicsDevice* device) : mDevice(device)
+        explicit GeomImpl(OpenGLES2GraphicsDevice* device) noexcept
+          : mDevice(device)
         {}
-       ~GeomImpl()
+       ~GeomImpl() override
         {
             if (mVertexBufferSize)
             {
@@ -2169,15 +2165,15 @@ private:
                 DEBUG("Deleted geometry object. [name='%1']", mName);
         }
 
-        virtual size_t GetContentHash() const  override
+        size_t GetContentHash() const  override
         { return mHash; }
-        virtual size_t GetNumDrawCmds() const override
+        size_t GetNumDrawCmds() const override
         { return mDrawCommands.size(); }
-        virtual DrawCommand GetDrawCmd(size_t index) const override
+        DrawCommand GetDrawCmd(size_t index) const override
         { return mDrawCommands[index]; }
-        virtual Usage GetUsage() const override
+        Usage GetUsage() const override
         { return mUsage; }
-        virtual std::string GetName() const override
+        std::string GetName() const override
         { return mName; }
 
         void Upload() const
@@ -2278,10 +2274,11 @@ private:
     class ProgImpl : public gfx::Program
     {
     public:
-        ProgImpl(const OpenGLFunctions& funcs) : mGL(funcs)
+        explicit ProgImpl(const OpenGLFunctions& funcs) noexcept
+          : mGL(funcs)
         {}
 
-       ~ProgImpl()
+       ~ProgImpl() override
         {
             if (mProgram)
             {
@@ -2383,7 +2380,7 @@ private:
         }
 
 
-        virtual bool IsValid() const override
+        bool IsValid() const override
         { return mProgram != 0; }
 
         void SetName(const std::string& name)
@@ -2435,10 +2432,11 @@ private:
     class ShaderImpl : public gfx::Shader
     {
     public:
-        ShaderImpl(const OpenGLFunctions& funcs) : mGL(funcs)
+        explicit ShaderImpl(const OpenGLFunctions& funcs) noexcept
+          : mGL(funcs)
         {}
 
-       ~ShaderImpl()
+       ~ShaderImpl() override
         {
             if (mShader)
             {
@@ -2508,11 +2506,11 @@ private:
         }
 
 
-        virtual bool IsValid() const override
+        bool IsValid() const override
         { return mShader != 0; }
-        virtual std::string GetName() const override
+        std::string GetName() const override
         { return mName; }
-        virtual std::string GetError() const override
+        std::string GetError() const override
         { return mError; }
 
         inline void SetName(std::string name) noexcept
@@ -2573,7 +2571,7 @@ private:
                 DEBUG("Deleted frame buffer object. [name='%1', handle=%2]", mName, mHandle);
             }
         }
-        virtual void SetConfig(const Config& conf) override
+        void SetConfig(const Config& conf) override
         {
             ASSERT(conf.color_target_count >= 1);
 
@@ -2596,7 +2594,7 @@ private:
             mTextures.resize(mConfig.color_target_count);
         }
 
-        virtual void SetColorTarget(gfx::Texture* texture, ColorAttachment attachment) override
+        void SetColorTarget(gfx::Texture* texture, ColorAttachment attachment) override
         {
             const auto index = static_cast<uint8_t>(attachment);
 
@@ -2655,7 +2653,7 @@ private:
             }
         }
 
-        virtual void Resolve(gfx::Texture** color, ColorAttachment attachment) const override
+        void Resolve(gfx::Texture** color, ColorAttachment attachment) const override
         {
             const auto index = static_cast<uint8_t>(attachment);
 
@@ -2718,21 +2716,21 @@ private:
             }
         }
 
-        virtual unsigned GetWidth() const override
+        unsigned GetWidth() const override
         {
             if (mClientTextures.empty())
                 return mConfig.width;
 
             return mClientTextures[0]->GetWidth();
         }
-        virtual unsigned GetHeight() const override
+        unsigned GetHeight() const override
         {
             if (mClientTextures.empty())
                 return mConfig.height;
 
             return mClientTextures[0]->GetHeight();
         }
-        virtual Format GetFormat() const override
+        Format GetFormat() const override
         {
             return mConfig.format;
         }
