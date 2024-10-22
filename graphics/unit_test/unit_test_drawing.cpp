@@ -180,15 +180,15 @@ private:
 class TestDevice : public gfx::Device
 {
 public:
-    void ClearColor(const gfx::Color4f& color, gfx::Framebuffer*, std::optional<ColorAttachment>) const override
+    void ClearColor(const gfx::Color4f& color, gfx::Framebuffer*, ColorAttachment) const override
     {}
     void ClearStencil(int value, gfx::Framebuffer* fbo) const override
     {}
     void ClearDepth(float value, gfx::Framebuffer* fbo) const override
     {}
-    void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo) const override
+    void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo, ColorAttachment) const override
     {}
-    void ClearColorDepthStencil(const gfx::Color4f& color, float depth, int stencil, gfx::Framebuffer* fbo) const override
+    void ClearColorDepthStencil(const gfx::Color4f& color, float depth, int stencil, gfx::Framebuffer* fbo, ColorAttachment) const override
     {}
 
     void SetDefaultTextureFilter(MinFilter filter) override

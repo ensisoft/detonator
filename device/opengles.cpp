@@ -339,6 +339,8 @@ struct OpenGLFunctions
     PFNGLDRAWBUFFERSPROC             glDrawBuffers;
     PFNGLREADBUFFERPROC              glReadBuffer;
     PFNGLCLEARBUFFERFVPROC           glClearBufferfv;
+    PFNGLCLEARBUFFERFIPROC           glClearBufferfi;
+    PFNGLCLEARBUFFERIVPROC           glClearBufferiv;
 
     // KHR_debug
     PFNGLDEBUGMESSAGECALLBACKPROC    glDebugMessageCallback;
@@ -442,6 +444,8 @@ public:
         RESOLVE(glDrawBuffers)
         RESOLVE(glReadBuffer)
         RESOLVE(glClearBufferfv)
+        RESOLVE(glClearBufferfi)
+        RESOLVE(glClearBufferiv)
         // KHR_debug
         RESOLVE(glDebugMessageCallback);
     #undef RESOLVE
@@ -588,17 +592,16 @@ public:
         }
     }
 
-    virtual void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo,
-                            std::optional<ColorAttachment> attachment) const override
+    virtual void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
     {
         if (!SetupFBO(fbo))
             return;
 
         if (fbo)
         {
-            const auto color_buffer_index = static_cast<GLint>(attachment.value_or(ColorAttachment::Attachment0));
+            const auto color_buffer_index = static_cast<GLint>(attachment);
             const GLfloat value[] = {
-                    color.Red(), color.Green(), color.Blue(), color.Alpha()
+                color.Red(), color.Green(), color.Blue(), color.Alpha()
             };
             GL_CALL(glClearBufferfv(GL_COLOR, color_buffer_index, value));
         }
@@ -613,35 +616,73 @@ public:
         if (!SetupFBO(fbo))
             return;
 
-        GL_CALL(glClearStencil(value));
-        GL_CALL(glClear(GL_STENCIL_BUFFER_BIT));
+        if (fbo)
+        {
+            GL_CALL(glClearBufferiv(GL_STENCIL, 0, &value));
+        }
+        else
+        {
+            GL_CALL(glClearStencil(value));
+            GL_CALL(glClear(GL_STENCIL_BUFFER_BIT));
+        }
     }
     virtual void ClearDepth(float value, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
 
-        GL_CALL(glClearDepthf(value));
-        GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
+        if (fbo)
+        {
+            GL_CALL(glClearBufferfv(GL_DEPTH, 0, &value));
+        }
+        else
+        {
+            GL_CALL(glClearDepthf(value));
+            GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
+        }
     }
-    virtual void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo) const override
+    virtual void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
     {
         if (!SetupFBO(fbo))
             return;
 
-        GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
-        GL_CALL(glClearDepthf(depth));
-        GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
+        if (fbo)
+        {
+            const auto color_buffer_index = static_cast<GLint>(attachment);
+            const GLfloat value[] = {
+                color.Red(), color.Green(), color.Blue(), color.Alpha()
+            };
+            GL_CALL(glClearBufferfv(GL_COLOR, color_buffer_index, value));
+            GL_CALL(glClearBufferfv(GL_DEPTH, 0, &depth));
+        }
+        else
+        {
+            GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
+            GL_CALL(glClearDepthf(depth));
+            GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
+        }
     }
-    virtual void ClearColorDepthStencil(const gfx::Color4f&  color, float depth, int stencil, gfx::Framebuffer* fbo) const override
+    virtual void ClearColorDepthStencil(const gfx::Color4f&  color, float depth, int stencil, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
     {
         if (!SetupFBO(fbo))
             return;
 
-        GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
-        GL_CALL(glClearDepthf(depth));
-        GL_CALL(glClearStencil(stencil));
-        GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+        if (fbo)
+        {
+            const auto color_buffer_index = static_cast<GLint>(attachment);
+            const GLfloat value[] = {
+                color.Red(), color.Green(), color.Blue(), color.Alpha()
+            };
+            GL_CALL(glClearBufferfv(GL_COLOR, color_buffer_index, value));
+            GL_CALL(glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil));
+        }
+        else
+        {
+            GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
+            GL_CALL(glClearDepthf(depth));
+            GL_CALL(glClearStencil(stencil));
+            GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+        }
     }
 
     virtual void SetDefaultTextureFilter(MinFilter filter) override
