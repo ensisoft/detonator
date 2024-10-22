@@ -125,6 +125,7 @@ namespace gfx
             // Set the hash value based on the contents of the buffer.
             std::size_t content_hash = 0;
         };
+        virtual ~GeometryInstance() = default;
     private:
     };
 
