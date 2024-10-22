@@ -131,12 +131,36 @@ namespace gfx
 
         using ColorAttachment = gfx::Framebuffer::ColorAttachment;
 
-        virtual void ClearColor(const Color4f& color, Framebuffer* fbo = nullptr,
-                                std::optional<ColorAttachment> attachment = std::nullopt) const = 0;
-        virtual void ClearStencil(int value, Framebuffer* fbo = nullptr) const = 0;
-        virtual void ClearDepth(float value, Framebuffer* fbo = nullptr) const = 0;
-        virtual void ClearColorDepth(const Color4f& color, float depth, Framebuffer* fbo = nullptr) const = 0;
-        virtual void ClearColorDepthStencil(const Color4f& color, float depth, int stencil, Framebuffer* fbo = nullptr) const = 0;
+        virtual void ClearColor(const Color4f& color, Framebuffer* fbo, ColorAttachment attachment) const = 0;
+        virtual void ClearStencil(int value, Framebuffer* fbo) const = 0;
+        virtual void ClearDepth(float value, Framebuffer* fbo) const = 0;
+        virtual void ClearColorDepth(const Color4f& color, float depth, Framebuffer* fbo, ColorAttachment attachment) const = 0;
+        virtual void ClearColorDepthStencil(const Color4f& color, float depth, int stencil, Framebuffer* fbo, ColorAttachment attachment) const = 0;
+
+        void ClearColor(const Color4f& color) const
+        {
+            ClearColor(color, nullptr, ColorAttachment::Attachment0);
+        }
+        void ClearColor(const Color4f& color, Framebuffer* fbo) const
+        {
+            ClearColor(color, fbo, ColorAttachment::Attachment0);
+        }
+        void ClearStencil(int value) const
+        {
+            ClearStencil(value, nullptr);
+        }
+        void ClearDepth(float value) const
+        {
+            ClearDepth(value, nullptr);
+        }
+        void ClearColorDepth(const Color4f& color, float depth) const
+        {
+            ClearColorDepth(color, depth, nullptr, ColorAttachment::Attachment0);
+        }
+        void ClearColorDepthStencil(const Color4f& color, float depth, int stencil) const
+        {
+            ClearColorDepthStencil(color, depth, stencil, nullptr, ColorAttachment::Attachment0);
+        }
 
         // Texture minifying filter is used whenever the
         // pixel being textured maps to an area greater than
