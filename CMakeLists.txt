@@ -210,6 +210,7 @@ add_library(GfxLib
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/simple_shape.cpp
+    graphics/polygon_mesh.cpp
     graphics/geometry.cpp
     graphics/drawcmd.cpp
     graphics/vertex.cpp
@@ -266,6 +267,7 @@ add_library(GfxLibTesting
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/simple_shape.cpp
+    graphics/polygon_mesh.cpp
     graphics/geometry.cpp
     graphics/vertex.cpp
     graphics/material.cpp
@@ -769,6 +771,7 @@ add_executable(graphics_test
     graphics/shadersource.cpp
     graphics/drawable.cpp
     graphics/simple_shape.cpp
+    graphics/polygon_mesh.cpp
     graphics/geometry.cpp
     graphics/drawcmd.cpp
     graphics/vertex.cpp

@@ -31,6 +31,7 @@
 #include "graphics/drawable.h"
 #include "graphics/geometry.h"
 #include "graphics/drawcmd.h"
+#include "graphics/polygon_mesh.h"
 #include "editor/app/import.h"
 #include "editor/app/eventlog.h"
 

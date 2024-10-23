@@ -251,6 +251,7 @@ add_executable(GameEngine
     ../graphics/material.cpp
     ../graphics/drawable.cpp
     ../graphics/simple_shape.cpp
+    ../graphics/polygon_mesh.cpp
     ../graphics/image.cpp
     ../graphics/loader.cpp
     ../graphics/drawing.cpp
