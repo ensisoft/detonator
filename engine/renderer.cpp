@@ -97,7 +97,8 @@ void Renderer::UpdateRenderState(const game::Scene& scene, const game::Tilemap* 
             for (size_t i=0; i<entity->GetNumNodes(); ++i)
             {
                 const auto& node = entity->GetNode(i);
-                mPaintNodes.erase(node.GetId());
+                mPaintNodes.erase("drawable/" + node.GetId());
+                mPaintNodes.erase("text-item/" + node.GetId());
             }
         }
         else
@@ -135,11 +136,20 @@ void Renderer::CreateRenderPackets(const game::Scene& scene, const game::Tilemap
             for (size_t j=0; j<entity->GetNumNodes(); ++j)
             {
                 const auto& node = entity.GetNode(j);
-                if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+
+                if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
                 {
-                    CreateDrawResources<Entity, EntityNode>(entity, node, *paint);
-                    UpdateNode<Entity, EntityNode>(entity, node, *paint, time, dt);
-                    GenerateDrawPackets<Entity, EntityNode>(entity, node, *paint, packets, nullptr /* entity hook*/);
+                    CreateDrawableResources<Entity, EntityNode>(entity, node, *paint);
+                    UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, time, dt);
+                    CreateDrawableDrawPackets<Entity, EntityNode>(entity, node, *paint, packets, nullptr);
+                    paint->visited = true;
+                }
+
+                if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+                {
+                    CreateTextResources<Entity, EntityNode>(entity, node, *paint);
+                    UpdateTextResources<Entity, EntityNode>(entity, node, *paint, time, dt);
+                    CreateTextDrawPackets<Entity, EntityNode>(entity, node, *paint, packets, nullptr);
                     paint->visited = true;
                 }
             }
@@ -455,8 +465,12 @@ void Renderer::Update(const EntityClass& entity, float time, float dt)
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
         const auto& node = entity.GetNode(i);
-        if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
-            UpdateNode<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
+
+        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+            UpdateDrawableResources<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
+
+        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+            UpdateTextResources<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
     }
 }
 
@@ -465,8 +479,12 @@ void Renderer::Update(const Entity& entity, float time, float dt)
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
         const auto& node = entity.GetNode(i);
-        if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
-            UpdateNode<Entity, EntityNode>(entity, node, *paint, time, dt);
+
+        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+            UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, time, dt);
+
+        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+            UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, time, dt);
     }
 }
 
@@ -524,44 +542,43 @@ void Renderer::ClearPaintState()
 }
 
 template<typename EntityType, typename EntityNodeType>
-void Renderer::UpdateNode(const EntityType& entity, const EntityNodeType& entity_node,
-                          PaintNode& paint_node, double time, float dt) const
+void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
+                                       double time, float dt) const
 {
     using DrawableItemType = typename EntityNodeType::DrawableItemType;
     const auto* item = entity_node.GetDrawable();
-    const auto* text = entity_node.GetTextItem();
 
     gfx::Transform transform;
     transform.Scale(paint_node.world_scale);
     transform.RotateAroundZ(paint_node.world_rotation);
     transform.Translate(paint_node.world_pos);
 
-    if (item && paint_node.item_material)
+    if (item && paint_node.material)
     {
         const auto time_scale = item->GetTimeScale();
         if (item->TestFlag(DrawableItemType::Flags::UpdateMaterial))
-            paint_node.item_material->Update(dt * time_scale);
+            paint_node.material->Update(dt * time_scale);
 
         if constexpr (std::is_same_v<EntityNodeType, game::EntityNode>)
         {
             if (item->HasMaterialTimeAdjustment())
             {
                 const float adjusted_time = item->GetMaterialTimeAdjustment();
-                paint_node.item_material->SetRuntime(adjusted_time);
+                paint_node.material->SetRuntime(adjusted_time);
                 item->ClearMaterialTimeAdjustment();
             }
         }
 
         if constexpr (std::is_same_v<EntityNodeType, game::EntityNode>)
         {
-            item->SetCurrentMaterialTime(paint_node.item_material->GetRuntime());
+            item->SetCurrentMaterialTime(paint_node.material->GetRuntime());
         }
     }
-    if (item && paint_node.item_drawable)
+    if (item && paint_node.drawable)
     {
         const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
-        const auto& shape = paint_node.item_drawable;
+        const auto& shape = paint_node.drawable;
         const auto view = item->GetRenderView();
         const auto size = entity_node.GetSize();
         const auto is3d = Is3DShape(*shape);
@@ -619,9 +636,9 @@ void Renderer::UpdateNode(const EntityType& entity, const EntityNodeType& entity
 
         const auto time_scale = item->GetTimeScale();
         if (item->TestFlag(DrawableItemType::Flags::UpdateDrawable))
-            paint_node.item_drawable->Update(env, dt * time_scale);
-        if (item->TestFlag(DrawableItemType::Flags::RestartDrawable) && !paint_node.item_drawable->IsAlive())
-            paint_node.item_drawable->Restart(env);
+            paint_node.drawable->Update(env, dt * time_scale);
+        if (item->TestFlag(DrawableItemType::Flags::RestartDrawable) && !paint_node.drawable->IsAlive())
+            paint_node.drawable->Restart(env);
 
         if constexpr (std::is_same_v<EntityNodeType, game::EntityNode>)
         {
@@ -631,7 +648,7 @@ void Renderer::UpdateNode(const EntityType& entity, const EntityNodeType& entity
                 gfx::Drawable::Command gfx_cmd;
                 gfx_cmd.name = src_cmd.name;
                 gfx_cmd.args = src_cmd.args;
-                paint_node.item_drawable->Execute(env, gfx_cmd);
+                paint_node.drawable->Execute(env, gfx_cmd);
             }
             item->ClearCommands();
         }
@@ -646,12 +663,24 @@ void Renderer::UpdateNode(const EntityType& entity, const EntityNodeType& entity
             transform.Pop();
         }
     }
+}
 
-    if (text && paint_node.text_material)
+template<typename EntityType, typename EntityNodeType>
+void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
+                                   double time, float dt) const
+{
+    const auto* text = entity_node.GetTextItem();
+
+    gfx::Transform transform;
+    transform.Scale(paint_node.world_scale);
+    transform.RotateAroundZ(paint_node.world_rotation);
+    transform.Translate(paint_node.world_pos);
+
+    if (text && paint_node.material)
     {
-        paint_node.text_material->Update(dt);
+        paint_node.material->Update(dt);
     }
-    if (text && paint_node.text_drawable)
+    if (text && paint_node.drawable)
     {
         // push the actual model transform
         transform.Push(entity_node.GetModelTransform());
@@ -661,7 +690,7 @@ void Renderer::UpdateNode(const EntityType& entity, const EntityNodeType& entity
         env.model_matrix = &model;
         // todo: other env matrices?
 
-        paint_node.text_drawable->Update(env, dt);
+        paint_node.drawable->Update(env, dt);
 
         // pop model transform
         transform.Pop();
@@ -746,10 +775,17 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
             for (size_t i=0; i<entity->GetNumNodes(); ++i)
             {
                 const auto& node = entity->GetNode(i);
-                if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+
+                if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
                 {
-                    CreateDrawResources<EntityType, EntityNodeType>(*entity, node, *paint);
-                    GenerateDrawPackets<EntityType, EntityNodeType>(*entity, node, *paint, entity_packets, nullptr /*entity hook */);
+                    CreateDrawableResources<EntityType, EntityNodeType>(*entity, node, *paint);
+                    CreateDrawableDrawPackets<EntityType, EntityNodeType>(*entity, node, *paint, entity_packets, nullptr);
+                }
+
+                if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+                {
+                    CreateTextResources<EntityType, EntityNodeType>(*entity, node,*paint);
+                    CreateTextDrawPackets<EntityType, EntityNodeType>(*entity, node, *paint, entity_packets, nullptr);
                 }
             }
             // generate draw packets uses the entity to ask for the scene layer index.
@@ -820,12 +856,22 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
             // do render even if this node itself doesn't
             mTransform.Push(node->GetNodeTransform());
 
-            const auto* item = node->GetDrawable();
-            const auto* text = node->GetTextItem();
-            if (item || text)
+            game::FBox box;
+            if  (node->HasDrawable() || node->HasTextItem())
+                box.Transform(mTransform.GetAsMatrix());
+
+            if (const auto* item = node->GetDrawable())
             {
-                const game::FBox box(mTransform.GetAsMatrix());
-                auto& paint_node = mRenderer.mPaintNodes[node->GetId()];
+                auto& paint_node = mRenderer.mPaintNodes["drawable/" + node->GetId()];
+                paint_node.visited        = true;
+                paint_node.world_pos      = box.GetTopLeft();
+                paint_node.world_scale    = box.GetSize();
+                paint_node.world_rotation = box.GetRotation();
+            }
+
+            if (const auto* text = node->GetTextItem())
+            {
+                auto& paint_node = mRenderer.mPaintNodes["text-item/" + node->GetId()];
                 paint_node.visited        = true;
                 paint_node.world_pos      = box.GetTopLeft();
                 paint_node.world_scale    = box.GetSize();
@@ -860,12 +906,22 @@ void Renderer::DrawEntity(const EntityType& entity,
     for (size_t i=0; i<entity.GetNumNodes(); ++i)
     {
         const auto& node = entity.GetNode(i);
-        if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+
+        bool did_paint = false;
+        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
         {
-            CreateDrawResources<EntityType, NodeType>(entity, node, *paint);
-            GenerateDrawPackets<EntityType, NodeType>(entity, node, *paint, packets, hook);
+            CreateDrawableResources<EntityType, NodeType>(entity, node, *paint);
+            CreateDrawableDrawPackets<EntityType, NodeType>(entity, node, *paint, packets, hook);
+            did_paint = true;
         }
-        else if (hook)
+
+        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+        {
+            CreateTextResources<EntityType, NodeType>(entity, node, *paint);
+            CreateTextDrawPackets<EntityType, NodeType>(entity, node, *paint, packets, hook);
+            did_paint = true;
+        }
+        if (hook && !did_paint)
         {
             transform.Push(entity.FindNodeTransform(&node));
                 hook->AppendPackets(&node, transform, packets);
@@ -879,7 +935,75 @@ void Renderer::DrawEntity(const EntityType& entity,
 }
 
 template<typename EntityType, typename EntityNodeType>
-void Renderer::CreateDrawResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const
+void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const
+{
+    if (const auto* item = entity_node.GetDrawable())
+    {
+        const auto& material = item->GetMaterialId();
+        const auto& drawable = item->GetDrawableId();
+        if (paint_node.materialId != material)
+        {
+            paint_node.material.reset();
+            paint_node.materialId = material;
+            auto klass = mClassLib->FindMaterialClassById(material);
+            if (klass)
+                paint_node.material = gfx::CreateMaterialInstance(klass);
+            if (!paint_node.material)
+                WARN("No such material class found. [material='%1', entity='%2', node='%3']", material, entity.GetName(), entity_node.GetName());
+        }
+        if (paint_node.drawableId != drawable)
+        {
+            paint_node.drawable.reset();
+            paint_node.drawableId = drawable;
+
+            auto klass = mClassLib->FindDrawableClassById(drawable);
+            if (klass)
+                paint_node.drawable = gfx::CreateDrawableInstance(klass);
+
+            if (!paint_node.drawable)
+                WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", drawable, entity.GetName(), entity_node.GetName());
+            if (paint_node.drawable)
+            {
+                gfx::Transform transform;
+                transform.Scale(paint_node.world_scale);
+                transform.RotateAroundZ(paint_node.world_rotation);
+                transform.Translate(paint_node.world_pos);
+
+                transform.Push(entity_node.GetModelTransform());
+
+                const auto& model = transform.GetAsMatrix();
+                gfx::Drawable::Environment env; // todo:
+                env.model_matrix = &model;
+                paint_node.drawable->Restart(env);
+            }
+        }
+        if (paint_node.material)
+        {
+            paint_node.material->ResetUniforms();
+            if (const auto* params = item->GetMaterialParams())
+                paint_node.material->SetUniforms(*params);
+        }
+        if (paint_node.drawable)
+        {
+            if (paint_node.drawable->GetType() == gfx::Drawable::Type::SimpleShape)
+            {
+                auto simple = std::static_pointer_cast<gfx::SimpleShapeInstance>(paint_node.drawable);
+
+                gfx::SimpleShapeStyle style;
+                if (item->GetRenderStyle() == RenderStyle::Solid)
+                    style = gfx::SimpleShapeStyle::Solid;
+                else if (item->GetRenderStyle() == RenderStyle::Outline)
+                    style = gfx::SimpleShapeStyle::Outline;
+                else BUG("Unsupported rendering style.");
+
+                simple->SetStyle(style);
+            }
+        }
+    }
+}
+
+template<typename EntityType, typename EntityNodeType>
+void Renderer::CreateTextResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const
 {
     if (const auto* text = entity_node.GetTextItem())
     {
@@ -900,7 +1024,7 @@ void Renderer::CreateDrawResources(const EntityType& entity, const EntityNodeTyp
 
         const auto& material = std::to_string(hash);
         const auto& drawable = "_rect";
-        if (paint_node.text_material_id != material)
+        if (paint_node.materialId != material)
         {
             gfx::TextBuffer::Text text_and_style;
             text_and_style.text       = text->GetText();
@@ -926,89 +1050,25 @@ void Renderer::CreateDrawResources(const EntityType& entity, const EntityNodeTyp
             // setup material to shade text.
             auto mat = gfx::CreateMaterialInstance(std::move(buffer));
             mat->SetColor(text->GetTextColor());
-            paint_node.text_material = std::move(mat);
-            paint_node.text_material_id = material;
+            paint_node.material = std::move(mat);
+            paint_node.materialId = material;
         }
-        if (!paint_node.text_drawable)
+        if (!paint_node.drawable)
         {
             auto klass = mClassLib->FindDrawableClassById(drawable);
-            paint_node.text_drawable = gfx::CreateDrawableInstance(klass);
-        }
-    }
-    if (const auto* item = entity_node.GetDrawable())
-    {
-        const auto& material = item->GetMaterialId();
-        const auto& drawable = item->GetDrawableId();
-        if (paint_node.item_material_id != material)
-        {
-            paint_node.item_material.reset();
-            paint_node.item_material_id = material;
-            auto klass = mClassLib->FindMaterialClassById(material);
-            if (klass)
-                paint_node.item_material = gfx::CreateMaterialInstance(klass);
-            if (!paint_node.item_material)
-                WARN("No such material class found. [material='%1', entity='%2', node='%3']", material, entity.GetName(), entity_node.GetName());
-        }
-        if (paint_node.item_drawable_id != drawable)
-        {
-            paint_node.item_drawable.reset();
-            paint_node.item_drawable_id = drawable;
-
-            auto klass = mClassLib->FindDrawableClassById(drawable);
-            if (klass)
-                paint_node.item_drawable = gfx::CreateDrawableInstance(klass);
-
-            if (!paint_node.item_drawable)
-                WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", drawable, entity.GetName(), entity_node.GetName());
-            if (paint_node.item_drawable)
-            {
-                gfx::Transform transform;
-                transform.Scale(paint_node.world_scale);
-                transform.RotateAroundZ(paint_node.world_rotation);
-                transform.Translate(paint_node.world_pos);
-
-                transform.Push(entity_node.GetModelTransform());
-
-                const auto& model = transform.GetAsMatrix();
-                gfx::Drawable::Environment env; // todo:
-                env.model_matrix = &model;
-                paint_node.item_drawable->Restart(env);
-            }
-        }
-        if (paint_node.item_material)
-        {
-            paint_node.item_material->ResetUniforms();
-            if (const auto* params = item->GetMaterialParams())
-                paint_node.item_material->SetUniforms(*params);
-        }
-        if (paint_node.item_drawable)
-        {
-            if (paint_node.item_drawable->GetType() == gfx::Drawable::Type::SimpleShape)
-            {
-                auto simple = std::static_pointer_cast<gfx::SimpleShapeInstance>(paint_node.item_drawable);
-
-                gfx::SimpleShapeStyle style;
-                if (item->GetRenderStyle() == RenderStyle::Solid)
-                    style = gfx::SimpleShapeStyle::Solid;
-                else if (item->GetRenderStyle() == RenderStyle::Outline)
-                    style = gfx::SimpleShapeStyle::Outline;
-                else BUG("Unsupported rendering style.");
-
-                simple->SetStyle(style);
-            }
+            paint_node.drawable = gfx::CreateDrawableInstance(klass);
         }
     }
 }
 
 template<typename EntityType, typename EntityNodeType>
-void Renderer::GenerateDrawPackets(const EntityType& entity,
-                                   const EntityNodeType& entity_node,
-                                   const PaintNode& paint_node,
-                                   std::vector<DrawPacket>& packets,
-                                   EntityDrawHook<EntityNodeType>* hook) const
+void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
+                                         const EntityNodeType& entity_node,
+                                         const PaintNode& paint_node,
+                                         std::vector<DrawPacket>& packets,
+                                         EntityDrawHook<EntityNodeType>* hook) const
 {
     using DrawableItemType = typename EntityNodeType::DrawableItemType;
-
 
     const bool entity_visible = entity.TestFlag(EntityType::Flags::VisibleInGame);
 
@@ -1021,49 +1081,13 @@ void Renderer::GenerateDrawPackets(const EntityType& entity,
     if (const auto* map = entity_node.GetMapNode())
         sort_point = map->GetSortPoint();
 
-    if (const auto* text = entity_node.GetTextItem())
-    {
-        bool visible_now = true;
-        if (text->TestFlag(TextItemClass::Flags::BlinkText))
-        {
-            const auto fps = 1.5;
-            const auto full_period = 2.0 / fps;
-            const auto half_period = full_period * 0.5;
-            const auto time = fmodf(base::GetTime(), full_period);
-            if (time >= half_period)
-                visible_now = false;
-        }
-        if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && entity_visible && visible_now)
-        {
-            // push the actual model transform
-            transform.Push(entity_node.GetModelTransform());
-
-            DrawPacket packet;
-            packet.flags.set(DrawPacket::Flags::PP_Bloom, text->TestFlag(TextItemClass::Flags::PP_EnableBloom));
-            packet.source       = DrawPacket::Source::Scene;
-            packet.domain       = DrawPacket::Domain::Scene;
-            packet.drawable     = paint_node.text_drawable;
-            packet.material     = paint_node.text_material;
-            packet.transform    = transform;
-            packet.sort_point   = sort_point;
-            packet.pass         = RenderPass::DrawColor;
-            packet.packet_index = text->GetLayer();
-            packet.render_layer = entity.GetLayer();
-            if (!hook || hook->InspectPacket(&entity_node, packet))
-                packets.push_back(std::move(packet));
-
-            // pop model transform
-            transform.Pop();
-        }
-    }
-
     if (const auto* item = entity_node.GetDrawable())
     {
         const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
         const auto double_sided    = item->TestFlag(DrawableItemType::Flags::DoubleSided);
         const auto depth_test      = item->TestFlag(DrawableItemType::Flags::DepthTest);
-        const auto& shape = paint_node.item_drawable;
+        const auto& shape = paint_node.drawable;
         const auto size = entity_node.GetSize();
         const auto is3d = Is3DShape(*shape);
         const auto view = item->GetRenderView();
@@ -1125,8 +1149,8 @@ void Renderer::GenerateDrawPackets(const EntityType& entity,
             packet.domain       = DrawPacket::Domain::Scene;
             packet.culling      = DrawPacket::Culling::Back;
             packet.depth_test   = DrawPacket::DepthTest::Disabled;
-            packet.material     = paint_node.item_material;
-            packet.drawable     = paint_node.item_drawable;
+            packet.material     = paint_node.material;
+            packet.drawable     = paint_node.drawable;
             packet.transform    = transform;
             packet.sort_point   = sort_point;
             packet.render_layer = entity.GetLayer();
@@ -1166,6 +1190,70 @@ void Renderer::GenerateDrawPackets(const EntityType& entity,
         {
             // pop view based model transform
             transform.Pop();
+            transform.Pop();
+        }
+    }
+
+    // append any extra packets if needed.
+    if (hook)
+    {
+        // Allow the draw hook to append any extra draw packets for this node.
+        hook->AppendPackets(&entity_node, transform, packets);
+    }
+}
+
+template<typename EntityType, typename EntityNodeType>
+void Renderer::CreateTextDrawPackets(const EntityType& entity,
+                                     const EntityNodeType& entity_node,
+                                     const PaintNode& paint_node,
+                                     std::vector<DrawPacket>& packets,
+                                     EntityDrawHook<EntityNodeType>* hook) const
+{
+    using DrawableItemType = typename EntityNodeType::DrawableItemType;
+
+    const bool entity_visible = entity.TestFlag(EntityType::Flags::VisibleInGame);
+
+    gfx::Transform transform;
+    transform.Scale(paint_node.world_scale);
+    transform.RotateAroundZ(paint_node.world_rotation);
+    transform.Translate(paint_node.world_pos);
+
+    glm::vec2 sort_point = {0.5f, 1.0f};
+    if (const auto* map = entity_node.GetMapNode())
+        sort_point = map->GetSortPoint();
+
+    if (const auto* text = entity_node.GetTextItem())
+    {
+        bool visible_now = true;
+        if (text->TestFlag(TextItemClass::Flags::BlinkText))
+        {
+            const auto fps = 1.5;
+            const auto full_period = 2.0 / fps;
+            const auto half_period = full_period * 0.5;
+            const auto time = fmodf(base::GetTime(), full_period);
+            if (time >= half_period)
+                visible_now = false;
+        }
+        if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && entity_visible && visible_now)
+        {
+            // push the actual model transform
+            transform.Push(entity_node.GetModelTransform());
+
+            DrawPacket packet;
+            packet.flags.set(DrawPacket::Flags::PP_Bloom, text->TestFlag(TextItemClass::Flags::PP_EnableBloom));
+            packet.source       = DrawPacket::Source::Scene;
+            packet.domain       = DrawPacket::Domain::Scene;
+            packet.drawable     = paint_node.drawable;
+            packet.material     = paint_node.material;
+            packet.transform    = transform;
+            packet.sort_point   = sort_point;
+            packet.pass         = RenderPass::DrawColor;
+            packet.packet_index = text->GetLayer();
+            packet.render_layer = entity.GetLayer();
+            if (!hook || hook->InspectPacket(&entity_node, packet))
+                packets.push_back(std::move(packet));
+
+            // pop model transform
             transform.Pop();
         }
     }
