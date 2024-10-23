@@ -32,6 +32,7 @@
 #include "base/bitflag.h"
 #include "graphics/fwd.h"
 #include "graphics/drawable.h"
+#include "graphics/tilebatch.h"
 #include "game/enum.h"
 #include "game/tilemap.h"
 #include "game/entity.h"
