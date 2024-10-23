@@ -48,12 +48,14 @@
 #include <stack>
 #include <functional>
 
-#include "graphics/resource.h"
-#include "graphics/color4f.h"
+
 #include "engine/ui.h"
 #include "engine/data.h"
 #include "data/json.h"
 #include "base/json.h"
+#include "graphics/resource.h"
+#include "graphics/color4f.h"
+#include "graphics/simple_shape.h"
 #include "editor/app/resource-uri.h"
 #include "editor/app/packer.h"
 #include "editor/app/eventlog.h"

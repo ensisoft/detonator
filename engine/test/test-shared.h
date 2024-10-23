@@ -21,6 +21,7 @@
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "graphics/color4f.h"
+#include "graphics/simple_shape.h"
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/transform_animator.h"

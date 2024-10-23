@@ -250,6 +250,7 @@ add_executable(GameEngine
     ../graphics/painter.cpp
     ../graphics/material.cpp
     ../graphics/drawable.cpp
+    ../graphics/simple_shape.cpp
     ../graphics/image.cpp
     ../graphics/loader.cpp
     ../graphics/drawing.cpp

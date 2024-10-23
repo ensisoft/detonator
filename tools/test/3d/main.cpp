@@ -42,6 +42,7 @@
 #include "graphics/utility.h"
 #include "graphics/transform.h"
 #include "graphics/device.h"
+#include "graphics/simple_shape.h"
 #include "device/device.h"
 #include "engine/ui.h"
 #include "engine/data.h"

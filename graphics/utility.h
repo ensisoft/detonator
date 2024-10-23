@@ -34,6 +34,7 @@ namespace gfx
 {
 class Device;
 class Geometry;
+class ShaderSource;
 
 gfx::ProgramPtr MakeProgram(const std::string& vertex_source,
                             const std::string& fragment_source,
@@ -66,6 +67,10 @@ glm::mat4 MakeOrthographicProjection(float left, float right, float top, float b
 // mentioning the desired type
 glm::mat4 MakePerspectiveProjection(FDegrees fov, float aspect, float znear, float zfar);
 glm::mat4 MakePerspectiveProjection(FRadians fov, float aspect, float znear, float zfar);
+
+gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device);
+gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device);
+gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device);
 
 } // namespace
 

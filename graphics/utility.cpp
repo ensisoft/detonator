@@ -26,6 +26,7 @@
 #include "graphics/shader.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
+#include "graphics/shadersource.h"
 
 namespace gfx
 {
@@ -115,6 +116,127 @@ glm::mat4 MakePerspectiveProjection(FDegrees fov, float aspect, float znear, flo
 glm::mat4 MakePerspectiveProjection(FRadians fov, float aspect, float znear, float zfar)
 {
     return glm::perspective(fov.ToRadians(), aspect, znear, zfar);
+}
+
+gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device)
+{
+    // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
+    // are used to support per particle features.
+    // This shader doesn't provide that data but writes these varyings
+    // nevertheless so that it's possible to use a particle shader enabled
+    // material also with this shader.
+
+    // the vertex model space  is defined in the lower right quadrant in
+    // NDC (normalized device coordinates) (x grows right to 1.0 and
+    // y grows up to 1.0 to the top of the screen).
+
+    gfx::ShaderSource source;
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+    source.SetType(gfx::ShaderSource::Type::Vertex);
+    source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec2f);
+    source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
+
+    source.AddUniform("kProjectionMatrix", gfx::ShaderSource::UniformType::Mat4f);
+    source.AddUniform("kModelViewMatrix", gfx::ShaderSource::UniformType::Mat4f);
+
+    source.AddVarying("vTexCoord", gfx::ShaderSource::VaryingType::Vec2f);
+    source.AddVarying("vParticleRandomValue", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAlpha", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAngle", gfx::ShaderSource::VaryingType::Float);
+
+    source.AddVarying("vTileData", gfx::ShaderSource::VaryingType ::Vec2f);
+
+    source.AddSource(R"(
+void VertexShaderMain()
+{
+    vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 0.0, 1.0);
+    vTexCoord    = aTexCoord;
+
+    // dummy data out.
+    vParticleRandomValue = 0.0;
+    vParticleAlpha       = 1.0;
+    vParticleTime        = 0.0;
+    vParticleAngle       = 0.0;
+
+    // dummy data
+    vTileData = vec2(0.0, 0.0);
+
+    gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
+}
+)");
+    return source;
+}
+
+gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device)
+{
+    gfx::ShaderSource source;
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+    source.SetType(gfx::ShaderSource::Type::Vertex);
+    source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec3f);
+    source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
+
+    source.AddUniform("kProjectionMatrix", gfx::ShaderSource::UniformType::Mat4f);
+    source.AddUniform("kModelViewMatrix", gfx::ShaderSource::UniformType::Mat4f);
+
+    source.AddVarying("vTexCoord", gfx::ShaderSource::VaryingType::Vec2f);
+    source.AddVarying("vParticleRandomValue", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAlpha", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAngle", gfx::ShaderSource::VaryingType::Float);
+
+    source.AddVarying("vTileData", gfx::ShaderSource::VaryingType::Vec2f);
+
+    source.AddSource(R"(
+void VertexShaderMain()
+{
+    vTexCoord = aTexCoord;
+
+    // dummy out
+    vParticleRandomValue = 0.0;
+    vParticleAlpha       = 1.0;
+    vParticleTime        = 0.0;
+    vParticleAngle       = 0.0;
+
+    // dummy out
+    vTileData = vec2(0.0, 0.0);
+
+    gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
+}
+)");
+    return source;
+}
+
+gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device)
+{
+    gfx::ShaderSource source;
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+    source.SetType(gfx::ShaderSource::Type::Vertex);
+    source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec3f);
+    source.AddAttribute("aNormal", gfx::ShaderSource::AttributeType::Vec3f);
+    source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
+
+    source.AddUniform("kProjectionMatrix", gfx::ShaderSource::UniformType::Mat4f);
+    source.AddUniform("kModelViewMatrix", gfx::ShaderSource::UniformType::Mat4f);
+
+    source.AddVarying("vTexCoord", gfx::ShaderSource::VaryingType::Vec2f);
+    source.AddVarying("vParticleRandomValue", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAlpha", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAngle", gfx::ShaderSource::VaryingType::Float);
+
+    source.AddSource(R"(
+void VertexShaderMain()
+{
+    vTexCoord = aTexCoord;
+    vParticleRandomValue = 0.0;
+    vParticleAlpha       = 1.0;
+    vParticleTime        = 0.0;
+    vParticleAngle       = 0.0;
+    gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
+}
+)");
+    return source;
 }
 
 } // namespace

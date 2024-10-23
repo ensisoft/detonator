@@ -34,6 +34,7 @@
 #include <variant>
 
 #include "base/bitflag.h"
+#include "base/utility.h"
 #include "graphics/color4f.h"
 
 namespace gfx

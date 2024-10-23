@@ -45,6 +45,7 @@
 #include "graphics/program.h"
 #include "graphics/renderpass.h"
 #include "graphics/shadersource.h"
+#include "graphics/simple_shape.h"
 #include "graphics/utility.h"
 #include "graphics/tool/geometry.h"
 #include "wdk/opengl/config.h"

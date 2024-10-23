@@ -74,6 +74,7 @@
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
+#include "graphics/simple_shape.h"
 #include "game/treeop.h"
 
 namespace gui

@@ -43,8 +43,10 @@
 #include "graphics/transform.h"
 #include "graphics/shaderprogram.h"
 #include "graphics/shadersource.h"
+#include "graphics/simple_shape.h"
 #include "graphics/drawcmd.h"
 #include "graphics/tool/geometry.h"
+
 
 bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
 {

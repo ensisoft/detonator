@@ -39,6 +39,7 @@
 #include "graphics/transform.h"
 #include "graphics/renderpass.h"
 #include "graphics/utility.h"
+#include "graphics/simple_shape.h"
 #include "engine/ui.h"
 #include "engine/classlib.h"
 #include "engine/data.h"

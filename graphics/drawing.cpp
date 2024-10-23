@@ -29,6 +29,7 @@
 #include "graphics/transform.h"
 #include "graphics/text.h"
 #include "graphics/renderpass.h"
+#include "graphics/simple_shape.h"
 
 namespace {
 gfx::MaterialInstance MakeMaterial(const gfx::Color4f& color)
