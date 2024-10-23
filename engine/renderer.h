@@ -279,19 +279,30 @@ namespace engine
         struct PaintNode;
 
         template<typename EntityType, typename EntityNodeType>
-        void UpdateNode(const EntityType& entity,
-                        const EntityNodeType& entity_node,
-                        PaintNode& paint_node, double time, float dt) const;
+        void UpdateDrawableResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
+                                     double time, float dt) const;
+        template<typename EntityType, typename EntityNodeType>
+        void UpdateTextResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
+                                 double time, float dt) const;
 
         template<typename EntityType, typename EntityNodeType>
-        void CreateDrawResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const;
+        void CreateDrawableResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const;
+        template<typename EntityType, typename EntityNodeType>
+        void CreateTextResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const;
 
         template<typename EntityType, typename EntityNodeType>
-        void GenerateDrawPackets(const EntityType& entity,
-                                 const EntityNodeType& entity_node,
-                                 const PaintNode& paint_node,
-                                 std::vector<DrawPacket>& packets,
-                                 EntityDrawHook<EntityNodeType>* hook) const;
+        void CreateDrawableDrawPackets(const EntityType& entity,
+                                       const EntityNodeType& entity_node,
+                                       const PaintNode& paint_node,
+                                       std::vector<DrawPacket>& packets,
+                                       EntityDrawHook<EntityNodeType>* hook) const;
+        template<typename EntityType, typename EntityNodeType>
+        void CreateTextDrawPackets(const EntityType& entity,
+                                   const EntityNodeType& entity_node,
+                                   const PaintNode& paint_node,
+                                   std::vector<DrawPacket>& packets,
+                                   EntityDrawHook<EntityNodeType>* hook) const;
+
 
         void OffsetPacketLayers(std::vector<DrawPacket>& packets) const;
         void DrawTilemapPackets(gfx::Device& device, const std::vector<DrawPacket>& packets,
@@ -347,13 +358,10 @@ namespace engine
 
         struct PaintNode {
             bool visited = false;
-            std::string text_material_id;
-            std::string item_material_id;
-            std::string item_drawable_id;
-            std::shared_ptr<gfx::Material> text_material;
-            std::shared_ptr<gfx::Drawable> text_drawable;
-            std::shared_ptr<gfx::Material> item_material;
-            std::shared_ptr<gfx::Drawable> item_drawable;
+            std::string materialId;
+            std::string drawableId;
+            std::shared_ptr<gfx::Material> material;
+            std::shared_ptr<gfx::Drawable> drawable;
             glm::vec2 world_scale;
             glm::vec2 world_pos;
             float world_rotation = 0.0f;
