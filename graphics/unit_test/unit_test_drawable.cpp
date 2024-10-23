@@ -23,6 +23,7 @@
 #include "graphics/geometry.h"
 #include "graphics/drawcmd.h"
 #include "graphics/polygon_mesh.h"
+#include "graphics/particle_engine.h"
 #include "graphics/tool/geometry.h"
 
 bool operator==(const gfx::Vec2& lhs, const gfx::Vec2& rhs)

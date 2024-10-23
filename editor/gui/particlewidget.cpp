@@ -34,6 +34,7 @@
 #include "graphics/drawing.h"
 #include "graphics/types.h"
 #include "graphics/simple_shape.h"
+#include "graphics/particle_engine.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
