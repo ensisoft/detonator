@@ -44,6 +44,7 @@
 #include "graphics/shaderprogram.h"
 #include "graphics/shadersource.h"
 #include "graphics/simple_shape.h"
+#include "graphics/polygon_mesh.h"
 #include "graphics/drawcmd.h"
 #include "graphics/tool/geometry.h"
 

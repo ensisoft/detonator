@@ -37,6 +37,7 @@
 #include "data/reader.h"
 #include "audio/graph.h"
 #include "graphics/drawable.h"
+#include "graphics/polygon_mesh.h"
 #include "graphics/material.h"
 #include "game/entity.h"
 #include "game/scene.h"

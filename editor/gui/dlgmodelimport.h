@@ -29,6 +29,7 @@
 
 #include <unordered_map>
 
+#include "graphics/polygon_mesh.h"
 #include "editor/app/import.h"
 
 namespace app {
