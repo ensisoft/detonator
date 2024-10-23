@@ -34,6 +34,7 @@
 #include "graphics/renderpass.h"
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
+#include "graphics/particle_engine.h"
 #include "engine/classlib.h"
 #include "game/entity.h"
 #include "game/scene.h"

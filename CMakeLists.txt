@@ -211,6 +211,7 @@ add_library(GfxLib
     graphics/drawable.cpp
     graphics/simple_shape.cpp
     graphics/polygon_mesh.cpp
+    graphics/particle_engine.cpp
     graphics/geometry.cpp
     graphics/drawcmd.cpp
     graphics/vertex.cpp
@@ -268,6 +269,7 @@ add_library(GfxLibTesting
     graphics/drawable.cpp
     graphics/simple_shape.cpp
     graphics/polygon_mesh.cpp
+    graphics/particle_engine.cpp
     graphics/geometry.cpp
     graphics/vertex.cpp
     graphics/material.cpp
@@ -772,6 +774,7 @@ add_executable(graphics_test
     graphics/drawable.cpp
     graphics/simple_shape.cpp
     graphics/polygon_mesh.cpp
+    graphics/particle_engine.cpp
     graphics/geometry.cpp
     graphics/drawcmd.cpp
     graphics/vertex.cpp
