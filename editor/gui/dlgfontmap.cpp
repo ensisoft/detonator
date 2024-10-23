@@ -30,6 +30,7 @@
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/drawing.h"
+#include "graphics/simple_shape.h"
 #include "editor/app/resource-uri.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/drawing.h"

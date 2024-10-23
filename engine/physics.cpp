@@ -25,6 +25,7 @@
 #include "graphics/drawable.h"
 #include "graphics/drawing.h"
 #include "graphics/material.h"
+#include "graphics/simple_shape.h"
 #include "engine/physics.h"
 #include "engine/loader.h"
 #include "game/types.h"

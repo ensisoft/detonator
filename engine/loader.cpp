@@ -52,6 +52,7 @@
 #include "data/json.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
+#include "graphics/simple_shape.h"
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/tilemap.h"

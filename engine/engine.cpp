@@ -49,6 +49,7 @@
 #include "graphics/resource.h"
 #include "graphics/material.h"
 #include "graphics/utility.h"
+#include "graphics/simple_shape.h"
 #include "engine/main/interface.h"
 #include "engine/audio.h"
 #include "engine/camera.h"

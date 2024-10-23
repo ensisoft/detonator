@@ -33,6 +33,7 @@
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
+#include "graphics/simple_shape.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"

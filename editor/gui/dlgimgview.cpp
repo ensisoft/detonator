@@ -35,6 +35,7 @@
 #include "graphics/painter.h"
 #include "graphics/drawing.h"
 #include "graphics/bitmap.h"
+#include "graphics/simple_shape.h"
 #include "editor/app/resource-uri.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"

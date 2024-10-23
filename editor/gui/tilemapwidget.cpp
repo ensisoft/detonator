@@ -32,6 +32,7 @@
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/utility.h"
+#include "graphics/simple_shape.h"
 #include "editor/app/format.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"

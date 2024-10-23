@@ -28,6 +28,7 @@
 #include "graphics/painter.h"
 #include "graphics/transform.h"
 #include "graphics/utility.h"
+#include "graphics/simple_shape.h"
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/util.h"

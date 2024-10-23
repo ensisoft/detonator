@@ -39,6 +39,7 @@
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/framebuffer.h"
+#include "graphics/simple_shape.h"
 
 namespace {
     gfx::Color4f DefaultGridColor = gfx::Color::LightGray;

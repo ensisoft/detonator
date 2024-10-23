@@ -16,6 +16,7 @@
 
 #define LOGTAG "gui"
 
+#include "graphics/simple_shape.h"
 #include "engine/camera.h"
 #include "editor/gui/dlgtiletool.h"
 #include "editor/gui/dlgmaterial.h"

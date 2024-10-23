@@ -41,6 +41,7 @@
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/drawing.h"
+#include "graphics/simple_shape.h"
 
 namespace {
     enum class MaterialType {

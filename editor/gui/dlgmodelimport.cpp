@@ -29,6 +29,7 @@
 #include "graphics/shaderprogram.h"
 #include "graphics/painter.h"
 #include "graphics/utility.h"
+#include "graphics/simple_shape.h"
 
 namespace gui
 {

@@ -33,6 +33,7 @@
 #include "graphics/drawing.h"
 #include "graphics/transform.h"
 #include "graphics/utility.h"
+#include "graphics/simple_shape.h"
 
 namespace {
 
