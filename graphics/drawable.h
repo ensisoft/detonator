@@ -116,46 +116,6 @@ namespace gfx
     private:
     };
 
-    namespace detail {
-        struct EnvironmentCopy {
-            explicit EnvironmentCopy(const DrawableClass::Environment& env) noexcept
-                    : editing_mode(env.editing_mode)
-                    , pixel_ratio(env.pixel_ratio)
-            {
-                if (env.proj_matrix)
-                    proj_matrix = *env.proj_matrix;
-                if (env.view_matrix)
-                    view_matrix = *env.view_matrix;
-                if (env.model_matrix)
-                    model_matrix = *env.model_matrix;
-                if (env.world_matrix)
-                    world_matrix = *env.world_matrix;
-            }
-            DrawableClass::Environment ToEnv() const
-            {
-                DrawableClass::Environment env;
-                env.editing_mode = editing_mode;
-                env.pixel_ratio  = pixel_ratio;
-                if (proj_matrix.has_value())
-                    env.proj_matrix = &proj_matrix.value();
-                if (view_matrix.has_value())
-                    env.view_matrix = &view_matrix.value();
-                if (model_matrix.has_value())
-                    env.model_matrix = &model_matrix.value();
-                if (world_matrix.has_value())
-                    env.world_matrix = &world_matrix.value();
-                return env;
-            }
-
-            bool editing_mode;
-            glm::vec2 pixel_ratio;
-            std::optional<glm::mat4> proj_matrix;
-            std::optional<glm::mat4> view_matrix;
-            std::optional<glm::mat4> model_matrix;
-            std::optional<glm::mat4> world_matrix;
-        };
-    } // detail
-
 
     // Drawable interface represents some kind of drawable
     // object or shape such as quad/rectangle/mesh/particle engine.
