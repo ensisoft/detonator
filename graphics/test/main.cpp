@@ -49,6 +49,7 @@
 #include "graphics/polygon_mesh.h"
 #include "graphics/particle_engine.h"
 #include "graphics/tilebatch.h"
+#include "graphics/linebatch.h"
 #include "graphics/utility.h"
 #include "graphics/tool/geometry.h"
 #include "wdk/opengl/config.h"
