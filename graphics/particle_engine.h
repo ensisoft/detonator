@@ -22,10 +22,13 @@
 #  include <glm/vec2.hpp>
 #include "warnpop.h"
 
+#include <atomic>
 #include <string>
 #include <optional>
 #include <memory>
+#include <mutex>
 
+#include "base/utility.h"
 #include "graphics/drawable.h"
 
 namespace gfx

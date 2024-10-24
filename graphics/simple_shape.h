@@ -24,6 +24,7 @@
 #include <string>
 
 #include "base/assert.h"
+#include "base/utility.h"
 #include "graphics/drawable.h"
 
 namespace gfx

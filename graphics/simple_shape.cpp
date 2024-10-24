@@ -24,10 +24,13 @@
 #include <vector>
 
 #include "base/format.h"
+#include "data/reader.h"
+#include "data/writer.h"
 #include "graphics/simple_shape.h"
 #include "graphics/shadersource.h"
 #include "graphics/utility.h"
 #include "graphics/vertex.h"
+#include "graphics/program.h"
 
 namespace {
 float HalfRound(float value)

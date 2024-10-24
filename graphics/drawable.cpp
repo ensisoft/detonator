@@ -16,99 +16,13 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <nlohmann/json.hpp>
-#  include <base64/base64.h>
-#include "warnpop.h"
-
-#include <functional> // for hash
-#include <cmath>
-#include <cstdio>
-
-#include "base/logging.h"
-#include "base/utility.h"
-#include "base/threadpool.h"
-#include "base/math.h"
-#include "base/json.h"
-#include "data/reader.h"
-#include "data/writer.h"
-#include "data/json.h"
-#include "graphics/drawcmd.h"
+#include "base/assert.h"
 #include "graphics/drawable.h"
-#include "graphics/device.h"
-#include "graphics/shader.h"
-#include "graphics/geometry.h"
-#include "graphics/resource.h"
-#include "graphics/transform.h"
-#include "graphics/loader.h"
-#include "graphics/shadersource.h"
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/particle_engine.h"
-#include "graphics/utility.h"
 
 namespace gfx {
-
-void DebugDrawableBase::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
-{
-    mDrawable->ApplyDynamicState(env, program, state);
-}
-
-ShaderSource DebugDrawableBase::GetShader(const Environment& env, const Device& device) const
-{
-    return mDrawable->GetShader(env, device);
-}
-std::string DebugDrawableBase::GetShaderId(const Environment& env) const
-{
-    return mDrawable->GetShaderId(env);
-}
-std::string DebugDrawableBase::GetShaderName(const Environment& env) const
-{
-    return mDrawable->GetShaderName(env);
-}
-std::string DebugDrawableBase::GetGeometryId(const Environment& env) const
-{
-    std::string id;
-    id += mDrawable->GetGeometryId(env);
-    id += base::ToString(mFeature);
-    return id;
-}
-
-bool DebugDrawableBase::Construct(const Environment& env, Geometry::CreateArgs& create) const
-{
-    if (mDrawable->GetPrimitive() != Primitive::Triangles)
-    {
-        return mDrawable->Construct(env, create);
-    }
-
-    if (mFeature == Feature::Wireframe)
-    {
-        Geometry::CreateArgs temp;
-        if (!mDrawable->Construct(env, temp))
-            return false;
-
-        if (temp.buffer.HasData())
-        {
-            GeometryBuffer wireframe;
-            CreateWireframe(temp.buffer, wireframe);
-
-            create.buffer = std::move(wireframe);
-            create.content_name = "Wireframe/" + temp.content_name;
-            create.content_hash = temp.content_hash;
-        }
-    }
-    return true;
-}
-
-Drawable::Usage DebugDrawableBase::GetUsage() const
-{
-    return mDrawable->GetUsage();
-}
-
-size_t DebugDrawableBase::GetContentHash() const
-{
-    return mDrawable->GetContentHash();
-}
 
 bool Is3DShape(const Drawable& drawable) noexcept
 {

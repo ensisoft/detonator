@@ -24,7 +24,6 @@
 #  include <glm/gtc/type_ptr.hpp>
 #include "warnpop.h"
 
-#include <atomic>
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -32,17 +31,10 @@
 #include <optional>
 #include <variant>
 #include <unordered_map>
-#include <mutex>
 
-#include "base/assert.h"
-#include "base/utility.h"
-#include "base/math.h"
-#include "base/hash.h"
-#include "data/reader.h"
-#include "data/writer.h"
+#include "data/fwd.h"
 #include "graphics/geometry.h"
 #include "graphics/device.h"
-#include "graphics/program.h"
 #include "graphics/types.h"
 
 namespace gfx
@@ -263,85 +255,6 @@ namespace gfx
         virtual const DrawableClass* GetClass() const { return nullptr; }
     private:
     };
-
-    class DebugDrawableBase : public Drawable
-    {
-    public:
-        enum class Feature {
-            Normals,
-            Wireframe
-        };
-
-        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState&  state) const override;
-        virtual ShaderSource GetShader(const Environment& env, const Device& device) const override;
-        virtual std::string GetShaderId(const Environment& env) const override;
-        virtual std::string GetShaderName(const Environment& env) const override;
-        virtual std::string GetGeometryId(const Environment& env) const override;
-        virtual bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
-        virtual Usage GetUsage() const override;
-        virtual size_t GetContentHash() const override;
-        virtual Primitive GetPrimitive() const override
-        { return Primitive::Lines; }
-    protected:
-        DebugDrawableBase(const Drawable* drawable, Feature feature)
-          : mDrawable(drawable)
-          , mFeature(feature)
-        {}
-        DebugDrawableBase() = default;
-
-        const Drawable* mDrawable = nullptr;
-        Feature mFeature;
-    };
-
-    class DebugDrawableInstance : public DebugDrawableBase
-    {
-    public:
-        DebugDrawableInstance(const std::shared_ptr<const Drawable> drawable, Feature feature)
-          : DebugDrawableBase(drawable.get(), feature)
-        {
-            mSharedDrawable = drawable;
-        }
-    private:
-        std::shared_ptr<const Drawable> mSharedDrawable;
-    };
-
-    class WireframeInstance : public DebugDrawableInstance
-    {
-    public:
-        WireframeInstance(const std::shared_ptr<const Drawable>& drawable)
-          : DebugDrawableInstance(drawable, Feature::Wireframe)
-        {}
-    };
-
-    template<typename T>
-    class DebugDrawable : public DebugDrawableBase
-    {
-    public:
-        using Feature = DebugDrawableBase::Feature;
-
-        template<typename... Args>
-        DebugDrawable(Feature feature, Args&&... args) : mObject(std::forward<Args>(args)...)
-        {
-            mDrawable = &mObject;
-            mFeature  = feature;
-        }
-    private:
-        T mObject;
-    };
-    template<typename T>
-    class Wireframe : public DebugDrawableBase
-    {
-    public:
-        template<typename... Args>
-        Wireframe(Args&&... args) : mObject(std::forward<Args>(args)...)
-        {
-            mDrawable = &mObject;
-            mFeature  = Feature::Wireframe;
-        }
-    private:
-        T mObject;
-    };
-
 
     bool Is3DShape(const Drawable& drawable) noexcept;
     bool Is3DShape(const DrawableClass& klass) noexcept;
