@@ -40,6 +40,7 @@
 #include "graphics/drawing.h"
 #include "graphics/framebuffer.h"
 #include "graphics/simple_shape.h"
+#include "graphics/guidegrid.h"
 
 namespace {
     gfx::Color4f DefaultGridColor = gfx::Color::LightGray;

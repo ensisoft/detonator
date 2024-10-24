@@ -31,6 +31,7 @@
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
+#include "graphics/guidegrid.h"
 
 namespace gui
 {

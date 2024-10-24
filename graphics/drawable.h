@@ -264,36 +264,6 @@ namespace gfx
     private:
     };
 
-    // render a series of intersecting horizontal and vertical lines
-    // at some particular interval (gap distance)
-    class Grid : public Drawable
-    {
-    public:
-        // the num vertical and horizontal lines is the number of lines
-        // *inside* the grid. I.e. not including the enclosing border lines
-        Grid(unsigned num_vertical_lines, unsigned num_horizontal_lines, bool border_lines = true) noexcept
-          : mNumVerticalLines(num_vertical_lines)
-          , mNumHorizontalLines(num_horizontal_lines)
-          , mBorderLines(border_lines)
-        {}
-        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
-        virtual ShaderSource GetShader(const Environment& env, const Device& device) const override;
-        virtual std::string GetShaderId(const Environment& env) const override;
-        virtual std::string GetShaderName(const Environment& env) const override;
-        virtual std::string GetGeometryId(const Environment& env) const override;
-        virtual bool Construct(const Environment& env, Geometry::CreateArgs& geometry) const override;
-
-        virtual Primitive GetPrimitive() const override
-        { return Primitive::Lines; }
-        virtual Usage GetUsage() const override
-        { return Usage::Static; }
-    private:
-        unsigned mNumVerticalLines = 1;
-        unsigned mNumHorizontalLines = 1;
-        bool mBorderLines = false;
-    };
-
-
     class DebugDrawableBase : public Drawable
     {
     public:

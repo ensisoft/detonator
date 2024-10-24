@@ -214,6 +214,7 @@ add_library(GfxLib
     graphics/particle_engine.cpp
     graphics/tilebatch.cpp
     graphics/linebatch.cpp
+    graphics/guidegrid.cpp
     graphics/geometry.cpp
     graphics/drawcmd.cpp
     graphics/vertex.cpp
@@ -274,6 +275,7 @@ add_library(GfxLibTesting
     graphics/particle_engine.cpp
     graphics/tilebatch.cpp
     graphics/linebatch.cpp
+    graphics/guidegrid.cpp
     graphics/geometry.cpp
     graphics/vertex.cpp
     graphics/material.cpp
@@ -781,6 +783,7 @@ add_executable(graphics_test
     graphics/particle_engine.cpp
     graphics/tilebatch.cpp
     graphics/linebatch.cpp
+    graphics/guidegrid.cpp
     graphics/geometry.cpp
     graphics/drawcmd.cpp
     graphics/vertex.cpp
