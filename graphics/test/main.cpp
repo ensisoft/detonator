@@ -51,6 +51,7 @@
 #include "graphics/tilebatch.h"
 #include "graphics/linebatch.h"
 #include "graphics/guidegrid.h"
+#include "graphics/debug_drawable.h"
 #include "graphics/utility.h"
 #include "graphics/tool/geometry.h"
 #include "wdk/opengl/config.h"

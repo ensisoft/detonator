@@ -256,6 +256,7 @@ add_executable(GameEngine
     ../graphics/tilebatch.cpp
     ../graphics/linebatch.cpp
     ../graphics/guidegrid.cpp
+    ../graphics/debug_drawable.cpp
     ../graphics/image.cpp
     ../graphics/loader.cpp
     ../graphics/drawing.cpp

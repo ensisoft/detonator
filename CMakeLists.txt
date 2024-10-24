@@ -215,6 +215,7 @@ add_library(GfxLib
     graphics/tilebatch.cpp
     graphics/linebatch.cpp
     graphics/guidegrid.cpp
+    graphics/debug_drawable.cpp
     graphics/geometry.cpp
     graphics/drawcmd.cpp
     graphics/vertex.cpp
@@ -276,6 +277,7 @@ add_library(GfxLibTesting
     graphics/tilebatch.cpp
     graphics/linebatch.cpp
     graphics/guidegrid.cpp
+    graphics/debug_drawable.cpp
     graphics/geometry.cpp
     graphics/vertex.cpp
     graphics/material.cpp
@@ -784,6 +786,7 @@ add_executable(graphics_test
     graphics/tilebatch.cpp
     graphics/linebatch.cpp
     graphics/guidegrid.cpp
+    graphics/debug_drawable.cpp
     graphics/geometry.cpp
     graphics/drawcmd.cpp
     graphics/vertex.cpp
