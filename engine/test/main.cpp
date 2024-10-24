@@ -43,6 +43,7 @@
 #include "graphics/transform.h"
 #include "graphics/resource.h"
 #include "graphics/utility.h"
+#include "graphics/guidegrid.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
 #include "uikit/state.h"
