@@ -186,13 +186,13 @@ namespace gfx
 
         virtual DrawCmd GetDrawCmd() const override;
 
-        virtual Primitive GetPrimitive() const override
-        { return Primitive::Triangles; }
+        virtual DrawPrimitive GetDrawPrimitive() const override
+        { return DrawPrimitive::Triangles; }
         virtual Type GetType() const override
         { return Type::Polygon; }
-        virtual Usage GetUsage() const override;
+        virtual Usage GetGeometryUsage() const override;
 
-        virtual size_t GetContentHash() const override;
+        virtual size_t GetGeometryHash() const override;
 
         virtual const DrawableClass* GetClass() const override
         { return mClass.get(); }

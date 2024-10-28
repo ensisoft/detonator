@@ -42,9 +42,9 @@ namespace gfx
         virtual std::string GetGeometryId(const Environment& env) const override;
         virtual bool Construct(const Environment& env, Geometry::CreateArgs& geometry) const override;
 
-        virtual Primitive GetPrimitive() const override
-        { return Primitive::Lines; }
-        virtual Usage GetUsage() const override
+        virtual DrawPrimitive GetDrawPrimitive() const override
+        { return DrawPrimitive::Lines; }
+        virtual Usage GetGeometryUsage() const override
         { return Usage::Static; }
     private:
         unsigned mNumVerticalLines = 1;

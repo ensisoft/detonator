@@ -50,7 +50,7 @@ std::string DebugDrawableBase::GetGeometryId(const Environment& env) const
 
 bool DebugDrawableBase::Construct(const Environment& env, Geometry::CreateArgs& create) const
 {
-    if (mDrawable->GetPrimitive() != Primitive::Triangles)
+    if (mDrawable->GetDrawPrimitive() != DrawPrimitive::Triangles)
     {
         return mDrawable->Construct(env, create);
     }
@@ -74,14 +74,14 @@ bool DebugDrawableBase::Construct(const Environment& env, Geometry::CreateArgs& 
     return true;
 }
 
-Drawable::Usage DebugDrawableBase::GetUsage() const
+Drawable::Usage DebugDrawableBase::GetGeometryUsage() const
 {
-    return mDrawable->GetUsage();
+    return mDrawable->GetGeometryUsage();
 }
 
-size_t DebugDrawableBase::GetContentHash() const
+size_t DebugDrawableBase::GetGeometryHash() const
 {
-    return mDrawable->GetContentHash();
+    return mDrawable->GetGeometryHash();
 }
 
 } // namespace

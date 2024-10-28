@@ -61,10 +61,10 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& env) const override;
         virtual std::string GetGeometryId(const Environment& env) const override;
         virtual bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
-        virtual Primitive GetPrimitive() const override;
+        virtual DrawPrimitive GetDrawPrimitive() const override;
         virtual Type GetType() const override
         { return Type::TileBatch; }
-        virtual Usage GetUsage() const override
+        virtual Usage GetGeometryUsage() const override
         { return Usage::Stream; }
 
         inline void AddTile(const Tile& tile)

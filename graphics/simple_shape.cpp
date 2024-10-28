@@ -1299,18 +1299,18 @@ Drawable::Type SimpleShapeInstance::GetType() const
     return Type::SimpleShape;
 }
 
-Drawable::Primitive SimpleShapeInstance::GetPrimitive() const
+Drawable::DrawPrimitive SimpleShapeInstance::GetDrawPrimitive() const
 {
     if (Is3DShape(mClass->GetShapeType()))
-        return Primitive::Triangles;
+        return DrawPrimitive::Triangles;
 
     if (mStyle == Style::Outline)
-        return Primitive::Lines;
+        return DrawPrimitive::Lines;
 
-    return Primitive::Triangles;
+    return DrawPrimitive::Triangles;
 }
 
-Drawable::Usage SimpleShapeInstance::GetUsage() const
+Drawable::Usage SimpleShapeInstance::GetGeometryUsage() const
 {
     return Usage::Static;
 }
@@ -1361,18 +1361,18 @@ Drawable::Type SimpleShape::GetType() const
     return Type::SimpleShape;
 }
 
-Drawable::Primitive SimpleShape::GetPrimitive() const
+Drawable::DrawPrimitive SimpleShape::GetDrawPrimitive() const
 {
     if (Is3DShape(mShape))
-        return Primitive::Triangles;
+        return DrawPrimitive::Triangles;
 
     if (mStyle == Style::Outline)
-        return Primitive::Lines;
+        return DrawPrimitive::Lines;
 
-    return Primitive::Triangles;
+    return DrawPrimitive::Triangles;
 }
 
-Drawable::Usage SimpleShape::GetUsage() const
+Drawable::Usage SimpleShape::GetGeometryUsage() const
 {
     return Usage::Static;
 }
