@@ -39,10 +39,10 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& env) const override;
         virtual std::string GetGeometryId(const Environment& env) const override;
         virtual bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
-        virtual Usage GetUsage() const override;
-        virtual size_t GetContentHash() const override;
-        virtual Primitive GetPrimitive() const override
-        { return Primitive::Lines; }
+        virtual Usage GetGeometryUsage() const override;
+        virtual size_t GetGeometryHash() const override;
+        virtual DrawPrimitive GetDrawPrimitive() const override
+        { return DrawPrimitive::Lines; }
     protected:
         DebugDrawableBase(const Drawable* drawable, Feature feature)
           : mDrawable(drawable)

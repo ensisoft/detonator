@@ -1166,7 +1166,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             if (mEditingMode)
             {
                 if (mStyle == RenderingStyle::Wireframe &&
-                    packet.drawable->GetPrimitive() == gfx::Drawable::Primitive::Triangles)
+                        packet.drawable->GetDrawPrimitive() == gfx::Drawable::DrawPrimitive::Triangles)
                 {
                     static auto wireframe_color = std::make_shared<gfx::MaterialInstance>(
                             gfx::CreateMaterialClassFromColor(gfx::Color::Gray));

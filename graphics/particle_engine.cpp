@@ -1141,17 +1141,17 @@ void ParticleEngineInstance::Execute(const Environment& env, const Command& cmd)
     else WARN("No such particle engine command. [cmd='%1']", cmd.name);
 }
 
-Drawable::Primitive ParticleEngineInstance::GetPrimitive() const
+Drawable::DrawPrimitive ParticleEngineInstance::GetDrawPrimitive() const
 {
     const auto p = mClass->GetParams().primitive;
     if (p == ParticleEngineClass::DrawPrimitive::Point)
-        return Primitive::Points;
+        return DrawPrimitive::Points;
     else if (p == ParticleEngineClass::DrawPrimitive::FullLine ||
              p == ParticleEngineClass::DrawPrimitive::PartialLineBackward ||
              p == ParticleEngineClass::DrawPrimitive::PartialLineForward)
-        return Primitive ::Lines;
+        return DrawPrimitive ::Lines;
     else BUG("Bug on particle engine draw primitive.");
-    return Primitive::Points;
+    return DrawPrimitive::Points;
 }
 
 } // namespace

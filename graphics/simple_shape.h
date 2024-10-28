@@ -316,8 +316,8 @@ namespace gfx
         virtual std::string GetGeometryId(const Environment& env) const override;
         virtual bool Construct(const Environment& env, Geometry::CreateArgs& geometry) const override;
         virtual Type GetType() const override;
-        virtual Primitive GetPrimitive() const override;
-        virtual Usage GetUsage() const override;
+        virtual DrawPrimitive GetDrawPrimitive() const override;
+        virtual Usage GetGeometryUsage() const override;
 
         virtual const DrawableClass* GetClass() const override
         { return mClass.get(); }
@@ -357,8 +357,8 @@ namespace gfx
         virtual std::string GetGeometryId(const Environment& env) const override;
         virtual bool Construct(const Environment& env, Geometry::CreateArgs& geometry) const override;
         virtual Type GetType() const override;
-        virtual Primitive GetPrimitive() const override;
-        virtual Usage GetUsage() const override;
+        virtual DrawPrimitive GetDrawPrimitive() const override;
+        virtual Usage GetGeometryUsage() const override;
 
         inline Shape GetShape() const noexcept
         { return mShape; }

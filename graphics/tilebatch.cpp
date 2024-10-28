@@ -253,15 +253,15 @@ bool TileBatch::Construct(const Environment& env, Geometry::CreateArgs& create) 
 }
 
 
-Drawable::Primitive TileBatch::GetPrimitive() const
+Drawable::DrawPrimitive TileBatch::GetDrawPrimitive() const
 {
     const auto shape = ResolveTileShape();
     if (shape == TileShape::Square)
-        return Primitive::Points;
+        return DrawPrimitive::Points;
     else if (shape == TileShape::Rectangle)
-        return Primitive::Triangles;
+        return DrawPrimitive::Triangles;
     else BUG("Unknown tile batch tile shape");
-    return Primitive::Points;
+    return DrawPrimitive::Points;
 }
 
 } // namespace

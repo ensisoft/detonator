@@ -71,9 +71,9 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& environment) const override;
         virtual std::string GetGeometryId(const Environment& environment) const override;
         virtual bool Construct(const Environment& environment, Geometry::CreateArgs& create) const override;
-        virtual Primitive GetPrimitive() const override
-        { return Primitive::Lines; }
-        virtual Usage GetUsage() const override
+        virtual DrawPrimitive GetDrawPrimitive() const override
+        { return DrawPrimitive::Lines; }
+        virtual Usage GetGeometryUsage() const override
         { return Usage::Stream; }
     private:
         std::vector<Line> mLines;
@@ -108,9 +108,9 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& environment) const override;
         virtual std::string GetGeometryId(const Environment& environment) const override;
         virtual bool Construct(const Environment& environment, Geometry::CreateArgs& create) const override;
-        virtual Primitive GetPrimitive() const override
-        { return Primitive::Lines; }
-        virtual Usage GetUsage() const override
+        virtual DrawPrimitive GetDrawPrimitive() const override
+        { return DrawPrimitive::Lines; }
+        virtual Usage GetGeometryUsage() const override
         { return Usage::Stream; }
     private:
         std::vector<Line> mLines;

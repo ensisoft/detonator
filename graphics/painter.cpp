@@ -89,7 +89,7 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
 
         Material::Environment material_env;
         material_env.editing_mode   = mEditingMode;
-        material_env.draw_primitive = draw.drawable->GetPrimitive();
+        material_env.draw_primitive = draw.drawable->GetDrawPrimitive();
         material_env.renderpass     = program.GetRenderPass();
         ProgramPtr gpu_program = GetProgram(program, *draw.drawable, *draw.material, drawable_env, material_env);
         if (gpu_program == nullptr)
@@ -260,7 +260,7 @@ GeometryPtr Painter::GetGeometry(const Drawable& drawable,
 {
     const auto& id = drawable.GetGeometryId(env);
 
-    const auto usage = drawable.GetUsage();
+    const auto usage = drawable.GetGeometryUsage();
     if (usage == Drawable::Usage::Stream)
     {
         Geometry::CreateArgs args;
@@ -279,7 +279,7 @@ GeometryPtr Painter::GetGeometry(const Drawable& drawable,
 
             return mDevice->CreateGeometry(id, std::move(args));
         }
-        if (geom->GetContentHash() == drawable.GetContentHash())
+        if (geom->GetContentHash() == drawable.GetGeometryHash())
             return geom;
 
         Geometry::CreateArgs args;
@@ -301,7 +301,7 @@ GeometryPtr Painter::GetGeometry(const Drawable& drawable,
         if (!mEditingMode)
             return geom;
 
-        if (geom->GetContentHash() == drawable.GetContentHash())
+        if (geom->GetContentHash() == drawable.GetGeometryHash())
             return geom;
 
         Geometry::CreateArgs args;

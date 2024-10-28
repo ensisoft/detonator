@@ -374,11 +374,11 @@ namespace gfx
         virtual bool IsAlive() const override;
         virtual void Restart(const Environment& env) override;
         virtual void Execute(const Environment& env, const Command& cmd) override;
-        virtual Primitive  GetPrimitive() const override;
+        virtual DrawPrimitive  GetDrawPrimitive() const override;
 
         virtual Type GetType() const override
         { return Type::ParticleEngine; }
-        virtual Usage GetUsage() const override
+        virtual Usage GetGeometryUsage() const override
         { return Usage::Stream; }
         virtual const DrawableClass* GetClass() const override
         { return mClass.get(); }

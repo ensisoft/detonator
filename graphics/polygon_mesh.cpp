@@ -513,7 +513,7 @@ Drawable::DrawCmd PolygonMeshInstance::GetDrawCmd() const
     return {0, 0};
 }
 
-Drawable::Usage PolygonMeshInstance::GetUsage() const
+Drawable::Usage PolygonMeshInstance::GetGeometryUsage() const
 {
     if (mClass->IsStatic())
         return Usage::Static;
@@ -521,7 +521,7 @@ Drawable::Usage PolygonMeshInstance::GetUsage() const
     return Usage::Dynamic;
 }
 
-size_t PolygonMeshInstance::GetContentHash() const
+size_t PolygonMeshInstance::GetGeometryHash() const
 {
     return mClass->GetContentHash();
 }
