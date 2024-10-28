@@ -266,12 +266,12 @@ public:
         return nullptr;
     }
 
-    gfx::GeometryInstancePtr FindGeometryInstance(const std::string& id) override
+    gfx::InstancedDrawPtr FindInstancedDraw(const std::string& id) override
     {
         return nullptr;
     }
 
-    gfx::GeometryInstancePtr CreateGeometryInstance(const std::string& id,gfx::GeometryInstance::CreateArgs args) override
+    gfx::InstancedDrawPtr CreateInstancedDraw(const std::string& id, gfx::InstancedDraw::CreateArgs args) override
     {
         return nullptr;
     }

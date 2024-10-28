@@ -207,8 +207,8 @@ namespace gfx
         virtual ProgramPtr CreateProgram(const std::string& id, const Program::CreateArgs& args) = 0;
         virtual GeometryPtr FindGeometry(const std::string& id) = 0;
         virtual GeometryPtr CreateGeometry(const std::string& id, Geometry::CreateArgs args) = 0;
-        virtual GeometryInstancePtr FindGeometryInstance(const std::string& id) = 0;
-        virtual GeometryInstancePtr CreateGeometryInstance(const std::string& id, GeometryInstance::CreateArgs args) = 0;
+        virtual InstancedDrawPtr FindInstancedDraw(const std::string& id) = 0;
+        virtual InstancedDrawPtr CreateInstancedDraw(const std::string& id, InstancedDraw::CreateArgs args) = 0;
         virtual Texture* FindTexture(const std::string& name) = 0;
         virtual Texture* MakeTexture(const std::string& name) = 0;
         virtual Framebuffer* FindFramebuffer(const std::string& name) = 0;

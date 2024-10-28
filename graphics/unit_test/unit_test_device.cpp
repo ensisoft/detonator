@@ -1986,7 +1986,7 @@ void main() {
         gfx::Vec2 iaPosition;
     };
 #pragma pack(pop)
-    static const gfx::GeometryInstanceDataLayout layout(sizeof(InstanceAttribute), {
+    static const gfx::InstanceDataLayout layout(sizeof(InstanceAttribute), {
         {"iaSize",     0, 2, 0, offsetof(InstanceAttribute, iaSize)    },
         {"iaPosition", 0, 2, 0, offsetof(InstanceAttribute, iaPosition)}
     });
@@ -2030,11 +2030,11 @@ void main() {
     instances[3].iaSize     = gfx::Vec2 {  0.1f,  0.1f };
     instances[3].iaPosition = gfx::Vec2 { -0.5f, -0.5f };
 
-    gfx::GeometryInstance::CreateArgs instance_args;
-    instance_args.usage = gfx::GeometryInstanceBuffer::Usage::Static;
-    instance_args.buffer.SetVertexLayout(layout);
+    gfx::InstancedDraw::CreateArgs instance_args;
+    instance_args.usage = gfx::InstancedDrawBuffer::Usage::Static;
+    instance_args.buffer.SetInstanceDataLayout(layout);
     instance_args.buffer.SetInstanceBuffer(instances);
-    auto inst = dev->CreateGeometryInstance("inst", std::move(instance_args));
+    auto inst = dev->CreateInstancedDraw("inst", std::move(instance_args));
 
     // instanced draw arrays
     {

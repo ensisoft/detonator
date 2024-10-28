@@ -38,7 +38,7 @@ namespace gfx
           , mCmdStart(0)
           , mCmdCount(geometry.GetNumDrawCmds())
         {}
-        GeometryDrawCommand(const Geometry& geometry, const GeometryInstance& instance) noexcept
+        GeometryDrawCommand(const Geometry& geometry, const InstancedDraw& instance) noexcept
           : mGeometry(&geometry)
           , mCmdStart(0)
           , mCmdCount(geometry.GetNumDrawCmds())
@@ -51,7 +51,7 @@ namespace gfx
           , mCmdCount(ResolveCount(geometry, cmd_count))
         {}
         GeometryDrawCommand(const Geometry& geometry, size_t cmd_start, size_t cmd_count,
-                            const GeometryInstance& instance)
+                            const InstancedDraw& instance)
           : mGeometry(&geometry)
           , mCmdStart(cmd_start)
           , mCmdCount(ResolveCount(geometry, cmd_count))
@@ -64,7 +64,7 @@ namespace gfx
         { return mGeometry->GetDrawCmd(mCmdStart + index); }
         inline const Geometry* GetGeometry() const noexcept
         { return mGeometry;}
-        inline const GeometryInstance* GetInstance() const noexcept
+        inline const InstancedDraw* GetInstance() const noexcept
         { return mInstance; }
         inline bool UsesInstancing() const noexcept
         { return mInstance != nullptr; }
@@ -80,7 +80,7 @@ namespace gfx
         const Geometry* mGeometry = nullptr;
         const size_t mCmdStart = 0;
         const size_t mCmdCount = 0;
-        const GeometryInstance* mInstance = nullptr;
+        const InstancedDraw* mInstance = nullptr;
     };
 
     class CommandStream
