@@ -30,11 +30,11 @@
 
 namespace gfx
 {
-    using GeometryInstanceDataLayout = VertexLayout;
+    using InstanceDataLayout = VertexLayout;
 
     // A CPU buffer for (geometry) instance data, containing InstanceDataLayout
     // and per geometry instance
-    class GeometryInstanceBuffer
+    class InstancedDrawBuffer
     {
     public:
         // Define how the contents of the instance buffer are used
@@ -74,7 +74,7 @@ namespace gfx
         inline void Clear()
         {
             mVertexData.clear();
-            mLayout = GeometryInstanceDataLayout{};
+            mLayout = InstanceDataLayout{};
         }
         inline bool IsValid() const noexcept
         {
@@ -94,29 +94,29 @@ namespace gfx
             ASSERT(mLayout.vertex_struct_size);
             return mVertexData.size() / mLayout.vertex_struct_size;
         }
-        inline void SetVertexLayout(const GeometryInstanceDataLayout& layout)
+        inline void SetInstanceDataLayout(const InstanceDataLayout& layout)
         { mLayout = layout; }
-        inline size_t GetVertexBytes() const noexcept
+        inline size_t GetInstanceDataSize() const noexcept
         { return mVertexData.size(); }
         inline const void* GetVertexDataPtr() const noexcept
         { return mVertexData.data(); }
 
-        inline const auto& GetLayout() const & noexcept
+        inline const auto& GetInstanceDataLayout() const & noexcept
         { return mLayout; }
-        inline auto&& GetLayout() const && noexcept
+        inline auto&& GetInstanceDataLayout() const && noexcept
         { return std::move(mLayout); }
     private:
-        GeometryInstanceDataLayout mLayout;
+        InstanceDataLayout mLayout;
         std::vector<uint8_t> mVertexData;
     };
 
     // Per geometry instance vertex data.
-    class GeometryInstance
+    class InstancedDraw
     {
     public:
-        using Usage = GeometryInstanceBuffer::Usage;
+        using Usage = InstancedDrawBuffer::Usage;
         struct CreateArgs {
-            GeometryInstanceBuffer buffer;
+            InstancedDrawBuffer buffer;
             // The expected usage of the geometry instance data.
             Usage usage = Usage::Stream;
             // Set the (human-readable) name of the instance geometry.
@@ -125,10 +125,10 @@ namespace gfx
             // Set the hash value based on the contents of the buffer.
             std::size_t content_hash = 0;
         };
-        virtual ~GeometryInstance() = default;
+        virtual ~InstancedDraw() = default;
     private:
     };
 
-    using GeometryInstancePtr = std::shared_ptr<const GeometryInstance>;
+    using InstancedDrawPtr = std::shared_ptr<const InstancedDraw>;
 
 } // namespace

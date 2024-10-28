@@ -762,7 +762,7 @@ public:
         return geometry;
     }
 
-    gfx::GeometryInstancePtr FindGeometryInstance(const std::string& id) override
+    gfx::InstancedDrawPtr FindInstancedDraw(const std::string& id) override
     {
         auto it = mInstances.find(id);
         if (it == std::end(mInstances))
@@ -770,9 +770,9 @@ public:
         return it->second;
     }
 
-    gfx::GeometryInstancePtr CreateGeometryInstance(const std::string& id, gfx::GeometryInstance::CreateArgs args) override
+    gfx::InstancedDrawPtr CreateInstancedDraw(const std::string& id, gfx::InstancedDraw::CreateArgs args) override
     {
-        auto instance = std::make_shared<GeometryInstanceImpl>(this);
+        auto instance = std::make_shared<InstancedDrawImpl>(this);
         instance->SetFrameStamp(mFrameNumber);
         instance->SetName(args.content_name);
         instance->SetDataHash(args.content_hash);
@@ -858,7 +858,7 @@ public:
 
         const auto* myprog = static_cast<const ProgImpl*>(&program);
         const auto* mygeom = static_cast<const GeomImpl*>(geometry.GetGeometry());
-        const auto* myinst = static_cast<const GeometryInstanceImpl*>(geometry.GetInstance());
+        const auto* myinst = static_cast<const InstancedDrawImpl*>(geometry.GetInstance());
         myprog->SetFrameStamp(mFrameNumber);
         mygeom->SetFrameStamp(mFrameNumber);
         if (myinst)
@@ -1384,7 +1384,7 @@ public:
 
             for (auto it = mInstances.begin(); it != mInstances.end(); )
             {
-                auto* impl = static_cast<GeometryInstanceImpl*>(it->second.get());
+                auto* impl = static_cast<InstancedDrawImpl*>(it->second.get());
                 const auto last_used_frame_number = impl->GetFrameStamp();
                 if (mFrameNumber - last_used_frame_number >= max_num_idle_frames)
                     it = mInstances.erase(it);
@@ -2073,13 +2073,13 @@ private:
         mutable bool mWarnOnce  = true;
     };
 
-    class GeometryInstanceImpl : public gfx::GeometryInstance
+    class InstancedDrawImpl : public gfx::InstancedDraw
     {
     public:
-        explicit GeometryInstanceImpl(OpenGLES2GraphicsDevice* device) noexcept
+        explicit InstancedDrawImpl(OpenGLES2GraphicsDevice* device) noexcept
           : mDevice(device)
         {}
-       ~GeometryInstanceImpl() override
+       ~InstancedDrawImpl() override
         {
             if (mBufferSize)
             {
@@ -2095,7 +2095,7 @@ private:
 
             mPendingUpload.reset();
 
-            const auto vertex_bytes = upload.GetVertexBytes();
+            const auto vertex_bytes = upload.GetInstanceDataSize();
             const auto vertex_ptr   = upload.GetVertexDataPtr();
             if (vertex_bytes == 0)
                 return;
@@ -2106,14 +2106,14 @@ private:
                                   vertex_ptr, vertex_bytes,
                                   mUsage, BufferType::VertexBuffer);
             mBufferSize = vertex_bytes;
-            mLayout = std::move(upload.GetLayout());
+            mLayout = std::move(upload.GetInstanceDataLayout());
             if (mUsage == Usage::Static)
             {
                 DEBUG("Uploaded geometry instance buffer data. [name='%1', bytes='%2', usage='%3']", mName, vertex_bytes, mUsage);
             }
         }
 
-        inline void SetBuffer(gfx::GeometryInstanceBuffer&& buffer) noexcept
+        inline void SetBuffer(gfx::InstancedDrawBuffer&& buffer) noexcept
         { mPendingUpload = std::move(buffer); }
         inline void SetUsage(Usage usage) noexcept
         { mUsage = usage; }
@@ -2131,7 +2131,7 @@ private:
         { return mBufferIndex; }
         inline size_t GetInstanceCount() const noexcept
         { return mBufferSize / mLayout.vertex_struct_size; }
-        inline const gfx::GeometryInstanceDataLayout& GetVertexLayout() const noexcept
+        inline const gfx::InstanceDataLayout& GetVertexLayout() const noexcept
         { return mLayout; }
 
     private:
@@ -2143,8 +2143,8 @@ private:
         mutable std::size_t mBufferSize   = 0;
         mutable std::size_t mBufferOffset = 0;
         mutable std::size_t mBufferIndex  = 0;
-        mutable std::optional<gfx::GeometryInstanceBuffer> mPendingUpload;
-        mutable gfx::GeometryInstanceDataLayout mLayout;
+        mutable std::optional<gfx::InstancedDrawBuffer> mPendingUpload;
+        mutable gfx::InstanceDataLayout mLayout;
     };
 
     class GeomImpl : public gfx::Geometry
@@ -3098,7 +3098,7 @@ private:
         std::size_t mFrameNumber = 0;
     };
 private:
-    std::map<std::string, std::shared_ptr<gfx::GeometryInstance>> mInstances;
+    std::map<std::string, std::shared_ptr<gfx::InstancedDraw>> mInstances;
     std::map<std::string, std::shared_ptr<gfx::Geometry>> mGeoms;
     std::map<std::string, std::shared_ptr<gfx::Shader>> mShaders;
     std::map<std::string, std::shared_ptr<gfx::Program>> mPrograms;
