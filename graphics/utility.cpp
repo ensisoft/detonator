@@ -131,7 +131,7 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device)
     // y grows up to 1.0 to the top of the screen).
 
     gfx::ShaderSource source;
-    source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
     source.SetType(gfx::ShaderSource::Type::Vertex);
     source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec2f);
     source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
@@ -171,7 +171,7 @@ void VertexShaderMain()
 gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device)
 {
     gfx::ShaderSource source;
-    source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
     source.SetType(gfx::ShaderSource::Type::Vertex);
     source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec3f);
     source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
@@ -210,7 +210,7 @@ void VertexShaderMain()
 gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device)
 {
     gfx::ShaderSource source;
-    source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
     source.SetType(gfx::ShaderSource::Type::Vertex);
     source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec3f);
     source.AddAttribute("aNormal", gfx::ShaderSource::AttributeType::Vec3f);
