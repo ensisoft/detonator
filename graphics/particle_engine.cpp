@@ -85,7 +85,7 @@ std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
 ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device& device) const
 {
     ShaderSource source;
-    source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
     source.SetType(gfx::ShaderSource::Type::Vertex);
     source.AddAttribute("aPosition", ShaderSource::AttributeType::Vec2f);
     source.AddAttribute("aData", ShaderSource::AttributeType::Vec4f);
