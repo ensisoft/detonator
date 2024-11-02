@@ -20,6 +20,8 @@
 
 #include "base/assert.h"
 #include "base/hash.h"
+#include "base/math.h"
+#include "base/noise.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "graphics/bitmap.h"
@@ -93,7 +95,7 @@ std::unique_ptr<IBitmap> NoiseBitmapGenerator::Generate() const
             float pixel = 0.0f;
             for (const auto& layer : mLayers)
             {
-                const math::NoiseGenerator gen(layer.frequency, layer.prime0, layer.prime1, layer.prime2);
+                const base::NoiseGenerator gen(layer.frequency, layer.prime0, layer.prime1, layer.prime2);
                 const auto amplitude = math::clamp(0.0f, 255.0f, layer.amplitude);
                 const auto sample = gen.GetSample(x / w, y / h);
                 pixel += (sample * amplitude);
