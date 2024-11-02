@@ -17,7 +17,6 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <boost/math/special_functions/prime.hpp>
 #  include <stb/stb_image_write.h>
 #include "warnpop.h"
 
@@ -383,96 +382,5 @@ URect FindImageRectangle(const IBitmapReadView& img, const IPoint& start)
     return ret;
 }
 
-void NoiseBitmapGenerator::Randomize(unsigned min_prime_index, unsigned max_prime_index, unsigned layers)
-{
-    mLayers.clear();
-    for (unsigned i=0; i<layers; ++i)
-    {
-        const auto prime_index = math::rand(min_prime_index, max_prime_index);
-        const auto prime = boost::math::prime(prime_index);
-        Layer layer;
-        layer.prime0 = prime;
-        layer.frequency = math::rand(1.0f, 100.0f);
-        layer.amplitude = math::rand(1.0f, 255.0f);
-        mLayers.push_back(layer);
-    }
-}
-
-void NoiseBitmapGenerator::IntoJson(data::Writer& data) const
-{
-    data.Write("width", mWidth);
-    data.Write("height", mHeight);
-    for (const auto& layer : mLayers)
-    {
-        auto chunk = data.NewWriteChunk();
-        chunk->Write("prime0", layer.prime0);
-        chunk->Write("prime1", layer.prime1);
-        chunk->Write("prime2", layer.prime2);
-        chunk->Write("frequency", layer.frequency);
-        chunk->Write("amplitude", layer.amplitude);
-        data.AppendChunk("layers", std::move(chunk));
-    }
-}
-
-bool NoiseBitmapGenerator::FromJson(const data::Reader& data)
-{
-    if (!data.Read("width", &mWidth) ||
-        !data.Read("height", &mHeight))
-        return false;
-    for (unsigned i=0; i<data.GetNumChunks("layers"); ++i)
-    {
-        const auto& chunk = data.GetReadChunk("layers", i);
-        Layer layer;
-        if (!chunk->Read("prime0", &layer.prime0) ||
-            !chunk->Read("prime1", &layer.prime1) ||
-            !chunk->Read("prime2", &layer.prime2) ||
-            !chunk->Read("frequency", &layer.frequency) ||
-            !chunk->Read("amplitude", &layer.amplitude))
-            return false;
-        mLayers.push_back(std::move(layer));
-    }
-    return true;
-}
-
-std::unique_ptr<IBitmap> NoiseBitmapGenerator::Generate() const
-{
-    auto ret = std::make_unique<AlphaMask>();
-    ret->Resize(mWidth, mHeight);
-    const float w = mWidth;
-    const float h = mHeight;
-    for (unsigned y = 0; y < mHeight; ++y)
-    {
-        for (unsigned x = 0; x < mWidth; ++x)
-        {
-            float pixel = 0.0f;
-            for (const auto& layer : mLayers)
-            {
-                const math::NoiseGenerator gen(layer.frequency, layer.prime0, layer.prime1, layer.prime2);
-                const auto amplitude = math::clamp(0.0f, 255.0f, layer.amplitude);
-                const auto sample = gen.GetSample(x / w, y / h);
-                pixel += (sample * amplitude);
-            }
-            Pixel_A px;
-            px.r = math::clamp(0u, 255u, (unsigned) pixel);
-            ret->SetPixel(y, x, px);
-        }
-    }
-    return ret;
-}
- size_t NoiseBitmapGenerator::GetHash() const
- {
-     size_t hash = 0;
-     hash = base::hash_combine(hash, mWidth);
-     hash = base::hash_combine(hash, mHeight);
-     for (const auto& layer : mLayers)
-     {
-         hash = base::hash_combine(hash, layer.prime0);
-         hash = base::hash_combine(hash, layer.prime1);
-         hash = base::hash_combine(hash, layer.prime2);
-         hash = base::hash_combine(hash, layer.amplitude);
-         hash = base::hash_combine(hash, layer.frequency);
-     }
-     return hash;
- }
 
 } // namespace

@@ -27,6 +27,7 @@
 #include "data/json.h"
 #include "graphics/color4f.h"
 #include "graphics/bitmap.h"
+#include "graphics/bitmap_noise.h"
 
 void unit_test_basic()
 {
