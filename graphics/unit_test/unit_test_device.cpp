@@ -351,7 +351,7 @@ void main() {
             dev->EndFrame();
 
             const auto& bmp = dev->ReadColorBuffer(10, 10, nullptr);
-            TEST_REQUIRE(bmp.Compare(gfx::Color::Green));
+            TEST_REQUIRE(bmp.PixelCompare(gfx::Color::Green));
         }
 
         dev->DeleteFramebuffers();
@@ -396,7 +396,7 @@ void main() {
             dev->EndFrame();
 
             const auto& bmp = dev->ReadColorBuffer(10, 10, nullptr);
-            TEST_REQUIRE(bmp.Compare(gfx::Color::Green));
+            TEST_REQUIRE(bmp.PixelCompare(gfx::Color::Green));
         }
 
     }
@@ -456,7 +456,7 @@ void main() {
 
         // this has alpha in it.
         const auto& bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
     }
 
     // draw using vertex and index buffer
@@ -486,7 +486,7 @@ void main() {
 
         // this has alpha in it.
         const auto& bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
     }
 }
 
@@ -570,7 +570,7 @@ void main() {
 
     const auto& bmp = dev->ReadColorBuffer(4, 4);
     WritePNG(bmp, "foo.png");
-    TEST_REQUIRE(gfx::Compare(bmp, data));
+    TEST_REQUIRE(gfx::PixelCompare(bmp, data));
 }
 
 void unit_test_render_with_multiple_textures()
@@ -656,7 +656,7 @@ void main() {
 
     const auto& bmp = dev->ReadColorBuffer(4, 4);
     WritePNG(bmp, "foo.png");
-    TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
 }
 
 void unit_test_render_set_float_uniforms()
@@ -720,7 +720,7 @@ void main() {
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
     }
 
     dev->BeginFrame();
@@ -733,7 +733,7 @@ void main() {
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
     }
 
     dev->BeginFrame();
@@ -746,7 +746,7 @@ void main() {
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
     }
 
     dev->BeginFrame();
@@ -759,7 +759,7 @@ void main() {
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
     }
 
     dev->BeginFrame();
@@ -772,7 +772,7 @@ void main() {
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
     }
 }
 
@@ -833,7 +833,7 @@ void main() {
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
     }
 
     dev->BeginFrame();
@@ -844,7 +844,7 @@ void main() {
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
     }
 
     dev->BeginFrame();
@@ -855,7 +855,7 @@ void main() {
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
     }
 
 }
@@ -919,7 +919,7 @@ void main() {
 
     // this has alpha in it.
     const auto& bmp = dev->ReadColorBuffer(10, 10);
-    TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
 }
 
 void unit_test_render_set_matrix3x3_uniform()
@@ -982,7 +982,7 @@ void main() {
 
     // this has alpha in it.
     const auto& bmp = dev->ReadColorBuffer(10, 10);
-    TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
 }
 
 void unit_test_render_set_matrix4x4_uniform()
@@ -1047,7 +1047,7 @@ void main() {
 
     // this has alpha in it.
     const auto& bmp = dev->ReadColorBuffer(10, 10);
-    TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
 }
 
 void unit_test_uniform_sampler_optimize_bug()
@@ -1610,7 +1610,7 @@ void main() {
 
     // this has alpha in it.
     const auto& bmp = dev->ReadColorBuffer(10, 10);
-    TEST_REQUIRE(bmp.Compare(gfx::Color::Green));
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::Green));
 
 }
 
@@ -1678,7 +1678,7 @@ void main() {
         dev->Draw(*program, *geom, state);
         dev->EndFrame();
         const auto& ret = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(gfx::Compare(bmp, ret));
+        TEST_REQUIRE(gfx::PixelCompare(bmp, ret));
     }
 
     // by now we should have all the texture units in use.
@@ -1699,7 +1699,7 @@ void main() {
             dev->Draw(*program, *geom, state);
             dev->EndFrame();
             const auto& ret = dev->ReadColorBuffer(10, 10);
-            TEST_REQUIRE(gfx::Compare(pink, ret));
+            TEST_REQUIRE(gfx::PixelCompare(pink, ret));
         }
 
         // change the filtering.
@@ -1712,7 +1712,7 @@ void main() {
             dev->Draw(*program, *geom, state);
             dev->EndFrame();
             const auto& ret = dev->ReadColorBuffer(10, 10);
-            TEST_REQUIRE(gfx::Compare(pink, ret));
+            TEST_REQUIRE(gfx::PixelCompare(pink, ret));
         }
     }
 }
@@ -1780,7 +1780,7 @@ void main() {
             dev->Draw(*program, *geom, state);
             dev->EndFrame();
             const auto& ret = dev->ReadColorBuffer(10, 10);
-            TEST_REQUIRE(gfx::Compare(bmp, ret));
+            TEST_REQUIRE(gfx::PixelCompare(bmp, ret));
         }
     }
 
@@ -1843,7 +1843,7 @@ void main() {
         dev->EndFrame();
 
         const auto& ret = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(ret.Compare(gfx::Color::White));
+        TEST_REQUIRE(ret.PixelCompare(gfx::Color::White));
     }
 
 }
@@ -2160,7 +2160,7 @@ void main() {
             TEST_REQUIRE(ret->GetWidth() == 10);
             TEST_REQUIRE(ret->GetHeight() == 10);
             const auto* rgba_ret = dynamic_cast<const gfx::RgbaBitmap*>(ret.get());
-            TEST_REQUIRE(rgba_ret->Compare(gfx::Color::Red));
+            TEST_REQUIRE(rgba_ret->PixelCompare(gfx::Color::Red));
         }
 
         {
@@ -2173,7 +2173,7 @@ void main() {
             TEST_REQUIRE(ret->GetHeight() == 10);
             const auto* rgba_ret = dynamic_cast<const gfx::RgbaBitmap*>(ret.get());
             gfx::WritePNG(*rgba_ret, "/tmp/paska.png");
-            TEST_REQUIRE(rgba_ret->Compare(gfx::Color::Green));
+            TEST_REQUIRE(rgba_ret->PixelCompare(gfx::Color::Green));
         }
 
         dev->EndFrame();
@@ -2212,7 +2212,7 @@ void main() {
             TEST_REQUIRE(ret->GetWidth() == 10);
             TEST_REQUIRE(ret->GetHeight() == 10);
             const auto* rgba_ret = dynamic_cast<const gfx::RgbaBitmap*>(ret.get());
-            TEST_REQUIRE(rgba_ret->Compare(gfx::Color::Red));
+            TEST_REQUIRE(rgba_ret->PixelCompare(gfx::Color::Red));
         }
 
         {
@@ -2223,7 +2223,7 @@ void main() {
             TEST_REQUIRE(ret->GetWidth() == 10);
             TEST_REQUIRE(ret->GetHeight() == 10);
             const auto* rgba_ret = dynamic_cast<const gfx::RgbaBitmap*>(ret.get());
-            TEST_REQUIRE(rgba_ret->Compare(gfx::Color::Green));
+            TEST_REQUIRE(rgba_ret->PixelCompare(gfx::Color::Green));
         }
 
         dev->EndFrame();
@@ -2261,11 +2261,11 @@ void unit_test_fbo_clear_specific_attachment(gfx::Framebuffer::Format format, gf
 
             const auto& bmp0 = gfx::algo::ReadTexture(attachment0, dev.get());
             const auto* rgba_ret0 = dynamic_cast<gfx::RgbaBitmap*>(bmp0.get());
-            TEST_REQUIRE(rgba_ret0->Compare(gfx::Color::Red));
+            TEST_REQUIRE(rgba_ret0->PixelCompare(gfx::Color::Red));
 
             const auto& bmp1 = gfx::algo::ReadTexture(attachment1, dev.get());
             const auto* rgba_ret1 = dynamic_cast<gfx::RgbaBitmap*>(bmp1.get());
-            TEST_REQUIRE(rgba_ret1->Compare(gfx::Color::Green));
+            TEST_REQUIRE(rgba_ret1->PixelCompare(gfx::Color::Green));
 
             dev->EndFrame();
         }
@@ -2301,11 +2301,11 @@ void unit_test_fbo_clear_specific_attachment(gfx::Framebuffer::Format format, gf
 
             const auto& bmp0 = gfx::algo::ReadTexture(attachment0, dev.get());
             const auto* rgba_ret0 = dynamic_cast<gfx::RgbaBitmap*>(bmp0.get());
-            TEST_REQUIRE(rgba_ret0->Compare(gfx::Color::Red));
+            TEST_REQUIRE(rgba_ret0->PixelCompare(gfx::Color::Red));
 
             const auto& bmp1 = gfx::algo::ReadTexture(attachment1, dev.get());
             const auto* rgba_ret1 = dynamic_cast<gfx::RgbaBitmap*>(bmp1.get());
-            TEST_REQUIRE(rgba_ret1->Compare(gfx::Color::Green));
+            TEST_REQUIRE(rgba_ret1->PixelCompare(gfx::Color::Green));
 
             dev->EndFrame();
         }
@@ -2499,7 +2499,7 @@ void main() {
     dev->EndFrame();
 
     const auto& result_red = dev->ReadColorBuffer(10, 10);
-    TEST_REQUIRE(result_red.Compare(gfx::Color::Red));
+    TEST_REQUIRE(result_red.PixelCompare(gfx::Color::Red));
 
     dev->BeginFrame();
 
@@ -2509,7 +2509,7 @@ void main() {
     dev->EndFrame();
 
     const auto& result_green = dev->ReadColorBuffer(10, 10, nullptr);
-    TEST_REQUIRE(result_green.Compare(gfx::Color::Green));
+    TEST_REQUIRE(result_green.PixelCompare(gfx::Color::Green));
 }
 
 void unit_test_fbo_change_size()

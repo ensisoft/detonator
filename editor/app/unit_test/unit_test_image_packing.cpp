@@ -60,7 +60,7 @@ void unit_test_unbounded()
             const base::URect rc(img.xpos, img.ypos, img.width, img.height);
             // this are of the bitmap should be black i.e.
             // nothing has been placed there yet.
-            const auto is_non_occupied = bmp.Compare(rc, gfx::Color::Black);
+            const auto is_non_occupied = bmp.PixelCompare(rc, gfx::Color::Black);
             TEST_REQUIRE(is_non_occupied);
             bmp.Fill(rc, static_cast<gfx::Color>(img.index));
         }

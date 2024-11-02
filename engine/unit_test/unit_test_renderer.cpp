@@ -361,7 +361,7 @@ void unit_test_drawable_item()
         device->EndFrame(true);
 
         bmp = device->ReadColorBuffer(0, 0, 256, 256);
-        TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 200, 100), gfx::Color::Blue));
+        TEST_REQUIRE(bmp.PixelCompare(gfx::URect(0, 0, 200, 100), gfx::Color::Blue));
     }
 
     // change material so that updating makes a visual difference.

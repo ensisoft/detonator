@@ -553,7 +553,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         const auto& bmp = generated.AsBitmap<gfx::Pixel_RGB>();
         TEST_REQUIRE(bmp.GetWidth() == bitmap[0].GetWidth());
         TEST_REQUIRE(bmp.GetHeight() == bitmap[0].GetHeight());
-        TEST_REQUIRE(gfx::Compare(bitmap[0], bmp));
+        TEST_REQUIRE(gfx::PixelCompare(bitmap[0], bmp));
     }
 
     // use 2 small textures. packing should be done.
@@ -630,10 +630,10 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap0.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[0], img.AsBitmap<gfx::Pixel_RGB>()));
+        TEST_REQUIRE(gfx::PixelCompare(bitmap[0], img.AsBitmap<gfx::Pixel_RGB>()));
 
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap1.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[1], img.AsBitmap<gfx::Pixel_RGB>()));
+        TEST_REQUIRE(gfx::PixelCompare(bitmap[1], img.AsBitmap<gfx::Pixel_RGB>()));
     }
 
     // texture size that exceeds the max texture sizes and no resizing and no packing
@@ -667,7 +667,7 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap3.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[3], img.AsBitmap<gfx::Pixel_RGB>()));
+        TEST_REQUIRE(gfx::PixelCompare(bitmap[3], img.AsBitmap<gfx::Pixel_RGB>()));
     }
 
     // texture size that exceeds the max texture size gets resized.
@@ -762,7 +762,7 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap3.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[3], img.AsBitmap<gfx::Pixel_RGB>()));
+        TEST_REQUIRE(gfx::PixelCompare(bitmap[3], img.AsBitmap<gfx::Pixel_RGB>()));
     }
 
     // test discarding multiple copies of textures
@@ -811,13 +811,13 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap0.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[0], img.AsBitmap<gfx::Pixel_RGB>()));
+        TEST_REQUIRE(gfx::PixelCompare(bitmap[0], img.AsBitmap<gfx::Pixel_RGB>()));
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap1.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[1], img.AsBitmap<gfx::Pixel_RGB>()));
+        TEST_REQUIRE(gfx::PixelCompare(bitmap[1], img.AsBitmap<gfx::Pixel_RGB>()));
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap2.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[2], img.AsBitmap<gfx::Pixel_RGB>()));
+        TEST_REQUIRE(gfx::PixelCompare(bitmap[2], img.AsBitmap<gfx::Pixel_RGB>()));
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap3.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[3], img.AsBitmap<gfx::Pixel_RGB>()));
+        TEST_REQUIRE(gfx::PixelCompare(bitmap[3], img.AsBitmap<gfx::Pixel_RGB>()));
     }
 
     // todo: test cases where texture packing cannot be done (see material.cpp)
@@ -1074,8 +1074,8 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         const auto src_fixed_rect1 = src_rect1.Expand(bitmap[1].GetSize());
         const auto dst_fixed_rect0 = rect0.Expand(bmp.GetSize());
         const auto dst_fixed_rect1 = rect1.Expand(bmp.GetSize());
-        TEST_REQUIRE(gfx::Compare(bitmap[0].Copy(src_fixed_rect0), bmp.Copy(dst_fixed_rect0)));
-        TEST_REQUIRE(gfx::Compare(bitmap[1].Copy(src_fixed_rect1), bmp.Copy(dst_fixed_rect1)));
+        TEST_REQUIRE(gfx::PixelCompare(bitmap[0].Copy(src_fixed_rect0), bmp.Copy(dst_fixed_rect0)));
+        TEST_REQUIRE(gfx::PixelCompare(bitmap[1].Copy(src_fixed_rect1), bmp.Copy(dst_fixed_rect1)));
     }
 }
 

@@ -152,6 +152,10 @@ namespace gfx
     Pixel_RGBf sRGB_from_color(Color name);
     Pixel_RGBAf RGBA_premul_alpha(const Pixel_RGBAf& rgba);
 
+    double Pixel_MSE(const Pixel_A& lhs, const Pixel_A& rhs) noexcept;
+    double Pixel_MSE(const Pixel_RGB& lhs, const Pixel_RGB& rhs) noexcept;
+    double Pixel_MSE(const Pixel_RGBA& lhs, const Pixel_RGBA& rhs) noexcept;
+
     static_assert(sizeof(Pixel_A) == 1,
         "Unexpected size of Pixel_A pixel struct type.");
     static_assert(sizeof(Pixel_RGB) == 3,
@@ -578,11 +582,11 @@ namespace gfx
     }
 
     template<typename Pixel, typename CompareFunc>
-    bool CompareBitmaps(const BitmapReadView<Pixel>& src,
-                        const BitmapReadView<Pixel>& dst,
-                        const URect& src_rect,
-                        const URect& dst_rect,
-                        CompareFunc comparer)
+    bool PixelCompareBitmaps(const BitmapReadView<Pixel>& src,
+                             const BitmapReadView<Pixel>& dst,
+                             const URect& src_rect,
+                             const URect& dst_rect,
+                             CompareFunc comparer)
     {
         const auto src_width  = src.GetWidth();
         const auto src_height = src.GetHeight();
@@ -609,10 +613,10 @@ namespace gfx
     }
 
     template<typename Pixel, typename CompareFunc>
-    bool CompareBitmapRegion(const BitmapReadView<Pixel>& bmp,
-                             const URect& area,
-                             const Pixel& reference,
-                             CompareFunc comparer)
+    bool PixelCompareBitmapRegion(const BitmapReadView<Pixel>& bmp,
+                                  const URect& area,
+                                  const Pixel& reference,
+                                  CompareFunc comparer)
     {
         const auto bmp_width  = bmp.GetWidth();
         const auto bmp_height = bmp.GetHeight();
@@ -701,34 +705,21 @@ namespace gfx
         struct MSE {
             bool operator()(const Pixel_A& lhs, const Pixel_A& rhs) const
             {
-                const auto r = (int)lhs.r - (int)rhs.r;
-                const auto sum = r*r;
-                const auto mse = sum / 1.0;
+                const auto mse = Pixel_MSE(lhs, rhs);
                 return mse < max_mse;
             }
 
             bool operator()(const Pixel_RGB& lhs, const Pixel_RGB& rhs) const
             {
-                const auto r = (int)lhs.r - (int)rhs.r;
-                const auto g = (int)lhs.g - (int)rhs.g;
-                const auto b = (int)lhs.b - (int)rhs.b;
-
-                const auto sum = r*r + g*g + b*b;
-                const auto mse = sum / 3;
+                const auto mse = Pixel_MSE(lhs, rhs);
                 return mse < max_mse;
             }
             bool operator()(const Pixel_RGBA& lhs, const Pixel_RGBA& rhs) const
             {
-                const auto r = (int)lhs.r - (int)rhs.r;
-                const auto g = (int)lhs.g - (int)rhs.g;
-                const auto b = (int)lhs.b - (int)rhs.b;
-                const auto a = (int)lhs.a - (int)rhs.a;
-
-                const auto sum = r*r + g*g + b*b + a*a;
-                const auto mse = sum / 4.0;
+                const auto mse = Pixel_MSE(lhs, rhs);
                 return mse < max_mse;
             }
-            void SetErrorTreshold(double se)
+            void SetErrorThreshold(double se)
             {
                 max_mse = se * se;
             }
@@ -904,18 +895,18 @@ namespace gfx
         // Otherwise, if all pixels compare equal returns true.
         // This is mostly useful as a testing utility.
         template<typename CompareFunctor>
-        bool Compare(const URect& rc, const Pixel& reference, CompareFunctor comparer) const
+        bool PixelCompare(const URect& rc, const Pixel& reference, CompareFunctor comparer) const
         {
-            return CompareBitmapRegion(GetPixelReadView(),
+            return PixelCompareBitmapRegion(GetPixelReadView(),
                        rc, reference, std::move(comparer));
         }
 
         // Compare the pixels in this bitmap within the given
         // rectangle against the given reference pixel and expect
         // pixel perfect matching.
-        bool Compare(const URect& rc, const Pixel& reference) const
+        bool PixelCompare(const URect& rc, const Pixel& reference) const
         {
-            return CompareBitmapRegion(GetPixelReadView(),
+            return PixelCompareBitmapRegion(GetPixelReadView(),
                        rc, reference, Pixel2Pixel());
         }
 
@@ -924,9 +915,9 @@ namespace gfx
         // Returns false if the compare functor identifies non-equality
         // for any pixel otherwise true.
         template<typename CompareFunctor>
-        bool Compare(const Pixel& reference, CompareFunctor comparer) const
+        bool PixelCompare(const Pixel& reference, CompareFunctor comparer) const
         {
-            return CompareBitmapRegion(GetPixelReadView(),
+            return PixelCompareBitmapRegion(GetPixelReadView(),
                        URect(0, 0, mWidth, mHeight), reference, std::move(comparer));
         }
 
@@ -934,9 +925,9 @@ namespace gfx
         // reference pixel and expect pixel perfect matching.
         // Returns false if any pixel doesn't match the reference
         // otherwise true.
-        bool Compare(const Pixel& reference) const
+        bool PixelCompare(const Pixel& reference) const
         {
-            return CompareBitmapRegion(GetPixelReadView(),
+            return PixelCompareBitmapRegion(GetPixelReadView(),
                        URect(0, 0, mWidth, mHeight), reference, Pixel2Pixel());
         }
 
@@ -1062,7 +1053,7 @@ namespace gfx
     // Otherwise returns true the pixels between the two bitmaps compare equal
     // as determined by the compare functor.
     template<typename CompareF, typename PixelT>
-    bool Compare(const Bitmap<PixelT>& lhs, const URect& rc, const Bitmap<PixelT>& rhs, CompareF comparer)
+    bool PixelCompare(const Bitmap<PixelT>& lhs, const URect& rc, const Bitmap<PixelT>& rhs, CompareF comparer)
     {
         // take the intersection of the bitmaps and then intersection
         // of the minimum bitmap rect and the rect of interest
@@ -1076,23 +1067,23 @@ namespace gfx
         const auto& min_rect = Intersect(rc, min_bitmap_rect);
         if (min_rect.IsEmpty())
             return false;
-        return CompareBitmaps(lhs.GetPixelReadView(),
-                              rhs.GetPixelReadView(),
-                              min_rect, min_rect, std::move(comparer));
+        return PixelCompareBitmaps(lhs.GetPixelReadView(),
+                                   rhs.GetPixelReadView(),
+                                   min_rect, min_rect, std::move(comparer));
     }
 
     template<typename PixelT>
-    bool Compare(const Bitmap<PixelT>& lhs, const URect& rc, const Bitmap<PixelT>& rhs)
+    bool PixelCompare(const Bitmap<PixelT>& lhs, const URect& rc, const Bitmap<PixelT>& rhs)
     {
         using ComparerF = typename Bitmap<PixelT>::Pixel2Pixel;
-        return Compare(lhs, rc, rhs, ComparerF());
+        return PixelCompare(lhs, rc, rhs, ComparerF());
     }
 
     // Compare two bitmaps for equality. The bitmaps are equal
     // if they have equal dimensions and the given comparison
     // functor considers each pixel value to be equal.
     template<typename CompareF, typename PixelT>
-    bool Compare(const Bitmap<PixelT>& lhs, const Bitmap<PixelT>& rhs, CompareF comparer)
+    bool PixelCompare(const Bitmap<PixelT>& lhs, const Bitmap<PixelT>& rhs, CompareF comparer)
     {
         if (lhs.GetHeight() != rhs.GetHeight())
             return false;
@@ -1100,24 +1091,24 @@ namespace gfx
             return false;
         const URect rc (0, 0, lhs.GetWidth(), lhs.GetHeight());
 
-        return Compare(lhs, rc, rhs, comparer);
+        return PixelCompare(lhs, rc, rhs, comparer);
     }
 
     // Compare two bitmaps for equality. The bitmaps are equal
     // if the have equal dimensions and all the pixels
     // have equal pixel values.
     template<typename PixelT>
-    bool Compare(const Bitmap<PixelT>& lhs, const Bitmap<PixelT>& rhs)
+    bool PixelCompare(const Bitmap<PixelT>& lhs, const Bitmap<PixelT>& rhs)
     {
         using ComparerF = typename Bitmap<PixelT>::Pixel2Pixel;
-        return Compare(lhs, rhs, ComparerF());
+        return PixelCompare(lhs, rhs, ComparerF());
     }
 
 
     template<typename Pixel>
     bool operator==(const Bitmap<Pixel>& lhs, const Bitmap<Pixel>& rhs)
     {
-        return Compare(lhs, rhs);
+        return PixelCompare(lhs, rhs);
     }
 
     template<typename Pixel>
