@@ -57,7 +57,7 @@ int test_main(int argc, char* argv[])
         ref.SetPixel(3, 2, gfx::Color::White); 
         ref.SetPixel(3, 3, gfx::Color::White);                
 
-        gfx::Bitmap<gfx::Pixel_RGB>::MSE mse;
+        gfx::PixelEquality::ThresholdPrecision mse;
         mse.SetErrorThreshold(10);
         TEST_REQUIRE(PixelCompare(bmp, gfx::URect(0, 0, 4, 4), ref, mse));
 
@@ -96,7 +96,7 @@ int test_main(int argc, char* argv[])
         ref.SetPixel(3, 2, gfx::Color::White); 
         ref.SetPixel(3, 3, gfx::Color::White);                
 
-        gfx::Bitmap<gfx::Pixel_RGBA>::MSE mse;
+        gfx::PixelEquality::ThresholdPrecision mse;
         mse.SetErrorThreshold(10);
         TEST_REQUIRE(PixelCompare(bmp, gfx::URect(0, 0, 4, 4), ref, mse));
 
@@ -122,7 +122,7 @@ int test_main(int argc, char* argv[])
         ref.SetPixel(3, 2, 0x7f);
         ref.SetPixel(3, 3, 0x7f);
 
-        gfx::Bitmap<gfx::Pixel_A>::MSE mse;
+        gfx::PixelEquality::ThresholdPrecision mse;
         mse.SetErrorThreshold(10);
         TEST_REQUIRE(PixelCompare(bmp, gfx::URect(0, 0, 4, 4), ref, mse));
     }

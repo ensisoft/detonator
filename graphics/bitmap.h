@@ -101,37 +101,6 @@ namespace gfx
     public:
         using PixelType = Pixel;
 
-        // pixel to pixel
-        struct Pixel2Pixel {
-            bool operator()(const Pixel& lhs, const Pixel& rhs) const
-            { return lhs == rhs; }
-        };
-
-        // mean-squared-error
-        struct MSE {
-            bool operator()(const Pixel_A& lhs, const Pixel_A& rhs) const
-            {
-                const auto mse = Pixel_MSE(lhs, rhs);
-                return mse < max_mse;
-            }
-
-            bool operator()(const Pixel_RGB& lhs, const Pixel_RGB& rhs) const
-            {
-                const auto mse = Pixel_MSE(lhs, rhs);
-                return mse < max_mse;
-            }
-            bool operator()(const Pixel_RGBA& lhs, const Pixel_RGBA& rhs) const
-            {
-                const auto mse = Pixel_MSE(lhs, rhs);
-                return mse < max_mse;
-            }
-            void SetErrorThreshold(double se)
-            {
-                max_mse = se * se;
-            }
-            double max_mse;
-        };
-
         static_assert(std::is_trivially_copyable<Pixel>::value,
             "Pixel should be a POD type and compatible with memcpy.");
 
@@ -313,7 +282,7 @@ namespace gfx
         bool PixelCompare(const URect& rc, const Pixel& reference) const
         {
             return PixelCompareBitmapRegion(GetPixelReadView(),
-                       rc, reference, Pixel2Pixel());
+                       rc, reference, PixelEquality::PixelPrecision());
         }
 
         // Compare all pixels in this bitmap against the given
@@ -334,7 +303,7 @@ namespace gfx
         bool PixelCompare(const Pixel& reference) const
         {
             return PixelCompareBitmapRegion(GetPixelReadView(),
-                       URect(0, 0, mWidth, mHeight), reference, Pixel2Pixel());
+                       URect(0, 0, mWidth, mHeight), reference, PixelEquality::PixelPrecision());
         }
 
         // Fill the area defined by the rectangle rc with the given pixel value.
@@ -506,8 +475,7 @@ namespace gfx
     template<typename PixelT>
     bool PixelCompare(const Bitmap<PixelT>& lhs, const Bitmap<PixelT>& rhs)
     {
-        using ComparerF = typename Bitmap<PixelT>::Pixel2Pixel;
-        return PixelCompare(lhs, rhs, ComparerF());
+        return PixelCompare(lhs, rhs, PixelEquality::PixelPrecision());
     }
 
 

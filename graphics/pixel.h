@@ -157,4 +157,36 @@ namespace gfx
     inline Pixel RasterOp_BitwiseOr(const Pixel& dst, const Pixel& src)
     { return dst | src; }
 
+    namespace PixelEquality {
+        struct PixelPrecision {
+            template<typename Pixel>
+            bool operator()(const Pixel& lhs, const Pixel& rhs) const
+            { return lhs == rhs; }
+        };
+
+        // mean-squared-error
+        struct ThresholdPrecision {
+            ThresholdPrecision() = default;
+            explicit ThresholdPrecision(double max_mse) noexcept
+              : max_mse(max_mse)
+            {}
+
+            template<typename Pixel>
+            bool operator()(const Pixel& lhs, const Pixel& rhs) const
+            {
+                const auto mse = Pixel_MSE(lhs, rhs);
+                return mse < max_mse;
+            }
+            void SetErrorThreshold(double se)
+            {
+                max_mse = se * se;
+            }
+
+            static constexpr double ZeroTolerance = 0.0;
+            static constexpr double LowTolerance  = 500.0;
+            static constexpr double HighTolerance = 1000.0;
+            double max_mse = ZeroTolerance;
+        };
+    } // PixelEquality
+
 } // namespace

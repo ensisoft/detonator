@@ -3130,7 +3130,7 @@ int main(int argc, char* argv[])
 
                 stop_for_input = true;
 
-                gfx::Bitmap<gfx::Pixel_RGBA>::MSE mse;
+                gfx::PixelEquality::ThresholdPrecision mse;
                 mse.SetErrorThreshold(5.0);
 
                 // load gold image
