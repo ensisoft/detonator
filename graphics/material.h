@@ -43,6 +43,8 @@
 #include "graphics/types.h"
 #include "graphics/text.h"
 #include "graphics/program.h"
+#include "graphics/bitmap.h"
+#include "graphics/bitmap_noise.h"
 
 namespace gfx
 {
