@@ -29,10 +29,7 @@
 
 #include "base/assert.h"
 #include "base/hash.h"
-#include "base/math.h"
-#include "data/fwd.h"
 #include "graphics/pixel.h"
-#include "graphics/color4f.h"
 #include "graphics/types.h"
 #include "graphics/bitmap_interface.h"
 #include "graphics/bitmap_view.h"
