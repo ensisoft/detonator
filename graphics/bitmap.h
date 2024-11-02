@@ -35,336 +35,13 @@
 #include "graphics/color4f.h"
 #include "graphics/types.h"
 #include "graphics/bitmap_interface.h"
+#include "graphics/bitmap_view.h"
+#include "graphics/bitmap_algo.h"
 
 #include "base/snafu.h"
 
 namespace gfx
 {
-
-    template<typename Pixel>
-    class BitmapReadView : public IBitmapReadView
-    {
-    public:
-        using PixelType = Pixel;
-        BitmapReadView(const Pixel* data, unsigned width, unsigned height)
-          : mPixels(data)
-          , mWidth(width)
-          , mHeight(height)
-        {}
-        BitmapReadView() = default;
-        virtual unsigned GetWidth() const override
-        { return mWidth; }
-        virtual unsigned GetHeight() const override
-        { return mHeight; }
-        virtual unsigned GetDepthBits() const override
-        { return sizeof(Pixel) * 8; }
-        virtual const void* GetReadPtr() const override
-        { return mPixels; }
-        virtual bool IsValid() const override
-        { return mPixels  && mWidth && mHeight; }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGBA* pixel) const override
-        { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGB* pixel) const override
-        { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_A* pixel) const override
-        { read_pixel(row, col, pixel); }
-
-        using IBitmapReadView::ReadPixel;
-    private:
-        template<typename T>
-        void read_pixel(unsigned row, unsigned col, T* pout) const
-        {
-            ASSERT(row < mHeight);
-            ASSERT(col < mWidth);
-            const auto index = row * mWidth + col;
-            constexpr auto bytes  = std::min(sizeof(T), sizeof(Pixel));
-            std::memcpy(pout, &mPixels[index], bytes);
-        }
-    private:
-        const Pixel* mPixels  = nullptr;
-        const unsigned mWidth  = 0;
-        const unsigned mHeight = 0;
-    };
-
-    template<typename Pixel>
-    class BitmapWriteView : public IBitmapWriteView
-    {
-    public:
-        using PixelType = Pixel;
-        BitmapWriteView(Pixel* data, unsigned width, unsigned height)
-          : mPixels(data)
-          , mWidth(width)
-          , mHeight(height)
-        {}
-        BitmapWriteView() = default;
-        virtual unsigned GetWidth() const override
-        { return mWidth; }
-        virtual unsigned GetHeight() const override
-        { return mHeight; }
-        virtual unsigned GetDepthBits() const override
-        { return sizeof(Pixel) * 8; }
-        virtual void* GetWritePtr() const override
-        { return mPixels; }
-        virtual bool IsValid() const override
-        { return mPixels  && mWidth && mHeight; }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGBA& pixel) const override
-        { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGB& pixel) const override
-        { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_A& pixel) const override
-        { write_pixel(row, col, pixel); }
-
-        using IBitmapWriteView::WritePixel;
-    private:
-        template<typename T>
-        void write_pixel(unsigned row, unsigned col, const T& value) const
-        {
-            ASSERT(row < mHeight);
-            ASSERT(col < mWidth);
-            const auto index = row * mWidth + col;
-            constexpr auto bytes = std::min(sizeof(T), sizeof(Pixel));
-            std::memcpy(&mPixels[index], &value, bytes);
-        }
-    private:
-        mutable Pixel* mPixels  = nullptr;
-        const unsigned mWidth  = 0;
-        const unsigned mHeight = 0;
-    };
-
-    template<typename Pixel>
-    class BitmapReadWriteView : public IBitmapReadWriteView
-    {
-    public:
-        using PixelType = Pixel;
-        BitmapReadWriteView(Pixel* data, unsigned width, unsigned height)
-            : mPixels(data)
-            , mWidth(width)
-            , mHeight(height)
-        {}
-        virtual unsigned GetWidth() const override
-        { return mWidth; }
-        virtual unsigned GetHeight() const override
-        { return mHeight; }
-        virtual unsigned GetDepthBits() const override
-        { return sizeof(Pixel) * 8; }
-        virtual const void* GetReadPtr() const override
-        { return mPixels; }
-        virtual void* GetWritePtr() const override
-        { return mPixels; }
-        virtual bool IsValid() const override
-        { return mPixels  && mWidth && mHeight; }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGBA& pixel) const override
-        { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGB& pixel) const override
-        { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_A& pixel) const override
-        { write_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGBA* pixel) const override
-        { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGB* pixel) const override
-        { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_A* pixel) const override
-        { read_pixel(row, col, pixel); }
-
-        using IBitmapWriteView::WritePixel;
-        using IBitmapReadView::ReadPixel;
-    private:
-        template<typename T>
-        void write_pixel(unsigned row, unsigned col, const T& value) const
-        {
-            ASSERT(row < mHeight);
-            ASSERT(col < mWidth);
-            const auto index = row * mWidth + col;
-            constexpr auto bytes = std::min(sizeof(T), sizeof(Pixel));
-            std::memcpy(&mPixels[index], &value, bytes);
-        }
-        template<typename T>
-        void read_pixel(unsigned row, unsigned col, T* pout) const
-        {
-            ASSERT(row < mHeight);
-            ASSERT(col < mWidth);
-            const auto index = row * mWidth + col;
-            constexpr auto bytes = std::min(sizeof(T), sizeof(Pixel));
-            std::memcpy(pout, &mPixels[index], bytes);
-        }
-    private:
-        mutable Pixel* mPixels  = nullptr;
-        const unsigned mWidth  = 0;
-        const unsigned mHeight = 0;
-    };
-
-
-    template<typename Pixel>
-    void FillBitmap(const BitmapWriteView<Pixel>& dst,
-                    const IRect& dst_rect, const Pixel& value)
-    {
-        const auto dst_width  = dst.GetWidth();
-        const auto dst_height = dst.GetHeight();
-        const auto dst_rect_safe = IRect(0, 0, dst_width, dst_height);
-        const auto rect = Intersect(dst_rect_safe, dst_rect);
-        for (unsigned y=0; y<rect.GetHeight(); ++y)
-        {
-            for (unsigned x=0; x<rect.GetWidth(); ++x)
-            {
-                const auto point = rect.MapToGlobal(x, y);
-                dst.WritePixel(point, value);
-            }
-        }
-    }
-
-    template<typename Pixel, typename RasterOp>
-    void BlitBitmap(const BitmapReadWriteView<Pixel>& dst,
-                    const BitmapReadView<Pixel>& src,
-                    const IPoint& dst_pos, const IRect& src_rect, RasterOp raster_op)
-    {
-        const auto dst_width  = dst.GetWidth();
-        const auto dst_height = dst.GetHeight();
-        const auto src_width  = src.GetWidth();
-        const auto src_height = src.GetHeight();
-        const auto src_rect_safe = Intersect(IRect(0, 0, src_width, src_height), src_rect);
-        const auto dst_rect = IRect(dst_pos, src_rect_safe.GetSize());
-        const auto cpy_rect = Intersect(IRect(0, 0, dst_width, dst_height), dst_rect);
-
-        for (unsigned y=0; y<cpy_rect.GetHeight(); ++y)
-        {
-            for (unsigned x=0; x<cpy_rect.GetWidth(); ++x)
-            {
-                const auto& dst_point = cpy_rect.MapToGlobal(x, y);
-                const auto& src_point = src_rect_safe.MapToGlobal(dst_rect.MapToLocal(dst_point));
-                const auto& src_pixel = src.template ReadPixel<Pixel>(src_point);
-                const auto& dst_pixel = dst.template ReadPixel<Pixel>(dst_point);
-                const auto& ret_pixel = raster_op(src_pixel, dst_pixel);
-                dst.WritePixel(dst_point, ret_pixel);
-            }
-        }
-    }
-
-    template<typename Pixel>
-    void CopyBitmap(const BitmapWriteView<Pixel>& dst,
-                    const BitmapReadView<Pixel>& src,
-                    const IPoint& dst_pos, const IRect& src_rect)
-    {
-        const auto dst_width  = dst.GetWidth();
-        const auto dst_height = dst.GetHeight();
-        const auto src_width  = src.GetWidth();
-        const auto src_height = src.GetHeight();
-        const auto src_rect_safe = Intersect(IRect(0, 0, src_width, src_height), src_rect);
-        const auto dst_rect = IRect(dst_pos, src_rect_safe.GetSize());
-        const auto cpy_rect = Intersect(IRect(0, 0, dst_width, dst_height), dst_rect);
-
-        for (unsigned y=0; y<cpy_rect.GetHeight(); ++y)
-        {
-            for (unsigned x=0; x<cpy_rect.GetWidth(); ++x)
-            {
-                const auto& dst_point = cpy_rect.MapToGlobal(x, y);
-                const auto& src_point = src_rect_safe.MapToGlobal(dst_rect.MapToLocal(dst_point));
-                const auto& src_pixel = src.template ReadPixel<Pixel>(src_point);
-                dst.WritePixel(dst_point, src_pixel);
-            }
-        }
-    }
-
-    template<typename SrcPixel, typename DstPixel>
-    void ReinterpretBitmap(const BitmapWriteView<DstPixel>& dst,
-                           const BitmapReadView<SrcPixel>& src)
-    {
-        const auto src_width  = src.GetWidth();
-        const auto src_height = src.GetHeight();
-        const auto dst_width = dst.GetWidth();
-        const auto dst_height = dst.GetHeight();
-        ASSERT(src_width == dst_width);
-        ASSERT(src_height == dst_height);
-        for (unsigned row=0; row<src_height; ++row)
-        {
-            for (unsigned col=0; col<src_width; ++col)
-            {
-                // either read from src as dst pixel type and get
-                // conversion on read or read from src as src pixel
-                // type and then write as dst pixel type and convert
-                // on write.
-                DstPixel value;
-                src.ReadPixel(row, col, &value);
-                dst.WritePixel(row, col, value);
-            }
-        }
-    }
-
-    template<typename SrcPixel, typename DstPixel, typename Converter>
-    void ConvertBitmap(const BitmapWriteView<DstPixel>& dst,
-                       const BitmapReadView<SrcPixel>& src,
-                       Converter conversion_op)
-    {
-        const auto src_width  = src.GetWidth();
-        const auto src_height = src.GetHeight();
-        const auto dst_width  = dst.GetWidth();
-        const auto dst_height = dst.GetHeight();
-        ASSERT(src_width == dst_width);
-        ASSERT(src_height == dst_height);
-        for (unsigned row=0; row<src_height; ++row)
-        {
-            for (unsigned col=0; col<src_width; ++col)
-            {
-                SrcPixel src_pixel;
-                DstPixel dst_pixel;
-                src.ReadPixel(row, col, &src_pixel);
-                conversion_op(src_pixel, &dst_pixel);
-                dst.WritePixel(row, col, dst_pixel);
-            }
-        }
-    }
-
-    template<typename Pixel, typename CompareFunc>
-    bool PixelCompareBitmaps(const BitmapReadView<Pixel>& src,
-                             const BitmapReadView<Pixel>& dst,
-                             const URect& src_rect,
-                             const URect& dst_rect,
-                             CompareFunc comparer)
-    {
-        const auto src_width  = src.GetWidth();
-        const auto src_height = src.GetHeight();
-        const auto dst_width  = dst.GetWidth();
-        const auto dst_height = dst.GetHeight();
-        const auto dst_rect_safe = Intersect(URect(0, 0, dst_width, dst_height), dst_rect);
-        const auto src_rect_safe = Intersect(URect(0, 0, src_width, src_height), src_rect);
-
-        const auto width  = std::min(dst_rect_safe.GetWidth(), src_rect_safe.GetWidth());
-        const auto height = std::min(dst_rect_safe.GetHeight(), dst_rect_safe.GetHeight());
-        for (unsigned row=0; row<height; ++row)
-        {
-            for (unsigned col=0; col<width; ++col)
-            {
-                const auto& dst_point = dst_rect_safe.MapToGlobal(col, row);
-                const auto& src_point = src_rect_safe.MapToGlobal(col, row);
-                const auto& dst_pixel = dst.template ReadPixel<Pixel>(dst_point);
-                const auto& src_pixel = src.template ReadPixel<Pixel>(src_point);
-                if (!comparer(dst_pixel, src_pixel))
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    template<typename Pixel, typename CompareFunc>
-    bool PixelCompareBitmapRegion(const BitmapReadView<Pixel>& bmp,
-                                  const URect& area,
-                                  const Pixel& reference,
-                                  CompareFunc comparer)
-    {
-        const auto bmp_width  = bmp.GetWidth();
-        const auto bmp_height = bmp.GetHeight();
-        const auto safe_rect  = Intersect(URect(0, 0, bmp_width, bmp_height), area);
-        for (unsigned row=0; row<safe_rect.GetHeight(); ++row)
-        {
-            for (unsigned col=0; col<safe_rect.GetWidth(); ++col)
-            {
-                const auto& bmp_point = safe_rect.MapToGlobal(col, row);
-                const auto& bmp_pixel = bmp.template ReadPixel<Pixel>(bmp_point);
-                if (!comparer(bmp_pixel, reference))
-                    return false;
-            }
-        }
-        return true;
-    }
 
     // Bitmap interface. Mostly designed so that it's possible
     // to keep bitmap objects around as generic bitmaps
@@ -521,19 +198,19 @@ namespace gfx
         // IBitmap interface implementation
 
         // Get the width of the bitmap.
-        virtual unsigned GetWidth() const override
+        unsigned GetWidth() const override
         { return mWidth; }
         // Get the height of the bitmap.
-        virtual unsigned GetHeight() const override
+        unsigned GetHeight() const override
         { return mHeight; }
         // Get the depth of the bitmap
-        virtual unsigned GetDepthBits() const override
+        unsigned GetDepthBits() const override
         { return sizeof(Pixel) * 8; }
         // Get whether the bitmap is valid or not (has been allocated)
-        virtual bool IsValid() const override
+        bool IsValid() const override
         { return mWidth != 0 && mHeight != 0; }
         // Resize the bitmap with the given dimensions.
-        virtual void Resize(unsigned width, unsigned height) override
+        void Resize(unsigned width, unsigned height) override
         {
             Bitmap b(width, height);
             mPixels = std::move(b.mPixels);
@@ -541,16 +218,16 @@ namespace gfx
             mHeight = height;
         }
         // Get the unsafe data pointer.
-        virtual const void* GetDataPtr() const override
+        const void* GetDataPtr() const override
         {
             return mPixels.empty() ? nullptr : (const void*)&mPixels[0];
         }
-        virtual void* GetDataPtr() override
+        void* GetDataPtr() override
         {
             return mPixels.empty() ? nullptr : (void*)&mPixels[0];
         }
         // Flip the rows of the bitmap around horizontal axis (the middle row)
-        virtual void FlipHorizontally() override
+        void FlipHorizontally() override
         {
             for (unsigned y=0; y<mHeight/2; ++y)
             {
@@ -563,7 +240,7 @@ namespace gfx
                 }
             }
         }
-        virtual std::size_t GetHash() const override
+        std::size_t GetHash() const override
         {
             std::size_t hash_value = 0;
             if (mPixels.empty())
@@ -575,13 +252,13 @@ namespace gfx
                 hash_value = base::hash_combine(hash_value, ptr[i]);
             return hash_value;
         }
-        virtual std::unique_ptr<IBitmapReadView> GetReadView() const override
+        std::unique_ptr<IBitmapReadView> GetReadView() const override
         { return std::make_unique<BitmapReadView<Pixel>>((const Pixel*)GetDataPtr(), mWidth, mHeight); }
-        virtual std::unique_ptr<IBitmapWriteView> GetWriteView() override
+        std::unique_ptr<IBitmapWriteView> GetWriteView() override
         { return std::make_unique<BitmapWriteView<Pixel>>((Pixel*)GetDataPtr(), mWidth, mHeight); }
-        virtual std::unique_ptr<IBitmapReadWriteView> GetReadWriteView() override
+        std::unique_ptr<IBitmapReadWriteView> GetReadWriteView() override
         { return std::make_unique<BitmapReadWriteView<Pixel>>((Pixel*)GetDataPtr(), mWidth, mHeight); }
-        virtual std::unique_ptr<IBitmap> Clone() const override
+        std::unique_ptr<IBitmap> Clone() const override
         { return std::make_unique<Bitmap>(*this); }
 
         BitmapReadView<Pixel> GetPixelReadView() const
