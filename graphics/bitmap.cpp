@@ -568,6 +568,35 @@ Pixel_RGBf sRGB_from_color(Color name)
     return ret;
 }
 
+double Pixel_MSE(const Pixel_A& lhs, const Pixel_A& rhs) noexcept
+{
+    const auto r = (int)lhs.r - (int)rhs.r;
+    const auto sum = r*r;
+    const auto mse = sum / 1.0;
+    return mse;
+}
+double Pixel_MSE(const Pixel_RGB& lhs, const Pixel_RGB& rhs) noexcept
+{
+    const auto r = (int)lhs.r - (int)rhs.r;
+    const auto g = (int)lhs.g - (int)rhs.g;
+    const auto b = (int)lhs.b - (int)rhs.b;
+
+    const auto sum = r*r + g*g + b*b;
+    const auto mse = sum / 3.0;
+    return mse;
+}
+double Pixel_MSE(const Pixel_RGBA& lhs, const Pixel_RGBA& rhs) noexcept
+{
+    const auto r = (int)lhs.r - (int)rhs.r;
+    const auto g = (int)lhs.g - (int)rhs.g;
+    const auto b = (int)lhs.b - (int)rhs.b;
+    const auto a = (int)lhs.a - (int)rhs.a;
+
+    const auto sum = r*r + g*g + b*b + a*a;
+    const auto mse = sum / 4.0;
+    return mse;
+}
+
 void WritePPM(const IBitmapReadView& bmp, const std::string& filename)
 {
     static_assert(sizeof(Pixel_RGB) == 3,

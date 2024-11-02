@@ -170,7 +170,7 @@ void unit_test_compare()
             // we've tested the fill operation previously already.
             bmp.Fill(gfx::Color::White);
             bmp.Fill(rc, gfx::Color::Green);
-            TEST_REQUIRE(bmp.Compare(rc, gfx::Color::Green));
+            TEST_REQUIRE(bmp.PixelCompare(rc, gfx::Color::Green));
         }
 
     }
@@ -281,7 +281,7 @@ void unit_test_copy()
         // copy whole bitmap.
         {
             const auto& ret = src.Copy(gfx::URect(0, 0, 4, 4));
-            TEST_REQUIRE(Compare(ret, src));
+            TEST_REQUIRE(PixelCompare(ret, src));
         }
         // copy a sub rectangle
         {

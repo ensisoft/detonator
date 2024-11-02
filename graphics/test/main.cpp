@@ -3131,12 +3131,12 @@ int main(int argc, char* argv[])
                 stop_for_input = true;
 
                 gfx::Bitmap<gfx::Pixel_RGBA>::MSE mse;
-                mse.SetErrorTreshold(5.0);
+                mse.SetErrorThreshold(5.0);
 
                 // load gold image
                 gfx::Image img(goldfile);
                 const gfx::Bitmap<gfx::Pixel_RGBA>& gold = img.AsBitmap<gfx::Pixel_RGBA>();
-                if (!gfx::Compare(gold, result, mse))
+                if (!gfx::PixelCompare(gold, result, mse))
                 {
                     ERROR("'%1' vs '%2' FAILED.", goldfile, resultfile);
                     if (gold.GetWidth() != result.GetWidth() || gold.GetHeight() != result.GetHeight())
