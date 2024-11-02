@@ -207,6 +207,7 @@ add_library(GfxLib
     graphics/algo.cpp
     graphics/utility.cpp
     graphics/bitmap.cpp
+    graphics/pixel.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/simple_shape.cpp
@@ -267,6 +268,7 @@ add_library(GfxLibTesting
     device/opengles.cpp
     graphics/algo.cpp
     graphics/bitmap.cpp
+    graphics/pixel.cpp
     graphics/utility.cpp
     graphics/drawcmd.cpp
     graphics/drawing.cpp
@@ -776,6 +778,7 @@ add_executable(graphics_test
     graphics/algo.cpp
     graphics/utility.cpp
     graphics/bitmap.cpp
+    graphics/pixel.cpp
     graphics/material.cpp
     graphics/shaderprogram.cpp
     graphics/shadersource.cpp
@@ -901,6 +904,7 @@ add_executable(unit_test_imgpack
         editor/app/packing.cpp
         base/assert.cpp
         graphics/bitmap.cpp
+        graphics/pixel.cpp
         third_party/stb/stb_image.c
         third_party/stb/stb_image_write.c)
 add_executable(unit_test_ipc

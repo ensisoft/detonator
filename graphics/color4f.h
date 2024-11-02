@@ -23,4 +23,7 @@ namespace gfx
     using Color = base::Color;
     using Color4f = base::Color4f;
 
+    using base::sRGB_Encode;
+    using base::sRGB_Decode;
+
 } // namespace
