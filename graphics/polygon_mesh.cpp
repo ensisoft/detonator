@@ -39,8 +39,8 @@ void PolygonMeshClass::SetIndexBuffer(IndexBuffer&& buffer) noexcept
         mData = InlineData {};
 
     auto& data = mData.value();
-    data.indices    = std::move(buffer).GetIndexBuffer();
     data.index_type = buffer.GetType();
+    data.indices    = std::move(buffer).GetIndexBuffer();
 }
 
 void PolygonMeshClass::SetIndexBuffer(const IndexBuffer& buffer)
@@ -92,8 +92,8 @@ void PolygonMeshClass::SetCommandBuffer(const CommandBuffer& buffer)
 
 void PolygonMeshClass::SetVertexBuffer(VertexBuffer&& buffer) noexcept
 {
-    SetVertexBuffer(std::move(buffer).GetVertexBuffer());
     SetVertexLayout(buffer.GetLayout());
+    SetVertexBuffer(std::move(buffer).GetVertexBuffer());
 }
 
 void PolygonMeshClass::SetVertexBuffer(std::vector<uint8_t>&& buffer) noexcept
@@ -193,7 +193,7 @@ std::size_t PolygonMeshClass::GetHash() const
     for (const auto& it : mSubMeshes)
         keys.insert(it.first);
 
-    for (const auto key : keys)
+    for (const auto& key : keys)
     {
         const auto& cmd = mSubMeshes.find(key);
         hash = base::hash_combine(hash, key);
@@ -419,7 +419,7 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
 
     const char* beg = (const char*)buffer->GetData();
     const char* end = (const char*)buffer->GetData() + buffer->GetByteSize();
-    const auto& [success, json, error] = base::JsonParse(beg, end);
+    auto [success, json, error] = base::JsonParse(beg, end);
     if (!success)
     {
         ERROR("Failed to parse geometry buffer. [uri='%1', error='%2'].", mContentUri, error);
@@ -460,8 +460,7 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
 
     geometry.SetVertexLayout(vertex_buffer.GetLayout());
     geometry.UploadVertices(vertex_buffer.GetBufferPtr(), vertex_buffer.GetBufferSize());
-    geometry.UploadIndices(index_buffer.GetBufferPtr(), index_buffer.GetBufferSize(),
-                           index_buffer.GetType());
+    geometry.UploadIndices(index_buffer.GetBufferPtr(), index_buffer.GetBufferSize(), index_buffer.GetType());
     geometry.SetDrawCommands(command_buffer.GetCommandBuffer());
     return true;
 }
@@ -483,7 +482,7 @@ ShaderSource PolygonMeshInstance::GetShader(const Environment& env, const Device
     else if (mesh == MeshType::Model3D)
         return MakeModel3DVertexShader(device); // todo:
     else BUG("No such vertex shader");
-    return ShaderSource();
+    return {};
 }
 
 std::string PolygonMeshInstance::GetGeometryId(const Environment& env) const
