@@ -72,9 +72,9 @@ namespace  {
 namespace gfx
 {
 
-std::string ParticleEngineClass::GetProgramId(const Environment& env) const
+std::string ParticleEngineClass::GetShaderId(const Environment& env) const
 {
-    return "particle-program";
+    return env.instanced_draw ? "instanced-particle-shader" : "particle-shader";
 }
 
 std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
@@ -97,10 +97,38 @@ ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device
     source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleTime", ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleAngle", ShaderSource::VaryingType::Float);
+
+    if (env.instanced_draw)
+    {
+        source.AddAttribute("iaModelVectorX", gfx::ShaderSource::AttributeType ::Vec4f);
+        source.AddAttribute("iaModelVectorY", gfx::ShaderSource::AttributeType ::Vec4f);
+        source.AddAttribute("iaModelVectorZ", gfx::ShaderSource::AttributeType ::Vec4f);
+        source.AddAttribute("iaModelVectorW", gfx::ShaderSource::AttributeType ::Vec4f);
+
+        source.AddSource(R"(
+mat4 GetInstanceTransform() {
+   return mat4(iaModelVectorX,
+               iaModelVectorY,
+               iaModelVectorZ,
+               iaModelVectorW);
+}
+)");
+    }
+    else
+    {
+        source.AddSource(R"(
+mat4 GetInstanceTransform() {
+   return mat4(1.0);
+}
+)");
+    }
+
     // this shader doesn't actually write to vTexCoord because when
     // particle (GL_POINTS) rasterization is done the fragment shader
     // must use gl_PointCoord instead.
     source.AddSource(R"(
+mat4 GetInstancedTransform();
+
 void VertexShaderMain()
 {
     vec4 vertex = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
@@ -118,7 +146,10 @@ void VertexShaderMain()
     vParticleRandomValue = aData.y;
     vParticleAlpha       = aData.z;
     vParticleTime        = aData.w;
-    gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
+
+    mat4 instance_matrix = GetInstanceTransform();
+
+    gl_Position  = kProjectionMatrix * kModelViewMatrix * instance_matrix * vertex;
 }
     )");
     return source;
@@ -127,7 +158,7 @@ void VertexShaderMain()
 
 std::string ParticleEngineClass::GetShaderName(const Environment& env) const
 {
-    return "ParticleShader";
+    return env.instanced_draw ? "InstancedParticleShader" : "ParticleShader";
 }
 
 bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const InstanceState& state, Geometry::CreateArgs& create) const
@@ -279,6 +310,32 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
         geometry.SetVertexLayout(layout);
         geometry.AddDrawCmd(Geometry::DrawType::Lines);
     }
+    return true;
+}
+
+bool ParticleEngineClass::Construct(const Environment& env, const InstanceState& state, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+{
+    InstancedDrawBuffer buffer;
+    buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
+    buffer.Resize(draw.instances.size());
+
+    for (size_t i=0; i<draw.instances.size(); ++i)
+    {
+        const auto& instance = draw.instances[i];
+        InstanceAttribute ia;
+        ia.iaModelVectorX = ToVec(instance.model_to_world[0]);
+        ia.iaModelVectorY = ToVec(instance.model_to_world[1]);
+        ia.iaModelVectorZ = ToVec(instance.model_to_world[2]);
+        ia.iaModelVectorW = ToVec(instance.model_to_world[3]);
+        buffer.SetInstanceData(ia, i);
+    }
+
+    // we're not making any contribution to the instance data here, therefore
+    // the hash and usage are exactly what the caller specified.
+    args.usage = draw.usage;
+    args.content_hash = draw.content_hash;
+    args.content_name = draw.content_name;
+    args.buffer = std::move(buffer);
     return true;
 }
 
@@ -1092,7 +1149,7 @@ ShaderSource ParticleEngineInstance::GetShader(const Environment& env, const Dev
 }
 std::string ParticleEngineInstance::GetShaderId(const Environment&  env) const
 {
-    return mClass->GetProgramId(env);
+    return mClass->GetShaderId(env);
 }
 std::string ParticleEngineInstance::GetShaderName(const Environment& env) const
 {
@@ -1106,6 +1163,11 @@ std::string ParticleEngineInstance::GetGeometryId(const Environment& env) const
 bool ParticleEngineInstance::Construct(const Environment& env, Geometry::CreateArgs& create) const
 {
     return mClass->Construct(env, *mState, create);
+}
+
+bool ParticleEngineInstance::Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+{
+    return mClass->Construct(env, *mState, draw, args);
 }
 
 void ParticleEngineInstance::Update(const Environment& env, float dt)
