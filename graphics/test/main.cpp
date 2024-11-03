@@ -3130,13 +3130,19 @@ int main(int argc, char* argv[])
 
                 stop_for_input = true;
 
-                gfx::PixelEquality::ThresholdPrecision mse;
-                mse.SetErrorThreshold(5.0);
-
                 // load gold image
                 gfx::Image img(goldfile);
-                const gfx::Bitmap<gfx::Pixel_RGBA>& gold = img.AsBitmap<gfx::Pixel_RGBA>();
-                if (!gfx::PixelCompare(gold, result, mse))
+
+                const auto& gold = img.AsBitmap<gfx::Pixel_RGBA>();
+                const auto& gold_view = gold.GetPixelReadView();
+                const auto& result_view = result.GetPixelReadView();
+
+                // for some threshold value listing see the unit_test_bitmap which can produce/print
+                // a table of various thresholds.
+                const gfx::PixelEquality::ThresholdPrecision mse_comparator(1000.0);
+                const gfx::USize mse_block_size(8, 8);
+
+                if (!gfx::PixelBlockCompareBitmaps(gold_view, result_view, mse_block_size, mse_comparator))
                 {
                     ERROR("'%1' vs '%2' FAILED.", goldfile, resultfile);
                     if (gold.GetWidth() != result.GetWidth() || gold.GetHeight() != result.GetHeight())
