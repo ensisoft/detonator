@@ -315,6 +315,79 @@ private:
     std::unique_ptr<gfx::ParticleEngineInstance> mEngine[2];
 };
 
+class PacmanPolygon
+{
+public:
+    void Build(gfx::PolygonMeshClass* polygon, float time) const
+    {
+        gfx::tool::PolygonBuilder builder;
+        builder.SetStatic(false);
+        AddPacman(builder, 0.4f, -0.5f, 0.3f, time);
+        AddCircleShape(builder, 0.60f, -0.5f, 0.05f);
+        AddCircleShape(builder, 0.75f, -0.5f, 0.05f);
+        AddCircleShape(builder, 0.90f, -0.5f, 0.05f);
+
+        builder.BuildPoly(*polygon);
+    }
+private:
+    void AddPacman(gfx::tool::PolygonBuilder& poly, float x, float y, float r, float time) const
+    {
+        gfx::Vertex2D center = {
+                {x, y}, {x, -y}
+        };
+        std::vector<gfx::Vertex2D> verts;
+        verts.push_back(center);
+
+        const auto slices = 200;
+        const auto angle = (math::Pi * 2) / slices;
+        const auto mouth = (std::sin(time) + 1.0f) / 2.0f * 15;
+        for (int i=mouth; i<=slices-mouth; ++i)
+        {
+            const float a = i * angle;
+            gfx::Vertex2D v;
+            v.aPosition.x = x + std::cos(a) * r;
+            v.aPosition.y = y + std::sin(a) * r;
+            v.aTexCoord.x = v.aPosition.x;
+            v.aTexCoord.y = v.aPosition.y * -1.0f;
+            verts.push_back(v);
+        }
+        gfx::Geometry::DrawCommand cmd;
+        cmd.type   = gfx::Geometry::DrawType::TriangleFan;
+        cmd.offset = poly.GetNumVertices();
+        cmd.count  = verts.size();
+        poly.AddVertices(std::move(verts));
+        poly.AddDrawCommand(cmd);
+    }
+    void AddCircleShape(gfx::tool::PolygonBuilder& poly, float x, float y, float r) const
+    {
+        gfx::Vertex2D center = {
+                {x, y}, {x, -y}
+        };
+        std::vector<gfx::Vertex2D> verts;
+        verts.push_back(center);
+
+        const auto slices = 200;
+        const auto angle = (math::Pi * 2) / slices;
+        for (int i=0; i<=slices; ++i)
+        {
+            const float a = i * angle;
+            gfx::Vertex2D v;
+            v.aPosition.x = x + std::cos(a) * r;
+            v.aPosition.y = y + std::sin(a) * r;
+            v.aTexCoord.x = v.aPosition.x;
+            v.aTexCoord.y = v.aPosition.y * -1.0f;
+            verts.push_back(v);
+        }
+        gfx::Geometry::DrawCommand cmd;
+        cmd.type   = gfx::Geometry::DrawType::TriangleFan;
+        cmd.offset = poly.GetNumVertices();
+        cmd.count  = verts.size();
+        poly.AddVertices(std::move(verts));
+        poly.AddDrawCommand(cmd);
+    }
+private:
+};
+
 class PolygonTest : public GraphicsTest
 {
 public:
@@ -324,9 +397,10 @@ public:
         mPoly.SetDynamic(true);
     }
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
-        Build();
+        PacmanPolygon pacman;
+        pacman.Build(&mPoly, mTime);
 
         // pacman body + food dots
         gfx::Transform transform;
@@ -355,86 +429,18 @@ public:
                 gfx::Color::DarkYellow, gfx::TextAlign::AlignBottom, 0, 1.4f);
         }
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "PolygonTest"; }
 
-    virtual void Update(float dts) override
+    void Update(float dts) override
     {
         const float velocity = 5.23;
         mTime += dts * velocity;
     }
 private:
-    void Build()
-    {
-        gfx::tool::PolygonBuilder builder;
-        builder.SetStatic(false);
-        AddPacman(builder, 0.4f, -0.5f, 0.3f);
-        AddCircleShape(builder, 0.60f, -0.5f, 0.05f);
-        AddCircleShape(builder, 0.75f, -0.5f, 0.05f);
-        AddCircleShape(builder, 0.90f, -0.5f, 0.05f);
-
-        builder.BuildPoly(mPoly);
-    }
-
-    void AddPacman(gfx::tool::PolygonBuilder& poly, float x, float y, float r)
-    {
-        gfx::Vertex2D center = {
-            {x, y}, {x, -y}
-        };
-        std::vector<gfx::Vertex2D> verts;
-        verts.push_back(center);
-
-        const auto slices = 200;
-        const auto angle = (math::Pi * 2) / slices;
-        const auto mouth = (std::sin(mTime) + 1.0f) / 2.0f * 15;
-        for (int i=mouth; i<=slices-mouth; ++i)
-        {
-            const float a = i * angle;
-            gfx::Vertex2D v;
-            v.aPosition.x = x + std::cos(a) * r;
-            v.aPosition.y = y + std::sin(a) * r;
-            v.aTexCoord.x = v.aPosition.x;
-            v.aTexCoord.y = v.aPosition.y * -1.0f;
-            verts.push_back(v);
-        }
-        gfx::Geometry::DrawCommand cmd;
-        cmd.type   = gfx::Geometry::DrawType::TriangleFan;
-        cmd.offset = poly.GetNumVertices();
-        cmd.count  = verts.size();
-        poly.AddVertices(std::move(verts));
-        poly.AddDrawCommand(cmd);
-    }
-
-    void AddCircleShape(gfx::tool::PolygonBuilder& poly, float x, float y, float r)
-    {
-        gfx::Vertex2D center = {
-            {x, y}, {x, -y}
-        };
-        std::vector<gfx::Vertex2D> verts;
-        verts.push_back(center);
-
-        const auto slices = 200;
-        const auto angle = (math::Pi * 2) / slices;
-        for (int i=0; i<=slices; ++i)
-        {
-            const float a = i * angle;
-            gfx::Vertex2D v;
-            v.aPosition.x = x + std::cos(a) * r;
-            v.aPosition.y = y + std::sin(a) * r;
-            v.aTexCoord.x = v.aPosition.x;
-            v.aTexCoord.y = v.aPosition.y * -1.0f;
-            verts.push_back(v);
-        }
-        gfx::Geometry::DrawCommand cmd;
-        cmd.type   = gfx::Geometry::DrawType::TriangleFan;
-        cmd.offset = poly.GetNumVertices();
-        cmd.count  = verts.size();
-        poly.AddVertices(std::move(verts));
-        poly.AddDrawCommand(cmd);
-    }
-private:
     float mTime = 0.0f;
     gfx::PolygonMeshClass mPoly;
+
 };
 
 class TileBatchTest : public GraphicsTest
