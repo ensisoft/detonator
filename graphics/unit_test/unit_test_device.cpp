@@ -2054,7 +2054,7 @@ void main() {
         args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
         auto geom = dev->CreateGeometry("geom", std::move(args));
 
-        const gfx::GeometryDrawCommand draw(*geom, *inst);
+        const gfx::GeometryDrawCommand draw(*geom, inst);
 
         dev->BeginFrame();
            dev->ClearColor(gfx::Color::DarkRed);
@@ -2086,7 +2086,7 @@ void main() {
         args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
         auto geom = dev->CreateGeometry("geom", std::move(args));
 
-        const gfx::GeometryDrawCommand draw(*geom, *inst);
+        const gfx::GeometryDrawCommand draw(*geom, inst);
 
         dev->BeginFrame();
         dev->ClearColor(gfx::Color::DarkRed);
