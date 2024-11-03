@@ -118,7 +118,7 @@ glm::mat4 MakePerspectiveProjection(FRadians fov, float aspect, float znear, flo
     return glm::perspective(fov.ToRadians(), aspect, znear, zfar);
 }
 
-gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device)
+gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instancing)
 {
     // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
     // are used to support per particle features.
@@ -136,6 +136,14 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device)
     source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec2f);
     source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
 
+    if (use_instancing)
+    {
+        source.AddAttribute("iaModelVectorX", gfx::ShaderSource::AttributeType ::Vec4f);
+        source.AddAttribute("iaModelVectorY", gfx::ShaderSource::AttributeType ::Vec4f);
+        source.AddAttribute("iaModelVectorZ", gfx::ShaderSource::AttributeType ::Vec4f);
+        source.AddAttribute("iaModelVectorW", gfx::ShaderSource::AttributeType ::Vec4f);
+    }
+
     source.AddUniform("kProjectionMatrix", gfx::ShaderSource::UniformType::Mat4f);
     source.AddUniform("kModelViewMatrix", gfx::ShaderSource::UniformType::Mat4f);
 
@@ -147,7 +155,29 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device)
 
     source.AddVarying("vTileData", gfx::ShaderSource::VaryingType ::Vec2f);
 
+    if (use_instancing)
+    {
+        source.AddSource(R"(
+mat4 GetInstanceTransform() {
+   return mat4(iaModelVectorX,
+               iaModelVectorY,
+               iaModelVectorZ,
+               iaModelVectorW);
+}
+)");
+    }
+    else
+    {
+        source.AddSource(R"(
+mat4 GetInstanceTransform() {
+   return mat4(1.0);
+}
+)");
+    }
+
     source.AddSource(R"(
+mat4 GetInstanceTransform();
+
 void VertexShaderMain()
 {
     vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 0.0, 1.0);
@@ -162,19 +192,29 @@ void VertexShaderMain()
     // dummy data
     vTileData = vec2(0.0, 0.0);
 
-    gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
+    mat4 instance_matrix = GetInstanceTransform();
+
+    gl_Position  = kProjectionMatrix * kModelViewMatrix * instance_matrix * vertex;
 }
 )");
     return source;
 }
 
-gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device)
+gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instancing)
 {
     gfx::ShaderSource source;
     source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
     source.SetType(gfx::ShaderSource::Type::Vertex);
     source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec3f);
     source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
+
+    if (use_instancing)
+    {
+        source.AddAttribute("iaModelVectorX", gfx::ShaderSource::AttributeType ::Vec4f);
+        source.AddAttribute("iaModelVectorY", gfx::ShaderSource::AttributeType ::Vec4f);
+        source.AddAttribute("iaModelVectorZ", gfx::ShaderSource::AttributeType ::Vec4f);
+        source.AddAttribute("iaModelVectorW", gfx::ShaderSource::AttributeType ::Vec4f);
+    }
 
     source.AddUniform("kProjectionMatrix", gfx::ShaderSource::UniformType::Mat4f);
     source.AddUniform("kModelViewMatrix", gfx::ShaderSource::UniformType::Mat4f);
@@ -187,7 +227,29 @@ gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device)
 
     source.AddVarying("vTileData", gfx::ShaderSource::VaryingType::Vec2f);
 
+    if (use_instancing)
+    {
+        source.AddSource(R"(
+mat4 GetInstanceTransform() {
+   return mat4(iaModelVectorX,
+               iaModelVectorY,
+               iaModelVectorZ,
+               iaModelVectorW);
+}
+)");
+    }
+    else
+    {
+        source.AddSource(R"(
+mat4 GetInstanceTransform() {
+   return mat4(1.0);
+}
+)");
+    }
+
     source.AddSource(R"(
+mat4 GetInstanceTransform();
+
 void VertexShaderMain()
 {
     vTexCoord = aTexCoord;
@@ -201,13 +263,15 @@ void VertexShaderMain()
     // dummy out
     vTileData = vec2(0.0, 0.0);
 
-    gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
+    mat4 instance_matrix = GetInstanceTransform();
+
+    gl_Position = kProjectionMatrix * kModelViewMatrix * instance_matrix * vec4(aPosition.xyz, 1.0);
 }
 )");
     return source;
 }
 
-gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device)
+gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_instancing)
 {
     gfx::ShaderSource source;
     source.SetVersion(gfx::ShaderSource::Version::GLSL_300);

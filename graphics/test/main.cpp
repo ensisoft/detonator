@@ -2844,6 +2844,144 @@ private:
 
 };
 
+class Simple2DInstanceTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::Rectangle drawable;
+        gfx::MaterialInstance material(gfx::CreateMaterialClassFromColor(gfx::Color::DarkGreen));
+
+        gfx::Drawable::InstancedDraw instanced;
+        instanced.gpu_id = "simple-2d-instance-test";
+        instanced.usage = gfx::BufferUsage::Static;
+        instanced.content_name = "simple-2d-instance-test";
+        instanced.content_hash = 0; // irrelevant since we use static data and are not in editing mode.
+
+        for (unsigned i=0; i<10; ++i)
+        {
+            for (unsigned j=0; j<10; ++j)
+            {
+                const auto xpos = 20.0f + j * 100.0f;
+                const auto ypos = 20.0f + i * 45.0f;
+                gfx::Drawable::DrawInstance inst;
+                inst.model_to_world = MakeTransform(glm::vec2{xpos, ypos}, glm::vec2{80.0f, 38.0f});
+                instanced.instances.push_back(inst);
+            }
+        }
+
+        gfx::Painter::DrawCommand cmd;
+        cmd.drawable = &drawable;
+        cmd.material = &material;
+        cmd.instanced_draw = instanced;
+
+        gfx::Painter::DrawList draw_list;
+        draw_list.push_back(cmd);
+
+        gfx::detail::GenericShaderProgram program;
+        painter.Draw(draw_list, program);
+    }
+    virtual std::string GetName() const override
+    {
+        return "Simple2DInstanceTest";
+    }
+    glm::mat4 MakeTransform(const glm::vec2& pos, const glm::vec2& size) const
+    {
+        gfx::Transform transform;
+        transform.Resize(size);
+        transform.MoveTo(pos);
+        return transform.GetAsMatrix();
+    }
+private:
+};
+
+class Simple3DInstanceTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        constexpr auto const aspect = 1024.0f / 768.0f;
+        constexpr auto Fov = 45.0f;
+        constexpr auto Far = 10000.0f;
+        const auto half_width = 1024.0f*0.5f;
+        const auto half_height = 768.0f*0.5f;
+        const auto ortho = glm::ortho(-half_width, half_height, -half_height, half_height, -1000.0f, 1000.0f);
+        const auto near = half_height / std::tan(glm::radians(Fov*0.5f));
+        const auto projection = ortho *
+                                  glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -1000.0f} ) *
+                                    glm::inverse(ortho) *
+                                      glm::perspective(glm::radians(Fov), aspect, near, Far) *
+                                        glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -near });
+
+        gfx::Painter p(painter);
+        p.ResetViewMatrix();
+        p.SetProjectionMatrix(projection);
+
+        gfx::Cube drawable;
+        gfx::MaterialInstance material(gfx::CreateMaterialClassFromImage("textures/uv_test_512.png"));
+
+        gfx::Drawable::InstancedDraw instanced;
+        instanced.gpu_id = "simple-3d-instance-test";
+        instanced.usage = gfx::BufferUsage::Stream;
+        instanced.content_name = "simple-3d-instance-test";
+        instanced.content_hash = 0; // irrelevant since we're doing stream (i.e. every render updates the VBO)
+
+        gfx::Painter::DrawState state;
+        state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
+        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.culling      = gfx::Painter::Culling::Back;
+        state.write_color  = true;
+
+        gfx::detail::GenericShaderProgram program;
+
+        const auto t = mTime;
+
+        for (unsigned i=0; i<10; ++i)
+        {
+            for (unsigned j=0; j<10; ++j)
+            {
+                const auto xpos =  100.0f + j * 80.0f;
+                const auto ypos = -50.0f - i * 80.0f;
+
+                gfx::Transform transform;
+                transform.Resize(40.0f, 40.0f, 40.0f);
+                transform.RotateAroundY(std::sin(t));
+                transform.RotateAroundX(std::cos(t));
+                transform.Translate(-half_width, half_height);
+                transform.Translate(xpos, ypos);
+
+                //p.Draw(drawable, transform, material, state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+                gfx::Drawable::DrawInstance inst;
+                inst.model_to_world = transform;
+                instanced.instances.push_back(inst);
+            }
+        }
+
+        gfx::Painter::DrawCommand cmd;
+        cmd.drawable = &drawable;
+        cmd.material = &material;
+        cmd.state    = state;
+        cmd.instanced_draw = instanced;
+
+        gfx::Painter::DrawList draw_list;
+        draw_list.push_back(cmd);
+
+        p.Draw(draw_list, program);
+    }
+    virtual void Update(float dt) override
+    {
+        mTime += dt;
+    }
+
+    virtual std::string GetName() const override
+    {
+        return "Simple3DInstanceTest";
+    }
+private:
+    double mTime = 0.0;
+};
+
 
 int main(int argc, char* argv[])
 {
@@ -3030,6 +3168,8 @@ int main(int argc, char* argv[])
     if (version == 3)
     {
         tests.emplace_back(new FramebufferTest);
+        tests.emplace_back(new Simple2DInstanceTest);
+        tests.emplace_back(new Simple3DInstanceTest);
     }
 
     bool stop_for_input = false;

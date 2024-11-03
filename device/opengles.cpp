@@ -774,8 +774,8 @@ public:
     {
         auto instance = std::make_shared<InstancedDrawImpl>(this);
         instance->SetFrameStamp(mFrameNumber);
-        instance->SetName(args.content_name);
-        instance->SetDataHash(args.content_hash);
+        instance->SetContentName(args.content_name);
+        instance->SetContentHash(args.content_hash);
         instance->SetUsage(args.usage);
         instance->SetBuffer(std::move(args.buffer));
         instance->Upload();
@@ -2085,7 +2085,26 @@ private:
             {
                 mDevice->FreeBuffer(mBufferIndex, mBufferOffset, mBufferSize, mUsage, BufferType::VertexBuffer);
             }
+            if (mUsage == Usage::Static)
+                DEBUG("Deleted instanced draw object. [name='%1']", mContentName);
         }
+        std::size_t GetContentHash() const override
+        {
+            return mContentHash;
+        }
+        std::string GetContentName() const override
+        {
+            return mContentName;
+        }
+        void SetContentHash(size_t hash) override
+        {
+            mContentHash = hash;
+        }
+        void SetContentName(std::string name) override
+        {
+            mContentName = std::move(name);
+        }
+
         void Upload() const
         {
             if (!mPendingUpload.has_value())
@@ -2109,7 +2128,7 @@ private:
             mLayout = std::move(upload.GetInstanceDataLayout());
             if (mUsage == Usage::Static)
             {
-                DEBUG("Uploaded geometry instance buffer data. [name='%1', bytes='%2', usage='%3']", mName, vertex_bytes, mUsage);
+                DEBUG("Uploaded geometry instance buffer data. [name='%1', bytes='%2', usage='%3']", mContentName, vertex_bytes, mUsage);
             }
         }
 
@@ -2117,10 +2136,6 @@ private:
         { mPendingUpload = std::move(buffer); }
         inline void SetUsage(Usage usage) noexcept
         { mUsage = usage; }
-        inline void SetDataHash(size_t hash) noexcept
-        { mHash = hash; }
-        inline void SetName(const std::string& name) noexcept
-        { mName = name; }
         inline void SetFrameStamp(size_t frame_number) const noexcept
         { mFrameNumber = frame_number; }
         inline size_t GetFrameStamp() const noexcept
@@ -2136,8 +2151,8 @@ private:
 
     private:
         OpenGLES2GraphicsDevice* mDevice = nullptr;
-        std::size_t mHash = 0;
-        std::string mName;
+        std::size_t mContentHash = 0;
+        std::string mContentName;
         Usage mUsage = Usage::Static;
         mutable std::size_t mFrameNumber = 0;
         mutable std::size_t mBufferSize   = 0;

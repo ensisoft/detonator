@@ -476,11 +476,11 @@ ShaderSource PolygonMeshInstance::GetShader(const Environment& env, const Device
 {
     const auto mesh = GetMeshType();
     if (mesh == MeshType::Simple2D)
-        return MakeSimple2DVertexShader(device);
+        return MakeSimple2DVertexShader(device, false);
     else if (mesh == MeshType::Simple3D)
-        return MakeSimple3DVertexShader(device);
+        return MakeSimple3DVertexShader(device, false);
     else if (mesh == MeshType::Model3D)
-        return MakeModel3DVertexShader(device); // todo:
+        return MakeModel3DVertexShader(device, false); // todo:
     else BUG("No such vertex shader");
     return {};
 }

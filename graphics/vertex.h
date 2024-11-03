@@ -143,6 +143,14 @@ namespace gfx
         Vec3 aTangent;
         Vec3 aBitangent;
     };
+
+    struct InstanceAttribute {
+        Vec4 iaModelVectorX;
+        Vec4 iaModelVectorY;
+        Vec4 iaModelVectorZ;
+        Vec4 iaModelVectorW;
+    };
+
 #pragma pack(pop)
 
     // The offsetof macro is guaranteed to be usable only with types with standard layout.
@@ -227,6 +235,23 @@ namespace gfx
             {"aTexCoord",  0, 2, 0, offsetof(ModelVertex3D, aTexCoord)},
             {"aTangent",   0, 3, 0, offsetof(ModelVertex3D, aTangent)},
             {"aBitangent", 0, 3, 0, offsetof(ModelVertex3D, aBitangent)},
+        });
+        return layout;
+    }
+
+    using InstanceDataLayout = VertexLayout;
+
+    template<typename Attribute>
+    const InstanceDataLayout& GetInstanceDataLayout();
+
+    template<> inline
+    const InstanceDataLayout& GetInstanceDataLayout<InstanceAttribute>()
+    {
+        static const InstanceDataLayout layout(sizeof(InstanceAttribute), {
+            {"iaModelVectorX", 0, 4, 0, offsetof(InstanceAttribute, iaModelVectorX)},
+            {"iaModelVectorY", 0, 4, 0, offsetof(InstanceAttribute, iaModelVectorY)},
+            {"iaModelVectorZ", 0, 4, 0, offsetof(InstanceAttribute, iaModelVectorZ)},
+            {"iaModelVectorW", 0, 4, 0, offsetof(InstanceAttribute, iaModelVectorW)}
         });
         return layout;
     }
