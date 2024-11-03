@@ -476,11 +476,11 @@ ShaderSource PolygonMeshInstance::GetShader(const Environment& env, const Device
 {
     const auto mesh = GetMeshType();
     if (mesh == MeshType::Simple2D)
-        return MakeSimple2DVertexShader(device, false);
+        return MakeSimple2DVertexShader(device, env.instanced_draw);
     else if (mesh == MeshType::Simple3D)
-        return MakeSimple3DVertexShader(device, false);
+        return MakeSimple3DVertexShader(device, env.instanced_draw);
     else if (mesh == MeshType::Model3D)
-        return MakeModel3DVertexShader(device, false); // todo:
+        return MakeModel3DVertexShader(device, env.instanced_draw); // todo:
     else BUG("No such vertex shader");
     return {};
 }
@@ -493,6 +493,32 @@ std::string PolygonMeshInstance::GetGeometryId(const Environment& env) const
 bool PolygonMeshInstance::Construct(const Environment& env, Geometry::CreateArgs& create) const
 {
     return mClass->Construct(env, create);
+}
+
+bool PolygonMeshInstance::Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+{
+    InstancedDrawBuffer buffer;
+    buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
+    buffer.Resize(draw.instances.size());
+
+    for (size_t i=0; i<draw.instances.size(); ++i)
+    {
+        const auto& instance = draw.instances[i];
+        InstanceAttribute ia;
+        ia.iaModelVectorX = ToVec(instance.model_to_world[0]);
+        ia.iaModelVectorY = ToVec(instance.model_to_world[1]);
+        ia.iaModelVectorZ = ToVec(instance.model_to_world[2]);
+        ia.iaModelVectorW = ToVec(instance.model_to_world[3]);
+        buffer.SetInstanceData(ia, i);
+    }
+
+    // we're not making any contribution to the instance data here, therefore
+    // the hash and usage are exactly what the caller specified.
+    args.usage = draw.usage;
+    args.content_hash = draw.content_hash;
+    args.content_name = draw.content_name;
+    args.buffer = std::move(buffer);
+    return true;
 }
 
 Drawable::DrawCmd PolygonMeshInstance::GetDrawCmd() const
@@ -529,11 +555,11 @@ std::string PolygonMeshInstance::GetShaderId(const Environment& env) const
 {
     const auto mesh = GetMeshType();
     if (mesh == MeshType::Simple2D)
-        return "simple-2D-vertex-program";
+        return env.instanced_draw ? "simple-instanced-2D-vertex-shader" : "simple-2D-vertex-shader";
     else if (mesh == MeshType::Simple3D)
-        return "simple-3D-vertex-program";
+        return env.instanced_draw ? "simple-instanced-3D-vertex-shader" : "simple-3D-vertex-shader";
     else if (mesh == MeshType::Model3D) // todo
-        return "model-3D-vertex-shader";
+        return env.instanced_draw ? "instanced-3D-vertex-shader" : "3D-vertex-shader";
     else BUG("No such vertex shader.");
     return "";
 }
@@ -542,11 +568,11 @@ std::string PolygonMeshInstance::GetShaderName(const Environment& env) const
 {
     const auto mesh = GetMeshType();
     if (mesh == MeshType::Simple2D)
-        return "Simple2DVertexShader";
+        return env.instanced_draw ? "SimpleInstanced2DVertexShader" : "Simple2DVertexShader";
     else if (mesh == MeshType::Simple3D)
-        return "Simple2DVertexShader";
+        return env.instanced_draw ? "SimpleInstanced3DVertexShader" : "Simple3DVertexShader";
     else if (mesh == MeshType::Model3D)
-        return "Model3DVertexShader";
+        return env.instanced_draw ? "Instanced3DVertexShader" : "3DVertexShader";
     else BUG("No such vertex shader");
     return "";
 }
