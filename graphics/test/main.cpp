@@ -2988,6 +2988,75 @@ private:
     double mTime = 0.0;
 };
 
+class PolygonInstanceTest : public GraphicsTest
+{
+public:
+    PolygonInstanceTest()
+    {
+        // allow dynamic updates.
+        mPolygon.SetDynamic(true);
+    }
+
+    virtual void Render(gfx::Painter& painter) override
+    {
+        PacmanPolygon pacman;
+        pacman.Build(&mPolygon, mTime);
+
+        gfx::Drawable::InstancedDraw instanced;
+        instanced.gpu_id = "polygon-2d-instance-test";
+        instanced.usage = gfx::BufferUsage::Static;
+        instanced.content_name = "polygon-2d-instance-test";
+        instanced.content_hash = 0; // irrelevant since we use static data and are not in editing mode.
+
+        for (unsigned i=0; i<7; ++i)
+        {
+            for (unsigned j=0; j<10; ++j)
+            {
+                const auto xpos = 20.0f + j * 100.0f;
+                const auto ypos = 20.0f + i * 100.0f;
+                gfx::Drawable::DrawInstance inst;
+                inst.model_to_world = MakeTransform(glm::vec2{xpos, ypos}, glm::vec2{80.0f, 80.0f});
+                instanced.instances.push_back(inst);
+            }
+        }
+
+        gfx::PolygonMeshInstance drawable(mPolygon);
+        gfx::MaterialInstance material(gfx::CreateMaterialClassFromColor(gfx::Color::DarkYellow));
+
+        gfx::Painter::DrawCommand cmd;
+        cmd.drawable = &drawable;
+        cmd.material = &material;
+        cmd.instanced_draw = instanced;
+
+        gfx::Painter::DrawList draw_list;
+        draw_list.push_back(cmd);
+
+        gfx::detail::GenericShaderProgram program;
+        painter.Draw(draw_list, program);
+    }
+
+    virtual std::string GetName() const override
+    {
+        return "PolygonInstanceTest";
+    }
+    virtual void Update(float dt) override
+    {
+        const float velocity = 5.23;
+        mTime += (dt * velocity);
+    }
+private:
+    glm::mat4 MakeTransform(const glm::vec2& pos, const glm::vec2& size) const
+    {
+        gfx::Transform transform;
+        transform.Resize(size);
+        transform.MoveTo(pos);
+        return transform.GetAsMatrix();
+    }
+private:
+    float mTime = 0.0f;
+    gfx::PolygonMeshClass mPolygon;
+};
+
 
 int main(int argc, char* argv[])
 {
@@ -3176,6 +3245,7 @@ int main(int argc, char* argv[])
         tests.emplace_back(new FramebufferTest);
         tests.emplace_back(new Simple2DInstanceTest);
         tests.emplace_back(new Simple3DInstanceTest);
+        tests.emplace_back(new PolygonInstanceTest);
     }
 
     bool stop_for_input = false;

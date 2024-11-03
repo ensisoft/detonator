@@ -177,24 +177,26 @@ namespace gfx
         inline void SetSubMeshKey(std::string key) noexcept
         { mSubMeshKey = std::move(key); }
 
-        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
-        virtual ShaderSource GetShader(const Environment& env, const Device& device) const override;
-        virtual std::string GetShaderId(const Environment& env) const override;
-        virtual std::string GetShaderName(const Environment& env) const override;
-        virtual std::string GetGeometryId(const Environment& env) const override;
-        virtual bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
+        void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
+        ShaderSource GetShader(const Environment& env, const Device& device) const override;
+        std::string GetShaderId(const Environment& env) const override;
+        std::string GetShaderName(const Environment& env) const override;
+        std::string GetGeometryId(const Environment& env) const override;
+        bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
+        bool Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
 
-        virtual DrawCmd GetDrawCmd() const override;
+        DrawCmd GetDrawCmd() const override;
 
-        virtual DrawPrimitive GetDrawPrimitive() const override
+        DrawPrimitive GetDrawPrimitive() const override
         { return DrawPrimitive::Triangles; }
-        virtual Type GetType() const override
+        Type GetType() const override
         { return Type::Polygon; }
-        virtual Usage GetGeometryUsage() const override;
 
-        virtual size_t GetGeometryHash() const override;
+        Usage GetGeometryUsage() const override;
 
-        virtual const DrawableClass* GetClass() const override
+        size_t GetGeometryHash() const override;
+
+        const DrawableClass* GetClass() const override
         { return mClass.get(); }
 
     private:
