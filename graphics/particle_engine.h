@@ -268,8 +268,10 @@ namespace gfx
         {}
 
         bool Construct(const Environment& env, const InstanceState& state, Geometry::CreateArgs& create) const;
+        bool Construct(const Environment& env, const InstanceState& state, const InstancedDraw& draw,
+                       gfx::InstancedDraw::CreateArgs& args) const;
         ShaderSource GetShader(const Environment& env, const Device& device) const;
-        std::string GetProgramId(const Environment& env) const;
+        std::string GetShaderId(const Environment& env) const;
         std::string GetShaderName(const Environment& env) const;
         std::string GetGeometryId(const Environment& env) const;
 
@@ -293,19 +295,19 @@ namespace gfx
             mParams = std::make_shared<Params>(params);
         }
 
-        virtual Type GetType() const override
+        Type GetType() const override
         { return DrawableClass::Type::ParticleEngine; }
-        virtual std::string GetId() const override
+        std::string GetId() const override
         { return mId; }
-        virtual std::string GetName() const override
+        std::string GetName() const override
         { return mName; };
-        virtual void SetName(const std::string& name) override
+        void SetName(const std::string& name) override
         { mName = name; }
-        virtual std::size_t GetHash() const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-        virtual std::unique_ptr<DrawableClass> Clone() const override;
-        virtual std::unique_ptr<DrawableClass> Copy() const override;
+        std::size_t GetHash() const override;
+        void IntoJson(data::Writer& data) const override;
+        bool FromJson(const data::Reader& data) override;
+        std::unique_ptr<DrawableClass> Clone() const override;
+        std::unique_ptr<DrawableClass> Copy() const override;
     private:
         void InitParticles(const Environment& env, InstanceStatePtr state, size_t num) const;
         void UpdateParticles(const Environment& env, InstanceStatePtr state, float dt) const;
@@ -364,23 +366,24 @@ namespace gfx
           : mClass(std::make_shared<ParticleEngineClass>(params))
           , mState(std::make_shared<ParticleEngineClass::InstanceState>())
         {}
-        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
-        virtual ShaderSource GetShader(const Environment& env, const Device& device) const override;
-        virtual std::string GetShaderId(const Environment&  env) const override;
-        virtual std::string GetShaderName(const Environment& env) const override;
-        virtual std::string GetGeometryId(const Environment& env) const override;
-        virtual bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
-        virtual void Update(const Environment& env, float dt) override;
-        virtual bool IsAlive() const override;
-        virtual void Restart(const Environment& env) override;
-        virtual void Execute(const Environment& env, const Command& cmd) override;
-        virtual DrawPrimitive  GetDrawPrimitive() const override;
+        void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
+        ShaderSource GetShader(const Environment& env, const Device& device) const override;
+        std::string GetShaderId(const Environment&  env) const override;
+        std::string GetShaderName(const Environment& env) const override;
+        std::string GetGeometryId(const Environment& env) const override;
+        bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
+        bool Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
+        void Update(const Environment& env, float dt) override;
+        bool IsAlive() const override;
+        void Restart(const Environment& env) override;
+        void Execute(const Environment& env, const Command& cmd) override;
+        DrawPrimitive  GetDrawPrimitive() const override;
 
-        virtual Type GetType() const override
+        Type GetType() const override
         { return Type::ParticleEngine; }
-        virtual Usage GetGeometryUsage() const override
+        Usage GetGeometryUsage() const override
         { return Usage::Stream; }
-        virtual const DrawableClass* GetClass() const override
+        const DrawableClass* GetClass() const override
         { return mClass.get(); }
 
         // Get the current number of alive particles.

@@ -97,6 +97,19 @@ namespace gfx
             size_t draw_cmd_count = std::numeric_limits<size_t>::max();
         };
 
+        struct DrawInstance {
+            glm::mat4 model_to_world;
+        };
+        using DrawInstanceArray = std::vector<DrawInstance>;
+
+        struct InstancedDraw {
+            std::string gpu_id;
+            std::string content_name;
+            std::size_t content_hash;
+            DrawInstanceArray instances;
+            Usage usage = Usage::Dynamic;
+        };
+
         virtual ~DrawableClass() = default;
         // Get the type of the drawable.
         virtual Type GetType() const = 0;
@@ -139,6 +152,10 @@ namespace gfx
 
         using DrawCmd = DrawableClass::DrawCmd;
 
+        using DrawInstance = DrawableClass::DrawInstance;
+        using DrawInstanceArray = DrawableClass::DrawInstanceArray;
+        using InstancedDraw = DrawableClass::InstancedDraw;
+
         // Rasterizer state that the geometry can manipulate.
         struct RasterState {
             // rasterizer setting for line width when the geometry
@@ -147,19 +164,6 @@ namespace gfx
             // Culling state for discarding back/front facing fragments.
             // Culling state only applies to polygon's not to points or lines.
             Culling culling = Culling::Back;
-        };
-
-        struct DrawInstance {
-            glm::mat4 model_to_world;
-        };
-        using DrawInstanceArray = std::vector<DrawInstance>;
-
-        struct InstancedDraw {
-            std::string gpu_id;
-            std::string content_name;
-            std::size_t content_hash;
-            Drawable::DrawInstanceArray instances;
-            Drawable::Usage usage = Drawable::Usage::Dynamic;
         };
 
         using CommandArg = std::variant<float, int, std::string>;
