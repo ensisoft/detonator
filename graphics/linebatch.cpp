@@ -31,7 +31,7 @@ void LineBatch2D::ApplyDynamicState(const Environment &environment, ProgramState
 
 ShaderSource LineBatch2D::GetShader(const Environment& environment, const Device& device) const
 {
-    return MakeSimple2DVertexShader(device);
+    return MakeSimple2DVertexShader(device, false);
 }
 
 std::string LineBatch2D::GetShaderId(const Environment& environment) const
@@ -80,7 +80,7 @@ void LineBatch3D::ApplyDynamicState(const Environment& environment, ProgramState
 
 ShaderSource LineBatch3D::GetShader(const Environment& environment, const Device& device) const
 {
-    return MakeSimple3DVertexShader(device);
+    return MakeSimple3DVertexShader(device, false);
 }
 
 std::string LineBatch3D::GetShaderId(const Environment& environment) const

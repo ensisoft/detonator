@@ -25,6 +25,7 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "graphics/types.h"
 #include "graphics/color4f.h"
@@ -32,6 +33,7 @@
 #include "graphics/device.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
+#include "graphics/instance.h"
 
 #include "base/snafu.h"
 
@@ -184,6 +186,8 @@ namespace gfx
             float line_width = 1.0f;
         };
 
+        using InstancedDraw = Drawable::InstancedDraw;
+
         struct DrawCommand {
             // Optional projection matrix that will override the painter's projection matrix.
             const glm::mat4* projection = nullptr;
@@ -204,7 +208,10 @@ namespace gfx
             // stencil testing etc.
             DrawState state;
 
-            GeometryPtr geometry;
+            std::optional<InstancedDraw> instanced_draw;
+
+            InstancedDrawPtr instance_draw_ptr;
+            GeometryPtr geometry_gpu_ptr;
         };
         using DrawList = std::vector<DrawCommand>;
 
@@ -278,8 +285,9 @@ namespace gfx
                               const Drawable::Environment& drawable_environment,
                               const Material::Environment& material_environment) const;
 
-        GeometryPtr GetGeometry(const Drawable& drawable,
-                                const Drawable::Environment& env) const;
+        GeometryPtr GetGpuGeometry(const Drawable& drawable, const Drawable::Environment& env) const;
+        InstancedDrawPtr GetGpuInstancedDraw(const InstancedDraw& inst,
+                const Drawable& drawable, const Drawable::Environment& env) const;
 
     private:
         std::shared_ptr<Device> mDeviceInst;

@@ -65,6 +65,25 @@ std::string NameAspectRatio(float width, float height, RoundFunc Round, const ch
     }
     return ret;
 }
+
+std::string GetShaderName(gfx::SimpleShapeType type, bool use_instancing)
+{
+    if (gfx::Is3DShape(type))
+    {
+        return use_instancing ? "SimpleInstanced3DVertexShader" : "Simple3DVertexShader";
+    }
+    return use_instancing ? "SimpleInstanced2DVertexShader" : "Simple2DVertexShader";
+}
+
+std::string GetShaderId(gfx::SimpleShapeType type, bool use_instancing)
+{
+    if (gfx::Is3DShape(type))
+    {
+        return use_instancing ? "simple-instanced-3D-vertex-shader" : "simple-3D-vertex-shader";
+    }
+    return use_instancing ? "simple-instanced-2D-vertex-shader" : "simple-2D-vertex-shader";
+}
+
 } // namespace
 
 
@@ -1264,9 +1283,9 @@ void SimpleShapeInstance::ApplyDynamicState(const Environment& env, ProgramState
 ShaderSource SimpleShapeInstance::GetShader(const Environment& env, const Device& device) const
 {
     if (Is3DShape(mClass->GetShapeType()))
-        return MakeSimple3DVertexShader(device);
+        return MakeSimple3DVertexShader(device, env.instanced_draw);
 
-    return MakeSimple2DVertexShader(device);
+    return MakeSimple2DVertexShader(device, env.instanced_draw);
 }
 std::string SimpleShapeInstance::GetGeometryId(const Environment& env) const
 {
@@ -1278,20 +1297,41 @@ bool SimpleShapeInstance::Construct(const Environment& env, Geometry::CreateArgs
     detail::ConstructSimpleShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), geometry);
     return true;
 }
+
+bool SimpleShapeInstance::Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+{
+    InstancedDrawBuffer buffer;
+    buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
+    buffer.Resize(draw.instances.size());
+
+    for (size_t i=0; i<draw.instances.size(); ++i)
+    {
+        const auto& instance = draw.instances[i];
+        InstanceAttribute ia;
+        ia.iaModelVectorX = ToVec(instance.model_to_world[0]);
+        ia.iaModelVectorY = ToVec(instance.model_to_world[1]);
+        ia.iaModelVectorZ = ToVec(instance.model_to_world[2]);
+        ia.iaModelVectorW = ToVec(instance.model_to_world[3]);
+        buffer.SetInstanceData(ia, i);
+    }
+
+    // we're not making any contribution to the instance data here, therefore
+    // the hash and usage are exactly what the caller specified
+    args.usage = draw.usage;
+    args.content_name = draw.content_name;
+    args.content_hash = draw.content_hash;
+    args.buffer = std::move(buffer);
+    return true;
+}
+
 std::string SimpleShapeInstance::GetShaderId(const Environment& env) const
 {
-    if (Is3DShape(mClass->GetShapeType()))
-        return "simple-3D-vertex-shader";
-
-    return "simple-2D-vertex-shader";
+    return ::GetShaderId(mClass->GetShapeType(), env.instanced_draw);
 }
 
 std::string SimpleShapeInstance::GetShaderName(const Environment& env) const
 {
-    if (Is3DShape(mClass->GetShapeType()))
-        return "Simple3DVertexShader";
-
-    return "Simple2DVertexShader";
+    return ::GetShaderName(mClass->GetShapeType(), env.instanced_draw);
 }
 
 Drawable::Type SimpleShapeInstance::GetType() const
@@ -1325,24 +1365,18 @@ void SimpleShape::ApplyDynamicState(const Environment& env, ProgramState& progra
 ShaderSource SimpleShape::GetShader(const Environment& env, const Device& device) const
 {
     if (Is3DShape(mShape))
-        return MakeSimple3DVertexShader(device);
+        return MakeSimple3DVertexShader(device, env.instanced_draw);
 
-    return MakeSimple2DVertexShader(device);
+    return MakeSimple2DVertexShader(device, env.instanced_draw);
 }
 std::string SimpleShape::GetShaderId(const Environment& env) const
 {
-    if (Is3DShape(mShape))
-        return "simple-3D-vertex-shader";
-
-    return "simple-2D-vertex-shader";
+    return ::GetShaderId(mShape, env.instanced_draw);
 }
 
 std::string SimpleShape::GetShaderName(const Environment& env) const
 {
-    if (Is3DShape(mShape))
-        return "Simple3DVertexShader";
-
-    return "Simple2DVertexShader";
+    return ::GetShaderName(mShape, env.instanced_draw);
 }
 
 std::string SimpleShape::GetGeometryId(const Environment& env) const
@@ -1353,6 +1387,32 @@ std::string SimpleShape::GetGeometryId(const Environment& env) const
 bool SimpleShape::Construct(const Environment& env, Geometry::CreateArgs& geometry) const
 {
     detail::ConstructSimpleShape(mArgs, env, mStyle, mShape, geometry);
+    return true;
+}
+
+bool SimpleShape::Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+{
+    InstancedDrawBuffer buffer;
+    buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
+    buffer.Resize(draw.instances.size());
+
+    for (size_t i=0; i<draw.instances.size(); ++i)
+    {
+        const auto& instance = draw.instances[i];
+        InstanceAttribute ia;
+        ia.iaModelVectorX = ToVec(instance.model_to_world[0]);
+        ia.iaModelVectorY = ToVec(instance.model_to_world[1]);
+        ia.iaModelVectorZ = ToVec(instance.model_to_world[2]);
+        ia.iaModelVectorW = ToVec(instance.model_to_world[3]);
+        buffer.SetInstanceData(ia, i);
+    }
+
+    // we're not making any contribution to the instance data here, therefore
+    // the hash and usage are exactly what the caller specified.
+    args.usage = draw.usage;
+    args.content_hash = draw.content_hash;
+    args.content_name = draw.content_name;
+    args.buffer = std::move(buffer);
     return true;
 }
 
@@ -1376,5 +1436,6 @@ Drawable::Usage SimpleShape::GetGeometryUsage() const
 {
     return Usage::Static;
 }
+
 
 } // namespace gfx

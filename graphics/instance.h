@@ -30,8 +30,6 @@
 
 namespace gfx
 {
-    using InstanceDataLayout = VertexLayout;
-
     // A CPU buffer for (geometry) instance data, containing InstanceDataLayout
     // and per geometry instance
     class InstancedDrawBuffer
@@ -50,7 +48,28 @@ namespace gfx
 
         template<typename InstanceAttr>
         void AddInstanceData(const InstanceAttr& attr)
-        { AddInstanceData(&attr, sizeof(attr)); }
+        {
+            AddInstanceData(&attr, sizeof(attr));
+        }
+
+        template<typename InstanceAttr>
+        void SetInstanceData(const InstanceAttr& attr, size_t index)
+        {
+            const auto byte_offset = index * mLayout.vertex_struct_size;
+
+            ASSERT(mLayout.vertex_struct_size);
+            ASSERT(mLayout.vertex_struct_size == sizeof(attr));
+            ASSERT(byte_offset + mLayout.vertex_struct_size <= mVertexData.size());
+
+            std::memcpy(&mVertexData[byte_offset], &attr, sizeof(attr));
+        }
+
+        void Resize(size_t count)
+        {
+            ASSERT(mLayout.vertex_struct_size);
+            const auto bytes = count * mLayout.vertex_struct_size;
+            mVertexData.resize(bytes);
+        }
 
         void SetInstanceBuffer(const void* ptr, size_t bytes)
         {
@@ -126,6 +145,11 @@ namespace gfx
             std::size_t content_hash = 0;
         };
         virtual ~InstancedDraw() = default;
+
+        virtual std::size_t GetContentHash() const = 0;
+        virtual std::string GetContentName() const = 0;
+        virtual void SetContentHash(std::size_t hash) = 0;
+        virtual void SetContentName(std::string name) = 0;
     private:
     };
 

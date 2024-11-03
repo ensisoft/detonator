@@ -297,8 +297,8 @@ namespace gfx
         using Shape = SimpleShapeClass::Shape;
         using Style = SimpleShapeClass::Style;
 
-        explicit SimpleShapeInstance(const std::shared_ptr<const Class>& klass, Style style = Style::Solid) noexcept
-          : mClass(klass)
+        explicit SimpleShapeInstance(std::shared_ptr<const Class> klass, Style style = Style::Solid) noexcept
+          : mClass(std::move(klass))
           , mStyle(style)
         {}
         explicit SimpleShapeInstance(const Class& klass, Style style = Style::Solid)
@@ -309,17 +309,18 @@ namespace gfx
           : mClass(std::make_shared<Class>(std::move(klass)))
           , mStyle(style)
         {}
-        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
-        virtual ShaderSource GetShader(const Environment& env, const Device& device) const override;
-        virtual std::string GetShaderId(const Environment& env) const override;
-        virtual std::string GetShaderName(const Environment& env) const override;
-        virtual std::string GetGeometryId(const Environment& env) const override;
-        virtual bool Construct(const Environment& env, Geometry::CreateArgs& geometry) const override;
-        virtual Type GetType() const override;
-        virtual DrawPrimitive GetDrawPrimitive() const override;
-        virtual Usage GetGeometryUsage() const override;
+        void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
+        ShaderSource GetShader(const Environment& env, const Device& device) const override;
+        std::string GetShaderId(const Environment& env) const override;
+        std::string GetShaderName(const Environment& env) const override;
+        std::string GetGeometryId(const Environment& env) const override;
+        bool Construct(const Environment& env, Geometry::CreateArgs& geometry) const override;
+        bool Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
+        Type GetType() const override;
+        DrawPrimitive GetDrawPrimitive() const override;
+        Usage GetGeometryUsage() const override;
 
-        virtual const DrawableClass* GetClass() const override
+        const DrawableClass* GetClass() const override
         { return mClass.get(); }
 
         inline Shape GetShape() const noexcept
@@ -350,15 +351,16 @@ namespace gfx
           , mArgs(args)
           , mStyle(style)
         {}
-        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
-        virtual ShaderSource GetShader(const Environment& env, const Device& device) const override;
-        virtual std::string GetShaderId(const Environment& env) const override;
-        virtual std::string GetShaderName(const Environment& env) const override;
-        virtual std::string GetGeometryId(const Environment& env) const override;
-        virtual bool Construct(const Environment& env, Geometry::CreateArgs& geometry) const override;
-        virtual Type GetType() const override;
-        virtual DrawPrimitive GetDrawPrimitive() const override;
-        virtual Usage GetGeometryUsage() const override;
+        void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
+        ShaderSource GetShader(const Environment& env, const Device& device) const override;
+        std::string GetShaderId(const Environment& env) const override;
+        std::string GetShaderName(const Environment& env) const override;
+        std::string GetGeometryId(const Environment& env) const override;
+        bool Construct(const Environment& env, Geometry::CreateArgs& geometry) const override;
+        bool Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
+        Type GetType() const override;
+        DrawPrimitive GetDrawPrimitive() const override;
+        Usage GetGeometryUsage() const override;
 
         inline Shape GetShape() const noexcept
         { return mShape; }
