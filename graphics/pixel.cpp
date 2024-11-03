@@ -443,7 +443,7 @@ Pixel_RGBf sRGB_from_color(Color name)
 
 double Pixel_MSE(const Pixel_A& lhs, const Pixel_A& rhs) noexcept
 {
-    const auto r = (int)lhs.r - (int)rhs.r;
+    const auto r = static_cast<int>(lhs.r) - static_cast<int>(rhs.r);
     const auto sum = r*r;
     const auto mse = sum / 1.0;
     return mse;
@@ -451,9 +451,9 @@ double Pixel_MSE(const Pixel_A& lhs, const Pixel_A& rhs) noexcept
 
 double Pixel_MSE(const Pixel_RGB& lhs, const Pixel_RGB& rhs) noexcept
 {
-    const auto r = (int)lhs.r - (int)rhs.r;
-    const auto g = (int)lhs.g - (int)rhs.g;
-    const auto b = (int)lhs.b - (int)rhs.b;
+    const auto r = static_cast<int>(lhs.r) - static_cast<int>(rhs.r);
+    const auto g = static_cast<int>(lhs.g) - static_cast<int>(rhs.g);
+    const auto b = static_cast<int>(lhs.b) - static_cast<int>(rhs.b);
 
     const auto sum = r*r + g*g + b*b;
     const auto mse = sum / 3.0;
@@ -462,14 +462,73 @@ double Pixel_MSE(const Pixel_RGB& lhs, const Pixel_RGB& rhs) noexcept
 
 double Pixel_MSE(const Pixel_RGBA& lhs, const Pixel_RGBA& rhs) noexcept
 {
-    const auto r = (int)lhs.r - (int)rhs.r;
-    const auto g = (int)lhs.g - (int)rhs.g;
-    const auto b = (int)lhs.b - (int)rhs.b;
-    const auto a = (int)lhs.a - (int)rhs.a;
+    const auto r = static_cast<int>(lhs.r) - static_cast<int>(rhs.r);
+    const auto g = static_cast<int>(lhs.g) - static_cast<int>(rhs.g);
+    const auto b = static_cast<int>(lhs.b) - static_cast<int>(rhs.b);
+    const auto a = static_cast<int>(lhs.a) - static_cast<int>(rhs.a);
 
     const auto sum = r*r + g*g + b*b + a*a;
     const auto mse = sum / 4.0;
     return mse;
 }
+
+double Pixel_MSE(const Pixel_A_Array& lhs, const Pixel_A_Array& rhs) noexcept
+{
+    ASSERT(lhs.size() == rhs.size());
+    const auto channels = 1;
+    const auto samples = static_cast<double>(lhs.size() * channels);
+
+    double mse = 0.0;
+
+    for (size_t i=0; i<lhs.size(); ++i)
+    {
+        const auto r = static_cast<int>(lhs[i].r) - static_cast<int>(rhs[i].r);
+        mse += ((r * r) / samples);
+    }
+    return mse;
+}
+double Pixel_MSE(const Pixel_RGB_Array& lhs, const Pixel_RGB_Array& rhs) noexcept
+{
+    ASSERT(lhs.size() == rhs.size());
+    const auto channels = 3;
+    const auto samples = static_cast<double>(lhs.size() * channels);
+
+    double mse = 0.0;
+
+    for (size_t i=0; i<lhs.size(); ++i)
+    {
+        const auto r = static_cast<int>(lhs[i].r) - static_cast<int>(rhs[i].r);
+        const auto g = static_cast<int>(lhs[i].g) - static_cast<int>(rhs[i].g);
+        const auto b = static_cast<int>(lhs[i].b) - static_cast<int>(rhs[i].b);
+
+        mse += ((r * r) / samples);
+        mse += ((g * g) / samples);
+        mse += ((b * b) / samples);
+    }
+    return mse;
+}
+double Pixel_MSE(const Pixel_RGBA_Array& lhs, const Pixel_RGBA_Array& rhs) noexcept
+{
+    ASSERT(lhs.size() == rhs.size());
+    const auto channels = 4;
+    const auto samples = static_cast<double>(lhs.size() * channels);
+
+    double mse = 0.0;
+
+    for (size_t i=0; i<lhs.size(); ++i)
+    {
+        const auto r = static_cast<int>(lhs[i].r) - static_cast<int>(rhs[i].r);
+        const auto g = static_cast<int>(lhs[i].g) - static_cast<int>(rhs[i].g);
+        const auto b = static_cast<int>(lhs[i].b) - static_cast<int>(rhs[i].b);
+        const auto a = static_cast<int>(lhs[i].a) - static_cast<int>(rhs[i].a);
+
+        mse += ((r * r) / samples);
+        mse += ((g * g) / samples);
+        mse += ((b * b) / samples);
+        mse += ((a * a) / samples);
+    }
+    return mse;
+}
+
 
 } // namespace
