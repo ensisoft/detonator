@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include <cstdint>
+#include <vector>
 
 #include "graphics/color4f.h"
 
@@ -138,6 +139,14 @@ namespace gfx
     double Pixel_MSE(const Pixel_RGB& lhs, const Pixel_RGB& rhs) noexcept;
     double Pixel_MSE(const Pixel_RGBA& lhs, const Pixel_RGBA& rhs) noexcept;
 
+    using Pixel_A_Array = std::vector<Pixel_A>;
+    using Pixel_RGB_Array = std::vector<Pixel_RGB>;
+    using Pixel_RGBA_Array = std::vector<Pixel_RGBA>;
+
+    double Pixel_MSE(const Pixel_A_Array& lhs, const Pixel_A_Array& rhs) noexcept;
+    double Pixel_MSE(const Pixel_RGB_Array& lhs, const Pixel_RGB_Array& rhs) noexcept;
+    double Pixel_MSE(const Pixel_RGBA_Array& lhs, const Pixel_RGBA_Array& rhs) noexcept;
+
     static_assert(sizeof(Pixel_A) == 1,
                   "Unexpected size of Pixel_A pixel struct type.");
     static_assert(sizeof(Pixel_RGB) == 3,
@@ -175,7 +184,7 @@ namespace gfx
             bool operator()(const Pixel& lhs, const Pixel& rhs) const
             {
                 const auto mse = Pixel_MSE(lhs, rhs);
-                return mse < max_mse;
+                return mse <= max_mse;
             }
             void SetErrorThreshold(double se)
             {

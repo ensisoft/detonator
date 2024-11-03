@@ -28,6 +28,72 @@
 #include "graphics/color4f.h"
 #include "graphics/bitmap.h"
 #include "graphics/bitmap_noise.h"
+#include "graphics/bitmap_algo.h"
+
+void print_mse()
+{
+    struct Entry {
+        unsigned block_width;
+        unsigned block_height;
+        gfx::Color first_color;
+        gfx::Color second_color;
+        std::string name;
+    };
+    Entry mse_table[] = {
+        {1, 1, gfx::Color::White,     gfx::Color::White,     "White-White       1x1px"},
+        {1, 1, gfx::Color::White,     gfx::Color::Black,     "White-Black       1x1px"},
+        {1, 1, gfx::Color::White,     gfx::Color::Red,       "White-Red         1x1px"},
+        {1, 1, gfx::Color::Gray,      gfx::Color::DarkGray,  "Gray-DarkGray     1x1px"},
+        {1, 1, gfx::Color::DarkCyan,  gfx::Color::DarkBlue,  "DarkCyan-DarkBlue 1x1px"},
+
+        {4, 4, gfx::Color::White,     gfx::Color::White,     "White-White       4px"},
+        {4, 4, gfx::Color::White,     gfx::Color::Black,     "White-Black       4px"},
+        {4, 4, gfx::Color::White,     gfx::Color::Red,       "White-Red         4px"},
+        {4, 4, gfx::Color::Gray,      gfx::Color::DarkGray,  "Gray-DarkGray     4px"},
+        {4, 4, gfx::Color::DarkCyan,  gfx::Color::DarkBlue,  "DarkCyan-DarkBlue 4px"},
+
+        {8, 8, gfx::Color::White,     gfx::Color::White,     "White-White       8x8px"},
+        {8, 8, gfx::Color::White,     gfx::Color::Black,     "White-Black       8x8px"},
+        {8, 8, gfx::Color::White,     gfx::Color::Red,       "White-Red         8x8px"},
+        {8, 8, gfx::Color::Gray,      gfx::Color::DarkGray,  "Gray-DarkGray     8x8px"},
+        {8, 8, gfx::Color::DarkCyan,  gfx::Color::DarkBlue,  "DarkCyan-DarkBlue 8x8px"},
+
+        {16, 16, gfx::Color::White,     gfx::Color::White,     "White-White       16x16px"},
+        {16, 16, gfx::Color::White,     gfx::Color::Black,     "White-Black       16x16px"},
+        {16, 16, gfx::Color::White,     gfx::Color::Red,       "White-Red         16x16px"},
+        {16, 16, gfx::Color::Gray,      gfx::Color::DarkGray,  "Gray-DarkGray     16x16px"},
+        {16, 16, gfx::Color::DarkCyan,  gfx::Color::DarkBlue,  "DarkCyan-DarkBlue 16x16px"},
+    };
+
+
+    auto SetPixel = [](gfx::Pixel_RGB_Array& array, gfx::Color color) {
+        for (auto& pixel : array)
+            pixel = gfx::Pixel_RGB(color);
+    };
+
+    for (const auto& test : mse_table)
+    {
+        const auto width = test.block_width;
+        const auto height = test.block_height;
+
+        for (size_t i = 0; i < width * height; ++i)
+        {
+            gfx::Pixel_RGB_Array white;
+            white.resize(width * height);
+            SetPixel(white, test.first_color);
+
+            gfx::Pixel_RGB_Array red;
+            red.resize(width * height);
+            SetPixel(red, test.first_color);
+
+            for (size_t j = 0; j <= i; ++j)
+                red[j] = gfx::Pixel_RGB(test.second_color);
+
+            const auto mse = gfx::Pixel_MSE(white, red);
+            std::printf("%s (%u/%u) pixel diff MSE = %f\n", test.name.c_str(), i + 1, width*height, mse);
+        }
+    }
+}
 
 void unit_test_basic()
 {
@@ -152,29 +218,89 @@ void unit_test_compare()
     // test the compare against pixel
     {
         gfx::Bitmap<gfx::Pixel_RGB> bmp(100, 100);
-        struct Rect {
-            int x, y;
-            int w, h;
-        } test_rects[] = {
-                {0, 0, 10, 10},
-                {0, 0, 1, 100},
-                {0, 0, 100, 1},
-                {0, 99, 100, 1},
-                {99, 0, 1, 100},
-                {40, 40, 40, 40},
-                {0, 0, 100, 100},
-                {0, 0, 200, 200},
+
+        const gfx::URect test_rects[] = {
+            {0, 0, 10, 10},
+            {0, 0, 1, 100},
+            {0, 0, 100, 1},
+            {0, 99, 100, 1},
+            {99, 0, 1, 100},
+            {40, 40, 40, 40},
+            {0, 0, 100, 100},
+            {0, 0, 200, 200},
         };
-        for (const auto& r : test_rects)
+        for (const auto& rect : test_rects)
         {
-            const auto& rc = gfx::URect(r.x, r.y, r.w, r.h);
             // we've tested the fill operation previously already.
             bmp.Fill(gfx::Color::White);
-            bmp.Fill(rc, gfx::Color::Green);
-            TEST_REQUIRE(bmp.PixelCompare(rc, gfx::Color::Green));
+            bmp.Fill(rect, gfx::Color::Green);
+
+            auto view = bmp.GetPixelReadView();
+
+            TEST_REQUIRE(PixelCompareBitmapRegion(view, rect,
+                    gfx::Pixel_RGB(gfx::Color::Green), gfx::PixelEquality::PixelPrecision()));
+            TEST_REQUIRE(PixelCompareBitmapRegion(view, rect,
+                    gfx::Pixel_RGB(gfx::Color::Green), gfx::PixelEquality::ThresholdPrecision()));
         }
+    }
+
+    // test pixel block compare
+    {
+        // MSE values. (the table was printed by print_mse function)
+
+        // White-Red         4px (1/16) pixel diff MSE = 2709.375000
+        // White-Red         4px (2/16) pixel diff MSE = 5418.750000
+        // White-Red         4px (3/16) pixel diff MSE = 8128.125000
+        // White-Red         4px (4/16) pixel diff MSE = 10837.500000
+        // White-Red         4px (5/16) pixel diff MSE = 13546.875000
+        // White-Red         4px (6/16) pixel diff MSE = 16256.250000
+        // White-Red         4px (7/16) pixel diff MSE = 18965.625000
+        // White-Red         4px (8/16) pixel diff MSE = 21675.000000
+        // White-Red         4px (9/16) pixel diff MSE = 24384.375000
+        // White-Red         4px (10/16) pixel diff MSE = 27093.750000
+        // White-Red         4px (11/16) pixel diff MSE = 29803.125000
+        // White-Red         4px (12/16) pixel diff MSE = 32512.500000
+        // White-Red         4px (13/16) pixel diff MSE = 35221.875000
+        // White-Red         4px (14/16) pixel diff MSE = 37931.250000
+        // White-Red         4px (15/16) pixel diff MSE = 40640.625000
+        // White-Red         4px (16/16) pixel diff MSE = 43350.000000
+
+        gfx::Bitmap<gfx::Pixel_RGB> lhs(16, 16);
+        gfx::Bitmap<gfx::Pixel_RGB> rhs(16, 16);
+
+        lhs.Fill(gfx::Color::White);
+        rhs.Fill(gfx::Color::White);
+
+        TEST_REQUIRE(PixelBlockCompareBitmaps(lhs.GetPixelReadView(),
+                                              rhs.GetPixelReadView(),
+                                              gfx::USize(4, 4),
+                                              gfx::PixelEquality::ThresholdPrecision(0.0)));
+
+        rhs.SetPixel(0, 0,  gfx::Color::Red);
+        TEST_REQUIRE(!PixelBlockCompareBitmaps(lhs.GetPixelReadView(),
+                                               rhs.GetPixelReadView(),
+                                               gfx::USize(4, 4),
+                                               gfx::PixelEquality::ThresholdPrecision(0.0)));
+
+        TEST_REQUIRE(PixelBlockCompareBitmaps(lhs.GetPixelReadView(),
+                                               rhs.GetPixelReadView(),
+                                               gfx::USize(4, 4),
+                                               gfx::PixelEquality::ThresholdPrecision(2800.0)));
+
+        rhs.SetPixel(0, 0, gfx::Color::White);
+        rhs.SetPixel(15, 15, gfx::Color::Red);
+        TEST_REQUIRE(!PixelBlockCompareBitmaps(lhs.GetPixelReadView(),
+                                               rhs.GetPixelReadView(),
+                                               gfx::USize(4, 4),
+                                               gfx::PixelEquality::ThresholdPrecision(0.0)));
+
+        TEST_REQUIRE(PixelBlockCompareBitmaps(lhs.GetPixelReadView(),
+                                              rhs.GetPixelReadView(),
+                                              gfx::USize(4, 4),
+                                              gfx::PixelEquality::ThresholdPrecision(2800.0)));
 
     }
+
 }
 
 void unit_test_copy()
@@ -538,9 +664,51 @@ void unit_test_find_rect()
 
 }
 
+void unit_test_algo()
+{
+    TEST_CASE(test::Type::Feature)
+
+    {
+        gfx::Bitmap<gfx::Pixel_RGBA> bmp(256, 256);
+        bmp.Fill(gfx::Color::Transparent);
+        bmp.Fill(gfx::URect(0, 0, 6, 6), gfx::Color::Red);
+        bmp.Fill(gfx::URect(250, 250, 6, 6), gfx::Color::Green);
+
+        auto view = bmp.GetPixelReadView();
+
+        std::vector<gfx::Pixel_RGBA> pixels;
+        gfx::ReadBitmapPixels(view, gfx::URect(0, 0, 6, 6), &pixels);
+
+        TEST_REQUIRE(pixels.size() == 6 * 6);
+        for (const auto& pixel : pixels)
+            TEST_REQUIRE(pixel == gfx::Color::Red);
+
+        pixels.clear();
+        gfx::ReadBitmapPixels(view, gfx::URect(250, 250, 6, 6), &pixels);
+        TEST_REQUIRE(pixels.size() == 6 * 6);
+        for (const auto& pixel : pixels)
+            TEST_REQUIRE(pixel == gfx::Color::Green);
+
+    }
+
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
+    bool print_mse_table = false;
+    for (int i=1; i<argc; ++i)
+    {
+        if (!std::strcmp(argv[i], "--print-mse"))
+            print_mse_table = true;
+    }
+
+    if (print_mse_table)
+    {
+        print_mse();
+        return 0;
+    }
+
     unit_test_basic();
     unit_test_filling();
     unit_test_compare();
@@ -550,6 +718,7 @@ int test_main(int argc, char* argv[])
     unit_test_mipmap();
     unit_test_noise();
     unit_test_find_rect();
+    unit_test_algo();
     return 0;
 }
 ) // TEST_MAIN

@@ -18,11 +18,34 @@
 
 #include "config.h"
 
+#include <vector>
+
+#include "base/assert.h"
 #include "graphics/bitmap_view.h"
 #include "graphics/types.h"
 
 namespace gfx
 {
+    template<typename Pixel>
+    void ReadBitmapPixels(const BitmapReadView<Pixel>& src,
+                          const URect& rect, std::vector<Pixel>* pixels)
+    {
+        const auto bitmap_width  = src.GetWidth();
+        const auto bitmap_height = src.GetHeight();
+
+        ASSERT(Contains(URect(0, 0, bitmap_width, bitmap_height), rect));
+
+        for (unsigned y=0; y<rect.GetHeight(); ++y)
+        {
+            for (unsigned x=0; x<rect.GetWidth(); ++x)
+            {
+                const auto src_point = rect.MapToGlobal(x, y);
+                const auto src_pixel = src.template ReadPixel<Pixel>(src_point);
+                pixels->push_back(src_pixel);
+            }
+        }
+    }
+
     template<typename Pixel>
     void FillBitmap(const BitmapWriteView<Pixel>& dst,
                     const IRect& dst_rect, const Pixel& value)
@@ -195,4 +218,44 @@ namespace gfx
         }
         return true;
     }
+
+    template<typename Pixel, typename CompareFunc>
+    bool PixelBlockCompareBitmaps(const BitmapReadView<Pixel>& lhs,
+                                  const BitmapReadView<Pixel>& rhs,
+                                  const USize& block_size,
+                                  CompareFunc comparator)
+    {
+        ASSERT(lhs.GetWidth() == rhs.GetWidth());
+        ASSERT(lhs.GetHeight() == rhs.GetHeight());
+
+        const auto bitmap_width  = lhs.GetWidth();
+        const auto bitmap_height = lhs.GetHeight();
+        const auto block_width  = block_size.GetWidth();
+        const auto block_height = block_size.GetHeight();
+        // right now only allow exact multiples of block size for the image size.
+        ASSERT((bitmap_width % block_width) == 0);
+        ASSERT((bitmap_height % block_height) == 0);
+
+        const auto rows = bitmap_height / block_height;
+        const auto cols = bitmap_width / block_width;
+
+        for (unsigned row=0; row<rows; ++row)
+        {
+            for (unsigned col=0; col<cols; ++col)
+            {
+                const auto y = row * block_height;
+                const auto x = col * block_width;
+                const URect block(x, y, block_width, block_height);
+
+                std::vector<Pixel> lhs_array;
+                std::vector<Pixel> rhs_array;
+                ReadBitmapPixels(lhs, block, &lhs_array);
+                ReadBitmapPixels(rhs, block, &rhs_array);
+                if (!comparator(lhs_array, rhs_array))
+                    return false;
+            }
+        }
+        return true;
+    }
+
 } // namespace
