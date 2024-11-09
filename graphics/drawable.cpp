@@ -22,6 +22,14 @@
 #include "graphics/polygon_mesh.h"
 #include "graphics/particle_engine.h"
 
+#include "simple_shape.cpp"
+#include "polygon_mesh.cpp"
+#include "particle_engine.cpp"
+#include "tilebatch.cpp"
+#include "linebatch.cpp"
+#include "guidegrid.cpp"
+#include "debug_drawable.cpp"
+
 namespace gfx {
 
 bool Is3DShape(const Drawable& drawable) noexcept

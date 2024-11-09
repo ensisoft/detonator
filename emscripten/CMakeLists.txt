@@ -250,13 +250,6 @@ add_executable(GameEngine
     ../graphics/painter.cpp
     ../graphics/material.cpp
     ../graphics/drawable.cpp
-    ../graphics/simple_shape.cpp
-    ../graphics/polygon_mesh.cpp
-    ../graphics/particle_engine.cpp
-    ../graphics/tilebatch.cpp
-    ../graphics/linebatch.cpp
-    ../graphics/guidegrid.cpp
-    ../graphics/debug_drawable.cpp
     ../graphics/image.cpp
     ../graphics/loader.cpp
     ../graphics/drawing.cpp
