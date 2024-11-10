@@ -486,6 +486,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
+                renderer.Update(*entity, 0.0f, 0.0f);
                 renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
