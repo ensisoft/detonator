@@ -559,6 +559,10 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
 
     if (item && paint_node.material)
     {
+        paint_node.material->ResetUniforms();
+        if (const auto* params = item->GetMaterialParams())
+            paint_node.material->SetUniforms(*params);
+
         const auto time_scale = item->GetTimeScale();
         if (item->TestFlag(DrawableItemType::Flags::UpdateMaterial))
             paint_node.material->Update(dt * time_scale);
@@ -580,6 +584,20 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
     }
     if (item && paint_node.drawable)
     {
+        if (paint_node.drawable->GetType() == gfx::Drawable::Type::SimpleShape)
+        {
+            auto simple = std::static_pointer_cast<gfx::SimpleShapeInstance>(paint_node.drawable);
+
+            gfx::SimpleShapeStyle style;
+            if (item->GetRenderStyle() == RenderStyle::Solid)
+                style = gfx::SimpleShapeStyle::Solid;
+            else if (item->GetRenderStyle() == RenderStyle::Outline)
+                style = gfx::SimpleShapeStyle::Outline;
+            else BUG("Unsupported rendering style.");
+
+            simple->SetStyle(style);
+        }
+
         const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
         const auto& shape = paint_node.drawable;
@@ -953,7 +971,8 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
             if (klass)
                 paint_node.material = gfx::CreateMaterialInstance(klass);
             if (!paint_node.material)
-                WARN("No such material class found. [material='%1', entity='%2', node='%3']", material, entity.GetName(), entity_node.GetName());
+                WARN("No such material class found. [material='%1', entity='%2', node='%3']", material,
+                     entity.GetName(), entity_node.GetName());
         }
         if (paint_node.drawableId != drawable)
         {
@@ -965,7 +984,8 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
                 paint_node.drawable = gfx::CreateDrawableInstance(klass);
 
             if (!paint_node.drawable)
-                WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", drawable, entity.GetName(), entity_node.GetName());
+                WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", drawable,
+                     entity.GetName(), entity_node.GetName());
             if (paint_node.drawable)
             {
                 gfx::Transform transform;
@@ -979,28 +999,6 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
                 gfx::Drawable::Environment env; // todo:
                 env.model_matrix = &model;
                 paint_node.drawable->Restart(env);
-            }
-        }
-        if (paint_node.material)
-        {
-            paint_node.material->ResetUniforms();
-            if (const auto* params = item->GetMaterialParams())
-                paint_node.material->SetUniforms(*params);
-        }
-        if (paint_node.drawable)
-        {
-            if (paint_node.drawable->GetType() == gfx::Drawable::Type::SimpleShape)
-            {
-                auto simple = std::static_pointer_cast<gfx::SimpleShapeInstance>(paint_node.drawable);
-
-                gfx::SimpleShapeStyle style;
-                if (item->GetRenderStyle() == RenderStyle::Solid)
-                    style = gfx::SimpleShapeStyle::Solid;
-                else if (item->GetRenderStyle() == RenderStyle::Outline)
-                    style = gfx::SimpleShapeStyle::Outline;
-                else BUG("Unsupported rendering style.");
-
-                simple->SetStyle(style);
             }
         }
     }
