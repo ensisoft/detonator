@@ -442,7 +442,7 @@ public:
         // this state is rebuilt in the the call to renderer's
         // CreateRenderPackets, which is an operation that cannot
         // run at the same time when we're drawing.
-        TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mDevice));
+        TRACE_CALL("Renderer::DrawFrame", mRenderer.DrawFrame(*mDevice));
 
         // if we had updates running in parallel then complete (wait)
         // the tasks here. This is unfortunately needed in order to
@@ -902,7 +902,7 @@ private:
 
         mScene->SetMap(mTilemap.get());
 
-        TRACE_CALL("Renderer::CreateState", mRenderer.CreateRenderState(*mScene, mTilemap.get()));
+        TRACE_CALL("Renderer::CreateState", mRenderer.CreateRendererState(*mScene, mTilemap.get()));
         ConfigureRendererForScene();
 
         TRACE_CALL("Runtime::BeginPlay", mRuntime->BeginPlay(mScene.get(), mTilemap.get()));
@@ -1077,7 +1077,7 @@ private:
             // that have been spawned etc. This needs to be done inside
             // the begin/end loop in order to have the correct signalling
             // i.e. entity control flags.
-            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRenderState(*mScene, mTilemap.get(), game_time, dt));
+            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRendererState(*mScene, mTilemap.get(), game_time, dt));
 
             // make sure to do this first in order to allow the scene to rebuild
             // the spatial indices etc. before the game's PostUpdate runs.
@@ -1105,8 +1105,8 @@ private:
             {
                 // Rebuild the renderer data structures and prepare the
                 // draw packets for the next draw(s)
-                TRACE_CALL("Renderer::CreateRenderPackets",
-                           mRenderer.CreateRenderPackets(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
+                TRACE_CALL("Renderer::CreateFrame",
+                           mRenderer.CreateFrame(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
                 if (mFlags.test(GameStudioEngine::Flags::EditingMode))
                 {
                     ConfigureRendererForScene();

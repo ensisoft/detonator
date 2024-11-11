@@ -684,7 +684,7 @@ void unit_test_entity_lifecycle()
 
     const float dt = 1.0f/60.0f;
 
-    renderer.CreateRenderState(*scene, nullptr);
+    renderer.CreateRendererState(*scene, nullptr);
     TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
 
     engine::Renderer::Surface surface;
@@ -709,7 +709,7 @@ void unit_test_entity_lifecycle()
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
             renderer.BeginFrame();
             {
-                renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
+                renderer.UpdateRendererState(*scene, nullptr, 0.0, dt);
             }
             renderer.EndFrame();
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
@@ -736,7 +736,7 @@ void unit_test_entity_lifecycle()
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
             renderer.BeginFrame();
             {
-                renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
+                renderer.UpdateRendererState(*scene, nullptr, 0.0, dt);
             }
             renderer.EndFrame();
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 0);
@@ -756,7 +756,7 @@ void unit_test_entity_lifecycle()
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 0);
             renderer.BeginFrame();
             {
-                renderer.UpdateRenderState(*scene, nullptr, 0.0, dt);
+                renderer.UpdateRendererState(*scene, nullptr, 0.0, dt);
             }
             renderer.EndFrame();
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);

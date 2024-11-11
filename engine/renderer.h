@@ -181,16 +181,16 @@ namespace engine
 
         // Create the internal renderer data structures for visually representing
         // the contents of the given scene.
-        void CreateRenderState(const game::Scene& scene, const game::Tilemap* map);
+        void CreateRendererState(const game::Scene& scene, const game::Tilemap* map);
 
-        void UpdateRenderState(const game::Scene& scene, const game::Tilemap* map,
-                               double time, float dt);
-
-        void CreateRenderPackets(const game::Scene& scene, const game::Tilemap* map,
+        void UpdateRendererState(const game::Scene& scene, const game::Tilemap* map,
                                  double time, float dt);
 
+        void CreateFrame(const game::Scene& scene, const game::Tilemap* map,
+                         double time, float dt);
+
         // Draw the current rendering state.
-        void Draw(gfx::Device& painter) const;
+        void DrawFrame(gfx::Device& painter) const;
 
         // The following API methods used by the editor to draw some
         // edit time representations of things.

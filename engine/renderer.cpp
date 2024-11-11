@@ -69,7 +69,7 @@ void Renderer::BeginFrame()
     }
 }
 
-void Renderer::CreateRenderState(const game::Scene& scene, const game::Tilemap* map)
+void Renderer::CreateRendererState(const game::Scene& scene, const game::Tilemap* map)
 {
     mPaintNodes.clear();
 
@@ -86,7 +86,7 @@ void Renderer::CreateRenderState(const game::Scene& scene, const game::Tilemap* 
     }
 }
 
-void Renderer::UpdateRenderState(const game::Scene& scene, const game::Tilemap* map, double time, float dt)
+void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap* map, double time, float dt)
 {
     const auto& nodes = scene.CollectNodes();
 
@@ -113,7 +113,7 @@ void Renderer::UpdateRenderState(const game::Scene& scene, const game::Tilemap* 
     }
 }
 
-void Renderer::CreateRenderPackets(const game::Scene& scene, const game::Tilemap* map, double time, float dt)
+void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, double time, float dt)
 {
     std::vector<DrawPacket> packets;
 
@@ -132,7 +132,7 @@ void Renderer::CreateRenderPackets(const game::Scene& scene, const game::Tilemap
     const auto scene_packet_start_index = packets.size();
 
     {
-        TRACE_SCOPE("UpdateRenderState");
+        TRACE_SCOPE("UpdateRendererState");
 
         for (size_t i=0; i<scene.GetNumEntities(); ++i)
         {
@@ -178,7 +178,7 @@ void Renderer::CreateRenderPackets(const game::Scene& scene, const game::Tilemap
     std::swap(mRenderBuffer, packets);
 }
 
-void Renderer::Draw(gfx::Device& device) const
+void Renderer::DrawFrame(gfx::Device& device) const
 {
     if (mRenderBuffer.empty())
         return;
