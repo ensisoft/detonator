@@ -219,7 +219,7 @@ public:
             }
         }
         mScene = game::CreateSceneInstance(klass);
-        engine.renderer->CreateRenderState(*mScene, nullptr);
+        engine.renderer->CreateRendererState(*mScene, nullptr);
     }
     virtual void Execute(Engine& engine) override
     {
@@ -242,11 +242,11 @@ public:
         camera.position    = glm::vec2{-50.0f, -50.0f};
         engine.renderer->SetCamera(camera);
 
-        TRACE_CALL("BeginFrame",    engine.renderer->BeginFrame());
-        TRACE_CALL("Update",        engine.renderer->UpdateRenderState(*mScene, nullptr, 0.0, 0.0f));
-        TRACE_CALL("CreatePackets", engine.renderer->CreateRenderPackets(*mScene, nullptr, 0.0, 0.0f));
-        TRACE_CALL("Draw",          engine.renderer->Draw(*engine.graphics_device));
-        TRACE_CALL("EndFrame",      engine.renderer->EndFrame());
+        TRACE_CALL("BeginFrame", engine.renderer->BeginFrame());
+        TRACE_CALL("Update", engine.renderer->UpdateRendererState(*mScene, nullptr, 0.0, 0.0f));
+        TRACE_CALL("CreatFrame", engine.renderer->CreateFrame(*mScene, nullptr, 0.0, 0.0f));
+        TRACE_CALL("DrawFrame",  engine.renderer->DrawFrame(*engine.graphics_device));
+        TRACE_CALL("EndFrame",   engine.renderer->EndFrame());
 
         engine.graphics_device->EndFrame();
 
@@ -284,7 +284,7 @@ public:
             }
         }
         mScene = game::CreateSceneInstance(klass);
-        engine.renderer->CreateRenderState(*mScene, nullptr);
+        engine.renderer->CreateRendererState(*mScene, nullptr);
 
     }
     virtual void Execute(Engine& engine) override
@@ -308,11 +308,11 @@ public:
         camera.position    = glm::vec2{-50.0f, -50.0f};
         engine.renderer->SetCamera(camera);
 
-        TRACE_CALL("BeginFrame",    engine.renderer->BeginFrame());
-        TRACE_CALL("Update",        engine.renderer->UpdateRenderState(*mScene, nullptr, 0.0f, 0.0f));
-        TRACE_CALL("CreatePackets", engine.renderer->CreateRenderPackets(*mScene, nullptr, 0.0, 0.0f));
-        TRACE_CALL("Draw",          engine.renderer->Draw(*engine.graphics_device));
-        TRACE_CALL("EndFrame",      engine.renderer->EndFrame());
+        TRACE_CALL("BeginFrame",  engine.renderer->BeginFrame());
+        TRACE_CALL("Update", engine.renderer->UpdateRendererState(*mScene, nullptr, 0.0f, 0.0f));
+        TRACE_CALL("CreateFrame", engine.renderer->CreateFrame(*mScene, nullptr, 0.0, 0.0f));
+        TRACE_CALL("DrawFrame",   engine.renderer->DrawFrame(*engine.graphics_device));
+        TRACE_CALL("EndFrame",    engine.renderer->EndFrame());
 
         engine.graphics_device->EndFrame();
 

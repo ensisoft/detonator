@@ -329,7 +329,7 @@ public:
         camera.scale       = glm::vec2{1.0f, 1.0f};
         camera.position    = glm::vec2{0.0f, 0.0f};
         mRenderer.SetCamera(camera);
-        mRenderer.Draw(*device);
+        mRenderer.DrawFrame(*device);
 
         mPhysics.DebugDrawObjects(painter);
     }
@@ -341,8 +341,8 @@ public:
             mPhysics.UpdateScene(*mScene);
         }
 
-        mRenderer.UpdateRenderState(*mScene, nullptr, 0.0, dt);
-        mRenderer.CreateRenderPackets(*mScene, nullptr, 0.0, dt);
+        mRenderer.UpdateRendererState(*mScene, nullptr, 0.0, dt);
+        mRenderer.CreateFrame(*mScene, nullptr, 0.0, dt);
     }
     virtual void Start(engine::ClassLibrary* loader) override
     {
@@ -392,7 +392,7 @@ public:
 
         mScene = game::CreateSceneInstance(klass);
         mRenderer.SetClassLibrary(loader);
-        mRenderer.CreateRenderState(*mScene, nullptr);
+        mRenderer.CreateRendererState(*mScene, nullptr);
 
         mPhysics.SetClassLibrary(loader);
         mPhysics.SetGravity(glm::vec2(0.0f, 100.0f));
@@ -453,15 +453,15 @@ public:
         camera.scale       = glm::vec2{1.0f, 1.0f};
         camera.position    = glm::vec2{0.0f, 0.0f};
         mRenderer.SetCamera(camera);
-        mRenderer.Draw(*device);
+        mRenderer.DrawFrame(*device);
     }
     virtual void Update(float dt) override
     {
         if (mScene)
         {
             mScene->Update(dt);
-            mRenderer.UpdateRenderState(*mScene, nullptr, 0.0, dt);
-            mRenderer.CreateRenderPackets(*mScene, nullptr, 0.0, dt);
+            mRenderer.UpdateRendererState(*mScene, nullptr, 0.0, dt);
+            mRenderer.CreateFrame(*mScene, nullptr, 0.0, dt);
         }
     }
     virtual void Start(engine::ClassLibrary* loader) override
@@ -502,7 +502,7 @@ public:
         mScene->FindEntityByInstanceName("robot 1")->PlayAnimationByName("idle");
         mScene->FindEntityByInstanceName("robot 2")->PlayAnimationByName("idle");
         mRenderer.SetClassLibrary(loader);
-        mRenderer.CreateRenderState(*mScene, nullptr);
+        mRenderer.CreateRendererState(*mScene, nullptr);
 
         mViewport = gfx::FRect(0.0f, 0.0f, 200.0f, 200.0f);
     }
@@ -565,7 +565,7 @@ public:
         camera.position    = glm::vec2{-300.0f, -400.0f};
         mRenderer.SetCamera(camera);
 
-        mRenderer.Draw(*device);
+        mRenderer.DrawFrame(*device);
 
         for (size_t i=0; i<mScene->GetNumEntities(); ++i)
         {
@@ -604,8 +604,8 @@ public:
         if (mScene)
         {
             mScene->Update(dt);
-            mRenderer.UpdateRenderState(*mScene, nullptr, 0.0, dt);
-            mRenderer.CreateRenderPackets(*mScene, nullptr, 0.0, dt);
+            mRenderer.UpdateRendererState(*mScene, nullptr, 0.0, dt);
+            mRenderer.CreateFrame(*mScene, nullptr, 0.0, dt);
         }
     }
     virtual void Start(engine::ClassLibrary* loader) override
@@ -636,7 +636,7 @@ public:
         mScene->FindEntityByInstanceName("robot 1")->PlayAnimationByName("idle");
         mScene->FindEntityByInstanceName("robot 2")->PlayAnimationByName("idle");
         mRenderer.SetClassLibrary(loader);
-        mRenderer.CreateRenderState(*mScene, nullptr);
+        mRenderer.CreateRendererState(*mScene, nullptr);
     }
     virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
     {
