@@ -269,7 +269,7 @@ namespace engine
                        SceneDrawHook<SceneNodeType>* scene_hook);
 
         template<typename EntityType, typename NodeType>
-        void MapEntity(const EntityType& entity, gfx::Transform& transform);
+        void CreatePaintNodes(const EntityType& entity, gfx::Transform& transform);
 
         template<typename EntityType, typename NodeType>
         void DrawEntity(const EntityType& entity,
