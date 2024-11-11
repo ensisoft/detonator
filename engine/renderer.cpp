@@ -82,7 +82,7 @@ void Renderer::CreateRenderState(const game::Scene& scene, const game::Tilemap* 
             continue;
 
         gfx::Transform transform(p.node_to_scene);
-        MapEntity<Entity, EntityNode>(*p.entity, transform);
+        CreatePaintNodes<Entity, EntityNode>(*p.entity, transform);
     }
 }
 
@@ -108,7 +108,7 @@ void Renderer::UpdateRenderState(const game::Scene& scene, const game::Tilemap* 
         else
         {
             gfx::Transform transform(node.node_to_scene);
-            MapEntity<Entity, EntityNode>(*node.entity, transform);
+            CreatePaintNodes<Entity, EntityNode>(*node.entity, transform);
         }
     }
 }
@@ -143,7 +143,6 @@ void Renderer::CreateRenderPackets(const game::Scene& scene, const game::Tilemap
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
                 {
-                    CreateDrawableResources<Entity, EntityNode>(entity, node, *paint);
                     UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, time, dt);
                     CreateDrawableDrawPackets<Entity, EntityNode>(entity, node, *paint, packets, nullptr);
                     paint->visited = true;
@@ -151,7 +150,6 @@ void Renderer::CreateRenderPackets(const game::Scene& scene, const game::Tilemap
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
                 {
-                    CreateTextResources<Entity, EntityNode>(entity, node, *paint);
                     UpdateTextResources<Entity, EntityNode>(entity, node, *paint, time, dt);
                     CreateTextDrawPackets<Entity, EntityNode>(entity, node, *paint, packets, nullptr);
                     paint->visited = true;
@@ -790,7 +788,7 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
 
         if (placement->TestFlag(EntityType::Flags::VisibleInGame))
         {
-            MapEntity<EntityType, EntityNodeType>(*entity, transform);
+            CreatePaintNodes<EntityType, EntityNodeType>(*entity, transform);
 
             std::vector<DrawPacket> entity_packets;
 
@@ -800,13 +798,11 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
                 {
-                    CreateDrawableResources<EntityType, EntityNodeType>(*entity, node, *paint);
                     CreateDrawableDrawPackets<EntityType, EntityNodeType>(*entity, node, *paint, entity_packets, nullptr);
                 }
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
                 {
-                    CreateTextResources<EntityType, EntityNodeType>(*entity, node,*paint);
                     CreateTextDrawPackets<EntityType, EntityNodeType>(*entity, node, *paint, entity_packets, nullptr);
                 }
             }
@@ -857,10 +853,10 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
     DrawEditorPackets(device, packets);
 }
 
-template<typename EntityType, typename NodeType>
-void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
+template<typename EntityType, typename EntityNodeType>
+void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transform)
 {
-    using RenderTree = game::RenderTree<NodeType>;
+    using RenderTree = game::RenderTree<EntityNodeType>;
 
     class Visitor : public RenderTree::ConstVisitor {
     public:
@@ -869,7 +865,7 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
           , mRenderer(renderer)
           , mTransform(transform)
         {}
-        virtual void EnterNode(const NodeType* node) override
+        virtual void EnterNode(const EntityNodeType* node) override
         {
             if (!node)
                 return;
@@ -889,6 +885,7 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
                 paint_node.world_pos      = box.GetTopLeft();
                 paint_node.world_scale    = box.GetSize();
                 paint_node.world_rotation = box.GetRotation();
+                mRenderer.CreateDrawableResources<EntityType, EntityNodeType>(mEntity, *node, paint_node);
             }
 
             if (const auto* text = node->GetTextItem())
@@ -898,9 +895,10 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
                 paint_node.world_pos      = box.GetTopLeft();
                 paint_node.world_scale    = box.GetSize();
                 paint_node.world_rotation = box.GetRotation();
+                mRenderer.CreateTextResources<EntityType, EntityNodeType>(mEntity, *node, paint_node);
             }
         }
-        virtual void LeaveNode(const NodeType* node) override
+        virtual void LeaveNode(const EntityNodeType* node) override
         {
             if (!node)
                 return;
@@ -922,7 +920,7 @@ void Renderer::DrawEntity(const EntityType& entity,
                           gfx::Transform& transform,
                           EntityDrawHook<NodeType>* hook)
 {
-    MapEntity<EntityType, NodeType>(entity, transform);
+    CreatePaintNodes<EntityType, NodeType>(entity, transform);
 
     std::vector<DrawPacket> packets;
     for (size_t i=0; i<entity.GetNumNodes(); ++i)
@@ -932,14 +930,12 @@ void Renderer::DrawEntity(const EntityType& entity,
         bool did_paint = false;
         if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
         {
-            CreateDrawableResources<EntityType, NodeType>(entity, node, *paint);
             CreateDrawableDrawPackets<EntityType, NodeType>(entity, node, *paint, packets, hook);
             did_paint = true;
         }
 
         if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
         {
-            CreateTextResources<EntityType, NodeType>(entity, node, *paint);
             CreateTextDrawPackets<EntityType, NodeType>(entity, node, *paint, packets, hook);
             did_paint = true;
         }
