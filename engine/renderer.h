@@ -187,6 +187,8 @@ namespace engine
         // scene in the renderers data structures.
         void UpdateRendererState(const game::Scene& scene, const game::Tilemap* map,
                                  double time, float dt);
+        void UpdateRendererState(const game::SceneClass& scene, const game::Tilemap* map,
+                                 double time, float dt);
 
         // Update the current frame rendering state, animate materials etc.
         // note that when doing multi-threaded render/update this
@@ -210,6 +212,8 @@ namespace engine
         // with with DrawFrame.
         void CreateFrame(const game::Scene& scene, const game::Tilemap* map,
                          double time, float dt);
+        void CreateFrame(const game::SceneClass& scene, const game::Tilemap* map,
+                         double time, float dt, SceneClassDrawHook* scene_hook);
 
         // Draw the current frame rendering state, i.e. the currently
         // enqueued and created draw commands.
@@ -239,13 +243,6 @@ namespace engine
         void Draw(const game::EntityClass& entity,
                   gfx::Device& device, gfx::Transform& model,
                   EntityClassDrawHook* hook = nullptr);
-
-        void Draw(const game::Scene& scene,
-                  gfx::Device& device,
-                  SceneInstanceDrawHook* scene_hook = nullptr);
-        void Draw(const game::SceneClass& scene, const game::Tilemap* map,
-                  gfx::Device& device,
-                  SceneClassDrawHook* scene_hook = nullptr);
 
         void Draw(const game::Tilemap& map,
                   gfx::Device& device,
@@ -278,14 +275,8 @@ namespace engine
             glm::vec2 render_size = {0.0f, 0.0f};
         };
 
-        template<typename SceneType, typename SceneNodeType,
-                 typename EntityType, typename EntityNodeType>
-        void DrawScene(const SceneType& scene, const game::Tilemap* map,
-                       gfx::Device& device,
-                       SceneDrawHook<SceneNodeType>* scene_hook);
-
         template<typename EntityType, typename NodeType>
-        void CreatePaintNodes(const EntityType& entity, gfx::Transform& transform);
+        void CreatePaintNodes(const EntityType& entity, gfx::Transform& transform, std::string prefix = "");
 
         template<typename EntityType, typename NodeType>
         void DrawEntity(const EntityType& entity,
