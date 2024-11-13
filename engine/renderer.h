@@ -183,13 +183,36 @@ namespace engine
         // the contents of the given scene.
         void CreateRendererState(const game::Scene& scene, const game::Tilemap* map);
 
+        // Update the internal renderer data structures by applying changes to the
+        // scene in the renderers data structures.
         void UpdateRendererState(const game::Scene& scene, const game::Tilemap* map,
                                  double time, float dt);
 
+        // Update the current frame rendering state, animate materials etc.
+        // note that when doing multi-threaded render/update this
+        // method cannot run in parallel with DrawFrame.
+        void Update(const game::EntityClass& entity, double time, float dt);
+        void Update(const game::Entity& entity, double time, float dt);
+        void Update(const game::SceneClass& scene, const game::Tilemap* map, double time, float dt);
+        void Update(const game::Scene& scene, const game::Tilemap* map, double time, float dt);
+
+        void Update(const game::Scene& scene, double time, float dt)
+        {
+            Update(scene, nullptr, time, dt);
+        }
+        void Update(const game::SceneClass& scene, double time, float dt)
+        {
+            Update(scene, nullptr, time, dt);
+        }
+
+        // Create the draw commands for the next frame that to be drawn
+        // by the call to DrawFrame. This method cannot run in parallel
+        // with with DrawFrame.
         void CreateFrame(const game::Scene& scene, const game::Tilemap* map,
                          double time, float dt);
 
-        // Draw the current rendering state.
+        // Draw the current frame rendering state, i.e. the currently
+        // enqueued and created draw commands.
         void DrawFrame(gfx::Device& painter) const;
 
         // The following API methods used by the editor to draw some
@@ -229,13 +252,6 @@ namespace engine
                   TileBatchDrawHook* hook,
                   bool draw_render_layer,
                   bool draw_data_layer);
-
-        // Update the visual representation of the renderer's paint node
-        // based on the given animation node.
-        void Update(const game::EntityClass& entity, float time, float dt);
-        void Update(const game::Entity& entity, float time, float dt);
-        void Update(const game::SceneClass& scene, float time, float dt);
-        void Update(const game::Scene& scene, float time, float dt);
 
         void EndFrame();
 

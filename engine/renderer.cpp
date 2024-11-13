@@ -132,7 +132,7 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, d
     const auto scene_packet_start_index = packets.size();
 
     {
-        TRACE_SCOPE("UpdateRendererState");
+        TRACE_SCOPE("CreateScenePackets");
 
         for (size_t i=0; i<scene.GetNumEntities(); ++i)
         {
@@ -143,14 +143,12 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, d
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
                 {
-                    UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, time, dt);
                     CreateDrawableDrawPackets<Entity, EntityNode>(entity, node, *paint, packets, nullptr);
                     paint->visited = true;
                 }
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
                 {
-                    UpdateTextResources<Entity, EntityNode>(entity, node, *paint, time, dt);
                     CreateTextDrawPackets<Entity, EntityNode>(entity, node, *paint, packets, nullptr);
                     paint->visited = true;
                 }
@@ -462,35 +460,47 @@ void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
     }
 }
 
-void Renderer::Update(const EntityClass& entity, float time, float dt)
+void Renderer::Update(const EntityClass& entity, double time, float dt)
 {
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
         const auto& node = entity.GetNode(i);
 
         if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+        {
             UpdateDrawableResources<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
+            paint->visited = true;
+        }
 
         if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+        {
             UpdateTextResources<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
+            paint->visited = true;
+        }
     }
 }
 
-void Renderer::Update(const Entity& entity, float time, float dt)
+void Renderer::Update(const Entity& entity, double time, float dt)
 {
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
         const auto& node = entity.GetNode(i);
 
         if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+        {
             UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, time, dt);
+            paint->visited = true;
+        }
 
         if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+        {
             UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, time, dt);
+            paint->visited = true;
+        }
     }
 }
 
-void Renderer::Update(const SceneClass& scene, float time, float dt)
+void Renderer::Update(const SceneClass& scene, const game::Tilemap* map, double time, float dt)
 {
     // when updating scene class the scene class nodes
     // refer to an entity class. Multiple scene nodes that
@@ -514,7 +524,7 @@ void Renderer::Update(const SceneClass& scene, float time, float dt)
         klass_set.insert(klass->GetId());
     }
 }
-void Renderer::Update(const Scene& scene, float time, float dt)
+void Renderer::Update(const Scene& scene, const game::Tilemap* map, double time, float dt)
 {
     for (size_t i=0; i<scene.GetNumEntities(); ++i)
     {

@@ -1103,10 +1103,11 @@ private:
         {
             if (SetRendererState())
             {
-                // Rebuild the renderer data structures and prepare the
-                // draw packets for the next draw(s)
+                TRACE_CALL("Renderer::Update",
+                           mRenderer.Update(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
                 TRACE_CALL("Renderer::CreateFrame",
                            mRenderer.CreateFrame(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
+
                 if (mFlags.test(GameStudioEngine::Flags::EditingMode))
                 {
                     ConfigureRendererForScene();
