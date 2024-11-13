@@ -113,6 +113,21 @@ void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap
     }
 }
 
+void Renderer::UpdateRendererState(const game::SceneClass& scene, const game::Tilemap* map, double time, float dt)
+{
+    const auto& nodes = scene.CollectNodes();
+
+    for (const auto& node : nodes)
+    {
+        const auto* placement = node.placement;
+        // When we're drawing SceneClass object entity is shared_ptr<const EntityClass>
+        const auto& entity = node.entity;
+
+        gfx::Transform transform(node.node_to_scene);
+        CreatePaintNodes<game::EntityClass, game::EntityNodeClass>(*entity, transform, placement->GetId());
+    }
+}
+
 void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, double time, float dt)
 {
     std::vector<DrawPacket> packets;
@@ -176,12 +191,148 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, d
     std::swap(mRenderBuffer, packets);
 }
 
+void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* map, double time, float dt, SceneClassDrawHook* scene_hook)
+{
+    // When we're combining the map with a scene everything that is to be drawn
+    // has to live in the same space and understand "depth" the same way.
+    // Current implementation already uses scene layering so we're going to do
+    // the same here and leverage the scene layer index value instead of using
+    // floating points. Other option could be compute a floating distance from
+    // camera and then sort the draw packets based on distance. It'd just mean
+    // that scene layering would not work the same way regarding stencil masking
+    // and how entities that map to the same scene layer interact when rendered.
+    // I.e. each scene layer has the same render passes, mask cover/expose, color.
+    // Layer Indexing is essentially the same thing but uses distinct buckets
+    // instead of a continuous range.
+    //
+    // To compute the render layer index there could be two options (as far as I
+    // can think of right now...)
+    //
+    // a) Use the relative height of objects in the clip space.
+    // Project both entities and tiles from their own coordinate spaces into clip
+    // space and use the clip space height value to to separate objects into different
+    // render layer buckets.
+    //
+    //
+    // b) Use the tilemap row index and render from back to front. Since rows grow towards
+    // the "screen surface" and bigger row indices are closer to the viewer the row index
+    // should map directly to a layer index. Then each entity needs to be mapped from
+    // entity world into tilemap and xy tile position computed.
+
+    std::vector<DrawPacket> packets;
+
+    if (map)
+    {
+        std::vector<TileBatch> batches;
+
+        constexpr auto obey_klass_flags   = false;
+        constexpr auto draw_render_layers = true;
+        constexpr auto draw_data_layers   = false;
+        constexpr auto use_tile_batching = true;
+        PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching);
+        GenerateMapDrawPackets(*map, batches, packets);
+    }
+
+    const auto& nodes = scene.CollectNodes();
+
+    for (const auto& node : nodes)
+    {
+        // When we're drawing SceneClass object the placement is a EntityPlacement*
+        // When we're drawing a Scene object the placement is n Entity* object
+        auto placement = node.placement;
+        // When we're drawing SceneClass object entity is shared_ptr<const EntityClass>
+        auto entity = node.entity;
+
+        // draw when there's no scene hook or when the scene hook returns
+        // true for the filtering operation.
+        const bool should_draw = !scene_hook || (scene_hook->FilterEntity(*placement));
+        if (!should_draw)
+            continue;
+
+        if (scene_hook)
+            scene_hook->BeginDrawEntity(*placement);
+
+        if (placement->TestFlag(game::EntityPlacement::Flags::VisibleInGame))
+        {
+            std::vector<DrawPacket> entity_packets;
+
+            for (size_t i=0; i<entity->GetNumNodes(); ++i)
+            {
+                const auto& node = entity->GetNode(i);
+
+                if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + placement->GetId() + "/" + node.GetId()))
+                {
+                    CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(*entity, node, *paint, entity_packets, nullptr);
+                    paint->visited = true;
+                }
+
+                if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + placement->GetId() + "/" + node.GetId()))
+                {
+                    CreateTextDrawPackets<game::EntityClass, game::EntityNodeClass>(*entity, node, *paint, entity_packets, nullptr);
+                    paint->visited = true;
+                }
+            }
+            // generate draw packets uses the entity to ask for the scene layer index.
+            // When rendering a SceneClass the entity class doesn't have the layer index
+            // (but only a stub function) and the real layer information is in the placement.
+            for (auto& packet: entity_packets)
+            {
+                packet.render_layer = placement->GetLayer();
+            }
+
+            // Compute tile coordinates for each draw packet created by the entity.
+            if (map)
+            {
+                ComputeTileCoordinates(*map, 0, entity_packets);
+            }
+
+            if (scene_hook)
+            {
+                for (auto& packet : entity_packets)
+                {
+                    if (scene_hook->InspectPacket(*placement, packet))
+                        packets.push_back(packet);
+                }
+
+            }
+            else base::AppendVector(packets, entity_packets);
+
+        } // visible placement
+
+        if (scene_hook)
+        {
+            // this is the model, aka model_to_world transform
+            gfx::Transform transform(node.node_to_scene);
+
+            scene_hook->AppendPackets(*placement, transform, packets);
+            scene_hook->EndDrawEntity(*placement);
+        }
+    }
+
+    if (map)
+    {
+        SortTilePackets(packets);
+    }
+    else
+    {
+        OffsetPacketLayers(packets);
+    }
+
+    // this is the outcome that the draw function will then actually draw
+    std::swap(mRenderBuffer, packets);
+}
+
+
 void Renderer::DrawFrame(gfx::Device& device) const
 {
-    if (mRenderBuffer.empty())
+    // only take this shortcut when running for realz otherwise
+    // (in the editor) we end up skipping doing low level render
+    // hook operations such as drawing the guide grid
+    if (mRenderBuffer.empty() && !mEditingMode)
         return;
 
     TRACE_CALL("DrawScenePackets", DrawScenePackets(device, mRenderBuffer));
+    TRACE_CALL("DrawEditorPackets", DrawEditorPackets(device, mRenderBuffer));
 }
 
 void Renderer::Draw(const Entity& entity,
@@ -198,20 +349,6 @@ void Renderer::Draw(const EntityClass& entity,
     DrawEntity<EntityClass, EntityNodeClass>(entity, device, model, hook);
 }
 
-void Renderer::Draw(const Scene& scene,
-                    gfx::Device& device,
-                    SceneInstanceDrawHook* scene_hook)
-{
-    DrawScene<Scene, Entity, Entity, EntityNode>(scene, nullptr, device, scene_hook);
-}
-
-void Renderer::Draw(const SceneClass& scene, const game::Tilemap* map,
-                    gfx::Device& device,
-                    SceneClassDrawHook* scene_hook)
-{
-
-    DrawScene<SceneClass, EntityPlacement, EntityClass, EntityNodeClass>(scene, map, device, scene_hook);
-}
 
 void Renderer::Draw(const game::Tilemap& map,
                     gfx::Device& device,
@@ -502,26 +639,27 @@ void Renderer::Update(const Entity& entity, double time, float dt)
 
 void Renderer::Update(const SceneClass& scene, const game::Tilemap* map, double time, float dt)
 {
-    // when updating scene class the scene class nodes
-    // refer to an entity class. Multiple scene nodes that
-    // define a placement for an entity of some type then
-    // refer to the same entity class type and actually point
-    // to the *same* entity class object.
-    // this map is used to check against duplicate reference
-    // in order to discard incorrect duplicate update iterations
-    // of the entity class object.
-    std::unordered_set<std::string> klass_set;
-
     for (size_t i=0; i<scene.GetNumNodes(); ++i)
     {
-        const auto& node = scene.GetPlacement(i);
-        const auto& klass = node.GetEntityClass();
-        if (!klass)
+        const auto& placement = scene.GetPlacement(i);
+        const auto& entity = placement.GetEntityClass();
+        if (!entity)
             continue;
-        else if (klass_set.find(klass->GetId()) != klass_set.end())
-            continue;
-        Update(*klass, time, dt);
-        klass_set.insert(klass->GetId());
+
+        for (size_t j=0; j<entity->GetNumNodes(); ++j)
+        {
+            const auto& node = entity->GetNode(j);
+            if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + placement.GetId() + "/" + node.GetId()))
+            {
+                UpdateDrawableResources<EntityClass, EntityNodeClass>(*entity, node, *paint, time, dt);
+                paint->visited = true;
+            }
+            if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + placement.GetId() + "/" + node.GetId()))
+            {
+                UpdateTextResources<EntityClass, EntityNodeClass>(*entity, node, *paint, time, dt);
+                paint->visited = true;
+            }
+        }
     }
 }
 void Renderer::Update(const Scene& scene, const game::Tilemap* map, double time, float dt)
@@ -727,153 +865,18 @@ void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeTyp
     }
 }
 
-template<typename SceneType,typename SceneNodeType,
-         typename EntityType, typename EntityNodeType>
-void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
-                         gfx::Device& device,
-                         SceneDrawHook<SceneNodeType>* scene_hook)
-{
-
-    // When we're combining the map with a scene everything that is to be drawn
-    // has to live in the same space and understand "depth" the same way.
-    // Current implementation already uses scene layering so we're going to do
-    // the same here and leverage the scene layer index value instead of using
-    // floating points. Other option could be compute a floating distance from
-    // camera and then sort the draw packets based on distance. It'd just mean
-    // that scene layering would not work the same way regarding stencil masking
-    // and how entities that map to the same scene layer interact when rendered.
-    // I.e. each scene layer has the same render passes, mask cover/expose, color.
-    // Layer Indexing is essentially the same thing but uses distinct buckets
-    // instead of a continuous range.
-    //
-    // To compute the render layer index there could be two options (as far as I
-    // can think of right now...)
-    //
-    // a) Use the relative height of objects in the clip space.
-    // Project both entities and tiles from their own coordinate spaces into clip
-    // space and use the clip space height value to to separate objects into different
-    // render layer buckets.
-    //
-    //
-    // b) Use the tilemap row index and render from back to front. Since rows grow towards
-    // the "screen surface" and bigger row indices are closer to the viewer the row index
-    // should map directly to a layer index. Then each entity needs to be mapped from
-    // entity world into tilemap and xy tile position computed.
-
-    std::vector<DrawPacket> packets;
-
-    if (map)
-    {
-        std::vector<TileBatch> batches;
-
-        constexpr auto obey_klass_flags   = false;
-        constexpr auto draw_render_layers = true;
-        constexpr auto draw_data_layers   = false;
-        constexpr auto use_tile_batching = true;
-        PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching);
-        GenerateMapDrawPackets(*map, batches, packets);
-    }
-
-    const auto& nodes = scene.CollectNodes();
-
-    for (const auto& node : nodes)
-    {
-        // When we're drawing SceneClass object the placement is a EntityPlacement*
-        // When we're drawing a Scene object the placement is n Entity* object
-        auto placement = node.placement;
-        // When we're drawing SceneClass object entity is shared_ptr<const EntityClass>
-        auto entity = node.entity;
-
-        // draw when there's no scene hook or when the scene hook returns
-        // true for the filtering operation.
-        const bool should_draw = !scene_hook || (scene_hook && scene_hook->FilterEntity(*placement));
-        if (!should_draw)
-            continue;
-
-        if (scene_hook)
-            scene_hook->BeginDrawEntity(*placement);
-
-        // this is the model, aka model_to_world transform
-        gfx::Transform transform(node.node_to_scene);
-
-        if (placement->TestFlag(EntityType::Flags::VisibleInGame))
-        {
-            CreatePaintNodes<EntityType, EntityNodeType>(*entity, transform);
-
-            std::vector<DrawPacket> entity_packets;
-
-            for (size_t i=0; i<entity->GetNumNodes(); ++i)
-            {
-                const auto& node = entity->GetNode(i);
-
-                if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
-                {
-                    CreateDrawableDrawPackets<EntityType, EntityNodeType>(*entity, node, *paint, entity_packets, nullptr);
-                }
-
-                if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
-                {
-                    CreateTextDrawPackets<EntityType, EntityNodeType>(*entity, node, *paint, entity_packets, nullptr);
-                }
-            }
-            // generate draw packets uses the entity to ask for the scene layer index.
-            // When rendering a SceneClass the entity class doesn't have the layer index
-            // (but only a stub function) and the real layer information is in the placement.
-            for (auto& packet: entity_packets)
-            {
-                packet.render_layer = placement->GetLayer();
-            }
-
-            // Compute tile coordinates for each draw packet created by the entity.
-            if (map)
-            {
-                ComputeTileCoordinates(*map, 0, entity_packets);
-            }
-
-            if (scene_hook)
-            {
-                for (auto& packet : entity_packets)
-                {
-                    if (scene_hook->InspectPacket(*placement, packet))
-                        packets.push_back(packet);
-                }
-
-            }
-            else base::AppendVector(packets, entity_packets);
-
-        } // visible placement
-
-        if (scene_hook)
-        {
-            scene_hook->AppendPackets(*placement, transform, packets);
-            scene_hook->EndDrawEntity(*placement);
-        }
-    }
-
-    if (map)
-    {
-        SortTilePackets(packets);
-    }
-    else
-    {
-        OffsetPacketLayers(packets);
-    }
-
-    DrawScenePackets(device, packets);
-    DrawEditorPackets(device, packets);
-}
-
 template<typename EntityType, typename EntityNodeType>
-void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transform)
+void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transform, std::string prefix)
 {
     using RenderTree = game::RenderTree<EntityNodeType>;
 
     class Visitor : public RenderTree::ConstVisitor {
     public:
-        Visitor(const EntityType& entity, Renderer& renderer, gfx::Transform& transform)
+        Visitor(const EntityType& entity, Renderer& renderer, gfx::Transform& transform, std::string prefix)
           : mEntity(entity)
           , mRenderer(renderer)
           , mTransform(transform)
+          , mPrefix(std::move(prefix))
         {}
         virtual void EnterNode(const EntityNodeType* node) override
         {
@@ -890,7 +893,7 @@ void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transf
 
             if (const auto* item = node->GetDrawable())
             {
-                auto& paint_node = mRenderer.mPaintNodes["drawable/" + node->GetId()];
+                auto& paint_node = mRenderer.mPaintNodes["drawable/" + mPrefix + node->GetId()];
                 paint_node.visited        = true;
                 paint_node.world_pos      = box.GetTopLeft();
                 paint_node.world_scale    = box.GetSize();
@@ -900,7 +903,7 @@ void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transf
 
             if (const auto* text = node->GetTextItem())
             {
-                auto& paint_node = mRenderer.mPaintNodes["text-item/" + node->GetId()];
+                auto& paint_node = mRenderer.mPaintNodes["text-item/" + mPrefix + node->GetId()];
                 paint_node.visited        = true;
                 paint_node.world_pos      = box.GetTopLeft();
                 paint_node.world_scale    = box.GetSize();
@@ -918,7 +921,8 @@ void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transf
         const EntityType& mEntity;
         Renderer& mRenderer;
         gfx::Transform& mTransform;
-    } visitor(entity, *this, transform);
+        const std::string mPrefix;
+    } visitor(entity, *this, transform, prefix + "/");
 
     const auto& tree = entity.GetRenderTree();
     tree.PreOrderTraverse(visitor);

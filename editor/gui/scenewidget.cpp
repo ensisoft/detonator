@@ -407,6 +407,7 @@ public:
             if (mEntityIds[mCurrentEntityIdIndex] == app::FromUtf8(klass->GetId()))
                 break;
         }
+        StartNextPlacement();
     }
     PlaceEntityTool(SceneWidget::State& state, bool snap, unsigned grid)
         : mState(state)
@@ -424,7 +425,15 @@ public:
                 break;
             }
         }
+        StartNextPlacement();
     }
+    ~PlaceEntityTool()
+    {
+        ASSERT(mCurrentPlacement);
+        mState.scene->DeletePlacement(mCurrentPlacement);
+    }
+
+
     virtual void Render(gfx::Painter& painter, gfx::Painter& scene_painter) const override
     {
         const auto& rect = mClass->GetBoundingRect();
@@ -433,10 +442,7 @@ public:
         const auto right = rect.GetX() + width;
         const auto bottom = rect.GetY() + height;
 
-        gfx::Device* device = painter.GetDevice();
-        gfx::Transform model;
-        model.Translate(mWorldPos.x, mWorldPos.y);
-        mState.renderer.Draw(*mClass, *device, model, nullptr);
+        mCurrentPlacement->SetTranslation(mWorldPos);
 
         const auto& pos = engine::ProjectPoint(scene_painter.GetProjMatrix(),
                                                scene_painter.GetViewMatrix(),
@@ -471,39 +477,58 @@ public:
             mWorldPos.x = std::round(mWorldPos.x / mGridSize) * mGridSize;
             mWorldPos.y = std::round(mWorldPos.y / mGridSize) * mGridSize;
         }
+        mCurrentPlacement->SetScale(1.0f, 1.0f);
+        mCurrentPlacement->SetName(CreateName());
+        mCurrentPlacement->SetTranslation(mWorldPos);
 
-        const auto name = CreateName();
-        game::EntityPlacement node;
-        node.SetEntity(mClass);
-        node.SetName(name);
-        node.SetScale(glm::vec2(1.0f, 1.0f));
-        node.SetTranslation(glm::vec2(mWorldPos.x, mWorldPos.y));
-        // leave this empty for the class default to take place.
-        // node.SetIdleAnimationId(mClass->GetIdleTrackId());
-        auto* child = mState.scene->PlaceEntity(std::move(node));
-        mState.scene->LinkChild(nullptr, child);
         mState.view->Rebuild();
-        mState.view->SelectItemById(child->GetId());
+        mState.view->SelectItemById(mCurrentPlacement->GetId());
         mState.last_placed_entity = app::FromUtf8(mClass->GetId());
-        DEBUG("Added new entity '%1'", name);
+        DEBUG("Added new entity '%1'", mCurrentPlacement->GetName());
+
+        // start the next placement
+        StartNextPlacement();
+
         // return false to indicate that another object can be placed.
         // in fact object placement continues until it's cancelled.
         // this makes it quite convenient to place multiple objects
         // in rapid succession.
         return false;
     }
+    void StartNextPlacement()
+    {
+        // Create a new placement for temporarily adding the entity
+        // to the scene in order to visualize it while it's being
+        // placed. If the placement is completed we leave it there
+        // or on cancellation we delete it.
+        game::EntityPlacement placement;
+        placement.SetEntity(mClass);
+        placement.SetTranslation(glm::vec2(mWorldPos.x, mWorldPos.y));
+        // leave this empty for the class default to take place.
+        // placement.SetIdleAnimationId(mClass->GetIdleTrackId());
+
+        // add and link to the scene.
+        mCurrentPlacement = mState.scene->PlaceEntity(placement);
+        // link to the root
+        mState.scene->LinkChild(nullptr, mCurrentPlacement);
+    }
+
     void SelectNextEntity()
     {
         mCurrentEntityIdIndex = (mCurrentEntityIdIndex + 1) % mEntityIds.size();
         mClass = mState.workspace->GetEntityClassById(mEntityIds[mCurrentEntityIdIndex]);
+        mCurrentPlacement->SetEntity(mClass);
     }
     void SelectPrevEntity()
     {
         mCurrentEntityIdIndex = mCurrentEntityIdIndex > 0 ? mCurrentEntityIdIndex - 1 : mEntityIds.size() - 1;
         mClass = mState.workspace->GetEntityClassById(mEntityIds[mCurrentEntityIdIndex]);
+        mCurrentPlacement->SetEntity(mClass);
     }
     void SetWorldPos(const glm::vec2& pos)
-    { mWorldPos = pos; }
+    {
+        mWorldPos = pos;
+    }
 private:
     std::string CreateName() const
     {
@@ -531,6 +556,8 @@ private:
     QStringList mEntityIds;
     // the current index into the mEntityIds list.
     unsigned mCurrentEntityIdIndex = 0;
+
+    game::EntityPlacement* mCurrentPlacement = nullptr;
 };
 
 SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
@@ -979,9 +1006,19 @@ void SceneWidget::Shutdown()
 }
 void SceneWidget::Update(double secs)
 {
+    // todo: we're passing nullptr for the tilemap here even though we
+    // might have one associated with the scene. Right now though we know
+    // that the renderer update doesn't use it, but this assumption should
+    // be fixed.
+    mState.renderer.UpdateRendererState(*mState.scene, nullptr, 0.0, 0.0f);
+
     if (mPlayState == PlayState::Playing)
     {
-        mState.renderer.Update(*mState.scene, mSceneTime, secs);
+        // todo: we're passing nullptr for the tilemap here even though we
+        // might have one associated with the scene. Right now though we know
+        // that the renderer update doesn't use it, but this assumption should
+        // be fixed.
+        mState.renderer.Update(*mState.scene, nullptr, mSceneTime, secs);
         mSceneTime += secs;
     }
     mCurrentTime += secs;
@@ -2052,7 +2089,8 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         const auto* map = show_map ? mTilemap.get() : nullptr;
 
         mState.renderer.BeginFrame();
-        mState.renderer.Draw(*mState.scene,  map, *device, &draw_hook);
+        mState.renderer.CreateFrame(*mState.scene, map, 0.0, 0.0f, &draw_hook);
+        mState.renderer.DrawFrame(*device);
 
         if (mCurrentTool)
             mCurrentTool->Render(painter, scene_painter);
@@ -2727,7 +2765,8 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     mState.renderer.SetLowLevelRendererHook(nullptr);
 
     DrawHook hook(hit_nodes);
-    mState.renderer.Draw(*mState.scene, nullptr, *device, &hook);
+    mState.renderer.CreateFrame(*mState.scene, nullptr, mSceneTime, 0.0f, &hook);
+    mState.renderer.DrawFrame(*device);
 
     {
         // for debugging.
