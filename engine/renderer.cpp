@@ -631,7 +631,7 @@ void Renderer::Update(const Entity& entity, double time, float dt)
 
         if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
         {
-            UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, time, dt);
+            UpdateTextResources<Entity, EntityNode>(entity, node, *paint, time, dt);
             paint->visited = true;
         }
     }
