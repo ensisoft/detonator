@@ -485,7 +485,15 @@ void AnimationTrackWidget::Update(double secs)
 
     // Playing back an animation track ?
     if (mPlayState != PlayState::Playing)
+    {
+        if (mPlayState == PlayState::Stopped)
+        {
+            mRenderer.UpdateRendererState(*mEntity, 0.0, 0.0f);
+        }
         return;
+    }
+
+    ASSERT(mPlayState == PlayState::Playing);
 
     mPlaybackAnimation->Update(secs);
 
@@ -495,6 +503,7 @@ void AnimationTrackWidget::Update(double secs)
         mPhysics.Step();
         mPhysics.UpdateEntity(*mPlaybackAnimation);
     }
+    mRenderer.UpdateRendererState(*mPlaybackAnimation, mCurrentTime, secs);
     mRenderer.Update(*mPlaybackAnimation, mCurrentTime, secs);
 
     if (mPlaybackAnimation->IsAnimating())
@@ -528,6 +537,8 @@ void AnimationTrackWidget::Update(double secs)
     mPlaybackAnimation.reset();
     ReturnToDefault();
     SelectedItemChanged(mUI.timeline->GetSelectedItem());
+
+    mRenderer.ClearPaintState();
     NOTE("Animation finished.");
     DEBUG("Animation finished.");
 }
@@ -671,13 +682,15 @@ void AnimationTrackWidget::on_actionPlay_triggered()
     mUI.timeline->SetFreezeItems(true);
     mUI.timeline->SetCurrentTime(0.0f);
     mUI.timeline->Repaint();
+
+    mRenderer.ClearPaintState();
 }
 
 void AnimationTrackWidget::on_actionPause_triggered()
 {
     mPlayState = PlayState::Paused;
     SetEnabled(mUI.actionPlay, true);
-    SetEnabled(mUI.actionPlay, false);
+    SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, true);
 }
 
@@ -695,6 +708,8 @@ void AnimationTrackWidget::on_actionStop_triggered()
     mUI.timeline->SetCurrentTime(0.0f);
     mUI.timeline->Update();
     mPlaybackAnimation.reset();
+
+    mRenderer.ClearPaintState();
 }
 
 void AnimationTrackWidget::on_actionSave_triggered()
@@ -1851,19 +1866,25 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     mRenderer.SetName("AnimationWidgetRenderer/" + mState.entity->GetId());
     mRenderer.SetLowLevelRendererHook(&low_level_render_hook);
 
-    mRenderer.BeginFrame();
     if (mPlaybackAnimation)
     {
-        mRenderer.Draw(*mPlaybackAnimation, *device, nullptr);
+        mRenderer.BeginFrame();
+        mRenderer.CreateFrame(*mPlaybackAnimation, mAnimationTime, 0.0f);
+        mRenderer.DrawFrame(*device);
+        mRenderer.EndFrame();
     }
     else
     {
         DrawHook hook(GetCurrentEntityNode());
         hook.SetIsPlaying(mPlayState == PlayState::Playing);
         hook.SetDrawVectors(false);
-        mRenderer.Draw(*mEntity, *device, &hook);
+
+        mRenderer.BeginFrame();
+
+        mRenderer.CreateFrame(*mEntity, 0.0, 0.0f, &hook);
+        mRenderer.DrawFrame(*device);
+        mRenderer.EndFrame();
     }
-    mRenderer.EndFrame();
 
     // basis vectors
     if (GetValue(mUI.chkShowOrigin))

@@ -128,6 +128,18 @@ void Renderer::UpdateRendererState(const game::SceneClass& scene, const game::Ti
     }
 }
 
+void Renderer::UpdateRendererState(const game::EntityClass& entity, double time, float dt)
+{
+    gfx::Transform transform;
+    CreatePaintNodes<EntityClass, EntityNodeClass>(entity, transform, "");
+}
+
+void Renderer::UpdateRendererState(const game::Entity& entity, double time, float dt)
+{
+    gfx::Transform transform;
+    CreatePaintNodes<Entity, EntityNode>(entity, transform, "");
+}
+
 void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, double time, float dt)
 {
     std::vector<DrawPacket> packets;
@@ -319,6 +331,72 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
     }
 
     // this is the outcome that the draw function will then actually draw
+    std::swap(mRenderBuffer, packets);
+}
+
+void Renderer::CreateFrame(const game::EntityClass& entity, double time, float dt, EntityClassDrawHook* hook)
+{
+    std::vector<DrawPacket> packets;
+    for (size_t i=0; i<entity.GetNumNodes(); ++i)
+    {
+        const auto& node = entity.GetNode(i);
+
+        bool did_paint = false;
+        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+        {
+            CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, packets, hook);
+            paint->visited = true;
+            did_paint = true;
+        }
+
+        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+        {
+            CreateTextDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, packets, hook);
+            paint->visited = true;
+            did_paint = true;
+        }
+        if (hook && !did_paint)
+        {
+            gfx::Transform transform(entity.FindNodeTransform(&node));
+            hook->AppendPackets(&node, transform, packets);
+        }
+    }
+
+    OffsetPacketLayers(packets);
+
+    std::swap(mRenderBuffer, packets);
+}
+
+void Renderer::CreateFrame(const game::Entity& entity, double time, float dt, EntityInstanceDrawHook* hook)
+{
+    std::vector<DrawPacket> packets;
+    for (size_t i=0; i<entity.GetNumNodes(); ++i)
+    {
+        const auto& node = entity.GetNode(i);
+
+        bool did_paint = false;
+        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+        {
+            CreateDrawableDrawPackets<game::Entity, game::EntityNode>(entity, node, *paint, packets, hook);
+            paint->visited = true;
+            did_paint = true;
+        }
+
+        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+        {
+            CreateTextDrawPackets<game::Entity, game::EntityNode>(entity, node, *paint, packets, hook);
+            paint->visited = true;
+            did_paint = true;
+        }
+        if (hook && !did_paint)
+        {
+            gfx::Transform transform(entity.FindNodeTransform(&node));
+            hook->AppendPackets(&node, transform, packets);
+        }
+    }
+
+    OffsetPacketLayers(packets);
+
     std::swap(mRenderBuffer, packets);
 }
 
@@ -922,7 +1000,7 @@ void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transf
         Renderer& mRenderer;
         gfx::Transform& mTransform;
         const std::string mPrefix;
-    } visitor(entity, *this, transform, prefix + "/");
+    } visitor(entity, *this, transform, prefix.empty() ? "" : prefix + "/");
 
     const auto& tree = entity.GetRenderTree();
     tree.PreOrderTraverse(visitor);

@@ -189,6 +189,8 @@ namespace engine
                                  double time, float dt);
         void UpdateRendererState(const game::SceneClass& scene, const game::Tilemap* map,
                                  double time, float dt);
+        void UpdateRendererState(const game::EntityClass& entity, double time, float dt);
+        void UpdateRendererState(const game::Entity& entity, double time, float dt);
 
         // Update the current frame rendering state, animate materials etc.
         // note that when doing multi-threaded render/update this
@@ -214,6 +216,8 @@ namespace engine
                          double time, float dt);
         void CreateFrame(const game::SceneClass& scene, const game::Tilemap* map,
                          double time, float dt, SceneClassDrawHook* scene_hook);
+        void CreateFrame(const game::EntityClass& entity, double time, float dt, EntityClassDrawHook* hook = nullptr);
+        void CreateFrame(const game::Entity& entity, double time, float dt, EntityInstanceDrawHook* hook = nullptr);
 
         // Draw the current frame rendering state, i.e. the currently
         // enqueued and created draw commands.
