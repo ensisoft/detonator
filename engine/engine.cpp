@@ -1077,7 +1077,7 @@ private:
             // that have been spawned etc. This needs to be done inside
             // the begin/end loop in order to have the correct signalling
             // i.e. entity control flags.
-            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRendererState(*mScene, mTilemap.get(), game_time, dt));
+            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRendererState(*mScene, mTilemap.get()));
 
             // make sure to do this first in order to allow the scene to rebuild
             // the spatial indices etc. before the game's PostUpdate runs.
@@ -1103,11 +1103,8 @@ private:
         {
             if (SetRendererState())
             {
-                TRACE_CALL("Renderer::Update",
-                           mRenderer.Update(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
-                TRACE_CALL("Renderer::CreateFrame",
-                           mRenderer.CreateFrame(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
-
+                TRACE_CALL("Renderer::Update", mRenderer.Update(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
+                TRACE_CALL("Renderer::CreateFrame", mRenderer.CreateFrame(*mScene, mTilemap.get()));
                 if (mFlags.test(GameStudioEngine::Flags::EditingMode))
                 {
                     ConfigureRendererForScene();

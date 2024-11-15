@@ -1349,7 +1349,7 @@ void EntityWidget::Shutdown()
 }
 void EntityWidget::Update(double secs)
 {
-    mState.renderer.UpdateRendererState(*mState.entity, mEntityTime, secs);
+    mState.renderer.UpdateRendererState(*mState.entity);
 
     if (mPlayState == PlayState::Playing)
     {
@@ -3450,7 +3450,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     mState.renderer.SetName("EntityWidgetRenderer/" + mState.entity->GetId());
 
     mState.renderer.BeginFrame();
-    mState.renderer.CreateFrame(*mState.entity, mEntityTime, 0.0, &draw_hook);
+    mState.renderer.CreateFrame(*mState.entity, &draw_hook);
     mState.renderer.DrawFrame(*device);
     mState.renderer.EndFrame();
 

@@ -488,7 +488,7 @@ void AnimationTrackWidget::Update(double secs)
     {
         if (mPlayState == PlayState::Stopped)
         {
-            mRenderer.UpdateRendererState(*mEntity, 0.0, 0.0f);
+            mRenderer.UpdateRendererState(*mEntity);
         }
         return;
     }
@@ -503,7 +503,7 @@ void AnimationTrackWidget::Update(double secs)
         mPhysics.Step();
         mPhysics.UpdateEntity(*mPlaybackAnimation);
     }
-    mRenderer.UpdateRendererState(*mPlaybackAnimation, mCurrentTime, secs);
+    mRenderer.UpdateRendererState(*mPlaybackAnimation);
     mRenderer.Update(*mPlaybackAnimation, mCurrentTime, secs);
 
     if (mPlaybackAnimation->IsAnimating())
@@ -1869,7 +1869,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     if (mPlaybackAnimation)
     {
         mRenderer.BeginFrame();
-        mRenderer.CreateFrame(*mPlaybackAnimation, mAnimationTime, 0.0f);
+        mRenderer.CreateFrame(*mPlaybackAnimation);
         mRenderer.DrawFrame(*device);
         mRenderer.EndFrame();
     }
@@ -1880,8 +1880,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
         hook.SetDrawVectors(false);
 
         mRenderer.BeginFrame();
-
-        mRenderer.CreateFrame(*mEntity, 0.0, 0.0f, &hook);
+        mRenderer.CreateFrame(*mEntity, &hook);
         mRenderer.DrawFrame(*device);
         mRenderer.EndFrame();
     }

@@ -1010,7 +1010,7 @@ void SceneWidget::Update(double secs)
     // might have one associated with the scene. Right now though we know
     // that the renderer update doesn't use it, but this assumption should
     // be fixed.
-    mState.renderer.UpdateRendererState(*mState.scene, nullptr, 0.0, 0.0f);
+    mState.renderer.UpdateRendererState(*mState.scene, nullptr);
 
     if (mPlayState == PlayState::Playing)
     {
@@ -2089,7 +2089,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         const auto* map = show_map ? mTilemap.get() : nullptr;
 
         mState.renderer.BeginFrame();
-        mState.renderer.CreateFrame(*mState.scene, map, 0.0, 0.0f, &draw_hook);
+        mState.renderer.CreateFrame(*mState.scene, map, &draw_hook);
         mState.renderer.DrawFrame(*device);
 
         if (mCurrentTool)
@@ -2765,7 +2765,7 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     mState.renderer.SetLowLevelRendererHook(nullptr);
 
     DrawHook hook(hit_nodes);
-    mState.renderer.CreateFrame(*mState.scene, nullptr, mSceneTime, 0.0f, &hook);
+    mState.renderer.CreateFrame(*mState.scene, nullptr, &hook);
     mState.renderer.DrawFrame(*device);
 
     {

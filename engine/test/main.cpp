@@ -329,6 +329,7 @@ public:
         camera.scale       = glm::vec2{1.0f, 1.0f};
         camera.position    = glm::vec2{0.0f, 0.0f};
         mRenderer.SetCamera(camera);
+        mRenderer.CreateFrame(*mScene, nullptr);
         mRenderer.DrawFrame(*device);
 
         mPhysics.DebugDrawObjects(painter);
@@ -340,9 +341,7 @@ public:
             mPhysics.Step();
             mPhysics.UpdateScene(*mScene);
         }
-
-        mRenderer.UpdateRendererState(*mScene, nullptr, 0.0, dt);
-        mRenderer.CreateFrame(*mScene, nullptr, 0.0, dt);
+        mRenderer.UpdateRendererState(*mScene, nullptr);
     }
     virtual void Start(engine::ClassLibrary* loader) override
     {
@@ -453,6 +452,7 @@ public:
         camera.scale       = glm::vec2{1.0f, 1.0f};
         camera.position    = glm::vec2{0.0f, 0.0f};
         mRenderer.SetCamera(camera);
+        mRenderer.CreateFrame(*mScene, nullptr);
         mRenderer.DrawFrame(*device);
     }
     virtual void Update(float dt) override
@@ -460,8 +460,7 @@ public:
         if (mScene)
         {
             mScene->Update(dt);
-            mRenderer.UpdateRendererState(*mScene, nullptr, 0.0, dt);
-            mRenderer.CreateFrame(*mScene, nullptr, 0.0, dt);
+            mRenderer.UpdateRendererState(*mScene, nullptr);
         }
     }
     virtual void Start(engine::ClassLibrary* loader) override
@@ -565,6 +564,7 @@ public:
         camera.position    = glm::vec2{-300.0f, -400.0f};
         mRenderer.SetCamera(camera);
 
+        mRenderer.CreateFrame(*mScene, nullptr);
         mRenderer.DrawFrame(*device);
 
         for (size_t i=0; i<mScene->GetNumEntities(); ++i)
@@ -604,8 +604,7 @@ public:
         if (mScene)
         {
             mScene->Update(dt);
-            mRenderer.UpdateRendererState(*mScene, nullptr, 0.0, dt);
-            mRenderer.CreateFrame(*mScene, nullptr, 0.0, dt);
+            mRenderer.UpdateRendererState(*mScene, nullptr);
         }
     }
     virtual void Start(engine::ClassLibrary* loader) override
@@ -683,7 +682,7 @@ public:
 
         auto* device = painter.GetDevice();
 
-        mRenderer.CreateFrame(*mEntity, 0.0, 0.0f);
+        mRenderer.CreateFrame(*mEntity);
         mRenderer.DrawFrame(*device);
 
         for (size_t i=0; i<mEntity->GetNumNodes(); ++i)
@@ -711,7 +710,7 @@ public:
 
         mEntity->Update(dt);
 
-        mRenderer.UpdateRendererState(*mEntity, 0.0, 0.0f);
+        mRenderer.UpdateRendererState(*mEntity);
         mRenderer.Update(*mEntity, mTime, dt);
 
         mTime += dt;

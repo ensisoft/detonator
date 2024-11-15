@@ -243,8 +243,8 @@ public:
         engine.renderer->SetCamera(camera);
 
         TRACE_CALL("BeginFrame", engine.renderer->BeginFrame());
-        TRACE_CALL("Update", engine.renderer->UpdateRendererState(*mScene, nullptr, 0.0, 0.0f));
-        TRACE_CALL("CreatFrame", engine.renderer->CreateFrame(*mScene, nullptr, 0.0, 0.0f));
+        TRACE_CALL("Update",     engine.renderer->UpdateRendererState(*mScene, nullptr));
+        TRACE_CALL("CreatFrame", engine.renderer->CreateFrame(*mScene, nullptr));
         TRACE_CALL("DrawFrame",  engine.renderer->DrawFrame(*engine.graphics_device));
         TRACE_CALL("EndFrame",   engine.renderer->EndFrame());
 
@@ -309,8 +309,8 @@ public:
         engine.renderer->SetCamera(camera);
 
         TRACE_CALL("BeginFrame",  engine.renderer->BeginFrame());
-        TRACE_CALL("Update", engine.renderer->UpdateRendererState(*mScene, nullptr, 0.0f, 0.0f));
-        TRACE_CALL("CreateFrame", engine.renderer->CreateFrame(*mScene, nullptr, 0.0, 0.0f));
+        TRACE_CALL("Update",      engine.renderer->UpdateRendererState(*mScene, nullptr));
+        TRACE_CALL("CreateFrame", engine.renderer->CreateFrame(*mScene, nullptr));
         TRACE_CALL("DrawFrame",   engine.renderer->DrawFrame(*engine.graphics_device));
         TRACE_CALL("EndFrame",    engine.renderer->EndFrame());
 

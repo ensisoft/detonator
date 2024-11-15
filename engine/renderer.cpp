@@ -86,7 +86,7 @@ void Renderer::CreateRendererState(const game::Scene& scene, const game::Tilemap
     }
 }
 
-void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap* map, double time, float dt)
+void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap* map)
 {
     const auto& nodes = scene.CollectNodes();
 
@@ -113,7 +113,7 @@ void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap
     }
 }
 
-void Renderer::UpdateRendererState(const game::SceneClass& scene, const game::Tilemap* map, double time, float dt)
+void Renderer::UpdateRendererState(const game::SceneClass& scene, const game::Tilemap* map)
 {
     const auto& nodes = scene.CollectNodes();
 
@@ -128,19 +128,19 @@ void Renderer::UpdateRendererState(const game::SceneClass& scene, const game::Ti
     }
 }
 
-void Renderer::UpdateRendererState(const game::EntityClass& entity, double time, float dt)
+void Renderer::UpdateRendererState(const game::EntityClass& entity)
 {
     gfx::Transform transform;
     CreatePaintNodes<EntityClass, EntityNodeClass>(entity, transform, "");
 }
 
-void Renderer::UpdateRendererState(const game::Entity& entity, double time, float dt)
+void Renderer::UpdateRendererState(const game::Entity& entity)
 {
     gfx::Transform transform;
     CreatePaintNodes<Entity, EntityNode>(entity, transform, "");
 }
 
-void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, double time, float dt)
+void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
 {
     std::vector<DrawPacket> packets;
 
@@ -203,7 +203,7 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, d
     std::swap(mRenderBuffer, packets);
 }
 
-void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* map, double time, float dt, SceneClassDrawHook* scene_hook)
+void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* map, SceneClassDrawHook* scene_hook)
 {
     // When we're combining the map with a scene everything that is to be drawn
     // has to live in the same space and understand "depth" the same way.
@@ -334,7 +334,7 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
     std::swap(mRenderBuffer, packets);
 }
 
-void Renderer::CreateFrame(const game::EntityClass& entity, double time, float dt, EntityClassDrawHook* hook)
+void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook* hook)
 {
     std::vector<DrawPacket> packets;
     for (size_t i=0; i<entity.GetNumNodes(); ++i)
@@ -367,7 +367,7 @@ void Renderer::CreateFrame(const game::EntityClass& entity, double time, float d
     std::swap(mRenderBuffer, packets);
 }
 
-void Renderer::CreateFrame(const game::Entity& entity, double time, float dt, EntityInstanceDrawHook* hook)
+void Renderer::CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* hook)
 {
     std::vector<DrawPacket> packets;
     for (size_t i=0; i<entity.GetNumNodes(); ++i)
