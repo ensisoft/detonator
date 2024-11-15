@@ -1349,6 +1349,8 @@ void EntityWidget::Shutdown()
 }
 void EntityWidget::Update(double secs)
 {
+    mState.renderer.UpdateRendererState(*mState.entity, mEntityTime, secs);
+
     if (mPlayState == PlayState::Playing)
     {
         mState.renderer.Update(*mState.entity, mEntityTime, secs);
@@ -3448,7 +3450,8 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     mState.renderer.SetName("EntityWidgetRenderer/" + mState.entity->GetId());
 
     mState.renderer.BeginFrame();
-    mState.renderer.Draw(*mState.entity, *device, &draw_hook);
+    mState.renderer.CreateFrame(*mState.entity, mEntityTime, 0.0, &draw_hook);
+    mState.renderer.DrawFrame(*device);
     mState.renderer.EndFrame();
 
     // Draw joints, drawn in the entity space.
