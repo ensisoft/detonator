@@ -409,6 +409,12 @@ void Renderer::DrawFrame(gfx::Device& device) const
     if (mRenderBuffer.empty() && !mEditingMode)
         return;
 
+    // surface (renderer) has not been configured yet.
+    const auto width = mSurface.size.GetWidth();
+    const auto height = mSurface.size.GetHeight();
+    if (width == 0 || height == 0)
+        return;
+
     TRACE_CALL("DrawScenePackets", DrawScenePackets(device, mRenderBuffer));
     TRACE_CALL("DrawEditorPackets", DrawEditorPackets(device, mRenderBuffer));
 }
