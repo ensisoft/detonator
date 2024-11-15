@@ -339,8 +339,8 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Black);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*entity, 0.0, 0.0f);
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.UpdateRendererState(*entity);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -356,7 +356,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Black);
             renderer.BeginFrame();
             {
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -378,8 +378,8 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*entity, 0.0, 0.0f);
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.UpdateRendererState(*entity);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -398,8 +398,8 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*entity, 0.0, 0.0f);
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.UpdateRendererState(*entity);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -425,8 +425,8 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*entity, 0.0, 0.0f);
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.UpdateRendererState(*entity);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -444,8 +444,8 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*entity, 0.0, 0.0f);
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.UpdateRendererState(*entity);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -463,8 +463,8 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*entity, 0.0, 0.0f);
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.UpdateRendererState(*entity);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -484,8 +484,8 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*entity, 0.0, 0.0f);
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.UpdateRendererState(*entity);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -501,9 +501,9 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*entity, 0.0, 0.0f);
+                renderer.UpdateRendererState(*entity);
                 renderer.Update(*entity, 0.0f, 0.0f);
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -524,9 +524,9 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*entity, 0.0, 0.0f);
+                renderer.UpdateRendererState(*entity);
                 renderer.Update(*entity, 0.0f, 0.0f);
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -539,9 +539,9 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*entity, 0.0, 0.0f);
+                renderer.UpdateRendererState(*entity);
                 renderer.Update(*entity, 0.0f, 1.0f / 60.0f);
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -555,9 +555,9 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
              renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*entity, 0.0, 0.0f);
+                renderer.UpdateRendererState(*entity);
                 renderer.Update(*entity, 0.0f, 1.0f / 60.0f);
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -625,7 +625,7 @@ void unit_test_entity_layering()
     camera.viewport = gfx::FRect(0.0f, 0.0f, 256.0f, 256.0f);
     renderer.SetCamera(camera);
 
-    renderer.UpdateRendererState(*entity, 0.0, 0.0f);
+    renderer.UpdateRendererState(*entity);
 
     // green should be on top
     {
@@ -634,7 +634,7 @@ void unit_test_entity_layering()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -654,7 +654,7 @@ void unit_test_entity_layering()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.CreateFrame(*entity, 0.0, 0.0f);
+                renderer.CreateFrame(*entity);
                 renderer.DrawFrame(*device);
             }
             renderer.EndFrame();
@@ -739,7 +739,7 @@ void unit_test_entity_lifecycle()
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*scene, nullptr, 0.0, dt);
+                renderer.UpdateRendererState(*scene, nullptr);
             }
             renderer.EndFrame();
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
@@ -766,7 +766,7 @@ void unit_test_entity_lifecycle()
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*scene, nullptr, 0.0, dt);
+                renderer.UpdateRendererState(*scene, nullptr);
             }
             renderer.EndFrame();
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 0);
@@ -786,7 +786,7 @@ void unit_test_entity_lifecycle()
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 0);
             renderer.BeginFrame();
             {
-                renderer.UpdateRendererState(*scene, nullptr, 0.0, dt);
+                renderer.UpdateRendererState(*scene, nullptr);
             }
             renderer.EndFrame();
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
@@ -851,7 +851,7 @@ void unit_test_transform_precision()
     camera.position = glm::vec2{-512.0f, -512.0f};
     renderer.SetCamera(camera);
 
-    renderer.UpdateRendererState(entity, 0.0, 0.0f);
+    renderer.UpdateRendererState(entity);
 
     {
         class Hook : public engine::EntityClassDrawHook {
@@ -876,7 +876,7 @@ void unit_test_transform_precision()
         device->ClearColor(gfx::Color::Black);
 
         renderer.BeginFrame();
-        renderer.CreateFrame(entity, 0.0, 0.0f, &hook);
+        renderer.CreateFrame(entity, &hook);
         renderer.DrawFrame(*device);
         renderer.EndFrame();
 
@@ -1156,37 +1156,37 @@ void unit_test_scene_culling()
         renderer.ClearPaintState();
 
         node->SetTranslation(410.0f, 0.0f);
-        renderer.UpdateRendererState(entity, 0.0, 0.0f);
-        renderer.CreateFrame(entity, 0.0, 0.0f);
+        renderer.UpdateRendererState(entity);
+        renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == true);
         TEST_REQUIRE(filter.counter == 1);
 
         node->SetTranslation(-410.0f, 0.0f);
-        renderer.UpdateRendererState(entity, 0.0, 0.0f);
-        renderer.CreateFrame(entity, 0.0, 0.0f);
+        renderer.UpdateRendererState(entity);
+        renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == true);
         TEST_REQUIRE(filter.counter == 2);
 
         node->SetTranslation(0.0f, 410.0f);
-        renderer.UpdateRendererState(entity, 0.0, 0.0f);
-        renderer.CreateFrame(entity, 0.0, 0.0f);
+        renderer.UpdateRendererState(entity);
+        renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == true);
         TEST_REQUIRE(filter.counter == 3);
 
         node->SetTranslation(0.0f, -410.0f);
-        renderer.UpdateRendererState(entity, 0.0, 0.0f);
-        renderer.CreateFrame(entity, 0.0, 0.0f);
+        renderer.UpdateRendererState(entity);
+        renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == true);
         TEST_REQUIRE(filter.counter == 4);
 
         node->SetTranslation(0.0f, 0.0f);
 
-        renderer.UpdateRendererState(entity, 0.0, 0.0f);
-        renderer.CreateFrame(entity, 0.0, 0.0f);
+        renderer.UpdateRendererState(entity);
+        renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == false);
         TEST_REQUIRE(filter.counter == 5);
@@ -1220,36 +1220,36 @@ void unit_test_scene_culling()
         renderer.ClearPaintState();
 
         node->SetTranslation(450.0f, 0.0f);
-        renderer.UpdateRendererState(entity, 0.0, 0.0f);
-        renderer.CreateFrame(entity, 0.0, 0.0f);
+        renderer.UpdateRendererState(entity);
+        renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == true);
         TEST_REQUIRE(filter.counter == 1);
 
         node->SetTranslation(-450.0f, 0.0f);
-        renderer.UpdateRendererState(entity, 0.0, 0.0f);
-        renderer.CreateFrame(entity, 0.0, 0.0f);
+        renderer.UpdateRendererState(entity);
+        renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == true);
         TEST_REQUIRE(filter.counter == 2);
 
         node->SetTranslation(0.0f, 450.0f);
-        renderer.UpdateRendererState(entity, 0.0, 0.0f);
-        renderer.CreateFrame(entity, 0.0, 0.0f);
+        renderer.UpdateRendererState(entity);
+        renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == true);
         TEST_REQUIRE(filter.counter == 3);
 
         node->SetTranslation(0.0f, -450.0f);
-        renderer.UpdateRendererState(entity, 0.0, 0.0f);
-        renderer.CreateFrame(entity, 0.0, 0.0f);
+        renderer.UpdateRendererState(entity);
+        renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == true);
         TEST_REQUIRE(filter.counter == 4);
 
         node->SetTranslation(0.0f, 0.0f);
-        renderer.UpdateRendererState(entity, 0.0, 0.0f);
-        renderer.CreateFrame(entity, 0.0, 0.0f);
+        renderer.UpdateRendererState(entity);
+        renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == false);
         TEST_REQUIRE(filter.counter == 5);

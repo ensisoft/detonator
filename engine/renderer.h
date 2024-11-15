@@ -185,12 +185,10 @@ namespace engine
 
         // Update the internal renderer data structures by applying changes to the
         // scene in the renderers data structures.
-        void UpdateRendererState(const game::Scene& scene, const game::Tilemap* map,
-                                 double time, float dt);
-        void UpdateRendererState(const game::SceneClass& scene, const game::Tilemap* map,
-                                 double time, float dt);
-        void UpdateRendererState(const game::EntityClass& entity, double time, float dt);
-        void UpdateRendererState(const game::Entity& entity, double time, float dt);
+        void UpdateRendererState(const game::Scene& scene, const game::Tilemap* map);
+        void UpdateRendererState(const game::SceneClass& scene, const game::Tilemap* map);
+        void UpdateRendererState(const game::EntityClass& entity);
+        void UpdateRendererState(const game::Entity& entity);
 
         // Update the current frame rendering state, animate materials etc.
         // note that when doing multi-threaded render/update this
@@ -212,12 +210,10 @@ namespace engine
         // Create the draw commands for the next frame that to be drawn
         // by the call to DrawFrame. This method cannot run in parallel
         // with with DrawFrame.
-        void CreateFrame(const game::Scene& scene, const game::Tilemap* map,
-                         double time, float dt);
-        void CreateFrame(const game::SceneClass& scene, const game::Tilemap* map,
-                         double time, float dt, SceneClassDrawHook* scene_hook);
-        void CreateFrame(const game::EntityClass& entity, double time, float dt, EntityClassDrawHook* hook = nullptr);
-        void CreateFrame(const game::Entity& entity, double time, float dt, EntityInstanceDrawHook* hook = nullptr);
+        void CreateFrame(const game::Scene& scene, const game::Tilemap* map);
+        void CreateFrame(const game::SceneClass& scene, const game::Tilemap* map, SceneClassDrawHook* hook = nullptr);
+        void CreateFrame(const game::EntityClass& entity, EntityClassDrawHook* hook = nullptr);
+        void CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* hook = nullptr);
 
         // Draw the current frame rendering state, i.e. the currently
         // enqueued and created draw commands.
