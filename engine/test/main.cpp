@@ -682,7 +682,9 @@ public:
         mRenderer.SetCamera(camera);
 
         auto* device = painter.GetDevice();
-        mRenderer.Draw(*mEntity, *device);
+
+        mRenderer.CreateFrame(*mEntity, 0.0, 0.0f);
+        mRenderer.DrawFrame(*device);
 
         for (size_t i=0; i<mEntity->GetNumNodes(); ++i)
         {
@@ -707,8 +709,12 @@ public:
         if (!mEntity)
             return;
 
-        mTime += dt;
         mEntity->Update(dt);
+
+        mRenderer.UpdateRendererState(*mEntity, 0.0, 0.0f);
+        mRenderer.Update(*mEntity, mTime, dt);
+
+        mTime += dt;
     }
     virtual void Start(engine::ClassLibrary* loader) override
     {
