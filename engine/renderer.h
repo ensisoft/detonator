@@ -226,28 +226,6 @@ namespace engine
         // The following API methods used by the editor to draw some
         // edit time representations of things.
 
-        void Draw(const game::Entity& entity,
-                  gfx::Device& device,
-                  EntityInstanceDrawHook* hook = nullptr)
-        {
-            gfx::Transform model;
-            Draw(entity, device, model, hook);
-        }
-        void Draw(const game::EntityClass& entity,
-                  gfx::Device& device,
-                  EntityClassDrawHook* hook = nullptr)
-        {
-            gfx::Transform model;
-            Draw(entity, device, model, hook);
-        }
-
-        void Draw(const game::Entity& entity,
-                  gfx::Device& device, gfx::Transform& model,
-                  EntityInstanceDrawHook* hook = nullptr);
-        void Draw(const game::EntityClass& entity,
-                  gfx::Device& device, gfx::Transform& model,
-                  EntityClassDrawHook* hook = nullptr);
-
         void Draw(const game::Tilemap& map,
                   gfx::Device& device,
                   TileBatchDrawHook* hook,
@@ -281,12 +259,6 @@ namespace engine
 
         template<typename EntityType, typename NodeType>
         void CreatePaintNodes(const EntityType& entity, gfx::Transform& transform, std::string prefix = "");
-
-        template<typename EntityType, typename NodeType>
-        void DrawEntity(const EntityType& entity,
-                        gfx::Device& device,
-                        gfx::Transform& transform,
-                        EntityDrawHook<NodeType>* hook);
 
         struct PaintNode;
 

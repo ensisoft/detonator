@@ -413,20 +413,6 @@ void Renderer::DrawFrame(gfx::Device& device) const
     TRACE_CALL("DrawEditorPackets", DrawEditorPackets(device, mRenderBuffer));
 }
 
-void Renderer::Draw(const Entity& entity,
-                    gfx::Device& device, gfx::Transform& model,
-                    EntityInstanceDrawHook* hook)
-{
-    DrawEntity<Entity, EntityNode>(entity, device, model, hook);
-}
-
-void Renderer::Draw(const EntityClass& entity,
-                    gfx::Device& device, gfx::Transform& model,
-                    EntityClassDrawHook* hook)
-{
-    DrawEntity<EntityClass, EntityNodeClass>(entity, device, model, hook);
-}
-
 
 void Renderer::Draw(const game::Tilemap& map,
                     gfx::Device& device,
@@ -1004,44 +990,6 @@ void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transf
 
     const auto& tree = entity.GetRenderTree();
     tree.PreOrderTraverse(visitor);
-}
-
-template<typename EntityType, typename NodeType>
-void Renderer::DrawEntity(const EntityType& entity,
-                          gfx::Device& device,
-                          gfx::Transform& transform,
-                          EntityDrawHook<NodeType>* hook)
-{
-    CreatePaintNodes<EntityType, NodeType>(entity, transform);
-
-    std::vector<DrawPacket> packets;
-    for (size_t i=0; i<entity.GetNumNodes(); ++i)
-    {
-        const auto& node = entity.GetNode(i);
-
-        bool did_paint = false;
-        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
-        {
-            CreateDrawableDrawPackets<EntityType, NodeType>(entity, node, *paint, packets, hook);
-            did_paint = true;
-        }
-
-        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
-        {
-            CreateTextDrawPackets<EntityType, NodeType>(entity, node, *paint, packets, hook);
-            did_paint = true;
-        }
-        if (hook && !did_paint)
-        {
-            transform.Push(entity.FindNodeTransform(&node));
-                hook->AppendPackets(&node, transform, packets);
-            transform.Pop();
-        }
-    }
-
-    OffsetPacketLayers(packets);
-    DrawScenePackets(device, packets);
-    DrawEditorPackets(device, packets);
 }
 
 template<typename EntityType, typename EntityNodeType>
