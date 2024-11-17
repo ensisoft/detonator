@@ -187,6 +187,9 @@ namespace engine
         {
             return mSettings.surface_size.GetHeight();
         }
+        void DrawDefault(const SceneRenderLayerList& layers) const;
+        void DrawFramebuffer(const SceneRenderLayerList& layers) const;
+        void Draw(const SceneRenderLayerList& layers, gfx::Framebuffer* fbo, gfx::ShaderProgram& program) const;
 
     private:
         gfx::Texture* CreateTextureTarget(const std::string& name) const;
