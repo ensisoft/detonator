@@ -128,6 +128,49 @@ LowLevelRenderer::LowLevelRenderer(const std::string* name, gfx::Device& device)
 
 void LowLevelRenderer::Draw(const SceneRenderLayerList& layers) const
 {
+    if (mSettings.enable_bloom)
+    {
+        DrawFramebuffer(layers);
+    }
+    else
+    {
+        DrawDefault(layers);
+    }
+}
+
+void LowLevelRenderer::DrawDefault(const SceneRenderLayerList& layers) const
+{
+    // draw using the default frame buffer
+
+    mDevice.ClearColorDepth(mSettings.clear_color, 1.0f);
+
+    if (mRenderHook)
+    {
+        LowLevelRendererHook::GPUResources res;
+        res.device      = &mDevice;
+        res.framebuffer = nullptr;
+        res.main_image  = nullptr;
+        mRenderHook->BeginDraw(mSettings, res);
+    }
+
+    gfx::detail::GenericShaderProgram program;
+
+    Draw(layers, nullptr, program);
+
+    if (mRenderHook)
+    {
+        LowLevelRendererHook::GPUResources res;
+        res.device      = &mDevice;
+        res.framebuffer = nullptr;
+        res.main_image  = nullptr;
+        mRenderHook->EndDraw(mSettings, res);
+    }
+
+}
+void LowLevelRenderer::DrawFramebuffer(const SceneRenderLayerList& layers) const
+{
+    // draw using our own frame buffer with a texture color target
+    // for post processing or when using bloom
     mMainFBO = CreateFrameBuffer("MainFBO");
     mMainImage = CreateTextureTarget("MainImage");
     mBloomImage = CreateTextureTarget("BloomImage");
@@ -148,50 +191,9 @@ void LowLevelRenderer::Draw(const SceneRenderLayerList& layers) const
         mRenderHook->BeginDraw(mSettings, res);
     }
 
-    gfx::Painter painter(&mDevice);
-    painter.SetViewport(mSettings.viewport);
-    painter.SetSurfaceSize(mSettings.surface_size);
-    painter.SetEditingMode(mSettings.editing_mode);
-    painter.SetPixelRatio(mSettings.pixel_ratio);
-    painter.SetFramebuffer(mMainFBO);
+    MainShaderProgram program(mSettings.bloom_color, mSettings.bloom_threshold);
 
-    MainShaderProgram main_program(mSettings.bloom_color, mSettings.bloom_threshold);
-
-    for (const auto& scene_layer : layers)
-    {
-        for (const auto& entity_layer : scene_layer)
-        {
-            if (!entity_layer.mask_cover_list.empty() && !entity_layer.mask_expose_list.empty())
-            {
-                gfx::detail::StencilShaderProgram stencil_program;
-
-                painter.ClearStencil(gfx::StencilClearValue(1));
-                painter.Draw(entity_layer.mask_cover_list, stencil_program);
-                painter.Draw(entity_layer.mask_expose_list, stencil_program);
-                painter.Draw(entity_layer.draw_color_list, main_program);
-            }
-            else if (!entity_layer.mask_cover_list.empty())
-            {
-                gfx::detail::StencilShaderProgram stencil_program;
-
-                painter.ClearStencil(gfx::StencilClearValue(1));
-                painter.Draw(entity_layer.mask_cover_list, stencil_program);
-                painter.Draw(entity_layer.draw_color_list, main_program);
-            }
-            else if (!entity_layer.mask_expose_list.empty())
-            {
-                gfx::detail::StencilShaderProgram stencil_program;
-
-                painter.ClearStencil(gfx::StencilClearValue(0));
-                painter.Draw(entity_layer.mask_expose_list, stencil_program);
-                painter.Draw(entity_layer.draw_color_list, main_program);
-            }
-            else if (!entity_layer.draw_color_list.empty())
-            {
-                painter.Draw(entity_layer.draw_color_list, main_program);
-            }
-        }
-    }
+    Draw(layers, mMainFBO, program);
 
     // after this we have the rendering result in the main image
     // texture FBO color attachment
@@ -208,8 +210,58 @@ void LowLevelRenderer::Draw(const SceneRenderLayerList& layers) const
     }
 }
 
+
+void LowLevelRenderer::Draw(const SceneRenderLayerList& layers, gfx::Framebuffer* fbo, gfx::ShaderProgram& program) const
+{
+    gfx::Painter painter(&mDevice);
+    painter.SetViewport(mSettings.viewport);
+    painter.SetSurfaceSize(mSettings.surface_size);
+    painter.SetEditingMode(mSettings.editing_mode);
+    painter.SetPixelRatio(mSettings.pixel_ratio);
+    painter.SetFramebuffer(fbo);
+
+    for (const auto& scene_layer : layers)
+    {
+        for (const auto& entity_layer : scene_layer)
+        {
+            if (!entity_layer.mask_cover_list.empty() && !entity_layer.mask_expose_list.empty())
+            {
+                gfx::detail::StencilShaderProgram stencil_program;
+
+                painter.ClearStencil(gfx::StencilClearValue(1));
+                painter.Draw(entity_layer.mask_cover_list, stencil_program);
+                painter.Draw(entity_layer.mask_expose_list, stencil_program);
+                painter.Draw(entity_layer.draw_color_list, program);
+            }
+            else if (!entity_layer.mask_cover_list.empty())
+            {
+                gfx::detail::StencilShaderProgram stencil_program;
+
+                painter.ClearStencil(gfx::StencilClearValue(1));
+                painter.Draw(entity_layer.mask_cover_list, stencil_program);
+                painter.Draw(entity_layer.draw_color_list, program);
+            }
+            else if (!entity_layer.mask_expose_list.empty())
+            {
+                gfx::detail::StencilShaderProgram stencil_program;
+
+                painter.ClearStencil(gfx::StencilClearValue(0));
+                painter.Draw(entity_layer.mask_expose_list, stencil_program);
+                painter.Draw(entity_layer.draw_color_list, program);
+            }
+            else if (!entity_layer.draw_color_list.empty())
+            {
+                painter.Draw(entity_layer.draw_color_list, program);
+            }
+        }
+    }
+}
+
 void LowLevelRenderer::Blit() const
 {
+    if (!mSettings.enable_bloom)
+        return;
+
     const auto surface_width  = (int)GetSurfaceWidth();
     const auto surface_height = (int)GetSurfaceHeight();
     constexpr auto* vertex_source = R"(
