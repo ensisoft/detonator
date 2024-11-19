@@ -142,7 +142,7 @@ void LowLevelRenderer::DrawDefault(const SceneRenderLayerList& layers) const
 {
     // draw using the default frame buffer
 
-    mDevice.ClearColorDepth(mSettings.clear_color, 1.0f);
+    mDevice.ClearColorDepth(mSettings.camera.clear_color, 1.0f);
 
     if (mRenderHook)
     {
@@ -178,7 +178,7 @@ void LowLevelRenderer::DrawFramebuffer(const SceneRenderLayerList& layers) const
     mMainFBO->SetColorTarget(mMainImage, gfx::Framebuffer::ColorAttachment::Attachment0);
     mMainFBO->SetColorTarget(mBloomImage, gfx::Framebuffer::ColorAttachment::Attachment1);
 
-    mDevice.ClearColor(mSettings.clear_color, mMainFBO, gfx::Device::ColorAttachment::Attachment0);
+    mDevice.ClearColor(mSettings.camera.clear_color, mMainFBO, gfx::Device::ColorAttachment::Attachment0);
     mDevice.ClearColor(gfx::Color::Transparent, mMainFBO, gfx::Device::ColorAttachment::Attachment1);
     mDevice.ClearDepth(1.0f, mMainFBO);
 
@@ -191,7 +191,8 @@ void LowLevelRenderer::DrawFramebuffer(const SceneRenderLayerList& layers) const
         mRenderHook->BeginDraw(mSettings, res);
     }
 
-    MainShaderProgram program(mSettings.bloom_color, mSettings.bloom_threshold);
+    const auto& bloom = mSettings.bloom;
+    MainShaderProgram program(gfx::Color4f(bloom.red, bloom.green, bloom.blue, 1.0f), bloom.threshold);
 
     Draw(layers, mMainFBO, program);
 
@@ -214,8 +215,8 @@ void LowLevelRenderer::DrawFramebuffer(const SceneRenderLayerList& layers) const
 void LowLevelRenderer::Draw(const SceneRenderLayerList& layers, gfx::Framebuffer* fbo, gfx::ShaderProgram& program) const
 {
     gfx::Painter painter(&mDevice);
-    painter.SetViewport(mSettings.viewport);
-    painter.SetSurfaceSize(mSettings.surface_size);
+    painter.SetViewport(mSettings.surface.viewport);
+    painter.SetSurfaceSize(mSettings.surface.size);
     painter.SetEditingMode(mSettings.editing_mode);
     painter.SetPixelRatio(mSettings.pixel_ratio);
     painter.SetFramebuffer(fbo);

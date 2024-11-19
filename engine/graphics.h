@@ -29,6 +29,9 @@
 #include "base/bitflag.h"
 #include "graphics/painter.h"
 #include "graphics/fwd.h"
+#include "engine/camera.h"
+#include "engine/types.h"
+#include "engine/color.h"
 #include "game/enum.h"
 
 namespace engine
@@ -110,15 +113,38 @@ namespace engine
     class LowLevelRendererHook
     {
     public:
+        struct BloomParams {
+            float threshold = 0.0f;
+            float red   = 0.0f;
+            float green = 0.0f;
+            float blue  = 0.0f;
+        };
+
+        struct Camera {
+            Color4f clear_color;
+            glm::vec2 position = {0.0f, 0.0f};
+            glm::vec2 scale    = {1.0f, 1.0f};
+            FRect viewport;
+            float rotation = 0.0f;
+
+            PerspectiveProjectionArgs ppa;
+        };
+
+        // The rendering window/surface details.
+        struct Surface {
+            // Device viewport in which part of the surface to render.
+            IRect viewport;
+            // Rendering surface size in pixels.
+            USize size;
+        };
+
         struct RenderSettings {
+            Camera camera;
+            Surface surface;
             bool editing_mode = false;
             bool enable_bloom = false;
-            float bloom_threshold = 0.0f;
-            gfx::Color4f bloom_color;
-            gfx::Color4f clear_color;
-            gfx::USize surface_size;
-            gfx::IRect viewport;
             glm::vec2 pixel_ratio = {1.0f, 1.0f};
+            BloomParams bloom;
         };
 
         struct GPUResources {
@@ -134,23 +160,31 @@ namespace engine
     class LowLevelRenderer
     {
     public:
+        using BloomParams = LowLevelRendererHook::BloomParams;
+        using Camera = LowLevelRendererHook::Camera;
+        using Surface = LowLevelRendererHook::Surface;
         using RenderSettings = LowLevelRendererHook::RenderSettings;
 
         LowLevelRenderer(const std::string* name, gfx::Device& device);
 
-        inline void SetSurfaceSize(const gfx::USize& size) noexcept
+
+        inline void SetBloom(const BloomParams& bloom) noexcept
         {
-            mSettings.surface_size = size;
+            mSettings.bloom = bloom;
         }
+        inline void SetCamera(const Camera& camera) noexcept
+        {
+            mSettings.camera = camera;
+        }
+        inline void SetSurface(const Surface& surface) noexcept
+        {
+            mSettings.surface = surface;
+        }
+
         inline void SetPixelRatio(const glm::vec2& ratio) noexcept
         {
             mSettings.pixel_ratio = ratio;
         }
-        inline void SetViewport(const gfx::IRect& viewport) noexcept
-        {
-            mSettings.viewport = viewport;
-        }
-
         inline void SetEditingMode(bool on_off) noexcept
         {
             mSettings.editing_mode = on_off;
@@ -160,16 +194,6 @@ namespace engine
         {
             mSettings.enable_bloom = on_off;
         }
-        inline void SetBloomParams(const gfx::Color4f& color, float threshold) noexcept
-        {
-            mSettings.bloom_color = color;
-            mSettings.bloom_threshold = threshold;
-        }
-        inline void SetClearColor(const gfx::Color4f& color) noexcept
-        {
-            mSettings.clear_color = color;
-        }
-
         inline void SetRenderHook(LowLevelRendererHook* hook) noexcept
         {
             mRenderHook = hook;
@@ -181,11 +205,11 @@ namespace engine
     private:
         unsigned GetSurfaceWidth() const noexcept
         {
-            return mSettings.surface_size.GetWidth();
+            return mSettings.surface.size.GetWidth();
         }
         unsigned GetSurfaceHeight() const noexcept
         {
-            return mSettings.surface_size.GetHeight();
+            return mSettings.surface.size.GetHeight();
         }
         void DrawDefault(const SceneRenderLayerList& layers) const;
         void DrawFramebuffer(const SceneRenderLayerList& layers) const;

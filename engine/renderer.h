@@ -123,30 +123,9 @@ namespace engine
             Bloom
         };
 
-        struct BloomParams {
-            float threshold = 0.0f;
-            float red   = 0.0f;
-            float green = 0.0f;
-            float blue  = 0.0f;
-        };
-
-        struct Camera {
-            gfx::Color4f clear_color;
-            glm::vec2 position = {0.0f, 0.0f};
-            glm::vec2 scale    = {1.0f, 1.0f};
-            game::FRect viewport;
-            float rotation = 0.0f;
-
-            PerspectiveProjectionArgs ppa;
-        };
-
-        // The rendering window/surface details.
-        struct Surface {
-            // Device viewport in which part of the surface to render.
-            IRect viewport;
-            // Rendering surface size in pixels.
-            USize size;
-        };
+        using BloomParams = LowLevelRenderer::BloomParams;
+        using Camera = LowLevelRenderer::Camera;
+        using Surface = LowLevelRenderer::Surface;
 
         explicit Renderer(const ClassLibrary* classlib = nullptr);
 

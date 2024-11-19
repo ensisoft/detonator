@@ -1576,22 +1576,13 @@ void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& pa
     }
 
     LowLevelRenderer low_level_renderer(&mRendererName, device);
-    low_level_renderer.SetClearColor(mCamera.clear_color);
+    low_level_renderer.SetCamera(mCamera);
     low_level_renderer.SetEditingMode(mEditingMode);
     low_level_renderer.SetPixelRatio(pixel_ratio);
-    low_level_renderer.SetSurfaceSize(mSurface.size);
-    low_level_renderer.SetViewport(mSurface.viewport);
+    low_level_renderer.SetSurface(mSurface);
     low_level_renderer.SetRenderHook(mLowLevelRendererHook);
-
-    if (enable_bloom)
-    {
-        low_level_renderer.EnableBloom(true);
-        low_level_renderer.SetBloomParams(gfx::Color4f(mBloom.red,
-                                                       mBloom.green,
-                                                       mBloom.blue, 1.0f),
-                                          mBloom.threshold);
-    }
-
+    low_level_renderer.SetBloom(mBloom);
+    low_level_renderer.EnableBloom(enable_bloom);
     TRACE_CALL("LowLevelRenderer::Draw", low_level_renderer.Draw(layers));
     TRACE_CALL("LowLevelRenderer::Blit", low_level_renderer.Blit());
 }
