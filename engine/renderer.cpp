@@ -415,10 +415,32 @@ void Renderer::DrawFrame(gfx::Device& device) const
     if (width == 0 || height == 0)
         return;
 
-    TRACE_CALL("DrawScenePackets", DrawScenePackets(device, mRenderBuffer));
-    TRACE_CALL("DrawEditorPackets", DrawEditorPackets(device, mRenderBuffer));
-}
+    bool enable_bloom = false;
+    if (mEditingMode)
+    {
+        if (mStyle == RenderingStyle::Normal)
+        {
+            if (IsEnabled(Effects::Bloom))
+                enable_bloom = true;
+        }
+    }
+    else
+    {
+        if (IsEnabled(Effects::Bloom))
+            enable_bloom = true;
+    }
 
+    LowLevelRenderer low_level_renderer(&mRendererName, device);
+    low_level_renderer.SetCamera(mCamera);
+    low_level_renderer.SetEditingMode(mEditingMode);
+    low_level_renderer.SetSurface(mSurface);
+    low_level_renderer.SetRenderHook(mLowLevelRendererHook);
+    low_level_renderer.SetPacketFilter(mPacketFilter);
+    low_level_renderer.SetBloom(mBloom);
+    low_level_renderer.EnableBloom(enable_bloom);
+    TRACE_CALL("DrawPackets", low_level_renderer.Draw(mRenderBuffer));
+    TRACE_CALL("Blit", low_level_renderer.Blit());
+}
 
 void Renderer::Draw(const game::Tilemap& map,
                     gfx::Device& device,
@@ -1409,184 +1431,6 @@ void Renderer::DrawTilemapPackets(gfx::Device& device,
     }
 }
 
-void Renderer::DrawEditorPackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const
-{
-    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
-    const auto logical_viewport_width = mCamera.viewport.GetWidth();
-    const auto logical_viewport_height = mCamera.viewport.GetHeight();
-
-    gfx::Painter painter(&device);
-    painter.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport));
-    painter.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
-    painter.SetViewport(mSurface.viewport);
-    painter.SetSurfaceSize(mSurface.size);
-    painter.SetEditingMode(mEditingMode);
-    painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
-
-    for (const auto& packet : packets)
-    {
-        if (packet.domain == DrawPacket::Domain::Editor)
-            painter.Draw(*packet.drawable, packet.transform, *packet.material);
-    }
-}
-
-void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& packets) const
-{
-    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
-    const auto logical_viewport_width = mCamera.viewport.GetWidth();
-    const auto logical_viewport_height = mCamera.viewport.GetHeight();
-
-    const auto& model_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation);
-    const auto& orthographic = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-    const auto& perspective  = CreateProjectionMatrix(mCamera.viewport, mCamera.ppa);
-
-    const auto& pixel_ratio = window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale;
-
-    gfx::Painter painter(&device);
-    painter.SetViewport(mSurface.viewport);
-    painter.SetSurfaceSize(mSurface.size);
-    painter.SetEditingMode(mEditingMode);
-    painter.SetPixelRatio(pixel_ratio);
-
-    // Each entity in the scene is assigned to a scene/entity layer and each
-    // entity node within an entity is assigned to an entity layer.
-    // Thus, to have the right ordering both indices of each
-    // render packet must be considered!
-    std::vector<std::vector<RenderLayer>> layers;
-
-    TRACE_ENTER(CreateDrawCmd);
-    for (auto& packet : packets)
-    {
-        if (!packet.material || !packet.drawable)
-            continue;
-        else if (packet.domain != DrawPacket::Domain::Scene)
-            continue;
-
-        const glm::mat4* projection = nullptr;
-        if (packet.projection == DrawPacket::Projection::Orthographic)
-            projection = &orthographic;
-        else if (packet.projection == DrawPacket::Projection::Perspective)
-            projection = &perspective;
-        else BUG("Missing draw packet projection mapping.");
-
-        if (CullDrawPacket(packet, *projection, model_view))
-        {
-            packet.flags.set(DrawPacket::Flags::CullPacket, true);
-            //DEBUG("culled packet %1", packet.name);
-        }
-
-        if (mPacketFilter && !mPacketFilter->InspectPacket(packet))
-            continue;
-
-        if (packet.flags.test(DrawPacket::Flags::CullPacket))
-            continue;
-
-        gfx::Painter::DrawCommand draw;
-        draw.user               = (void*)&packet;
-        draw.model              = &packet.transform;
-        draw.drawable           = packet.drawable.get();
-        draw.material           = packet.material.get();
-        draw.state.culling      = packet.culling;
-        draw.state.line_width   = packet.line_width;
-        draw.state.depth_test   = packet.depth_test;
-        draw.state.write_color  = true;
-        draw.state.stencil_func = gfx::Painter::StencilFunc ::Disabled;
-        draw.view               = &model_view;
-        draw.projection         = projection;
-        painter.Prime(draw);
-
-        const auto render_layer_index = packet.render_layer;
-        ASSERT(render_layer_index >= 0);
-        if (render_layer_index >= layers.size())
-            layers.resize(render_layer_index + 1);
-
-        auto& render_layer = layers[render_layer_index];
-
-        const auto packet_index = packet.packet_index;
-        ASSERT(packet_index >= 0);
-        if (packet_index >= render_layer.size())
-            render_layer.resize(packet_index + 1);
-
-        RenderLayer& layer = render_layer[packet_index];
-        if (packet.pass == RenderPass::DrawColor)
-            layer.draw_color_list.push_back(draw);
-        else if (packet.pass == RenderPass::MaskCover)
-            layer.mask_cover_list.push_back(draw);
-        else if (packet.pass == RenderPass::MaskExpose)
-            layer.mask_expose_list.push_back(draw);
-        else BUG("Missing packet render pass mapping.");
-    }
-    TRACE_LEAVE(CreateDrawCmd);
-
-    // set the state for each draw packet.
-    TRACE_ENTER(ArrangeLayers);
-    for (auto& scene_layer : layers)
-    {
-        for (auto& entity_layer : scene_layer)
-        {
-            const auto needs_stencil = !entity_layer.mask_cover_list.empty() ||
-                                       !entity_layer.mask_expose_list.empty();
-            if (needs_stencil)
-            {
-                for (auto& draw : entity_layer.mask_expose_list)
-                {
-                    draw.state.write_color   = false;
-                    draw.state.stencil_ref   = 1;
-                    draw.state.stencil_mask  = 0xff;
-                    draw.state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
-                    draw.state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
-                    draw.state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
-                }
-                for (auto& draw : entity_layer.mask_cover_list)
-                {
-                    draw.state.write_color   = false;
-                    draw.state.stencil_ref   = 0;
-                    draw.state.stencil_mask  = 0xff;
-                    draw.state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
-                    draw.state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
-                    draw.state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
-                }
-                for (auto& draw : entity_layer.draw_color_list)
-                {
-                    draw.state.write_color   = true;
-                    draw.state.stencil_ref   = 1;
-                    draw.state.stencil_mask  = 0xff;
-                    draw.state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
-                    draw.state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
-                    draw.state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
-                }
-            }
-        }
-    }
-    TRACE_LEAVE(ArrangeLayers);
-
-    bool enable_bloom = false;
-    if (mEditingMode)
-    {
-        if (mStyle == RenderingStyle::Normal)
-        {
-            if (IsEnabled(Effects::Bloom))
-                enable_bloom = true;
-        }
-    }
-    else
-    {
-        if (IsEnabled(Effects::Bloom))
-            enable_bloom = true;
-    }
-
-    LowLevelRenderer low_level_renderer(&mRendererName, device);
-    low_level_renderer.SetCamera(mCamera);
-    low_level_renderer.SetEditingMode(mEditingMode);
-    low_level_renderer.SetPixelRatio(pixel_ratio);
-    low_level_renderer.SetSurface(mSurface);
-    low_level_renderer.SetRenderHook(mLowLevelRendererHook);
-    low_level_renderer.SetBloom(mBloom);
-    low_level_renderer.EnableBloom(enable_bloom);
-    TRACE_CALL("LowLevelRenderer::Draw", low_level_renderer.Draw(layers));
-    TRACE_CALL("LowLevelRenderer::Blit", low_level_renderer.Blit());
-}
-
 template<typename LayerType>
 void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
                                              const game::TilemapLayer& layer,
@@ -1761,80 +1605,6 @@ void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
         }
         return false;
     });
-}
-
-bool Renderer::CullDrawPacket(const DrawPacket& packet, const glm::mat4& projection, const glm::mat4& modelview) const
-{
-    // the draw packets for the map are only generated for the visible part
-    // of the map already. so culling check is not needed.
-    if (packet.source == DrawPacket::Source::Map)
-        return false;
-
-    const auto& shape = packet.drawable;
-
-    // don't cull global particle engines since the particles can be "where-ever"
-    if (shape->GetType() == gfx::Drawable::Type::ParticleEngine)
-    {
-        const auto& particle = std::static_pointer_cast<const gfx::ParticleEngineInstance>(shape);
-        const auto& params   = particle->GetParams();
-        if (params.coordinate_space == gfx::ParticleEngineClass::CoordinateSpace::Global)
-            return false;
-    }
-
-    // take the model view bounding box (which we should probably get from the drawable)
-    // and project all the 6 corners on the rendering plane. cull the packet if it's
-    // outside the NDC the X, Y axis.
-    std::vector<glm::vec4> corners;
-
-    if (Is3DShape(*shape))
-    {
-        corners.resize(8);
-        corners[0] = glm::vec4 { -0.5f,  0.5f, 0.5f, 1.0f };
-        corners[1] = glm::vec4 { -0.5f, -0.5f, 0.5f, 1.0f };
-        corners[2] = glm::vec4 {  0.5f,  0.5f, 0.5f, 1.0f };
-        corners[3] = glm::vec4 {  0.5f, -0.5f, 0.5f, 1.0f };
-        corners[4] = glm::vec4 { -0.5f,  0.5f, -0.5f, 1.0f };
-        corners[5] = glm::vec4 { -0.5f, -0.5f, -0.5f, 1.0f };
-        corners[6] = glm::vec4 {  0.5f,  0.5f, -0.5f, 1.0f };
-        corners[7] = glm::vec4 {  0.5f, -0.5f, -0.5f, 1.0f };
-    }
-    else
-    {
-        // regarding the Y value, remember the complication
-        // in the 2D vertex shader. huhu.. should really fix
-        // this one soon...
-        corners.resize(4);
-        corners[0] = glm::vec4 { 0.0f,  0.0f, 0.0f, 1.0f };
-        corners[1] = glm::vec4 { 0.0f,  1.0f, 0.0f, 1.0f };
-        corners[2] = glm::vec4 { 1.0f,  1.0f, 0.0f, 1.0f };
-        corners[3] = glm::vec4 { 1.0f,  0.0f, 0.0f, 1.0f };
-    }
-
-    const auto& transform = projection * modelview;
-
-    float min_x = std::numeric_limits<float>::max();
-    float max_x = std::numeric_limits<float>::lowest();
-    float min_y = std::numeric_limits<float>::max();
-    float max_y = std::numeric_limits<float>::lowest();
-    for (const auto& p0 : corners)
-    {
-        auto p1 = transform * packet.transform * p0;
-        p1 /= p1.w;
-        min_x = std::min(min_x, p1.x);
-        max_x = std::max(max_x, p1.x);
-        min_y = std::min(min_y, p1.y);
-        max_y = std::max(max_y, p1.y);
-    }
-    // completely above or below the NDC
-    if (max_y < -1.0f || min_y > 1.0f)
-        return true;
-
-    // completely to the left of to the right of the NDC
-    if (max_x < -1.0f || min_x > 1.0f)
-        return true;
-
-    return false;
-
 }
 
 void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
