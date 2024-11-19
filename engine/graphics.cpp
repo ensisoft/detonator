@@ -18,6 +18,8 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
+#include "base/trace.h"
+#include "game/enum.h"
 #include "engine/graphics.h"
 #include "graphics/framebuffer.h"
 #include "graphics/device.h"
@@ -29,6 +31,7 @@
 #include "graphics/utility.h"
 #include "graphics/algo.h"
 #include "graphics/drawcmd.h"
+#include "graphics/particle_engine.h"
 
 namespace {
 class MainShaderProgram : public gfx::ShaderProgram
@@ -126,19 +129,19 @@ LowLevelRenderer::LowLevelRenderer(const std::string* name, gfx::Device& device)
   , mDevice(device)
 {}
 
-void LowLevelRenderer::Draw(const SceneRenderLayerList& layers) const
+void LowLevelRenderer::Draw(DrawPacketList& packets) const
 {
     if (mSettings.enable_bloom)
     {
-        DrawFramebuffer(layers);
+        DrawFramebuffer(packets);
     }
     else
     {
-        DrawDefault(layers);
+        DrawDefault(packets);
     }
 }
 
-void LowLevelRenderer::DrawDefault(const SceneRenderLayerList& layers) const
+void LowLevelRenderer::DrawDefault(DrawPacketList& packets) const
 {
     // draw using the default frame buffer
 
@@ -155,7 +158,7 @@ void LowLevelRenderer::DrawDefault(const SceneRenderLayerList& layers) const
 
     gfx::detail::GenericShaderProgram program;
 
-    Draw(layers, nullptr, program);
+    Draw(packets, nullptr, program);
 
     if (mRenderHook)
     {
@@ -167,7 +170,7 @@ void LowLevelRenderer::DrawDefault(const SceneRenderLayerList& layers) const
     }
 
 }
-void LowLevelRenderer::DrawFramebuffer(const SceneRenderLayerList& layers) const
+void LowLevelRenderer::DrawFramebuffer(DrawPacketList& packets) const
 {
     // draw using our own frame buffer with a texture color target
     // for post processing or when using bloom
@@ -194,7 +197,7 @@ void LowLevelRenderer::DrawFramebuffer(const SceneRenderLayerList& layers) const
     const auto& bloom = mSettings.bloom;
     MainShaderProgram program(gfx::Color4f(bloom.red, bloom.green, bloom.blue, 1.0f), bloom.threshold);
 
-    Draw(layers, mMainFBO, program);
+    Draw(packets, mMainFBO, program);
 
     // after this we have the rendering result in the main image
     // texture FBO color attachment
@@ -211,15 +214,139 @@ void LowLevelRenderer::DrawFramebuffer(const SceneRenderLayerList& layers) const
     }
 }
 
-
-void LowLevelRenderer::Draw(const SceneRenderLayerList& layers, gfx::Framebuffer* fbo, gfx::ShaderProgram& program) const
+void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx::ShaderProgram& program) const
 {
+    const auto& camera = mSettings.camera;
+
+    const auto surface_width = (float)GetSurfaceWidth();
+    const auto surface_height = (float)GetSurfaceHeight();
+    const auto window_size = glm::vec2{surface_width, surface_height};
+    const auto logical_viewport_width = camera.viewport.GetWidth();
+    const auto logical_viewport_height = camera.viewport.GetHeight();
+
+    const auto& model_view = CreateModelViewMatrix(GameView::AxisAligned, camera.position, camera.scale, camera.rotation);
+    const auto& orthographic = CreateProjectionMatrix(Projection::Orthographic, camera.viewport);
+    const auto& perspective  = CreateProjectionMatrix(camera.viewport, camera.ppa);
+    const auto& pixel_ratio = window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * camera.scale;
+
     gfx::Painter painter(&mDevice);
     painter.SetViewport(mSettings.surface.viewport);
     painter.SetSurfaceSize(mSettings.surface.size);
     painter.SetEditingMode(mSettings.editing_mode);
-    painter.SetPixelRatio(mSettings.pixel_ratio);
+    painter.SetPixelRatio(pixel_ratio);
     painter.SetFramebuffer(fbo);
+
+    // Each entity in the scene is assigned to a scene/entity layer and each
+    // entity node within an entity is assigned to an entity layer.
+    // Thus, to have the right ordering both indices of each
+    // render packet must be considered!
+    std::vector<std::vector<RenderLayer>> layers;
+
+    TRACE_ENTER(CreateDrawCmd);
+    for (auto& packet : packets)
+    {
+        if (!packet.material || !packet.drawable)
+            continue;
+        else if (packet.domain != DrawPacket::Domain::Scene)
+            continue;
+
+        const glm::mat4* projection = nullptr;
+        if (packet.projection == DrawPacket::Projection::Orthographic)
+            projection = &orthographic;
+        else if (packet.projection == DrawPacket::Projection::Perspective)
+            projection = &perspective;
+        else BUG("Missing draw packet projection mapping.");
+
+        if (CullDrawPacket(packet, *projection, model_view))
+        {
+            packet.flags.set(DrawPacket::Flags::CullPacket, true);
+            //DEBUG("culled packet %1", packet.name);
+        }
+
+        if (mPacketFilter && !mPacketFilter->InspectPacket(packet))
+            continue;
+
+        if (packet.flags.test(DrawPacket::Flags::CullPacket))
+            continue;
+
+        gfx::Painter::DrawCommand draw;
+        draw.user               = (void*)&packet;
+        draw.model              = &packet.transform;
+        draw.drawable           = packet.drawable.get();
+        draw.material           = packet.material.get();
+        draw.state.culling      = packet.culling;
+        draw.state.line_width   = packet.line_width;
+        draw.state.depth_test   = packet.depth_test;
+        draw.state.write_color  = true;
+        draw.state.stencil_func = gfx::Painter::StencilFunc ::Disabled;
+        draw.view               = &model_view;
+        draw.projection         = projection;
+        painter.Prime(draw);
+
+        const auto render_layer_index = packet.render_layer;
+        ASSERT(render_layer_index >= 0);
+        if (render_layer_index >= layers.size())
+            layers.resize(render_layer_index + 1);
+
+        auto& render_layer = layers[render_layer_index];
+
+        const auto packet_index = packet.packet_index;
+        ASSERT(packet_index >= 0);
+        if (packet_index >= render_layer.size())
+            render_layer.resize(packet_index + 1);
+
+        RenderLayer& layer = render_layer[packet_index];
+        if (packet.pass == DrawPacket::RenderPass::DrawColor)
+            layer.draw_color_list.push_back(draw);
+        else if (packet.pass == DrawPacket::RenderPass::MaskCover)
+            layer.mask_cover_list.push_back(draw);
+        else if (packet.pass == DrawPacket::RenderPass::MaskExpose)
+            layer.mask_expose_list.push_back(draw);
+        else BUG("Missing packet render pass mapping.");
+    }
+    TRACE_LEAVE(CreateDrawCmd);
+
+    // set the state for each draw packet.
+    TRACE_ENTER(ArrangeLayers);
+    for (auto& scene_layer : layers)
+    {
+        for (auto& entity_layer : scene_layer)
+        {
+            const auto needs_stencil = !entity_layer.mask_cover_list.empty() ||
+                                       !entity_layer.mask_expose_list.empty();
+            if (needs_stencil)
+            {
+                for (auto& draw : entity_layer.mask_expose_list)
+                {
+                    draw.state.write_color   = false;
+                    draw.state.stencil_ref   = 1;
+                    draw.state.stencil_mask  = 0xff;
+                    draw.state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+                    draw.state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+                    draw.state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+                }
+                for (auto& draw : entity_layer.mask_cover_list)
+                {
+                    draw.state.write_color   = false;
+                    draw.state.stencil_ref   = 0;
+                    draw.state.stencil_mask  = 0xff;
+                    draw.state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+                    draw.state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+                    draw.state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+                }
+                for (auto& draw : entity_layer.draw_color_list)
+                {
+                    draw.state.write_color   = true;
+                    draw.state.stencil_ref   = 1;
+                    draw.state.stencil_mask  = 0xff;
+                    draw.state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
+                    draw.state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
+                    draw.state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
+                }
+            }
+        }
+    }
+    TRACE_LEAVE(ArrangeLayers);
 
     for (const auto& scene_layer : layers)
     {
@@ -254,6 +381,25 @@ void LowLevelRenderer::Draw(const SceneRenderLayerList& layers, gfx::Framebuffer
             {
                 painter.Draw(entity_layer.draw_color_list, program);
             }
+        }
+    }
+
+    // draw editor packets
+    if (mSettings.editing_mode)
+    {
+        gfx::Painter painter(&mDevice);
+        painter.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, camera.viewport));
+        painter.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, camera.position, camera.scale, camera.rotation));
+        painter.SetViewport(mSettings.surface.viewport);
+        painter.SetSurfaceSize(mSettings.surface.size);
+        painter.SetEditingMode(mSettings.editing_mode);
+        painter.SetPixelRatio(pixel_ratio);
+        painter.SetFramebuffer(fbo);
+
+        for (const auto& packet : packets)
+        {
+            if (packet.domain == DrawPacket::Domain::Editor)
+                painter.Draw(*packet.drawable, packet.transform, *packet.material);
         }
     }
 }
@@ -387,6 +533,80 @@ gfx::Framebuffer* LowLevelRenderer::CreateFrameBuffer(const std::string& name) c
         fbo->SetConfig(conf);
     }
     return fbo;
+}
+
+bool LowLevelRenderer::CullDrawPacket(const DrawPacket& packet, const glm::mat4& projection, const glm::mat4& modelview) const
+{
+    // the draw packets for the map are only generated for the visible part
+    // of the map already. so culling check is not needed.
+    if (packet.source == DrawPacket::Source::Map)
+        return false;
+
+    const auto& shape = packet.drawable;
+
+    // don't cull global particle engines since the particles can be "where-ever"
+    if (shape->GetType() == gfx::Drawable::Type::ParticleEngine)
+    {
+        const auto& particle = std::static_pointer_cast<const gfx::ParticleEngineInstance>(shape);
+        const auto& params   = particle->GetParams();
+        if (params.coordinate_space == gfx::ParticleEngineClass::CoordinateSpace::Global)
+            return false;
+    }
+
+    // take the model view bounding box (which we should probably get from the drawable)
+    // and project all the 6 corners on the rendering plane. cull the packet if it's
+    // outside the NDC the X, Y axis.
+    std::vector<glm::vec4> corners;
+
+    if (Is3DShape(*shape))
+    {
+        corners.resize(8);
+        corners[0] = glm::vec4 { -0.5f,  0.5f, 0.5f, 1.0f };
+        corners[1] = glm::vec4 { -0.5f, -0.5f, 0.5f, 1.0f };
+        corners[2] = glm::vec4 {  0.5f,  0.5f, 0.5f, 1.0f };
+        corners[3] = glm::vec4 {  0.5f, -0.5f, 0.5f, 1.0f };
+        corners[4] = glm::vec4 { -0.5f,  0.5f, -0.5f, 1.0f };
+        corners[5] = glm::vec4 { -0.5f, -0.5f, -0.5f, 1.0f };
+        corners[6] = glm::vec4 {  0.5f,  0.5f, -0.5f, 1.0f };
+        corners[7] = glm::vec4 {  0.5f, -0.5f, -0.5f, 1.0f };
+    }
+    else
+    {
+        // regarding the Y value, remember the complication
+        // in the 2D vertex shader. huhu.. should really fix
+        // this one soon...
+        corners.resize(4);
+        corners[0] = glm::vec4 { 0.0f,  0.0f, 0.0f, 1.0f };
+        corners[1] = glm::vec4 { 0.0f,  1.0f, 0.0f, 1.0f };
+        corners[2] = glm::vec4 { 1.0f,  1.0f, 0.0f, 1.0f };
+        corners[3] = glm::vec4 { 1.0f,  0.0f, 0.0f, 1.0f };
+    }
+
+    const auto& transform = projection * modelview;
+
+    float min_x = std::numeric_limits<float>::max();
+    float max_x = std::numeric_limits<float>::lowest();
+    float min_y = std::numeric_limits<float>::max();
+    float max_y = std::numeric_limits<float>::lowest();
+    for (const auto& p0 : corners)
+    {
+        auto p1 = transform * packet.transform * p0;
+        p1 /= p1.w;
+        min_x = std::min(min_x, p1.x);
+        max_x = std::max(max_x, p1.x);
+        min_y = std::min(min_y, p1.y);
+        max_y = std::max(max_y, p1.y);
+    }
+    // completely above or below the NDC
+    if (max_y < -1.0f || min_y > 1.0f)
+        return true;
+
+    // completely to the left of to the right of the NDC
+    if (max_x < -1.0f || min_x > 1.0f)
+        return true;
+
+    return false;
+
 }
 
 } // namespace

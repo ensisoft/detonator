@@ -101,6 +101,13 @@ namespace engine
         float line_width = 1.0f;
     };
 
+    class PacketFilter
+    {
+    public:
+        virtual ~PacketFilter() = default;
+        virtual bool InspectPacket(DrawPacket& packet) { return true; }
+    };
+
     struct RenderLayer {
         std::vector<gfx::Painter::DrawCommand> draw_color_list;
         std::vector<gfx::Painter::DrawCommand> mask_cover_list;
@@ -109,6 +116,7 @@ namespace engine
 
     using EntityRenderLayerList = std::vector<RenderLayer>;
     using SceneRenderLayerList  = std::vector<EntityRenderLayerList>;
+    using DrawPacketList = std::vector<DrawPacket>;
 
     class LowLevelRendererHook
     {
@@ -167,7 +175,6 @@ namespace engine
 
         LowLevelRenderer(const std::string* name, gfx::Device& device);
 
-
         inline void SetBloom(const BloomParams& bloom) noexcept
         {
             mSettings.bloom = bloom;
@@ -198,8 +205,12 @@ namespace engine
         {
             mRenderHook = hook;
         }
+        inline void SetPacketFilter(PacketFilter* packet_filter) noexcept
+        {
+            mPacketFilter = packet_filter;
+        }
 
-        void Draw(const SceneRenderLayerList& layers) const;
+        void Draw(DrawPacketList& packets) const;
         void Blit() const;
 
     private:
@@ -211,9 +222,10 @@ namespace engine
         {
             return mSettings.surface.size.GetHeight();
         }
-        void DrawDefault(const SceneRenderLayerList& layers) const;
-        void DrawFramebuffer(const SceneRenderLayerList& layers) const;
-        void Draw(const SceneRenderLayerList& layers, gfx::Framebuffer* fbo, gfx::ShaderProgram& program) const;
+        void DrawDefault(DrawPacketList& packets) const;
+        void DrawFramebuffer(DrawPacketList& packets) const;
+        void Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx::ShaderProgram& program) const;
+        bool CullDrawPacket(const DrawPacket& packet, const glm::mat4& projection, const glm::mat4& modelview) const;
 
     private:
         gfx::Texture* CreateTextureTarget(const std::string& name) const;
@@ -222,6 +234,7 @@ namespace engine
     private:
         const std::string* mRendererName = nullptr;
         LowLevelRendererHook* mRenderHook = nullptr;
+        PacketFilter* mPacketFilter = nullptr;
         RenderSettings mSettings;
         mutable gfx::Texture* mMainImage = nullptr;
         mutable gfx::Texture* mBloomImage = nullptr;
