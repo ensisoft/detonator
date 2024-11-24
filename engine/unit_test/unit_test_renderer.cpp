@@ -997,11 +997,12 @@ void unit_test_axis_aligned_map()
     camera.viewport   = game::FRect(-128, -128, 256, 256);
     renderer.SetCamera(camera);
 
-    class MapHook : public engine::TileBatchDrawHook {
+    class MapHook : public engine::PacketFilter {
     public:
-        virtual void BeginDrawBatch(const engine::DrawPacket& packet, gfx::Painter&) override
+        virtual bool InspectPacket(engine::DrawPacket& packet) override
         {
             batches.push_back(packet);
+            return true;
         }
         void Clear()
         {
@@ -1010,7 +1011,9 @@ void unit_test_axis_aligned_map()
         std::vector<engine::DrawPacket> batches;
     } hook;
 
-    renderer.Draw(*map_instance, *device, &hook, true, false);
+    renderer.SetPacketFilter(&hook);
+    renderer.CreateFrame(*map_instance, true, false);
+    renderer.DrawFrame(*device);
 
     {
         const auto& bmp = device->ReadColorBuffer(0, 0, 256, 256);
@@ -1062,7 +1065,10 @@ void unit_test_axis_aligned_map()
 
         map->SetTileRenderWidthScale(1.0);
         map->SetTileRenderHeightScale(1.0f);
-        renderer.Draw(*map_instance, *device, &hook, true, false);
+
+        renderer.CreateFrame(*map_instance, true, false);
+        renderer.DrawFrame(*device);
+
         for (size_t i=0; i<hook.batches.size(); ++i)
         {
             const auto* tiles = dynamic_cast<const gfx::TileBatch*>(hook.batches[i].drawable.get());
@@ -1074,7 +1080,9 @@ void unit_test_axis_aligned_map()
         // change the render scale
         map->SetTileRenderWidthScale(2.0);
         map->SetTileRenderHeightScale(1.0f);
-        renderer.Draw(*map_instance, *device, &hook, true, false);
+
+        renderer.CreateFrame(*map_instance, true, false);
+        renderer.DrawFrame(*device);
 
         for (size_t i=0; i<hook.batches.size(); ++i)
         {
@@ -1086,7 +1094,10 @@ void unit_test_axis_aligned_map()
 
         map->SetTileRenderWidthScale(1.0f);
         map->SetTileRenderHeightScale(2.0f);
-        renderer.Draw(*map_instance, *device, &hook, true, false);
+
+        renderer.CreateFrame(*map_instance, true, false);
+        renderer.DrawFrame(*device);
+
         for (size_t i=0; i<hook.batches.size(); ++i)
         {
             const auto* tiles = dynamic_cast<const gfx::TileBatch*>(hook.batches[i].drawable.get());

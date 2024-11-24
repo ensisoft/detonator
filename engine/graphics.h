@@ -136,6 +136,8 @@ namespace engine
             float rotation = 0.0f;
 
             PerspectiveProjectionArgs ppa;
+
+            GameView map_perspective;
         };
 
         // The rendering window/surface details.
@@ -163,6 +165,7 @@ namespace engine
 
         virtual void BeginDraw(const RenderSettings& settings, const GPUResources& gpu) {}
         virtual void EndDraw(const RenderSettings& settings, const GPUResources& gpu) {}
+        virtual void EndDrawPacket(const RenderSettings& settings, const GPUResources& gpu, const DrawPacket& packet, gfx::Painter& painter) {}
     };
 
     class LowLevelRenderer

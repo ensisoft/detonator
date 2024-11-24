@@ -229,12 +229,47 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx:
     const auto& perspective  = CreateProjectionMatrix(camera.viewport, camera.ppa);
     const auto& pixel_ratio = window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * camera.scale;
 
-    gfx::Painter painter(&mDevice);
-    painter.SetViewport(mSettings.surface.viewport);
-    painter.SetSurfaceSize(mSettings.surface.size);
-    painter.SetEditingMode(mSettings.editing_mode);
-    painter.SetPixelRatio(pixel_ratio);
-    painter.SetFramebuffer(fbo);
+    // draw editing mode tilemap data packets first.
+    // this is only used to visualize map data in the editor.
+    if (mSettings.editing_mode)
+    {
+        // Setup painter to draw in whatever is the map perspective.
+        gfx::Painter map_painter(&mDevice);
+        map_painter.SetProjectionMatrix(orthographic);
+        map_painter.SetViewMatrix(CreateModelViewMatrix(camera.map_perspective, camera.position, camera.scale, camera.rotation));
+        map_painter.SetPixelRatio({1.0f, 1.0f});
+        map_painter.SetViewport(mSettings.surface.viewport);
+        map_painter.SetSurfaceSize(mSettings.surface.size);
+        map_painter.SetFramebuffer(fbo);
+
+        for (auto& packet : packets)
+        {
+            if (packet.domain != DrawPacket::Domain::Editor)
+                continue;
+            else if (packet.source != DrawPacket::Source::Map)
+                continue;
+
+            map_painter.Draw(*packet.drawable, packet.transform, *packet.material);
+
+            if (mRenderHook)
+            {
+                LowLevelRendererHook::GPUResources resources;
+                resources.device      = &mDevice;
+                resources.framebuffer = fbo;
+                resources.main_image  = nullptr;
+                mRenderHook->EndDrawPacket(mSettings, resources, packet, map_painter);
+            }
+        }
+    }
+
+    gfx::Painter scene_painter(&mDevice);
+    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, camera.viewport));
+    scene_painter.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, camera.position, camera.scale, camera.rotation));
+    scene_painter.SetViewport(mSettings.surface.viewport);
+    scene_painter.SetSurfaceSize(mSettings.surface.size);
+    scene_painter.SetEditingMode(mSettings.editing_mode);
+    scene_painter.SetPixelRatio(pixel_ratio);
+    scene_painter.SetFramebuffer(fbo);
 
     // Each entity in the scene is assigned to a scene/entity layer and each
     // entity node within an entity is assigned to an entity layer.
@@ -281,7 +316,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx:
         draw.state.stencil_func = gfx::Painter::StencilFunc ::Disabled;
         draw.view               = &model_view;
         draw.projection         = projection;
-        painter.Prime(draw);
+        scene_painter.Prime(draw);
 
         const auto render_layer_index = packet.render_layer;
         ASSERT(render_layer_index >= 0);
@@ -356,30 +391,43 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx:
             {
                 gfx::detail::StencilShaderProgram stencil_program;
 
-                painter.ClearStencil(gfx::StencilClearValue(1));
-                painter.Draw(entity_layer.mask_cover_list, stencil_program);
-                painter.Draw(entity_layer.mask_expose_list, stencil_program);
-                painter.Draw(entity_layer.draw_color_list, program);
+                scene_painter.ClearStencil(gfx::StencilClearValue(1));
+                scene_painter.Draw(entity_layer.mask_cover_list, stencil_program);
+                scene_painter.Draw(entity_layer.mask_expose_list, stencil_program);
+                scene_painter.Draw(entity_layer.draw_color_list, program);
             }
             else if (!entity_layer.mask_cover_list.empty())
             {
                 gfx::detail::StencilShaderProgram stencil_program;
 
-                painter.ClearStencil(gfx::StencilClearValue(1));
-                painter.Draw(entity_layer.mask_cover_list, stencil_program);
-                painter.Draw(entity_layer.draw_color_list, program);
+                scene_painter.ClearStencil(gfx::StencilClearValue(1));
+                scene_painter.Draw(entity_layer.mask_cover_list, stencil_program);
+                scene_painter.Draw(entity_layer.draw_color_list, program);
             }
             else if (!entity_layer.mask_expose_list.empty())
             {
                 gfx::detail::StencilShaderProgram stencil_program;
 
-                painter.ClearStencil(gfx::StencilClearValue(0));
-                painter.Draw(entity_layer.mask_expose_list, stencil_program);
-                painter.Draw(entity_layer.draw_color_list, program);
+                scene_painter.ClearStencil(gfx::StencilClearValue(0));
+                scene_painter.Draw(entity_layer.mask_expose_list, stencil_program);
+                scene_painter.Draw(entity_layer.draw_color_list, program);
             }
             else if (!entity_layer.draw_color_list.empty())
             {
-                painter.Draw(entity_layer.draw_color_list, program);
+                scene_painter.Draw(entity_layer.draw_color_list, program);
+            }
+
+            if (mRenderHook)
+            {
+                LowLevelRendererHook::GPUResources resources;
+                resources.device      = &mDevice;
+                resources.framebuffer = fbo;
+                resources.main_image  = nullptr;
+                for (const auto& draw_cmd : entity_layer.draw_color_list)
+                {
+                    const auto* draw_packet = static_cast<const DrawPacket*>(draw_cmd.user);
+                    mRenderHook->EndDrawPacket(mSettings, resources, *draw_packet, scene_painter);
+                }
             }
         }
     }
@@ -387,19 +435,29 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx:
     // draw editor packets
     if (mSettings.editing_mode)
     {
-        gfx::Painter painter(&mDevice);
-        painter.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, camera.viewport));
-        painter.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, camera.position, camera.scale, camera.rotation));
-        painter.SetViewport(mSettings.surface.viewport);
-        painter.SetSurfaceSize(mSettings.surface.size);
-        painter.SetEditingMode(mSettings.editing_mode);
-        painter.SetPixelRatio(pixel_ratio);
-        painter.SetFramebuffer(fbo);
-
-        for (const auto& packet : packets)
+        for (auto& packet : packets)
         {
-            if (packet.domain == DrawPacket::Domain::Editor)
-                painter.Draw(*packet.drawable, packet.transform, *packet.material);
+            // we're only drawing editor packets that are used for extra
+            // visualization
+            if (packet.domain != DrawPacket::Domain::Editor)
+                continue;
+
+            // currently editor + map = data layer visualization which
+            // is drawn before anything else so that ends up below
+            // the rendering layer stuff.
+            if (packet.source == DrawPacket::Source::Map)
+                continue;
+
+            scene_painter.Draw(*packet.drawable, packet.transform, *packet.material);
+
+            if (mRenderHook)
+            {
+                LowLevelRendererHook::GPUResources resources;
+                resources.device      = &mDevice;
+                resources.framebuffer = fbo;
+                resources.main_image  = nullptr;
+                mRenderHook->EndDrawPacket(mSettings, resources, packet, scene_painter);
+            }
         }
     }
 }

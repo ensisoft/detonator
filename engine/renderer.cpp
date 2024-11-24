@@ -140,6 +140,12 @@ void Renderer::UpdateRendererState(const game::Entity& entity)
     CreatePaintNodes<Entity, EntityNode>(entity, transform, "");
 }
 
+void Renderer::UpdateRendererState(const game::Tilemap& map)
+{
+    // this API exists for the sake of completeness but currently
+    // there's nothing here that needs to be done.
+}
+
 void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
 {
     std::vector<DrawPacket> packets;
@@ -400,6 +406,65 @@ void Renderer::CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* h
     std::swap(mRenderBuffer, packets);
 }
 
+void Renderer::CreateFrame(const game::Tilemap& map, bool draw_render_layer, bool draw_data_layer, TileBatchDrawHook* hook)
+{
+    // The isometric tile rendering is quite complicated assuming pre-rendered tiles.
+    // Conceptually the tiles are 2D squares in the "tile world space",
+    // which is on the XY plane in a 3D coordinate space. When such a tile is
+    // projected onto the 2D projection plane with dimetric projection the outline
+    // shape that is produced is a rhombus. Finally the shape of the object that
+    // is actually rendered to represent the tile visually in screen space is
+    // either a square or a rectangle depending on the tileset.
+    // The correct rendering position is computed by selecting some point on the
+    // tile or inside the tile (such as one of the corners or the center point)
+    // and projecting it from the tile world to render world and then aligning
+    // a rectangle around this point.
+    //
+    // Another complication is the correct rendering order to solve for the
+    // visibility problem. If the rendering is dimetric the rendering order
+    // must be from left to right, top to bottom in tile grid coordinates
+    // because the rendered tiles are actually overlapping. (This doesn't work
+    // with tile batching based on material index when using multiple materials.
+    // If there's a single material and all tiles inside the batch are sorted
+    // to their correct order then it works as expected)
+    // Random thoughts...
+    // - depth buffering doesn't work out of the box since the vertex depth
+    //   (distance from camera) is useless with orthographic projection.
+    //   Rather a depth value for a tile would need to be fabricated from the
+    //   tile x,y coordinates.
+    //  - OpenGL ES2 doesn't have gl_FragDepth
+    //  - Do a depth pre-pass, render the tile depth to a texture, when doing
+    //   the color pass compute the depth again and compare against the depth
+    //   value in the texture. then discard or write. Would work for alpha cut-outs (?)
+    //   but not for semi-transparent objects(!)
+
+    constexpr auto obey_klass_flags = true;
+    constexpr auto use_tile_batching = false;
+
+    std::vector<TileBatch> batches;
+    PrepareMapTileBatches(map, batches, draw_render_layer, draw_data_layer, obey_klass_flags, use_tile_batching);
+
+    std::vector<DrawPacket> packets;
+    GenerateMapDrawPackets(map, batches,packets);
+
+    SortTilePackets(packets);
+
+    // this rendering path doesn't use the runtime rendering path (DrawScenePackets)
+    // therefore we must do our own sorting here to get the packets sorted
+    // according to render layers as well.
+    std::stable_sort(packets.begin(), packets.end(), [](const auto& lhs, const auto& rhs) {
+        if (lhs.render_layer < rhs.render_layer)
+            return true;
+        return false;
+    });
+
+    // put the data packets (indicated by editor) first
+    std::stable_partition(packets.begin(), packets.end(), [](const auto& packet) {
+        return packet.domain == DrawPacket::Domain::Editor;
+    });
+
+    std::swap(mRenderBuffer, packets);
+}
 
 void Renderer::DrawFrame(gfx::Device& device) const
 {
@@ -440,41 +505,6 @@ void Renderer::DrawFrame(gfx::Device& device) const
     low_level_renderer.EnableBloom(enable_bloom);
     TRACE_CALL("DrawPackets", low_level_renderer.Draw(mRenderBuffer));
     TRACE_CALL("Blit", low_level_renderer.Blit());
-}
-
-void Renderer::Draw(const game::Tilemap& map,
-                    gfx::Device& device,
-                    TileBatchDrawHook* hook,
-                    bool draw_render_layer,
-                    bool draw_data_layer)
-{
-    constexpr auto obey_klass_flags = true;
-    constexpr auto use_tile_batching = false;
-
-    std::vector<TileBatch> batches;
-    PrepareMapTileBatches(map, batches, draw_render_layer, draw_data_layer, obey_klass_flags, use_tile_batching);
-
-    std::vector<DrawPacket> packets;
-    GenerateMapDrawPackets(map, batches,packets);
-
-    SortTilePackets(packets);
-
-    // this rendering path doesn't use the runtime rendering path (DrawScenePackets)
-    // therefore we must do our own sorting here to get the packets sorted
-    // according to render layers as well.
-    std::stable_sort(packets.begin(), packets.end(), [](const auto& lhs, const auto& rhs) {
-        if (lhs.render_layer < rhs.render_layer)
-            return true;
-        return false;
-    });
-
-    // put the data packets (indicated by editor) first
-    std::stable_partition(packets.begin(), packets.end(),
-                          [](const auto& packet) {
-        return packet.domain == DrawPacket::Domain::Editor;
-    });
-
-    DrawTilemapPackets(device, packets, map, hook);
 }
 
 void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
@@ -761,6 +791,12 @@ void Renderer::Update(const Scene& scene, const game::Tilemap* map, double time,
         const auto& entity = scene.GetEntity(i);
         Update(entity, time, dt);
     }
+}
+
+void Renderer::Update(const game::Tilemap& map, double time, float dt)
+{
+    // this API exists for the sake of completeness but currently
+    // there's nothing here that needs to be done.
 }
 
 void Renderer::EndFrame()
@@ -1349,85 +1385,6 @@ void Renderer::OffsetPacketLayers(std::vector<DrawPacket>& packets) const
         packet.packet_index -= first_packet_index;
         packet.render_layer -= first_render_layer;
         ASSERT(packet.packet_index >= 0 && packet.render_layer >= 0);
-    }
-}
-void Renderer::DrawTilemapPackets(gfx::Device& device,
-                                  const std::vector<DrawPacket>& packets,
-                                  const game::Tilemap& map,TileBatchDrawHook* hook) const
-{
-    // The isometric tile rendering is quite complicated assuming pre-rendered tiles.
-    // Conceptually the tiles are 2D squares in the "tile world space",
-    // which is on the XY plane in a 3D coordinate space. When such a tile is
-    // projected onto the 2D projection plane with dimetric projection the outline
-    // shape that is produced is a rhombus. Finally the shape of the object that
-    // is actually rendered to represent the tile visually in screen space is
-    // either a square or a rectangle depending on the tileset.
-    // The correct rendering position is computed by selecting some point on the
-    // tile or inside the tile (such as one of the corners or the center point)
-    // and projecting it from the tile world to render world and then aligning
-    // a rectangle around this point.
-    //
-    // Another complication is the correct rendering order to solve for the
-    // visibility problem. If the rendering is dimetric the rendering order
-    // must be from left to right, top to bottom in tile grid coordinates
-    // because the rendered tiles are actually overlapping. (This doesn't work
-    // with tile batching based on material index when using multiple materials.
-    // If there's a single material and all tiles inside the batch are sorted
-    // to their correct order then it works as expected)
-    // Random thoughts...
-    // - depth buffering doesn't work out of the box since the vertex depth
-    //   (distance from camera) is useless with orthographic projection.
-    //   Rather a depth value for a tile would need to be fabricated from the
-    //   tile x,y coordinates.
-    //  - OpenGL ES2 doesn't have gl_FragDepth
-    //  - Do a depth pre-pass, render the tile depth to a texture, when doing
-    //   the color pass compute the depth again and compare against the depth
-    //   value in the texture. then discard or write. Would work for alpha cut-outs (?)
-    //   but not for semi-transparent objects(!)
-
-    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
-    const auto logical_viewport_width = mCamera.viewport.GetWidth();
-    const auto logical_viewport_height = mCamera.viewport.GetHeight();
-    const auto& orthographic = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-
-    gfx::Painter scene_painter(&device);
-    scene_painter.SetProjectionMatrix(orthographic);
-    scene_painter.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
-    scene_painter.SetViewport(mSurface.viewport);
-    scene_painter.SetSurfaceSize(mSurface.size);
-    scene_painter.SetEditingMode(mEditingMode);
-    scene_painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
-
-    // Setup painter to draw in whatever is the map perspective.
-    gfx::Painter tile_painter(&device);
-    tile_painter.SetProjectionMatrix(orthographic);
-    tile_painter.SetViewMatrix(CreateModelViewMatrix(map.GetPerspective(), mCamera.position, mCamera.scale, mCamera.rotation));
-    tile_painter.SetPixelRatio({1.0f, 1.0f});
-    tile_painter.SetViewport(mSurface.viewport);
-    tile_painter.SetSurfaceSize(mSurface.size);
-
-    for (const auto& packet : packets)
-    {
-        if (packet.source != DrawPacket::Source::Map)
-            continue;
-
-        if (hook && !hook->FilterBatch(packet))
-            continue;
-
-        gfx::Painter* painter = nullptr;
-        if (packet.domain == DrawPacket::Domain::Scene)
-            painter = &scene_painter;
-        else if (packet.domain == DrawPacket::Domain::Editor)
-            painter = &tile_painter;
-        else BUG("Unhandled draw packet domain.");
-
-        if (hook)
-            hook->BeginDrawBatch(packet, *painter);
-
-        painter->Draw(*packet.drawable, packet.transform, *packet.material);
-
-        if (hook)
-            hook->EndDrawBatch(packet, *painter);
     }
 }
 
