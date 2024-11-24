@@ -95,9 +95,10 @@ namespace engine
             // todo: ObliqueTopDown
             //Oblique
         };
-        GameView(EnumValue value)
+        GameView(EnumValue value) noexcept
           : value(value)
         {}
+        GameView() = default;
         GameView(game::Tilemap::Perspective perspective)
         {
             if (perspective == game::Tilemap::Perspective::AxisAligned)
@@ -109,7 +110,7 @@ namespace engine
         inline operator EnumValue () const noexcept
         { return value; }
 
-        EnumValue value;
+        EnumValue value = AxisAligned;
     };
 
     inline bool operator==(GameView lhs, GameView rhs)

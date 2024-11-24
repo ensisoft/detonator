@@ -2225,17 +2225,37 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
 
     // render the actual tilemap
     {
-        class DrawHook : public engine::TileBatchDrawHook
+        auto* device = painter.GetDevice();
+
+        const auto camera_position = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
+        const auto camera_scale    = glm::vec2{xs, ys};
+        const auto camera_rotation = (float)GetValue(mUI.rotation);
+
+        LowLevelRenderHook low_level_render_hook(
+                camera_position,
+                camera_scale,
+                map_view,
+                camera_rotation,
+                width, height,
+                zoom,
+                grid,
+                GetValue(mUI.chkShowGrid));
+
+        class DrawHook : public engine::LowLevelRendererHook
         {
         public:
-            explicit DrawHook(const State& state, const game::TilemapLayer* layer, const gfx::Painter& painter)
+            DrawHook(const State& state, const game::TilemapLayer* layer, const gfx::Painter& painter, LowLevelRenderHook* hook)
               : mState(state)
               , mLayer(layer)
-              , mPainter(painter)
+              , mWindowPainter(painter)
+              , mLowLevelRenderHook(hook)
+            {}
+            void BeginDraw(const RenderSettings& settings, const GPUResources& gpu) override
             {
-                auto klass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture);
+                mLowLevelRenderHook->BeginDraw(settings, gpu);
             }
-            virtual void EndDrawBatch(const engine::DrawPacket& packet, gfx::Painter& painter) override
+
+            void EndDrawPacket(const RenderSettings& settings, const GPUResources& gpu, const engine::DrawPacket& packet, gfx::Painter& painter) override
             {
                 if (!mState.selection.has_value() || !mLayer)
                     return;
@@ -2289,28 +2309,24 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                             tiles.SetProjection(gfx::TileBatch::Projection::Dimetric);
                         else BUG("unknown projection");
 
-                        DrawEdges(painter, mPainter, tiles, *packet.material, packet.transform, mState.klass->GetId());
+                        DrawEdges(painter, mWindowPainter, tiles, *packet.material, packet.transform, mState.klass->GetId());
                     }
                 }
             }
         private:
             const State& mState;
             const game::TilemapLayer* mLayer = nullptr;
-            const gfx::Painter& mPainter;
-        } hook(mState, GetCurrentLayerInstance(), painter);
-
-        auto* device = painter.GetDevice();
-
-        const auto camera_position = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
-        const auto camera_scale    = glm::vec2{xs, ys};
-        const auto camera_rotation = (float)GetValue(mUI.rotation);
+            const gfx::Painter& mWindowPainter;
+            LowLevelRenderHook* mLowLevelRenderHook = nullptr;
+        } hook(mState, GetCurrentLayerInstance(), painter, &low_level_render_hook);
 
         engine::Renderer::Camera camera;
-        camera.clear_color = mUI.widget->GetCurrentClearColor();
-        camera.position    = camera_position;
-        camera.scale       = camera_scale * zoom;
-        camera.rotation    = camera_rotation;
-        camera.viewport    = game::FRect(-width*0.5f, -height*0.5f, width, height);
+        camera.clear_color     = mUI.widget->GetCurrentClearColor();
+        camera.position        = camera_position;
+        camera.scale           = camera_scale * zoom;
+        camera.rotation        = camera_rotation;
+        camera.viewport        = game::FRect(-width*0.5f, -height*0.5f, width, height);
+        camera.map_perspective = map_view;
         mState.renderer.SetCamera(camera);
 
         engine::Renderer::Surface surface;
@@ -2318,6 +2334,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         surface.size     = gfx::USize(width, height);
         mState.renderer.SetSurface(surface);
 
+        mState.renderer.SetLowLevelRendererHook(&hook);
         mState.renderer.SetEditingMode(true);
         mState.renderer.SetName("TilemapWidgetRenderer/" + mState.klass->GetId());
         mState.renderer.SetClassLibrary(mState.workspace);
@@ -2326,7 +2343,8 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         const bool show_data_layers = GetValue(mUI.chkShowDataLayers);
 
         mState.renderer.BeginFrame();
-        mState.renderer.Draw(*mState.map, *device, &hook, show_render_layers, show_data_layers);
+        mState.renderer.CreateFrame(*mState.map, show_render_layers, show_data_layers);
+        mState.renderer.DrawFrame(*device);
         mState.renderer.EndFrame();
     }
 

@@ -161,6 +161,7 @@ namespace engine
         void UpdateRendererState(const game::SceneClass& scene, const game::Tilemap* map);
         void UpdateRendererState(const game::EntityClass& entity);
         void UpdateRendererState(const game::Entity& entity);
+        void UpdateRendererState(const game::Tilemap& map);
 
         // Update the current frame rendering state, animate materials etc.
         // note that when doing multi-threaded render/update this
@@ -169,6 +170,7 @@ namespace engine
         void Update(const game::Entity& entity, double time, float dt);
         void Update(const game::SceneClass& scene, const game::Tilemap* map, double time, float dt);
         void Update(const game::Scene& scene, const game::Tilemap* map, double time, float dt);
+        void Update(const game::Tilemap& map, double time, float dt);
 
         void Update(const game::Scene& scene, double time, float dt)
         {
@@ -186,19 +188,12 @@ namespace engine
         void CreateFrame(const game::SceneClass& scene, const game::Tilemap* map, SceneClassDrawHook* hook = nullptr);
         void CreateFrame(const game::EntityClass& entity, EntityClassDrawHook* hook = nullptr);
         void CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* hook = nullptr);
+        void CreateFrame(const game::Tilemap& map, bool draw_render_layer, bool draw_data_layer,
+                         TileBatchDrawHook* hook = nullptr);
 
         // Draw the current frame rendering state, i.e. the currently
         // enqueued and created draw commands.
         void DrawFrame(gfx::Device& painter) const;
-
-        // The following API methods used by the editor to draw some
-        // edit time representations of things.
-
-        void Draw(const game::Tilemap& map,
-                  gfx::Device& device,
-                  TileBatchDrawHook* hook,
-                  bool draw_render_layer,
-                  bool draw_data_layer);
 
         void EndFrame();
 
@@ -255,10 +250,7 @@ namespace engine
                                    std::vector<DrawPacket>& packets,
                                    EntityDrawHook<EntityNodeType>* hook) const;
 
-
         void OffsetPacketLayers(std::vector<DrawPacket>& packets) const;
-        void DrawTilemapPackets(gfx::Device& device, const std::vector<DrawPacket>& packets,
-                                const game::Tilemap& map, TileBatchDrawHook* hook) const;
 
         void GenerateMapDrawPackets(const game::Tilemap& map,
                                     const std::vector<TileBatch>& batches,
