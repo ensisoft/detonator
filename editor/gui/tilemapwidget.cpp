@@ -2543,7 +2543,7 @@ void TilemapWidget::MousePress(QMouseEvent* event)
     {
         if (auto* layer = GetCurrentLayerInstance())
         {
-            if (mState.selection.has_value())
+            if (mState.selection.has_value() && layer->HasRenderComponent())
             {
                 const auto& selection = mState.selection.value();
                 if (const auto& tile = FindTileUnderMouse())
