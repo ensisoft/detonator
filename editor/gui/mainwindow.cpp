@@ -3310,13 +3310,13 @@ void MainWindow::ShowHelpWidget()
 
     if (mWorkspace && mCurrentWidget)
     {
-        mUI.helpWidget->setVisible(false);
+        mUI.mainHelpWidget->setVisible(false);
         mUI.mainTab->setVisible(true);
     }
     else if (mWorkspace && !mCurrentWidget)
     {
-        mUI.helpWidget->setVisible(true);
-        mUI.helpWidget->setCurrentIndex(0);
+        mUI.mainHelpWidget->setVisible(true);
+        mUI.mainHelpWidget->setCurrentIndex(0);
         mUI.mainTab->setVisible(false);
         mUI.mainToolBar->clear();
         mUI.mainToolBar->addAction(mUI.actionNewMaterial);
@@ -3349,8 +3349,8 @@ void MainWindow::ShowHelpWidget()
         mUI.mainToolBar->clear();
         mUI.mainToolBar->addAction(mUI.actionNewWorkspace);
         mUI.mainToolBar->addAction(mUI.actionLoadWorkspace);
-        mUI.helpWidget->setCurrentIndex(1);
-        mUI.helpWidget->setVisible(true);
+        mUI.mainHelpWidget->setCurrentIndex(1);
+        mUI.mainHelpWidget->setVisible(true);
         mUI.mainTab->setVisible(false);
     }
 }

@@ -169,11 +169,14 @@
      </widget>
     </item>
     <item>
-     <widget class="QStackedWidget" name="helpWidget">
+     <widget class="QStackedWidget" name="mainHelpWidget">
       <property name="currentIndex">
        <number>1</number>
       </property>
       <widget class="QWidget" name="started">
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <widget class="QGroupBox" name="grpHelp">
