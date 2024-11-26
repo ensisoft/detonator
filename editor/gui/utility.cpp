@@ -264,6 +264,9 @@ void PopulateQtStyles(QComboBox* cmb)
     {
         cmb->addItem(style);
     }
+
+    cmb->addItem("Fusion-Dark"); // custom dark
+
     if (cmb->isEditable())
         cmb->lineEdit()->setCursorPosition(0);
 }

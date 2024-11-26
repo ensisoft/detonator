@@ -645,6 +645,10 @@ add_executable(Detonator
     editor/gui/translation.cpp
     editor/resource/resource.qrc
     editor/welcome.qrc
+    editor/gui/darkstyle/darkstyle.cpp
+    editor/gui/darkstyle/darkstyle.h
+    editor/gui/darkstyle/stylecommon.h
+    editor/gui/darkstyle/stylecommon.cpp
 )
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # suppress some noise coming from Qt (Qt-Color-Widgets)
@@ -710,7 +714,12 @@ add_executable(EditorGameHost
     editor/gui/dlgeventlog.ui
     editor/gui/dlgeventlog.cpp
     editor/resource/resource.qrc
+    editor/gui/darkstyle/darkstyle.cpp
+    editor/gui/darkstyle/darkstyle.h
+    editor/gui/darkstyle/stylecommon.h
+    editor/gui/darkstyle/stylecommon.cpp
 )
+target_compile_definitions(EditorGameHost PRIVATE DETONATOR_GAMEHOST_BUILD)
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")

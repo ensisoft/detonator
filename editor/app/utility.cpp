@@ -41,6 +41,12 @@
 #include "base/utility.h"
 #include "editor/app/utility.h"
 
+#if defined(DETONATOR_EDITOR_BUILD) || defined(DETONATOR_GAMEHOST_BUILD)
+#  include "editor/gui/darkstyle/darkstyle.h"
+#endif
+
+#include "base/snafu.h"
+
 namespace {
 
 QString ToNativeSeparators(QString p)
@@ -282,11 +288,30 @@ bool SetTheme(const QString& name)
 
 bool SetStyle(const QString& name)
 {
+#if defined(DETONATOR_EDITOR_BUILD) || defined(DETONATOR_GAMEHOST_BUILD)
+    if (name == "Fusion-Dark")
+    {
+        QApplication::setStyle(new DarkStyle());
+
+        auto* style = QApplication::style();
+        style->setObjectName("fusion");
+
+        QPalette palette;
+        style->polish(palette);
+
+        QApplication::setPalette(palette);
+        style->polish(qApp);
+        return true;
+    }
+#endif
+
     QStyle* style = QApplication::setStyle(name);
     if (style == nullptr)
         return false;
 
     QApplication::setPalette(style->standardPalette());
+    QApplication::style()->polish(qApp);
+    qApp->setStyleSheet("");
     return true;
 }
 
