@@ -415,6 +415,9 @@ QSlider::sub-page:horizontal{
 QSlider::sub-page:horizontal:disabled{
   background:rgb(80,80,80);
 }
+#mainHelpWidget {
+    border-image: url(:/darkstyle/wave.png) 0 0 0 0 stretch stretch;
+}
     )";
 
     app->setStyleSheet(QSS);
