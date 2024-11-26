@@ -111,6 +111,10 @@ void copyright()
     const auto boost_minor    = BOOST_VERSION / 100 % 1000;
     const auto boost_revision = BOOST_VERSION % 100;
 
+    INFO("https://github.com/antonypro/QGoodWindow");
+    INFO("Qt DarkStyle");
+    INFO("Copyright (c) 2018-2024 Antonio Dias");
+
     INFO("https://github.com/assimp");
     INFO("https://assimp.org/");
     INFO("Assimp the Asset Importer Library %1.%2.%3", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
