@@ -2,5 +2,7 @@
 <RCC version="1.0">
     <qresource prefix="/darkstyle">
       <file>wave.png</file>
+      <file>icons/restore.svg</file>
+      <file>icons/close.svg</file>
    </qresource>
 </RCC>
