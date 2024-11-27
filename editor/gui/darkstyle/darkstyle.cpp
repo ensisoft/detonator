@@ -229,8 +229,8 @@ QDockWidget::title{
   border-bottom:2px solid rgba(25,25,25,75);
 }
 QDockWidget{
-  titlebar-close-icon:url(:/darkstyle/icon_close.png);
-  titlebar-normal-icon:url(:/darkstyle/icon_restore.png);
+  titlebar-close-icon:url(:/darkstyle/icons/close.svg);
+  titlebar-normal-icon:url(:/darkstyle/icons/restore.svg);
 }
 QDockWidget::close-button,QDockWidget::float-button{
   subcontrol-position:top right;
@@ -300,6 +300,8 @@ QTabBar::tab:!selected{
 QTabBar::close-button {
   border:1px solid transparent;
   border-radius:2px;
+  image: url(:/darkstyle/icons/close.svg);
+  padding: 6px;
 }
 QTabBar::close-button:hover {
   background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(106,106,106,255),stop:1 rgba(106,106,106,75));
