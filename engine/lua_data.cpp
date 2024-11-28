@@ -67,20 +67,28 @@ void BindDataWriterInterface(sol::usertype<Writer>& writer)
     writer["AppendChunk"]   = (void(Writer::*)(const char*, const data::Writer&))&Writer::AppendChunk;
 }
 
+// WAR for MSVS2019 that gets confused if the class function pointers
+// are used directly. the issue presented itself in the Lua data unit test.
+template<typename Reader, typename T>
+std::tuple<bool, T> ReadValue(const Reader& reader, const char* name)
+{
+    return reader.template Read<T>(name);
+}
+
 template<typename Reader>
 void BindDataReaderInterface(sol::usertype<Reader>& reader)
 {
-    reader["ReadFloat"]   = (std::tuple<bool, float>(Reader::*)(const char*)const)&Reader::Read;
-    reader["ReadInt"]     = (std::tuple<bool, int>(Reader::*)(const char*)const)&Reader::Read;
-    reader["ReadBool"]    = (std::tuple<bool, bool>(Reader::*)(const char*)const)&Reader::Read;
-    reader["ReadString"]  = (std::tuple<bool, std::string>(Reader::*)(const char*)const)&Reader::Read;
-    reader["ReadVec2"]    = (std::tuple<bool, glm::vec2>(Reader::*)(const char*)const)&Reader::Read;
-    reader["ReadVec3"]    = (std::tuple<bool, glm::vec3>(Reader::*)(const char*)const)&Reader::Read;
-    reader["ReadVec4"]    = (std::tuple<bool, glm::vec4>(Reader::*)(const char*)const)&Reader::Read;
-    reader["ReadFRect"]   = (std::tuple<bool, base::FRect>(Reader::*)(const char*)const)&Reader::Read;
-    reader["ReadFPoint"]  = (std::tuple<bool, base::FPoint>(Reader::*)(const char*)const)&Reader::Read;
-    reader["ReadFSize"]   = (std::tuple<bool, base::FSize>(Reader::*)(const char*)const)&Reader::Read;
-    reader["ReadColor4f"] = (std::tuple<bool, base::Color4f>(Reader::*)(const char*)const)&Reader::Read;
+    reader["ReadFloat"]   = &ReadValue<Reader, float>;
+    reader["ReadInt"]     = &ReadValue<Reader, int>;
+    reader["ReadBool"]    = &ReadValue<Reader, bool>;
+    reader["ReadString"]  = &ReadValue<Reader, std::string>;
+    reader["ReadVec2"]    = &ReadValue<Reader, glm::vec2>;
+    reader["ReadVec3"]    = &ReadValue<Reader, glm::vec3>;
+    reader["ReadVec4"]    = &ReadValue<Reader, glm::vec4>;
+    reader["ReadFRect"]   = &ReadValue<Reader, base::FRect>;
+    reader["ReadFPoint"]  = &ReadValue<Reader, base::FPoint>;
+    reader["ReadFSize"]   = &ReadValue<Reader, base::FSize>;
+    reader["ReadColor4f"] = &ReadValue<Reader, base::Color4f>;
 
     reader["Read"] = sol::overload(
       (std::tuple<bool, float>(Reader::*)(const char*, const float&)const)&Reader::Read,
