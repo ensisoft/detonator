@@ -106,7 +106,12 @@ namespace {
                uri.StartsWith("fs://") ||
                uri.StartsWith("app://") ||
                uri.StartsWith("zip://"));
-        QStringList components = uri.Split("/");
+
+        // for Windows that uses \ for the file path separator.
+        QString str = uri.GetWide();
+        str.replace("\\", "/");
+
+        QStringList components = str.split("/");
         components.pop_back();
         return components.join("/");
     }
