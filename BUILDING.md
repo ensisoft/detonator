@@ -417,7 +417,7 @@ in the editor.
 <details><summary>Instructions to run unit tests</summary>
 
 There's a bunch of unit tests that are built as part of the normal build process. Basically anything that begins with
-a "*unit_test_*" is a unit test.
+a "*unit_test_*" is a unit test.<br>
 For writing tests there's a very simple testing utility that is available in base. [base/test_minimal.h](base/test_minimal.h)
 
 In addition to having the unit tests both the audio and graphics subsystems also have "rendering" tests, i.e. playing audio
@@ -427,14 +427,21 @@ in OpenGL implementations it's possible that the rendering output is not exactly
 vendors/implementations (such as NVIDIA, AMD, Intel etc. Fixing this is a todo for later). The audio tests, however,
 don't have any automated way of verifying the test output.
 
+* The expectation is that all unit test cases should pass on Linux
+* The graphics rendering tests might have false negatives on different OpenGL vendors/driver versions/OS.
+* Any graphics rendering test that differs from the expected gold image will generate *delta* and *result* images.
+  * The *result* image will be the actual result image.
+  * The *delta* image will help visualize the pixels that were not the same between the *result* and the *gold* image.
+* Using multiple CMake "jobs" to run tests can confuse the rendering tests. 
+  * A safer alternative is to *NOT* use the -jN parameter but only use a single job. 
+
 #### [See this list for known Issues](ISSUES.md)
 
-### On the desktop (Linux/Windows) 🐧🪟
+### On the Desktop Linux 🐧
 
 <details><summary>How to run all tests</summary>
 
-*Currently, the expectation is that all cases should pass on Linux. On Windows some tests are unfortunately broken.*
-* In order to run tests after a successful build:
+Run all tests including unit tests, graphics and audio tests:
 
 ```
   $ cd detonator/build
@@ -444,7 +451,8 @@ don't have any automated way of verifying the test output.
 
 <details><summary>How to run audio tests</summary>
 
-* Runs, mp3, ogg, flag and 24bit .wav tests. Use --help for more information.
+Run mp3, ogg, flag and 24bit .wav tests. (Use --help for more information): 
+
 ```
   $ cd detonator/audio/test
   $ ./audio_test --mp3 --ogg --flac --24bit
@@ -456,11 +464,7 @@ don't have any automated way of verifying the test output.
 
 <details><summary>How to run graphics tests</summary>
 
-*Any test rendering that differs from the expected gold image will stop the program for user input
-(press any key to continue) and will generate a *Delta_* and *Result_* images. The former will help visualize the pixels
-that were not the same between result and gold and the result will be actual rendering result.*
-
-For example to run all tests with MSAA4. (Use --help for more information)
+Run all tests with MSAA4. (Use --help for more information):
 
 ```
   $ cd detonator/graphics/test/dist
@@ -469,6 +473,32 @@ For example to run all tests with MSAA4. (Use --help for more information)
   $ ./graphics_test --help
 ```
 
+</details>
+
+### On the Desktop Windows 🪟
+
+<details><summary>How to run all tests</summary>
+
+* Before the tests can run you need to make sure that you have the Qt libraries available for loading.
+* For testing in release:
+  * Copy `QtCore.dll`, `QtGui.dll`, `QtNetwork.dll`, `QtSvg.dll`,  `QtWidgets.dll` and `QtXml.dll` to `detonator\build\Release` folder.
+  * Copy Qt `plugins\platforms` folder to `detonator\build\Release` folder.
+  * Copy Qt `plugins\imageformats` folder to `detonator\build\Release` folder.
+
+* For testing in debug: 
+  * Copy `QtCored.dll`, `QtGuid.dll`, `QtNetworkd.dll`, `QtSvgd.dll`,  `QtWidgetsd.dll` and `QtXmld.dll` to `detonator\build_d\Debug` folder.
+  * Copy Qt `plugins\platforms` folder to `detonator\build_d\Debug\` folder.
+  * Copy Qt `plugins\imageformats` folder to `detonator\build_d\Debug\` folder.
+
+Run all tests including unit tests, graphics and audio tests:
+
+```
+  $ cd detonator\build
+  $ ctest -C Release
+  ...
+  $ cd detonator\build_d
+  $ ctest -C Debug
+```
 </details>
 
 ### On the Web (WASM+HTML5) 💩
@@ -505,20 +535,22 @@ to indicate completion.
 
 </details>
 
-### How to install Conan💩💩 using Yay on ArchLinux
 
+### Random Notes on Building and Build Setup
 
-Download the yay package from AUR<br>
-https://aur.archlinux.org/packages/yay
+<details><summary>How to install Conan💩💩 with Yay on ArchLinux</summary>
 
-WARNING! BOTH YAY AND CONAN💩💩 WILL LIKELY HAVE MISSING DEPENDENCIES
+1. Download the yay package from AUR<br>
+https://aur.archlinux.org/packages/yay <br>
+<strong>BOTH YAY AND CONAN💩💩 WILL LIKELY HAVE MISSING DEPENDENCIES</strong>
+   
 
- install missing yay dependencies
+2. Install missing Yay dependencies
 ```
 $ sudo pacman -S debugedit
 ```
 
-build yay
+3. Build Yay
 ```
 $ cd yay
 $ makepkg
@@ -527,8 +559,8 @@ $ yay --version
 $ yay v12.3.5 - libalpm v14.0.0
 $
 ```
-use yay to install Conan💩💩
 
+4. Use Yay to install Conan💩💩
 
 ```
 $ yay -S conan
@@ -538,3 +570,4 @@ $ conan --version
 $ Conan version 2.6.0
 $
 ```
+</details>
