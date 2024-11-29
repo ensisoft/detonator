@@ -25,6 +25,9 @@
      </property>
      <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
        <item>
         <widget class="QGroupBox" name="find">
          <property name="sizePolicy">
@@ -190,6 +193,9 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
          </property>
         </widget>
        </item>
@@ -382,6 +388,9 @@
       </property>
       <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout_4">
+        <property name="bottomMargin">
+         <number>6</number>
+        </property>
         <item>
          <widget class="QLineEdit" name="filter">
           <property name="placeholderText">
@@ -401,7 +410,7 @@
            </sizepolicy>
           </property>
           <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
+           <enum>QFrame::StyledPanel</enum>
           </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::SingleSelection</enum>
@@ -419,7 +428,7 @@
            <bool>false</bool>
           </attribute>
           <attribute name="verticalHeaderDefaultSectionSize">
-           <number>24</number>
+           <number>26</number>
           </attribute>
          </widget>
         </item>
@@ -436,7 +445,7 @@
            </sizepolicy>
           </property>
           <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
+           <enum>QFrame::StyledPanel</enum>
           </property>
           <property name="readOnly">
            <bool>true</bool>
