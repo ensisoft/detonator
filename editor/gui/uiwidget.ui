@@ -29,7 +29,7 @@
         <widget class="QGroupBox" name="baseProperties">
          <property name="minimumSize">
           <size>
-           <width>440</width>
+           <width>0</width>
            <height>0</height>
           </size>
          </property>
@@ -923,8 +923,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>366</width>
-             <height>988</height>
+             <width>517</width>
+             <height>1322</height>
             </rect>
            </property>
            <property name="sizePolicy">
