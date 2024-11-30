@@ -28,12 +28,14 @@
 #include "base/trace.h"
 #include "base/utility.h"
 #include "base/allocator.h"
+#include "base/memory.h"
 
 #if !defined(UNIT_TEST_BUNDLE)
 #  include "base/json.cpp"
 #  include "base/utility.cpp"
 #  include "base/trace.cpp"
 #  include "base/assert.cpp"
+#  include "base/memory.cpp"
 #endif
 
 template<typename T>
@@ -250,6 +252,8 @@ void unit_test_rect_test_point()
 
 void unit_test_rect_mapping()
 {
+    TEST_CASE(test::Type::Feature)
+
     base::FRect rect(0.0f, 0.0f, 100.0f, 200.0f);
 
     {
@@ -305,6 +309,33 @@ void meh()
     keke();
 }
 } // tracing test
+
+void unit_test_shmem()
+{
+#if !defined(WEBASSEMBLY)
+    {
+        TEST_CASE(test::Type::Feature)
+
+        mem::detail::DestroySharedMemory("/my_int");
+        mem::SharedMemoryVariableAllocator<int> my_int("/my_int", 123);
+
+        mem::SharedMemoryVariable<int> foo("/my_int");
+        mem::SharedMemoryVariable<int> bar("/my_int");
+        TEST_REQUIRE(foo == 123);
+        TEST_REQUIRE(bar == 123);
+
+        foo = 666;
+        TEST_REQUIRE(foo == 666);
+        TEST_REQUIRE(bar == 666);
+
+        // should not create the variable again
+        mem::SharedMemoryVariableAllocator<int> my_int_two("/my_int", 1);
+        // these should not change
+        TEST_REQUIRE(foo == 666);
+        TEST_REQUIRE(bar == 666);
+    }
+#endif
+}
 
 void unit_test_trace()
 {
@@ -619,14 +650,14 @@ int test_main(int argc, char* argv[])
     unit_test_rect_test_point<int>();
     unit_test_rect_test_point<float>();
     unit_test_rect_mapping();
-    unit_test_trace();
-
-    unit_test_util();
-
-    unit_test_allocator();
-
     unit_test_string();
     unit_test_color();
+
+    unit_test_shmem();
+    unit_test_trace();
+    unit_test_util();
+    unit_test_allocator();
+
     return 0;
 }
 ) // TEST_MAIN
