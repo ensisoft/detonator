@@ -22,6 +22,7 @@
 #include "base/assert.h"
 #include "base/trace.h"
 #include "base/logging.h"
+#include "base/memory.h"
 
 namespace {
 static thread_local base::Trace* thread_tracer = nullptr;

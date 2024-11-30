@@ -28,6 +28,7 @@
 #include <new>
 
 #include "base/assert.h"
+#include "base/platform.h"
 
 namespace mem
 {
@@ -614,5 +615,91 @@ namespace mem
 
     template<typename T, typename Tag=StandardAllocatorTag>
     using shared_ptr = SharedPtr<T, Tag>;
+
+    namespace detail {
+        struct SharedMemory;
+        using SharedMemoryHandle = SharedMemory*;
+        void* CreateSharedMemory(const char* name, size_t bytes, SharedMemoryHandle* shm_handle);
+        void* OpenSharedMemory(const char* name, size_t bytes, SharedMemoryHandle* shm_handle);
+        void CloseSharedMemory(void* memory, size_t bytes, SharedMemoryHandle shm_handle);
+        void DestroySharedMemory(const char* name);
+    } // namespace
+
+#if !defined(WEBASSEMBLY)
+    template<typename T>
+    class SharedMemoryVariableAllocator
+    {
+    public:
+        static constexpr auto VarSize = sizeof(T);
+
+        template<typename... Args>
+        SharedMemoryVariableAllocator(const char* name, Args&&... args)
+          : mName(name)
+        {
+            if (void* mem = detail::CreateSharedMemory(name, VarSize, &mSharedMemory)) {
+                mVariable = new(mem) T(std::forward<Args...>(args...));
+            }
+        }
+        SharedMemoryVariableAllocator(const char* name)
+        {
+            if (void* mem = detail::CreateSharedMemory(name, VarSize, &mSharedMemory)) {
+                mVariable = new (mem) T();
+            }
+        }
+        ~SharedMemoryVariableAllocator()
+        {
+            if (mVariable)
+            {
+                mVariable->~T();
+                detail::CloseSharedMemory((void*) mVariable, sizeof(T), mSharedMemory);
+                detail::DestroySharedMemory(mName);
+            }
+        }
+        SharedMemoryVariableAllocator(const SharedMemoryVariableAllocator&) = delete;
+        SharedMemoryVariableAllocator(SharedMemoryVariableAllocator&& other) = delete;
+
+        SharedMemoryVariableAllocator& operator=(const SharedMemoryVariableAllocator&) = delete;
+        SharedMemoryVariableAllocator& operator=(SharedMemoryVariableAllocator&&) = delete;
+    private:
+        const char* mName = nullptr;
+        T* mVariable = nullptr;
+        detail::SharedMemoryHandle mSharedMemory = nullptr;
+    };
+
+    template<typename T>
+    class SharedMemoryVariable
+    {
+    public:
+        SharedMemoryVariable(const char* name)
+        {
+            mVariable = static_cast<T*>(detail::OpenSharedMemory(name, sizeof(T), &mSharedMemory));
+        }
+        ~SharedMemoryVariable()
+        {
+            detail::CloseSharedMemory((void*)mVariable, sizeof(T), mSharedMemory);
+        }
+        SharedMemoryVariable(const SharedMemoryVariable&) = delete;
+        SharedMemoryVariable(SharedMemoryVariable&&) = delete;
+
+        operator T& () noexcept
+        {
+            return *mVariable;
+        }
+        operator const T&() const noexcept
+        {
+            return *mVariable;
+        }
+        SharedMemoryVariable& operator=(T value)
+        {
+            *mVariable = value;
+            return *this;
+        }
+        SharedMemoryVariable& operator=(const SharedMemoryVariable&) = delete;
+        SharedMemoryVariable& operator=(SharedMemoryVariable&&) = delete;
+    private:
+        T* mVariable = nullptr;
+        detail::SharedMemoryHandle  mSharedMemory = nullptr;
+    };
+#endif // EMSCRIPTEN
 
 } // namespace
