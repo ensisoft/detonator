@@ -1,3 +1,5 @@
+![logo](logo/detonator.png)
+
 DETONATOR 2D 💣💥
 ===================
 An OpenGL ES based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
