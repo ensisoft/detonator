@@ -150,11 +150,34 @@ void EnableTracing(bool on_off)
 unsigned int TraceLog::GetTime()
 {
     using clock = std::chrono::high_resolution_clock;
+    using time_point = clock::time_point;
 
-    static auto start_time = clock::now();
+#if defined(WEBASSEMBLY)
+    static auto start_time_accessor = clock::now();
+#else
+    // use a hack(?) for working around the issue of actually
+    // having multiple copies of the the static variable.
+    // a static variable has internal linkage which means that
+    // every binary module (dll, executable) that builds and
+    // links this translation unit in them gets their own
+    // copy of the static variable.
+    // For the tracing this will mean that when the tracing
+    // is started both the game main thread and the engine
+    // thread(s) get their own timestamp and both start at
+    // zero even though the engine thread(s) are in reality
+    // starting at some later time.
+
+    // Create a single instance of a variable in a shared memory
+    static mem::SharedMemoryVariableAllocator<time_point> start_time("/global_trace_start_time", clock::now());
+
+    // get access to the global variable
+    // using static here to avoid doing the shared memory mapping
+    // on every call to GetTime
+    static mem::SharedMemoryVariable<time_point> start_time_accessor("/global_trace_start_time");
+#endif
 
     const auto now = clock::now();
-    const auto gone = now - start_time;
+    const auto gone = now - (time_point)start_time_accessor;
     return std::chrono::duration_cast<std::chrono::microseconds>(gone).count();
 }
 
