@@ -47,10 +47,10 @@ DlgAbout::DlgAbout(QWidget* parent) : QDialog(parent)
         git_Branch(), git_CommitSHA1(), __DATE__ ", " __TIME__, COMPILER_NAME, COMPILER_VERSION, APP_VERSION));
     mUI.build->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 
-    QMovie* movie = new QMovie(this);
-    movie->setFileName(":splash.gif");
-    movie->start();
-    mUI.animation->setMovie(movie);
+    //QMovie* movie = new QMovie(this);
+    //movie->setFileName(":splash.gif");
+    //movie->start();
+    //mUI.animation->setMovie(movie);
 }
 
 } // namespace
