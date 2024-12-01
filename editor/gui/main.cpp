@@ -236,6 +236,9 @@ void EventLoop(QApplication& app, Window& window)
     // try to adjust the timer resolution to something better.
     // https://learn.microsoft.com/en-us/windows/win32/api/timeapi/nf-timeapi-timebeginperiod
     timeBeginPeriod(1);
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setpriorityclass
+    SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
 #endif
 
     // use a dedicated thread to give the main application thread
