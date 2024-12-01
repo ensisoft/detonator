@@ -455,7 +455,7 @@ public:
         {
             for (auto& task: mUpdateTasks)
             {
-                task.Wait();
+                TRACE_CALL("WaitSceneUpdate", task.Wait(base::TaskHandle::WaitStrategy::BusyLoop));
             }
             mUpdateTasks.clear();
 
@@ -476,7 +476,9 @@ public:
 
             auto* thread_pool = base::GetGlobalThreadPool();
             auto thread_task = std::make_unique<UpdateRendererStateTask>(this);
-            update_renderer_task = thread_pool->SubmitTask(std::move(thread_task), base::ThreadPool::UpdateThreadID);
+            {
+                update_renderer_task = thread_pool->SubmitTask(std::move(thread_task), base::ThreadPool::UpdateThreadID);
+            }
 
             // update the debug draws only after updating the game
             // if this is done per each frame they will not be seen
@@ -504,7 +506,7 @@ public:
         // so that the update/rendering stay in sync.
         if (update_renderer_task)
         {
-            update_renderer_task.Wait();
+            TRACE_CALL("WaitRendererUpdate", update_renderer_task.Wait(base::TaskHandle::WaitStrategy::BusyLoop));
         }
 #endif
 

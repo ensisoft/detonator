@@ -107,7 +107,11 @@ namespace base
             return mTask->IsComplete();
         }
 
-        void Wait() noexcept;
+        enum class WaitStrategy {
+            BusyLoop, Sleep, WaitCondition
+        };
+
+        void Wait(WaitStrategy strategy) noexcept;
 
         const ThreadTask* GetTask() const noexcept
         {

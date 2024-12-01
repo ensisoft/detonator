@@ -78,7 +78,7 @@ void unit_test_pool()
         TEST_REQUIRE(!handle.IsComplete());
         TEST_REQUIRE(handle.GetTask() == nullptr);
 
-        handle.Wait();
+        handle.Wait(base::TaskHandle::WaitStrategy::Sleep);
         TEST_REQUIRE(handle.IsComplete());
         auto* task = handle.GetTask();
         TEST_REQUIRE(task);
