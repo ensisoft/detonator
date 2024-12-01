@@ -290,6 +290,7 @@ Texture* detail::TextureBitmapBufferSource::Upload(const Environment& env, Devic
         content_hash = base::hash_combine(content_hash, mBitmap->GetHeight());
         content_hash = base::hash_combine(content_hash, mBitmap->GetHash());
         content_hash = base::hash_combine(content_hash, mEffects);
+        content_hash = base::hash_combine(content_hash, mColorSpace);
         if (texture && texture->GetContentHash() == content_hash)
             return texture;
     }
@@ -299,10 +300,10 @@ Texture* detail::TextureBitmapBufferSource::Upload(const Environment& env, Devic
         texture->SetName(mName);
     }
 
-    // todo: assuming linear color space now.
-    constexpr auto sRGB = false;
+    const auto sRGB = mColorSpace == ColorSpace::sRGB;
     constexpr auto generate_mips = true;
 
+    texture->SetName(mName);
     texture->SetContentHash(content_hash);
     texture->Upload(mBitmap->GetDataPtr(), mBitmap->GetWidth(), mBitmap->GetHeight(),
         Texture::DepthToFormat(mBitmap->GetDepthBits(), sRGB), generate_mips);
@@ -322,6 +323,7 @@ void detail::TextureBitmapBufferSource::IntoJson(data::Writer& data) const
     data.Write("depth",  depth);
     data.Write("data", base64::Encode((const unsigned char*)mBitmap->GetDataPtr(), bytes));
     data.Write("effects", mEffects);
+    data.Write("colorspace", mColorSpace);
 }
 bool detail::TextureBitmapBufferSource::FromJson(const data::Reader& data)
 {
@@ -338,6 +340,8 @@ bool detail::TextureBitmapBufferSource::FromJson(const data::Reader& data)
     ok &= data.Read("data",   &base64);
     if (data.HasValue("effects"))
         ok &= data.Read("effects", &mEffects);
+    if (data.HasValue("colorspace"))
+        ok &= data.Read("colorspace", &mColorSpace);
 
     const auto& bits = base64::Decode(base64);
     if (depth == 1 && bits.size() == width*height)
