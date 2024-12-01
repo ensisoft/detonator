@@ -567,7 +567,7 @@ namespace gfx
 
     template<typename T>
     inline auto CreateTextureFromBitmap(Bitmap<T>&& bitmap, std::string id = base::RandomString(10))
-    { return std::make_unique<detail::TextureBitmapBufferSource>(std::forward<T>(bitmap), std::move(id)); }
+    { return std::make_unique<detail::TextureBitmapBufferSource>(std::forward<Bitmap<T>>(bitmap), std::move(id)); }
 
     inline auto CreateTextureFromText(const TextBuffer& text, std::string id = base::RandomString(10))
     { return std::make_unique<detail::TextureTextBufferSource>(text, std::move(id)); }

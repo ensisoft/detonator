@@ -487,7 +487,7 @@ namespace app
             #endif
             }
             // Loading screen font
-            QString loading_font = "app://fonts/orbitron-bold.otf";
+            QString loading_font = "app://fonts/ethnocentric rg.otf";
 
             // Debug font (if any) used by the engine to print debug messages.
             QString debug_font;
