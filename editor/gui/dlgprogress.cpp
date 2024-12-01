@@ -37,12 +37,12 @@ DlgProgress::DlgProgress(QWidget* parent) noexcept
 {
     mUI = new Ui::DlgProgress;
     mUI->setupUi(this);
-    mUI->title->setText(APP_TITLE);
+    //mUI->title->setText(APP_TITLE);
     QMovie* movie = new QMovie(this);
     movie->setFileName(":about.gif");
     movie->setSpeed(200);
     movie->start();
-    mUI->label->setMovie(movie);
+    //mUI->label->setMovie(movie);
 }
 
 DlgProgress::~DlgProgress() noexcept
@@ -63,9 +63,9 @@ void DlgProgress::UpdateState() noexcept
     std::lock_guard<std::mutex> lock(mMutex);
     for (const auto& update :  mUpdateQueue)
     {
-        if (auto* ptr = std::get_if<struct SetMessage>(&update))
-            mUI->message->setText(GetMessage(ptr->msg));
-        else if (auto* ptr = std::get_if<struct SetValue>(&update))
+        //if (auto* ptr = std::get_if<struct SetMessage>(&update))
+            //mUI->message->setText(GetMessage(ptr->msg));
+        if (auto* ptr = std::get_if<struct SetValue>(&update))
             mUI->progressBar->setValue(ptr->value);
         else if (auto* ptr = std::get_if<struct StepOne>(&update))
             mUI->progressBar->setValue(mUI->progressBar->value() + 1);
