@@ -158,6 +158,7 @@
     <file>splash.gif</file>
     <file>about.gif</file>
     <file>detonator-transparent.png</file>
+    <file>detonator-transparent-cropped.png</file>
 
     <file>fonts/orbitron-medium.otf</file>
   </qresource>
