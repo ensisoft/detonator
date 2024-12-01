@@ -5510,14 +5510,14 @@
                 "Blur": false,
                 "Edges": false
               },
-              "file": "ws://textures/particleWhite_2.png",
+              "file": "ws://textures/block-particle.png",
               "flags": {
                 "AllowPacking": true,
                 "AllowResizing": true,
                 "PremulAlpha": false
               },
-              "id": "TiLt0JrgIX",
-              "name": "particleWhite_2",
+              "id": "u8RwyyfjYA",
+              "name": "block-particle",
               "rect": {
                 "h": 1.0,
                 "w": 1.0,
@@ -5540,7 +5540,7 @@
           "value": {
             "x": 0.0,
             "y": 0.0,
-            "z": 10.0
+            "z": 10.000039100646973
           }
         }
       ]
@@ -5612,14 +5612,14 @@
       "init_rect_ypos": 0.0,
       "max_alpha": 1.0,
       "max_lifetime": 10.0,
-      "max_point_size": 30.0,
+      "max_point_size": 10.0,
       "max_time": 3.4028234663852886e+38,
       "max_velocity": 322.8900146484375,
       "max_xpos": 1.0,
       "max_ypos": 1.0,
       "min_alpha": 1.0,
       "min_lifetime": 1.0,
-      "min_point_size": 7.0,
+      "min_point_size": 2.0,
       "min_time": 0.0,
       "min_velocity": 1.0,
       "mode": "Once",
@@ -5655,7 +5655,7 @@
       "init_rect_ypos": 0.0,
       "max_alpha": 1.0,
       "max_lifetime": 10.0,
-      "max_point_size": 13.0,
+      "max_point_size": 5.0,
       "max_time": 3.4028234663852886e+38,
       "max_velocity": 234.5399932861328,
       "max_xpos": 1.0,
