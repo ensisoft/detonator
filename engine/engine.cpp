@@ -68,6 +68,12 @@
 
 namespace
 {
+static const unsigned char DetonatorLOGO[] = {
+#include "engine/detonator-logo.h"
+};
+// we'll do this dynamically in loading screen.
+static unsigned LogoWidth  = 0;
+static unsigned LogoHeight = 0;
 
 // Default game engine implementation. Implements the main App interface
 // which is the interface that enables the game host to communicate
@@ -182,10 +188,27 @@ public:
         engine::UIPainter painter;
         std::vector<uik::Animation> animations;
         std::string font;
+        std::unique_ptr<gfx::Material> logo;
     };
     virtual std::unique_ptr<Engine::LoadingScreen> CreateLoadingScreen(const LoadingScreenSettings& settings) override
     {
         auto state = std::make_unique<LoadingScreen>();
+
+        gfx::Image png((const void*)DetonatorLOGO, sizeof(DetonatorLOGO));
+        if (png.IsValid())
+        {
+            auto texture_source = std::make_unique<gfx::detail::TextureBitmapBufferSource>();
+            texture_source->SetBitmap(png.AsBitmap<gfx::Pixel_RGBA>());
+            texture_source->SetColorSpace(gfx::TextureSource::ColorSpace::sRGB);
+            texture_source->SetName("Detonator Logo");
+
+            gfx::MaterialClass logo(gfx::MaterialClass::Type::Texture);
+            logo.SetTexture(std::move(texture_source));
+
+            state->logo = gfx::CreateMaterialInstance(logo);
+            LogoWidth  = png.GetWidth();
+            LogoHeight = png.GetHeight();
+        }
         state->font = settings.font_uri;
         return state;
     }
@@ -341,15 +364,28 @@ public:
 
             painter.ClearColor(gfx::Color::Black);
             const auto& window = gfx::FRect(0.0f, 0.0f, mSurfaceWidth, mSurfaceHeight);
-            const auto& text   = gfx::FRect(0.0f, 0.0f, 500.0f, 300.0f);
-            const auto& rect   = CenterRectOnRect(window, text);
 
-            gfx::FillRect(painter, rect, gfx::Color::Black);
+            const auto have_logo = LogoWidth && LogoHeight;
+            const auto& logo_rect = CenterRectOnRect(window, gfx::FRect(0.0f, 0.0f,
+                                        have_logo ? LogoWidth / 2 : 500.0f,
+                                        have_logo ? LogoHeight / 2 : 300.0f));
+            if (my_screen->logo)
+            {
+                gfx::FillRect(painter, logo_rect, *my_screen->logo);
+            }
 
-            gfx::DrawTextRect(painter,  base::FormatString("DETONATOR 2D\n\n%1\n\nLoading ... %2/%3 ", klass.name, index, last),
-                              my_screen->font, 26, rect,
+            gfx::FRect text_rect;
+            text_rect.Resize(logo_rect.GetWidth(), 50.0f);
+            text_rect.Translate(logo_rect.GetPosition());
+            text_rect.Translate(0.0f, logo_rect.GetHeight());
+
+            const int done = ((float)index / (float)last) * 100;
+
+            gfx::FillRect(painter, text_rect, gfx::Color::Black);
+            gfx::DrawTextRect(painter,  base::FormatString("Loading ... %1%\n%2", done, klass.name),
+                              my_screen->font, 22, text_rect,
                               gfx::Color::Silver,
-                              gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignVCenter);
+                              gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignHCenter);
         }
 
         // this is for debugging so we can see what happens...
