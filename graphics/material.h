@@ -315,6 +315,8 @@ namespace gfx
               : mId(other.mId)
               , mName(other.mName)
               , mBitmap(other.mBitmap->Clone())
+              , mEffects(other.mEffects)
+              , mColorSpace(other.mColorSpace)
             {}
 
             virtual base::bitflag<Effect> GetEffects() const override
@@ -333,6 +335,7 @@ namespace gfx
                 hash = base::hash_combine(hash, mId);
                 hash = base::hash_combine(hash, mName);
                 hash = base::hash_combine(hash, mEffects);
+                hash = base::hash_combine(hash, mColorSpace);
                 return hash;
             }
             virtual std::string GetName() const override
@@ -343,6 +346,8 @@ namespace gfx
             { return mBitmap; }
             virtual void SetEffect(Effect effect, bool on_off) override
             { mEffects.set(effect, on_off); }
+            virtual ColorSpace GetColorSpace() const override
+            { return mColorSpace; }
 
             virtual Texture* Upload(const Environment& env, Device& device) const override;
 
@@ -359,6 +364,11 @@ namespace gfx
             { mBitmap = std::make_unique<gfx::Bitmap<T>>(std::move(bitmap)); }
             const IBitmap& GetBitmap() const
             { return *mBitmap; }
+
+            void SetColorSpace(ColorSpace colorspace)
+            {
+                mColorSpace = colorspace;
+            }
 
             template<typename Pixel>
             const Bitmap<Pixel>* GetBitmap() const
@@ -391,6 +401,7 @@ namespace gfx
             std::string mName;
             std::shared_ptr<IBitmap> mBitmap;
             base::bitflag<Effect> mEffects;
+            ColorSpace mColorSpace = ColorSpace::Linear;
         };
 
         // Source texture data from a bitmap
