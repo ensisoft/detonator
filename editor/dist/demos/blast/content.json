@@ -5695,7 +5695,7 @@
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
-            "layer": 3,
+            "layer": 1,
             "linewidth": 1.0,
             "material": "Kb5sHrP5bL",
             "material_params": [
@@ -5720,7 +5720,7 @@
             "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
-              "y": -0.0,
+              "y": 0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -5731,7 +5731,7 @@
           "name": "Copy of Node 3",
           "position": {
             "x": 0.0,
-            "y": 0.0
+            "y": -0.0
           },
           "rotation": 0.0,
           "scale": {
@@ -5739,147 +5739,8 @@
             "y": 0.5
           },
           "size": {
-            "x": 786.8400268554688,
-            "y": 436.4700012207031
-          },
-          "tag": ""
-        },
-        {
-          "class": "8Sr3RyhHdm",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "_rect",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 2,
-            "linewidth": 1.0,
-            "material": "CeOxBBO4ib",
-            "material_params": [
-              {
-                "name": "kBaseColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.0,
-                  "g": 0.0,
-                  "r": 0.057999543845653534
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Copy of Node 4",
-          "position": {
-            "x": 12.0,
-            "y": 13.999969482421875
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 808.9402465820313,
-            "y": 447.15545654296875
-          },
-          "tag": ""
-        },
-        {
-          "class": "C4H57D4RGm",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "kvOgLarfY3",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": -1,
-            "linewidth": 1.0,
-            "material": "YL23jp6zHS",
-            "material_params": [
-              {
-                "name": "kEndColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.8108797073364258,
-                  "g": 0.30614176392555237,
-                  "r": 0.26074618101119995
-                }
-              },
-              {
-                "name": "kStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.8688944578170776,
-                  "g": 0.8688944578170776,
-                  "r": 0.9730678200721741
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Copy of Particles",
-          "position": {
-            "x": 2.0,
-            "y": -22.000015258789063
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 675.864501953125,
-            "y": 235.34934997558594
+            "x": 800.0,
+            "y": 600.0
           },
           "tag": ""
         }
@@ -5887,18 +5748,6 @@
       "render_tree": {
         "children": [
           {
-            "children": [
-              {
-                "node": {
-                  "id": "8Sr3RyhHdm"
-                }
-              },
-              {
-                "node": {
-                  "id": "C4H57D4RGm"
-                }
-              }
-            ],
             "node": {
               "id": "RfPLX5xUST"
             }
