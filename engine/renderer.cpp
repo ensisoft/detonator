@@ -504,7 +504,7 @@ void Renderer::DrawFrame(gfx::Device& device) const
     low_level_renderer.SetBloom(mBloom);
     low_level_renderer.EnableBloom(enable_bloom);
     TRACE_CALL("DrawPackets", low_level_renderer.Draw(mRenderBuffer));
-    TRACE_CALL("Blit", low_level_renderer.Blit());
+    TRACE_CALL("BlitImage", low_level_renderer.Blit());
 }
 
 void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,

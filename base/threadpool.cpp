@@ -248,7 +248,7 @@ private:
 };
 
 
-void TaskHandle::Wait() noexcept
+void TaskHandle::Wait(WaitStrategy strategy) noexcept
 {
     // assuming our current thread is the "main" thread
     // if we call here to wait for completion we'll spin
@@ -265,7 +265,15 @@ void TaskHandle::Wait() noexcept
 
     while (!IsComplete())
     {
-        std::this_thread::sleep_for(std::chrono::microseconds(1));
+        // holy hell batman, let's not cause a stall here by blocking the
+        // calling thread for unexpectedly long time. the reason why this
+        // might actually sleep for much longer is due to the system timer
+        // granularity. Especially on the web we have no control (no API
+        // such as timeBeginPeriod) to try to adjust the granularity.
+        if (strategy == WaitStrategy::Sleep)
+        {
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
+        }
     }
 }
 
