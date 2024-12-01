@@ -33,6 +33,8 @@
 #  include <dlfcn.h>
 #elif defined(WINDOWS_OS)
 #  include <Windows.h>
+#  include <timeapi.h>
+#  pragma comment(lib, "Winmm.lib")
 #endif
 
 #include "base/logging.h"
@@ -321,6 +323,14 @@ void Main(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
+#if defined(WINDOWS_OS)
+    // try to adjust the timer resolution to something better.
+    // https://learn.microsoft.com/en-us/windows/win32/api/timeapi/nf-timeapi-timebeginperiod
+    timeBeginPeriod(1); // 1 millisecond
+    // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setpriorityclass
+    SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+#endif
+
     try
     {
         Main(argc, argv);
