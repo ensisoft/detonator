@@ -32,6 +32,7 @@
 #include "graphics/drawing.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
+#include "graphics/texture_bitmap_generator_source.h"
 
 namespace gui
 {
@@ -203,7 +204,7 @@ void DlgBitmap::PaintScene(gfx::Painter &painter, double secs)
         mMaterial = gfx::CreateMaterialInstance(mClass);
     }
     auto* source = mClass->GetTextureMap(0)->GetTextureSource(0);
-    auto* bitmap = dynamic_cast<gfx::detail::TextureBitmapGeneratorSource*>(source);
+    auto* bitmap = dynamic_cast<gfx::TextureBitmapGeneratorSource*>(source);
     bitmap->SetGenerator(mGenerator->Clone());
 
     if ((bool)GetValue(mUI.chkScale))

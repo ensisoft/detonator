@@ -41,6 +41,7 @@
 #include "graphics/texture_texture_source.cpp"
 #include "graphics/texture_file_source.cpp"
 #include "graphics/texture_bitmap_buffer_source.cpp"
+#include "graphics/texture_bitmap_generator_source.cpp"
 
 //                  == Notes about shaders ==
 // 1. Shaders are specific to a device within compatibility constraints
@@ -102,87 +103,6 @@
 
 namespace gfx
 {
-
-
-Texture* detail::TextureBitmapGeneratorSource::Upload(const Environment& env, Device& device) const
-{
-    auto* texture = device.FindTexture(GetGpuId());
-    if (texture && !env.dynamic_content)
-        return texture;
-
-    size_t content_hash = 0;
-    if (env.dynamic_content)
-    {
-        content_hash = mGenerator->GetHash();
-        content_hash = base::hash_combine(content_hash, mEffects);
-        if (texture && texture->GetContentHash() == content_hash)
-            return texture;
-    }
-    if (!texture)
-    {
-        texture = device.MakeTexture(mId);
-        texture->SetName(mName);
-    }
-
-    // todo: assuming linear color space now
-    constexpr auto sRGB = false;
-    constexpr auto generate_mips = true;
-
-    if (const auto& bitmap = mGenerator->Generate())
-    {
-        texture->SetContentHash(content_hash);
-        texture->Upload(bitmap->GetDataPtr(), bitmap->GetWidth(), bitmap->GetHeight(),
-            Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB), false);
-        texture->SetFilter(Texture::MinFilter::Linear);
-        texture->SetFilter(Texture::MagFilter::Linear);
-
-        const auto format = texture->GetFormat();
-        if (mEffects.any_bit() && format == Texture::Format::AlphaMask)
-            algo::ColorTextureFromAlpha(mId, texture, &device);
-
-        if (mEffects.test(Effect::Edges))
-            algo::DetectSpriteEdges(mId, texture, &device);
-        if (mEffects.test(Effect::Blur))
-            algo::ApplyBlur(mId, texture, &device);
-
-        texture->GenerateMips();
-        DEBUG("Uploaded bitmap generator texture. [name='%1', effects=%2]", mName, mEffects);
-        return texture;
-    } else ERROR("Failed to generate bitmap generator texture. [name='%1']", mName);
-    return nullptr;
-}
-
-void detail::TextureBitmapGeneratorSource::IntoJson(data::Writer& data) const
-{
-    auto chunk = data.NewWriteChunk();
-    mGenerator->IntoJson(*chunk);
-    data.Write("id", mId);
-    data.Write("name", mName);
-    data.Write("function", mGenerator->GetFunction());
-    data.Write("generator", std::move(chunk));
-    data.Write("effects", mEffects);
-}
-bool detail::TextureBitmapGeneratorSource::FromJson(const data::Reader& data)
-{
-    IBitmapGenerator::Function function;
-    bool ok = true;
-    ok &= data.Read("id",       &mId);
-    ok &= data.Read("name",     &mName);
-    if (!data.Read("function", &function))
-        return false;
-    if (data.HasValue("effects"))
-        ok &= data.Read("effects", &mEffects);
-
-    if (function == IBitmapGenerator::Function::Noise)
-        mGenerator = std::make_unique<NoiseBitmapGenerator>();
-    else BUG("Unhandled bitmap generator type.");
-
-    const auto& chunk = data.GetReadChunk("generator");
-    if (!chunk || !mGenerator->FromJson(*chunk))
-        return false;
-
-    return ok;
-}
 
 std::shared_ptr<IBitmap> detail::TextureTextBufferSource::GetData() const
 {
@@ -500,7 +420,7 @@ bool TextureMap::FromJson(const data::Reader& data)
             else if (type == TextureSource::Source::BitmapBuffer)
                 source = std::make_unique<TextureBitmapBufferSource>();
             else if (type == TextureSource::Source::BitmapGenerator)
-                source = std::make_unique<detail::TextureBitmapGeneratorSource>();
+                source = std::make_unique<TextureBitmapGeneratorSource>();
             else if (type == TextureSource::Source::Texture)
                 source = std::make_unique<TextureTextureSource>();
             else BUG("Unhandled texture source type.");
@@ -539,7 +459,7 @@ bool TextureMap::FromLegacyJsonTexture2D(const data::Reader& data)
     else if (type == TextureSource::Source::BitmapBuffer)
         source = std::make_unique<TextureBitmapBufferSource>();
     else if (type == TextureSource::Source::BitmapGenerator)
-        source = std::make_unique<detail::TextureBitmapGeneratorSource>();
+        source = std::make_unique<TextureBitmapGeneratorSource>();
     else if (type == TextureSource::Source::Texture)
         source = std::make_unique<TextureTextureSource>();
     else BUG("Unhandled texture source type.");
