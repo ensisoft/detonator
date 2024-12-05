@@ -56,6 +56,7 @@
 #include "graphics/tool/geometry.h"
 #include "graphics/texture_texture_source.h"
 #include "graphics/texture_file_source.h"
+#include "graphics/text_material.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"

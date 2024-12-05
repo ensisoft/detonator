@@ -37,6 +37,7 @@
 #include "graphics/particle_engine.h"
 #include "graphics/tilebatch.h"
 #include "graphics/debug_drawable.h"
+#include "graphics/text_material.h"
 #include "engine/classlib.h"
 #include "game/entity.h"
 #include "game/scene.h"

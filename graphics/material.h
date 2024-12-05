@@ -639,48 +639,6 @@ namespace gfx
         mutable bool mError = false;
     };
 
-    // material specialized for rendering text using
-    // a pre-rasterized bitmap of text. Creates transient
-    // texture objects for the text.
-    class TextMaterial : public gfx::Material
-    {
-    public:
-        TextMaterial(const TextBuffer& text);
-        TextMaterial(TextBuffer&& text);
-        virtual bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const override;
-        virtual void ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const override;
-        virtual ShaderSource GetShader(const Environment& env, const Device& device) const override;
-        virtual std::string GetShaderId(const Environment&) const override;
-        virtual std::string GetShaderName(const Environment&) const override;
-        virtual std::string GetClassId() const override;
-        virtual void Update(float dt) override;
-        virtual void SetRuntime(double runtime) override;
-        virtual void SetUniform(const std::string& name, const Uniform& value) override;
-        virtual void SetUniform(const std::string& name, Uniform&& value) override;
-        virtual void ResetUniforms()  override;
-        virtual void SetUniforms(const UniformMap& uniforms) override;
-        virtual double GetRuntime() const override
-        { return 0.0f; }
-
-        void ComputeTextMetrics(unsigned* width, unsigned* height) const;
-
-        inline void SetColor(const Color4f& color) noexcept
-        { mColor = color; }
-        // Set point sampling to true in order to use a fast filtering
-        // when sampling from the texture. This should be for maximum perf
-        // ideally when the geometry to be drawn matches closely with the
-        // rasterized text texture/buffer. So when the texture maps onto
-        // a rectangle and there's now transformation that would change the
-        // rasterized dimensions (in pixels) of the rectangle from the
-        // dimensions of the rasterized text texture.
-        // The default is true.
-        inline void SetPointSampling(bool on_off) noexcept
-        { mPointSampling = on_off; }
-    private:
-        TextBuffer mText;
-        Color4f mColor = Color::White;
-        bool mPointSampling = true;
-    };
 
     // These functions are intended to use when you just need to create
     // a material quickly on the stack to draw something immediately and
@@ -728,20 +686,7 @@ namespace gfx
     MaterialInstance CreateMaterialFromText(TextBuffer&& text);
     MaterialInstance CreateMaterialFromTexture(std::string gpu_id, Texture* texture = nullptr);
 
-    TextMaterial CreateMaterialFromText(const std::string& text,
-                                        const std::string& font,
-                                        const gfx::Color4f& color,
-                                        unsigned font_size_px,
-                                        unsigned raster_width,
-                                        unsigned raster_height,
-                                        unsigned text_align,
-                                        unsigned text_prop,
-                                        float line_height);
-
     std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass);
     std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass);
-    std::unique_ptr<TextMaterial> CreateMaterialInstance(const TextBuffer& text);
-    std::unique_ptr<TextMaterial> CreateMaterialInstance(TextBuffer&& text);
-
 
 } // namespace

@@ -1,0 +1,85 @@
+// Copyright (C) 2020-2024 Sami Väisänen
+// Copyright (C) 2020-2024 Ensisoft http://www.ensisoft.com
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#pragma once
+
+#include "config.h"
+
+#include <memory>
+
+#include "graphics/material.h"
+#include "graphics/text.h"
+#include "graphics/types.h"
+
+namespace gfx
+{
+    // material specialized for rendering text using
+    // a pre-rasterized bitmap of text. Creates transient
+    // texture objects for the text.
+    class TextMaterial : public Material
+    {
+    public:
+        TextMaterial(const TextBuffer& text);
+        TextMaterial(TextBuffer&& text);
+        bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const override;
+        void ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const override;
+        ShaderSource GetShader(const Environment& env, const Device& device) const override;
+        std::string GetShaderId(const Environment&) const override;
+        std::string GetShaderName(const Environment&) const override;
+        std::string GetClassId() const override;
+        void Update(float dt) override;
+        void SetRuntime(double runtime) override;
+        void SetUniform(const std::string& name, const Uniform& value) override;
+        void SetUniform(const std::string& name, Uniform&& value) override;
+        void ResetUniforms()  override;
+        void SetUniforms(const UniformMap& uniforms) override;
+        double GetRuntime() const override
+        { return 0.0f; }
+
+        void ComputeTextMetrics(unsigned* width, unsigned* height) const;
+
+        inline void SetColor(const Color4f& color) noexcept
+        { mColor = color; }
+        // Set point sampling to true in order to use a fast filtering
+        // when sampling from the texture. This should be for maximum perf
+        // ideally when the geometry to be drawn matches closely with the
+        // rasterized text texture/buffer. So when the texture maps onto
+        // a rectangle and there's now transformation that would change the
+        // rasterized dimensions (in pixels) of the rectangle from the
+        // dimensions of the rasterized text texture.
+        // The default is true.
+        inline void SetPointSampling(bool on_off) noexcept
+        { mPointSampling = on_off; }
+    private:
+        TextBuffer mText;
+        Color4f mColor = Color::White;
+        bool mPointSampling = true;
+    };
+
+    TextMaterial CreateMaterialFromText(const std::string& text,
+                                        const std::string& font,
+                                        const gfx::Color4f& color,
+                                        unsigned font_size_px,
+                                        unsigned raster_width,
+                                        unsigned raster_height,
+                                        unsigned text_align,
+                                        unsigned text_prop,
+                                        float line_height);
+
+
+    std::unique_ptr<TextMaterial> CreateMaterialInstance(const TextBuffer& text);
+    std::unique_ptr<TextMaterial> CreateMaterialInstance(TextBuffer&& text);
+} // namespace

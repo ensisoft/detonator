@@ -29,6 +29,7 @@
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "graphics/drawing.h"
+#include "graphics/text_material.h"
 #include "base/utility.h"
 #include "base/math.h"
 

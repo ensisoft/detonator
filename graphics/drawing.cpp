@@ -31,6 +31,7 @@
 #include "graphics/renderpass.h"
 #include "graphics/simple_shape.h"
 #include "graphics/linebatch.h"
+#include "graphics/text_material.h"
 
 namespace {
 gfx::MaterialInstance MakeMaterial(const gfx::Color4f& color)
