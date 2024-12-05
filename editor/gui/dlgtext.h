@@ -27,6 +27,7 @@
 #include "graphics/painter.h"
 #include "graphics/text.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 
 namespace app {
     class Workspace;

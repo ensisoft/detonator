@@ -32,6 +32,8 @@
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/guidegrid.h"
+#include "graphics/material.h"
+#include "graphics/material_class.h"
 
 namespace gui
 {

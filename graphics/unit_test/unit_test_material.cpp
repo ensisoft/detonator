@@ -24,6 +24,7 @@
 #include "data/json.h"
 #include "graphics/types.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 #include "graphics/texture_file_source.h"
 
 void unit_test_maps()

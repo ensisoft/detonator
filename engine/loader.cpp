@@ -55,6 +55,7 @@
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/particle_engine.h"
+#include "graphics/material_class.h"
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/tilemap.h"

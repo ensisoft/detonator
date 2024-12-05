@@ -29,6 +29,7 @@
 
 #include "base/json.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 #include "graphics/painter.h"
 #include "graphics/drawing.h"
 #include "graphics/texture_file_source.h"

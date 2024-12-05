@@ -55,6 +55,7 @@
 #include "editor/gui/playwindow.h"
 #include "graphics/drawing.h"
 #include "graphics/utility.h"
+#include "graphics/material_class.h"
 #include "graphics/texture_text_buffer_source.h"
 #include "uikit/op.h"
 #include "uikit/state.h"

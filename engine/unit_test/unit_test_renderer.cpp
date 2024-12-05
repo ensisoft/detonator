@@ -25,6 +25,7 @@
 #include "device/device.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
 #include "graphics/utility.h"

@@ -30,6 +30,7 @@
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/drawing.h"
+#include "graphics/material_class.h"
 
 namespace gui
 {
