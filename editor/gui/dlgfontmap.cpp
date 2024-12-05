@@ -31,6 +31,7 @@
 #include "graphics/painter.h"
 #include "graphics/drawing.h"
 #include "graphics/simple_shape.h"
+#include "graphics/texture_file_source.h"
 #include "editor/app/resource-uri.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/drawing.h"
@@ -64,8 +65,8 @@ DlgFontMap::DlgFontMap(QWidget* parent) : QDialog(parent)
     connect(this, &QDialog::finished, this,  &DlgFontMap::finished);
     connect(&mTimer, &QTimer::timeout, this, &DlgFontMap::timer);
 
-    PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
-    SetValue(mUI.cmbColorSpace, gfx::detail::TextureFileSource::ColorSpace::sRGB);
+    PopulateFromEnum<gfx::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
+    SetValue(mUI.cmbColorSpace, gfx::TextureFileSource::ColorSpace::sRGB);
     SetEnabled(mUI.btnExport, false);
     SetValue(mUI.zoom, 1.0f);
 }
@@ -80,7 +81,7 @@ void DlgFontMap::LoadImage(const QString& file)
 
     std::string file_uri  = app::ToUtf8(file);
     std::string file_name = app::ToUtf8(name);
-    auto source = std::make_unique<gfx::detail::TextureFileSource>();
+    auto source = std::make_unique<gfx::TextureFileSource>();
     source->SetFileName(file_uri);
     source->SetName(file_name);
     source->SetColorSpace(GetValue(mUI.cmbColorSpace));
@@ -121,7 +122,7 @@ void DlgFontMap::on_cmbColorSpace_currentIndexChanged(int)
         return;
     auto* map = mClass->GetTextureMap(0);
     auto* src = map->GetTextureSource(0);
-    auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(src);
+    auto* file_source = dynamic_cast<gfx::TextureFileSource*>(src);
     file_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
 }
 
@@ -193,7 +194,7 @@ void DlgFontMap::on_btnExport_clicked()
     base::JsonWrite(json, "yoffset", tile_yoffset);
     base::JsonWrite(json, "premultiply_alpha_hint", (bool)GetValue(mUI.chkAlpha));
     base::JsonWrite(json, "case_sensitive", (bool)GetValue(mUI.chkCaseSensitive));
-    base::JsonWrite(json, "color_space", (gfx::detail::TextureFileSource::ColorSpace)GetValue(mUI.cmbColorSpace));
+    base::JsonWrite(json, "color_space", (gfx::TextureFileSource::ColorSpace)GetValue(mUI.cmbColorSpace));
 ;
     const auto max_rows = (mHeight-tile_yoffset) / tile_height;
     const auto max_cols = (mWidth-tile_xoffset) / tile_width;

@@ -35,6 +35,7 @@
 #include "graphics/types.h"
 #include "graphics/simple_shape.h"
 #include "graphics/particle_engine.h"
+#include "graphics/texture_file_source.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
@@ -1025,7 +1026,7 @@ void ParticleEditorWidget::ShowParams()
     const auto* texture_src = texture_map->GetTextureSource(0);
     if (texture_src->GetSourceType() != gfx::TextureSource::Source::Filesystem)
         return;
-    const auto* file_texture_src = dynamic_cast<const gfx::detail::TextureFileSource*>(texture_src);
+    const auto* file_texture_src = dynamic_cast<const gfx::TextureFileSource*>(texture_src);
 
     SetValue(mUI.cmbSurface, mMaterialClass->GetSurfaceType());
     SetValue(mUI.startColor, mMaterialClass->GetUniformValue("kStartColor", gfx::Color4f(gfx::Color::White)));
@@ -1189,7 +1190,7 @@ void ParticleEditorWidget::on_btnCreateMaterial_clicked()
     SetValue(mUI.cmbShader, 0);
     SetValue(mUI.cmbSurface, gfx::MaterialClass::SurfaceType::Transparent);
 
-    auto texture = std::make_unique<gfx::detail::TextureFileSource>();
+    auto texture = std::make_unique<gfx::TextureFileSource>();
     texture->SetColorSpace(gfx::TextureSource::ColorSpace::sRGB);
     texture->SetFileName("app://textures/particles/circle_02.png");
     texture->SetName("Texture");
@@ -1258,7 +1259,7 @@ void ParticleEditorWidget::on_cmbParticle_currentIndexChanged(int)
     auto* texture_src = texture_map->GetTextureSource(0);
     if (texture_src->GetSourceType() != gfx::TextureSource::Source::Filesystem)
         return;
-    auto* file_texture_src = dynamic_cast<gfx::detail::TextureFileSource*>(texture_src);
+    auto* file_texture_src = dynamic_cast<gfx::TextureFileSource*>(texture_src);
 
     // this is an URI
     file_texture_src->SetFileName(GetItemId(mUI.cmbParticle));

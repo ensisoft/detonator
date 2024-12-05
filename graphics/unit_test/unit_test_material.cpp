@@ -24,6 +24,7 @@
 #include "data/json.h"
 #include "graphics/types.h"
 #include "graphics/material.h"
+#include "graphics/texture_file_source.h"
 
 void unit_test_maps()
 {
@@ -166,7 +167,7 @@ void unit_test_material_class()
     klass.SetUniform("color", gfx::Color::DarkCyan);
     klass.SetActiveTextureMap("123abc");
 
-    auto texture_file_source = std::make_unique<gfx::detail::TextureFileSource>();
+    auto texture_file_source = std::make_unique<gfx::TextureFileSource>();
     texture_file_source->SetFileName("file.png");
     texture_file_source->SetName("file");
     auto texture_map = std::make_unique<gfx::TextureMap>();

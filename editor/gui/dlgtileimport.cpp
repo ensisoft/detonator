@@ -42,6 +42,7 @@
 #include "graphics/material.h"
 #include "graphics/drawing.h"
 #include "graphics/simple_shape.h"
+#include "graphics/texture_file_source.h"
 
 namespace {
     enum class MaterialType {
@@ -116,12 +117,12 @@ DlgTileImport::DlgTileImport(QWidget* parent, app::Workspace* workspace)
     PopulateFromEnum<gfx::MaterialClass::SurfaceType>(mUI.surfaceType);
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.minFilter);
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.magFilter);
-    PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
+    PopulateFromEnum<gfx::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.cmbMinFilter);
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.cmbMagFilter);
     PopulateFromEnum<MaterialType>(mUI.materialType);
     SetValue(mUI.zoom, 1.0f);
-    SetValue(mUI.cmbColorSpace, gfx::detail::TextureFileSource::ColorSpace::sRGB);
+    SetValue(mUI.cmbColorSpace, gfx::TextureFileSource::ColorSpace::sRGB);
 
     on_materialType_currentIndexChanged(0);
     mUI.renameTemplate->installEventFilter(this);
@@ -232,9 +233,9 @@ void DlgTileImport::on_btnImport_clicked()
                 continue;
 
             const auto& name = img.widget->GetName();
-            auto texture = std::make_unique<gfx::detail::TextureFileSource>();
+            auto texture = std::make_unique<gfx::TextureFileSource>();
             texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
-            texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
+            texture->SetFlag(gfx::TextureFileSource::Flags::PremulAlpha, premul_alpha);
             texture->SetFileName(mFileUri);
             texture->SetName(name);
 
@@ -389,9 +390,9 @@ void DlgTileImport::on_btnImport_clicked()
                     const auto& img = *image_list[index];
                     const auto& name = img.widget->GetName();
 
-                    auto texture = std::make_unique<gfx::detail::TextureFileSource>();
+                    auto texture = std::make_unique<gfx::TextureFileSource>();
                     texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
-                    texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
+                    texture->SetFlag(gfx::TextureFileSource::Flags::PremulAlpha, premul_alpha);
                     texture->SetFileName(mFileUri);
                     texture->SetName(name);
 
@@ -423,9 +424,9 @@ void DlgTileImport::on_btnImport_clicked()
                 rect.SetWidth(width - tile_margin_left - tile_margin_right);
                 rect.SetHeight(height - tile_margin_top - tile_margin_bottom);
 
-                auto texture = std::make_unique<gfx::detail::TextureFileSource>();
+                auto texture = std::make_unique<gfx::TextureFileSource>();
                 texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
-                texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
+                texture->SetFlag(gfx::TextureFileSource::Flags::PremulAlpha, premul_alpha);
                 texture->SetFileName(mFileUri);
                 texture->SetName("Spritesheet");
 
@@ -609,7 +610,7 @@ void DlgTileImport::on_cmbColorSpace_currentIndexChanged(int)
         return;
     auto* map = mClass->GetTextureMap(0);
     auto* src = map->GetTextureSource(0);
-    auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(src);
+    auto* file_source = dynamic_cast<gfx::TextureFileSource*>(src);
     file_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
 }
 
@@ -682,7 +683,7 @@ void DlgTileImport::LoadImageFile(const QString& ret)
 
     std::string file_uri  = app::ToUtf8(file);
     std::string file_name = app::ToUtf8(name);
-    auto source = std::make_unique<gfx::detail::TextureFileSource>();
+    auto source = std::make_unique<gfx::TextureFileSource>();
     source->SetFileName(file_uri);
     source->SetName(file_name);
     source->SetColorSpace(GetValue(mUI.cmbColorSpace));

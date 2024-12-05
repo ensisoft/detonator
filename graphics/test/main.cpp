@@ -55,6 +55,7 @@
 #include "graphics/utility.h"
 #include "graphics/tool/geometry.h"
 #include "graphics/texture_texture_source.h"
+#include "graphics/texture_file_source.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
@@ -2371,7 +2372,7 @@ void FragmentShaderMain()
 
         {
             gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
-            auto source = std::make_unique<gfx::detail::TextureFileSource>();
+            auto source = std::make_unique<gfx::TextureFileSource>();
             source->SetFileName("textures/black-gray-white.png");
             source->SetColorSpace(gfx::TextureSource::ColorSpace::sRGB);
             material.SetTexture(std::move(source));
@@ -2381,7 +2382,7 @@ void FragmentShaderMain()
 
         {
             gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
-            auto source = std::make_unique<gfx::detail::TextureFileSource>();
+            auto source = std::make_unique<gfx::TextureFileSource>();
             source->SetFileName("textures/black-gray-white.png");
             source->SetColorSpace(gfx::TextureSource::ColorSpace::Linear);
             material.SetTexture(std::move(source));
@@ -2439,7 +2440,7 @@ void FragmentShaderMain() {
         {
             gfx::TextureMap2D map;
             auto tex = gfx::LoadTextureFromFile("textures/alpha-cutout.png");
-            tex->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, true);
+            tex->SetFlag(gfx::TextureFileSource::Flags::PremulAlpha, true);
             map.SetNumTextures(1);
             map.SetTextureSource(0, std::move(tex));
             map.SetSamplerName("kTexture");

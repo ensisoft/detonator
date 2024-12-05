@@ -32,6 +32,7 @@
 #include "graphics/geometry.h"
 #include "graphics/drawcmd.h"
 #include "graphics/polygon_mesh.h"
+#include "graphics/texture_file_source.h"
 #include "editor/app/import.h"
 #include "editor/app/eventlog.h"
 
@@ -230,7 +231,7 @@ bool ModelImporter::LoadModel(const app::AnyString& file)
             const AnyString& file = JoinPath(file_path, diffuse_map);
             const AnyString& uri = toString("fs://%1", file);
 
-            auto texture = std::make_unique<gfx::detail::TextureFileSource>();
+            auto texture = std::make_unique<gfx::TextureFileSource>();
             texture->SetColorSpace(gfx::TextureSource::ColorSpace::sRGB);
             texture->SetFileName(uri);
             texture->SetName(diffuse_map);

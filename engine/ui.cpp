@@ -40,6 +40,7 @@
 #include "graphics/renderpass.h"
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
+#include "graphics/texture_file_source.h"
 #include "engine/ui.h"
 #include "engine/classlib.h"
 #include "engine/data.h"
