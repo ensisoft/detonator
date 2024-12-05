@@ -44,6 +44,7 @@
 #include "graphics/shaderprogram.h"
 #include "graphics/texture_file_source.h"
 #include "graphics/texture_bitmap_generator_source.h"
+#include "graphics/texture_text_buffer_source.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
@@ -661,7 +662,7 @@ void MaterialWidget::on_btnEditTexture_clicked()
         {
             emit OpenExternalImage(app::FromUtf8(ptr->GetFilename()));
         }
-        else if (auto* ptr = dynamic_cast<gfx::detail::TextureTextBufferSource*>(source))
+        else if (auto* ptr = dynamic_cast<gfx::TextureTextBufferSource*>(source))
         {
             // make a copy for editing.
             gfx::TextBuffer text(ptr->GetTextBuffer());
@@ -1215,7 +1216,7 @@ void MaterialWidget::AddNewTextureMapFromText()
         auto& style_and_text = text.GetText();
         style_and_text.font = mWorkspace->MapFileToWorkspace(style_and_text.font);
 
-        auto source = std::make_unique<gfx::detail::TextureTextBufferSource>(std::move(text));
+        auto source = std::make_unique<gfx::TextureTextBufferSource>(std::move(text));
         source->SetName("TextBuffer");
 
         texture_source = std::move(source);

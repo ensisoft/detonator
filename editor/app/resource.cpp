@@ -34,6 +34,7 @@
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
 #include "graphics/texture_file_source.h"
+#include "graphics/texture_text_buffer_source.h"
 #include "engine/ui.h"
 #include "editor/app/buffer.h"
 #include "editor/app/eventlog.h"
@@ -735,7 +736,7 @@ bool PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
         for (size_t j=0; j<map->GetNumTextures(); ++j)
         {
             auto* src = map->GetTextureSource(j);
-            if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(src))
+            if (auto* text_source = dynamic_cast<gfx::TextureTextBufferSource*>(src))
             {
                 auto& text_buffer = text_source->GetTextBuffer();
                 auto& text_chunk  = text_buffer.GetText();
