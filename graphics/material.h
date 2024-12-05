@@ -55,59 +55,6 @@ namespace gfx
 
 
     namespace detail {
-        class TextureTextureSource : public TextureSource
-        {
-        public:
-            TextureTextureSource()
-              : mId(base::RandomString(10))
-            {}
-            //  Persistence only works with a known GPU texture ID.
-            explicit TextureTextureSource(std::string gpu_id, gfx::Texture* texture =  nullptr, std::string id = base::RandomString(10))
-               : mId(std::move(id))
-               , mGpuId(std::move(gpu_id))
-               , mTexture(texture)
-            {}
-            virtual ColorSpace GetColorSpace() const override
-            { return ColorSpace::Linear; }
-            virtual Source GetSourceType() const override
-            { return Source::Texture; }
-            virtual std::string GetId() const override
-            { return mId; }
-            virtual std::string GetGpuId() const override
-            { return mGpuId; }
-            virtual std::string GetName() const override
-            { return mName; }
-            virtual std::size_t GetHash() const override
-            {
-                size_t hash = 0;
-                hash = base::hash_combine(hash, mId);
-                hash = base::hash_combine(hash, mName);
-                hash = base::hash_combine(hash, mGpuId);
-                return hash;
-            }
-            virtual void SetName(const std::string& name) override
-            { mName = name; }
-            virtual std::shared_ptr<IBitmap> GetData() const override
-            { return nullptr; }
-            virtual Texture* Upload(const Environment& env, Device& device) const override;
-            virtual void IntoJson(data::Writer& data) const override;
-            virtual bool FromJson(const data::Reader& data) override;
-
-            inline void SetTexture(gfx::Texture* texture) noexcept
-            { mTexture = texture; }
-        protected:
-            virtual std::unique_ptr<TextureSource> MakeCopy(std::string copy_id) const override
-            {
-                auto ret = std::make_unique<TextureTextureSource>(*this);
-                ret->mId = std::move(copy_id);
-                return ret;
-            }
-        private:
-            std::string mId;
-            std::string mName;
-            std::string mGpuId;
-            mutable gfx::Texture* mTexture = nullptr;
-        };
 
         // Source texture data from an image file.
         class TextureFileSource : public TextureSource
@@ -465,8 +412,7 @@ namespace gfx
 
     } // detail
 
-    inline auto  UseExistingTexture(std::string gpu_id, gfx::Texture* texture = nullptr, std::string id = base::RandomString(10))
-    { return std::make_unique<detail::TextureTextureSource>(std::move(gpu_id), texture, std::move(id)); }
+
 
     inline auto LoadTextureFromFile(std::string uri, std::string id = base::RandomString(10))
     { return std::make_unique<detail::TextureFileSource>(std::move(uri), std::move(id)); }

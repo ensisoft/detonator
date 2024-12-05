@@ -54,6 +54,7 @@
 #include "graphics/debug_drawable.h"
 #include "graphics/utility.h"
 #include "graphics/tool/geometry.h"
+#include "graphics/texture_texture_source.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
