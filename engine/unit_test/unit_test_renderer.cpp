@@ -30,6 +30,7 @@
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
 #include "graphics/particle_engine.h"
+#include "graphics/texture_bitmap_buffer_source.h"
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/util.h"
@@ -216,7 +217,7 @@ public:
             bmp.SetPixel(1, 0, gfx::Color::Red);
             bmp.SetPixel(0, 1, gfx::Color::Green);
             bmp.SetPixel(1, 1, gfx::Color::Green);
-            gfx::detail::TextureBitmapBufferSource src;
+            gfx::TextureBitmapBufferSource src;
             src.SetName("bitmap");
             src.SetBitmap(std::move(bmp));
 
@@ -231,7 +232,7 @@ public:
             gfx::RgbBitmap red;
             red.Resize(4, 4);
             red.Fill(gfx::Color::Red);
-            gfx::detail::TextureBitmapBufferSource red_bitmap_src;
+            gfx::TextureBitmapBufferSource red_bitmap_src;
             red_bitmap_src.SetName("red");
             red_bitmap_src.SetBitmap(red);
             sprite.AddTexture(red_bitmap_src.Copy());
@@ -239,7 +240,7 @@ public:
             gfx::RgbBitmap green;
             green.Resize(4, 4);
             green.Fill(gfx::Color::Green);
-            gfx::detail::TextureBitmapBufferSource green_bitmap_src;
+            gfx::TextureBitmapBufferSource green_bitmap_src;
             green_bitmap_src.SetName("green");
             green_bitmap_src.SetBitmap(green);
             sprite.AddTexture(green_bitmap_src.Copy());

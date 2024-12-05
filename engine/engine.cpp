@@ -50,6 +50,7 @@
 #include "graphics/material.h"
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
+#include "graphics/texture_bitmap_buffer_source.h"
 #include "engine/main/interface.h"
 #include "engine/audio.h"
 #include "engine/camera.h"
@@ -197,7 +198,7 @@ public:
         gfx::Image png((const void*)DetonatorLOGO, sizeof(DetonatorLOGO));
         if (png.IsValid())
         {
-            auto texture_source = std::make_unique<gfx::detail::TextureBitmapBufferSource>();
+            auto texture_source = std::make_unique<gfx::TextureBitmapBufferSource>();
             texture_source->SetBitmap(png.AsBitmap<gfx::Pixel_RGBA>());
             texture_source->SetColorSpace(gfx::TextureSource::ColorSpace::sRGB);
             texture_source->SetName("Detonator Logo");

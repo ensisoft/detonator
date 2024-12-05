@@ -48,8 +48,8 @@
 #include "graphics/particle_engine.h"
 #include "graphics/drawcmd.h"
 #include "graphics/texture_file_source.h"
+#include "graphics/texture_bitmap_buffer_source.h"
 #include "graphics/tool/geometry.h"
-
 
 bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
 {
