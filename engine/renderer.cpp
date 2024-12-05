@@ -197,6 +197,7 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
         // node, map that node to a position on the map tile grid for combining it
         // with the map's tile rendering.
         TRACE_CALL("ComputeTileCoordinates", ComputeTileCoordinates(*map, scene_packet_start_index, packets));
+        TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets));
         // Sort all packets based on the map based sorting criteria
         TRACE_CALL("SortTilePackets", SortTilePackets(packets));
     }
@@ -329,6 +330,7 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
 
     if (map)
     {
+        OffsetPacketLayers(packets);
         SortTilePackets(packets);
     }
     else
@@ -447,6 +449,7 @@ void Renderer::CreateFrame(const game::Tilemap& map, bool draw_render_layer, boo
     std::vector<DrawPacket> packets;
     GenerateMapDrawPackets(map, batches,packets);
 
+    OffsetPacketLayers(packets);
     SortTilePackets(packets);
 
     // this rendering path doesn't use the runtime rendering path (DrawScenePackets)
@@ -1536,8 +1539,6 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
 
 void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
 {
-    OffsetPacketLayers(packets);
-
     // layer is the layer index coming from the tilemap
     // the sorting order applies *inside* a render layer.
     // the render layer sorting happens later, so as long
