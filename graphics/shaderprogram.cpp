@@ -19,6 +19,7 @@
 #include "graphics/shaderprogram.h"
 #include "graphics/shadersource.h"
 #include "graphics/device.h"
+#include "graphics/material_class.h"
 
 namespace gfx {
 

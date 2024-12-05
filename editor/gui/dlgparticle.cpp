@@ -18,6 +18,7 @@
 
 #include "graphics/drawable.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/dlgparticle.h"

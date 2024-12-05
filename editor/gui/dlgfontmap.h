@@ -73,7 +73,7 @@ namespace gui
     private:
         Ui::DlgFontMap mUI;
     private:
-        std::shared_ptr<gfx::TextureMap2DClass> mClass;
+        std::shared_ptr<gfx::MaterialClass> mClass;
         std::unique_ptr<gfx::Material> mMaterial;
 
         QTimer mTimer;

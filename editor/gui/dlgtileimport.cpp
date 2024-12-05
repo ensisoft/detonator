@@ -40,6 +40,7 @@
 #include "editor/gui/dlgtileimport.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 #include "graphics/drawing.h"
 #include "graphics/simple_shape.h"
 #include "graphics/texture_file_source.h"

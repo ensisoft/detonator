@@ -33,6 +33,7 @@
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 #include "graphics/painter.h"
 #include "graphics/text.h"
 #include "graphics/drawing.h"

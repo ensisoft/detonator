@@ -24,9 +24,12 @@
 #include "warnpop.h"
 
 #include <cstdint>
+#include <variant>
+#include <unordered_map>
 
 #include "base/assert.h"
 #include "base/types.h"
+#include "graphics/color4f.h"
 
 namespace gfx
 {
@@ -137,5 +140,11 @@ namespace gfx
     using StencilWriteValue = StencilValue<1>;
     using StencilPassValue  = StencilValue<2>;
 
+    // Material/Shader uniform/params
+    using Uniform = std::variant<float, int,
+            std::string,
+            gfx::Color4f,
+            glm::vec2, glm::vec3, glm::vec4>;
+    using UniformMap = std::unordered_map<std::string, Uniform>;
 
 } // gfx

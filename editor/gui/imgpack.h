@@ -27,6 +27,7 @@
 #include <string>
 
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 #include "graphics/texture_file_source.h"
 
 namespace gui

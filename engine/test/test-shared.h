@@ -19,6 +19,7 @@
 #include "config.h"
 #include "base/assert.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 #include "graphics/drawable.h"
 #include "graphics/color4f.h"
 #include "graphics/simple_shape.h"

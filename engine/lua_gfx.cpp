@@ -22,6 +22,7 @@
 
 #include "engine/lua.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 
 namespace engine
 {

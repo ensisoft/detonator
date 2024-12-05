@@ -31,6 +31,7 @@
 #include "engine/camera.h"
 #include "engine/physics.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 #include "data/json.h"
 #include "game/animation.h"
 #include "game/animator.h"

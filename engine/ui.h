@@ -41,6 +41,7 @@
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "graphics/fwd.h"
+#include "graphics/material_class.h"
 #include "wdk/keys.h"
 #include "wdk/bitflag.h"
 #include "wdk/events.h"

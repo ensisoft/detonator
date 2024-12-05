@@ -27,6 +27,7 @@
 #include "base/test_minimal.h"
 #include "base/logging.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 #include "editor/app/ipc.h"
 #include "editor/app/resource.h"
 #include "editor/app/workspace.h"

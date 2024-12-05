@@ -33,6 +33,7 @@
 #include "engine/lua_array.h"
 #include "engine/classlib.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 
 using namespace game;
 using namespace engine::lua;

@@ -29,6 +29,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 #include "graphics/drawable.h"
 #include "graphics/drawing.h"
 #include "graphics/transform.h"

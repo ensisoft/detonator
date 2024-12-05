@@ -30,6 +30,7 @@
 #include "data/reader.h"
 #include "data/json.h"
 #include "uikit/window.h"
+#include "graphics/material_class.h"
 #include "editor/app/ipc.h"
 #include "editor/app/resource.h"
 #include "editor/app/eventlog.h"
