@@ -47,6 +47,7 @@
 #include "graphics/polygon_mesh.h"
 #include "graphics/particle_engine.h"
 #include "graphics/drawcmd.h"
+#include "graphics/texture_file_source.h"
 #include "graphics/tool/geometry.h"
 
 

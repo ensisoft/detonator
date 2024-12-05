@@ -56,92 +56,7 @@ namespace gfx
 
     namespace detail {
 
-        // Source texture data from an image file.
-        class TextureFileSource : public TextureSource
-        {
-        public:
-            enum class Flags {
-                AllowPacking,
-                AllowResizing,
-                PremulAlpha
-            };
-            TextureFileSource()
-              : mId(base::RandomString(10))
-            {
-                mFlags.set(Flags::AllowResizing, true);
-                mFlags.set(Flags::AllowPacking, true);
-            }
-            explicit TextureFileSource(std::string file, std::string id = base::RandomString(10))
-              : mId(std::move(id))
-              , mFile(std::move(file))
-            {
-                mFlags.set(Flags::AllowResizing, true);
-                mFlags.set(Flags::AllowPacking, true);
-            }
-            virtual ColorSpace GetColorSpace() const override
-            { return mColorSpace; }
-            virtual Source GetSourceType() const override
-            { return Source::Filesystem; }
-            virtual base::bitflag<Effect> GetEffects() const override
-            { return mEffects; }
-            virtual std::string GetId() const override
-            { return mId; }
-            virtual std::string GetName() const override
-            { return mName; }
-            virtual void SetName(const std::string& name) override
-            { mName = name; }
-            virtual void SetEffect(Effect effect, bool on_off) override
-            { mEffects.set(effect, on_off); }
 
-            virtual std::string GetGpuId() const override;
-
-            virtual std::size_t GetHash() const override;
-
-            virtual std::shared_ptr<IBitmap> GetData() const override;
-
-            virtual Texture* Upload(const Environment& env, Device& device) const override;
-
-            virtual void IntoJson(data::Writer& data) const override;
-            virtual bool FromJson(const data::Reader& data) override;
-
-            virtual void BeginPacking(TexturePacker* packer) const override
-            {
-                packer->PackTexture(this, mFile);
-                packer->SetTextureFlag(this, TexturePacker::TextureFlags::AllowedToPack,
-                                       TestFlag(Flags::AllowPacking));
-                packer->SetTextureFlag(this, TexturePacker::TextureFlags::AllowedToResize,
-                                       TestFlag(Flags::AllowResizing));
-            }
-            virtual void FinishPacking(const TexturePacker* packer) override
-            {
-                mFile = packer->GetPackedTextureId(this);
-            }
-            void SetFileName(const std::string& file)
-            { mFile = file; }
-            const std::string& GetFilename() const
-            { return mFile; }
-            bool TestFlag(Flags flag) const
-            { return mFlags.test(flag); }
-            void SetFlag(Flags flag, bool on_off)
-            { mFlags.set(flag, on_off); }
-            void SetColorSpace(ColorSpace space)
-            { mColorSpace = space; }
-        protected:
-            virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
-            {
-                auto ret = std::make_unique<TextureFileSource>(*this);
-                ret->mId = std::move(id);
-                return ret;
-            }
-        private:
-            std::string mId;
-            std::string mFile;
-            std::string mName;
-            base::bitflag<Flags> mFlags;
-            base::bitflag<Effect> mEffects;
-            ColorSpace mColorSpace = ColorSpace::sRGB;
-        private:
-        };
 
         // Source texture data from a bitmap
         class TextureBitmapBufferSource : public TextureSource
@@ -411,11 +326,6 @@ namespace gfx
         };
 
     } // detail
-
-
-
-    inline auto LoadTextureFromFile(std::string uri, std::string id = base::RandomString(10))
-    { return std::make_unique<detail::TextureFileSource>(std::move(uri), std::move(id)); }
 
     template<typename T>
     inline auto CreateTextureFromBitmap(const Bitmap<T>& bitmap, std::string id = base::RandomString(10))

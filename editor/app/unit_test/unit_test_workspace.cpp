@@ -41,6 +41,7 @@
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
 #include "graphics/types.h"
+#include "graphics/texture_file_source.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
 
@@ -1137,7 +1138,7 @@ void unit_test_packing_texture_name_collision()
     {
         const auto& mat = cloader->FindMaterialClassById(material0.GetId());
         const auto& source = mat->GetTextureMap(0)->GetTextureSource(0);
-        const auto* file = static_cast<const gfx::detail::TextureFileSource*>(source);
+        const auto* file = static_cast<const gfx::TextureFileSource*>(source);
         gfx::Image img;
         TEST_REQUIRE(img.Load(file->GetFilename()));
         const auto& bmp = img.AsBitmap<gfx::Pixel_RGB>();
@@ -1147,7 +1148,7 @@ void unit_test_packing_texture_name_collision()
     {
         const auto& mat = cloader->FindMaterialClassById(material1.GetId());
         const auto& source = mat->GetTextureMap(0)->GetTextureSource(0);
-        const auto* file = static_cast<const gfx::detail::TextureFileSource*>(source);
+        const auto* file = static_cast<const gfx::TextureFileSource*>(source);
         gfx::Image img;
         TEST_REQUIRE(img.Load(file->GetFilename()));
         const auto& bmp = img.AsBitmap<gfx::Pixel_RGB>();
@@ -1332,7 +1333,7 @@ void unit_test_packing_texture_name_collision_resample_bug()
     {
         const auto& mat = cloader->FindMaterialClassById(material0.GetId());
         const auto& source = mat->GetTextureMap(0)->GetTextureSource(0);
-        const auto* file = static_cast<const gfx::detail::TextureFileSource*>(source);
+        const auto* file = static_cast<const gfx::TextureFileSource*>(source);
         gfx::Image img;
         TEST_REQUIRE(img.Load(file->GetFilename()));
         const auto& bmp = img.AsBitmap<gfx::Pixel_RGB>();
@@ -1347,7 +1348,7 @@ void unit_test_packing_texture_name_collision_resample_bug()
     {
         const auto& mat = cloader->FindMaterialClassById(material1.GetId());
         const auto& source = mat->GetTextureMap(0)->GetTextureSource(0);
-        const auto* file = static_cast<const gfx::detail::TextureFileSource*>(source);
+        const auto* file = static_cast<const gfx::TextureFileSource*>(source);
         gfx::Image img;
         TEST_REQUIRE(img.Load(file->GetFilename()));
         const auto& bmp = img.AsBitmap<gfx::Pixel_RGB>();
@@ -1758,7 +1759,7 @@ void unit_test_export_import_basic()
         gfx::WritePNG(bitmap, "TestWorkspace/textures/foobar/test_bitmap.png");
 
         // setup some content.
-        gfx::detail::TextureFileSource texture_source;
+        gfx::TextureFileSource texture_source;
         texture_source.SetFileName(workspace.MapFileToWorkspace(std::string("TestWorkspace/textures/foobar/test_bitmap.png")));
         texture_source.SetName("test-texture");
 
@@ -1917,8 +1918,8 @@ void unit_test_export_name_dupe()
             const auto* texture_map1 = material1->GetTextureMap(0);
             const auto* texture_map_source0 = texture_map0->GetTextureSource(0);
             const auto* texture_map_source1 = texture_map1->GetTextureSource(0);
-            const auto* texture_map_file_source0 = dynamic_cast<const gfx::detail::TextureFileSource*>(texture_map_source0);
-            const auto* texture_map_file_source1 = dynamic_cast<const gfx::detail::TextureFileSource*>(texture_map_source1);
+            const auto* texture_map_file_source0 = dynamic_cast<const gfx::TextureFileSource*>(texture_map_source0);
+            const auto* texture_map_file_source1 = dynamic_cast<const gfx::TextureFileSource*>(texture_map_source1);
             TEST_REQUIRE(texture_map_file_source0->GetFilename() != texture_map_file_source1->GetFilename());
             const auto& texture_file0 = workspace.MapFileToFilesystem(texture_map_file_source0->GetFilename());
             const auto& texture_file1 = workspace.MapFileToFilesystem(texture_map_file_source1->GetFilename());

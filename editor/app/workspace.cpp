@@ -56,6 +56,7 @@
 #include "graphics/resource.h"
 #include "graphics/color4f.h"
 #include "graphics/simple_shape.h"
+#include "graphics/texture_file_source.h"
 #include "editor/app/resource-uri.h"
 #include "editor/app/packer.h"
 #include "editor/app/eventlog.h"
@@ -2653,7 +2654,7 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         }
         else if (suffix == "JPEG" || suffix == "JPG" || suffix == "PNG" || suffix == "TGA" || suffix == "BMP")
         {
-            gfx::detail::TextureFileSource texture;
+            gfx::TextureFileSource texture;
             texture.SetFileName(ToUtf8(uri));
             texture.SetName(ToUtf8(name));
 

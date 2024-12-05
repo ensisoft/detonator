@@ -36,6 +36,7 @@
 #include "graphics/drawing.h"
 #include "graphics/bitmap.h"
 #include "graphics/simple_shape.h"
+#include "graphics/texture_file_source.h"
 #include "editor/app/resource-uri.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
@@ -81,7 +82,7 @@ DlgImgView::DlgImgView(QWidget* parent) : QDialog(parent)
 
     connect(this, &QDialog::finished, this, &DlgImgView::finished);
     connect(&mTimer, &QTimer::timeout, this, &DlgImgView::timer);
-    PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
+    PopulateFromEnum<gfx::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.cmbMinFilter);
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.cmbMagFilter);
 
@@ -90,7 +91,7 @@ DlgImgView::DlgImgView(QWidget* parent) : QDialog(parent)
     SetVisible(mUI.imageCutterProgress, false);
     SetVisible(mUI.tilePackerProgress, false);
     SetValue(mUI.zoom, 1.0f);
-    SetValue(mUI.cmbColorSpace, gfx::detail::TextureFileSource::ColorSpace::sRGB);
+    SetValue(mUI.cmbColorSpace, gfx::TextureFileSource::ColorSpace::sRGB);
     PopulateFromEnum<TilePackVerticalAlignment>(mUI.tilePackerVerticalAlign);
     PopulateFromEnum<TilePackHorizontalAlignment>(mUI.tilePackerHorizontalAlign);
     PopulateFromEnum<ToolMode>(mUI.cmbToolMode);
@@ -122,7 +123,7 @@ DlgImgView::DlgImgView(QWidget* parent) : QDialog(parent)
 
 void DlgImgView::LoadImage(const QString& file)
 {
-    auto source = std::make_unique<gfx::detail::TextureFileSource>();
+    auto source = std::make_unique<gfx::TextureFileSource>();
     source->SetFileName(app::ToUtf8(file));
     source->SetName(app::ToUtf8(file));
     const auto& bitmap = source->GetData();
@@ -848,7 +849,7 @@ void DlgImgView::on_btnPackTiles_clicked()
         pack.image_height = ret.height;
         pack.mag_filter   = GetValue(mUI.cmbMagFilter);
         pack.min_filter   = GetValue(mUI.cmbMinFilter);
-        pack.color_space  = gfx::detail::TextureFileSource::ColorSpace::sRGB;
+        pack.color_space  = gfx::TextureFileSource::ColorSpace::sRGB;
         pack.tilemap      = tilemap;
         pack.power_of_two_hint = power_of_two;
 
@@ -880,7 +881,7 @@ void DlgImgView::on_cmbColorSpace_currentIndexChanged(int)
     if (!mClass)
         return;
     auto* source = mClass->GetTextureMap(0)->GetTextureSource(0);
-    auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(source);
+    auto* file_source = dynamic_cast<gfx::TextureFileSource*>(source);
     file_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
 }
 

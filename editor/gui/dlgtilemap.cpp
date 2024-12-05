@@ -31,6 +31,7 @@
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/drawing.h"
+#include "graphics/texture_file_source.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
@@ -64,12 +65,12 @@ DlgTilemap::DlgTilemap(QWidget* parent) : QDialog(parent)
     connect(this, &QDialog::finished, this,  &DlgTilemap::finished);
     connect(&mTimer, &QTimer::timeout, this, &DlgTilemap::timer);
 
-    PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
+    PopulateFromEnum<gfx::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.cmbMinFilter);
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.cmbMagFilter);
     SetEnabled(mUI.btnExport, false);
     SetValue(mUI.zoom, 1.0f);
-    SetValue(mUI.cmbColorSpace, gfx::detail::TextureFileSource::ColorSpace::sRGB);
+    SetValue(mUI.cmbColorSpace, gfx::TextureFileSource::ColorSpace::sRGB);
 }
 
 DlgTilemap::~DlgTilemap()
@@ -82,7 +83,7 @@ void DlgTilemap::LoadImage(const QString& file)
 
     std::string file_uri  = app::ToUtf8(file);
     std::string file_name = app::ToUtf8(name);
-    auto source = std::make_unique<gfx::detail::TextureFileSource>();
+    auto source = std::make_unique<gfx::TextureFileSource>();
     source->SetFileName(file_uri);
     source->SetName(file_name);
     source->SetColorSpace(GetValue(mUI.cmbColorSpace));
@@ -200,7 +201,7 @@ void DlgTilemap::on_btnExport_clicked()
     base::JsonWrite(json, "padding",       tile_padding);
     base::JsonWrite(json, "xoffset",       tile_xoffset);
     base::JsonWrite(json, "yoffset",       tile_yoffset);
-    base::JsonWrite(json, "color_space",   (gfx::detail::TextureFileSource::ColorSpace)GetValue(mUI.cmbColorSpace));
+    base::JsonWrite(json, "color_space",   (gfx::TextureFileSource::ColorSpace)GetValue(mUI.cmbColorSpace));
     base::JsonWrite(json, "min_filter",    (gfx::MaterialClass::MinTextureFilter)GetValue(mUI.cmbMinFilter));
     base::JsonWrite(json, "mag_filter",    (gfx::MaterialClass::MagTextureFilter)GetValue(mUI.cmbMagFilter));
     base::JsonWrite(json, "premultiply_alpha", (bool)GetValue(mUI.chkPremulAlpha));
@@ -289,9 +290,9 @@ void DlgTilemap::OnPaintScene(gfx::Painter& painter, double secs)
     mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
     auto* map = mClass->GetTextureMap(0);
     auto* src = map->GetTextureSource(0);
-    auto* texture_source = dynamic_cast<gfx::detail::TextureFileSource*>(src);
+    auto* texture_source = dynamic_cast<gfx::TextureFileSource*>(src);
     texture_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
-    texture_source->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPremulAlpha));
+    texture_source->SetFlag(gfx::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPremulAlpha));
 
     const float zoom   = GetValue(mUI.zoom);
     const float img_width  = mWidth * zoom;

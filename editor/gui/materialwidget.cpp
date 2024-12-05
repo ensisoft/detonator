@@ -42,6 +42,7 @@
 #include "graphics/types.h"
 #include "graphics/shadersource.h"
 #include "graphics/shaderprogram.h"
+#include "graphics/texture_file_source.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
@@ -110,7 +111,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::MaterialClass::Type>(mUI.materialType);
     PopulateFromEnum<gfx::MaterialClass::ParticleAction>(mUI.particleAction);
     PopulateFromEnum<gfx::TextureMap::Type>(mUI.textureMapType);
-    PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
+    PopulateFromEnum<gfx::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
 
     // leave this out for now. particle UI can take care
     // PopulateShaderList(mUI.shaderFile);
@@ -536,7 +537,7 @@ void MaterialWidget::on_actionReloadTextures_triggered()
             for (unsigned j=0; j<map->GetNumTextures(); ++j)
             {
                 const auto* texture = map->GetTextureSource(j);
-                if (const auto* file = dynamic_cast<const gfx::detail::TextureFileSource*>(texture))
+                if (const auto* file = dynamic_cast<const gfx::TextureFileSource*>(texture))
                 {
                     const auto& uri = file->GetFilename();
                     if (base::StartsWith(uri, "app://"))
@@ -655,7 +656,7 @@ void MaterialWidget::on_btnEditTexture_clicked()
 {
     if (auto* source = GetSelectedTextureSrc())
     {
-        if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(source))
+        if (const auto* ptr = dynamic_cast<const gfx::TextureFileSource*>(source))
         {
             emit OpenExternalImage(app::FromUtf8(ptr->GetFilename()));
         }
@@ -690,10 +691,10 @@ void MaterialWidget::on_btnEditTexture_clicked()
                 const auto& name = info.baseName();
                 const auto& file = mWorkspace->MapFileToWorkspace(info.absoluteFilePath());
 
-                auto source = std::make_unique<gfx::detail::TextureFileSource>(file);
+                auto source = std::make_unique<gfx::TextureFileSource>(file);
                 source->SetName(app::ToUtf8(name));
                 source->SetFileName(file);
-                source->SetColorSpace(gfx::detail::TextureFileSource::ColorSpace::sRGB);
+                source->SetColorSpace(gfx::TextureFileSource::ColorSpace::sRGB);
 
                 if (map->GetType() == gfx::TextureMap::Type::Texture2D)
                 {
@@ -1007,7 +1008,7 @@ void MaterialWidget::on_cmbColorSpace_currentIndexChanged(int)
 {
     if (auto* source = GetSelectedTextureSrc())
     {
-        if (auto* ptr = dynamic_cast<gfx::detail::TextureFileSource*>(source))
+        if (auto* ptr = dynamic_cast<gfx::TextureFileSource*>(source))
         {
             ptr->SetColorSpace(GetValue(mUI.cmbColorSpace));
         }
@@ -1139,10 +1140,10 @@ void MaterialWidget::AddNewTextureMapFromFile()
 
         const auto& uri = mWorkspace->MapFileToWorkspace(image_file);
 
-        auto source = std::make_unique<gfx::detail::TextureFileSource>(uri);
+        auto source = std::make_unique<gfx::TextureFileSource>(uri);
         source->SetName(app::ToUtf8(image_name));
         source->SetFileName(uri);
-        source->SetColorSpace(gfx::detail::TextureFileSource::ColorSpace::sRGB);
+        source->SetColorSpace(gfx::TextureFileSource::ColorSpace::sRGB);
 
         if (map->GetType() == gfx::TextureMap::Type::Texture2D)
         {
@@ -1201,10 +1202,10 @@ void MaterialWidget::AddNewTextureMapFromText()
         const auto& name = info.baseName();
         const auto& file = mWorkspace->MapFileToWorkspace(info.absoluteFilePath());
 
-        auto source = std::make_unique<gfx::detail::TextureFileSource>(file);
+        auto source = std::make_unique<gfx::TextureFileSource>(file);
         source->SetName(app::ToUtf8(name));
         source->SetFileName(file);
-        source->SetColorSpace(gfx::detail::TextureFileSource::ColorSpace::sRGB);
+        source->SetColorSpace(gfx::TextureFileSource::ColorSpace::sRGB);
         texture_source = std::move(source);
     }
     else
@@ -1813,11 +1814,11 @@ void MaterialWidget::SetTextureFlags()
 {
     if (auto* source = GetSelectedTextureSrc())
     {
-        if (auto* ptr = dynamic_cast<gfx::detail::TextureFileSource*>(source))
+        if (auto* ptr = dynamic_cast<gfx::TextureFileSource*>(source))
         {
-            ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowPacking, GetValue(mUI.chkAllowPacking));
-            ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowResizing, GetValue(mUI.chkAllowResizing));
-            ptr->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPreMulAlpha));
+            ptr->SetFlag(gfx::TextureFileSource::Flags::AllowPacking, GetValue(mUI.chkAllowPacking));
+            ptr->SetFlag(gfx::TextureFileSource::Flags::AllowResizing, GetValue(mUI.chkAllowResizing));
+            ptr->SetFlag(gfx::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPreMulAlpha));
         }
         source->SetEffect(gfx::TextureSource::Effect::Blur, GetValue(mUI.chkBlurTexture));
         source->SetEffect(gfx::TextureSource::Effect::Edges, GetValue(mUI.chkDetectEdges));
@@ -2258,13 +2259,13 @@ void MaterialWidget::ShowTextureProperties()
     SetValue(mUI.textureSourceID,   source->GetId());
     SetValue(mUI.textureSourceName, source->GetName());
     SetValue(mUI.textureSourceFile, QString("N/A"));
-    if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(source))
+    if (const auto* ptr = dynamic_cast<const gfx::TextureFileSource*>(source))
     {
         SetValue(mUI.textureSourceFile, ptr->GetFilename());
         SetValue(mUI.cmbColorSpace,     ptr->GetColorSpace());
-        SetValue(mUI.chkAllowPacking,   ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowPacking));
-        SetValue(mUI.chkAllowResizing,  ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowResizing));
-        SetValue(mUI.chkPreMulAlpha,    ptr->TestFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha));
+        SetValue(mUI.chkAllowPacking,   ptr->TestFlag(gfx::TextureFileSource::Flags::AllowPacking));
+        SetValue(mUI.chkAllowResizing,  ptr->TestFlag(gfx::TextureFileSource::Flags::AllowResizing));
+        SetValue(mUI.chkPreMulAlpha,    ptr->TestFlag(gfx::TextureFileSource::Flags::PremulAlpha));
         SetEnabled(mUI.chkAllowPacking,  true);
         SetEnabled(mUI.chkAllowResizing, true);
         SetEnabled(mUI.chkPreMulAlpha,   true);
@@ -2341,7 +2342,7 @@ void MaterialWidget::ShowTextureMapProperties()
     if (count == 1)
     {
         const auto* src = map->GetTextureSource(0);
-        if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(src))
+        if (const auto* ptr = dynamic_cast<const gfx::TextureFileSource*>(src))
             SetValue(mUI.textureMapTextures, ptr->GetFilename());
         else SetValue(mUI.textureMapTextures, app::toString(src->GetSourceType()));
     }

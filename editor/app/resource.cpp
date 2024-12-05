@@ -33,12 +33,14 @@
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
+#include "graphics/texture_file_source.h"
 #include "engine/ui.h"
 #include "editor/app/buffer.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/app/resource.h"
 #include "editor/app/packer.h"
+
 
 namespace {
     void PushBack(QStringList& list, const QString& id)
@@ -740,7 +742,7 @@ bool PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
                 ok &= packer.CopyFile(text_chunk.font, "fonts/");
                 text_chunk.font = packer.MapUri(text_chunk.font);
             }
-            else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(src))
+            else if (auto* file_source = dynamic_cast<gfx::TextureFileSource*>(src))
             {
                 const auto& uri = file_source->GetFilename();
                 ok &= packer.CopyFile(uri, "textures/");
@@ -883,9 +885,9 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
             for (unsigned j = 0; j < map->GetNumTextures(); ++j)
             {
                 auto* source = map->GetTextureSource(j);
-                if (auto* ptr = dynamic_cast<gfx::detail::TextureFileSource*>(source))
+                if (auto* ptr = dynamic_cast<gfx::TextureFileSource*>(source))
                 {
-                    ptr->SetColorSpace(gfx::detail::TextureFileSource::ColorSpace::sRGB);
+                    ptr->SetColorSpace(gfx::TextureFileSource::ColorSpace::sRGB);
                     DEBUG("Changing material texture color space to sRGB. [material='%1', texture='%2']", material.GetName(), source->GetName());
                     log->Log(material, "Material", "Changed texture color space to sRGB from linear.");
                 }
