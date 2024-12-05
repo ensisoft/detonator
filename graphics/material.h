@@ -56,83 +56,6 @@ namespace gfx
 
     namespace detail {
 
-        // Source texture data from a bitmap
-        class TextureBitmapGeneratorSource : public TextureSource
-        {
-        public:
-            TextureBitmapGeneratorSource()
-              : mId(base::RandomString(10))
-            {}
-
-            explicit TextureBitmapGeneratorSource(std::unique_ptr<IBitmapGenerator>&& generator, std::string id = base::RandomString(10))
-              : mId(std::move(id))
-              , mGenerator(std::move(generator))
-            {}
-
-            TextureBitmapGeneratorSource(const TextureBitmapGeneratorSource& other)
-              : mId(other.mId)
-              , mName(other.mName)
-              , mGenerator(other.mGenerator->Clone())
-            {}
-
-            virtual base::bitflag<Effect> GetEffects() const override
-            { return mEffects; }
-            virtual Source GetSourceType() const override
-            { return Source::BitmapGenerator; }
-            virtual std::string GetId() const override
-            { return mId; }
-            virtual std::string GetGpuId() const override
-            { return mId; }
-            virtual std::size_t GetHash() const override
-            {
-                auto hash = mGenerator->GetHash();
-                hash = base::hash_combine(hash, mId);
-                hash = base::hash_combine(hash, mName);
-                hash = base::hash_combine(hash, mEffects);
-                return hash;
-            }
-            virtual std::string GetName() const override
-            { return mName; }
-            virtual void SetName(const std::string& name) override
-            { mName = name; }
-            virtual void SetEffect(Effect effect, bool on_off) override
-            { mEffects.set(effect, on_off); }
-            virtual std::shared_ptr<IBitmap> GetData() const override
-            { return mGenerator->Generate(); }
-
-            virtual Texture* Upload(const Environment& env, Device& device) const override;
-
-            virtual void IntoJson(data::Writer& data) const override;
-            virtual bool FromJson(const data::Reader& data) override;
-
-            IBitmapGenerator& GetGenerator()
-            { return *mGenerator; }
-            const IBitmapGenerator& GetGenerator() const
-            { return *mGenerator; }
-
-            void SetGenerator(std::unique_ptr<IBitmapGenerator> generator)
-            { mGenerator = std::move(generator); }
-
-            template<typename T>
-            void SetGenerator(T&& generator)
-            {
-                // generator is a "universal reference"
-                // Meyer's Item. 24
-                mGenerator = std::make_unique<std::remove_reference_t<T>>(std::forward<T>(generator));
-            }
-        protected:
-            virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
-            {
-                auto ret = std::make_unique<TextureBitmapGeneratorSource>(*this);
-                ret->mId = std::move(id);
-                return ret;
-            }
-        private:
-            std::string mId;
-            std::string mName;
-            std::unique_ptr<IBitmapGenerator> mGenerator;
-            base::bitflag<Effect> mEffects;
-        };
 
         // Rasterize text buffer and provide as a texture source.
         class TextureTextBufferSource : public TextureSource
@@ -212,8 +135,7 @@ namespace gfx
     inline auto CreateTextureFromText(TextBuffer&& text, std::string id = base::RandomString(10))
     { return std::make_unique<detail::TextureTextBufferSource>(std::move(text), std::move(id)); }
 
-    inline auto GenerateTexture(std::unique_ptr<IBitmapGenerator> generator, std::string id = base::RandomString(10))
-    {  return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(generator), std::move(id)); }
+
 
     template<typename T>
     inline auto GenerateTexture(T&& generator, std::string id = base::RandomString(10))
@@ -222,16 +144,7 @@ namespace gfx
         return GenerateTexture(std::move(gen), std::move(id));
     }
 
-    inline auto GenerateNoiseTexture(const NoiseBitmapGenerator& generator, std::string id = base::RandomString(10))
-    {
-        auto gen = std::make_unique<NoiseBitmapGenerator>(generator);
-        return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen), std::move(id));
-    }
-    inline auto GenerateNoiseTexture(NoiseBitmapGenerator&& generator, std::string id = base::RandomString(10))
-    {
-        auto gen = std::make_unique<NoiseBitmapGenerator>(std::move(generator));
-        return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen), std::move(id));
-    }
+
 
     // Interface for binding texture map(s) to texture sampler(s) in the material shader.
     class TextureMap

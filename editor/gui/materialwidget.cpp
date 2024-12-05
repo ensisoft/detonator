@@ -43,6 +43,7 @@
 #include "graphics/shadersource.h"
 #include "graphics/shaderprogram.h"
 #include "graphics/texture_file_source.h"
+#include "graphics/texture_bitmap_generator_source.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
@@ -727,7 +728,7 @@ void MaterialWidget::on_btnEditTexture_clicked()
                 ShowTextureProperties();
             }
         }
-        else if (auto* ptr = dynamic_cast<gfx::detail::TextureBitmapGeneratorSource*>(source))
+        else if (auto* ptr = dynamic_cast<gfx::TextureBitmapGeneratorSource*>(source))
         {
             // make a copy for editing.
             auto copy = ptr->GetGenerator().Clone();
@@ -1254,7 +1255,7 @@ void MaterialWidget::AddNewTextureMapFromBitmap()
         return;
 
     auto result = dlg.GetResult();
-    auto source = std::make_unique<gfx::detail::TextureBitmapGeneratorSource>(std::move(result));
+    auto source = std::make_unique<gfx::TextureBitmapGeneratorSource>(std::move(result));
     source->SetName("Noise");
 
     if (map->GetType() == gfx::TextureMap::Type::Texture2D)
