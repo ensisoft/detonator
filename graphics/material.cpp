@@ -38,6 +38,8 @@
 #include "graphics/shadersource.h"
 #include "graphics/algo.h"
 
+#include "graphics/texture_texture_source.cpp"
+
 //                  == Notes about shaders ==
 // 1. Shaders are specific to a device within compatibility constraints
 // but a GLES 2 device context cannot use GL ES 3 shaders for example.
@@ -98,30 +100,6 @@
 
 namespace gfx
 {
-
-Texture* detail::TextureTextureSource::Upload(const Environment& env, Device& device) const
-{
-    if (!mTexture)
-        mTexture = device.FindTexture(mGpuId);
-
-    return mTexture;
-}
-
-void detail::TextureTextureSource::IntoJson(data::Writer& data) const
-{
-    data.Write("id",     mId);
-    data.Write("name",   mName);
-    data.Write("gpu_id", mGpuId);
-}
-
-bool detail::TextureTextureSource::FromJson(const data::Reader& data)
-{
-    bool ok = true;
-    ok &= data.Read("id",     &mId);
-    ok &= data.Read("name",   &mName);
-    ok &= data.Read("gpu_id", &mGpuId);
-    return ok;
-}
 
 std::string detail::TextureFileSource::GetGpuId() const
 {
@@ -752,7 +730,7 @@ bool TextureMap::FromJson(const data::Reader& data)
             else if (type == TextureSource::Source::BitmapGenerator)
                 source = std::make_unique<detail::TextureBitmapGeneratorSource>();
             else if (type == TextureSource::Source::Texture)
-                source = std::make_unique<detail::TextureTextureSource>();
+                source = std::make_unique<TextureTextureSource>();
             else BUG("Unhandled texture source type.");
 
             MyTexture texture;
@@ -791,7 +769,7 @@ bool TextureMap::FromLegacyJsonTexture2D(const data::Reader& data)
     else if (type == TextureSource::Source::BitmapGenerator)
         source = std::make_unique<detail::TextureBitmapGeneratorSource>();
     else if (type == TextureSource::Source::Texture)
-        source = std::make_unique<detail::TextureTextureSource>();
+        source = std::make_unique<TextureTextureSource>();
     else BUG("Unhandled texture source type.");
 
     if (!source->FromJson(*texture))
