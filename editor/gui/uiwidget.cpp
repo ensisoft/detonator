@@ -55,6 +55,7 @@
 #include "editor/gui/playwindow.h"
 #include "graphics/drawing.h"
 #include "graphics/utility.h"
+#include "graphics/texture_text_buffer_source.h"
 #include "uikit/op.h"
 #include "uikit/state.h"
 #include "uikit/widget.h"
@@ -2293,7 +2294,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         text.SetBufferSize(400, 200);
         text.SetText(text_and_style);
 
-        gfx::detail::TextureTextBufferSource texture_source;
+        gfx::TextureTextBufferSource texture_source;
         texture_source.SetTextBuffer(text);
 
         gfx::TextureMap2D texture_map;

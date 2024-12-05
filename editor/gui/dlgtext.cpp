@@ -31,6 +31,7 @@
 #include "graphics/text.h"
 #include "graphics/drawing.h"
 #include "graphics/material.h"
+#include "graphics/texture_text_buffer_source.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/dlgtext.h"
@@ -242,7 +243,7 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
         mMaterial = gfx::CreateMaterialInstance(mClass);
     }
     auto* source = mClass->GetTextureMap(0)->GetTextureSource(0);
-    auto* bitmap = dynamic_cast<gfx::detail::TextureTextBufferSource*>(source);
+    auto* bitmap = dynamic_cast<gfx::TextureTextBufferSource*>(source);
     bitmap->SetTextBuffer(mText);
 
     if ((bool)GetValue(mUI.chkScale))
