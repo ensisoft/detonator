@@ -21,7 +21,7 @@
 #include <memory>
 
 #include "graphics/material.h"
-#include "graphics/text.h"
+#include "graphics/text_buffer.h"
 #include "graphics/types.h"
 
 namespace gfx

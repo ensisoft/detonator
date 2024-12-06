@@ -28,11 +28,13 @@
 #  include <QPixmap>
 #include "warnpop.h"
 
-#include "graphics/text.h"
 #include "graphics/drawing.h"
 #include "graphics/material.h"
 #include "graphics/material_instance.h"
+#include "graphics/material_class.h"
+#include "graphics/text_buffer.h"
 #include "graphics/texture_text_buffer_source.h"
+#include "graphics/painter.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/dlgtext.h"
@@ -82,6 +84,16 @@ DlgText::DlgText(QWidget* parent, const app::Workspace* workspace, gfx::TextBuff
     SetValue(mUI.cmbHAlign, text.GetHorizontalAligment());
 
     mUI.cmbFont->lineEdit()->setReadOnly(true);
+}
+
+bool DlgText::DidExport() const
+{
+    if (mExportFile.isEmpty())
+        return false;
+    if (mExportHash != mText.GetHash())
+        return false;
+
+    return true;
 }
 
 void DlgText::on_btnAccept_clicked()

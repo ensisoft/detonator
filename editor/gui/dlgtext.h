@@ -23,11 +23,7 @@
 #  include <QTimer>
 #include "warnpop.h"
 
-#include "graphics/text.h"
-#include "graphics/painter.h"
-#include "graphics/text.h"
-#include "graphics/material.h"
-#include "graphics/material_class.h"
+#include "graphics/fwd.h"
 
 namespace app {
     class Workspace;
@@ -44,15 +40,7 @@ namespace gui
         QString GetSaveFile() const
         { return mExportFile; }
 
-        bool DidExport() const
-        {
-            if (mExportFile.isEmpty())
-                return false;
-            if (mExportHash != mText.GetHash())
-                return false;
-
-            return true;
-        }
+        bool DidExport() const;
 
     private slots:
         void on_btnAccept_clicked();
@@ -71,7 +59,7 @@ namespace gui
         QTimer mTimer;
         QString mExportFile;
         bool mAdjustOnce = false;
-        std::shared_ptr<gfx::TextureMap2DClass> mClass;
+        std::shared_ptr<gfx::MaterialClass> mClass;
         std::unique_ptr<gfx::Material> mMaterial;
         std::size_t mExportHash = 0;
     };

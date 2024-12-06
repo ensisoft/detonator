@@ -38,7 +38,7 @@
 #include "graphics/material.h"
 #include "graphics/material_instance.h"
 #include "graphics/painter.h"
-#include "graphics/text.h"
+#include "graphics/text_buffer.h"
 #include "graphics/drawing.h"
 #include "graphics/drawable.h"
 #include "graphics/transform.h"

@@ -223,13 +223,13 @@ add_library(GfxLib
     graphics/texture_bitmap_generator_source.cpp
     graphics/texture_text_buffer_source.cpp
     graphics/text_material.cpp
+    graphics/text_buffer.cpp
     graphics/material_class.cpp
     graphics/material_instance.cpp
     graphics/shaderprogram.cpp
     graphics/shadersource.cpp
     graphics/image.cpp
     graphics/painter.cpp
-    graphics/text.cpp
     graphics/loader.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
@@ -288,13 +288,13 @@ add_library(GfxLibTesting
     graphics/texture_bitmap_generator_source.cpp
     graphics/texture_text_buffer_source.cpp
     graphics/text_material.cpp
+    graphics/text_buffer.cpp
     graphics/material_class.cpp
     graphics/material_instance.cpp
     graphics/shaderprogram.cpp
     graphics/shadersource.cpp
     graphics/image.cpp
     graphics/painter.cpp
-    graphics/text.cpp
     graphics/loader.cpp
     graphics/tool/geometry.cpp
     third_party/stb/stb_image.c
@@ -806,6 +806,7 @@ add_executable(graphics_test
     graphics/texture_bitmap_generator_source.cpp
     graphics/texture_text_buffer_source.cpp
     graphics/text_material.cpp
+    graphics/text_buffer.cpp
     graphics/material_class.cpp
     graphics/material_instance.cpp
     graphics/shaderprogram.cpp
@@ -816,7 +817,6 @@ add_executable(graphics_test
     graphics/vertex.cpp
     graphics/drawing.cpp
     graphics/painter.cpp
-    graphics/text.cpp
     graphics/loader.cpp
     graphics/image.cpp
     graphics/test/main.cpp

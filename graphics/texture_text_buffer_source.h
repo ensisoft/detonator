@@ -19,7 +19,7 @@
 #include "config.h"
 
 #include "base/hash.h"
-#include "graphics/text.h"
+#include "graphics/text_buffer.h"
 #include "graphics/texture_source.h"
 
 namespace gfx
