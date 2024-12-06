@@ -41,7 +41,7 @@
 #include "data/writer.h"
 #include "graphics/resource.h"
 #include "graphics/loader.h"
-#include "graphics/text.h"
+#include "graphics/text_buffer.h"
 #include "graphics/device.h"
 #include "graphics/framebuffer.h"
 #include "graphics/texture.h"

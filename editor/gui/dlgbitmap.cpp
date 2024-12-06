@@ -28,7 +28,7 @@
 #include "editor/gui/dlgbitmap.h"
 #include "editor/gui/utility.h"
 #include "graphics/bitmap.h"
-#include "graphics/text.h"
+#include "graphics/text_buffer.h"
 #include "graphics/drawing.h"
 #include "graphics/material.h"
 #include "graphics/material_instance.h"

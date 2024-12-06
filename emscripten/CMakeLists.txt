@@ -266,6 +266,7 @@ add_executable(GameEngine
     ../graphics/texture_bitmap_generator_source.cpp
     ../graphics/texture_text_buffer_source.cpp
     ../graphics/text_material.cpp
+    ../graphics/text_buffer.cpp
     ../graphics/material_class.cpp
     ../graphics/material_instance.cpp
     ../graphics/drawable.cpp
@@ -276,7 +277,6 @@ add_executable(GameEngine
     ../graphics/bitmap.cpp
     ../graphics/bitmap_noise.cpp
     ../graphics/pixel.cpp
-    ../graphics/text.cpp
     ../graphics/utility.cpp
     ../graphics/vertex.cpp
     ../wdk/wdk/keys.cpp

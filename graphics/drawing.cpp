@@ -29,7 +29,7 @@
 #include "graphics/material_class.h"
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
-#include "graphics/text.h"
+#include "graphics/text_buffer.h"
 #include "graphics/renderpass.h"
 #include "graphics/simple_shape.h"
 #include "graphics/linebatch.h"
