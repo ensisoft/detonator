@@ -59,6 +59,15 @@ add_executable(UnitTest
     ../data/io.cpp
     ../data/json.cpp
     ../graphics/material.cpp
+    ../graphics/texture_map.cpp
+    ../graphics/texture_texture_source.cpp
+    ../graphics/texture_file_source.cpp
+    ../graphics/texture_bitmap_buffer_source.cpp
+    ../graphics/texture_bitmap_generator_source.cpp
+    ../graphics/texture_text_buffer_source.cpp
+    ../graphics/text_material.cpp
+    ../graphics/material_class.cpp
+    ../graphics/material_instance.cpp
     ../engine/audio.cpp
     ../engine/camera.cpp
     ../engine/lua_base.cpp
@@ -250,6 +259,15 @@ add_executable(GameEngine
     ../graphics/shadersource.cpp
     ../graphics/painter.cpp
     ../graphics/material.cpp
+    ../graphics/texture_map.cpp
+    ../graphics/texture_texture_source.cpp
+    ../graphics/texture_file_source.cpp
+    ../graphics/texture_bitmap_buffer_source.cpp
+    ../graphics/texture_bitmap_generator_source.cpp
+    ../graphics/texture_text_buffer_source.cpp
+    ../graphics/text_material.cpp
+    ../graphics/material_class.cpp
+    ../graphics/material_instance.cpp
     ../graphics/drawable.cpp
     ../graphics/image.cpp
     ../graphics/loader.cpp

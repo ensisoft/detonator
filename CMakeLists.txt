@@ -216,6 +216,15 @@ add_library(GfxLib
     graphics/drawcmd.cpp
     graphics/vertex.cpp
     graphics/material.cpp
+    graphics/texture_map.cpp
+    graphics/texture_texture_source.cpp
+    graphics/texture_file_source.cpp
+    graphics/texture_bitmap_buffer_source.cpp
+    graphics/texture_bitmap_generator_source.cpp
+    graphics/texture_text_buffer_source.cpp
+    graphics/text_material.cpp
+    graphics/material_class.cpp
+    graphics/material_instance.cpp
     graphics/shaderprogram.cpp
     graphics/shadersource.cpp
     graphics/image.cpp
@@ -272,6 +281,15 @@ add_library(GfxLibTesting
     graphics/geometry.cpp
     graphics/vertex.cpp
     graphics/material.cpp
+    graphics/texture_map.cpp
+    graphics/texture_texture_source.cpp
+    graphics/texture_file_source.cpp
+    graphics/texture_bitmap_buffer_source.cpp
+    graphics/texture_bitmap_generator_source.cpp
+    graphics/texture_text_buffer_source.cpp
+    graphics/text_material.cpp
+    graphics/material_class.cpp
+    graphics/material_instance.cpp
     graphics/shaderprogram.cpp
     graphics/shadersource.cpp
     graphics/image.cpp
@@ -781,6 +799,15 @@ add_executable(graphics_test
     graphics/bitmap_noise.cpp
     graphics/pixel.cpp
     graphics/material.cpp
+    graphics/texture_map.cpp
+    graphics/texture_texture_source.cpp
+    graphics/texture_file_source.cpp
+    graphics/texture_bitmap_buffer_source.cpp
+    graphics/texture_bitmap_generator_source.cpp
+    graphics/texture_text_buffer_source.cpp
+    graphics/text_material.cpp
+    graphics/material_class.cpp
+    graphics/material_instance.cpp
     graphics/shaderprogram.cpp
     graphics/shadersource.cpp
     graphics/drawable.cpp

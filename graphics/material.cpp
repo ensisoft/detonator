@@ -16,16 +16,6 @@
 
 #include "config.h"
 
-#include "graphics/texture_map.cpp"
-#include "graphics/texture_texture_source.cpp"
-#include "graphics/texture_file_source.cpp"
-#include "graphics/texture_bitmap_buffer_source.cpp"
-#include "graphics/texture_bitmap_generator_source.cpp"
-#include "graphics/texture_text_buffer_source.cpp"
-#include "graphics/text_material.cpp"
-#include "graphics/material_class.cpp"
-#include "graphics/material_instance.cpp"
-
 //                  == Notes about shaders ==
 // 1. Shaders are specific to a device within compatibility constraints
 // but a GLES 2 device context cannot use GL ES 3 shaders for example.

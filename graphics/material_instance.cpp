@@ -18,6 +18,7 @@
 
 #include "graphics/material_class.h"
 #include "graphics/material_instance.h"
+#include "graphics/texture_texture_source.h"
 
 namespace gfx
 {
