@@ -699,7 +699,7 @@ Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, const std::stri
 
     result_texture->Allocate(buffer_width, buffer_height, gfx::Texture::Format::sRGBA);
 
-    auto* fbo = device.FindFramebuffer("BitmapFontCompositeFBO");
+    auto* fbo = device.FindFramebuffer("BitmapFontCompositorFBO");
     if (fbo == nullptr)
     {
         // when setting the FBO configuration the width/height
@@ -709,7 +709,7 @@ Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, const std::stri
         conf.format = gfx::Framebuffer::Format::ColorRGBA8;
         conf.width  = 0;
         conf.height = 0;
-        fbo = device.MakeFramebuffer("BitmapFontCompositeFBO");
+        fbo = device.MakeFramebuffer("BitmapFontCompositorFBO");
         fbo->SetConfig(conf);
     }
 constexpr auto* fragment_src = R"(
@@ -732,10 +732,10 @@ void main() {
     gl_Position = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
 }
     )";
-    auto program = device.FindProgram("BitmapFontCompositeProgram");
+    auto program = device.FindProgram("BitmapFontCompositorProgram");
     if (program == nullptr)
     {
-        program = gfx::MakeProgram(vertex_src, fragment_src, "BitmapFontComposite", device);
+        program = gfx::MakeProgram(vertex_src, fragment_src, "BitmapFontCompositorProgram", device);
     }
 
     auto ortho = glm::ortho(0.0f, (float)buffer_width, (float)buffer_height, 0.0f);
