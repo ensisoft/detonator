@@ -66,7 +66,11 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         }
         else if (format == TextBuffer::RasterFormat::Texture)
         {
-            texture = mText.RasterizeTexture(gpu_id, "TextMaterialTexture", device);
+            // this is a dynamic text texture, i.e. texture that is used
+            // to show text and then discarded when no longer needed
+            const auto transient = true;
+
+            texture = mText.RasterizeTexture(gpu_id, "TextMaterialTexture", device, transient);
             if (!texture)
                 return false;
             texture->SetTransient(true);
