@@ -31,6 +31,7 @@
 #include "graphics/text.h"
 #include "graphics/drawing.h"
 #include "graphics/material.h"
+#include "graphics/material_instance.h"
 #include "graphics/transform.h"
 #include "graphics/texture_bitmap_generator_source.h"
 

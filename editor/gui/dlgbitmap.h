@@ -27,6 +27,8 @@
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/bitmap.h"
+#include "graphics/bitmap_generator.h"
+#include "graphics/bitmap_noise.h"
 #include "graphics/material_class.h"
 
 namespace gui

@@ -19,6 +19,7 @@
 #include "graphics/simple_shape.h"
 #include "graphics/tilebatch.h"
 #include "graphics/guidegrid.h"
+#include "graphics/material_instance.h"
 #include "engine/camera.h"
 #include "editor/gui/dlgtiletool.h"
 #include "editor/gui/dlgmaterial.h"

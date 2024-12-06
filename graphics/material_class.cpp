@@ -73,6 +73,8 @@ MaterialClass::MaterialClass(const MaterialClass& other, bool copy)
     }
 }
 
+MaterialClass::~MaterialClass() = default;
+
 std::string MaterialClass::GetShaderName(const State& state) const noexcept
 {
     if (mType == Type::Custom)
@@ -820,6 +822,26 @@ void MaterialClass::SetTextureRect(const std::string& id, const gfx::FRect& rect
         map->SetTextureRect(index, rect);
         return;
     }
+}
+
+void MaterialClass::SetTextureRect(size_t map, size_t texture, const gfx::FRect& rect) noexcept
+{
+    base::SafeIndex(mTextureMaps, map)->SetTextureRect(texture, rect);
+}
+
+void MaterialClass::SetTextureRect(const gfx::FRect& rect) noexcept
+{
+    SetTextureRect(0, 0, rect);
+}
+
+void MaterialClass::SetTextureSource(size_t map, size_t texture, std::unique_ptr<TextureSource> source) noexcept
+{
+    base::SafeIndex(mTextureMaps, map)->SetTextureSource(texture, std::move(source));
+}
+
+void MaterialClass::SetTextureSource(std::unique_ptr<TextureSource> source) noexcept
+{
+    SetTextureSource(0, 0, std::move(source));
 }
 
 // static

@@ -48,7 +48,6 @@
 #include <stack>
 #include <functional>
 
-
 #include "engine/ui.h"
 #include "engine/data.h"
 #include "data/json.h"
@@ -57,6 +56,9 @@
 #include "graphics/color4f.h"
 #include "graphics/simple_shape.h"
 #include "graphics/texture_file_source.h"
+#include "graphics/image.h"
+#include "graphics/packer.h"
+#include "graphics/material_instance.h"
 #include "editor/app/resource-uri.h"
 #include "editor/app/packer.h"
 #include "editor/app/eventlog.h"

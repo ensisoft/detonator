@@ -25,6 +25,7 @@
 #include "graphics/drawing.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
+#include "graphics/material_instance.h"
 #include "graphics/material_class.h"
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
@@ -34,6 +35,7 @@
 #include "graphics/linebatch.h"
 #include "graphics/text_material.h"
 #include "graphics/material_class.h"
+#include "graphics/texture_map.h"
 
 namespace {
 gfx::MaterialInstance MakeMaterial(const gfx::Color4f& color)

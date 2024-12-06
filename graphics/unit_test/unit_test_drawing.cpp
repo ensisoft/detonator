@@ -34,6 +34,7 @@
 #include "graphics/types.h"
 #include "graphics/material.h"
 #include "graphics/material_class.h"
+#include "graphics/material_instance.h"
 #include "graphics/device.h"
 #include "graphics/drawable.h"
 #include "graphics/shader.h"

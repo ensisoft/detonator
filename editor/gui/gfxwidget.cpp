@@ -32,6 +32,7 @@
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
 #include "graphics/material_class.h"
+#include "graphics/material_instance.h"
 #include "editor/app/resource-uri.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/utility.h"

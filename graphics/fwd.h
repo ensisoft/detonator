@@ -30,6 +30,8 @@ namespace gfx
     class IBitmapGenerator;
     class Image;
     class Text;
+    class TextureMap;
+    class Texturesource;
     class TexturePacker;
     class Loader;
     class Resource;

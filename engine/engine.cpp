@@ -48,6 +48,7 @@
 #include "graphics/transform.h"
 #include "graphics/resource.h"
 #include "graphics/material.h"
+#include "graphics/material_instance.h"
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
 #include "graphics/texture_bitmap_buffer_source.h"

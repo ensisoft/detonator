@@ -58,6 +58,7 @@ add_executable(UnitTest
     ../base/utility.cpp
     ../data/io.cpp
     ../data/json.cpp
+    ../graphics/material.cpp
     ../engine/audio.cpp
     ../engine/camera.cpp
     ../engine/lua_base.cpp

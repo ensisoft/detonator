@@ -23,6 +23,7 @@
 #include "base/utility.h"
 #include "data/fwd.h"
 #include "graphics/types.h"
+#include "graphics/texture_source.h"
 
 namespace gfx
 {

@@ -111,7 +111,7 @@ namespace gui
         Ui::DlgImgView mUI;
     private:
         app::Workspace* mWorkspace = nullptr;
-        std::shared_ptr<gfx::TextureMap2DClass> mClass;
+        std::shared_ptr<gfx::MaterialClass> mClass;
         std::unique_ptr<gfx::Material> mMaterial;
         unsigned mWidth  = 0;
         unsigned mHeight = 0;

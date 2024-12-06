@@ -24,6 +24,7 @@
 
 #include "base/math.h"
 #include "graphics/material_class.h"
+#include "graphics/material_instance.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/dlgentity.h"
 #include "editor/gui/dlgscriptvar.h"

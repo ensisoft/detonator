@@ -29,8 +29,9 @@
 #include "editor/gui/dlgtexturerect.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
-#include "graphics/drawing.h"
+#include "graphics/material_instance.h"
 #include "graphics/material_class.h"
+#include "graphics/drawing.h"
 
 namespace gui
 {

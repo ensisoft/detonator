@@ -30,6 +30,7 @@
 #include <unordered_map>
 
 #include "graphics/polygon_mesh.h"
+#include "graphics/material_instance.h"
 #include "editor/app/import.h"
 
 namespace app {

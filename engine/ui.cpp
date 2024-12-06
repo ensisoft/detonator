@@ -42,6 +42,7 @@
 #include "graphics/simple_shape.h"
 #include "graphics/texture_file_source.h"
 #include "graphics/text_material.h"
+#include "graphics/material_instance.h"
 #include "engine/ui.h"
 #include "engine/classlib.h"
 #include "engine/data.h"
