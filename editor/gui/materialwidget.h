@@ -28,10 +28,12 @@
 #include <vector>
 
 #include "editor/gui/mainwidget.h"
+#include "graphics/fwd.h"
 #include "graphics/types.h"
 #include "graphics/material.h"
 
 namespace gfx {
+    class MaterialInstance;
     class Material;
     class Painter;
 } // gfx

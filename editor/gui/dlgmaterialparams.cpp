@@ -30,6 +30,7 @@
 #include "game/material_animator.h"
 #include "graphics/material.h"
 #include "graphics/material_class.h"
+#include "graphics/material_instance.h"
 #include "editor/gui/dlgmaterialparams.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/uniform.h"

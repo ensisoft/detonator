@@ -155,6 +155,7 @@ namespace gfx
 
         explicit MaterialClass(Type type, std::string id = base::RandomString(10));
         MaterialClass(const MaterialClass& other, bool copy=true);
+       ~MaterialClass();
 
         // Set the surface type of the material.
         inline void SetSurfaceType(SurfaceType surface) noexcept
@@ -426,20 +427,13 @@ namespace gfx
 
         FRect FindTextureRect(const std::string& id) const noexcept;
         void SetTextureRect(const std::string& id, const gfx::FRect& rect) noexcept;
-
-        inline void SetTextureRect(size_t map, size_t texture, const gfx::FRect& rect) noexcept
-        { base::SafeIndex(mTextureMaps, map)->SetTextureRect(texture, rect); }
-        inline void SetTextureRect(const gfx::FRect& rect)noexcept
-        { SetTextureRect(0, 0, rect); }
-        inline void SetTextureSource(size_t map, size_t texture, std::unique_ptr<TextureSource> source) noexcept
-        { base::SafeIndex(mTextureMaps, map)->SetTextureSource(texture, std::move(source)); }
-        inline void SetTextureSource(std::unique_ptr<TextureSource> source) noexcept
-        { SetTextureSource(0, 0, std::move(source)); }
+        void SetTextureRect(size_t map, size_t texture, const gfx::FRect& rect) noexcept;
+        void SetTextureRect(const gfx::FRect& rect) noexcept;
+        void SetTextureSource(size_t map, size_t texture, std::unique_ptr<TextureSource> source) noexcept;
+        void SetTextureSource(std::unique_ptr<TextureSource> source) noexcept;
 
         static ShaderSource CreateShaderStub(Type type);
-
         static std::string GetColorUniformName(ColorIndex index);
-
         static std::unique_ptr<MaterialClass> ClassFromJson(const data::Reader& data);
 
         MaterialClass& operator=(const MaterialClass& other);

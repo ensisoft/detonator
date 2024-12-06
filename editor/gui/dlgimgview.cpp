@@ -37,6 +37,7 @@
 #include "graphics/bitmap.h"
 #include "graphics/simple_shape.h"
 #include "graphics/texture_file_source.h"
+#include "graphics/material_instance.h"
 #include "editor/app/resource-uri.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"

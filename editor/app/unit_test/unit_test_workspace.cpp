@@ -42,6 +42,8 @@
 #include "game/entity_node_text_item.h"
 #include "graphics/types.h"
 #include "graphics/texture_file_source.h"
+#include "graphics/material_instance.h"
+#include "graphics/image.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
 

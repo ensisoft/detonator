@@ -31,6 +31,7 @@
 #include "engine/camera.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
+#include "graphics/material_instance.h"
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
 #include "editor/app/format.h"

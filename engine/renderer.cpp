@@ -39,6 +39,7 @@
 #include "graphics/debug_drawable.h"
 #include "graphics/text_material.h"
 #include "graphics/material_class.h"
+#include "graphics/material_instance.h"
 #include "engine/classlib.h"
 #include "game/entity.h"
 #include "game/scene.h"

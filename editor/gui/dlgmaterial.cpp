@@ -28,6 +28,7 @@
 #include "editor/gui/utility.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
+#include "graphics/material_instance.h"
 #include "graphics/drawable.h"
 #include "graphics/drawing.h"
 

@@ -34,6 +34,7 @@
 #include "graphics/guidegrid.h"
 #include "graphics/material.h"
 #include "graphics/material_class.h"
+#include "graphics/material_instance.h"
 
 namespace gui
 {

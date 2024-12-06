@@ -37,6 +37,7 @@
 #include "data/json.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
+#include "graphics/material_instance.h"
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
