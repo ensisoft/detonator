@@ -224,6 +224,7 @@ add_library(GfxLib
     graphics/texture_text_buffer_source.cpp
     graphics/text_material.cpp
     graphics/text_buffer.cpp
+    graphics/text_font.cpp
     graphics/material_class.cpp
     graphics/material_instance.cpp
     graphics/shaderprogram.cpp
@@ -289,6 +290,7 @@ add_library(GfxLibTesting
     graphics/texture_text_buffer_source.cpp
     graphics/text_material.cpp
     graphics/text_buffer.cpp
+    graphics/text_font.cpp
     graphics/material_class.cpp
     graphics/material_instance.cpp
     graphics/shaderprogram.cpp
@@ -807,6 +809,7 @@ add_executable(graphics_test
     graphics/texture_text_buffer_source.cpp
     graphics/text_material.cpp
     graphics/text_buffer.cpp
+    graphics/text_font.cpp
     graphics/material_class.cpp
     graphics/material_instance.cpp
     graphics/shaderprogram.cpp

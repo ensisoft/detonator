@@ -267,6 +267,7 @@ add_executable(GameEngine
     ../graphics/texture_text_buffer_source.cpp
     ../graphics/text_material.cpp
     ../graphics/text_buffer.cpp
+    ../graphics/text_font.cpp
     ../graphics/material_class.cpp
     ../graphics/material_instance.cpp
     ../graphics/drawable.cpp
