@@ -80,7 +80,11 @@ Texture* TextureTextBufferSource::Upload(const Environment& env, Device& device)
     }
     else if (format == TextBuffer::RasterFormat::Texture)
     {
-        if (texture = mTextBuffer.RasterizeTexture(mId, mName, device))
+        // this is not a texture used for dynamic text.
+        // this is a static texture that happens to contain text.
+        const auto transient = false;
+
+        if ((texture = mTextBuffer.RasterizeTexture(mId, mName, device, transient)))
         {
             texture->SetName(mName);
             texture->SetFilter(Texture::MinFilter::Linear);

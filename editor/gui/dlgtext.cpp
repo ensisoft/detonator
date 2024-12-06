@@ -221,7 +221,7 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
         }
         else if (format == gfx::TextBuffer::RasterFormat::Texture)
         {
-            if (auto* texture = mText.RasterizeTexture("TmpTextRaster", "TmpTextRaster", *painter.GetDevice()))
+            if (auto* texture = mText.RasterizeTexture("TmpTextRaster", "TmpTextRaster", *painter.GetDevice(), true))
             {
                 texture->SetTransient(true);
                 texture->SetGarbageCollection(true);
