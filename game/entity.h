@@ -687,6 +687,8 @@ namespace game
         // attachments, i.d. drawables or text items.
         bool HasRenderableItems() const;
 
+        bool HasLights() const;
+
         using PhysicsJointClass = EntityClass::PhysicsJoint;
         using PhysicsJointType  = EntityClass::PhysicsJointType;
         using PhysicsJointParams = EntityClass::PhysicsJointParams;

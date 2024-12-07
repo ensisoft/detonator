@@ -47,6 +47,8 @@ namespace game
     class Fixture;
     class MapNodeClass;
     class MapNode;
+    class LightClass;
+    class Light;
     class Entity;
 
     class EntityNodeClass
@@ -138,6 +140,8 @@ namespace game
         // Attach a transformer to this node class
         void SetTransformer(const NodeTransformerClass& transformer);
 
+        void SetLight(const LightClass& light);
+
         // Create and attach a rigid body with default settings.
         void CreateRigidBody();
         // Create and attach a drawable with default settings.
@@ -153,6 +157,8 @@ namespace game
         // Create and attach a transformer with default settings.
         void CreateTransformer();
 
+        void CreateLight();
+
         void RemoveDrawable() noexcept
         { mDrawable.reset(); }
         void RemoveRigidBody() noexcept
@@ -167,28 +173,32 @@ namespace game
         { mMapNode.reset(); }
         void RemoveTransformer() noexcept
         { mTransformer.reset(); }
+        void RemoveLight() noexcept
+        { mLight.reset(); }
 
         // Get the rigid body shared class object if any.
-        std::shared_ptr<const RigidBodyClass> GetSharedRigidBody() const noexcept
+        auto GetSharedRigidBody() const noexcept
         { return mRigidBody; }
         // Get the drawable shared class object if any.
-        std::shared_ptr<const DrawableItemClass> GetSharedDrawable() const noexcept
+        auto GetSharedDrawable() const noexcept
         { return mDrawable; }
         // Get the text item class object if any.
-        std::shared_ptr<const TextItemClass> GetSharedTextItem() const noexcept
+        auto GetSharedTextItem() const noexcept
         { return mTextItem; }
         // Get the spatial index node if any.
-        std::shared_ptr<const SpatialNodeClass> GetSharedSpatialNode() const noexcept
+        auto GetSharedSpatialNode() const noexcept
         { return mSpatialNode; }
         // Get the fixture class if any
-        std::shared_ptr<const FixtureClass> GetSharedFixture() const noexcept
+        auto GetSharedFixture() const noexcept
         { return mFixture; }
         // Get the map node class if any.
-        std::shared_ptr<const MapNodeClass> GetSharedMapNode() const noexcept
+        auto GetSharedMapNode() const noexcept
         { return mMapNode; }
-
-        std::shared_ptr<const NodeTransformerClass> GetSharedTransformer() const noexcept
+        auto GetSharedTransformer() const noexcept
         { return mTransformer; }
+        auto GetSharedLight() const noexcept
+        { return mLight; }
+
 
         // Returns true if a rigid body has been set for this class.
         bool HasRigidBody() const noexcept
@@ -206,6 +216,8 @@ namespace game
         { return !!mMapNode; }
         bool HasTransformer() const noexcept
         { return !!mTransformer; }
+        bool HasLight() const noexcept
+        { return !!mLight; }
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
@@ -231,6 +243,8 @@ namespace game
         { return mMapNode.get(); }
         NodeTransformerClass* GetTransformer() noexcept
         { return mTransformer.get(); }
+        LightClass* GetLight() noexcept
+        { return mLight.get(); }
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
@@ -258,6 +272,9 @@ namespace game
 
         const MapNodeClass* GetMapNode() const noexcept
         { return mMapNode.get(); }
+
+        const LightClass* GetLight() const noexcept
+        { return mLight.get(); }
 
         // Get the transform that applies to this node
         // and the subsequent hierarchy of nodes.
@@ -307,6 +324,7 @@ namespace game
         std::shared_ptr<FixtureClass> mFixture;
         std::shared_ptr<MapNodeClass> mMapNode;
         std::shared_ptr<NodeTransformerClass> mTransformer;
+        std::shared_ptr<LightClass> mLight;
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
     };
@@ -501,6 +519,8 @@ namespace game
 
         NodeTransformer* GetTransformer();
 
+        Light* GetLight();
+
         // Get the node's drawable item if any. If now drawable
         // item is set then returns nullptr.
         const DrawableItem* GetDrawable() const;
@@ -521,6 +541,8 @@ namespace game
 
         const NodeTransformer* GetTransformer() const;
 
+        const Light* GetLight() const;
+
         bool HasRigidBody() const noexcept
         { return !!mRigidBody; }
         bool HasDrawable() const noexcept
@@ -533,6 +555,8 @@ namespace game
         { return !!mFixture; }
         bool HasMapNode() const noexcept
         { return !!mMapNode; }
+        bool HasLight() const noexcept
+        { return !!mLight; }
 
         // shortcut for class getters.
         const std::string& GetClassId() const noexcept
@@ -580,6 +604,7 @@ namespace game
         // map node if any.
         std::unique_ptr<MapNode> mMapNode;
         std::unique_ptr<NodeTransformer> mTransformer;
+        std::unique_ptr<Light> mLight;
 
     };
 

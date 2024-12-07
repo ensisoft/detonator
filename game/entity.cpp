@@ -1471,6 +1471,16 @@ bool Entity::HasRenderableItems() const
     return false;
 }
 
+bool Entity::HasLights() const
+{
+    for (auto& node : mNodes)
+    {
+        if (node->HasLight())
+            return true;
+    }
+    return false;
+}
+
 Entity::PhysicsJoint* Entity::FindJointById(const std::string& id)
 {
     for (auto& joint : mJoints)

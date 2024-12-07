@@ -99,6 +99,7 @@ add_executable(UnitTest
     ../game/entity_node_spatial_node.cpp
     ../game/entity_node_fixture.cpp
     ../game/entity_node_tilemap_node.cpp
+    ../game/entity_node_light.cpp
     ../game/scene.cpp
     ../game/scriptvar.cpp
     ../game/tilemap.cpp
@@ -231,6 +232,7 @@ add_executable(GameEngine
     ../game/entity_node_spatial_node.cpp
     ../game/entity_node_fixture.cpp
     ../game/entity_node_tilemap_node.cpp
+    ../game/entity_node_light.cpp
     ../game/scene.cpp
     ../game/scriptvar.cpp
     ../game/tilemap.cpp
