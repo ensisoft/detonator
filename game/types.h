@@ -18,6 +18,16 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/vec2.hpp>
+#  include <glm/vec3.hpp>
+#  include <glm/vec4.hpp>
+#include "warnpop.h"
+
+#include <string>
+#include <variant>
+#include <unordered_map>
+
 #include "base/box.h"
 #include "base/types.h"
 #include "base/color4f.h"
@@ -40,6 +50,12 @@ namespace game
     using FRadians = base::FRadians;
     using FDegrees = base::FDegrees;
     using Color = base::Color;
+
+    using LightParam = std::variant<float,
+            glm::vec2, glm::vec3, glm::vec4,
+            Color4f>;
+    using LightParamMap = std::unordered_map<std::string, LightParam>;
+
 
 } // namespace
 

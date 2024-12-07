@@ -38,6 +38,7 @@
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_tilemap_node.h"
+#include "game/entity_node_light.h"
 #include "game/transform_animator.h"
 #include "game/property_animator.h"
 
@@ -133,6 +134,14 @@ void unit_test_entity_node()
     game::MapNodeClass map;
     map.SetMapSortPoint(glm::vec2{2.0f, 3.0f});
 
+
+    game::LightClass light;
+    light.Enable(true);
+    light.SetLightParameter("float", 1.0f);
+    light.SetLightParameter("vec2", glm::vec2{1.0f, 2.0f});
+    light.SetLightParameter("vec3", glm::vec3{1.0f, 2.0f, 3.0f});
+    light.SetLightParameter("vec4", glm::vec4{1.0f, 2.0f, 3.0f, 4.0f});
+
     game::NodeTransformerClass transformer;
     transformer.SetAngularAcceleration(1.0f);
     transformer.SetAngularVelocity(5.0f);
@@ -153,7 +162,7 @@ void unit_test_entity_node()
     node.SetFixture(fix);
     node.SetMapNode(map);
     node.SetTransformer(transformer);
-
+    node.SetLight(light);
 
     TEST_REQUIRE(node.HasDrawable());
     TEST_REQUIRE(node.HasRigidBody());
@@ -162,6 +171,7 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.HasFixture());
     TEST_REQUIRE(node.HasMapNode());
     TEST_REQUIRE(node.HasTransformer());
+    TEST_REQUIRE(node.HasLight());
     TEST_REQUIRE(node.GetName()         == "root");
     TEST_REQUIRE(node.GetSize()         == glm::vec2(100.0f, 100.0f));
     TEST_REQUIRE(node.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -207,6 +217,10 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetTransformer()->GetAngularVelocity() == 5.0f);
     TEST_REQUIRE(node.GetTransformer()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
     TEST_REQUIRE(node.GetTransformer()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
+    TEST_REQUIRE(*node.GetLight()->GetLightParameter<float>("float") == 1.0f);
+    TEST_REQUIRE(*node.GetLight()->GetLightParameter<glm::vec2>("vec2") == glm::vec2(1.0f, 2.0f));
+    TEST_REQUIRE(*node.GetLight()->GetLightParameter<glm::vec3>("vec3") == glm::vec3(1.0f, 2.0f, 3.0f));
+    TEST_REQUIRE(*node.GetLight()->GetLightParameter<glm::vec4>("vec4") == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
 
     // to/from json
     {
@@ -219,6 +233,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.HasTextItem());
         TEST_REQUIRE(ret.HasSpatialNode());
         TEST_REQUIRE(ret.HasMapNode());
+        TEST_REQUIRE(ret.HasLight());
         TEST_REQUIRE(ret.GetName()         == "root");
         TEST_REQUIRE(ret.GetSize()         == glm::vec2(100.0f, 100.0f));
         TEST_REQUIRE(ret.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -259,6 +274,10 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.GetTransformer()->GetAngularVelocity() == 5.0f);
         TEST_REQUIRE(ret.GetTransformer()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
         TEST_REQUIRE(ret.GetTransformer()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(*ret.GetLight()->GetLightParameter<float>("float") == 1.0f);
+        TEST_REQUIRE(*ret.GetLight()->GetLightParameter<glm::vec2>("vec2") == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(*ret.GetLight()->GetLightParameter<glm::vec3>("vec3") == glm::vec3(1.0f, 2.0f, 3.0f));
+        TEST_REQUIRE(*ret.GetLight()->GetLightParameter<glm::vec4>("vec4") == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
         TEST_REQUIRE(ret.GetHash() == node.GetHash());
     }
 
@@ -297,6 +316,10 @@ void unit_test_entity_node()
         TEST_REQUIRE(clone.GetSpatialNode()->TestFlag(game::SpatialNodeClass::Flags::ReportOverlap));
         TEST_REQUIRE(clone.GetSpatialNode()->GetShape() == game::SpatialNodeClass::Shape::AABB);
         TEST_REQUIRE(clone.GetFixture()->GetCollisionShape() == game::FixtureClass::CollisionShape::Circle);
+        TEST_REQUIRE(*clone.GetLight()->GetLightParameter<float>("float") == 1.0f);
+        TEST_REQUIRE(*clone.GetLight()->GetLightParameter<glm::vec2>("vec2") == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(*clone.GetLight()->GetLightParameter<glm::vec3>("vec3") == glm::vec3(1.0f, 2.0f, 3.0f));
+        TEST_REQUIRE(*clone.GetLight()->GetLightParameter<glm::vec4>("vec4") == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
     }
 
     // test instance state.
@@ -313,6 +336,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(instance.HasRigidBody());
         TEST_REQUIRE(instance.HasDrawable());
         TEST_REQUIRE(instance.HasSpatialNode());
+        TEST_REQUIRE(instance.HasLight());
         TEST_REQUIRE(instance.GetDrawable()->GetLineWidth()   == real::float32(5.0f));
         TEST_REQUIRE(instance.GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::MaskCover);
         TEST_REQUIRE(instance.GetRigidBody()->GetPolygonShapeId() == "shape");

@@ -254,6 +254,7 @@ add_library(EngineLib
     game/entity_node_spatial_node.cpp
     game/entity_node_fixture.cpp
     game/entity_node_tilemap_node.cpp
+    game/entity_node_light.cpp
     game/scriptvar.cpp
     game/scene.cpp
     game/tilemap.cpp
@@ -1041,6 +1042,7 @@ add_library(GameLibTesting
     game/entity_node_spatial_node.cpp
     game/entity_node_fixture.cpp
     game/entity_node_tilemap_node.cpp
+    game/entity_node_light.cpp
     game/scriptvar.cpp
     game/animation.cpp
     game/animator.cpp
