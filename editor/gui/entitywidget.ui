@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1900</width>
-    <height>1064</height>
+    <width>1952</width>
+    <height>1361</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -73,7 +73,7 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>120</width>
+              <width>151</width>
               <height>0</height>
              </size>
             </property>
@@ -264,7 +264,7 @@
                <x>0</x>
                <y>0</y>
                <width>353</width>
-               <height>431</height>
+               <height>831</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -1416,7 +1416,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QScrollArea" name="scrollArea_2">
+      <widget class="QScrollArea" name="nodeScrollArea">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -1444,13 +1444,13 @@
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
-       <widget class="QWidget" name="scrollAreaWidgetContents_2">
+       <widget class="QWidget" name="nodeScrollAreaWidgetContents">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>426</width>
-          <height>1251</height>
+          <width>427</width>
+          <height>905</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1640,7 +1640,7 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>109</width>
+                <width>140</width>
                 <height>0</height>
                </size>
               </property>
@@ -1668,7 +1668,7 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>114</width>
+                <width>145</width>
                 <height>0</height>
                </size>
               </property>
@@ -1696,7 +1696,7 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>109</width>
+                <width>140</width>
                 <height>0</height>
                </size>
               </property>
@@ -1740,7 +1740,7 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>109</width>
+                <width>140</width>
                 <height>0</height>
                </size>
               </property>
@@ -1854,7 +1854,7 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>109</width>
+                <width>140</width>
                 <height>0</height>
                </size>
               </property>
@@ -1888,7 +1888,7 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>114</width>
+                <width>145</width>
                 <height>0</height>
                </size>
               </property>
@@ -1931,7 +1931,7 @@
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>107</width>
+                  <width>138</width>
                   <height>0</height>
                  </size>
                 </property>
@@ -2021,30 +2021,16 @@
                   <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
                 </property>
                 <property name="popupMode">
-                 <enum>QToolButton::MenuButtonPopup</enum>
+                 <enum>QToolButton::InstantPopup</enum>
                 </property>
                 <property name="toolButtonStyle">
                  <enum>Qt::ToolButtonTextBesideIcon</enum>
                 </property>
+                <property name="autoRaise">
+                 <bool>false</bool>
+                </property>
                 <property name="arrowType">
-                 <enum>Qt::NoArrow</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnAddDrawable">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Add Renderer Model and Material</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
+                 <enum>Qt::DownArrow</enum>
                 </property>
                </widget>
               </item>
@@ -2638,23 +2624,6 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="btnAddTextItem">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Add Renderer Text Item</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/text.png</normaloff>:/16x16_ico_png/text.png</iconset>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="gui::CollapsibleWidget" name="textItem">
                 <property name="collapsed" stdset="0">
                  <bool>true</bool>
@@ -3142,23 +3111,6 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="btnAddRigidBody">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Add Physics Rigid Body</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/bricks.png</normaloff>:/16x16_ico_png/bricks.png</iconset>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="gui::CollapsibleWidget" name="rigidBody">
                 <property name="collapsed" stdset="0">
                  <bool>true</bool>
@@ -3403,23 +3355,6 @@
                   </item>
                  </layout>
                 </widget>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnAddFixture">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Add Physics Rigid Body Fixture</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/bricks.png</normaloff>:/16x16_ico_png/bricks.png</iconset>
-                </property>
                </widget>
               </item>
               <item>
@@ -3705,23 +3640,6 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="btnAddTilemapNode">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Add Tilemap Placement Node</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/tilemap.png</normaloff>:/16x16_ico_png/tilemap.png</iconset>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="gui::CollapsibleWidget" name="tilemapNode">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -3851,23 +3769,6 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="btnAddSpatialNode">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Add Spatial Query Support Node</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/database.png</normaloff>:/16x16_ico_png/database.png</iconset>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="gui::CollapsibleWidget" name="spatialNode">
                 <property name="collapsed" stdset="0">
                  <bool>true</bool>
@@ -3959,23 +3860,6 @@
                   </item>
                  </layout>
                 </widget>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnAddTransformer">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Add Node Transformer</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/vector.png</normaloff>:/16x16_ico_png/vector.png</iconset>
-                </property>
                </widget>
               </item>
               <item>
@@ -4758,7 +4642,7 @@
      <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
    </property>
    <property name="text">
-    <string>Model &amp; Material</string>
+    <string>Model &amp;&amp; Material</string>
    </property>
   </action>
   <action name="actionAddTextItem">
@@ -4924,7 +4808,7 @@
   <tabstop>btnEditJoint</tabstop>
   <tabstop>btnDeleteJoint</tabstop>
   <tabstop>tree</tabstop>
-  <tabstop>scrollArea_2</tabstop>
+  <tabstop>nodeScrollArea</tabstop>
   <tabstop>nodeID</tabstop>
   <tabstop>nodeName</tabstop>
   <tabstop>nodeTag</tabstop>
@@ -4940,7 +4824,6 @@
   <tabstop>nodePlus90</tabstop>
   <tabstop>nodeMinus90</tabstop>
   <tabstop>btnAddNodeItem</tabstop>
-  <tabstop>btnAddDrawable</tabstop>
   <tabstop>drawable</tabstop>
   <tabstop>dsDrawable</tabstop>
   <tabstop>btnEditDrawable</tabstop>
@@ -4972,7 +4855,6 @@
   <tabstop>dsDoubleSided</tabstop>
   <tabstop>dsDepthTest</tabstop>
   <tabstop>btnDelDrawable</tabstop>
-  <tabstop>btnAddTextItem</tabstop>
   <tabstop>textItem</tabstop>
   <tabstop>tiFontName</tabstop>
   <tabstop>btnSelectFont</tabstop>
@@ -4994,7 +4876,6 @@
   <tabstop>tiStatic</tabstop>
   <tabstop>tiBloom</tabstop>
   <tabstop>btnDelTextItem</tabstop>
-  <tabstop>btnAddRigidBody</tabstop>
   <tabstop>rigidBody</tabstop>
   <tabstop>rbSimulation</tabstop>
   <tabstop>rbShape</tabstop>
@@ -5010,7 +4891,6 @@
   <tabstop>rbCanSleep</tabstop>
   <tabstop>rbDiscardRotation</tabstop>
   <tabstop>btnDelRigidBody</tabstop>
-  <tabstop>btnAddFixture</tabstop>
   <tabstop>fixture</tabstop>
   <tabstop>fxBody</tabstop>
   <tabstop>fxShape</tabstop>
@@ -5023,17 +4903,14 @@
   <tabstop>btnResetFxDensity</tabstop>
   <tabstop>fxIsSensor</tabstop>
   <tabstop>btnDelFixture</tabstop>
-  <tabstop>btnAddTilemapNode</tabstop>
   <tabstop>tilemapNode</tabstop>
   <tabstop>mnHCenter</tabstop>
   <tabstop>mnVCenter</tabstop>
   <tabstop>btnDelTilemapNode</tabstop>
-  <tabstop>btnAddSpatialNode</tabstop>
   <tabstop>spatialNode</tabstop>
   <tabstop>spnShape</tabstop>
   <tabstop>spnEnabled</tabstop>
   <tabstop>btnDelSpatialNode</tabstop>
-  <tabstop>btnAddTransformer</tabstop>
   <tabstop>transformer</tabstop>
   <tabstop>tfIntegrator</tabstop>
   <tabstop>tfVelocityX</tabstop>
