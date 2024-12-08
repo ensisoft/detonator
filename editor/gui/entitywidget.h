@@ -258,19 +258,12 @@ namespace gui
         void on_tfAccelY_valueChanged(double);
         void on_tfAccelA_valueChanged(double);
         void on_tfEnabled_stateChanged(int);
-        void on_btnAddDrawable_clicked();
         void on_btnDelDrawable_clicked();
-        void on_btnAddTextItem_clicked();
         void on_btnDelTextItem_clicked();
-        void on_btnAddRigidBody_clicked();
         void on_btnDelRigidBody_clicked();
-        void on_btnAddFixture_clicked();
         void on_btnDelFixture_clicked();
-        void on_btnAddTilemapNode_clicked();
         void on_btnDelTilemapNode_clicked();
-        void on_btnAddSpatialNode_clicked();
         void on_btnDelSpatialNode_clicked();
-        void on_btnAddTransformer_clicked();
         void on_btnDelTransformer_clicked();
         void on_actionAddDrawable_triggered();
         void on_actionAddTextItem_triggered();
@@ -305,6 +298,7 @@ namespace gui
         void ToggleFixture(bool on);
         void ToggleTilemapNode(bool on);
         void ToggleTransformer(bool on);
+        void ScrollEntityNodeArea();
 
     private:
         void PaintScene(gfx::Painter& painter, double secs);

@@ -916,7 +916,7 @@ void EntityWidget::SetViewerMode()
     SetVisible(mUI.nodeProperties,  false);
     SetVisible(mUI.nodeTransform,   false);
     SetVisible(mUI.nodeItems,       false);
-    SetVisible(mUI.scrollArea_2,    false);
+    SetVisible(mUI.nodeScrollArea,  false);
     SetVisible(mUI.cmbStyle,        false);
 
     SetValue(mUI.chkShowGrid,       false);
@@ -2878,11 +2878,6 @@ void EntityWidget::on_tfEnabled_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
-void EntityWidget::on_btnAddDrawable_clicked()
-{
-    ToggleDrawable(true);
-}
-
 void EntityWidget::on_btnDelDrawable_clicked()
 {
     ToggleDrawable(false);
@@ -2900,6 +2895,9 @@ void EntityWidget::ToggleDrawable(bool on)
                 draw.SetMaterialId(mState.workspace->GetMaterialClassByName("Checkerboard")->GetId());
                 draw.SetDrawableId(mState.workspace->GetDrawableClassByName("Rectangle")->GetId());
                 node->SetDrawable(draw);
+
+                ScrollEntityNodeArea();
+
                 DEBUG("Added drawable item to '%1'", node->GetName());
             }
         }
@@ -2913,11 +2911,6 @@ void EntityWidget::ToggleDrawable(bool on)
 
         mUI.drawable->Collapse(!on);
     }
-}
-
-void EntityWidget::on_btnAddRigidBody_clicked()
-{
-    ToggleRigidBody(true);
 }
 
 void EntityWidget::on_btnDelRigidBody_clicked()
@@ -2965,6 +2958,9 @@ void EntityWidget::ToggleRigidBody(bool on)
             }
         }
         node->SetRigidBody(body);
+
+        ScrollEntityNodeArea();
+
         DEBUG("Added rigid body to '%1'", node->GetName());
     }
 
@@ -2979,10 +2975,6 @@ void EntityWidget::ToggleRigidBody(bool on)
     mUI.rigidBody->Collapse(!on);
 }
 
-void EntityWidget::on_btnAddTextItem_clicked()
-{
-    ToggleTextItem(true);
-}
 void EntityWidget::on_btnDelTextItem_clicked()
 {
     ToggleTextItem(false);
@@ -3011,6 +3003,9 @@ void EntityWidget::ToggleTextItem(bool on)
                 text.SetText("Hello");
                 text.SetLayer(layer);
                 node->SetTextItem(text);
+
+                ScrollEntityNodeArea();
+
                 DEBUG("Added text item to '%1'", node->GetName());
             }
         }
@@ -3026,19 +3021,11 @@ void EntityWidget::ToggleTextItem(bool on)
     }
 }
 
-void EntityWidget::on_btnAddSpatialNode_clicked()
-{
-    ToggleSpatialNode(true);
-}
 void EntityWidget::on_btnDelSpatialNode_clicked()
 {
     ToggleSpatialNode(false);
 }
 
-void EntityWidget::on_btnAddTransformer_clicked()
-{
-    ToggleTransformer(true);
-}
 void EntityWidget::on_btnDelTransformer_clicked()
 {
     ToggleTransformer(false);
@@ -3108,6 +3095,9 @@ void EntityWidget::ToggleSpatialNode(bool on)
                 sp.SetShape(game::SpatialNodeClass::Shape::AABB);
                 sp.SetFlag(game::SpatialNodeClass::Flags::Enabled, GetValue(mUI.spnEnabled));
                 node->SetSpatialNode(sp);
+
+                ScrollEntityNodeArea();
+
                 DEBUG("Added spatial node to '%1'.", node->GetName());
             }
         }
@@ -3122,10 +3112,6 @@ void EntityWidget::ToggleSpatialNode(bool on)
     }
 }
 
-void EntityWidget::on_btnAddFixture_clicked()
-{
-    ToggleFixture(true);
-}
 void EntityWidget::on_btnDelFixture_clicked()
 {
     ToggleFixture(false);
@@ -3165,9 +3151,10 @@ void EntityWidget::ToggleFixture(bool on)
                     }
                 }
             }
-
-
             node->SetFixture(fixture);
+
+            ScrollEntityNodeArea();
+
             DEBUG("Added fixture to '%1'.", node->GetName());
         }
         else if (!on && node->HasFixture())
@@ -3181,10 +3168,6 @@ void EntityWidget::ToggleFixture(bool on)
     }
 }
 
-void EntityWidget::on_btnAddTilemapNode_clicked()
-{
-    ToggleTilemapNode(true);
-}
 void EntityWidget::on_btnDelTilemapNode_clicked()
 {
     ToggleTilemapNode(false);
@@ -3197,8 +3180,10 @@ void EntityWidget::ToggleTilemapNode(bool on)
         if (on && !node->HasMapNode())
         {
             game::MapNodeClass map;
-
             node->SetMapNode(map);
+
+            ScrollEntityNodeArea();
+
             DEBUG("Added map node to '%1'", node->GetName());
         }
         else if (!on && node->HasMapNode())
@@ -3219,6 +3204,9 @@ void EntityWidget::ToggleTransformer(bool on)
         {
             game::NodeTransformerClass trans;
             node->SetTransformer(trans);
+
+            ScrollEntityNodeArea();
+
             DEBUG("Added transformer to node '%1'", node->GetName());
         }
         else if (!on && node->HasTransformer())
@@ -3306,6 +3294,15 @@ void EntityWidget::on_trackList_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionAnimationEdit);
     menu.addAction(mUI.actionAnimationDel);
     menu.exec(QCursor::pos());
+}
+
+void EntityWidget::ScrollEntityNodeArea()
+{
+    QTimer::singleShot(100, this, [this]() {
+        auto* scroll = mUI.nodeScrollArea->verticalScrollBar();
+        const auto max = scroll->maximum();
+        scroll->setValue(max);
+    });
 }
 
 void EntityWidget::TreeCurrentNodeChangedEvent()
@@ -3972,16 +3969,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetEnabled(mUI.nodeTransform, false);
     SetEnabled(mUI.nodeItems, false);
 
-    // attachments (node items)
-    // these are currently hidden, using the actions instead
-    SetVisible(mUI.btnAddDrawable,    false);
-    SetVisible(mUI.btnAddTextItem,    false);
-    SetVisible(mUI.btnAddRigidBody,   false);
-    SetVisible(mUI.btnAddFixture,     false);
-    SetVisible(mUI.btnAddTilemapNode, false);
-    SetVisible(mUI.btnAddSpatialNode, false);
-    SetVisible(mUI.btnAddTransformer, false);
-
     SetEnabled(mUI.actionAddDrawable,    true);
     SetEnabled(mUI.actionAddTextItem,    true);
     SetEnabled(mUI.actionAddRigidBody,   true);
@@ -4024,7 +4011,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
         if (const auto* item = node->GetDrawable())
         {
             SetEnabled(mUI.actionAddDrawable, false);
-            SetVisible(mUI.btnAddDrawable, false);
             SetVisible(mUI.drawable, true);
             SetValue(mUI.dsMaterial, ListItemId(item->GetMaterialId()));
             SetValue(mUI.dsDrawable, ListItemId(item->GetDrawableId()));
@@ -4069,7 +4055,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
         if (const auto* body = node->GetRigidBody())
         {
             SetEnabled(mUI.actionAddRigidBody, false);
-            SetVisible(mUI.btnAddRigidBody, false);
             SetVisible(mUI.rigidBody, true);
             SetValue(mUI.rbSimulation, body->GetSimulation());
             SetValue(mUI.rbShape, body->GetCollisionShape());
@@ -4098,7 +4083,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
         {
             SetEnabled(mUI.actionAddTextItem, false);
             SetVisible(mUI.textItem, true);
-            SetVisible(mUI.btnAddTextItem, false);
             SetValue(mUI.tiFontName, text->GetFontName());
             SetValue(mUI.tiFontSize, text->GetFontSize());
             SetValue(mUI.tiVAlign, text->GetVAlign());
@@ -4118,7 +4102,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
         if (const auto* sp = node->GetSpatialNode())
         {
             SetEnabled(mUI.actionAddSpatialNode, false);
-            SetVisible(mUI.btnAddSpatialNode, false);
             SetVisible(mUI.spatialNode, true);
 
             SetValue(mUI.spnShape, sp->GetShape());
@@ -4127,7 +4110,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
         if (const auto* fixture = node->GetFixture())
         {
             SetEnabled(mUI.actionAddFixture, false);
-            SetVisible(mUI.btnAddFixture, false);
             SetVisible(mUI.fixture, true);
 
             SetValue(mUI.fxBody, ListItemId(fixture->GetRigidBodyNodeId()));
@@ -4154,7 +4136,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
         if (const auto* map = node->GetMapNode())
         {
             SetEnabled(mUI.actionAddTilemapNode, false);
-            SetVisible(mUI.btnAddTilemapNode, false);
             SetVisible(mUI.tilemapNode, true);
 
             const auto& center = map->GetSortPoint();
@@ -4164,7 +4145,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
         if (const auto* trans = node->GetTransformer())
         {
             SetEnabled(mUI.actionAddTransformer, false);
-            SetVisible(mUI.btnAddTransformer, false);
             SetVisible(mUI.transformer, true);
 
             const auto& accel = trans->GetLinearAcceleration();
