@@ -37,17 +37,26 @@ namespace {
 class MainShaderProgram : public gfx::ShaderProgram
 {
 public:
-    MainShaderProgram(const gfx::Color4f& bloom_color, float bloom_threshold)
-      : mBloomColor(bloom_color)
-      , mBloomThreshold(bloom_threshold)
-    {}
-    virtual std::string GetShaderId(const gfx::Material& material, const gfx::Material::Environment& env) const override
+    void SetBloomColor(const gfx::Color4f& color)
+    {
+        mBloomColor = color;
+    }
+    void SetBloomThreshold(float threshold)
+    {
+        mBloomThreshold = threshold;
+    }
+    void EnableBloom(bool on_off)
+    {
+        mEnableBloom = on_off;
+    }
+
+    std::string GetShaderId(const gfx::Material& material, const gfx::Material::Environment& env) const override
     {
         auto ret = material.GetShaderId(env);
         ret += "+main";
         return ret;
     }
-    virtual gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
+    gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
     {
         gfx::ShaderSource source;
         source.SetType(gfx::ShaderSource::Type::Fragment);
@@ -55,15 +64,18 @@ public:
         source.SetPrecision(gfx::ShaderSource::Precision::High);
 
         source.AddSource(R"(
+#define SHADER_FLAG_ENABLE_BLOOM 1
+
 struct FS_OUT {
    vec4 color;
 } fs_out;
 
+uniform int kFlags;
 uniform float kBloomThreshold;
 uniform vec4  kBloomColor;
 
-layout (location=0) out vec4 fragOutColor0;
-layout (location=1) out vec4 fragOutColor1;
+layout (location=0) out vec4 fragOutColor0; // main image
+layout (location=1) out vec4 fragOutColor1; // bloom image
 
 vec4 Bloom(vec4 color) {
     float brightness = dot(color.rgb, kBloomColor.rgb); //vec3(0.2126, 0.7252, 0.0722));
@@ -90,33 +102,53 @@ vec4 sRGB_encode(vec4 color)
 
 void FragmentShaderMain();
 
+bool TestFlag(int flag) {
+   return (kFlags & flag) == flag;
+}
+
 void main() {
     FragmentShaderMain();
 
-    vec4 bloom = Bloom(fs_out.color);
-
     fragOutColor0 = sRGB_encode(fs_out.color);
-    fragOutColor1 = sRGB_encode(bloom);
+
+    if (TestFlag(SHADER_FLAG_ENABLE_BLOOM)) {
+      vec4 bloom = Bloom(fs_out.color);
+      fragOutColor1 = sRGB_encode(bloom);
+    }
 
 })");
         source.Merge(material.GetShader(env, device));
         return source;
     }
-    virtual std::string GetName() const override
-    { return "MainShader"; }
-    virtual void ApplyDynamicState(const gfx::Device& device, gfx::ProgramState& program, gfx::Device::State& state, void* user) const override
+    std::string GetName() const override
+    {
+        return "MainShader";
+    }
+    void ApplyDynamicState(const gfx::Device& device, gfx::ProgramState& program, gfx::Device::State& state, void* user) const override
     {
         const auto* packet = static_cast<const engine::DrawPacket*>(user);
+        const auto enable_packet_bloom = packet->flags.test(engine::DrawPacket::Flags::PP_Bloom);
 
-        const auto bloom = packet->flags.test(engine::DrawPacket::Flags::PP_Bloom);
+        int flags = 0;
 
-        program.SetUniform("kBloomThreshold", bloom ? mBloomThreshold : 1.0f);
-        program.SetUniform("kBloomColor",     mBloomColor);
+        if (enable_packet_bloom && mEnableBloom)
+        {
+            program.SetUniform("kBloomThreshold", mBloomThreshold);
+            program.SetUniform("kBloomColor", mBloomColor);
+            flags |= ShaderFlag_EnableBloom;
+        }
+        program.SetUniform("kFlags", flags);
         //state.blending = gfx::Device::State::BlendOp::None;
     }
+
+    enum Flags {
+        ShaderFlag_EnableBloom = 0x1
+    };
+
 private:
-    const gfx::Color4f mBloomColor;
-    const float mBloomThreshold = 0.0f;
+    gfx::Color4f mBloomColor;
+    float mBloomThreshold = 0.0f;
+    bool mEnableBloom = false;
 };
 
 } // namespace
@@ -156,7 +188,7 @@ void LowLevelRenderer::DrawDefault(DrawPacketList& packets) const
         mRenderHook->BeginDraw(mSettings, res);
     }
 
-    gfx::detail::GenericShaderProgram program;
+    MainShaderProgram program;
 
     Draw(packets, nullptr, program);
 
@@ -195,7 +227,10 @@ void LowLevelRenderer::DrawFramebuffer(DrawPacketList& packets) const
     }
 
     const auto& bloom = mSettings.bloom;
-    MainShaderProgram program(gfx::Color4f(bloom.red, bloom.green, bloom.blue, 1.0f), bloom.threshold);
+    MainShaderProgram program;
+    program.SetBloomColor(gfx::Color4f(bloom.red, bloom.green, bloom.blue, 1.0f));
+    program.SetBloomThreshold(bloom.threshold);
+    program.EnableBloom(true);
 
     Draw(packets, mMainFBO, program);
 
