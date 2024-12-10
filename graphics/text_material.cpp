@@ -124,7 +124,7 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
         source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
         source.AddUniform("kColor", ShaderSource::UniformType::Color4f);
         source.AddUniform("kTime", ShaderSource::UniformType::Float);
-        source.AddVarying("vTexCoord", ShaderSource::UniformType::Vec2f);
+        source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
         source.AddSource(R"(
 void FragmentShaderMain() {
    float alpha = texture(kTexture, vTexCoord).a;
