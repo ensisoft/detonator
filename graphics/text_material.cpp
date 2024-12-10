@@ -186,22 +186,6 @@ std::string TextMaterial::GetShaderName(const Environment&) const
     return "";
 }
 
-std::string TextMaterial::GetClassId() const
-{
-    return {};
-}
-void TextMaterial::Update(float dt)
-{}
-void TextMaterial::SetRuntime(double runtime)
-{}
-void TextMaterial::SetUniform(const std::string& name, const Uniform& value)
-{}
-void TextMaterial::SetUniform(const std::string& name, Uniform&& value)
-{}
-void TextMaterial::ResetUniforms()
-{}
-void TextMaterial::SetUniforms(const UniformMap& uniforms)
-{}
 void TextMaterial::ComputeTextMetrics(unsigned int* width, unsigned int* height) const
 {
     mText.ComputeTextMetrics(width, height);

@@ -44,14 +44,12 @@ namespace gfx
         { mRuntime += dt; }
         void SetRuntime(double runtime) override
         { mRuntime = runtime; }
-        void SetUniform(const std::string& name, const Uniform& value) override
-        { mUniforms[name] = value; }
-        void SetUniform(const std::string& name, Uniform&& value) override
+        void SetUniform(const std::string& name, Uniform value) override
         { mUniforms[name] = std::move(value); }
         void ResetUniforms()  override
         { mUniforms.clear(); }
-        void SetUniforms(const UniformMap& uniforms) override
-        { mUniforms = uniforms; }
+        void SetUniforms(UniformMap uniforms) override
+        { mUniforms = std::move(uniforms); }
         double GetRuntime() const override
         { return mRuntime; }
         const MaterialClass* GetClass() const override

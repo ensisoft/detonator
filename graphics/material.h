@@ -76,21 +76,19 @@ namespace gfx
         // shader object generated from this drawable.
         virtual std::string GetShaderName(const Environment& env) const = 0;
         // Get the material class id (if any).
-        virtual std::string GetClassId() const = 0;
+        virtual std::string GetClassId() const { return {}; }
         // Update material time by a delta value (in seconds).
-        virtual void Update(float dt) = 0;
+        virtual void Update(float dt) {}
         // Set the material instance time to a specific time value.
-        virtual void SetRuntime(double runtime) = 0;
+        virtual void SetRuntime(double runtime) {}
         // Set material instance uniform.
-        virtual void SetUniform(const std::string& name, const Uniform& value) = 0;
-        // Set material instance uniform.
-        virtual void SetUniform(const std::string& name, Uniform&& value) = 0;
+        virtual void SetUniform(const std::string& name, Uniform value) {}
         // Set all material uniforms at once.
-        virtual void SetUniforms(const UniformMap& uniforms) = 0;
+        virtual void SetUniforms(UniformMap uniforms) {}
         // Clear away all material instance uniforms.
-        virtual void ResetUniforms() = 0;
+        virtual void ResetUniforms() {}
         // Get the current material time.
-        virtual double GetRuntime() const = 0;
+        virtual double GetRuntime() const { return 0.0; }
         // Get the material class instance if any. Warning, this may be null for
         // material objects that aren't based on any material clas!
         virtual const MaterialClass* GetClass() const  { return nullptr; }

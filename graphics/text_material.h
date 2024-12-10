@@ -39,15 +39,6 @@ namespace gfx
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment&) const override;
         std::string GetShaderName(const Environment&) const override;
-        std::string GetClassId() const override;
-        void Update(float dt) override;
-        void SetRuntime(double runtime) override;
-        void SetUniform(const std::string& name, const Uniform& value) override;
-        void SetUniform(const std::string& name, Uniform&& value) override;
-        void ResetUniforms()  override;
-        void SetUniforms(const UniformMap& uniforms) override;
-        double GetRuntime() const override
-        { return 0.0f; }
 
         void ComputeTextMetrics(unsigned* width, unsigned* height) const;
 
