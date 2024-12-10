@@ -194,6 +194,10 @@ namespace gfx
         {
             mSamplers.resize(count);
         }
+        inline auto GetTextureCount() const noexcept
+        {
+            return mSamplers.size();
+        }
 
         inline size_t GetUniformCount() const noexcept
         {
