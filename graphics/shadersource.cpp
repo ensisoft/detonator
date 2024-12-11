@@ -290,7 +290,7 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
         if (data.decl_type == ShaderDataDeclarationType::PreprocessorDefine)
             continue;
 
-        if (variant == SourceVariant::ShaderStub)
+        if (variant == SourceVariant::Development)
         {
             const auto& lines = base::SplitString(data.comment, '\n');
             for (const auto& line: lines)
@@ -389,16 +389,10 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
         }
         ss << "\n";
     }
-    if (variant == SourceVariant::ShaderStub && !mStubFunction.empty())
+
+    for (const auto& src: mSource)
     {
-        ss << mStubFunction;
-    }
-    else
-    {
-        for (const auto& src: mSource)
-        {
-            ss << src;
-        }
+        ss << src;
     }
 
     return ss.str();

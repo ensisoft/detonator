@@ -558,6 +558,10 @@ void MaterialWidget::on_actionReloadTextures_triggered()
 
 void MaterialWidget::on_actionSelectShader_triggered()
 {
+    const auto type = mMaterial->GetType();
+    if (type != gfx::MaterialClass::Type::Custom)
+        return;
+
     const auto& shader = QFileDialog::getOpenFileName(this,
         tr("Select Shader File"), "",
         tr("Shaders (*.glsl)"));
@@ -573,26 +577,16 @@ void MaterialWidget::on_actionSelectShader_triggered()
 void MaterialWidget::on_actionCreateShader_triggered()
 {
     const auto type = mMaterial->GetType();
-    if (type == gfx::MaterialClass::Type::Custom)
-        CreateCustomShaderStub();
-    else if (type == gfx::MaterialClass::Type::Color)
-        CreateColorShaderStub();
-    else if (type == gfx::MaterialClass::Type::Gradient)
-        CreateGradientShaderStub();
-    else if (type == gfx::MaterialClass::Type::Texture)
-        CreateTextureShaderStub();
-    else if (type == gfx::MaterialClass::Type::Sprite)
-        CreateSpriteShaderStub();
-    else if (type == gfx::MaterialClass::Type::Tilemap)
-        CreateTilemapShaderStub();
-    else BUG("Unhandled material type for shader generation.");
+    if (type != gfx::MaterialClass::Type::Custom)
+        return;
+
+    CreateCustomShaderStub();
 
     ApplyShaderDescription();
     ReloadShaders();
     ShowMaterialProperties();
 
     on_actionEditShader_triggered();
-
 }
 
 void MaterialWidget::on_actionEditShader_triggered()
@@ -1451,40 +1445,6 @@ void FragmentShaderMain() {
     mMaterial->SetTextureMap(0, std::move(map));
 }
 
-void MaterialWidget::CreateColorShaderStub()
-{
-    const auto& src = gfx::MaterialClass::CreateShaderStub(gfx::MaterialClass::Type::Color);
-    const auto& glsl = src.GetSource(gfx::ShaderSource::SourceVariant::ShaderStub);
-    CreateShaderStubFromSource(glsl.c_str());
-}
-void MaterialWidget::CreateGradientShaderStub()
-{
-    const auto& src = gfx::MaterialClass::CreateShaderStub(gfx::MaterialClass::Type::Gradient);
-    const auto& glsl = src.GetSource(gfx::ShaderSource::SourceVariant::ShaderStub);
-    CreateShaderStubFromSource(glsl.c_str());
-}
-void MaterialWidget::CreateTextureShaderStub()
-{
-    const auto& src = gfx::MaterialClass::CreateShaderStub(gfx::MaterialClass::Type::Texture);
-    const auto& glsl = src.GetSource(gfx::ShaderSource::SourceVariant::ShaderStub);
-    CreateShaderStubFromSource(glsl.c_str());
-}
-
-
-void MaterialWidget::CreateSpriteShaderStub()
-{
-    const auto& src = gfx::MaterialClass::CreateShaderStub(gfx::MaterialClass::Type::Sprite);
-    const auto& glsl = src.GetSource(gfx::ShaderSource::SourceVariant::ShaderStub);
-    CreateShaderStubFromSource(glsl.c_str());
-}
-
-void MaterialWidget::CreateTilemapShaderStub()
-{
-    const auto& src = gfx::MaterialClass::CreateShaderStub(gfx::MaterialClass::Type::Tilemap);
-    const auto& glsl = src.GetSource(gfx::ShaderSource::SourceVariant::ShaderStub);
-    CreateShaderStubFromSource(glsl.c_str());
-}
-
 void MaterialWidget::CreateShaderStubFromSource(const char* source)
 {
     QString name = GetValue(mUI.materialName);
@@ -2003,9 +1963,7 @@ void MaterialWidget::ShowMaterialProperties()
     SetEnabled(mUI.textureProp,        false);
     SetEnabled(mUI.textureRect,        false);
     SetEnabled(mUI.btnAddShader,       false);
-    SetEnabled(mUI.actionCreateShader, false);
-    SetEnabled(mUI.actionEditShader,   false);
-    SetEnabled(mUI.actionSelectShader, false);
+    SetEnabled(mUI.btnResetShader,     false);
 
     SetVisible(mUI.grpRenderFlags,     false);
     SetVisible(mUI.chkBlendPreMulAlpha,false);
@@ -2024,7 +1982,6 @@ void MaterialWidget::ShowMaterialProperties()
     SetVisible(mUI.lblTilePadding,     false);
     SetVisible(mUI.tileLeftPadding,    false);
     SetVisible(mUI.tileTopPadding,     false);
-
 
     SetVisible(mUI.lblParticleEffect,  false);
     SetVisible(mUI.particleAction,     false);
@@ -2085,26 +2042,20 @@ void MaterialWidget::ShowMaterialProperties()
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
     {
         SetPlaceholderText(mUI.shaderFile, "None Selected");
-        SetEnabled(mUI.btnAddShader, true);
-        SetEnabled(mUI.shaderFile,      true);
+        SetEnabled(mUI.btnAddShader,       true);
+        SetEnabled(mUI.shaderFile,         true);
         SetEnabled(mUI.actionSelectShader, true);
         SetEnabled(mUI.actionCreateShader, true);
         SetEnabled(mUI.actionEditShader,   mMaterial->HasShaderUri());
-        SetEnabled(mUI.btnResetShader,  mMaterial->HasShaderUri());
-        SetVisible(mUI.grpRenderFlags, false);
+        SetEnabled(mUI.btnResetShader,     mMaterial->HasShaderUri());
+        SetVisible(mUI.grpRenderFlags,     false);
     }
     else
     {
         ClearCustomUniforms();
 
         SetPlaceholderText(mUI.shaderFile, "Using The Built-in Shader");
-        SetEnabled(mUI.btnAddShader,    true);
-        SetEnabled(mUI.shaderFile,      true);
-        SetEnabled(mUI.actionSelectShader, true); // allow an alternative shader to be used from the file
-        SetEnabled(mUI.actionCreateShader, true);
-        SetEnabled(mUI.actionEditShader,   mMaterial->HasShaderUri());
-        SetEnabled(mUI.btnResetShader,  mMaterial->HasShaderUri());
-
+        SetEnabled(mUI.btnAddShader,        true);
         SetVisible(mUI.grpRenderFlags,      true);
         SetVisible(mUI.builtInProperties,   true);
         // the static instance constant folding doesn't work

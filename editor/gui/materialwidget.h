@@ -163,11 +163,6 @@ namespace gui
 
     private:
         void CreateCustomShaderStub();
-        void CreateColorShaderStub();
-        void CreateGradientShaderStub();
-        void CreateTextureShaderStub();
-        void CreateSpriteShaderStub();
-        void CreateTilemapShaderStub();
         void CreateShaderStubFromSource(const char* source);
 
         void ClearCustomUniforms();
