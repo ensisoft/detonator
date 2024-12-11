@@ -119,8 +119,7 @@ namespace gfx
         { mSource.clear(); }
         inline void ClearData() noexcept
         { mData.clear(); }
-        inline void SetStub(std::string stub) noexcept
-        { mStubFunction = std::move(stub); }
+
         inline void SetShaderUniformAPIVersion(unsigned version)
         { mShaderUniformAPIVersion = version; }
         inline void SetShaderSourceUri(std::string uri) noexcept
@@ -220,7 +219,7 @@ namespace gfx
         void SetComment(const std::string& name, std::string comment);
 
         enum class SourceVariant {
-            Production, ShaderStub
+            Production, Development
         };
 
         // Get the actual shader source string by combining
@@ -257,7 +256,6 @@ namespace gfx
         // Currently basically everything else other than the
         // data declarations.
         std::vector<std::string> mSource;
-        std::string mStubFunction;
         // for debugging help, we can embed the shader source
         // URI int he shader source as a comment so when it borks
         // in production the user can easily see which shader it is.

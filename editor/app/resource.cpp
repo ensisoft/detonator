@@ -1021,6 +1021,14 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         }
     }
 
+    if (material.GetType() != gfx::MaterialClass::Type::Custom)
+    {
+        if (material.HasShaderUri())
+        {
+            log->Log(material, "Material", "Built-in material uses a custom shader source. This is no longer supported.");
+        }
+    }
+
 }
 
 

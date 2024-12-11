@@ -845,107 +845,6 @@ void MaterialClass::SetTextureSource(std::unique_ptr<TextureSource> source) noex
 }
 
 // static
-ShaderSource MaterialClass::CreateShaderStub(Type type)
-{
-    ShaderSource source;
-    if (type == Type::Color)
-        source = GetColorShaderSource();
-    else if (type == Type::Gradient)
-        source = GetGradientShaderSource();
-    else if (type == Type::Texture)
-        source = GetTextureShaderSource();
-    else if (type == Type::Sprite)
-        source = GetSpriteShaderSource();
-    else if (type == Type::Tilemap)
-        source = GetTilemapShaderSource();
-    else BUG("Bug on shader stub based on shader type.");
-
-    // if the shader doesn't already use these uniforms and
-    // varyings then add them now so that they will be made
-    // known to the user in the shader stub source.
-    // If they are not needed in the shader they can then be
-    // simply deleted.
-
-    if (!source.HasUniform("kTime"))
-        source.AddUniform("kTime", ShaderSource::UniformType::Float);
-    if (!source.HasUniform("kEditingMode"))
-        source.AddUniform("kEditingMode", ShaderSource::UniformType::Int);
-    if (!source.HasUniform("kRenderPoints"))
-        source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
-    if (!source.HasUniform("kParticleEffect"))
-        source.AddUniform("kParticleEffect", ShaderSource::UniformType::Int);
-    if (!source.HasUniform("kSurfaceType"))
-        source.AddUniform("kSurfaceType", ShaderSource::UniformType::Int);
-    if (!source.HasUniform("kDrawPrimitive"))
-        source.AddUniform("kDrawPrimitive", ShaderSource::UniformType::Int);
-    //if (!source.HasUniform("kRenderPass"))
-    //    source.AddUniform("kRenderPass", ShaderSource::UniformType::Int);
-
-    if (!source.HasVarying("vTexCoord"))
-        source.AddVarying("vTexCoord",  ShaderSource::VaryingType::Vec2f);
-    if (!source.HasVarying("vParticleAlpha"))
-        source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
-    if (!source.HasVarying("vParticleRandomValue"))
-        source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
-    if (!source.HasVarying("vParticleTime"))
-        source.AddVarying("vParticleTime", ShaderSource::VaryingType::Float);
-
-    //source.SetComment("kRenderPass", "Render pass identifier.");
-    source.SetComment("kTime", "Material instance time in seconds.");
-    source.SetComment("kEditingMode", "Flag to indicate whether we're in editing mode, i.e. running editor or not.\n"
-                      "0 = editing mode is off, i.e. we're running in production/deployment\n"
-                      "1 = editing mode is on, i.e. we're running in the editor.");
-    source.SetComment("kRenderPoints", "Flag to indicate when the geometry is GL_POINTS.\n"
-                      "When rendering GL_POINTS the normal texture coordinates don't apply\n"
-                      "but you must use gl_PointCoord GLSL variable.\n"
-                      "For convenience this flag is a float with either 0.0 or 1.0 value\n"
-                      "so to cover both cases you can do:\n"
-                      "   vec2 coordinates = mix(vTexCoords, gl_PointCoord, kRenderPoints);\n"
-                      "to be used to get the coordinates always correctly.");
-    source.SetComment("kBaseColor", "The base color set for the material.\n"
-                                    "Used to modulate the output color (for example the texture sample).\n");
-    source.SetComment("kTextureVelocity", "Velocity of texture coordinates. \n"
-                                          ".xy = x and y axis velocity in texture units per second.\n"
-                                          " .z = rotation in radians per second.");
-    source.SetComment("kTextureWrap", "Software texture wrapping mode. Needed when texture sub-rects are used\n"
-                                      "and the texture sampling can exceed the sub-rect borders.\n"
-                                      "0 = disabled (nothing is done)\n"
-                                      "1 = clamp to sub-rect borders\n"
-                                      "2 = wrap around the sub-rect borders\n"
-                                      "3 = wrap + mirror around the sub-rect borders.\n");
-    source.SetComment("kTextureRotation", "Texture coordinate rotation in radians.");
-    source.SetComment("kTextureScale", "Texture coordinate scaling factor(s) for both x,y axis.");
-    source.SetComment("kTexture", "The current texture to sample from.");
-    source.SetComment("kTextureBox", "Texture box (texture sub-rect) that defines a smaller area inside the\n"
-                                     "texture for sampling the texture. Needed to support arbitrary texture rects\n"
-                                     "and to support texture packing.\n"
-                                     ".xy = the translation of the box in normalized texture coordinates\n"
-                                     ".zw = the size of the box in normalized texture coordinates.");
-    source.SetComment("kAlphaMask", "Flag to indicate whether the texture is an alpha mask or not."
-                                    "0.0 = texture is normal color data and has all RGBA channels\n"
-                                    "1.0 = texture is an alpha mask and only has A channel");
-    source.SetComment("kAlphaCutoff", "Alpha cutoff value to support alpha based cutouts such as sprites\n"
-                                      "that aren't really transparent but just cutouts. Cutoff value is the value\n"
-                                      "to test against in order to discard the fragments.");
-    source.SetComment("kParticleEffect", "Particle effect enumerator value.");
-    source.SetComment("kSurfaceType", "Material surface type enumerator value.");
-
-    source.SetComment("vTileData", "Fragment's tile data coming from the vertex shader.\n"
-                                   ".x = the material tile index. the product of 'row * cols_per_row + col'\n"
-                                   ".y = unused data.");
-
-    source.SetComment("vTexCoord", "Fragment's texture coordinates coming from the vertex shader.");
-
-    source.SetComment("vParticleAlpha", "The per particle alpha value. Only available when rendering particles.");
-    source.SetComment("vParticleRandomValue", "The per particle random value. Only available when rendering particles.");
-    source.SetComment("vParticleTime", "Normalized per particle lifetime. Only available when rendering particles.\n"
-                                       "0.0 = beginning of life\n"
-                                       "1.0 = end of life");
-
-    return source;
-}
-
-// static
 std::string MaterialClass::GetColorUniformName(ColorIndex index)
 {
     if (index == ColorIndex::BaseColor)
@@ -1047,30 +946,32 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     // exist then check the shader URI for loading the shader from the URI.
     // Finally if that doesn't exist and the material has a known type then
     // use one of the built-in shaders!
-
-    if (!mShaderSrc.empty())
-        return ShaderSource::FromRawSource(mShaderSrc, ShaderSource::Type::Fragment);
-
-    if (!mShaderUri.empty())
+    if (mType == Type::Custom)
     {
-        Loader::ResourceDesc desc;
-        desc.uri  = mShaderUri;
-        desc.id   = mClassId;
-        desc.type = Loader::Type::Shader;
-        const auto& buffer = gfx::LoadResource(desc);
-        if (!buffer)
+        if (!mShaderSrc.empty())
+            return ShaderSource::FromRawSource(mShaderSrc, ShaderSource::Type::Fragment);
+
+        if (!mShaderUri.empty())
         {
-            ERROR("Failed to load custom material shader source file. [name='%1', uri='%2']", mName, mShaderUri);
-            return ShaderSource();
+            Loader::ResourceDesc desc;
+            desc.uri = mShaderUri;
+            desc.id = mClassId;
+            desc.type = Loader::Type::Shader;
+            const auto& buffer = gfx::LoadResource(desc);
+            if (!buffer)
+            {
+                ERROR("Failed to load custom material shader source file. [name='%1', uri='%2']", mName, mShaderUri);
+                return ShaderSource();
+            }
+            const char* beg = (const char*) buffer->GetData();
+            const char* end = beg + buffer->GetByteSize();
+
+            DEBUG("Load shader source. [uri=%1', material='%2']", mShaderUri, mName);
+
+            auto source = ShaderSource::FromRawSource(std::string(beg, end), ShaderSource::Type::Fragment);
+            source.SetShaderSourceUri(mShaderUri);
+            return source;
         }
-        const char* beg = (const char*)buffer->GetData();
-        const char* end = beg + buffer->GetByteSize();
-
-        DEBUG("Load shader source. [uri=%1', material='%2']", mShaderUri, mName);
-
-        auto source = ShaderSource::FromRawSource(std::string(beg, end), ShaderSource::Type::Fragment);
-        source.SetShaderSourceUri(mShaderUri);
-        return source;
     }
 
     if (mType == Type::Color)
@@ -1112,15 +1013,6 @@ void FragmentShaderMain()
   vec4 color = kBaseColor;
   color.a *= vParticleAlpha;
   fs_out.color = color;
-}
-)");
-
-    source.SetStub(R"(
-void FragmentShaderMain() {
-
-    // your code here
-
-    fs_out.color = kBaseColor * vParticleAlpha;
 }
 )");
 
@@ -1176,19 +1068,6 @@ void FragmentShaderMain()
   fs_out.color.a   = color.a * vParticleAlpha;
 }
 )");
-
-    source.SetStub(R"(
-void FragmentShaderMain() {
-
-    // your code here
-
-    vec4 color_mix_0 = mix(kColor0, kColor1, vTexCoord.x);
-    vec4 color_mix_1 = mix(kColor2, kColor3, vTexCoord.x);
-    fs_out.color = mix(color_mix_0, color_mix_1, vTexCoord.y);
-}
-)");
-
-
     return source;
 }
 
@@ -1310,17 +1189,6 @@ void FragmentShaderMain()
         discard;
 
     fs_out.color = color;
-}
-)");
-
-    source.SetStub(R"(
-void FragmentShaderMain() {
-
-    // your code here
-
-    fs_out.color = mix(texture(kTexture0, vTexCoord),
-                       texture(kTexture1, vTexCoord),
-                       kBlendCoeff) * kBaseColor;
 }
 )");
 
@@ -1531,16 +1399,6 @@ void FragmentShaderMain()
         discard;
 
     fs_out.color = color;
-}
-)");
-
-    source.SetStub(R"(
-void FragmentShaderMain() {
-
-    // your code here
-
-    fs_out.color = texture(kTexture, vTexCoord) * kBaseColor;
-
 }
 )");
 
