@@ -1,0 +1,12 @@
+{
+    "uniforms": [
+    ],
+
+    "maps": [
+        {
+            "desc": "Texture",
+            "name": "kTexture",
+            "type": "Texture2D"
+        }
+    ]
+}

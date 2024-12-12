@@ -183,7 +183,7 @@
       ]
     },
     {
-      "active_texture_map": "Jl15fzuJOZ",
+      "active_texture_map": "",
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
@@ -196,18 +196,18 @@
       "resource_name": "Fantasy Stars",
       "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/Stars.glsl",
+      "shader_uri": "ws://shaders/es2/Fantasy_Background.glsl",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
-          "id": "Jl15fzuJOZ",
+          "id": "elOaxxICB9",
           "looping": true,
-          "name": "Texture",
-          "rect_name0": "",
+          "name": "kTexture",
+          "rect_name0": "kTextureRect",
           "rect_name1": "",
-          "sampler_name0": "",
+          "sampler_name0": "kTexture",
           "sampler_name1": "",
           "textures": [
             {
@@ -222,7 +222,7 @@
                 "AllowResizing": true,
                 "PremulAlpha": false
               },
-              "id": "9L371jT7Bo",
+              "id": "moRahG65Pu",
               "name": "background-stars",
               "rect": {
                 "h": 1.0,
@@ -239,10 +239,10 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Repeat",
       "texture_wrap_y": "Repeat",
-      "type": "Texture"
+      "type": "Custom"
     },
     {
-      "active_texture_map": "YYdD2ExFUi",
+      "active_texture_map": "",
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
@@ -255,18 +255,18 @@
       "resource_name": "Fantasy Game GUI",
       "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/text.glsl",
+      "shader_uri": "ws://shaders/es2/Fantasy_Text_Shader.glsl",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
-          "id": "YYdD2ExFUi",
+          "id": "IMXztgauJY",
           "looping": true,
-          "name": "Texture",
-          "rect_name0": "",
+          "name": "kTexture",
+          "rect_name0": "kTextureBox",
           "rect_name1": "",
-          "sampler_name0": "",
+          "sampler_name0": "kTexture",
           "sampler_name1": "",
           "textures": [
             {
@@ -281,7 +281,7 @@
                 "AllowResizing": true,
                 "PremulAlpha": false
               },
-              "id": "Y6ToIngPWw",
+              "id": "MxQDhT6Csa",
               "name": "fantasy-game-gui",
               "rect": {
                 "h": 1.0,
@@ -298,7 +298,7 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Custom"
     },
     {
       "active_texture_map": "TfN0sCJjmg",
@@ -430,7 +430,7 @@
       ]
     },
     {
-      "active_texture_map": "jhWUxq6YbY",
+      "active_texture_map": "",
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
@@ -443,18 +443,18 @@
       "resource_name": "Fantasy FREE",
       "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/text.glsl",
+      "shader_uri": "ws://shaders/es2/Fantasy_Text_Shader.glsl",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
-          "id": "jhWUxq6YbY",
+          "id": "dEypHsJ5Ft",
           "looping": true,
-          "name": "Texture",
-          "rect_name0": "",
+          "name": "kTexture",
+          "rect_name0": "kTextureBox",
           "rect_name1": "",
-          "sampler_name0": "",
+          "sampler_name0": "kTexture",
           "sampler_name1": "",
           "textures": [
             {
@@ -469,7 +469,7 @@
                 "AllowResizing": true,
                 "PremulAlpha": false
               },
-              "id": "rG0Y5oAH1h",
+              "id": "XShC1PFtiT",
               "name": "free",
               "rect": {
                 "h": 1.0,
@@ -486,10 +486,10 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Custom"
     },
     {
-      "active_texture_map": "A5wihSOW3X",
+      "active_texture_map": "",
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
@@ -502,18 +502,18 @@
       "resource_name": "Fantasy Star Orange",
       "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/star.glsl",
+      "shader_uri": "ws://shaders/es2/Fantasy_Star_Particle.glsl",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
-          "id": "A5wihSOW3X",
+          "id": "pzCEni9BoP",
           "looping": true,
-          "name": "Texture",
-          "rect_name0": "",
+          "name": "kTexture",
+          "rect_name0": "kTextureRect",
           "rect_name1": "",
-          "sampler_name0": "",
+          "sampler_name0": "kTexture",
           "sampler_name1": "",
           "textures": [
             {
@@ -524,11 +524,11 @@
               },
               "file": "ws://textures/Fantasy/star_08.png",
               "flags": {
-                "AllowPacking": true,
+                "AllowPacking": false,
                 "AllowResizing": true,
                 "PremulAlpha": false
               },
-              "id": "W9vWCN1wwp",
+              "id": "AYCoeoTHGF",
               "name": "star_08",
               "rect": {
                 "h": 1.0,
@@ -543,23 +543,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_wrap_x": "Repeat",
+      "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture",
+      "type": "Custom",
       "uniforms": [
         {
           "name": "kBaseColor",
           "value": {
             "a": 1.0,
-            "b": 0.1448996663093567,
-            "g": 0.8088502287864685,
-            "r": 0.95509272813797
+            "b": 0.14509804546833038,
+            "g": 0.8079041838645935,
+            "r": 0.95686274766922
           }
         }
       ]
     },
     {
-      "active_texture_map": "2fHfT21Svy",
+      "active_texture_map": "",
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
@@ -572,18 +572,18 @@
       "resource_name": "Fantasy Star White",
       "resource_ver": 3,
       "shader_src": "",
-      "shader_uri": "ws://shaders/es2/star.glsl",
+      "shader_uri": "ws://shaders/es2/Fantasy_Star_Particle.glsl",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
-          "id": "2fHfT21Svy",
+          "id": "r8Ps659HGa",
           "looping": true,
-          "name": "Texture",
-          "rect_name0": "",
+          "name": "kTexture",
+          "rect_name0": "kTextureRect",
           "rect_name1": "",
-          "sampler_name0": "",
+          "sampler_name0": "kTexture",
           "sampler_name1": "",
           "textures": [
             {
@@ -594,11 +594,11 @@
               },
               "file": "ws://textures/Fantasy/star_08.png",
               "flags": {
-                "AllowPacking": true,
+                "AllowPacking": false,
                 "AllowResizing": true,
                 "PremulAlpha": false
               },
-              "id": "UxMbKzdPi4",
+              "id": "EkYQQzAfBJ",
               "name": "star_08",
               "rect": {
                 "h": 1.0,
@@ -613,9 +613,20 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_wrap_x": "Repeat",
+      "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kBaseColor",
+          "value": {
+            "a": 1.0,
+            "b": 1.0,
+            "g": 1.0,
+            "r": 1.0
+          }
+        }
+      ]
     },
     {
       "active_texture_map": "Rwxj3GdYuH",
