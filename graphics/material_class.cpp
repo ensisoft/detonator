@@ -951,43 +951,7 @@ TextureMap* MaterialClass::SelectTextureMap(const State& state) const noexcept
 
 ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& device) const
 {
-    if (mType == Type::Color)
-    {
-        static const char* source = {
-#include "shaders/color_shader.glsl"
-        };
-        return ShaderSource::FromRawSource(source, ShaderSource::Type::Fragment);
-    }
-    else if (mType == Type::Gradient)
-    {
-        static const char* source = {
-#include "shaders/gradient_shader.glsl"
-        };
-
-        return ShaderSource::FromRawSource(source, ShaderSource::Type::Fragment);
-    }
-    else if (mType == Type::Sprite)
-    {
-        static const char* source = {
-#include "shaders/sprite_shader.glsl"
-        };
-        return ShaderSource::FromRawSource(source, ShaderSource::Type::Fragment);
-    }
-    else if (mType == Type::Texture)
-    {
-        static const char* source =  {
-#include "shaders/texture_shader.glsl"
-        };
-        return ShaderSource::FromRawSource(source, ShaderSource::Type::Fragment);
-    }
-    else if (mType == Type::Tilemap)
-    {
-        static const char* source = {
-#include "shaders/tilemap_shader.glsl"
-        };
-        return ShaderSource::FromRawSource(source, ShaderSource::Type::Fragment);
-    }
-    else  if (mType == Type::Custom)
+    if (mType == Type::Custom)
     {
         if (!mShaderSrc.empty())
             return ShaderSource::FromRawSource(mShaderSrc, ShaderSource::Type::Fragment);
@@ -1017,9 +981,59 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         source.SetShaderSourceUri(mShaderUri);
         return source;
     }
+
+
+    static const char* texture_functions =  {
+#include "shaders/texture_functions.glsl"
+    };
+
+    ShaderSource src;
+    src.SetType(gfx::ShaderSource::Type::Fragment);
+
+    if (mType == Type::Color)
+    {
+        static const char* source = {
+#include "shaders/color_shader.glsl"
+        };
+
+        src.LoadRawSource(source);
+    }
+    else if (mType == Type::Gradient)
+    {
+        static const char* source = {
+#include "shaders/gradient_shader.glsl"
+        };
+
+        src.LoadRawSource(source);
+    }
+    else if (mType == Type::Sprite)
+    {
+        static const char* source = {
+#include "shaders/sprite_shader.glsl"
+        };
+
+        src.LoadRawSource(texture_functions);
+        src.LoadRawSource(source);
+    }
+    else if (mType == Type::Texture)
+    {
+        static const char* source =  {
+#include "shaders/texture_shader.glsl"
+        };
+        src.LoadRawSource(texture_functions);
+        src.LoadRawSource(source);
+    }
+    else if (mType == Type::Tilemap)
+    {
+        static const char* source = {
+#include "shaders/tilemap_shader.glsl"
+        };
+
+        src.LoadRawSource(source);
+    }
     else BUG("Unknown material type.");
 
-    return ShaderSource();
+    return src;
 }
 
 bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, ProgramState& program) const noexcept

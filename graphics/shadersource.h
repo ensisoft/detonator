@@ -141,6 +141,16 @@ namespace gfx
             }
             return nullptr;
         }
+        void AddPreprocessorDefinition(std::string name, std::string comment = "")
+        {
+            ShaderDataDeclaration decl;
+            decl.decl_type      = ShaderDataDeclarationType::PreprocessorDefine;
+            decl.data_type      = ShaderDataType::Int;
+            decl.name           = std::move(name);
+            decl.comment        = std::move(comment);
+            AddData(std::move(decl));
+        }
+
         void AddPreprocessorDefinition(std::string name, int value, std::string  comment = "")
         {
             ShaderDataDeclaration decl;
@@ -236,6 +246,8 @@ namespace gfx
         // with the other shader source, i.e. the shader type,
         // version and precision qualifiers match.
         bool IsCompatible(const ShaderSource& other) const noexcept;
+
+        bool LoadRawSource(const std::string& source);
 
         static ShaderSource FromRawSource(const std::string& source, Type type);
 

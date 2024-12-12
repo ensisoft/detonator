@@ -261,25 +261,32 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
         {
             ss << "// " << line << "\n";
         }
-        ASSERT(data.constant_value.has_value());
-        const auto& value = data.constant_value.value();
+        if (data.constant_value.has_value())
+        {
+            const auto& value = data.constant_value.value();
 
-        if (const auto* ptr = std::get_if<int>(&value))
+            if (const auto* ptr = std::get_if<int>(&value))
+            {
+                ss << "#define " << data.name << " " << ToConst(*ptr);
+                ss << "\n";
+            }
+            else if (const auto* ptr = std::get_if<float>(&value))
+            {
+                ss << "#define " << data.name << " " << ToConst(*ptr);
+                ss << "\n";
+            }
+            else if (const auto* ptr = std::get_if<std::string>(&value))
+            {
+                ss << "#define " << data.name << " " << *ptr;
+                ss << "\n";
+            }
+            else BUG("Unsupported preprocessor definition type.");
+        }
+        else
         {
-            ss << "#define " << data.name << " " << ToConst(*ptr);
+            ss << "define " << data.name;
             ss << "\n";
         }
-        else if (const auto* ptr = std::get_if<float>(&value))
-        {
-            ss << "#define " << data.name << " " << ToConst(*ptr);
-            ss << "\n";
-        }
-        else if (const auto* ptr = std::get_if<std::string>(&value))
-        {
-            ss << "#define " << data.name << " " << *ptr;
-            ss << "\n";
-        }
-        else BUG("Unsupported preprocessor definition type.");
     }
     ss << "\n";
 
@@ -468,8 +475,7 @@ ShaderSource::ShaderDataType ShaderSource::DataTypeFromValue(gfx::ShaderSource::
     return ShaderDataType::Int;
 }
 
-// static
-ShaderSource ShaderSource::FromRawSource(const std::string& raw_source, Type type)
+bool ShaderSource::LoadRawSource(const std::string& source)
 {
     // Go over the raw GLSL source and try to extract higher
     // level information out of it so that more reasoning
@@ -482,12 +488,9 @@ ShaderSource ShaderSource::FromRawSource(const std::string& raw_source, Type typ
         return tokens[index];
     };
 
-    ShaderSource source;
-    source.SetType(type);
-
     std::string glsl_code;
 
-    std::stringstream ss(raw_source);
+    std::stringstream ss(source);
     std::string line;
     while (std::getline(ss, line))
     {
@@ -502,9 +505,9 @@ ShaderSource ShaderSource::FromRawSource(const std::string& raw_source, Type typ
         if (base::StartsWith(trimmed, "#version"))
         {
             if (base::Contains(trimmed, "100"))
-                source.SetVersion(ShaderSource::Version::GLSL_100);
+                SetVersion(ShaderSource::Version::GLSL_100);
             else if (base::Contains(trimmed, "300 es"))
-                source.SetVersion(ShaderSource::Version::GLSL_300);
+                SetVersion(ShaderSource::Version::GLSL_300);
             else WARN("Unsupported GLSL version '%1'.", trimmed);
         }
         else if (base::StartsWith(trimmed, "#define"))
@@ -523,16 +526,16 @@ ShaderSource ShaderSource::FromRawSource(const std::string& raw_source, Type typ
             decl.data_type      = ShaderDataType::PreprocessorString;
             decl.name           = name;
             decl.constant_value = value;
-            source.AddData(std::move(decl));
+            AddData(std::move(decl));
         }
         else if (base::StartsWith(trimmed, "precision"))
         {
             if (base::Contains(trimmed, "lowp"))
-                source.SetPrecision(ShaderSource::Precision::Low);
+                SetPrecision(ShaderSource::Precision::Low);
             else if (base::Contains(trimmed, "mediump"))
-                source.SetPrecision(ShaderSource::Precision::Medium);
+                SetPrecision(ShaderSource::Precision::Medium);
             else if (base::Contains(trimmed, "highp"))
-                source.SetPrecision(ShaderSource::Precision::High);
+                SetPrecision(ShaderSource::Precision::High);
             else WARN("Unsupported GLSL precision '%1'.]", trimmed);
         }
         else if (base::StartsWith(trimmed, "attribute") ||
@@ -542,7 +545,7 @@ ShaderSource ShaderSource::FromRawSource(const std::string& raw_source, Type typ
                  base::StartsWith(trimmed, "out"))
         {
             const auto& parts = base::SplitString(trimmed);
-            const auto& decl_type = DeclTypeFromString(GetToken(parts, 0), type);
+            const auto& decl_type = DeclTypeFromString(GetToken(parts, 0), mType);
             const auto& data_type = DataTypeFromString(GetToken(parts, 1));
             const auto& name = GetTokenName(GetToken(parts, 2));
             if (!decl_type.has_value() || !data_type.has_value() || !name.has_value())
@@ -555,7 +558,7 @@ ShaderSource ShaderSource::FromRawSource(const std::string& raw_source, Type typ
             decl.data_type = data_type.value();
             decl.decl_type = decl_type.value();
             decl.name      = name.value();
-            source.AddData(std::move(decl));
+            AddData(std::move(decl));
         }
         else if (base::StartsWith(trimmed, "const"))
         {
@@ -572,7 +575,16 @@ ShaderSource ShaderSource::FromRawSource(const std::string& raw_source, Type typ
         }
     }
 
-    source.AddSource(glsl_code);
+    AddSource(glsl_code);
+    return true;
+}
+
+// static
+ShaderSource ShaderSource::FromRawSource(const std::string& raw_source, Type type)
+{
+    ShaderSource source;
+    source.SetType(type);
+    source.LoadRawSource(raw_source);
     return source;
 }
 
