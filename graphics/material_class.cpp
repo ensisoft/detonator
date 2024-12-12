@@ -942,257 +942,75 @@ TextureMap* MaterialClass::SelectTextureMap(const State& state) const noexcept
 
 ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& device) const
 {
-    // First check the inline source within the material. If that doesn't
-    // exist then check the shader URI for loading the shader from the URI.
-    // Finally if that doesn't exist and the material has a known type then
-    // use one of the built-in shaders!
-    if (mType == Type::Custom)
+    if (mType == Type::Color)
+    {
+        static const char* source = {
+#include "shaders/color_shader.glsl"
+        };
+        return ShaderSource::FromRawSource(source, ShaderSource::Type::Fragment);
+    }
+    else if (mType == Type::Gradient)
+    {
+        static const char* source = {
+#include "shaders/gradient_shader.glsl"
+        };
+
+        return ShaderSource::FromRawSource(source, ShaderSource::Type::Fragment);
+    }
+    else if (mType == Type::Sprite)
+    {
+        static const char* source = {
+#include "shaders/sprite_shader.glsl"
+        };
+        return ShaderSource::FromRawSource(source, ShaderSource::Type::Fragment);
+    }
+    else if (mType == Type::Texture)
+    {
+        static const char* source =  {
+#include "shaders/texture_shader.glsl"
+        };
+        return ShaderSource::FromRawSource(source, ShaderSource::Type::Fragment);
+    }
+    else if (mType == Type::Tilemap)
+    {
+        static const char* source = {
+#include "shaders/tilemap_shader.glsl"
+        };
+        return ShaderSource::FromRawSource(source, ShaderSource::Type::Fragment);
+    }
+    else  if (mType == Type::Custom)
     {
         if (!mShaderSrc.empty())
             return ShaderSource::FromRawSource(mShaderSrc, ShaderSource::Type::Fragment);
 
-        if (!mShaderUri.empty())
+        if (mShaderUri.empty())
         {
-            Loader::ResourceDesc desc;
-            desc.uri = mShaderUri;
-            desc.id = mClassId;
-            desc.type = Loader::Type::Shader;
-            const auto& buffer = gfx::LoadResource(desc);
-            if (!buffer)
-            {
-                ERROR("Failed to load custom material shader source file. [name='%1', uri='%2']", mName, mShaderUri);
-                return ShaderSource();
-            }
-            const char* beg = (const char*) buffer->GetData();
-            const char* end = beg + buffer->GetByteSize();
-
-            DEBUG("Load shader source. [uri=%1', material='%2']", mShaderUri, mName);
-
-            auto source = ShaderSource::FromRawSource(std::string(beg, end), ShaderSource::Type::Fragment);
-            source.SetShaderSourceUri(mShaderUri);
-            return source;
+            ERROR("Material has no shader source specified. [name='%1']", mName);
+            return ShaderSource();
         }
-    }
 
-    if (mType == Type::Color)
-        return GetColorShaderSource(state, device);
-    else if (mType == Type::Gradient)
-        return GetGradientShaderSource(state, device);
-    else if (mType == Type::Sprite)
-        return GetSpriteShaderSource(state, device);
-    else if (mType == Type::Texture)
-        return GetTextureShaderSource(state, device);
-    else if (mType == Type::Tilemap)
-        return GetTilemapShaderSource(state, device);
-    else  if (mType == Type::Custom)
-    {
-        ERROR("Material has no shader source specified. [name='%1']", mName);
-        return ShaderSource();
-    } else BUG("Unknown material type.");
+        Loader::ResourceDesc desc;
+        desc.uri = mShaderUri;
+        desc.id = mClassId;
+        desc.type = Loader::Type::Shader;
+        const auto& buffer = gfx::LoadResource(desc);
+        if (!buffer)
+        {
+            ERROR("Failed to load custom material shader source file. [name='%1', uri='%2']", mName, mShaderUri);
+            return ShaderSource();
+        }
+        const char* beg = (const char*) buffer->GetData();
+        const char* end = beg + buffer->GetByteSize();
+
+        DEBUG("Loading custom shader source. [uri=%1', material='%2']", mShaderUri, mName);
+
+        auto source = ShaderSource::FromRawSource(std::string(beg, end), ShaderSource::Type::Fragment);
+        source.SetShaderSourceUri(mShaderUri);
+        return source;
+    }
+    else BUG("Unknown material type.");
+
     return ShaderSource();
-}
-
-ShaderSource MaterialClass::GetColorShaderSource(const State& state, const Device& device) const
-{
-    return GetColorShaderSource();
-}
-
-// static
-ShaderSource MaterialClass::GetColorShaderSource()
-{
-    ShaderSource source;
-    source.SetShaderUniformAPIVersion(1);
-    source.SetType(ShaderSource::Type::Fragment);
-    source.SetPrecision(ShaderSource::Precision::High);
-    source.SetVersion(ShaderSource::Version::GLSL_300);
-    source.AddUniform("kBaseColor",     ShaderSource::UniformType::Color4f);
-    source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
-    source.AddSource(R"(
-void FragmentShaderMain()
-{
-  vec4 color = kBaseColor;
-  color.a *= vParticleAlpha;
-  fs_out.color = color;
-}
-)");
-
-    return source;
-}
-
-
-ShaderSource MaterialClass::GetGradientShaderSource(const State& state, const Device& device) const
-{
-    return GetGradientShaderSource();
-}
-
-// static
-ShaderSource MaterialClass::GetGradientShaderSource()
-{
-    ShaderSource source;
-    source.SetShaderUniformAPIVersion(1);
-    source.SetType(ShaderSource::Type::Fragment);
-    source.SetPrecision(ShaderSource::Precision::High);
-    source.SetVersion(ShaderSource::Version::GLSL_300);
-    source.AddUniform("kColor0", ShaderSource::UniformType::Color4f,
-                      "The gradient top left color value.");
-    source.AddUniform("kColor1", ShaderSource::UniformType::Color4f,
-                      "The gradient top right color value.");
-    source.AddUniform("kColor2", ShaderSource::UniformType::Color4f,
-                      "The gradient bottom left color value.");
-    source.AddUniform("kColor3", ShaderSource::UniformType::Color4f,
-                      "The gradient bottom right color value.");
-    source.AddUniform("kOffset", ShaderSource::UniformType::Vec2f,
-                      "The gradient x and y axis mixing/blending coefficient offset.");
-    source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
-
-    source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
-    source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
-
-    source.AddSource(R"(
-vec4 MixGradient(vec2 coords)
-{
-  vec4 top = mix(kColor0, kColor1, coords.x);
-  vec4 bot = mix(kColor2, kColor3, coords.x);
-  vec4 color = mix(top, bot, coords.y);
-  return color;
-}
-
-void FragmentShaderMain()
-{
-  vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-  coords = (coords - kOffset) + vec2(0.5, 0.5);
-  coords = clamp(coords, vec2(0.0, 0.0), vec2(1.0, 1.0));
-  vec4 color  = MixGradient(coords);
-
-  fs_out.color.rgb = vec3(pow(color.rgb, vec3(2.2)));
-  fs_out.color.a   = color.a * vParticleAlpha;
-}
-)");
-    return source;
-}
-
-ShaderSource MaterialClass::GetSpriteShaderSource(const State& state, const Device& device) const
-{
-    return GetSpriteShaderSource();
-}
-
-ShaderSource MaterialClass::GetSpriteShaderSource()
-{
-    // todo: maybe pack some of shader uniforms
-
-    ShaderSource source;
-    source.SetShaderUniformAPIVersion(1);
-    source.SetType(ShaderSource::Type::Fragment);
-    source.SetPrecision(ShaderSource::Precision::High);
-    source.SetVersion(ShaderSource::Version::GLSL_300);
-    source.AddUniform("kTexture0", ShaderSource::UniformType::Sampler2D);
-    source.AddUniform("kTexture1", ShaderSource::UniformType::Sampler2D);
-    source.AddUniform("kTextureBox0", ShaderSource::UniformType::Vec4f);
-    source.AddUniform("kTextureBox1", ShaderSource::UniformType::Vec4f);
-    source.AddUniform("kBaseColor", ShaderSource::UniformType::Color4f);
-    source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
-    source.AddUniform("kAlphaCutoff", ShaderSource::UniformType::Float);
-    source.AddUniform("kTime", ShaderSource::UniformType::Float);
-    source.AddUniform("kBlendCoeff", ShaderSource::UniformType::Float);
-    source.AddUniform("kParticleEffect", ShaderSource::UniformType::Int);
-    source.AddUniform("kTextureScale", ShaderSource::UniformType::Vec2f);
-    source.AddUniform("kTextureVelocity", ShaderSource::UniformType::Vec3f);
-    source.AddUniform("kTextureRotation", ShaderSource::UniformType::Float);
-    source.AddUniform("kTextureWrap", ShaderSource::UniformType::Vec2i); // 0 disabled, 1 clamp, 2 wrap, 3 repeat
-    source.AddUniform("kAlphaMask", ShaderSource::UniformType::Vec2f);
-
-    source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
-    source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
-    source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
-
-    source.AddSource(R"(
-
-// do software wrapping for texture coordinates.
-// used for cases when texture sub-rects are used.
-float Wrap(float x, float w, int mode) {
-    if (mode == 1) {
-        return clamp(x, 0.0, w);
-    } else if (mode == 2) {
-        return fract(x / w) * w;
-    } else if (mode == 3) {
-        float p = floor(x / w);
-        float f = fract(x / w);
-        int m = int(floor(mod(p, 2.0)));
-        if (m == 0)
-           return f * w;
-
-        return w - f * w;
-    }
-    return x;
-}
-
-vec2 WrapTextureCoords(vec2 coords, vec2 box)
-{
-  float x = Wrap(coords.x, box.x, kTextureWrap.x);
-  float y = Wrap(coords.y, box.y, kTextureWrap.y);
-  return vec2(x, y);
-}
-
-vec2 RotateCoords(vec2 coords)
-{
-    float random_angle = 0.0;
-    if (kParticleEffect == 2)
-        random_angle = mix(0.0, 3.1415926, vParticleRandomValue);
-
-    float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle;
-    coords = coords - vec2(0.5, 0.5);
-    coords = mat2(cos(angle), -sin(angle),
-                  sin(angle),  cos(angle)) * coords;
-    coords += vec2(0.5, 0.5);
-    return coords;
-}
-
-void FragmentShaderMain()
-{
-    // for texture coords we need either the coords from the
-    // vertex data or gl_PointCoord if the geometry is being
-    // rasterized as points.
-    // we set kRenderPoints to 1.0f when rendering points.
-    // note about gl_PointCoord:
-    // "However, the gl_PointCoord fragment shader input defines
-    // a per-fragment coordinate space (s, t) where s varies from
-    // 0 to 1 across the point horizontally left-to-right, and t
-    // ranges from 0 to 1 across the point vertically top-to-bottom."
-    vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-    coords = RotateCoords(coords);
-
-    coords += kTextureVelocity.xy * kTime;
-    coords = coords * kTextureScale;
-
-    // apply texture box transformation.
-    vec2 scale_tex0 = kTextureBox0.zw;
-    vec2 scale_tex1 = kTextureBox1.zw;
-    vec2 trans_tex0 = kTextureBox0.xy;
-    vec2 trans_tex1 = kTextureBox1.xy;
-
-    // scale and transform based on texture box. (todo: maybe use texture matrix?)
-    vec2 c1 = WrapTextureCoords(coords * scale_tex0, scale_tex0) + trans_tex0;
-    vec2 c2 = WrapTextureCoords(coords * scale_tex1, scale_tex1) + trans_tex1;
-
-    // sample textures, if texture is a just an alpha mask we use
-    // only the alpha channel later.
-    vec4 tex0 = texture(kTexture0, c1);
-    vec4 tex1 = texture(kTexture1, c2);
-
-    vec4 col0 = mix(kBaseColor * tex0, vec4(kBaseColor.rgb, kBaseColor.a * tex0.a), kAlphaMask[0]);
-    vec4 col1 = mix(kBaseColor * tex1, vec4(kBaseColor.rgb, kBaseColor.a * tex1.a), kAlphaMask[1]);
-
-    vec4 color = mix(col0, col1, kBlendCoeff);
-    color.a *= vParticleAlpha;
-
-    if (color.a <= kAlphaCutoff)
-        discard;
-
-    fs_out.color = color;
-}
-)");
-
-    return source;
 }
 
 bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
@@ -1289,221 +1107,6 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     return true;
 }
 
-ShaderSource MaterialClass::GetTextureShaderSource(const State& state, const Device& device) const
-{
-    return GetTextureShaderSource();
-}
-
-// static
-ShaderSource MaterialClass::GetTextureShaderSource()
-{
-    // todo: pack some of the uniforms ?
-
-    ShaderSource source;
-    source.SetShaderUniformAPIVersion(1);
-    source.SetType(ShaderSource::Type::Fragment);
-    source.SetPrecision(ShaderSource::Precision::High);
-    source.SetVersion(ShaderSource::Version::GLSL_300);
-    source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
-    source.AddUniform("kTextureBox", ShaderSource::UniformType::Vec4f);
-    source.AddUniform("kAlphaMask", ShaderSource::UniformType::Float);
-    source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
-    source.AddUniform("kAlphaCutoff", ShaderSource::UniformType::Float);
-    source.AddUniform("kParticleEffect", ShaderSource::UniformType::Int);
-    source.AddUniform("kTime", ShaderSource::UniformType::Float);
-    source.AddUniform("kTextureScale", ShaderSource::UniformType::Vec2f);
-    source.AddUniform("kTextureVelocity", ShaderSource::UniformType::Vec3f);
-    source.AddUniform("kTextureRotation", ShaderSource::UniformType::Float);
-    source.AddUniform("kBaseColor", ShaderSource::UniformType::Color4f);
-    source.AddUniform("kTextureWrap", ShaderSource::UniformType::Vec2i); // 0 disabled, 1 clamp, 2 wrap, 3 repeat
-
-    source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
-    source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
-    source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
-
-    source.AddSource(R"(
-// do software wrapping for texture coordinates.
-// used for cases when texture sub-rects are used.
-float Wrap(float x, float w, int mode) {
-    if (mode == 1) {
-        return clamp(x, 0.0, w);
-    } else if (mode == 2) {
-        return fract(x / w) * w;
-    } else if (mode == 3) {
-        float p = floor(x / w);
-        float f = fract(x / w);
-        int m = int(floor(mod(p, 2.0)));
-        if (m == 0)
-           return f * w;
-
-        return w - f * w;
-    }
-    return x;
-}
-
-vec2 WrapTextureCoords(vec2 coords, vec2 box)
-{
-  float x = Wrap(coords.x, box.x, kTextureWrap.x);
-  float y = Wrap(coords.y, box.y, kTextureWrap.y);
-  return vec2(x, y);
-}
-
-vec2 RotateCoords(vec2 coords)
-{
-    float random_angle = 0.0;
-    if (kParticleEffect == 2)
-        random_angle = mix(0.0, 3.1415926, vParticleRandomValue);
-
-    float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle;
-    coords = coords - vec2(0.5, 0.5);
-    coords = mat2(cos(angle), -sin(angle),
-                  sin(angle),  cos(angle)) * coords;
-    coords += vec2(0.5, 0.5);
-    return coords;
-}
-
-void FragmentShaderMain()
-{
-    // for texture coords we need either the coords from the
-    // vertex data or gl_PointCoord if the geometry is being
-    // rasterized as points.
-    // we set kRenderPoints to 1.0f when rendering points.
-    // note about gl_PointCoord:
-    // "However, the gl_PointCoord fragment shader input defines
-    // a per-fragment coordinate space (s, t) where s varies from
-    // 0 to 1 across the point horizontally left-to-right, and t
-    // ranges from 0 to 1 across the point vertically top-to-bottom."
-    vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-    coords = RotateCoords(coords);
-    coords += kTextureVelocity.xy * kTime;
-    coords = coords * kTextureScale;
-
-    // apply texture box transformation.
-    vec2 scale_tex = kTextureBox.zw;
-    vec2 trans_tex = kTextureBox.xy;
-
-    // scale and transform based on texture box. (todo: maybe use texture matrix?)
-    coords = WrapTextureCoords(coords * scale_tex, scale_tex) + trans_tex;
-
-    // sample textures, if texture is a just an alpha mask we use
-    // only the alpha channel later.
-    vec4 texel = texture(kTexture, coords);
-
-    // either modulate/mask texture color with base color
-    // or modulate base color with texture's alpha value if
-    // texture is an alpha mask
-    vec4 color = mix(kBaseColor * texel, vec4(kBaseColor.rgb, kBaseColor.a * texel.a), kAlphaMask);
-    color.a *= vParticleAlpha;
-
-    if (color.a <= kAlphaCutoff)
-        discard;
-
-    fs_out.color = color;
-}
-)");
-
-    return source;
-}
-
-ShaderSource MaterialClass::GetTilemapShaderSource(const State& state, const Device& device) const
-{
-    return GetTilemapShaderSource();
-}
-
-// static
-ShaderSource MaterialClass::GetTilemapShaderSource()
-{
-    ShaderSource source;
-    source.SetShaderUniformAPIVersion(1);
-    source.SetType(ShaderSource::Type::Fragment);
-    source.SetPrecision(ShaderSource::Precision::High);
-    source.SetVersion(ShaderSource::Version::GLSL_300);
-    source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
-    source.AddUniform("kTextureBox", ShaderSource::UniformType::Vec4f);
-    source.AddUniform("kAlphaCutoff", ShaderSource::UniformType::Float);
-    source.AddUniform("kTime", ShaderSource::UniformType::Float);
-    source.AddUniform("kBaseColor", ShaderSource::UniformType::Color4f);
-    source.AddUniform("kTileIndex", ShaderSource::UniformType::Float);
-    source.AddUniform("kTileSize", ShaderSource::UniformType::Vec2f);
-    source.AddUniform("kTileOffset", ShaderSource::UniformType::Vec2f);
-    source.AddUniform("kTilePadding", ShaderSource::UniformType::Vec2f);
-    source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
-
-    source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
-    source.AddVarying("vTileData", ShaderSource::VaryingType::Vec2f);
-
-    source.AddSource(R"(
-float GetTileIndex() {
-    // to help debugging the material in the editor we're checking the flag
-    // here whether we're editing or not and then either return a tile index
-    // based on a uniform or a "real" tile index based on tile data.
-    if (kTileIndex > 0.0)
-        return kTileIndex - 1.0;
-    return vTileData.x;
-}
-
-void FragmentShaderMain()
-{
-    // the tile rendering can provide geometry also through GL_POINTS.
-    // that means we must then use gl_PointCoord as the texture coordinates
-    // for the fragment.
-    vec2 frag_texture_coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-
-    // apply texture box transformation
-    vec2 texture_box_size      = kTextureBox.zw;
-    vec2 texture_box_translate = kTextureBox.xy;
-
-    vec2 texture_size = vec2(textureSize(kTexture, 0));
-
-    vec2 tile_texture_offset   = kTileOffset / texture_size;
-    vec2 tile_texture_size     = kTileSize / texture_size;
-    vec2 tile_texture_padding  = kTilePadding / texture_size;
-    vec2 tile_texture_box_size = tile_texture_size + (tile_texture_padding * 2.0);
-
-    vec2 tile_map_size = texture_box_size - tile_texture_offset;
-    vec2 tile_map_dims = tile_map_size / tile_texture_box_size; // rows and cols
-
-    int tile_index = int(GetTileIndex());
-    int tile_cols = int(tile_map_dims.x);
-    int tile_rows = int(tile_map_dims.y);
-    int tile_row = tile_index / tile_cols;
-    int tile_col = tile_index - (tile_row * tile_cols);
-
-    // build the final texture coordinate by successively adding offsets
-    // in order to map the frag coord to the right texture position inside
-    // the tile, inside the tile region of the tile-texture inside the
-    // texture box inside the texture atlas.
-    vec2 texture_coords = vec2(0.0, 0.0);
-
-    // add texture box offset inside the texture.
-    texture_coords += texture_box_translate;
-
-    // add the tile offset inside the texture box to get to the tiles
-    texture_coords += tile_texture_offset;
-
-    // add the tile base coord to get to the top-left of
-    // the tile coordinate.
-    texture_coords += vec2(float(tile_col), float(tile_row)) * tile_texture_box_size;
-
-    texture_coords += tile_texture_padding;
-
-    // add the frag coordinate relative to the tile's top left
-    texture_coords += tile_texture_size * frag_texture_coords;
-
-    vec4 texture_sample = texture(kTexture, texture_coords);
-
-    // produce color value.
-    vec4 color = texture_sample * kBaseColor;
-
-    if (color.a <= kAlphaCutoff)
-        discard;
-
-    fs_out.color = color;
-}
-)");
-    return source;
-
-}
 
 bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
 {
