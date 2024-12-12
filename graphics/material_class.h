@@ -446,16 +446,6 @@ namespace gfx
     private:
         TextureMap* SelectTextureMap(const State& state) const noexcept;
         ShaderSource GetShaderSource(const State& state, const Device& device) const;
-        ShaderSource GetColorShaderSource(const State& state, const Device& device) const;
-        ShaderSource GetGradientShaderSource(const State& state, const Device& device) const;
-        ShaderSource GetSpriteShaderSource(const State& state, const Device& device) const;
-        ShaderSource GetTextureShaderSource(const State& state, const Device& device) const;
-        ShaderSource GetTilemapShaderSource(const State& state, const Device& device) const;
-        static ShaderSource GetColorShaderSource();
-        static ShaderSource GetGradientShaderSource();
-        static ShaderSource GetSpriteShaderSource();
-        static ShaderSource GetTextureShaderSource();
-        static ShaderSource GetTilemapShaderSource();
 
         bool ApplySpriteDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
         bool ApplyCustomDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;

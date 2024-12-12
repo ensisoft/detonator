@@ -105,7 +105,8 @@ namespace {
     }
     bool ValidateConstDataType(const gfx::Color4f, gfx::ShaderSource::ShaderDataType type)
     {
-        return type == gfx::ShaderSource::ShaderDataType::Color4f;
+        return type == gfx::ShaderSource::ShaderDataType::Color4f ||
+               type == gfx::ShaderSource::ShaderDataType::Vec4f;
     }
 
     template<typename T>
@@ -238,9 +239,6 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
         else if (mPrecision != Precision::NotSet)
             BUG("Missing GLSL fragment shader floating point precision handling.");
     }
-
-    ss << "\n// Warning. Do not delete the below line.";
-    ss << "\n// shader_uniform_api_version=" << mShaderUniformAPIVersion << "\n\n";
 
     // this could go to the beginning but I'm 100% sure it'll
     // bug out with shitty buggy drivers.
@@ -496,6 +494,11 @@ ShaderSource ShaderSource::FromRawSource(const std::string& raw_source, Type typ
         const auto& trimmed = base::TrimString(line);
         if (trimmed.empty())
             continue;
+        if (base::StartsWith(trimmed, "R\"CPP_RAW_STRING(") ||
+            base::StartsWith(trimmed, ")CPP_RAW_STRING\""))
+        {
+            continue;
+        }
         if (base::StartsWith(trimmed, "#version"))
         {
             if (base::Contains(trimmed, "100"))
@@ -535,7 +538,7 @@ ShaderSource ShaderSource::FromRawSource(const std::string& raw_source, Type typ
         else if (base::StartsWith(trimmed, "attribute") ||
                  base::StartsWith(trimmed, "uniform") ||
                  base::StartsWith(trimmed, "varying") ||
-                 base::StartsWith(trimmed, "in") ||
+                 base::StartsWith(trimmed, "in ") || // SPACE HERE on purpose to distinguish from int
                  base::StartsWith(trimmed, "out"))
         {
             const auto& parts = base::SplitString(trimmed);
