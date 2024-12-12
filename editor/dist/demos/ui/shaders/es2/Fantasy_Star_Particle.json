@@ -1,0 +1,17 @@
+ {
+     "uniforms": [
+         {
+             "name": "kBaseColor",
+             "desc": "Base color",
+             "type": "Color"
+         }
+     ],
+
+     "maps": [
+        {
+             "desc": "Texture",
+             "name": "kTexture",
+             "type": "Texture2D"
+        }
+    ]
+ }
