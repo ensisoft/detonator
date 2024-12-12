@@ -1936,19 +1936,43 @@ void MaterialWidget::SetMaterialProperties()
     for (auto* widget : mUniforms)
     {
         const auto& name = app::ToUtf8(widget->GetName());
-        if (auto* val = mMaterial->FindUniformValue<float>(name))
-            *val = widget->GetAsFloat();
-        else if (auto* val = mMaterial->FindUniformValue<glm::vec2>(name))
-            *val = widget->GetAsVec2();
-        else if (auto* val = mMaterial->FindUniformValue<glm::vec3>(name))
-            *val = widget->GetAsVec3();
-        else if (auto* val = mMaterial->FindUniformValue<glm::vec4>(name))
-            *val = widget->GetAsVec4();
-        else if (auto* val = mMaterial->FindUniformValue<gfx::Color4f>(name))
-            *val = ToGfx(widget->GetAsColor());
-        else if (auto* val = mMaterial->FindUniformValue<int>(name))
-            *val = widget->GetAsInt();
-        else BUG("No such uniform in material. UI and material are out of sync.");
+        const auto type = widget->GetType();
+        if (type == Uniform::Type::Float)
+        {
+            if (auto* val = mMaterial->FindUniformValue<float>(name))
+                *val = widget->GetAsFloat();
+            else mMaterial->SetUniform(name, widget->GetAsFloat());
+        }
+        else if (type == Uniform::Type::Vec2)
+        {
+            if (auto* val = mMaterial->FindUniformValue<glm::vec2>(name))
+                *val = widget->GetAsVec2();
+            else mMaterial->SetUniform(name, widget->GetAsVec2());
+        }
+        else if (type == Uniform::Type::Vec3)
+        {
+            if (auto* val = mMaterial->FindUniformValue<glm::vec3>(name))
+                *val = widget->GetAsVec3();
+            else mMaterial->SetUniform(name, widget->GetAsVec3());
+        }
+        else if (type == Uniform::Type::Vec4)
+        {
+            if (auto* val = mMaterial->FindUniformValue<glm::vec4>(name))
+                *val = widget->GetAsVec4();
+            else mMaterial->SetUniform(name, widget->GetAsVec4());
+        }
+        else if (type == Uniform::Type::Color)
+        {
+            if (auto* val = mMaterial->FindUniformValue<gfx::Color4f>(name))
+                *val = ToGfx(widget->GetAsColor());
+            else mMaterial->SetUniform(name, ToGfx(widget->GetAsColor()));
+        }
+        else if (type == Uniform::Type::Int)
+        {
+            if (auto* val = mMaterial->FindUniformValue<int>(name))
+                *val = widget->GetAsInt();
+            else mMaterial->SetUniform(name, widget->GetAsInt());
+        } else BUG("Bug on uniform type.");
     }
 
     if (auto* map = GetSelectedTextureMap())
