@@ -344,12 +344,68 @@ void main() {
 
 }
 
+void unit_test_raw_source_combine()
+{
+    TEST_CASE(test::Type::Feature)
+
+    gfx::ShaderSource source;
+    source.SetType(gfx::ShaderSource::Type::Fragment);
+
+    source.LoadRawSource(R"(
+float SomeFunction() {
+   return 1.0;
+}
+)");
+
+    source.LoadRawSource(R"(
+#version 300 es
+
+precision highp float;
+
+// The incoming color value.
+uniform vec4 kBaseColor;
+
+// Incoming per particle alpha value.
+in float vParticleAlpha;
+
+void FragmentShaderMain() {
+
+    vec4 color = kBaseColor;
+
+    // modulate by alpha
+    color.a *= vParticleAlpha;
+
+    // out value.
+    fs_out.color = color;
+}
+
+)");
+    auto src = source.GetSource();
+    TEST_REQUIRE(src ==
+R"(#version 300 es
+precision highp float;
+
+uniform vec4 kBaseColor;
+in float vParticleAlpha;
+float SomeFunction() {
+   return 1.0;
+}
+void FragmentShaderMain() {
+    vec4 color = kBaseColor;
+    color.a *= vParticleAlpha;
+    fs_out.color = color;
+}
+)");
+
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_raw_source_es100();
     unit_test_raw_source_es300();
     unit_test_generation();
+    unit_test_raw_source_combine();
 
     return 0;
 }

@@ -68,43 +68,13 @@ in float vParticleRandomValue;
 // Incoming per particle alpha value.
 in float vParticleAlpha;
 
-// do software wrapping for texture coordinates.
-// used for cases when texture sub-rects are used.
-float Wrap(float x, float w, int mode) {
-    if (mode == TEXTURE_WRAP_CLAMP) {
-        return clamp(x, 0.0, w);
-    } else if (mode == TEXTURE_WRAP_REPEAT) {
-        return fract(x / w) * w;
-    } else if (mode == TEXTURE_WRAP_MIRROR) {
-        float p = floor(x / w);
-        float f = fract(x / w);
-        int m = int(floor(mod(p, 2.0)));
-        if (m == 0)
-           return f * w;
-
-        return w - f * w;
-    }
-    return x;
-}
-
-vec2 WrapTextureCoords(vec2 coords, vec2 box) {
-    float x = Wrap(coords.x, box.x, kTextureWrap.x);
-    float y = Wrap(coords.y, box.y, kTextureWrap.y);
-    return vec2(x, y);
-}
-
 vec2 RotateCoords(vec2 coords) {
     float random_angle = 0.0;
-
     if (kParticleEffect == PARTICLE_EFFECT_ROTATE)
         random_angle = mix(0.0, 3.1415926, vParticleRandomValue);
 
     float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle;
-    coords = coords - vec2(0.5, 0.5);
-    coords = mat2(cos(angle), -sin(angle),
-                  sin(angle),  cos(angle)) * coords;
-    coords += vec2(0.5, 0.5);
-    return coords;
+    return RotateTextureCoords(coords, angle);
 }
 
 void FragmentShaderMain() {
@@ -120,7 +90,7 @@ void FragmentShaderMain() {
     vec2 trans_tex = kTextureBox.xy;
 
     // scale and transform based on texture box. (todo: maybe use texture matrix?)
-    coords = WrapTextureCoords(coords * scale_tex, scale_tex) + trans_tex;
+    coords = WrapTextureCoords(coords * scale_tex, scale_tex, kTextureWrap) + trans_tex;
 
     // sample textures, if texture is a just an alpha mask we use
     // only the alpha channel later.
