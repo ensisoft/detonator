@@ -85,11 +85,11 @@ in float vParticleAlpha;
 // do software wrapping for texture coordinates.
 // used for cases when texture sub-rects are used.
 float Wrap(float x, float w, int mode) {
-    if (mode == 1) {
+    if (mode == TEXTURE_WRAP_CLAMP) {
         return clamp(x, 0.0, w);
-    } else if (mode == 2) {
+    } else if (mode == TEXTURE_WRAP_REPEAT) {
         return fract(x / w) * w;
-    } else if (mode == 3) {
+    } else if (mode == TEXTURE_WRAP_MIRROR) {
         float p = floor(x / w);
         float f = fract(x / w);
         int m = int(floor(mod(p, 2.0)));

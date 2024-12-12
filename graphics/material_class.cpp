@@ -220,6 +220,9 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     source.AddPreprocessorDefinition("DRAW_PRIMITIVE_POINTS", static_cast<int>(DrawPrimitive::Points));
     source.AddPreprocessorDefinition("DRAW_PRIMITIVE_LINES", static_cast<int>(DrawPrimitive::Lines));
     source.AddPreprocessorDefinition("DRAW_PRIMITIVE_TRIANGLES", static_cast<int>(DrawPrimitive::Triangles));
+    source.AddPreprocessorDefinition("TEXTURE_WRAP_CLAMP", static_cast<int>(TextureWrapping::Clamp));
+    source.AddPreprocessorDefinition("TEXTURE_WRAP_REPEAT", static_cast<int>(TextureWrapping::Repeat));
+    source.AddPreprocessorDefinition("TEXTURE_WRAP_MIRROR", static_cast<int>(TextureWrapping::Mirror));
 
     if (IsStatic())
     {
@@ -1078,23 +1081,14 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     program.SetUniform("kBlendCoeff",                  kBlendCoeff);
     program.SetUniform("kAlphaMask",                   alpha_mask);
 
-    // set software wrap/clamp. 0 = disabled.
+    // set software wrap/clamp. -1 = disabled.
     if (need_software_wrap)
     {
-        auto ToGLSL = [](TextureWrapping wrapping) {
-            if (wrapping == TextureWrapping::Clamp)
-                return 1;
-            else if (wrapping == TextureWrapping::Repeat)
-                return 2;
-            else if (wrapping == TextureWrapping::Mirror)
-                return 3;
-            else BUG("Bug on software texture wrap.");
-        };
-        program.SetUniform("kTextureWrap", ToGLSL(mTextureWrapY), ToGLSL(mTextureWrapY));
+        program.SetUniform("kTextureWrap", static_cast<int>(mTextureWrapX), static_cast<int>(mTextureWrapY));
     }
     else
     {
-        program.SetUniform("kTextureWrap", 0, 0);
+        program.SetUniform("kTextureWrap", -1, -1);
     }
     if (!IsStatic())
     {
@@ -1159,23 +1153,14 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     program.SetTextureCount(1);
     program.SetUniform("kAlphaMask", binds.textures[0]->IsAlphaMask() ? 1.0f : 0.0f);
 
-    // set software wrap/clamp. 0 = disabled.
+    // set software wrap/clamp. -1 = disabled.
     if (need_software_wrap)
     {
-        auto ToGLSL = [](TextureWrapping wrapping) {
-            if (wrapping == TextureWrapping::Clamp)
-                return 1;
-            else if (wrapping == TextureWrapping::Repeat)
-                return 2;
-            else if (wrapping == TextureWrapping::Mirror)
-                return 3;
-            else BUG("Bug on software texture wrap.");
-        };
-        program.SetUniform("kTextureWrap", ToGLSL(mTextureWrapX), ToGLSL(mTextureWrapY));
+        program.SetUniform("kTextureWrap", static_cast<int>(mTextureWrapX), static_cast<int>(mTextureWrapY));
     }
     else
     {
-        program.SetUniform("kTextureWrap", 0, 0);
+        program.SetUniform("kTextureWrap", -1, -1);
     }
     if (!IsStatic())
     {
