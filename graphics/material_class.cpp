@@ -224,6 +224,12 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     source.AddPreprocessorDefinition("TEXTURE_WRAP_REPEAT", static_cast<int>(TextureWrapping::Repeat));
     source.AddPreprocessorDefinition("TEXTURE_WRAP_MIRROR", static_cast<int>(TextureWrapping::Mirror));
 
+    if (IsBuiltIn())
+    {
+        source.AddPreprocessorDefinition("PARTICLE_EFFECT_NONE", static_cast<int>(ParticleAction::None));
+        source.AddPreprocessorDefinition("PARTICLE_EFFECT_ROTATE", static_cast<int>(ParticleAction::Rotate));
+    }
+
     if (IsStatic())
     {
         // fold a set of known uniforms to constants in the shader

@@ -95,7 +95,8 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box) {
 
 vec2 RotateCoords(vec2 coords) {
     float random_angle = 0.0;
-    if (kParticleEffect == 2)
+
+    if (kParticleEffect == PARTICLE_EFFECT_ROTATE)
         random_angle = mix(0.0, 3.1415926, vParticleRandomValue);
 
     float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle;

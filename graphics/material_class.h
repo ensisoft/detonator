@@ -119,11 +119,7 @@ namespace gfx
         // in order to make the result visually more appealing.
         enum class ParticleAction : int {
             None   =  0,
-            Custom =  1, // try to set this value so that future expansion
-                         // works without breaking stuff. 255 or so could
-                         // also work but magic_enum breaks on a value
-                         // discontinuity
-            Rotate =  2,
+            Rotate =  1
         };
 
         // The current material state to apply when applying the
@@ -156,6 +152,9 @@ namespace gfx
         explicit MaterialClass(Type type, std::string id = base::RandomString(10));
         MaterialClass(const MaterialClass& other, bool copy=true);
        ~MaterialClass();
+
+        inline bool IsBuiltIn() const noexcept
+        { return mType != Type::Custom; }
 
         // Set the surface type of the material.
         inline void SetSurfaceType(SurfaceType surface) noexcept
