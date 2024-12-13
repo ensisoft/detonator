@@ -107,6 +107,8 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetColor(ColorIndex::BottomLeft));
             hash = base::hash_combine(hash, GetColor(ColorIndex::BottomRight));
             hash = base::hash_combine(hash, GetColorWeight());
+            hash = base::hash_combine(hash, state.draw_primitive);
+            hash = base::hash_combine(hash, mSurfaceType);
         }
     }
     else if (mType == Type::Sprite)
@@ -118,6 +120,8 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetTextureVelocity());
             hash = base::hash_combine(hash, GetTextureRotation());
             hash = base::hash_combine(hash, GetAlphaCutoff());
+            hash = base::hash_combine(hash, state.draw_primitive);
+            hash = base::hash_combine(hash, mSurfaceType);
         }
     }
     else if (mType == Type::Texture)
@@ -129,6 +133,8 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetTextureVelocity());
             hash = base::hash_combine(hash, GetTextureRotation());
             hash = base::hash_combine(hash, GetAlphaCutoff());
+            hash = base::hash_combine(hash, state.draw_primitive);
+            hash = base::hash_combine(hash, mSurfaceType);
         }
     }
     else if (mType == Type::Tilemap)
@@ -139,6 +145,8 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetAlphaCutoff());
             hash = base::hash_combine(hash, GetTileSize());
             hash = base::hash_combine(hash, GetTileOffset());
+            hash = base::hash_combine(hash, state.draw_primitive);
+            hash = base::hash_combine(hash, mSurfaceType);
         }
     }
     else if (mType == Type::Custom)
@@ -214,43 +222,68 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     if (!source.HasDataDeclaration("PI", ShaderSource::ShaderDataDeclarationType::PreprocessorDefine))
         source.AddPreprocessorDefinition("PI", float(3.1415926));
 
-    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_OPAQUE", static_cast<int>(SurfaceType::Opaque));
+    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_OPAQUE",      static_cast<int>(SurfaceType::Opaque));
     source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_TRANSPARENT", static_cast<int>(SurfaceType::Transparent));
-    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_EMISSIVE", static_cast<int>(SurfaceType::Emissive));
-    source.AddPreprocessorDefinition("DRAW_PRIMITIVE_POINTS", static_cast<int>(DrawPrimitive::Points));
-    source.AddPreprocessorDefinition("DRAW_PRIMITIVE_LINES", static_cast<int>(DrawPrimitive::Lines));
+    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_EMISSIVE",    static_cast<int>(SurfaceType::Emissive));
+    source.AddPreprocessorDefinition("DRAW_PRIMITIVE_POINTS",    static_cast<int>(DrawPrimitive::Points));
+    source.AddPreprocessorDefinition("DRAW_PRIMITIVE_LINES",     static_cast<int>(DrawPrimitive::Lines));
     source.AddPreprocessorDefinition("DRAW_PRIMITIVE_TRIANGLES", static_cast<int>(DrawPrimitive::Triangles));
-    source.AddPreprocessorDefinition("TEXTURE_WRAP_CLAMP", static_cast<int>(TextureWrapping::Clamp));
+    source.AddPreprocessorDefinition("TEXTURE_WRAP_CLAMP",  static_cast<int>(TextureWrapping::Clamp));
     source.AddPreprocessorDefinition("TEXTURE_WRAP_REPEAT", static_cast<int>(TextureWrapping::Repeat));
     source.AddPreprocessorDefinition("TEXTURE_WRAP_MIRROR", static_cast<int>(TextureWrapping::Mirror));
 
     if (IsBuiltIn())
     {
-        source.AddPreprocessorDefinition("PARTICLE_EFFECT_NONE", static_cast<int>(ParticleAction::None));
+        source.AddPreprocessorDefinition("PARTICLE_EFFECT_NONE",   static_cast<int>(ParticleAction::None));
         source.AddPreprocessorDefinition("PARTICLE_EFFECT_ROTATE", static_cast<int>(ParticleAction::Rotate));
     }
 
     if (IsStatic())
     {
-        // fold a set of known uniforms to constants in the shader
-        // code so that we don't need to set them at runtime.
-        // the tradeoff is that this creates more shader programs!
-        source.FoldUniform("kAlphaCutoff", GetAlphaCutoff());
-        source.FoldUniform("kBaseColor", GetColor(ColorIndex::BaseColor));
-        source.FoldUniform("kColor0", GetColor(ColorIndex::TopLeft));
-        source.FoldUniform("kColor1", GetColor(ColorIndex::TopRight));
-        source.FoldUniform("kColor2", GetColor(ColorIndex::BottomLeft));
-        source.FoldUniform("kColor3", GetColor(ColorIndex::BottomRight));
-        source.FoldUniform("kOffset", GetColorWeight());
-        source.FoldUniform("kTextureVelocity", GetTextureVelocity());
-        source.FoldUniform("kTextureVelocityXY", glm::vec2(GetTextureVelocity()));
-        source.FoldUniform("kTextureVelocityZ", GetTextureVelocity().z);
-        source.FoldUniform("kTextureRotation", GetTextureRotation());
-        source.FoldUniform("kTextureScale", GetTextureScale());
-        source.FoldUniform("kTileSize", GetTileSize());
-        source.FoldUniform("kTileOffset", GetTileOffset());
-        source.FoldUniform("kTilePadding", GetTilePadding());
-        source.FoldUniform("kSurfaceType", (int)mSurfaceType);
+        source.AddPreprocessorDefinition("STATIC_SHADER_SOURCE");
+
+        if (state.draw_primitive == DrawPrimitive::Triangles)
+            source.AddPreprocessorDefinition("DRAW_TRIANGLES");
+        else if (state.draw_primitive == DrawPrimitive::Points)
+            source.AddPreprocessorDefinition("DRAW_POINTS");
+        else if (state.draw_primitive == DrawPrimitive::Lines)
+            source.AddPreprocessorDefinition("DRAW_LINES");
+        else BUG("Bug on draw primitive");
+
+        if (mSurfaceType == SurfaceType::Transparent)
+            source.AddPreprocessorDefinition("TRANSPARENT_SURFACE");
+        else if (mSurfaceType == SurfaceType::Opaque)
+            source.AddPreprocessorDefinition("OPAQUE_SURFACE");
+        else if (mSurfaceType == SurfaceType::Emissive)
+            source.AddPreprocessorDefinition("EMISSIVE_SURFACE");
+        else BUG("Bug on surface type");
+
+        if (IsBuiltIn())
+        {
+            // fold a set of known uniforms to constants in the shader
+            // code so that we don't need to set them at runtime.
+            // the tradeoff is that this creates more shader programs!
+            source.FoldUniform("kAlphaCutoff", GetAlphaCutoff());
+            source.FoldUniform("kBaseColor", GetColor(ColorIndex::BaseColor));
+            source.FoldUniform("kColor0", GetColor(ColorIndex::TopLeft));
+            source.FoldUniform("kColor1", GetColor(ColorIndex::TopRight));
+            source.FoldUniform("kColor2", GetColor(ColorIndex::BottomLeft));
+            source.FoldUniform("kColor3", GetColor(ColorIndex::BottomRight));
+            source.FoldUniform("kOffset", GetColorWeight());
+            source.FoldUniform("kTextureVelocity", GetTextureVelocity());
+            source.FoldUniform("kTextureVelocityXY", glm::vec2(GetTextureVelocity()));
+            source.FoldUniform("kTextureVelocityZ", GetTextureVelocity().z);
+            source.FoldUniform("kTextureRotation", GetTextureRotation());
+            source.FoldUniform("kTextureScale", GetTextureScale());
+            source.FoldUniform("kTileSize", GetTileSize());
+            source.FoldUniform("kTileOffset", GetTileOffset());
+            source.FoldUniform("kTilePadding", GetTilePadding());
+            source.FoldUniform("kSurfaceType", static_cast<int>(mSurfaceType));
+        }
+    }
+    else
+    {
+        source.AddPreprocessorDefinition("DYNAMIC_SHADER_SOURCE");
     }
     return source;
 }
