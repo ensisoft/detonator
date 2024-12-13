@@ -49,22 +49,27 @@ namespace gfx
             Vec2i, Vec3i, Vec4i,
             Mat2f, Mat3f, Mat4f,
             Color4f,
-            Sampler2D,
-            // todo: should refactor this away, using it here for convenience
-            // when dealing with preprocessor strings
-            PreprocessorString
+            Sampler2D
         };
         using AttributeType = ShaderDataType;
         using UniformType   = ShaderDataType;
         using VaryingType   = ShaderDataType;
         using ConstantType  = ShaderDataType;
 
-        enum class ShaderDataDeclarationType {
-            Attribute, Uniform, Varying, Constant,
+        enum class ShaderBlockType {
+            // Attribute, Uniform, Varying, Constant,
+            ShaderDataDeclaration,
             // technically not part of the GLSL data types itself
             // since it's preprocessor #define BLAH 1
             // but combining it in the same enum for convenience.
-            PreprocessorDefine
+            PreprocessorDefine,
+            // #ifdef, #else, #endif, #define
+            PreprocessorToken,
+            // this is a comment
+            Comment,
+            StructDeclaration,
+            LayoutDeclaration,
+            ShaderCode
         };
 
         using ShaderDataDeclarationValue = std::variant<
@@ -87,12 +92,25 @@ namespace gfx
             NotSet, Low, Medium, High
         };
 
+        enum class ShaderDataDeclarationType {
+            Attribute, Uniform, Varying, Constant,
+        };
+
         struct ShaderDataDeclaration {
-            ShaderDataDeclarationType decl_type = ShaderDataDeclarationType::Attribute;
-            ShaderDataType data_type = ShaderDataType::Float;
+            // attribute, uniform, constant et.
+            ShaderDataDeclarationType decl_type;
+            // int, float, vec2, etc.
+            ShaderDataType data_type;
+            // name of the data variable, uniform for example kBaseColor
             std::string name;
-            std::string comment;
+            // constant value (if any), only used when the decl_type is Constant
             std::optional<ShaderDataDeclarationValue> constant_value;
+        };
+
+        struct ShaderBlock {
+            ShaderBlockType type;
+            std::string data;
+            std::optional<ShaderDataDeclaration> data_decl;
         };
 
         ShaderSource() = default;
@@ -103,25 +121,12 @@ namespace gfx
         { mPrecision = precision; }
         inline void SetVersion(Version version) noexcept
         { mVersion = version; }
-        inline void AddSource(std::string source)
-        { mSource.push_back(std::move(source)); }
-        inline void AddData(const ShaderDataDeclaration& data)
-        { mData.push_back(data); }
-        inline void AddData(ShaderDataDeclaration&& data)
-        { mData.push_back(std::move(data)); }
         inline bool IsEmpty() const noexcept
-        { return mSource.empty(); }
-        inline size_t GetSourceCount() const noexcept
-        { return mSource.size(); }
-        inline std::string GetSource(size_t index) const noexcept
-        { return base::SafeIndex(mSource, index); }
+        { return mDataBlocks.empty(); }
         inline void ClearSource() noexcept
-        { mSource.clear(); }
+        { mCodeBlocks.clear(); }
         inline void ClearData() noexcept
-        { mData.clear(); }
-
-        inline void SetShaderUniformAPIVersion(unsigned version)
-        { mShaderUniformAPIVersion = version; }
+        { mDataBlocks.clear(); }
         inline void SetShaderSourceUri(std::string uri) noexcept
         { mShaderSourceUri = std::move(uri); }
 
@@ -132,101 +137,28 @@ namespace gfx
         inline Version GetVersion() const noexcept
         { return mVersion; }
 
-        const ShaderDataDeclaration* FindDataDeclaration(const std::string& key) const
-        {
-            for (const auto& data : mData)
-            {
-                if (data.name == key)
-                    return &data;
-            }
-            return nullptr;
-        }
-        void AddPreprocessorDefinition(std::string name, std::string comment = "")
-        {
-            ShaderDataDeclaration decl;
-            decl.decl_type      = ShaderDataDeclarationType::PreprocessorDefine;
-            decl.data_type      = ShaderDataType::Int;
-            decl.name           = std::move(name);
-            decl.comment        = std::move(comment);
-            AddData(std::move(decl));
-        }
+        const ShaderDataDeclaration* FindDataDeclaration(const std::string& key) const;
+        const ShaderBlock* FindShaderBlock(const std::string& key) const;
 
-        void AddPreprocessorDefinition(std::string name, int value, std::string  comment = "")
-        {
-            ShaderDataDeclaration decl;
-            decl.decl_type      = ShaderDataDeclarationType::PreprocessorDefine;
-            decl.data_type      = ShaderDataType::Int;
-            decl.name           = std::move(name);
-            decl.comment        = std::move(comment);
-            decl.constant_value = value;
-            AddData(std::move(decl));
-        }
-        void AddPreprocessorDefinition(std::string name, float value, std::string  comment = "")
-        {
-            ShaderDataDeclaration decl;
-            decl.decl_type      = ShaderDataDeclarationType::PreprocessorDefine;
-            decl.data_type      = ShaderDataType::Float;
-            decl.name           = std::move(name);
-            decl.comment        = std::move(comment);
-            decl.constant_value = value;
-            AddData(std::move(decl));
-        }
+        void AddSource(std::string source);
+        void AddSingleLineComment(std::string comment);
+        void AddPreprocessorDefinition(std::string name, std::string comment = "");
+        void AddPreprocessorDefinition(std::string name, int value, std::string comment = "");
+        void AddPreprocessorDefinition(std::string name, float value, std::string comment = "");
+        void AddAttribute(std::string name, AttributeType type, std::string comment = "");
+        void AddUniform(std::string name, UniformType type, std::string comment = "");
+        void AddConstant(std::string name, ShaderDataDeclarationValue value, std::string comment = "");
+        void AddVarying(std::string name, VaryingType type, std::string comment = "");
 
-        void AddAttribute(std::string name, AttributeType type, std::string comment = "")
-        {
-            ShaderDataDeclaration decl;
-            decl.decl_type = ShaderDataDeclarationType::Attribute;
-            decl.data_type = type;
-            decl.name      = std::move(name);
-            decl.comment   = std::move(comment);
-            AddData(std::move(decl));
-        }
-        void AddUniform(std::string name, UniformType type, std::string comment = "")
-        {
-            ShaderDataDeclaration decl;
-            decl.decl_type = ShaderDataDeclarationType::Uniform;
-            decl.data_type = type;
-            decl.name      = std::move(name);
-            decl.comment   = std::move(comment);
-            AddData(std::move(decl));
-        }
-        void AddConstant(std::string name, ShaderDataDeclarationValue value, std::string comment = "")
-        {
-            ShaderDataDeclaration decl;
-            decl.decl_type = ShaderDataDeclarationType::Constant;
-            decl.data_type = DataTypeFromValue(value);
-            decl.constant_value = value;
-            decl.name      = std::move(name);
-            decl.comment   = std::move(comment);
-            AddData(std::move(decl));
-        }
-        void AddVarying(std::string name, VaryingType type, std::string comment = "")
-        {
-            ShaderDataDeclaration decl;
-            decl.decl_type = ShaderDataDeclarationType::Varying;
-            decl.data_type = type;
-            decl.name      = std::move(name);
-            decl.comment   = std::move(comment);
-            AddData(std::move(decl));
-        }
+        bool HasShaderBlock(const std::string& key, ShaderBlockType type) const;
+        bool HasDataDeclaration(const std::string& name, ShaderDataDeclarationType type) const;
 
-        bool HasDataDeclaration(const std::string& name, ShaderDataDeclarationType type) const
-        {
-            for (const auto& data : mData)
-            {
-                if (data.decl_type == type && data.name == name)
-                    return true;
-            }
-            return false;
-        }
+        void FoldUniform(const std::string& name, ShaderDataDeclarationValue value);
+
         inline bool HasUniform(const std::string& name) const
         { return HasDataDeclaration(name, ShaderDataDeclarationType::Uniform); }
         inline bool HasVarying(const std::string& name) const
         { return HasDataDeclaration(name, ShaderDataDeclarationType::Varying); }
-
-        void FoldUniform(const std::string& name, ShaderDataDeclarationValue value);
-
-        void SetComment(const std::string& name, std::string comment);
 
         enum class SourceVariant {
             Production, Development
@@ -254,7 +186,6 @@ namespace gfx
         static ShaderDataType DataTypeFromValue(ShaderDataDeclarationValue value) noexcept;
 
     private:
-        unsigned mShaderUniformAPIVersion = 1;
         Type mType = Type::NotSet;
         Version mVersion = Version::NotSet;
         Precision mPrecision = Precision::NotSet;
@@ -263,11 +194,9 @@ namespace gfx
         // These are the shader program's data interface
         // the interface mechanism for data flow from vertex
         // shader to the fragment shader.
-        std::vector<ShaderDataDeclaration> mData;
-        // Source are the actual GLSL shader code functions etc.
-        // Currently basically everything else other than the
-        // data declarations.
-        std::vector<std::string> mSource;
+        std::vector<ShaderBlock> mDataBlocks;
+
+        std::vector<ShaderBlock> mCodeBlocks;
         // for debugging help, we can embed the shader source
         // URI int he shader source as a comment so when it borks
         // in production the user can easily see which shader it is.

@@ -65,55 +65,20 @@ namespace {
                                   base::ToChars(vec4.w));
     }
     template<typename T>
-    std::string ToConst(const T& value)
+    std::string ToConst(T)
     {
-        BUG("Not implemented!");
+        BUG("Shader data type has no const support.");
         return "";
     }
 
-    bool ValidateConstDataType(float, gfx::ShaderSource::ShaderDataType type)
-    {
-        return type == gfx::ShaderSource::ShaderDataType::Float;
-    }
-    bool ValidateConstDataType(int, gfx::ShaderSource::ShaderDataType type)
-    {
-        return type == gfx::ShaderSource::ShaderDataType::Int;
-    }
-    bool ValidateConstDataType(const glm::vec2&, gfx::ShaderSource::ShaderDataType type)
-    {
-        return type == gfx::ShaderSource::ShaderDataType::Vec2f;
-    }
-    bool ValidateConstDataType(const glm::vec3&, gfx::ShaderSource::ShaderDataType type)
-    {
-        return type == gfx::ShaderSource::ShaderDataType::Vec3f;
-    }
-    bool ValidateConstDataType(const glm::vec4&, gfx::ShaderSource::ShaderDataType type)
-    {
-        return type == gfx::ShaderSource::ShaderDataType::Vec4f;
-    }
-    bool ValidateConstDataType(const glm::ivec2&, gfx::ShaderSource::ShaderDataType type)
-    {
-        return type == gfx::ShaderSource::ShaderDataType::Vec2i;
-    }
-    bool ValidateConstDataType(const glm::ivec3&, gfx::ShaderSource::ShaderDataType type)
-    {
-        return type == gfx::ShaderSource::ShaderDataType::Vec3i;
-    }
-    bool ValidateConstDataType(const glm::ivec4&, gfx::ShaderSource::ShaderDataType type)
-    {
-        return type == gfx::ShaderSource::ShaderDataType::Vec4i;
-    }
-    bool ValidateConstDataType(const gfx::Color4f, gfx::ShaderSource::ShaderDataType type)
-    {
-        return type == gfx::ShaderSource::ShaderDataType::Color4f ||
-               type == gfx::ShaderSource::ShaderDataType::Vec4f;
-    }
 
-    template<typename T>
-    bool ValidateConstDataType(T, gfx::ShaderSource::ShaderDataType)
+    std::string ToConst(const gfx::ShaderSource::ShaderDataDeclarationValue value)
     {
-        BUG("Not implemented");
-        return false;
+        std::string ret;
+        std::visit([&ret](auto the_value) {
+            ret = ToConst(the_value);
+        }, value);
+        return ret;
     }
 
     std::optional<gfx::ShaderSource::ShaderDataDeclarationType> DeclTypeFromString(const std::string& str, gfx::ShaderSource::Type type)
@@ -182,41 +147,251 @@ namespace {
         return std::nullopt;
     }
 
+    std::string DataTypeToString(gfx::ShaderSource::ShaderDataType type)
+    {
+        using T = gfx::ShaderSource::ShaderDataType;
+
+        if (type == T::Int)
+            return "int";
+        else if (type == T::Float)
+            return "float";
+        else if (type == T::Vec2f)
+            return "vec2";
+        else if (type == T::Vec3f)
+            return "vec3";
+        else if (type == T::Vec4f)
+            return "vec4";
+        else if (type == T::Vec2i)
+            return "ivec2";
+        else if (type == T::Vec3i)
+            return "ivec3";
+        else if (type == T::Vec4i)
+            return "ivec4";
+        else if (type == T::Mat2f)
+            return "mat2";
+        else if (type == T::Mat3f)
+            return "mat3";
+        else if (type == T::Mat4f)
+            return "mat4";
+        else if (type == T::Color4f)
+            return "vec4";
+        else if (type == T::Sampler2D)
+            return "sampler2D";
+       BUG("Bug on shader type string.");
+    }
+
 } // namespace
 
 namespace gfx
 {
 
+const ShaderSource::ShaderDataDeclaration* ShaderSource::FindDataDeclaration(const std::string& key) const
+{
+    for (const auto& block : mDataBlocks)
+    {
+        if (block.type != ShaderBlockType::ShaderDataDeclaration)
+            continue;
+        auto& data = block.data_decl.value();
+        if (data.name == key)
+            return &data;
+    }
+    return nullptr;
+}
+
+const ShaderSource::ShaderBlock* ShaderSource::FindShaderBlock(const std::string& key) const
+{
+    for (const auto& block : mDataBlocks)
+    {
+        if (base::Contains(block.data, key))
+            return &block;
+    }
+    return nullptr;
+}
+
+void ShaderSource::AddSource(std::string source)
+{
+    std::string line;
+    std::stringstream ss(source);
+    while (std::getline(ss, line))
+    {
+        ShaderBlock block;
+        block.type = ShaderBlockType::ShaderCode;
+        block.data = line;
+        mCodeBlocks.push_back(std::move(block));
+    }
+}
+
+
+void ShaderSource::AddSingleLineComment(std::string comment)
+{
+    if (comment.empty())
+        return;
+
+    ShaderBlock block;
+    block.type = ShaderBlockType::Comment;
+    block.data = base::FormatString("// %1", comment);
+    mDataBlocks.push_back(std::move(block));
+}
+
+void ShaderSource::AddPreprocessorDefinition(std::string name, std::string comment)
+{
+    AddSingleLineComment(std::move(comment));
+
+    ShaderBlock block;
+    block.type = ShaderBlockType::PreprocessorDefine;
+    block.data = base::FormatString("#define %1", name);
+    mDataBlocks.push_back(std::move(block));
+}
+
+void ShaderSource::AddPreprocessorDefinition(std::string name, int value, std::string  comment)
+{
+    AddSingleLineComment(std::move(comment));
+
+    ShaderBlock block;
+    block.type = ShaderBlockType::PreprocessorDefine;
+    block.data = base::FormatString("#define %1 %2", name, ToConst(value));
+    mDataBlocks.push_back(std::move(block));
+}
+
+void ShaderSource::AddPreprocessorDefinition(std::string name, float value, std::string comment)
+{
+    AddSingleLineComment(std::move(comment));
+
+    ShaderBlock block;
+    block.type = ShaderBlockType::PreprocessorDefine;
+    block.data = base::FormatString("#define %1 %2", name, ToConst(value));
+    mDataBlocks.push_back(std::move(block));
+}
+
+void ShaderSource::AddAttribute(std::string name, AttributeType type, std::string comment)
+{
+    AddSingleLineComment(std::move(comment));
+
+    std::string code;
+    if (mVersion == Version::GLSL_100)
+        code = base::FormatString("attribute %1 %2;", DataTypeToString(type), name);
+    else if (mVersion == Version::GLSL_300)
+        code = base::FormatString("in %1 %2;", DataTypeToString(type), name);
+    else BUG("Bug on attribute formatting.");
+
+    ShaderDataDeclaration decl;
+    decl.decl_type = ShaderDataDeclarationType::Attribute;
+    decl.data_type = type;
+    decl.name      = name;
+
+    ShaderBlock block;
+    block.type = ShaderBlockType::ShaderDataDeclaration;
+    block.data = std::move(code);
+    block.data_decl = decl;
+    mDataBlocks.push_back(std::move(block));
+}
+void ShaderSource::AddUniform(std::string name, UniformType type, std::string comment)
+{
+    AddSingleLineComment(std::move(comment));
+
+    ShaderDataDeclaration decl;
+    decl.decl_type = ShaderDataDeclarationType::Uniform;
+    decl.data_type = type;
+    decl.name      = name;
+
+    ShaderBlock block;
+    block.type = ShaderBlockType::ShaderDataDeclaration;
+    block.data = base::FormatString("uniform %1 %2;", DataTypeToString(type), name);
+    block.data_decl = decl;
+    mDataBlocks.push_back(std::move(block));
+}
+void ShaderSource::AddConstant(std::string name, ShaderDataDeclarationValue value, std::string comment)
+{
+    AddSingleLineComment(std::move(comment));
+
+    const auto data_type  = DataTypeFromValue(value);
+
+    ShaderDataDeclaration decl;
+    decl.decl_type = ShaderDataDeclarationType::Constant;
+    decl.data_type = data_type;
+    decl.name      = name;
+    decl.constant_value = value;
+
+    ShaderBlock block;
+    block.type = ShaderBlockType::ShaderDataDeclaration;
+    block.data = base::FormatString("const %1 %2 = %3;", DataTypeToString(data_type), name, ToConst(value));
+    block.data_decl = decl;
+    mDataBlocks.push_back(std::move(block));
+}
+void ShaderSource::AddVarying(std::string name, VaryingType type, std::string comment)
+{
+    AddSingleLineComment(std::move(comment));
+
+    std::string code;
+    if (mVersion == Version::GLSL_100)
+        code = base::FormatString("varying %1 %2;", DataTypeToString(type), name);
+    else if (mVersion == Version::GLSL_300)
+    {
+        if (mType == Type::Fragment)
+            code = base::FormatString("in %1 %2;", DataTypeToString(type), name);
+        else if (mType == Type::Vertex)
+            code = base::FormatString("out %1 %2;", DataTypeToString(type), name);
+        else BUG("Bug on varying formatting.");
+    } else BUG("Bug on varying formatting.");
+
+    ShaderDataDeclaration decl;
+    decl.decl_type = ShaderDataDeclarationType::Varying;
+    decl.data_type = type;
+    decl.name      = name;
+
+    ShaderBlock block;
+    block.type = ShaderBlockType::ShaderDataDeclaration;
+    block.data = code;
+    block.data_decl = decl;
+    mDataBlocks.push_back(std::move(block));
+}
+
+bool ShaderSource::HasShaderBlock(const std::string& key, ShaderBlockType type) const
+{
+    for (const auto& block : mDataBlocks)
+    {
+        if (block.type != type)
+            continue;
+        if (base::Contains(block.data, key))
+            return true;
+    }
+    return false;
+}
+
+bool ShaderSource::HasDataDeclaration(const std::string& name, ShaderDataDeclarationType type) const
+{
+    for (const auto& block : mDataBlocks)
+    {
+        if (block.type != ShaderBlockType::ShaderDataDeclaration)
+            continue;
+
+        const auto& decl = block.data_decl.value();
+        if (decl.name == name && decl.decl_type == type)
+            return true;
+    }
+    return false;
+}
+
+
 void ShaderSource::FoldUniform(const std::string& name, ShaderDataDeclarationValue value)
 {
-    for (auto& decl : mData)
+    for (auto& block : mDataBlocks)
     {
-        if (decl.decl_type != ShaderDataDeclarationType::Uniform)
+        if (block.type != ShaderBlockType::ShaderDataDeclaration)
             continue;
+
+        auto& decl = block.data_decl.value();
         if (decl.name != name)
             continue;
 
-        std::visit([&decl](auto the_value)  {
-            ASSERT(ValidateConstDataType(the_value, decl.data_type));
-        }, value);
-
+        const auto data_type  = DataTypeFromValue(value);
+        ASSERT(data_type == decl.data_type);
         decl.decl_type = ShaderDataDeclarationType::Constant;
         decl.constant_value = std::move(value);
+        block.data =  base::FormatString("const %1 %2 = %3;", DataTypeToString(data_type), name, ToConst(value));
         break;
     }
 }
-
-void ShaderSource::SetComment(const std::string& name, std::string comment)
-{
-    for (auto& decl : mData)
-    {
-        if (decl.name != name)
-            continue;
-        decl.comment = std::move(comment);
-        break;
-    }
-}
-
 
 std::string ShaderSource::GetSource(SourceVariant variant) const
 {
@@ -248,156 +423,36 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
         ss << "\n// " << mShaderSourceUri << "\n\n";
     }
 
-    // deal with preprocessor definitions
-    // expect to produce something like
-    // #define PI 3.123441
-    for (const auto& data : mData)
+    for (const auto& block : mDataBlocks)
     {
-        if (data.decl_type != ShaderDataDeclarationType::PreprocessorDefine)
+        if (block.type == ShaderBlockType::Comment)
+        {
+            if (variant == SourceVariant::Development)
+            {
+                ss << block.data;
+                ss << "\n";
+            }
             continue;
-
-        const auto& lines = base::SplitString(data.comment, '\n');
-        for (const auto& line: lines)
-        {
-            ss << "// " << line << "\n";
         }
-        if (data.constant_value.has_value())
-        {
-            const auto& value = data.constant_value.value();
-
-            if (const auto* ptr = std::get_if<int>(&value))
-            {
-                ss << "#define " << data.name << " " << ToConst(*ptr);
-                ss << "\n";
-            }
-            else if (const auto* ptr = std::get_if<float>(&value))
-            {
-                ss << "#define " << data.name << " " << ToConst(*ptr);
-                ss << "\n";
-            }
-            else if (const auto* ptr = std::get_if<std::string>(&value))
-            {
-                ss << "#define " << data.name << " " << *ptr;
-                ss << "\n";
-            }
-            else BUG("Unsupported preprocessor definition type.");
-        }
-        else
-        {
-            ss << "#define " << data.name;
-            ss << "\n";
-        }
-    }
-    ss << "\n";
-
-    for (const auto& data : mData)
-    {
-        if (data.decl_type == ShaderDataDeclarationType::PreprocessorDefine)
-            continue;
-
-        if (variant == SourceVariant::Development)
-        {
-            const auto& lines = base::SplitString(data.comment, '\n');
-            for (const auto& line: lines)
-            {
-                ss << "// " << line << "\n";
-            }
-        }
-
-        if (data.decl_type == ShaderDataDeclarationType::Attribute)
-        {
-            if (mVersion == Version::GLSL_100)
-            {
-                ss << "attribute ";
-            }
-            else if (mVersion == Version::GLSL_300)
-            {
-                ss << "in ";
-            }
-            else BUG("Missing shader version handling.");
-        }
-        else if (data.decl_type == ShaderDataDeclarationType::Uniform)
-            ss << "uniform ";
-        else if (data.decl_type == ShaderDataDeclarationType::Constant)
-            ss << "const ";
-        else if (data.decl_type == ShaderDataDeclarationType::Varying)
-        {
-            if (mVersion == Version::GLSL_100)
-            {
-                ss << "varying ";
-            }
-            else if (mVersion == Version::GLSL_300)
-            {
-                if (mType == Type::Fragment)
-                    ss << "in ";
-                else if (mType == Type::Vertex)
-                    ss << "out ";
-                else BUG("Missing vertex type handling.");
-            }
-            else BUG("Missing shader version handling.");
-
-        }
-        else BUG("Missing GLSL data declaration type handling.");
-
-        if (data.data_type == ShaderDataType::Int)
-            ss << "int ";
-        else if (data.data_type == ShaderDataType::Float)
-            ss << "float ";
-        else if (data.data_type == ShaderDataType::Vec2f)
-            ss << "vec2 ";
-        else if (data.data_type == ShaderDataType::Vec3f)
-            ss << "vec3 ";
-        else if (data.data_type == ShaderDataType::Vec4f)
-            ss << "vec4 ";
-        else if (data.data_type == ShaderDataType::Vec2i)
-            ss << "ivec2 ";
-        else if (data.data_type == ShaderDataType::Vec3i)
-            ss << "ivec3 ";
-        else if (data.data_type == ShaderDataType::Vec4i)
-            ss << "ivec4 ";
-        else if (data.data_type == ShaderDataType::Mat2f)
-            ss << "mat2 ";
-        else if (data.data_type == ShaderDataType::Mat3f)
-            ss << "mat3 ";
-        else if (data.data_type == ShaderDataType::Mat4f)
-            ss << "mat4 ";
-        else if (data.data_type == ShaderDataType::Color4f)
-            ss << "vec4 ";
-        else if (data.data_type == ShaderDataType::Sampler2D)
-        {
-            if (data.decl_type != ShaderDataDeclarationType::Uniform)
-            {
-                ERROR("Shader uses sampler2D data declaration that isn't a uniform.");
-                return "";
-            }
-            ss << "sampler2D ";
-        }
-        else BUG("Missing GLSL data type handling.");
-
-        if (data.decl_type == ShaderDataDeclarationType::Constant)
-        {
-            ASSERT(data.constant_value.has_value());
-
-            ss << data.name;
-            ss << " = ";
-            std::visit([&ss, &data](auto the_value) {
-                ASSERT(ValidateConstDataType(the_value, data.data_type));
-
-                ss << ToConst(the_value);
-            }, data.constant_value.value());
-            ss << ";";
-        }
-        else
-        {
-            ss << data.name;
-            ss << ";";
-        }
+        ss << block.data;
         ss << "\n";
     }
 
-    for (const auto& src: mSource)
+    ss << "\n";
+
+    for (const auto& block : mCodeBlocks)
     {
-        ss << src;
+        if (block.type == ShaderBlockType::Comment)
+        {
+            if (variant == SourceVariant::Development)
+            {
+                ss << block.data;
+                ss << "\n";
+            }
+            continue;
+        }
+        ss << block.data;
+        ss << "\n";
     }
 
     return ss.str();
@@ -407,14 +462,14 @@ void ShaderSource::Merge(const ShaderSource& other)
 {
     ASSERT(IsCompatible(other));
 
-    for (const auto& other_source : other.mSource)
+    for (const auto& other_source : other.mCodeBlocks)
     {
-        mSource.push_back(other_source);
+        mCodeBlocks.push_back(other_source);
     }
 
-    for (const auto& other_data : other.mData)
+    for (const auto& other_data : other.mDataBlocks)
     {
-        mData.push_back(other_data);
+        mDataBlocks.push_back(other_data);
     }
 }
 
@@ -449,7 +504,7 @@ ShaderSource::ShaderDataType ShaderSource::DataTypeFromValue(gfx::ShaderSource::
     else if (std::holds_alternative<float>(value))
         return ShaderDataType::Float;
     else if (std::holds_alternative<Color4f>(value))
-        return ShaderDataType::Color4f;
+        return ShaderDataType::Vec4f;
     else if (std::holds_alternative<glm::vec2>(value))
         return ShaderDataType::Vec2f;
     else if (std::holds_alternative<glm::vec3>(value))
@@ -470,8 +525,8 @@ ShaderSource::ShaderDataType ShaderSource::DataTypeFromValue(gfx::ShaderSource::
         return ShaderDataType::Mat4f;
     else if (std::holds_alternative<std::string>(value))
         BUG("String is not a valid GLSL shader constant value type.");
-    else
-        BUG("Missing shader source type.");
+
+    BUG("Missing shader source type.");
     return ShaderDataType::Int;
 }
 
@@ -488,45 +543,61 @@ bool ShaderSource::LoadRawSource(const std::string& source)
         return tokens[index];
     };
 
-    std::string glsl_code;
-
+    std::vector<std::string> line_buffer;
     std::stringstream ss(source);
     std::string line;
     while (std::getline(ss, line))
     {
+        if (base::StartsWith(line, "R\"CPP_RAW_STRING(") ||
+            base::StartsWith(line, ")CPP_RAW_STRING\""))
+            continue;
+
+        line_buffer.push_back(line);
+    }
+
+    // try to "parse" (lol) the GLSL in two segments.
+    // first try to extract the in, out, varying, uniform
+    // shader data declarations but with relative ordering
+    // and preprocessor definitions intact.
+    //
+    // then assume the rest is code...
+    size_t line_buffer_index = 0;
+    for (; line_buffer_index < line_buffer.size(); line_buffer_index++)
+    {
+        auto line = line_buffer[line_buffer_index];
+        if (line.empty())
+            continue;
+
         const auto& trimmed = base::TrimString(line);
-        if (trimmed.empty())
-            continue;
-        if (base::StartsWith(trimmed, "R\"CPP_RAW_STRING(") ||
-            base::StartsWith(trimmed, ")CPP_RAW_STRING\""))
-        {
-            continue;
-        }
+
         if (base::StartsWith(trimmed, "#version"))
         {
             if (base::Contains(trimmed, "100"))
                 SetVersion(ShaderSource::Version::GLSL_100);
             else if (base::Contains(trimmed, "300 es"))
                 SetVersion(ShaderSource::Version::GLSL_300);
-            else WARN("Unsupported GLSL version '%1'.", trimmed);
+            else
+            {
+                ERROR("Unsupported GLSL version '%1'.", trimmed);
+                return false;
+            }
         }
         else if (base::StartsWith(trimmed, "#define"))
         {
-            const auto& parts = base::SplitString(trimmed);
-            const auto& name = GetToken(parts, 1);
-            const auto& value = GetToken(parts, 2);
-            if (name.empty())
-            {
-                WARN("Failed to parse GLSL #define '%1'", trimmed);
-                glsl_code.append(trimmed);
-                continue;
-            }
-            ShaderDataDeclaration decl;
-            decl.decl_type      = ShaderDataDeclarationType::PreprocessorDefine;
-            decl.data_type      = ShaderDataType::PreprocessorString;
-            decl.name           = name;
-            decl.constant_value = value;
-            AddData(std::move(decl));
+            ShaderBlock block;
+            block.type = ShaderBlockType::PreprocessorDefine;
+            block.data = trimmed;
+            mDataBlocks.push_back(std::move(block));
+        }
+        else if (base::StartsWith(trimmed, "#ifdef") ||
+                 base::StartsWith(trimmed, "#ifndef") ||
+                 base::StartsWith(trimmed, "#else") ||
+                 base::StartsWith(trimmed, "#endif"))
+        {
+            ShaderBlock block;
+            block.type = ShaderBlockType::PreprocessorToken;
+            block.data = line;
+            mDataBlocks.push_back(std::move(block));
         }
         else if (base::StartsWith(trimmed, "precision"))
         {
@@ -550,15 +621,19 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             const auto& name = GetTokenName(GetToken(parts, 2));
             if (!decl_type.has_value() || !data_type.has_value() || !name.has_value())
             {
-                WARN("Failed to parse GLSL declaration '%1'.", trimmed);
-                glsl_code.append(trimmed);
-                continue;
+                ERROR("Failed to parse GLSL declaration '%1'.", trimmed);
+                return false;
             }
             ShaderDataDeclaration decl;
             decl.data_type = data_type.value();
             decl.decl_type = decl_type.value();
             decl.name      = name.value();
-            AddData(std::move(decl));
+
+            ShaderBlock block;
+            block.type = ShaderBlockType::ShaderDataDeclaration;
+            block.data = line;
+            block.data_decl = decl;
+            mDataBlocks.push_back(std::move(block));
         }
         else if (base::StartsWith(trimmed, "const"))
         {
@@ -567,15 +642,85 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             // const int foo = 123;
             // const int foo= 123;
             // const int foo =123;
+            ERROR("Unimplemented GLSL constant parsing.");
+            return false;
         }
-        else if (!base::StartsWith(trimmed, "//"))
+        else if (base::StartsWith(trimmed, "layout"))
         {
-            glsl_code.append(line);
-            glsl_code.append("\n");
+            if (base::Contains(trimmed, "location"))
+            {
+                ShaderBlock block;
+                block.type = ShaderBlockType::LayoutDeclaration;
+                block.data = line;
+                mDataBlocks.push_back(std::move(block));
+            }
+            else
+            {
+                ERROR("Unrecognized shader layout directive.");
+                return false;
+            }
+        }
+        else if (base::StartsWith(trimmed, "struct"))
+        {
+            // todo: parse properly until }
+            ShaderBlock block;
+            block.type = ShaderBlockType::StructDeclaration;
+            block.data = line;
+
+            for (; line_buffer_index<line_buffer.size(); ++line_buffer_index)
+            {
+                auto line = line_buffer[line_buffer_index];
+                auto trimmed = base::TrimString(line);
+                block.data += line;
+                block.data += "\n";
+                if (trimmed == "}")
+                    break;
+            }
+            mDataBlocks.push_back(std::move(block));
+        }
+        else if (base::StartsWith(trimmed, "//"))
+        {
+            ShaderBlock block;
+            block.type = ShaderBlockType::Comment;
+            block.data = line;
+            mDataBlocks.push_back(std::move(block));
+        }
+        else if (base::StartsWith(trimmed, "/*"))
+        {
+            ERROR("Unimplemented GLSL block comment parsing.");
+            return false;
+        }
+        else
+        {
+            // start code ?
+            break;
         }
     }
 
-    AddSource(glsl_code);
+    for (; line_buffer_index < line_buffer.size(); line_buffer_index++)
+    {
+        auto line = line_buffer[line_buffer_index];
+        auto trimmed = base::TrimString(line);
+        if (base::StartsWith(trimmed, "//"))
+        {
+            ShaderBlock block;
+            block.type = ShaderBlockType::Comment;
+            block.data = std::move(line);
+            mCodeBlocks.push_back(std::move(block));
+        }
+        else if (base::StartsWith(trimmed, "/*"))
+        {
+            ERROR("Unimplemented GLSL block comment parsing.");
+            return false;
+        }
+        else
+        {
+            ShaderBlock block;
+            block.type = ShaderBlockType::ShaderCode;
+            block.data = std::move(line);
+            mCodeBlocks.push_back(std::move(block));
+        }
+    }
     return true;
 }
 
