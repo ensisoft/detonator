@@ -1019,6 +1019,9 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     static const char* texture_functions =  {
 #include "shaders/texture_functions.glsl"
     };
+    static const char* base_shader = {
+#include "shaders/material_base_shader.glsl"
+    };
 
     ShaderSource src;
     src.SetType(gfx::ShaderSource::Type::Fragment);
@@ -1037,6 +1040,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 #include "shaders/gradient_shader.glsl"
         };
 
+        src.LoadRawSource(base_shader);
         src.LoadRawSource(source);
     }
     else if (mType == Type::Sprite)
@@ -1045,6 +1049,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 #include "shaders/sprite_shader.glsl"
         };
 
+        src.LoadRawSource(base_shader);
         src.LoadRawSource(texture_functions);
         src.LoadRawSource(source);
     }
@@ -1053,6 +1058,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         static const char* source =  {
 #include "shaders/texture_shader.glsl"
         };
+        src.LoadRawSource(base_shader);
         src.LoadRawSource(texture_functions);
         src.LoadRawSource(source);
     }
