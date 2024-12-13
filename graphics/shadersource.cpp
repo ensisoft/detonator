@@ -284,7 +284,7 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
         }
         else
         {
-            ss << "define " << data.name;
+            ss << "#define " << data.name;
             ss << "\n";
         }
     }
