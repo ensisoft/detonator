@@ -2306,9 +2306,9 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         texture_map.SetSamplerName("kTexture");
         texture_map.SetRectUniformName("kTextureRect");
 
-        auto klass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture,
+        auto klass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Custom,
             std::string("_design-mode-widget-scroll-area"));
-        klass->SetBaseColor(base::ColorFromHex("#e3e3e335"));
+        klass->SetUniform("kBaseColor", base::ColorFromHex("#e3e3e335"));
         klass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         klass->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
         klass->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
