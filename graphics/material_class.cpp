@@ -219,7 +219,7 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     if (source.IsEmpty())
         return source;
 
-    if (!source.HasDataDeclaration("PI", ShaderSource::ShaderDataDeclarationType::PreprocessorDefine))
+    if (!source.HasShaderBlock("PI", ShaderSource::ShaderBlockType::PreprocessorDefine))
         source.AddPreprocessorDefinition("PI", float(3.1415926));
 
     source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_OPAQUE",      static_cast<int>(SurfaceType::Opaque));

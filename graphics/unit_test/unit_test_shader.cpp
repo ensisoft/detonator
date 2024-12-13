@@ -21,6 +21,18 @@
 #include "base/test_minimal.h"
 #include "graphics/shadersource.h"
 
+std::string CleanStr(const std::string& str)
+{
+    std::string ret;
+    for (auto c : str)
+    {
+        if (c == ' ' || c == '\r' || c == '\n')
+            continue;
+        ret += c;
+    }
+    return ret;
+}
+
 void unit_test_raw_source_es100()
 {
     TEST_CASE(test::Type::Feature)
@@ -52,7 +64,6 @@ void main() {
         TEST_REQUIRE(ret.FindDataDeclaration("aVec3")->decl_type == ddt::Attribute);
         TEST_REQUIRE(ret.FindDataDeclaration("aVec4")->data_type == dt::Vec4f);
         TEST_REQUIRE(ret.FindDataDeclaration("aVec4")->decl_type == ddt::Attribute);
-
         TEST_REQUIRE(ret.FindDataDeclaration("vVec2")->data_type == dt::Vec2f);
         TEST_REQUIRE(ret.FindDataDeclaration("vVec2")->decl_type == ddt::Varying);
         TEST_REQUIRE(ret.FindDataDeclaration("vVec3")->data_type == dt::Vec3f);
@@ -60,10 +71,17 @@ void main() {
         TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->data_type == dt::Vec4f);
         TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->decl_type == ddt::Varying);
 
-        TEST_REQUIRE(ret.GetSource(0) == R"(void main() {
+        const auto& sauce = ret.GetSource();
+        TEST_REQUIRE(base::Contains(sauce, "attribute vec2 aVec2;"));
+        TEST_REQUIRE(base::Contains(sauce, "attribute vec3 aVec3;"));
+        TEST_REQUIRE(base::Contains(sauce, "attribute vec4 aVec4;"));
+        TEST_REQUIRE(base::Contains(sauce, "varying vec2 vVec2;"));
+        TEST_REQUIRE(base::Contains(sauce, "varying vec3 vVec3;"));
+        TEST_REQUIRE(base::Contains(sauce, "varying vec4 vVec4;"));
+        TEST_REQUIRE(base::Contains(sauce, R"(void main() {
   gl_Position = vec4(1.0);
-}
-)");
+})"));
+
     }
 
     // fragment shader
@@ -73,8 +91,6 @@ void main() {
 
 #define PI 3.145
 #define MY_SHADER_FOO
-
-const int cInt = 1;
 
 uniform int kInt;
 uniform float kFloat;
@@ -98,11 +114,10 @@ void main() {
         )", gfx::ShaderSource::Type::Fragment);
 
         TEST_REQUIRE(ret.GetVersion() == gfx::ShaderSource::Version::GLSL_100);
-
-        TEST_REQUIRE(ret.FindDataDeclaration("PI")->data_type == dt::PreprocessorString);
-        TEST_REQUIRE(ret.FindDataDeclaration("PI")->decl_type == ddt::PreprocessorDefine);
-        TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->data_type == dt::PreprocessorString);
-        TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->decl_type == ddt::PreprocessorDefine);
+        TEST_REQUIRE(ret.FindShaderBlock("PI")->type == gfx::ShaderSource::ShaderBlockType::PreprocessorDefine);
+        TEST_REQUIRE(ret.FindShaderBlock("PI")->data == "#define PI 3.145");
+        TEST_REQUIRE(ret.FindShaderBlock("MY_SHADER_FOO")->type == gfx::ShaderSource::ShaderBlockType::PreprocessorDefine);
+        TEST_REQUIRE(ret.FindShaderBlock("MY_SHADER_FOO")->data == "#define MY_SHADER_FOO");
         TEST_REQUIRE(ret.FindDataDeclaration("kInt")->data_type == dt::Int);
         TEST_REQUIRE(ret.FindDataDeclaration("kInt")->decl_type == ddt::Uniform);
         TEST_REQUIRE(ret.FindDataDeclaration("kVec2")->data_type == dt::Vec2f);
@@ -127,11 +142,6 @@ void main() {
         TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->data_type == dt::Vec4f);
         TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->decl_type == ddt::Varying);
 
-        TEST_REQUIRE(ret.GetSourceCount() == 1);
-        TEST_REQUIRE(ret.GetSource(0) == R"(void main() {
-  gl_FragColor = vec4(1.0);
-}
-)");
         const auto& sauce = ret.GetSource();
         TEST_REQUIRE(base::Contains(sauce, "#version 100"));
         TEST_REQUIRE(base::Contains(sauce, "#define PI 3.145"));
@@ -148,6 +158,11 @@ void main() {
         TEST_REQUIRE(base::Contains(sauce, "varying vec2 vVec2;"));
         TEST_REQUIRE(base::Contains(sauce, "varying vec3 vVec3;"));
         TEST_REQUIRE(base::Contains(sauce, "varying vec4 vVec4;"));
+        TEST_REQUIRE(base::Contains(sauce, R"(void main() {
+  gl_FragColor = vec4(1.0);
+}
+)"));
+
     }
 }
 
@@ -167,9 +182,9 @@ in vec2 aVec2;
 in vec3 aVec3;
 in vec4 aVec4;
 
-varying vec2 vVec2;
-varying vec3 vVec3;
-varying vec4 vVec4;
+out vec2 vVec2;
+out vec3 vVec3;
+out vec4 vVec4;
 
 void main() {
   gl_Position = vec4(1.0);
@@ -191,11 +206,6 @@ void main() {
         TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->data_type == dt::Vec4f);
         TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->decl_type == ddt::Varying);
 
-        TEST_REQUIRE(ret.GetSourceCount() == 1);
-        TEST_REQUIRE(ret.GetSource(0) == R"(void main() {
-  gl_Position = vec4(1.0);
-}
-)");
         const auto& sauce = ret.GetSource();
         TEST_REQUIRE(base::Contains(sauce, "#version 300 es"));
         TEST_REQUIRE(base::Contains(sauce, "in vec2 aVec2;"));
@@ -204,6 +214,10 @@ void main() {
         TEST_REQUIRE(base::Contains(sauce, "out vec2 vVec2;"));
         TEST_REQUIRE(base::Contains(sauce, "out vec3 vVec3;"));
         TEST_REQUIRE(base::Contains(sauce, "out vec4 vVec4;"));
+        TEST_REQUIRE(base::Contains(sauce, R"(void main() {
+  gl_Position = vec4(1.0);
+}
+)"));
     }
 
     // fragment shader
@@ -213,8 +227,6 @@ void main() {
 
 #define PI 3.145
 #define MY_SHADER_FOO
-
-const int cInt = 1;
 
 uniform int kInt;
 uniform float kFloat;
@@ -239,10 +251,10 @@ void main() {
         )", gfx::ShaderSource::Type::Fragment);
 
         TEST_REQUIRE(ret.GetVersion() == gfx::ShaderSource::Version::GLSL_300);
-        TEST_REQUIRE(ret.FindDataDeclaration("PI")->data_type == dt::PreprocessorString);
-        TEST_REQUIRE(ret.FindDataDeclaration("PI")->decl_type == ddt::PreprocessorDefine);
-        TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->data_type == dt::PreprocessorString);
-        TEST_REQUIRE(ret.FindDataDeclaration("MY_SHADER_FOO")->decl_type == ddt::PreprocessorDefine);
+        TEST_REQUIRE(ret.FindShaderBlock("PI")->type == gfx::ShaderSource::ShaderBlockType::PreprocessorDefine);
+        TEST_REQUIRE(ret.FindShaderBlock("PI")->data == "#define PI 3.145");
+        TEST_REQUIRE(ret.FindShaderBlock("MY_SHADER_FOO")->type == gfx::ShaderSource::ShaderBlockType::PreprocessorDefine);
+        TEST_REQUIRE(ret.FindShaderBlock("MY_SHADER_FOO")->data == "#define MY_SHADER_FOO");
 
         TEST_REQUIRE(ret.FindDataDeclaration("kInt")->data_type == dt::Int);
         TEST_REQUIRE(ret.FindDataDeclaration("kInt")->decl_type == ddt::Uniform);
@@ -268,11 +280,6 @@ void main() {
         TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->data_type == dt::Vec4f);
         TEST_REQUIRE(ret.FindDataDeclaration("vVec4")->decl_type == ddt::Varying);
 
-        TEST_REQUIRE(ret.GetSourceCount() == 1);
-        TEST_REQUIRE(ret.GetSource(0) == R"(void main() {
-  gl_Position = vec4(1.0);
-}
-)");
         const auto& sauce = ret.GetSource();
         TEST_REQUIRE(base::Contains(sauce, "#version 300 es"));
         TEST_REQUIRE(base::Contains(sauce, "#define PI 3.145"));
@@ -289,6 +296,10 @@ void main() {
         TEST_REQUIRE(base::Contains(sauce, "in vec2 vVec2;"));
         TEST_REQUIRE(base::Contains(sauce, "in vec3 vVec3;"));
         TEST_REQUIRE(base::Contains(sauce, "in vec4 vVec4;"));
+        TEST_REQUIRE(base::Contains(sauce, R"(void main() {
+  gl_Position = vec4(1.0);
+}
+)"));
     }
 
 }
@@ -381,21 +392,60 @@ void FragmentShaderMain() {
 
 )");
     auto src = source.GetSource();
-    TEST_REQUIRE(src ==
-R"(#version 300 es
+    TEST_REQUIRE(CleanStr(src) ==
+CleanStr(R"(#version 300 es
 precision highp float;
-
 uniform vec4 kBaseColor;
 in float vParticleAlpha;
+
 float SomeFunction() {
    return 1.0;
 }
 void FragmentShaderMain() {
     vec4 color = kBaseColor;
+
     color.a *= vParticleAlpha;
+
     fs_out.color = color;
 }
+
+)"));
+
+}
+
+
+void unit_test_conditional_data()
+{
+    TEST_CASE(test::Type::Feature)
+
+    gfx::ShaderSource source;
+    source.SetType(gfx::ShaderSource::Type::Vertex);
+
+    source.LoadRawSource(R"(
+
+#version 300 es
+
+in vec4 kBleh;
+
+#ifdef FOOBAR
+  in vec4 kFoobar;
+#endif
+
+float SomeFunction() {
+   return 1.0;
+}
 )");
+    auto src = source.GetSource();
+    TEST_REQUIRE(CleanStr(src) == CleanStr(R"(#version 300 es
+in vec4 kBleh;
+#ifdef FOOBAR
+  in vec4 kFoobar;
+#endif
+
+float SomeFunction() {
+   return 1.0;
+}
+)"));
 
 }
 
@@ -407,6 +457,7 @@ int test_main(int argc, char* argv[])
     unit_test_generation();
     unit_test_raw_source_combine();
 
+    unit_test_conditional_data();
     return 0;
 }
 ) // EXPORT_TEST_MAIN
