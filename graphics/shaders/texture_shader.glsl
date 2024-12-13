@@ -21,10 +21,6 @@ uniform vec4 kBaseColor;
 // 1.0 = texture is alpha mask only.
 uniform float kAlphaMask;
 
-// Runtime flag to indicate GL_POINTS and gl_PointCoord
-// for texture coordinates.
-uniform float kRenderPoints;
-
 // Alpha cutoff for controllling when to discard the fragment.
 // This is useful for using "opaque" rendering with alpha
 // cutout sprites.
@@ -79,7 +75,7 @@ vec2 RotateCoords(vec2 coords) {
 
 void FragmentShaderMain() {
 
-    vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+    vec2 coords = GetTextureCoords();
     coords = RotateCoords(coords);
 
     coords += kTextureVelocity.xy * kTime;

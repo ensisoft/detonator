@@ -18,10 +18,6 @@ uniform vec4 kColor3;
 // The gradient X and Y axis mixing/blending weights.
 uniform vec2 kOffset;
 
-// Runtime flag to indicate GL_POINTS and gl_PointCoord
-// for texture coordinates.
-uniform float kRenderPoints;
-
 // Incoming texture coordinate from vertex shader.
 in vec2 vTexCoord;
 
@@ -37,7 +33,7 @@ vec4 MixGradient(vec2 coords) {
 
 void FragmentShaderMain() {
 
-  vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+  vec2 coords = GetTextureCoords();
   coords = (coords - kOffset) + vec2(0.5, 0.5);
   coords = clamp(coords, vec2(0.0, 0.0), vec2(1.0, 1.0));
   vec4 color  = MixGradient(coords);
