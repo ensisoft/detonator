@@ -1020,7 +1020,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 #include "shaders/texture_functions.glsl"
     };
     static const char* base_shader = {
-#include "shaders/material_base_shader.glsl"
+#include "shaders/base_fragment_shader.glsl"
     };
 
     ShaderSource src;
@@ -1029,7 +1029,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     if (mType == Type::Color)
     {
         static const char* source = {
-#include "shaders/color_shader.glsl"
+#include "shaders/color_fragment_shader.glsl"
         };
 
         src.LoadRawSource(source);
@@ -1037,7 +1037,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     else if (mType == Type::Gradient)
     {
         static const char* source = {
-#include "shaders/gradient_shader.glsl"
+#include "shaders/gradient_fragment_shader.glsl"
         };
 
         src.LoadRawSource(base_shader);
@@ -1046,7 +1046,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     else if (mType == Type::Sprite)
     {
         static const char* source = {
-#include "shaders/sprite_shader.glsl"
+#include "shaders/sprite_fragment_shader.glsl"
         };
 
         src.LoadRawSource(base_shader);
@@ -1056,7 +1056,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     else if (mType == Type::Texture)
     {
         static const char* source =  {
-#include "shaders/texture_shader.glsl"
+#include "shaders/texture_fragment_shader.glsl"
         };
         src.LoadRawSource(base_shader);
         src.LoadRawSource(texture_functions);
@@ -1065,7 +1065,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     else if (mType == Type::Tilemap)
     {
         static const char* source = {
-#include "shaders/tilemap_shader.glsl"
+#include "shaders/tilemap_fragment_shader.glsl"
         };
 
         src.LoadRawSource(source);
