@@ -84,76 +84,23 @@ std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
 
 ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device& device) const
 {
+    static const char* base_shader = {
+#include "shaders/base_vertex_shader.glsl"
+    };
+    static const char* particle_shader = {
+#include "shaders/particle_vertex_shader.glsl"
+    };
+
     ShaderSource source;
     source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
     source.SetType(gfx::ShaderSource::Type::Vertex);
-    source.AddAttribute("aPosition", ShaderSource::AttributeType::Vec2f);
-    source.AddAttribute("aData", ShaderSource::AttributeType::Vec4f);
-    source.AddAttribute("aDirection", ShaderSource::AttributeType::Vec2f);
-    source.AddUniform("kProjectionMatrix", ShaderSource::UniformType::Mat4f);
-    source.AddUniform("kModelViewMatrix", ShaderSource::UniformType::Mat4f);
-    source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
-    source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
-    source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
-    source.AddVarying("vParticleTime", ShaderSource::VaryingType::Float);
-    source.AddVarying("vParticleAngle", ShaderSource::VaryingType::Float);
-
     if (env.instanced_draw)
     {
-        source.AddAttribute("iaModelVectorX", gfx::ShaderSource::AttributeType ::Vec4f);
-        source.AddAttribute("iaModelVectorY", gfx::ShaderSource::AttributeType ::Vec4f);
-        source.AddAttribute("iaModelVectorZ", gfx::ShaderSource::AttributeType ::Vec4f);
-        source.AddAttribute("iaModelVectorW", gfx::ShaderSource::AttributeType ::Vec4f);
-
-        source.AddSource(R"(
-mat4 GetInstanceTransform() {
-   return mat4(iaModelVectorX,
-               iaModelVectorY,
-               iaModelVectorZ,
-               iaModelVectorW);
-}
-)");
+        source.AddPreprocessorDefinition("INSTANCED_DRAW");
     }
-    else
-    {
-        source.AddSource(R"(
-mat4 GetInstanceTransform() {
-   return mat4(1.0);
-}
-)");
-    }
-
-    // this shader doesn't actually write to vTexCoord because when
-    // particle (GL_POINTS) rasterization is done the fragment shader
-    // must use gl_PointCoord instead.
-    source.AddSource(R"(
-mat4 GetInstancedTransform();
-
-void VertexShaderMain()
-{
-    vec4 vertex = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
-    gl_PointSize = aData.x;
-
-    // angle of the direction vector relative to the x axis
-    float cosine = dot(vec2(1.0, 0.0), normalize(aDirection));
-
-    float angle = 0.0;
-    if (aDirection.y < 0.0)
-        angle = -acos(cosine);
-    else angle = acos(cosine);
-
-    vParticleAngle       = angle;
-    vParticleRandomValue = aData.y;
-    vParticleAlpha       = aData.z;
-    vParticleTime        = aData.w;
-
-    mat4 instance_matrix = GetInstanceTransform();
-
-    gl_Position  = kProjectionMatrix * kModelViewMatrix * instance_matrix * vertex;
-}
-    )");
+    source.LoadRawSource(base_shader);
+    source.LoadRawSource(particle_shader);
     return source;
-
 }
 
 std::string ParticleEngineClass::GetShaderName(const Environment& env) const
