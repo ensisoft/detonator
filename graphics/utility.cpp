@@ -154,72 +154,19 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_i
 
 gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instancing)
 {
-    gfx::ShaderSource source;
+    static const char* shader = {
+#include "shaders/simple_3d_vertex_shader.glsl"
+    };
+
+    ShaderSource source;
     source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
-    source.SetType(gfx::ShaderSource::Type::Vertex);
-    source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec3f);
-    source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
-
+    source.SetType(ShaderSource::Type::Vertex);
     if (use_instancing)
     {
-        source.AddAttribute("iaModelVectorX", gfx::ShaderSource::AttributeType ::Vec4f);
-        source.AddAttribute("iaModelVectorY", gfx::ShaderSource::AttributeType ::Vec4f);
-        source.AddAttribute("iaModelVectorZ", gfx::ShaderSource::AttributeType ::Vec4f);
-        source.AddAttribute("iaModelVectorW", gfx::ShaderSource::AttributeType ::Vec4f);
+        source.AddPreprocessorDefinition("INSTANCED_DRAW");
     }
-
-    source.AddUniform("kProjectionMatrix", gfx::ShaderSource::UniformType::Mat4f);
-    source.AddUniform("kModelViewMatrix", gfx::ShaderSource::UniformType::Mat4f);
-
-    source.AddVarying("vTexCoord", gfx::ShaderSource::VaryingType::Vec2f);
-    source.AddVarying("vParticleRandomValue", gfx::ShaderSource::VaryingType::Float);
-    source.AddVarying("vParticleAlpha", gfx::ShaderSource::VaryingType::Float);
-    source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
-    source.AddVarying("vParticleAngle", gfx::ShaderSource::VaryingType::Float);
-
-    source.AddVarying("vTileData", gfx::ShaderSource::VaryingType::Vec2f);
-
-    if (use_instancing)
-    {
-        source.AddSource(R"(
-mat4 GetInstanceTransform() {
-   return mat4(iaModelVectorX,
-               iaModelVectorY,
-               iaModelVectorZ,
-               iaModelVectorW);
-}
-)");
-    }
-    else
-    {
-        source.AddSource(R"(
-mat4 GetInstanceTransform() {
-   return mat4(1.0);
-}
-)");
-    }
-
-    source.AddSource(R"(
-mat4 GetInstanceTransform();
-
-void VertexShaderMain()
-{
-    vTexCoord = aTexCoord;
-
-    // dummy out
-    vParticleRandomValue = 0.0;
-    vParticleAlpha       = 1.0;
-    vParticleTime        = 0.0;
-    vParticleAngle       = 0.0;
-
-    // dummy out
-    vTileData = vec2(0.0, 0.0);
-
-    mat4 instance_matrix = GetInstanceTransform();
-
-    gl_Position = kProjectionMatrix * kModelViewMatrix * instance_matrix * vec4(aPosition.xyz, 1.0);
-}
-)");
+    source.LoadRawSource(vertex_base);
+    source.LoadRawSource(shader);
     return source;
 }
 
