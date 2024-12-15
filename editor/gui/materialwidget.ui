@@ -269,34 +269,10 @@
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
            <layout class="QGridLayout" name="gridLayout_2">
-            <item row="4" column="0">
-             <widget class="QLabel" name="lblTileOffset">
-              <property name="text">
-               <string>Tile offset</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="lblAlphaCutoff">
-              <property name="text">
-               <string>Alpha cutoff</string>
-              </property>
-             </widget>
-            </item>
             <item row="5" column="1">
              <widget class="QSpinBox" name="tileLeftPadding">
               <property name="suffix">
                <string> px</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QSpinBox" name="tileLeftOffset">
-              <property name="suffix">
-               <string> px</string>
-              </property>
-              <property name="maximum">
-               <number>1024</number>
               </property>
              </widget>
             </item>
@@ -309,6 +285,16 @@
                </sizepolicy>
               </property>
              </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="lblTilePadding">
+              <property name="text">
+               <string>Tile padding</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1" colspan="2">
+             <widget class="QComboBox" name="particleRotationMode"/>
             </item>
             <item row="3" column="1" colspan="2">
              <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -334,48 +320,8 @@
               </item>
              </layout>
             </item>
-            <item row="4" column="2">
-             <widget class="QSpinBox" name="tileTopOffset">
-              <property name="suffix">
-               <string> px</string>
-              </property>
-              <property name="maximum">
-               <number>1024</number>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="0">
-             <widget class="QLabel" name="lblActiveTextureMap">
-              <property name="text">
-               <string>Active texture map</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1" colspan="2">
-             <widget class="QComboBox" name="particleAction"/>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="lblBaseColor">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Base color</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="lblTilePadding">
-              <property name="text">
-               <string>Tile padding</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1" colspan="2">
-             <widget class="color_widgets::ColorSelector" name="baseColor">
+            <item row="8" column="1" colspan="2">
+             <widget class="color_widgets::ColorSelector" name="particleStartColor">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -423,10 +369,10 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="lblParticleEffect">
+            <item row="4" column="0">
+             <widget class="QLabel" name="lblTileOffset">
               <property name="text">
-               <string>Particle effect</string>
+               <string>Tile offset</string>
               </property>
              </widget>
             </item>
@@ -450,6 +396,180 @@
               <property name="clearButtonIcon" stdset="0">
                <iconset resource="../resource/resource.qrc">
                 <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1" colspan="2">
+             <widget class="color_widgets::ColorSelector" name="particleEndColor">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::TabFocus</enum>
+              </property>
+              <property name="color">
+               <color>
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </property>
+              <property name="display_mode" stdset="0">
+               <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+              </property>
+              <property name="background">
+               <brush brushstyle="Dense3Pattern">
+                <color alpha="255">
+                 <red>128</red>
+                 <green>128</green>
+                 <blue>128</blue>
+                </color>
+               </brush>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblAlphaCutoff">
+              <property name="text">
+               <string>Alpha cutoff</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="lblBaseColor">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Base color</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="lblActiveTextureMap">
+              <property name="text">
+               <string>Active texture map</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QSpinBox" name="tileLeftOffset">
+              <property name="suffix">
+               <string> px</string>
+              </property>
+              <property name="maximum">
+               <number>1024</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="2">
+             <widget class="color_widgets::ColorSelector" name="baseColor">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::TabFocus</enum>
+              </property>
+              <property name="color">
+               <color>
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </property>
+              <property name="display_mode" stdset="0">
+               <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+              </property>
+              <property name="background">
+               <brush brushstyle="Dense3Pattern">
+                <color alpha="255">
+                 <red>128</red>
+                 <green>128</green>
+                 <blue>128</blue>
+                </color>
+               </brush>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1" colspan="2">
+             <widget class="QComboBox" name="particleAction"/>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="lblParticleEffect">
+              <property name="text">
+               <string>Particle effect</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="2">
+             <widget class="QSpinBox" name="tileTopOffset">
+              <property name="suffix">
+               <string> px</string>
+              </property>
+              <property name="maximum">
+               <number>1024</number>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="1" colspan="2">
+             <widget class="QDoubleSpinBox" name="particleBaseRotation">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="wrapping">
+               <bool>true</bool>
+              </property>
+              <property name="suffix">
+               <string> °</string>
+              </property>
+              <property name="minimum">
+               <double>-180.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>180.000000000000000</double>
+              </property>
+              <property name="stepType">
+               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0">
+             <widget class="QLabel" name="lblParticleStartColor">
+              <property name="text">
+               <string>Start color</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0">
+             <widget class="QLabel" name="lblParticleEndColor">
+              <property name="text">
+               <string>End color</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="0">
+             <widget class="QLabel" name="lblParticleRotationMode">
+              <property name="text">
+               <string>Rotation mode</string>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="0">
+             <widget class="QLabel" name="lblParticleBaseRotation">
+              <property name="text">
+               <string>Rotation base</string>
               </property>
              </widget>
             </item>
@@ -736,88 +856,6 @@
           <string>Texture coords</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="3">
-           <widget class="QDoubleSpinBox" name="velocityX">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="suffix">
-             <string> u/s</string>
-            </property>
-            <property name="minimum">
-             <double>-99.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QDoubleSpinBox" name="velocityY">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="suffix">
-             <string> u/s</string>
-            </property>
-            <property name="minimum">
-             <double>-99.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="scaleY">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="suffix">
-             <string/>
-            </property>
-            <property name="minimum">
-             <double>-99.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="value">
-             <double>1.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="scaleX">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="suffix">
-             <string/>
-            </property>
-            <property name="minimum">
-             <double>-99.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="value">
-             <double>1.000000000000000</double>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="2">
            <widget class="QLabel" name="label_5">
             <property name="sizePolicy">
@@ -850,6 +888,88 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="textureRotation">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="wrapping">
+             <bool>true</bool>
+            </property>
+            <property name="suffix">
+             <string> °</string>
+            </property>
+            <property name="minimum">
+             <double>-180.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>180.000000000000000</double>
+            </property>
+            <property name="stepType">
+             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="textureScaleX">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="suffix">
+             <string/>
+            </property>
+            <property name="minimum">
+             <double>-99.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="label_11">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Z velocity</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="textureScaleY">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="suffix">
+             <string/>
+            </property>
+            <property name="minimum">
+             <double>-99.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_28">
             <property name="sizePolicy">
@@ -866,24 +986,21 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_29">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_2">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="styleSheet">
-             <string notr="true">color: rgb(200,0, 0)</string>
-            </property>
             <property name="text">
-             <string>Y Scale</string>
+             <string>Rotation</string>
             </property>
            </widget>
           </item>
           <item row="2" column="3">
-           <widget class="QDoubleSpinBox" name="velocityZ">
+           <widget class="QDoubleSpinBox" name="textureVelocityZ">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -907,54 +1024,57 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="label_11">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Z velocity</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Rotation</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="rotation">
+          <item row="0" column="3">
+           <widget class="QDoubleSpinBox" name="textureVelocityX">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="wrapping">
-             <bool>true</bool>
-            </property>
             <property name="suffix">
-             <string> °</string>
+             <string> u/s</string>
             </property>
             <property name="minimum">
-             <double>-180.000000000000000</double>
+             <double>-99.000000000000000</double>
             </property>
-            <property name="maximum">
-             <double>180.000000000000000</double>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QDoubleSpinBox" name="textureVelocityY">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="suffix">
+             <string> u/s</string>
+            </property>
+            <property name="minimum">
+             <double>-99.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_29">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(200,0, 0)</string>
+            </property>
+            <property name="text">
+             <string>Y Scale</string>
             </property>
            </widget>
           </item>
@@ -996,7 +1116,7 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QComboBox" name="magFilter">
+           <widget class="QComboBox" name="textureMagFilter">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -1029,7 +1149,7 @@
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QComboBox" name="wrapX">
+           <widget class="QComboBox" name="textureWrapX">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -1039,7 +1159,7 @@
            </widget>
           </item>
           <item row="4" column="1">
-           <widget class="QComboBox" name="wrapY">
+           <widget class="QComboBox" name="textureWrapY">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -1049,7 +1169,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QComboBox" name="minFilter">
+           <widget class="QComboBox" name="textureMinFilter">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -1328,8 +1448,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>450</width>
-          <height>1239</height>
+          <width>440</width>
+          <height>1003</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -2339,22 +2459,26 @@
   <tabstop>tileTopPadding</tabstop>
   <tabstop>particleAction</tabstop>
   <tabstop>activeMap</tabstop>
+  <tabstop>particleStartColor</tabstop>
+  <tabstop>particleEndColor</tabstop>
+  <tabstop>particleRotationMode</tabstop>
+  <tabstop>particleBaseRotation</tabstop>
   <tabstop>gradientOffsetY</tabstop>
   <tabstop>colorMap0</tabstop>
   <tabstop>colorMap2</tabstop>
   <tabstop>colorMap1</tabstop>
   <tabstop>colorMap3</tabstop>
   <tabstop>gradientOffsetX</tabstop>
-  <tabstop>scaleX</tabstop>
-  <tabstop>scaleY</tabstop>
-  <tabstop>velocityX</tabstop>
-  <tabstop>velocityY</tabstop>
-  <tabstop>rotation</tabstop>
-  <tabstop>velocityZ</tabstop>
-  <tabstop>minFilter</tabstop>
-  <tabstop>magFilter</tabstop>
-  <tabstop>wrapX</tabstop>
-  <tabstop>wrapY</tabstop>
+  <tabstop>textureScaleX</tabstop>
+  <tabstop>textureScaleY</tabstop>
+  <tabstop>textureVelocityX</tabstop>
+  <tabstop>textureVelocityY</tabstop>
+  <tabstop>textureRotation</tabstop>
+  <tabstop>textureVelocityZ</tabstop>
+  <tabstop>textureMinFilter</tabstop>
+  <tabstop>textureMagFilter</tabstop>
+  <tabstop>textureWrapX</tabstop>
+  <tabstop>textureWrapY</tabstop>
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbModel</tabstop>
@@ -2395,6 +2519,7 @@
   <tabstop>rectW</tabstop>
   <tabstop>rectH</tabstop>
   <tabstop>btnResetTextureRect</tabstop>
+  <tabstop>shaderFile</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
