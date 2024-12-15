@@ -145,6 +145,7 @@ namespace gfx
         void AddPreprocessorDefinition(std::string name);
         void AddPreprocessorDefinition(std::string name, int value);
         void AddPreprocessorDefinition(std::string name, float value);
+        void AddPreprocessorDefinition(std::string name, std::string value);
         void AddAttribute(std::string name, AttributeType type);
         void AddUniform(std::string name, UniformType type);
         void AddConstant(std::string name, ShaderDataDeclarationValue value);
