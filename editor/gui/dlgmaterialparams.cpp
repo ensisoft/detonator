@@ -100,9 +100,18 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
         }
         else
         {
+            SetVisible(mUI.lblBaseColor,               false);
+            SetVisible(mUI.baseColor,                  false);
+            SetVisible(mUI.btnResetBaseColor,          false);
+            SetVisible(mUI.lblParticleStartColor,      false);
+            SetVisible(mUI.particleStartColor,         false);
+            SetVisible(mUI.btnResetParticleStartColor, false);
+            SetVisible(mUI.lblParticleEndColor,        false);
+            SetVisible(mUI.particleEndColor,           false);
+            SetVisible(mUI.btnResetParticleEndColor,   false);
+
             if (mActuator)
             {
-
                 if (mItem->HasMaterialParam("kBaseColor"))
                 {
                     if (const auto* param = mActuator->FindMaterialParam("kBaseColor"))
@@ -119,14 +128,45 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
                     SetVisible(mUI.baseColor,         true);
                     SetVisible(mUI.btnResetBaseColor, true);
                 }
-                else
+
+                if (mItem->HasMaterialParam("kParticleStartColor"))
                 {
-                    SetVisible(mUI.lblBaseColor,      false);
-                    SetVisible(mUI.baseColor,         false);
-                    SetVisible(mUI.btnResetBaseColor, false);
+                    if (const auto* param = mActuator->FindMaterialParam("kParticleStartColor"))
+                    {
+                        if (const auto* color = std::get_if<game::Color4f>(param))
+                            SetValue(mUI.particleStartColor, *color);
+                    }
+                    else if (const auto* param = mItem->FindMaterialParam("kParticleStartColor"))
+                    {
+                        if (const auto* color = std::get_if<game::Color4f>(param))
+                            SetValue(mUI.particleStartColor, *color);
+                    }
+                    SetVisible(mUI.lblParticleStartColor,      true);
+                    SetVisible(mUI.particleStartColor,         true);
+                    SetVisible(mUI.btnResetParticleStartColor, true);
                 }
 
-                if (!mItem->HasMaterialParam("kBaseColor"))
+                if (mItem->HasMaterialParam("kParticleEndColor"))
+                {
+                    if (const auto* param = mActuator->FindMaterialParam("kParticleEndColor"))
+                    {
+                        if (const auto* color = std::get_if<game::Color4f>(param))
+                            SetValue(mUI.particleEndColor, *color);
+                    }
+                    else if (const auto* param = mItem->FindMaterialParam("kParticleEndColor"))
+                    {
+                        if (const auto* color = std::get_if<game::Color4f>(param))
+                            SetValue(mUI.particleEndColor, *color);
+                    }
+                    SetVisible(mUI.lblParticleEndColor,        true);
+                    SetVisible(mUI.particleEndColor,           true);
+                    SetVisible(mUI.btnResetParticleEndColor,   true);
+                }
+
+                const bool has_uniform = mItem->HasMaterialParam("kBaseColor") ||
+                                         mItem->HasMaterialParam("kParticleEndColor")  ||
+                                         mItem->HasMaterialParam("kParticleStartColor");
+                if (!has_uniform)
                 {
                     SetVisible(mUI.grpMessage, true);
                     SetValue(mUI.lblMessage, "This entity node has no material parameters available for changing.\n"
@@ -140,10 +180,36 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
             }
             else
             {
+                const auto has_base_color = material->HasUniform("kBaseColor");
+                const auto has_particle_start_color = material->HasUniform("kParticleStartColor");
+                const auto has_particle_end_color = material->HasUniform("kParticleEndColor");
+
+                SetVisible(mUI.lblBaseColor,               has_base_color);
+                SetVisible(mUI.baseColor,                  has_base_color);
+                SetVisible(mUI.btnResetBaseColor,          has_base_color);
+                SetVisible(mUI.lblParticleStartColor,      has_particle_start_color);
+                SetVisible(mUI.particleStartColor,         has_particle_start_color);
+                SetVisible(mUI.btnResetParticleStartColor, has_particle_start_color);
+                SetVisible(mUI.lblParticleEndColor,        has_particle_end_color);
+                SetVisible(mUI.particleEndColor,           has_particle_end_color);
+                SetVisible(mUI.btnResetParticleEndColor,   has_particle_end_color);
+
                 if (const auto* param = mItem->FindMaterialParam("kBaseColor"))
                 {
                     if (const auto* color = std::get_if<game::Color4f>(param))
                         SetValue(mUI.baseColor, *color);
+                }
+
+                if (const auto* param = mItem->FindMaterialParam("kParticleEndColor"))
+                {
+                    if (const auto* color = std::get_if<game::Color4f>(param))
+                        SetValue(mUI.particleEndColor, *color);
+                }
+
+                if (const auto* param = mItem->FindMaterialParam("kParticleStartColor"))
+                {
+                    if (const auto* color = std::get_if<game::Color4f>(param))
+                        SetValue(mUI.particleStartColor, *color);
                 }
 
                 std::vector<ResourceListItem> maps;
@@ -305,6 +371,41 @@ void DlgMaterialParams::on_btnResetBaseColor_clicked()
     }
 }
 
+ void DlgMaterialParams::on_btnResetParticleStartColor_clicked()
+ {
+    mUI.particleStartColor->clearColor();
+    if (mActuator)
+    {
+        mActuator->DeleteMaterialParam("kParticleStartColor");
+        if (const auto* param = mItem->FindMaterialParam("kParticleStartColor"))
+        {
+            if (const auto* color = std::get_if<game::Color4f>(param))
+                SetValue(mUI.particleStartColor, *color);
+        }
+    }
+    else
+    {
+        mItem->DeleteMaterialParam("kParticleStartColor");
+    }
+ }
+ void DlgMaterialParams::on_btnResetParticleEndColor_clicked()
+ {
+     mUI.particleEndColor->clearColor();
+     if (mActuator)
+     {
+         mActuator->DeleteMaterialParam("kParticleEndColor");
+         if (const auto* param = mItem->FindMaterialParam("kParticleEndColor"))
+         {
+             if (const auto* color = std::get_if<game::Color4f>(param))
+                 SetValue(mUI.particleEndColor, *color);
+         }
+     }
+     else
+     {
+         mItem->DeleteMaterialParam("kParticleEndColor");
+     }
+ }
+
 void DlgMaterialParams::on_btnResetActiveMap_clicked()
 {
     SetValue(mUI.textureMaps, -1);
@@ -335,6 +436,19 @@ void DlgMaterialParams::on_baseColor_colorChanged(QColor color)
     if (mActuator)
         mActuator->SetMaterialParam("kBaseColor", ToGfx(color));
     else mItem->SetMaterialParam("kBaseColor", ToGfx(color));
+}
+
+void DlgMaterialParams::on_particleStartColor_colorChanged(QColor color)
+{
+    if (mActuator)
+        mActuator->SetMaterialParam("kParticleStartColor", ToGfx(color));
+    else mItem->SetMaterialParam("kParticleStartColor", ToGfx(color));
+}
+void DlgMaterialParams::on_particleEndColor_colorChanged(QColor color)
+{
+    if (mActuator)
+        mActuator->SetMaterialParam("kParticleEndColor", ToGfx(color));
+    else mItem->SetMaterialParam("kParticleEndColor", ToGfx(color));
 }
 
 void DlgMaterialParams::on_btnAccept_clicked()
