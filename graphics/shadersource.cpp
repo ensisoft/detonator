@@ -254,6 +254,14 @@ void ShaderSource::AddPreprocessorDefinition(std::string name, float value)
     mDataBlocks.push_back(std::move(block));
 }
 
+void ShaderSource::AddPreprocessorDefinition(std::string name, std::string value)
+{
+    ShaderBlock block;
+    block.type = ShaderBlockType::PreprocessorDefine;
+    block.data = base::FormatString("#define %1 %2", name, value);
+    mDataBlocks.push_back(std::move(block));
+}
+
 void ShaderSource::AddAttribute(std::string name, AttributeType type)
 {
     std::string code;

@@ -220,7 +220,7 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
         return source;
 
     if (!source.HasShaderBlock("PI", ShaderSource::ShaderBlockType::PreprocessorDefine))
-        source.AddPreprocessorDefinition("PI", float(3.1415926));
+        source.AddPreprocessorDefinition("PI", "3.1415926");
 
     source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_OPAQUE",      static_cast<int>(SurfaceType::Opaque));
     source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_TRANSPARENT", static_cast<int>(SurfaceType::Transparent));
