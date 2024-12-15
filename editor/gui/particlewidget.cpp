@@ -269,7 +269,6 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::ParticleEngineClass::Direction>(mUI.direction);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     PopulateParticleList(mUI.cmbParticle);
-    PopulateShaderList(mUI.cmbShader, "particle");
 
     SetList(mUI.materials, workspace->ListAllMaterials());
     SetValue(mUI.name, QString("My Particle System"));
@@ -998,10 +997,8 @@ void ParticleEditorWidget::ShowParams()
     SetEnabled(mUI.cmbParticle, false);
     SetEnabled(mUI.startColor, false);
     SetEnabled(mUI.endColor, false);
-    SetEnabled(mUI.cmbShader, false);
     SetValue(mUI.cmbSurface, -1);
     SetValue(mUI.cmbParticle, -1);
-    SetValue(mUI.cmbShader, -1);
     mUI.startColor->clearColor();
     mUI.endColor->clearColor();
 
@@ -1018,7 +1015,7 @@ void ParticleEditorWidget::ShowParams()
     // so the user can change this shit to whatever they want!
     if (mMaterialClass->GetNumTextureMaps() != 1)
         return;
-    if (mMaterialClass->GetType() != gfx::MaterialClass::Type::Custom)
+    if (mMaterialClass->GetType() != gfx::MaterialClass::Type::Particle2D)
         return;
 
     const auto& texture_map = mMaterialClass->GetTextureMap(0);
@@ -1031,10 +1028,9 @@ void ParticleEditorWidget::ShowParams()
     const auto* file_texture_src = dynamic_cast<const gfx::TextureFileSource*>(texture_src);
 
     SetValue(mUI.cmbSurface, mMaterialClass->GetSurfaceType());
-    SetValue(mUI.startColor, mMaterialClass->GetUniformValue("kStartColor", gfx::Color4f(gfx::Color::White)));
-    SetValue(mUI.endColor, mMaterialClass->GetUniformValue("kEndColor", gfx::Color4f(gfx::Color::White)));
+    SetValue(mUI.startColor, mMaterialClass->GetUniformValue("kParticleStartColor", gfx::Color4f(gfx::Color::White)));
+    SetValue(mUI.endColor, mMaterialClass->GetUniformValue("kParticleEndColor", gfx::Color4f(gfx::Color::White)));
     SetValue(mUI.cmbParticle, ListItemId(file_texture_src->GetFilename()));
-    SetValue(mUI.cmbShader, ListItemId(mMaterialClass->GetShaderUri()));
     if (const auto bitmap = texture_src->GetData())
     {
         // hah, of course this is broken when loading the widget
@@ -1048,7 +1044,6 @@ void ParticleEditorWidget::ShowParams()
     SetEnabled(mUI.cmbParticle, true);
     SetEnabled(mUI.startColor, true);
     SetEnabled(mUI.endColor, true);
-    SetEnabled(mUI.cmbShader, true);
 }
 
 void ParticleEditorWidget::MinMax()
@@ -1189,7 +1184,6 @@ void ParticleEditorWidget::on_btnCreateMaterial_clicked()
         }
     }
 
-    SetValue(mUI.cmbShader, 0);
     SetValue(mUI.cmbSurface, gfx::MaterialClass::SurfaceType::Transparent);
 
     auto texture = std::make_unique<gfx::TextureFileSource>();
@@ -1199,26 +1193,22 @@ void ParticleEditorWidget::on_btnCreateMaterial_clicked()
 
     auto map = std::make_unique<gfx::TextureMap>(base::RandomString(10));
     map->SetType(gfx::TextureMap::Type::Texture2D);
-    map->SetName("kMask");
+    map->SetName("Particle Alpha Mask");
     map->SetSamplerName("kMask");
     map->SetRectUniformName("kMaskRect");
     map->SetNumTextures(1);
     map->SetTextureSource(0, std::move(texture));
 
-    mMaterialClass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Custom, materialId);
+    mMaterialClass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Particle2D, materialId);
     mMaterialClass->SetSurfaceType(GetValue(mUI.cmbSurface));
     mMaterialClass->SetNumTextureMaps(1);
     mMaterialClass->SetActiveTextureMap(map->GetId());
     mMaterialClass->SetTextureMap(0, std::move(map));
     mMaterialClass->SetName((std::string)GetValue(mUI.name) + std::string(" Particle"));
-    mMaterialClass->SetShaderUri(GetItemId(mUI.cmbShader));
-    mMaterialClass->SetUniform("kStartColor", GetValue(mUI.startColor));
-    mMaterialClass->SetUniform("kEndColor", GetValue(mUI.endColor));
-    mMaterialClass->SetUniform("kRotationValue", 0.0f);
-    // todo: this magic 3 here maps to the value in the basic_particle.json, "base + from direction"
-    // which says that particle texture coordinate rotation is derived from base texture
-    // rotation combined with the particle angle
-    mMaterialClass->SetUniform("kRotate", 3);
+    mMaterialClass->SetParticleStartColor(GetValue(mUI.startColor));
+    mMaterialClass->SetParticleEndColor(GetValue(mUI.endColor));
+    mMaterialClass->SetParticleBaseRotation(0.0f);
+    mMaterialClass->SetParticleRotation(gfx::MaterialClass::ParticleRotation::ParticleDirectionAndBase);
 
     mMaterial.reset();
 
@@ -1270,14 +1260,6 @@ void ParticleEditorWidget::on_cmbParticle_currentIndexChanged(int)
     {
         SetImage(mUI.preview, *bitmap);
     }
-}
-
-void ParticleEditorWidget::on_cmbShader_currentIndexChanged(int)
-{
-    if (!mMaterialClass)
-        return;
-
-    mMaterialClass->SetShaderUri(GetItemId(mUI.cmbShader));
 }
 
 void ParticleEditorWidget::on_startColor_colorChanged(QColor)

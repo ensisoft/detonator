@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1871</width>
-    <height>1382</height>
+    <width>1798</width>
+    <height>1198</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -319,8 +319,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>469</width>
-            <height>928</height>
+            <width>450</width>
+            <height>859</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -355,13 +355,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="6" column="0">
-                  <widget class="QLabel" name="label_34">
-                   <property name="text">
-                    <string>Shader</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="label_13">
                    <property name="text">
@@ -369,29 +362,15 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_18">
-                   <property name="text">
-                    <string>Start color</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="0">
-                  <widget class="QLabel" name="label_41">
-                   <property name="text">
-                    <string>End color</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1" colspan="2">
-                  <widget class="QComboBox" name="cmbSurface"/>
-                 </item>
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_2">
                    <property name="text">
                     <string>Surface</string>
                    </property>
                   </widget>
+                 </item>
+                 <item row="1" column="1" colspan="2">
+                  <widget class="QComboBox" name="cmbSurface"/>
                  </item>
                  <item row="2" column="1" colspan="2">
                   <widget class="QComboBox" name="cmbParticle"/>
@@ -457,6 +436,19 @@
                    </property>
                   </widget>
                  </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_21">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Material</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="5" column="1" colspan="2">
                   <widget class="color_widgets::ColorSelector" name="endColor">
                    <property name="minimumSize">
@@ -473,23 +465,17 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_21">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_18">
                    <property name="text">
-                    <string>Material</string>
+                    <string>Start color</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="6" column="1" colspan="3">
-                  <widget class="QComboBox" name="cmbShader">
-                   <property name="placeholderText">
-                    <string/>
+                 <item row="5" column="0">
+                  <widget class="QLabel" name="label_41">
+                   <property name="text">
+                    <string>End color</string>
                    </property>
                   </widget>
                  </item>
@@ -2025,7 +2011,6 @@
   <tabstop>cmbParticle</tabstop>
   <tabstop>startColor</tabstop>
   <tabstop>endColor</tabstop>
-  <tabstop>cmbShader</tabstop>
   <tabstop>particleEmissionGroup</tabstop>
   <tabstop>when</tabstop>
   <tabstop>numParticles</tabstop>
