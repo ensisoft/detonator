@@ -112,7 +112,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::MaterialClass::TextureWrapping>(mUI.wrapY);
     PopulateFromEnum<gfx::MaterialClass::SurfaceType>(mUI.surfaceType);
     PopulateFromEnum<gfx::MaterialClass::Type>(mUI.materialType);
-    PopulateFromEnum<gfx::MaterialClass::ParticleAction>(mUI.particleAction);
+    PopulateFromEnum<gfx::MaterialClass::ParticleEffect>(mUI.particleAction);
     PopulateFromEnum<gfx::TextureMap::Type>(mUI.textureMapType);
     PopulateFromEnum<gfx::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
 
@@ -1793,7 +1793,7 @@ void MaterialWidget::SetMaterialProperties()
     mMaterial->SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, GetValue(mUI.chkBlendPreMulAlpha));
     mMaterial->SetStatic(GetValue(mUI.chkStaticInstance));
     mMaterial->SetSurfaceType(GetValue(mUI.surfaceType));
-    mMaterial->SetParticleAction(GetValue(mUI.particleAction));
+    mMaterial->SetParticleEffect(GetValue(mUI.particleAction));
     mMaterial->SetTextureMinFilter(GetValue(mUI.minFilter));
     mMaterial->SetTextureMagFilter(GetValue(mUI.magFilter));
     mMaterial->SetTextureWrapX(GetValue(mUI.wrapX));
@@ -2003,7 +2003,7 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.chkBlendFrames,      mMaterial->BlendFrames());
     SetValue(mUI.alphaCutoff,         mMaterial->GetAlphaCutoff());
     SetValue(mUI.baseColor,           mMaterial->GetBaseColor());
-    SetValue(mUI.particleAction,      mMaterial->GetParticleAction());
+    SetValue(mUI.particleAction,      mMaterial->GetParticleEffect());
     SetValue(mUI.scaleX,              mMaterial->GetTextureScaleX());
     SetValue(mUI.scaleY,              mMaterial->GetTextureScaleY());
     SetValue(mUI.rotation,            qRadiansToDegrees(mMaterial->GetTextureRotation()));

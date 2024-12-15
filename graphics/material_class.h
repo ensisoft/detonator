@@ -117,7 +117,7 @@ namespace gfx
         // be used when applying the material onto particle
         // system and to add some variation to the rendered output
         // in order to make the result visually more appealing.
-        enum class ParticleAction : int {
+        enum class ParticleEffect : int {
             None   =  0,
             Rotate =  1
         };
@@ -159,8 +159,7 @@ namespace gfx
         // Set the surface type of the material.
         inline void SetSurfaceType(SurfaceType surface) noexcept
         { mSurfaceType = surface; }
-        inline void SetParticleAction(ParticleAction action) noexcept
-        { mParticleAction = action; }
+
         inline void SetActiveTextureMap(std::string id) noexcept
         { mActiveTextureMap = id; }
         // Set the human-readable material class name.
@@ -224,6 +223,9 @@ namespace gfx
         { return !mShaderSrc.empty() || !mShaderUri.empty(); }
 
         // Material uniform API for setting/getting "Known" uniforms.
+        inline void SetParticleEffect(ParticleEffect action) noexcept
+        { action == ParticleEffect::None ? DeleteUniform("kParticleEffect")
+                                         : SetUniform("kParticleEffect", static_cast<int>(action)); }
         inline void SetAlphaCutoff(float cutoff) noexcept
         { SetUniform("kAlphaCutoff", cutoff); }
         inline void SetColorWeight(glm::vec2 weight) noexcept
@@ -285,6 +287,8 @@ namespace gfx
         { return GetUniformValue<glm::vec2>("kTileOffset", {0.0f, 0.0f}); }
         inline glm::vec2 GetTilePadding() const noexcept
         { return GetUniformValue<glm::vec2>("kTilePadding", {0.0f, 0.0f}); }
+        inline ParticleEffect GetParticleEffect() const noexcept
+        { return static_cast<ParticleEffect>(GetUniformValue("kParticleEffect", 0)); }
 
         inline MinTextureFilter GetTextureMinFilter() const noexcept
         { return mTextureMinFilter; }
@@ -294,8 +298,6 @@ namespace gfx
         { return mTextureWrapX; }
         inline TextureWrapping GetTextureWrapY() const noexcept
         { return mTextureWrapY; }
-        inline ParticleAction GetParticleAction() const noexcept
-        { return mParticleAction; }
 
         inline void SetUniform(const std::string& name, const Uniform& value) noexcept
         { mUniforms[name] = value; }
@@ -458,7 +460,6 @@ namespace gfx
         std::string mShaderSrc;
         std::string mActiveTextureMap;
         Type mType = Type::Color;
-        ParticleAction mParticleAction = ParticleAction::None;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
         MinTextureFilter mTextureMinFilter = MinTextureFilter::Default;
         MagTextureFilter mTextureMagFilter = MagTextureFilter::Default;
