@@ -1303,6 +1303,8 @@ public:
     {
         if (flags &  GCFlags::FBOs)
         {
+            const auto did_have_fbos = mFBOs.empty();
+
             for (auto it = mFBOs.begin(); it != mFBOs.end(); )
             {
                 auto* impl = static_cast<FramebufferImpl*>(it->second.get());
@@ -1311,10 +1313,14 @@ public:
                     it = mFBOs.erase(it);
                 else ++it;
             }
+            if (did_have_fbos && mFBOs.empty())
+                DEBUG("All GPU frame-buffers were deleted.");
         }
 
         if (flags & GCFlags::Programs)
         {
+            const auto did_have_programs = !mPrograms.empty();
+
             for (auto it = mPrograms.begin(); it != mPrograms.end();)
             {
                 auto* impl = static_cast<ProgImpl*>(it->second.get());
@@ -1323,6 +1329,8 @@ public:
                     it = mPrograms.erase(it);
                 else ++it;
             }
+            if (did_have_programs && mPrograms.empty())
+                INFO("All GPU program objects were deleted.");
         }
 
         if (flags & GCFlags::Textures)
@@ -1344,6 +1352,8 @@ public:
                 const auto last_used  = impl->GetFrameStamp();
                 group_last_use[group] = std::max(group_last_use[group], last_used);
             }
+
+            const bool did_have_textures = !mTextures.empty();
 
             for (auto it = mTextures.begin(); it != mTextures.end();)
             {
@@ -1369,10 +1379,16 @@ public:
                     it = mTextures.erase(it);
                 } else ++it;
             }
+
+            if (did_have_textures && mTextures.empty())
+                INFO("All GPU texture objects were deleted.");
         }
 
         if (flags & GCFlags::Geometries)
         {
+            const auto did_have_geometries = !mGeoms.empty();
+            const auto did_have_instances = !mInstances.empty();
+
             for (auto it = mGeoms.begin(); it != mGeoms.end();)
             {
                 auto* impl = static_cast<GeomImpl*>(it->second.get());
@@ -1390,6 +1406,11 @@ public:
                     it = mInstances.erase(it);
                 else ++it;
             }
+
+            if (did_have_geometries && mGeoms.empty())
+                INFO("All GPU geometries were deleted.");
+            if (did_have_instances && mInstances.empty())
+                INFO("All GPU geometry instances were deleted.");
         }
     }
 
