@@ -1,3 +1,5 @@
+#version 300 es
+
 // Built-in (from material system) uniforms
 // -------------------------------------------------
 // the monotonic material instance time in seconds.

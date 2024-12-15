@@ -129,6 +129,8 @@ namespace gfx
         { mDataBlocks.clear(); }
         inline void SetShaderSourceUri(std::string uri) noexcept
         { mShaderSourceUri = std::move(uri); }
+        inline void SetShaderName(std::string name) noexcept
+        { mShaderName = std::move(name); }
 
         inline Type GetType() const noexcept
         { return mType; }
@@ -160,6 +162,11 @@ namespace gfx
         { return HasDataDeclaration(name, ShaderDataDeclarationType::Uniform); }
         inline bool HasVarying(const std::string& name) const
         { return HasDataDeclaration(name, ShaderDataDeclarationType::Varying); }
+
+        inline std::string GetShaderUri() const
+        { return mShaderSourceUri; }
+        inline std::string GetShaderName() const
+        { return mShaderName; }
 
         enum class SourceVariant {
             Production, Development
@@ -202,5 +209,8 @@ namespace gfx
         // URI int he shader source as a comment so when it borks
         // in production the user can easily see which shader it is.
         std::string mShaderSourceUri;
+        // Human readable name associated with the shader.
+        // Used for debugging.
+        std::string mShaderName;
     };
 } // namespace

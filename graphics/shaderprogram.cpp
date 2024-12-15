@@ -33,95 +33,51 @@ std::string ShaderProgram::GetShaderId(const Drawable& drawable, const Drawable:
 }
 ShaderSource ShaderProgram::GetShader(const Material& material, const Material::Environment& env, const Device& device) const
 {
-    // todo: right now everything is using 'GLSL 100' shaders
-    // but when/if something generates GLSL 300 es shaders
-    // (based on the device type) then the code here also
-    // has to change so that the right (compatible) GLSL
-    // code is generated/selected before merging the shader
-    // source together.
+    static const char* fragment_main = {
+#include "shaders/generic_fragment_main.glsl"
+    };
+    static const char* utility_func = {
+#include "shaders/utility_functions.glsl"
+    };
 
-    ShaderSource source;
-    source.SetType(ShaderSource::Type::Fragment);
-    source.SetVersion(ShaderSource::Version::GLSL_300);
-    source.SetPrecision(ShaderSource::Precision::High);
-
-    source.AddSource(R"(
-layout (location=0) out vec4 fragOutColor;
-
-struct FS_OUT {
-   vec4 color;
-} fs_out;
-
-void FragmentShaderMain();
-
-float sRGB_encode(float value)
-{
-   return value <= 0.0031308
-       ? value * 12.92
-       : pow(value, 1.0/2.4) * 1.055 - 0.055;
-}
-vec4 sRGB_encode(vec4 color)
-{
-   vec4 ret;
-   ret.r = sRGB_encode(color.r);
-   ret.g = sRGB_encode(color.g);
-   ret.b = sRGB_encode(color.b);
-   ret.a = color.a; // alpha is always linear
-   return ret;
-}
-
-void main() {
-  FragmentShaderMain();
-
-  fragOutColor = sRGB_encode(fs_out.color);
-}
-)");
-
-    const auto& src = material.GetShader(env, device);
-    if (!src.IsCompatible(source))
+    auto source = material.GetShader(env, device);
+    if (source.GetType() != ShaderSource::Type::Fragment)
     {
-        const auto* klass = material.GetClass();
-        ERROR("Material (fragment) shader source is not compatible with the generic shader program source. [material='%1']",
-              klass ? klass->GetName() : material.GetShaderName(env));
-        return ShaderSource();
+        ERROR("Non supported GLSL shader type. Type must be 'fragment'.  [shader='%1']", source.GetShaderName());
+        return {};
     }
+    if (source.GetVersion() != ShaderSource::Version::GLSL_300)
+    {
+        ERROR("Non supported GLSL version. Version must be 300 es. [shader='%1']", source.GetShaderName());
+        return {};
+    }
+    if (source.GetPrecision() == ShaderSource::Precision::NotSet)
+        source.SetPrecision(ShaderSource::Precision::High);
 
-    source.Merge(material.GetShader(env, device));
+    source.LoadRawSource(utility_func);
+    source.LoadRawSource(fragment_main);
     return source;
 }
 ShaderSource ShaderProgram::GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const
 {
     // careful here, WebGL shits itself if the source is concatenated together
     // so that the vertex source (with varyings) comes after the main.
-    ShaderSource source;
-    source.SetType(ShaderSource::Type::Vertex);
-    source.SetVersion(ShaderSource::Version::GLSL_300);
+    static const char* vertex_main = {
+#include "shaders/generic_vertex_main.glsl"
+    };
 
-    source.AddSource(R"(
-struct VS_OUT {
-   vec4 position;
-} vs_out;
-
-void VertexShaderMain();
-
-)");
-
-    const auto& src = drawable.GetShader(env, device);
-    if (!src.IsCompatible(source))
+    auto source = drawable.GetShader(env, device);
+    if (source.GetType() != ShaderSource::Type::Vertex)
     {
-        const auto* klass = drawable.GetClass();
-        ERROR("Drawable (vertex) shader source is not compatible with the generic shader program source. [drawable='%1']",
-              klass ? klass->GetName() : drawable.GetShaderName(env));
-        return ShaderSource();
+        ERROR("Non supported GLSL shader type. Type must be 'vertex'. [shader='%1']", source.GetShaderName());
+        return {};
     }
-    source.Merge(drawable.GetShader(env, device));
-    source.AddSource(R"(
-
-void main() {
-   VertexShaderMain();
-}
-)");
-
+    if (source.GetVersion() != ShaderSource::Version::GLSL_300)
+    {
+        ERROR("Non supported GLSL version. Version must be 300 es. [shader='%1']", source.GetShaderName());
+        return {};
+    }
+    source.LoadRawSource(vertex_main);
     return source;
 }
 std::string ShaderProgram::GetShaderName(const Material& material, const Material::Environment& env) const
