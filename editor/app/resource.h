@@ -480,6 +480,7 @@ namespace app
 
         void MigrateResource(uik::Window& window, MigrationLog* log, unsigned old_version, unsigned new_version);
         void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned old_version, unsigned new_version);
+        void MigrateResource(game::EntityClass& entity, MigrationLog* log, unsigned  old_version, unsigned new_version);
 
     } // detail
 
@@ -573,7 +574,7 @@ namespace app
 
             if constexpr (TypeValue == Resource::Type::Material)
             {
-                chunk->Write("resource_ver", 3);
+                chunk->Write("resource_ver", 4);
                 data.AppendChunk("materials", std::move(chunk));
             }
             else if (TypeValue == Resource::Type::ParticleSystem)
@@ -629,8 +630,16 @@ namespace app
         {
             if constexpr (TypeValue == Resource::Type::Material)
             {
-                unsigned current_version = 3;
+                unsigned current_version = 4;
                 unsigned saved_version;
+                ASSERT(Resource::GetProperty("__version", &saved_version));
+                if (saved_version < current_version)
+                    detail::MigrateResource(*mContent, log, saved_version, current_version);
+            }
+            else
+            {
+                unsigned current_version = 2;
+                unsigned saved_version = 1;
                 ASSERT(Resource::GetProperty("__version", &saved_version));
                 if (saved_version < current_version)
                     detail::MigrateResource(*mContent, log, saved_version, current_version);
