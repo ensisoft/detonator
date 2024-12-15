@@ -2418,8 +2418,11 @@ public:
     virtual void Start() override
     {
         const char* src = R"(
+#version 300 es
+
 uniform sampler2D kTexture;
-varying vec2 vTexCoord;
+
+in vec2 vTexCoord;
 
 void FragmentShaderMain() {
     vec4 foo = texture2D(kTexture, vTexCoord);

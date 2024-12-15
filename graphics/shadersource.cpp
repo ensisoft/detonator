@@ -413,6 +413,11 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
         ss << "\n// shader source uri:";
         ss << "\n// " << mShaderSourceUri << "\n\n";
     }
+    if (!mShaderName.empty())
+    {
+        ss << "\n// shader name: ";
+        ss << "\n// " << mShaderName << "\n\n";
+    }
 
     for (const auto& block : mDataBlocks)
     {
@@ -451,8 +456,6 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
 
 void ShaderSource::Merge(const ShaderSource& other)
 {
-    ASSERT(IsCompatible(other));
-
     for (const auto& other_source : other.mCodeBlocks)
     {
         mCodeBlocks.push_back(other_source);
@@ -656,15 +659,15 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             // todo: parse properly until }
             ShaderBlock block;
             block.type = ShaderBlockType::StructDeclaration;
-            block.data = line;
+            block.data = line + "\n";
 
-            for (; line_buffer_index<line_buffer.size(); ++line_buffer_index)
+            for (++line_buffer_index; line_buffer_index<line_buffer.size(); ++line_buffer_index)
             {
                 auto line = line_buffer[line_buffer_index];
                 auto trimmed = base::TrimString(line);
                 block.data += line;
                 block.data += "\n";
-                if (trimmed == "}")
+                if (base::StartsWith(trimmed, "}") && base::EndsWith(trimmed, ";"))
                     break;
             }
             mDataBlocks.push_back(std::move(block));

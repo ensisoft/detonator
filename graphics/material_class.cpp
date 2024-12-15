@@ -992,7 +992,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         if (mShaderUri.empty())
         {
             ERROR("Material has no shader source specified. [name='%1']", mName);
-            return ShaderSource();
+            return {};
         }
 
         Loader::ResourceDesc desc;
@@ -1003,15 +1003,17 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         if (!buffer)
         {
             ERROR("Failed to load custom material shader source file. [name='%1', uri='%2']", mName, mShaderUri);
-            return ShaderSource();
+            return {};
         }
         const char* beg = (const char*) buffer->GetData();
         const char* end = beg + buffer->GetByteSize();
-
         DEBUG("Loading custom shader source. [uri=%1', material='%2']", mShaderUri, mName);
 
-        auto source = ShaderSource::FromRawSource(std::string(beg, end), ShaderSource::Type::Fragment);
+        ShaderSource source;
+        source.SetType(ShaderSource::Type::Fragment);
+        source.LoadRawSource(std::string(beg, end));
         source.SetShaderSourceUri(mShaderUri);
+        source.SetShaderName(mName.empty() ? mShaderUri : mName);
         return source;
     }
 
