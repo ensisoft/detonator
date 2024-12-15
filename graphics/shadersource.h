@@ -142,13 +142,13 @@ namespace gfx
 
         void AddSource(std::string source);
         void AddSingleLineComment(std::string comment);
-        void AddPreprocessorDefinition(std::string name, std::string comment = "");
-        void AddPreprocessorDefinition(std::string name, int value, std::string comment = "");
-        void AddPreprocessorDefinition(std::string name, float value, std::string comment = "");
-        void AddAttribute(std::string name, AttributeType type, std::string comment = "");
-        void AddUniform(std::string name, UniformType type, std::string comment = "");
-        void AddConstant(std::string name, ShaderDataDeclarationValue value, std::string comment = "");
-        void AddVarying(std::string name, VaryingType type, std::string comment = "");
+        void AddPreprocessorDefinition(std::string name);
+        void AddPreprocessorDefinition(std::string name, int value);
+        void AddPreprocessorDefinition(std::string name, float value);
+        void AddAttribute(std::string name, AttributeType type);
+        void AddUniform(std::string name, UniformType type);
+        void AddConstant(std::string name, ShaderDataDeclarationValue value);
+        void AddVarying(std::string name, VaryingType type);
 
         bool HasShaderBlock(const std::string& key, ShaderBlockType type) const;
         bool HasDataDeclaration(const std::string& name, ShaderDataDeclarationType type) const;
