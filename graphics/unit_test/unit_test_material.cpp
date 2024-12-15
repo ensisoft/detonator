@@ -150,7 +150,6 @@ void unit_test_material_class()
     klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
     klass.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
     klass.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
-    klass.SetParticleAction(gfx::TextureMap2DClass::ParticleAction::Rotate);
     klass.SetTextureScaleX(2.0f);
     klass.SetTextureScaleY(3.0f);
     klass.SetTextureVelocityX(4.0f);
@@ -197,7 +196,6 @@ void unit_test_material_class()
         TEST_REQUIRE(ret->GetColor(gfx::MaterialClass::ColorIndex::TopRight)    == gfx::Color::DarkGray);
         TEST_REQUIRE(ret->IsStatic()            == false);
         TEST_REQUIRE(ret->GetSurfaceType()      == gfx::MaterialClass::SurfaceType::Emissive);
-        TEST_REQUIRE(ret->GetParticleAction()   == gfx::MaterialClass::ParticleAction::Rotate);
         TEST_REQUIRE(ret->GetTextureMinFilter() == gfx::MaterialClass::MinTextureFilter::Trilinear);
         TEST_REQUIRE(ret->GetTextureMagFilter() == gfx::MaterialClass::MagTextureFilter::Nearest);
         TEST_REQUIRE(ret->GetTextureWrapX()     == gfx::MaterialClass::TextureWrapping::Repeat);

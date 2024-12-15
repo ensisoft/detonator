@@ -54,7 +54,6 @@ MaterialClass::MaterialClass(const MaterialClass& other, bool copy)
     mShaderUri        = other.mShaderUri;
     mShaderSrc        = other.mShaderSrc;
     mActiveTextureMap = other.mActiveTextureMap;
-    mParticleAction   = other.mParticleAction;
     mSurfaceType      = other.mSurfaceType;
     mTextureMinFilter = other.mTextureMinFilter;
     mTextureMagFilter = other.mTextureMagFilter;
@@ -167,7 +166,6 @@ std::size_t MaterialClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mShaderUri);
     hash = base::hash_combine(hash, mShaderSrc);
     hash = base::hash_combine(hash, mActiveTextureMap);
-    hash = base::hash_combine(hash, mParticleAction);
     hash = base::hash_combine(hash, mSurfaceType);
     hash = base::hash_combine(hash, mTextureMinFilter);
     hash = base::hash_combine(hash, mTextureMagFilter);
@@ -234,8 +232,8 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
 
     if (IsBuiltIn())
     {
-        source.AddPreprocessorDefinition("PARTICLE_EFFECT_NONE",   static_cast<int>(ParticleAction::None));
-        source.AddPreprocessorDefinition("PARTICLE_EFFECT_ROTATE", static_cast<int>(ParticleAction::Rotate));
+        source.AddPreprocessorDefinition("PARTICLE_EFFECT_NONE",   static_cast<int>(ParticleEffect::None));
+        source.AddPreprocessorDefinition("PARTICLE_EFFECT_ROTATE", static_cast<int>(ParticleEffect::Rotate));
     }
 
     if (IsStatic())
@@ -295,8 +293,10 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     program.SetUniform("kRenderPoints", render_points ? 1.0f : 0.0f);
     program.SetUniform("kTime", (float)state.material_time);
     program.SetUniform("kEditingMode", (int)state.editing_mode);
+
     // todo: fix this, point rendering could be used without particles.
-    program.SetUniform("kParticleEffect", render_points ? (int)mParticleAction : 0);
+    const auto effect = static_cast<int>(GetParticleEffect());
+    program.SetUniform("kParticleEffect", render_points ? effect : 0);
 
     // for the future... for different render passes we got two options
     // either the single shader implements the different render pass
@@ -391,7 +391,6 @@ void MaterialClass::IntoJson(data::Writer& data) const
     data.Write("shader_src",         mShaderSrc);
     data.Write("active_texture_map", mActiveTextureMap);
     data.Write("surface",            mSurfaceType);
-    data.Write("particle_action",    mParticleAction);
     data.Write("texture_min_filter", mTextureMinFilter);
     data.Write("texture_mag_filter", mTextureMagFilter);
     data.Write("texture_wrap_x",     mTextureWrapX);
@@ -476,7 +475,6 @@ bool MaterialClass::FromJson(const data::Reader& data)
     ok &= data.Read("shader_src",         &mShaderSrc);
     ok &= data.Read("active_texture_map", &mActiveTextureMap);
     ok &= data.Read("surface",            &mSurfaceType);
-    ok &= data.Read("particle_action",    &mParticleAction);
     ok &= data.Read("texture_min_filter", &mTextureMinFilter);
     ok &= data.Read("texture_mag_filter", &mTextureMagFilter);
     ok &= data.Read("texture_wrap_x",     &mTextureWrapX);
@@ -494,6 +492,15 @@ bool MaterialClass::FromJson(const data::Reader& data)
     ok &= ReadLegacyValue<glm::vec2>("texture_scale", "kTextureScale", data);
     ok &= ReadLegacyValue<glm::vec3>("texture_velocity", "kTextureVelocity", data);
     ok &= ReadLegacyValue<float>("texture_rotation", "kTextureRotation", data);
+
+    if (data.HasValue("particle_action"))
+    {
+        // migrated to use a uniform
+        ParticleEffect effect;
+        ok &= data.Read("particle_action", &effect);
+        if (effect != ParticleEffect::None)
+            SetParticleEffect(effect);
+    }
 
     if (data.HasValue("static"))
     {
@@ -930,7 +937,6 @@ MaterialClass& MaterialClass::operator=(const MaterialClass& other)
     std::swap(mShaderUri       , tmp.mShaderUri);
     std::swap(mShaderSrc       , tmp.mShaderSrc);
     std::swap(mActiveTextureMap, tmp.mActiveTextureMap);
-    std::swap(mParticleAction  , tmp.mParticleAction);
     std::swap(mSurfaceType     , tmp.mSurfaceType);
     std::swap(mTextureMinFilter, tmp.mTextureMinFilter);
     std::swap(mTextureMagFilter, tmp.mTextureMagFilter);
