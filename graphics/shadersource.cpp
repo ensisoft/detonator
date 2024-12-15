@@ -224,49 +224,38 @@ void ShaderSource::AddSource(std::string source)
 
 void ShaderSource::AddSingleLineComment(std::string comment)
 {
-    if (comment.empty())
-        return;
-
     ShaderBlock block;
     block.type = ShaderBlockType::Comment;
     block.data = base::FormatString("// %1", comment);
     mDataBlocks.push_back(std::move(block));
 }
 
-void ShaderSource::AddPreprocessorDefinition(std::string name, std::string comment)
+void ShaderSource::AddPreprocessorDefinition(std::string name)
 {
-    AddSingleLineComment(std::move(comment));
-
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
     block.data = base::FormatString("#define %1", name);
     mDataBlocks.push_back(std::move(block));
 }
 
-void ShaderSource::AddPreprocessorDefinition(std::string name, int value, std::string  comment)
+void ShaderSource::AddPreprocessorDefinition(std::string name, int value)
 {
-    AddSingleLineComment(std::move(comment));
-
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
     block.data = base::FormatString("#define %1 %2", name, ToConst(value));
     mDataBlocks.push_back(std::move(block));
 }
 
-void ShaderSource::AddPreprocessorDefinition(std::string name, float value, std::string comment)
+void ShaderSource::AddPreprocessorDefinition(std::string name, float value)
 {
-    AddSingleLineComment(std::move(comment));
-
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
     block.data = base::FormatString("#define %1 %2", name, ToConst(value));
     mDataBlocks.push_back(std::move(block));
 }
 
-void ShaderSource::AddAttribute(std::string name, AttributeType type, std::string comment)
+void ShaderSource::AddAttribute(std::string name, AttributeType type)
 {
-    AddSingleLineComment(std::move(comment));
-
     std::string code;
     if (mVersion == Version::GLSL_100)
         code = base::FormatString("attribute %1 %2;", DataTypeToString(type), name);
@@ -285,10 +274,8 @@ void ShaderSource::AddAttribute(std::string name, AttributeType type, std::strin
     block.data_decl = decl;
     mDataBlocks.push_back(std::move(block));
 }
-void ShaderSource::AddUniform(std::string name, UniformType type, std::string comment)
+void ShaderSource::AddUniform(std::string name, UniformType type)
 {
-    AddSingleLineComment(std::move(comment));
-
     ShaderDataDeclaration decl;
     decl.decl_type = ShaderDataDeclarationType::Uniform;
     decl.data_type = type;
@@ -300,10 +287,8 @@ void ShaderSource::AddUniform(std::string name, UniformType type, std::string co
     block.data_decl = decl;
     mDataBlocks.push_back(std::move(block));
 }
-void ShaderSource::AddConstant(std::string name, ShaderDataDeclarationValue value, std::string comment)
+void ShaderSource::AddConstant(std::string name, ShaderDataDeclarationValue value)
 {
-    AddSingleLineComment(std::move(comment));
-
     const auto data_type  = DataTypeFromValue(value);
 
     ShaderDataDeclaration decl;
@@ -318,10 +303,8 @@ void ShaderSource::AddConstant(std::string name, ShaderDataDeclarationValue valu
     block.data_decl = decl;
     mDataBlocks.push_back(std::move(block));
 }
-void ShaderSource::AddVarying(std::string name, VaryingType type, std::string comment)
+void ShaderSource::AddVarying(std::string name, VaryingType type)
 {
-    AddSingleLineComment(std::move(comment));
-
     std::string code;
     if (mVersion == Version::GLSL_100)
         code = base::FormatString("varying %1 %2;", DataTypeToString(type), name);
