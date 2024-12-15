@@ -93,6 +93,8 @@ namespace gfx
             // Built-in material using a single tile map
             // to display "tiles" based on a regular texture layout
             Tilemap,
+            // Built-in 2D particle material
+            Particle2D,
             // Custom material with user defined material
             // shader and an arbitrary number of uniforms
             // and texture maps.
@@ -120,6 +122,14 @@ namespace gfx
         enum class ParticleEffect : int {
             None   =  0,
             Rotate =  1
+        };
+
+        enum class ParticleRotation : int {
+            None,
+            BaseRotation,
+            RandomRotation,
+            ParticleDirection,
+            ParticleDirectionAndBase
         };
 
         // The current material state to apply when applying the
@@ -223,6 +233,15 @@ namespace gfx
         { return !mShaderSrc.empty() || !mShaderUri.empty(); }
 
         // Material uniform API for setting/getting "Known" uniforms.
+        inline void SetParticleRotation(ParticleRotation rotation) noexcept
+        { SetUniform("kParticleRotation", static_cast<int>(rotation)); }
+        inline void SetParticleStartColor(const Color4f& color) noexcept
+        { SetUniform("kParticleStartColor", color); }
+        inline void SetParticleEndColor(const Color4f& color) noexcept
+        { SetUniform("kParticleEndColor", color); }
+        inline void SetParticleBaseRotation(float rotation_angle) noexcept
+        { SetUniform("kParticleBaseRotation", rotation_angle); }
+
         inline void SetParticleEffect(ParticleEffect action) noexcept
         { action == ParticleEffect::None ? DeleteUniform("kParticleEffect")
                                          : SetUniform("kParticleEffect", static_cast<int>(action)); }
@@ -256,6 +275,15 @@ namespace gfx
         { GetUniformValue<glm::vec2>("kTileOffset", {0.0, 0.0f}) = offset; }
         inline void SetTilePadding(const glm::vec2& padding) noexcept
         { GetUniformValue<glm::vec2>("kTilePadding", {0.0f, 0.0f}) = padding; }
+
+        inline Color4f GetParticleStartColor() const noexcept
+        { return GetUniformValue<Color4f>("kParticleStartColor", Color::White); }
+        inline Color4f GetParticleEndColor() const noexcept
+        { return GetUniformValue<Color4f>("kParticleEndColor", Color::White); }
+        inline ParticleRotation GetParticleRotation() const noexcept
+        { return static_cast<ParticleRotation>(GetUniformValue("kParticleRotation", static_cast<int>(ParticleRotation::None))); }
+        inline float GetParticleBaseRotation() const noexcept
+        { return GetUniformValue<float>("kParticleBaseRotation", 0.0f); }
 
         inline float GetAlphaCutoff() const noexcept
         { return GetUniformValue<float>("kAlphaCutoff", -1.0f); }
@@ -411,9 +439,12 @@ namespace gfx
         // Helpers
         unsigned FindTextureMapIndexByName(const std::string& name) const;
         unsigned FindTextureMapIndexById(const std::string& id) const;
+        unsigned FindTextureMapIndexBySampler(const std::string& name, unsigned sampler_index) const;
 
+        TextureMap* FindTextureMapBySampler(const std::string& name, unsigned sampler_index);
         TextureMap* FindTextureMapByName(const std::string& name);
         TextureMap* FindTextureMapById(const std::string& id);
+        const TextureMap* FindTextureMapBySampler(const std::string& name, unsigned sampler_index) const;
         const TextureMap* FindTextureMapByName(const std::string& name) const;
         const TextureMap* FindTextureMapById(const std::string& id) const;
 
@@ -452,6 +483,7 @@ namespace gfx
         bool ApplyCustomDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
         bool ApplyTextureDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
         bool ApplyTilemapDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
+        bool ApplyParticleDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
 
     private:
         std::string mClassId;

@@ -148,6 +148,15 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, mSurfaceType);
         }
     }
+    else if (mType == Type::Particle2D)
+    {
+        if (IsStatic())
+        {
+            hash = base::hash_combine(hash, GetParticleStartColor());
+            hash = base::hash_combine(hash, GetParticleEndColor());
+            hash = base::hash_combine(hash, GetParticleBaseRotation());
+        }
+    }
     else if (mType == Type::Custom)
     {
         // todo: static uniform information
@@ -185,6 +194,10 @@ std::size_t MaterialClass::GetHash() const noexcept
     hash = base::hash_combine(hash, GetAlphaCutoff());
     hash = base::hash_combine(hash, GetTileSize());
     hash = base::hash_combine(hash, GetTileOffset());
+    hash = base::hash_combine(hash, GetParticleStartColor());
+    hash = base::hash_combine(hash, GetParticleEndColor());
+    hash = base::hash_combine(hash, GetParticleRotation());
+    hash = base::hash_combine(hash, GetParticleBaseRotation());
 
     // remember that the order of uniforms (and texturemaps)
     // can change between IntoJson/FromJson! This can result
@@ -234,6 +247,14 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     {
         source.AddPreprocessorDefinition("PARTICLE_EFFECT_NONE",   static_cast<int>(ParticleEffect::None));
         source.AddPreprocessorDefinition("PARTICLE_EFFECT_ROTATE", static_cast<int>(ParticleEffect::Rotate));
+        if (mType == Type::Particle2D)
+        {
+            source.AddPreprocessorDefinition("PARTICLE_ROTATION_NONE", static_cast<int>(ParticleRotation::None));
+            source.AddPreprocessorDefinition("PARTICLE_ROTATION_BASE", static_cast<int>(ParticleRotation::BaseRotation));
+            source.AddPreprocessorDefinition("PARTICLE_ROTATION_RANDOM", static_cast<int>(ParticleRotation::RandomRotation));
+            source.AddPreprocessorDefinition("PARTICLE_ROTATION_DIRECTION", static_cast<int>(ParticleRotation::ParticleDirection));
+            source.AddPreprocessorDefinition("PARTICLE_ROTATION_DIRECTION_AND_BASE", static_cast<int>(ParticleRotation::ParticleDirectionAndBase));
+        }
     }
 
     if (IsStatic())
@@ -277,6 +298,9 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
             source.FoldUniform("kTileOffset", GetTileOffset());
             source.FoldUniform("kTilePadding", GetTilePadding());
             source.FoldUniform("kSurfaceType", static_cast<int>(mSurfaceType));
+            source.FoldUniform("kParticleStartColor", GetParticleStartColor());
+            source.FoldUniform("kParticleEndColor", GetParticleEndColor());
+            source.FoldUniform("kParticleBaseRotation", GetParticleBaseRotation());
         }
     }
     else
@@ -330,6 +354,8 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
         return ApplyTextureDynamicState(state, device, program);
     else if (mType == Type::Tilemap)
         return ApplyTilemapDynamicState(state, device, program);
+    else if (mType == Type::Particle2D)
+        return ApplyParticleDynamicState(state, device, program);
     else if (mType == Type::Custom)
         return ApplyCustomDynamicState(state, device, program);
     else BUG("Unknown material type.");
@@ -373,6 +399,12 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
         program.SetUniform("kAlphaCutoff", GetAlphaCutoff());
         // I'm not sure if there's a use case for setting the texture
         // scale or texture velocity. so we're not applying these now.
+    }
+    else if (mType ==Type::Particle2D)
+    {
+        program.SetUniform("kParticleStartColor",   GetParticleStartColor());
+        program.SetUniform("kParticleEndColor",     GetParticleEndColor());
+        program.SetUniform("kParticleBaseRotation", GetParticleBaseRotation());
     }
     else if (mType == Type::Custom)
     {
@@ -722,6 +754,18 @@ unsigned MaterialClass::FindTextureMapIndexById(const std::string& id) const
     return i;
 }
 
+unsigned MaterialClass::FindTextureMapIndexBySampler(const std::string& name, unsigned sampler_index) const
+{
+    unsigned i=0;
+    for (i=0; i<GetNumTextureMaps(); ++i)
+    {
+        const auto* map = GetTextureMap(i);
+        if (map->GetSamplerName(sampler_index) == name)
+            break;
+    }
+    return i;
+}
+
 unsigned MaterialClass::FindTextureMapIndexByName(const std::string& name) const
 {
     unsigned i=0;
@@ -732,6 +776,15 @@ unsigned MaterialClass::FindTextureMapIndexByName(const std::string& name) const
             break;
     }
     return i;
+}
+
+TextureMap* MaterialClass::FindTextureMapBySampler(const std::string& name, unsigned sampler_index)
+{
+    const auto index = FindTextureMapIndexBySampler(name, sampler_index);
+    if (index == GetNumTextureMaps())
+        return nullptr;
+
+    return GetTextureMap(index);
 }
 
 TextureMap* MaterialClass::FindTextureMapByName(const std::string& name)
@@ -748,6 +801,17 @@ TextureMap* MaterialClass::FindTextureMapById(const std::string& id)
         return nullptr;
     return GetTextureMap(index);
 }
+
+const TextureMap* MaterialClass::FindTextureMapBySampler(const std::string& name, unsigned sampler_index) const
+{
+    const auto index = FindTextureMapIndexBySampler(name, sampler_index);
+    if (index == GetNumTextureMaps())
+        return nullptr;
+
+    return GetTextureMap(index);
+}
+
+
 const TextureMap* MaterialClass::FindTextureMapByName(const std::string& name) const
 {
     const auto index = FindTextureMapIndexByName(name);
@@ -1078,6 +1142,14 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 
         src.LoadRawSource(source);
     }
+    else if (mType == Type::Particle2D)
+    {
+        static const char* source = {
+#include "shaders/particle_2d_fragment_shader.glsl"
+        };
+
+        src.LoadRawSource(source);
+    }
     else BUG("Unknown material type.");
 
     return src;
@@ -1295,6 +1367,55 @@ bool MaterialClass::ApplyTilemapDynamicState(const State& state, Device& device,
     {
         SetUniform("kTileIndex", state.uniforms, GetUniformValue("kTileIndex", 0.0f), program);
     }
+    return true;
+}
+
+bool MaterialClass::ApplyParticleDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
+{
+    if (mTextureMaps.empty())
+    {
+        if (state.first_render)
+            ERROR("Particle2D Material alpha mask texture map is not set.");
+
+        return false;
+    }
+    auto* texture_map = mTextureMaps[0].get();
+
+    TextureMap::BindingState ts;
+    ts.dynamic_content = state.editing_mode || !IsStatic();
+    ts.current_time    = 0.0;
+
+    TextureMap::BoundState binds;
+    if (!texture_map->BindTextures(ts, device, binds))
+    {
+        if (state.first_render)
+            ERROR("Failed to bind material texture. [material='%1]", mName);
+        return false;
+    }
+    auto* texture = binds.textures[0];
+    texture->SetFilter(mTextureMinFilter);
+    texture->SetFilter(mTextureMagFilter);
+    texture->SetWrapX(mTextureWrapX);
+    texture->SetWrapY(mTextureWrapY);
+
+    const auto rect = binds.rects[0];
+    const float x  = rect.GetX();
+    const float y  = rect.GetY();
+    const float sx = rect.GetWidth();
+    const float sy = rect.GetHeight();
+
+    program.SetTexture("kMask", 0, *texture);
+    program.SetUniform("kMaskRect", x, y, sx, sy);
+    program.SetTextureCount(1);
+
+    if (!IsStatic())
+    {
+        SetUniform("kParticleStartColor",   state.uniforms, GetParticleStartColor(), program);
+        SetUniform("kParticleEndColor",     state.uniforms, GetParticleEndColor(), program);
+        SetUniform("kParticleBaseRotation", state.uniforms, GetParticleBaseRotation(), program);
+    }
+    SetUniform("kParticleRotation", state.uniforms, static_cast<int>(GetParticleRotation()), program);
+
     return true;
 }
 
