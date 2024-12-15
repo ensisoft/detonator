@@ -106,15 +106,16 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, this, &MaterialWidget::ShaderFileChanged);
     connect(mWorkspace, &app::Workspace::ResourceUpdated, this, &MaterialWidget::ResourceUpdated);
 
-    PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.minFilter);
-    PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.magFilter);
-    PopulateFromEnum<gfx::MaterialClass::TextureWrapping>(mUI.wrapX);
-    PopulateFromEnum<gfx::MaterialClass::TextureWrapping>(mUI.wrapY);
+    PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.textureMinFilter);
+    PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.textureMagFilter);
+    PopulateFromEnum<gfx::MaterialClass::TextureWrapping>(mUI.textureWrapX);
+    PopulateFromEnum<gfx::MaterialClass::TextureWrapping>(mUI.textureWrapY);
     PopulateFromEnum<gfx::MaterialClass::SurfaceType>(mUI.surfaceType);
     PopulateFromEnum<gfx::MaterialClass::Type>(mUI.materialType);
     PopulateFromEnum<gfx::MaterialClass::ParticleEffect>(mUI.particleAction);
     PopulateFromEnum<gfx::TextureMap::Type>(mUI.textureMapType);
     PopulateFromEnum<gfx::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
+    PopulateFromEnum<gfx::MaterialClass::ParticleRotation>(mUI.particleRotationMode);
 
     // leave this out for now. particle UI can take care
     // PopulateShaderList(mUI.shaderFile);
@@ -853,6 +854,16 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         other.SetNumTextureMaps(1);
         other.SetTextureMap(0, std::move(map));
     }
+    else if (type == gfx::MaterialClass::Type::Particle2D)
+    {
+        auto map = std::make_unique<gfx::TextureMap>();
+        map->SetType(gfx::TextureMap::Type::Texture2D);
+        map->SetName("Particle Alpha Mask");
+        map->SetSamplerName("kMask");
+        other.SetActiveTextureMap(map->GetId());
+        other.SetNumTextureMaps(1);
+        other.SetTextureMap(0, std::move(map));
+    }
     *mMaterial = other;
 
     ClearCustomUniforms();
@@ -879,6 +890,23 @@ void MaterialWidget::on_shaderFile_currentIndexChanged(int)
     ApplyShaderDescription();
     ReloadShaders();
     ShowMaterialProperties();
+}
+
+void MaterialWidget::on_particleStartColor_colorChanged(QColor color)
+{
+    SetMaterialProperties();
+}
+void MaterialWidget::on_particleEndColor_colorChanged(QColor color)
+{
+    SetMaterialProperties();
+}
+void MaterialWidget::on_particleBaseRotation_valueChanged(double)
+{
+    SetMaterialProperties();
+}
+void MaterialWidget::on_particleRotationMode_currentIndexChanged(int)
+{
+    SetMaterialProperties();
 }
 
 void MaterialWidget::on_tileWidth_valueChanged(int)
@@ -963,25 +991,25 @@ void MaterialWidget::on_gradientOffsetX_valueChanged(int value)
 { SetMaterialProperties(); }
 void MaterialWidget::on_gradientOffsetY_valueChanged(int value)
 { SetMaterialProperties(); }
-void MaterialWidget::on_scaleX_valueChanged(double)
+void MaterialWidget::on_textureScaleX_valueChanged(double)
 { SetMaterialProperties(); }
-void MaterialWidget::on_scaleY_valueChanged(double)
+void MaterialWidget::on_textureScaleY_valueChanged(double)
 { SetMaterialProperties(); }
-void MaterialWidget::on_rotation_valueChanged(double)
+void MaterialWidget::on_textureRotation_valueChanged(double)
 { SetMaterialProperties(); }
-void MaterialWidget::on_velocityX_valueChanged(double)
+void MaterialWidget::on_textureVelocityX_valueChanged(double)
 { SetMaterialProperties(); }
-void MaterialWidget::on_velocityY_valueChanged(double)
+void MaterialWidget::on_textureVelocityY_valueChanged(double)
 { SetMaterialProperties(); }
-void MaterialWidget::on_velocityZ_valueChanged(double)
+void MaterialWidget::on_textureVelocityZ_valueChanged(double)
 { SetMaterialProperties(); }
-void MaterialWidget::on_minFilter_currentIndexChanged(int)
+void MaterialWidget::on_textureMinFilter_currentIndexChanged(int)
 { SetMaterialProperties(); }
-void MaterialWidget::on_magFilter_currentIndexChanged(int)
+void MaterialWidget::on_textureMagFilter_currentIndexChanged(int)
 { SetMaterialProperties(); }
-void MaterialWidget::on_wrapX_currentIndexChanged(int)
+void MaterialWidget::on_textureWrapX_currentIndexChanged(int)
 { SetMaterialProperties(); }
-void MaterialWidget::on_wrapY_currentIndexChanged(int)
+void MaterialWidget::on_textureWrapY_currentIndexChanged(int)
 { SetMaterialProperties(); }
 void MaterialWidget::on_rectX_valueChanged(double value)
 { SetTextureRect(); }
@@ -1794,10 +1822,10 @@ void MaterialWidget::SetMaterialProperties()
     mMaterial->SetStatic(GetValue(mUI.chkStaticInstance));
     mMaterial->SetSurfaceType(GetValue(mUI.surfaceType));
     mMaterial->SetParticleEffect(GetValue(mUI.particleAction));
-    mMaterial->SetTextureMinFilter(GetValue(mUI.minFilter));
-    mMaterial->SetTextureMagFilter(GetValue(mUI.magFilter));
-    mMaterial->SetTextureWrapX(GetValue(mUI.wrapX));
-    mMaterial->SetTextureWrapY(GetValue(mUI.wrapY));
+    mMaterial->SetTextureMinFilter(GetValue(mUI.textureMinFilter));
+    mMaterial->SetTextureMagFilter(GetValue(mUI.textureMagFilter));
+    mMaterial->SetTextureWrapX(GetValue(mUI.textureWrapX));
+    mMaterial->SetTextureWrapY(GetValue(mUI.textureWrapY));
     mMaterial->SetBlendFrames(GetValue(mUI.chkBlendFrames));
     mMaterial->SetActiveTextureMap(GetItemId(mUI.activeMap));
 
@@ -1838,6 +1866,21 @@ void MaterialWidget::SetMaterialProperties()
         mMaterial->DeleteUniform("kTilePadding");
     }
 
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Particle2D)
+    {
+        mMaterial->SetParticleStartColor(GetValue(mUI.particleStartColor));
+        mMaterial->SetParticleEndColor(GetValue(mUI.particleEndColor));
+        mMaterial->SetParticleBaseRotation(qDegreesToRadians((float)GetValue(mUI.particleBaseRotation)));
+        mMaterial->SetParticleRotation(GetValue(mUI.particleRotationMode));
+    }
+    else
+    {
+        mMaterial->DeleteUniform("kParticleStartColor");
+        mMaterial->DeleteUniform("kParticleEndColor");
+        mMaterial->DeleteUniform("kParticleBaseRotation");
+        mMaterial->DeleteUniform("kParticleRotation");
+    }
+
     // set of known uniforms if they differ from the defaults.
     // todo: this assumes implicit knowledge about the internals
     // of the material class. refactor these names away and the
@@ -1848,20 +1891,20 @@ void MaterialWidget::SetMaterialProperties()
     else mMaterial->DeleteUniform("kAlphaCutoff");
 
     glm::vec2 texture_scale;
-    texture_scale.x = GetValue(mUI.scaleX);
-    texture_scale.y = GetValue(mUI.scaleY);
+    texture_scale.x = GetValue(mUI.textureScaleX);
+    texture_scale.y = GetValue(mUI.textureScaleY);
     if (math::equals(texture_scale, glm::vec2(1.0f, 1.0f)))
         mMaterial->DeleteUniform("kTextureScale");
     else mMaterial->SetTextureScale(texture_scale);
 
-    if (math::equals((float)GetValue(mUI.rotation), 0.0f))
+    if (math::equals((float)GetValue(mUI.textureRotation), 0.0f))
         mMaterial->DeleteUniform("kTextureRotation");
-    else mMaterial->SetTextureRotation(qDegreesToRadians((float)GetValue(mUI.rotation)));
+    else mMaterial->SetTextureRotation(qDegreesToRadians((float)GetValue(mUI.textureRotation)));
 
     glm::vec2 linear_texture_velocity;
-    linear_texture_velocity.x = GetValue(mUI.velocityX);
-    linear_texture_velocity.y = GetValue(mUI.velocityY);
-    const float angular_texture_velocity = qDegreesToRadians((float)GetValue(mUI.velocityZ));
+    linear_texture_velocity.x = GetValue(mUI.textureVelocityX);
+    linear_texture_velocity.y = GetValue(mUI.textureVelocityY);
+    const float angular_texture_velocity = qDegreesToRadians((float)GetValue(mUI.textureVelocityZ));
     if (math::equals(glm::vec3(linear_texture_velocity, angular_texture_velocity), glm::vec3(0.0f, 0.0f, 0.0f)))
         mMaterial->DeleteUniform("kTextureVelocity");
     else mMaterial->SetTextureVelocity(linear_texture_velocity, angular_texture_velocity);
@@ -1971,6 +2014,8 @@ void MaterialWidget::ShowMaterialProperties()
     SetVisible(mUI.chkBlendFrames,     false);
 
     SetVisible(mUI.builtInProperties,  false);
+    SetVisible(mUI.lblBaseColor,       false);
+    SetVisible(mUI.baseColor,          false);
     SetVisible(mUI.alphaCutoff,        false);
     SetVisible(mUI.lblAlphaCutoff,     false);
     SetVisible(mUI.lblTileSize,        false);
@@ -1983,43 +2028,73 @@ void MaterialWidget::ShowMaterialProperties()
     SetVisible(mUI.tileLeftPadding,    false);
     SetVisible(mUI.tileTopPadding,     false);
 
-    SetVisible(mUI.lblParticleEffect,  false);
-    SetVisible(mUI.particleAction,     false);
+    SetVisible(mUI.lblParticleStartColor,   false);
+    SetVisible(mUI.lblParticleEndColor,     false);
+    SetVisible(mUI.lblParticleBaseRotation, false);
+    SetVisible(mUI.lblParticleRotationMode, false);
+    SetVisible(mUI.particleStartColor,      false);
+    SetVisible(mUI.particleEndColor,        false);
+    SetVisible(mUI.particleBaseRotation,    false);
+    SetVisible(mUI.particleRotationMode,    false);
+
+    SetVisible(mUI.lblParticleEffect,   false);
+    SetVisible(mUI.particleAction,      false);
     SetVisible(mUI.lblActiveTextureMap, false);
-    SetVisible(mUI.activeMap,          false);
+    SetVisible(mUI.activeMap,           false);
 
     SetVisible(mUI.gradientMap,        false);
     SetVisible(mUI.textureCoords,      false);
     SetVisible(mUI.textureFilters,     false);
     SetVisible(mUI.customUniforms,     false);
 
-    SetValue(mUI.materialName,        mMaterial->GetName());
-    SetValue(mUI.materialID,          mMaterial->GetId());
-    SetValue(mUI.materialType,        mMaterial->GetType());
-    SetValue(mUI.surfaceType,         mMaterial->GetSurfaceType());
-    SetValue(mUI.shaderFile,          mMaterial->GetShaderUri());
-    SetValue(mUI.chkStaticInstance,   mMaterial->IsStatic());
-    SetValue(mUI.chkBlendPreMulAlpha, mMaterial->PremultipliedAlpha());
-    SetValue(mUI.chkBlendFrames,      mMaterial->BlendFrames());
-    SetValue(mUI.alphaCutoff,         mMaterial->GetAlphaCutoff());
-    SetValue(mUI.baseColor,           mMaterial->GetBaseColor());
-    SetValue(mUI.particleAction,      mMaterial->GetParticleEffect());
-    SetValue(mUI.scaleX,              mMaterial->GetTextureScaleX());
-    SetValue(mUI.scaleY,              mMaterial->GetTextureScaleY());
-    SetValue(mUI.rotation,            qRadiansToDegrees(mMaterial->GetTextureRotation()));
-    SetValue(mUI.velocityX,           mMaterial->GetTextureVelocityX());
-    SetValue(mUI.velocityY,           mMaterial->GetTextureVelocityY());
-    SetValue(mUI.velocityZ,           qRadiansToDegrees(mMaterial->GetTextureVelocityZ()));
-    SetValue(mUI.minFilter,           mMaterial->GetTextureMinFilter());
-    SetValue(mUI.magFilter,           mMaterial->GetTextureMagFilter());
-    SetValue(mUI.wrapX,               mMaterial->GetTextureWrapX());
-    SetValue(mUI.wrapY,               mMaterial->GetTextureWrapY());
-    SetValue(mUI.tileWidth,           mMaterial->GetTileSize().x);
-    SetValue(mUI.tileHeight,          mMaterial->GetTileSize().y);
-    SetValue(mUI.tileLeftPadding,     mMaterial->GetTilePadding().x);
-    SetValue(mUI.tileTopPadding,      mMaterial->GetTilePadding().y);
-    SetValue(mUI.tileLeftOffset,      mMaterial->GetTileOffset().x);
-    SetValue(mUI.tileTopOffset,       mMaterial->GetTileOffset().y);
+    SetValue(mUI.materialName,         mMaterial->GetName());
+    SetValue(mUI.materialID,           mMaterial->GetId());
+    SetValue(mUI.materialType,         mMaterial->GetType());
+    SetValue(mUI.surfaceType,          mMaterial->GetSurfaceType());
+    SetValue(mUI.shaderFile,           mMaterial->GetShaderUri());
+    SetValue(mUI.chkStaticInstance,    mMaterial->IsStatic());
+    SetValue(mUI.chkBlendPreMulAlpha,  mMaterial->PremultipliedAlpha());
+    SetValue(mUI.chkBlendFrames,       mMaterial->BlendFrames());
+
+    // base
+    SetValue(mUI.alphaCutoff,          mMaterial->GetAlphaCutoff());
+    SetValue(mUI.baseColor,            mMaterial->GetBaseColor());
+
+    // tilemap
+    SetValue(mUI.tileWidth,            mMaterial->GetTileSize().x);
+    SetValue(mUI.tileHeight,           mMaterial->GetTileSize().y);
+    SetValue(mUI.tileLeftOffset,       mMaterial->GetTileOffset().x);
+    SetValue(mUI.tileTopOffset,        mMaterial->GetTileOffset().y);
+    SetValue(mUI.tileLeftPadding,      mMaterial->GetTilePadding().x);
+    SetValue(mUI.tileTopPadding,       mMaterial->GetTilePadding().y);
+
+    // particle
+    SetValue(mUI.particleAction,       mMaterial->GetParticleEffect());
+    SetValue(mUI.particleRotationMode, mMaterial->GetParticleRotation());
+    SetValue(mUI.particleStartColor,   mMaterial->GetParticleStartColor());
+    SetValue(mUI.particleEndColor,     mMaterial->GetParticleEndColor());
+    SetValue(mUI.particleBaseRotation, qRadiansToDegrees(mMaterial->GetParticleBaseRotation()));
+
+    // gradient values.
+    const auto& offset = mMaterial->GetColorWeight();
+    SetValue(mUI.colorMap0, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::TopLeft));
+    SetValue(mUI.colorMap1, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::TopRight));
+    SetValue(mUI.colorMap2, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::BottomLeft));
+    SetValue(mUI.colorMap3, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::BottomRight));
+    SetValue(mUI.gradientOffsetX, NormalizedFloat(offset.x));
+    SetValue(mUI.gradientOffsetY, NormalizedFloat(offset.y));
+
+    SetValue(mUI.textureScaleX,        mMaterial->GetTextureScaleX());
+    SetValue(mUI.textureScaleY,        mMaterial->GetTextureScaleY());
+    SetValue(mUI.textureRotation,      qRadiansToDegrees(mMaterial->GetTextureRotation()));
+    SetValue(mUI.textureVelocityX,     mMaterial->GetTextureVelocityX());
+    SetValue(mUI.textureVelocityY,     mMaterial->GetTextureVelocityY());
+    SetValue(mUI.textureVelocityZ,     qRadiansToDegrees(mMaterial->GetTextureVelocityZ()));
+    SetValue(mUI.textureMinFilter,     mMaterial->GetTextureMinFilter());
+    SetValue(mUI.textureMagFilter,     mMaterial->GetTextureMagFilter());
+    SetValue(mUI.textureWrapX,         mMaterial->GetTextureWrapX());
+    SetValue(mUI.textureWrapY,         mMaterial->GetTextureWrapY());
+
     ClearList(mUI.activeMap);
 
     mUI.alphaCutoff->ClearValue();
@@ -2057,32 +2132,24 @@ void MaterialWidget::ShowMaterialProperties()
         SetPlaceholderText(mUI.shaderFile, "Using The Built-in Shader");
         SetEnabled(mUI.btnAddShader,        true);
         SetVisible(mUI.grpRenderFlags,      true);
-        SetVisible(mUI.builtInProperties,   true);
-        // the static instance constant folding doesn't work
-        // with custom shader source. the user needs to do the
-        // work manually then.
-        SetVisible(mUI.chkStaticInstance,   !mMaterial->HasCustomShader());
+        SetVisible(mUI.chkStaticInstance,   true);
 
         if (mMaterial->GetType() == gfx::MaterialClass::Type::Color)
         {
-            SetVisible(mUI.baseColor, true);
-            SetVisible(mUI.lblBaseColor, true);
+            SetVisible(mUI.builtInProperties,   true);
+            SetVisible(mUI.baseColor,           true);
+            SetVisible(mUI.lblBaseColor,        true);
         }
         else if (mMaterial->GetType() == gfx::MaterialClass::Type::Gradient)
         {
-            const auto& offset = mMaterial->GetColorWeight();
-            SetValue(mUI.colorMap0, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::TopLeft));
-            SetValue(mUI.colorMap1, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::TopRight));
-            SetValue(mUI.colorMap2, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::BottomLeft));
-            SetValue(mUI.colorMap3, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::BottomRight));
-            SetValue(mUI.gradientOffsetY, NormalizedFloat(offset.y));
-            SetValue(mUI.gradientOffsetX, NormalizedFloat(offset.x));
             SetVisible(mUI.gradientMap, true);
-            SetVisible(mUI.builtInProperties, false);
         }
         else if (mMaterial->GetType() == gfx::MaterialClass::Type::Texture ||
                  mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
         {
+            SetVisible(mUI.builtInProperties,   true);
+            SetVisible(mUI.lblBaseColor,        true);
+            SetVisible(mUI.baseColor,           true);
             SetVisible(mUI.lblAlphaCutoff,      true);
             SetVisible(mUI.alphaCutoff,         true);
             SetVisible(mUI.lblParticleEffect,   true);
@@ -2094,6 +2161,9 @@ void MaterialWidget::ShowMaterialProperties()
         }
         else if (mMaterial->GetType() == gfx::MaterialClass::Type::Tilemap)
         {
+            SetVisible(mUI.builtInProperties,   true);
+            SetVisible(mUI.lblBaseColor,        true);
+            SetVisible(mUI.baseColor,           true);
             SetVisible(mUI.lblAlphaCutoff,      true);
             SetVisible(mUI.alphaCutoff,         true);
             SetVisible(mUI.lblTileSize,         true);
@@ -2110,6 +2180,19 @@ void MaterialWidget::ShowMaterialProperties()
             SetVisible(mUI.textureFilters,      true);
             SetVisible(mUI.lblTileIndex,        true);
             SetVisible(mUI.kTileIndex,          true);
+        }
+        else if (mMaterial->GetType() == gfx::MaterialClass::Type::Particle2D)
+        {
+            SetVisible(mUI.builtInProperties,       true);
+            SetVisible(mUI.lblParticleStartColor,   true);
+            SetVisible(mUI.lblParticleEndColor,     true);
+            SetVisible(mUI.lblParticleBaseRotation, true);
+            SetVisible(mUI.lblParticleRotationMode, true);
+            SetVisible(mUI.particleStartColor,      true);
+            SetVisible(mUI.particleEndColor,        true);
+            SetVisible(mUI.particleBaseRotation,    true);
+            SetVisible(mUI.particleRotationMode,    true);
+            SetVisible(mUI.textureFilters,          true);
         }
     }
 
@@ -2143,7 +2226,6 @@ void MaterialWidget::ShowMaterialProperties()
 
     if (mMaterial->GetNumTextureMaps())
     {
-        SetVisible(mUI.textureCoords,  true);
         SetVisible(mUI.textureFilters, true);
         SetEnabled(mUI.textureMaps,    true);
 
