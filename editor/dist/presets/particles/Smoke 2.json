@@ -10,7 +10,7 @@
     "name": "Smoke 2 Particle",
     "particle_action": "None",
     "shader_src": "",
-    "shader_uri": "app://shaders/es2/basic_particle.glsl",
+    "shader_uri": "",
     "surface": "Transparent",
     "texture_mag_filter": "Default",
     "texture_maps": [
@@ -53,10 +53,10 @@
     "texture_min_filter": "Default",
     "texture_wrap_x": "Clamp",
     "texture_wrap_y": "Clamp",
-    "type": "Custom",
+    "type": "Particle2D",
     "uniforms": [
       {
-        "name": "kEndColor",
+        "name": "kParticleEndColor",
         "value": {
           "a": 0.0,
           "b": 0.16517890989780426,
@@ -65,15 +65,15 @@
         }
       },
       {
-        "name": "kRotate",
-        "value": 1
+        "name": "kParticleRotation",
+        "value": 2
       },
       {
-        "name": "kRotationValue",
+        "name": "kParticleBaseRotation",
         "value": 0.0
       },
       {
-        "name": "kStartColor",
+        "name": "kParticleStartColor",
         "value": {
           "a": 1.0,
           "b": 0.09822232276201248,

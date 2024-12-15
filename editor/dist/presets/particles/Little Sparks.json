@@ -10,7 +10,7 @@
     "name": "My Particle System Particle",
     "particle_action": "None",
     "shader_src": "",
-    "shader_uri": "app://shaders/es2/basic_particle.glsl",
+    "shader_uri": "",
     "surface": "Emissive",
     "texture_mag_filter": "Default",
     "texture_maps": [
@@ -53,10 +53,10 @@
     "texture_min_filter": "Default",
     "texture_wrap_x": "Clamp",
     "texture_wrap_y": "Clamp",
-    "type": "Custom",
+    "type": "Particle2D",
     "uniforms": [
       {
-        "name": "kEndColor",
+        "name": "kParticleEndColor",
         "value": {
           "a": 1.0,
           "b": 0.06663614511489868,
@@ -65,15 +65,15 @@
         }
       },
       {
-        "name": "kRotate",
-        "value": 3
+        "name": "kParticleRotation",
+        "value": 4
       },
       {
-        "name": "kRotationValue",
+        "name": "kParticleBaseRotation",
         "value": 0.0
       },
       {
-        "name": "kStartColor",
+        "name": "kParticleStartColor",
         "value": {
           "a": 1.0,
           "b": 0.0,
