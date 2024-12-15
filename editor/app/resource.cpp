@@ -932,6 +932,38 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
             }
         }
     }
+    if (old_version < 4)
+    {
+        const auto& shader_uri = material.GetShaderUri();
+        if (shader_uri == "app://shaders/es2/basic_particle.glsl")
+        {
+            material.SetType(gfx::MaterialClass::Type::Particle2D);
+            const auto kStartColor = material.GetUniformValue("kStartColor", gfx::Color4f(gfx::Color::White));
+            const auto kEndColor = material.GetUniformValue("kEndColor", gfx::Color4f(gfx::Color::White));
+            const auto kRotationValue = material.GetUniformValue("kRotation", 0.0f);
+            const auto kRotate = material.GetUniformValue("kRotate", 0);
+
+            material.SetParticleStartColor(kStartColor);
+            material.SetParticleEndColor(kEndColor);
+            material.SetParticleBaseRotation(kRotationValue);
+            if (kRotate > 0) // 0 = OFF = maps to the same value.
+                material.SetParticleRotation(static_cast<gfx::MaterialClass::ParticleRotation>(kRotate+1));
+
+            log->Log(material, "Material", "Migrated to built-in Particle2D material and shader.");
+            if (material.GetNumTextureMaps())
+            {
+                auto* map = material.GetTextureMap(0);
+                map->SetSamplerName("kMask", 0);
+                map->SetRectUniformName("kMaskRect", 0);
+                map->SetName("Particle Alpha Mask");
+            }
+            material.DeleteUniform("kStartColor");
+            material.DeleteUniform("kEndColor");
+            material.DeleteUniform("kRotationValue");
+            material.DeleteUniform("kRotate");
+            material.SetShaderUri("");
+        }
+    }
 
     // the uniform values were refactored inside the material class
     // and they only exist now if they have been set explicitly.
@@ -1031,6 +1063,39 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
 
 }
 
+void MigrateResource(game::EntityClass& entity, MigrationLog* log, unsigned old_version, unsigned new_version)
+{
+    if (old_version < 2)
+    {
+        bool did_migrate = false;
+        for (unsigned i=0; i<entity.GetNumNodes(); ++i)
+        {
+            auto& node = entity.GetNode(i);
+            if (!node.HasDrawable())
+                continue;
+
+            auto* drawable = node.GetDrawable();
+            if (drawable->HasMaterialParam("kEndColor"))
+            {
+                auto value = drawable->GetMaterialParamValue<game::Color4f>("kEndColor");
+                drawable->SetMaterialParam("kParticleEndColor", *value);
+                drawable->DeleteMaterialParam("kEndColor");
+                did_migrate = true;
+            }
+            if (drawable->HasMaterialParam("kStartColor"))
+            {
+                auto value = drawable->GetMaterialParamValue<game::Color4f>("kStartColor");
+                drawable->SetMaterialParam("kParticleStartColor", *value);
+                drawable->DeleteMaterialParam("kStartColor");
+                did_migrate = true;
+            }
+        }
+        if (did_migrate)
+        {
+            log->Log(entity, "Entity", "Migrated to built-in particle 2D material entity node uniforms.");
+        }
+    }
+}
 
 } // namespace
 

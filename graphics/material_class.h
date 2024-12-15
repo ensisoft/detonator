@@ -170,6 +170,10 @@ namespace gfx
         inline void SetSurfaceType(SurfaceType surface) noexcept
         { mSurfaceType = surface; }
 
+        // Unsafe, but helpful for migration.
+        inline void SetType(Type type) noexcept
+        { mType = type; }
+
         inline void SetActiveTextureMap(std::string id) noexcept
         { mActiveTextureMap = id; }
         // Set the human-readable material class name.
