@@ -30,7 +30,7 @@
 
 namespace {
     static const char* vertex_base = {
-#include "shaders/base_vertex_shader.glsl"
+#include "shaders/vertex_shader_base.glsl"
     };
 } // namespace
 
@@ -137,7 +137,7 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_i
     // y grows up to 1.0 to the top of the screen).
 
     static const char* shader = {
-#include "shaders/simple_2d_vertex_shader.glsl"
+#include "shaders/vertex_2d_simple_shader.glsl"
     };
 
     ShaderSource source;
@@ -155,7 +155,7 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_i
 gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instancing)
 {
     static const char* shader = {
-#include "shaders/simple_3d_vertex_shader.glsl"
+#include "shaders/vertex_3d_simple_shader.glsl"
     };
 
     ShaderSource source;

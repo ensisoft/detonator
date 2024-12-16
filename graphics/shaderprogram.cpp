@@ -34,7 +34,7 @@ std::string ShaderProgram::GetShaderId(const Drawable& drawable, const Drawable:
 ShaderSource ShaderProgram::GetShader(const Material& material, const Material::Environment& env, const Device& device) const
 {
     static const char* fragment_main = {
-#include "shaders/generic_fragment_main.glsl"
+#include "shaders/generic_main_fragment_shader.glsl"
     };
     static const char* utility_func = {
 #include "shaders/utility_functions.glsl"
@@ -63,7 +63,7 @@ ShaderSource ShaderProgram::GetShader(const Drawable& drawable, const Drawable::
     // careful here, WebGL shits itself if the source is concatenated together
     // so that the vertex source (with varyings) comes after the main.
     static const char* vertex_main = {
-#include "shaders/generic_vertex_main.glsl"
+#include "shaders/generic_main_vertex_shader.glsl"
     };
 
     auto source = drawable.GetShader(env, device);
