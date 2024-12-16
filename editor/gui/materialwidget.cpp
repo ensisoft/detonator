@@ -1375,6 +1375,8 @@ void MaterialWidget::CreateCustomShaderStub()
     constexpr auto glsl = R"(
 // built-in uniforms
 
+#version 300 es
+
 // material time in seconds.
 uniform float kTime;
 
