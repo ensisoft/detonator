@@ -172,33 +172,19 @@ gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_i
 
 gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_instancing)
 {
-    gfx::ShaderSource source;
+    static const char* shader = {
+#include "shaders/vertex_3d_model_shader.glsl"
+    };
+
+    ShaderSource source;
     source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
-    source.SetType(gfx::ShaderSource::Type::Vertex);
-    source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec3f);
-    source.AddAttribute("aNormal", gfx::ShaderSource::AttributeType::Vec3f);
-    source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
-
-    source.AddUniform("kProjectionMatrix", gfx::ShaderSource::UniformType::Mat4f);
-    source.AddUniform("kModelViewMatrix", gfx::ShaderSource::UniformType::Mat4f);
-
-    source.AddVarying("vTexCoord", gfx::ShaderSource::VaryingType::Vec2f);
-    source.AddVarying("vParticleRandomValue", gfx::ShaderSource::VaryingType::Float);
-    source.AddVarying("vParticleAlpha", gfx::ShaderSource::VaryingType::Float);
-    source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
-    source.AddVarying("vParticleAngle", gfx::ShaderSource::VaryingType::Float);
-
-    source.AddSource(R"(
-void VertexShaderMain()
-{
-    vTexCoord = aTexCoord;
-    vParticleRandomValue = 0.0;
-    vParticleAlpha       = 1.0;
-    vParticleTime        = 0.0;
-    vParticleAngle       = 0.0;
-    gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
-}
-)");
+    source.SetType(ShaderSource::Type::Vertex);
+    if (use_instancing)
+    {
+        source.AddPreprocessorDefinition("INSTANCED_DRAW");
+    }
+    source.LoadRawSource(vertex_base);
+    source.LoadRawSource(shader);
     return source;
 }
 
