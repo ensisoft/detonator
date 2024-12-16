@@ -85,10 +85,10 @@ std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
 ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device& device) const
 {
     static const char* base_shader = {
-#include "shaders/base_vertex_shader.glsl"
+#include "shaders/vertex_shader_base.glsl"
     };
     static const char* particle_shader = {
-#include "shaders/particle_vertex_shader.glsl"
+#include "shaders/vertex_2d_particle_shader.glsl"
     };
 
     ShaderSource source;
