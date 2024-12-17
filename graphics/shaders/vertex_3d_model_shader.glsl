@@ -26,8 +26,9 @@ void VertexShaderMain() {
     vParticleTime        = 0.0;
     vParticleAngle       = 0.0;
 
-    gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
-
+    vec4 view_position = kModelViewMatrix * vec4(aPosition.xyz, 1.0);
+    vs_out.view_position = view_position;
+    vs_out.clip_position = kProjectionMatrix * view_position;
 }
 
 )CPP_RAW_STRING"

@@ -65,8 +65,11 @@ void VertexShaderMain() {
     // base vertex shader
     mat4 instance_matrix = GetInstanceTransform();
 
-    gl_Position  = kProjectionMatrix * kModelViewMatrix * instance_matrix * vertex;
-    gl_PointSize = aData.x;
+    vec4 view_position = kModelViewMatrix * instance_matrix * vertex;
+
+    vs_out.view_position = view_position;
+    vs_out.clip_position = kProjectionMatrix * view_position;
+    vs_out.point_size    = aData.x;
 }
 
 )CPP_RAW_STRING"

@@ -24,9 +24,9 @@ void VertexShaderMain() {
 
   vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xyz, 1.0);
 
-  gl_Position = kTileTransform * vertex;
-  gl_Position.z = 0.0;
-  gl_PointSize = kTileRenderSize.x;
+  vs_out.clip_position = kTileTransform * vertex;
+  vs_out.clip_position.z = 0.0;
+  vs_out.point_size = kTileRenderSize.x;
 
   vTileData = aTileData;
   // dummy, this shader requires gl_PointCoord
