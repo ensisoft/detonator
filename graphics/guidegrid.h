@@ -35,17 +35,25 @@ namespace gfx
           , mNumHorizontalLines(num_horizontal_lines)
           , mBorderLines(border_lines)
         {}
-        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
-        virtual ShaderSource GetShader(const Environment& env, const Device& device) const override;
-        virtual std::string GetShaderId(const Environment& env) const override;
-        virtual std::string GetShaderName(const Environment& env) const override;
-        virtual std::string GetGeometryId(const Environment& env) const override;
-        virtual bool Construct(const Environment& env, Geometry::CreateArgs& geometry) const override;
+        void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
+        ShaderSource GetShader(const Environment& env, const Device& device) const override;
+        std::string GetShaderId(const Environment& env) const override;
+        std::string GetShaderName(const Environment& env) const override;
+        std::string GetGeometryId(const Environment& env) const override;
+        bool Construct(const Environment& env, Geometry::CreateArgs& geometry) const override;
 
-        virtual DrawPrimitive GetDrawPrimitive() const override
-        { return DrawPrimitive::Lines; }
-        virtual Usage GetGeometryUsage() const override
-        { return Usage::Static; }
+        Type GetType() const override
+        {
+            return Type::GuideGrid;
+        }
+        DrawPrimitive GetDrawPrimitive() const override
+        {
+            return DrawPrimitive::Lines;
+        }
+        Usage GetGeometryUsage() const override
+        {
+            return Usage::Static;
+        }
     private:
         unsigned mNumVerticalLines = 1;
         unsigned mNumHorizontalLines = 1;

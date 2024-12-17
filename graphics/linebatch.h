@@ -65,16 +65,18 @@ namespace gfx
             mLines.push_back(line);
         }
 
-        virtual void ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const override;
-        virtual ShaderSource GetShader(const Environment& environment, const Device& device) const override;
-        virtual std::string GetShaderId(const Environment& environment) const override;
-        virtual std::string GetShaderName(const Environment& environment) const override;
-        virtual std::string GetGeometryId(const Environment& environment) const override;
-        virtual bool Construct(const Environment& environment, Geometry::CreateArgs& create) const override;
-        virtual DrawPrimitive GetDrawPrimitive() const override
+        void ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const override;
+        ShaderSource GetShader(const Environment& environment, const Device& device) const override;
+        std::string GetShaderId(const Environment& environment) const override;
+        std::string GetShaderName(const Environment& environment) const override;
+        std::string GetGeometryId(const Environment& environment) const override;
+        bool Construct(const Environment& environment, Geometry::CreateArgs& create) const override;
+        DrawPrimitive GetDrawPrimitive() const override
         { return DrawPrimitive::Lines; }
-        virtual Usage GetGeometryUsage() const override
+        Usage GetGeometryUsage() const override
         { return Usage::Stream; }
+        Type GetType() const override
+        { return Type::LineBatch2D; }
     private:
         std::vector<Line> mLines;
     };
@@ -102,16 +104,18 @@ namespace gfx
         inline void AddLine(Line line)
         { mLines.push_back(std::move(line)); }
 
-        virtual void ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const override;
-        virtual ShaderSource GetShader(const Environment& environment, const Device& device) const override;
-        virtual std::string GetShaderId(const Environment& environment) const override;
-        virtual std::string GetShaderName(const Environment& environment) const override;
-        virtual std::string GetGeometryId(const Environment& environment) const override;
-        virtual bool Construct(const Environment& environment, Geometry::CreateArgs& create) const override;
-        virtual DrawPrimitive GetDrawPrimitive() const override
+        void ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const override;
+        ShaderSource GetShader(const Environment& environment, const Device& device) const override;
+        std::string GetShaderId(const Environment& environment) const override;
+        std::string GetShaderName(const Environment& environment) const override;
+        std::string GetGeometryId(const Environment& environment) const override;
+        bool Construct(const Environment& environment, Geometry::CreateArgs& create) const override;
+        DrawPrimitive GetDrawPrimitive() const override
         { return DrawPrimitive::Lines; }
-        virtual Usage GetGeometryUsage() const override
+        Usage GetGeometryUsage() const override
         { return Usage::Stream; }
+        Type GetType() const override
+        { return Type::LineBatch3D; }
     private:
         std::vector<Line> mLines;
     };
