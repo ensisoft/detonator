@@ -31,8 +31,8 @@ void VertexShaderMain() {
   // center point
   vertex.xy += (aTileCorner * kTileRenderSize);
 
-  gl_Position = kTileTransform * vertex;
-  gl_Position.z = 0.0;
+  vs_out.clip_position = kTileTransform * vertex;
+  vs_out.clip_position.z = 0.0;
 
   vTexCoord = aTileCorner + vec2(0.5, 1.0);
   vTileData = aTileData;
