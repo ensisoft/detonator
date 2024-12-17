@@ -117,41 +117,27 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
     const auto format = mText.GetRasterFormat();
     if (format == TextBuffer::RasterFormat::Bitmap)
     {
+        static const char* fragment_source = {
+#include "shaders/fragment_text_bitmap_shader.glsl"
+        };
         ShaderSource source;
         source.SetType(ShaderSource::Type::Fragment);
         source.SetPrecision(ShaderSource::Precision::High);
         source.SetVersion(ShaderSource::Version::GLSL_300);
-        source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
-        source.AddUniform("kColor", ShaderSource::UniformType::Color4f);
-        source.AddUniform("kTime", ShaderSource::UniformType::Float);
-        source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
-        source.AddSource(R"(
-void FragmentShaderMain() {
-   float alpha = texture(kTexture, vTexCoord).a;
-   vec4 color = vec4(kColor.r, kColor.g, kColor.b, kColor.a * alpha);
-   fs_out.color = color;
-}
-        )");
+        source.LoadRawSource(fragment_source);
         return source;
     }
     else if (format == TextBuffer::RasterFormat::Texture)
     {
+        static const char* fragment_source = {
+#include "shaders/fragment_text_texture_shader.glsl"
+        };
+
         ShaderSource source;
         source.SetType(ShaderSource::Type::Fragment);
         source.SetPrecision(ShaderSource::Precision::High);
         source.SetVersion(ShaderSource::Version::GLSL_300);
-        source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
-        source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
-        source.AddSource(R"(
-void FragmentShaderMain() {
-    mat3 flip = mat3(vec3(1.0,  0.0, 0.0),
-                     vec3(0.0, -1.0, 0.0),
-                     vec3(0.0,  1.0, 0.0));
-    vec3 tex = flip * vec3(vTexCoord.xy, 1.0);
-    vec4 color = texture(kTexture, tex.xy);
-    fs_out.color = color;
-}
-    )");
+        source.LoadRawSource(fragment_source);
         return source;
     }
     else if (format == TextBuffer::RasterFormat::None)
