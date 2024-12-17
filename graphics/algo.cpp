@@ -274,59 +274,9 @@ void main() {
     // but the problem with this is that the blurring results vary depending
     // on the size of input texture and a small texture will blur much more
     // on fewer iterations than a large texture.
-    constexpr auto* fragment_src = R"(
-#version 100
-precision highp float;
-varying vec2 vTexCoord;
-uniform vec2 kTextureSize;
-uniform sampler2D kTexture;
-
-uniform int kDirection;
-
-void main() {
-  vec2 texel_size = vec2(1.0, 1.0) / vec2(256.0);
-
-  // The total sum of weights w=weights[0] + 2*(weights[1] + weights[2] + ... weights[n])
-  // W should then be approximately 1.0
-  float weights[5];
-  weights[0] = 0.227027;
-  weights[1] = 0.1945946;
-  weights[2] = 0.1216216;
-  weights[3] = 0.054054;
-  weights[4] = 0.016216;
-
-  vec4 color = texture2D(kTexture, vTexCoord) * weights[0];
-
-  if (kDirection == 0)
-  {
-    for (int i=1; i<5; ++i)
-    {
-      float left  = vTexCoord.x - float(i) * texel_size.x;
-      float right = vTexCoord.x + float(i) * texel_size.x;
-      float y = vTexCoord.y;
-      vec4 left_sample  = texture2D(kTexture, vec2(left, y)) * weights[i];
-      vec4 right_sample = texture2D(kTexture, vec2(right, y)) * weights[i];
-      color += left_sample;
-      color += right_sample;
-    }
-  }
-  else if (kDirection == 1)
-  {
-    for (int i=1; i<5; ++i)
-    {
-      float below = vTexCoord.y - float(i) * texel_size.y;
-      float above = vTexCoord.y + float(i) * texel_size.y;
-      float x = vTexCoord.x;
-      vec4 below_sample = texture2D(kTexture, vec2(x, below)) * weights[i];
-      vec4 above_sample = texture2D(kTexture, vec2(x, above)) * weights[i];
-      color += below_sample;
-      color += above_sample;
-    }
-  }
-  gl_FragColor = color;
-}
-
-)";
+    static const char* fragment_src = {
+#include "shaders/fragment_blur_kernel.glsl"
+    };
     auto program = device->FindProgram("BlurProgram");
     if (!program)
         program = MakeProgram(vertex_src, fragment_src, "BlurProgram", *device);
@@ -396,65 +346,9 @@ void main() {
 }
 )";
 
-    constexpr auto* fragment_src = R"(
-#version 100
-
-precision highp float;
-
-uniform vec2 kTextureSize;
-uniform vec4 kEdgeColor;
-uniform sampler2D kSrcTexture;
-
-varying vec2 vTexCoord;
-
-vec4 texel(vec2 offset)
-{
-   float w = 1.0 / kTextureSize.x;
-   float h = 1.0 / kTextureSize.y;
-
-   vec2 coord = vTexCoord + offset;
-   if (coord.x < 2.0*w || coord.x > (1.0-2.0*w))
-      return vec4(0.0);
-   if (coord.y < 2.0*h || coord.y > (1.0-2.0*h))
-      return vec4(0.0);
-
-   return texture2D(kSrcTexture, coord);
-}
-
-void sample(inout vec4[9] samples)
-{
-   // texel size in normalized units.
-   float w = 1.0 / kTextureSize.x;
-   float h = 1.0 / kTextureSize.y;
-
-   samples[0] = texel(vec2( -w, -h));
-   samples[1] = texel(vec2(0.0, -h));
-   samples[2] = texel(vec2(  w, -h));
-   samples[3] = texel(vec2( -w, 0.0));
-   samples[4] = texel(vec2(0.0, 0.0));
-   samples[5] = texel(vec2(  w, 0.0));
-   samples[6] = texel(vec2( -w, h));
-   samples[7] = texel(vec2(0.0, h));
-   samples[8] = texel(vec2(  w, h));
-}
-
-void main() {
-
-   vec4 n[9];
-   sample(n);
-
-   vec4 sobel_edge_h = n[2] + (2.0*n[5]) + n[8] - (n[0] + (2.0*n[3]) + n[6]);
-   vec4 sobel_edge_v = n[0] + (2.0*n[1]) + n[2] - (n[6] + (2.0*n[7]) + n[8]);
-   vec4 sobel = sqrt((sobel_edge_h * sobel_edge_h) + (sobel_edge_v * sobel_edge_v));
-
-   //gl_FragColor = vec4(1.0 - sobel.rgb, 1.0);
-   gl_FragColor = vec4(kEdgeColor.rgb, kEdgeColor * sobel.a);
-
-   //gl_FragColor = vec4(1.0) * (1.0 - sobel.a);
-
-}
-)";
-
+    static const char* fragment_src = {
+#include "shaders/fragment_edge_kernel.glsl"
+    };
     auto program = device->FindProgram("EdgeProgram");
     if (!program)
         program = MakeProgram(vertex_src, fragment_src, "EdgeProgram", *device);
