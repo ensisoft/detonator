@@ -2579,7 +2579,7 @@ void TilemapWidget::MousePress(QMouseEvent* event)
     {
         const auto* layer = GetCurrentLayerInstance();
         const auto* tool  = GetCurrentTool();
-        if (!ValidateToolAgainstLayer(*tool, *layer))
+        if (tool && !ValidateToolAgainstLayer(*tool, *layer))
         {
             mCurrentTool.reset();
             UncheckTools();
