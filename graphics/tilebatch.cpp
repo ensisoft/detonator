@@ -74,95 +74,25 @@ ShaderSource TileBatch::GetShader(const Environment& env, const Device& device) 
 
     const auto shape = ResolveTileShape();
 
-    constexpr const auto*  square_tile_source = R"(
-#version 300 es
+    static constexpr const char*  square_tile_source = {
+#include "shaders/vertex_tilebatch_point_shader.glsl"
+    };
+    static constexpr const char* rectangle_tile_source = {
+#include "shaders/vertex_tilebatch_quad_shader.glsl"
+    };
 
-in vec3 aTilePosition;
-in vec2 aTileData;
-
-uniform mat4 kTileTransform;
-uniform mat4 kTileCoordinateSpaceTransform;
-
-uniform vec3 kTileWorldSize;
-uniform vec3 kTilePointOffset;
-uniform vec2 kTileRenderSize;
-
-out float vParticleAlpha;
-out float vParticleRandomValue;
-out vec2 vTileData;
-out vec2 vTexCoord;
-
-void VertexShaderMain()
-{
-  // transform tile row,col index into a tile position in units in the x,y plane,
-  vec3 tile = aTilePosition * kTileWorldSize + kTilePointOffset;
-
-  vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xyz, 1.0);
-
-  gl_Position = kTileTransform * vertex;
-  gl_Position.z = 0.0;
-  gl_PointSize = kTileRenderSize.x;
-
-  vTileData = aTileData;
-  // dummy, this shader requires gl_PointCoord
-  vTexCoord = vec2(0.0, 0.0);
-
-  // dummy out.
-  vParticleAlpha = 1.0;
-  vParticleRandomValue = 1.0;
-}
-)";
-
-
-    constexpr const auto* rectangle_tile_source = R"(
-#version 300 es
-
-in vec3 aTilePosition;
-in vec2 aTileCorner;
-in vec2 aTileData;
-
-uniform mat4 kTileTransform;
-uniform mat4 kTileCoordinateSpaceTransform;
-
-uniform vec3 kTileWorldSize;
-uniform vec3 kTilePointOffset;
-uniform vec2 kTileRenderSize;
-
-out float vParticleAlpha;
-out float vParticleRandomValue;
-out vec2 vTileData;
-out vec2 vTexCoord;
-
-void VertexShaderMain()
-{
-  // transform tile col,row index into a tile position in tile world units in the tile x,y plane
-  vec3 tile = aTilePosition * kTileWorldSize + kTilePointOffset;
-
-  // transform the tile from tile space to rendering space
-  vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xyz, 1.0);
-
-  // pull the corner vertices apart by adding a corner offset
-  // for each vertex towards some corner/direction away from the
-  // center point
-  vertex.xy += (aTileCorner * kTileRenderSize);
-
-  gl_Position = kTileTransform * vertex;
-  gl_Position.z = 0.0;
-
-  vTexCoord = aTileCorner + vec2(0.5, 1.0);
-  vTileData = aTileData;
-
-  // dummy out
-  vParticleAlpha = 1.0;
-  vParticleRandomValue = 1.0;
-}
-)";
+    const char* src = nullptr;
     if (shape == TileShape::Square)
-        return ShaderSource::FromRawSource(square_tile_source, ShaderSource::Type::Vertex);
+        src = square_tile_source;
     else if (shape == TileShape::Rectangle)
-        return ShaderSource::FromRawSource(rectangle_tile_source, ShaderSource::Type::Vertex);
+        src = rectangle_tile_source;
     else BUG("Missing tile batch shader source.");
-    return ShaderSource();
+
+    ShaderSource source;
+    source.SetType(ShaderSource::Type::Vertex);
+    source.SetVersion(ShaderSource::Version::GLSL_300);
+    source.LoadRawSource(src);
+    return source;
 }
 
 std::string TileBatch::GetShaderId(const Environment& env) const
