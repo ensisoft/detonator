@@ -33,16 +33,14 @@ namespace gfx
             Wireframe
         };
 
-        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState&  state) const override;
-        virtual ShaderSource GetShader(const Environment& env, const Device& device) const override;
-        virtual std::string GetShaderId(const Environment& env) const override;
-        virtual std::string GetShaderName(const Environment& env) const override;
-        virtual std::string GetGeometryId(const Environment& env) const override;
-        virtual bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
-        virtual Usage GetGeometryUsage() const override;
-        virtual size_t GetGeometryHash() const override;
-        virtual DrawPrimitive GetDrawPrimitive() const override
-        { return DrawPrimitive::Lines; }
+        void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState&  state) const override;
+        ShaderSource GetShader(const Environment& env, const Device& device) const override;
+        std::string GetShaderId(const Environment& env) const override;
+        std::string GetShaderName(const Environment& env) const override;
+        std::string GetGeometryId(const Environment& env) const override;
+        bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
+        Usage GetGeometryUsage() const override;
+        size_t GetGeometryHash() const override;
     protected:
         DebugDrawableBase(const Drawable* drawable, Feature feature)
           : mDrawable(drawable)
@@ -72,6 +70,15 @@ namespace gfx
         WireframeInstance(const std::shared_ptr<const Drawable>& drawable)
           : DebugDrawableInstance(drawable, Feature::Wireframe)
         {}
+        Type GetType() const override
+        {
+            return Type::DebugDrawable;
+        }
+        DrawPrimitive GetDrawPrimitive() const override
+        {
+            return DrawPrimitive::Lines;
+        }
+    private:
     };
 
     template<typename T>
@@ -98,6 +105,14 @@ namespace gfx
         {
             mDrawable = &mObject;
             mFeature  = Feature::Wireframe;
+        }
+        Type GetType() const override
+        {
+            return Type::DebugDrawable;
+        }
+        DrawPrimitive GetDrawPrimitive() const override
+        {
+            return DrawPrimitive::Lines;
         }
     private:
         T mObject;
