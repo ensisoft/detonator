@@ -48,9 +48,10 @@ namespace base
     {
     public:
         Color4f() = default;
+
         // construct a Color4f object from floating point
         // channel values in the range of [0.0f, 1.0f]
-        Color4f(float red, float green, float blue, float alpha) noexcept
+        Color4f(float red, float green, float blue, float alpha = 1.0f) noexcept
         {
             mRed   = math::clamp(0.0f, 1.0f, red);
             mGreen = math::clamp(0.0f, 1.0f, green);
@@ -60,7 +61,7 @@ namespace base
 
         // construct a new color object from integers
         // each integer gets clamped to [0, 255] range
-        Color4f(int red, int green, int blue, int alpha) noexcept
+        Color4f(int red, int green, int blue, int alpha = 255) noexcept
         {
             // note: we take integers (as opposed to some
             // type unsigned) so that the simple syntax of
@@ -73,10 +74,20 @@ namespace base
             mAlpha = math::clamp(0, 255, alpha) / 255.0f;
         }
 
+        explicit Color4f(int rgb, int alpha = 255)  noexcept
+           : Color4f(rgb, rgb , rgb, alpha)
+        {}
+
+        explicit Color4f(float rgb, float alpha = 1.0f) noexcept
+          : Color4f(rgb, rgb, rgb, alpha)
+        {}
+
+        // not explicit on purpose to allow for implicit
+        // conversion from Color enum.
         Color4f(Color c, float alpha = 1.0f) noexcept
-                : mRed(0.0f)
-                , mGreen(0.0f)
-                , mBlue(0.0f)
+          : mRed(0.0f)
+          , mGreen(0.0f)
+          , mBlue(0.0f)
         {
             mAlpha = math::clamp(0.0f, 1.0f, alpha);
             switch (c)
