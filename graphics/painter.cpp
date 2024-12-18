@@ -20,6 +20,7 @@
 #include "warnpop.h"
 
 #include <string>
+#include <unordered_set>
 
 #include "base/format.h"
 #include "graphics/drawcmd.h"
@@ -72,6 +73,8 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
     Device::State device_state;
     device_state.viewport = MapToDevice(mViewport);
     device_state.scissor  = MapToDevice(mScissor);
+
+    std::unordered_set<std::string> used_programs;
 
     for (const auto& draw : list)
     {
@@ -133,6 +136,13 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         device_state.stencil_ref   = draw.state.stencil_ref;
         device_state.bWriteColor   = draw.state.write_color;
         device_state.depth_test    = draw.state.depth_test;
+
+        // apply shader program state dynamically once on the GPU program object
+        // if the GPU program object changes.
+        if (!base::Contains(used_programs, gpu_program->GetId()))
+        {
+            program.ApplyDynamicState(*mDevice, gpu_program_state);
+        }
 
         program.ApplyDynamicState(*mDevice, gpu_program_state, device_state, draw.user);
 
