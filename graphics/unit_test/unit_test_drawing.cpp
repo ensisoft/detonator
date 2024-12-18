@@ -163,6 +163,10 @@ class TestProgram : public gfx::Program
 public:
     bool IsValid() const override
     { return true; }
+    std::string GetName() const override
+    { return {}; }
+    std::string GetId() const override
+    { return {}; }
 private:
 
 };

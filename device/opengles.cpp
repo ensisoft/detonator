@@ -727,6 +727,7 @@ public:
         shaders.push_back(args.vertex_shader);
         shaders.push_back(args.fragment_shader);
 
+        program->SetId(id);
         program->SetName(args.name);
         program->Build(shaders);
 
@@ -2421,11 +2422,27 @@ private:
 
 
         bool IsValid() const override
-        { return mProgram != 0; }
+        {
+            return mProgram != 0;
+        }
+
+        std::string GetName() const override
+        {
+            return mName;
+        }
+
+        std::string GetId() const override
+        {
+            return mGpuId;
+        }
 
         void SetName(const std::string& name)
         {
             mName = name;
+        }
+        void SetId(const std::string& id)
+        {
+            mGpuId = id;
         }
 
 
@@ -2465,6 +2482,7 @@ private:
         GLuint mProgram = 0;
         GLuint mVersion = 0;
         std::string mName;
+        std::string mGpuId;
         mutable std::unordered_map<std::string, CachedUniform> mUniformCache;
         mutable std::size_t mFrameNumber = 0;
     };
