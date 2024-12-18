@@ -286,6 +286,11 @@ namespace gfx
         // successfully build and can be used for drawing.
         virtual bool IsValid() const = 0;
 
+        // Get the human readable (debug) program name.
+        virtual std::string GetName() const = 0;
+        // Get the program GPU resource ID that was used when program
+        // was first created.
+        virtual std::string GetId() const = 0;
 
         // this API exists here to facilitate migration towards design where
         // the program state (i.e. uniform and texture sampler state) is separate
