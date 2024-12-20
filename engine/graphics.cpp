@@ -535,8 +535,9 @@ void main() {
 
     // transfer the main image to the default frame buffer as-is
     {
-        program->SetTextureCount(1);
-        program->SetTexture("kTexture", 0, *mMainImage);
+        gfx::ProgramState program_state;
+        program_state.SetTextureCount(1);
+        program_state.SetTexture("kTexture", 0, *mMainImage);
 
         gfx::Device::State state;
         state.depth_test   = gfx::Device::State::DepthTest::Disabled;
@@ -546,7 +547,7 @@ void main() {
         state.bWriteColor  = true;
         state.premulalpha  = false;
         state.viewport     = gfx::IRect(0, 0, surface_width, surface_height);
-        mDevice.Draw(*program, *quad, state, nullptr /*framebuffer*/);
+        mDevice.Draw(*program, program_state, *quad, state, nullptr /*framebuffer*/);
     }
 
     // blend in the bloom image if any
@@ -554,8 +555,9 @@ void main() {
     {
         gfx::algo::ApplyBlur(*mRendererName + "BloomImage", mBloomImage, &mDevice, 8);
 
-        program->SetTextureCount(1);
-        program->SetTexture("kTexture", 0, *mBloomImage);
+        gfx::ProgramState program_state;
+        program_state.SetTextureCount(1);
+        program_state.SetTexture("kTexture", 0, *mBloomImage);
 
         gfx::Device::State state;
         state.depth_test   = gfx::Device::State::DepthTest::Disabled;
@@ -565,7 +567,7 @@ void main() {
         state.bWriteColor  = true;
         state.premulalpha  = false;
         state.viewport     = gfx::IRect(0, 0, surface_width, surface_height);
-        mDevice.Draw(*program, *quad, state, nullptr /*framebuffer*/);
+        mDevice.Draw(*program, program_state, *quad, state, nullptr /*framebuffer*/);
     }
 }
 
