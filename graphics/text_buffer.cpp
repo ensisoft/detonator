@@ -779,8 +779,9 @@ void main() {
     args.buffer.AddDrawCmd(Geometry::DrawType::Triangles);
     auto geometry = device.CreateGeometry("BitmapFontTextGeometry", std::move(args));
 
-    program->SetTexture("kGlyphMap", 0, *font_texture);
-    program->SetTextureCount(1);
+    ProgramState program_state;
+    program_state.SetTexture("kGlyphMap", 0, *font_texture);
+    program_state.SetTextureCount(1);
 
     fbo->SetColorTarget(result_texture);
 
@@ -795,7 +796,7 @@ void main() {
     state.scissor     = IRect(); // disabled
     state.viewport    = IRect(0, 0, buffer_width, buffer_height);
     state.stencil_func = Device::State::StencilFunc::Disabled;
-    device.Draw(*program, *geometry, state, fbo);
+    device.Draw(*program, program_state, *geometry, state, fbo);
     return result_texture;
 }
 
