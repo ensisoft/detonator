@@ -335,7 +335,7 @@ void main() {
             dev->BeginFrame();
             // clear the FBO to render and then render the green quad into it.
             dev->ClearColor(gfx::Color::Red, fbo);
-            dev->Draw(*p0, *geom, state, fbo);
+            dev->Draw(*p0, gfx::ProgramState(),  *geom, state, fbo);
 
             // render using the second program and sample from the FBO texture.
             gfx::Texture* color = nullptr;
@@ -343,10 +343,11 @@ void main() {
             color->SetFilter(gfx::Texture::MinFilter::Linear);
             color->SetFilter(gfx::Texture::MagFilter::Linear);
 
-            p1->SetTexture("kTexture", 0, *color);
+            gfx::ProgramState program_state;
+            program_state.SetTexture("kTexture", 0, *color);
 
             dev->ClearColor(gfx::Color::Blue, nullptr);
-            dev->Draw(*p1, *geom, state, nullptr);
+            dev->Draw(*p1, program_state, *geom, state, nullptr);
 
             dev->EndFrame();
 
@@ -380,7 +381,7 @@ void main() {
             dev->BeginFrame();
             // clear the FBO to render and then render the green quad into it.
             dev->ClearColor(gfx::Color::Red, fbo);
-            dev->Draw(*p0, *geom, state, fbo);
+            dev->Draw(*p0, gfx::ProgramState(), *geom, state, fbo);
 
             // render using the second program and sample from the FBO texture.
             gfx::Texture* color = nullptr;
@@ -388,10 +389,11 @@ void main() {
             color->SetFilter(gfx::Texture::MinFilter::Linear);
             color->SetFilter(gfx::Texture::MagFilter::Linear);
 
-            p1->SetTexture("kTexture", 0, *color);
+            gfx::ProgramState program_state;
+            program_state.SetTexture("kTexture", 0, *color);
 
             dev->ClearColor(gfx::Color::Blue, nullptr);
-            dev->Draw(*p1, *geom, state, nullptr);
+            dev->Draw(*p1, program_state, *geom, state, nullptr);
 
             dev->EndFrame();
 
@@ -451,7 +453,7 @@ void main() {
 
         dev->BeginFrame();
           dev->ClearColor(gfx::Color::Red);
-          dev->Draw(*prog, *geom, state);
+          dev->Draw(*prog, gfx::ProgramState(), *geom, state);
         dev->EndFrame();
 
         // this has alpha in it.
@@ -481,7 +483,7 @@ void main() {
 
         dev->BeginFrame();
             dev->ClearColor(gfx::Color::Red);
-            dev->Draw(*prog, *geom, state);
+            dev->Draw(*prog, gfx::ProgramState(), *geom, state);
         dev->EndFrame();
 
         // this has alpha in it.
@@ -557,7 +559,8 @@ void main() {
     auto* texture = dev->MakeTexture("tex");
     texture->Upload(data.GetDataPtr(), 4, 4, gfx::Texture::Format::RGBA);
 
-    prog->SetTexture("kTexture", 0, *texture);
+    gfx::ProgramState program_state;
+    program_state.SetTexture("kTexture", 0, *texture);
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
@@ -565,7 +568,7 @@ void main() {
     state.viewport = gfx::IRect(0, 0, 4, 4);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
-    dev->Draw(*prog, *geom, state);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
 
     const auto& bmp = dev->ReadColorBuffer(4, 4);
@@ -640,10 +643,11 @@ void main() {
     tex2->Upload(b.GetDataPtr(), 1, 1, gfx::Texture::Format::RGBA);
     tex3->Upload(a.GetDataPtr(), 1, 1, gfx::Texture::Format::RGBA);
 
-    prog->SetTexture("kTexture0", 0, *tex0);
-    prog->SetTexture("kTexture1", 1, *tex1);
-    prog->SetTexture("kTexture2", 2, *tex2);
-    prog->SetTexture("kTexture3", 3, *tex3);
+    gfx::ProgramState program_state;
+    program_state.SetTexture("kTexture0", 0, *tex0);
+    program_state.SetTexture("kTexture1", 1, *tex1);
+    program_state.SetTexture("kTexture2", 2, *tex2);
+    program_state.SetTexture("kTexture3", 3, *tex3);
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
@@ -651,7 +655,7 @@ void main() {
     state.viewport = gfx::IRect(0, 0, 4, 4);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
-    dev->Draw(*prog, *geom, state);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
 
     const auto& bmp = dev->ReadColorBuffer(4, 4);
@@ -712,11 +716,12 @@ void main() {
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
-    prog->SetUniform("kFloat", 0.2f); // 0.2f
-    prog->SetUniform("kVec2", 0.1f, 0.1f); // 0.2f total
-    prog->SetUniform("kVec3", 0.05f, 0.05f, 0.1f); // 0.2f total
-    prog->SetUniform("kVec4", 0.1f, 0.1f, 0.1f, 0.1f); // 0.4 total
-    dev->Draw(*prog, *geom, state);
+    gfx::ProgramState program_state;
+    program_state.SetUniform("kFloat", 0.2f); // 0.2f
+    program_state.SetUniform("kVec2", 0.1f, 0.1f); // 0.2f total
+    program_state.SetUniform("kVec3", 0.05f, 0.05f, 0.1f); // 0.2f total
+    program_state.SetUniform("kVec4", 0.1f, 0.1f, 0.1f, 0.1f); // 0.4 total
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
@@ -725,11 +730,12 @@ void main() {
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Black);
-    prog->SetUniform("kFloat", 1.0f);
-    prog->SetUniform("kVec2", 0.0f, 0.0f);
-    prog->SetUniform("kVec3", 0.0f, 0.0f, 0.0f);
-    prog->SetUniform("kVec4", 0.0f, 0.0f, 0.0f, 0.0f);
-    dev->Draw(*prog, *geom, state);
+    program_state.Clear();
+    program_state.SetUniform("kFloat", 1.0f);
+    program_state.SetUniform("kVec2", 0.0f, 0.0f);
+    program_state.SetUniform("kVec3", 0.0f, 0.0f, 0.0f);
+    program_state.SetUniform("kVec4", 0.0f, 0.0f, 0.0f, 0.0f);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
@@ -738,11 +744,12 @@ void main() {
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Black);
-    prog->SetUniform("kFloat", 0.0f);
-    prog->SetUniform("kVec2", 0.5f, 0.5f);
-    prog->SetUniform("kVec3", 0.0f, 0.0f, 0.0f);
-    prog->SetUniform("kVec4", 0.0f, 0.0f, 0.0f, 0.0f);
-    dev->Draw(*prog, *geom, state);
+    program_state.Clear();
+    program_state.SetUniform("kFloat", 0.0f);
+    program_state.SetUniform("kVec2", 0.5f, 0.5f);
+    program_state.SetUniform("kVec3", 0.0f, 0.0f, 0.0f);
+    program_state.SetUniform("kVec4", 0.0f, 0.0f, 0.0f, 0.0f);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
@@ -751,11 +758,12 @@ void main() {
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Black);
-    prog->SetUniform("kFloat", 0.0f);
-    prog->SetUniform("kVec2", 0.0f, 0.0f);
-    prog->SetUniform("kVec3", 0.5f, 0.3f, 0.2f);
-    prog->SetUniform("kVec4", 0.0f, 0.0f, 0.0f, 0.0f);
-    dev->Draw(*prog, *geom, state);
+    program_state.Clear();
+    program_state.SetUniform("kFloat", 0.0f);
+    program_state.SetUniform("kVec2", 0.0f, 0.0f);
+    program_state.SetUniform("kVec3", 0.5f, 0.3f, 0.2f);
+    program_state.SetUniform("kVec4", 0.0f, 0.0f, 0.0f, 0.0f);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
@@ -764,11 +772,12 @@ void main() {
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Black);
-    prog->SetUniform("kFloat", 0.0f);
-    prog->SetUniform("kVec2", 0.0f, 0.0f);
-    prog->SetUniform("kVec3", 0.0f, 0.0f, 0.0f);
-    prog->SetUniform("kVec4", 0.25f, 0.25f, 0.25f, 0.25f);
-    dev->Draw(*prog, *geom, state);
+    program_state.Clear();
+    program_state.SetUniform("kFloat", 0.0f);
+    program_state.SetUniform("kVec2", 0.0f, 0.0f);
+    program_state.SetUniform("kVec3", 0.0f, 0.0f, 0.0f);
+    program_state.SetUniform("kVec4", 0.25f, 0.25f, 0.25f, 0.25f);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
@@ -827,9 +836,10 @@ void main() {
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
-    prog->SetUniform("kValue", 1);
-    prog->SetUniform("kVec2", 0, 0);
-    dev->Draw(*prog, *geom, state);
+    gfx::ProgramState program_state;
+    program_state.SetUniform("kValue", 1);
+    program_state.SetUniform("kVec2", 0, 0);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
@@ -838,9 +848,10 @@ void main() {
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
-    prog->SetUniform("kValue", 0);
-    prog->SetUniform("kVec2", 1, 0);
-    dev->Draw(*prog, *geom, state);
+    program_state.Clear();
+    program_state.SetUniform("kValue", 0);
+    program_state.SetUniform("kVec2", 1, 0);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
@@ -849,9 +860,10 @@ void main() {
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
-    prog->SetUniform("kValue", 0);
-    prog->SetUniform("kVec2", 0, 1);
-    dev->Draw(*prog, *geom, state);
+    program_state.Clear();
+    program_state.SetUniform("kValue", 0);
+    program_state.SetUniform("kVec2", 0, 1);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
     {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
@@ -913,8 +925,9 @@ void main() {
         {0.25f, 0.25f},
         {0.25f, 0.25f}
     };
-    prog->SetUniform("kMatrix", matrix);
-    dev->Draw(*prog, *geom, state);
+    gfx::ProgramState program_state;
+    program_state.SetUniform("kMatrix", matrix);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
 
     // this has alpha in it.
@@ -976,8 +989,9 @@ void main() {
         {0.25f, 0.50f, 0.25f},
         {0.50f, 0.25f, 0.25f}
     };
-    prog->SetUniform("kMatrix", matrix);
-    dev->Draw(*prog, *geom, state);
+    gfx::ProgramState program_state;
+    program_state.SetUniform("kMatrix", matrix);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
 
     // this has alpha in it.
@@ -1041,8 +1055,9 @@ void main() {
         {0.25f, 0.25, 0.25f, 0.25f},
         {0.25f, 0.25, 0.25f, 0.25f}
     };
-    prog->SetUniform("kMatrix", matrix);
-    dev->Draw(*prog, *geom, state);
+    gfx::ProgramState program_state;
+    program_state.SetUniform("kMatrix", matrix);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
 
     // this has alpha in it.
@@ -1108,10 +1123,11 @@ void main() {
 
     // set the texture that isn't actually set  since the shader
     // doesn't use it.
-    prog->SetTexture("kTexture", 0, *texture);
-    prog->SetTextureCount(1);
+    gfx::ProgramState program_state;
+    program_state.SetTexture("kTexture", 0, *texture);
+    program_state.SetTextureCount(1);
 
-    dev->Draw(*prog, *geom, state);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
 }
 
@@ -1175,10 +1191,11 @@ void main() {
         {
             dev->BeginFrame();
 
-            prog->SetTexture("kTexture", 0, *texture);
-            prog->SetTextureCount(1);
+            gfx::ProgramState program_state;
+            program_state.SetTexture("kTexture", 0, *texture);
+            program_state.SetTextureCount(1);
 
-            dev->Draw(*prog, *geom, state);
+            dev->Draw(*prog, program_state, *geom, state);
             dev->EndFrame();
             dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
         }
@@ -1221,10 +1238,11 @@ void main() {
         {
             dev->BeginFrame();
 
-            prog->SetTexture("kTexture", 0, *texture);
-            prog->SetTextureCount(1);
+            gfx::ProgramState program_state;
+            program_state.SetTexture("kTexture", 0, *texture);
+            program_state.SetTextureCount(1);
 
-            dev->Draw(*prog, *geom, state);
+            dev->Draw(*prog, program_state, *geom, state);
             dev->EndFrame();
             dev->CleanGarbage(2, gfx::Device::GCFlags::Textures);
         }
@@ -1570,7 +1588,8 @@ void main() {
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
 
-    prog->SetUniform("kColor", gfx::Color::Green);
+    gfx::ProgramState program_state;
+    program_state.SetUniform("kColor", gfx::Color::Green);
 
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
@@ -1580,7 +1599,7 @@ void main() {
 
     // this doesn't actually draw anything (and it cannot draw) because
     // there's no vertex data that has been put in the geometry.
-    dev->Draw(*prog, *empty, state);
+    dev->Draw(*prog, program_state, *empty, state);
     dev->EndFrame();
 
     // now set the actual vertex geometry
@@ -1603,9 +1622,10 @@ void main() {
     dev->ClearColor(gfx::Color::Red);
 
     // set color uniform again.
-    prog->SetUniform("kColor", gfx::Color::Green);
+    program_state.Clear();
+    program_state.SetUniform("kColor", gfx::Color::Green);
 
-    dev->Draw(*prog, *geom, state);
+    dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
 
     // this has alpha in it.
@@ -1674,8 +1694,11 @@ void main() {
         auto* texture = dev->MakeTexture("texture_" + std::to_string(i));
         texture->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA);
         dev->BeginFrame();
-        program->SetTexture("kTexture", 0, *texture);
-        dev->Draw(*program, *geom, state);
+
+        gfx::ProgramState program_state;
+        program_state.SetTexture("kTexture", 0, *texture);
+
+        dev->Draw(*program, program_state, *geom, state);
         dev->EndFrame();
         const auto& ret = dev->ReadColorBuffer(10, 10);
         TEST_REQUIRE(gfx::PixelCompare(bmp, ret));
@@ -1695,8 +1718,11 @@ void main() {
 
         {
             dev->BeginFrame();
-            program->SetTexture("kTexture", 0, *texture);
-            dev->Draw(*program, *geom, state);
+
+            gfx::ProgramState program_state;
+            program_state.SetTexture("kTexture", 0, *texture);
+
+            dev->Draw(*program, program_state, *geom, state);
             dev->EndFrame();
             const auto& ret = dev->ReadColorBuffer(10, 10);
             TEST_REQUIRE(gfx::PixelCompare(pink, ret));
@@ -1708,8 +1734,11 @@ void main() {
 
         {
             dev->BeginFrame();
-            program->SetTexture("kTexture", 0, *texture);
-            dev->Draw(*program, *geom, state);
+
+            gfx::ProgramState program_state;
+            program_state.SetTexture("kTexture", 0, *texture);
+
+            dev->Draw(*program, program_state, *geom, state);
             dev->EndFrame();
             const auto& ret = dev->ReadColorBuffer(10, 10);
             TEST_REQUIRE(gfx::PixelCompare(pink, ret));
@@ -1776,8 +1805,11 @@ void main() {
             auto* texture = dev->MakeTexture("texture_" + std::to_string(i));
             texture->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA);
             dev->BeginFrame();
-            program->SetTexture("kTexture", 0, *texture);
-            dev->Draw(*program, *geom, state);
+
+            gfx::ProgramState program_state;
+            program_state.SetTexture("kTexture", 0, *texture);
+
+            dev->Draw(*program, program_state, *geom, state);
             dev->EndFrame();
             const auto& ret = dev->ReadColorBuffer(10, 10);
             TEST_REQUIRE(gfx::PixelCompare(bmp, ret));
@@ -1828,10 +1860,11 @@ void main() {
 
         dev->BeginFrame();
 
-        program->SetTexture("kTexture0", 0, *tex0);
-        program->SetTexture("kTexture1", 1, *tex1);
-        program->SetTexture("kTexture2", 2, *tex2);
-        program->SetTexture("kTexture3", 3, *tex3);
+        gfx::ProgramState program_state;
+        program_state.SetTexture("kTexture0", 0, *tex0);
+        program_state.SetTexture("kTexture1", 1, *tex1);
+        program_state.SetTexture("kTexture2", 2, *tex2);
+        program_state.SetTexture("kTexture3", 3, *tex3);
 
         gfx::Device::State state;
         state.blending = gfx::Device::State::BlendOp::None;
@@ -1839,7 +1872,7 @@ void main() {
         state.viewport = gfx::IRect(0, 0, 10, 10);
         state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
-        dev->Draw(*program, *geom, state);
+        dev->Draw(*program, program_state, *geom, state);
         dev->EndFrame();
 
         const auto& ret = dev->ReadColorBuffer(10, 10);
@@ -2058,7 +2091,7 @@ void main() {
 
         dev->BeginFrame();
            dev->ClearColor(gfx::Color::DarkRed);
-           dev->Draw(*program, draw, state);
+           dev->Draw(*program, gfx::ProgramState(), draw, state);
         dev->EndFrame();
 
         const auto& bmp = dev->ReadColorBuffer(200, 200);
@@ -2090,7 +2123,7 @@ void main() {
 
         dev->BeginFrame();
         dev->ClearColor(gfx::Color::DarkRed);
-        dev->Draw(*program, draw, state);
+        dev->Draw(*program, gfx::ProgramState(), draw, state);
         dev->EndFrame();
 
         const auto& bmp = dev->ReadColorBuffer(200, 200);
@@ -2149,7 +2182,7 @@ void main() {
 
         dev->BeginFrame();
         dev->ClearColor(gfx::Color::Blue, fbo);
-        dev->Draw(*p0, *geom, state, fbo);
+        dev->Draw(*p0, gfx::ProgramState(), *geom, state, fbo);
 
         {
             gfx::Texture* color0 = nullptr;
@@ -2202,7 +2235,7 @@ void main() {
 
         dev->BeginFrame();
         dev->ClearColor(gfx::Color::Blue, fbo);
-        dev->Draw(*p0, *geom, state, fbo);
+        dev->Draw(*p0, gfx::ProgramState(), *geom, state, fbo);
 
         {
             fbo->Resolve(nullptr, gfx::Framebuffer::ColorAttachment::Attachment0);
@@ -2366,19 +2399,19 @@ void main() {
     state.viewport     = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
-    program->SetUniform("kColor", gfx::Color4f(gfx::Color::Red));
-    TEST_REQUIRE(program->GetPendingUniformCount() == 1);
+    gfx::ProgramState program_state;
+    program_state.SetUniform("kColor", gfx::Color4f(gfx::Color::Red));
+    TEST_REQUIRE(program_state.GetUniformCount() == 1);
 
-    dev->Draw(*program, *geom, state);
-    TEST_REQUIRE(program->GetPendingUniformCount() == 0);
+    dev->Draw(*program, program_state, *geom, state);
+    TEST_REQUIRE(program_state.GetUniformCount() == 1);
 
-    dev->Draw(*program, *geom, state);
-    TEST_REQUIRE(program->GetPendingUniformCount() == 0);
+    program_state.Clear();
+    program_state.SetUniform("kColor", gfx::Color4f(gfx::Color::Green));
+    TEST_REQUIRE(program_state.GetUniformCount() == 1);
 
-    program->SetUniform("kColor", gfx::Color4f(gfx::Color::Green));
-    TEST_REQUIRE(program->GetPendingUniformCount() == 1);
-    dev->Draw(*program, *geom, state);
-    TEST_REQUIRE(program->GetPendingUniformCount() == 0);
+    dev->Draw(*program, program_state, *geom, state);
+    TEST_REQUIRE(program_state.GetUniformCount() == 1);
 
 }
 
@@ -2493,9 +2526,10 @@ void main() {
 
     dev->BeginFrame();
 
-    program->SetTextureCount(1);
-    program->SetTexture("kTexture", 0, *red);
-    dev->Draw(*program, *quad, state, nullptr);
+    gfx::ProgramState program_state;
+    program_state.SetTextureCount(1);
+    program_state.SetTexture("kTexture", 0, *red);
+    dev->Draw(*program, program_state, *quad, state, nullptr);
     dev->EndFrame();
 
     const auto& result_red = dev->ReadColorBuffer(10, 10);
@@ -2503,9 +2537,10 @@ void main() {
 
     dev->BeginFrame();
 
-    program->SetTextureCount(1);
-    program->SetTexture("kTexture", 0, *green);
-    dev->Draw(*program, *quad, state, nullptr);
+    program_state.Clear();
+    program_state.SetTextureCount(1);
+    program_state.SetTexture("kTexture", 0, *green);
+    dev->Draw(*program, program_state, *quad, state, nullptr);
     dev->EndFrame();
 
     const auto& result_green = dev->ReadColorBuffer(10, 10, nullptr);
@@ -2600,7 +2635,7 @@ void main() {
 
     dev->BeginFrame();
        dev->ClearColor(gfx::Color::Red);
-       dev->Draw(*prog, *geom, state);
+       dev->Draw(*prog, gfx::ProgramState(), *geom, state);
     dev->EndFrame();
 
     // this has alpha in it.
