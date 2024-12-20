@@ -225,15 +225,6 @@ namespace gfx
         virtual void Draw(const Program& program, const ProgramState& program_state,
                           const GeometryDrawCommand& geometry, const State& state, Framebuffer* fbo = nullptr) const = 0;
 
-
-        void Draw(const Program& program, const GeometryDrawCommand& geometry, const State& state, Framebuffer* fbo  = nullptr) const
-        {
-            const auto& program_state = program.TransferState();
-            if (program_state)
-                Draw(program, *program_state, geometry, state, fbo);
-            else Draw(program, ProgramState(), geometry, state, fbo);
-        }
-
         enum GCFlags {
             Textures   = 0x1,
             Programs   = 0x2,
