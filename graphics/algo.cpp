@@ -117,10 +117,11 @@ void main() {
 
     auto quad = MakeFullscreenQuad(*device);
 
-    program->SetUniform("kColor", color);
-    program->SetUniform("kThreshold", threshold);
-    program->SetTextureCount(1);
-    program->SetTexture("kSourceTexture", 0, *src);
+    ProgramState program_state;
+    program_state.SetUniform("kColor", color);
+    program_state.SetUniform("kThreshold", threshold);
+    program_state.SetTextureCount(1);
+    program_state.SetTexture("kSourceTexture", 0, *src);
 
     gfx::Device::State state;
     state.bWriteColor  = true;
@@ -131,7 +132,7 @@ void main() {
     state.blending     = Device::State::BlendOp::None;
     state.viewport     = IRect(0, 0, dst->GetWidthI(), dst->GetHeightI());
 
-    device->Draw(*program, *quad, state, fbo);
+    device->Draw(*program, program_state, *quad, state, fbo);
 
     fbo->SetColorTarget(nullptr);
 }
@@ -302,11 +303,14 @@ void main() {
             dir_value = 1;
         else dir_value = int(i & 1);
         fbo->SetColorTarget(textures[0]);
-        program->SetUniform("kDirection", dir_value);
-        program->SetUniform("kTextureSize", (float)src_width, (float)src_height);
-        program->SetTextureCount(1);
-        program->SetTexture("kTexture", 0, *textures[1]);
-        device->Draw(*program, *quad, state, fbo);
+
+        ProgramState program_state;
+        program_state.SetUniform("kDirection", dir_value);
+        program_state.SetUniform("kTextureSize", (float)src_width, (float)src_height);
+        program_state.SetTextureCount(1);
+        program_state.SetTexture("kTexture", 0, *textures[1]);
+
+        device->Draw(*program, program_state, *quad, state, fbo);
 
         std::swap(textures[0], textures[1]);
     }
@@ -355,10 +359,12 @@ void main() {
 
     const float src_width  = src->GetWidthF();
     const float src_height = src->GetHeightF();
-    program->SetTextureCount(1);
-    program->SetTexture("kSrcTexture", 0, *src);
-    program->SetUniform("kTextureSize", src_width, src_height);
-    program->SetUniform("kEdgeColor", edge_color);
+
+    ProgramState program_state;
+    program_state.SetTextureCount(1);
+    program_state.SetTexture("kSrcTexture", 0, *src);
+    program_state.SetUniform("kTextureSize", src_width, src_height);
+    program_state.SetUniform("kEdgeColor", edge_color);
 
     auto quad = MakeFullscreenQuad(*device);
     const auto dst_width  = dst->GetWidthI();
@@ -372,7 +378,7 @@ void main() {
     state.culling      = gfx::Device::State::Culling::None;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.viewport     = gfx::IRect(0, 0, dst_width, dst_height);
-    device->Draw(*program, *quad, state, fbo);
+    device->Draw(*program, program_state, *quad, state, fbo);
 
     fbo->Resolve(nullptr);
     fbo->SetColorTarget(nullptr);
@@ -447,9 +453,10 @@ void main() {
     if (!program)
         program = MakeProgram(vertex_src, fragment_src, "CopyProgram", *device);
 
-    program->SetUniform("kTextureMatrix", matrix);
-    program->SetTexture("kTexture", 0, *src);
-    program->SetTextureCount(1);
+    ProgramState program_state;
+    program_state.SetUniform("kTextureMatrix", matrix);
+    program_state.SetTexture("kTexture", 0, *src);
+    program_state.SetTextureCount(1);
 
     auto quad = MakeFullscreenQuad(*device);
     const auto dst_width  = dst->GetWidthI();
@@ -463,7 +470,7 @@ void main() {
     state.culling      = gfx::Device::State::Culling::None;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.viewport     = gfx::IRect(0, 0, dst_width, dst_height);
-    device->Draw(*program, *quad, state, fbo);
+    device->Draw(*program, program_state, *quad, state, fbo);
 
     fbo->SetColorTarget(nullptr);
 }
