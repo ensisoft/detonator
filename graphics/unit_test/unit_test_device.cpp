@@ -2132,6 +2132,211 @@ void main() {
     }
 }
 
+void unit_test_uniform_buffer()
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto dev = CreateDevice();
+    auto geom = MakeQuad(*dev);
+    auto p0 = MakeTestProgram(*dev,
+R"(#version 300 es
+
+in vec2 aPosition;
+
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+}
+)",
+
+R"(#version 300 es
+precision highp float;
+
+layout (std140) uniform Testing {
+   vec4 color0;
+   vec4 color1;
+   vec4 color2;
+   int  selector;
+};
+
+layout(location = 0) out vec4 fragOutColor0;
+
+void main() {
+   if (selector == 0)
+      fragOutColor0 = color0;
+   else if (selector == 1)
+      fragOutColor0 = color1;
+   else if (selector == 2)
+      fragOutColor0 = color2;
+}
+)", "p0");
+
+    gfx::Device::State state;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.bWriteColor  = true;
+    state.viewport     = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::GeometryDrawCommand draw_command(*geom);
+    gfx::ProgramState program_state;
+
+#pragma pack(push, 1)
+    struct Testing {
+        gfx::Vec4 color0;
+        gfx::Vec4 color1;
+        gfx::Vec4 color2;
+        int selector;
+    };
+#pragma pack(pop)
+
+    gfx::UniformBlock block("Testing");
+    auto uniform_block_data = block.GetData<Testing>();
+
+    uniform_block_data.Resize(1);
+    uniform_block_data[0].color0 = gfx::ToVec(gfx::Color::Red);
+    uniform_block_data[0].color1 = gfx::ToVec(gfx::Color::Green);
+    uniform_block_data[0].color2 = gfx::ToVec(gfx::Color::Blue);
+    uniform_block_data[0].selector = 0;
+    program_state.Clear();
+    program_state.SetUniformBlock(block);
+
+    dev->BeginFrame();
+      dev->ClearColor(gfx::Color::Black);
+      dev->Draw(*p0, program_state, draw_command, state);
+    dev->EndFrame();
+
+    auto bmp = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::Red));
+
+    uniform_block_data[0].color0 = gfx::ToVec(gfx::Color::Red);
+    uniform_block_data[0].color1 = gfx::ToVec(gfx::Color::Green);
+    uniform_block_data[0].color2 = gfx::ToVec(gfx::Color::Blue);
+    uniform_block_data[0].selector = 1;
+    program_state.Clear();
+    program_state.SetUniformBlock(block);
+
+    dev->BeginFrame();
+      dev->ClearColor(gfx::Color::Black);
+      dev->Draw(*p0, program_state, draw_command, state);
+    dev->EndFrame();
+
+    bmp = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::Green));
+
+    uniform_block_data[0].color0 = gfx::ToVec(gfx::Color::Red);
+    uniform_block_data[0].color1 = gfx::ToVec(gfx::Color::Green);
+    uniform_block_data[0].color2 = gfx::ToVec(gfx::Color::Blue);
+    uniform_block_data[0].selector = 2;
+    program_state.Clear();
+    program_state.SetUniformBlock(block);
+
+    dev->BeginFrame();
+      dev->ClearColor(gfx::Color::Black);
+      dev->Draw(*p0, program_state, draw_command, state);
+    dev->EndFrame();
+
+    bmp = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::Blue));
+}
+
+void unit_test_uniform_buffer_array()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // ES3.0 does not offer proper support for dynamically sized uniform buffers
+    // ES3.1 would provide SSBOs (shader storage buffer object) but those are
+    // available in WebGL natively.
+
+    auto dev = CreateDevice();
+    auto geom = MakeQuad(*dev);
+    auto p0 = MakeTestProgram(*dev,
+R"(#version 300 es
+
+in vec2 aPosition;
+
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+}
+)",
+
+R"(#version 300 es
+precision highp float;
+
+#define MAX_LIGHTS 3
+
+struct Light {
+   vec4 light;
+};
+
+layout (std140) uniform Testing {
+   Light lights[MAX_LIGHTS];
+};
+
+uniform int kLightIndex;
+
+layout(location = 0) out vec4 fragOutColor0;
+
+void main() {
+   fragOutColor0 = lights[kLightIndex].light;
+}
+)", "p0");
+
+
+
+#pragma pack(push, 1)
+    struct Light {
+        gfx::Vec4 light;
+    };
+    struct Testing {
+        Light lights[3];
+    };
+#pragma pack(pop)
+
+    gfx::UniformBlock block("Testing", Testing{});
+    block.GetAs<Testing>().lights[0].light = gfx::ToVec(gfx::Color::Red);
+    block.GetAs<Testing>().lights[1].light = gfx::ToVec(gfx::Color::Green);
+    block.GetAs<Testing>().lights[2].light = gfx::ToVec(gfx::Color::Blue);
+
+    gfx::Device::State state;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.bWriteColor  = true;
+    state.viewport     = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::GeometryDrawCommand draw_command(*geom);
+
+    gfx::ProgramState program_state;
+    program_state.SetUniformBlock(block);
+    program_state.SetUniform("kLightIndex", 0);
+
+    dev->BeginFrame();
+      dev->ClearColor(gfx::Color::Black);
+      dev->Draw(*p0, program_state, draw_command, state);
+    dev->EndFrame();
+
+    auto bmp = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::Red));
+
+
+    program_state.SetUniform("kLightIndex", 1);
+    dev->BeginFrame();
+      dev->ClearColor(gfx::Color::Black);
+      dev->Draw(*p0, program_state, draw_command, state);
+    dev->EndFrame();
+
+    bmp = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::Green));
+
+    program_state.SetUniform("kLightIndex", 2);
+    dev->BeginFrame();
+      dev->ClearColor(gfx::Color::Black);
+      dev->Draw(*p0, program_state, draw_command, state);
+    dev->EndFrame();
+
+    bmp = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::Blue));
+
+}
+
 void unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format format,
                                                  gfx::Framebuffer::MSAA msaa)
 {
@@ -2690,6 +2895,8 @@ int test_main(int argc, char* argv[])
     if (TestContext::GL_ES_Version == 3)
     {
         unit_test_instanced_rendering();
+        unit_test_uniform_buffer();
+        unit_test_uniform_buffer_array();
 
         unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8, gfx::Framebuffer::MSAA::Disabled);
         unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8_Depth16, gfx::Framebuffer::MSAA::Disabled);

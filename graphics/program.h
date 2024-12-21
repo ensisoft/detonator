@@ -32,8 +32,10 @@
 #include <vector>
 #include <variant>
 #include <memory>
+#include <string>
 
 #include "graphics/color4f.h"
+#include "graphics/uniform.h"
 
 namespace gfx
 {
@@ -60,6 +62,28 @@ namespace gfx
                     glm::mat3,
                     glm::mat4> value;
         };
+
+        template<typename T>
+        inline void SetUniformBlock(std::string name, UniformBlockData<T>&& uniform_data)
+        {
+            UniformBlock block(std::move(name, std::move(uniform_data)));
+            mUniformBlocks.push_back(std::move(block));
+        }
+        template<typename T>
+        inline void SetUniformBlock(std::string name, const UniformBlockData<T>& uniform_data)
+        {
+            UniformBlock block(std::move(name, std::move(uniform_data)));
+            mUniformBlocks.push_back(block);
+        }
+
+        inline void SetUniformBlock(UniformBlock&& block)
+        {
+            mUniformBlocks.push_back(std::move(block));
+        }
+        inline void SetUniformBlock(const UniformBlock& block)
+        {
+            mUniformBlocks.push_back(block);
+        }
 
         // Set scalar uniform.
         inline void SetUniform(const char* name, int x)
@@ -208,6 +232,16 @@ namespace gfx
             return mSamplers.size();
         }
 
+        inline size_t GetUniformBlockCount() const noexcept
+        {
+            return mUniformBlocks.size();
+        }
+
+        inline const UniformBlock& GetUniformBlock(size_t index) const noexcept
+        {
+            return mUniformBlocks[index];
+        }
+
         inline const Sampler& GetSamplerSetting(size_t index) const noexcept
         {
             return mSamplers[index];
@@ -244,6 +278,7 @@ namespace gfx
         {
             mUniforms.clear();
             mSamplers.clear();
+            mUniformBlocks.clear();
         }
 
         const Sampler* FindTextureBinding(const char* name) const
@@ -260,6 +295,7 @@ namespace gfx
     private:
         std::vector<Sampler> mSamplers;
         std::vector<Uniform> mUniforms;
+        std::vector<UniformBlock> mUniformBlocks;
     };
 
 
