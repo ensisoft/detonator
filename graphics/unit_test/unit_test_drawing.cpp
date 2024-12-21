@@ -1354,9 +1354,11 @@ void unit_test_polygon_inline_data()
         TEST_REQUIRE(geom.GetDrawCmd(0) == cmd);
         TEST_REQUIRE(geom.GetVertexCount() == 3);
         TEST_REQUIRE(geom.GetVertexBytes() == sizeof(verts));
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(0) == verts[0]);
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(1) == verts[1]);
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(2) == verts[2]);
+
+        const gfx::VertexStream stream(geom.GetLayout(), geom.GetVertexBuffer());
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
     }
 
     // change the content (simulate editing)
@@ -1380,12 +1382,14 @@ void unit_test_polygon_inline_data()
         TEST_REQUIRE(geom.GetDrawCmd(1) == cmd);
         TEST_REQUIRE(geom.GetVertexBytes() == sizeof(verts) * 2);
         TEST_REQUIRE(geom.GetVertexCount() == 6);
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(0) == verts[0]);
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(1) == verts[1]);
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(2) == verts[2]);
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(3) == verts[0]);
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(4) == verts[1]);
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(5) == verts[2]);
+
+        const gfx::VertexStream stream(geom.GetLayout(), geom.GetVertexBuffer());
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(3) == verts[0]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(4) == verts[1]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(5) == verts[2]);
     }
 
 }
@@ -1445,9 +1449,11 @@ void unit_test_polygon_mesh()
         TEST_REQUIRE(geom.GetDrawCmd(0) == cmds[0]);
         TEST_REQUIRE(geom.GetVertexBytes() == sizeof(verts));
         TEST_REQUIRE(geom.GetVertexCount() == 3);
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(0) == verts[0]);
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(1) == verts[1]);
-        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(2) == verts[2]);
+
+        const gfx::VertexStream stream(geom.GetLayout(), geom.GetVertexBuffer());
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
     }
 
 }
@@ -1489,9 +1495,13 @@ void unit_test_local_particles()
 
         TEST_REQUIRE(eng.Construct(env, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+
+        const gfx::VertexStream stream(args.buffer.GetLayout(),
+                                       args.buffer.GetVertexBuffer());
+
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
+            const auto& v = *stream.GetVertex<ParticleVertex>(i);
             TEST_REQUIRE(v.aPosition.x >= 0.25f);
             TEST_REQUIRE(v.aPosition.y >= 0.25f);
             TEST_REQUIRE(v.aPosition.x <= 0.25f + 0.5f);
@@ -1523,9 +1533,13 @@ void unit_test_local_particles()
 
         TEST_REQUIRE(eng.Construct(env, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+
+        const gfx::VertexStream stream(args.buffer.GetLayout(),
+                                       args.buffer.GetVertexBuffer());
+
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
+            const auto& v = *stream.GetVertex<ParticleVertex>(i);
             const bool inside_box = (v.aPosition.x > 0.25f && v.aPosition.x < 0.75f) &&
                                     (v.aPosition.y > 0.25f && v.aPosition.y < 0.75f);
             TEST_REQUIRE(!inside_box);
@@ -1556,9 +1570,13 @@ void unit_test_local_particles()
 
         TEST_REQUIRE(eng.Construct(env, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+
+        const gfx::VertexStream stream(args.buffer.GetLayout(),
+                                       args.buffer.GetVertexBuffer());
+
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
+            const auto& v = *stream.GetVertex<ParticleVertex>(i);
             const auto on_left_edge   = math::equals(v.aPosition.x, 0.25f)   && v.aPosition.y >= 0.25f && v.aPosition.y <= 0.75f;
             const auto on_right_edge  = math::equals(v.aPosition.x, 0.75f)  && v.aPosition.y >= 0.25f && v.aPosition.y <= 0.75f;
             const auto on_top_edge    = math::equals(v.aPosition.y, 0.25f)    && v.aPosition.x >= 0.25f && v.aPosition.x <= 0.75f;
@@ -1591,9 +1609,13 @@ void unit_test_local_particles()
 
         TEST_REQUIRE(eng.Construct(env, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+
+        const gfx::VertexStream stream(args.buffer.GetLayout(),
+                                       args.buffer.GetVertexBuffer());
+
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
+            const auto& v = *stream.GetVertex<ParticleVertex>(i);
             TEST_REQUIRE(math::equals(v.aPosition.x, 0.5f));
             TEST_REQUIRE(math::equals(v.aPosition.y, 0.5f));
         }
@@ -1631,9 +1653,13 @@ void unit_test_local_particles()
 
             TEST_REQUIRE(eng.Construct(env, args));
             TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+
+            const gfx::VertexStream stream(args.buffer.GetLayout(),
+                                           args.buffer.GetVertexBuffer());
+
             for (size_t i=0; i<p.num_particles; ++i)
             {
-                const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
+                const auto& v = *stream.GetVertex<ParticleVertex>(i);
                 const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
                 if (placement == K::Placement::Inside)
                     TEST_REQUIRE(math::equals(r, 0.25f) || r < 0.25f);
@@ -1675,9 +1701,13 @@ void unit_test_local_particles()
 
         TEST_REQUIRE(eng.Construct(env, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+
+        const gfx::VertexStream stream(args.buffer.GetLayout(),
+                                       args.buffer.GetVertexBuffer());
+
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
+            const auto& v = *stream.GetVertex<ParticleVertex>(i);
             const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
             TEST_REQUIRE( r > 0.25f);
         }
@@ -1711,9 +1741,13 @@ void unit_test_local_particles()
 
         TEST_REQUIRE(eng.Construct(env, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
+
+        const gfx::VertexStream stream(args.buffer.GetLayout(),
+                                       args.buffer.GetVertexBuffer());
+
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
+            const auto& v = *stream.GetVertex<ParticleVertex>(i);
             const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
             TEST_REQUIRE( r < 0.25f);
         }
@@ -1767,9 +1801,12 @@ void unit_test_global_particles()
         TEST_REQUIRE(eng.Construct(env, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
 
+        const gfx::VertexStream stream(args.buffer.GetLayout(),
+                                       args.buffer.GetVertexBuffer());
+
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
+            const auto& v = *stream.GetVertex<ParticleVertex>(i);
             TEST_REQUIRE(math::equals(100.0f, v.aPosition.x, 0.1f));
             TEST_REQUIRE(math::equals(3.0f, v.aPosition.y, 0.1f));
 

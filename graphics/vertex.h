@@ -399,7 +399,6 @@ namespace gfx
         inline auto&& GetVertexBuffer() && noexcept
         { return std::move(*mBuffer); }
 
-
         template<typename T>
         const T* GetVertex(size_t index) const noexcept
         {
@@ -410,7 +409,32 @@ namespace gfx
         }
 
         template<typename T>
-        std::vector<T> Copy() const
+        T* GetVertex(size_t index) noexcept
+        {
+            ASSERT(index < GetCount());
+            ASSERT(sizeof(T) == mLayout.vertex_struct_size);
+            const auto offset = index * mLayout.vertex_struct_size;
+            return reinterpret_cast<T*>(mBuffer->data() + offset);
+        }
+
+        template<typename T>
+        void SetVertex(const T& value, size_t index)
+        {
+            ASSERT(index < GetCount());
+            ASSERT(sizeof(T) == mLayout.vertex_struct_size);
+            const auto offset = index * mLayout.vertex_struct_size;
+            std::memcpy(&(*mBuffer)[offset], (const void*)&value, sizeof(T));
+        }
+
+        void Resize(size_t count)
+        {
+            ASSERT(mLayout.vertex_struct_size);
+            const auto bytes = count * mLayout.vertex_struct_size;
+            mBuffer->resize(bytes);
+        }
+
+        template<typename T>
+        std::vector<T> CopyBuffer() const
         {
             ASSERT(sizeof(T) == mLayout.vertex_struct_size);
             std::vector<T> ret;
@@ -418,6 +442,15 @@ namespace gfx
             if (!ret.empty())
                 std::memcpy(ret.data(), mBuffer->data(), mBuffer->size());
             return ret;
+        }
+        inline auto CopyBuffer() const
+        {
+            return std::vector<uint8_t>{*mBuffer};
+        }
+
+        inline auto TransferBuffer()
+        {
+            return std::move(*mBuffer);
         }
 
         bool Validate() const noexcept;
@@ -427,6 +460,65 @@ namespace gfx
         VertexLayout mLayout;
         std::vector<uint8_t> mStorage;
         std::vector<uint8_t>* mBuffer = nullptr;
+    };
+
+    template<typename T>
+    class TypedVertexBuffer
+    {
+    public:
+        TypedVertexBuffer(const VertexLayout& layout, std::vector<uint8_t>* buffer)
+          : mBuffer(layout, buffer)
+        {}
+        explicit TypedVertexBuffer(const VertexLayout& layout)
+          : mBuffer(layout)
+        {}
+        explicit TypedVertexBuffer(std::vector<uint8_t>* buffer)
+          : mBuffer(buffer)
+        {}
+        TypedVertexBuffer() = default;
+
+        T* GetVertex(size_t index) noexcept
+        { return mBuffer.GetVertex<T>(index); }
+
+        const T* GetVertex(size_t index) const noexcept
+        { return mBuffer.GetVertex<T>(index); }
+
+        inline void Append(const T& value)
+        { mBuffer.PushBack((const void*)&value); }
+
+        inline void SetVertexLayout(VertexLayout layout) noexcept
+        { mBuffer.SetVertexLayout(std::move(layout)); }
+
+        inline void Resize(size_t count)
+        { mBuffer.Resize(count); }
+
+        std::vector<T> CopyBuffer() const
+        {
+            ASSERT(sizeof(T) == mBuffer.GetLayout().vertex_struct_size);
+
+            std::vector<T> ret;
+            ret.resize(mBuffer.GetCount());
+            if (ret.empty())
+                return ret;
+
+            std::memcpy(ret.data(), mBuffer.GetBufferPtr(), mBuffer.GetBufferSize());
+            return ret;
+        }
+
+        T& operator[](size_t index) noexcept
+        { return *GetVertex(index); }
+
+        const T& operator[](size_t index) const noexcept
+        { return *GetVertex(index); }
+
+        auto CopyRawBuffer()
+        { return mBuffer.CopyBuffer(); }
+
+        auto TransferRawBuffer() noexcept
+        { return std::move(mBuffer.TransferBuffer()); }
+
+    private:
+        VertexBuffer mBuffer;
     };
 
     class IndexStream

@@ -172,7 +172,7 @@ bool PolygonBuilder::FromJson(const data::Reader& reader)
     ok &= command_buffer.FromJson(reader);
     ok &= reader.Read("static", &mStatic);
 
-    mVertices = vertex_buffer.Copy<Vertex2D>();
+    mVertices = vertex_buffer.CopyBuffer<Vertex2D>();
     return ok;
 }
 

@@ -122,28 +122,43 @@ namespace gfx
 
         // Update the geometry object's data buffer contents.
         template<typename Vertex>
-        void SetVertexBuffer(const Vertex* vertices, std::size_t count)
+        inline void SetVertexBuffer(const Vertex* vertices, std::size_t count)
         { UploadVertices(vertices, count * sizeof(Vertex)); }
 
-        template<typename Vertex> inline
-        void SetVertexBuffer(const std::vector<Vertex>& vertices)
+        template<typename Vertex>
+        inline void SetVertexBuffer(const std::vector<Vertex>& vertices)
         { UploadVertices(vertices.data(), vertices.size() * sizeof(Vertex)); }
+
+        template<typename Vertex>
+        inline void SetVertexBuffer(const TypedVertexBuffer<Vertex>& buffer)
+        { mVertexData = buffer.CopyRawBuffer(); }
+
+        template<typename Vertex>
+        inline void SetVertexBuffer(TypedVertexBuffer<Vertex>&& buffer)
+        { mVertexData = std::move(buffer.TransferRawBuffer()); }
 
         inline void SetVertexBuffer(std::vector<uint8_t>&& data) noexcept
         { mVertexData = std::move(data); }
 
-        inline void SetIndexData(std::vector<uint8_t>&& data) noexcept
+        inline void SetVertexBuffer(const VertexBuffer& buffer)
+        { mVertexData = buffer.CopyBuffer(); }
+
+        inline void SetVertexBuffer(VertexBuffer&& buffer)
+        { mVertexData = std::move(buffer.TransferBuffer()); }
+
+        inline void SetIndexBuffer(std::vector<uint8_t>&& data) noexcept
         { mIndexData = std::move(data); }
-        void SetIndexBuffer(const Index16* indices, size_t count)
+
+        inline void SetIndexBuffer(const Index16* indices, size_t count)
         { UploadIndices(indices, count * sizeof(Index16), IndexType::Index16); }
 
-        void SetIndexBuffer(const Index32* indices, size_t count)
+        inline void SetIndexBuffer(const Index32* indices, size_t count)
         { UploadIndices(indices, count * sizeof(Index32), IndexType::Index32); }
 
-        void SetIndexBuffer(const std::vector<Index16>& indices)
+        inline void SetIndexBuffer(const std::vector<Index16>& indices)
         { SetIndexBuffer(indices.data(), indices.size()); }
 
-        void SetIndexBuffer(const std::vector<Index32>& indices)
+        inline void SetIndexBuffer(const std::vector<Index32>& indices)
         { SetIndexBuffer(indices.data(), indices.size()); }
 
         // Add a draw command that starts at offset 0 and covers the whole
@@ -170,7 +185,7 @@ namespace gfx
 
         inline void SetDrawCommands(const std::vector<DrawCommand>& commands)
         { mDrawCmds = commands; }
-        inline void SetDrawCmds(std::vector<DrawCommand>&& commands)
+        inline void SetDrawCommands(std::vector<DrawCommand>&& commands) noexcept
         { mDrawCmds = std::move(commands); }
 
         inline const auto& GetDrawCommands() const & noexcept
@@ -188,19 +203,9 @@ namespace gfx
             return mVertexData.size() / mVertexLayout.vertex_struct_size;
         }
 
-        template<typename Vertex>
-        Vertex GetVertexAt(size_t index) const noexcept
-        {
-            ASSERT(sizeof(Vertex) == mVertexLayout.vertex_struct_size);
-            const auto count = GetVertexCount();
-            ASSERT(index < count);
-            const auto offset = index * mVertexLayout.vertex_struct_size;
-            Vertex vertex;
-            const auto* src = (const char*)mVertexData.data();
-            std::memcpy(&vertex, src + offset, sizeof(vertex));
-            return vertex;
+        inline const auto& GetVertexBuffer() const noexcept
+        { return mVertexData; }
 
-        }
     private:
         GeometryDataLayout mVertexLayout;
         std::vector<DrawCommand> mDrawCmds;
