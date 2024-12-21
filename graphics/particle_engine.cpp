@@ -121,16 +121,21 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
     // based sizes
     const auto pixel_scaler = std::min(env.pixel_ratio.x, env.pixel_ratio.y);
 
+#pragma pack(push, 1)
     struct ParticleVertex {
         Vec2 aPosition;
         Vec2 aDirection;
         Vec4 aData;
     };
+#pragma pack(pop)
     static const VertexLayout layout(sizeof(ParticleVertex), {
         {"aPosition",  0, 2, 0, offsetof(ParticleVertex, aPosition)},
         {"aDirection", 0, 2, 0, offsetof(ParticleVertex, aDirection)},
         {"aData",      0, 4, 0, offsetof(ParticleVertex, aData)}
     });
+    static_assert(std::is_trivially_copyable<ParticleVertex>::value &&
+                  std::is_trivially_copy_assignable<ParticleVertex>::value &&
+                  std::is_standard_layout<ParticleVertex>::value, "Particle vertex is not supported.");
 
     auto& geometry = create.buffer;
     ASSERT(geometry.GetNumDrawCmds() == 0);
@@ -139,33 +144,36 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
 
     if (mParams->primitive == DrawPrimitive::Point)
     {
-        std::vector<ParticleVertex> verts;
-        for (const auto& p: state.particles)
+        TypedVertexBuffer<ParticleVertex> vertex_buffer;
+        vertex_buffer.SetVertexLayout(layout);
+        vertex_buffer.Resize(state.particles.size());
+
+        for (size_t i=0; i<state.particles.size(); ++i)
         {
+            const auto& particle = state.particles[i];
             // When using local coordinate space the max x/y should
             // be the extents of the simulation in which case the
             // particle x,y become normalized on the [0.0f, 1.0f] range.
             // when using global coordinate space max x/y should be 1.0f
             // and particle coordinates are left in the global space
-            ParticleVertex v;
-            v.aPosition.x = p.position.x / mParams->max_xpos;
-            v.aPosition.y = p.position.y / mParams->max_ypos;
-            v.aDirection = ToVec(p.direction);
+            auto& vertex = vertex_buffer[i];
+            vertex.aPosition.x = particle.position.x / mParams->max_xpos;
+            vertex.aPosition.y = particle.position.y / mParams->max_ypos;
+            vertex.aDirection = ToVec(particle.direction);
             // copy the per particle data into the data vector for the fragment shader.
-            v.aData.x = p.pointsize >= 0.0f ? p.pointsize * pixel_scaler : 0.0f;
+            vertex.aData.x = particle.pointsize >= 0.0f ? particle.pointsize * pixel_scaler : 0.0f;
             // abusing texcoord here to provide per particle random value.
             // we can use this to simulate particle rotation for example
             // (if the material supports it)
-            v.aData.y = p.randomizer;
+            vertex.aData.y = particle.randomizer;
             // Use the particle data to pass the per particle alpha.
-            v.aData.z = p.alpha;
+            vertex.aData.z = particle.alpha;
             // use the particle data to pass the per particle time.
-            v.aData.w = p.time / (p.time_scale * mParams->max_lifetime);
-            verts.push_back(v);
+            vertex.aData.w = particle.time / (particle.time_scale * mParams->max_lifetime);
         }
 
-        geometry.SetVertexBuffer(std::move(verts));
         geometry.SetVertexLayout(layout);
+        geometry.SetVertexBuffer(std::move(vertex_buffer));
         geometry.AddDrawCmd(Geometry::DrawType::Points);
     }
     else if (mParams->primitive == DrawPrimitive::FullLine ||
@@ -204,19 +212,24 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
                                      ? glm::inverse(model_to_world) : glm::mat4(1.0f);
 
         const auto primitive = mParams->primitive;
+        const auto particle_count = state.particles.size();
 
-        std::vector<ParticleVertex> verts;
-        for (const auto& p: state.particles)
+        TypedVertexBuffer<ParticleVertex> vertex_buffer;
+        vertex_buffer.SetVertexLayout(layout);
+        vertex_buffer.Resize(particle_count * 2); // for the 2 line end points.
+
+        for (size_t i=0; i<state.particles.size(); ++i)
         {
+            const auto& particle = state.particles[i];
             const auto line_length = mParams->coordinate_space == CoordinateSpace::Local
-                                     ? glm::length(world_to_model * glm::vec4(p.pointsize, 0.0f, 0.0f, 0.0f)) : p.pointsize;
+                                     ? glm::length(world_to_model * glm::vec4(particle.pointsize, 0.0f, 0.0f, 0.0f)) : particle.pointsize;
 
-            const auto& pos = p.position;
+            const auto& pos = particle.position;
             // todo: the velocity is baked in the direction vector
             // so computing the end points for the line based on the
             // position and direction is expensive since need to
             // normalize...
-            const auto& dir = glm::normalize(p.direction);
+            const auto& dir = glm::normalize(particle.direction);
             glm::vec2 start;
             glm::vec2 end;
             if (primitive == DrawPrimitive::FullLine)
@@ -235,25 +248,27 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
                 end   = pos;
             }
 
-            ParticleVertex v;
-            v.aPosition = ToVec(start / glm::vec2(mParams->max_xpos, mParams->max_ypos));
-            v.aDirection = ToVec(p.direction);
+            const auto vertex_index = 2 * i;
+
+            ParticleVertex vertex;
+            vertex.aPosition = ToVec(start / glm::vec2(mParams->max_xpos, mParams->max_ypos));
+            vertex.aDirection = ToVec(particle.direction);
             // copy the per particle data into the data vector for the fragment shader.
-            v.aData.x = p.pointsize >= 0.0f ? p.pointsize * pixel_scaler : 0.0f;
+            vertex.aData.x = particle.pointsize >= 0.0f ? particle.pointsize * pixel_scaler : 0.0f;
             // abusing texcoord here to provide per particle random value.
             // we can use this to simulate particle rotation for example
             // (if the material supports it)
-            v.aData.y = p.randomizer;
+            vertex.aData.y = particle.randomizer;
             // Use the particle data to pass the per particle alpha.
-            v.aData.z = p.alpha;
+            vertex.aData.z = particle.alpha;
             // use the particle data to pass the per particle time.
-            v.aData.w = p.time / (p.time_scale * mParams->max_lifetime);
-            verts.push_back(v);
+            vertex.aData.w = particle.time / (particle.time_scale * mParams->max_lifetime);
+            vertex_buffer[vertex_index+0] = vertex;
 
-            v.aPosition = ToVec(end / glm::vec2(mParams->max_xpos, mParams->max_ypos));
-            verts.push_back(v);
+            vertex.aPosition = ToVec(end / glm::vec2(mParams->max_xpos, mParams->max_ypos));
+            vertex_buffer[vertex_index+1] = vertex;
         }
-        geometry.SetVertexBuffer(std::move(verts));
+        geometry.SetVertexBuffer(std::move(vertex_buffer));
         geometry.SetVertexLayout(layout);
         geometry.AddDrawCmd(Geometry::DrawType::Lines);
     }
