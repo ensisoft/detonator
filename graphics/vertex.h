@@ -32,6 +32,7 @@
 
 #include "base/assert.h"
 #include "data/fwd.h"
+#include "graphics/color4f.h"
 
 namespace gfx
 {
@@ -92,6 +93,12 @@ namespace gfx
     { return { vec.x, vec.y, vec.z }; }
     inline glm::vec4 ToVec(const Vec4& vec) noexcept
     { return { vec.x, vec.y, vec.z, vec.w }; }
+
+    inline Vec4 ToVec(const Color4f& color) noexcept
+    {
+        const auto linear = gfx::sRGB_Decode(color);
+        return {linear.Red(), linear.Green(), linear.Blue(), linear.Alpha() };
+    }
 
     // About texture coordinates.
     // In OpenGL the Y axis for texture coordinates goes so that

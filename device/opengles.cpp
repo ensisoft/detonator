@@ -287,6 +287,8 @@ struct OpenGLFunctions
     PFNGLVERTEXATTRIBDIVISORPROC     glVertexAttribDivisor;
     PFNGLGETSTRINGPROC               glGetString;
     PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation;
+    PFNGLGETUNIFORMBLOCKINDEXPROC    glGetUniformBlockIndex;
+    PFNGLUNIFORMBLOCKBINDINGPROC     glUniformBlockBinding;
     PFNGLUNIFORM1IPROC               glUniform1i;
     PFNGLUNIFORM2IPROC               glUniform2i;
     PFNGLUNIFORM1FPROC               glUniform1f;
@@ -322,6 +324,7 @@ struct OpenGLFunctions
     PFNGLGENBUFFERSPROC              glGenBuffers;
     PFNGLDELETEBUFFERSPROC           glDeleteBuffers;
     PFNGLBINDBUFFERPROC              glBindBuffer;
+    PFNGLBINDBUFFERRANGEPROC         glBindBufferRange;
     PFNGLBUFFERDATAPROC              glBufferData;
     PFNGLBUFFERSUBDATAPROC           glBufferSubData;
     PFNGLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbuffer;
@@ -392,6 +395,8 @@ public:
         RESOLVE(glVertexAttribDivisor);
         RESOLVE(glGetString);
         RESOLVE(glGetUniformLocation);
+        RESOLVE(glGetUniformBlockIndex);
+        RESOLVE(glUniformBlockBinding);
         RESOLVE(glUniform1i);
         RESOLVE(glUniform2i);
         RESOLVE(glUniform1f);
@@ -427,6 +432,7 @@ public:
         RESOLVE(glGenBuffers);
         RESOLVE(glDeleteBuffers);
         RESOLVE(glBindBuffer);
+        RESOLVE(glBindBufferRange);
         RESOLVE(glBufferData);
         RESOLVE(glBufferSubData);
         RESOLVE(glFramebufferRenderbuffer);
@@ -590,6 +596,10 @@ public:
         {
             GL_CALL(glDeleteBuffers(1, &buffer.name));
         }
+        for (auto& buffer : mBuffers[2])
+        {
+            GL_CALL(glDeleteBuffers(1, &buffer.name));
+        }
     }
 
     void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
@@ -721,7 +731,7 @@ public:
 
     gfx::ProgramPtr CreateProgram(const std::string& id, const gfx::Program::CreateArgs& args) override
     {
-        auto program = std::make_shared<ProgImpl>(mGL);
+        auto program = std::make_shared<ProgImpl>(mGL, this);
 
         std::vector<gfx::ShaderPtr> shaders;
         shaders.push_back(args.vertex_shader);
@@ -1202,9 +1212,9 @@ public:
         // an offset into the element/index buffer.
         const uint8_t* index_buffer_offset = (const uint8_t*)mygeom->GetIndexBufferByteOffset();
 
-        const auto* vertex_buffer = &mBuffers[0][mygeom->GetVertexBufferIndex()];
-        const auto* index_buffer = mygeom->UsesIndexBuffer() ? &mBuffers[1][mygeom->GetIndexBufferIndex()] : nullptr;
-        const auto* instance_buffer = myinst ? &mBuffers[0][myinst->GetVertexBufferIndex()] : nullptr;
+        const auto* vertex_buffer = &mBuffers[BufferIndex(BufferType::VertexBuffer)][mygeom->GetVertexBufferIndex()];
+        const auto* index_buffer = mygeom->UsesIndexBuffer() ? &mBuffers[BufferIndex(BufferType::IndexBuffer)][mygeom->GetIndexBufferIndex()] : nullptr;
+        const auto* instance_buffer = myinst ? &mBuffers[BufferIndex(BufferType::VertexBuffer)][myinst->GetVertexBufferIndex()] : nullptr;
 
         TRACE_ENTER(BindBuffers);
 
@@ -1431,7 +1441,7 @@ public:
         // vertex buffers
         for (auto& buff : mBuffers[0])
         {
-            if (buff.usage == gfx::Geometry::Usage::Stream)
+            if (buff.usage == gfx::BufferUsage::Stream)
             {
                 GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buff.name));
                 GL_CALL(glBufferData(GL_ARRAY_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
@@ -1441,10 +1451,20 @@ public:
         // index buffers
         for (auto& buff : mBuffers[1])
         {
-            if (buff.usage == gfx::Geometry::Usage::Stream)
+            if (buff.usage == gfx::BufferUsage::Stream)
             {
                 GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buff.name));
                 GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
+                buff.offset = 0;
+            }
+        }
+        // uniform buffers
+        for (auto& buff : mBuffers[2])
+        {
+            if (buff.usage == gfx::BufferUsage::Stream)
+            {
+                GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, buff.name));
+                GL_CALL(glBufferData(GL_UNIFORM_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
                 buff.offset = 0;
             }
         }
@@ -1549,6 +1569,24 @@ public:
                 stats->streaming_ibo_mem_use   += buffer.offset;
             }
         }
+        for (const auto& buffer : mBuffers[2])
+        {
+            if (buffer.usage == gfx::Geometry::Usage::Static)
+            {
+                stats->static_ubo_mem_alloc += buffer.capacity;
+                stats->static_ubo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == gfx::Geometry::Usage::Dynamic)
+            {
+                stats->dynamic_ubo_mem_alloc += buffer.capacity;
+                stats->dynamic_ubo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == gfx::Geometry::Usage::Stream)
+            {
+                stats->streaming_ubo_mem_alloc += buffer.capacity;
+                stats->streaming_ubo_mem_use   += buffer.offset;
+            }
+        }
     }
     void GetDeviceCaps(DeviceCaps* caps) const override
     {
@@ -1582,9 +1620,25 @@ public:
     { return shared_from_this(); }
 
     enum class BufferType {
-        VertexBuffer = GL_ARRAY_BUFFER,
-        IndexBuffer  = GL_ELEMENT_ARRAY_BUFFER
+        VertexBuffer  = 0,
+        IndexBuffer   = 1,
+        UniformBuffer = 2
     };
+    static GLenum GetBufferEnum(BufferType type)
+    {
+        if (type == BufferType::VertexBuffer)
+            return GL_ARRAY_BUFFER;
+        else if (type == BufferType::IndexBuffer)
+            return GL_ELEMENT_ARRAY_BUFFER;
+        else if (type == BufferType::UniformBuffer)
+            return GL_UNIFORM_BUFFER;
+        BUG("Bug on buffer type.");
+        return 0;
+    }
+    static size_t BufferIndex(BufferType type)
+    {
+        return static_cast<size_t>(type);
+    }
 
     std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, gfx::Geometry::Usage usage, BufferType type)
     {
@@ -1640,8 +1694,7 @@ public:
         }
         else BUG("Unsupported vertex buffer type.");
 
-        auto& buffers = type == BufferType::VertexBuffer ? mBuffers[0] : mBuffers[1];
-
+        auto& buffers = mBuffers[BufferIndex(type)];
         for (size_t i=0; i<buffers.size(); ++i)
         {
             auto& buffer = buffers[i];
@@ -1660,17 +1713,21 @@ public:
         buffer.offset   = bytes;
         buffer.capacity = capacity;
         buffer.refcount = 1;
+
         GL_CALL(glGenBuffers(1, &buffer.name));
-        GL_CALL(glBindBuffer(static_cast<GLenum>(type), buffer.name));
-        GL_CALL(glBufferData(static_cast<GLenum>(type), buffer.capacity, nullptr, flag));
+        GL_CALL(glBindBuffer(GetBufferEnum(type), buffer.name));
+        GL_CALL(glBufferData(GetBufferEnum(type), buffer.capacity, nullptr, flag));
+
         buffers.push_back(buffer);
-        DEBUG("Allocated new buffer object. [bo=%1, size=%2, type=%3, type=%4]", buffer.name, buffer.capacity, usage,
-              GLEnumToStr(static_cast<GLenum>(type)));
+
+        DEBUG("Allocated new buffer object. [bo=%1, size=%2, type=%3, type=%4]",
+              buffer.name, buffer.capacity, usage, type);
+
         return {buffers.size()-1, 0};
     }
     void FreeBuffer(size_t index, size_t offset, size_t bytes, gfx::Geometry::Usage usage, BufferType type)
     {
-        auto& buffers = type == BufferType::VertexBuffer ? mBuffers[0] : mBuffers[1];
+        auto& buffers = mBuffers[BufferIndex(type)];
 
         ASSERT(index < buffers.size());
         auto& buffer = buffers[index];
@@ -1684,25 +1741,26 @@ public:
         }
         if (usage == gfx::Geometry::Usage::Static) {
             DEBUG("Free buffer data. [bo=%1, bytes=%2, offset=%3, type=%4, refs=%5, type=%6]",
-                  buffer.name, bytes, offset, buffer.usage, buffer.refcount, GLEnumToStr(static_cast<GLenum>(type)));
+                  buffer.name, bytes, offset, buffer.usage, buffer.refcount, type);
         }
     }
 
     void UploadBuffer(size_t index, size_t offset, const void* data, size_t bytes, gfx::Geometry::Usage usage, BufferType type)
     {
-        auto& buffers = type == BufferType::VertexBuffer ? mBuffers[0] : mBuffers[1];
-
+        auto& buffers = mBuffers[BufferIndex(type)];
         ASSERT(index < buffers.size());
+
         auto& buffer = buffers[index];
         ASSERT(offset + bytes <= buffer.capacity);
-        GL_CALL(glBindBuffer(static_cast<GLenum>(type), buffer.name));
-        GL_CALL(glBufferSubData(static_cast<GLenum>(type), offset, bytes, data));
+
+        GL_CALL(glBindBuffer(GetBufferEnum(type), buffer.name));
+        GL_CALL(glBufferSubData(GetBufferEnum(type), offset, bytes, data));
 
         if (buffer.usage == gfx::Geometry::Usage::Static)
         {
             const int percent_full = 100 * (double)buffer.offset / (double)buffer.capacity;
             DEBUG("Uploaded buffer data. [bo=%1, bytes=%2, offset=%3, full=%4%, usage=%5, type=%6]",
-                  buffer.name, bytes, offset, percent_full, buffer.usage, GLEnumToStr(static_cast<GLenum>(type)));
+                  buffer.name, bytes, offset, percent_full, buffer.usage, type);
         }
     }
     bool SetupFBO(gfx::Framebuffer* fbo) const
@@ -2315,8 +2373,9 @@ private:
     class ProgImpl : public gfx::Program
     {
     public:
-        explicit ProgImpl(const OpenGLFunctions& funcs) noexcept
+        explicit ProgImpl(const OpenGLFunctions& funcs, OpenGLES2GraphicsDevice* device) noexcept
           : mGL(funcs)
+          , mDevice(device)
         {}
 
        ~ProgImpl() override
@@ -2325,6 +2384,16 @@ private:
             {
                 GL_CALL(glDeleteProgram(mProgram));
                 DEBUG("Deleted program object. [name='%1', handle='%2']", mName, mProgram);
+            }
+
+            for (auto pair : mUniformBlockCache)
+            {
+                const auto& block = pair.second;
+                if (block.block_buffer_size)
+                {
+                    mDevice->FreeBuffer(block.buffer_index, block.buffer_offset,
+                                        block.block_buffer_size, gfx::BufferUsage::Stream, BufferType::UniformBuffer);
+                }
             }
         }
         bool Build(const std::vector<gfx::ShaderPtr>& shaders)
@@ -2418,8 +2487,37 @@ private:
                     GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE /*transpose*/, glm::value_ptr(*ptr)));
                 else BUG("Unhandled shader program uniform type.");
             }
-        }
 
+            for (size_t i=0; i<state.GetUniformBlockCount(); ++i)
+            {
+                auto& block = state.GetUniformBlock(i);
+                auto& uniform = this->GetUniformBlock(block.GetName());
+                if (uniform.location == -1)
+                    continue;
+
+                const auto& block_buffer = block.GetBuffer();
+                const auto block_buffer_size = block_buffer.size();
+
+                if (uniform.block_buffer_size != block_buffer_size)
+                {
+                    std::tie(uniform.buffer_index, uniform.buffer_offset) =
+                            mDevice->AllocateBuffer(block_buffer_size, gfx::BufferUsage::Stream, BufferType::UniformBuffer);
+                }
+                mDevice->UploadBuffer(uniform.buffer_index,
+                                      uniform.buffer_offset,
+                                      block_buffer.data(), block_buffer_size,
+                                      gfx::BufferUsage::Stream, BufferType::UniformBuffer);
+                uniform.block_buffer_size = block_buffer_size;
+
+                const auto buffer_name = mDevice->mBuffers[BufferIndex(BufferType::UniformBuffer)][uniform.buffer_index].name;
+                // todo: binding index ??
+                const auto binding_index = GLuint(i);
+
+                GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, buffer_name));
+                GL_CALL(glUniformBlockBinding(mProgram, uniform.location, binding_index));
+                GL_CALL(glBindBufferRange(GL_UNIFORM_BUFFER, binding_index, buffer_name, uniform.buffer_offset, uniform.block_buffer_size));
+            }
+        }
 
         bool IsValid() const override
         {
@@ -2463,6 +2561,13 @@ private:
             uint32_t hash   = 0;
         };
 
+        struct CachedUniformBlock {
+            GLuint location = 0;
+            size_t block_buffer_size = 0;
+            size_t buffer_index  = 0;
+            size_t buffer_offset = 0;
+        };
+
         CachedUniform& GetUniform(const std::string& name) const
         {
             auto it = mUniformCache.find(name);
@@ -2476,14 +2581,29 @@ private:
             mUniformCache[name] = uniform;
             return mUniformCache[name];
         }
+        CachedUniformBlock& GetUniformBlock(const std::string& name) const
+        {
+            auto it = mUniformBlockCache.find(name);
+            if (it != std::end(mUniformBlockCache))
+                return it->second;
+
+            auto ret = mGL.glGetUniformBlockIndex(mProgram, name.c_str());
+            CachedUniformBlock block;
+            block.location = ret;
+            mUniformBlockCache[name] = block;
+            return mUniformBlockCache[name];
+        }
 
     private:
         const OpenGLFunctions& mGL;
+        OpenGLES2GraphicsDevice* mDevice = nullptr;
         GLuint mProgram = 0;
         GLuint mVersion = 0;
         std::string mName;
         std::string mGpuId;
+
         mutable std::unordered_map<std::string, CachedUniform> mUniformCache;
+        mutable std::unordered_map<std::string, CachedUniformBlock> mUniformBlockCache;
         mutable std::size_t mFrameNumber = 0;
     };
 
@@ -3174,8 +3294,9 @@ private:
         size_t offset   = 0;
         size_t refcount = 0;
     };
-    // vertex buffers at index 0 and index buffers at index 1
-    std::vector<BufferObject> mBuffers[2];
+    // vertex buffers at index 0 and index buffers at index 1, uniform buffers at index 2
+    std::vector<BufferObject> mBuffers[3];
+
     struct Extensions {
         bool EXT_sRGB = false;
         bool OES_packed_depth_stencil = false;

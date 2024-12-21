@@ -270,6 +270,13 @@ namespace gfx
             std::size_t static_ibo_mem_alloc    = 0;
             std::size_t streaming_ibo_mem_use   = 0;
             std::size_t streaming_ibo_mem_alloc = 0;
+            // uniform buffer objects
+            std::size_t dynamic_ubo_mem_use     = 0;
+            std::size_t dynamic_ubo_mem_alloc   = 0;
+            std::size_t static_ubo_mem_use      = 0;
+            std::size_t static_ubo_mem_alloc    = 0;
+            std::size_t streaming_ubo_mem_use   = 0;
+            std::size_t streaming_ubo_mem_alloc = 0;
         };
         virtual void GetResourceStats(ResourceStats* stats) const = 0;
 
