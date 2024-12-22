@@ -225,7 +225,7 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
                 return nullptr;
 
             Shader::CreateArgs args;
-            args.name   = material.GetShaderName(material_environment);
+            args.name   = program.GetShaderName(material, material_environment);
             args.source = material_shader_source.GetSource();
             material_shader = mDevice->CreateShader(material_gpu_id, args);
         }
@@ -245,7 +245,7 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
                 return nullptr;
 
             Shader::CreateArgs args;
-            args.name   = drawable.GetShaderName(drawable_environment);
+            args.name   = program.GetShaderName(drawable, drawable_environment);
             args.source = drawable_shader_source.GetSource();
             drawable_shader = mDevice->CreateShader(drawable_gpu_id, args);
         }
