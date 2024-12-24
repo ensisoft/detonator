@@ -716,7 +716,7 @@ public:
     {
         auto shader = std::make_shared<ShaderImpl>(mGL);
         shader->SetName(args.name);
-        shader->CompileSource(args.source);
+        shader->CompileSource(args.source, args.debug || mContext->IsDebug());
         mShaders[id] = shader;
         return shader;
     }
@@ -2426,16 +2426,28 @@ private:
             {
                 ERROR("Program link error. [name='%1', info='%2']", mName, build_info);
                 GL_CALL(glDeleteProgram(prog));
+                for (const auto& shader : shaders)
+                {
+                    static_cast<const ShaderImpl*>(shader.get())->DumpSource();
+                }
                 return false;
             }
             else if (valid_status == 0)
             {
                 ERROR("Program is not valid. [name='%1', info='%2']", mName, build_info);
                 GL_CALL(glDeleteProgram(prog));
+                for (const auto& shader : shaders)
+                {
+                    static_cast<const ShaderImpl*>(shader.get())->DumpSource();
+                }
                 return false;
             }
 
             DEBUG("Program was built successfully. [name='%1', info='%2']", mName, build_info);
+            for (auto& shader : shaders)
+            {
+                static_cast<const ShaderImpl*>(shader.get())->ClearSource();
+            }
             mProgram = prog;
             return true;
         }
@@ -2622,7 +2634,7 @@ private:
                 DEBUG("Deleted shader object. [name='%1', handle=[%2]", mName, mShader);
             }
         }
-        void CompileSource(const std::string& source)
+        void CompileSource(const std::string& source, bool debug)
         {
             GLenum type = GL_NONE;
             std::stringstream ss(source);
@@ -2666,23 +2678,40 @@ private:
             {
                 GL_CALL(glDeleteShader(shader));
                 ERROR("Shader compile error. [name='%1', info='%2']", mName, compile_info);
-
-                std::stringstream ss(source);
-                std::string line;
-                while (std::getline(ss, line))
-                {
-                    DEBUG("%1", line);
-                }
+                DumpSource(source);
                 mError = compile_info;
                 return;
             }
             else
             {
+                if (debug)
+                    DumpSource(source);
+
                 DEBUG("Shader was built successfully. [name='%1', info='%2']", mName, compile_info);
             }
             mShader = shader;
+            mSource = source;
         }
-
+        void DumpSource() const
+        {
+            DumpSource(mSource);
+        }
+        void DumpSource(const std::string& source) const
+        {
+            DEBUG("Shader source: [name='%1']", mName);
+            std::stringstream ss(source);
+            std::string line;
+            std::size_t counter = 1;
+            while (std::getline(ss, line))
+            {
+                DEBUG("L:%1 %2", counter, line);
+                ++counter;
+            }
+        }
+        void ClearSource() const
+        {
+            mSource.clear();
+        }
 
         bool IsValid() const override
         { return mShader != 0; }
@@ -2705,6 +2734,7 @@ private:
         GLuint mVersion = 0;
         std::string mName;
         std::string mError;
+        mutable std::string mSource;
     };
     struct Extensions;
 
