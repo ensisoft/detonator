@@ -29,6 +29,7 @@ namespace gfx
         struct CreateArgs {
             std::string name;
             std::string source;
+            bool debug = false;
         };
 
         virtual ~Shader() = default;
