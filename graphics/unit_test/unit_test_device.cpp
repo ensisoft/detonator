@@ -2410,7 +2410,6 @@ void main() {
             TEST_REQUIRE(ret->GetWidth() == 10);
             TEST_REQUIRE(ret->GetHeight() == 10);
             const auto* rgba_ret = dynamic_cast<const gfx::RgbaBitmap*>(ret.get());
-            gfx::WritePNG(*rgba_ret, "/tmp/paska.png");
             TEST_REQUIRE(rgba_ret->PixelCompare(gfx::Color::Green));
         }
 
