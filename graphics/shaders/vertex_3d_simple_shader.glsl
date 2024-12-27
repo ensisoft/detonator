@@ -7,6 +7,7 @@ R"CPP_RAW_STRING(//"
 // @attributes
 in vec3 aPosition;
 in vec2 aTexCoord;
+in vec3 aNormal;
 
 // these should be in the base_vertex_shader.glsl but alas
 // it seems that if these are defined *before* the non-instanced
@@ -32,9 +33,12 @@ out vec2 vTexCoord;
 void VertexShaderMain() {
     vTexCoord = aTexCoord;
 
-    mat4 instance_matrix = GetInstanceTransform();
+    mat4 model_inst_matrix = GetInstanceTransform();
+    mat4 model_view_matrix = kModelViewMatrix * model_inst_matrix;
+    mat3 normal_matrix = mat3(transpose(inverse(model_view_matrix)));
 
-    vec4 view_position = kModelViewMatrix * instance_matrix * vec4(aPosition.xyz, 1.0);
+    vec4 view_position = model_view_matrix * vec4(aPosition.xyz, 1.0);
+    vs_out.view_normal = normal_matrix * aNormal;
     vs_out.view_position = view_position;
     vs_out.clip_position = kProjectionMatrix * view_position;
 }

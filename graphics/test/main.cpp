@@ -59,6 +59,7 @@
 #include "graphics/texture_file_source.h"
 #include "graphics/text_buffer.h"
 #include "graphics/text_material.h"
+#include "graphics/basic_light_program.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/surface.h"
@@ -3175,6 +3176,321 @@ private:
     std::unique_ptr<gfx::ParticleEngineInstance> mInstance;
 };
 
+class OrthoDepthTest : public GraphicsTest
+{
+public:
+    void Render(gfx::Painter& painter) override
+    {
+        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 1024.0f, 0, 768.0f, -1000.0f, 1000.0f));
+
+        // draw two quads, confirm that that one with smaller Z value is
+        // is "further into the scene", i.e. further away from the camera.
+
+        gfx::Painter::DrawState state;
+        state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
+
+        gfx::detail::GenericShaderProgram program;
+
+        {
+            gfx::Transform transform;
+            transform.Scale(400.0f, 400.0f);
+            transform.Translate(100.0f, 100.0f, -999.0f); // close to the far plane
+            painter.Draw(gfx::Rectangle(), transform, gfx::CreateMaterialFromColor(gfx::Color::Gray), state, program);
+        }
+
+        {
+            gfx::Transform transform;
+            transform.Scale(100.0f, 100.0f);
+            transform.Translate(250.0f, 250.0f, 999.0f); // close to the near plane
+            painter.Draw(gfx::Rectangle(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkRed), state, program);
+        }
+
+        // we should get a red square on top of gray square
+    }
+    std::string GetName() const override
+    {
+        return "OrthoDepthTest";
+    }
+    bool IsFeatureTest() const override
+    {
+        return false;
+    }
+private:
+
+};
+
+class Light2DTest : public GraphicsTest
+{
+public:
+    using LightType = gfx::BasicLightProgram::LightType;
+
+    Light2DTest()
+    {
+        mLightType = LightType::Point;
+    }
+    Light2DTest(const glm::vec3& direction)
+    {
+        mLightType = LightType::Directional;
+        mLightDirection = direction;
+    }
+    Light2DTest(const glm::vec3& direction, base::FDegrees half_angle)
+    {
+        mLightType = LightType::Spot;
+        mLightDirection = direction;
+        mLightHalfAngle = half_angle;
+    }
+
+    void Render(gfx::Painter& painter) override
+    {
+        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 1024.0f, 0, 768.0f, -1000.0f, 1000.0f));
+
+        auto material = gfx::CreateMaterialFromColor(gfx::Color::White);
+        auto light_pos = glm::vec3{512.0f, 384.0f, 0.0f};
+
+        mLightDirection.x = std::sin(mTime);
+
+        gfx::BasicLightProgram program;
+        program.SetCameraCenter(512.0, 384.0f, 0.0f);
+
+        gfx::BasicLightProgram::Light light;
+        light.type = mLightType;
+        light.ambient_color  = gfx::Color4f(gfx::Color::DarkGray) * 0.245f;
+        light.diffuse_color  = gfx::Color4f(gfx::Color::Gold);
+        light.specular_color = gfx::Color4f(gfx::Color::White) * 0.3f;
+        light.direction = mLightDirection;
+        light.position = light_pos;
+        light.spot_half_angle = mLightHalfAngle;
+        light.quadratic_attenuation = 0.0001f;
+        program.AddLight(light);
+
+        gfx::Transform transform;
+        // watch out of the -1.0 in the scaling factor below.
+        // the reason is that we want to flip the surface normal
+        // so that it points to the positive Z axis, i.e. towards
+        // us, the viewer.
+        // see the vertex 2D shader for more information about this
+        // trick...
+        transform.Scale(500.0f, 500.0f, -1.0f);
+        transform.Translate(262.0f, 134.0f, -10.0f);
+
+        gfx::Painter::DrawState state;
+        painter.Draw(gfx::Rectangle (), transform, material,  state, program);
+    }
+
+    std::string GetName() const override
+    {
+        return base::FormatString("%1Light2DTest", mLightType);
+    }
+    void Update(float dt) override
+    {
+        mTime += dt;
+    }
+    void Start() override
+    {
+        mTime = 0.0f;
+    }
+private:
+    LightType mLightType;
+    glm::vec3 mLightDirection;
+    gfx::FDegrees mLightHalfAngle;
+    float mTime = 0.0f;
+};
+
+class Light3DTest : public GraphicsTest
+{
+public:
+    using LightType = gfx::BasicLightProgram::LightType;
+
+    Light3DTest()
+    {
+        mLightType = LightType::Point;
+    }
+    Light3DTest(const glm::vec3& direction)
+    {
+        mLightType = LightType::Directional;
+        mLightDirection = direction;
+    }
+    Light3DTest(const glm::vec3& direction, base::FDegrees half_angle)
+    {
+        mLightType = LightType::Spot;
+        mLightDirection = direction;
+        mLightHalfAngle = half_angle;
+    }
+
+    void Render(gfx::Painter& painter) override
+    {
+        constexpr auto const aspect = 1024.0 / 768.0f;
+
+        gfx::Painter p(painter);
+        p.ResetViewMatrix();
+        p.SetProjectionMatrix(gfx::MakePerspectiveProjection(gfx::FDegrees { 45.0f }, aspect, 1.0f, 100.0f));
+
+        const float t = std::sin(mTime * 0.4) * 0.5 + 0.5;
+        gfx::Painter::DrawState state;
+        state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
+        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.write_color  = true;
+
+        const auto index = mShapeIndex % 4;
+        std::unique_ptr<gfx::Drawable> drawable;
+        if (index == 0)
+            drawable.reset(new gfx::Sphere);
+        else if (index == 1)
+            drawable.reset(new gfx::Cone);
+        else if (index == 2)
+            drawable.reset(new gfx::Cube);
+        else if (index == 3)
+            drawable.reset(new gfx::Cylinder);
+
+        auto& shape = *drawable;
+        auto material = gfx::CreateMaterialFromColor(gfx::Color::White);
+        auto light_pos = glm::vec3{0.0f, 2.0f, -12.0f};
+
+        light_pos.x = 6.0 * std::sin(mTime * 0.4);
+
+        {
+            gfx::BasicLightProgram program;
+
+            gfx::BasicLightProgram::Light light;
+            light.type = mLightType;
+            light.ambient_color  = gfx::Color4f(gfx::Color::Red) * 0.5;
+            light.diffuse_color  = gfx::Color4f(gfx::Color::Black);
+            light.specular_color = gfx::Color4f(gfx::Color::Black);
+            light.position  = light_pos;
+            light.direction = mLightDirection;
+            light.quadratic_attenuation = 0.005f;
+            light.spot_half_angle = mLightHalfAngle;
+            program.AddLight(light);
+
+            gfx::Transform transform;
+            transform.Resize(2.0f, 2.0f, 2.0f);
+            transform.RotateAroundY(std::sin(t));
+            transform.RotateAroundX(std::cos(t));
+            transform.MoveTo(-4.5f, 0.0f, -13.0f);
+            p.Draw(shape, transform, material, state, program);
+        }
+
+        {
+            gfx::BasicLightProgram program;
+
+            gfx::BasicLightProgram::Light light;
+            light.type = mLightType;
+            light.ambient_color  = gfx::Color4f(gfx::Color::Black);
+            light.diffuse_color  = gfx::Color4f(gfx::Color::Green);
+            light.specular_color = gfx::Color4f(gfx::Color::Black);
+            light.position  = light_pos;
+            light.direction = mLightDirection;
+            light.quadratic_attenuation = 0.005f;
+            light.spot_half_angle = mLightHalfAngle;
+            program.AddLight(light);
+
+            gfx::Transform transform;
+            transform.Resize(2.0f, 2.0f, 2.0f);
+            transform.RotateAroundY(std::sin(t));
+            transform.RotateAroundX(std::cos(t));
+            transform.MoveTo(-1.5f, 0.0f, -13.0f);
+            p.Draw(shape, transform, material, state, program);
+
+        }
+
+        {
+            gfx::BasicLightProgram program;
+
+            gfx::BasicLightProgram::Light light;
+            light.type = mLightType;
+            light.ambient_color  = gfx::Color4f(gfx::Color::Black);
+            light.diffuse_color  = gfx::Color4f(gfx::Color::Black);
+            light.specular_color = gfx::Color4f(gfx::Color::Blue);
+            light.position  = light_pos;
+            light.direction = mLightDirection;
+            light.quadratic_attenuation = 0.005f;
+            light.spot_half_angle = mLightHalfAngle;
+            program.AddLight(light);
+
+            gfx::Transform transform;
+            transform.Resize(2.0f, 2.0f, 2.0f);
+            transform.RotateAroundY(std::sin(t));
+            transform.RotateAroundX(std::cos(t));
+            transform.MoveTo(1.5f, 0.0f, -13.0f);
+            p.Draw(shape, transform, material, state, program);
+        }
+
+        // all components on
+        {
+            gfx::BasicLightProgram program;
+
+            gfx::BasicLightProgram::Light light;
+            light.type = mLightType;
+            light.ambient_color  = gfx::Color4f(gfx::Color::DarkGray) * 0.5f;
+            light.diffuse_color  = gfx::Color4f(gfx::Color::LightGray) * 0.8;
+            light.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
+            light.position  = light_pos;
+            light.direction = mLightDirection;
+            light.quadratic_attenuation = 0.005f;
+            light.spot_half_angle = mLightHalfAngle;
+            program.AddLight(light);
+
+
+            gfx::Transform transform;
+            transform.Resize(2.0f, 2.0f, 2.0f);
+            transform.RotateAroundY(std::sin(t));
+            transform.RotateAroundX(std::cos(t));
+            transform.MoveTo(4.5f, 0.0f, -13.0f);
+            p.Draw(shape, transform, material, state, program);
+
+            // ground plane
+            {
+                //state.winding = gfx::Painter::PolygonWindigOrder::ClockWise;
+
+                gfx::Transform transform;
+                // careful here, using 0.0 for the resize factor on the Z axis is easy mistake
+                // to make since logically this "plane" is razor thin (has no thickness)
+                // but the right scaling coefficient is of course 1.0. Using 0 will cause
+                // normal transformations to go all wrong.
+                transform.Resize(10.0f, 10.0f, 1.0f);
+                transform.RotateAroundX(gfx::FDegrees(-90.0f));
+                transform.Translate(0.0f, -2.5f, -10.0f);
+                transform.Push();
+                   transform.Translate(-0.5f, -0.5f);
+                   transform.RotateAroundX(gfx::FDegrees(180.0f));
+                p.Draw(gfx::Rectangle(), transform, material, state, program);
+            }
+        }
+
+
+        if (mLightType == LightType::Point || mLightType == LightType::Spot)
+        {
+            gfx::Transform transform;
+            transform.Resize(0.2f, 0.2f, 0.2f);
+            transform.MoveTo(light_pos);
+            p.Draw(gfx::Cube(), transform, material);
+        }
+    }
+
+    std::string GetName() const override
+    {
+        return base::FormatString("%1Light3DTest", mLightType);
+    }
+    void KeyDown(const wdk::WindowEventKeyDown& key) override
+    {
+        if (key.symbol == wdk::Keysym::Space)
+            ++mShapeIndex;
+    }
+    void Update(float dt) override
+    {
+        mTime += dt;
+    }
+    void Start() override
+    {
+        mTime = 0.0f;
+    }
+private:
+    LightType mLightType;
+    glm::vec3 mLightDirection;
+    gfx::FDegrees mLightHalfAngle;
+    unsigned mShapeIndex = 0;
+    float mTime = 0.0f;
+};
 
 int main(int argc, char* argv[])
 {
@@ -3357,6 +3673,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new Draw3DTest);
     tests.emplace_back(new Shape3DTest);
     tests.emplace_back(new DepthLayerTest);
+    tests.emplace_back(new OrthoDepthTest);
 
     // GL ES3 specific tests
     if (version == 3)
@@ -3366,6 +3683,14 @@ int main(int argc, char* argv[])
         tests.emplace_back(new Simple3DInstanceTest);
         tests.emplace_back(new PolygonInstanceTest);
         tests.emplace_back(new ParticleInstanceTest);
+        // under ES3 because we require uniform buffers
+        tests.emplace_back(new Light2DTest);
+        tests.emplace_back(new Light2DTest(glm::vec3{0.0f, -1.0f, -0.3f}));
+        tests.emplace_back(new Light2DTest(glm::vec3{0.0f, 1.0f, -0.3f}, gfx::FDegrees(25.0f)));
+
+        tests.emplace_back(new Light3DTest);
+        tests.emplace_back(new Light3DTest(glm::vec3{-1.0f, -1.0f, 0.0f}));
+        tests.emplace_back(new Light3DTest(glm::vec3{0.0f, -1.0f, 0.0f}, gfx::FDegrees(25.0f)));
     }
 
     bool stop_for_input = false;
