@@ -6,21 +6,23 @@ R"CPP_RAW_STRING(//"
 #version 300 es
 
 struct VS_OUT {
-    // vertex position in clip space (after projection transformation)
     vec4 clip_position;
-    // vertx position in eye coordinates (after camera/view transformation)
     vec4 view_position;
-    // view space normal vector
     vec3 view_normal;
-    // point size for GL_POINTS rasterization.
     float point_size;
 } vs_out;
+
+out vec3 vertexViewPosition;
+out vec3 vertexViewNormal;
 
 void main() {
     VertexShaderMain();
 
     gl_PointSize = vs_out.point_size;
     gl_Position  = vs_out.clip_position;
+
+    vertexViewPosition = vs_out.view_position.xyz;
+    vertexViewNormal = normalize(vs_out.view_normal);
 }
 
 )CPP_RAW_STRING"

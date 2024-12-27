@@ -256,6 +256,7 @@ add_executable(GameEngine
     ../engine/graphics.cpp
     ../device/opengles.cpp
     ../graphics/algo.cpp
+    ../graphics/basic_light_program.cpp
     ../graphics/geometry.cpp
     ../graphics/shaderprogram.cpp
     ../graphics/shadersource.cpp

@@ -15,6 +15,12 @@ layout (location=0) out vec4 fragOutColor;
 // this is what the material shader fills.
 struct FS_OUT {
     vec4 color;
+
+    vec4 ambient_color;
+    vec4 diffuse_color;
+    vec4 specular_color;
+    float specular_exponent;
+    bool use_light;
 } fs_out;
 
 void main() {
