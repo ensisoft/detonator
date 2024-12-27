@@ -4,6 +4,8 @@ R"CPP_RAW_STRING(//"
 
 #version 300 es
 
+// @attributes
+
 in vec2 aPosition;
 in vec2 aTexCoord;
 
@@ -21,8 +23,12 @@ in vec2 aTexCoord;
   in vec4 iaModelVectorW;
 #endif
 
+// @uniforms
+
 uniform mat4 kProjectionMatrix;
 uniform mat4 kModelViewMatrix;
+
+// @varyings
 
 out vec2 vTexCoord;
 out float vParticleRandomValue;

@@ -12,7 +12,6 @@ mat4 GetInstanceTransform() {
 #else
     return mat4(1.0);
 #endif
-
 }
 
 )CPP_RAW_STRING"

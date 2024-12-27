@@ -246,7 +246,7 @@ in vec3 vVec3;
 in vec4 vVec4;
 
 void main() {
-  gl_Position = vec4(1.0);
+  gl_FragColor = vec4(1.0);
 }
         )", gfx::ShaderSource::Type::Fragment);
 
@@ -297,7 +297,7 @@ void main() {
         TEST_REQUIRE(base::Contains(sauce, "in vec3 vVec3;"));
         TEST_REQUIRE(base::Contains(sauce, "in vec4 vVec4;"));
         TEST_REQUIRE(base::Contains(sauce, R"(void main() {
-  gl_Position = vec4(1.0);
+  gl_FragColor = vec4(1.0);
 }
 )"));
     }
@@ -425,6 +425,8 @@ void unit_test_conditional_data()
 
 #version 300 es
 
+// @attributes
+
 in vec4 kBleh;
 
 #ifdef FOOBAR
@@ -436,6 +438,7 @@ float SomeFunction() {
 }
 )");
     auto src = source.GetSource();
+    std::cout << src;
     TEST_REQUIRE(CleanStr(src) == CleanStr(R"(#version 300 es
 in vec4 kBleh;
 #ifdef FOOBAR

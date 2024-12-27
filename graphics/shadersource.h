@@ -32,6 +32,7 @@
 #include <string>
 #include <optional>
 #include <variant>
+#include <unordered_map>
 
 #include "base/bitflag.h"
 #include "base/utility.h"
@@ -68,7 +69,6 @@ namespace gfx
             // this is a comment
             Comment,
             StructDeclaration,
-            LayoutDeclaration,
             ShaderCode
         };
 
@@ -122,11 +122,9 @@ namespace gfx
         inline void SetVersion(Version version) noexcept
         { mVersion = version; }
         inline bool IsEmpty() const noexcept
-        { return mDataBlocks.empty(); }
-        inline void ClearSource() noexcept
-        { mCodeBlocks.clear(); }
-        inline void ClearData() noexcept
-        { mDataBlocks.clear(); }
+        { return mShaderBlocks.empty(); }
+        inline void Clear() noexcept
+        { mShaderBlocks.clear(); }
         inline void SetShaderSourceUri(std::string uri) noexcept
         { mShaderSourceUri = std::move(uri); }
         inline void SetShaderName(std::string name) noexcept
@@ -143,7 +141,6 @@ namespace gfx
         const ShaderBlock* FindShaderBlock(const std::string& key) const;
 
         void AddSource(std::string source);
-        void AddSingleLineComment(std::string comment);
         void AddPreprocessorDefinition(std::string name);
         void AddPreprocessorDefinition(std::string name, int value);
         void AddPreprocessorDefinition(std::string name, float value);
@@ -197,14 +194,10 @@ namespace gfx
         Type mType = Type::NotSet;
         Version mVersion = Version::NotSet;
         Precision mPrecision = Precision::NotSet;
-        // Data are the shader data declarations such as uniforms,
-        // constants, varyings and (vertex) attributes.
-        // These are the shader program's data interface
-        // the interface mechanism for data flow from vertex
-        // shader to the fragment shader.
-        std::vector<ShaderBlock> mDataBlocks;
 
-        std::vector<ShaderBlock> mCodeBlocks;
+        std::unordered_map<std::string,
+           std::vector<ShaderBlock>> mShaderBlocks;
+
         // for debugging help, we can embed the shader source
         // URI int he shader source as a comment so when it borks
         // in production the user can easily see which shader it is.
