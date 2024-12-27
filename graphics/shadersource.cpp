@@ -187,23 +187,31 @@ namespace gfx
 
 const ShaderSource::ShaderDataDeclaration* ShaderSource::FindDataDeclaration(const std::string& key) const
 {
-    for (const auto& block : mDataBlocks)
+    for (const auto& pair : mShaderBlocks)
     {
-        if (block.type != ShaderBlockType::ShaderDataDeclaration)
-            continue;
-        auto& data = block.data_decl.value();
-        if (data.name == key)
-            return &data;
+        const auto& blocks = pair.second;
+        for (const auto& block : blocks)
+        {
+            if (block.type != ShaderBlockType::ShaderDataDeclaration)
+                continue;
+            auto& data = block.data_decl.value();
+            if (data.name == key)
+                return &data;
+        }
     }
     return nullptr;
 }
 
 const ShaderSource::ShaderBlock* ShaderSource::FindShaderBlock(const std::string& key) const
 {
-    for (const auto& block : mDataBlocks)
+    for (const auto& pair : mShaderBlocks)
     {
-        if (base::Contains(block.data, key))
-            return &block;
+        const auto& blocks = pair.second;
+        for (const auto& block : blocks)
+        {
+            if (base::Contains(block.data, key))
+                return &block;
+        }
     }
     return nullptr;
 }
@@ -217,17 +225,8 @@ void ShaderSource::AddSource(std::string source)
         ShaderBlock block;
         block.type = ShaderBlockType::ShaderCode;
         block.data = line;
-        mCodeBlocks.push_back(std::move(block));
+        mShaderBlocks["code"].push_back(std::move(block));
     }
-}
-
-
-void ShaderSource::AddSingleLineComment(std::string comment)
-{
-    ShaderBlock block;
-    block.type = ShaderBlockType::Comment;
-    block.data = base::FormatString("// %1", comment);
-    mDataBlocks.push_back(std::move(block));
 }
 
 void ShaderSource::AddPreprocessorDefinition(std::string name)
@@ -235,7 +234,7 @@ void ShaderSource::AddPreprocessorDefinition(std::string name)
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
     block.data = base::FormatString("#define %1", name);
-    mDataBlocks.push_back(std::move(block));
+    mShaderBlocks["preprocessor"].push_back(std::move(block));
 }
 
 void ShaderSource::AddPreprocessorDefinition(std::string name, int value)
@@ -243,7 +242,7 @@ void ShaderSource::AddPreprocessorDefinition(std::string name, int value)
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
     block.data = base::FormatString("#define %1 %2", name, ToConst(value));
-    mDataBlocks.push_back(std::move(block));
+    mShaderBlocks["preprocessor"].push_back(std::move(block));
 }
 
 void ShaderSource::AddPreprocessorDefinition(std::string name, float value)
@@ -251,7 +250,7 @@ void ShaderSource::AddPreprocessorDefinition(std::string name, float value)
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
     block.data = base::FormatString("#define %1 %2", name, ToConst(value));
-    mDataBlocks.push_back(std::move(block));
+    mShaderBlocks["preprocessor"].push_back(std::move(block));
 }
 
 void ShaderSource::AddPreprocessorDefinition(std::string name, std::string value)
@@ -259,7 +258,7 @@ void ShaderSource::AddPreprocessorDefinition(std::string name, std::string value
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
     block.data = base::FormatString("#define %1 %2", name, value);
-    mDataBlocks.push_back(std::move(block));
+    mShaderBlocks["preprocessor"].push_back(std::move(block));
 }
 
 void ShaderSource::AddAttribute(std::string name, AttributeType type)
@@ -280,7 +279,7 @@ void ShaderSource::AddAttribute(std::string name, AttributeType type)
     block.type = ShaderBlockType::ShaderDataDeclaration;
     block.data = std::move(code);
     block.data_decl = decl;
-    mDataBlocks.push_back(std::move(block));
+    mShaderBlocks["attributes"].push_back(std::move(block));
 }
 void ShaderSource::AddUniform(std::string name, UniformType type)
 {
@@ -293,7 +292,7 @@ void ShaderSource::AddUniform(std::string name, UniformType type)
     block.type = ShaderBlockType::ShaderDataDeclaration;
     block.data = base::FormatString("uniform %1 %2;", DataTypeToString(type), name);
     block.data_decl = decl;
-    mDataBlocks.push_back(std::move(block));
+    mShaderBlocks["uniforms"].push_back(std::move(block));
 }
 void ShaderSource::AddConstant(std::string name, ShaderDataDeclarationValue value)
 {
@@ -309,7 +308,7 @@ void ShaderSource::AddConstant(std::string name, ShaderDataDeclarationValue valu
     block.type = ShaderBlockType::ShaderDataDeclaration;
     block.data = base::FormatString("const %1 %2 = %3;", DataTypeToString(data_type), name, ToConst(value));
     block.data_decl = decl;
-    mDataBlocks.push_back(std::move(block));
+    mShaderBlocks["constants"].push_back(std::move(block));
 }
 void ShaderSource::AddVarying(std::string name, VaryingType type)
 {
@@ -334,31 +333,39 @@ void ShaderSource::AddVarying(std::string name, VaryingType type)
     block.type = ShaderBlockType::ShaderDataDeclaration;
     block.data = code;
     block.data_decl = decl;
-    mDataBlocks.push_back(std::move(block));
+    mShaderBlocks["varyings"].push_back(std::move(block));
 }
 
 bool ShaderSource::HasShaderBlock(const std::string& key, ShaderBlockType type) const
 {
-    for (const auto& block : mDataBlocks)
+    for (const auto& pair : mShaderBlocks)
     {
-        if (block.type != type)
-            continue;
-        if (base::Contains(block.data, key))
-            return true;
+        const auto& blocks = pair.second;
+        for (const auto& block : blocks)
+        {
+            if (block.type != type)
+                continue;
+            if (base::Contains(block.data, key))
+                return true;
+        }
     }
     return false;
 }
 
 bool ShaderSource::HasDataDeclaration(const std::string& name, ShaderDataDeclarationType type) const
 {
-    for (const auto& block : mDataBlocks)
+    for (const auto& pair : mShaderBlocks)
     {
-        if (block.type != ShaderBlockType::ShaderDataDeclaration)
-            continue;
+        const auto& blocks = pair.second;
+        for (const auto& block : blocks)
+        {
+            if (block.type != ShaderBlockType::ShaderDataDeclaration)
+                continue;
 
-        const auto& decl = block.data_decl.value();
-        if (decl.name == name && decl.decl_type == type)
-            return true;
+            const auto& decl = block.data_decl.value();
+            if (decl.name == name && decl.decl_type == type)
+                return true;
+        }
     }
     return false;
 }
@@ -366,7 +373,9 @@ bool ShaderSource::HasDataDeclaration(const std::string& name, ShaderDataDeclara
 
 void ShaderSource::FoldUniform(const std::string& name, ShaderDataDeclarationValue value)
 {
-    for (auto& block : mDataBlocks)
+    auto& uniforms = mShaderBlocks["uniforms"];
+
+    for (auto& block : uniforms)
     {
         if (block.type != ShaderBlockType::ShaderDataDeclaration)
             continue;
@@ -388,22 +397,24 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
 {
     std::stringstream ss;
     if (mVersion == Version::GLSL_100)
-        ss << "#version 100\n";
+        ss << "#version 100";
     else if (mVersion == Version::GLSL_300)
-        ss << "#version 300 es\n";
+        ss << "#version 300 es";
     else if (mVersion != Version::NotSet)
         BUG("Missing GLSL version handling.");
+    ss << "\n\n";
 
     if (mType == Type::Fragment)
     {
         if (mPrecision == Precision::Low)
-            ss << "precision lowp float;\n";
+            ss << "precision lowp float;";
         else if (mPrecision == Precision::Medium)
-            ss << "precision mediump float;\n";
+            ss << "precision mediump float;";
         else if (mPrecision == Precision::High)
-            ss << "precision highp float;\n";
+            ss << "precision highp float;";
         else if (mPrecision != Precision::NotSet)
             BUG("Missing GLSL fragment shader floating point precision handling.");
+        ss << "\n\n";
     }
 
     // this could go to the beginning but I'm 100% sure it'll
@@ -419,51 +430,50 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
         ss << "\n// " << mShaderName << "\n\n";
     }
 
-    for (const auto& block : mDataBlocks)
+    static const char* groups[] = {
+        "preprocessor",
+        "constants",
+        "types",
+        "attributes",
+        "uniforms",
+        "varyings",
+        "out",
+        "code"
+    };
+    for (const char* group_key : groups)
     {
-        if (block.type == ShaderBlockType::Comment)
-        {
-            if (variant == SourceVariant::Development)
-            {
-                ss << block.data;
-                ss << "\n";
-            }
+        const auto* blocks = base::SafeFind(mShaderBlocks, std::string(group_key));
+        if (blocks == nullptr)
             continue;
+        for (const auto& block : *blocks)
+        {
+            if (block.type == ShaderBlockType::Comment)
+            {
+                if (variant == SourceVariant::Development)
+                {
+                    ss << block.data;
+                    ss << "\n";
+                }
+                continue;
+            }
+            ss << block.data;
+            ss << "\n";
         }
-        ss << block.data;
         ss << "\n";
     }
-
-    ss << "\n";
-
-    for (const auto& block : mCodeBlocks)
-    {
-        if (block.type == ShaderBlockType::Comment)
-        {
-            if (variant == SourceVariant::Development)
-            {
-                ss << block.data;
-                ss << "\n";
-            }
-            continue;
-        }
-        ss << block.data;
-        ss << "\n";
-    }
-
     return ss.str();
 }
 
 void ShaderSource::Merge(const ShaderSource& other)
 {
-    for (const auto& other_source : other.mCodeBlocks)
+    for (const auto& pair : other.mShaderBlocks)
     {
-        mCodeBlocks.push_back(other_source);
-    }
-
-    for (const auto& other_data : other.mDataBlocks)
-    {
-        mDataBlocks.push_back(other_data);
+        const auto& key = pair.first;
+        const auto& blocks = pair.second;
+        for (const auto& block : blocks)
+        {
+            mShaderBlocks[key].push_back(block);
+        }
     }
 }
 
@@ -549,6 +559,8 @@ bool ShaderSource::LoadRawSource(const std::string& source)
         line_buffer.push_back(line);
     }
 
+    std::string group;
+
     // try to "parse" (lol) the GLSL in two segments.
     // first try to extract the in, out, varying, uniform
     // shader data declarations but with relative ordering
@@ -563,6 +575,17 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             continue;
 
         const auto& trimmed = base::TrimString(line);
+
+        if (base::StartsWith(trimmed, "// @"))
+        {
+            group = trimmed.substr(4);
+            continue;
+        }
+        else if (base::StartsWith(trimmed, "//@"))
+        {
+            group = trimmed.substr(3);
+            continue;
+        }
 
         if (base::StartsWith(trimmed, "#version"))
         {
@@ -581,7 +604,7 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             ShaderBlock block;
             block.type = ShaderBlockType::PreprocessorDefine;
             block.data = trimmed;
-            mDataBlocks.push_back(std::move(block));
+            mShaderBlocks["preprocessor"].push_back(std::move(block));
         }
         else if (base::StartsWith(trimmed, "#ifdef") ||
                  base::StartsWith(trimmed, "#ifndef") ||
@@ -591,7 +614,13 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             ShaderBlock block;
             block.type = ShaderBlockType::PreprocessorToken;
             block.data = line;
-            mDataBlocks.push_back(std::move(block));
+            if (group.empty())
+            {
+                WARN("Empty shader block group for preprocessor conditional.");
+                WARN("Your shader will likely not work as expected.");
+                WARN("Use '// @ group-name' to set the expected shader block group.");
+            }
+            mShaderBlocks[group].push_back(std::move(block));
         }
         else if (base::StartsWith(trimmed, "precision"))
         {
@@ -614,10 +643,8 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             const auto& data_type = DataTypeFromString(GetToken(parts, 1));
             const auto& name = GetTokenName(GetToken(parts, 2));
             if (!decl_type.has_value() || !data_type.has_value() || !name.has_value())
-            {
-                ERROR("Failed to parse GLSL declaration '%1'.", trimmed);
-                return false;
-            }
+                ERROR_RETURN(false, "Failed to parse GLSL declaration '%1'.", trimmed);
+
             ShaderDataDeclaration decl;
             decl.data_type = data_type.value();
             decl.decl_type = decl_type.value();
@@ -627,7 +654,28 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             block.type = ShaderBlockType::ShaderDataDeclaration;
             block.data = line;
             block.data_decl = decl;
-            mDataBlocks.push_back(std::move(block));
+            if (base::StartsWith(trimmed, "attribute"))
+                mShaderBlocks["attributes"].push_back(std::move(block));
+            else if (base::StartsWith(trimmed, "uniform"))
+                mShaderBlocks["uniforms"].push_back(std::move(block));
+            else if (base::StartsWith(trimmed, "varying"))
+                mShaderBlocks["varyings"].push_back(std::move(block));
+            else if (base::StartsWith(trimmed, "in "))
+            {
+                if (mType == Type::Vertex)
+                    mShaderBlocks["attributes"].push_back(std::move(block));
+                else if (mType == Type::Fragment)
+                    mShaderBlocks["varyings"].push_back(std::move(block));
+                else ERROR_RETURN(false, "Failed to parse GLSL declaration '%1.", trimmed);
+            }
+            else if (base::StartsWith(trimmed, "out"))
+            {
+                if (mType == Type::Vertex)
+                    mShaderBlocks["varyings"].push_back(std::move(block));
+                else if (mType == Type::Fragment)
+                    mShaderBlocks["out"].push_back(std::move(block));
+                else ERROR_RETURN(false, "Failed to parse GLSL declaration '%1'.", trimmed);
+            }
         }
         else if (base::StartsWith(trimmed, "const"))
         {
@@ -641,18 +689,33 @@ bool ShaderSource::LoadRawSource(const std::string& source)
         }
         else if (base::StartsWith(trimmed, "layout"))
         {
-            if (base::Contains(trimmed, "location"))
+            if (base::Contains(trimmed, "uniform") && base::Contains(trimmed, "{"))
             {
+                // todo: data declaration parsing.
                 ShaderBlock block;
-                block.type = ShaderBlockType::LayoutDeclaration;
+                block.type = ShaderBlockType::ShaderDataDeclaration;
                 block.data = line;
-                mDataBlocks.push_back(std::move(block));
+                block.data += "\n";
+                for (++line_buffer_index; line_buffer_index<line_buffer.size(); ++line_buffer_index)
+                {
+                    auto line = line_buffer[line_buffer_index];
+                    auto trimmed = base::TrimString(line);
+                    block.data += std::move(line);
+                    block.data += "\n";
+                    if (base::StartsWith(trimmed, "}") && base::EndsWith(trimmed, ";"))
+                        break;
+                }
+                mShaderBlocks["uniforms"].push_back(std::move(block));
             }
-            else
+            else if (base::Contains(trimmed, " out "))
             {
-                ERROR("Unrecognized shader layout directive.");
-                return false;
+                // todo: data declaration parsing.
+                ShaderBlock block;
+                block.type = ShaderBlockType::ShaderDataDeclaration;
+                block.data = line;
+                mShaderBlocks["out"].push_back(std::move(block));
             }
+            else ERROR_RETURN(false, "Failed to parse GLSL layout declaration '%1'.", trimmed);
         }
         else if (base::StartsWith(trimmed, "struct"))
         {
@@ -670,14 +733,14 @@ bool ShaderSource::LoadRawSource(const std::string& source)
                 if (base::StartsWith(trimmed, "}") && base::EndsWith(trimmed, ";"))
                     break;
             }
-            mDataBlocks.push_back(std::move(block));
+            mShaderBlocks["types"].push_back(std::move(block));
         }
         else if (base::StartsWith(trimmed, "//"))
         {
             ShaderBlock block;
             block.type = ShaderBlockType::Comment;
             block.data = line;
-            mDataBlocks.push_back(std::move(block));
+            mShaderBlocks[group].push_back(std::move(block));
         }
         else if (base::StartsWith(trimmed, "/*"))
         {
@@ -700,7 +763,7 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             ShaderBlock block;
             block.type = ShaderBlockType::Comment;
             block.data = std::move(line);
-            mCodeBlocks.push_back(std::move(block));
+            mShaderBlocks["code"].push_back(std::move(block));
         }
         else if (base::StartsWith(trimmed, "/*"))
         {
@@ -712,7 +775,7 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             ShaderBlock block;
             block.type = ShaderBlockType::ShaderCode;
             block.data = std::move(line);
-            mCodeBlocks.push_back(std::move(block));
+            mShaderBlocks["code"].push_back(std::move(block));
         }
     }
     return true;

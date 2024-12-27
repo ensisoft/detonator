@@ -4,6 +4,8 @@ R"CPP_RAW_STRING(//"
 
 #version 300 es
 
+// @attributes
+
 // particle position in the particle simulation space.
 // could be "local" or "global". the model matrix must
 // be adjusted accordingly.
@@ -32,8 +34,12 @@ in vec2 aDirection;
   in vec4 iaModelVectorW;
 #endif
 
+// @uniforms
+
 uniform mat4 kProjectionMatrix;
 uniform mat4 kModelViewMatrix;
+
+// @varyings
 
 // dummy for now
 // this shader doesn't actually write to vTexCoord because when
