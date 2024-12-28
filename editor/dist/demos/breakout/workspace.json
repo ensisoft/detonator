@@ -49,6 +49,7 @@
         "checked_for_packing": true
     },
     "5xCJbUrrKL": {
+        "__version": 1,
         "local_emitter_h": 0.46,
         "local_emitter_w": 0.44,
         "local_emitter_x": 0,
@@ -89,6 +90,7 @@
         "checked_for_packing": true
     },
     "AOdUyA9mYj": {
+        "__version": 3
     },
     "AdiJbNNuTp": {
         "__version": 3,
@@ -221,6 +223,7 @@
         "comment_omyQ6afIog": ""
     },
     "dn9XJGsQt0": {
+        "__version": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
         "local_emitter_x": 0,
@@ -303,6 +306,7 @@
         }
     },
     "kZPKqhUrT6": {
+        "__version": 1
     },
     "kkBOwiYNRn": {
         "__version": 1,
