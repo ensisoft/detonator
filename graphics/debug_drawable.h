@@ -29,7 +29,7 @@ namespace gfx
     {
     public:
         enum class Feature {
-            Normals,
+            NormalMesh,
             Wireframe
         };
 
@@ -55,10 +55,10 @@ namespace gfx
     class DebugDrawableInstance : public DebugDrawableBase
     {
     public:
-        DebugDrawableInstance(const std::shared_ptr<const Drawable> drawable, Feature feature)
+        DebugDrawableInstance(std::shared_ptr<const Drawable> drawable, Feature feature) noexcept
           : DebugDrawableBase(drawable.get(), feature)
         {
-            mSharedDrawable = drawable;
+            mSharedDrawable = std::move(drawable);
         }
     private:
         std::shared_ptr<const Drawable> mSharedDrawable;
@@ -67,8 +67,25 @@ namespace gfx
     class WireframeInstance : public DebugDrawableInstance
     {
     public:
-        WireframeInstance(const std::shared_ptr<const Drawable>& drawable)
-          : DebugDrawableInstance(drawable, Feature::Wireframe)
+        explicit WireframeInstance(std::shared_ptr<const Drawable> drawable) noexcept
+          : DebugDrawableInstance(std::move(drawable), Feature::Wireframe)
+        {}
+        Type GetType() const override
+        {
+            return Type::DebugDrawable;
+        }
+        DrawPrimitive GetDrawPrimitive() const override
+        {
+            return DrawPrimitive::Lines;
+        }
+    private:
+    };
+
+    class NormalMeshInstance : public DebugDrawableInstance
+    {
+    public:
+        explicit NormalMeshInstance(std::shared_ptr<const Drawable> drawable) noexcept
+          : DebugDrawableInstance(std::move(drawable), Feature::NormalMesh)
         {}
         Type GetType() const override
         {
@@ -118,5 +135,26 @@ namespace gfx
         T mObject;
     };
 
+    template<typename T>
+    class NormalMesh : public DebugDrawableBase
+    {
+    public:
+        template<typename... Args>
+        NormalMesh(Args&&... args) : mObject(std::forward<Args>(args)...)
+        {
+            mDrawable = &mObject;
+            mFeature  = Feature::NormalMesh;
+        }
+        Type GetType() const override
+        {
+            return Type::DebugDrawable;
+        }
+        DrawPrimitive GetDrawPrimitive() const override
+        {
+            return DrawPrimitive::Lines;
+        }
+    private:
+        T mObject;
+    };
 
 } // namespace

@@ -55,21 +55,31 @@ bool DebugDrawableBase::Construct(const Environment& env, Geometry::CreateArgs& 
         return mDrawable->Construct(env, create);
     }
 
+    Geometry::CreateArgs temp;
+    if (!mDrawable->Construct(env, temp))
+        return false;
+
+    if (!temp.buffer.HasData())
+        return false;
+
     if (mFeature == Feature::Wireframe)
     {
-        Geometry::CreateArgs temp;
-        if (!mDrawable->Construct(env, temp))
+        GeometryBuffer wireframe;
+        CreateWireframe(temp.buffer, wireframe);
+
+        create.buffer = std::move(wireframe);
+        create.content_name = "Wireframe/" + temp.content_name;
+        create.content_hash = temp.content_hash;
+    }
+    else if (mFeature == Feature::NormalMesh)
+    {
+        GeometryBuffer normals;
+        if (!CreateNormalMesh(temp.buffer, normals))
             return false;
 
-        if (temp.buffer.HasData())
-        {
-            GeometryBuffer wireframe;
-            CreateWireframe(temp.buffer, wireframe);
-
-            create.buffer = std::move(wireframe);
-            create.content_name = "Wireframe/" + temp.content_name;
-            create.content_hash = temp.content_hash;
-        }
+        create.buffer = std::move(normals);
+        create.content_name = "NormalMesh/" + temp.content_name;
+        create.content_hash = temp.content_hash;
     }
     return true;
 }
