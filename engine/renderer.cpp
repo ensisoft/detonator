@@ -864,20 +864,6 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
     }
     if (item && paint_node.drawable)
     {
-        if (paint_node.drawable->GetType() == gfx::Drawable::Type::SimpleShape)
-        {
-            auto simple = std::static_pointer_cast<gfx::SimpleShapeInstance>(paint_node.drawable);
-
-            gfx::SimpleShapeStyle style;
-            if (item->GetRenderStyle() == RenderStyle::Solid)
-                style = gfx::SimpleShapeStyle::Solid;
-            else if (item->GetRenderStyle() == RenderStyle::Outline)
-                style = gfx::SimpleShapeStyle::Outline;
-            else BUG("Unsupported rendering style.");
-
-            simple->SetStyle(style);
-        }
-
         const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
         const auto& shape = paint_node.drawable;
@@ -1106,6 +1092,20 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
                 env.model_matrix = &model;
                 paint_node.drawable->Restart(env);
             }
+        }
+        if (paint_node.drawable &&
+            paint_node.drawable->GetType() == gfx::Drawable::Type::SimpleShape)
+        {
+            auto simple = std::static_pointer_cast<gfx::SimpleShapeInstance>(paint_node.drawable);
+
+            gfx::SimpleShapeStyle style;
+            if (item->GetRenderStyle() == RenderStyle::Solid)
+                style = gfx::SimpleShapeStyle::Solid;
+            else if (item->GetRenderStyle() == RenderStyle::Outline)
+                style = gfx::SimpleShapeStyle::Outline;
+            else BUG("Unsupported rendering style.");
+
+            simple->SetStyle(style);
         }
     }
 }
