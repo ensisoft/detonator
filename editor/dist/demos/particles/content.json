@@ -301,7 +301,7 @@
             "material": "SXaZ6dfqlS",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.08390936255455017,
@@ -310,7 +310,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.0,
@@ -883,7 +883,7 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.09387350082397461,
@@ -892,7 +892,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.5348744988441467,
@@ -1032,7 +1032,7 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.0,
@@ -1041,7 +1041,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.9096055626869202,
@@ -1420,7 +1420,7 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.9383687973022461,
@@ -1429,7 +1429,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.9391012191772461,
@@ -1622,7 +1622,7 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.7411764860153198,
@@ -1631,7 +1631,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.9192644953727722,
@@ -1696,7 +1696,7 @@
             "material": "8qJeAKQFtw",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.8028839826583862,
@@ -1705,7 +1705,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 1.0,
@@ -1901,7 +1901,7 @@
             "material": "8qJeAKQFtw",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 1.0,
@@ -1910,7 +1910,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 1.0,
@@ -2484,7 +2484,7 @@
             "material": "J8J3JM8rC8",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.774563193321228,
@@ -2493,7 +2493,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.8694896101951599,
@@ -2558,7 +2558,7 @@
             "material": "J8J3JM8rC8",
             "material_params": [
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 0.4627451002597809,
                   "b": 0.9201343059539795,
@@ -2664,7 +2664,7 @@
             "material": "HA5M7RGQpK",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.4903334081172943,
@@ -2673,17 +2673,17 @@
                 }
               },
               {
-                "name": "kRotationalVelocity",
-                "value": 2.0
-              },
-              {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.0,
                   "g": 1.0,
                   "r": 0.3791714310646057
                 }
+              },
+              {
+                "name": "kRotationalVelocity",
+                "value": 2.0
               }
             ],
             "offset": {
@@ -2763,7 +2763,7 @@
             "material": "eySa2QEq4I",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.29130998253822327,
@@ -2772,7 +2772,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.06971847265958786,
@@ -2953,7 +2953,7 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.02561989799141884,
@@ -2962,7 +2962,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.012436103075742722,
@@ -3171,7 +3171,7 @@
             "material": "8qJeAKQFtw",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 0.0,
                   "b": 0.5213549733161926,
@@ -3180,7 +3180,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.24641793966293335,
@@ -3869,7 +3869,7 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.9850614070892334,
@@ -3878,7 +3878,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.25957122445106506,
@@ -4069,7 +4069,7 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.07074082642793655,
@@ -4078,7 +4078,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.05127031356096268,
@@ -4238,7 +4238,7 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 1.0,
@@ -4247,7 +4247,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 1.0,
@@ -4312,7 +4312,7 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 1.0,
@@ -4321,7 +4321,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 1.0,
@@ -4427,7 +4427,7 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.0,
@@ -4492,7 +4492,7 @@
             "material": "dZDA63fz8X",
             "material_params": [
               {
-                "name": "kEndColor",
+                "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.0,
@@ -4501,7 +4501,7 @@
                 }
               },
               {
-                "name": "kStartColor",
+                "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
                   "b": 0.0,
@@ -4668,12 +4668,11 @@
       },
       "id": "N5AZXzLO89",
       "name": "Star Particle",
-      "particle_action": "None",
       "resource_id": "N5AZXzLO89",
       "resource_name": "Star Particle",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "shader_uri": "",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -4681,7 +4680,7 @@
           "fps": 0.0,
           "id": "rdHY5lvyKq",
           "looping": true,
-          "name": "kMask",
+          "name": "Particle Alpha Mask",
           "rect_name0": "kMaskRect",
           "rect_name1": "",
           "sampler_name0": "kMask",
@@ -4716,10 +4715,14 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom",
+      "type": "Particle2D",
       "uniforms": [
         {
-          "name": "kEndColor",
+          "name": "kParticleBaseRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kParticleEndColor",
           "value": {
             "a": 1.0,
             "b": 1.0,
@@ -4728,21 +4731,21 @@
           }
         },
         {
-          "name": "kRotate",
-          "value": 1
+          "name": "kParticleRotation",
+          "value": 2
         },
         {
-          "name": "kRotationValue",
-          "value": 0.5
-        },
-        {
-          "name": "kStartColor",
+          "name": "kParticleStartColor",
           "value": {
             "a": 1.0,
             "b": 1.0,
             "g": 1.0,
             "r": 1.0
           }
+        },
+        {
+          "name": "kRotation",
+          "value": 0.0
         }
       ]
     },
@@ -4755,12 +4758,11 @@
       },
       "id": "0xydhM7UqW",
       "name": "Lightning Particle",
-      "particle_action": "None",
       "resource_id": "0xydhM7UqW",
       "resource_name": "Lightning Particle",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "shader_uri": "",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -4768,7 +4770,7 @@
           "fps": 0.0,
           "id": "21n3e31PFK",
           "looping": true,
-          "name": "kMask",
+          "name": "Particle Alpha Mask",
           "rect_name0": "kMaskRect",
           "rect_name1": "",
           "sampler_name0": "kMask",
@@ -4803,10 +4805,14 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom",
+      "type": "Particle2D",
       "uniforms": [
         {
-          "name": "kEndColor",
+          "name": "kParticleBaseRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kParticleEndColor",
           "value": {
             "a": 0.0,
             "b": 0.8942549824714661,
@@ -4815,21 +4821,17 @@
           }
         },
         {
-          "name": "kRotate",
-          "value": 0
-        },
-        {
-          "name": "kRotationValue",
-          "value": 0.0
-        },
-        {
-          "name": "kStartColor",
+          "name": "kParticleStartColor",
           "value": {
             "a": 0.0,
             "b": 0.929198145866394,
             "g": 0.7711299061775208,
             "r": 0.7024185657501221
           }
+        },
+        {
+          "name": "kRotation",
+          "value": 0.0
         }
       ]
     },
@@ -4842,12 +4844,11 @@
       },
       "id": "bBESp9pEw3",
       "name": "Rain Particle",
-      "particle_action": "None",
       "resource_id": "bBESp9pEw3",
       "resource_name": "Rain Particle",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "shader_uri": "",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -4855,7 +4856,7 @@
           "fps": 0.0,
           "id": "KpOQ19eszk",
           "looping": true,
-          "name": "kMask",
+          "name": "Particle Alpha Mask",
           "rect_name0": "kMaskRect",
           "rect_name1": "",
           "sampler_name0": "kMask",
@@ -4890,10 +4891,14 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom",
+      "type": "Particle2D",
       "uniforms": [
         {
-          "name": "kEndColor",
+          "name": "kParticleBaseRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kParticleEndColor",
           "value": {
             "a": 1.0,
             "b": 0.8942549824714661,
@@ -4902,21 +4907,21 @@
           }
         },
         {
-          "name": "kRotate",
-          "value": 1
+          "name": "kParticleRotation",
+          "value": 2
         },
         {
-          "name": "kRotationValue",
-          "value": 0.0
-        },
-        {
-          "name": "kStartColor",
+          "name": "kParticleStartColor",
           "value": {
             "a": 1.0,
             "b": 0.9164111018180847,
             "g": 0.7101243734359741,
             "r": 0.6085145473480225
           }
+        },
+        {
+          "name": "kRotation",
+          "value": 0.0
         }
       ]
     },
@@ -4929,12 +4934,11 @@
       },
       "id": "eySa2QEq4I",
       "name": "Magic Particle",
-      "particle_action": "None",
       "resource_id": "eySa2QEq4I",
       "resource_name": "Magic Particle",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "shader_uri": "",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -4942,7 +4946,7 @@
           "fps": 0.0,
           "id": "w2bm9pw6xr",
           "looping": true,
-          "name": "kMask",
+          "name": "Particle Alpha Mask",
           "rect_name0": "kMaskRect",
           "rect_name1": "",
           "sampler_name0": "kMask",
@@ -4977,10 +4981,14 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom",
+      "type": "Particle2D",
       "uniforms": [
         {
-          "name": "kEndColor",
+          "name": "kParticleBaseRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kParticleEndColor",
           "value": {
             "a": 1.0,
             "b": 0.800000011920929,
@@ -4989,21 +4997,21 @@
           }
         },
         {
-          "name": "kRotate",
-          "value": 1
+          "name": "kParticleRotation",
+          "value": 2
         },
         {
-          "name": "kRotationValue",
-          "value": 0.0
-        },
-        {
-          "name": "kStartColor",
+          "name": "kParticleStartColor",
           "value": {
             "a": 1.0,
             "b": 0.800000011920929,
             "g": 0.0,
             "r": 0.7921263575553894
           }
+        },
+        {
+          "name": "kRotation",
+          "value": 0.0
         }
       ]
     },
@@ -5016,12 +5024,11 @@
       },
       "id": "EJtsMLLYa9",
       "name": "Energy Particle",
-      "particle_action": "None",
       "resource_id": "EJtsMLLYa9",
       "resource_name": "Energy Particle",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "shader_uri": "",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -5029,7 +5036,7 @@
           "fps": 0.0,
           "id": "TosMEeZuhp",
           "looping": true,
-          "name": "kMask",
+          "name": "Particle Alpha Mask",
           "rect_name0": "kMaskRect",
           "rect_name1": "",
           "sampler_name0": "kMask",
@@ -5064,10 +5071,14 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom",
+      "type": "Particle2D",
       "uniforms": [
         {
-          "name": "kEndColor",
+          "name": "kParticleBaseRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kParticleEndColor",
           "value": {
             "a": 1.0,
             "b": 0.8839246034622192,
@@ -5076,21 +5087,17 @@
           }
         },
         {
-          "name": "kRotate",
-          "value": 0
-        },
-        {
-          "name": "kRotationValue",
-          "value": 0.0
-        },
-        {
-          "name": "kStartColor",
+          "name": "kParticleStartColor",
           "value": {
             "a": 1.0,
             "b": 1.0,
             "g": 1.0,
             "r": 1.0
           }
+        },
+        {
+          "name": "kRotation",
+          "value": 0.0
         }
       ]
     },
@@ -5103,12 +5110,11 @@
       },
       "id": "J8J3JM8rC8",
       "name": "Water Particle",
-      "particle_action": "None",
       "resource_id": "J8J3JM8rC8",
       "resource_name": "Water Particle",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "shader_uri": "",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -5116,7 +5122,7 @@
           "fps": 0.0,
           "id": "7zWymX4eUU",
           "looping": true,
-          "name": "kMask",
+          "name": "Particle Alpha Mask",
           "rect_name0": "kMaskRect",
           "rect_name1": "",
           "sampler_name0": "kMask",
@@ -5151,10 +5157,14 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom",
+      "type": "Particle2D",
       "uniforms": [
         {
-          "name": "kEndColor",
+          "name": "kParticleBaseRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kParticleEndColor",
           "value": {
             "a": 0.37254902720451355,
             "b": 0.9408865571022034,
@@ -5163,21 +5173,21 @@
           }
         },
         {
-          "name": "kRotate",
-          "value": 1
+          "name": "kParticleRotation",
+          "value": 2
         },
         {
-          "name": "kRotationValue",
-          "value": 2.0
-        },
-        {
-          "name": "kStartColor",
+          "name": "kParticleStartColor",
           "value": {
             "a": 0.729411780834198,
             "b": 0.8143892288208008,
             "g": 0.5719996690750122,
             "r": 0.5306172370910645
           }
+        },
+        {
+          "name": "kRotation",
+          "value": 0.0
         }
       ]
     },
@@ -5190,12 +5200,11 @@
       },
       "id": "8qJeAKQFtw",
       "name": "Smoke Particle",
-      "particle_action": "None",
       "resource_id": "8qJeAKQFtw",
       "resource_name": "Smoke Particle",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "shader_uri": "",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -5203,7 +5212,7 @@
           "fps": 0.0,
           "id": "KUoYx1Yl7U",
           "looping": true,
-          "name": "kMask",
+          "name": "Particle Alpha Mask",
           "rect_name0": "kMaskRect",
           "rect_name1": "",
           "sampler_name0": "kMask",
@@ -5238,33 +5247,33 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom",
+      "type": "Particle2D",
       "uniforms": [
         {
-          "name": "kEndColor",
-          "value": {
-            "a": 1.0,
-            "b": 0.13333334028720856,
-            "g": 0.13333334028720856,
-            "r": 0.13333334028720856
-          }
-        },
-        {
-          "name": "kRotate",
-          "value": 0
-        },
-        {
-          "name": "kRotationValue",
+          "name": "kParticleBaseRotation",
           "value": 0.0
         },
         {
-          "name": "kStartColor",
+          "name": "kParticleEndColor",
           "value": {
             "a": 1.0,
             "b": 0.13333334028720856,
             "g": 0.13333334028720856,
             "r": 0.13333334028720856
           }
+        },
+        {
+          "name": "kParticleStartColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.13333334028720856,
+            "g": 0.13333334028720856,
+            "r": 0.13333334028720856
+          }
+        },
+        {
+          "name": "kRotation",
+          "value": 0.0
         }
       ]
     },
@@ -5277,12 +5286,11 @@
       },
       "id": "SXaZ6dfqlS",
       "name": "Blocky Particle",
-      "particle_action": "None",
       "resource_id": "SXaZ6dfqlS",
       "resource_name": "Blocky Particle",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "shader_uri": "",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -5290,7 +5298,7 @@
           "fps": 0.0,
           "id": "eyXJN5gw9t",
           "looping": true,
-          "name": "kMask",
+          "name": "Particle Alpha Mask",
           "rect_name0": "kMaskRect",
           "rect_name1": "",
           "sampler_name0": "kMask",
@@ -5325,10 +5333,14 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom",
+      "type": "Particle2D",
       "uniforms": [
         {
-          "name": "kEndColor",
+          "name": "kParticleBaseRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kParticleEndColor",
           "value": {
             "a": 1.0,
             "b": 0.01269550621509552,
@@ -5337,21 +5349,17 @@
           }
         },
         {
-          "name": "kRotate",
-          "value": 0
-        },
-        {
-          "name": "kRotationValue",
-          "value": 0.0
-        },
-        {
-          "name": "kStartColor",
+          "name": "kParticleStartColor",
           "value": {
             "a": 1.0,
             "b": 0.13453879952430725,
             "g": 0.13453879952430725,
             "r": 0.8406347632408142
           }
+        },
+        {
+          "name": "kRotation",
+          "value": 0.0
         }
       ]
     },
@@ -5364,12 +5372,11 @@
       },
       "id": "dZDA63fz8X",
       "name": "Round Particle",
-      "particle_action": "None",
       "resource_id": "dZDA63fz8X",
       "resource_name": "Round Particle",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "shader_uri": "",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -5377,7 +5384,7 @@
           "fps": 0.0,
           "id": "l0zWPdkNCw",
           "looping": true,
-          "name": "kMask",
+          "name": "Particle Alpha Mask",
           "rect_name0": "kMaskRect",
           "rect_name1": "",
           "sampler_name0": "kMask",
@@ -5412,10 +5419,14 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom",
+      "type": "Particle2D",
       "uniforms": [
         {
-          "name": "kEndColor",
+          "name": "kParticleBaseRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kParticleEndColor",
           "value": {
             "a": 1.0,
             "b": 0.01269550621509552,
@@ -5424,21 +5435,17 @@
           }
         },
         {
-          "name": "kRotate",
-          "value": 0
-        },
-        {
-          "name": "kRotationValue",
-          "value": 0.0
-        },
-        {
-          "name": "kStartColor",
+          "name": "kParticleStartColor",
           "value": {
             "a": 1.0,
             "b": 0.13453879952430725,
             "g": 0.13453879952430725,
             "r": 0.8406347632408142
           }
+        },
+        {
+          "name": "kRotation",
+          "value": 0.0
         }
       ]
     },
@@ -5451,10 +5458,9 @@
       },
       "id": "y6vxOLdMaI",
       "name": "Background",
-      "particle_action": "None",
       "resource_id": "y6vxOLdMaI",
       "resource_name": "Background",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -5510,10 +5516,9 @@
       },
       "id": "sv05U2SGGE",
       "name": "Snowflake",
-      "particle_action": "Rotate",
       "resource_id": "sv05U2SGGE",
       "resource_name": "Snowflake",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5561,6 +5566,10 @@
       "type": "Texture",
       "uniforms": [
         {
+          "name": "kParticleEffect",
+          "value": 1
+        },
+        {
           "name": "kTextureVelocity",
           "value": {
             "x": 0.0,
@@ -5579,12 +5588,11 @@
       },
       "id": "HA5M7RGQpK",
       "name": "Summoning Circle",
-      "particle_action": "None",
       "resource_id": "HA5M7RGQpK",
       "resource_name": "Summoning Circle",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
-      "shader_uri": "app://shaders/es2/basic_particle.glsl",
+      "shader_uri": "",
       "surface": "Emissive",
       "texture_mag_filter": "Default",
       "texture_maps": [
@@ -5592,7 +5600,7 @@
           "fps": 0.0,
           "id": "Dp1O4UmvUE",
           "looping": true,
-          "name": "kMask",
+          "name": "Particle Alpha Mask",
           "rect_name0": "kMaskRect",
           "rect_name1": "",
           "sampler_name0": "kMask",
@@ -5627,10 +5635,14 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom",
+      "type": "Particle2D",
       "uniforms": [
         {
-          "name": "kEndColor",
+          "name": "kParticleBaseRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kParticleEndColor",
           "value": {
             "a": 1.0,
             "b": 0.0003356984816491604,
@@ -5639,21 +5651,21 @@
           }
         },
         {
-          "name": "kRotate",
-          "value": 1
+          "name": "kParticleRotation",
+          "value": 2
         },
         {
-          "name": "kRotationValue",
-          "value": 1.0
-        },
-        {
-          "name": "kStartColor",
+          "name": "kParticleStartColor",
           "value": {
             "a": 1.0,
             "b": 0.0,
             "g": 0.0,
             "r": 1.0
           }
+        },
+        {
+          "name": "kRotation",
+          "value": 0.0
         }
       ]
     },
@@ -5666,10 +5678,9 @@
       },
       "id": "K9D27CRUwq",
       "name": "Blood Splatter",
-      "particle_action": "None",
       "resource_id": "K9D27CRUwq",
       "resource_name": "Blood Splatter",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5725,10 +5736,9 @@
       },
       "id": "pEBDeuBGgb",
       "name": "Spaceship",
-      "particle_action": "None",
       "resource_id": "pEBDeuBGgb",
       "resource_name": "Spaceship",
-      "resource_ver": 3,
+      "resource_ver": 4,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
