@@ -323,6 +323,16 @@ namespace gfx
 
         void IntoJson(data::Writer& writer) const;
 
+        const VertexLayout::Attribute* FindAttribute(const char* name) const noexcept
+        {
+            for (const auto& attr : mLayout.attributes)
+            {
+                if (attr.name == name)
+                    return &attr;
+            }
+            return nullptr;
+        }
+
     private:
         static size_t GetCount(size_t vertex_size_bytes, size_t buffer_size_bytes)
         {
@@ -337,15 +347,6 @@ namespace gfx
                     return attr;
             }
             BUG("No such vertex attribute was found.");
-        }
-        const VertexLayout::Attribute* FindAttribute(const char* name) const noexcept
-        {
-            for (const auto& attr : mLayout.attributes)
-            {
-                if (attr.name == name)
-                    return &attr;
-            }
-            return nullptr;
         }
     private:
         const VertexLayout mLayout;

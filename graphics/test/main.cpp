@@ -2655,6 +2655,42 @@ public:
         p.Draw(gfx::Wireframe<gfx::Sphere>(),transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
 
+        // normals
+
+        transform.MoveTo(-half_width, half_height);
+        transform.Translate(100.0f, -500.0f);
+        p.Draw(gfx::Pyramid(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::NormalMesh<gfx::Pyramid>(), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::NormalMesh<gfx::Cube>(), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Cylinder(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::NormalMesh<gfx::Cylinder>(), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Cone(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::NormalMesh<gfx::Cone>(), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Sphere(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        // reduce the level of detail (the number of slices) in the sphere when visualizing
+        // the normals to make it visually less crowded.
+        p.Draw(gfx::NormalMesh<gfx::Sphere>(gfx::Sphere::Style::Solid, 15), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
     }
     virtual std::string GetName() const override
     { return "Shape3DTest"; }

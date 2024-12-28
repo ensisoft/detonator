@@ -106,4 +106,45 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
     wireframe.AddDrawCmd(Geometry::DrawType::Lines);
 }
 
+bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals)
+{
+    const VertexStream vertices(geometry.GetLayout(),
+                                geometry.GetVertexDataPtr(),
+                                geometry.GetVertexBytes());
+    const auto vertex_count = vertices.GetCount();
+
+    const auto* vertex_normal   = vertices.FindAttribute("aNormal");
+    const auto* vertex_position = vertices.FindAttribute("aPosition");
+
+    if (!vertex_normal || vertex_normal->num_vector_components != 3)
+        return false;
+    if (!vertex_position || vertex_position->num_vector_components != 3)
+        return false;
+
+    std::vector<uint8_t> vertex_buffer;
+    VertexBuffer vertex_writer(GetVertexLayout<Vertex3D>(), &vertex_buffer);
+    vertex_writer.Resize(vertex_count * 2);
+
+    for (size_t i=0; i<vertex_count; ++i)
+    {
+        const auto& aPosition = ToVec(*vertices.GetAttribute<Vec3>("aPosition", i));
+        const auto& aNormal   = ToVec(*vertices.GetAttribute<Vec3>("aNormal", i));
+
+        Vertex3D a;
+        a.aPosition = ToVec(aPosition);
+
+        Vertex3D b;
+        b.aPosition = ToVec(aPosition + aNormal * 0.5f);
+
+        const auto vertex_index = i * 2;
+        vertex_writer.SetVertex(a, vertex_index + 0);
+        vertex_writer.SetVertex(b, vertex_index + 1);
+    }
+
+    normals.SetVertexBuffer(std::move(vertex_buffer));
+    normals.SetVertexLayout(GetVertexLayout<Vertex3D>());
+    normals.AddDrawCmd(Geometry::DrawType::Lines);
+    return true;
+}
+
 } // namespace

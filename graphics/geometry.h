@@ -257,5 +257,6 @@ namespace gfx
     using GeometryPtr = std::shared_ptr<const Geometry>;
 
     void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe);
+    bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals);
 
 } // namespace
