@@ -40,13 +40,6 @@ uniform mat4 kProjectionMatrix;
 uniform mat4 kModelViewMatrix;
 
 // @varyings
-
-// dummy for now
-// this shader doesn't actually write to vTexCoord because when
-// particle (GL_POINTS) rasterization is done the fragment shader
-// must use gl_PointCoord instead.
-out vec2 vTexCoord;
-
 out float vParticleRandomValue;
 out float vParticleAlpha;
 out float vParticleTime;

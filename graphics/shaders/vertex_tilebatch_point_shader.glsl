@@ -3,9 +3,11 @@ R"CPP_RAW_STRING(//"
 
 #version 300 es
 
+// @attributes
 in vec3 aTilePosition;
 in vec2 aTileData;
 
+// @uniforms
 uniform mat4 kTileTransform;
 uniform mat4 kTileCoordinateSpaceTransform;
 
@@ -13,10 +15,8 @@ uniform vec3 kTileWorldSize;
 uniform vec3 kTilePointOffset;
 uniform vec2 kTileRenderSize;
 
-out float vParticleAlpha;
-out float vParticleRandomValue;
+// @varyings
 out vec2 vTileData;
-out vec2 vTexCoord;
 
 void VertexShaderMain() {
   // transform tile row,col index into a tile position in units in the x,y plane,
@@ -29,12 +29,6 @@ void VertexShaderMain() {
   vs_out.point_size = kTileRenderSize.x;
 
   vTileData = aTileData;
-  // dummy, this shader requires gl_PointCoord
-  vTexCoord = vec2(0.0, 0.0);
-
-  // dummy out.
-  vParticleAlpha = 1.0;
-  vParticleRandomValue = 1.0;
 }
 
 )CPP_RAW_STRING"

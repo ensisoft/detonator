@@ -3,10 +3,12 @@ R"CPP_RAW_STRING(//"
 
 #version 300 es
 
+// @attributes
 in vec3 aTilePosition;
 in vec2 aTileCorner;
 in vec2 aTileData;
 
+// @uniforms
 uniform mat4 kTileTransform;
 uniform mat4 kTileCoordinateSpaceTransform;
 
@@ -14,8 +16,7 @@ uniform vec3 kTileWorldSize;
 uniform vec3 kTilePointOffset;
 uniform vec2 kTileRenderSize;
 
-out float vParticleAlpha;
-out float vParticleRandomValue;
+// @varyings
 out vec2 vTileData;
 out vec2 vTexCoord;
 
@@ -36,10 +37,6 @@ void VertexShaderMain() {
 
   vTexCoord = aTileCorner + vec2(0.5, 1.0);
   vTileData = aTileData;
-
-  // dummy out
-  vParticleAlpha = 1.0;
-  vParticleRandomValue = 1.0;
 }
 
 )CPP_RAW_STRING"
