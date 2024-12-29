@@ -134,6 +134,11 @@ namespace gfx
         // Load state from JSON object. Returns true if successful
         // otherwise false.
         virtual bool FromJson(const data::Reader& data) = 0;
+
+        static DrawCategory MapDrawableCategory(Type type);
+
+        inline DrawCategory GetDrawCategory() const
+        { return MapDrawableCategory(GetType()); }
     private:
     };
 
@@ -260,6 +265,10 @@ namespace gfx
         // Get the drawable class instance if any. Warning, this may be null for
         // drawable objects that aren't based on any drawable clas!
         virtual const DrawableClass* GetClass() const { return nullptr; }
+
+
+        inline DrawCategory GetDrawCategory() const
+        { return DrawableClass::MapDrawableCategory(GetType()); }
     private:
     };
 

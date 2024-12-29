@@ -32,6 +32,23 @@
 
 namespace gfx {
 
+DrawCategory DrawableClass::MapDrawableCategory(Type type)
+{
+    if (type == Type::ParticleEngine)
+        return DrawCategory::Particles;
+    else if (type == Type::TileBatch)
+        return DrawCategory::TileBatch;
+    else if (type == Type::SimpleShape ||
+             type == Type::Polygon ||
+             type == Type::DebugDrawable ||
+             type == Type::LineBatch3D ||
+             type == Type::LineBatch2D ||
+             type == Type::GuideGrid)
+        return DrawCategory::Basic;
+    BUG("Bug on draw category mapping based on drawable type.");
+    return DrawCategory::Basic;
+}
+
 bool Is3DShape(const Drawable& drawable) noexcept
 {
     const auto type = drawable.GetType();

@@ -46,6 +46,7 @@ namespace gfx
             // in case it has been modified and should be re-uploaded.
             bool editing_mode  = false;
             DrawPrimitive draw_primitive = DrawPrimitive::Triangles;
+            DrawCategory draw_category = DrawCategory::Basic;
             RenderPass renderpass = RenderPass::ColorPass;
         };
         struct RasterState {

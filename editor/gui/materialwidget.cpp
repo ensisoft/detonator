@@ -1377,35 +1377,55 @@ void MaterialWidget::CreateCustomShaderStub()
 
 #version 300 es
 
+// @uniforms
+
 // material time in seconds.
 uniform float kTime;
-
-// when rendering particles with points the material
-// shader must sample gl_PointCoord for texture coordinates
-// instead of the texcoord varying from the vertex shader.
-// the value kRenderPoints will be set to 1.0 so for portability
-// the material shader can do:
-//   vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-uniform float kRenderPoints;
 
 // custom uniforms that need to match the json description
 uniform vec4 kColor;
 uniform sampler2D kNoise;
 uniform vec2 kNoiseRect;
 
-// varyings from vertex stage.
-in vec2 vTexCoord;
+// @varyings
 
-// per particle data.
-// these are only written when the drawable is a particle engine
-in float vParticleAlpha;
-// particle random value.
-in float vParticleRandomValue;
-// normalized particle lifetime.
-in float vParticleTime;
+#ifdef DRAW_POINTS
+  // when drawing points the gl_PointCoord must be used
+  // for texture coordinates and we don't have any texture
+  // coordinates coming from the vertex shader.
+  #define vTexCoord gl_PointCoord
+#else
+  in vec2 vTexCoord;
+#endif
+
+// per particle data only exists when rendering particles
+#ifdef GEOMETRY_IS_PARTICLES
+  // per particle alpha value.
+  in float vParticleAlpha;
+  // particle random value.
+  in float vParticleRandomValue;
+  // normalized particle lifetime.
+  in float vParticleTime;
+  // Angle of particle's direction vector relative to X axis.
+  in float vParticleAngle;
+#else
+   // we can support the editor and make the per particle data
+   // dummies with macros
+   #define vParticleAlpha 1.0
+   #define vParticleRandomValue 0.0
+   #define vParticleTime kTime
+   #define vParticleAngle 0.0
+#endif
+
+// tile data only exists when rendering a tile batch
+#ifdef GEOMETRY_IS_TILES
+  in vec2 vTileData;
+#endif
 
 void FragmentShaderMain() {
-    vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+
+    vec2 coords = vTexCoord;
+
     float a = texture(kNoise, coords).a;
     float r = coords.x + a + kTime;
     float g = coords.y + a;
@@ -2518,7 +2538,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         mMaterialInst = std::make_unique<gfx::MaterialInstance>(mMaterial);
 
     mMaterialInst->SetRuntime(time);
-    mMaterialInst->SetUniform("kTileIndex", (float)GetValue(mUI.kTileIndex)+1.0f);
+    mMaterialInst->SetUniform("kTileIndex", (float)GetValue(mUI.kTileIndex));
 
     gfx::Transform transform;
     transform.MoveTo(xpos, ypos);

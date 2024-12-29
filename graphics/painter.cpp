@@ -108,6 +108,7 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         Material::Environment material_env;
         material_env.editing_mode   = mEditingMode;
         material_env.draw_primitive = draw.drawable->GetDrawPrimitive();
+        material_env.draw_category  = draw.drawable->GetDrawCategory();
         material_env.renderpass     = program.GetRenderPass();
         ProgramPtr gpu_program = GetProgram(program, *draw.drawable, *draw.material, drawable_env, material_env);
         if (gpu_program == nullptr)

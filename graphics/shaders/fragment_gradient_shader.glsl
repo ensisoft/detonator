@@ -7,6 +7,7 @@ R"CPP_RAW_STRING(//"
 
 precision highp float;
 
+// @uniforms
 // The gradient top left color value.
 uniform vec4 kColor0;
 // The gradient top right color value.
@@ -18,11 +19,11 @@ uniform vec4 kColor3;
 // The gradient X and Y axis mixing/blending weights.
 uniform vec2 kOffset;
 
-// Incoming texture coordinate from vertex shader.
-in vec2 vTexCoord;
-
-// Incoming per particle alpha value.
-in float vParticleAlpha;
+// @varyings
+#ifdef GEOMETRY_IS_PARTICLES
+  // Incoming per particle alpha value.
+  in float vParticleAlpha;
+#endif
 
 vec4 MixGradient(vec2 coords) {
   vec4 top = mix(kColor0, kColor1, coords.x);
@@ -39,7 +40,11 @@ void FragmentShaderMain() {
   vec4 color  = MixGradient(coords);
 
   fs_out.color.rgb = vec3(pow(color.rgb, vec3(2.2)));
-  fs_out.color.a   = color.a * vParticleAlpha;
+  fs_out.color.a   = color.a;
+
+#ifdef GEOMETRY_IS_PARTICLES
+  fs_out.color.a *= vParticleAlpha;
+#endif
 }
 
 )CPP_RAW_STRING"

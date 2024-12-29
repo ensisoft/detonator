@@ -89,6 +89,8 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
     hash = base::hash_combine(hash, mType);
     hash = base::hash_combine(hash, mShaderSrc);
     hash = base::hash_combine(hash, mShaderUri);
+    hash = base::hash_combine(hash, state.draw_primitive);
+    hash = base::hash_combine(hash, state.draw_category);
 
     if (mType == Type::Color)
     {
@@ -106,7 +108,6 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetColor(ColorIndex::BottomLeft));
             hash = base::hash_combine(hash, GetColor(ColorIndex::BottomRight));
             hash = base::hash_combine(hash, GetColorWeight());
-            hash = base::hash_combine(hash, state.draw_primitive);
             hash = base::hash_combine(hash, mSurfaceType);
         }
     }
@@ -119,7 +120,6 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetTextureVelocity());
             hash = base::hash_combine(hash, GetTextureRotation());
             hash = base::hash_combine(hash, GetAlphaCutoff());
-            hash = base::hash_combine(hash, state.draw_primitive);
             hash = base::hash_combine(hash, mSurfaceType);
         }
     }
@@ -132,7 +132,6 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetTextureVelocity());
             hash = base::hash_combine(hash, GetTextureRotation());
             hash = base::hash_combine(hash, GetAlphaCutoff());
-            hash = base::hash_combine(hash, state.draw_primitive);
             hash = base::hash_combine(hash, mSurfaceType);
         }
     }
@@ -144,7 +143,6 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetAlphaCutoff());
             hash = base::hash_combine(hash, GetTileSize());
             hash = base::hash_combine(hash, GetTileOffset());
-            hash = base::hash_combine(hash, state.draw_primitive);
             hash = base::hash_combine(hash, mSurfaceType);
         }
     }
@@ -236,9 +234,6 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_OPAQUE",      static_cast<int>(SurfaceType::Opaque));
     source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_TRANSPARENT", static_cast<int>(SurfaceType::Transparent));
     source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_EMISSIVE",    static_cast<int>(SurfaceType::Emissive));
-    source.AddPreprocessorDefinition("DRAW_PRIMITIVE_POINTS",    static_cast<int>(DrawPrimitive::Points));
-    source.AddPreprocessorDefinition("DRAW_PRIMITIVE_LINES",     static_cast<int>(DrawPrimitive::Lines));
-    source.AddPreprocessorDefinition("DRAW_PRIMITIVE_TRIANGLES", static_cast<int>(DrawPrimitive::Triangles));
     source.AddPreprocessorDefinition("TEXTURE_WRAP_CLAMP",  static_cast<int>(TextureWrapping::Clamp));
     source.AddPreprocessorDefinition("TEXTURE_WRAP_REPEAT", static_cast<int>(TextureWrapping::Repeat));
     source.AddPreprocessorDefinition("TEXTURE_WRAP_MIRROR", static_cast<int>(TextureWrapping::Mirror));
@@ -257,17 +252,26 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
         }
     }
 
+    if (state.draw_primitive == DrawPrimitive::Triangles)
+        source.AddPreprocessorDefinition("DRAW_TRIANGLES");
+    else if (state.draw_primitive == DrawPrimitive::Points)
+        source.AddPreprocessorDefinition("DRAW_POINTS");
+    else if (state.draw_primitive == DrawPrimitive::Lines)
+        source.AddPreprocessorDefinition("DRAW_LINES");
+    else BUG("Bug on draw primitive");
+
+    if (state.draw_category == DrawCategory::Particles)
+        source.AddPreprocessorDefinition("GEOMETRY_IS_PARTICLES");
+    else if (state.draw_category == DrawCategory::TileBatch)
+        source.AddPreprocessorDefinition("GEOMETRY_IS_TILES");
+    else if (state.draw_category == DrawCategory::Basic)
+        source.AddPreprocessorDefinition("GEOMETRY_IS_BASIC");
+    else BUG("Bug on draw category");
+
+
     if (IsStatic())
     {
         source.AddPreprocessorDefinition("STATIC_SHADER_SOURCE");
-
-        if (state.draw_primitive == DrawPrimitive::Triangles)
-            source.AddPreprocessorDefinition("DRAW_TRIANGLES");
-        else if (state.draw_primitive == DrawPrimitive::Points)
-            source.AddPreprocessorDefinition("DRAW_POINTS");
-        else if (state.draw_primitive == DrawPrimitive::Lines)
-            source.AddPreprocessorDefinition("DRAW_LINES");
-        else BUG("Bug on draw primitive");
 
         if (mSurfaceType == SurfaceType::Transparent)
             source.AddPreprocessorDefinition("TRANSPARENT_SURFACE");
@@ -312,23 +316,14 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
 
 bool MaterialClass::ApplyDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
 {
-    const bool render_points = state.draw_primitive == DrawPrimitive::Points;
-    // todo: kill the kRenderPoints uniform
-    program.SetUniform("kRenderPoints", render_points ? 1.0f : 0.0f);
     program.SetUniform("kTime", (float)state.material_time);
     program.SetUniform("kEditingMode", (int)state.editing_mode);
-
-    // todo: fix this, point rendering could be used without particles.
-    const auto effect = static_cast<int>(GetParticleEffect());
-    program.SetUniform("kParticleEffect", render_points ? effect : 0);
+    program.SetUniform("kSurfaceType", static_cast<int>(mSurfaceType));
 
     // for the future... for different render passes we got two options
     // either the single shader implements the different render pass
     // functionality or then there are different shaders for different passes
     // program.SetUniform("kRenderPass", (int)state.renderpass);
-
-    program.SetUniform("kSurfaceType", static_cast<int>(mSurfaceType));
-    program.SetUniform("kDrawPrimitive", static_cast<int>(state.draw_primitive));
 
     if (mType == Type::Color)
     {
@@ -1139,7 +1134,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         static const char* source = {
 #include "shaders/fragment_tilemap_shader.glsl"
         };
-
+        src.LoadRawSource(base_shader);
         src.LoadRawSource(source);
     }
     else if (mType == Type::Particle2D)
@@ -1217,8 +1212,14 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
 
     const float kBlendCoeff  = BlendFrames() ? binds.blend_coefficient : 0.0f;
     program.SetTextureCount(2);
-    program.SetUniform("kBlendCoeff",                  kBlendCoeff);
-    program.SetUniform("kAlphaMask",                   alpha_mask);
+    program.SetUniform("kBlendCoeff", kBlendCoeff);
+    program.SetUniform("kAlphaMask", alpha_mask);
+
+    if (state.draw_category == DrawCategory::Particles)
+    {
+        const auto effect = static_cast<int>(GetParticleEffect());
+        program.SetUniform("kParticleEffect", effect);
+    }
 
     // set software wrap/clamp. -1 = disabled.
     if (need_software_wrap)
@@ -1287,10 +1288,16 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
         math::equals(1.0f, sy, eps))
         need_software_wrap = false;
 
+    program.SetTextureCount(1);
     program.SetTexture("kTexture", 0, *texture);
     program.SetUniform("kTextureBox", x, y, sx, sy);
-    program.SetTextureCount(1);
     program.SetUniform("kAlphaMask", binds.textures[0]->IsAlphaMask() ? 1.0f : 0.0f);
+
+    if (state.draw_category == DrawCategory::Particles)
+    {
+        const auto effect = static_cast<int>(GetParticleEffect());
+        program.SetUniform("kParticleEffect", effect);
+    }
 
     // set software wrap/clamp. -1 = disabled.
     if (need_software_wrap)
