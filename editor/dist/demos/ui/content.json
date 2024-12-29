@@ -607,7 +607,18 @@
       "texture_min_filter": "Default",
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom"
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kBaseColor",
+          "value": {
+            "a": 1.0,
+            "b": 1.0,
+            "g": 1.0,
+            "r": 1.0
+          }
+        }
+      ]
     },
     {
       "active_texture_map": "Rwxj3GdYuH",

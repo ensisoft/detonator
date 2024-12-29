@@ -1,20 +1,30 @@
 #version 300 es
 
+// @uniforms
 uniform sampler2D kTexture;
 uniform vec4 kBaseColor;
 uniform float kTime;
-uniform float kRenderPoints;
 
-//// varyings from vertex stage ////
+// @varyings
 
-// particle specific values. only used / needed
-// when the material is used to render particles.
-in float vParticleAlpha;
-in float vParticleRandomValue;
-in float vParticleTime;
+#ifdef GEOMETRY_IS_PARTICLES
+  // particle specific values. only used / needed
+  // when the material is used to render particles.
+  in float vParticleAlpha;
+  in float vParticleRandomValue;
+  in float vParticleTime;
+#else
+  // this rendering path is currently only taken when in the
+  // editor's material widget.
+  #define vParticleAlpha 1.0
+  #define vParticleRandomValue 0.0
+  #define vParticleTime 0.0
+#endif
 
-// texture coordinates
-in vec2 vTexCoord;
+#ifndef DRAW_POINTS
+  // texture coordinates
+  in vec2 vTexCoord;
+#endif
 
 vec2 Motion(vec2 st)
 {
@@ -56,10 +66,13 @@ void FragmentShaderMain()
     float t = mod(kTime + vParticleRandomValue * 3.0, 3.0);
     float s = smoothstep(1.5, 2.0, t) - smoothstep(2.5, 3.0, t);
 
-    vec2 coord = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-
+    vec2 coord;
+#ifdef DRAW_POINTS
+    coord = gl_PointCoord;
+#else
+    coord = vTexCoord;
+#endif
     vec2 texture_coord = Motion(coord); // * texture_box_scale + texture_box_translate;
-
     vec4 texture_sample = texture(kTexture, texture_coord);
 
     //vec4 star_color  = vec4(kBaseColor.rgb, texture_sample.r * s);

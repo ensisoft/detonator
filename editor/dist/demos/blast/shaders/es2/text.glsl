@@ -1,6 +1,5 @@
 #version 300 es
 uniform float kTime;
-uniform float kRenderPoints;
 
 uniform sampler2D kTexture0;
 uniform vec4  kBaseColor;

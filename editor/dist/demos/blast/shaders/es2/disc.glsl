@@ -2,11 +2,6 @@
 // material system will provide these.
 // kTime will be the current material instance runtime in second.s
 uniform float kTime;
-// If the material is applied on a particle system (i.e. we're rendering points)
-// kRenderPoints will be set to 1.0. When rendering points the shader must use
-// gl_PointCoord instead of vTexCoord. simple way to support both is to
-// vec2 pos = mix(vTexCoord, gl_PointCoord, kRenderPoints)
-uniform float kRenderPoints;
 
 uniform vec4  kBaseColor;
 uniform vec4  kColor0;
@@ -40,7 +35,7 @@ void FragmentShaderMain()
     disc_radius = clamp(disc_radius, 0.01, 0.45);
 
 
-    vec2 fragment_pos = mix(vTexCoord, gl_PointCoord, kRenderPoints) - vec2(0.5, 0.5);
+    vec2 fragment_pos = vTexCoord - vec2(0.5, 0.5);
     vec2 fragment_ori = vec2(0.0, 0.0);
     float dist = length(fragment_ori - fragment_pos);
     dist = clamp(dist, 0.0, 0.5);
