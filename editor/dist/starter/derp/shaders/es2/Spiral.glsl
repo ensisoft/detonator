@@ -4,14 +4,6 @@
 // material time in seconds.
 uniform float kTime;
 
-// when rendering particles with points the material
-// shader must sample gl_PointCoord for texture coordinates
-// instead of the texcoord varying from the vertex shader.
-// the value kRenderPoints will be set to 1.0 so for portability
-// the material shader can do:
-//   vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-uniform float kRenderPoints;
-
 // custom uniforms that need to match the json description
 uniform vec4 kBaseColor;
 
@@ -19,14 +11,6 @@ uniform sampler2D kTexture;
 
 // varyings from vertex stage.
 varying vec2 vTexCoord;
-
-// per particle data.
-// these are only written when the drawable is a particle engine
-varying float vParticleAlpha;
-// particle random value.
-varying float vParticleRandomValue;
-// normalized particle lifetime.
-varying float vParticleTime;
 
 float spiral(vec2 m) {
 	float r = length(m);
