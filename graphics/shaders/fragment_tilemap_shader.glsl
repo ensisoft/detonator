@@ -10,6 +10,8 @@ R"CPP_RAW_STRING(//"
 
 precision highp float;
 
+// @uniforms
+
 // Tilemap texture
 uniform sampler2D kTexture;
 
@@ -44,30 +46,27 @@ uniform vec2 kTileOffset;
 // The extra space in pixels around each tile.
 uniform vec2 kTilePadding;
 
-// Runtime flag to indicate GL_POINTS and gl_PointCoord
-// for texture coordinates.
-uniform float kRenderPoints;
-
-// Incoming per vertex texture coordinates
-in vec2 vTexCoord;
-
+// @varyings
 // Incoming per vertex tile data.
-in vec2 vTileData;
+#ifdef GEOMETRY_IS_TILES
+  in vec2 vTileData;
+#endif
 
 float GetTileIndex() {
     // to help debugging the material in the editor we're checking the flag
     // here whether we're editing or not and then either return a tile index
     // based on a uniform or a "real" tile index based on tile data.
-    if (kTileIndex > 0.0)
-        return kTileIndex - 1.0;
+#ifdef GEOMETRY_IS_TILES
     return vTileData.x;
+#endif
+    return kTileIndex;
 }
 
 void FragmentShaderMain() {
     // the tile rendering can provide geometry also through GL_POINTS.
     // that means we must then use gl_PointCoord as the texture coordinates
     // for the fragment.
-    vec2 frag_texture_coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+    vec2 frag_texture_coords = GetTextureCoords();
 
     // apply texture box transformation
     vec2 texture_box_size      = kTextureBox.zw;

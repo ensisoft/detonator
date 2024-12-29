@@ -3,13 +3,13 @@ R"CPP_RAW_STRING(//"
 
 #version 300 es
 
+// @uniforms
+
 // the monotonic material instance time in seconds.
 uniform float kTime;
 
 // current surface type value.
 uniform int kSurfaceType;
-// current draw primitive
-uniform int kDrawPrimitive;
 // particle alpha mask
 uniform sampler2D kMask;
 // the sub-rectangle in the texture from where to sample
@@ -23,19 +23,32 @@ uniform float kParticleBaseRotation;
 // particle rotation mode.
 uniform int kParticleRotation;
 
-// Vertex input
-// ---------------------------------------------------
-// Vertex texture coordinates.
-in vec2 vTexCoord;
-// Normalized lifetime of the particle
-in float vParticleTime;
-// Particle alpha value.
-in float vParticleAlpha;
-// Particle random value. [0.0, 1.0]
-in float vParticleRandomValue;
-// Angle of the particle's direction vector
-// relative to the x axis
-in float vParticleAngle;
+// @varyings
+
+#ifdef GEOMETRY_IS_PARTICLES
+  // Normalized lifetime of the particle
+  in float vParticleTime;
+  // Particle alpha value.
+  in float vParticleAlpha;
+  // Particle random value. [0.0, 1.0]
+  in float vParticleRandomValue;
+  // Angle of the particle's direction vector
+  // relative to the x axis
+  in float vParticleAngle;
+#else
+  // currently only used when in the material editor
+  // make these dummies
+  #define vParticleTime kTime
+  #define vParticleAlpha 1.0
+  #define vParticleRandomValue 0.0
+  #define vParticleAngle 0.0
+#endif
+
+#ifndef DRAW_POINTS
+  // Vertex texture coordinates.
+  in vec2 vTexCoord;
+#endif
+
 
 void MixColors(float alpha) {
 
@@ -96,16 +109,9 @@ float ReadTextureAlpha(vec2 coord) {
     return alpha;
 }
 
-void DrawTriangles() {
-    // this path is only taken when the material widget renders
-    // the preview, right now it doesn't know about point rendering
-    // yet so it uses a textured shape.
-    float alpha = ReadTextureAlpha(vTexCoord);
+void FragmentShaderMain() {
 
-    MixColors(alpha);
-}
-
-void DrawPoints() {
+#ifdef DRAW_POINTS
     // this is the normal particle rendering path
     // using point rendering. texture sampling works
     // but since the geometry is points the texture
@@ -114,22 +120,24 @@ void DrawPoints() {
     float alpha = ReadTextureAlpha(gl_PointCoord);
 
     MixColors(alpha);
-}
+#endif
 
-void DrawLines() {
+#ifdef DRAW_LINES
     // right now we're not supporting texture sampling
     // or rather.. the particle engine doesn't provide
     // texture coordinates for non point geometry (lines)
     MixColors(1.0);
-}
+#endif
 
-void FragmentShaderMain() {
-    if (kDrawPrimitive == DRAW_PRIMITIVE_POINTS)
-        DrawPoints();
-    else if (kDrawPrimitive == DRAW_PRIMITIVE_LINES)
-       DrawLines();
-    else if (kDrawPrimitive == DRAW_PRIMITIVE_TRIANGLES)
-        DrawTriangles();
+#ifdef DRAW_TRIANGLES
+    // this path is only taken when the material widget renders
+    // the preview, right now it doesn't know about point rendering
+    // yet so it uses a textured shape.
+    float alpha = ReadTextureAlpha(vTexCoord);
+
+    MixColors(alpha);
+#endif
+
 }
 
 )CPP_RAW_STRING"

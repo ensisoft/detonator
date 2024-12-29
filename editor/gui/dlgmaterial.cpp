@@ -210,7 +210,7 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
 
         gfx::MaterialInstance material(klass);
         material.SetRuntime(mUI.widget->GetTime());
-        material.SetUniform("kTileIndex", (float)GetValue(mUI.tileIndex) + 1.0f);
+        material.SetUniform("kTileIndex", (float)GetValue(mUI.tileIndex));
 
         gfx::FillRect(painter, rect, material);
 

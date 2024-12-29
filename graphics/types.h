@@ -74,6 +74,40 @@ namespace gfx
         Points, Lines, Triangles
     };
 
+    // broad category of drawables for describing the semantic
+    // meaning of the drawable. Each drawable in this category
+    // has specific constraint and specific requirements in order
+    // for the drawable and material to work together.
+    //
+    // Category    Particle Data  Tile Data  Tris Points  Lines
+    //----------------------------------------------------------
+    // Basic                                  *     *       *
+    // Particles        *                           *       *
+    // TileBatch                     *        *     *
+    //
+    // In other words if we're for example rendering particles
+    // then the material can expect there to be per particle data
+    // and the rasterizer draw primitive is either POINTS or LINES.
+    //
+    // If any material's shader source is written to support
+    // multiple different drawable types then care must be taken
+    // to ensure that the right set of varyings are exposed  in
+    // the vertex-fragment shader interface. In other words if we
+    // have a fragment shader that can module it's output with per
+    // particle alpha but the shader is used with a non-particle
+    // drawable then there's not going to be incoming per particle
+    // alpha value which means that if the fragment shader has
+    // 'in float vParticleAlpha' it will cause a program link error.
+    enum class DrawCategory {
+        // Lines, line batches, polygons, simple shapes such as rect
+        // round rect, circle, 2D and 3D
+        Basic,
+        // Particles with per particle data.
+        Particles,
+        // Tiles with per tile data.
+        TileBatch
+    };
+
     // type aliases for base types for gfx.
     using FPoint = base::FPoint;
     using IPoint = base::IPoint;

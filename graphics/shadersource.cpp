@@ -603,12 +603,13 @@ bool ShaderSource::LoadRawSource(const std::string& source)
         {
             ShaderBlock block;
             block.type = ShaderBlockType::PreprocessorDefine;
-            block.data = trimmed;
-            mShaderBlocks["preprocessor"].push_back(std::move(block));
+            block.data = line;
+            mShaderBlocks[group.empty() ? "preprocessor" : group].push_back(std::move(block));
         }
         else if (base::StartsWith(trimmed, "#ifdef") ||
                  base::StartsWith(trimmed, "#ifndef") ||
                  base::StartsWith(trimmed, "#else") ||
+                 base::StartsWith(trimmed, "#elif") ||
                  base::StartsWith(trimmed, "#endif"))
         {
             ShaderBlock block;

@@ -149,6 +149,9 @@ namespace gfx
             bool editing_mode = false;
             // what primitives will be drawn with this material.
             DrawPrimitive draw_primitive = DrawPrimitive::Triangles;
+            // What is the drawable category and data interface we
+            // can / need to expect.
+            DrawCategory draw_category = DrawCategory::Basic;
             // The current material instance time.
             double material_time = 0.0f;
             // The uniform parameters set on the material instance (if any).

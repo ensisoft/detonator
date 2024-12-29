@@ -10,15 +10,21 @@ precision highp float;
 // The incoming color value.
 uniform vec4 kBaseColor;
 
-// Incoming per particle alpha value.
-in float vParticleAlpha;
+// @varyings
+
+#ifdef GEOMETRY_IS_PARTICLES
+  // Incoming per particle alpha value.
+  in float vParticleAlpha;
+#endif
 
 void FragmentShaderMain() {
 
     vec4 color = kBaseColor;
 
+#ifdef GEOMETRY_IS_PARTICLES
     // modulate by alpha
     color.a *= vParticleAlpha;
+#endif
 
     // out value.
     fs_out.color = color;

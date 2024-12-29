@@ -7,6 +7,8 @@ R"CPP_RAW_STRING(//"
 
 precision highp float;
 
+// @uniforms
+
 // Texture sampler2 for the two sprite animation frames
 // These may or may not be bound to same texture object
 // depending on whether the frames are in separate textures
@@ -69,19 +71,22 @@ uniform ivec2 kTextureWrap;
 // 1.0 = texture is alpha mask only.
 uniform vec2 kAlphaMask;
 
-// Incoming vertex texture coordinates.
-in vec2 vTexCoord;
 
-// Incoming per particle random value.
-in float vParticleRandomValue;
-
-// Incoming per particle alpha value.
-in float vParticleAlpha;
+// @varyings
+#ifdef GEOMETRY_IS_PARTICLES
+  // Incoming per particle random value.
+  in float vParticleRandomValue;
+  // Incoming per particle alpha value.
+  in float vParticleAlpha;
+#endif
 
 vec2 RotateCoords(vec2 coords) {
     float random_angle = 0.0;
+
+#ifdef GEOMETRY_IS_PARTICLES
     if (kParticleEffect == PARTICLE_EFFECT_ROTATE)
         random_angle = mix(0.0, 3.1415926, vParticleRandomValue);
+#endif
 
     float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle;
     return RotateTextureCoords(coords, angle);
@@ -114,7 +119,10 @@ void FragmentShaderMain() {
     vec4 col1 = mix(kBaseColor * tex1, vec4(kBaseColor.rgb, kBaseColor.a * tex1.a), kAlphaMask[1]);
 
     vec4 color = mix(col0, col1, kBlendCoeff);
+
+#ifdef GEOMETRY_IS_PARTICLES
     color.a *= vParticleAlpha;
+#endif
 
     if (color.a <= kAlphaCutoff)
         discard;

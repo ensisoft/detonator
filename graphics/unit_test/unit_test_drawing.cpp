@@ -436,7 +436,7 @@ void unit_test_material_uniforms()
         TestDevice device;
         gfx::ProgramState program;
 
-        gfx::TextureMap2DClass test(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Texture);
         test.SetTextureScaleX(2.0f);
         test.SetTextureScaleY(3.0f);
         test.SetTextureVelocityX(4.0f);
@@ -447,24 +447,28 @@ void unit_test_material_uniforms()
 
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
+        env.draw_category = gfx::DrawCategory::Basic;
+        env.draw_primitive = gfx::DrawPrimitive::Triangles;
         env.material_time = 2.0f;
         test.ApplyDynamicState(env, device, program);
 
         glm::vec2 texture_scale;
         glm::vec3 texture_velocity;
         int particle_effect;
-        float render_points_flag;
         float runtime;
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
         TEST_REQUIRE(program.GetUniform("kTextureVelocity", &texture_velocity));
-        TEST_REQUIRE(program.GetUniform("kParticleEffect", &particle_effect));
-        TEST_REQUIRE(program.GetUniform("kRenderPoints", &render_points_flag));
         TEST_REQUIRE(program.GetUniform("kTime", &runtime));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
         TEST_REQUIRE(texture_velocity == glm::vec3(4.0f, 5.0f, -1.0f));
-        TEST_REQUIRE(particle_effect == 0);
-        TEST_REQUIRE(render_points_flag == 0.0f);
         TEST_REQUIRE(runtime == 2.0f);
+
+        env.draw_category  = gfx::DrawCategory::Particles;
+        env.draw_primitive = gfx::DrawPrimitive::Points;
+        test.SetParticleEffect(gfx::MaterialClass::ParticleEffect::Rotate);
+        test.ApplyDynamicState(env, device, program);
+        TEST_REQUIRE(program.GetUniform("kParticleEffect", &particle_effect));
+        TEST_REQUIRE(particle_effect == static_cast<int>(gfx::MaterialClass::ParticleEffect::Rotate));
 
     }
 
@@ -475,7 +479,7 @@ void unit_test_material_uniforms()
         TestDevice device;
         gfx::ProgramState program;
 
-        gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Sprite);
         test.SetTextureScaleX(2.0f);
         test.SetTextureScaleY(3.0f);
         test.SetTextureVelocityX(4.0f);
@@ -488,27 +492,30 @@ void unit_test_material_uniforms()
 
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
+        env.draw_category = gfx::DrawCategory::Basic;
+        env.draw_primitive = gfx::DrawPrimitive::Triangles;
         env.material_time = 2.0f;
         test.ApplyDynamicState(env, device, program);
 
         glm::vec2 texture_scale;
         glm::vec3 texture_velocity;
         int particle_effect = 0;
-        float render_points_flag;
         float runtime;
         gfx::Color4f base_color;
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
         TEST_REQUIRE(program.GetUniform("kTextureVelocity", &texture_velocity));
-        TEST_REQUIRE(program.GetUniform("kParticleEffect", &particle_effect));
-        TEST_REQUIRE(program.GetUniform("kRenderPoints", &render_points_flag));
         TEST_REQUIRE(program.GetUniform("kTime", &runtime));
         TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
         TEST_REQUIRE(texture_velocity == glm::vec3(4.0f, 5.0f, -1.0f));
-        TEST_REQUIRE(particle_effect == 0);
-        TEST_REQUIRE(render_points_flag == 0.0f);
         TEST_REQUIRE(runtime == 2.0f);
         TEST_REQUIRE(base_color == gfx::Color::Green);
+
+        env.draw_category = gfx::DrawCategory::Particles;
+        env.draw_primitive = gfx::DrawPrimitive::Points;
+        test.ApplyDynamicState(env, device, program);
+        TEST_REQUIRE(program.GetUniform("kParticleEffect", &particle_effect));
+        TEST_REQUIRE(particle_effect == 0);
 
     }
 

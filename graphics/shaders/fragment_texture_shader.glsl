@@ -6,6 +6,8 @@ R"CPP_RAW_STRING(//"
 
 precision highp float;
 
+// @uniforms
+
 // The texture to sample from
 uniform sampler2D kTexture;
 // The texture sub-rectangle inside a potentially
@@ -55,19 +57,21 @@ uniform float kTextureRotation;
 // 3 = wrap + mirror around sub-rect borders.
 uniform ivec2 kTextureWrap;
 
-// Incoming vertex texture coordinates.
-in vec2 vTexCoord;
-
-// Incoming per particle random value.
-in float vParticleRandomValue;
-
-// Incoming per particle alpha value.
-in float vParticleAlpha;
+// @varyings
+#ifdef GEOMETRY_IS_PARTICLES
+  // Incoming per particle random value.
+  in float vParticleRandomValue;
+  // Incoming per particle alpha value.
+  in float vParticleAlpha;
+#endif
 
 vec2 RotateCoords(vec2 coords) {
     float random_angle = 0.0;
+
+#ifdef GEOMETRY_IS_PARTICLES
     if (kParticleEffect == PARTICLE_EFFECT_ROTATE)
         random_angle = mix(0.0, 3.1415926, vParticleRandomValue);
+#endif
 
     float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle;
     return RotateTextureCoords(coords, angle);
@@ -96,7 +100,10 @@ void FragmentShaderMain() {
     // or modulate base color with texture's alpha value if
     // texture is an alpha mask
     vec4 color = mix(kBaseColor * texel, vec4(kBaseColor.rgb, kBaseColor.a * texel.a), kAlphaMask);
+
+#ifdef GEOMETRY_IS_PARTICLES
     color.a *= vParticleAlpha;
+#endif
 
     if (color.a <= kAlphaCutoff)
         discard;
