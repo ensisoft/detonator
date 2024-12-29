@@ -24,29 +24,15 @@ in vec2 aTexCoord;
 #endif
 
 // @uniforms
-
 uniform mat4 kProjectionMatrix;
 uniform mat4 kModelViewMatrix;
 
 // @varyings
-
 out vec2 vTexCoord;
-out float vParticleRandomValue;
-out float vParticleAlpha;
-out float vParticleTime;
-out float vParticleAngle;
-out vec2 vTileData;
 
 void VertexShaderMain() {
     vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 0.0, 1.0);
     vTexCoord    = aTexCoord;
-
-    // dummy data out.
-    vParticleRandomValue = 0.0;
-    vParticleAlpha       = 1.0;
-    vParticleTime        = 0.0;
-    vParticleAngle       = 0.0;
-    vTileData            = vec2(0.0, 0.0);
 
     mat4 instance_matrix = GetInstanceTransform();
 

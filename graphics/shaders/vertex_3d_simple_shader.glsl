@@ -28,20 +28,9 @@ uniform mat4 kModelViewMatrix;
 
 // @varyings
 out vec2 vTexCoord;
-out float vParticleRandomValue;
-out float vParticleAlpha;
-out float vParticleTime;
-out float vParticleAngle;
-out vec2 vTileData;
 
 void VertexShaderMain() {
     vTexCoord = aTexCoord;
-   // dummy out
-    vParticleRandomValue = 0.0;
-    vParticleAlpha       = 1.0;
-    vParticleTime        = 0.0;
-    vParticleAngle       = 0.0;
-    vTileData            = vec2(0.0, 0.0);
 
     mat4 instance_matrix = GetInstanceTransform();
 
