@@ -466,6 +466,7 @@ public:
         GLint max_texture_units = 0;
         GLint max_rbo_size = 0;
         GLint max_samples = 0;
+        GLint uniform_buffer_offset_alignment = 0;
         GL_CALL(glGetIntegerv(GL_MAX_SAMPLES, &max_samples));
         GL_CALL(glGetIntegerv(GL_STENCIL_BITS, &stencil_bits));
         GL_CALL(glGetIntegerv(GL_RED_BITS, &red_bits));
@@ -476,6 +477,7 @@ public:
         GL_CALL(glGetIntegerv(GL_ALIASED_POINT_SIZE_RANGE, point_size));
         GL_CALL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_texture_units));
         GL_CALL(glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &max_rbo_size));
+        GL_CALL(glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniform_buffer_offset_alignment));
         DEBUG("OpenGLESGraphicsDevice");
         // a little hack to provide the INFO level graphics device
         // information only once.
@@ -496,6 +498,7 @@ public:
             DEBUG("Fragment shader texture units: %1", max_texture_units);
             DEBUG("Maximum render buffer size %1x%2", max_rbo_size, max_rbo_size);
             DEBUG("FBO MSAA samples: %1", max_samples);
+            DEBUG("UBO offset alignment: %1", uniform_buffer_offset_alignment);
         }
         else
         {
@@ -513,6 +516,7 @@ public:
             INFO("Fragment shader texture units: %1", max_texture_units);
             INFO("Maximum render buffer size %1x%2", max_rbo_size, max_rbo_size);
             INFO("FBO MSAA samples: %1", max_samples);
+            INFO("UBO offset alignment: %1", uniform_buffer_offset_alignment);
         }
 
         const char* extensions = (const char*)mGL.glGetString(GL_EXTENSIONS);
@@ -570,6 +574,7 @@ public:
         GL_CALL(glFrontFace(GL_CCW));
 
         have_printed_info = true;
+        mUniformBufferOffsetAlignment = (unsigned)uniform_buffer_offset_alignment;
     }
     explicit OpenGLES2GraphicsDevice(std::shared_ptr<dev::Context> context) noexcept
         : OpenGLES2GraphicsDevice(context.get())
@@ -1677,6 +1682,15 @@ public:
         GLenum flag = GL_NONE;
         size_t capacity = 0;
 
+        if (type == BufferType::UniformBuffer)
+        {
+            const auto reminder = bytes % mUniformBufferOffsetAlignment;
+            const auto padding  = mUniformBufferOffsetAlignment - reminder;
+            VERBOSE("Grow uniform buffer size from %1 to %2 bytes for offset alignment to %3.",
+                    bytes, bytes+padding, mUniformBufferOffsetAlignment);
+            bytes += padding;
+        }
+
         if (usage == gfx::Geometry::Usage::Static)
         {
             flag = GL_STATIC_DRAW;
@@ -1723,7 +1737,9 @@ public:
         DEBUG("Allocated new buffer object. [bo=%1, size=%2, type=%3, type=%4]",
               buffer.name, buffer.capacity, usage, type);
 
-        return {buffers.size()-1, 0};
+        const auto buffer_index = buffers.size() - 1;
+        const auto buffer_offset = 0;
+        return { buffer_index, buffer_offset };
     }
     void FreeBuffer(size_t index, size_t offset, size_t bytes, gfx::Geometry::Usage usage, BufferType type)
     {
@@ -3333,6 +3349,8 @@ private:
         // support multiple color attachments in GL ES2.
         bool GL_EXT_draw_buffers = false;
     } mExtensions;
+
+    unsigned mUniformBufferOffsetAlignment = 0;
 };
 
 } // namespace
