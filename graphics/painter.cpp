@@ -137,6 +137,7 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         device_state.stencil_ref   = draw.state.stencil_ref;
         device_state.bWriteColor   = draw.state.write_color;
         device_state.depth_test    = draw.state.depth_test;
+        device_state.winding_order = draw.state.winding;
 
         // apply shader program state dynamically once on the GPU program object
         // if the GPU program object changes.

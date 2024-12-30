@@ -125,6 +125,12 @@ namespace gfx
             // rasterizer setting for line width when rasterizing
             // geometries with lines.
             float line_width = 1.0f;
+
+            enum class PolygonWindingOrder {
+                CounterClockWise,
+                ClockWise
+            };
+            PolygonWindingOrder winding_order = PolygonWindingOrder::CounterClockWise;
         };
 
         virtual ~Device() = default;
