@@ -380,15 +380,22 @@ namespace math
     }
     // transform a direction vector (such as a normal) safely even if the
     // transformation matrix contains a non-uniform scale.
+    inline glm::vec3 TransformNormalVector(const glm::mat4& matrix, const glm::vec3& vector) noexcept
+    {
+        const auto& normal_transform = glm::mat3(glm::transpose(glm::inverse(matrix)));
+        return normal_transform * vector;
+    }
     inline glm::vec4 TransformNormalVector(const glm::mat4& matrix, const glm::vec4& vector) noexcept
     {
-        return glm::transpose(glm::inverse(matrix)) * vector;
+        const auto& ret = TransformNormalVector(matrix, glm::vec3{vector.x, vector.y, vector.z});
+        return {ret.x, ret.y, ret.z, 0.0f};
     }
+
     // transform a direction vector (such as a normal) safely even if the
     // transformation matrix contains a non-uniform scale.
     inline glm::vec2 TransformNormalVector(const glm::mat4& matrix, const glm::vec2& vector) noexcept
     {
-        return TransformNormalVector(matrix, glm::vec4(vector, 0.0f, 0.0f));
+        return TransformNormalVector(matrix, glm::vec3(vector, 0.0f));
     }
 
     inline glm::vec4 TransformVector(const glm::mat4& matrix, const glm::vec4& vector) noexcept
