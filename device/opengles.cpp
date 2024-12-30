@@ -942,6 +942,15 @@ public:
                 GL_CALL(glBlendFunc(GL_ONE, GL_ONE));
                 break;
         }
+        switch (state.winding_order)
+        {
+            case State::PolygonWindingOrder::CounterClockWise:
+                GL_CALL(glFrontFace(GL_CCW));
+                break;
+            case State::PolygonWindingOrder::ClockWise:
+                GL_CALL(glFrontFace(GL_CW));
+                break;
+        }
 
         // enable scissor if needed.
         if (EnableIf(GL_SCISSOR_TEST, !state.scissor.IsEmpty()))
