@@ -149,6 +149,10 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_i
 
     source.LoadRawSource(vertex_base);
     source.LoadRawSource(shader);
+    source.AddShaderName("2D Vertex Shader");
+    source.AddShaderSourceUri("shaders/vertex_base.glsl");
+    source.AddShaderSourceUri("shaders/vertex_2d_simple_shader.glsl");
+    source.AddDebugInfo("Instanced", use_instancing ? "YES" : "NO");
     return source;
 }
 
@@ -167,6 +171,10 @@ gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_i
     }
     source.LoadRawSource(vertex_base);
     source.LoadRawSource(shader);
+    source.AddShaderName("3D Vertex Shader");
+    source.AddShaderSourceUri("shaders/vertex_base.glsl");
+    source.AddShaderSourceUri("shaders/vertex_3d_simple_shader.glsl");
+    source.AddDebugInfo("Instanced", use_instancing ? "YES" : "NO");
     return source;
 }
 
@@ -185,6 +193,10 @@ gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_in
     }
     source.LoadRawSource(vertex_base);
     source.LoadRawSource(shader);
+    source.AddShaderName("3D Model Shader");
+    source.AddShaderSourceUri("shaders/vertex_base.glsl");
+    source.AddShaderSourceUri("shaders/vertex_3d_model_shader.glsl");
+    source.AddDebugInfo("Instanced", use_instancing ? "YES" : "NO");
     return source;
 }
 

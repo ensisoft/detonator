@@ -100,6 +100,10 @@ ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device
     }
     source.LoadRawSource(base_shader);
     source.LoadRawSource(particle_shader);
+    source.AddShaderName("2D Particle Shader");
+    source.AddShaderSourceUri("shaders/vertex_shader_base.glsl");
+    source.AddShaderSourceUri("shaders/vertex_2d_particle_shader.glsl");
+    source.AddDebugInfo("Instanced", env.instanced_draw ? "YES" : "NO");
     return source;
 }
 

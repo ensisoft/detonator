@@ -56,6 +56,8 @@ ShaderSource ShaderProgram::GetShader(const Material& material, const Material::
 
     source.LoadRawSource(utility_func);
     source.LoadRawSource(fragment_main);
+    source.AddShaderSourceUri("shaders/utility_functions.glsl");
+    source.AddShaderSourceUri("shaders/generic_main_fragment_shader.glsl");
     return source;
 }
 ShaderSource ShaderProgram::GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const
@@ -78,6 +80,7 @@ ShaderSource ShaderProgram::GetShader(const Drawable& drawable, const Drawable::
         return {};
     }
     source.LoadRawSource(vertex_main);
+    source.AddShaderSourceUri("shaders/generic_main_vertex_shader.glsl");
     return source;
 }
 std::string ShaderProgram::GetShaderName(const Material& material, const Material::Environment& env) const

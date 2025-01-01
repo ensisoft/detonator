@@ -3311,6 +3311,7 @@ int main(int argc, char* argv[])
     auto gfx_device = dev_device->GetSharedGraphicsDevice();
     auto painter = gfx::Painter::Create(gfx_device);
     painter->SetEditingMode(false);
+    painter->SetDebugMode(debug_context);
 
     std::size_t test_index = 0;
     std::vector<std::unique_ptr<GraphicsTest>> tests;

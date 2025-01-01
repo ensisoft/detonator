@@ -721,7 +721,7 @@ public:
     {
         auto shader = std::make_shared<ShaderImpl>(mGL);
         shader->SetName(args.name);
-        shader->CompileSource(args.source, args.debug || mContext->IsDebug());
+        shader->CompileSource(args.source, args.debug);
         mShaders[id] = shader;
         return shader;
     }

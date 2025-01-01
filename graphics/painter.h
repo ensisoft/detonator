@@ -110,6 +110,8 @@ namespace gfx
         // dynamically on every render.
         inline void SetEditingMode(bool on_off) noexcept
         { mEditingMode = on_off; }
+        inline void SetDebugMode(bool on_off) noexcept
+        { mDebugMode = on_off; }
         inline void SetDevice(std::shared_ptr<Device> device) noexcept
         { mDeviceInst = device; mDevice = mDeviceInst.get(); }
         inline void SetDevice(Device* device) noexcept
@@ -306,6 +308,7 @@ namespace gfx
     private:
         mutable std::vector<std::string> mErrors;
         bool mEditingMode = false;
+        bool mDebugMode= false;
     };
 
 } // namespace

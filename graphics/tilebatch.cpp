@@ -92,6 +92,8 @@ ShaderSource TileBatch::GetShader(const Environment& env, const Device& device) 
     source.SetType(ShaderSource::Type::Vertex);
     source.SetVersion(ShaderSource::Version::GLSL_300);
     source.LoadRawSource(src);
+    source.AddShaderName("Tile Vertex Shader");
+    source.AddDebugInfo("Tile shape", base::ToString(shape));
     return source;
 }
 

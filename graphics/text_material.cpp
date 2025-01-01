@@ -125,6 +125,8 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
         source.SetPrecision(ShaderSource::Precision::High);
         source.SetVersion(ShaderSource::Version::GLSL_300);
         source.LoadRawSource(fragment_source);
+        source.AddShaderName("Text Shader");
+        source.AddShaderSourceUri("shaders/fragment_text_bitmap_shader.glsl");
         return source;
     }
     else if (format == TextBuffer::RasterFormat::Texture)
@@ -138,6 +140,8 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
         source.SetPrecision(ShaderSource::Precision::High);
         source.SetVersion(ShaderSource::Version::GLSL_300);
         source.LoadRawSource(fragment_source);
+        source.AddShaderName("Text Shader");
+        source.AddShaderSourceUri("shaders/fragment_text_texture_shader.glsl");
         return source;
     }
     else if (format == TextBuffer::RasterFormat::None)

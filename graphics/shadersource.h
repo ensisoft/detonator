@@ -125,17 +125,31 @@ namespace gfx
         { return mShaderBlocks.empty(); }
         inline void Clear() noexcept
         { mShaderBlocks.clear(); }
-        inline void SetShaderSourceUri(std::string uri) noexcept
-        { mShaderSourceUri = std::move(uri); }
-        inline void SetShaderName(std::string name) noexcept
-        { mShaderName = std::move(name); }
-
         inline Type GetType() const noexcept
         { return mType; }
         inline Precision GetPrecision() const noexcept
         { return mPrecision; }
         inline Version GetVersion() const noexcept
         { return mVersion; }
+
+        struct DebugInfo {
+            std::string key;
+            std::string val;
+        };
+
+        inline void AddDebugInfo(std::string key, std::string val) noexcept
+        { mDebugInfos.push_back( { std::move(key), std::move(val) } ); }
+        inline void AddDebugInfo(DebugInfo info) noexcept
+        { mDebugInfos.push_back(std::move(info)); }
+        inline const auto& GetDebugInfo(size_t index) const noexcept
+        { return mDebugInfos[index]; }
+        inline auto GetDebugInfoCount() const noexcept
+        { return mDebugInfos.size(); }
+
+        inline void AddShaderName(std::string name) noexcept
+        { AddDebugInfo("Name", std::move(name)); }
+        inline void AddShaderSourceUri(std::string uri) noexcept
+        { AddDebugInfo("Source", std::move(uri)); }
 
         const ShaderDataDeclaration* FindDataDeclaration(const std::string& key) const;
         const ShaderBlock* FindShaderBlock(const std::string& key) const;
@@ -160,14 +174,11 @@ namespace gfx
         inline bool HasVarying(const std::string& name) const
         { return HasDataDeclaration(name, ShaderDataDeclarationType::Varying); }
 
-        inline std::string GetShaderUri() const
-        { return mShaderSourceUri; }
-        inline std::string GetShaderName() const
-        { return mShaderName; }
-
         enum class SourceVariant {
             Production, Development
         };
+
+        std::string GetShaderName() const;
 
         // Get the actual shader source string by combining
         // the shader source object's contents (i.e. data
@@ -198,12 +209,6 @@ namespace gfx
         std::unordered_map<std::string,
            std::vector<ShaderBlock>> mShaderBlocks;
 
-        // for debugging help, we can embed the shader source
-        // URI int he shader source as a comment so when it borks
-        // in production the user can easily see which shader it is.
-        std::string mShaderSourceUri;
-        // Human readable name associated with the shader.
-        // Used for debugging.
-        std::string mShaderName;
+        std::vector<DebugInfo> mDebugInfos;
     };
 } // namespace
