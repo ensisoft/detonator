@@ -23,6 +23,7 @@
 #include <unordered_set>
 
 #include "base/format.h"
+#include "base/logging.h"
 #include "graphics/drawcmd.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
@@ -219,6 +220,8 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
     ProgramPtr gpu_program = mDevice->FindProgram(program_gpu_id);
     if (!gpu_program)
     {
+        DEBUG("----------------------------------------------------------------------");
+
         ShaderPtr material_shader = mDevice->FindShader(material_gpu_id);
         if (material_shader == nullptr)
         {
@@ -226,9 +229,18 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             if (material_shader_source.IsEmpty())
                 return nullptr;
 
+            DEBUG("Compile shader: %1", material_shader_source.GetShaderName());
+            DEBUG(" GPU ID     = %1", material_gpu_id);
+            for (size_t i=0; i<material_shader_source.GetDebugInfoCount(); ++i)
+            {
+                const auto& info = material_shader_source.GetDebugInfo(i);
+                DEBUG(" %1 = %2", base::fmt::FixedString { info.key, 10 }, info.val);
+            }
+
             Shader::CreateArgs args;
-            args.name   = program.GetShaderName(material, material_environment);
+            args.name   = material_shader_source.GetShaderName();
             args.source = material_shader_source.GetSource();
+            args.debug  = mDebugMode;
             material_shader = mDevice->CreateShader(material_gpu_id, args);
         }
         if (!material_shader->IsValid())
@@ -246,9 +258,18 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             if (drawable_shader_source.IsEmpty())
                 return nullptr;
 
+            DEBUG("Compile shader: %1", drawable_shader_source.GetShaderName());
+            DEBUG(" GPU ID     = %1", drawable_gpu_id);
+            for (size_t i=0; i<drawable_shader_source.GetDebugInfoCount(); ++i)
+            {
+                const auto& info = drawable_shader_source.GetDebugInfo(i);
+                DEBUG(" %1 = %2", base::fmt::FixedString { info.key, 10 }, info.val);
+            }
+
             Shader::CreateArgs args;
-            args.name   = program.GetShaderName(drawable, drawable_environment);
+            args.name   = drawable_shader_source.GetShaderName();
             args.source = drawable_shader_source.GetSource();
+            args.debug  = mDebugMode;
             drawable_shader = mDevice->CreateShader(drawable_gpu_id, args);
         }
         if (!drawable_shader->IsValid())
@@ -259,15 +280,17 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             return nullptr;
         }
 
-        const auto& gpu_program_name = base::FormatString("%1(%2, %3)",
-                                              program.GetName(),
-                                              drawable_shader->GetName(),
-                                              material_shader->GetName());
+        DEBUG("Build program: %1", program.GetName());
+        DEBUG(" FS GPU ID = %1", material_gpu_id);
+        DEBUG(" VS GPU ID = %1", drawable_gpu_id);
 
         Program::CreateArgs args;
-        args.name = gpu_program_name;
         args.fragment_shader = material_shader;
         args.vertex_shader   = drawable_shader;
+        args.name = base::FormatString("%1(%2, %3)",
+                                       program.GetName(),
+                                       drawable_shader->GetName(),
+                                       material_shader->GetName());
 
         material.ApplyStaticState(material_environment, *mDevice, args.state);
 

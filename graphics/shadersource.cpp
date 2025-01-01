@@ -393,6 +393,16 @@ void ShaderSource::FoldUniform(const std::string& name, ShaderDataDeclarationVal
     }
 }
 
+std::string ShaderSource::GetShaderName() const
+{
+    for (const auto& info : mDebugInfos)
+    {
+        if (info.key == "Name")
+            return info.val;
+    }
+    return "";
+}
+
 std::string ShaderSource::GetSource(SourceVariant variant) const
 {
     std::stringstream ss;
@@ -419,15 +429,10 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
 
     // this could go to the beginning but I'm 100% sure it'll
     // bug out with shitty buggy drivers.
-    if (!mShaderSourceUri.empty())
+    for (const auto& debug : mDebugInfos)
     {
-        ss << "\n// shader source uri:";
-        ss << "\n// " << mShaderSourceUri << "\n\n";
-    }
-    if (!mShaderName.empty())
-    {
-        ss << "\n// shader name: ";
-        ss << "\n// " << mShaderName << "\n\n";
+        ss << "// " << base::FormatString("%1 = %2", debug.key, debug.val);
+        ss << "\n";
     }
 
     static const char* groups[] = {

@@ -80,7 +80,7 @@ std::string MaterialClass::GetShaderName(const State& state) const noexcept
         return mName;
     if (IsStatic())
         return mName;
-    return base::FormatString("BuiltIn%1Shader", mType);
+    return base::FormatString("%1 Shader", mType);
 }
 
 std::string MaterialClass::GetShaderId(const State& state) const noexcept
@@ -1077,8 +1077,8 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         ShaderSource source;
         source.SetType(ShaderSource::Type::Fragment);
         source.LoadRawSource(std::string(beg, end));
-        source.SetShaderSourceUri(mShaderUri);
-        source.SetShaderName(mName.empty() ? mShaderUri : mName);
+        source.AddShaderSourceUri(mShaderUri);
+        source.AddShaderName(mName);
         return source;
     }
 
@@ -1092,6 +1092,9 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 
     ShaderSource src;
     src.SetType(gfx::ShaderSource::Type::Fragment);
+    if (IsStatic())
+        src.AddShaderName(mName);
+    else src.AddShaderName(base::FormatString("%1 Shader", mType));
 
     if (mType == Type::Color)
     {
@@ -1100,6 +1103,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         };
 
         src.LoadRawSource(source);
+        src.AddShaderSourceUri("shaders/fragment_color_shader.glsl");
     }
     else if (mType == Type::Gradient)
     {
@@ -1109,6 +1113,8 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 
         src.LoadRawSource(base_shader);
         src.LoadRawSource(source);
+        src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
+        src.AddShaderSourceUri("shaders/fragment_gradient_shader.glsl");
     }
     else if (mType == Type::Sprite)
     {
@@ -1119,23 +1125,33 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         src.LoadRawSource(base_shader);
         src.LoadRawSource(texture_functions);
         src.LoadRawSource(source);
+        src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
+        src.AddShaderSourceUri("shaders/fragment_texture_functions.glsl");
+        src.AddShaderSourceUri("shaders/fragment_sprite_shader.glsl");
     }
     else if (mType == Type::Texture)
     {
         static const char* source =  {
 #include "shaders/fragment_texture_shader.glsl"
         };
+
         src.LoadRawSource(base_shader);
         src.LoadRawSource(texture_functions);
         src.LoadRawSource(source);
+        src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
+        src.AddShaderSourceUri("shaders/fragment_texture_functions.glsl");
+        src.AddShaderSourceUri("shaders/fragment_texture_shader.glsl");
     }
     else if (mType == Type::Tilemap)
     {
         static const char* source = {
 #include "shaders/fragment_tilemap_shader.glsl"
         };
+
         src.LoadRawSource(base_shader);
         src.LoadRawSource(source);
+        src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
+        src.AddShaderSourceUri("shaders/fragment_tilemap_shader.glsl");
     }
     else if (mType == Type::Particle2D)
     {
@@ -1144,6 +1160,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         };
 
         src.LoadRawSource(source);
+        src.AddShaderSourceUri("shaders/fragment_2d_particle_shader.glsl");
     }
     else BUG("Unknown material type.");
 
