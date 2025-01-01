@@ -46,6 +46,24 @@
 
 namespace base
 {
+    namespace fmt {
+        struct FixedString {
+            std::string str;
+            unsigned length;
+        };
+
+        inline std::string ToString(const FixedString& fixed_string)
+        {
+            if (fixed_string.length == 0)
+                return "";
+
+            std::stringstream ss;
+            ss << std::setfill(' ') << std::left << std::setw(fixed_string.length);
+            ss << fixed_string.str;
+            return ss.str();
+        }
+    } //
+
     namespace detail {
         std::string ToString(const std::wstring& s);
         inline std::string ToString(const std::string& s)
