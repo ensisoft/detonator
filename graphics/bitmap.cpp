@@ -382,5 +382,13 @@ URect FindImageRectangle(const IBitmapReadView& img, const IPoint& start)
     return ret;
 }
 
+void SetAlphaToOne(RgbaBitmap& bitmap)
+{
+    const auto count = bitmap.GetWidth() * bitmap.GetHeight();
+
+    for (unsigned index=0; index<count; ++index)
+        bitmap.GetPixel(index).a = 255;
+
+}
 
 } // namespace
