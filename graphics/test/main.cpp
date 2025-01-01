@@ -3610,6 +3610,9 @@ int main(int argc, char* argv[])
                 frame_times.clear();
                 frames = 0.0f;
                 seconds = 0.0f;
+
+                base::FlushGlobalLog();
+                base::FlushThreadLog();
             }
         }
     }
