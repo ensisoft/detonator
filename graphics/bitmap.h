@@ -234,6 +234,12 @@ namespace gfx
         BitmapReadWriteView<Pixel> GetPixelReadWriteView()
         { return BitmapReadWriteView<Pixel>((Pixel*)GetDataPtr(), mWidth, mHeight); }
 
+        const Pixel& GetPixel(unsigned index) const
+        {
+            ASSERT(index < mPixels.size());
+            return mPixels[index];
+        }
+
         // Get a pixel from within the bitmap.
         // The pixel must be within this bitmap's width and height.
         const Pixel& GetPixel(unsigned row, unsigned col) const
@@ -243,9 +249,32 @@ namespace gfx
             const auto index = row * mWidth + col;
             return mPixels[index];
         }
-        const Pixel& GetPixel(const UPoint& p) const
+        const Pixel& GetPixel(const UPoint& point) const
         {
-            return GetPixel(p.GetY(), p.GetX());
+            return GetPixel(point.GetY(), point.GetX());
+        }
+
+        Pixel& GetPixel(unsigned index)
+        {
+            ASSERT(index < mPixels.size());
+            return mPixels[index];
+        }
+        Pixel& GetPixel(unsigned row, unsigned col)
+        {
+            ASSERT(row < mHeight);
+            ASSERT(col < mWidth);
+            const auto index = row * mWidth + col;
+            return mPixels[index];
+        }
+        Pixel& GetPixel(const UPoint& point)
+        {
+            return GetPixel(point.GetY(), point.GetX());
+        }
+
+        void SetPixel(unsigned index, const Pixel& value)
+        {
+            ASSERT(index < mPixels.size());
+            mPixels[index] = value;
         }
 
         // Set a pixel within the bitmap to a new pixel value.
@@ -507,5 +536,7 @@ namespace gfx
     Bitmap<Pixel_RGBA> PremultiplyAlpha(const Bitmap<Pixel_RGBA>& src, bool srgb);
 
     URect FindImageRectangle(const IBitmapReadView& src, const IPoint& start);
+
+    void SetAlphaToOne(RgbaBitmap& bitmap);
 
 } // namespace
