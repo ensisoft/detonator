@@ -284,6 +284,7 @@ struct OpenGLFunctions
     PFNGLGETATTRIBLOCATIONPROC       glGetAttribLocation;
     PFNGLVERTEXATTRIBPOINTERPROC     glVertexAttribPointer;
     PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
+    PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray;
     PFNGLVERTEXATTRIBDIVISORPROC     glVertexAttribDivisor;
     PFNGLGETSTRINGPROC               glGetString;
     PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation;
@@ -392,6 +393,7 @@ public:
         RESOLVE(glGetAttribLocation);
         RESOLVE(glVertexAttribPointer);
         RESOLVE(glEnableVertexAttribArray);
+        RESOLVE(glDisableVertexAttribArray);
         RESOLVE(glVertexAttribDivisor);
         RESOLVE(glGetString);
         RESOLVE(glGetUniformLocation);
@@ -1246,6 +1248,7 @@ public:
             const auto stride = vertex_layout.vertex_struct_size;
             const auto attr_ptr = vertex_base_ptr + attr.offset;
             GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, attr_ptr));
+            GL_CALL(glVertexAttribDivisor(location, 0));
             GL_CALL(glEnableVertexAttribArray(location));
         }
 
@@ -1322,6 +1325,33 @@ public:
             else GL_CALL(glDrawArrays(draw_mode, offset, count));
         }
         TRACE_LEAVE(DrawGeometry);
+
+#if 0
+
+        if (instance_buffer)
+        {
+            GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, instance_buffer->name));
+            const auto& per_instance_vertex_layout = myinst->GetVertexLayout();
+            for (const auto& attr : per_instance_vertex_layout.attributes)
+            {
+                const GLint location = mGL.glGetAttribLocation(myprog->GetHandle(), attr.name.c_str());
+                if (location == -1)
+                    continue;
+                GL_CALL(glDisableVertexAttribArray(location));
+            }
+        }
+
+        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer->name));
+        for (const auto& attr : vertex_layout.attributes)
+        {
+            const GLint location = mGL.glGetAttribLocation(myprog->GetHandle(), attr.name.c_str());
+            if (location == -1)
+                continue;
+            GL_CALL(glDisableVertexAttribArray(location));
+        }
+
+        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+#endif
     }
 
     void CleanGarbage(size_t max_num_idle_frames, unsigned flags) override
