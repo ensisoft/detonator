@@ -3387,6 +3387,13 @@ int main(int argc, char* argv[])
             test_index = test_index ? test_index - 1 : tests.size() - 1;
         else if (key.symbol == wdk::Keysym::ArrowRight)
             test_index = (test_index + 1) % tests.size();
+        else if (key.symbol == wdk::Keysym::KeyR)
+        {
+            gfx_device->DeleteShaders();
+            gfx_device->DeletePrograms();
+            gfx_device->DeleteGeometries();
+            DEBUG("Reload!");
+        }
         else if (key.symbol == wdk::Keysym::KeyS && key.modifiers.test(wdk::Keymod::Control))
         {
             static unsigned screenshot_number = 0;
