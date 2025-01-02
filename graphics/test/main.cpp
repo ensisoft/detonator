@@ -3397,10 +3397,9 @@ int main(int argc, char* argv[])
         else if (key.symbol == wdk::Keysym::KeyS && key.modifiers.test(wdk::Keymod::Control))
         {
             static unsigned screenshot_number = 0;
-            const auto& rgba = gfx_device->ReadColorBuffer(window.GetSurfaceWidth(),
-                window.GetSurfaceHeight());
-
             const auto& name = "demo_" + std::to_string(screenshot_number) + ".png";
+            auto rgba = gfx_device->ReadColorBuffer(surface_width, surface_height);
+            gfx::SetAlphaToOne(rgba);
             gfx::WritePNG(rgba, name);
             INFO("Wrote screen capture '%1'", name);
             screenshot_number++;
@@ -3447,7 +3446,7 @@ int main(int argc, char* argv[])
                     test->Update(dt);
 
                 gfx_device->BeginFrame();
-                gfx_device->ClearColor(gfx::Color::Black);
+                gfx_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
                 gfx_device->ClearDepth(1.0f);
                 painter->SetViewport(0, 0, surface_width, surface_height);
                 painter->SetSurfaceSize(surface_width, surface_height);
@@ -3455,8 +3454,8 @@ int main(int argc, char* argv[])
                 // render the test.
                 test->Render(*painter);
 
-                const gfx::Bitmap<gfx::Pixel_RGBA>& result = gfx_device->ReadColorBuffer(window.GetSurfaceWidth(),
-                                                                                         window.GetSurfaceHeight());
+                gfx::Bitmap<gfx::Pixel_RGBA> result = gfx_device->ReadColorBuffer(surface_width, surface_height);
+                gfx::SetAlphaToOne(result);
 
                 const auto& resultfile = base::FormatString("%1_%2_%3_Result.png", test->GetName(), i, sampling);
                 const auto& goldfile   = base::FormatString("%1_%2_%3_Gold.png", test->GetName(), i, sampling);
