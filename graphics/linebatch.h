@@ -103,6 +103,8 @@ namespace gfx
         {}
         inline void AddLine(Line line)
         { mLines.push_back(std::move(line)); }
+        inline void AddLine(glm::vec3 start, glm::vec3 end)
+        { mLines.push_back({ start, end }); }
 
         void ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& environment, const Device& device) const override;
