@@ -235,8 +235,6 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
     ProgramPtr gpu_program = mDevice->FindProgram(program_gpu_id);
     if (!gpu_program)
     {
-        DEBUG("----------------------------------------------------------------------");
-
         ShaderPtr material_shader = mDevice->FindShader(material_gpu_id);
         if (material_shader == nullptr)
         {
