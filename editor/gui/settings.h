@@ -26,6 +26,9 @@
 #  include <QSignalBlocker>
 #  include <QJsonObject>
 #  include <color_selector.hpp> // from Qt color widgets
+#  include <glm/vec4.hpp>
+#  include <glm/vec3.hpp>
+#  include <glm/vec2.hpp>
 #include "warnpop.h"
 
 #include <memory>
@@ -89,6 +92,9 @@ namespace gui
         bool GetValue(const QString& module, const app::PropertyKey& key, QJsonObject* json) const;
         bool GetValue(const QString& module, const app::PropertyKey& key, QSize* size) const;
         bool GetValue(const QString& module, const app::PropertyKey& key, QPoint* point) const;
+        bool GetValue(const QString& module, const app::PropertyKey& key, glm::vec2* vector) const;
+        bool GetValue(const QString& module, const app::PropertyKey& key, glm::vec3* vector) const;
+        bool GetValue(const QString& module, const app::PropertyKey& key, glm::vec4* vector) const;
 
         // Get a value from the settings object under the specific key
         // under a specific module. If the module/key pair doesn't exist
@@ -128,6 +134,9 @@ namespace gui
         void SetValue(const QString& module, const app::PropertyKey& key, const QJsonObject& json);
         void SetValue(const QString& module, const app::PropertyKey& key, const QSize& size);
         void SetValue(const QString& module, const app::PropertyKey& key, const QPoint& point);
+        void SetValue(const QString& module, const app::PropertyKey& key, const glm::vec2& vector);
+        void SetValue(const QString& module, const app::PropertyKey& key, const glm::vec3& vector);
+        void SetValue(const QString& module, const app::PropertyKey& key, const glm::vec4& vector);
 
         // Save the state of a widget.
         void SaveWidget(const QString& module, const QTableView* table);

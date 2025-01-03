@@ -35,6 +35,9 @@
 #  include <QFontComboBox>
 #  include <color_selector.hpp>
 #  include <glm/glm.hpp>
+#  include <glm/vec2.hpp>
+#  include <glm/vec3.hpp>
+#  include <glm/vec4.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -1515,6 +1518,15 @@ inline void SetProperty(Resource& res, const PropertyKey& key, const QPoint& val
 template<typename Resource>
 inline void SetProperty(Resource& res, const PropertyKey& key, const QSize& value)
 { res.SetProperty(key, value); }
+template<typename Resource>
+inline void SetProperty(Resource& res, const PropertyKey& key, const glm::vec2& value)
+{ res.SetProperty(key, value); }
+template<typename Resource>
+inline void SetProperty(Resource& res, const PropertyKey& key, const glm::vec3& value)
+{ res.SetProperty(key, value); }
+template<typename Resource>
+inline void SetProperty(Resource& res, const PropertyKey& key, const glm::vec4& value)
+{ res.SetProperty(key, value); }
 
 #if !defined(__MSVC__)
 // this overload cannot happen on 64bit MSVC build because size_t is unsigned __int64 which
@@ -1610,6 +1622,15 @@ inline void SetUserProperty(Resource& res, const PropertyKey& key, const QPoint&
 { res.SetUserProperty(key, value); }
 template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, const QSize& value)
+{ res.SetUserProperty(key, value); }
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const glm::vec2& value)
+{ res.SetUserProperty(key, value); }
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const glm::vec3& value)
+{ res.SetUserProperty(key, value); }
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const glm::vec4& value)
 { res.SetUserProperty(key, value); }
 
 #if !defined(__MSVC__)
