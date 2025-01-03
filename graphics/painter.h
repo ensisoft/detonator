@@ -259,8 +259,13 @@ namespace gfx
                   const glm::mat4& model,
                   const Material& material,
                   const DrawState& state,
+                  const ShaderProgram& program) const;
+        void Draw(const Drawable& shape,
+                  const glm::mat4& model,
+                  const Material& material,
+                  const DrawState& state,
                   const ShaderProgram& program,
-                  const LegacyDrawState& legacy_draw_state = LegacyDrawState()) const;
+                  const LegacyDrawState& legacy_draw_state) const;
         // Legacy immediate mode draw function.
         // Draw the shape with the material and transformation immediately in the
         // current render target. The following default render target state is used:

@@ -168,6 +168,21 @@ void Painter::Draw(const Drawable& shape,
                    const glm::mat4& model,
                    const Material& material,
                    const DrawState& state,
+                   const ShaderProgram& program) const
+{
+    std::vector<DrawCommand> list;
+    list.resize(1);
+    list[0].drawable = &shape;
+    list[0].material = &material;
+    list[0].model    = &model;
+    list[0].state    = state;
+    Draw(list, program);
+}
+
+void Painter::Draw(const Drawable& shape,
+                   const glm::mat4& model,
+                   const Material& material,
+                   const DrawState& state,
                    const ShaderProgram& program,
                    const LegacyDrawState& legacy_draw_state) const
 {
