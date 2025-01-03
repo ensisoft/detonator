@@ -35,6 +35,8 @@
 #include "base/utility.h"
 #include "base/json.h"
 #include "data/json.h"
+#include "graphics/simple_shape.h"
+#include "graphics/linebatch.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/material_instance.h"
@@ -76,9 +78,12 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mOriginalHash = mMaterial->GetHash();
 
     mUI.setupUi(this);
-    mUI.widget->onPaintScene = std::bind(&MaterialWidget::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onZoomIn     = std::bind(&MaterialWidget::ZoomIn, this);
-    mUI.widget->onZoomOut    = std::bind(&MaterialWidget::ZoomOut, this);
+    mUI.widget->onPaintScene   = std::bind(&MaterialWidget::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onZoomIn       = std::bind(&MaterialWidget::ZoomIn, this);
+    mUI.widget->onZoomOut      = std::bind(&MaterialWidget::ZoomOut, this);
+    mUI.widget->onMouseMove    = std::bind(&MaterialWidget::MouseMove, this, std::placeholders::_1);
+    mUI.widget->onMousePress   = std::bind(&MaterialWidget::MousePress, this, std::placeholders::_1);
+    mUI.widget->onMouseRelease = std::bind(&MaterialWidget::MouseRelease, this, std::placeholders::_1);
     mUI.actionPause->setEnabled(false);
     mUI.actionPlay->setEnabled(true);
     mUI.actionStop->setEnabled(false);
@@ -149,6 +154,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     GetUserProperty(resource, "time", mUI.kTime);
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
+    GetUserProperty(resource, "model_rotation", &mModelRotationTotal);
 
     ApplyShaderDescription();
     ShowMaterialProperties();
@@ -233,6 +239,7 @@ bool MaterialWidget::LoadState(const Settings& settings)
     data::JsonObject json;
     settings.GetValue("Material", "content", &json);
     settings.GetValue("Material", "hash", &mOriginalHash);
+    settings.GetValue("Material", "model_rotation", &mModelRotationTotal);
     settings.LoadWidget("Material", mUI.materialName);
     settings.LoadWidget("Material", mUI.zoom);
     settings.LoadWidget("Material", mUI.cmbModel);
@@ -267,6 +274,7 @@ bool MaterialWidget::SaveState(Settings& settings) const
     mMaterial->IntoJson(json);
     settings.SetValue("Material", "content", json);
     settings.SetValue("Material", "hash", mOriginalHash);
+    settings.SetValue("Material", "model_rotation", mModelRotationTotal);
     settings.SaveWidget("Material", mUI.materialName);
     settings.SaveWidget("Material", mUI.zoom);
     settings.SaveWidget("Material", mUI.cmbModel);
@@ -426,6 +434,7 @@ void MaterialWidget::on_actionSave_triggered()
     SetUserProperty(resource, "time", mUI.kTime);
     SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
+    SetUserProperty(resource, "model_rotation", mModelRotationTotal);
 
     mWorkspace->SaveResource(resource);
     mOriginalHash = mMaterial->GetHash();
@@ -2519,20 +2528,18 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         aspect_ratio = tile_width / tile_height;
     }
 
-
     const auto time = mState == PlayState::Playing ? mTime : GetValue(mUI.kTime);
     const auto zoom = (float)GetValue(mUI.zoom);
-    const auto content_width  = texture_width_sum * aspect_ratio;
-    const auto content_height = texture_width_sum;
-    const auto window_scaler = std::min((float)width/content_width, (float)height/content_height);
-    const auto actual_width  = content_width * window_scaler * zoom;
-    const auto actual_height = content_height * window_scaler * zoom;
-
-    const auto xpos = (width - actual_width) * 0.5f;
-    const auto ypos = (height - actual_height) * 0.5f;
 
     if (!mDrawable)
+    {
         mDrawable = mWorkspace->MakeDrawableById(GetItemId(mUI.cmbModel));
+        if (gfx::Is3DShape(*mDrawable))
+        {
+            mModelRotationTotal.x = glm::radians(45.0f);
+            mModelRotationTotal.y = glm::radians(15.0f);
+        }
+    }
 
     if (!mMaterialInst)
         mMaterialInst = std::make_unique<gfx::MaterialInstance>(mMaterial);
@@ -2540,10 +2547,91 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     mMaterialInst->SetRuntime(time);
     mMaterialInst->SetUniform("kTileIndex", (float)GetValue(mUI.kTileIndex));
 
-    gfx::Transform transform;
-    transform.MoveTo(xpos, ypos);
-    transform.Resize(actual_width, actual_height);
-    painter.Draw(*mDrawable, transform, *mMaterialInst);
+    if (gfx::Is3DShape(*mDrawable))
+    {
+        const auto aspect = (float)width / (float)height;
+        constexpr auto Fov = 45.0f;
+        constexpr auto Far = 10000.0f;
+        const auto half_width = width*0.5f;
+        const auto half_height = height*0.5f;
+        const auto ortho = glm::ortho(-half_width, half_width, -half_height, half_height, -1000.0f, 1000.0f);
+        const auto near = half_height / std::tan(glm::radians(Fov*0.5f));
+        const auto projection = ortho *
+                glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -1000.0f} ) *
+                glm::inverse(ortho) *
+                glm::perspective(glm::radians(Fov), aspect, near, Far) *
+                glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -near });
+
+        const auto size = std::min(half_width, half_height);
+
+        gfx::detail::GenericShaderProgram program;
+
+        gfx::Transform transform;
+        transform.Resize(size, size, size);
+        transform.Scale(zoom, zoom, zoom);
+        transform.RotateAroundY(mModelRotationTotal.x + mModelRotationDelta.x);
+        transform.RotateAroundX(mModelRotationTotal.y + mModelRotationDelta.y);
+        transform.Translate(0.0f, 0.0f, -size*0.5f);
+
+        gfx::Painter p(painter);
+        p.ResetViewMatrix();
+        p.SetProjectionMatrix(projection);
+
+        gfx::Painter::DrawState state;
+        state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
+        state.culling    = gfx::Painter::Culling::Back;
+        state.line_width = 4.0f;
+        p.Draw(*mDrawable, transform, *mMaterialInst, state, program);
+
+        {
+            gfx::LineBatch3D lines;
+            lines.AddLine({0.0f, 0.0f, 0.0f}, {0.75f, 0.0f, 0.0f});
+            p.Draw(lines, transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), state, program);
+        }
+        {
+            gfx::LineBatch3D lines;
+            lines.AddLine({0.0f, 0.0f, 0.0f}, {0.0f, 0.75f, 0.0f});
+            p.Draw(lines, transform, gfx::CreateMaterialFromColor(gfx::Color::DarkRed), state, program);
+        }
+
+        {
+            gfx::LineBatch3D lines;
+            lines.AddLine({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.75f});
+            p.Draw(lines, transform, gfx::CreateMaterialFromColor(gfx::Color::DarkBlue), state, program);
+        }
+
+
+        if (Editor::DebugEditor())
+        {
+            state.winding = gfx::Painter::PolygonWindigOrder::ClockWise;
+
+            gfx::Transform transform;
+            transform.Resize(size*zoom, size*zoom);
+            transform.MoveTo(0.0f, 0.0f, 0.0f);
+            transform.Push();
+              transform.Translate(-0.5f, -0.5f);
+
+            p.SetProjectionMatrix(ortho);
+            p.Draw(gfx::Rectangle(gfx::SimpleShape::Style::Outline), transform,
+                   gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, program);
+        }
+
+    }
+    else
+    {
+        const auto content_width  = texture_width_sum * aspect_ratio;
+        const auto content_height = texture_width_sum;
+        const auto window_scaler = std::min((float)width/content_width, (float)height/content_height);
+        const auto actual_width  = content_width * window_scaler * zoom;
+        const auto actual_height = content_height * window_scaler * zoom;
+        const auto xpos = (width - actual_width) * 0.5f;
+        const auto ypos = (height - actual_height) * 0.5f;
+
+        gfx::Transform transform;
+        transform.MoveTo(xpos, ypos);
+        transform.Resize(actual_width, actual_height);
+        painter.Draw(*mDrawable, transform, *mMaterialInst);
+    }
 
     if (mMaterialInst->HasError())
     {
@@ -2553,6 +2641,36 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     {
         ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
         ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
+    }
+}
+
+void MaterialWidget::MouseMove(QMouseEvent* mickey)
+{
+    if (mMouseDown)
+    {
+        const auto mouse_movement = mickey->pos() - mMouseDownPoint;
+        const auto mouse_dx = mouse_movement.x();
+        const auto mouse_dy = mouse_movement.y();
+        mModelRotationDelta.x = mouse_dx * 0.002f;
+        mModelRotationDelta.y = mouse_dy * 0.002f;
+    }
+}
+
+void MaterialWidget::MousePress(QMouseEvent* mickey)
+{
+    if (mickey->button() == Qt::RightButton)
+    {
+        mMouseDownPoint = mickey->pos();
+        mMouseDown = true;
+    }
+}
+void MaterialWidget::MouseRelease(QMouseEvent* mickey)
+{
+    if (mMouseDown)
+    {
+        mMouseDown = false;
+        mModelRotationTotal += mModelRotationDelta;
+        mModelRotationDelta = glm::vec3{0.0f, 0.0f, 0.0f};
     }
 }
 

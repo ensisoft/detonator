@@ -23,6 +23,7 @@
 #  include <QMap>
 #  include <QString>
 #  include <QFileSystemWatcher>
+#  include <glm/vec3.hpp>
 #include "warnpop.h"
 
 #include <vector>
@@ -178,6 +179,9 @@ namespace gui
         void ShowTextureProperties();
         void ShowTextureMapProperties();
         void PaintScene(gfx::Painter& painter, double sec);
+        void MouseMove(QMouseEvent* mickey);
+        void MousePress(QMouseEvent* mickey);
+        void MouseRelease(QMouseEvent* mickey);
         gfx::TextureMap* GetSelectedTextureMap();
         gfx::TextureSource* GetSelectedTextureSrc();
     private:
@@ -201,8 +205,13 @@ namespace gui
         std::size_t mOriginalHash = 0;
         std::vector<Uniform*> mUniforms;
         std::vector<Sampler*> mSamplers;
+        glm::vec3 mModelRotationTotal = {0.0f, 0.0f, 0.0f};
+        glm::vec3 mModelRotationDelta = {0.0f, 0.0f, 0.0f};
+
+        bool mMouseDown = false;
+        QPoint mMouseMovePoint;
+        QPoint mMouseDownPoint;
 
         QFileSystemWatcher mFileWatcher;
-
     };
 } // namespace
