@@ -2585,14 +2585,13 @@ public:
         constexpr auto Far = 10000.0f;
         const auto half_width = 1024.0f*0.5f;
         const auto half_height = 768.0f*0.5f;
-        const auto ortho = glm::ortho(-half_width, half_height, -half_height, half_height, -1000.0f, 1000.0f);
+        const auto ortho = glm::ortho(-half_width, half_width, -half_height, half_height, -1000.0f, 1000.0f);
         const auto near = half_height / std::tan(glm::radians(Fov*0.5f));
         const auto projection = ortho *
                 glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -1000.0f} ) *
-                  glm::inverse(ortho) *
-                    glm::perspective(glm::radians(Fov), aspect, near, Far) *
-                      glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -near });
-
+                glm::inverse(ortho) *
+                glm::perspective(glm::radians(Fov), aspect, near, Far) *
+                glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -near });
 
         gfx::Painter p(painter);
         p.ResetViewMatrix();
