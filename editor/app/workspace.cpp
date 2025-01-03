@@ -806,23 +806,23 @@ Workspace::Workspace(const QString& dir)
     // setup primitive drawables with known/fixed class IDs
     // these IDs are also hardcoded in the engine/loader.cpp which uses
     // these same IDs to create primitive resources.
-    mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>(gfx::CapsuleClass("_capsule"), "Capsule"));
-    mResources.emplace_back(new DrawableResource<gfx::RectangleClass>(gfx::RectangleClass("_rect"), "Rectangle"));
-    mResources.emplace_back(new DrawableResource<gfx::IsoscelesTriangleClass>(gfx::IsoscelesTriangleClass("_isosceles_triangle"), "Isosceles Triangle"));
-    mResources.emplace_back(new DrawableResource<gfx::RightTriangleClass>(gfx::RightTriangleClass("_right_triangle"), "Right Triangle"));
-    mResources.emplace_back(new DrawableResource<gfx::CircleClass>(gfx::CircleClass("_circle"), "Circle"));
-    mResources.emplace_back(new DrawableResource<gfx::SemiCircleClass>(gfx::SemiCircleClass("_semi_circle"), "Semi Circle"));
-    mResources.emplace_back(new DrawableResource<gfx::TrapezoidClass>(gfx::TrapezoidClass("_trapezoid"), "Trapezoid"));
-    mResources.emplace_back(new DrawableResource<gfx::ParallelogramClass>(gfx::ParallelogramClass("_parallelogram"), "Parallelogram"));
-    mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>(gfx::RoundRectangleClass("_round_rect", "", 0.05f), "Round Rectangle"));
-    mResources.emplace_back(new DrawableResource<gfx::ArrowCursorClass>(gfx::ArrowCursorClass("_arrow_cursor"), "Arrow Cursor"));
-    mResources.emplace_back(new DrawableResource<gfx::BlockCursorClass>(gfx::BlockCursorClass("_block_cursor"), "Block Cursor"));
+    mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>(gfx::CapsuleClass("_capsule"), "2D Capsule"));
+    mResources.emplace_back(new DrawableResource<gfx::RectangleClass>(gfx::RectangleClass("_rect"), "2D Rectangle"));
+    mResources.emplace_back(new DrawableResource<gfx::IsoscelesTriangleClass>(gfx::IsoscelesTriangleClass("_isosceles_triangle"), "2D Isosceles Triangle"));
+    mResources.emplace_back(new DrawableResource<gfx::RightTriangleClass>(gfx::RightTriangleClass("_right_triangle"), "2D Right Triangle"));
+    mResources.emplace_back(new DrawableResource<gfx::CircleClass>(gfx::CircleClass("_circle"), "2D Circle"));
+    mResources.emplace_back(new DrawableResource<gfx::SemiCircleClass>(gfx::SemiCircleClass("_semi_circle"), "2D Semi Circle"));
+    mResources.emplace_back(new DrawableResource<gfx::TrapezoidClass>(gfx::TrapezoidClass("_trapezoid"), "2D Trapezoid"));
+    mResources.emplace_back(new DrawableResource<gfx::ParallelogramClass>(gfx::ParallelogramClass("_parallelogram"), "2D Parallelogram"));
+    mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>(gfx::RoundRectangleClass("_round_rect", "", 0.05f), "2D Round Rectangle"));
+    mResources.emplace_back(new DrawableResource<gfx::ArrowCursorClass>(gfx::ArrowCursorClass("_arrow_cursor"), "2D Arrow Cursor"));
+    mResources.emplace_back(new DrawableResource<gfx::BlockCursorClass>(gfx::BlockCursorClass("_block_cursor"), "2D Block Cursor"));
 
-    mResources.emplace_back(new DrawableResource<gfx::ConeClass>(gfx::ConeClass("_cone", "", 100), "Cone"));
-    mResources.emplace_back(new DrawableResource<gfx::CubeClass>(gfx::CubeClass("_cube"), "Cube"));
-    mResources.emplace_back(new DrawableResource<gfx::CylinderClass>(gfx::CylinderClass("_cylinder", "", 100), "Cylinder"));
-    mResources.emplace_back(new DrawableResource<gfx::PyramidClass>(gfx::PyramidClass("_pyramid"), "Pyramid"));
-    mResources.emplace_back(new DrawableResource<gfx::SphereClass>(gfx::SphereClass("_sphere", "", 100), "Sphere"));
+    mResources.emplace_back(new DrawableResource<gfx::ConeClass>(gfx::ConeClass("_cone", "", 100), "3D Cone"));
+    mResources.emplace_back(new DrawableResource<gfx::CubeClass>(gfx::CubeClass("_cube"), "3D Cube"));
+    mResources.emplace_back(new DrawableResource<gfx::CylinderClass>(gfx::CylinderClass("_cylinder", "", 100), "3D Cylinder"));
+    mResources.emplace_back(new DrawableResource<gfx::PyramidClass>(gfx::PyramidClass("_pyramid"), "3D Pyramid"));
+    mResources.emplace_back(new DrawableResource<gfx::SphereClass>(gfx::SphereClass("_sphere", "", 100), "3D Sphere"));
 
     for (auto& resource : mResources)
     {
