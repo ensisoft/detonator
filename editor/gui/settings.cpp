@@ -146,6 +146,43 @@ bool Settings::GetValue(const QString& module, const app::PropertyKey& key, QPoi
     return true;
 }
 
+bool Settings::GetValue(const QString& module, const app::PropertyKey& key, glm::vec2* vector) const
+{
+    const auto& x_var = mSettings->GetValue(module + "/" + key + "_x");
+    const auto& y_var = mSettings->GetValue(module + "/" + key + "_y");
+    if (!x_var.isValid()  || !y_var.isValid())
+        return false;
+    vector->x = x_var.toFloat();
+    vector->y = y_var.toFloat();
+    return true;
+}
+bool Settings::GetValue(const QString& module, const app::PropertyKey& key, glm::vec3* vector) const
+{
+    const auto& x_var = mSettings->GetValue(module + "/" + key + "_x");
+    const auto& y_var = mSettings->GetValue(module + "/" + key + "_y");
+    const auto& z_var = mSettings->GetValue(module + "/" + key + "_z");
+    if (!x_var.isValid()  || !y_var.isValid() || !z_var.isValid())
+        return false;
+    vector->x = x_var.toFloat();
+    vector->y = y_var.toFloat();
+    vector->z = z_var.toFloat();
+    return true;
+}
+bool Settings::GetValue(const QString& module, const app::PropertyKey& key, glm::vec4* vector) const
+{
+    const auto& x_var = mSettings->GetValue(module + "/" + key + "_x");
+    const auto& y_var = mSettings->GetValue(module + "/" + key + "_y");
+    const auto& z_var = mSettings->GetValue(module + "/" + key + "_z");
+    const auto& w_var = mSettings->GetValue(module + "/" + key + "_w");
+    if (!x_var.isValid()  || !y_var.isValid() || !z_var.isValid() || !w_var.isValid())
+        return false;
+    vector->x = x_var.toFloat();
+    vector->y = y_var.toFloat();
+    vector->z = z_var.toFloat();
+    vector->w = w_var.toFloat();
+    return true;
+}
+
 void Settings::SetValue(const QString& module, const app::PropertyKey& key, const QSize& size)
 {
     mSettings->SetValue(module + "/" + key + "_w", size.width());
@@ -171,6 +208,25 @@ void Settings::SetValue(const QString& module, const app::PropertyKey& key, std:
     lo = (value >> 0)  & 0xffffffff;
     mSettings->SetValue(module + "/" + key + "_lo", lo);
     mSettings->SetValue(module + "/" + key + "_hi", hi);
+}
+
+void Settings::SetValue(const QString& module, const app::PropertyKey& key, const glm::vec2& vector)
+{
+    mSettings->SetValue(module + "/" + key + "_x", vector.x);
+    mSettings->SetValue(module + "/" + key + "_y", vector.y);
+}
+void Settings::SetValue(const QString& module, const app::PropertyKey& key, const glm::vec3& vector)
+{
+    mSettings->SetValue(module + "/" + key + "_x", vector.x);
+    mSettings->SetValue(module + "/" + key + "_y", vector.y);
+    mSettings->SetValue(module + "/" + key + "_z", vector.z);
+}
+void Settings::SetValue(const QString& module, const app::PropertyKey& key, const glm::vec4& vector)
+{
+    mSettings->SetValue(module + "/" + key + "_x", vector.x);
+    mSettings->SetValue(module + "/" + key + "_y", vector.y);
+    mSettings->SetValue(module + "/" + key + "_z", vector.z);
+    mSettings->SetValue(module + "/" + key + "_w", vector.w);
 }
 
 void Settings::SetValue(const QString& module, const app::PropertyKey& key, const data::JsonObject& json)

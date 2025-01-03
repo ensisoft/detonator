@@ -26,6 +26,9 @@
 #  include <QVariant>
 #  include <QVariantMap>
 #  include <QMetaType>
+#  include <glm/vec2.hpp>
+#  include <glm/vec3.hpp>
+#  include <glm/vec4.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -345,6 +348,31 @@ namespace app
             map["y"] = value.y();
             SetVariantProperty(map);
         }
+        PropertyValue(const glm::vec2& vector)
+        {
+            QVariantMap map;
+            map["x"] = vector.x;
+            map["y"] = vector.y;
+            SetVariantProperty(map);
+        }
+        PropertyValue(const glm::vec3& vector)
+        {
+            QVariantMap map;
+            map["x"] = vector.x;
+            map["y"] = vector.y;
+            map["z"] = vector.z;
+            SetVariantProperty(map);
+        }
+        PropertyValue(const glm::vec4& vector)
+        {
+            QVariantMap map;
+            map["x"] = vector.x;
+            map["y"] = vector.y;
+            map["z"] = vector.z;
+            map["w"] = vector.w;
+            SetVariantProperty(map);
+        }
+
         PropertyValue(const QVariantMap& map)
         { SetVariantProperty(map); }
         PropertyValue(const QStringList& strings)
@@ -384,6 +412,27 @@ namespace app
             const auto& map = mVariantValue.toMap();
             out->setWidth(map["width"].toInt());
             out->setHeight(map["height"].toInt());
+        }
+        void GetValue(glm::vec2* out) const
+        {
+            const auto& map = mVariantValue.toMap();
+            out->x = map["x"].toFloat();
+            out->y = map["y"].toFloat();
+        }
+        void GetValue(glm::vec3* out) const
+        {
+            const auto& map = mVariantValue.toMap();
+            out->x = map["x"].toFloat();
+            out->y = map["y"].toFloat();
+            out->z = map["z"].toFloat();
+        }
+        void GetValue(glm::vec4* out) const
+        {
+            const auto& map = mVariantValue.toMap();
+            out->x = map["x"].toFloat();
+            out->y = map["y"].toFloat();
+            out->z = map["z"].toFloat();
+            out->w = map["w"].toFloat();
         }
 
         operator QVariant () const
