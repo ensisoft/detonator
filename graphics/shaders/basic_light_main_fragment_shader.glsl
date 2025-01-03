@@ -117,26 +117,30 @@ void main() {
                 direction_towards_light = -direction_towards_point;
             }
 
+            // ambient component for the light against the material
+            vec4 ambient_color = light.ambient_color * material_ambient_color;
+            vec4 diffuse_color = vec4(0.0);
+            vec4 specular_color = vec4(0.0);
+
             // ideal matte reflectance value, i.e. so called Lambertinian reflectance.
             // computed by taking the angle between the surface normal the vector that
             // points to the light from that point on the surface.
-            // if the light is behind the surface the dot product is negative then
-            // use 0.0 instead.
+            // if the light is behind the surface the dot product is negative
             // https://en.wikipedia.org/wiki/Lambertian_reflectance
-            float light_reflectance_factor = max(dot(vertexViewNormal, direction_towards_light), 0.0);
+            float light_reflectance_factor = dot(vertexViewNormal, direction_towards_light);
 
-            vec3 direction_towards_eye = normalize(kCameraCenter - vertexViewPosition);
-            vec3 reflected_light_direction = reflect(direction_towards_point, vertexViewNormal);
-            float light_specular_factor = pow(max(dot(direction_towards_eye, reflected_light_direction), 0.0), material_specular_exponent);
+            if (light_strength > 0.0 && light_reflectance_factor > 0.0) {
 
-            // specular component for the light against the material
-            vec4 specular_color = light.specular_color * material_specular_color * light_strength * light_specular_factor * light_spot_factor;
+                vec3 direction_towards_eye = normalize(kCameraCenter - vertexViewPosition);
+                vec3 reflected_light_direction = reflect(direction_towards_point, vertexViewNormal);
+                float light_specular_factor = pow(max(dot(direction_towards_eye, reflected_light_direction), 0.0), material_specular_exponent);
 
-            // diffuse component for the light against the material
-            vec4 diffuse_color = light.diffuse_color * material_diffuse_color * light_strength * light_reflectance_factor * light_spot_factor;
+                // specular component for the light against the material
+                specular_color = light.specular_color * material_specular_color * light_strength * light_specular_factor * light_spot_factor;
 
-            // ambient component for the light against the material
-            vec4 ambient_color = light.ambient_color * material_ambient_color;
+                // diffuse component for the light against the material
+                diffuse_color = light.diffuse_color * material_diffuse_color * light_strength * light_reflectance_factor * light_spot_factor;
+            }
 
             // total light accumulation
             total_color += (ambient_color + diffuse_color + specular_color);
