@@ -88,7 +88,7 @@ private:
 class ScissorTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         const auto cycle = 2.0f;
         const auto time = fmodf(mTime, cycle);
@@ -100,9 +100,9 @@ public:
                       gfx::CreateMaterialFromImage("textures/uv_test_512.png"));
         painter.ClearScissor();
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "ScissorTest"; }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         mTime += dt;
     }
@@ -113,7 +113,7 @@ private:
 class ViewportTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         const auto cycle = 2.0f;
         const auto time = fmodf(mTime, cycle);
@@ -124,9 +124,9 @@ public:
         static auto klass = gfx::CreateMaterialFromImage("textures/uv_test_512.png");
         gfx::FillRect(painter, gfx::FRect(0, 0, 1024, 768), gfx::MaterialInstance(klass));
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "ViewportTest"; }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         mTime += dt;
     }
@@ -138,11 +138,11 @@ private:
 class NullTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter&) override
+    void Render(gfx::Painter&) override
     {}
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "NullTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return false; }
 private:
 };
@@ -155,10 +155,10 @@ class VSyncTest : public GraphicsTest
 public:
     VSyncTest()
     {
-        mColors.push_back(gfx::Color::Red);
-        mColors.push_back(gfx::Color::Cyan);
+        mColors.emplace_back(gfx::Color::Red);
+        mColors.emplace_back(gfx::Color::Cyan);
     }
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::DrawTextRect(painter,
           "VSYNC TEST",
@@ -168,9 +168,9 @@ public:
           gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter, 0, 1.4f);
         mColorIndex = (mColorIndex + 1) % mColors.size();
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "VSyncTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return false; }
 private:
     std::vector<gfx::Color4f> mColors;
@@ -201,15 +201,15 @@ public:
         p.min_point_size = 2;
         p.max_point_size = 2;
         gfx::ParticleEngineClass klass(p);
-        mEngine.reset(new gfx::ParticleEngineInstance(p));
+        mEngine = std::make_unique<gfx::ParticleEngineInstance>(p);
     }
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::Transform model;
         model.Resize(1024, 768);
         painter.Draw(*mEngine, model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         if (!mStarted)
             return;
@@ -222,7 +222,7 @@ public:
         e.model_matrix = &model;
         mEngine->Update(e, dt);
     }
-    virtual void Start() override
+    void Start() override
     {
         gfx::Transform transform;
         transform.Resize(1024, 768);
@@ -235,13 +235,13 @@ public:
 
         mStarted = true;
     }
-    virtual void End() override
+    void End() override
     {
         mStarted = false;
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "MegaParticleTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return false; }
 private:
     std::unique_ptr<gfx::ParticleEngineInstance> mEngine;
@@ -273,23 +273,23 @@ public:
         p.max_point_size = 40;
         {
             gfx::ParticleEngineClass klass(p);
-            mEngine[0].reset(new gfx::ParticleEngineInstance(klass));
+            mEngine[0] = std::make_unique<gfx::ParticleEngineInstance>(klass);
         }
 
         {
             p.init_rect_xpos = 0.5f;
             gfx::ParticleEngineClass klass(p);
-            mEngine[1].reset(new gfx::ParticleEngineInstance(klass));
+            mEngine[1] = std::make_unique<gfx::ParticleEngineInstance>(klass);
         }
     }
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::Transform model;
         model.Resize(1024, 768);
         painter.Draw(*mEngine[0], model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
         painter.Draw(*mEngine[1], model, gfx::CreateMaterialFromColor(gfx::Color::Green));
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         gfx::Transform transform;
         transform.Resize(1024, 768);
@@ -301,7 +301,7 @@ public:
         mEngine[0]->Update(e, dt);
         mEngine[1]->Update(e, dt);
     }
-    virtual void Start() override
+    void Start() override
     {
         gfx::Transform transform;
         transform.Resize(1024, 768);
@@ -313,9 +313,9 @@ public:
         mEngine[1]->Restart(e);
     }
 
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "JankTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return false; }
 private:
     std::unique_ptr<gfx::ParticleEngineInstance> mEngine[2];
@@ -324,7 +324,7 @@ private:
 class PacmanPolygon
 {
 public:
-    void Build(gfx::PolygonMeshClass* polygon, float time) const
+    static void Build(gfx::PolygonMeshClass* polygon, float time)
     {
         gfx::tool::PolygonBuilder builder;
         builder.SetStatic(false);
@@ -336,7 +336,7 @@ public:
         builder.BuildPoly(*polygon);
     }
 private:
-    void AddPacman(gfx::tool::PolygonBuilder& poly, float x, float y, float r, float time) const
+    static void AddPacman(gfx::tool::PolygonBuilder& poly, float x, float y, float r, float time)
     {
         gfx::Vertex2D center = {
                 {x, y}, {x, -y}
@@ -364,7 +364,7 @@ private:
         poly.AddVertices(std::move(verts));
         poly.AddDrawCommand(cmd);
     }
-    void AddCircleShape(gfx::tool::PolygonBuilder& poly, float x, float y, float r) const
+    static void AddCircleShape(gfx::tool::PolygonBuilder& poly, float x, float y, float r)
     {
         gfx::Vertex2D center = {
                 {x, y}, {x, -y}
@@ -406,7 +406,7 @@ public:
     void Render(gfx::Painter& painter) override
     {
         PacmanPolygon pacman;
-        pacman.Build(&mPoly, mTime);
+        PacmanPolygon::Build(&mPoly, mTime);
 
         // pacman body + food dots
         gfx::Transform transform;
@@ -452,11 +452,7 @@ private:
 class TileBatchTest : public GraphicsTest
 {
 public:
-    TileBatchTest()
-    {
-
-    }
-    virtual void Start() override
+    void Start() override
     {
         {
             gfx::TextureMap2D map;
@@ -551,7 +547,7 @@ public:
 
     }
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         const auto tile_size = 50.0f;
 
@@ -570,10 +566,10 @@ public:
                 for (unsigned col=0; col<4; ++col)
                 {
                     gfx::TileBatch::Tile tile;
-                    tile.pos.y = row;
-                    tile.pos.x = col;
-                    tile.data.x = row * 4 + col; // tile index.
-                    tiles.AddTile(std::move(tile));
+                    tile.pos.y  = static_cast<float>(row);
+                    tile.pos.x  = static_cast<float>(col);
+                    tile.data.x = static_cast<float>(row * 4 + col); // tile index.
+                    tiles.AddTile(tile);
                 }
             }
             gfx::Transform transform;
@@ -593,10 +589,10 @@ public:
                 for (unsigned col=0; col<4; ++col)
                 {
                     gfx::TileBatch::Tile tile;
-                    tile.pos.y = row;
-                    tile.pos.x = col;
-                    tile.data.x = row * 4 + col; // tile index.
-                    tiles.AddTile(std::move(tile));
+                    tile.pos.y  = static_cast<float>(row);
+                    tile.pos.x  = static_cast<float>(col);
+                    tile.data.x = static_cast<float>(row * 4 + col); // tile index.
+                    tiles.AddTile(tile);
                 }
             }
             gfx::Transform transform;
@@ -616,10 +612,10 @@ public:
                 for (unsigned col=0; col<4; ++col)
                 {
                     gfx::TileBatch::Tile tile;
-                    tile.pos.y = row;
-                    tile.pos.x = col;
-                    tile.data.x = row * 4 + col; // tile index.
-                    tiles.AddTile(std::move(tile));
+                    tile.pos.y  = static_cast<float>(row);
+                    tile.pos.x  = static_cast<float>(col);
+                    tile.data.x = static_cast<float>(row * 4 + col); // tile index.
+                    tiles.AddTile(tile);
                 }
             }
             gfx::Transform transform;
@@ -639,10 +635,10 @@ public:
                 for (unsigned col=0; col<4; ++col)
                 {
                     gfx::TileBatch::Tile tile;
-                    tile.pos.y = row;
-                    tile.pos.x = col;
-                    tile.data.x = (row * 4 + col + row) % 4; // tile index.
-                    tiles.AddTile(std::move(tile));
+                    tile.pos.y  = static_cast<float>(row);
+                    tile.pos.x  = static_cast<float>(col);
+                    tile.data.x = static_cast<float>((row * 4 + col + row) % 4); // tile index.
+                    tiles.AddTile(tile);
                 }
             }
             gfx::Transform transform;
@@ -652,7 +648,7 @@ public:
         }
 
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "TileBatchTest"; }
 private:
     std::unique_ptr<gfx::Material> mTileset64x46;
@@ -664,7 +660,7 @@ private:
 class StencilTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         // draw a gradient in the background
         {
@@ -699,12 +695,12 @@ public:
             cover.Draw(gfx::Rectangle(), shape, material_instance);
         }
     }
-    virtual void Update(float dts) override
+    void Update(float dts) override
     {
         const float velocity = 1.23;
         mTime += dts * velocity;
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "StencilTest"; }
 private:
     float mTime = 0.0f;
@@ -768,7 +764,7 @@ public:
         }
     }
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::FillRect(painter, gfx::FRect(100, 100, 256, 256), *mBlur1024x1024);
         gfx::FillRect(painter, gfx::FRect(100, 400, 256, 256), *mClear1024x1024);
@@ -779,7 +775,7 @@ public:
         gfx::FillRect(painter, gfx::FRect(700, 100, 256, 256), *mBlur256x256);
         gfx::FillRect(painter, gfx::FRect(700, 400, 256, 256), *mClear256x256);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "TextureBlurTest"; }
 private:
     std::unique_ptr<gfx::Material> mBlur1024x1024;
@@ -816,12 +812,12 @@ public:
         }
     }
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::FillRect(painter, gfx::FRect(400, 100, 256, 256), *mEdge512x512);
         gfx::FillRect(painter, gfx::FRect(400, 400, 256, 256), *mClear512x512);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "TextureEdgeTest"; }
 private:
     std::unique_ptr<gfx::Material> mEdge512x512;
@@ -842,7 +838,7 @@ public:
             mSource = gfx::CreateMaterialInstance(material);
         }
     }
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::FillRect(painter, gfx::FRect(100.0f, 200.0f, 256.0f, 256.0f), *mSource);
 
@@ -866,7 +862,7 @@ public:
         gfx::FillRect(painter, gfx::FRect(800.0f, 200.0f, 128.0f, 128.0f), *mColorB);
 
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     {
         return "TextureColorExtractTest";
     }
@@ -911,7 +907,7 @@ private:
 class GradientTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::GradientClass material(gfx::MaterialClass::Type::Gradient);
         material.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::TopLeft);
@@ -933,7 +929,7 @@ public:
         material.SetColorWeight(glm::vec2(0.25, 0.0f));
         gfx::FillRect(painter, gfx::FRect(500, 260, 400, 100), gfx::MaterialInstance(material));
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "GradientTest"; }
 private:
 };
@@ -941,7 +937,7 @@ private:
 class TextureTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         // whole texture (box = 1.0f)
         {
@@ -1084,12 +1080,12 @@ public:
             gfx::FillRect(painter, gfx::FRect(750, 450, 128, 128), gfx::MaterialInstance(material, mTime));
         }
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         mTime += dt;
     }
 
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "TextureTest"; }
 private:
     float mTime = 0.0f;
@@ -1114,7 +1110,7 @@ public:
         mMaterial->GetTextureMap(0)->SetSpriteFrameRate(10.0f);
     }
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         // instance
         gfx::MaterialInstance material(mMaterial);
@@ -1280,9 +1276,9 @@ public:
 
     }
 
-    virtual void Update(float dt) override
+    void Update(float dt) override
     { mTime += dt; }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "SpriteTest"; }
 private:
     void SetRect(const gfx::FRect& rect)
@@ -1329,7 +1325,7 @@ public:
         map->SetSpriteFrameRate(15.0f);
     }
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::MaterialInstance material(mMaterial);
         material.SetRuntime(mTime);
@@ -1391,9 +1387,9 @@ public:
         mMaterial->SetTextureRotation(0.0f);
     }
 
-    virtual void Update(float dt) override
+    void Update(float dt) override
     { mTime += dt; }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "SpriteSheetTest"; }
 private:
     std::shared_ptr<gfx::SpriteClass> mMaterial;
@@ -1405,7 +1401,7 @@ class TransformTest : public GraphicsTest
 public:
     TransformTest()
     {
-        mRobot.reset(new BodyPart("Robot"));
+        mRobot = std::make_unique<BodyPart>("Robot");
         mRobot->SetPosition(100, 100);
         mRobot->SetScale(30.0f, 30.0f);
 
@@ -1437,7 +1433,7 @@ public:
 
     }
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         const float velocity = 0.3;
         const float angle = mTime* velocity;
@@ -1485,18 +1481,19 @@ public:
             tr.Pop();
         tr.Pop();
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         mRobot->Update(dt);
         mTime += dt;
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "TransformTest"; }
 private:
     class BodyPart
     {
     public:
-        BodyPart(const std::string& name) : mName(name)
+        explicit BodyPart(std::string name) noexcept
+          : mName(std::move(name))
         {}
         void SetScale(float sx, float sy)
         {
@@ -1559,7 +1556,7 @@ private:
         }
         BodyPart& AddPart(const std::string& name)
         {
-            mBodyparts.push_back(BodyPart(name));
+            mBodyparts.emplace_back(BodyPart(name));
             return mBodyparts.back();
         }
 
@@ -1575,7 +1572,7 @@ private:
         float mTime = 0.0f;
         float mVelocity = 0.0f;
         float mRotation = 0.0f;
-        gfx::Color mColor;
+        gfx::Color mColor = gfx::Color::White;
     };
     std::unique_ptr<BodyPart> mRobot;
 
@@ -1587,9 +1584,10 @@ template<typename Shape>
 class ShapeTest : public GraphicsTest
 {
 public:
-    ShapeTest(const std::string& name) : mName(name)
+    explicit ShapeTest(std::string name) noexcept
+       : mName(std::move(name))
     {}
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         auto klass = gfx::CreateMaterialClassFromImage("textures/uv_test_512.png");
         // in order to validate the texture coordinates let's set
@@ -1630,9 +1628,9 @@ public:
         transform.Translate(250.0f, 0.0f);
         painter.Draw(Shape(gfx::SimpleShapeStyle::Solid), transform, material);
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {}
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return mName; }
 private:
     const std::string mName;
@@ -1668,7 +1666,7 @@ public:
             p.max_point_size = 60;
             p.rate_of_change_in_size_wrt_dist = -2.0f;
             p.rate_of_change_in_size_wrt_time = -2.0f;
-            mFire.reset(new gfx::ParticleEngineInstance(p));
+            mFire = std::make_unique<gfx::ParticleEngineInstance>(p);
         }
 
         {
@@ -1694,7 +1692,7 @@ public:
             p.max_point_size = 60;
             p.rate_of_change_in_size_wrt_dist = -4.0f;
             p.rate_of_change_in_size_wrt_time = -8.0f;
-            mSmoke.reset(new gfx::ParticleEngineInstance(p));
+            mSmoke = std::make_unique<gfx::ParticleEngineInstance>(p);
         }
 
         {
@@ -1718,7 +1716,7 @@ public:
             p.max_point_size = 40;
             p.rate_of_change_in_size_wrt_time = -2.0f;
             p.rate_of_change_in_size_wrt_dist = -2.0f;
-            mBlood.reset(new gfx::ParticleEngineInstance(p));
+            mBlood = std::make_unique<gfx::ParticleEngineInstance>(p);
         }
 
         {
@@ -1742,12 +1740,12 @@ public:
             p.max_lifetime = 30.0f;
             p.min_point_size = 100;
             p.max_point_size = 150;
-            mClouds.reset(new gfx::ParticleEngineInstance(p));
+            mClouds = std::make_unique<gfx::ParticleEngineInstance>(p);
         }
 
     }
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::Transform model;
         model.Resize(300, 300);
@@ -1781,7 +1779,7 @@ public:
         model.MoveTo(-100, 100);
         painter.Draw(*mClouds, model, gfx::MaterialInstance(material));
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         // todo: setup the model matrices properly. keep in mind that
         // the model matrix needs to change per each particle engine
@@ -1793,7 +1791,7 @@ public:
         mBlood->Update(e, dt);
         mClouds->Update(e, dt);
     }
-    virtual void Start() override
+    void Start() override
     {
         // todo: setup the model matrices properly. keep in mind that
         // the model matrix needs to change per each particle engine
@@ -1806,7 +1804,7 @@ public:
         mClouds->Restart(e);
     }
 
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "ParticleTest"; }
 private:
     std::unique_ptr<ParticleEngine> mFire;
@@ -1819,7 +1817,7 @@ private:
 class TextRectScaleTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         const auto width  = 600.0f + 600 * std::sin(mAngle);
         const auto height = 600.0f + 600 * std::sin(mAngle);
@@ -1840,16 +1838,16 @@ public:
             rect,
             gfx::Color::Black);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "TextRectScaleTest"; }
 
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         // full circle in 2s
         const auto angular_velo = math::Pi;
         mAngle += (angular_velo * dt);
     }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return false; }
 private:
     float mAngle = 0.0f;
@@ -1858,14 +1856,14 @@ private:
 class TextAlignTest : public GraphicsTest
 {
 public:
-    TextAlignTest(const std::string& name, const std::string& font, const gfx::Color4f& color, unsigned size)
-      : mName(name)
-      , mFont(font)
+    TextAlignTest(std::string name, std::string font, const gfx::Color4f& color, unsigned size)
+      : mName(std::move(name))
+      , mFont(std::move(font))
       , mColor(color)
       , mFontSize(size)
     {}
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         const auto cycle = 2.0f;
         const auto reminder = fmodf(mTime, cycle);
@@ -1976,10 +1974,10 @@ public:
         if (show_box)
             gfx::DrawRectOutline(painter, gfx::FRect(800, 50, 173, 173), gfx::Color::HotPink, 1.0f);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return mName;  }
 
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         mTime += dt;
     }
@@ -1996,7 +1994,7 @@ private:
 class RenderTextTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::DrawTextRect(painter,
             "AtariFontFullVersion.ttf, 20px\n"
@@ -2093,11 +2091,11 @@ public:
                 gfx::Color4f(r, g, b, 1.0f));
         }
     }
-    virtual void Update(float dts) override
+    void Update(float dts) override
     {
         mTime += dts;
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "TextTest"; }
 private:
     float mTime = 0.0f;
@@ -2106,7 +2104,7 @@ private:
 class FillShapeTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::FRect rect(10, 10, 100, 140);
         gfx::FillShape(painter, rect,  gfx::Rectangle(), gfx::Color::DarkGreen);
@@ -2125,7 +2123,7 @@ public:
         rect.Translate(150, 0);
         gfx::FillShape(painter, rect, gfx::Circle(), gfx::Color::DarkGreen);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "FillShapeTest"; }
 private:
 };
@@ -2133,7 +2131,7 @@ private:
 class DrawShapeOutlineTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::FRect rect(10, 10, 100, 140);
         gfx::DrawShapeOutline(painter, rect,  gfx::Rectangle(), gfx::Color::DarkGreen);
@@ -2169,7 +2167,7 @@ public:
         rect.Translate(150, 0);
         gfx::DrawShapeOutline(painter, rect, gfx::Circle(), gfx::Color::DarkGreen);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "DrawShapeOutline"; }
 private:
 };
@@ -2177,7 +2175,7 @@ private:
 class sRGBWindowTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::CustomMaterialClass srgb_out(gfx::MaterialClass::Type::Custom);
         gfx::CustomMaterialClass linear_out(gfx::MaterialClass::Type::Custom);
@@ -2206,9 +2204,9 @@ public:
 
         class TestProgram : public gfx::ShaderProgram {
         public:
-            virtual std::string GetName() const override
+            std::string GetName() const override
             { return "TestProgram"; }
-            virtual gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
+            gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
             {
                 auto source = material.GetShader(env, device);
                 source.SetType(gfx::ShaderSource::Type::Fragment);
@@ -2264,9 +2262,9 @@ void main() {
         model_to_world.Translate(20.0f, 0.0f);
         painter.Draw(gfx::Rectangle(), model_to_world, gfx::MaterialInstance(linear_out), state, program, gfx::Painter::LegacyDrawState());
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "sRGBWindowTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return false; }
 private:
 };
@@ -2274,7 +2272,7 @@ private:
 class sRGBTextureSampleTest : public GraphicsTest
 {
 public:
-    virtual void Start() override
+    void Start() override
     {
         // inspect the image
         {
@@ -2395,7 +2393,7 @@ void FragmentShaderMain()
         }
     }
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::FillRect(painter, gfx::FRect(20.0f, 20.0f, 400.0f, 400.0f), *mMaterialSRGB);
         gfx::FillRect(painter, gfx::FRect(20.0f + 72.0f, 20.0f + 72.0f, 256.0f, 256.0f), *mMaterialReference);
@@ -2403,9 +2401,9 @@ void FragmentShaderMain()
         gfx::FillRect(painter, gfx::FRect(520.0f, 20.0f, 400.0f, 400.0f), *mMaterialLinear);
         gfx::FillRect(painter, gfx::FRect(520.0f + 72.0f, 20.0f + 72.0f, 256.0f, 256.0f), *mMaterialReference);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "sRGBTextureSampleTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return false; }
 private:
     std::unique_ptr<gfx::Material> mMaterialSRGB;
@@ -2416,7 +2414,7 @@ private:
 class PremultiplyAlphaTest : public GraphicsTest
 {
 public:
-    virtual void Start() override
+    void Start() override
     {
         const char* src = R"(
 #version 300 es
@@ -2463,14 +2461,14 @@ void FragmentShaderMain() {
             mMaterialPremultAlpha = gfx::CreateMaterialInstance(material);
         }
     }
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::FillRect(painter, gfx::FRect(10.0f, 10.0, 512.0f, 512.0f), *mMaterialStraightAlpha);
         gfx::FillRect(painter, gfx::FRect(500.0f, 10.0, 512.0f, 512.0f), *mMaterialPremultAlpha);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "PremultiplyAlphaTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return true; }
 private:
     std::unique_ptr<gfx::Material> mMaterialStraightAlpha;
@@ -2480,7 +2478,7 @@ private:
 class PrecisionTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         // test transformation precision by rendering overlapping
         // objects after doing different transformations. the green
@@ -2504,9 +2502,9 @@ public:
         }
 
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "PrecisionTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return true; }
 private:
 };
@@ -2514,7 +2512,7 @@ private:
 class Draw3DTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         constexpr auto const aspect = 1024.0 / 768.0f;
 
@@ -2568,9 +2566,9 @@ public:
                    state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
         }
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "Draw3DTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return false; }
 };
 
@@ -2578,7 +2576,7 @@ public:
 class Shape3DTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         constexpr auto const aspect = 1024.0f / 768.0f;
         constexpr auto Fov = 45.0f;
@@ -2692,16 +2690,16 @@ public:
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
 
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "Shape3DTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return false; }
 };
 
 class FramebufferTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         auto* device = painter.GetDevice();
 
@@ -2795,18 +2793,18 @@ public:
             }
         }
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "FramebufferTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return true;}
-    virtual void KeyDown(const wdk::WindowEventKeyDown& key) override
+    void KeyDown(const wdk::WindowEventKeyDown& key) override
     {
         if (key.symbol == wdk::Keysym::Space)
         {
             mAccumulateTime = !mAccumulateTime;
         }
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         if (mAccumulateTime)
             mTime += dt;
@@ -2820,7 +2818,7 @@ private:
 class DepthLayerTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         const auto surface_size = painter.GetSurfaceSize();
         const auto surface_width = surface_size.GetWidth();
@@ -2886,9 +2884,9 @@ public:
 
     }
 
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "DepthLayerTest"; }
-    virtual bool IsFeatureTest() const override
+    bool IsFeatureTest() const override
     { return false; }
 private:
 
@@ -2897,7 +2895,7 @@ private:
 class Simple2DInstanceTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::Rectangle drawable;
         gfx::MaterialInstance material(gfx::CreateMaterialClassFromColor(gfx::Color::DarkGreen));
@@ -2931,11 +2929,11 @@ public:
         gfx::detail::GenericShaderProgram program;
         painter.Draw(draw_list, program);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     {
         return "Simple2DInstanceTest";
     }
-    glm::mat4 MakeTransform(const glm::vec2& pos, const glm::vec2& size) const
+    static glm::mat4 MakeTransform(const glm::vec2& pos, const glm::vec2& size)
     {
         gfx::Transform transform;
         transform.Resize(size);
@@ -2948,7 +2946,7 @@ private:
 class Simple3DInstanceTest : public GraphicsTest
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         constexpr auto const aspect = 1024.0f / 768.0f;
         constexpr auto Fov = 45.0f;
@@ -3019,12 +3017,12 @@ public:
 
         p.Draw(draw_list, program);
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         mTime += dt;
     }
 
-    virtual std::string GetName() const override
+    std::string GetName() const override
     {
         return "Simple3DInstanceTest";
     }
@@ -3041,10 +3039,10 @@ public:
         mPolygon.SetDynamic(true);
     }
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         PacmanPolygon pacman;
-        pacman.Build(&mPolygon, mTime);
+        PacmanPolygon::Build(&mPolygon, mTime);
 
         gfx::Drawable::InstancedDraw instanced;
         instanced.gpu_id = "polygon-2d-instance-test";
@@ -3079,17 +3077,17 @@ public:
         painter.Draw(draw_list, program);
     }
 
-    virtual std::string GetName() const override
+    std::string GetName() const override
     {
         return "PolygonInstanceTest";
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         const float velocity = 5.23;
         mTime += (dt * velocity);
     }
 private:
-    glm::mat4 MakeTransform(const glm::vec2& pos, const glm::vec2& size) const
+    static glm::mat4 MakeTransform(const glm::vec2& pos, const glm::vec2& size)
     {
         gfx::Transform transform;
         transform.Resize(size);
@@ -3114,7 +3112,7 @@ public:
         mInstance = std::make_unique<gfx::ParticleEngineInstance>(mClass);
     }
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::Drawable::InstancedDraw instanced;
         instanced.gpu_id = "particle-instance-test";
@@ -3148,22 +3146,22 @@ public:
         painter.Draw(draw_list, program);
     }
 
-    virtual void Start() override
+    void Start() override
     {
         gfx::Drawable::Environment env;
         mInstance->Restart(env);
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         gfx::Drawable::Environment env;
         mInstance->Update(env, dt);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     {
         return "ParticleInstanceTest";
     }
 private:
-    glm::mat4 MakeTransform(const glm::vec2& pos, const glm::vec2& size) const
+    static glm::mat4 MakeTransform(const glm::vec2& pos, const glm::vec2& size)
     {
         gfx::Transform transform;
         transform.Resize(size);
@@ -3227,7 +3225,7 @@ public:
     {
         mLightType = LightType::Point;
     }
-    BasicLight2DTest(const glm::vec3& direction)
+    explicit BasicLight2DTest(const glm::vec3& direction)
     {
         mLightType = LightType::Directional;
         mLightDirection = direction;
@@ -3289,8 +3287,8 @@ public:
         mTime = 0.0f;
     }
 private:
-    LightType mLightType;
-    glm::vec3 mLightDirection;
+    LightType mLightType = LightType::Point;
+    glm::vec3 mLightDirection = {0.0f, 0.0f, 1.0f};
     gfx::FDegrees mLightHalfAngle;
     float mTime = 0.0f;
 };
@@ -3304,7 +3302,7 @@ public:
     {
         mLightType = LightType::Point;
     }
-    BasicLight3DTest(const glm::vec3& direction)
+    explicit BasicLight3DTest(const glm::vec3& direction)
     {
         mLightType = LightType::Directional;
         mLightDirection = direction;
@@ -3484,8 +3482,8 @@ public:
         mTime = 0.0f;
     }
 private:
-    LightType mLightType;
-    glm::vec3 mLightDirection;
+    LightType mLightType = LightType::Point;
+    glm::vec3 mLightDirection = {0.0f, 0.0f, 1.0f};
     gfx::FDegrees mLightHalfAngle;
     unsigned mShapeIndex = 0;
     float mTime = 0.0f;
@@ -3568,19 +3566,19 @@ int main(int argc, char* argv[])
             mVisualID = mConfig->GetVisualID();
             mDebug = debug;
         }
-        virtual void Display() override
+        void Display() override
         {
             mContext->SwapBuffers();
         }
-        virtual void* Resolve(const char* name) override
+        void* Resolve(const char* name) override
         {
             return mContext->Resolve(name);
         }
-        virtual void MakeCurrent() override
+        void MakeCurrent() override
         {
             mContext->MakeCurrent(mSurface.get());
         }
-        virtual Version GetVersion() const override
+        Version GetVersion() const override
         {
             if (mVersion == 2)
                 return Version::OpenGL_ES2;
@@ -3588,7 +3586,7 @@ int main(int argc, char* argv[])
                 return Version::OpenGL_ES3;
             else BUG("Unknown OpenGL ES version");
         }
-        virtual bool IsDebug() const override
+        bool IsDebug() const override
         {
             return mDebug;
         }
@@ -3774,7 +3772,7 @@ int main(int argc, char* argv[])
                 gfx_device->ClearDepth(1.0f);
                 painter->SetViewport(0, 0, surface_width, surface_height);
                 painter->SetSurfaceSize(surface_width, surface_height);
-                painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width , surface_height));
+                painter->SetProjectionMatrix(gfx::MakeOrthographicProjection((float)surface_width , (float)surface_height));
                 // render the test.
                 test->Render(*painter);
 
@@ -3916,7 +3914,7 @@ int main(int argc, char* argv[])
             gfx_device->ClearDepth(1.0f);
             painter->SetViewport(0, 0, surface_width, surface_height);
             painter->SetSurfaceSize(surface_width, surface_height);
-            painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width , surface_height));
+            painter->SetProjectionMatrix(gfx::MakeOrthographicProjection((float)surface_width, (float)surface_height));
             // render the current test
             tests[test_index]->Render(*painter);
 
