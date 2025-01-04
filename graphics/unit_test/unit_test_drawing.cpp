@@ -380,8 +380,8 @@ void unit_test_material_uniforms()
     // test dynamic program uniforms.
     {
         TestDevice device;
-        gfx::ProgramState program;
-        gfx::ColorClass test(gfx::MaterialClass::Type::Color);
+        gfx::ProgramState state;
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Color);
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         test.SetBaseColor(gfx::Color::Green);
         test.SetStatic(false);
@@ -392,18 +392,52 @@ void unit_test_material_uniforms()
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
         env.material_time = 0.0f;
-        test.ApplyDynamicState(env, device, program);
+        test.ApplyDynamicState(env, device, state);
 
         gfx::Color4f base_color;
-        TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
+        TEST_REQUIRE(state.GetUniform("kBaseColor", &base_color));
         TEST_REQUIRE(base_color == gfx::Color::Green);
+    }
+
+    {
+        TestDevice device;
+        gfx::ProgramState state;
+        gfx::MaterialClass test(gfx::MaterialClass::Type::BasicLight);
+        test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        test.SetStatic(false);
+
+        test.SetAmbientColor(gfx::Color::Red);
+        test.SetDiffuseColor(gfx::Color::Green);
+        test.SetSpecularColor(gfx::Color::Blue);
+        test.SetSpecularExponent(128.0f);
+
+        // check that the dynamic state is set as expected.
+        // this should mean that both static uniforms  and dynamic
+        // uniforms are set.
+        gfx::detail::GenericShaderProgram pass;
+        gfx::MaterialClass::State env;
+        env.material_time = 0.0f;
+        test.ApplyDynamicState(env, device, state);
+
+        gfx::Color4f diffuse_color;
+        gfx::Color4f ambient_color;
+        gfx::Color4f specular_color;
+        float specular_exponent = 0.0f;
+        TEST_REQUIRE(state.GetUniform("kDiffuseColor", &diffuse_color));
+        TEST_REQUIRE(state.GetUniform("kAmbientColor", &ambient_color));
+        TEST_REQUIRE(state.GetUniform("kSpecularColor", &specular_color));
+        TEST_REQUIRE(state.GetUniform("kSpecularExponent", &specular_exponent));
+        TEST_REQUIRE(ambient_color == gfx::Color::Red);
+        TEST_REQUIRE(diffuse_color == gfx::Color::Green);
+        TEST_REQUIRE(specular_color == gfx::Color::Blue);
+        TEST_REQUIRE(specular_exponent == real::float32(128.0f));
     }
 
     {
         TestDevice device;
         gfx::ProgramState program;
 
-        gfx::GradientClass test(gfx::MaterialClass::Type::Gradient);
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Gradient);
         test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
         test.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::TopLeft);
         test.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
@@ -543,11 +577,53 @@ void unit_test_material_uniforms()
         TEST_REQUIRE(!program.HasUniform("kBaseColor"));
     }
 
+
+    {
+        TestDevice device;
+        gfx::ProgramState state;
+        gfx::MaterialClass test(gfx::MaterialClass::Type::BasicLight);
+        test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        test.SetStatic(true);
+
+        test.SetAmbientColor(gfx::Color::Red);
+        test.SetDiffuseColor(gfx::Color::Green);
+        test.SetSpecularColor(gfx::Color::Blue);
+        test.SetSpecularExponent(128.0f);
+
+        // check that the dynamic state is set as expected.
+        // this should mean that both static uniforms  and dynamic
+        // uniforms are set.
+        gfx::detail::GenericShaderProgram pass;
+        gfx::MaterialClass::State env;
+        env.material_time = 0.0f;
+        test.ApplyStaticState(env, device, state);
+
+        gfx::Color4f diffuse_color;
+        gfx::Color4f ambient_color;
+        gfx::Color4f specular_color;
+        float specular_exponent = 0.0f;
+        TEST_REQUIRE(state.GetUniform("kDiffuseColor", &diffuse_color));
+        TEST_REQUIRE(state.GetUniform("kAmbientColor", &ambient_color));
+        TEST_REQUIRE(state.GetUniform("kSpecularColor", &specular_color));
+        TEST_REQUIRE(state.GetUniform("kSpecularExponent", &specular_exponent));
+        TEST_REQUIRE(ambient_color == gfx::Color::Red);
+        TEST_REQUIRE(diffuse_color == gfx::Color::Green);
+        TEST_REQUIRE(specular_color == gfx::Color::Blue);
+        TEST_REQUIRE(specular_exponent == real::float32(128.0f));
+
+        state.Clear();
+        test.ApplyDynamicState(env, device, state);
+        TEST_REQUIRE(!state.HasUniform("kDiffuseColor"));
+        TEST_REQUIRE(!state.HasUniform("kAmbientColor"));
+        TEST_REQUIRE(!state.HasUniform("kSpecularColor"));
+        TEST_REQUIRE(!state.HasUniform("kSpecularExponent"));
+    }
+
     {
         TestDevice device;
         gfx::ProgramState program;
 
-        gfx::GradientClass test(gfx::MaterialClass::Type::Gradient);
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Gradient);
         test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
         test.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::TopLeft);
         test.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
@@ -588,7 +664,7 @@ void unit_test_material_uniforms()
         TestDevice device;
         gfx::ProgramState program;
 
-        gfx::TextureMap2DClass test(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Texture);
         test.SetTextureScaleX(2.0f);
         test.SetTextureScaleY(3.0f);
         test.SetTextureVelocityX(4.0f);
@@ -627,7 +703,7 @@ void unit_test_material_uniforms()
         TestDevice device;
         gfx::ProgramState program;
 
-        gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Sprite);
         test.SetTextureScaleX(2.0f);
         test.SetTextureScaleY(3.0f);
         test.SetTextureVelocityX(4.0f);
@@ -666,7 +742,7 @@ void unit_test_material_uniforms()
     // based on their static state even if the underlying shader
     // program has the same type.
     {
-        gfx::ColorClass foo(gfx::MaterialClass::Type::Color);
+        gfx::MaterialClass foo(gfx::MaterialClass::Type::Color);
         foo.SetStatic(true);
         foo.SetBaseColor(gfx::Color::Red);
 
@@ -680,9 +756,41 @@ void unit_test_material_uniforms()
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
     }
 
+    {
+        gfx::MaterialClass foo(gfx::MaterialClass::Type::BasicLight);
+        foo.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        foo.SetStatic(true);
+
+        foo.SetAmbientColor(gfx::Color::Red);
+        foo.SetDiffuseColor(gfx::Color::Green);
+        foo.SetSpecularColor(gfx::Color::Blue);
+        foo.SetSpecularExponent(128.0f);
+
+        gfx::MaterialClass::State state;
+
+        auto bar = foo;
+        TEST_REQUIRE(foo.GetShaderId(state) == bar.GetShaderId(state));
+
+        foo.SetAmbientColor(gfx::Color::HotPink);
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
+
+        bar = foo;
+        foo.SetDiffuseColor(gfx::Color::HotPink);
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
+
+        bar = foo;
+        foo.SetSpecularColor(gfx::Color::HotPink);
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
+
+        bar = foo;
+        foo.SetSpecularExponent(8.0f);
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
+
+    }
+
 
     {
-        gfx::GradientClass foo(gfx::MaterialClass::Type::Gradient);
+        gfx::MaterialClass foo(gfx::MaterialClass::Type::Gradient);
         foo.SetStatic(true);
         foo.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
         foo.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::TopLeft);
@@ -709,7 +817,7 @@ void unit_test_material_uniforms()
     }
 
     {
-        gfx::TextureMap2DClass foo(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass foo(gfx::MaterialClass::Type::Texture);
         foo.SetStatic(true);
         foo.SetTextureScaleX(2.0f);
         foo.SetTextureScaleY(3.0f);
@@ -1089,7 +1197,7 @@ void unit_test_material_uniform_folding()
     {
         TestDevice device;
 
-        gfx::ColorClass klass(gfx::MaterialClass::Type::Color);
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Color);
         klass.SetBaseColor(gfx::Color::White);
         klass.SetStatic(true);
         const auto& source = klass.GetShader(state, device);
@@ -1100,8 +1208,30 @@ void unit_test_material_uniform_folding()
 
     {
         TestDevice device;
+        gfx::MaterialClass test(gfx::MaterialClass::Type::BasicLight);
+        test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        test.SetStatic(true);
+        test.SetAmbientColor(gfx::Color::Red);
+        test.SetDiffuseColor(gfx::Color::Green);
+        test.SetSpecularColor(gfx::Color::Blue);
+        test.SetSpecularExponent(128.0f);
 
-        gfx::GradientClass klass(gfx::MaterialClass::Type::Gradient);
+        const auto& source = test.GetShader(state, device);
+        const auto& sauce = source.GetSource();
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kAmbientColor = vec4(1.00,0.00,0.00,1.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kDiffuseColor = vec4(0.00,1.00,0.00,1.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kSpecularColor = vec4(0.00,0.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const float kSpecularExponent = 128.00;"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kAmbientColor") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kDiffuseColor") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kSpecularColor") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform float kSpecularExponent") == false);
+    }
+
+    {
+        TestDevice device;
+
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Gradient);
         klass.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::BottomLeft);
         klass.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::TopLeft);
         klass.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::BottomRight);
@@ -1122,7 +1252,7 @@ void unit_test_material_uniform_folding()
     {
         TestDevice device;
 
-        gfx::TextureMap2DClass klass(gfx::MaterialClass::Type::Texture);
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
         klass.SetStatic(true);
         klass.SetBaseColor(gfx::Color::White);
         klass.SetTextureVelocityX(4.0f);
@@ -1144,7 +1274,7 @@ void unit_test_material_uniform_folding()
     {
         TestDevice device;
 
-        gfx::SpriteClass klass(gfx::MaterialClass::Type::Sprite);
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Sprite);
         klass.SetStatic(true);
         klass.SetTextureVelocityX(4.0f);
         klass.SetTextureVelocityY(5.0f);

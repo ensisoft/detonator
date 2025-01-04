@@ -95,6 +95,8 @@ namespace gfx
             Tilemap,
             // Built-in 2D particle material
             Particle2D,
+            // Material with basic light interaction
+            BasicLight,
             // Custom material with user defined material
             // shader and an arbitrary number of uniforms
             // and texture maps.
@@ -249,6 +251,15 @@ namespace gfx
         inline void SetParticleBaseRotation(float rotation_angle) noexcept
         { SetUniform("kParticleBaseRotation", rotation_angle); }
 
+        inline void SetAmbientColor(const Color4f& color) noexcept
+        { SetUniform("kAmbientColor", color); }
+        inline void SetDiffuseColor(const Color4f& color) noexcept
+        { SetUniform("kDiffuseColor", color); }
+        inline void SetSpecularColor(const Color4f& color) noexcept
+        { SetUniform("kSpecularColor", color); }
+        inline void SetSpecularExponent(float exponent) noexcept
+        { SetUniform("kSpecularExponent", exponent); }
+
         inline void SetParticleEffect(ParticleEffect action) noexcept
         { action == ParticleEffect::None ? DeleteUniform("kParticleEffect")
                                          : SetUniform("kParticleEffect", static_cast<int>(action)); }
@@ -324,6 +335,16 @@ namespace gfx
         { return GetUniformValue<glm::vec2>("kTilePadding", {0.0f, 0.0f}); }
         inline ParticleEffect GetParticleEffect() const noexcept
         { return static_cast<ParticleEffect>(GetUniformValue("kParticleEffect", 0)); }
+
+        inline Color4f GetAmbientColor() const noexcept
+        { return GetUniformValue<Color4f>("kAmbientColor", gfx::Color::Gray); }
+        inline Color4f GetDiffuseColor() const noexcept
+        { return GetUniformValue<Color4f>("kDiffuseColor", gfx::Color::Gray); }
+        inline Color4f GetSpecularColor() const noexcept
+        { return GetUniformValue<Color4f>("kSpecularColor", gfx::Color::White); }
+        inline float GetSpecularExponent() const noexcept
+        { return GetUniformValue<float>("kSpecularExponent", 4.0f); }
+
 
         inline MinTextureFilter GetTextureMinFilter() const noexcept
         { return mTextureMinFilter; }
@@ -491,6 +512,7 @@ namespace gfx
         bool ApplyTextureDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
         bool ApplyTilemapDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
         bool ApplyParticleDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
+        bool ApplyBasicLightDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
 
     private:
         std::string mClassId;

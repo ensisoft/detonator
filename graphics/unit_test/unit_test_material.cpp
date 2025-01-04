@@ -165,6 +165,11 @@ void unit_test_material_class()
     klass.SetUniform("vec3", glm::vec3(1.0f, 2.0f, 3.0f));
     klass.SetUniform("vec4", glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
     klass.SetUniform("color", gfx::Color::DarkCyan);
+    klass.SetAmbientColor(gfx::Color::Red);
+    klass.SetDiffuseColor(gfx::Color::Green);
+    klass.SetSpecularColor(gfx::Color::Blue);
+    klass.SetSpecularExponent(128.0f);
+
     klass.SetActiveTextureMap("123abc");
 
     auto texture_file_source = std::make_unique<gfx::TextureFileSource>();
@@ -206,6 +211,10 @@ void unit_test_material_class()
         TEST_REQUIRE(ret->GetTextureVelocityY() == real::float32(5.0f));
         TEST_REQUIRE(ret->GetTextureVelocityZ() == real::float32(-1.0f));
         TEST_REQUIRE(ret->GetTextureRotation()  == real::float32(2.5f));
+        TEST_REQUIRE(ret->GetAmbientColor()     == gfx::Color::Red);
+        TEST_REQUIRE(ret->GetDiffuseColor()     == gfx::Color::Green);
+        TEST_REQUIRE(ret->GetSpecularColor()    == gfx::Color::Blue);
+        TEST_REQUIRE(ret->GetSpecularExponent() == 128.0f);
         TEST_REQUIRE(ret->GetShaderUri() == "my_shader.glsl");
         TEST_REQUIRE(ret->GetShaderSrc() == "some shader source");
         TEST_REQUIRE(ret->GetActiveTextureMap() == "123abc");
