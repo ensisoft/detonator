@@ -65,6 +65,13 @@ void unit_test_maps()
         TEST_REQUIRE(copy.GetSamplerName(0) == "kFoobar");
         TEST_REQUIRE(copy.GetRectUniformName(0) == "kFoobarRect");
         TEST_REQUIRE(copy.GetTextureRect(0) == gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
+
+        copy = std::move(texture);
+        TEST_REQUIRE(copy.GetHash() == texture.GetHash());
+        TEST_REQUIRE(copy.GetName() == "hehe");
+        TEST_REQUIRE(copy.GetSamplerName(0) == "kFoobar");
+        TEST_REQUIRE(copy.GetRectUniformName(0) == "kFoobarRect");
+        TEST_REQUIRE(copy.GetTextureRect(0) == gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
     }
 
     {

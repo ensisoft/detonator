@@ -81,6 +81,7 @@ namespace gfx
         {}
         TextureMap(const TextureMap& other, bool copy);
         TextureMap(const TextureMap& other) : TextureMap(other, true) {}
+        TextureMap(TextureMap&& other) noexcept;
 
         // Get the type of the texture map.
         inline Type GetType() const noexcept
