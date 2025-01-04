@@ -57,7 +57,7 @@ ShaderSource BasicLightProgram::GetShader(const Material& material, const Materi
 #include "shaders/basic_light_main_fragment_shader.glsl"
     };
     static const char* utility_func = {
-#include "shaders/utility_functions.glsl"
+#include "shaders/srgb_functions.glsl"
     };
 
     auto source = material.GetShader(env, device);
@@ -81,7 +81,7 @@ ShaderSource BasicLightProgram::GetShader(const Material& material, const Materi
     source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_POINT", static_cast<int>(LightType::Point));
     source.LoadRawSource(utility_func);
     source.LoadRawSource(fragment_main);
-    source.AddShaderSourceUri("shaders/utility_functions.glsl");
+    source.AddShaderSourceUri("shaders/srgb_functions.glsl");
     source.AddShaderSourceUri("shaders/basic_light_main_fragment_shader.glsl");
     return source;
 }
