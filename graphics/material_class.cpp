@@ -155,6 +155,16 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetParticleBaseRotation());
         }
     }
+    else if (mType == Type::BasicLight)
+    {
+        if (IsStatic())
+        {
+            hash = base::hash_combine(hash, GetAmbientColor());
+            hash = base::hash_combine(hash, GetDiffuseColor());
+            hash = base::hash_combine(hash, GetSpecularColor());
+            hash = base::hash_combine(hash, GetSpecularExponent());
+        }
+    }
     else if (mType == Type::Custom)
     {
         // todo: static uniform information
@@ -196,6 +206,11 @@ std::size_t MaterialClass::GetHash() const noexcept
     hash = base::hash_combine(hash, GetParticleEndColor());
     hash = base::hash_combine(hash, GetParticleRotation());
     hash = base::hash_combine(hash, GetParticleBaseRotation());
+
+    hash = base::hash_combine(hash, GetAmbientColor());
+    hash = base::hash_combine(hash, GetDiffuseColor());
+    hash = base::hash_combine(hash, GetSpecularColor());
+    hash = base::hash_combine(hash, GetSpecularExponent());
 
     // remember that the order of uniforms (and texturemaps)
     // can change between IntoJson/FromJson! This can result
@@ -305,6 +320,11 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
             source.FoldUniform("kParticleStartColor", GetParticleStartColor());
             source.FoldUniform("kParticleEndColor", GetParticleEndColor());
             source.FoldUniform("kParticleBaseRotation", GetParticleBaseRotation());
+
+            source.FoldUniform("kAmbientColor", GetAmbientColor());
+            source.FoldUniform("kDiffuseColor", GetDiffuseColor());
+            source.FoldUniform("kSpecularColor", GetSpecularColor());
+            source.FoldUniform("kSpecularExponent", GetSpecularExponent());
         }
     }
     else
@@ -351,6 +371,8 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
         return ApplyTilemapDynamicState(state, device, program);
     else if (mType == Type::Particle2D)
         return ApplyParticleDynamicState(state, device, program);
+    else if (mType == Type::BasicLight)
+        return ApplyBasicLightDynamicState(state, device, program);
     else if (mType == Type::Custom)
         return ApplyCustomDynamicState(state, device, program);
     else BUG("Unknown material type.");
@@ -401,6 +423,14 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
         program.SetUniform("kParticleEndColor",     GetParticleEndColor());
         program.SetUniform("kParticleBaseRotation", GetParticleBaseRotation());
     }
+    else if (mType == Type::BasicLight)
+    {
+        program.SetUniform("kAmbientColor", GetAmbientColor());
+        program.SetUniform("kDiffuseColor", GetDiffuseColor());
+        program.SetUniform("kSpecularColor", GetSpecularColor());
+        program.SetUniform("kSpecularExponent", GetSpecularExponent());
+    }
+
     else if (mType == Type::Custom)
     {
         // nothing to do here, static state should be in the shader
@@ -1162,6 +1192,14 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         src.LoadRawSource(source);
         src.AddShaderSourceUri("shaders/fragment_2d_particle_shader.glsl");
     }
+    else if (mType == Type::BasicLight)
+    {
+        static const char* source = {
+#include "shaders/fragment_basic_light_material_shader.glsl"
+        };
+        src.LoadRawSource(source);
+        src.AddShaderSourceUri("shaders/fragment_basic_light_material_shader.glsl");
+    }
     else BUG("Unknown material type.");
 
     return src;
@@ -1440,6 +1478,18 @@ bool MaterialClass::ApplyParticleDynamicState(const State& state, Device& device
     }
     SetUniform("kParticleRotation", state.uniforms, static_cast<int>(GetParticleRotation()), program);
 
+    return true;
+}
+
+bool MaterialClass::ApplyBasicLightDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
+{
+    if (!IsStatic())
+    {
+        SetUniform("kAmbientColor", state.uniforms, GetAmbientColor(), program);
+        SetUniform("kDiffuseColor", state.uniforms, GetDiffuseColor(), program);
+        SetUniform("kSpecularColor", state.uniforms, GetSpecularColor(), program);
+        SetUniform("kSpecularExponent", state.uniforms, GetSpecularExponent(), program);
+    }
     return true;
 }
 
