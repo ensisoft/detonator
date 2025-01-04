@@ -108,6 +108,10 @@ namespace gui
         void on_shaderFile_currentIndexChanged(int);
         void on_particleStartColor_colorChanged(QColor color);
         void on_particleEndColor_colorChanged(QColor color);
+        void on_diffuseColor_colorChanged(QColor color);
+        void on_ambientColor_colorChanged(QColor color);
+        void on_specularColor_colorChanged(QColor color);
+        void on_specularExponent_valueChanged(double);
         void on_particleBaseRotation_valueChanged(double);
         void on_particleRotationMode_currentIndexChanged(int);
         void on_tileWidth_valueChanged(int);
@@ -192,7 +196,7 @@ namespace gui
         // the material class we're editing
         std::shared_ptr<gfx::MaterialClass> mMaterial;
         std::unique_ptr<gfx::MaterialInstance> mMaterialInst;
-        std::unique_ptr<gfx::Drawable> mDrawable;
+        std::shared_ptr<gfx::Drawable> mDrawable;
         // play state
         enum PlayState {
             Playing, Paused, Stopped
