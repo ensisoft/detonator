@@ -35,6 +35,12 @@
 #include "graphics/packer.h"
 #include "graphics/loader.h"
 
+namespace {
+    enum class BasicLightMaterialMap : int {
+        Diffuse = 0x1, Specular = 0x2
+    };
+} // namesapce
+
 namespace gfx
 {
 
@@ -282,6 +288,11 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
             source.AddPreprocessorDefinition("PARTICLE_ROTATION_RANDOM", static_cast<int>(ParticleRotation::RandomRotation));
             source.AddPreprocessorDefinition("PARTICLE_ROTATION_DIRECTION", static_cast<int>(ParticleRotation::ParticleDirection));
             source.AddPreprocessorDefinition("PARTICLE_ROTATION_DIRECTION_AND_BASE", static_cast<int>(ParticleRotation::ParticleDirectionAndBase));
+        }
+        else if (mType == Type::BasicLight)
+        {
+            source.AddPreprocessorDefinition("LIGHT_DIFFUSE_MAP",  static_cast<int>(BasicLightMaterialMap::Diffuse));
+            source.AddPreprocessorDefinition("LIGHT_SPECULAR_MAP", static_cast<int>(BasicLightMaterialMap::Specular));
         }
     }
 
@@ -1508,6 +1519,55 @@ bool MaterialClass::ApplyBasicLightDynamicState(const State& state, Device& devi
         SetUniform("kSpecularColor", state.uniforms, GetSpecularColor(), program);
         SetUniform("kSpecularExponent", state.uniforms, GetSpecularExponent(), program);
     }
+
+    struct Map {
+        const char* texture_map_name;
+        const char* texture_rect_name;
+        BasicLightMaterialMap type;
+    } maps[] = {
+        { "kDiffuseMap", "kDiffuseMapRect", BasicLightMaterialMap::Diffuse },
+        { "kSpecularMap", "kSpecularMapRect", BasicLightMaterialMap::Specular }
+    };
+    int map_flags = 0;
+
+    for (unsigned i=0; i<base::ArraySize(maps); ++i)
+    {
+        // these textures are optional so if there's no map or the map doesn't
+        // have any textures set then we're just going to skip binding it.
+        const auto* texture_map = FindTextureMapBySampler(maps[i].texture_map_name, 0);
+        if (!texture_map || texture_map->GetNumTextures() == 0)
+            continue;
+
+        map_flags |= static_cast<unsigned>(maps[i].type);
+
+        TextureMap::BindingState ts;
+        ts.dynamic_content = state.editing_mode || !IsStatic();
+        ts.current_time = state.material_time;
+
+        TextureMap::BoundState binds;
+        if (!texture_map->BindTextures(ts, device, binds))
+        {
+            if (state.first_render)
+                ERROR("Failed to bind basic light material diffuse map. [material='%1']", mName);
+            return false;
+        }
+        auto* texture = binds.textures[0];
+        texture->SetFilter(mTextureMinFilter);
+        texture->SetFilter(mTextureMagFilter);
+        texture->SetWrapX(mTextureWrapX);
+        texture->SetWrapY(mTextureWrapY);
+
+        const auto rect = binds.rects[0];
+        const float x  = rect.GetX();
+        const float y  = rect.GetY();
+        const float sx = rect.GetWidth();
+        const float sy = rect.GetHeight();
+
+        program.SetTexture(maps[i].texture_map_name, i, *texture);
+        program.SetUniform(maps[i].texture_rect_name, x, y, sx, sy);
+    }
+    program.SetUniform("kMaterialMaps", map_flags);
+
     return true;
 }
 

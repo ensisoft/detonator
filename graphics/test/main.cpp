@@ -3489,6 +3489,119 @@ private:
     float mTime = 0.0f;
 };
 
+class BasicLightMaterialTest : public GraphicsTest
+{
+public:
+    using LightType = gfx::BasicLightProgram::LightType;
+
+    explicit BasicLightMaterialTest(LightType light) noexcept
+      : mLightType(light)
+    {}
+    void Render(gfx::Painter& painter) override
+    {
+        constexpr auto const aspect = 1024.0 / 768.0f;
+
+        const float t = std::sin(mTime * 0.4) * 0.5 + 0.5;
+        const auto x = std::cos(math::Circle * t) * 4.0f;
+        const auto y = std::sin(math::Circle * t) * 4.0f;
+
+        gfx::Painter::DrawState state;
+        state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
+        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.write_color  = true;
+
+        gfx::Painter p(painter);
+        p.ResetViewMatrix();
+        p.SetProjectionMatrix(gfx::MakePerspectiveProjection(gfx::FDegrees { 45.0f }, aspect, 1.0f, 100.0f));
+
+        gfx::BasicLightProgram program;
+        gfx::BasicLightProgram::Light light;
+        light.type = mLightType;
+        light.ambient_color  = gfx::Color4f(gfx::Color::White) * 0.33f;
+        light.diffuse_color  = gfx::Color4f(gfx::Color::White) * 1.0f;
+        light.specular_color = gfx::Color4f(gfx::Color::White) * 0.8;
+        light.position  = glm::vec3 {x, y, -10.0f};
+        light.direction = glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - glm::vec3(x, y, 0.0f));
+        light.quadratic_attenuation = 0.005f;
+        light.spot_half_angle = gfx::FDegrees{30.0f};
+        program.AddLight(light);
+
+        gfx::Transform transform;
+        transform.Resize(3.0f, 3.0f, 3.0f);
+        transform.RotateAroundY(std::sin(t));
+        transform.RotateAroundX(std::cos(t));
+        transform.MoveTo(0.0f, 0.0f, -10.0f);
+        p.Draw(gfx::Cube(), transform, gfx::MaterialInstance(mMaterial), state, program);
+
+
+        if (mLightType == LightType::Point || mLightType == LightType::Spot)
+        {
+            gfx::Transform transform;
+            transform.Resize(0.2f, 0.2f, 0.2f);
+            transform.MoveTo(light.position);
+            p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::White));
+        }
+    }
+
+    std::string GetName() const override
+    {
+        return base::FormatString("Basic%1LightMaterialTest", mLightType);
+    }
+    void Start() override
+    {
+        mTime = 0.0f;
+
+        mMaterial = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::BasicLight);
+        mMaterial->SetAmbientColor(gfx::Color::White);
+        mMaterial->SetDiffuseColor(gfx::Color::White);
+        mMaterial->SetSpecularColor(gfx::Color::White);
+        mMaterial->SetNumTextureMaps(2);
+        {
+            gfx::TextureMap2D diffuse;
+            diffuse.SetType(gfx::TextureMap2D::Type::Texture2D);
+            diffuse.SetName("Diffuse Map");
+            diffuse.SetSamplerName("kDiffuseMap");
+            diffuse.SetRectUniformName("kDiffuseMapRect");
+            diffuse.SetNumTextures(1);
+            diffuse.SetTextureSource(0, gfx::LoadTextureFromFile("textures/wooden-crate-diffuse.png"));
+            diffuse.SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            mMaterial->SetTextureMap(0, std::move(diffuse));
+        }
+        {
+            gfx::TextureMap2D specular;
+            specular.SetType(gfx::TextureMap2D::Type::Texture2D);
+            specular.SetName("Specular Map");
+            specular.SetSamplerName("kSpecularMap");
+            specular.SetRectUniformName("kSpecularMapRect");
+            specular.SetNumTextures(1);
+            specular.SetTextureSource(0, gfx::LoadTextureFromFile("textures/wooden-crate-specular.png"));
+            specular.SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            mMaterial->SetTextureMap(1, std::move(specular));
+        }
+
+    }
+    void Update(float dt) override
+    {
+        mTime += dt;
+    }
+    void KeyDown(const wdk::WindowEventKeyDown& key) override
+    {
+        if (key.symbol == wdk::Keysym::Space)
+        {
+            ++mLightIndex;
+
+            const auto light_index = mLightIndex % 4;
+            mLightType = static_cast<LightType>(light_index);
+            DEBUG("Light type changed to '%1'", mLightType);
+        }
+    }
+private:
+    LightType mLightType = LightType::Point;
+    std::shared_ptr<gfx::MaterialClass> mMaterial;
+    float mTime = 0.0f;
+    unsigned mLightIndex = 0;
+};
+
 int main(int argc, char* argv[])
 {
     base::OStreamLogger logger(std::cout);
@@ -3688,6 +3801,8 @@ int main(int argc, char* argv[])
         tests.emplace_back(new BasicLight3DTest);
         tests.emplace_back(new BasicLight3DTest(glm::vec3{-1.0f, -1.0f, 0.0f}));
         tests.emplace_back(new BasicLight3DTest(glm::vec3{0.0f, -1.0f, 0.0f}, gfx::FDegrees(25.0f)));
+
+        tests.emplace_back(new BasicLightMaterialTest(BasicLightMaterialTest::LightType::Point));
     }
 
     bool stop_for_input = false;
