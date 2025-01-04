@@ -330,32 +330,6 @@ size_t TextureMap::FindTextureSourceIndexByName(const std::string& name) const
     return i;
 }
 
-TextureMap* TextureMap::AsSpriteMap()
-{
-    if (mType == Type::Sprite)
-        return this;
-    return nullptr;
-}
-TextureMap* TextureMap::AsTextureMap2D()
-{
-    if (mType == Type::Texture2D)
-        return this;
-    return nullptr;
-}
-
-const TextureMap* TextureMap::AsSpriteMap() const
-{
-    if (mType == Type::Sprite)
-        return this;
-    return nullptr;
-}
-const TextureMap* TextureMap::AsTextureMap2D() const
-{
-    if (mType == Type::Texture2D)
-        return this;
-    return nullptr;
-}
-
 unsigned TextureMap::GetSpriteFrameCount() const
 {
     if (!IsSpriteMap())

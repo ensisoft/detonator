@@ -129,14 +129,14 @@ void unit_test_maps()
         TEST_REQUIRE(x->GetHash() == sprite.GetHash());
         x = sprite.Clone();
         TEST_REQUIRE(x->GetHash() != sprite.GetHash());
-        TEST_REQUIRE(x->AsSpriteMap()->GetSpriteFrameRate() == real::float32(10.0f));
-        TEST_REQUIRE(x->AsSpriteMap()->GetSamplerName(0) == "kTexture0");
-        TEST_REQUIRE(x->AsSpriteMap()->GetSamplerName(1) == "kTexture1");
-        TEST_REQUIRE(x->AsSpriteMap()->GetRectUniformName(0) == "kTextureRect0");
-        TEST_REQUIRE(x->AsSpriteMap()->GetRectUniformName(1) == "kTextureRect1");
-        TEST_REQUIRE(x->AsSpriteMap()->GetNumTextures() == 2);
-        TEST_REQUIRE(x->AsSpriteMap()->GetTextureSource(0)->GetSourceType() == gfx::TextureSource::Source::Filesystem);
-        TEST_REQUIRE(x->AsSpriteMap()->GetTextureSource(1)->GetSourceType() == gfx::TextureSource::Source::Filesystem);
+        TEST_REQUIRE(x->GetSpriteFrameRate() == real::float32(10.0f));
+        TEST_REQUIRE(x->GetSamplerName(0) == "kTexture0");
+        TEST_REQUIRE(x->GetSamplerName(1) == "kTexture1");
+        TEST_REQUIRE(x->GetRectUniformName(0) == "kTextureRect0");
+        TEST_REQUIRE(x->GetRectUniformName(1) == "kTextureRect1");
+        TEST_REQUIRE(x->GetNumTextures() == 2);
+        TEST_REQUIRE(x->GetTextureSource(0)->GetSourceType() == gfx::TextureSource::Source::Filesystem);
+        TEST_REQUIRE(x->GetTextureSource(1)->GetSourceType() == gfx::TextureSource::Source::Filesystem);
     }
 }
 
