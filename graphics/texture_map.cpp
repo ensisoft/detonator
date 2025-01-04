@@ -53,6 +53,21 @@ TextureMap::TextureMap(const TextureMap& other, bool copy)
     }
 }
 
+TextureMap::TextureMap(TextureMap&& other) noexcept
+{
+    mId = std::move(other.mId);
+    mName = std::move(other.mName);
+    mType = other.mType;
+    mFps = other.mFps;
+    mLooping = other.mLooping;
+    mSamplerName[0] = std::move(other.mSamplerName[0]);
+    mSamplerName[1] = std::move(other.mSamplerName[1]);
+    mRectUniformName[0] = std::move(other.mRectUniformName[0]);
+    mRectUniformName[1] = std::move(other.mRectUniformName[1]);
+    mSpriteSheet = std::move(other.mSpriteSheet);
+    mTextures = std::move(other.mTextures);
+}
+
 size_t TextureMap::GetHash() const noexcept
 {
     size_t hash = 0;
