@@ -175,12 +175,6 @@ namespace gfx
         // object is returned. Returns end index if no matching texture source was found.
         size_t FindTextureSourceIndexByName(const std::string& name) const;
 
-        // down cast helpers.
-        TextureMap* AsSpriteMap();
-        TextureMap* AsTextureMap2D();
-        const TextureMap* AsSpriteMap() const;
-        const TextureMap* AsTextureMap2D() const;
-
         std::unique_ptr<TextureMap> Copy() const
         { return std::make_unique<TextureMap>(*this, true); }
         std::unique_ptr<TextureMap> Clone() const
