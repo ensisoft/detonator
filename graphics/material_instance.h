@@ -31,6 +31,7 @@ namespace gfx
         // Create new material instance based on the given material class.
         explicit MaterialInstance(std::shared_ptr<const MaterialClass> klass, double time = 0.0);
         explicit MaterialInstance(const MaterialClass& klass, double time = 0.0);
+        explicit MaterialInstance(MaterialClass&& klass, double time = 0.0) noexcept;
 
         // Apply the material properties to the given program object and set the rasterizer state.
         bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const override;
@@ -96,6 +97,7 @@ namespace gfx
     MaterialInstance CreateMaterialFromTexture(std::string gpu_id, Texture* texture = nullptr);
 
     std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass);
+    std::unique_ptr<Material> CreateMaterialInstance(MaterialClass&& klass);
     std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass);
 
 } // namespace

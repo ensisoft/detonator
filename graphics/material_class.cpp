@@ -72,6 +72,24 @@ MaterialClass::MaterialClass(const MaterialClass& other, bool copy)
     }
 }
 
+MaterialClass::MaterialClass(MaterialClass&& other) noexcept
+{
+    mClassId = std::move(other.mClassId);
+    mName = std::move(other.mName);
+    mType = other.mType;
+    mFlags = other.mFlags;
+    mShaderUri = std::move(other.mShaderUri);
+    mShaderSrc = std::move(other.mShaderSrc);
+    mActiveTextureMap = std::move(other.mActiveTextureMap);
+    mSurfaceType = other.mSurfaceType;
+    mTextureMinFilter = other.mTextureMinFilter;
+    mTextureMagFilter = other.mTextureMagFilter;
+    mTextureWrapX = other.mTextureWrapX;
+    mTextureWrapY = other.mTextureWrapY;
+    mUniforms = std::move(other.mUniforms);
+    mTextureMaps = std::move(other.mTextureMaps);
+}
+
 MaterialClass::~MaterialClass() = default;
 
 std::string MaterialClass::GetShaderName(const State& state) const noexcept

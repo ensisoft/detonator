@@ -166,6 +166,7 @@ namespace gfx
 
         explicit MaterialClass(Type type, std::string id = base::RandomString(10));
         MaterialClass(const MaterialClass& other, bool copy=true);
+        MaterialClass(MaterialClass&& other) noexcept;
        ~MaterialClass();
 
         inline bool IsBuiltIn() const noexcept
