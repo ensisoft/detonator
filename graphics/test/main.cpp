@@ -3218,21 +3218,21 @@ private:
 
 };
 
-class Light2DTest : public GraphicsTest
+class BasicLight2DTest : public GraphicsTest
 {
 public:
     using LightType = gfx::BasicLightProgram::LightType;
 
-    Light2DTest()
+    BasicLight2DTest()
     {
         mLightType = LightType::Point;
     }
-    Light2DTest(const glm::vec3& direction)
+    BasicLight2DTest(const glm::vec3& direction)
     {
         mLightType = LightType::Directional;
         mLightDirection = direction;
     }
-    Light2DTest(const glm::vec3& direction, base::FDegrees half_angle)
+    BasicLight2DTest(const glm::vec3& direction, base::FDegrees half_angle)
     {
         mLightType = LightType::Spot;
         mLightDirection = direction;
@@ -3278,7 +3278,7 @@ public:
 
     std::string GetName() const override
     {
-        return base::FormatString("%1Light2DTest", mLightType);
+        return base::FormatString("Basic%1Light2DTest", mLightType);
     }
     void Update(float dt) override
     {
@@ -3295,21 +3295,21 @@ private:
     float mTime = 0.0f;
 };
 
-class Light3DTest : public GraphicsTest
+class BasicLight3DTest : public GraphicsTest
 {
 public:
     using LightType = gfx::BasicLightProgram::LightType;
 
-    Light3DTest()
+    BasicLight3DTest()
     {
         mLightType = LightType::Point;
     }
-    Light3DTest(const glm::vec3& direction)
+    BasicLight3DTest(const glm::vec3& direction)
     {
         mLightType = LightType::Directional;
         mLightDirection = direction;
     }
-    Light3DTest(const glm::vec3& direction, base::FDegrees half_angle)
+    BasicLight3DTest(const glm::vec3& direction, base::FDegrees half_angle)
     {
         mLightType = LightType::Spot;
         mLightDirection = direction;
@@ -3468,7 +3468,7 @@ public:
 
     std::string GetName() const override
     {
-        return base::FormatString("%1Light3DTest", mLightType);
+        return base::FormatString("Basic%1Light3DTest", mLightType);
     }
     void KeyDown(const wdk::WindowEventKeyDown& key) override
     {
@@ -3683,13 +3683,13 @@ int main(int argc, char* argv[])
         tests.emplace_back(new PolygonInstanceTest);
         tests.emplace_back(new ParticleInstanceTest);
         // under ES3 because we require uniform buffers
-        tests.emplace_back(new Light2DTest);
-        tests.emplace_back(new Light2DTest(glm::vec3{0.0f, -1.0f, -0.3f}));
-        tests.emplace_back(new Light2DTest(glm::vec3{0.0f, 1.0f, -0.3f}, gfx::FDegrees(25.0f)));
+        tests.emplace_back(new BasicLight2DTest);
+        tests.emplace_back(new BasicLight2DTest(glm::vec3{0.0f, -1.0f, -0.3f}));
+        tests.emplace_back(new BasicLight2DTest(glm::vec3{0.0f, 1.0f, -0.3f}, gfx::FDegrees(25.0f)));
 
-        tests.emplace_back(new Light3DTest);
-        tests.emplace_back(new Light3DTest(glm::vec3{-1.0f, -1.0f, 0.0f}));
-        tests.emplace_back(new Light3DTest(glm::vec3{0.0f, -1.0f, 0.0f}, gfx::FDegrees(25.0f)));
+        tests.emplace_back(new BasicLight3DTest);
+        tests.emplace_back(new BasicLight3DTest(glm::vec3{-1.0f, -1.0f, 0.0f}));
+        tests.emplace_back(new BasicLight3DTest(glm::vec3{0.0f, -1.0f, 0.0f}, gfx::FDegrees(25.0f)));
     }
 
     bool stop_for_input = false;
