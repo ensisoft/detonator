@@ -32,6 +32,10 @@ MaterialInstance::MaterialInstance(const MaterialClass& klass, double time)
   : mClass(klass.Copy())
   , mRuntime(time)
 {}
+MaterialInstance::MaterialInstance(MaterialClass&& klass, double time) noexcept
+  : mClass(std::make_shared<MaterialClass>(std::move(klass)))
+  , mRuntime(time)
+{}
 
 bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const
 {
@@ -172,6 +176,11 @@ MaterialInstance CreateMaterialFromTexture(std::string gpu_id, Texture* texture)
 std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass)
 {
     return std::make_unique<MaterialInstance>(klass);
+}
+
+std::unique_ptr<Material> CreateMaterialInstance(MaterialClass&& klass)
+{
+    return std::make_unique<MaterialInstance>(std::move(klass));
 }
 
 std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass)

@@ -249,6 +249,11 @@ void unit_test_material_class()
         temp =  klass;
         TEST_REQUIRE(temp.GetHash() == klass.GetHash());
         TEST_REQUIRE(temp.GetId() == klass.GetId());
+
+        temp = std::move(klass);
+        TEST_REQUIRE(temp.GetHash() == klass.GetHash());
+        TEST_REQUIRE(temp.GetId() == klass.GetId());
+
     }
     // clone
     {
