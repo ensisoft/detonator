@@ -35,6 +35,8 @@
 #include "base/utility.h"
 #include "base/json.h"
 #include "data/json.h"
+#include "graphics/debug_drawable.h"
+#include "graphics/basic_light_program.h"
 #include "graphics/simple_shape.h"
 #include "graphics/linebatch.h"
 #include "graphics/painter.h"
@@ -612,11 +614,20 @@ void MaterialWidget::on_actionShowShader_triggered()
 {
     auto* device = mUI.widget->GetDevice();
 
-    gfx::detail::GenericShaderProgram program;
-
+    gfx::ShaderSource source;
     gfx::Material::Environment environment;
     environment.editing_mode  = false; // we want to see the shader as it will be, so using false here
-    const auto& source = program.GetShader(gfx::MaterialInstance(mMaterial), environment, *device);
+
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::BasicLight)
+    {
+        gfx::BasicLightProgram program;
+        source = program.GetShader(gfx::MaterialInstance(mMaterial), environment, *device);
+    }
+    else
+    {
+        gfx::detail::GenericShaderProgram program;
+        source = program.GetShader(gfx::MaterialInstance(mMaterial), environment, *device);
+    }
 
     DlgTextEdit dlg(this);
     dlg.SetText(source.GetSource(), "GLSL");
@@ -899,6 +910,23 @@ void MaterialWidget::on_shaderFile_currentIndexChanged(int)
     ApplyShaderDescription();
     ReloadShaders();
     ShowMaterialProperties();
+}
+
+void MaterialWidget::on_diffuseColor_colorChanged(QColor color)
+{
+    SetMaterialProperties();
+}
+void MaterialWidget::on_ambientColor_colorChanged(QColor color)
+{
+    SetMaterialProperties();
+}
+void MaterialWidget::on_specularColor_colorChanged(QColor color)
+{
+    SetMaterialProperties();
+}
+void MaterialWidget::on_specularExponent_valueChanged(double)
+{
+    SetMaterialProperties();
 }
 
 void MaterialWidget::on_particleStartColor_colorChanged(QColor color)
@@ -1912,6 +1940,22 @@ void MaterialWidget::SetMaterialProperties()
         mMaterial->DeleteUniform("kParticleRotation");
     }
 
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::BasicLight)
+    {
+        mMaterial->SetDiffuseColor(GetValue(mUI.diffuseColor));
+        mMaterial->SetAmbientColor(GetValue(mUI.ambientColor));
+        mMaterial->SetSpecularColor(GetValue(mUI.specularColor));
+        mMaterial->SetSpecularExponent(GetValue(mUI.specularExponent));
+    }
+    else
+    {
+        mMaterial->DeleteUniform("kDiffuseColor");
+        mMaterial->DeleteUniform("kAmbientColor");
+        mMaterial->DeleteUniform("kSpecularColor");
+        mMaterial->DeleteUniform("kSpecularExponent");
+    }
+
+
     // set of known uniforms if they differ from the defaults.
     // todo: this assumes implicit knowledge about the internals
     // of the material class. refactor these names away and the
@@ -2078,6 +2122,16 @@ void MaterialWidget::ShowMaterialProperties()
     SetVisible(mUI.textureFilters,     false);
     SetVisible(mUI.customUniforms,     false);
 
+    SetVisible(mUI.lblDiffuseColor,     false);
+    SetVisible(mUI.lblAmbientColor,     false);
+    SetVisible(mUI.lblSpecularColor,    false);
+    SetVisible(mUI.lblSpecularExponent, false);
+    SetVisible(mUI.ambientColor,        false);
+    SetVisible(mUI.diffuseColor,        false);
+    SetVisible(mUI.specularColor,       false);
+    SetVisible(mUI.specularExponent,    false);
+
+
     SetValue(mUI.materialName,         mMaterial->GetName());
     SetValue(mUI.materialID,           mMaterial->GetId());
     SetValue(mUI.materialType,         mMaterial->GetType());
@@ -2114,6 +2168,12 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.colorMap3, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::BottomRight));
     SetValue(mUI.gradientOffsetX, NormalizedFloat(offset.x));
     SetValue(mUI.gradientOffsetY, NormalizedFloat(offset.y));
+
+    /// basic light material
+    SetValue(mUI.ambientColor, mMaterial->GetAmbientColor());
+    SetValue(mUI.diffuseColor, mMaterial->GetDiffuseColor());
+    SetValue(mUI.specularColor, mMaterial->GetSpecularColor());
+    SetValue(mUI.specularExponent, mMaterial->GetSpecularExponent());
 
     SetValue(mUI.textureScaleX,        mMaterial->GetTextureScaleX());
     SetValue(mUI.textureScaleY,        mMaterial->GetTextureScaleY());
@@ -2165,7 +2225,19 @@ void MaterialWidget::ShowMaterialProperties()
         SetVisible(mUI.grpRenderFlags,      true);
         SetVisible(mUI.chkStaticInstance,   true);
 
-        if (mMaterial->GetType() == gfx::MaterialClass::Type::Color)
+        if (mMaterial->GetType() == gfx::MaterialClass::Type::BasicLight)
+        {
+            SetVisible(mUI.builtInProperties,   true);
+            SetVisible(mUI.lblDiffuseColor,     true);
+            SetVisible(mUI.lblAmbientColor,     true);
+            SetVisible(mUI.lblSpecularColor,    true);
+            SetVisible(mUI.lblSpecularExponent, true);
+            SetVisible(mUI.ambientColor,        true);
+            SetVisible(mUI.diffuseColor,        true);
+            SetVisible(mUI.specularColor,       true);
+            SetVisible(mUI.specularExponent,    true);
+        }
+        else if (mMaterial->GetType() == gfx::MaterialClass::Type::Color)
         {
             SetVisible(mUI.builtInProperties,   true);
             SetVisible(mUI.baseColor,           true);
@@ -2536,7 +2608,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         mDrawable = mWorkspace->MakeDrawableById(GetItemId(mUI.cmbModel));
         if (gfx::Is3DShape(*mDrawable))
         {
-            mModelRotationTotal.x = glm::radians(45.0f);
+            mModelRotationTotal.x = glm::radians(-45.0f);
             mModelRotationTotal.y = glm::radians(15.0f);
         }
     }
@@ -2564,8 +2636,6 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
         const auto size = std::min(half_width, half_height);
 
-        gfx::detail::GenericShaderProgram program;
-
         gfx::Transform transform;
         transform.Resize(size, size, size);
         transform.Scale(zoom, zoom, zoom);
@@ -2581,20 +2651,60 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
         state.culling    = gfx::Painter::Culling::Back;
         state.line_width = 4.0f;
-        p.Draw(*mDrawable, transform, *mMaterialInst, state, program);
+
+        if (mMaterial->GetType() == gfx::MaterialClass::Type::BasicLight)
+        {
+            gfx::BasicLightProgram program;
+            gfx::BasicLightProgram::Light light;
+            light.type = gfx::BasicLightProgram::LightType::Point;
+            light.position = glm::vec3 { 0.0f, size, -size*0.5f };
+            light.ambient_color = gfx::Color4f(gfx::Color::White) * 0.2f;
+            light.diffuse_color = gfx::Color4f(gfx::Color::White) * 0.89;
+            light.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
+            light.direction = glm::vec3 { 0.0f, -1.0f, 0.0f };
+            light.quadratic_attenuation = 0.00005;
+            light.spot_half_angle = gfx::FDegrees(35.0f);
+            program.AddLight(light);
+            program.SetCameraCenter(0.0f, 0.0f, 0.0f);
+            p.Draw(*mDrawable, transform, *mMaterialInst, state, program);
+
+            if (Editor::DebugEditor())
+            {
+                gfx::detail::GenericShaderProgram program;
+                p.Draw(gfx::NormalMeshInstance(mDrawable), transform,
+                       gfx::CreateMaterialFromColor(gfx::Color::HotPink), state, program);
+            }
+
+            {
+                gfx::detail::GenericShaderProgram program;
+                gfx::Transform transform;
+                transform.Resize(20.0f, 20.0f, 20.0f);
+                transform.Scale(zoom, zoom, zoom);
+                transform.Translate(0.0f, size, -size*0.5f);
+                p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::White), state, program);
+            }
+        }
+        else
+        {
+            gfx::detail::GenericShaderProgram program;
+            p.Draw(*mDrawable, transform, *mMaterialInst, state, program);
+        }
 
         {
+            gfx::detail::GenericShaderProgram program;
             gfx::LineBatch3D lines;
             lines.AddLine({0.0f, 0.0f, 0.0f}, {0.75f, 0.0f, 0.0f});
             p.Draw(lines, transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), state, program);
         }
         {
+            gfx::detail::GenericShaderProgram program;
             gfx::LineBatch3D lines;
             lines.AddLine({0.0f, 0.0f, 0.0f}, {0.0f, 0.75f, 0.0f});
             p.Draw(lines, transform, gfx::CreateMaterialFromColor(gfx::Color::DarkRed), state, program);
         }
 
         {
+            gfx::detail::GenericShaderProgram program;
             gfx::LineBatch3D lines;
             lines.AddLine({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.75f});
             p.Draw(lines, transform, gfx::CreateMaterialFromColor(gfx::Color::DarkBlue), state, program);
@@ -2604,6 +2714,8 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         if (Editor::DebugEditor())
         {
             state.winding = gfx::Painter::PolygonWindigOrder::ClockWise;
+
+            gfx::detail::GenericShaderProgram program;
 
             gfx::Transform transform;
             transform.Resize(size*zoom, size*zoom);
