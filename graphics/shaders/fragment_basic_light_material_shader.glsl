@@ -13,9 +13,11 @@ uniform float kSpecularExponent;
 
 uniform sampler2D kDiffuseMap;
 uniform sampler2D kSpecularMap;
+uniform sampler2D kNormalMap;
 
 uniform vec4 kDiffuseMapRect;
 uniform vec4 kSpecularMapRect;
+uniform vec4 kNormalMapRect;
 
 uniform int kMaterialMaps;
 
@@ -47,12 +49,19 @@ void FragmentShaderMain() {
         specular_color *= specular_map_sample;
     }
 
+    if (TestMap(LIGHT_NORMAL_MAP)) {
+        vec2 normal_map_coords = vTexCoord * kNormalMapRect.zw + kNormalMapRect.xy;
+        vec4 normal_map_sample = texture(kNormalMap, normal_map_coords);
+        fs_out.surface_normal = normalize(normal_map_sample.xyz * 2.0 - 1.0);
+        fs_out.have_surface_normal = true;
+    }
+
     fs_out.color = kDiffuseColor;
     fs_out.ambient_color = ambient_color;
     fs_out.diffuse_color = diffuse_color;
     fs_out.specular_color = specular_color;
     fs_out.specular_exponent = kSpecularExponent;
-    fs_out.use_light = true;
+    fs_out.have_material_colors = true;
 }
 
 )CPP_RAW_STRING"

@@ -37,7 +37,7 @@
 
 namespace {
     enum class BasicLightMaterialMap : int {
-        Diffuse = 0x1, Specular = 0x2
+        Diffuse = 0x1, Specular = 0x2, Normal = 0x4
     };
 } // namesapce
 
@@ -293,6 +293,7 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
         {
             source.AddPreprocessorDefinition("LIGHT_DIFFUSE_MAP",  static_cast<int>(BasicLightMaterialMap::Diffuse));
             source.AddPreprocessorDefinition("LIGHT_SPECULAR_MAP", static_cast<int>(BasicLightMaterialMap::Specular));
+            source.AddPreprocessorDefinition("LIGHT_NORMAL_MAP",   static_cast<int>(BasicLightMaterialMap::Normal));
         }
     }
 
@@ -1526,7 +1527,8 @@ bool MaterialClass::ApplyBasicLightDynamicState(const State& state, Device& devi
         BasicLightMaterialMap type;
     } maps[] = {
         { "kDiffuseMap", "kDiffuseMapRect", BasicLightMaterialMap::Diffuse },
-        { "kSpecularMap", "kSpecularMapRect", BasicLightMaterialMap::Specular }
+        { "kSpecularMap", "kSpecularMapRect", BasicLightMaterialMap::Specular },
+        { "kNormalMap", "kNormalMapRect", BasicLightMaterialMap::Normal }
     };
     int map_flags = 0;
 
@@ -1548,7 +1550,7 @@ bool MaterialClass::ApplyBasicLightDynamicState(const State& state, Device& devi
         if (!texture_map->BindTextures(ts, device, binds))
         {
             if (state.first_render)
-                ERROR("Failed to bind basic light material diffuse map. [material='%1']", mName);
+                ERROR("Failed to bind basic light material map. [material='%1', map=%2]", mName, maps[i].type);
             return false;
         }
         auto* texture = binds.textures[0];

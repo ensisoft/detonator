@@ -17,7 +17,9 @@ struct FS_OUT {
     vec4 diffuse_color;
     vec4 specular_color;
     float specular_exponent; // aka shininess
-    bool use_light;
+    vec3 surface_normal;
+    bool have_material_colors;
+    bool have_surface_normal;
 } fs_out;
 
 // vec4 has 16 byte alignment.
@@ -58,9 +60,11 @@ layout (location=0) out vec4 fragOutColor;
 
 in vec3 vertexViewPosition;
 in vec3 vertexViewNormal;
+in mat3 TBN;
 
 void main() {
-    fs_out.use_light = false;
+    fs_out.have_material_colors = false;
+    fs_out.have_surface_normal = false;
 
     FragmentShaderMain();
 
@@ -71,11 +75,16 @@ void main() {
     vec4 material_specular_color = color;
     float material_specular_exponent = 4.0;
 
-    if (fs_out.use_light) {
+    if (fs_out.have_material_colors) {
         material_ambient_color = fs_out.ambient_color;
         material_diffuse_color = fs_out.diffuse_color;
         material_specular_color = fs_out.specular_color;
         material_specular_exponent = fs_out.specular_exponent;
+    }
+
+    vec3 surface_normal = vertexViewNormal;
+    if (fs_out.have_surface_normal) {
+        surface_normal = TBN * fs_out.surface_normal;
     }
 
     vec4 total_color = vec4(0.0);
@@ -127,12 +136,12 @@ void main() {
             // points to the light from that point on the surface.
             // if the light is behind the surface the dot product is negative
             // https://en.wikipedia.org/wiki/Lambertian_reflectance
-            float light_reflectance_factor = dot(vertexViewNormal, direction_towards_light);
+            float light_reflectance_factor = dot(surface_normal, direction_towards_light);
 
             if (light_strength > 0.0 && light_reflectance_factor > 0.0) {
 
                 vec3 direction_towards_eye = normalize(kCameraCenter - vertexViewPosition);
-                vec3 reflected_light_direction = reflect(direction_towards_point, vertexViewNormal);
+                vec3 reflected_light_direction = reflect(direction_towards_point, surface_normal);
                 float light_specular_factor = pow(max(dot(direction_towards_eye, reflected_light_direction), 0.0), material_specular_exponent);
 
                 // specular component for the light against the material
@@ -144,11 +153,25 @@ void main() {
 
             // total light accumulation
             total_color += (ambient_color + diffuse_color + specular_color);
-
-            // debug the normals
-            //total_color = vec4(vertexViewNormal, 1.0);
         }
     }
+
+    // debug the normals
+    // keep in mind that when debugging normal *maps* the maps are
+    // in *LINEAR* color space (at least they should be!) since they
+    // don't encode color data but vectors and those vectors should
+    // have equal precision regardless of whether they're collinear
+    // with the negative or positive axis.
+    // HOWEVER regular image viewers don't understand this and will
+    // assume they're sRGB *images* and thus will decode the data
+    // which will result the displayed image showing darker than
+    // what it should. SO if you're comparing the output of this
+    // the image produced by writing out the normal here against
+    // the normal map image that is open in some image viewer you
+    // can expect the colors not to match!
+
+    //total_color = vec4(surface_normal*0.5 + 0.5, 1.0);
+
     fragOutColor = sRGB_encode(total_color);
 }
 

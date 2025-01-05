@@ -274,6 +274,8 @@ namespace gfx
 
     bool Is3DShape(const Drawable& drawable) noexcept;
     bool Is3DShape(const DrawableClass& klass) noexcept;
+    bool Is2DShape(const Drawable& drawable) noexcept;
+    bool Is2DShape(const DrawableClass& klass) noexcept;
 
     std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass);
 

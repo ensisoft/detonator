@@ -92,6 +92,16 @@ bool Is3DShape(const DrawableClass& klass) noexcept
     else BUG("Unknown drawable shape type");
 }
 
+bool Is2DShape(const Drawable& drawable) noexcept
+{
+    return !Is3DShape(drawable);
+}
+
+bool Is2DShape(const DrawableClass& klass) noexcept
+{
+    return !Is2DShape(klass);
+}
+
 std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass)
 {
     // factory function based on type switching.

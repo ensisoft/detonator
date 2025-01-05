@@ -19,8 +19,11 @@ struct FS_OUT {
     vec4 ambient_color;
     vec4 diffuse_color;
     vec4 specular_color;
+    vec3 surface_normal;
     float specular_exponent;
-    bool use_light;
+    bool have_material_colors;
+    bool have_surface_normal;
+
 } fs_out;
 
 void main() {

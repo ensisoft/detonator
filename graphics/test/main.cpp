@@ -3630,6 +3630,160 @@ private:
     unsigned mLightIndex = 0;
 };
 
+
+class BasicLightNormalMapMaterialTest : public GraphicsTest
+{
+public:
+    using LightType = gfx::BasicLightProgram::LightType;
+
+    explicit BasicLightNormalMapMaterialTest(LightType light) noexcept
+      : mLightType(light)
+    {}
+
+    void Render(gfx::Painter& painter) override
+    {
+        constexpr auto const aspect = 1024.0 / 768.0f;
+
+        const float t = std::sin(mTime * 0.4) * 0.5f + 0.5f;
+        const auto x = std::cos(math::Circle * t) * 4.0f;
+        const auto y = std::sin(math::Circle * t) * 4.0f;
+
+        gfx::Painter::DrawState state;
+        state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
+        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.write_color = true;
+
+        gfx::Painter p(painter);
+        p.ResetViewMatrix();
+        p.SetProjectionMatrix(gfx::MakePerspectiveProjection(gfx::FDegrees{45.0f}, aspect, 1.0f, 100.0f));
+
+        gfx::BasicLightProgram program;
+        gfx::BasicLightProgram::Light light;
+        light.type = mLightType;
+        light.ambient_color = gfx::Color4f(gfx::Color::White) * 0.25;
+        light.diffuse_color = gfx::Color4f(gfx::Color::White) * 1.0f;
+        light.specular_color = gfx::Color4f(gfx::Color::White) * 0.3f;
+        light.position = glm::vec3{x, y, -7.0f};
+        light.direction = glm::normalize(glm::vec3(0.0f, 0.0f, -10.0f) - glm::vec3(x, y, -7.0f));
+        light.quadratic_attenuation = 0.0005f;
+        light.spot_half_angle = mLightHalfAngle;
+        program.AddLight(light);
+
+        gfx::Transform transform;
+        transform.Resize(10.0f, 10.0f, 10.0f);
+        transform.RotateAroundX(gfx::FDegrees(mPitch));
+        transform.RotateAroundY(gfx::FDegrees(mRoll));
+        transform.MoveTo(0.0f, 0.0f, mZ);
+        if (gfx::Is2DShape(*mShape))
+        {
+            transform.Push();
+                transform.Translate(-0.5f, -0.5f);
+                transform.RotateAroundZ(gfx::FDegrees(180.0f));
+                transform.RotateAroundY(gfx::FDegrees(180.0f));
+        }
+
+        p.Draw(*mShape, transform, gfx::MaterialInstance(mMaterial), state, program);
+
+        if (mLightType == LightType::Point || mLightType == LightType::Spot)
+        {
+            gfx::Transform transform;
+            transform.Resize(0.2f, 0.2f, 0.2f);
+            transform.MoveTo(light.position);
+            p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::White));
+        }
+    }
+
+    std::string GetName() const override
+    {
+        return base::FormatString("Basic%1LightNormalMapMaterialTest", mLightType);
+    }
+    void Start() override
+    {
+        mTime = 0.0f;
+        mPitch = 0.0f;
+        mRoll = 0.0f;
+        mZ = -10.0f;
+
+        mMaterial = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::BasicLight);
+        mMaterial->SetAmbientColor(gfx::Color::White);
+        mMaterial->SetDiffuseColor(gfx::Color::White);
+        mMaterial->SetSpecularColor(gfx::Color::White);
+        mMaterial->SetNumTextureMaps(2);
+        {
+            gfx::TextureMap2D diffuse;
+            diffuse.SetType(gfx::TextureMap2D::Type::Texture2D);
+            diffuse.SetName("Diffuse Map");
+            diffuse.SetSamplerName("kDiffuseMap");
+            diffuse.SetRectUniformName("kDiffuseMapRect");
+            diffuse.SetNumTextures(1);
+            diffuse.SetTextureSource(0, gfx::LoadTextureFromFile("textures/ground-diffuse.png"));
+            diffuse.SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            mMaterial->SetTextureMap(0, std::move(diffuse));
+        }
+        {
+            gfx::TextureMap2D normal;
+            normal.SetType(gfx::TextureMap2D::Type::Texture2D);
+            normal.SetName("Normal Map");
+            normal.SetSamplerName("kNormalMap");
+            normal.SetRectUniformName("kNormalMapRect");
+            normal.SetNumTextures(1);
+            normal.SetTextureSource(0, gfx::LoadTextureFromFile("textures/ground-normal.png"));
+            normal.SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            normal.GetTextureSource(0)->SetColorSpace(gfx::TextureSource::ColorSpace::Linear);
+            mMaterial->SetTextureMap(1, std::move(normal));
+        }
+
+        mShape = std::make_unique<gfx::Rectangle>();
+
+    }
+    void Update(float dt) override
+    {
+        mTime += dt;
+
+    }
+    void KeyDown(const wdk::WindowEventKeyDown& key) override
+    {
+        if (key.symbol == wdk::Keysym::Space)
+        {
+            ++mLightIndex;
+
+            const auto light_index = mLightIndex % 4;
+            mLightType = static_cast<LightType>(light_index);
+            DEBUG("Light type changed to '%1'", mLightType);
+        }
+        else if (key.symbol == wdk::Keysym::Key1)
+            mShape = std::make_unique<gfx::Rectangle>();
+        else if (key.symbol == wdk::Keysym::Key2)
+            mShape = std::make_unique<gfx::Cube>();
+        else if (key.symbol == wdk::Keysym::Key3)
+            mShape = std::make_unique<gfx::Pyramid>();
+        else if (key.symbol == wdk::Keysym::Key4)
+            mShape = std::make_unique<gfx::Sphere>();
+        else if (key.symbol == wdk::Keysym::KeyW)
+            mPitch -= 2.0f;
+        else if (key.symbol == wdk::Keysym::KeyS)
+            mPitch += 2.0f;
+        else if (key.symbol == wdk::Keysym::KeyA)
+            mRoll -= 2.0f;
+        else if (key.symbol == wdk::Keysym::KeyD)
+            mRoll += 2.0f;
+        else if (key.symbol == wdk::Keysym::KeyZ && key.modifiers.test(wdk::Keymod::Shift))
+            mZ += 0.5f;
+        else if (key.symbol == wdk::Keysym::KeyZ)
+            mZ -= 0.5f;
+    }
+private:
+    LightType mLightType = LightType::Point;
+    gfx::FDegrees mLightHalfAngle = gfx::FDegrees{30.0f};
+    std::shared_ptr<gfx::MaterialClass> mMaterial;
+    std::unique_ptr<gfx::Drawable> mShape;
+    float mTime = 0.0f;
+    float mPitch = 0.0f;
+    float mRoll = 0.0f;
+    float mZ = -10.0f;
+    unsigned mLightIndex = 0;
+};
+
 int main(int argc, char* argv[])
 {
     base::OStreamLogger logger(std::cout);
@@ -3831,6 +3985,12 @@ int main(int argc, char* argv[])
         tests.emplace_back(new BasicLight3DTest(glm::vec3{0.0f, -1.0f, 0.0f}, gfx::FDegrees(25.0f)));
 
         tests.emplace_back(new BasicLightMaterialTest(BasicLightMaterialTest::LightType::Point));
+        tests.emplace_back(new BasicLightMaterialTest(BasicLightMaterialTest::LightType::Spot));
+        tests.emplace_back(new BasicLightMaterialTest(BasicLightMaterialTest::LightType::Directional));
+
+        tests.emplace_back(new BasicLightNormalMapMaterialTest(BasicLightNormalMapMaterialTest::LightType::Point));
+        tests.emplace_back(new BasicLightNormalMapMaterialTest(BasicLightNormalMapMaterialTest::LightType::Spot));
+        tests.emplace_back(new BasicLightNormalMapMaterialTest(BasicLightNormalMapMaterialTest::LightType::Directional));
     }
 
     bool stop_for_input = false;
