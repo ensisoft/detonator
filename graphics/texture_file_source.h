@@ -46,33 +46,32 @@ namespace gfx
             mFlags.set(Flags::AllowResizing, true);
             mFlags.set(Flags::AllowPacking, true);
         }
-        virtual ColorSpace GetColorSpace() const override
+        ColorSpace GetColorSpace() const override
         { return mColorSpace; }
-        virtual Source GetSourceType() const override
+        Source GetSourceType() const override
         { return Source::Filesystem; }
-        virtual base::bitflag<Effect> GetEffects() const override
+        base::bitflag<Effect> GetEffects() const override
         { return mEffects; }
-        virtual std::string GetId() const override
+        std::string GetId() const override
         { return mId; }
-        virtual std::string GetName() const override
+        std::string GetName() const override
         { return mName; }
-        virtual void SetName(const std::string& name) override
+        void SetName(const std::string& name) override
         { mName = name; }
-        virtual void SetEffect(Effect effect, bool on_off) override
+        void SetEffect(Effect effect, bool on_off) override
         { mEffects.set(effect, on_off); }
+        void SetColorSpace(ColorSpace colorspace)
+        { mColorSpace = colorspace; }
 
-        virtual std::string GetGpuId() const override;
+        std::string GetGpuId() const override;
+        std::size_t GetHash() const override;
+        std::shared_ptr<IBitmap> GetData() const override;
+        Texture* Upload(const Environment& env, Device& device) const override;
 
-        virtual std::size_t GetHash() const override;
-
-        virtual std::shared_ptr<IBitmap> GetData() const override;
-
-        virtual Texture* Upload(const Environment& env, Device& device) const override;
-
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-        virtual void BeginPacking(TexturePacker* packer) const override;
-        virtual void FinishPacking(const TexturePacker* packer) override;
+        void IntoJson(data::Writer& data) const override;
+        bool FromJson(const data::Reader& data) override;
+        void BeginPacking(TexturePacker* packer) const override;
+        void FinishPacking(const TexturePacker* packer) override;
 
         void SetFileName(const std::string& file)
         { mFile = file; }
@@ -82,8 +81,6 @@ namespace gfx
         { return mFlags.test(flag); }
         void SetFlag(Flags flag, bool on_off)
         { mFlags.set(flag, on_off); }
-        void SetColorSpace(ColorSpace space)
-        { mColorSpace = space; }
     protected:
         virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
         {
