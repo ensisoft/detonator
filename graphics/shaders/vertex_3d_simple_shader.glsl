@@ -8,6 +8,8 @@ R"CPP_RAW_STRING(//"
 in vec3 aPosition;
 in vec2 aTexCoord;
 in vec3 aNormal;
+in vec3 aTangent;
+in vec3 aBitangent;
 
 // these should be in the base_vertex_shader.glsl but alas
 // it seems that if these are defined *before* the non-instanced
@@ -35,12 +37,18 @@ void VertexShaderMain() {
 
     mat4 model_inst_matrix = GetInstanceTransform();
     mat4 model_view_matrix = kModelViewMatrix * model_inst_matrix;
-    mat3 normal_matrix = mat3(transpose(inverse(model_view_matrix)));
-
     vec4 view_position = model_view_matrix * vec4(aPosition.xyz, 1.0);
-    vs_out.view_normal = normal_matrix * aNormal;
+
     vs_out.view_position = view_position;
     vs_out.clip_position = kProjectionMatrix * view_position;
+
+    if (vs_out.need_tbn) {
+      mat3 normal_matrix = mat3(transpose(inverse(model_view_matrix)));
+      vs_out.view_normal    = normalize(normal_matrix * aNormal);
+      vs_out.view_tangent   = normalize(normal_matrix * aTangent);
+      vs_out.view_bitangent = normalize(normal_matrix * aBitangent);
+      vs_out.have_tbn = true;
+    }
 }
 
 )CPP_RAW_STRING"

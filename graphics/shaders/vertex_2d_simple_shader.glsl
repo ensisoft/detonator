@@ -66,18 +66,25 @@ void VertexShaderMain() {
 
     vec4 vertex = vec4(aPosition.x, -aPosition.y, 0.0, 1.0);
     vec3 normal = vec3(0.0, 0.0, -1.0);
+    vec3 tangent = vec3(1.0, 0.0, 0.0);
+    vec3 bitangent = vec3(0.0, -1.0, 0.0);
 
     vTexCoord = aTexCoord;
 
     mat4 model_inst_matrix = GetInstanceTransform();
     mat4 model_view_matrix = kModelViewMatrix * model_inst_matrix;
-    mat3 normal_matrix = mat3(transpose(inverse(model_view_matrix)));
-
     vec4 view_position = model_view_matrix * vertex;
-    vs_out.view_normal = normal_matrix * normal;
+
     vs_out.view_position = view_position;
     vs_out.clip_position = kProjectionMatrix * view_position;
 
+    if (vs_out.need_tbn) {
+        mat3 normal_matrix = mat3(transpose(inverse(model_view_matrix)));
+        vs_out.view_normal    = normalize(normal_matrix * normal);
+        vs_out.view_tangent   = normalize(normal_matrix * tangent);
+        vs_out.view_bitangent = normalize(normal_matrix * bitangent);
+        vs_out.have_tbn = true;
+    }
 }
 
 )CPP_RAW_STRING"
