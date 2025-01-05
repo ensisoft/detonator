@@ -1024,9 +1024,16 @@ public:
         for (size_t i=0; i<num_textures; ++i)
         {
             const auto& setting = program_state.GetSamplerSetting(i);
-            const auto& sampler = myprog->GetUniform(setting.name);
 
             auto* texture = (TextureImpl*)setting.texture;
+            // if the program sampler/texture setting is using a discontinuous set of
+            // texture units we might end up with "holes" in the program texture state
+            // and then the texture object is actually a nullptr.
+            if (texture == nullptr)
+                continue;
+
+            const auto& sampler = myprog->GetUniform(setting.name);
+
             texture->SetFrameStamp(mFrameNumber);
 
             if (sampler.location == -1)
