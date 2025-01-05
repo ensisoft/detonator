@@ -88,6 +88,8 @@ namespace gfx
         virtual void SetName(const std::string& name) = 0;
         // Set a texture effect on/off on the texture.
         virtual void SetEffect(Effect effect, bool on_off) {}
+        // Set the texture color space (if the setting is supported)
+        virtual void SetColorSpace(ColorSpace colorspace) {}
         // Generate or load the data as a bitmap. If there's a content
         // error this function should return empty shared pointer.
         // The returned bitmap can be potentially immutably shared.
