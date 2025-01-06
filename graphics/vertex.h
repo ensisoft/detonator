@@ -424,7 +424,28 @@ namespace gfx
             ASSERT(index < GetCount());
             ASSERT(sizeof(T) == mLayout.vertex_struct_size);
             const auto offset = index * mLayout.vertex_struct_size;
-            std::memcpy(&(*mBuffer)[offset], (const void*)&value, sizeof(T));
+            std::memcpy(mBuffer->data() + offset, (const void*)&value, sizeof(T));
+        }
+
+        template<typename A>
+        A* GetAttribute(const char* name, size_t index) noexcept
+        {
+            ASSERT(index < GetCount());
+            const auto& attribute = GetAttribute(name);
+            const auto offset = attribute.offset + index * mLayout.vertex_struct_size;
+            const auto size   = attribute.num_vector_components * sizeof(float);
+            ASSERT(sizeof(A) == size);
+            return reinterpret_cast<A*>(mBuffer->data() + offset);
+        }
+
+        const VertexLayout::Attribute* FindAttribute(const char* name) const noexcept
+        {
+            for (const auto& attr : mLayout.attributes)
+            {
+                if (attr.name == name)
+                    return &attr;
+            }
+            return nullptr;
         }
 
         void Resize(size_t count)
@@ -457,6 +478,16 @@ namespace gfx
         bool Validate() const noexcept;
 
         bool FromJson(const data::Reader& reader);
+    private:
+        const VertexLayout::Attribute& GetAttribute(const char* name) const noexcept
+        {
+            for (const auto& attr : mLayout.attributes)
+            {
+                if (attr.name == name)
+                    return attr;
+            }
+            BUG("No such vertex attribute was found.");
+        }
     private:
         VertexLayout mLayout;
         std::vector<uint8_t> mStorage;

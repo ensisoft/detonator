@@ -206,6 +206,9 @@ namespace gfx
         inline const auto& GetVertexBuffer() const noexcept
         { return mVertexData; }
 
+        inline auto& GetVertexBuffer() noexcept
+        { return mVertexData; }
+
     private:
         GeometryDataLayout mVertexLayout;
         std::vector<DrawCommand> mDrawCmds;
