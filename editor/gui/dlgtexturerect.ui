@@ -161,6 +161,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="btnReset">
+       <property name="text">
+        <string>Reset to whole texture</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -248,9 +255,11 @@
   <tabstop>Y</tabstop>
   <tabstop>W</tabstop>
   <tabstop>H</tabstop>
+  <tabstop>btnReset</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
+  <tabstop>widget</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
