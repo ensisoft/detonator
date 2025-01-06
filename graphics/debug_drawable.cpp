@@ -42,9 +42,16 @@ std::string DebugDrawableBase::GetShaderName(const Environment& env) const
 }
 std::string DebugDrawableBase::GetGeometryId(const Environment& env) const
 {
+    const auto normals = mFlags.test(Flags::Normals);
+    const auto tangents = mFlags.test(Flags::Tangents);
+    const auto bitangents = mFlags.test(Flags::Bitangents);
+
     std::string id;
     id += mDrawable->GetGeometryId(env);
     id += base::ToString(mFeature);
+    id += normals ? "Normals" : "";
+    id += tangents ? "Tangents" : "";
+    id += bitangents ? "Bitangents" : "";
     return id;
 }
 
@@ -73,12 +80,25 @@ bool DebugDrawableBase::Construct(const Environment& env, Geometry::CreateArgs& 
     }
     else if (mFeature == Feature::NormalMesh)
     {
-        GeometryBuffer normals;
-        if (!CreateNormalMesh(temp.buffer, normals))
+        const auto normals = mFlags.test(Flags::Normals);
+        const auto tangents = mFlags.test(Flags::Tangents);
+        const auto bitangents = mFlags.test(Flags::Bitangents);
+
+        unsigned flags = 0;
+        if (normals) flags |= NormalMeshFlags::Normals;
+        if (tangents) flags |= NormalMeshFlags::Tangents;
+        if (bitangents) flags |= NormalMeshFlags::Bitangents;
+
+        GeometryBuffer buffer;
+        if (!CreateNormalMesh(temp.buffer, buffer, flags))
             return false;
 
-        create.buffer = std::move(normals);
-        create.content_name = "NormalMesh/" + temp.content_name;
+        create.buffer = std::move(buffer);
+        create.content_name = base::FormatString("%1%2%3Mesh/%4",
+                normals ? "Normal" : "",
+                tangents ? "Tangent" : "",
+                bitangents ? "Bitangent" : "",
+                temp.content_name);
         create.content_hash = temp.content_hash;
     }
     return true;

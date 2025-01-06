@@ -20,6 +20,7 @@
 
 #include <memory>
 
+#include "base/bitflag.h"
 #include "graphics/drawable.h"
 
 namespace gfx
@@ -32,6 +33,10 @@ namespace gfx
             NormalMesh,
             Wireframe
         };
+        enum class Flags {
+            Normals, Tangents, Bitangents
+        };
+        using FlagBits = base::bitflag<Flags>;
 
         void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState&  state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
@@ -42,14 +47,26 @@ namespace gfx
         Usage GetGeometryUsage() const override;
         size_t GetGeometryHash() const override;
     protected:
-        DebugDrawableBase(const Drawable* drawable, Feature feature)
+        DebugDrawableBase(const Drawable* drawable, Feature feature) noexcept
           : mDrawable(drawable)
           , mFeature(feature)
+        {}
+        DebugDrawableBase(const Drawable* drawable, Feature feature, FlagBits flags) noexcept
+          : mDrawable(drawable)
+          , mFeature(feature)
+          , mFlags(flags)
         {}
         DebugDrawableBase() = default;
 
         const Drawable* mDrawable = nullptr;
-        Feature mFeature;
+        Feature mFeature = Feature::Wireframe;
+        FlagBits mFlags = GetDefaultFlags();
+    private:
+        static FlagBits GetDefaultFlags() noexcept
+        {
+            static FlagBits bits(Flags::Normals);
+            return bits;
+        }
     };
 
     class DebugDrawableInstance : public DebugDrawableBase
@@ -57,6 +74,11 @@ namespace gfx
     public:
         DebugDrawableInstance(std::shared_ptr<const Drawable> drawable, Feature feature) noexcept
           : DebugDrawableBase(drawable.get(), feature)
+        {
+            mSharedDrawable = std::move(drawable);
+        }
+        DebugDrawableInstance(std::shared_ptr<const Drawable> drawable, Feature feature, FlagBits flags) noexcept
+          : DebugDrawableBase(drawable.get(), feature, flags)
         {
             mSharedDrawable = std::move(drawable);
         }
@@ -87,6 +109,9 @@ namespace gfx
         explicit NormalMeshInstance(std::shared_ptr<const Drawable> drawable) noexcept
           : DebugDrawableInstance(std::move(drawable), Feature::NormalMesh)
         {}
+        NormalMeshInstance(std::shared_ptr<const Drawable> drawable, FlagBits flags) noexcept
+           : DebugDrawableInstance(std::move(drawable), Feature::NormalMesh, flags)
+        {}
         Type GetType() const override
         {
             return Type::DebugDrawable;
@@ -110,6 +135,14 @@ namespace gfx
             mDrawable = &mObject;
             mFeature  = feature;
         }
+        template<typename... Args>
+        DebugDrawable(FlagBits flags, Feature feature, Args&&... args) : mObject(std::forward<Args>(args)...)
+        {
+            mDrawable = &mObject;
+            mFeature  = feature;
+            mFlags    = flags;
+        }
+
     private:
         T mObject;
     };
@@ -145,6 +178,14 @@ namespace gfx
             mDrawable = &mObject;
             mFeature  = Feature::NormalMesh;
         }
+        template<typename... Args>
+        NormalMesh(FlagBits flags, Args&&... args) : mObject(std::forward<Args>(args)...)
+        {
+            mDrawable = &mObject;
+            mFeature  = Feature::NormalMesh;
+            mFlags    = flags;
+        }
+
         Type GetType() const override
         {
             return Type::DebugDrawable;
