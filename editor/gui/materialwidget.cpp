@@ -54,6 +54,7 @@
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
 #include "editor/app/workspace.h"
+#include "editor/app/resource-uri.h"
 #include "editor/gui/main.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/utility.h"
@@ -67,6 +68,23 @@
 #include "editor/gui/dlgimgview.h"
 #include "editor/gui/materialwidget.h"
 #include "editor/gui/imgpack.h"
+#include "editor/gui/translation.h"
+
+namespace {
+    enum class PreviewScene {
+        FlatColor, BasicShading
+    };
+    std::string TranslateEnum(PreviewScene scene)
+    {
+        if (scene == PreviewScene::FlatColor)
+            return "Flat Color";
+        else if (scene == PreviewScene::BasicShading)
+            return "Basic Shading";
+        BUG("Bug on preview env translation");
+        return "???";
+    }
+
+} // namespace
 
 namespace gui
 {
@@ -123,6 +141,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::TextureMap::Type>(mUI.textureMapType);
     PopulateFromEnum<gfx::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
     PopulateFromEnum<gfx::MaterialClass::ParticleRotation>(mUI.particleRotationMode);
+    PopulateFromEnum<PreviewScene>(mUI.cmbScene);
 
     // leave this out for now. particle UI can take care
     // PopulateShaderList(mUI.shaderFile);
@@ -131,6 +150,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     SetValue(mUI.cmbModel, ListItemId("_rect"));
     SetValue(mUI.materialID, mMaterial->GetId());
     SetValue(mUI.materialName, mMaterial->GetName());
+    SetValue(mUI.cmbScene, PreviewScene::FlatColor);
     setWindowTitle(GetValue(mUI.materialName));
 
     ShowMaterialProperties();
@@ -141,6 +161,9 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
 
     // hide this for now.
     SetVisible(mUI.textureRect, false);
+
+    mModelRotationTotal.x = glm::radians(-45.0f);
+    mModelRotationTotal.y = glm::radians(15.0f);
 }
 
 MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
@@ -151,12 +174,14 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     SetValue(mUI.materialID, resource.GetId());
     SetValue(mUI.materialName, resource.GetName());
     GetUserProperty(resource, "model", mUI.cmbModel);
+    GetUserProperty(resource, "scene", mUI.cmbScene);
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "time", mUI.kTime);
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
     GetUserProperty(resource, "model_rotation", &mModelRotationTotal);
+    GetUserProperty(resource, "light_position", &mLightPositionTotal);
 
     ApplyShaderDescription();
     ShowMaterialProperties();
@@ -242,9 +267,11 @@ bool MaterialWidget::LoadState(const Settings& settings)
     settings.GetValue("Material", "content", &json);
     settings.GetValue("Material", "hash", &mOriginalHash);
     settings.GetValue("Material", "model_rotation", &mModelRotationTotal);
+    settings.GetValue("Material", "light_position", &mLightPositionTotal);
     settings.LoadWidget("Material", mUI.materialName);
     settings.LoadWidget("Material", mUI.zoom);
     settings.LoadWidget("Material", mUI.cmbModel);
+    settings.LoadWidget("Material", mUI.cmbScene);
     settings.LoadWidget("Material", mUI.widget);
     settings.LoadWidget("Material", mUI.kTime);
     settings.LoadWidget("Material", mUI.kTileIndex);
@@ -277,9 +304,11 @@ bool MaterialWidget::SaveState(Settings& settings) const
     settings.SetValue("Material", "content", json);
     settings.SetValue("Material", "hash", mOriginalHash);
     settings.SetValue("Material", "model_rotation", mModelRotationTotal);
+    settings.SetValue("Material", "light_position", mLightPositionTotal);
     settings.SaveWidget("Material", mUI.materialName);
     settings.SaveWidget("Material", mUI.zoom);
     settings.SaveWidget("Material", mUI.cmbModel);
+    settings.SaveWidget("Material", mUI.cmbScene);
     settings.SaveWidget("Material", mUI.widget);
     settings.SaveWidget("Material", mUI.kTime);
     settings.SaveWidget("Material", mUI.kTileIndex);
@@ -431,12 +460,14 @@ void MaterialWidget::on_actionSave_triggered()
 
     app::MaterialResource resource(mMaterial, GetValue(mUI.materialName));
     SetUserProperty(resource, "model", mUI.cmbModel);
+    SetUserProperty(resource, "scene", mUI.cmbScene);
     SetUserProperty(resource, "widget", mUI.widget);    
     SetUserProperty(resource, "zoom", mUI.zoom);
     SetUserProperty(resource, "time", mUI.kTime);
     SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
     SetUserProperty(resource, "model_rotation", mModelRotationTotal);
+    SetUserProperty(resource, "light_position", mLightPositionTotal);
 
     mWorkspace->SaveResource(resource);
     mOriginalHash = mMaterial->GetHash();
@@ -618,7 +649,9 @@ void MaterialWidget::on_actionShowShader_triggered()
     gfx::Material::Environment environment;
     environment.editing_mode  = false; // we want to see the shader as it will be, so using false here
 
-    if (mMaterial->GetType() == gfx::MaterialClass::Type::BasicLight)
+    const auto scene = (PreviewScene)GetValue(mUI.cmbScene);
+
+    if (scene == PreviewScene::BasicShading)
     {
         gfx::BasicLightProgram program;
         source = program.GetShader(gfx::MaterialInstance(mMaterial), environment, *device);
@@ -883,6 +916,31 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         other.SetActiveTextureMap(map->GetId());
         other.SetNumTextureMaps(1);
         other.SetTextureMap(0, std::move(map));
+    }
+    else if (type == gfx::MaterialClass::Type::BasicLight)
+    {
+        auto diffuse = std::make_unique<gfx::TextureMap>();
+        diffuse->SetType(gfx::TextureMap::Type::Texture2D);
+        diffuse->SetName("Diffuse Map");
+        diffuse->SetSamplerName("kDiffuseMap");
+        diffuse->SetRectUniformName("kDiffuseMapRect");
+
+        auto specular = std::make_unique<gfx::TextureMap>();
+        specular->SetType(gfx::TextureMap::Type::Texture2D);
+        specular->SetName("Specular Map");
+        specular->SetSamplerName("kSpecularMap");
+        specular->SetRectUniformName("kSpecularMapRect");
+
+        auto normal = std::make_unique<gfx::TextureMap>();
+        normal->SetType(gfx::TextureMap::Type::Texture2D);
+        normal->SetName("Normal Map");
+        normal->SetSamplerName("kNormalMap");
+        normal->SetRectUniformName("kNormalMapRect");
+
+        other.SetNumTextureMaps(3);
+        other.SetTextureMap(0, std::move(diffuse));
+        other.SetTextureMap(1, std::move(specular));
+        other.SetTextureMap(2, std::move(normal));
     }
     *mMaterial = other;
 
@@ -1212,6 +1270,8 @@ void MaterialWidget::AddNewTextureMapFromFile()
             map->SetNumTextures(1);
             map->SetTextureSource(0, std::move(source));
             map->SetTextureRect(0, image_rect);
+            if (map->GetSamplerName(0) == "kNormalMap")
+                map->GetTextureSource(0)->SetColorSpace(gfx::TextureFileSource::ColorSpace::Linear);
         }
         else if (map->GetType() == gfx::TextureMap::Type::Sprite)
         {
@@ -2522,15 +2582,22 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     painter.SetViewport(0, 0, width, height);
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    // check whether we have all the textures that are needed.
-    for (unsigned i=0; i<mMaterial->GetNumTextureMaps(); ++i)
-    {
-        const auto& map = mMaterial->GetTextureMap(i);
-        if (map->GetNumTextures() > 0)
-            continue;
+    const auto type =  mMaterial->GetType();
+    const auto scene = (PreviewScene)GetValue(mUI.cmbScene);
 
-        ShowMessage(base::FormatString("Missing texture map '%1' texture", map->GetName()), painter);
-        return;
+    // check whether we have all the textures that are needed.
+    // basic light material has optional texture maps.
+    if (type != gfx::MaterialClass::Type::BasicLight)
+    {
+        for (unsigned i = 0; i < mMaterial->GetNumTextureMaps(); ++i)
+        {
+            const auto& map = mMaterial->GetTextureMap(i);
+            if (map->GetNumTextures() > 0)
+                continue;
+
+            ShowMessage(base::FormatString("Missing texture map '%1' texture", map->GetName()), painter);
+            return;
+        }
     }
 
     // check we have shader
@@ -2606,11 +2673,6 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     if (!mDrawable)
     {
         mDrawable = mWorkspace->MakeDrawableById(GetItemId(mUI.cmbModel));
-        if (gfx::Is3DShape(*mDrawable))
-        {
-            mModelRotationTotal.x = glm::radians(-45.0f);
-            mModelRotationTotal.y = glm::radians(15.0f);
-        }
     }
 
     if (!mMaterialInst)
@@ -2642,6 +2704,12 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         transform.RotateAroundY(mModelRotationTotal.x + mModelRotationDelta.x);
         transform.RotateAroundX(mModelRotationTotal.y + mModelRotationDelta.y);
         transform.Translate(0.0f, 0.0f, -size*0.5f);
+        if (gfx::Is2DShape(*mDrawable))
+        {
+            transform.Push();
+              transform.Translate(-0.5f, -0.5f);
+              transform.RotateAroundX(gfx::FDegrees(90.0f));
+        }
 
         gfx::Painter p(painter);
         p.ResetViewMatrix();
@@ -2652,14 +2720,14 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         state.culling    = gfx::Painter::Culling::Back;
         state.line_width = 4.0f;
 
-        if (mMaterial->GetType() == gfx::MaterialClass::Type::BasicLight)
+        if (scene == PreviewScene::BasicShading)
         {
             gfx::BasicLightProgram program;
             gfx::BasicLightProgram::Light light;
-            light.type = gfx::BasicLightProgram::LightType::Point;
+            light.type = gfx::BasicLightProgram::LightType::Directional;
             light.position = glm::vec3 { 0.0f, size, -size*0.5f };
-            light.ambient_color = gfx::Color4f(gfx::Color::White) * 0.2f;
-            light.diffuse_color = gfx::Color4f(gfx::Color::White) * 0.89;
+            light.ambient_color = gfx::Color4f(gfx::Color::White) * 0.5f;
+            light.diffuse_color = gfx::Color4f(gfx::Color::White) * 1.0f;
             light.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
             light.direction = glm::vec3 { 0.0f, -1.0f, 0.0f };
             light.quadratic_attenuation = 0.00005;
@@ -2675,6 +2743,8 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
                        gfx::CreateMaterialFromColor(gfx::Color::HotPink), state, program);
             }
 
+            if (light.type == gfx::BasicLightProgram::LightType::Point ||
+                light.type == gfx::BasicLightProgram::LightType::Spot)
             {
                 gfx::detail::GenericShaderProgram program;
                 gfx::Transform transform;
@@ -2742,7 +2812,51 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         gfx::Transform transform;
         transform.MoveTo(xpos, ypos);
         transform.Resize(actual_width, actual_height);
-        painter.Draw(*mDrawable, transform, *mMaterialInst);
+
+        if (scene == PreviewScene::BasicShading)
+        {
+            glm::vec3 light_position = glm::vec3{width * 0.5, height*0.5, -100.0f};
+            light_position += mLightPositionTotal;
+            light_position += mLightPositionDelta;
+
+            gfx::BasicLightProgram program;
+            gfx::BasicLightProgram::Light light;
+            light.type = gfx::BasicLightProgram::LightType::Point;
+            light.position = light_position;
+            light.ambient_color = gfx::Color4f(gfx::Color::White) * 0.5f;
+            light.diffuse_color = gfx::Color4f(gfx::Color::White) * 1.0f;
+            light.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
+            light.direction = glm::vec3 { 0.0f, 1.0f, 0.0f };
+            light.quadratic_attenuation = 0.00005;
+            light.spot_half_angle = gfx::FDegrees(35.0f);
+            program.AddLight(light);
+            program.SetCameraCenter(width*0.5f, height*0.5f, -10000.0f);
+
+            gfx::Painter::DrawState state;
+            painter.Draw(*mDrawable, transform, *mMaterialInst, state, program);
+
+            if (light.type == gfx::BasicLightProgram::LightType::Point ||
+                light.type == gfx::BasicLightProgram::LightType::Spot)
+            {
+                static std::shared_ptr<gfx::MaterialClass> light_material;
+                if (!light_material)
+                {
+                    light_material = std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromImage(res::LightIcon));
+                    light_material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+                }
+
+                gfx::detail::GenericShaderProgram program;
+                gfx::Transform transform;
+                transform.Resize(40.0f, 40.0f);
+                transform.Translate(light_position.x, light_position.y);
+                transform.Translate(-20.0f, -20.0f);
+                painter.Draw(gfx::Rectangle(), transform, gfx::MaterialInstance(light_material), state, program);
+            }
+        }
+        else
+        {
+            painter.Draw(*mDrawable, transform, *mMaterialInst);
+        }
     }
 
     if (mMaterialInst->HasError())
@@ -2758,13 +2872,21 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
 void MaterialWidget::MouseMove(QMouseEvent* mickey)
 {
-    if (mMouseDown)
+    if (mMouseState == MouseState::RotateModel)
     {
         const auto mouse_movement = mickey->pos() - mMouseDownPoint;
         const auto mouse_dx = mouse_movement.x();
         const auto mouse_dy = mouse_movement.y();
         mModelRotationDelta.x = mouse_dx * 0.002f;
         mModelRotationDelta.y = mouse_dy * 0.002f;
+    }
+    else if (mMouseState == MouseState::MoveLight)
+    {
+        const auto mouse_movement = mickey->pos() - mMouseDownPoint;
+        const auto mouse_dx = mouse_movement.x();
+        const auto mouse_dy = mouse_movement.y();
+        mLightPositionDelta.x = mouse_dx;
+        mLightPositionDelta.y = mouse_dy;
     }
 }
 
@@ -2773,17 +2895,34 @@ void MaterialWidget::MousePress(QMouseEvent* mickey)
     if (mickey->button() == Qt::RightButton)
     {
         mMouseDownPoint = mickey->pos();
-        mMouseDown = true;
+        mMouseState = MouseState::RotateModel;
+    }
+    else if (mickey->button() == Qt::LeftButton)
+    {
+        const auto width = mUI.widget->width();
+        const auto height = mUI.widget->height();
+        const auto xpos = width*.5f;
+        const auto ypos = height*0.5f;
+
+        mMouseDownPoint = mickey->pos();
+        mLightPositionTotal.x = mMouseDownPoint.x() - xpos;
+        mLightPositionTotal.y = mMouseDownPoint.y() - ypos;
+        mMouseState = MouseState::MoveLight;
     }
 }
 void MaterialWidget::MouseRelease(QMouseEvent* mickey)
 {
-    if (mMouseDown)
+    if (mMouseState == MouseState::RotateModel)
     {
-        mMouseDown = false;
         mModelRotationTotal += mModelRotationDelta;
         mModelRotationDelta = glm::vec3{0.0f, 0.0f, 0.0f};
     }
+    else if (mMouseState == MouseState::MoveLight)
+    {
+        mLightPositionTotal += mLightPositionDelta;
+        mLightPositionDelta = glm::vec3{0.0f, 0.0f, 0.0f};
+    }
+    mMouseState = MouseState::Nada;
 }
 
 gfx::TextureMap* MaterialWidget::GetSelectedTextureMap()

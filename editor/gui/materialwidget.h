@@ -211,10 +211,14 @@ namespace gui
         std::vector<Sampler*> mSamplers;
         glm::vec3 mModelRotationTotal = {0.0f, 0.0f, 0.0f};
         glm::vec3 mModelRotationDelta = {0.0f, 0.0f, 0.0f};
-
-        bool mMouseDown = false;
-        QPoint mMouseMovePoint;
+        glm::vec3 mLightPositionTotal = {0.0f, 0.0f, 0.0f};
+        glm::vec3 mLightPositionDelta = {0.0f, 0.0f, 0.0f};
         QPoint mMouseDownPoint;
+
+        enum class MouseState {
+            Nada, RotateModel, MoveLight
+        };
+        MouseState mMouseState = MouseState::Nada;
 
         QFileSystemWatcher mFileWatcher;
     };
