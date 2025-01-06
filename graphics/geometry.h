@@ -261,5 +261,6 @@ namespace gfx
 
     void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe);
     bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals);
+    bool ComputeTangents(GeometryBuffer& geometry);
 
 } // namespace

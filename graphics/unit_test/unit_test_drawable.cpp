@@ -32,6 +32,14 @@ bool operator==(const gfx::Vec2& lhs, const gfx::Vec2& rhs)
            real::equals(lhs.y, rhs.y);
 }
 
+bool operator==(const gfx::Vec3& lhs, const gfx::Vec3& rhs)
+{
+    return real::equals(lhs.x, rhs.x) &&
+           real::equals(lhs.y, rhs.y) &&
+           real::equals(lhs.z, rhs.z);
+}
+
+
 bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
 {
     return real::equals(lhs.aPosition.x, rhs.aPosition.x) &&
@@ -325,7 +333,200 @@ void unit_test_wireframe()
             TEST_REQUIRE((p0 == line.a && p1 == line.b) || (p1 == line.a && p0 == line.b));
         }
     }
+}
 
+void unit_test_tangents()
+{
+    TEST_CASE(test::Type::Feature)
+
+    const auto right = gfx::Vec3 { 1.0f, 0.0f, 0.0f };
+    const auto up = gfx::Vec3 {0.0f, 1.0f, 0.0f };
+
+    // a quad, 2 separate vertices.
+    {
+        std::vector<gfx::Vertex3D> vertices;
+        vertices.resize(6);
+        vertices[0].aPosition = gfx::Vec3{-1.0f,  1.0f, 0.0f};
+        vertices[0].aTexCoord = gfx::Vec2{ 0.0f, 0.0f};
+
+        vertices[1].aPosition = gfx::Vec3{-1.0f, -1.0f, 0.0f};
+        vertices[1].aTexCoord = gfx::Vec2{ 0.0f, 1.0f};
+
+        vertices[2].aPosition = gfx::Vec3{ 1.0f, -1.0f, 0.0f};
+        vertices[2].aTexCoord = gfx::Vec2{ 1.0f, 1.0f};
+
+        vertices[3].aPosition = gfx::Vec3{-1.0f,  1.0f, 0.0f};
+        vertices[3].aTexCoord = gfx::Vec2{ 0.0f, 0.0f};
+
+        vertices[4].aPosition = gfx::Vec3{ 1.0f, -1.0f, 0.0f};
+        vertices[4].aTexCoord = gfx::Vec2{ 1.0f, 1.0f};
+
+        vertices[5].aPosition = gfx::Vec3{ 1.0f,  1.0f, 0.0f};
+        vertices[5].aTexCoord = gfx::Vec2{ 1.0f, 0.0f};
+
+        gfx::GeometryBuffer buffer;
+        buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex3D>());
+        buffer.SetVertexBuffer(std::move(vertices));
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 0, 3);
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 3, 3);
+
+        TEST_REQUIRE(gfx::ComputeTangents(buffer));
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(0)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(1)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(2)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(3)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(4)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(5)->aTangent == right);
+
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(0)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(1)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(2)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(3)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(4)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(5)->aBitangent == up);
+    }
+
+    // a quad, using index buffer
+    {
+        std::vector<gfx::Vertex3D> vertices;
+        vertices.resize(4);
+        vertices[0].aPosition = gfx::Vec3{ -1.0f,  1.0f, 0.0f };
+        vertices[0].aTexCoord = gfx::Vec2{  0.0f, 0.0f};
+
+        vertices[1].aPosition = gfx::Vec3{ -1.0f, -1.0f, 0.0f };
+        vertices[1].aTexCoord = gfx::Vec2{  0.0f, 1.0f};
+
+        vertices[2].aPosition = gfx::Vec3{ 1.0f, -1.0f, 0.0f };
+        vertices[2].aTexCoord = gfx::Vec2{ 1.0f, 1.0f};
+
+        vertices[3].aPosition = gfx::Vec3{ 1.0f,  1.0f, 0.0f };
+        vertices[3].aTexCoord = gfx::Vec2{ 1.0f, 0.0f};
+
+        std::vector<gfx::Index16> indices;
+        indices.push_back(0);
+        indices.push_back(1);
+        indices.push_back(2);
+        indices.push_back(0);
+        indices.push_back(2);
+        indices.push_back(3);
+
+        gfx::GeometryBuffer buffer;
+        buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex3D>());
+        buffer.SetIndexBuffer(std::move(indices));
+        buffer.SetVertexBuffer(std::move(vertices));
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 0, 3);
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 3, 3);
+
+        TEST_REQUIRE(gfx::ComputeTangents(buffer));
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(0)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(1)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(2)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(3)->aTangent == right);
+
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(0)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(1)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(2)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(3)->aBitangent == up);
+    }
+
+    // a triangle
+    {
+        std::vector<gfx::Vertex3D> vertices;
+        vertices.resize(3);
+        vertices[0].aPosition = gfx::Vec3{  0.0f,  1.0f, 0.0f }; // apex
+        vertices[0].aTexCoord = gfx::Vec2{  0.5f, 0.0f};
+
+        vertices[1].aPosition = gfx::Vec3{ -1.0f, -1.0f, 0.0f };
+        vertices[1].aTexCoord = gfx::Vec2{  0.0f, 1.0f};
+
+        vertices[2].aPosition = gfx::Vec3{ 1.0f, -1.0f, 0.0f };
+        vertices[2].aTexCoord = gfx::Vec2{ 1.0f, 1.0f};
+
+        gfx::GeometryBuffer buffer;
+        buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex3D>());
+        buffer.SetVertexBuffer(std::move(vertices));
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 0, 3);
+
+        TEST_REQUIRE(gfx::ComputeTangents(buffer));
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(0)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(1)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(2)->aTangent == right);
+
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(0)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(1)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(2)->aBitangent == up);
+    }
+
+    // triangle fan
+    {
+        std::vector<gfx::Vertex3D> vertices;
+        vertices.resize(3);
+        vertices[0].aPosition = gfx::Vec3{  0.0f,  1.0f, 0.0f }; // apex
+        vertices[0].aTexCoord = gfx::Vec2{  0.5f, 0.0f};
+
+        vertices[1].aPosition = gfx::Vec3{ -1.0f, -1.0f, 0.0f };
+        vertices[1].aTexCoord = gfx::Vec2{  0.0f, 1.0f};
+
+        vertices[2].aPosition = gfx::Vec3{ 1.0f, -1.0f, 0.0f };
+        vertices[2].aTexCoord = gfx::Vec2{ 1.0f, 1.0f};
+
+        gfx::GeometryBuffer buffer;
+        buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex3D>());
+        buffer.SetVertexBuffer(std::move(vertices));
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::TriangleFan, 0, 3);
+
+        TEST_REQUIRE(gfx::ComputeTangents(buffer));
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(0)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(1)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(2)->aTangent == right);
+
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(0)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(1)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(2)->aBitangent == up);
+    }
+
+    // triangle fan + 1
+    {
+        std::vector<gfx::Vertex3D> vertices;
+        vertices.resize(4);
+        vertices[0].aPosition = gfx::Vec3{  0.0f,  1.0f, 0.0f }; // apex
+        vertices[0].aTexCoord = gfx::Vec2{  0.5f, 0.0f};
+
+        vertices[1].aPosition = gfx::Vec3{ -1.0f, -1.0f, 0.0f };
+        vertices[1].aTexCoord = gfx::Vec2{  0.0f, 1.0f};
+
+        vertices[2].aPosition = gfx::Vec3{ 1.0f, -1.0f, 0.0f };
+        vertices[2].aTexCoord = gfx::Vec2{ 1.0f, 1.0f};
+
+        vertices[3].aPosition = gfx::Vec3{ 1.0f, 1.0f, 0.0f };
+        vertices[3].aTexCoord = gfx::Vec2{ 1.0f, 0.0f};
+
+        gfx::GeometryBuffer buffer;
+        buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex3D>());
+        buffer.SetVertexBuffer(std::move(vertices));
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::TriangleFan, 0, 4);
+
+        TEST_REQUIRE(gfx::ComputeTangents(buffer));
+
+        const gfx::VertexStream stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(0)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(1)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(2)->aTangent == right);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(3)->aTangent == right);
+
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(0)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(1)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(2)->aBitangent == up);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex3D>(3)->aBitangent == up);
+    }
 }
 
 void unit_test_polygon_builder_json()
@@ -728,6 +929,7 @@ int test_main(int argc, char* argv[])
     unit_test_vertex_stream();
     unit_test_command_stream();
     unit_test_wireframe();
+    unit_test_tangents();
     unit_test_polygon_builder_json();
     unit_test_polygon_builder_build();
     unit_test_particle_engine_data();
