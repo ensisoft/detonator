@@ -2602,7 +2602,7 @@ public:
         state.stencil_func = gfx::Painter::StencilFunc::Disabled;
         state.write_color  = true;
 
-        const auto t = base::GetTime();
+        const auto t = mTime;
 
         gfx::Transform transform;
         transform.Resize(100.0f, 100.0f, 100.0f);
@@ -2653,31 +2653,31 @@ public:
         p.Draw(gfx::Wireframe<gfx::Sphere>(),transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
 
-        // normals
+        // normals, tangents and bitangents
 
         transform.MoveTo(-half_width, half_height);
         transform.Translate(100.0f, -500.0f);
         p.Draw(gfx::Pyramid(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
-        p.Draw(gfx::NormalMesh<gfx::Pyramid>(), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+        p.Draw(gfx::NormalMesh<gfx::Pyramid>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
 
         transform.Translate(200.0f, 0.0f);
         p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
-        p.Draw(gfx::NormalMesh<gfx::Cube>(), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+        p.Draw(gfx::NormalMesh<gfx::Cube>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
 
         transform.Translate(200.0f, 0.0f);
         p.Draw(gfx::Cylinder(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
-        p.Draw(gfx::NormalMesh<gfx::Cylinder>(), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+        p.Draw(gfx::NormalMesh<gfx::Cylinder>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
 
         transform.Translate(200.0f, 0.0f);
         p.Draw(gfx::Cone(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
-        p.Draw(gfx::NormalMesh<gfx::Cone>(), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+        p.Draw(gfx::NormalMesh<gfx::Cone>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
 
         transform.Translate(200.0f, 0.0f);
@@ -2686,7 +2686,7 @@ public:
 
         // reduce the level of detail (the number of slices) in the sphere when visualizing
         // the normals to make it visually less crowded.
-        p.Draw(gfx::NormalMesh<gfx::Sphere>(gfx::Sphere::Style::Solid, 15), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+        p.Draw(gfx::NormalMesh<gfx::Sphere>(mFlags, gfx::Sphere::Style::Solid, 15), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
 
     }
@@ -2694,6 +2694,34 @@ public:
     { return "Shape3DTest"; }
     bool IsFeatureTest() const override
     { return false; }
+
+    void KeyDown(const wdk::WindowEventKeyDown& key) override
+    {
+        if (key.symbol == wdk::Keysym::Key1)
+            mFlags.flip(gfx::DebugDrawableBase::Flags::Normals);
+        else if (key.symbol == wdk::Keysym::Key2)
+            mFlags.flip(gfx::DebugDrawableBase::Flags::Tangents);
+        else if (key.symbol == wdk::Keysym::Key3)
+            mFlags.flip(gfx::DebugDrawableBase::Flags::Bitangents);
+        else if (key.symbol == wdk::Keysym::Space)
+            mPaused = !mPaused;
+
+    }
+    void Update(float dt) override
+    {
+        if (!mPaused)
+            mTime += dt;
+    }
+    void Start() override
+    {
+        mTime = 0.0f;
+        mFlags.clear();
+        mFlags.set(gfx::DebugDrawableBase::Flags::Normals);
+    }
+private:
+    gfx::DebugDrawableBase::FlagBits mFlags;
+    bool mPaused = false;
+    float mTime = 0.0f;
 };
 
 class FramebufferTest : public GraphicsTest

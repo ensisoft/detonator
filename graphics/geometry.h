@@ -260,7 +260,16 @@ namespace gfx
     using GeometryPtr = std::shared_ptr<const Geometry>;
 
     void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe);
-    bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals);
+
+    enum NormalMeshFlags {
+        Normals = 0x1,
+        Tangents = 0x2,
+        Bitangents = 0x4
+    };
+
+    bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals,
+                          unsigned flags = NormalMeshFlags::Normals, float line_length = 0.2f);
+
     bool ComputeTangents(GeometryBuffer& geometry);
 
 } // namespace

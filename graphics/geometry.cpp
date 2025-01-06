@@ -155,39 +155,107 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
     wireframe.AddDrawCmd(Geometry::DrawType::Lines);
 }
 
-bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals)
+bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, unsigned flags, float line_length)
 {
     const VertexStream vertices(geometry.GetLayout(),
                                 geometry.GetVertexDataPtr(),
                                 geometry.GetVertexBytes());
     const auto vertex_count = vertices.GetCount();
 
-    const auto* vertex_normal   = vertices.FindAttribute("aNormal");
     const auto* vertex_position = vertices.FindAttribute("aPosition");
-
-    if (!vertex_normal || vertex_normal->num_vector_components != 3)
-        return false;
     if (!vertex_position || vertex_position->num_vector_components != 3)
         return false;
 
+    unsigned data_count = 0;
+
+    if (flags & NormalMeshFlags::Normals)
+    {
+        const auto* normal   = vertices.FindAttribute("aNormal");
+        if (!normal || normal->num_vector_components != 3)
+            return false;
+
+        data_count++;
+    }
+
+    if (flags & NormalMeshFlags::Tangents)
+    {
+        const auto* tangent = vertices.FindAttribute("aTangent");
+        if (!tangent || tangent->num_vector_components != 3)
+            return false;
+
+        data_count++;
+    }
+    if (flags & NormalMeshFlags::Bitangents)
+    {
+        const auto* bitangent = vertices.FindAttribute("aBitangent");
+        if (!bitangent || bitangent->num_vector_components != 3)
+            return false;
+
+        data_count++;
+    }
+
+    if (data_count == 0)
+        return true;
+
+
     std::vector<uint8_t> vertex_buffer;
     VertexBuffer vertex_writer(GetVertexLayout<Vertex3D>(), &vertex_buffer);
-    vertex_writer.Resize(vertex_count * 2);
+    vertex_writer.Resize(vertex_count * data_count * 2);
 
     for (size_t i=0; i<vertex_count; ++i)
     {
         const auto& aPosition = ToVec(*vertices.GetAttribute<Vec3>("aPosition", i));
-        const auto& aNormal   = ToVec(*vertices.GetAttribute<Vec3>("aNormal", i));
 
-        Vertex3D a;
-        a.aPosition = ToVec(aPosition);
+        const auto vertex_base_index = i * data_count * 2;
 
-        Vertex3D b;
-        b.aPosition = ToVec(aPosition + aNormal * 0.5f);
+        unsigned vertex_data_index = 0;
 
-        const auto vertex_index = i * 2;
-        vertex_writer.SetVertex(a, vertex_index + 0);
-        vertex_writer.SetVertex(b, vertex_index + 1);
+        if (flags & NormalMeshFlags::Normals)
+        {
+            const auto& aNormal = ToVec(*vertices.GetAttribute<Vec3>("aNormal", i));
+
+            Vertex3D a;
+            a.aPosition = ToVec(aPosition);
+
+            Vertex3D b;
+            b.aPosition = ToVec(aPosition + aNormal * line_length);
+
+            const auto vertex_index = vertex_base_index + vertex_data_index;
+            vertex_writer.SetVertex(a, vertex_index + 0);
+            vertex_writer.SetVertex(b, vertex_index + 1);
+            vertex_data_index += 2;
+        }
+        if (flags & NormalMeshFlags::Tangents)
+        {
+            const auto& aTangent = ToVec(*vertices.GetAttribute<Vec3>("aTangent", i));
+
+            Vertex3D a;
+            a.aPosition = ToVec(aPosition);
+
+            Vertex3D b;
+            b.aPosition = ToVec(aPosition + aTangent * line_length);
+
+            const auto vertex_index = vertex_base_index + vertex_data_index;
+            vertex_writer.SetVertex(a, vertex_index + 0);
+            vertex_writer.SetVertex(b, vertex_index + 1);
+            vertex_data_index += 2;
+        }
+
+        if (flags & NormalMeshFlags::Bitangents)
+        {
+            const auto& aBitangent = ToVec(*vertices.GetAttribute<Vec3>("aBitangent", i));
+
+            Vertex3D a;
+            a.aPosition = ToVec(aPosition);
+
+            Vertex3D b;
+            b.aPosition = ToVec(aPosition + aBitangent * line_length);
+
+            const auto vertex_index = vertex_base_index + vertex_data_index;
+            vertex_writer.SetVertex(a, vertex_index + 0);
+            vertex_writer.SetVertex(b, vertex_index + 1);
+            vertex_data_index += 2;
+        }
     }
 
     normals.SetVertexBuffer(std::move(vertex_buffer));
