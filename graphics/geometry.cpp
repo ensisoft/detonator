@@ -15,8 +15,57 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstring>
+#include <tuple>
 
 #include "graphics/geometry.h"
+
+namespace {
+    std::tuple<glm::vec3, glm::vec3> ComputeTangent(const gfx::Vec3& vertex_pos0,
+                                                    const gfx::Vec3& vertex_pos1,
+                                                    const gfx::Vec3& vertex_pos2,
+                                                    const gfx::Vec2& vertex_uv0,
+                                                    const gfx::Vec2& vertex_uv1,
+                                                    const gfx::Vec2& vertex_uv2)
+    {
+        glm::vec3 pos1 = ToVec(vertex_pos0);
+        glm::vec3 pos2 = ToVec(vertex_pos1);
+        glm::vec3 pos3 = ToVec(vertex_pos2);
+
+        // flipeti flip, we use "flipped" texture coordinates where y=0.0 is "up"
+        // and y=1.0 is "bottom"
+        auto FlipUV = [](glm::vec2 uv) {
+            float x = uv.x;
+            float y = 1.0f - uv.y;
+            return glm::vec2 {x, y};
+        };
+
+        glm::vec2 uv1 = FlipUV(ToVec(vertex_uv0));
+        glm::vec2 uv2 = FlipUV(ToVec(vertex_uv1));
+        glm::vec2 uv3 = FlipUV(ToVec(vertex_uv2));
+
+        glm::vec3 tangent;
+        glm::vec3 bitangent;
+
+        glm::vec3 edge1 = pos2 - pos1;
+        glm::vec3 edge2 = pos3 - pos1;
+        glm::vec2 deltaUV1 = uv2 - uv1;
+        glm::vec2 deltaUV2 = uv3 - uv1;
+
+        float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+        tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+        tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+        tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+        tangent = glm::normalize(tangent);
+
+        bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+        bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+        bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+        bitangent = glm::normalize(bitangent);
+
+        return {tangent, bitangent };
+    }
+}
 
 namespace gfx
 {
@@ -146,5 +195,147 @@ bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals)
     normals.AddDrawCmd(Geometry::DrawType::Lines);
     return true;
 }
+
+bool ComputeTangents(GeometryBuffer& geometry)
+{
+    // allow read+write access to the data.
+    VertexBuffer vertices(geometry.GetLayout(), &geometry.GetVertexBuffer());
+
+    const IndexStream indices(geometry.GetIndexDataPtr(),
+                              geometry.GetIndexBytes(),
+                              geometry.GetIndexType());
+
+    const auto vertex_count = vertices.GetCount();
+    const auto index_count  = indices.GetCount();
+    const auto has_index = indices.IsValid();
+
+    const auto* vertex_position = vertices.FindAttribute("aPosition");
+    const auto* vertex_tangent  = vertices.FindAttribute("aTangent");
+    const auto* vertex_bitangent = vertices.FindAttribute("aBitangent");
+    const auto* vertex_texcoord  = vertices.FindAttribute("aTexCoord");
+
+    if (!vertex_position || vertex_position->num_vector_components != 3)
+        return false;
+    if (!vertex_tangent || vertex_tangent->num_vector_components != 3)
+        return false;
+    if (!vertex_bitangent || vertex_bitangent->num_vector_components != 3)
+        return false;
+    if (!vertex_texcoord || vertex_texcoord->num_vector_components != 2)
+        return false;
+
+    std::vector<uint16_t> vertex_use_count;
+
+    // use 3 vertex indices into the vertex array to take 3 vertices
+    // and 3 texture coordinates and use those to compute the surface
+    // (triangle) tangent and bitangent vectors. these vectors are the
+    // same for every vertex of the triangle.
+    // Then for each vertex take the previous vectors and compute the
+    // new average vectors based on previous and current data.
+    auto CalcTangents = [&vertex_use_count, &vertices](uint32_t i0, uint32_t i1, uint32_t i2) {
+        const auto [tangent, bitangent] = ComputeTangent(
+                *vertices.GetAttribute<Vec3>("aPosition", i0),
+                *vertices.GetAttribute<Vec3>("aPosition", i1),
+                *vertices.GetAttribute<Vec3>("aPosition", i2),
+                *vertices.GetAttribute<Vec2>("aTexCoord", i0),
+                *vertices.GetAttribute<Vec2>("aTexCoord", i1),
+                *vertices.GetAttribute<Vec2>("aTexCoord", i2));
+
+        // every vertex has the same normal, tangent and bitangent.
+        // if the vertex is shared with many surfaces then average
+        // out the tangent vectors.
+        const uint32_t indices[3] = {i0, i1, i2};
+        for (int i=0; i<3; ++i)
+        {
+            const auto vertex_index = indices[i];
+            if (vertex_index >= vertex_use_count.size())
+                vertex_use_count.resize(vertex_index+1);
+
+            const auto use_count = vertex_use_count[vertex_index];
+
+            auto* tangent_attr_ptr = vertices.GetAttribute<Vec3>("aTangent", vertex_index);
+            auto* bitagent_attr_ptr = vertices.GetAttribute<Vec3>("aBitangent", vertex_index);
+
+            auto current_tangent_value = ToVec(*tangent_attr_ptr);
+            auto current_bitangent_value = ToVec(*bitagent_attr_ptr);
+
+            auto new_tangent_value = math::RunningAvg(current_tangent_value, use_count + 1, tangent);
+            auto new_bitagent_value = math::RunningAvg(current_bitangent_value, use_count + 1, bitangent);
+
+            *tangent_attr_ptr = ToVec(new_tangent_value);
+            *bitagent_attr_ptr = ToVec(new_bitagent_value);
+
+            vertex_use_count[vertex_index] = use_count + 1;
+        }
+    };
+
+    for (size_t i=0; i<geometry.GetNumDrawCmds(); ++i)
+    {
+        const auto& cmd = geometry.GetDrawCmd(i);
+        const auto primitive_count = cmd.count != std::numeric_limits<uint32_t>::max()
+                                     ? (cmd.count)
+                                     : (has_index ? index_count : vertex_count);
+
+        if (cmd.type == Geometry::DrawType::Triangles)
+        {
+            ASSERT((primitive_count % 3) == 0);
+            const auto triangles = primitive_count / 3;
+
+            for (size_t j=0; j<triangles; ++j)
+            {
+                const auto start = cmd.offset + j * 3;
+                const uint32_t i0 = has_index ? indices.GetIndex(start+0) : start+0;
+                const uint32_t i1 = has_index ? indices.GetIndex(start+1) : start+1;
+                const uint32_t i2 = has_index ? indices.GetIndex(start+2) : start+2;
+
+                ASSERT(i0 < vertex_count);
+                ASSERT(i1 < vertex_count);
+                ASSERT(i2 < vertex_count);
+                CalcTangents(i0, i1, i2);
+            }
+        }
+        else if (cmd.type == Geometry::DrawType::TriangleFan)
+        {
+            ASSERT(primitive_count >= 3);
+            // the first 3 vertices form a triangle and then
+            // every subsequent vertex creates another triangle with
+            // the first and previous vertex.
+            const uint32_t i0 = has_index ? indices.GetIndex(cmd.offset+0) : cmd.offset+0;
+            const uint32_t i1 = has_index ? indices.GetIndex(cmd.offset+1) : cmd.offset+1;
+            const uint32_t i2 = has_index ? indices.GetIndex(cmd.offset+2) : cmd.offset+2;
+
+            ASSERT(i0 < vertex_count);
+            ASSERT(i1 < vertex_count);
+            ASSERT(i2 < vertex_count);
+            CalcTangents(i0, i1, i2);
+
+            for (size_t j=3; j<primitive_count; ++j)
+            {
+                const auto start = cmd.offset + j;
+                const uint32_t iPrev = has_index ? indices.GetIndex(start-1) : start-1;
+                const uint32_t iCurr = has_index ? indices.GetIndex(start-0) : start-0;
+
+                ASSERT(iPrev < vertex_count);
+                ASSERT(iCurr < vertex_count);
+                CalcTangents(i0, iPrev, iCurr);
+            }
+        }
+    }
+
+    for (size_t i=0; i<vertex_count; ++i)
+    {
+        auto* tangent_ptr = vertices.GetAttribute<Vec3>("aTangent", i);
+        auto* bitangent_ptr = vertices.GetAttribute<Vec3>("aBitangent", i);
+
+        auto tangent = glm::normalize(ToVec(*tangent_ptr));
+        auto bitangent = glm::normalize(ToVec(*bitangent_ptr));
+
+        *tangent_ptr = ToVec(tangent);
+        *bitangent_ptr = ToVec(bitangent);
+    }
+
+    return true;
+}
+
+
 
 } // namespace
