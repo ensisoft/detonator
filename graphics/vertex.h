@@ -141,6 +141,10 @@ namespace gfx
         Vec3 aNormal;
         // Texture coordinate for the vertex.
         Vec2 aTexCoord;
+        // Surface coordinate space right vector for normal mapping.
+        Vec3 aTangent;
+        // Surface coordinate space up vector for normal mapping.
+        Vec3 aBitangent;
     };
 
     struct ModelVertex3D {
@@ -226,9 +230,11 @@ namespace gfx
     const VertexLayout& GetVertexLayout<Vertex3D>()
     {
         static const VertexLayout layout(sizeof(Vertex3D), {
-            {"aPosition", 0, 3, 0, offsetof(Vertex3D, aPosition)},
-            {"aNormal",   0, 3, 0, offsetof(Vertex3D, aNormal)},
-            {"aTexCoord", 0, 2, 0, offsetof(Vertex3D, aTexCoord)}
+            {"aPosition",   0, 3, 0, offsetof(Vertex3D, aPosition)},
+            {"aNormal",     0, 3, 0, offsetof(Vertex3D, aNormal)},
+            {"aTexCoord",   0, 2, 0, offsetof(Vertex3D, aTexCoord)},
+            {"aTangent",    0, 3, 0, offsetof(Vertex3D, aTangent)},
+            {"aBitangent",  0, 3, 0, offsetof(Vertex3D, aBitangent)}
         });
         return layout;
     }

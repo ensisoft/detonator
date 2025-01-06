@@ -31,6 +31,7 @@
 #include "graphics/utility.h"
 #include "graphics/vertex.h"
 #include "graphics/program.h"
+#include "graphics/geometry.h"
 
 namespace {
 float HalfRound(float value)
@@ -1295,6 +1296,10 @@ std::string SimpleShapeInstance::GetGeometryId(const Environment& env) const
 bool SimpleShapeInstance::Construct(const Environment& env, Geometry::CreateArgs& geometry) const
 {
     detail::ConstructSimpleShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), geometry);
+
+    if (Is3DShape(mClass->GetShapeType()))
+        ASSERT(ComputeTangents(geometry.buffer));
+
     return true;
 }
 
@@ -1387,6 +1392,10 @@ std::string SimpleShape::GetGeometryId(const Environment& env) const
 bool SimpleShape::Construct(const Environment& env, Geometry::CreateArgs& geometry) const
 {
     detail::ConstructSimpleShape(mArgs, env, mStyle, mShape, geometry);
+
+    if (Is3DShape(mShape))
+        ASSERT(ComputeTangents(geometry.buffer));
+
     return true;
 }
 
