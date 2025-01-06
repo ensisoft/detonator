@@ -88,6 +88,8 @@ protected:
             {QStringLiteral("\\binout\\b"),         RuleType::Keyword},
             {QStringLiteral("\\blayout\\b"),        RuleType::Keyword},
 
+            {QStringLiteral("\\bbool\\b"),          RuleType::DataType},
+            {QStringLiteral("\\buint\\b"),          RuleType::DataType},
             {QStringLiteral("\\bint\\b"),           RuleType::DataType},
             {QStringLiteral("\\bfloat\\b"),         RuleType::DataType},
             {QStringLiteral("\\bvec2\\b"),          RuleType::DataType},

@@ -1239,7 +1239,7 @@
           </size>
          </property>
          <property name="title">
-          <string>Texture filtering</string>
+          <string>Texture filtering and wrapping</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_7">
           <item row="2" column="0">
@@ -1392,13 +1392,6 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_14">
-           <property name="text">
-            <string>Model</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QComboBox" name="cmbModel">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1407,6 +1400,9 @@
             </sizepolicy>
            </property>
           </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cmbScene"/>
          </item>
          <item>
           <spacer name="horizontalSpacer_3">
@@ -2627,6 +2623,7 @@
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbModel</tabstop>
+  <tabstop>cmbScene</tabstop>
   <tabstop>kTime</tabstop>
   <tabstop>kTileIndex</tabstop>
   <tabstop>widgetColor</tabstop>
