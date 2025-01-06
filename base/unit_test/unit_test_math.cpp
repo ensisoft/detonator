@@ -40,6 +40,16 @@ bool operator==(const Point2D& lhs, const Point2D& rhs)
 inline Point2D GetPosition(const Point2D& p)
 { return p; }
 
+void unit_test_math()
+{
+    TEST_CASE(test::Type::Feature)
+
+    TEST_REQUIRE(math::RunningAvg(0.0f, 1, 5.0f) == real::float32(5.0f));
+    TEST_REQUIRE(math::RunningAvg(5.0f, 2, 3.0f) == real::float32(4.0f));
+    TEST_REQUIRE(math::RunningAvg(4.0f, 3, 10.0f) == real::float32(6.0f));
+    TEST_REQUIRE(math::RunningAvg(6.0f, 4, -10.0f) == real::float32(2.0f));
+}
+
 void unit_test_triangle_winding_order()
 {
     TEST_CASE(test::Type::Feature)
@@ -190,6 +200,8 @@ void unit_test_rect_line_intersection()
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
+    unit_test_math();
+
     unit_test_triangle_winding_order();
     unit_test_convex_hull();
     unit_test_rect_circle_intersection();

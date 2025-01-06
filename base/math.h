@@ -54,6 +54,15 @@ namespace math
         }
     } // namespace
 
+    inline float RunningAvg(float current_average, unsigned count, float next_value) noexcept
+    {
+        return current_average + (next_value - current_average) / (float)count;
+    }
+    inline double RunningAvg(double current_average, unsigned count, double next_value) noexcept
+    {
+        return current_average + (next_value - current_average) / (double)count;
+    }
+
     template<typename Float> inline constexpr
     Float DegreesToRadians(Float degrees) noexcept
     {
@@ -354,6 +363,34 @@ namespace math
     }
 
 #if defined(MATH_SUPPORT_GLM)
+    inline glm::vec2 RunningAvg(const glm::vec2& current_value, unsigned count, const glm::vec2& next_value) noexcept
+    {
+        glm::vec2 ret;
+        ret.x = RunningAvg(current_value.x, count, next_value.x);
+        ret.y = RunningAvg(current_value.y, count, next_value.y);
+        return ret;
+    }
+
+    inline glm::vec3 RunningAvg(const glm::vec3& current_value, unsigned count, const glm::vec3& next_value) noexcept
+    {
+        glm::vec3 ret;
+        ret.x = RunningAvg(current_value.x, count, next_value.x);
+        ret.y = RunningAvg(current_value.y, count, next_value.y);
+        ret.z = RunningAvg(current_value.z, count, next_value.z);
+        return ret;
+    }
+
+    inline glm::vec4 RunningAvg(const glm::vec4& current_value, unsigned count, const glm::vec4& next_value) noexcept
+    {
+        glm::vec4 ret;
+        ret.x = RunningAvg(current_value.x, count, next_value.x);
+        ret.y = RunningAvg(current_value.y, count, next_value.y);
+        ret.z = RunningAvg(current_value.z, count, next_value.z);
+        ret.w = RunningAvg(current_value.w, count, next_value.w);
+        return ret;
+    }
+
+
     inline bool equals(const glm::vec2& lhs, const glm::vec2& rhs, float epsilon = 0.0001f) noexcept
     {
         return equals(lhs.x, rhs.x, epsilon) &&
