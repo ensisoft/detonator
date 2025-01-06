@@ -144,6 +144,19 @@ void DlgTextureRect::on_btnCancel_clicked()
     reject();
 }
 
+void DlgTextureRect::on_btnReset_clicked()
+{
+    mRect.SetX(0.0f);
+    mRect.SetY(0.0f);
+    mRect.SetWidth(1.0f);
+    mRect.SetHeight(1.0f);
+
+    SetValue(mUI.X, 0);
+    SetValue(mUI.Y, 0);
+    SetValue(mUI.W, mWidth);
+    SetValue(mUI.H, mHeight);
+}
+
 void DlgTextureRect::on_X_valueChanged(int)
 {
     UpdateRect();
@@ -198,6 +211,13 @@ void DlgTextureRect::OnPaintScene(gfx::Painter& painter, double)
     img.Translate(xpos, ypos);
     img.Translate(mTrackingOffset.x(), mTrackingOffset.y());
     gfx::FillRect(painter, img, *mMaterial);
+
+    gfx::FRect text(0.0f, 0.0f, 100.0f, 20.0f);
+    text.Translate(xpos, ypos);
+    text.Translate(mTrackingOffset.x(), mTrackingOffset.y());
+    text.Translate(img_width, img_height);
+    text.Translate(10.0f, 10.0f);
+    ShowMessage(base::FormatString("%1 x %2 ", mWidth, mHeight), text, painter);
 
     // draw the cross-hairs
     const int xp = mCurrentPoint.x();

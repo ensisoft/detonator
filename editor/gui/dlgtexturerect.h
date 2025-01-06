@@ -55,6 +55,7 @@ namespace gui
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
+        void on_btnReset_clicked();
         void on_X_valueChanged(int);
         void on_Y_valueChanged(int);
         void on_W_valueChanged(int);
