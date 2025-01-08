@@ -34,7 +34,7 @@ namespace gui
         Q_OBJECT
 
     public:
-        enum class Format {
+        enum class Unit {
             Millisecs,
             Seconds,
             Minutes
@@ -43,7 +43,7 @@ namespace gui
         TimeWidget(QWidget* parent);
        ~TimeWidget();
 
-        void SetFormat(Format format);
+        void SetFormat(Unit format);
         // Get the time in milliseconds.
         unsigned GetTime() const;
         // Set the time from milliseconds.

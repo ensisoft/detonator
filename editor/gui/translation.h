@@ -21,6 +21,8 @@
 #include <string>
 
 #include "base/math.h"
+#include "audio/format.h"
+#include "audio/loader.h"
 #include "editor/app/workspace.h"
 #include "engine/loader.h"
 #include "graphics/drawable.h"
@@ -60,4 +62,9 @@ namespace gfx {
     std::string TranslateEnum(gfx::ParticleEngineClass::CoordinateSpace space);
     std::string TranslateEnum(gfx::ParticleEngineClass::Motion motion);
     std::string TranslateEnum(gfx::ParticleEngineClass::SpawnPolicy spawn);
+}
+
+namespace audio {
+    std::string TranslateEnum(audio::SampleType sampletype);
+    std::string TranslateEnum(audio::IOStrategy io);
 }

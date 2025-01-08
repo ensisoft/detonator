@@ -40,6 +40,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/clipboard.h"
+#include "editor/gui/translation.h"
 
 namespace {
 struct PortDesc {
@@ -1172,6 +1173,7 @@ void AudioWidget::InitializeContent()
 {
     auto* element = new AudioElement(FindElementDescription("FileSource"));
     element->SetName("Kalimba");
+    element->setPos(0.0f, 0.0f);
     if (auto* val = element->GetArgValue<std::string>("file"))
         *val = "app://audio/music/Kalimba_short.mp3";
 
@@ -1233,6 +1235,7 @@ void AudioWidget::AddActions(QToolBar& bar)
         auto* action = bar.addAction(app::toString("%1", pair.first));
         action->setIcon(QIcon("level:plugin-add.png"));
         action->setData(app::FromUtf8(pair.first));
+        action->setProperty("source", "toolbar");
         connect(action, &QAction::triggered, this, &AudioWidget::AddElementAction);
     }
 
@@ -1304,9 +1307,12 @@ bool AudioWidget::LoadState(const Settings& settings)
     }
     UpdateElementList();
 
-    SetValue(mUI.outElem, ListItemId(graph_out_elem));
-    on_outElem_currentIndexChanged(0);
-    SetValue(mUI.outPort, ListItemId(graph_out_port));
+    if (!graph_out_elem.isEmpty())
+    {
+        SetValue(mUI.outElem, ListItemId(graph_out_elem));
+        on_outElem_currentIndexChanged(0);
+        SetValue(mUI.outPort, ListItemId(graph_out_port));
+    }
 
     GetSelectedElementProperties();
     return true;
@@ -1721,6 +1727,7 @@ void AudioWidget::on_view_customContextMenuRequested(QPoint pos)
         auto* action = menu.addAction(app::toString("New %1", pair.first));
         action->setIcon(QIcon("icons:add.png"));
         action->setData(app::FromUtf8(pair.first));
+        action->setProperty("source", "context-menu");
         connect(action, &QAction::triggered, this, &AudioWidget::AddElementAction);
     }
 
@@ -1914,10 +1921,18 @@ void AudioWidget::AddElementAction()
         if (it != mItems.end()) continue;
         break;
     }
-    // todo: this is off somehow... weird
-    const auto& mouse_pos = mUI.view->mapFromGlobal(QCursor::pos());
-    const auto& scene_pos = mUI.view->mapToScene(mouse_pos);
-    element->setPos(scene_pos);
+
+    if (action->property("source").toString() == "toolbar")
+    {
+        element->setPos(0.0f, 0.0f);
+    }
+    else
+    {
+        // todo: this is off somehow... weird
+        const auto& mouse_pos = mUI.view->mapFromGlobal(QCursor::pos());
+        const auto& scene_pos = mUI.view->mapToScene(mouse_pos);
+        element->setPos(scene_pos);
+    }
     element->SetName(name);
     // scene takes ownership of the graphics item
     mScene->addItem(element);
