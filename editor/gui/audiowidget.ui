@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2530</width>
-    <height>1433</height>
+    <width>1683</width>
+    <height>1058</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -155,7 +155,7 @@
      </widget>
      <widget class="QGroupBox" name="center">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
         <horstretch>1</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -167,7 +167,7 @@
        <item>
         <widget class="QGraphicsView" name="view">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -231,7 +231,7 @@
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <widget class="QGroupBox" name="textureMaps">
+         <widget class="QGroupBox" name="elementBox">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -317,8 +317,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>491</width>
-             <height>958</height>
+             <width>473</width>
+             <height>794</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">

@@ -339,3 +339,34 @@ std::string TranslateEnum(gfx::ParticleEngineClass::SpawnPolicy spawn)
 }
 
 } // namespace
+
+namespace audio
+{
+std::string TranslateEnum(audio::SampleType sampletype)
+{
+    if (sampletype == audio::SampleType::Float32)
+        return "Float 32bits";
+    else if (sampletype == audio::SampleType::Int16)
+        return "Signed Int 16bit";
+    else if (sampletype == audio::SampleType::Int32)
+        return "Signed Int 32bit";
+    else BUG("Missing translation");
+    return "???";
+}
+std::string TranslateEnum(audio::IOStrategy io)
+{
+    if (io == audio::IOStrategy::Stream)
+        return "File Stream";
+    else if (io == audio::IOStrategy::Automatic)
+        return "Automatic";
+    else if (io == audio::IOStrategy::Default)
+        return "Project Default";
+    else if (io == audio::IOStrategy::Buffer)
+        return "Memory Buffer";
+    else if (io == audio::IOStrategy::Memmap)
+        return "Memory Map";
+    else BUG("Missing translation");
+    return "???";
+}
+
+} // audio
