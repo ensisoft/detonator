@@ -291,9 +291,9 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
         }
         else if (mType == Type::BasicLight)
         {
-            source.AddPreprocessorDefinition("LIGHT_DIFFUSE_MAP",  static_cast<int>(BasicLightMaterialMap::Diffuse));
-            source.AddPreprocessorDefinition("LIGHT_SPECULAR_MAP", static_cast<int>(BasicLightMaterialMap::Specular));
-            source.AddPreprocessorDefinition("LIGHT_NORMAL_MAP",   static_cast<int>(BasicLightMaterialMap::Normal));
+            source.AddPreprocessorDefinition("BASIC_LIGHT_MATERIAL_DIFFUSE_MAP",  static_cast<int>(BasicLightMaterialMap::Diffuse));
+            source.AddPreprocessorDefinition("BASIC_LIGHT_MATERIAL_SPECULAR_MAP", static_cast<int>(BasicLightMaterialMap::Specular));
+            source.AddPreprocessorDefinition("BASIC_LIGHT_MATERIAL_NORMAL_MAP",   static_cast<int>(BasicLightMaterialMap::Normal));
         }
     }
 
