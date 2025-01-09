@@ -20,6 +20,8 @@
 
 #include <string>
 
+#include "device/enum.h"
+
 namespace gfx
 {
     class Texture
@@ -40,66 +42,10 @@ namespace gfx
             AlphaMask
         };
 
-        enum class Format {
-            // non-linear sRGB(A) encoded RGB data.
-            sRGB,
-            sRGBA,
-            // linear RGB(A) data.
-            RGB,
-            RGBA,
-            // 8bit linear alpha mask
-            AlphaMask
-        };
-        // Texture minifying filter is used whenever the
-        // pixel being textured maps to an area greater than
-        // one texture element.
-        enum class MinFilter {
-            // Use the default filtering set for the device.
-            Default,
-            // Use the texture element nearest to the
-            // center of the pixel (Manhattan distance)
-            Nearest,
-            // Use the weighted average of the four texture
-            // elements that are closest to the pixel.
-            Linear,
-            // Use mips (precomputed) minified textures.
-            // Use the nearest texture element from the nearest
-            // mipmap level
-            Mipmap,
-            // Use mips (precomputed) minified textures).
-            // Use the weighted average of the four texture
-            // elements that are sampled from the closest mipmap level.
-            Bilinear,
-            // Use mips (precomputed minified textures).
-            // Use the weighted average of the four texture
-            // elements that are sampled from the two nearest mipmap levels.
-            Trilinear
-        };
-
-        // Texture magnifying filter is used whenever the
-        // pixel being textured maps to an area less than
-        // one texture element.
-        enum class MagFilter {
-            // Use the default filtering set for the device.
-            Default,
-            // Use the texture element nearest to the center
-            // of the pixel. (Manhattan distance).
-            Nearest,
-            // Use the weighted average of the four texture
-            // elements that are closest to the pixel.
-            Linear
-        };
-
-        // Texture wrapping options for how to deal with
-        // texture coordinates outside of [0,1] range,
-        enum class Wrapping {
-            // Clamp the texture coordinate to the boundary.
-            Clamp,
-            // Wrap the coordinate by ignoring the integer part.
-            Repeat,
-            // todo:
-            Mirror
-        };
+        using Format = dev::TextureFormat;
+        using MinFilter = dev::TextureMinFilter;
+        using MagFilter = dev::TextureMagFilter;
+        using Wrapping = dev::TextureWrapping;
 
         // Identify texture format based on the bit depth
         static Format DepthToFormat(unsigned bit_depth, bool srgb)

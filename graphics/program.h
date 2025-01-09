@@ -34,6 +34,7 @@
 #include <memory>
 #include <string>
 
+#include "device/graphics.h"
 #include "graphics/color4f.h"
 #include "graphics/uniform.h"
 
@@ -50,18 +51,7 @@ namespace gfx
             unsigned unit = 0;
             const Texture* texture = nullptr;
         };
-        struct Uniform {
-            std::string name;
-            std::variant<int, float,
-                    glm::ivec2,
-                    glm::vec2,
-                    glm::vec3,
-                    glm::vec4,
-                    gfx::Color4f,
-                    glm::mat2,
-                    glm::mat3,
-                    glm::mat4> value;
-        };
+        using Uniform = dev::ProgramState::Uniform;
 
         template<typename T>
         inline void SetUniformBlock(std::string name, UniformBlockData<T>&& uniform_data)

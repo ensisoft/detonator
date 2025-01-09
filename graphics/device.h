@@ -23,6 +23,7 @@
 #include <string>
 #include <optional>
 
+#include "device/types.h"
 #include "graphics/types.h"
 #include "graphics/color4f.h"
 #include "graphics/bitmap.h"
@@ -44,94 +45,9 @@ namespace gfx
     class Device
     {
     public:
-        // Device state including the rasterizer state
-        // that is to be applied for any draw operation.
-        struct State {
-            enum class DepthTest {
-                Disabled,
-                // Depth test passes and color buffer is updated when the fragments
-                // depth value is less or equal to previously written depth value.
-                LessOrEQual
-            };
-            DepthTest depth_test = DepthTest::Disabled;
-
-            // should write color buffer or not.
-            bool bWriteColor = true;
-            bool premulalpha = false;
-            // how to mix the fragment with the existing color buffer value.
-            enum class BlendOp {
-                None,
-                Transparent,
-                Additive
-            };
-            BlendOp blending = BlendOp::None;
-            // stencil test
-            enum class StencilFunc {
-                Disabled,
-                PassAlways,
-                PassNever,
-                RefIsLess,
-                RefIsLessOrEqual,
-                RefIsMore,
-                RefIsMoreOrEqual,
-                // The stencil test passes if (ref & mask) == (stencil & mask)
-                RefIsEqual,
-                RefIsNotEqual
-            };
-            // the stencil action to take on various stencil tests.
-            enum class StencilOp {
-                DontModify,
-                WriteZero,
-                WriteRef,
-                Increment,
-                Decrement
-            };
-            // the stencil test function.
-            StencilFunc  stencil_func  = StencilFunc::Disabled;
-            // what to do when the stencil test fails.
-            StencilOp    stencil_fail  = StencilOp::DontModify;
-            // what to do when the stencil test passes and the depth passes
-            StencilOp    stencil_dpass = StencilOp::DontModify;
-            // what to do when the stencil test passes but depth test fails.
-            StencilOp    stencil_dfail = StencilOp::DontModify;
-            // todo:
-            std::uint8_t stencil_mask  = 0xff;
-            // todo:
-            std::uint8_t stencil_ref   = 0x0;
-            // the device viewport into the render target. the viewport is in
-            // device coordinates (pixels, texels) and the origin is at the bottom
-            // left and Y axis grows upwards (towards the window top)
-            IRect viewport;
-            // the device scissor that can be used to limit the rendering to the
-            // area inside the scissor. if the scissor rect is an empty rect
-            // the scissor test is disabled.
-            IRect scissor;
-            // Which polygon faces to cull. Note that this only applies
-            // to polygons, not to lines or points.
-            enum class Culling {
-                // Don't cull anything, both polygon front and back faces are rasterized
-                None,
-                // Cull front faces. Front face is determined by the polygon
-                // winding order. Currently, counter-clockwise winding is used to
-                // indicate front face.
-                Front,
-                // Cull back faces. This is the default.
-                Back,
-                // Cull both front and back faces.
-                FrontAndBack
-            };
-            // polygon face culling setting.
-            Culling culling = Culling::Back;
-            // rasterizer setting for line width when rasterizing
-            // geometries with lines.
-            float line_width = 1.0f;
-
-            enum class PolygonWindingOrder {
-                CounterClockWise,
-                ClockWise
-            };
-            PolygonWindingOrder winding_order = PolygonWindingOrder::CounterClockWise;
-        };
+        using State = dev::GraphicsPipelineState;
+        using ResourceStats = dev::GraphicsDeviceResourceStats;
+        using DeviceCaps = dev::GraphicsDeviceCaps;
 
         virtual ~Device() = default;
 
@@ -261,38 +177,8 @@ namespace gfx
         virtual Bitmap<Pixel_RGBA> ReadColorBuffer(unsigned width, unsigned height, Framebuffer* fbo = nullptr) const = 0;
         virtual Bitmap<Pixel_RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height, Framebuffer* fbo = nullptr) const = 0;
 
-        struct ResourceStats {
-            // vertex buffer objects
-            std::size_t dynamic_vbo_mem_use     = 0;
-            std::size_t dynamic_vbo_mem_alloc   = 0;
-            std::size_t static_vbo_mem_use      = 0;
-            std::size_t static_vbo_mem_alloc    = 0;
-            std::size_t streaming_vbo_mem_use   = 0;
-            std::size_t streaming_vbo_mem_alloc = 0;
-            // index buffer objects
-            std::size_t dynamic_ibo_mem_use     = 0;
-            std::size_t dynamic_ibo_mem_alloc   = 0;
-            std::size_t static_ibo_mem_use      = 0;
-            std::size_t static_ibo_mem_alloc    = 0;
-            std::size_t streaming_ibo_mem_use   = 0;
-            std::size_t streaming_ibo_mem_alloc = 0;
-            // uniform buffer objects
-            std::size_t dynamic_ubo_mem_use     = 0;
-            std::size_t dynamic_ubo_mem_alloc   = 0;
-            std::size_t static_ubo_mem_use      = 0;
-            std::size_t static_ubo_mem_alloc    = 0;
-            std::size_t streaming_ubo_mem_use   = 0;
-            std::size_t streaming_ubo_mem_alloc = 0;
-        };
         virtual void GetResourceStats(ResourceStats* stats) const = 0;
 
-        struct DeviceCaps {
-            unsigned num_texture_units = 0;
-            unsigned max_fbo_width = 0;
-            unsigned max_fbo_height = 0;
-            bool instanced_rendering = false;
-            bool multiple_color_attachments = false;
-        };
         virtual void GetDeviceCaps(DeviceCaps* caps) const = 0;
     private:
     };

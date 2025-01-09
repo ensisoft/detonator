@@ -44,26 +44,7 @@ namespace gfx
     {
     public:
         using IndexType = gfx::IndexType;
-
-        // Define how the geometry is to be rasterized.
-        enum class DrawType : uint32_t {
-            // Draw the given vertices as triangles, i.e.
-            // each 3 vertices make a single triangle.
-            Triangles,
-            // Draw each given vertex as a separate point
-            Points,
-            // Draw a series of triangles all connected to the
-            // first vertex
-            TriangleFan,
-            // Draw the vertices as a series of connected lines
-            // where each pair of adjacent vertices are connected
-            // by a line.
-            // In this draw the line width setting applies.
-            Lines,
-            // Draw a line between the given vertices looping back
-            // from the last vertex to the first.
-            LineLoop
-        };
+        using DrawType  = gfx::DrawType;
 
         // Define how the contents of the geometry object are expected
         // to be used.

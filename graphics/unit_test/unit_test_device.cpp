@@ -2020,8 +2020,8 @@ void main() {
     };
 #pragma pack(pop)
     static const gfx::InstanceDataLayout layout(sizeof(InstanceAttribute), {
-        {"iaSize",     0, 2, 0, offsetof(InstanceAttribute, iaSize)    },
-        {"iaPosition", 0, 2, 0, offsetof(InstanceAttribute, iaPosition)}
+        {"iaSize",     0, 2, 1, offsetof(InstanceAttribute, iaSize)    },
+        {"iaPosition", 0, 2, 1, offsetof(InstanceAttribute, iaPosition)}
     });
 
     // create reference (expected result)
