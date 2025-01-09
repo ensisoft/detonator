@@ -33,6 +33,8 @@
 #include "base/assert.h"
 #include "data/fwd.h"
 #include "graphics/color4f.h"
+#include "device/vertex.h"
+#include "device/enum.h"
 
 namespace gfx
 {
@@ -41,20 +43,8 @@ namespace gfx
     // 32bit vertex index for indexed drawing.
     using Index32 = std::uint32_t;
 
-    enum class IndexType {
-        Index16, Index32
-    };
-
-    // Map the type of the index to index size in bytes.
-    inline size_t GetIndexByteSize(IndexType type)
-    {
-        if (type == IndexType::Index16)
-            return 2;
-        else if (type == IndexType::Index32)
-            return 4;
-        else BUG("Missing index type.");
-        return 0;
-    }
+    using DrawType = dev::DrawType;
+    using IndexType = dev::IndexType;
 
 #pragma pack(push, 1)
     struct Vec1 {
@@ -172,42 +162,9 @@ namespace gfx
     static_assert(std::is_trivially_copyable<Vertex3D>::value, "Vertex3D must be trivial to copy.");
     static_assert(std::is_trivially_copyable<Vertex2D>::value, "Vertex2D must be trivial to copy.");
 
-    struct VertexLayout {
-        struct Attribute {
-            // name of the attribute in the shader code.
-            std::string name;
-            // the index of the attribute.
-            // use glsl syntax
-            // layout (binding=x) in vec3 myAttrib;
-            unsigned index = 0;
-            // number of vector components
-            // must be one of [1, 2, 3, 4]
-            unsigned num_vector_components = 0;
-            // the attribute divisor. if this is 0 the
-            // attribute updates for every vertex and instancing is off.
-            // ignored for geometry attributes.
-            unsigned divisor = 0;
-            // relative offset in the vertex data
-            // typically offsetof(MyVertex, member)
-            unsigned offset = 0;
-        };
-        unsigned vertex_struct_size = 0;
-        std::vector<Attribute> attributes;
-
-        VertexLayout() = default;
-        VertexLayout(std::size_t struct_size,
-                     std::initializer_list<Attribute> attrs)
-                : vertex_struct_size(struct_size)
-                , attributes(std::move(attrs))
-        {}
-
-        bool FromJson(const data::Reader& reader) noexcept;
-        void IntoJson(data::Writer& writer) const;
-        size_t GetHash() const noexcept;
-    };
-
-    bool operator==(const VertexLayout& lhs, const VertexLayout& rhs) noexcept;
-    bool operator!=(const VertexLayout& lhs, const VertexLayout& rhs) noexcept;
+    using VertexLayout = dev::VertexLayout;
+    using dev::operator!=;
+    using dev::operator==;
 
     template<typename Vertex>
     const VertexLayout& GetVertexLayout();
@@ -261,10 +218,10 @@ namespace gfx
     const InstanceDataLayout& GetInstanceDataLayout<InstanceAttribute>()
     {
         static const InstanceDataLayout layout(sizeof(InstanceAttribute), {
-            {"iaModelVectorX", 0, 4, 0, offsetof(InstanceAttribute, iaModelVectorX)},
-            {"iaModelVectorY", 0, 4, 0, offsetof(InstanceAttribute, iaModelVectorY)},
-            {"iaModelVectorZ", 0, 4, 0, offsetof(InstanceAttribute, iaModelVectorZ)},
-            {"iaModelVectorW", 0, 4, 0, offsetof(InstanceAttribute, iaModelVectorW)}
+            {"iaModelVectorX", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorX)},
+            {"iaModelVectorY", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorY)},
+            {"iaModelVectorZ", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorZ)},
+            {"iaModelVectorW", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorW)}
         });
         return layout;
     }

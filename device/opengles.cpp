@@ -50,6 +50,8 @@
 #include "graphics/loader.h"
 #include "graphics/framebuffer.h"
 #include "device/device.h"
+#include "device/graphics.h"
+#include "device/vertex.h"
 
 // WebGL
 #define WEBGL_DEPTH_STENCIL_ATTACHMENT 0x821A
@@ -358,10 +360,105 @@ struct OpenGLFunctions
 class OpenGLES2GraphicsDevice : public std::enable_shared_from_this<OpenGLES2GraphicsDevice>
                               , public gfx::Device
                               , public dev::Device
+                              , public dev::GraphicsDevice
 {
+
+private:
+    struct CachedUniform {
+        GLuint location = 0;
+        uint32_t hash   = 0;
+    };
+    struct BufferObject {
+        dev::BufferUsage usage = dev::BufferUsage::Static;
+        GLuint name     = 0;
+        size_t capacity = 0;
+        size_t offset   = 0;
+        size_t refcount = 0;
+    };
+    struct TextureState {
+        GLenum wrap_x = GL_NONE;
+        GLenum wrap_y = GL_NONE;
+        GLenum min_filter = GL_NONE;
+        GLenum mag_filter = GL_NONE;
+        bool has_mips = false;
+    };
+    struct FramebufferState {
+        // this is either only depth or packed depth+stencil
+        GLuint depth_buffer = 0;
+        // In case of multisampled FBO the color buffer is a MSAA
+        // render buffer which then gets resolved (blitted) into the
+        // associated color target texture.
+        struct MSAARenderBuffer {
+            GLuint handle = 0;
+            GLuint width  = 0;
+            GLuint height = 0;
+        };
+        std::vector<MSAARenderBuffer> multisample_color_buffers;
+    };
+    using UniformCache = std::unordered_map<std::string, CachedUniform>;
+
+    std::shared_ptr<dev::Context> mContextImpl;
+    dev::Context* mContext = nullptr;
+
+    mutable std::unordered_map<unsigned, UniformCache> mUniformCache;
+    mutable std::unordered_map<unsigned, UniformCache> mUniformBlockCache;
+    mutable std::unordered_map<unsigned, TextureState> mTextureState;
+    mutable std::unordered_map<unsigned, FramebufferState> mFramebufferState;
+
+    // vertex buffers at index 0 and index buffers at index 1, uniform buffers at index 2
+    std::vector<BufferObject> mBuffers[3];
+
+    unsigned mResolveFbo = 0;
+    unsigned mTempTextureUnitIndex = 0;
+    unsigned mTextureUnitCount = 0;
+    unsigned mUniformBufferOffsetAlignment = 0;
+
+    OpenGLFunctions mGL;
+
+    struct Extensions {
+        bool EXT_sRGB = false;
+        bool OES_packed_depth_stencil = false;
+        // support multiple color attachments in GL ES2.
+        bool GL_EXT_draw_buffers = false;
+    } mExtensions;
+private:
+
+    CachedUniform& GetUniformFromCache(const dev::GraphicsProgram& program, const std::string& name) const
+    {
+        // todo: replace with a better faster key
+        auto& cache = mUniformCache[program.handle];
+
+        auto it = cache.find(name);
+        if (it != std::end(cache))
+            return it->second;
+
+        auto ret = mGL.glGetUniformLocation(program.handle, name.c_str());
+        CachedUniform uniform;
+        uniform.location = ret;
+        uniform.hash     = 0;
+        cache[name] = uniform;
+        return cache[name];
+    }
+    CachedUniform& GetUniformBlockFromCache(const dev::GraphicsProgram& program, const std::string& name) const
+    {
+        auto& cache = mUniformBlockCache[program.handle];
+
+        auto it = cache.find(name);
+        if (it != std::end(cache))
+            return it->second;
+
+        auto ret = mGL.glGetUniformBlockIndex(program.handle, name.c_str());
+        CachedUniform block;
+        block.location = ret;
+        block.hash = 0;
+        cache[name] = block;
+        return cache[name];
+    }
+
 public:
     explicit OpenGLES2GraphicsDevice(dev::Context* context) noexcept
         : mContext(context)
+        , mDevice(this)
     {
     #define RESOLVE(x) mGL.x = reinterpret_cast<decltype(mGL.x)>(mContext->Resolve(#x));
         RESOLVE(glCreateProgram);
@@ -566,7 +663,12 @@ public:
         {
         }
 
-        mTextureUnits.resize(max_texture_units);
+        mTextureUnits.resize(max_texture_units-1);
+        // we use this for uploading textures and generating mips
+        // so we don't need to play stupid games with the "actual"
+        // texture units.
+        mTempTextureUnitIndex = max_texture_units-1;
+        mTextureUnitCount = max_texture_units-1; // see the temp
 
         // set some initial state
         GL_CALL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
@@ -595,6 +697,11 @@ public:
         mGeoms.clear();
         mInstances.clear();
 
+        if (mResolveFbo)
+        {
+            GL_CALL(glDeleteFramebuffers(1, &mResolveFbo));
+        }
+
         for (auto& buffer : mBuffers[0])
         {
             GL_CALL(glDeleteBuffers(1, &buffer.name));
@@ -609,12 +716,1146 @@ public:
         }
     }
 
-    void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
+    static size_t BufferIndex(dev::BufferType type)
     {
-        if (!SetupFBO(fbo))
+        if (type == dev::BufferType::VertexBuffer)
+            return 0;
+        else if (type == dev::BufferType::IndexBuffer)
+            return 1;
+        else if (type == dev::BufferType::UniformBuffer)
+            return 2;
+        BUG("Bug on buffer index.");
+        return 0;
+    }
+
+    static GLenum GetBufferEnum(dev::BufferType type)
+    {
+        if (type == dev::BufferType::VertexBuffer)
+            return GL_ARRAY_BUFFER;
+        else if (type == dev::BufferType::IndexBuffer)
+            return GL_ELEMENT_ARRAY_BUFFER;
+        else if (type == dev::BufferType::UniformBuffer)
+            return GL_UNIFORM_BUFFER;
+        BUG("Bug on buffer type.");
+        return 0;
+    }
+    static GLenum GetWrappingMode(dev::TextureWrapping wrapping)
+    {
+        if (wrapping == dev::TextureWrapping::Clamp)
+            return GL_CLAMP_TO_EDGE;
+        else if (wrapping == dev::TextureWrapping::Repeat)
+            return GL_REPEAT;
+        else if (wrapping == dev::TextureWrapping::Mirror)
+            return GL_MIRRORED_REPEAT;
+        else BUG("Bug on GL texture wrapping mode.");
+        return GL_NONE;
+    }
+    static GLenum GetTextureMinFilter(dev::TextureMinFilter filter)
+    {
+        if (filter == dev::TextureMinFilter::Nearest)
+            return GL_NEAREST;
+        else if (filter == dev::TextureMinFilter::Linear)
+            return GL_LINEAR;
+        else if (filter == dev::TextureMinFilter::Mipmap)
+            return GL_NEAREST_MIPMAP_NEAREST;
+        else if (filter == dev::TextureMinFilter::Bilinear)
+            return GL_NEAREST_MIPMAP_LINEAR;
+        else if (filter == dev::TextureMinFilter::Trilinear)
+            return GL_LINEAR_MIPMAP_LINEAR;
+        else BUG("Bug on min texture filter");
+        return GL_NONE;
+    }
+    static GLenum GetTextureMagFilter(dev::TextureMagFilter filter)
+    {
+        if (filter == dev::TextureMagFilter::Nearest)
+            return GL_NEAREST;
+        else if (filter == dev::TextureMagFilter::Linear)
+            return GL_LINEAR;
+        else BUG("Bug on mag texture filter.");
+        return GL_NONE;
+    }
+    static GLenum GetDrawMode(dev::DrawType draw)
+    {
+        if (draw == dev::DrawType::Triangles)
+            return GL_TRIANGLES;
+        else if (draw == dev::DrawType::Points)
+            return GL_POINTS;
+        else if (draw == dev::DrawType::TriangleFan)
+            return GL_TRIANGLE_FAN;
+        else if (draw == dev::DrawType::Lines)
+            return GL_LINES;
+        else if (draw == dev::DrawType::LineLoop)
+            return GL_LINE_LOOP;
+        else BUG("Bug on draw primitive.");
+        return GL_NONE;
+    }
+    static GLenum GetIndexType(dev::IndexType type)
+    {
+        if (type == dev::IndexType::Index16)
+            return GL_UNSIGNED_SHORT;
+        else if (type == dev::IndexType::Index32)
+            return GL_UNSIGNED_INT;
+        else BUG("Bug on index type.");
+        return GL_NONE;
+    }
+    static GLenum GetEnum(dev::StencilFunc func)
+    {
+        using Func = State::StencilFunc;
+
+        if (func == Func::Disabled)
+            return GL_NONE;
+        else if (func == Func::PassAlways)
+            return GL_ALWAYS;
+        else if (func == Func::PassNever)
+            return GL_NEVER;
+        else if (func == Func::RefIsLess)
+            return GL_LESS;
+        else if (func == Func::RefIsLessOrEqual)
+            return GL_LEQUAL;
+        else if (func == Func::RefIsMore)
+            return GL_GREATER;
+        else if (func == Func::RefIsMoreOrEqual)
+            return GL_GEQUAL;
+        else if (func == Func::RefIsEqual)
+            return GL_EQUAL;
+        else if (func == Func::RefIsNotEqual)
+            return GL_NOTEQUAL;
+        else BUG("Bug on stencil func");
+        return GL_NONE;
+    }
+    static GLenum GetEnum(dev::StencilOp op)
+    {
+        using Op = State::StencilOp;
+
+        if (op == Op::DontModify)
+            return GL_KEEP;
+        else if (op == Op::WriteZero)
+            return GL_ZERO;
+        else if (op == Op::WriteRef)
+            return GL_REPLACE;
+        else if (op == Op::Increment)
+            return GL_INCR;
+        else if (op == Op::Decrement)
+            return GL_DECR;
+        else BUG("Bug on stencil op");
+        return GL_NONE;
+    }
+
+    struct TextureFormat {
+        GLenum sizeFormat;
+        GLenum baseFormat;
+    };
+
+    TextureFormat GetTextureFormat(dev::TextureFormat format) const
+    {
+        const auto version = mContext->GetVersion();
+
+        GLenum sizeFormat = 0;
+        GLenum baseFormat = 0;
+        switch (format)
+        {
+            case dev::TextureFormat::sRGB:
+                if (version == dev::Context::Version::WebGL_1 || version == dev::Context::Version::OpenGL_ES2)
+                {
+                    sizeFormat = GL_SRGB_EXT;
+                    baseFormat = GL_RGB; //GL_SRGB_EXT;
+                }
+                else if (version == dev::Context::Version::WebGL_2 || version == dev::Context::Version::OpenGL_ES3)
+                {
+                    sizeFormat = GL_SRGB8;
+                    baseFormat = GL_RGB;
+                }
+                else BUG("Unknown OpenGL ES version.");
+                break;
+            case dev::TextureFormat::sRGBA:
+                if (version == dev::Context::Version::WebGL_1 || version == dev::Context::Version::OpenGL_ES2)
+                {
+                    sizeFormat = GL_SRGB_ALPHA_EXT;
+                    baseFormat = GL_RGBA; //GL_SRGB_ALPHA_EXT;
+                }
+                else if (version == dev::Context::Version::WebGL_2 || version == dev::Context::Version::OpenGL_ES3)
+                {
+                    sizeFormat = GL_SRGB8_ALPHA8;
+                    baseFormat = GL_RGBA;
+                }
+                else BUG("Unknown OpenGL ES version.");
+                break;
+            case dev::TextureFormat::RGB:
+                sizeFormat = GL_RGB;
+                baseFormat = GL_RGB;
+                break;
+            case dev::TextureFormat::RGBA:
+                sizeFormat = GL_RGBA;
+                baseFormat = GL_RGBA;
+                break;
+            case dev::TextureFormat::AlphaMask:
+                // when sampling R = G = B = 0.0 and A is the alpha value from here.
+                sizeFormat = GL_ALPHA;
+                baseFormat = GL_ALPHA;
+                break;
+            default:
+                BUG("Unknown texture format.");
+                break;
+        }
+
+        if (version == dev::Context::Version::OpenGL_ES2 || version == dev::Context::Version::WebGL_1)
+        {
+            if (format == dev::TextureFormat::sRGB && !mExtensions.EXT_sRGB)
+            {
+                sizeFormat = GL_RGB;
+                baseFormat = GL_RGB;
+                WARN("Treating sRGB texture as RGB texture in the absence of EXT_sRGB.");
+            }
+            else if (format == dev::TextureFormat::sRGBA && !mExtensions.EXT_sRGB)
+            {
+                sizeFormat = GL_RGBA;
+                baseFormat = GL_RGBA;
+                WARN("Treating sRGBA texture as RGBA texture in the absence of EXT_sRGB.");
+            }
+        }
+        TextureFormat ret;
+        ret.baseFormat = baseFormat;
+        ret.sizeFormat = sizeFormat;
+        return ret;
+    }
+
+
+    void DeleteShader(const dev::GraphicsShader& shader) override
+    {
+        GL_CALL(glDeleteShader(shader.handle));
+    }
+    void DeleteProgram(const dev::GraphicsProgram& program) override
+    {
+        GL_CALL(glDeleteProgram(program.handle));
+
+        mUniformCache.erase(program.handle);
+        mUniformBlockCache.erase(program.handle);
+    }
+
+    dev::Framebuffer GetDefaultFramebuffer() const override
+    {
+        static dev::Framebuffer framebuffer;
+        framebuffer.handle = 0;
+        // todo: width, height, format
+        return framebuffer;
+    }
+
+    dev::Framebuffer CreateFramebuffer(const dev::FramebufferConfig& config) override
+    {
+        // WebGL spec see.
+        // https://registry.khronos.org/webgl/specs/latest/1.0/
+
+        // The OpenGL ES Framebuffer has multiple different sometimes exclusive properties/features that can be
+        // parametrized when creating an FBO.
+        // - Logical buffers attached to the FBO possible combinations of
+        //   logical buffers including not having some buffer.
+        //    * Color buffer
+        //    * Depth buffer
+        //    * Stencil buffer
+        // - The bit representation for some logical buffer that dictates the number of bits used for the data.
+        //   For example 8bit RGBA/32bit float color buffer or 16bit depth buffer or 8bit stencil buffer.
+        // - The storage object that provides the data for the bitwise representation of the buffer's contents.
+        //    * Texture object
+        //    * Render buffer
+        //
+        // The OpenGL API essentially allows for a lot of possible FBO configurations to be created while in
+        // practice only few are supported (and make sense). Unfortunately the ES2 spec does not require any
+        // particular configurations to be supported by the implementation. Additionally, only 16bit color buffer
+        // configurations are available for render buffer. In practice, it seems that implementations prefer
+        // to support configurations that use a combined storage for depth + stencil and this requires and
+        // extension 'OES_packed_depth_stencil'.
+        // WebGL however makes an explicit requirement for implementations to support at least the following
+        // configurations:
+        // COLOR0                            DEPTH                           STENCIL
+        // RGBA/UNSIGNED_BYTE texture        N/A                             N/A
+        // RGBA/UNSIGNED_BYTE texture        DEPTH_COMPONENT16 renderbuffer  N/A
+        // RGBA/UNSIGNED_BYTE texture        DEPTH_STENCIL     renderbuffer  DEPTH_STENCIL renderbuffer
+        //
+        // Small caveat the WebGL spec doesn't specify the bitwise representation for DEPTH_STENCIL, i.e.
+        // how many bits of depth and how many bits of stencil.
+
+        // Some relevant extensions that provide more FBO format support.(All tested on Linux + NVIDIA)
+        // NAME                       Firefox   Chrome   Desktop   Desc
+        // ---------------------------------------------------------------------------------------------------------
+        // OES_rgb8_rgba8             No        No       Yes       RGB8 and RGBA8 color render buffer support (written against ES1)
+        // OES_depth32                No        No       Yes       32bit depth render buffer (written against ES1)
+        // OES_depth24                No        No       Yes       24bit depth render buffer (written against ES1)
+        // OES_depth_texture          No        No       Yes
+        // OES_packed_depth_stencil   No        No       Yes       24bit depth combined with 8bit stencil render buffer and texture format
+        // WEBGL_color_buffer_float   Yes       Yes      No        32bit float color render buffer and float texture attachment
+        // WEBGL_depth_texture        ?         ?        No        Limited form of OES_packed_depth_stencil + OES_depth_texture (ANGLE_depth_texture)
+        //
+
+        // Additional issues:
+        // * WebGL supports only POT textures with mips
+        // * Multisampled FBO creation and resolve. -> EXT_multisampled_render_to_texture but only for desktop
+        // * MIP generation
+        // * sRGB encoding
+
+        const auto version = mContext->GetVersion();
+
+        GLuint handle;
+        GL_CALL(glGenFramebuffers(1, &handle));
+        GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, handle));
+
+        unsigned samples = 0;
+        if (config.msaa)
+        {
+            const auto version = mContext->GetVersion();
+            if (version == dev::Context::Version::OpenGL_ES2 ||
+                version == dev::Context::Version::WebGL_1)
+                samples = 0;
+            else if (version == dev::Context::Version::OpenGL_ES3 ||
+                     version == dev::Context::Version::WebGL_2)
+                samples = 4;
+            else BUG("Missing OpenGL ES version.");
+        }
+
+        auto& framebuffer_state = mFramebufferState[handle];
+
+        // all the calls to bind the texture target to the framebuffer have been
+        // removed to Complete() function and are here for reference only.
+        // The split between Create() and Complete() allows the same FBO object
+        // to be reused with a different target texture.
+        if (config.format == dev::FramebufferFormat::ColorRGBA8)
+        {
+            // for posterity
+            //GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
+        }
+        else if (config.format == dev::FramebufferFormat::ColorRGBA8_Depth16)
+        {
+            GL_CALL(glGenRenderbuffers(1, &framebuffer_state.depth_buffer));
+            GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, framebuffer_state.depth_buffer));
+            if (samples)
+                GL_CALL(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT16, config.width, config.height));
+            else GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, config.width, config.height));
+            GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, framebuffer_state.depth_buffer));
+        }
+        else if (config.format == dev::FramebufferFormat::ColorRGBA8_Depth24_Stencil8)
+        {
+            if (version == dev::Context::Version::OpenGL_ES2)
+            {
+                ASSERT(samples == 0);
+
+                if (!mExtensions.OES_packed_depth_stencil)
+                {
+                    ERROR("Failed to create FBO. OES_packed_depth_stencil extension was not found.");
+                    dev::Framebuffer fbo;
+                    fbo.handle = 0;
+                    fbo.width  = 0;
+                    fbo.height = 0;
+                    fbo.format = dev::FramebufferFormat::Invalid;
+                    return fbo;
+                }
+                GL_CALL(glGenRenderbuffers(1, &framebuffer_state.depth_buffer));
+                GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, framebuffer_state.depth_buffer));
+                GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, config.width, config.height));
+                GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, framebuffer_state.depth_buffer));
+                GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, framebuffer_state.depth_buffer));
+            }
+            else if (version == dev::Context::Version::WebGL_1)
+            {
+                ASSERT(samples == 0);
+
+                // the WebGL spec doesn't actually mention the bit depths for the packed
+                // depth+stencil render buffer and the API exposed GLenum is GL_DEPTH_STENCIL 0x84F9
+                // which however is the same as GL_DEPTH_STENCIL_OES from OES_packed_depth_stencil
+                // So, I'm assuming here that the format is in fact 24bit depth with 8bit stencil.
+                GL_CALL(glGenRenderbuffers(1, &framebuffer_state.depth_buffer));
+                GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, framebuffer_state.depth_buffer));
+                GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, WEBGL_DEPTH_STENCIL, config.width, config.height));
+                GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, WEBGL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, framebuffer_state.depth_buffer));
+            }
+            else if (version == dev::Context::Version::OpenGL_ES3 || version == dev::Context::Version::WebGL_2)
+            {
+                GL_CALL(glGenRenderbuffers(1, &framebuffer_state.depth_buffer));
+                GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, framebuffer_state.depth_buffer));
+                if (samples)
+                    GL_CALL(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH24_STENCIL8, config.width, config.height));
+                else GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, config.width, config.height));
+                GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, framebuffer_state.depth_buffer));
+                GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, framebuffer_state.depth_buffer));
+            }
+        }
+        dev::Framebuffer fbo;
+        fbo.handle  = handle;
+        fbo.height  = config.height;
+        fbo.width   = config.width;
+        fbo.format  = config.format;
+        fbo.samples = samples;
+        return fbo;
+    }
+    void AllocateRenderTarget(const dev::Framebuffer& framebuffer, unsigned color_attachment,
+                              unsigned width, unsigned height) override
+    {
+        ASSERT(framebuffer.IsValid());
+        ASSERT(framebuffer.IsCustom());
+
+        auto& framebuffer_state = mFramebufferState[framebuffer.handle];
+
+        // this should not leak anything since we only allow the
+        // number of color targets to be set once in the SetConfig
+        // thus this vector is only ever resized once.
+        if (framebuffer_state.multisample_color_buffers.size() <= color_attachment)
+            framebuffer_state.multisample_color_buffers.resize(color_attachment+1);
+
+        const auto samples = framebuffer.samples;
+
+        auto& buff = framebuffer_state.multisample_color_buffers[color_attachment];
+        if (!buff.handle)
+            GL_CALL(glGenRenderbuffers(1, &buff.handle));
+
+        GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, buff.handle));
+
+        // GL ES3 reference pages under glRenderBufferStorageMultiple lists the table of formats but
+        // this table doesn't include the information about which formats are "color renderable".
+        // Check the ES3 spec under "3.3 TEXTURES" (p.180) or the ES3 reference pages under glTexStorage2D.
+        // https://registry.khronos.org/OpenGL-Refpages/es3.0/
+
+        if ((buff.width != width) || (buff.height != height))
+        {
+            GL_CALL(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_SRGB8_ALPHA8, width, height));
+            buff.width  = width;
+            buff.height = height;
+            DEBUG("Allocated multi-sampled render buffer storage. [size=%1x%2]", width, height);
+        }
+
+        GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.handle));
+        GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_attachment, GL_RENDERBUFFER, buff.handle));
+    }
+    void BindRenderTargetTexture2D(const dev::Framebuffer& framebuffer, const dev::TextureObject& texture,
+                                   unsigned color_attachment) override
+    {
+        ASSERT(framebuffer.IsValid());
+        ASSERT(framebuffer.IsCustom());
+        ASSERT(texture.IsValid());
+        GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.handle));
+        GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_attachment, GL_TEXTURE_2D, texture.handle, 0));
+    }
+    bool CompleteFramebuffer(const dev::Framebuffer& framebuffer,
+                             const std::vector<unsigned>& color_attachments) override
+    {
+        ASSERT(framebuffer.IsValid());
+        ASSERT(framebuffer.IsCustom());
+
+        // trying to render to multiple color attachments without platform
+        // support is a BUG. The device client is responsible for taking
+        // an alternative rendering path when there's no support
+        // for multiple color attachments.
+        // This API is only available starting from GL ES3 or WebGL2.
+        //
+        // It's also available with GL_EXT_draw_buffers extension but
+        // the problem is that there's no support for *glReadBuffer*
+        //
+        // We could choose to have single sampled FBO with ES2 / WebGL1
+        // with the GL_EXT_draw_buffers extension however.  But this
+        // isn't done now since the idea is to move forward to ES3 and
+        // ES3 shaders too (where not yet done)
+        ASSERT(mGL.glDrawBuffers);
+
+        std::vector<GLenum> draw_buffers;
+
+        for (unsigned i = 0; i < color_attachments.size(); ++i)
+        {
+            draw_buffers.push_back(GL_COLOR_ATTACHMENT0 + color_attachments[i]);
+        }
+        GL_CALL(glDrawBuffers(draw_buffers.size(), &draw_buffers[0]));
+
+        // possible FBO *error* statuses are: INCOMPLETE_ATTACHMENT, INCOMPLETE_DIMENSIONS and INCOMPLETE_MISSING_ATTACHMENT
+        // we're treating these status codes as BUGS in the engine code that is trying to create the
+        // frame buffer object and has violated the frame buffer completeness requirement or other
+        // creation parameter constraints.
+        const auto ret = mGL.glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (ret == GL_FRAMEBUFFER_COMPLETE)
+            return true;
+        else if (ret == GL_FRAMEBUFFER_UNSUPPORTED)
+            return false;
+        else if (ret == GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT) BUG("Incomplete FBO attachment.");
+        else if (ret == GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS) BUG("Incomplete FBO dimensions.");
+        else if (ret == GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) BUG("Incomplete FBO, missing attachment.");
+        else if (ret == GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE) BUG("Incomplete FBO, wrong sample counts.");
+        return false;
+    }
+
+    void ResolveFramebuffer(const dev::Framebuffer& multisampled_framebuffer,
+                            const dev::TextureObject& resolve_target,
+                            unsigned color_attachment) override
+    {
+        ASSERT(multisampled_framebuffer.IsValid());
+        ASSERT(multisampled_framebuffer.IsCustom());
+        ASSERT(multisampled_framebuffer.IsMultisampled());
+        ASSERT(resolve_target.IsValid());
+        // See the comments in Complete() regarding the glDrawBuffers which is
+        // the other half required to deal with multiple color attachments
+        // in multisampled FBO
+        ASSERT(mGL.glReadBuffer);
+
+        if (!mResolveFbo)
+            GL_CALL(glGenFramebuffers(1, &mResolveFbo));
+
+        const auto draw_buffers = GLenum(GL_COLOR_ATTACHMENT0);
+        const auto resolve_width = resolve_target.texture_width;
+        const auto resolve_height = resolve_target.texture_height;
+
+        GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mResolveFbo));
+        GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, resolve_target.handle, 0));
+        GL_CALL(glBindFramebuffer(GL_READ_FRAMEBUFFER, multisampled_framebuffer.handle));
+        GL_CALL(glReadBuffer(GL_COLOR_ATTACHMENT0 + color_attachment));
+        GL_CALL(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mResolveFbo));
+        GL_CALL(glDrawBuffers(1, &draw_buffers));
+        GL_CALL(glBlitFramebuffer(0, 0, resolve_width, resolve_height, 0, 0, resolve_width, resolve_height,
+                                  GL_COLOR_BUFFER_BIT, GL_NEAREST));
+    }
+
+    void BindFramebuffer(const dev::Framebuffer& framebuffer) const override
+    {
+        ASSERT(framebuffer.IsValid());
+        GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.handle));
+    }
+
+    void DeleteFramebuffer(const dev::Framebuffer& framebuffer) override
+    {
+        ASSERT(framebuffer.IsValid());
+        ASSERT(framebuffer.IsCustom());
+
+        auto& framebuffer_state = mFramebufferState[framebuffer.handle];
+        if (framebuffer_state.depth_buffer)
+            GL_CALL(glDeleteRenderbuffers(1, &framebuffer_state.depth_buffer));
+
+        for (auto buffer : framebuffer_state.multisample_color_buffers)
+        {
+            GL_CALL(glDeleteRenderbuffers(1, &buffer.handle));
+        }
+
+        GL_CALL(glDeleteFramebuffers(1, &framebuffer.handle));
+
+        mFramebufferState.erase(framebuffer.handle);
+    }
+
+    dev::GraphicsShader CompileShader(const std::string& source, dev::ShaderType type, std::string* compile_info) override
+    {
+        GLenum gl_type = GL_NONE;
+        if (type == dev::ShaderType::VertexShader)
+            gl_type = GL_VERTEX_SHADER;
+        else if (type == dev::ShaderType::FragmentShader)
+            gl_type = GL_FRAGMENT_SHADER;
+        else BUG("Bug on graphics shader type.");
+
+        GLint status = 0;
+        GLint shader = mGL.glCreateShader(gl_type);
+
+        const char* source_ptr = source.c_str();
+        GL_CALL(glShaderSource(shader, 1, &source_ptr, nullptr));
+        GL_CALL(glCompileShader(shader));
+        GL_CALL(glGetShaderiv(shader, GL_COMPILE_STATUS, &status));
+
+        GLint length = 0;
+        GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length));
+
+        compile_info->resize(length);
+        GL_CALL(glGetShaderInfoLog(shader, length, nullptr, &(*compile_info)[0]));
+
+        if (status == 0)
+        {
+            GL_CALL(glDeleteShader(shader));
+            return { 0, dev::ShaderType::Invalid };
+        }
+        return { static_cast<unsigned>(shader), type };
+    }
+
+    dev::GraphicsProgram BuildProgram(const std::vector<dev::GraphicsShader>& shaders, std::string* build_info) override
+    {
+        GLuint program = mGL.glCreateProgram();
+        for (const auto& shader : shaders)
+        {
+            ASSERT(shader.IsValid());
+            GL_CALL(glAttachShader(program, shader.GetHandle()));
+        }
+        GL_CALL(glLinkProgram(program));
+        GL_CALL(glValidateProgram(program));
+
+        GLint link_status = 0;
+        GLint valid_status = 0;
+        GL_CALL(glGetProgramiv(program, GL_LINK_STATUS, &link_status));
+        GL_CALL(glGetProgramiv(program, GL_VALIDATE_STATUS, &valid_status));
+
+        GLint length = 0;
+        GL_CALL(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length));
+
+        build_info->resize(length);
+        GL_CALL(glGetProgramInfoLog(program, length, nullptr, &(*build_info)[0]));
+
+        if (link_status == 0 || valid_status == 0)
+        {
+            GL_CALL(glDeleteProgram(program));
+            return { 0 };
+        }
+        return { program };
+    }
+
+    dev::TextureObject AllocateTexture2D(unsigned texture_width,
+                                         unsigned texture_height, dev::TextureFormat format) override
+    {
+        const auto& internal_format = GetTextureFormat(format);
+        const auto texture_border = 0;
+        const auto texture_level = 0; // mip level
+
+        GLuint handle = 0;
+        GL_CALL(glGenTextures(1, &handle));
+        GL_CALL(glActiveTexture(GL_TEXTURE0 + mTempTextureUnitIndex));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, handle));
+        GL_CALL(glTexImage2D(GL_TEXTURE_2D, texture_level, internal_format.sizeFormat,
+                             texture_width, texture_height, texture_border,
+                             internal_format.baseFormat, GL_UNSIGNED_BYTE, nullptr));
+
+        auto& texture_state = mTextureState[handle];
+        texture_state.min_filter = GL_NONE;
+        texture_state.mag_filter = GL_NONE;
+        texture_state.wrap_x     = GL_NONE;
+        texture_state.wrap_y     = GL_NONE;
+        texture_state.has_mips   = false;
+
+        dev::TextureObject ret;
+        ret.handle = handle;
+        ret.type   = dev::TextureType::Texture2D;
+        ret.texture_width = texture_width;
+        ret.texture_height = texture_height;
+        return ret;
+    }
+    dev::TextureObject UploadTexture2D(const void* bytes,
+                                       unsigned texture_width,
+                                       unsigned texture_height, dev::TextureFormat format) override
+    {
+        const auto& internal_format = GetTextureFormat(format);
+        const auto texture_border = 0;
+        const auto texture_level = 0; // mip level
+
+        GLuint handle = 0;
+        GL_CALL(glGenTextures(1, &handle));
+        GL_CALL(glActiveTexture(GL_TEXTURE0 + mTempTextureUnitIndex));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, handle));
+        GL_CALL(glTexImage2D(GL_TEXTURE_2D, texture_level, internal_format.sizeFormat,
+                             texture_width, texture_height, texture_border,
+                             internal_format.baseFormat, GL_UNSIGNED_BYTE, bytes));
+
+        auto& texture_state = mTextureState[handle];
+        texture_state.min_filter = GL_NONE;
+        texture_state.mag_filter = GL_NONE;
+        texture_state.wrap_x     = GL_NONE;
+        texture_state.wrap_y     = GL_NONE;
+        texture_state.has_mips   = false;
+
+        dev::TextureObject ret;
+        ret.handle = handle;
+        ret.type   = dev::TextureType::Texture2D;
+        ret.texture_width = texture_width;
+        ret.texture_height = texture_height;
+        return ret;
+    }
+
+    GraphicsDevice::MipStatus GenerateMipmaps(const dev::TextureObject& texture) override
+    {
+        ASSERT(texture.IsValid());
+        ASSERT(texture.texture_width);
+        ASSERT(texture.texture_height);
+
+        if (mContext->GetVersion() == dev::Context::Version::WebGL_1)
+        {
+            if (!base::IsPowerOfTwo(texture.texture_width) || !base::IsPowerOfTwo(texture.texture_height))
+                return GraphicsDevice::MipStatus::UnsupportedSize;
+
+            if (texture.format == dev::TextureFormat::sRGB ||
+                texture.format == dev::TextureFormat::sRGBA)
+                return GraphicsDevice::MipStatus::UnsupportedFormat;
+        }
+        else if (mContext->GetVersion() == dev::Context::Version::WebGL_2)
+        {
+            if (texture.format == dev::TextureFormat::sRGB ||
+                texture.format == dev::TextureFormat::sRGBA)
+                return GraphicsDevice::MipStatus::UnsupportedFormat;
+        }
+        else if (mContext->GetVersion() == dev::Context::Version::OpenGL_ES2)
+        {
+            if (texture.format == dev::TextureFormat::sRGB ||
+                texture.format == dev::TextureFormat::sRGBA)
+                return GraphicsDevice::MipStatus::UnsupportedFormat;
+        }
+        GL_CALL(glActiveTexture(GL_TEXTURE0 + mTempTextureUnitIndex));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, texture.handle));
+        // seems that driver bugs are common regarding sRGB mipmap generation
+        // so we're going to unwrap this GL call and assume any error
+        // is an error about failing to generate mips because of driver bugs
+        mGL.glGenerateMipmap(GL_TEXTURE_2D);
+        const auto error = mGL.glGetError();
+        if (error != GL_NO_ERROR)
+            return GraphicsDevice::MipStatus::Error;
+
+        auto& texture_state = mTextureState[texture.handle];
+        texture_state.has_mips = true;
+
+        return GraphicsDevice::MipStatus::Success;
+    }
+
+    bool BindTexture2D(const dev::TextureObject& texture, unsigned texture_sampler, unsigned texture_unit,
+                       dev::TextureWrapping texture_x_wrap, dev::TextureWrapping texture_y_wrap,
+                       dev::TextureMinFilter texture_min_filter, dev::TextureMagFilter texture_mag_filter, BindWarnings* warnings) const override
+    {
+        ASSERT(texture.IsValid());
+        ASSERT(texture.texture_width && texture.texture_height);
+
+        if (texture_unit >= mTextureUnitCount)
+        {
+            ERROR("Texture unit index exceeds the maximum available texture units. [unit=%1, available=¤2]", texture_unit,
+                  mTextureUnitCount);
+            return false;
+        }
+
+        bool force_clamp_x = false;
+        bool force_clamp_y = false;
+        bool force_min_linear = false;
+
+        auto internal_texture_min_filter = GetTextureMinFilter(texture_min_filter);
+        auto internal_texture_mag_filter = GetTextureMagFilter(texture_mag_filter);
+        auto internal_texture_x_wrap = GetWrappingMode(texture_x_wrap);
+        auto internal_texture_y_wrap = GetWrappingMode(texture_y_wrap);
+
+        auto& texture_state = mTextureState[texture.handle];
+
+        // do some validation and warning logging if there's something that is wrong.
+        if (internal_texture_min_filter == GL_NEAREST_MIPMAP_NEAREST ||
+            internal_texture_min_filter == GL_NEAREST_MIPMAP_LINEAR ||
+            internal_texture_min_filter == GL_LINEAR_MIPMAP_LINEAR)
+        {
+            // this case handles both WebGL NPOT textures that don't support mips
+            // and also cases such as render to a texture and using default filtering
+            // when sampling and not having generated mips.
+            if (!texture_state.has_mips)
+            {
+                internal_texture_min_filter = GL_LINEAR;
+                force_min_linear = true;
+            }
+        }
+
+        if (mContext->GetVersion() == dev::Context::Version::WebGL_1)
+        {
+            // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
+            const auto width = texture.texture_width;
+            const auto height = texture.texture_height;
+            if (!base::IsPowerOfTwo(width) || !base::IsPowerOfTwo(height))
+            {
+                if (internal_texture_x_wrap == GL_REPEAT || internal_texture_x_wrap == GL_MIRRORED_REPEAT)
+                {
+                    internal_texture_x_wrap = GL_CLAMP_TO_EDGE;
+                    force_clamp_x = true;
+                }
+                if (internal_texture_y_wrap == GL_REPEAT || internal_texture_y_wrap == GL_MIRRORED_REPEAT)
+                {
+                    internal_texture_y_wrap = GL_CLAMP_TO_EDGE;
+                    force_clamp_y = true;
+                }
+            }
+        }
+
+        if (warnings)
+        {
+            warnings->force_clamp_x = force_clamp_x;
+            warnings->force_clamp_y = force_clamp_y;
+            warnings->force_min_linear = force_min_linear;
+        }
+
+        if (texture_state.min_filter != internal_texture_min_filter ||
+            texture_state.mag_filter != internal_texture_mag_filter ||
+            texture_state.wrap_x != internal_texture_x_wrap ||
+            texture_state.wrap_y != internal_texture_y_wrap)
+        {
+            GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_unit));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture.handle));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, internal_texture_x_wrap));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, internal_texture_y_wrap));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, internal_texture_mag_filter));
+            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, internal_texture_min_filter));
+            GL_CALL(glUniform1i(texture_sampler, texture_unit));
+            texture_state.mag_filter = internal_texture_mag_filter;
+            texture_state.min_filter = internal_texture_min_filter;
+            texture_state.wrap_x = internal_texture_x_wrap;
+            texture_state.wrap_y = internal_texture_y_wrap;
+        }
+        else
+        {
+            // set the texture unit to the sampler
+            GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_unit));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture.handle));
+            GL_CALL(glUniform1i(texture_sampler, texture_unit));
+        }
+        return true;
+    }
+
+    void DeleteTexture(const dev::TextureObject& texture) override
+    {
+        GL_CALL(glDeleteTextures(1, &texture.handle));
+
+        mTextureState.erase(texture.handle);
+    }
+
+    dev::GraphicsBuffer AllocateBuffer(size_t bytes, dev::BufferUsage usage, dev::BufferType type) override
+    {
+        // there are 3 different types of buffers and each have their
+        // own allocation strategy:
+
+        // 1. Static buffers
+        // Static buffers are allocated by static geometry objects
+        // that are typically created once and never updated.
+        // For static buffers we're using so called bump allocation.
+        // That means that for each geometry allocation we take the
+        // first chunk that can be found and has enough space. These
+        // individual chunks can then never be "freed" but only when
+        // the whole VBO is no longer referred to can the data be re-used.
+        // This should be the optimal allocation strategy for static
+        // game data that is created when the application begins
+        // running and then never gets modified.
+        //
+        // 2. Dynamic buffers
+        // Dynamic buffers can be allocated and used by geometry objects
+        // that have had their geometry data updated. The usage can thus
+        // grow or shrink during application run. This type of buffering
+        // needs an allocation strategy that can handle fragmentation.
+        // Since that doesn't currently exist (but is a TODO) we're just
+        // going to use a VBO *per* geometry and let the driver handle
+        // the fragmentation.
+        //
+        // 3. Streaming buffers.
+        // Streaming buffers are used for streaming geometry that gets
+        // updated on every frame, for example particle engines. The
+        // allocation strategy is also to use a bump allocation but
+        // reset the contents of each buffer on every new frame. This
+        // allows the total buffer allocation to grow to a "high water
+        // mark" and then keep re-using those buffers frame after frame.
+
+        GLenum flag = GL_NONE;
+        size_t capacity = 0;
+
+        if (type == dev::BufferType::UniformBuffer)
+        {
+            const auto reminder = bytes % mUniformBufferOffsetAlignment;
+            const auto padding  = mUniformBufferOffsetAlignment - reminder;
+            VERBOSE("Grow uniform buffer size from %1 to %2 bytes for offset alignment to %3.",
+                    bytes, bytes+padding, mUniformBufferOffsetAlignment);
+            bytes += padding;
+        }
+
+        if (usage == dev::BufferUsage::Static)
+        {
+            flag = GL_STATIC_DRAW;
+            capacity = std::max(size_t(1024 * 1024), bytes);
+        }
+        else if (usage == dev::BufferUsage::Stream)
+        {
+            flag = GL_STREAM_DRAW;
+            capacity = std::max(size_t(1024 * 1024), bytes);
+        }
+        else if (usage == dev::BufferUsage::Dynamic)
+        {
+            flag = GL_DYNAMIC_DRAW;
+            capacity = bytes;
+        }
+        else BUG("Unsupported vertex buffer type.");
+
+        auto& buffers = mBuffers[BufferIndex(type)];
+        for (size_t buffer_index=0; buffer_index<buffers.size(); ++buffer_index)
+        {
+            auto& buffer = buffers[buffer_index];
+            const auto available = buffer.capacity - buffer.offset;
+            if ((available >= bytes) && (buffer.usage == usage))
+            {
+                const auto offset = buffer.offset;
+                buffer.offset += bytes;
+                buffer.refcount++;
+                return dev::GraphicsBuffer {buffer.name, type, buffer_index, offset, bytes};
+            }
+        }
+
+        BufferObject buffer;
+        buffer.usage    = usage;
+        buffer.offset   = bytes;
+        buffer.capacity = capacity;
+        buffer.refcount = 1;
+
+        GL_CALL(glGenBuffers(1, &buffer.name));
+        GL_CALL(glBindBuffer(GetBufferEnum(type), buffer.name));
+        GL_CALL(glBufferData(GetBufferEnum(type), buffer.capacity, nullptr, flag));
+
+        buffers.push_back(buffer);
+
+        DEBUG("Allocated new buffer object. [bo=%1, size=%2, type=%3, type=%4]",
+              buffer.name, buffer.capacity, usage, type);
+
+        const auto buffer_index = buffers.size() - 1;
+        const auto buffer_offset = 0;
+        return dev::GraphicsBuffer {buffer.name, type, buffer_index, buffer_offset, bytes};
+    }
+    void FreeBuffer(const dev::GraphicsBuffer& buffer) override
+    {
+        auto& buffers = mBuffers[BufferIndex(buffer.type)];
+
+        ASSERT(buffer.buffer_index < buffers.size());
+        auto& buffer_object = buffers[buffer.buffer_index];
+        ASSERT(buffer_object.refcount > 0);
+        buffer_object.refcount--;
+
+        if (buffer_object.usage == dev::BufferUsage::Static || buffer_object.usage == dev::BufferUsage::Dynamic)
+        {
+            if (buffer_object.refcount == 0)
+                buffer_object.offset = 0;
+        }
+        if (buffer_object.usage == dev::BufferUsage::Static) {
+            DEBUG("Free buffer data. [bo=%1, bytes=%2, offset=%3, type=%4, refs=%5, type=%6]",
+                  buffer_object.name, buffer.buffer_bytes, buffer.buffer_offset, buffer_object.usage, buffer_object.refcount, buffer.type);
+        }
+    }
+    void UploadBuffer(const dev::GraphicsBuffer& buffer, const void* data, size_t bytes) override
+    {
+        auto& buffers = mBuffers[BufferIndex(buffer.type)];
+        ASSERT(buffer.buffer_index < buffers.size());
+
+        auto& buffer_object = buffers[buffer.buffer_index];
+        ASSERT(bytes <= buffer.buffer_bytes);
+        ASSERT(buffer.buffer_offset + bytes <= buffer_object.capacity);
+
+        GL_CALL(glBindBuffer(GetBufferEnum(buffer.type), buffer_object.name));
+        GL_CALL(glBufferSubData(GetBufferEnum(buffer.type), buffer.buffer_offset, bytes, data));
+
+        if (buffer_object.usage == dev::BufferUsage::Static)
+        {
+            const int percent_full = 100 * (double) buffer_object.offset / (double) buffer_object.capacity;
+            DEBUG("Uploaded buffer data. [bo=%1, bytes=%2, offset=%3, full=%4%, usage=%5, type=%6]",
+                  buffer_object.name, bytes, buffer.buffer_offset, percent_full, buffer_object.usage, buffer.type);
+        }
+    }
+
+    void BindVertexBuffer(const dev::GraphicsBuffer& buffer,
+                          const dev::GraphicsProgram& program,
+                          const dev::VertexLayout& vertex_layout) const override
+    {
+        ASSERT(buffer.IsValid());
+        ASSERT(program.IsValid());
+        ASSERT(buffer.type == dev::BufferType::VertexBuffer);
+
+        // the brain-damaged API goes like this... when using DrawArrays with a client side
+        // data pointer the glVertexAttribPointer 'pointer' argument is actually a pointer
+        // to the vertex data. But when using a VBO the pointer is not a pointer but an offset
+        // into the contents of the VBO.
+        const uint8_t* base_ptr = reinterpret_cast<const uint8_t*>(buffer.buffer_offset);
+
+        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.handle));
+        for (const auto& attr : vertex_layout.attributes)
+        {
+            const GLint location = mGL.glGetAttribLocation(program.handle, attr.name.c_str());
+            if (location == -1)
+                continue;
+            const auto size   = attr.num_vector_components;
+            const auto stride = vertex_layout.vertex_struct_size;
+            const auto attr_ptr = base_ptr + attr.offset;
+            GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, attr_ptr));
+            GL_CALL(glVertexAttribDivisor(location, attr.divisor));
+            GL_CALL(glEnableVertexAttribArray(location));
+        }
+
+    }
+    void BindIndexBuffer(const dev::GraphicsBuffer& buffer) const override
+    {
+        ASSERT(buffer.IsValid());
+        ASSERT(buffer.type == dev::BufferType::IndexBuffer);
+        GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.handle));
+    }
+
+    void SetProgramState(const dev::GraphicsProgram& program, const dev::ProgramState& state) const override
+    {
+        GL_CALL(glUseProgram(program.handle));
+        // flush pending uniforms onto the GPU program object
+        for (size_t i=0; i<state.uniforms.size(); ++i)
+        {
+            const auto* uniform_setting = state.uniforms[i];
+            const auto& uniform_binding = GetUniformFromCache(program, uniform_setting->name);
+            if (uniform_binding.location == -1)
+                continue;
+
+            const auto& value = uniform_setting->value;
+            const auto location = uniform_binding.location;
+
+            // if the glUnifromXYZ gives GL_INVALID_OPERATION a possible
+            // cause is using wrong API for the uniform. for example
+            // calling glUniform1f when the uniform is an int.
+
+            if (const auto* ptr = std::get_if<int>(&value))
+                GL_CALL(glUniform1i(location, *ptr));
+            else if (const auto* ptr = std::get_if<float>(&value))
+                GL_CALL(glUniform1f(location, *ptr));
+            else if (const auto* ptr = std::get_if<glm::ivec2>(&value))
+                GL_CALL(glUniform2i(location, ptr->x, ptr->y));
+            else if (const auto* ptr = std::get_if<glm::vec2>(&value))
+                GL_CALL(glUniform2f(location, ptr->x, ptr->y));
+            else if (const auto* ptr = std::get_if<glm::vec3>(&value))
+                GL_CALL(glUniform3f(location, ptr->x, ptr->y, ptr->z));
+            else if (const auto* ptr = std::get_if<glm::vec4>(&value))
+                GL_CALL(glUniform4f(location, ptr->x, ptr->y, ptr->z, ptr->w));
+            else if (const auto* ptr = std::get_if<gfx::Color4f>(&value)) {
+                // Assume sRGB encoded color values now. so this is a simple
+                // place to convert to linear and will catch all uses without
+                // breaking the higher level APIs
+                // the cost of the sRGB conversion should be mitigated due to
+                // the hash check to compare to the previous value.
+                const auto& linear = sRGB_Decode(*ptr);
+                GL_CALL(glUniform4f(location, linear.Red(), linear.Green(), linear.Blue(), linear.Alpha()));
+            }
+            else if (const auto* ptr = std::get_if<glm::mat2>(&value))
+                GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE /* transpose */, glm::value_ptr(*ptr)));
+            else if (const auto* ptr = std::get_if<glm::mat3>(&value))
+                GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE /* transpose */, glm::value_ptr(*ptr)));
+            else if (const auto* ptr = std::get_if<glm::mat4>(&value))
+                GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE /*transpose*/, glm::value_ptr(*ptr)));
+            else BUG("Unhandled shader program uniform type.");
+        }
+    }
+
+    void SetPipelineState(const dev::GraphicsPipelineState& state) const override
+    {
+        GL_CALL(glLineWidth(state.line_width));
+        GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
+                           state.viewport.GetWidth(), state.viewport.GetHeight()));
+
+        // scissor
+        if (state.scissor.IsEmpty()) {
+            GL_CALL(glDisable(GL_SCISSOR_TEST));
+        } else {
+            GL_CALL(glEnable(GL_SCISSOR_TEST));
+            GL_CALL(glScissor(state.scissor.GetX(), state.scissor.GetY(),
+                              state.scissor.GetWidth(), state.scissor.GetHeight()));
+        }
+
+        // polygon winding order
+        if (state.winding_order == dev::PolygonWindingOrder::CounterClockWise) {
+            GL_CALL(glFrontFace(GL_CCW));
+        } else if (state.winding_order == dev::PolygonWindingOrder::ClockWise) {
+            GL_CALL(glFrontFace(GL_CW));
+        } else BUG("Bug on polygon winding order.");
+
+        // blending
+        if (state.blending == dev::BlendOp::None) {
+            GL_CALL(glDisable(GL_BLEND));
+        } else if (state.blending == dev::BlendOp::Transparent && state.premulalpha) {
+            GL_CALL(glEnable(GL_BLEND));
+            GL_CALL(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+        } else if (state.blending == dev::BlendOp::Transparent) {
+            GL_CALL(glEnable(GL_BLEND));
+            GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        } else if (state.blending == dev::BlendOp::Additive) {
+            GL_CALL(glEnable(GL_BLEND));
+            GL_CALL(glBlendFunc(GL_ONE, GL_ONE));
+        } else BUG("Bug on blend state.");
+
+        // culling
+        if (state.culling == dev::Culling::None) {
+            GL_CALL(glDisable(GL_CULL_FACE));
+        } else if (state.culling == dev::Culling::Front) {
+            GL_CALL(glEnable(GL_CULL_FACE));
+            GL_CALL(glCullFace(GL_FRONT));
+        } else if (state.culling == dev::Culling::Back) {
+            GL_CALL(glEnable(GL_CULL_FACE));
+            GL_CALL(glCullFace(GL_BACK));
+        } else if (state.culling == dev::Culling::FrontAndBack) {
+            GL_CALL(glEnable(GL_CULL_FACE));
+            GL_CALL(glCullFace(GL_FRONT_AND_BACK));
+        } else BUG("Bug on cull face state.");
+
+        // depth testing
+        if (state.depth_test == dev::DepthTest::Disabled) {
+            GL_CALL(glDisable(GL_DEPTH_TEST));
+        } else if (state.depth_test == dev::DepthTest::LessOrEQual) {
+            GL_CALL(glEnable(GL_DEPTH_TEST));
+            GL_CALL(glDepthFunc(GL_LEQUAL));
+        } else BUG("Bug on depth test state.");
+
+        // stencil test and stencil func
+        if (state.stencil_func == dev::StencilFunc::Disabled) {
+            GL_CALL(glDisable(GL_STENCIL_TEST));
+        } else {
+            const auto stencil_func  = GetEnum(state.stencil_func);
+            const auto stencil_fail  = GetEnum(state.stencil_fail);
+            const auto stencil_dpass = GetEnum(state.stencil_dpass);
+            const auto stencil_dfail = GetEnum(state.stencil_dfail);
+            GL_CALL(glEnable(GL_STENCIL_TEST));
+            GL_CALL(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
+            GL_CALL(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
+        }
+
+        // color mask
+        if (state.bWriteColor) {
+            GL_CALL(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
+        } else {
+            GL_CALL(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
+        }
+    }
+
+    void BindProgramBuffer(const dev::GraphicsProgram& program, const dev::GraphicsBuffer& buffer,
+                           const std::string& interface_block_name,
+                           unsigned binding_index) override
+    {
+        ASSERT(buffer.IsValid());
+        ASSERT(buffer.type == dev::BufferType::UniformBuffer);
+
+        const auto& uniform_block = GetUniformBlockFromCache(program, interface_block_name);
+        if (uniform_block.location == -1)
             return;
 
-        if (fbo)
+        GL_CALL(glUseProgram(program.handle));
+        GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, buffer.handle));
+        GL_CALL(glUniformBlockBinding(program.handle, uniform_block.location, binding_index));
+        GL_CALL(glBindBufferRange(GL_UNIFORM_BUFFER, binding_index, buffer.handle, buffer.buffer_offset, buffer.buffer_bytes));
+    }
+
+    void Draw(dev::DrawType draw_primitive, dev::IndexType index_type,
+              unsigned primitive_count, unsigned index_buffer_byte_offset, unsigned instance_count) const override
+    {
+        const auto primitive_draw_mode = GetDrawMode(draw_primitive);
+        const auto primitive_index_type = GetIndexType(index_type);
+
+        GL_CALL(glDrawElementsInstanced(primitive_draw_mode,
+                                        primitive_count,
+                                        primitive_index_type,
+                                        (const void*)ptrdiff_t(index_buffer_byte_offset), instance_count));
+    }
+    void Draw(dev::DrawType draw_primitive, dev::IndexType index_type,
+              unsigned primitive_count, unsigned index_buffer_byte_offset) const override
+    {
+        const auto primitive_draw_mode = GetDrawMode(draw_primitive);
+        const auto primitive_index_type = GetIndexType(index_type);
+
+        GL_CALL(glDrawElements(primitive_draw_mode,
+                               primitive_count,
+                               primitive_index_type, (const void*)ptrdiff_t(index_buffer_byte_offset)));
+    }
+
+    void Draw(dev::DrawType draw_primitive, unsigned vertex_start_index,
+              unsigned vertex_draw_count, unsigned instance_count) const override
+    {
+        const auto primitive_draw_mode = GetDrawMode(draw_primitive);
+
+        GL_CALL(glDrawArraysInstanced(primitive_draw_mode,
+                                      vertex_start_index, vertex_draw_count, instance_count));
+    }
+    void Draw(dev::DrawType draw_primitive, unsigned vertex_start_index, unsigned vertex_draw_count) const override
+    {
+        const auto primitive_draw_mode = GetDrawMode(draw_primitive);
+
+        GL_CALL(glDrawArrays(primitive_draw_mode,
+                             vertex_start_index, vertex_draw_count));
+    }
+
+    void ClearColor(const base::Color4f& color, const dev::Framebuffer& fbo, ColorAttachment attachment) const override
+    {
+        BindFramebuffer(fbo);
+
+        if (fbo.IsCustom())
         {
             const auto color_buffer_index = static_cast<GLint>(attachment);
             const GLfloat value[] = {
@@ -628,12 +1869,11 @@ public:
             GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
         }
     }
-    void ClearStencil(int value, gfx::Framebuffer* fbo) const override
+    void ClearStencil(int value, const dev::Framebuffer& fbo) const override
     {
-        if (!SetupFBO(fbo))
-            return;
+        BindFramebuffer(fbo);
 
-        if (fbo)
+        if (fbo.IsCustom())
         {
             GL_CALL(glClearBufferiv(GL_STENCIL, 0, &value));
         }
@@ -643,12 +1883,11 @@ public:
             GL_CALL(glClear(GL_STENCIL_BUFFER_BIT));
         }
     }
-    void ClearDepth(float value, gfx::Framebuffer* fbo) const override
+    void ClearDepth(float value, const dev::Framebuffer& fbo) const override
     {
-        if (!SetupFBO(fbo))
-            return;
+        BindFramebuffer(fbo);
 
-        if (fbo)
+        if (fbo.IsCustom())
         {
             GL_CALL(glClearBufferfv(GL_DEPTH, 0, &value));
         }
@@ -658,12 +1897,11 @@ public:
             GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
         }
     }
-    void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
+    void ClearColorDepth(const base::Color4f& color, float depth, const dev::Framebuffer& fbo, ColorAttachment attachment) const override
     {
-        if (!SetupFBO(fbo))
-            return;
+        BindFramebuffer(fbo);
 
-        if (fbo)
+        if (fbo.IsCustom())
         {
             const auto color_buffer_index = static_cast<GLint>(attachment);
             const GLfloat value[] = {
@@ -679,12 +1917,11 @@ public:
             GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
         }
     }
-    void ClearColorDepthStencil(const gfx::Color4f&  color, float depth, int stencil, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
+    void ClearColorDepthStencil(const base::Color4f& color, float depth, int stencil, const dev::Framebuffer& fbo, ColorAttachment attachment) const override
     {
-        if (!SetupFBO(fbo))
-            return;
+        BindFramebuffer(fbo);
 
-        if (fbo)
+        if (fbo.IsCustom())
         {
             const auto color_buffer_index = static_cast<GLint>(attachment);
             const GLfloat value[] = {
@@ -700,6 +1937,194 @@ public:
             GL_CALL(glClearStencil(stencil));
             GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
         }
+    }
+
+    void ReadColor(unsigned width, unsigned height, const dev::Framebuffer& fbo, void* color_data) const override
+    {
+        BindFramebuffer(fbo);
+        GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 1));
+        GL_CALL(glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, color_data));
+    }
+    void ReadColor(unsigned x, unsigned y, unsigned width, unsigned  height,
+                   const dev::Framebuffer& fbo, void* color_data) const override
+    {
+        BindFramebuffer(fbo);
+        GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 1));
+        GL_CALL(glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, color_data));
+    }
+
+    void GetResourceStats_tmp(dev::GraphicsDeviceResourceStats* stats) const override
+    {
+        std::memset(stats, 0, sizeof(*stats));
+        for (const auto& buffer : mBuffers[0])
+        {
+            if (buffer.usage == dev::BufferUsage::Static)
+            {
+                stats->static_vbo_mem_alloc += buffer.capacity;
+                stats->static_vbo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == dev::BufferUsage::Dynamic)
+            {
+                stats->dynamic_vbo_mem_alloc += buffer.capacity;
+                stats->dynamic_vbo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == dev::BufferUsage::Stream)
+            {
+                stats->streaming_vbo_mem_alloc += buffer.capacity;
+                stats->streaming_vbo_mem_use   += buffer.offset;
+            }
+        }
+        for (const auto& buffer : mBuffers[1])
+        {
+            if (buffer.usage == dev::BufferUsage::Static)
+            {
+                stats->static_ibo_mem_alloc += buffer.capacity;
+                stats->static_ibo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == dev::BufferUsage::Dynamic)
+            {
+                stats->dynamic_ibo_mem_alloc += buffer.capacity;
+                stats->dynamic_ibo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == dev::BufferUsage::Stream)
+            {
+                stats->streaming_ibo_mem_alloc += buffer.capacity;
+                stats->streaming_ibo_mem_use   += buffer.offset;
+            }
+        }
+        for (const auto& buffer : mBuffers[2])
+        {
+            if (buffer.usage == dev::BufferUsage::Static)
+            {
+                stats->static_ubo_mem_alloc += buffer.capacity;
+                stats->static_ubo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == dev::BufferUsage::Dynamic)
+            {
+                stats->dynamic_ubo_mem_alloc += buffer.capacity;
+                stats->dynamic_ubo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == dev::BufferUsage::Stream)
+            {
+                stats->streaming_ubo_mem_alloc += buffer.capacity;
+                stats->streaming_ubo_mem_use   += buffer.offset;
+            }
+        }
+    }
+    void GetDeviceCaps_tmp(dev::GraphicsDeviceCaps* caps) const override
+    {
+        std::memset(caps, 0, sizeof(*caps));
+        GLint num_texture_units = 0;
+        GLint max_fbo_size = 0;
+        GL_CALL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &num_texture_units));
+        GL_CALL(glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &max_fbo_size));
+
+        caps->num_texture_units = num_texture_units;
+        caps->max_fbo_height    = max_fbo_size;
+        caps->max_fbo_width     = max_fbo_size;
+
+        const auto version = mContext->GetVersion();
+        if (version == dev::Context::Version::WebGL_2 ||
+            version == dev::Context::Version::OpenGL_ES3)
+        {
+            caps->instanced_rendering = true;
+            caps->multiple_color_attachments = true;
+        }
+        else if (version == dev::Context::Version::OpenGL_ES2 ||
+                 version == dev::Context::Version::WebGL_1)
+        {
+            caps->instanced_rendering = false;
+            caps->multiple_color_attachments = false;
+        }
+    }
+
+    void BeginFrame_tmp() override
+    {
+        // trying to do so-called "buffer streaming" by "orphaning" the streaming
+        // vertex buffers. this is achieved by re-specifying the contents of the
+        // buffer by using nullptr data upload.
+        // https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming
+
+        // vertex buffers
+        for (auto& buff : mBuffers[0])
+        {
+            if (buff.usage == dev::BufferUsage::Stream)
+            {
+                GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buff.name));
+                GL_CALL(glBufferData(GL_ARRAY_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
+                buff.offset = 0;
+            }
+        }
+        // index buffers
+        for (auto& buff : mBuffers[1])
+        {
+            if (buff.usage == dev::BufferUsage::Stream)
+            {
+                GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buff.name));
+                GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
+                buff.offset = 0;
+            }
+        }
+        // uniform buffers
+        for (auto& buff : mBuffers[2])
+        {
+            if (buff.usage == dev::BufferUsage::Stream)
+            {
+                GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, buff.name));
+                GL_CALL(glBufferData(GL_UNIFORM_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
+                buff.offset = 0;
+            }
+        }
+    }
+    void EndFrame_tmp(bool display) override
+    {
+        if (display)
+            mContext->Display();
+    }
+
+
+    void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
+    {
+        const auto& framebuffer = SetupFBO(fbo);
+        if (!framebuffer.IsValid())
+            return;
+
+        mDevice->ClearColor(color, framebuffer, attachment);
+    }
+    void ClearStencil(int value, gfx::Framebuffer* fbo) const override
+    {
+        const auto& framebuffer = SetupFBO(fbo);
+        if (!framebuffer.IsValid())
+            return;
+
+        mDevice->ClearStencil(value, framebuffer);
+
+    }
+    void ClearDepth(float value, gfx::Framebuffer* fbo) const override
+    {
+        const auto& framebuffer = SetupFBO(fbo);
+        if (!framebuffer.IsValid())
+            return;
+
+        mDevice->ClearDepth(value, framebuffer);
+
+    }
+    void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
+    {
+        const auto& framebuffer = SetupFBO(fbo);
+        if (!framebuffer.IsValid())
+            return;
+
+        mDevice->ClearColorDepth(color, depth, framebuffer, attachment);
+
+    }
+    void ClearColorDepthStencil(const gfx::Color4f&  color, float depth, int stencil, gfx::Framebuffer* fbo, ColorAttachment attachment) const override
+    {
+        const auto& framebuffer = SetupFBO(fbo);
+        if (!framebuffer.IsValid())
+            return;
+
+        mDevice->ClearColorDepthStencil(color, depth, stencil, framebuffer, attachment);
     }
 
     void SetDefaultTextureFilter(MinFilter filter) override
@@ -721,7 +2146,7 @@ public:
 
     gfx::ShaderPtr CreateShader(const std::string& id, const gfx::Shader::CreateArgs& args) override
     {
-        auto shader = std::make_shared<ShaderImpl>(mGL);
+        auto shader = std::make_shared<ShaderImpl>(this);
         shader->SetName(args.name);
         shader->CompileSource(args.source, args.debug);
         mShaders[id] = shader;
@@ -738,7 +2163,7 @@ public:
 
     gfx::ProgramPtr CreateProgram(const std::string& id, const gfx::Program::CreateArgs& args) override
     {
-        auto program = std::make_shared<ProgImpl>(mGL, this);
+        auto program = std::make_shared<ProgImpl>(this);
 
         std::vector<gfx::ShaderPtr> shaders;
         shaders.push_back(args.vertex_shader);
@@ -811,7 +2236,7 @@ public:
 
     gfx::Texture* MakeTexture(const std::string& name) override
     {
-        auto texture = std::make_unique<TextureImpl>(name, mGL, *this);
+        auto texture = std::make_unique<TextureImpl>(this, name);
         auto* ret = texture.get();
         mTextures[name] = std::move(texture);
         // technically not "use" but we need to track the number of frames
@@ -832,7 +2257,7 @@ public:
     }
     gfx::Framebuffer* MakeFramebuffer(const std::string& name) override
     {
-        auto fbo = std::make_unique<FramebufferImpl>(name, mGL, *this);
+        auto fbo = std::make_unique<FramebufferImpl>(this, name);
         auto* ret = fbo.get();
         mFBOs[name] = std::move(fbo);
         return ret;
@@ -871,7 +2296,8 @@ public:
     void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
               const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) const override
     {
-        if (!SetupFBO(fbo))
+        dev::Framebuffer framebuffer = SetupFBO(fbo);
+        if (!framebuffer.IsValid())
             return;
 
         const auto* myprog = static_cast<const ProgImpl*>(&program);
@@ -892,133 +2318,13 @@ public:
         // indices there should be vertex data. if there isn't that means the
         // geometry is dummy, i.e. contains not vertex data.
         // todo: is this a BUG actually??
-        const auto vertex_buffer_byte_size = mygeom->GetVertexBufferByteSize();
-        if (vertex_buffer_byte_size == 0)
+        if (mygeom->IsEmpty())
             return;
 
-        const auto index_buffer_type = mygeom->GetIndexBufferType();
-        const auto index_byte_size = gfx::GetIndexByteSize(index_buffer_type);
-        const auto index_buffer_byte_size = mygeom->GetIndexBufferByteSize();
-        const auto buffer_index_count = index_buffer_byte_size / index_byte_size;
-
-        const auto& vertex_layout = mygeom->GetVertexLayout();
-        ASSERT(vertex_layout.vertex_struct_size && "Vertex layout has not been set.");
-
-        const auto buffer_vertex_count = vertex_buffer_byte_size / vertex_layout.vertex_struct_size;
-
-        TRACE_ENTER(SetState);
-        GL_CALL(glLineWidth(state.line_width));
-        GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
-                           state.viewport.GetWidth(), state.viewport.GetHeight()));
-        switch (state.culling)
-        {
-            case State::Culling::None:
-                GL_CALL(glDisable(GL_CULL_FACE));
-                break;
-            case State::Culling::Back:
-                GL_CALL(glEnable(GL_CULL_FACE));
-                GL_CALL(glCullFace(GL_BACK));
-                break;
-            case State::Culling::Front:
-                GL_CALL(glEnable(GL_CULL_FACE));
-                GL_CALL(glCullFace(GL_FRONT));
-                break;
-            case State::Culling::FrontAndBack:
-                GL_CALL(glEnable(GL_CULL_FACE));
-                GL_CALL(glCullFace(GL_FRONT_AND_BACK));
-                break;
-        }
-        switch (state.blending)
-        {
-            case State::BlendOp::None:
-                GL_CALL(glDisable(GL_BLEND));
-                break;
-            case State::BlendOp::Transparent:
-                GL_CALL(glEnable(GL_BLEND));
-                if (state.premulalpha)
-                    GL_CALL(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
-                else GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-                break;
-            case State::BlendOp::Additive:
-                GL_CALL(glEnable(GL_BLEND));
-                GL_CALL(glBlendFunc(GL_ONE, GL_ONE));
-                break;
-        }
-        switch (state.winding_order)
-        {
-            case State::PolygonWindingOrder::CounterClockWise:
-                GL_CALL(glFrontFace(GL_CCW));
-                break;
-            case State::PolygonWindingOrder::ClockWise:
-                GL_CALL(glFrontFace(GL_CW));
-                break;
-        }
-
-        // enable scissor if needed.
-        if (EnableIf(GL_SCISSOR_TEST, !state.scissor.IsEmpty()))
-        {
-            GL_CALL(glScissor(state.scissor.GetX(), state.scissor.GetY(),
-                              state.scissor.GetWidth(), state.scissor.GetHeight()));
-        }
-
-        if (EnableIf(GL_STENCIL_TEST, state.stencil_func != State::StencilFunc::Disabled))
-        {
-            const auto stencil_func  = ToGLEnum(state.stencil_func);
-            const auto stencil_fail  = ToGLEnum(state.stencil_fail);
-            const auto stencil_dpass = ToGLEnum(state.stencil_dpass);
-            const auto stencil_dfail = ToGLEnum(state.stencil_dfail);
-            GL_CALL(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
-            GL_CALL(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
-        }
-        if (EnableIf(GL_DEPTH_TEST, state.depth_test != State::DepthTest::Disabled))
-        {
-            if (state.depth_test == State::DepthTest::LessOrEQual)
-                GL_CALL(glDepthFunc(GL_LEQUAL));
-            else BUG("Unknown GL depth test mode.");
-        }
-
-        if (state.bWriteColor) {
-            GL_CALL(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
-        } else {
-            GL_CALL(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
-        }
-        TRACE_LEAVE(SetState);
-
-        GLenum default_texture_min_filter = GL_NONE;
-        GLenum default_texture_mag_filter = GL_NONE;
-        switch (mDefaultMinTextureFilter)
-        {
-            case gfx::Device::MinFilter::Nearest:   default_texture_min_filter = GL_NEAREST; break;
-            case gfx::Device::MinFilter::Linear:    default_texture_min_filter = GL_LINEAR;  break;
-            case gfx::Device::MinFilter::Mipmap:    default_texture_min_filter = GL_NEAREST_MIPMAP_NEAREST; break;
-            case gfx::Device::MinFilter::Bilinear:  default_texture_min_filter = GL_NEAREST_MIPMAP_LINEAR; break;
-            case gfx::Device::MinFilter::Trilinear: default_texture_min_filter = GL_LINEAR_MIPMAP_LINEAR; break;
-        }
-        switch (mDefaultMagTextureFilter)
-        {
-            case gfx::Device::MagFilter::Nearest: default_texture_mag_filter = GL_NEAREST; break;
-            case gfx::Device::MagFilter::Linear:  default_texture_mag_filter = GL_LINEAR;  break;
-        }
+        TRACE_CALL("SetPipelineState", mDevice->SetPipelineState(state));
 
         // set program texture bindings
-        size_t num_textures = program_state.GetSamplerCount();
-        if (num_textures > mTextureUnits.size())
-        {
-            WARN("Program uses more textures than there are units available.");
-            num_textures = mTextureUnits.size();
-        }
-        // for all textures used by this draw, look if the texture
-        // is already bound to some unit. if it is already bound
-        // and texture parameters haven't changed then nothing needs to be
-        // done. Otherwise, see if there's a free texture unit slot or lastly
-        // "evict" some texture from some unit and overwrite the binding with
-        // this texture.
-
-        // this is the set of units we're using already for this draw.
-        // it might happen so that a texture that gets bound is an one
-        // that was not used recently and then the next bind would
-        // replace this texture! 
-        std::unordered_set<size_t> units_for_this_draw;
+        const auto num_textures = program_state.GetSamplerCount();
 
         TRACE_ENTER(BindTextures);
         for (size_t i=0; i<num_textures; ++i)
@@ -1032,306 +2338,146 @@ public:
             if (texture == nullptr)
                 continue;
 
-            const auto& sampler = myprog->GetUniform(setting.name);
-
             texture->SetFrameStamp(mFrameNumber);
 
+            const auto& sampler = GetUniformFromCache(myprog->GetProgram(), setting.name);
             if (sampler.location == -1)
                 continue;
 
-            const auto num_units = mTextureUnits.size();
-            size_t lru_unit        = num_units;
-            size_t free_unit       = num_units;
-            size_t current_unit    = num_units;
-            size_t lru_frame_stamp = mFrameNumber;
+            auto texture_min_filter = texture->GetMinFilter();
+            auto texture_mag_filter = texture->GetMagFilter();
+            if (texture_min_filter == dev::TextureMinFilter::Default)
+                texture_min_filter = static_cast<dev::TextureMinFilter>(mDefaultMinTextureFilter);
+            if (texture_mag_filter == dev::TextureMagFilter::Default)
+                texture_mag_filter = static_cast<dev::TextureMagFilter>(mDefaultMagTextureFilter);
 
-            for (size_t i=0; i<mTextureUnits.size(); ++i)
-            {
-                if (mTextureUnits[i].texture == texture)
-                {
-                    current_unit = i;
-                    break;
-                }
-                else if (mTextureUnits[i].texture == nullptr)
-                {
-                    free_unit = i;
-                    break;
-                }
+            const auto texture_wrap_x = texture->GetWrapX();
+            const auto texture_wrap_y = texture->GetWrapY();
+            const auto texture_name = texture->GetName();
+            const auto texture_unit = i;
 
-                const auto frame_stamp = mTextureUnits[i].texture->GetFrameStamp();
-                if (frame_stamp <= lru_frame_stamp)
-                {
-                    if (!base::Contains(units_for_this_draw, i))
-                    {
-                        lru_frame_stamp = frame_stamp;
-                        lru_unit = i;
-                    }
-                }
-            }
+            dev::GraphicsDevice::BindWarnings warnings;
 
-            size_t unit = 0;
-            if (current_unit < num_units)
-                unit = current_unit;
-            else if (free_unit < num_units)
-                unit = free_unit;
-            else unit = lru_unit;
-
-            ASSERT(unit < mTextureUnits.size());
-
-            units_for_this_draw.insert(unit);
-
-            // map the texture filter to a GL setting.
-            GLenum texture_min_filter = GL_NONE;
-            GLenum texture_mag_filter = GL_NONE;
-            switch (texture->GetMinFilter())
-            {
-                case gfx::Texture::MinFilter::Default:
-                    texture_min_filter = default_texture_min_filter;
-                    break;
-                case gfx::Texture::MinFilter::Nearest:
-                    texture_min_filter = GL_NEAREST;
-                    break;
-                case gfx::Texture::MinFilter::Linear:
-                    texture_min_filter = GL_LINEAR;
-                    break;
-                case gfx::Texture::MinFilter::Mipmap:
-                    texture_min_filter = GL_NEAREST_MIPMAP_NEAREST;
-                    break;
-                case gfx::Texture::MinFilter::Bilinear:
-                    texture_min_filter = GL_NEAREST_MIPMAP_LINEAR;
-                    break;
-                case gfx::Texture::MinFilter::Trilinear:
-                    texture_min_filter = GL_LINEAR_MIPMAP_LINEAR;
-                    break;
-            }
-            switch (texture->GetMagFilter())
-            {
-                case gfx::Texture::MagFilter::Default:
-                    texture_mag_filter = default_texture_mag_filter;
-                    break;
-                case gfx::Texture::MagFilter::Nearest:
-                    texture_mag_filter = GL_NEAREST;
-                    break;
-                case gfx::Texture::MagFilter::Linear:
-                    texture_mag_filter = GL_LINEAR;
-                    break;
-            }
-            ASSERT(texture_min_filter != GL_NONE);
-            ASSERT(texture_mag_filter != GL_NONE);
-
-            auto GLWrappingModeEnum = [](gfx::Texture::Wrapping wrapping) {
-                if (wrapping == gfx::Texture::Wrapping::Clamp)
-                    return GL_CLAMP_TO_EDGE;
-                else if (wrapping == gfx::Texture::Wrapping::Repeat)
-                    return GL_REPEAT;
-                else if (wrapping == gfx::Texture::Wrapping::Mirror)
-                    return GL_MIRRORED_REPEAT;
-                else BUG("Bug on GL texture wrapping mode.");
-                return GL_NONE;
-            };
-
-            GLenum texture_wrap_x = GLWrappingModeEnum(texture->GetWrapX());
-            GLenum texture_wrap_y = GLWrappingModeEnum(texture->GetWrapY());
-
-            const auto texture_handle = texture->GetHandle();
-            const auto& texture_name  = texture->GetName();
-            auto texture_state = texture->GetState();
-
-            bool force_clamp_x = false;
-            bool force_clamp_y = false;
-            bool force_min_linear = false;
-
-            // do some validation and warning logging if there's something that is wrong.
-            if (texture_min_filter == GL_NEAREST_MIPMAP_NEAREST ||
-                texture_min_filter == GL_NEAREST_MIPMAP_LINEAR ||
-                texture_min_filter == GL_LINEAR_MIPMAP_LINEAR)
-            {
-                // this case handles both WebGL NPOT textures that don't support mips
-                // and also cases such as render to a texture and using default filtering
-                // when sampling and not having generated mips.
-                if (!texture->HasMips())
-                {
-                    texture_min_filter = GL_LINEAR;
-                    texture->SetFilter(gfx::Texture::MinFilter::Linear);
-                    force_min_linear = true;
-                }
-            }
-
-            if (mContext->GetVersion() == dev::Context::Version::WebGL_1)
-            {
-                // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
-                const auto width = texture->GetWidth();
-                const auto height = texture->GetHeight();
-                if (!base::IsPowerOfTwo(width) || !base::IsPowerOfTwo(height))
-                {
-                    if (texture_wrap_x == GL_REPEAT || texture_wrap_x == GL_MIRRORED_REPEAT)
-                    {
-                        texture_wrap_x = GL_CLAMP_TO_EDGE;
-                        texture->SetWrapX(gfx::Texture::Wrapping::Clamp);
-                        force_clamp_x = true;
-                    }
-                    if (texture_wrap_y == GL_REPEAT || texture_wrap_y == GL_MIRRORED_REPEAT)
-                    {
-                        texture_wrap_y = GL_CLAMP_TO_EDGE;
-                        texture->SetWrapY(gfx::Texture::Wrapping::Clamp);
-                        force_clamp_y = true;
-                    }
-                }
-            }
-
-            // if nothing has changed then skip all the work
-            if (mTextureUnits[unit].texture == texture &&
-                texture_state.min_filter == texture_min_filter &&
-                texture_state.mag_filter == texture_mag_filter &&
-                texture_state.wrap_x == texture_wrap_x &&
-                texture_state.wrap_y == texture_wrap_y)
-            {
-                // set the texture unit to the sampler
-                GL_CALL(glUniform1i(sampler.location, unit));
-                continue;
-            }
+            BindTexture2D(texture->GetTexture(), sampler.location,
+                          texture_unit,
+                          texture_wrap_x, texture_wrap_y,
+                          texture_min_filter, texture_mag_filter,
+                          &warnings);
 
             if (!texture->IsTransient() && texture->WarnOnce())
             {
-                if (force_min_linear)
+                if (warnings.force_min_linear)
                     WARN("Forcing GL_LINEAR on texture without mip maps. [texture='%1']", texture_name);
-                if (force_clamp_x)
+                if (warnings.force_clamp_x)
                     WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
-                if (force_clamp_y)
+                if (warnings.force_clamp_y)
                     WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
             }
-
-            GL_CALL(glActiveTexture(GL_TEXTURE0 + unit));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_handle));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_x));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_y));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_mag_filter));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_min_filter));
-
-            // set the texture unit to the sampler
-            GL_CALL(glUniform1i(sampler.location, unit));
-
-            mTextureUnits[unit].texture  = texture;
-
-            texture_state.wrap_x = texture_wrap_x;
-            texture_state.wrap_y = texture_wrap_y;
-            texture_state.mag_filter = texture_mag_filter;
-            texture_state.min_filter = texture_min_filter;
-            texture->SetState(texture_state);
         }
         TRACE_LEAVE(BindTextures);
 
         // start drawing geometry.
 
-        const uint8_t* instance_base_ptr = myinst ? (const uint8_t*)myinst->GetVertexBufferByteOffset() : nullptr;
+        constexpr auto DrawMax = std::numeric_limits<uint32_t>::max();
 
-        // the brain-damaged API goes like this... when using DrawArrays with a client side
-        // data pointer the glVertexAttribPointer 'pointer' argument is actually a pointer
-        // to the vertex data. But when using a VBO the pointer is not a pointer but an offset
-        // into the contents of the VBO.
-        const uint8_t* vertex_base_ptr = (const uint8_t*)mygeom->GetVertexBufferByteOffset();
-        // When an element array (i.e. an index buffer) is used the pointer argument in the
-        // glDrawElements call changes from being pointer to the client side index data to
-        // an offset into the element/index buffer.
-        const uint8_t* index_buffer_offset = (const uint8_t*)mygeom->GetIndexBufferByteOffset();
+        TRACE_ENTER(DrawCommands);
 
-        const auto* vertex_buffer = &mBuffers[BufferIndex(BufferType::VertexBuffer)][mygeom->GetVertexBufferIndex()];
-        const auto* index_buffer = mygeom->UsesIndexBuffer() ? &mBuffers[BufferIndex(BufferType::IndexBuffer)][mygeom->GetIndexBufferIndex()] : nullptr;
-        const auto* instance_buffer = myinst ? &mBuffers[BufferIndex(BufferType::VertexBuffer)][myinst->GetVertexBufferIndex()] : nullptr;
+        mDevice->BindFramebuffer(framebuffer);
+        mDevice->BindVertexBuffer(mygeom->GetVertexBuffer(),
+                                  myprog->GetProgram(),
+                                  mygeom->GetVertexLayout());
 
-        TRACE_ENTER(BindBuffers);
-
-        if (index_buffer)
-            GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer->name));
-
-        // first enable the vertex attributes.
-        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer->name));
-        for (const auto& attr : vertex_layout.attributes)
+        if (mygeom->UsesIndexBuffer())
         {
-            const GLint location = mGL.glGetAttribLocation(myprog->GetHandle(), attr.name.c_str());
-            if (location == -1)
-                continue;
-            const auto size   = attr.num_vector_components;
-            const auto stride = vertex_layout.vertex_struct_size;
-            const auto attr_ptr = vertex_base_ptr + attr.offset;
-            GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, attr_ptr));
-            GL_CALL(glVertexAttribDivisor(location, 0));
-            GL_CALL(glEnableVertexAttribArray(location));
-        }
+            mDevice->BindIndexBuffer(mygeom->GetIndexBuffer());
 
-        if (instance_buffer)
-        {
-            const auto& per_instance_vertex_layout = myinst->GetVertexLayout();
+            const auto draw_command_count      = geometry.GetNumDrawCmds();
+            const auto index_buffer_offset     = mygeom->GetIndexBufferByteOffset();
+            const auto index_buffer_type       = mygeom->GetIndexBufferType();
+            const auto index_buffer_item_count = mygeom->GetIndexCount();
+            const auto index_item_byte_size    = mygeom->GetIndexByteSize();
 
-            GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, instance_buffer->name));
-            for (const auto& attr : per_instance_vertex_layout.attributes)
+            if (myinst)
             {
-                const GLint location = mGL.glGetAttribLocation(myprog->GetHandle(), attr.name.c_str());
-                if (location == -1)
-                    continue;
-                const auto size = attr.num_vector_components;
-                const auto stride = per_instance_vertex_layout.vertex_struct_size;
-                const auto attr_ptr = instance_base_ptr + attr.offset;
-                GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, attr_ptr));
-                GL_CALL(glVertexAttribDivisor(location, 1)); // per instance attribute
-                GL_CALL(glEnableVertexAttribArray(location));
+                mDevice->BindVertexBuffer(myinst->GetVertexBuffer(),
+                                          myprog->GetProgram(),
+                                          myinst->GetVertexLayout());
+
+                const auto instance_count = myinst->GetInstanceCount();
+
+                for (size_t i = 0; i < draw_command_count; ++i)
+                {
+                    const auto& draw_cmd = geometry.GetDrawCmd(i);
+                    const auto draw_cmd_primitive_count =
+                            draw_cmd.count == DrawMax ? index_buffer_item_count : draw_cmd.count;
+                    const auto draw_cmd_primitive_type = draw_cmd.type;
+                    const auto draw_cmd_offset = draw_cmd.offset;
+
+                    // draw elements instanced
+                    mDevice->Draw(draw_cmd_primitive_type, index_buffer_type, draw_cmd_primitive_count,
+                                  index_buffer_offset + draw_cmd_offset * index_item_byte_size, instance_count);
+                }
+            }
+            else
+            {
+                for (size_t i=0; i<draw_command_count; ++i)
+                {
+                    const auto& draw_cmd = geometry.GetDrawCmd(i);
+                    const auto draw_cmd_primitive_count =
+                            draw_cmd.count == DrawMax ? index_buffer_item_count : draw_cmd.count;
+                    const auto draw_cmd_primitive_type  = draw_cmd.type;
+                    const auto draw_cmd_offset = draw_cmd.offset;
+
+                    // draw elements instanced
+                    mDevice->Draw(draw_cmd_primitive_type, index_buffer_type, draw_cmd_primitive_count,
+                                  index_buffer_offset + draw_cmd_offset * index_item_byte_size);
+                }
+            }
+        }
+        else
+        {
+            const auto draw_command_count = geometry.GetNumDrawCmds();
+            const auto vertex_buffer_item_count = mygeom->GetVertexCount();
+
+            if (myinst)
+            {
+                mDevice->BindVertexBuffer(myinst->GetVertexBuffer(),
+                                          myprog->GetProgram(),
+                                          myinst->GetVertexLayout());
+
+                const auto instance_count = myinst->GetInstanceCount();
+
+                for (size_t i = 0; i < draw_command_count; ++i)
+                {
+                    const auto& draw_cmd = geometry.GetDrawCmd(i);
+                    const auto draw_cmd_primitive_count =
+                            draw_cmd.count == DrawMax ? vertex_buffer_item_count : draw_cmd.count;
+                    const auto draw_cmd_primitive_type = draw_cmd.type;
+                    const auto draw_cmd_offset = draw_cmd.offset;
+
+                    // draw arrays instanced
+                    mDevice->Draw(draw_cmd_primitive_type, draw_cmd_offset, draw_cmd_primitive_count, instance_count);
+
+                }
+            }
+            else
+            {
+                for (size_t i=0; i<draw_command_count; ++i)
+                {
+                    const auto& draw_cmd = geometry.GetDrawCmd(i);
+                    const auto draw_cmd_primitive_count =
+                            draw_cmd.count == DrawMax ? vertex_buffer_item_count : draw_cmd.count;
+                    const auto draw_cmd_primitive_type  = draw_cmd.type;
+                    const auto draw_cmd_offset = draw_cmd.offset;
+
+                    // draw arrays
+                    mDevice->Draw(draw_cmd_primitive_type, draw_cmd_offset, draw_cmd_primitive_count);
+                }
             }
         }
 
-        TRACE_LEAVE(BindBuffers);
 
-        TRACE_ENTER(DrawGeometry);
-
-        GLenum index_type;
-        if (index_buffer_type == gfx::Geometry::IndexType::Index16)
-            index_type = GL_UNSIGNED_SHORT;
-        else if (index_buffer_type == gfx::Geometry::IndexType::Index32)
-            index_type = GL_UNSIGNED_INT;
-        else BUG("missing index type");
-
-        const GLsizei instance_count = myinst ? myinst->GetInstanceCount() : 0;
-
-        // go through the draw commands and submit the calls
-        const auto& cmds = geometry.GetNumDrawCmds();
-        for (size_t i=0; i<cmds; ++i)
-        {
-            // the number of buffer elements to draw by default if the draw doesn't specify
-            // any actual number of elements. if we're using index buffer then consider the
-            // number of index elements, otherwise consider the number of vertices.
-            const auto buffer_element_count = index_buffer ? buffer_index_count : buffer_vertex_count;
-
-            const auto& draw  = geometry.GetDrawCmd(i);
-            const auto count  = draw.count == std::numeric_limits<uint32_t>::max() ? buffer_element_count : draw.count;
-            const auto type   = draw.type;
-            const auto offset = draw.offset;
-
-            GLenum draw_mode;
-            if (type == gfx::Geometry::DrawType::Triangles)
-                draw_mode = GL_TRIANGLES;
-            else if (type == gfx::Geometry::DrawType::Points)
-                draw_mode = GL_POINTS;
-            else if (type == gfx::Geometry::DrawType::TriangleFan)
-                draw_mode = GL_TRIANGLE_FAN;
-            else if (type == gfx::Geometry::DrawType::Lines)
-                draw_mode = GL_LINES;
-            else if (type == gfx::Geometry::DrawType::LineLoop)
-                draw_mode = GL_LINE_LOOP;
-            else BUG("Unknown draw primitive type.");
-
-            // the byte offset from where to source the indices for the
-            // draw is the base index buffer offset assigned for the geometry
-            // plus the draw offset that is relative to the base offset.
-            const uint8_t* index_buffer_draw_offset = index_buffer_offset + offset * index_byte_size;
-
-            if (index_buffer && instance_buffer)
-                GL_CALL(glDrawElementsInstanced(draw_mode, count, index_type, (const void*)index_buffer_draw_offset, instance_count));
-            else if (index_buffer)
-                GL_CALL(glDrawElements(draw_mode, count, index_type, (const void*)index_buffer_draw_offset));
-            else if (instance_buffer)
-                GL_CALL(glDrawArraysInstanced(draw_mode, offset, count, instance_count));
-            else GL_CALL(glDrawArrays(draw_mode, offset, count));
-        }
-        TRACE_LEAVE(DrawGeometry);
+        TRACE_LEAVE(DrawCommands);
 
 #if 0
 
@@ -1484,47 +2630,15 @@ public:
             impl->BeginFrame();
         }
 
-        // trying to do so-called "buffer streaming" by "orphaning" the streaming
-        // vertex buffers. this is achieved by re-specifying the contents of the
-        // buffer by using nullptr data upload.
-        // https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming
+        mDevice->BeginFrame_tmp();
 
-        // vertex buffers
-        for (auto& buff : mBuffers[0])
-        {
-            if (buff.usage == gfx::BufferUsage::Stream)
-            {
-                GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buff.name));
-                GL_CALL(glBufferData(GL_ARRAY_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
-                buff.offset = 0;
-            }
-        }
-        // index buffers
-        for (auto& buff : mBuffers[1])
-        {
-            if (buff.usage == gfx::BufferUsage::Stream)
-            {
-                GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buff.name));
-                GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
-                buff.offset = 0;
-            }
-        }
-        // uniform buffers
-        for (auto& buff : mBuffers[2])
-        {
-            if (buff.usage == gfx::BufferUsage::Stream)
-            {
-                GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, buff.name));
-                GL_CALL(glBufferData(GL_UNIFORM_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
-                buff.offset = 0;
-            }
-        }
+
     }
     void EndFrame(bool display) override
     {
+        mDevice->EndFrame_tmp(display);
+
         mFrameNumber++;
-        if (display)
-            mContext->Display();
 
         const auto max_num_idle_frames = 120;
 
@@ -1555,14 +2669,13 @@ public:
     gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
         gfx::Bitmap<gfx::Pixel_RGBA> bmp;
-
-        if (!SetupFBO(fbo))
+        dev::Framebuffer framebuffer = SetupFBO(fbo);
+        if (!framebuffer.IsValid())
             return bmp;
 
         bmp.Resize(width, height);
+        mDevice->ReadColor(width, height, framebuffer, bmp.GetDataPtr());
 
-        GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 1));
-        GL_CALL(glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)bmp.GetDataPtr()));
         // by default the scan row order is reversed to what we expect.
         bmp.FlipHorizontally();
         return bmp;
@@ -1571,98 +2684,24 @@ public:
     gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
         gfx::Bitmap<gfx::Pixel_RGBA> bmp;
-        if (!SetupFBO(fbo))
+        dev::Framebuffer framebuffer = SetupFBO(fbo);
+        if (!framebuffer.IsValid())
             return bmp;
 
         bmp.Resize(width, height);
+        mDevice->ReadColor(x, y, width, height, framebuffer, bmp.GetDataPtr());
 
-        GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 1));
-        GL_CALL(glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)bmp.GetDataPtr()));
+        // by default the scan row order is reversed to what we expect.
         bmp.FlipHorizontally();
         return bmp;
     }
     void GetResourceStats(ResourceStats* stats) const override
     {
-        std::memset(stats, 0, sizeof(*stats));
-        for (const auto& buffer : mBuffers[0])
-        {
-            if (buffer.usage == gfx::Geometry::Usage::Static)
-            {
-                stats->static_vbo_mem_alloc += buffer.capacity;
-                stats->static_vbo_mem_use   += buffer.offset;
-            }
-            else if (buffer.usage == gfx::Geometry::Usage::Dynamic)
-            {
-                stats->dynamic_vbo_mem_alloc += buffer.capacity;
-                stats->dynamic_vbo_mem_use   += buffer.offset;
-            }
-            else if (buffer.usage == gfx::Geometry::Usage::Stream)
-            {
-                stats->streaming_vbo_mem_alloc += buffer.capacity;
-                stats->streaming_vbo_mem_use   += buffer.offset;
-            }
-        }
-        for (const auto& buffer : mBuffers[1])
-        {
-            if (buffer.usage == gfx::Geometry::Usage::Static)
-            {
-                stats->static_ibo_mem_alloc += buffer.capacity;
-                stats->static_ibo_mem_use   += buffer.offset;
-            }
-            else if (buffer.usage == gfx::Geometry::Usage::Dynamic)
-            {
-                stats->dynamic_ibo_mem_alloc += buffer.capacity;
-                stats->dynamic_ibo_mem_use   += buffer.offset;
-            }
-            else if (buffer.usage == gfx::Geometry::Usage::Stream)
-            {
-                stats->streaming_ibo_mem_alloc += buffer.capacity;
-                stats->streaming_ibo_mem_use   += buffer.offset;
-            }
-        }
-        for (const auto& buffer : mBuffers[2])
-        {
-            if (buffer.usage == gfx::Geometry::Usage::Static)
-            {
-                stats->static_ubo_mem_alloc += buffer.capacity;
-                stats->static_ubo_mem_use   += buffer.offset;
-            }
-            else if (buffer.usage == gfx::Geometry::Usage::Dynamic)
-            {
-                stats->dynamic_ubo_mem_alloc += buffer.capacity;
-                stats->dynamic_ubo_mem_use   += buffer.offset;
-            }
-            else if (buffer.usage == gfx::Geometry::Usage::Stream)
-            {
-                stats->streaming_ubo_mem_alloc += buffer.capacity;
-                stats->streaming_ubo_mem_use   += buffer.offset;
-            }
-        }
+        mDevice->GetResourceStats_tmp(stats);
     }
     void GetDeviceCaps(DeviceCaps* caps) const override
     {
-        std::memset(caps, 0, sizeof(*caps));
-        GLint num_texture_units = 0;
-        GLint max_fbo_size = 0;
-        GL_CALL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &num_texture_units));
-        GL_CALL(glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &max_fbo_size));
-
-        caps->num_texture_units = num_texture_units;
-        caps->max_fbo_height    = max_fbo_size;
-        caps->max_fbo_width     = max_fbo_size;
-
-        const auto version = mContext->GetVersion();
-        if (version == dev::Context::Version::WebGL_2 ||
-            version == dev::Context::Version::OpenGL_ES3)
-        {
-            caps->instanced_rendering = true;
-            caps->multiple_color_attachments = true;
-        }
-        else if (version == dev::Context::Version::OpenGL_ES2 ||
-                version == dev::Context::Version::WebGL_1)
-        {
-
-        }
+        mDevice->GetDeviceCaps_tmp(caps);
     }
 
     gfx::Device* AsGraphicsDevice() override
@@ -1670,185 +2709,28 @@ public:
     std::shared_ptr<gfx::Device> GetSharedGraphicsDevice() override
     { return shared_from_this(); }
 
-    enum class BufferType {
-        VertexBuffer  = 0,
-        IndexBuffer   = 1,
-        UniformBuffer = 2
-    };
-    static GLenum GetBufferEnum(BufferType type)
+    dev::Framebuffer SetupFBO(gfx::Framebuffer* fbo) const
     {
-        if (type == BufferType::VertexBuffer)
-            return GL_ARRAY_BUFFER;
-        else if (type == BufferType::IndexBuffer)
-            return GL_ELEMENT_ARRAY_BUFFER;
-        else if (type == BufferType::UniformBuffer)
-            return GL_UNIFORM_BUFFER;
-        BUG("Bug on buffer type.");
-        return 0;
-    }
-    static size_t BufferIndex(BufferType type)
-    {
-        return static_cast<size_t>(type);
-    }
-
-    std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, gfx::Geometry::Usage usage, BufferType type)
-    {
-        // there are 3 different types of buffers and each have their
-        // own allocation strategy:
-
-        // 1. Static buffers
-        // Static buffers are allocated by static geometry objects
-        // that are typically created once and never updated.
-        // For static buffers we're using so called bump allocation.
-        // That means that for each geometry allocation we take the
-        // first chunk that can be found and has enough space. These
-        // individual chunks can then never be "freed" but only when
-        // the whole VBO is no longer referred to can the data be re-used.
-        // This should be the optimal allocation strategy for static
-        // game data that is created when the application begins
-        // running and then never gets modified.
-        //
-        // 2. Dynamic buffers
-        // Dynamic buffers can be allocated and used by geometry objects
-        // that have had their geometry data updated. The usage can thus
-        // grow or shrink during application run. This type of buffering
-        // needs an allocation strategy that can handle fragmentation.
-        // Since that doesn't currently exist (but is a TODO) we're just
-        // going to use a VBO *per* geometry and let the driver handle
-        // the fragmentation.
-        //
-        // 3. Streaming buffers.
-        // Streaming buffers are used for streaming geometry that gets
-        // updated on every frame, for example particle engines. The
-        // allocation strategy is also to use a bump allocation but
-        // reset the contents of each buffer on every new frame. This
-        // allows the total buffer allocation to grow to a "high water
-        // mark" and then keep re-using those buffers frame after frame.
-
-        GLenum flag = GL_NONE;
-        size_t capacity = 0;
-
-        if (type == BufferType::UniformBuffer)
-        {
-            const auto reminder = bytes % mUniformBufferOffsetAlignment;
-            const auto padding  = mUniformBufferOffsetAlignment - reminder;
-            VERBOSE("Grow uniform buffer size from %1 to %2 bytes for offset alignment to %3.",
-                    bytes, bytes+padding, mUniformBufferOffsetAlignment);
-            bytes += padding;
-        }
-
-        if (usage == gfx::Geometry::Usage::Static)
-        {
-            flag = GL_STATIC_DRAW;
-            capacity = std::max(size_t(1024 * 1024), bytes);
-        }
-        else if (usage == gfx::Geometry::Usage::Stream)
-        {
-            flag = GL_STREAM_DRAW;
-            capacity = std::max(size_t(1024 * 1024), bytes);
-        }
-        else if (usage == gfx::Geometry::Usage::Dynamic)
-        {
-            flag = GL_DYNAMIC_DRAW;
-            capacity = bytes;
-        }
-        else BUG("Unsupported vertex buffer type.");
-
-        auto& buffers = mBuffers[BufferIndex(type)];
-        for (size_t i=0; i<buffers.size(); ++i)
-        {
-            auto& buffer = buffers[i];
-            const auto available = buffer.capacity - buffer.offset;
-            if ((available >= bytes) && (buffer.usage == usage))
-            {
-                const auto offset = buffer.offset;
-                buffer.offset += bytes;
-                buffer.refcount++;
-                return {i, offset};
-            }
-        }
-
-        BufferObject buffer;
-        buffer.usage    = usage;
-        buffer.offset   = bytes;
-        buffer.capacity = capacity;
-        buffer.refcount = 1;
-
-        GL_CALL(glGenBuffers(1, &buffer.name));
-        GL_CALL(glBindBuffer(GetBufferEnum(type), buffer.name));
-        GL_CALL(glBufferData(GetBufferEnum(type), buffer.capacity, nullptr, flag));
-
-        buffers.push_back(buffer);
-
-        DEBUG("Allocated new buffer object. [bo=%1, size=%2, type=%3, type=%4]",
-              buffer.name, buffer.capacity, usage, type);
-
-        const auto buffer_index = buffers.size() - 1;
-        const auto buffer_offset = 0;
-        return { buffer_index, buffer_offset };
-    }
-    void FreeBuffer(size_t index, size_t offset, size_t bytes, gfx::Geometry::Usage usage, BufferType type)
-    {
-        auto& buffers = mBuffers[BufferIndex(type)];
-
-        ASSERT(index < buffers.size());
-        auto& buffer = buffers[index];
-        ASSERT(buffer.refcount > 0);
-        buffer.refcount--;
-
-        if (buffer.usage == gfx::Geometry::Usage::Static || buffer.usage == gfx::Geometry::Usage::Dynamic)
-        {
-            if (buffer.refcount == 0)
-                buffer.offset = 0;
-        }
-        if (usage == gfx::Geometry::Usage::Static) {
-            DEBUG("Free buffer data. [bo=%1, bytes=%2, offset=%3, type=%4, refs=%5, type=%6]",
-                  buffer.name, bytes, offset, buffer.usage, buffer.refcount, type);
-        }
-    }
-
-    void UploadBuffer(size_t index, size_t offset, const void* data, size_t bytes, gfx::Geometry::Usage usage, BufferType type)
-    {
-        auto& buffers = mBuffers[BufferIndex(type)];
-        ASSERT(index < buffers.size());
-
-        auto& buffer = buffers[index];
-        ASSERT(offset + bytes <= buffer.capacity);
-
-        GL_CALL(glBindBuffer(GetBufferEnum(type), buffer.name));
-        GL_CALL(glBufferSubData(GetBufferEnum(type), offset, bytes, data));
-
-        if (buffer.usage == gfx::Geometry::Usage::Static)
-        {
-            const int percent_full = 100 * (double)buffer.offset / (double)buffer.capacity;
-            DEBUG("Uploaded buffer data. [bo=%1, bytes=%2, offset=%3, full=%4%, usage=%5, type=%6]",
-                  buffer.name, bytes, offset, percent_full, buffer.usage, type);
-        }
-    }
-    bool SetupFBO(gfx::Framebuffer* fbo) const
-    {
+        dev::Framebuffer invalid;
         if (fbo)
         {
             auto* impl = static_cast<FramebufferImpl*>(fbo);
             if (impl->IsReady())
             {
                 if (!impl->Complete())
-                    return false;
+                    return invalid;
             }
             else
             {
                 if (!impl->Create())
-                    return false;
+                    return invalid;
                 if (!impl->Complete())
-                    return false;
+                    return invalid;
             }
             impl->SetFrameStamp(mFrameNumber);
+            return impl->GetFramebuffer();
         }
-        else
-        {
-            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-        }
-        return true;
+        return mDevice->GetDefaultFramebuffer();
     }
 private:
     bool IsTextureFBOTarget(const gfx::Texture* texture) const
@@ -1868,68 +2750,12 @@ private:
         return false;
     }
 
-
-    bool EnableIf(GLenum flag, bool on_off) const
-    {
-        if (on_off)
-        {
-            GL_CALL(glEnable(flag));
-        }
-        else
-        {
-            GL_CALL(glDisable(flag));
-        }
-        return on_off;
-    }
-    static GLenum ToGLEnum(State::StencilFunc func)
-    {
-        using Func = State::StencilFunc;
-        switch (func)
-        {
-            case Func::Disabled:         return GL_NONE;
-            case Func::PassAlways:       return GL_ALWAYS;
-            case Func::PassNever:        return GL_NEVER;
-            case Func::RefIsLess:        return GL_LESS;
-            case Func::RefIsLessOrEqual: return GL_LEQUAL;
-            case Func::RefIsMore:        return GL_GREATER;
-            case Func::RefIsMoreOrEqual: return GL_GEQUAL;
-            case Func::RefIsEqual:       return GL_EQUAL;
-            case Func::RefIsNotEqual:    return GL_NOTEQUAL;
-        }
-        BUG("Unknown GL stencil function");
-        return GL_NONE;
-    }
-    static GLenum ToGLEnum(State::StencilOp op)
-    {
-        using Op = State::StencilOp;
-        switch (op)
-        {
-            case Op::DontModify: return GL_KEEP;
-            case Op::WriteZero:  return GL_ZERO;
-            case Op::WriteRef:   return GL_REPLACE;
-            case Op::Increment:  return GL_INCR;
-            case Op::Decrement:  return GL_DECR;
-        }
-        BUG("Unknown GL stencil op");
-        return GL_NONE;
-    }
 private:
-    class TextureImpl;
-    // cached texture unit state. used to omit texture unit
-    // state changes when not needed.
-    struct TextureUnit {
-        // the texture currently bound to the unit.
-        const TextureImpl* texture = nullptr;
-    };
-
-    using TextureUnits = std::vector<TextureUnit>;
-
     class TextureImpl : public gfx::Texture
     {
     public:
-        TextureImpl(std::string id, const OpenGLFunctions& funcs, OpenGLES2GraphicsDevice& device)
-           : mGL(funcs)
-           , mDevice(device)
+        TextureImpl(dev::GraphicsDevice* device, std::string id)
+           : mDevice(device)
            , mGpuId(std::move(id))
         {
             mFlags.set(Flags::Transient, false);
@@ -1937,128 +2763,59 @@ private:
         }
         ~TextureImpl() override
         {
-            if (mHandle)
+            if (mTexture.IsValid())
             {
-                GL_CALL(glDeleteTextures(1, &mHandle));
+                mDevice->DeleteTexture(mTexture);
                 if (!IsTransient())
-                    DEBUG("Deleted texture object. [name='%1', handle=%2]", mName, mHandle);
+                    DEBUG("Deleted texture object. [name='%1']", mName);
             }
         }
 
         void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips) override
         {
-            if (mHandle == 0)
+            if (mTexture.IsValid())
             {
-                GL_CALL(glGenTextures(1, &mHandle));
+                mDevice->DeleteTexture(mTexture);
+            }
+
+            if (bytes)
+            {
+                mTexture = mDevice->UploadTexture2D(bytes, xres, yres, format);
                 if (!IsTransient())
-                    DEBUG("Created new texture object. [name='%1', handle=%2]", mName, mHandle);
-            }
-
-            const auto version = mDevice.mContext->GetVersion();
-
-            GLenum sizeFormat = 0;
-            GLenum baseFormat = 0;
-            switch (format)
-            {
-                case Format::sRGB:
-                    if (version == dev::Context::Version::WebGL_1 ||
-                        version == dev::Context::Version::OpenGL_ES2)
-                    {
-                        sizeFormat = GL_SRGB_EXT;
-                        baseFormat = GL_RGB; //GL_SRGB_EXT;
-                    }
-                    else if (version == dev::Context::Version::WebGL_2 ||
-                             version == dev::Context::Version::OpenGL_ES3)
-                    {
-                        sizeFormat = GL_SRGB8;
-                        baseFormat = GL_RGB;
-                    } else BUG("Unknown OpenGL ES version.");
-                    break;
-                case Format::sRGBA:
-                    if (version == dev::Context::Version::WebGL_1 ||
-                        version == dev::Context::Version::OpenGL_ES2)
-                    {
-                        sizeFormat = GL_SRGB_ALPHA_EXT;
-                        baseFormat = GL_RGBA; //GL_SRGB_ALPHA_EXT;
-                    }
-                    else if (version == dev::Context::Version::WebGL_2 ||
-                             version == dev::Context::Version::OpenGL_ES3)
-                    {
-                        sizeFormat = GL_SRGB8_ALPHA8;
-                        baseFormat = GL_RGBA;
-                    } else BUG("Unknown OpenGL ES version.");
-                    break;
-                case Format::RGB:
-                    sizeFormat = GL_RGB;
-                    baseFormat = GL_RGB;
-                    break;
-                case Format::RGBA:
-                    sizeFormat = GL_RGBA;
-                    baseFormat = GL_RGBA;
-                    break;
-                case Format::AlphaMask:
-                    // when sampling R = G = B = 0.0 and A is the alpha value from here.
-                    sizeFormat = GL_ALPHA;
-                    baseFormat = GL_ALPHA;
-                    break;
-                default: BUG("Unknown texture format."); break;
-            }
-
-            if (version == dev::Context::Version::OpenGL_ES2 ||
-                version == dev::Context::Version::WebGL_1)
-            {
-                if (format == Format::sRGB && !mDevice.mExtensions.EXT_sRGB)
                 {
-                    sizeFormat = GL_RGB;
-                    baseFormat = GL_RGB;
-                    WARN("Treating sRGB texture as RGB texture in the absence of EXT_sRGB. [name='%1']", mName);
+                    DEBUG("Uploaded new texture object. [name='%1', size=%2x%3]", mName, xres, yres);
                 }
-                else if (format == Format::sRGBA && !mDevice.mExtensions.EXT_sRGB)
+
+                if (mips)
                 {
-                    sizeFormat = GL_RGBA;
-                    baseFormat = GL_RGBA;
-                    WARN("Treating sRGBA texture as RGBA texture in the absence of EXT_sRGB. [name='%1']", mName);
+                    const auto ret = mDevice->GenerateMipmaps(mTexture);
+                    if (ret == dev::GraphicsDevice::MipStatus::UnsupportedSize)
+                        WARN("Unsupported texture size for mipmap generation. [name='%1]", mName);
+                    else if (ret == dev::GraphicsDevice::MipStatus::UnsupportedFormat)
+                        WARN("Unsupported texture format for mipmap generation. [name='%1']", mName);
+                    else if (ret == dev::GraphicsDevice::MipStatus::Error)
+                        WARN("Failed to generate mips on texture. [name='%1']", mName);
+                    else if (ret == dev::GraphicsDevice::MipStatus::Success)
+                    {
+                        if (!IsTransient())
+                            DEBUG("Successfully generated texture mips. [name='%1']", mName);
+                    }
+                    else BUG("Bug on mipmap status.");
+
+                    mHasMips = ret == dev::GraphicsDevice::MipStatus::Success;
                 }
             }
-
-            GL_CALL(glActiveTexture(GL_TEXTURE0));
-
-            // trash the last texture unit in the hopes that it would not
-            // cause a rebind later.
-            const auto last = mDevice.mTextureUnits.size() - 1;
-            const auto unit = GL_TEXTURE0 + last;
-
-            // bind our texture here.
-            GL_CALL(glActiveTexture(unit));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, mHandle));
-            GL_CALL(glTexImage2D(GL_TEXTURE_2D,
-                0, // mip level
-                sizeFormat,
-                xres,
-                yres,
-                0, // border must be 0
-                baseFormat,
-                GL_UNSIGNED_BYTE,
-                bytes));
-
-            mHasMips = false;
-
-            if (bytes && mips)
+            else
             {
-                GenerateMips();
+                mTexture = mDevice->AllocateTexture2D(xres, yres, format);
+                if (!IsTransient())
+                {
+                    DEBUG("Allocated new texture object. [name='%1', size=%2x%3]", mName, xres, yres);
+                }
             }
-
             mWidth  = xres;
             mHeight = yres;
             mFormat = format;
-            mDevice.mTextureUnits[last].texture = this;
-
-            if (!IsTransient())
-            {
-                if (bytes)
-                    DEBUG("Loaded texture data. [name='%1', size=%2x%3, format=%4, handle=%5]", mName, xres, yres, format, mHandle);
-                else VERBOSE("Allocated texture storage. [name='%1', size=%2x%3, format=%4, handle=%5]", mName, xres, yres, format, mHandle);
-            }
         }
 
         void SetFlag(Flags flag, bool on_off) override
@@ -2108,58 +2865,27 @@ private:
 
         bool GenerateMips() override
         {
+            ASSERT(mTexture.IsValid());
+            ASSERT(mTexture.texture_width && mTexture.texture_height);
+
             if (mHasMips)
                 return true;
 
-            if (mDevice.mContext->GetVersion() == dev::Context::Version::WebGL_1)
+            const auto ret = mDevice->GenerateMipmaps(mTexture);
+            if (ret == dev::GraphicsDevice::MipStatus::UnsupportedSize)
+                WARN("Unsupported texture size for mipmap generation. [name='%1]", mName);
+            else if (ret == dev::GraphicsDevice::MipStatus::UnsupportedFormat)
+                WARN("Unsupported texture format for mipmap generation. [name='%1']", mName);
+            else if (ret == dev::GraphicsDevice::MipStatus::Error)
+                WARN("Failed to generate mips on texture. [name='%1']", mName);
+            else if (ret == dev::GraphicsDevice::MipStatus::Success)
             {
-                if (!base::IsPowerOfTwo(mWidth) || !base::IsPowerOfTwo(mHeight))
-                {
-                    WARN("WebGL1 doesn't support mips on NPOT texture. [name='%1', size=%2x%3]", mName, mWidth, mHeight);
-                    return false;
-                }
-                if (mFormat == Format::sRGB || mFormat == Format::sRGBA)
-                {
-                    WARN("WebGL1 doesn't support mips on sRGB/sRGBA texture. [name='%1', format=%2]", mName, mFormat);
-                    return false;
-                }
+                if (!IsTransient())
+                    DEBUG("Successfully generated texture mips. [name='%1']", mName);
             }
-            else if (mDevice.mContext->GetVersion() == dev::Context::Version::WebGL_2)
-            {
-                if (mFormat == Format::sRGB || mFormat == Format::sRGBA)
-                {
-                    WARN("WebGL2 doesn't support mips on sRGB/sRGBA texture. [name='%1', format=%2]", mName, mFormat);
-                    return false;
-                }
-            }
-            else if (mDevice.mContext->GetVersion() == dev::Context::Version::OpenGL_ES2)
-            {
-                if (mFormat == Format::sRGB || mFormat == Format::sRGBA)
-                {
-                    WARN("GL ES2 doesn't support mips on sRGB/sRGBA texture. [name='%1', format=%2]", mName, mFormat);
-                    return false;
-                }
-            }
+            else BUG("Bug on mipmap status.");
 
-            const auto last_unit_index = mDevice.mTextureUnits.size() - 1;
-            const auto texture_unit    = GL_TEXTURE0 + last_unit_index;
-
-            GL_CALL(glActiveTexture(texture_unit));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, mHandle));
-            // seems that driver bugs are common regarding sRGB mipmap generation
-            // so we're going to unwrap this GL call and assume any error 
-            // is an error about failing to generate mips because of driver bugs
-            mGL.glGenerateMipmap(GL_TEXTURE_2D);
-            const auto error = mGL.glGetError();
-
-            mDevice.mTextureUnits[last_unit_index].texture = this;
-            mHasMips = error == GL_NO_ERROR;
-            if (!IsTransient())
-            {
-                if (mHasMips)
-                    DEBUG("Generated mip maps on texture. [name='%1']", mName);
-                else WARN("Failed to generate mips on texture. [name='%1']", mName);
-            }
+            mHasMips = ret == dev::GraphicsDevice::MipStatus::Success;
             return mHasMips;
         }
         bool HasMips() const override
@@ -2173,29 +2899,24 @@ private:
             return ret;
         }
 
+        dev::TextureObject GetTexture() const
+        {
+            return mTexture;
+        }
         GLuint GetHandle() const
-        { return mHandle; }
+        {
+            return mTexture.handle;
+        }
+
         void SetFrameStamp(size_t frame_number) const
         { mFrameNumber = frame_number; }
         std::size_t GetFrameStamp() const
         { return mFrameNumber; }
 
-        struct GLState {
-            GLenum wrap_x = GL_NONE;
-            GLenum wrap_y = GL_NONE;
-            GLenum min_filter = GL_NONE;
-            GLenum mag_filter = GL_NONE;
-        };
-        GLState GetState() const
-        { return mState; }
-        void SetState(const GLState& state)
-        { mState = state; }
-
     private:
-        const OpenGLFunctions& mGL;
-        OpenGLES2GraphicsDevice& mDevice;
-        GLuint mHandle = 0;
-        GLState mState;
+        dev::GraphicsDevice* mDevice = nullptr;
+        dev::TextureObject mTexture;
+
     private:
         MinFilter mMinFilter = MinFilter::Default;
         MagFilter mMagFilter = MagFilter::Default;
@@ -2218,14 +2939,14 @@ private:
     class InstancedDrawImpl : public gfx::InstancedDraw
     {
     public:
-        explicit InstancedDrawImpl(OpenGLES2GraphicsDevice* device) noexcept
+        explicit InstancedDrawImpl(dev::GraphicsDevice* device) noexcept
           : mDevice(device)
         {}
        ~InstancedDrawImpl() override
         {
-            if (mBufferSize)
+            if (mBuffer.IsValid())
             {
-                mDevice->FreeBuffer(mBufferIndex, mBufferOffset, mBufferSize, mUsage, BufferType::VertexBuffer);
+                mDevice->FreeBuffer(mBuffer);
             }
             if (mUsage == Usage::Static)
                 DEBUG("Deleted instanced draw object. [name='%1']", mContentName);
@@ -2261,12 +2982,9 @@ private:
             if (vertex_bytes == 0)
                 return;
 
-            std::tie(mBufferIndex, mBufferOffset) = mDevice->AllocateBuffer(vertex_bytes, mUsage, BufferType::VertexBuffer);
-            mDevice->UploadBuffer(mBufferIndex,
-                                  mBufferOffset,
-                                  vertex_ptr, vertex_bytes,
-                                  mUsage, BufferType::VertexBuffer);
-            mBufferSize = vertex_bytes;
+            mBuffer = mDevice->AllocateBuffer(vertex_bytes, mUsage, dev::BufferType::VertexBuffer);
+            mDevice->UploadBuffer(mBuffer, vertex_ptr, vertex_bytes);
+
             mLayout = std::move(upload.GetInstanceDataLayout());
             if (mUsage == Usage::Static)
             {
@@ -2283,46 +3001,44 @@ private:
         inline size_t GetFrameStamp() const noexcept
         { return mFrameNumber; }
         inline size_t GetVertexBufferByteOffset() const noexcept
-        { return mBufferOffset; }
+        { return mBuffer.buffer_offset; }
         inline size_t GetVertexBufferIndex() const noexcept
-        { return mBufferIndex; }
+        { return mBuffer.buffer_index; }
         inline size_t GetInstanceCount() const noexcept
-        { return mBufferSize / mLayout.vertex_struct_size; }
+        { return mBuffer.buffer_bytes / mLayout.vertex_struct_size; }
         inline const gfx::InstanceDataLayout& GetVertexLayout() const noexcept
         { return mLayout; }
+        inline const dev::GraphicsBuffer& GetVertexBuffer() const noexcept
+        { return mBuffer; }
 
     private:
-        OpenGLES2GraphicsDevice* mDevice = nullptr;
+        dev::GraphicsDevice* mDevice = nullptr;
         std::size_t mContentHash = 0;
         std::string mContentName;
-        Usage mUsage = Usage::Static;
+        gfx::BufferUsage mUsage = gfx::BufferUsage::Static;
         mutable std::size_t mFrameNumber = 0;
-        mutable std::size_t mBufferSize   = 0;
-        mutable std::size_t mBufferOffset = 0;
-        mutable std::size_t mBufferIndex  = 0;
         mutable std::optional<gfx::InstancedDrawBuffer> mPendingUpload;
         mutable gfx::InstanceDataLayout mLayout;
+        mutable dev::GraphicsBuffer  mBuffer;
     };
 
     class GeomImpl : public gfx::Geometry
     {
     public:
-        using BufferType = OpenGLES2GraphicsDevice::BufferType;
-
-        explicit GeomImpl(OpenGLES2GraphicsDevice* device) noexcept
+        explicit GeomImpl(dev::GraphicsDevice* device) noexcept
           : mDevice(device)
         {}
        ~GeomImpl() override
         {
-            if (mVertexBufferSize)
+            if (mVertexBuffer.IsValid())
             {
-                mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mUsage, BufferType::VertexBuffer);
+                mDevice->FreeBuffer(mVertexBuffer);
             }
-            if (mIndexBufferSize)
+            if (mIndexBuffer.IsValid())
             {
-                mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mUsage, BufferType::IndexBuffer);
+                mDevice->FreeBuffer(mIndexBuffer);
             }
-            if (mUsage == Usage::Static)
+            if (mUsage == gfx::BufferUsage::Static)
                 DEBUG("Deleted geometry object. [name='%1']", mName);
         }
 
@@ -2353,30 +3069,25 @@ private:
             if (vertex_bytes == 0)
                 return;
 
-            std::tie(mVertexBufferIndex, mVertexBufferOffset) = mDevice->AllocateBuffer(vertex_bytes, mUsage, BufferType::VertexBuffer);
-            mDevice->UploadBuffer(mVertexBufferIndex,
-                                  mVertexBufferOffset,
-                                  vertex_ptr, vertex_bytes,
-                                  mUsage, BufferType::VertexBuffer);
-            mVertexBufferSize = upload.GetVertexBytes();
+            mVertexBuffer = mDevice->AllocateBuffer(vertex_bytes, mUsage, dev::BufferType::VertexBuffer);
+            mDevice->UploadBuffer(mVertexBuffer, vertex_ptr, vertex_bytes);
+
             mVertexLayout     = std::move(upload.GetLayout());
             mDrawCommands     = std::move(upload.GetDrawCommands());
 
-            if (mUsage == Usage::Static)
+            if (mUsage == gfx::BufferUsage::Static)
             {
                 DEBUG("Uploaded geometry vertices. [name='%1', bytes='%2', usage='%3']", mName, vertex_bytes, mUsage);
             }
             if (index_bytes == 0)
                 return;
 
-            std::tie(mIndexBufferIndex, mIndexBufferOffset) = mDevice->AllocateBuffer(index_bytes, mUsage, BufferType::IndexBuffer);
-            mDevice->UploadBuffer(mIndexBufferIndex,
-                                  mIndexBufferOffset,
-                                  index_ptr, index_bytes,
-                                  mUsage, BufferType::IndexBuffer);
-            mIndexBufferSize = index_bytes;
+            mIndexBuffer = mDevice->AllocateBuffer(index_bytes, mUsage, dev::BufferType::IndexBuffer);
+            mDevice->UploadBuffer(mIndexBuffer, index_ptr, index_bytes);
+
             mIndexBufferType = upload.GetIndexType();
-            if (mUsage == Usage::Static)
+
+            if (mUsage == gfx::BufferUsage::Static)
             {
                 DEBUG("Uploaded geometry indices. [name='%1', bytes='%2', usage='%3']", mName, index_bytes, mUsage);
             }
@@ -2394,40 +3105,55 @@ private:
         { mFrameNumber = frame_number; }
         inline size_t GetFrameStamp() const noexcept
         { return mFrameNumber; }
-        inline size_t GetVertexBufferIndex() const noexcept
-        { return mVertexBufferIndex; }
-        inline size_t GetIndexBufferIndex() const noexcept
-        { return mIndexBufferIndex; }
+
+        inline bool IsEmpty() const noexcept
+        { return mVertexBuffer.buffer_bytes == 0; }
+
         inline size_t GetVertexBufferByteOffset() const noexcept
-        { return mVertexBufferOffset; }
-        inline size_t GetIndexBufferByteOffset() const noexcept
-        { return mIndexBufferOffset; }
+        { return mVertexBuffer.buffer_offset; }
         inline size_t GetVertexBufferByteSize() const noexcept
-        { return mVertexBufferSize; }
+        { return mVertexBuffer.buffer_bytes; }
+
+        inline size_t GetIndexBufferByteOffset() const noexcept
+        { return mIndexBuffer.buffer_offset; }
         inline size_t GetIndexBufferByteSize() const noexcept
-        { return mIndexBufferSize; }
+        { return mIndexBuffer.buffer_bytes; }
+
         inline IndexType GetIndexBufferType() const noexcept
         { return mIndexBufferType; }
+
         inline bool UsesIndexBuffer() const noexcept
-        { return mIndexBufferSize != 0; }
+        { return mIndexBuffer.IsValid(); }
+
         inline const gfx::VertexLayout& GetVertexLayout() const noexcept
         { return mVertexLayout; }
+
+        inline const dev::GraphicsBuffer& GetVertexBuffer() const noexcept
+        { return mVertexBuffer; }
+
+        inline const dev::GraphicsBuffer& GetIndexBuffer() const noexcept
+        { return mIndexBuffer; }
+
+        inline size_t GetVertexCount() const noexcept
+        { return mVertexBuffer.buffer_bytes / mVertexLayout.vertex_struct_size; }
+
+        inline size_t GetIndexCount() const noexcept
+        { return mIndexBuffer.buffer_bytes / dev::GetIndexByteSize(mIndexBufferType); }
+
+        inline size_t GetIndexByteSize() const noexcept
+        { return dev::GetIndexByteSize(mIndexBufferType); }
     private:
-        OpenGLES2GraphicsDevice* mDevice = nullptr;
+        dev::GraphicsDevice* mDevice = nullptr;
 
         std::size_t mHash = 0;
         std::string mName;
-        Usage mUsage = Usage::Static;
+        gfx::BufferUsage mUsage = gfx::BufferUsage::Static;
 
         mutable std::size_t mFrameNumber = 0;
         mutable std::optional<gfx::GeometryBuffer> mPendingUpload;
         mutable std::vector<DrawCommand> mDrawCommands;
-        mutable std::size_t mVertexBufferSize   = 0;
-        mutable std::size_t mVertexBufferOffset = 0;
-        mutable std::size_t mVertexBufferIndex  = 0;
-        mutable std::size_t mIndexBufferSize   = 0;
-        mutable std::size_t mIndexBufferOffset = 0;
-        mutable std::size_t mIndexBufferIndex  = 0;
+        mutable dev::GraphicsBuffer mVertexBuffer;
+        mutable dev::GraphicsBuffer mIndexBuffer;
         mutable IndexType mIndexBufferType = IndexType::Index16;
         mutable gfx::VertexLayout mVertexLayout;
     };
@@ -2435,167 +3161,86 @@ private:
     class ProgImpl : public gfx::Program
     {
     public:
-        explicit ProgImpl(const OpenGLFunctions& funcs, OpenGLES2GraphicsDevice* device) noexcept
-          : mGL(funcs)
-          , mDevice(device)
+        explicit ProgImpl(dev::GraphicsDevice* device) noexcept
+          : mDevice(device)
         {}
 
        ~ProgImpl() override
         {
-            if (mProgram)
+            if (mProgram.IsValid())
             {
-                GL_CALL(glDeleteProgram(mProgram));
-                DEBUG("Deleted program object. [name='%1', handle='%2']", mName, mProgram);
+                mDevice->DeleteProgram(mProgram);
+                DEBUG("Deleted program object. [name='%1']", mName);
             }
 
-            for (auto pair : mUniformBlockCache)
+            for (auto pair : mUniformBlockBuffers)
             {
-                const auto& block = pair.second;
-                if (block.block_buffer_size)
+                const auto& buffer = pair.second;
+                if (buffer.IsValid())
                 {
-                    mDevice->FreeBuffer(block.buffer_index, block.buffer_offset,
-                                        block.block_buffer_size, gfx::BufferUsage::Stream, BufferType::UniformBuffer);
+                    mDevice->FreeBuffer(buffer);
                 }
             }
         }
         bool Build(const std::vector<gfx::ShaderPtr>& shaders)
         {
-            GLuint prog = mGL.glCreateProgram();
-            DEBUG("Created new GL program object. [name='%1', handle='%2']", mName, prog);
-
+            std::vector<dev::GraphicsShader> shader_handles;
             for (const auto& shader : shaders)
             {
-                ASSERT(shader && shader->IsValid());
-                GL_CALL(glAttachShader(prog,
-                    static_cast<const ShaderImpl*>(shader.get())->GetHandle()));
+                const auto* ptr = static_cast<const ShaderImpl*>(shader.get());
+                shader_handles.push_back(ptr->GetShader());
             }
-            GL_CALL(glLinkProgram(prog));
-            GL_CALL(glValidateProgram(prog));
-
-            GLint link_status = 0;
-            GLint valid_status = 0;
-            GL_CALL(glGetProgramiv(prog, GL_LINK_STATUS, &link_status));
-            GL_CALL(glGetProgramiv(prog, GL_VALIDATE_STATUS, &valid_status));
-
-            GLint length = 0;
-            GL_CALL(glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &length));
 
             std::string build_info;
-            build_info.resize(length);
-            GL_CALL(glGetProgramInfoLog(prog, length, nullptr, &build_info[0]));
-
-            if (link_status == 0)
+            auto program = mDevice->BuildProgram(shader_handles, &build_info);
+            if (!program.IsValid())
             {
-                ERROR("Program link error. [name='%1', info='%2']", mName, build_info);
-                GL_CALL(glDeleteProgram(prog));
-                for (const auto& shader : shaders)
-                {
-                    static_cast<const ShaderImpl*>(shader.get())->DumpSource();
-                }
-                return false;
-            }
-            else if (valid_status == 0)
-            {
-                ERROR("Program is not valid. [name='%1', info='%2']", mName, build_info);
-                GL_CALL(glDeleteProgram(prog));
-                for (const auto& shader : shaders)
-                {
-                    static_cast<const ShaderImpl*>(shader.get())->DumpSource();
-                }
+                ERROR("Program build error. [error='%1']", build_info);
                 return false;
             }
 
             DEBUG("Program was built successfully. [name='%1', info='%2']", mName, build_info);
             for (auto& shader : shaders)
             {
-                static_cast<const ShaderImpl*>(shader.get())->ClearSource();
+                const auto* ptr = static_cast<const ShaderImpl*>(shader.get());
+                ptr->ClearSource();
             }
-            mProgram = prog;
+            mProgram = program;
             return true;
         }
 
         void ApplyUniformState(const gfx::ProgramState& state) const
         {
-            GL_CALL(glUseProgram(mProgram));
-            // flush pending uniforms onto the GPU program object
+            dev::ProgramState ps;
             for (size_t i=0; i<state.GetUniformCount(); ++i)
             {
-                const auto& setting = state.GetUniformSetting(i);
-                const auto& uniform = this->GetUniform(setting.name);
-                if (uniform.location == -1)
-                    continue;
-
-                const auto& value = setting.value;
-                const auto location = uniform.location;
-
-                // if the glUnifromXYZ gives GL_INVALID_OPERATION a possible
-                // cause is using wrong API for the uniform. for example
-                // calling glUniform1f when the uniform is an int.
-
-                if (const auto* ptr = std::get_if<int>(&value))
-                    GL_CALL(glUniform1i(location, *ptr));
-                else if (const auto* ptr = std::get_if<float>(&value))
-                    GL_CALL(glUniform1f(location, *ptr));
-                else if (const auto* ptr = std::get_if<glm::ivec2>(&value))
-                    GL_CALL(glUniform2i(location, ptr->x, ptr->y));
-                else if (const auto* ptr = std::get_if<glm::vec2>(&value))
-                    GL_CALL(glUniform2f(location, ptr->x, ptr->y));
-                else if (const auto* ptr = std::get_if<glm::vec3>(&value))
-                    GL_CALL(glUniform3f(location, ptr->x, ptr->y, ptr->z));
-                else if (const auto* ptr = std::get_if<glm::vec4>(&value))
-                    GL_CALL(glUniform4f(location, ptr->x, ptr->y, ptr->z, ptr->w));
-                else if (const auto* ptr = std::get_if<gfx::Color4f>(&value)) {
-                    // Assume sRGB encoded color values now. so this is a simple
-                    // place to convert to linear and will catch all uses without
-                    // breaking the higher level APIs
-                    // the cost of the sRGB conversion should be mitigated due to
-                    // the hash check to compare to the previous value.
-                    const auto& linear = sRGB_Decode(*ptr);
-                    GL_CALL(glUniform4f(location, linear.Red(), linear.Green(), linear.Blue(), linear.Alpha()));
-                }
-                else if (const auto* ptr = std::get_if<glm::mat2>(&value))
-                    GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE /* transpose */, glm::value_ptr(*ptr)));
-                else if (const auto* ptr = std::get_if<glm::mat3>(&value))
-                    GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE /* transpose */, glm::value_ptr(*ptr)));
-                else if (const auto* ptr = std::get_if<glm::mat4>(&value))
-                    GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE /*transpose*/, glm::value_ptr(*ptr)));
-                else BUG("Unhandled shader program uniform type.");
+                const auto& uniform = state.GetUniformSetting(i);
+                ps.uniforms.push_back(&uniform);
             }
+            mDevice->SetProgramState(mProgram, ps);
 
             for (size_t i=0; i<state.GetUniformBlockCount(); ++i)
             {
-                auto& block = state.GetUniformBlock(i);
-                auto& uniform = this->GetUniformBlock(block.GetName());
-                if (uniform.location == -1)
-                    continue;
+                const auto& block = state.GetUniformBlock(i);
 
-                const auto& block_buffer = block.GetBuffer();
-                const auto block_buffer_size = block_buffer.size();
+                auto gpu_buffer = mUniformBlockBuffers[block.GetName()];
 
-                if (uniform.block_buffer_size != block_buffer_size)
+                const auto& cpu_block_buffer = block.GetBuffer();
+                const auto block_buffer_size = cpu_block_buffer.size();
+
+                if (gpu_buffer.buffer_bytes < block_buffer_size)
                 {
-                    std::tie(uniform.buffer_index, uniform.buffer_offset) =
-                            mDevice->AllocateBuffer(block_buffer_size, gfx::BufferUsage::Stream, BufferType::UniformBuffer);
+                    gpu_buffer = mDevice->AllocateBuffer(block_buffer_size, dev::BufferUsage::Stream, dev::BufferType::UniformBuffer);
                 }
-                mDevice->UploadBuffer(uniform.buffer_index,
-                                      uniform.buffer_offset,
-                                      block_buffer.data(), block_buffer_size,
-                                      gfx::BufferUsage::Stream, BufferType::UniformBuffer);
-                uniform.block_buffer_size = block_buffer_size;
-
-                const auto buffer_name = mDevice->mBuffers[BufferIndex(BufferType::UniformBuffer)][uniform.buffer_index].name;
-                // todo: binding index ??
-                const auto binding_index = GLuint(i);
-
-                GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, buffer_name));
-                GL_CALL(glUniformBlockBinding(mProgram, uniform.location, binding_index));
-                GL_CALL(glBindBufferRange(GL_UNIFORM_BUFFER, binding_index, buffer_name, uniform.buffer_offset, uniform.block_buffer_size));
+                mDevice->UploadBuffer(gpu_buffer, cpu_block_buffer.data(), block_buffer_size);
+                mDevice->BindProgramBuffer(mProgram, gpu_buffer, block.GetName(), i); // todo: binding index ??
+                mUniformBlockBuffers[block.GetName()] = gpu_buffer;
             }
         }
 
         bool IsValid() const override
         {
-            return mProgram != 0;
+            return mProgram.IsValid();
         }
 
         std::string GetName() const override
@@ -2622,94 +3267,57 @@ private:
         {
         }
 
+        dev::GraphicsProgram GetProgram() const
+        {
+            return mProgram;
+        }
+
         GLuint GetHandle() const
-        { return mProgram; }
+        { return mProgram.handle; }
         void SetFrameStamp(size_t frame_number) const
         { mFrameNumber = frame_number; }
         size_t GetFrameStamp() const
         { return mFrameNumber; }
 
-
-        struct CachedUniform {
-            GLuint location = 0;
-            uint32_t hash   = 0;
-        };
-
-        struct CachedUniformBlock {
-            GLuint location = 0;
-            size_t block_buffer_size = 0;
-            size_t buffer_index  = 0;
-            size_t buffer_offset = 0;
-        };
-
-        CachedUniform& GetUniform(const std::string& name) const
-        {
-            auto it = mUniformCache.find(name);
-            if (it != std::end(mUniformCache))
-                return it->second;
-
-            auto ret = mGL.glGetUniformLocation(mProgram, name.c_str());
-            CachedUniform uniform;
-            uniform.location = ret;
-            uniform.hash     = 0;
-            mUniformCache[name] = uniform;
-            return mUniformCache[name];
-        }
-        CachedUniformBlock& GetUniformBlock(const std::string& name) const
-        {
-            auto it = mUniformBlockCache.find(name);
-            if (it != std::end(mUniformBlockCache))
-                return it->second;
-
-            auto ret = mGL.glGetUniformBlockIndex(mProgram, name.c_str());
-            CachedUniformBlock block;
-            block.location = ret;
-            mUniformBlockCache[name] = block;
-            return mUniformBlockCache[name];
-        }
-
     private:
-        const OpenGLFunctions& mGL;
-        OpenGLES2GraphicsDevice* mDevice = nullptr;
-        GLuint mProgram = 0;
-        GLuint mVersion = 0;
+        dev::GraphicsDevice* mDevice = nullptr;
+        dev::GraphicsProgram mProgram;
         std::string mName;
         std::string mGpuId;
 
-        mutable std::unordered_map<std::string, CachedUniform> mUniformCache;
-        mutable std::unordered_map<std::string, CachedUniformBlock> mUniformBlockCache;
+        mutable std::unordered_map<std::string, dev::GraphicsBuffer> mUniformBlockBuffers;
         mutable std::size_t mFrameNumber = 0;
     };
 
     class ShaderImpl : public gfx::Shader
     {
     public:
-        explicit ShaderImpl(const OpenGLFunctions& funcs) noexcept
-          : mGL(funcs)
+        explicit ShaderImpl(dev::GraphicsDevice* device) noexcept
+          : mDevice(device)
         {}
 
        ~ShaderImpl() override
         {
-            if (mShader)
+            if (mShader.IsValid())
             {
-                GL_CALL(glDeleteShader(mShader));
-                DEBUG("Deleted shader object. [name='%1', handle=[%2]", mName, mShader);
+                mDevice->DeleteShader(mShader);
+                DEBUG("Deleted graphics shader. [name='%1']", mName);
             }
         }
         void CompileSource(const std::string& source, bool debug)
         {
-            GLenum type = GL_NONE;
+            dev::ShaderType type = dev::ShaderType::Invalid;
             std::stringstream ss(source);
             std::string line;
-            while (std::getline(ss, line) && type == GL_NONE)
+            while (std::getline(ss, line) && type == dev::ShaderType::Invalid)
             {
                 if (line.find("gl_Position") != std::string::npos)
-                    type = GL_VERTEX_SHADER;
+                    type = dev::ShaderType::VertexShader;
                 else if (line.find("gl_FragColor") != std::string::npos ||
                          line.find("fragOutColor") != std::string::npos)
-                    type = GL_FRAGMENT_SHADER;
+                    type = dev::ShaderType::FragmentShader;
             }
-            if (type == GL_NONE)
+            if (type == dev::ShaderType::Invalid)
             {
                 ERROR("Failed to identify shader type. [name='%1']", mName);
                 DEBUG("In order for the automatic shader type identification to work your shader must have one of the following:");
@@ -2720,28 +3328,11 @@ private:
                 return;
             }
 
-            GLint status = 0;
-            GLint shader = mGL.glCreateShader(type);
-            DEBUG("Created new GL shader object. [name='%1', type='%2']", mName, GLEnumToStr(type));
-
-            const char* source_ptr = source.c_str();
-            GL_CALL(glShaderSource(shader, 1, &source_ptr, nullptr));
-            GL_CALL(glCompileShader(shader));
-            GL_CALL(glGetShaderiv(shader, GL_COMPILE_STATUS, &status));
-
-            GLint length = 0;
-            GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length));
-
-            std::string compile_info;
-            compile_info.resize(length);
-            GL_CALL(glGetShaderInfoLog(shader, length, nullptr, &compile_info[0]));
-
-            if (status == 0)
+            auto shader = mDevice->CompileShader(source, type, &mCompileInfo);
+            if (!shader.IsValid())
             {
-                GL_CALL(glDeleteShader(shader));
-                ERROR("Shader compile error. [name='%1', info='%2']", mName, compile_info);
+                ERROR("Shader object compile error. [name='%1', info='%2']", mName, mCompileInfo);
                 DumpSource(source);
-                mError = compile_info;
                 return;
             }
             else
@@ -2749,7 +3340,7 @@ private:
                 if (debug)
                     DumpSource(source);
 
-                DEBUG("Shader was built successfully. [name='%1', info='%2']", mName, compile_info);
+                DEBUG("Shader was built successfully. [name='%1', info='%2']", mName, mCompileInfo);
             }
             mShader = shader;
             mSource = source;
@@ -2776,26 +3367,23 @@ private:
         }
 
         bool IsValid() const override
-        { return mShader != 0; }
+        { return mShader.IsValid(); }
         std::string GetName() const override
         { return mName; }
         std::string GetError() const override
-        { return mError; }
+        { return mCompileInfo; }
 
         inline void SetName(std::string name) noexcept
         { mName = std::move(name); }
 
-        inline GLuint GetHandle() const noexcept
+        inline dev::GraphicsShader GetShader() const noexcept
         { return mShader; }
 
     private:
-        const OpenGLFunctions& mGL;
-
-    private:
-        GLuint mShader  = 0;
-        GLuint mVersion = 0;
+        dev::GraphicsDevice* mDevice = nullptr;
+        dev::GraphicsShader mShader;
         std::string mName;
-        std::string mError;
+        std::string mCompileInfo;
         mutable std::string mSource;
     };
     struct Extensions;
@@ -2803,42 +3391,18 @@ private:
     class FramebufferImpl : public gfx::Framebuffer
     {
     public:
-        FramebufferImpl(std::string name, const OpenGLFunctions& funcs, OpenGLES2GraphicsDevice& device)
+        FramebufferImpl(dev::GraphicsDevice* device, std::string name)
           : mName(std::move(name))
-          , mGL(funcs)
           , mDevice(device)
         {}
        ~FramebufferImpl() override
         {
-            for (auto& texture : mTextures)
-            {
-                if (!texture)
-                    continue;
+            mTextures.clear();
 
-                for (size_t unit = 0; unit < mDevice.mTextureUnits.size(); ++unit)
-                {
-                    if (mDevice.mTextureUnits[unit].texture == texture.get())
-                    {
-                        mDevice.mTextureUnits[unit].texture = nullptr;
-                        break;
-                    }
-                }
-                mTextures.clear();
-            }
-
-            if (mDepthBuffer)
+            if (mFramebuffer.IsValid())
             {
-                GL_CALL(glDeleteRenderbuffers(1, &mDepthBuffer));
-            }
-            for (auto buffer : mMultisampleColorBuffers)
-            {
-                GL_CALL(glDeleteRenderbuffers(1, &buffer.handle));
-            }
-
-            if (mHandle)
-            {
-                GL_CALL(glDeleteFramebuffers(1, &mHandle));
-                DEBUG("Deleted frame buffer object. [name='%1', handle=%2]", mName, mHandle);
+                mDevice->DeleteFramebuffer(mFramebuffer);
+                DEBUG("Deleted frame buffer object. [name='%1']", mName);
             }
         }
         void SetConfig(const Config& conf) override
@@ -2848,7 +3412,7 @@ private:
             // we don't allow the config to be changed after it has been created.
             // todo: delete the SetConfig API and take the FBO config in the
             // device level API to create the FBO.
-            if (mHandle)
+            if (mFramebuffer.IsValid())
             {
                 ASSERT(mConfig.format == conf.format);
                 ASSERT(mConfig.msaa   == conf.msaa);
@@ -2895,7 +3459,7 @@ private:
                 // are other attachments then the client texture size must
                 // match the size of the other attachments. otherwise the FBO
                 // is in invalid state.
-                if (mHandle && (mConfig.format != Format::ColorRGBA8))
+                if (mFramebuffer.IsValid() && (mConfig.format != Format::ColorRGBA8))
                 {
                     ASSERT(width == mConfig.width);
                     ASSERT(height == mConfig.height);
@@ -2930,51 +3494,10 @@ private:
             // resolve the MSAA render buffer into a texture target with glBlitFramebuffer
             // the insane part here is that we need a *another* frame buffer for resolving
             // the multisampled color attachment into a texture.
-            if (const auto samples = GetSamples())
+            if (const auto samples = mFramebuffer.samples)
             {
                 auto* resolve_target = GetColorBufferTexture(index);
-
-                FramebufferImpl* fbo = static_cast<FramebufferImpl*>(mDevice.FindFramebuffer("ResolveFBO"));
-                if (fbo == nullptr)
-                {
-                    fbo = static_cast<FramebufferImpl*>(mDevice.MakeFramebuffer("ResolveFBO"));
-                    gfx::Framebuffer::Config config;
-                    config.width  = 0; // irrelevant since using a texture target.
-                    config.height = 0;
-                    config.format = gfx::Framebuffer::Format::ColorRGBA8;
-                    config.msaa   = gfx::Framebuffer::MSAA::Disabled;
-                    config.color_target_count = 1;
-                    fbo->SetConfig(config);
-                    fbo->SetColorTarget(resolve_target, gfx::Framebuffer::ColorAttachment::Attachment0);
-                    fbo->Create();
-                    fbo->Complete();
-                }
-                else
-                {
-                    fbo->SetColorTarget(resolve_target, gfx::Framebuffer::ColorAttachment::Attachment0);
-                    fbo->Complete();
-                }
-
-                // See the comments in Complete() regarding the glDrawBuffers which is
-                // the other half required to deal with multiple color attachments
-                // in multisampled FBO
-                ASSERT(mGL.glReadBuffer);
-
-                const auto width  = resolve_target->GetWidth();
-                const auto height = resolve_target->GetHeight();
-
-                GL_CALL(glBindFramebuffer(GL_READ_FRAMEBUFFER, mHandle));
-                GL_CALL(glReadBuffer(GL_COLOR_ATTACHMENT0 + index));
-
-                const GLenum draw_buffers = GL_COLOR_ATTACHMENT0;
-                GL_CALL(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo->mHandle));
-                GL_CALL(glDrawBuffers(1, &draw_buffers));
-                GL_CALL(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
-
-                fbo->SetFrameStamp(mFrameNumber);
-                fbo->Resolve(nullptr, gfx::Framebuffer::ColorAttachment::Attachment0);
-                fbo->SetColorTarget(nullptr, gfx::Framebuffer::ColorAttachment::Attachment0);
-
+                mDevice->ResolveFramebuffer(mFramebuffer, resolve_target->GetTexture(), index);
                 if (color)
                     *color = resolve_target;
             }
@@ -3009,40 +3532,16 @@ private:
         {
             // in case of a multisampled FBO the color attachment is a multisampled render buffer
             // and the resolve client texture will be the *resolve* target in the blit framebuffer operation.
-            if (const auto samples = GetSamples())
+            if (const auto samples = mFramebuffer.samples)
             {
                 CreateColorBufferTextures();
                 const auto* resolve_target = GetColorBufferTexture(0);
                 const unsigned width  = resolve_target->GetWidth();
                 const unsigned height = resolve_target->GetHeight();
 
-                // this should not leak anything since we only allow the
-                // number of color targets to be set once in the SetConfig
-                // thus this vector is only ever resized once.
-                mMultisampleColorBuffers.resize(mConfig.color_target_count);
-
                 for (unsigned i=0; i<mConfig.color_target_count; ++i)
                 {
-                    auto& buff = mMultisampleColorBuffers[i];
-                    if (!buff.handle)
-                        GL_CALL(glGenRenderbuffers(1, &buff.handle));
-
-                    GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, buff.handle));
-
-                    // GL ES3 reference pages under glRenderBufferStorageMultiple lists the table of formats but
-                    // this table doesn't include the information about which formats are "color renderable".
-                    // Check the ES3 spec under "3.3 TEXTURES" (p.180) or the ES3 reference pages under glTexStorage2D.
-                    // https://registry.khronos.org/OpenGL-Refpages/es3.0/
-
-                    if ((buff.width != width) || (buff.height != height))
-                    {
-                        GL_CALL(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_SRGB8_ALPHA8, width, height));
-                        buff.width  = width;
-                        buff.height = height;
-                        DEBUG("Allocated multi-sampled render buffer storage. [vbo='%1', size=%2x%3]", mName, width, height);
-                    }
-                    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
-                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_RENDERBUFFER, buff.handle));
+                    mDevice->AllocateRenderTarget(mFramebuffer, i, width, height);
                 }
             }
             else
@@ -3053,182 +3552,44 @@ private:
                     auto* color_target = GetColorBufferTexture(i);
                     // in case of a single sampled FBO the resolve target can be used directly
                     // as the color attachment in the FBO.
-                    GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
-                    GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, color_target->GetHandle(), 0));
+                    mDevice->BindRenderTargetTexture2D(mFramebuffer, color_target->GetTexture(), i);
                 }
             }
+            std::vector<unsigned> color_attachments;
+            for (unsigned i=0; i<mConfig.color_target_count; ++i)
+                color_attachments.push_back(i);
 
-
-            // trying to render to multiple color attachments without platform
-            // support is a BUG. The device client is responsible for taking
-            // an alternative rendering path when there's no support
-            // for multiple color attachments.
-            // This API is only available starting from GL ES3 or WebGL2.
-            //
-            // It's also available with GL_EXT_draw_buffers extension but
-            // the problem is that there's no support for *glReadBuffer*
-            //
-            // We could choose to have single sampled FBO with ES2 / WebGL1
-            // with the GL_EXT_draw_buffers extension however.  But this
-            // isn't done now since the idea is to move forward to ES3 and
-            // ES3 shaders too (where not yet done)
-            ASSERT(mGL.glDrawBuffers);
-
-            std::vector<GLenum> draw_buffers;
-
-            for (unsigned i = 0; i < mConfig.color_target_count; ++i)
+            if (!mDevice->CompleteFramebuffer(mFramebuffer, color_attachments))
             {
-                draw_buffers.push_back(GL_COLOR_ATTACHMENT0 + i);
+                ERROR("Unsupported framebuffer configuration. [name='%1']", mName);
+                return false;
             }
-            GL_CALL(glDrawBuffers(draw_buffers.size(), &draw_buffers[0]));
 
-            // possible FBO *error* statuses are: INCOMPLETE_ATTACHMENT, INCOMPLETE_DIMENSIONS and INCOMPLETE_MISSING_ATTACHMENT
-            // we're treating these status codes as BUGS in the engine code that is trying to create the
-            // frame buffer object and has violated the frame buffer completeness requirement or other
-            // creation parameter constraints.
-            const auto ret = mGL.glCheckFramebufferStatus(GL_FRAMEBUFFER);
-            if (ret == GL_FRAMEBUFFER_COMPLETE)
-                return true;
-            else if (ret == GL_FRAMEBUFFER_UNSUPPORTED)
-                ERROR("Unsupported FBO configuration. [name='%1']", mName);
-            else if (ret == GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT) BUG("Incomplete FBO attachment.");
-            else if (ret == GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS) BUG("Incomplete FBO dimensions.");
-            else if (ret == GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) BUG("Incomplete FBO, missing attachment.");
-            else if (ret == GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE) BUG("Incomplete FBO, wrong sample counts.");
-            return false;
+            return true;
         }
 
         bool Create()
         {
-            ASSERT(mHandle == 0);
-
-            // WebGL spec see.
-            // https://registry.khronos.org/webgl/specs/latest/1.0/
-
-            // The OpenGL ES Framebuffer has multiple different sometimes exclusive properties/features that can be
-            // parametrized when creating an FBO.
-            // - Logical buffers attached to the FBO possible combinations of
-            //   logical buffers including not having some buffer.
-            //    * Color buffer
-            //    * Depth buffer
-            //    * Stencil buffer
-            // - The bit representation for some logical buffer that dictates the number of bits used for the data.
-            //   For example 8bit RGBA/32bit float color buffer or 16bit depth buffer or 8bit stencil buffer.
-            // - The storage object that provides the data for the bitwise representation of the buffer's contents.
-            //    * Texture object
-            //    * Render buffer
-            //
-            // The OpenGL API essentially allows for a lot of possible FBO configurations to be created while in
-            // practice only few are supported (and make sense). Unfortunately the ES2 spec does not require any
-            // particular configurations to be supported by the implementation. Additionally, only 16bit color buffer
-            // configurations are available for render buffer. In practice, it seems that implementations prefer
-            // to support configurations that use a combined storage for depth + stencil and this requires and
-            // extension 'OES_packed_depth_stencil'.
-            // WebGL however makes an explicit requirement for implementations to support at least the following
-            // configurations:
-            // COLOR0                            DEPTH                           STENCIL
-            // RGBA/UNSIGNED_BYTE texture        N/A                             N/A
-            // RGBA/UNSIGNED_BYTE texture        DEPTH_COMPONENT16 renderbuffer  N/A
-            // RGBA/UNSIGNED_BYTE texture        DEPTH_STENCIL     renderbuffer  DEPTH_STENCIL renderbuffer
-            //
-            // Small caveat the WebGL spec doesn't specify the bitwise representation for DEPTH_STENCIL, i.e.
-            // how many bits of depth and how many bits of stencil.
-
-            // Some relevant extensions that provide more FBO format support.(All tested on Linux + NVIDIA)
-            // NAME                       Firefox   Chrome   Desktop   Desc
-            // ---------------------------------------------------------------------------------------------------------
-            // OES_rgb8_rgba8             No        No       Yes       RGB8 and RGBA8 color render buffer support (written against ES1)
-            // OES_depth32                No        No       Yes       32bit depth render buffer (written against ES1)
-            // OES_depth24                No        No       Yes       24bit depth render buffer (written against ES1)
-            // OES_depth_texture          No        No       Yes
-            // OES_packed_depth_stencil   No        No       Yes       24bit depth combined with 8bit stencil render buffer and texture format
-            // WEBGL_color_buffer_float   Yes       Yes      No        32bit float color render buffer and float texture attachment
-            // WEBGL_depth_texture        ?         ?        No        Limited form of OES_packed_depth_stencil + OES_depth_texture (ANGLE_depth_texture)
-            //
-
-            // Additional issues:
-            // * WebGL supports only POT textures with mips
-            // * Multisampled FBO creation and resolve. -> EXT_multisampled_render_to_texture but only for desktop
-            // * MIP generation
-            // * sRGB encoding
+            ASSERT(!mFramebuffer.IsValid());
 
             CreateColorBufferTextures();
 
             auto* texture = GetColorBufferTexture(0);
+            const auto width  = texture->GetWidth();
+            const auto height = texture->GetHeight();
 
-            const auto version = mDevice.mContext->GetVersion();
-            const auto xres = texture->GetWidth();
-            const auto yres = texture->GetHeight();
-            const auto samples = GetSamples();
-
-            GL_CALL(glGenFramebuffers(1, &mHandle));
-            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
-
-            // all the calls to bind the texture target to the framebuffer have been
-            // removed to Complete() function and are here for reference only.
-            // The split between Create() and Complete() allows the same FBO object
-            // to be reused with a different target texture.
-            if (mConfig.format == Format::ColorRGBA8)
-            {
-                // for posterity
-                //GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
-            }
-            else if (mConfig.format == Format::ColorRGBA8_Depth16)
-            {
-                GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
-                GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
-                if (samples)
-                    GL_CALL(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT16, xres, yres));
-                else GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, xres, yres));
-                GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-            }
-            else if (mConfig.format == Format::ColorRGBA8_Depth24_Stencil8)
-            {
-                if (version == dev::Context::Version::OpenGL_ES2)
-                {
-                    ASSERT(samples == 0);
-
-                    if (!mDevice.mExtensions.OES_packed_depth_stencil)
-                    {
-                        ERROR("Failed to create FBO. OES_packed_depth_stencil extension was not found. [name='%1']", mName);
-                        return false;
-                    }
-                    GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
-                    GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
-                    GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, xres, yres));
-                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-                }
-                else if (version == dev::Context::Version::WebGL_1)
-                {
-                    ASSERT(samples == 0);
-
-                    // the WebGL spec doesn't actually mention the bit depths for the packed
-                    // depth+stencil render buffer and the API exposed GLenum is GL_DEPTH_STENCIL 0x84F9
-                    // which however is the same as GL_DEPTH_STENCIL_OES from OES_packed_depth_stencil
-                    // So, I'm assuming here that the format is in fact 24bit depth with 8bit stencil.
-                    GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
-                    GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
-                    GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, WEBGL_DEPTH_STENCIL, xres, yres));
-                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, WEBGL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-                }
-                else if (version == dev::Context::Version::OpenGL_ES3 || version == dev::Context::Version::WebGL_2)
-                {
-                    GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
-                    GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
-                    if (samples)
-                        GL_CALL(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH24_STENCIL8, xres, yres));
-                    else GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, xres, yres));
-                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-                }
-            }
+            dev::FramebufferConfig config;
+            config.width  = width;
+            config.height = height;
+            config.msaa   = IsMultisampled();
+            config.format = mConfig.format;
+            mFramebuffer = mDevice->CreateFramebuffer(config);
+            DEBUG("Created new frame buffer object. [name='%1', width=%2, height=%3, format=%4, samples=%5]",
+                  mName, width, height, mConfig.format, config.msaa);
 
             // commit the size
-            mConfig.width  = xres;
-            mConfig.height = yres;
-
-            DEBUG("Created new frame buffer object. [name='%1', width=%2, height=%3, format=%4, samples=%5]", mName, xres, yres, mConfig.format, samples);
+            mConfig.width  = width;
+            mConfig.height = height;
             return true;
         }
         void SetFrameStamp(size_t stamp)
@@ -3253,27 +3614,16 @@ private:
         }
         inline GLuint GetHandle() const noexcept
         {
-            return mHandle;
+            return mFramebuffer.handle;
         }
         inline bool IsReady() const noexcept
         {
-            return mHandle != 0;
+            return mFramebuffer.IsValid();
         }
 
-        unsigned GetSamples() const noexcept
+        bool IsMultisampled() const noexcept
         {
-            if (mConfig.msaa == MSAA::Disabled)
-                return 0;
-
-            const auto version = mDevice.mContext->GetVersion();
-            if (version == dev::Context::Version::OpenGL_ES2 ||
-                version == dev::Context::Version::WebGL_1)
-                return 0;
-            else if (version == dev::Context::Version::OpenGL_ES3 ||
-                     version == dev::Context::Version::WebGL_2)
-                return 4;
-            else BUG("Missing OpenGL ES version.");
-            return 0;
+            return mConfig.msaa == MSAA::Enabled;
         }
 
         void CreateColorBufferTextures()
@@ -3293,7 +3643,7 @@ private:
                 if (!mTextures[i])
                 {
                     const auto& name = "FBO/" + mName + "/Color" + std::to_string(i);
-                    mTextures[i] = std::make_unique<TextureImpl>(name, mGL, mDevice);
+                    mTextures[i] = std::make_unique<TextureImpl>(mDevice, name);
                     mTextures[i]->SetName(name);
                     mTextures[i]->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::sRGBA);
                     mTextures[i]->SetFilter(gfx::Texture::MinFilter::Linear);
@@ -3331,10 +3681,13 @@ private:
             return mConfig.color_target_count;
         }
 
+        dev::Framebuffer GetFramebuffer() const
+        { return mFramebuffer; }
     private:
         const std::string mName;
-        const OpenGLFunctions& mGL;
-        OpenGLES2GraphicsDevice& mDevice;
+
+        dev::GraphicsDevice* mDevice = nullptr;
+        dev::Framebuffer mFramebuffer;
 
         // Texture target that we allocate when the use hasn't
         // provided a client texture. In case of a single sampled
@@ -3346,22 +3699,9 @@ private:
         // Client provided texture(s) that will ultimately contain
         // the rendered result.
         std::vector<TextureImpl*> mClientTextures;
-
-        GLuint mHandle = 0;
-        // this is either only depth or packed depth+stencil
-        GLuint mDepthBuffer = 0;
-        // In case of multisampled FBO the color buffer is a MSAA
-        // render buffer which then gets resolved (blitted) into the
-        // associated color target texture.
-        struct MSAARenderBuffer {
-            GLuint handle = 0;
-            GLuint width  = 0;
-            GLuint height = 0;
-        };
-        std::vector<MSAARenderBuffer> mMultisampleColorBuffers;
+        std::size_t mFrameNumber = 0;
 
         Config mConfig;
-        std::size_t mFrameNumber = 0;
     };
 private:
     std::map<std::string, std::shared_ptr<gfx::InstancedDraw>> mInstances;
@@ -3370,33 +3710,21 @@ private:
     std::map<std::string, std::shared_ptr<gfx::Program>> mPrograms;
     std::map<std::string, std::unique_ptr<gfx::Texture>> mTextures;
     std::map<std::string, std::unique_ptr<gfx::Framebuffer>> mFBOs;
-    std::shared_ptr<dev::Context> mContextImpl;
-    dev::Context* mContext = nullptr;
     std::size_t mFrameNumber = 0;
-    OpenGLFunctions mGL;
+
+    dev::GraphicsDevice* mDevice = nullptr;
+
     MinFilter mDefaultMinTextureFilter = MinFilter::Nearest;
     MagFilter mDefaultMagTextureFilter = MagFilter::Nearest;
-    // texture units and their current settings.
-    mutable TextureUnits mTextureUnits;
 
-    struct BufferObject {
-        gfx::Geometry::Usage usage = gfx::Geometry::Usage::Static;
-        GLuint name     = 0;
-        size_t capacity = 0;
-        size_t offset   = 0;
-        size_t refcount = 0;
+    // cached texture unit state. used to omit texture unit
+    // state changes when not needed.
+    struct TextureUnit {
+        // the texture currently bound to the unit.
+        TextureImpl* texture = nullptr;
     };
-    // vertex buffers at index 0 and index buffers at index 1, uniform buffers at index 2
-    std::vector<BufferObject> mBuffers[3];
-
-    struct Extensions {
-        bool EXT_sRGB = false;
-        bool OES_packed_depth_stencil = false;
-        // support multiple color attachments in GL ES2.
-        bool GL_EXT_draw_buffers = false;
-    } mExtensions;
-
-    unsigned mUniformBufferOffsetAlignment = 0;
+    // texture units and their current settings.
+    mutable std::vector<TextureUnit> mTextureUnits;
 };
 
 } // namespace

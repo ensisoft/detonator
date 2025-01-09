@@ -29,6 +29,7 @@
 
 #include "base/assert.h"
 #include "base/types.h"
+#include "device/enum.h"
 #include "graphics/color4f.h"
 
 namespace gfx
@@ -57,16 +58,7 @@ namespace gfx
         Blinking  = 0x2
     };
 
-    // Specify common usage hint for a GPU buffer such as
-    // vertex buffer, index buffer etc.
-    enum class BufferUsage {
-        // The buffer is updated once and used multiple times.
-        Static,
-        // The buffer is updated multiple times and used once/few times.
-        Stream,
-        // The buffer is updated multiple times and used multiple times.
-        Dynamic
-    };
+    using BufferUsage = dev::BufferUsage;
 
     // Style of the drawable's geometry determines how the geometry
     // is to be rasterized.

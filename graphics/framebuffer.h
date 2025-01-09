@@ -20,6 +20,8 @@
 
 #include <cstdint>
 
+#include "device/enum.h"
+
 namespace gfx
 {
     class Texture;
@@ -27,26 +29,11 @@ namespace gfx
     class Framebuffer
     {
     public:
-        virtual ~Framebuffer() = default;
-        // Each Format specifies the logical buffers and their bitwise representations.
-        enum class Format {
-            // RGBA color buffer with 8bits (unsigned) per channel.
-            ColorRGBA8,
-            // RGBA color buffer with 8bits (unsigned) per channel with 16bit depth buffer.
-            ColorRGBA8_Depth16,
-            // RGBA color buffer with 8bits (unsigned) per channel with 24bit depth buffer and 8bit stencil buffer.
-            ColorRGBA8_Depth24_Stencil8
-        };
+        using ColorAttachment = dev::ColorAttachment;
+        using Format = dev::FramebufferFormat;
 
         enum class MSAA {
             Disabled, Enabled
-        };
-
-        enum class ColorAttachment : uint8_t {
-            Attachment0,
-            Attachment1,
-            Attachment2,
-            Attachment3
         };
 
         // Framebuffer configuration.
@@ -61,7 +48,7 @@ namespace gfx
 
             MSAA msaa = MSAA::Disabled;
         };
-
+        virtual ~Framebuffer() = default;
         // Set the framebuffer configuration that will be used when drawing.
         virtual void SetConfig(const Config& conf) = 0;
         // Set the color buffer texture target. If this is not set when the
