@@ -43,7 +43,7 @@
 #include "graphics/geometry.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
-#include "graphics/shaderprogram.h"
+#include "graphics/shader_program.h"
 #include "graphics/shadersource.h"
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"

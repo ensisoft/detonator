@@ -24,7 +24,7 @@
 #include <cstdint>
 
 #include "base/utility.h"
-#include "graphics/shaderprogram.h"
+#include "graphics/shader_program.h"
 #include "graphics/color4f.h"
 #include "graphics/types.h"
 
