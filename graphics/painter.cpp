@@ -31,6 +31,7 @@
 #include "graphics/geometry.h"
 #include "graphics/painter.h"
 #include "graphics/shader_program.h"
+#include "graphics/shader_programs.h"
 #include "graphics/shader_source.h"
 
 namespace gfx
@@ -207,7 +208,7 @@ void Painter::Draw(const Drawable& drawable,
     state.stencil_func = StencilFunc::Disabled;
     state.depth_test   = DepthTest::Disabled;
 
-    detail::GenericShaderProgram program;
+    GenericShaderProgram program;
     Draw(drawable, model, material, state, program, draw_state);
 }
 

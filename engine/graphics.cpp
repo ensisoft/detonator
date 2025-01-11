@@ -27,6 +27,7 @@
 #include "graphics/program.h"
 #include "graphics/renderpass.h"
 #include "graphics/shader_program.h"
+#include "graphics/shader_programs.h"
 #include "graphics/shader_source.h"
 #include "graphics/utility.h"
 #include "graphics/algo.h"
@@ -424,7 +425,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx:
         {
             if (!entity_layer.mask_cover_list.empty() && !entity_layer.mask_expose_list.empty())
             {
-                gfx::detail::StencilShaderProgram stencil_program;
+                gfx::StencilShaderProgram stencil_program;
 
                 scene_painter.ClearStencil(gfx::StencilClearValue(1));
                 scene_painter.Draw(entity_layer.mask_cover_list, stencil_program);
@@ -433,7 +434,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx:
             }
             else if (!entity_layer.mask_cover_list.empty())
             {
-                gfx::detail::StencilShaderProgram stencil_program;
+                gfx::StencilShaderProgram stencil_program;
 
                 scene_painter.ClearStencil(gfx::StencilClearValue(1));
                 scene_painter.Draw(entity_layer.mask_cover_list, stencil_program);
@@ -441,7 +442,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx:
             }
             else if (!entity_layer.mask_expose_list.empty())
             {
-                gfx::detail::StencilShaderProgram stencil_program;
+                gfx::StencilShaderProgram stencil_program;
 
                 scene_painter.ClearStencil(gfx::StencilClearValue(0));
                 scene_painter.Draw(entity_layer.mask_expose_list, stencil_program);
