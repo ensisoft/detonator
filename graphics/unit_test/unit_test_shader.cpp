@@ -19,7 +19,7 @@
 #include <iostream>
 
 #include "base/test_minimal.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 
 std::string CleanStr(const std::string& str)
 {

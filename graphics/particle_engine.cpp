@@ -24,7 +24,7 @@
 #include "data/writer.h"
 #include "data/reader.h"
 #include "graphics/particle_engine.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/geometry.h"
 #include "graphics/program.h"
 #include "graphics/transform.h"

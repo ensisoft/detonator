@@ -45,7 +45,7 @@
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/shader_program.h"
 #include "graphics/texture_file_source.h"
 #include "graphics/texture_bitmap_generator_source.h"

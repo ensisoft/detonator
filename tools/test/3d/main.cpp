@@ -39,7 +39,7 @@
 #include "graphics/material.h"
 #include "graphics/material_instance.h"
 #include "graphics/shader_program.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/utility.h"
 #include "graphics/transform.h"
 #include "graphics/device.h"

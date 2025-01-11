@@ -16,7 +16,7 @@
 
 #include "graphics/linebatch.h"
 #include "graphics/utility.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/vertex.h"
 #include "graphics/program.h"
 
