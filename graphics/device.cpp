@@ -16,7 +16,7 @@
 
 #include "config.h"
 
-#include <map>
+#include <unordered_map>
 
 #include "base/assert.h"
 #include "base/logging.h"
@@ -97,12 +97,12 @@ private:
     MinFilter mDefaultMinTextureFilter = MinFilter::Nearest;
     MagFilter mDefaultMagTextureFilter = MagFilter::Nearest;
 
-    std::map<std::string, std::shared_ptr<gfx::InstancedDraw>> mInstances;
-    std::map<std::string, std::shared_ptr<gfx::Geometry>> mGeoms;
-    std::map<std::string, std::shared_ptr<gfx::Shader>> mShaders;
-    std::map<std::string, std::shared_ptr<gfx::Program>> mPrograms;
-    std::map<std::string, std::unique_ptr<gfx::Texture>> mTextures;
-    std::map<std::string, std::unique_ptr<gfx::Framebuffer>> mFBOs;
+    std::unordered_map<std::string, std::shared_ptr<gfx::InstancedDraw>> mInstances;
+    std::unordered_map<std::string, std::shared_ptr<gfx::Geometry>> mGeoms;
+    std::unordered_map<std::string, std::shared_ptr<gfx::Shader>> mShaders;
+    std::unordered_map<std::string, std::shared_ptr<gfx::Program>> mPrograms;
+    std::unordered_map<std::string, std::unique_ptr<gfx::Texture>> mTextures;
+    std::unordered_map<std::string, std::unique_ptr<gfx::Framebuffer>> mFBOs;
     std::size_t mFrameNumber = 0;
 };
 
