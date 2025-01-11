@@ -38,7 +38,7 @@
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/material_instance.h"
-#include "graphics/shaderprogram.h"
+#include "graphics/shader_program.h"
 #include "graphics/shadersource.h"
 #include "graphics/utility.h"
 #include "graphics/transform.h"

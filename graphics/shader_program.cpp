@@ -16,7 +16,7 @@
 #include "config.h"
 
 #include "base/logging.h"
-#include "graphics/shaderprogram.h"
+#include "graphics/shader_program.h"
 #include "graphics/shadersource.h"
 #include "graphics/device.h"
 #include "graphics/material_class.h"

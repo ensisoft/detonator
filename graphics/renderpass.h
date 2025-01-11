@@ -22,7 +22,7 @@
 
 #include "graphics/types.h"
 #include "graphics/painter.h"
-#include "graphics/shaderprogram.h"
+#include "graphics/shader_program.h"
 #include "graphics/transform.h"
 
 namespace gfx

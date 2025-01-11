@@ -46,7 +46,7 @@
 #include "graphics/drawing.h"
 #include "graphics/types.h"
 #include "graphics/shadersource.h"
-#include "graphics/shaderprogram.h"
+#include "graphics/shader_program.h"
 #include "graphics/texture_file_source.h"
 #include "graphics/texture_bitmap_generator_source.h"
 #include "graphics/texture_text_buffer_source.h"

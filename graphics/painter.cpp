@@ -30,7 +30,7 @@
 #include "graphics/program.h"
 #include "graphics/geometry.h"
 #include "graphics/painter.h"
-#include "graphics/shaderprogram.h"
+#include "graphics/shader_program.h"
 #include "graphics/shadersource.h"
 
 namespace gfx

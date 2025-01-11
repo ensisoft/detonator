@@ -259,7 +259,7 @@ add_executable(GameEngine
     ../graphics/algo.cpp
     ../graphics/basic_light_program.cpp
     ../graphics/geometry.cpp
-    ../graphics/shaderprogram.cpp
+    ../graphics/shader_program.cpp
     ../graphics/shadersource.cpp
     ../graphics/painter.cpp
     ../graphics/material.cpp
