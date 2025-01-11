@@ -29,7 +29,7 @@
         <widget class="QGroupBox" name="baseProperties">
          <property name="minimumSize">
           <size>
-           <width>450</width>
+           <width>0</width>
            <height>0</height>
           </size>
          </property>
@@ -1340,7 +1340,7 @@
         <widget class="QGroupBox" name="particleProperties">
          <property name="minimumSize">
           <size>
-           <width>450</width>
+           <width>0</width>
            <height>0</height>
           </size>
          </property>
