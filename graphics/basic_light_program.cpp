@@ -37,14 +37,6 @@ std::string BasicLightProgram::GetShaderId(const Drawable& drawable, const Drawa
 {
     return base::FormatString("BasicLight+%1", drawable.GetShaderId(env));
 }
-std::string BasicLightProgram::GetShaderName(const Material& material, const Material::Environment& env) const
-{
-    return base::FormatString("BasicLight+%1", material.GetShaderName(env));
-}
-std::string BasicLightProgram::GetShaderName(const Drawable& drawable, const Drawable::Environment& env) const
-{
-    return base::FormatString("BasicLight+%1", drawable.GetShaderName(env));
-}
 
 std::string BasicLightProgram::GetName() const
 {
