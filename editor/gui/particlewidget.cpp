@@ -390,6 +390,18 @@ void ParticleEditorWidget::InitializeSettings(const UISettings& settings)
     SetValue(mUI.zoom,        settings.zoom);
     SetValue(mUI.cmbGrid,     settings.grid);
     SetValue(mUI.chkShowGrid, settings.show_grid);
+
+    // try to make the default splitter partitions sane.
+    // looks like this garbage needs to be done *after* the
+    // widget has been shown (of course) so using a timer
+    // hack for a hack
+    QTimer::singleShot(10, this, [this]() {
+        QList<int> sizes;
+        sizes << mUI.leftSide->sizeHint().width() + 80;
+        sizes << mUI.center->sizeHint().width();
+        sizes << mUI.rightSide->sizeHint().width() + 40;
+        mUI.mainSplitter->setSizes(sizes);
+    });
 }
 
 void ParticleEditorWidget::SetViewerMode()
