@@ -191,8 +191,8 @@ namespace dev
                                               unsigned texture_height, TextureFormat format) = 0;
         virtual MipStatus GenerateMipmaps(const TextureObject& texture) = 0;
 
-        virtual bool BindTexture2D(const TextureObject& texture, unsigned texture_sampler, unsigned texture_unit,
-                                   TextureWrapping texture_x_wrap, TextureWrapping texture_y_wrap,
+        virtual bool BindTexture2D(const TextureObject& texture, const GraphicsProgram& program, const std::string& sampler_name,
+                                   unsigned texture_unit, TextureWrapping texture_x_wrap, TextureWrapping texture_y_wrap,
                                    TextureMinFilter texture_min_filter, TextureMagFilter texture_mag_filter, BindWarnings* warnings) const = 0;
 
         virtual void DeleteTexture(const TextureObject& texture) = 0;
@@ -233,11 +233,11 @@ namespace dev
         virtual void ReadColor(unsigned x, unsigned y, unsigned width, unsigned  height,
                                const Framebuffer& fbo, void* color_data) const = 0;
 
-        virtual void GetResourceStats_tmp(GraphicsDeviceResourceStats* stats) const = 0;
-        virtual void GetDeviceCaps_tmp(GraphicsDeviceCaps* caps) const = 0;
+        virtual void GetResourceStats(GraphicsDeviceResourceStats* stats) const = 0;
+        virtual void GetDeviceCaps(GraphicsDeviceCaps* caps) const = 0;
 
-        virtual void BeginFrame_tmp()  = 0;
-        virtual void EndFrame_tmp(bool display) = 0;
+        virtual void BeginFrame()  = 0;
+        virtual void EndFrame(bool display) = 0;
 
     protected:
         virtual ~GraphicsDevice() = default;

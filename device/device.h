@@ -20,7 +20,7 @@
 
 #include <memory>
 
-#include "graphics/device.h"
+#include "device/graphics.h"
 
 namespace dev {
     // OpenGL graphics context. The context is the interface for the device
@@ -72,10 +72,10 @@ namespace dev {
 
         // If the device has graphics capabilities return the device as graphics device.
         // if the device doesn't have graphics capabilities returns nullptr.
-        virtual gfx::Device* AsGraphicsDevice() = 0;
+        virtual GraphicsDevice* AsGraphicsDevice() = 0;
         // Get a shared ptr handle of the device as a graphics device.
         // If the device doesn't have graphics capabilities returns null handle.
-        virtual std::shared_ptr<gfx::Device> GetSharedGraphicsDevice() = 0;
+        virtual std::shared_ptr<GraphicsDevice> GetSharedGraphicsDevice() = 0;
     private:
     };
 

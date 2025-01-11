@@ -450,7 +450,7 @@ void GfxWindow::doInit()
     {
         // create custom painter for fancier shader based effects.
         auto dev = dev::CreateDevice(std::make_shared<WindowContext>(mContext.get()));
-        gfx_device = dev->GetSharedGraphicsDevice();
+        gfx_device = gfx::CreateDevice(dev->GetSharedGraphicsDevice());
         shared_gfx_device = gfx_device;
     }
     mCustomGraphicsDevice  = gfx_device;

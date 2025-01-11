@@ -393,7 +393,8 @@ int test_main(int argc, char* argv[])
     constexpr auto SurfaceHeight = 768;
     const bool screenshot = opt.WasGiven("--screenshot");
 
-    auto graphics_device = dev::CreateDevice(std::make_shared<TestContext>(SurfaceWidth, SurfaceHeight))->GetSharedGraphicsDevice();
+    auto gpu_device = dev::CreateDevice(std::make_shared<TestContext>(SurfaceWidth, SurfaceHeight));
+    auto graphics_device = gfx::CreateDevice(gpu_device->GetSharedGraphicsDevice());
     auto graphics_painter = gfx::Painter::Create(graphics_device);
     graphics_painter->SetSurfaceSize(SurfaceWidth, SurfaceHeight);
     graphics_painter->SetEditingMode(false);

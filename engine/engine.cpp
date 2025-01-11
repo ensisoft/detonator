@@ -107,7 +107,8 @@ public:
         mAudio->EnableCaching(conf.audio.enable_pcm_caching);
         mAudio->Start();
 
-        mDevice  = dev::CreateDevice(init.context)->GetSharedGraphicsDevice();
+        auto device = dev::CreateDevice(init.context);
+        mDevice = gfx::CreateDevice(device->GetSharedGraphicsDevice());
         mDevice->SetDefaultTextureFilter(conf.default_min_filter);
         mDevice->SetDefaultTextureFilter(conf.default_mag_filter);
 
