@@ -2892,8 +2892,8 @@ void EntityWidget::ToggleDrawable(bool on)
             if (!node->HasDrawable())
             {
                 game::DrawableItemClass draw;
-                draw.SetMaterialId(mState.workspace->GetMaterialClassByName("Checkerboard")->GetId());
-                draw.SetDrawableId(mState.workspace->GetDrawableClassByName("Rectangle")->GetId());
+                draw.SetMaterialId("_checkerboard");
+                draw.SetDrawableId("_rect");
                 node->SetDrawable(draw);
 
                 ScrollEntityNodeArea();
