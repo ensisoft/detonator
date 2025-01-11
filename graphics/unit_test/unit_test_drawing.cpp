@@ -44,7 +44,7 @@
 #include "graphics/painter.h"
 #include "graphics/transform.h"
 #include "graphics/shader_program.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/particle_engine.h"

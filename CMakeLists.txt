@@ -230,7 +230,7 @@ add_library(GfxLib
     graphics/material_instance.cpp
     graphics/basic_light_program.cpp
     graphics/shader_program.cpp
-    graphics/shadersource.cpp
+    graphics/shader_source.cpp
     graphics/image.cpp
     graphics/painter.cpp
     graphics/loader.cpp
@@ -298,7 +298,7 @@ add_library(GfxLibTesting
     graphics/material_class.cpp
     graphics/material_instance.cpp
     graphics/shader_program.cpp
-    graphics/shadersource.cpp
+    graphics/shader_source.cpp
     graphics/basic_light_program.cpp
     graphics/image.cpp
     graphics/painter.cpp
@@ -820,7 +820,7 @@ add_executable(graphics_test
     graphics/material_instance.cpp
     graphics/basic_light_program.cpp
     graphics/shader_program.cpp
-    graphics/shadersource.cpp
+    graphics/shader_source.cpp
     graphics/drawable.cpp
     graphics/geometry.cpp
     graphics/drawcmd.cpp

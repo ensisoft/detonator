@@ -28,7 +28,7 @@
 #include "graphics/drawcmd.h"
 #include "graphics/loader.h"
 #include "graphics/utility.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 
 namespace gfx
 {

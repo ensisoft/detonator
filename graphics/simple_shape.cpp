@@ -27,7 +27,7 @@
 #include "data/reader.h"
 #include "data/writer.h"
 #include "graphics/simple_shape.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/utility.h"
 #include "graphics/vertex.h"
 #include "graphics/program.h"

@@ -16,7 +16,7 @@
 
 #include "base/format.h"
 #include "graphics/debug_drawable.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
 

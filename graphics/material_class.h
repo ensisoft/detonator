@@ -34,7 +34,7 @@
 #include "graphics/texture.h"
 #include "graphics/types.h"
 #include "graphics/texture_map.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 
 namespace gfx
 {

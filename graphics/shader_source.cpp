@@ -20,7 +20,7 @@
 #include "base/utility.h"
 #include "base/format.h"
 #include "base/logging.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 
 namespace {
     std::string ToConst(int value)

@@ -26,7 +26,7 @@
 #include "graphics/shader.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 
 namespace {
     static const char* vertex_base = {

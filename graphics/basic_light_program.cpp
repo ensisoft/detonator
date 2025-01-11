@@ -17,7 +17,7 @@
 #include <algorithm>
 
 #include "base/logging.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/device.h"
 #include "graphics/basic_light_program.h"
 

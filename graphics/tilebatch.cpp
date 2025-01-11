@@ -16,7 +16,7 @@
 
 #include "graphics/tilebatch.h"
 #include "graphics/program.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/geometry.h"
 
 namespace gfx

@@ -18,7 +18,7 @@
 
 #include "graphics/device.h"
 #include "graphics/texture.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/text_material.h"
 
 namespace gfx

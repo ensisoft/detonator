@@ -18,7 +18,7 @@
 #include "base/format.h"
 #include "graphics/guidegrid.h"
 #include "graphics/program.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/utility.h"
 
 namespace gfx

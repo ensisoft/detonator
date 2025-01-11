@@ -31,7 +31,7 @@
 #include "graphics/geometry.h"
 #include "graphics/painter.h"
 #include "graphics/shader_program.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 
 namespace gfx
 {

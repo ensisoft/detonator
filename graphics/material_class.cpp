@@ -24,7 +24,7 @@
 #include "data/reader.h"
 #include "data/writer.h"
 #include "graphics/program.h"
-#include "graphics/shadersource.h"
+#include "graphics/shader_source.h"
 #include "graphics/material_class.h"
 #include "graphics/texture_source.h"
 #include "graphics/texture_texture_source.h"
