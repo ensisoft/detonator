@@ -85,25 +85,4 @@ namespace gfx
     private:
     };
 
-    namespace detail {
-        class GenericShaderProgram : public ShaderProgram
-        {
-        public:
-            virtual std::string GetName() const override
-            { return "GenericShaderProgram"; }
-        private:
-        };
-
-        class StencilShaderProgram : public ShaderProgram
-        {
-        public:
-            virtual RenderPass GetRenderPass() const override { return RenderPass::StencilPass; }
-
-            virtual std::string GetName() const override
-            { return "StencilShaderProgram"; }
-        private:
-        };
-
-    } // namespace
-
 } // namespace

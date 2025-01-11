@@ -39,6 +39,7 @@
 #include "graphics/material.h"
 #include "graphics/material_instance.h"
 #include "graphics/shader_program.h"
+#include "graphics/shader_programs.h"
 #include "graphics/shader_source.h"
 #include "graphics/utility.h"
 #include "graphics/transform.h"
@@ -384,7 +385,7 @@ public:
         if (mDepthTest && depth_test)
             state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
 
-        painter.Draw(drawable, model_to_world, material, state, gfx::detail::GenericShaderProgram());
+        painter.Draw(drawable, model_to_world, material, state, gfx::GenericShaderProgram());
     }
 private:
     const bool mDepthTest;

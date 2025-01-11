@@ -22,7 +22,7 @@
 
 #include "graphics/types.h"
 #include "graphics/painter.h"
-#include "graphics/shader_program.h"
+#include "graphics/shader_programs.h"
 #include "graphics/transform.h"
 
 namespace gfx
@@ -42,7 +42,7 @@ namespace gfx
             state.write_color  = true;
             state.stencil_func = Painter::StencilFunc::Disabled;
             state.depth_test   = Painter::DepthTest::Disabled;
-            detail::GenericShaderProgram program;
+            GenericShaderProgram program;
             mPainter.Draw(drawable, transform, material, state, program);
         }
     private:
@@ -98,7 +98,7 @@ namespace gfx
                 state.stencil_fail  = Painter::StencilOp::WriteZero;
             }
 
-            detail::StencilShaderProgram program;
+            StencilShaderProgram program;
             mPainter.Draw(drawable, transform, material, state, program);
         }
     private:
@@ -127,7 +127,7 @@ namespace gfx
             state.stencil_ref   = mStencilRefValue;
             state.stencil_mask  = 0xff;
 
-            detail::GenericShaderProgram program;
+            GenericShaderProgram program;
             mPainter.Draw(drawable, transform, material, state, program);
         }
     private:

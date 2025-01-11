@@ -46,6 +46,7 @@
 #include "graphics/program.h"
 #include "graphics/renderpass.h"
 #include "graphics/shader_source.h"
+#include "graphics/shader_programs.h"
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/particle_engine.h"
@@ -2520,7 +2521,7 @@ public:
         p.ResetViewMatrix();
         p.SetProjectionMatrix(gfx::MakePerspectiveProjection(gfx::FDegrees { 45.0f }, aspect, 1.0f, 100.0f));
 
-        gfx::detail::GenericShaderProgram program;
+        gfx::GenericShaderProgram program;
 
         gfx::Painter::DrawState state;
         state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
@@ -2595,7 +2596,7 @@ public:
         p.ResetViewMatrix();
         p.SetProjectionMatrix(projection);
 
-        gfx::detail::GenericShaderProgram program;
+        gfx::GenericShaderProgram program;
 
         gfx::Painter::DrawState state;
         state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
@@ -2879,7 +2880,7 @@ public:
         gfx::Painter::DrawState state;
         state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
 
-        gfx::detail::GenericShaderProgram program;
+        gfx::GenericShaderProgram program;
 
         // layer 0
         gfx::Transform trans;
@@ -2954,7 +2955,7 @@ public:
         gfx::Painter::DrawList draw_list;
         draw_list.push_back(cmd);
 
-        gfx::detail::GenericShaderProgram program;
+        gfx::GenericShaderProgram program;
         painter.Draw(draw_list, program);
     }
     std::string GetName() const override
@@ -3008,7 +3009,7 @@ public:
         state.culling      = gfx::Painter::Culling::Back;
         state.write_color  = true;
 
-        gfx::detail::GenericShaderProgram program;
+        gfx::GenericShaderProgram program;
 
         const auto t = mTime;
 
@@ -3101,7 +3102,7 @@ public:
         gfx::Painter::DrawList draw_list;
         draw_list.push_back(cmd);
 
-        gfx::detail::GenericShaderProgram program;
+        gfx::GenericShaderProgram program;
         painter.Draw(draw_list, program);
     }
 
@@ -3170,7 +3171,7 @@ public:
         gfx::Painter::DrawList draw_list;
         draw_list.push_back(cmd);
 
-        gfx::detail::GenericShaderProgram program;
+        gfx::GenericShaderProgram program;
         painter.Draw(draw_list, program);
     }
 
@@ -3214,7 +3215,7 @@ public:
         gfx::Painter::DrawState state;
         state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
 
-        gfx::detail::GenericShaderProgram program;
+        gfx::GenericShaderProgram program;
 
         {
             gfx::Transform transform;

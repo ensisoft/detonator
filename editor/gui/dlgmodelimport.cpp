@@ -35,6 +35,7 @@
 #include "graphics/material.h"
 #include "graphics/material_class.h"
 #include "graphics/material_instance.h"
+#include "graphics/shader_programs.h"
 
 namespace gui
 {
@@ -170,7 +171,7 @@ void DlgModelImport::PaintScene(gfx::Painter& painter, double secs)
     p.SetProjectionMatrix(gfx::MakePerspectiveProjection(gfx::FDegrees(45.0f), surf_aspect, 1.0f, 100.0f));
     p.ClearDepth(1.0f);
 
-    gfx::detail::GenericShaderProgram program;
+    gfx::GenericShaderProgram program;
 
     gfx::Painter::DrawState state;
     state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
