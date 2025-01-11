@@ -60,10 +60,7 @@ namespace gfx
         virtual ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device) const;
         // Get the device specific drawable (vertex) shader source.
         virtual ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const;
-        // Get the human readable debug name for the material shader.
-        virtual std::string GetShaderName(const Material& material, const Material::Environment& env) const;
-        // Get the human readable debug name for the drawable shader.
-        virtual std::string GetShaderName(const Drawable& drawable, const Drawable::Environment& env) const;
+
         // Get the human-readable name of the shader pass for debugging/logging purposes.
         virtual std::string GetName() const = 0;
         // Apply any shader program state on the GPU program object and on the device state.

@@ -83,13 +83,5 @@ ShaderSource ShaderProgram::GetShader(const Drawable& drawable, const Drawable::
     source.AddShaderSourceUri("shaders/generic_main_vertex_shader.glsl");
     return source;
 }
-std::string ShaderProgram::GetShaderName(const Material& material, const Material::Environment& env) const
-{
-    return material.GetShaderName(env);
-}
-std::string ShaderProgram::GetShaderName(const Drawable& drawable, const Drawable::Environment& env) const
-{
-    return drawable.GetShaderName(env);
-}
 
 } // namespace

@@ -127,8 +127,6 @@ namespace gfx
         RenderPass GetRenderPass() const override;
         std::string GetShaderId(const Material& material, const Material::Environment& env) const override;
         std::string GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const override;
-        std::string GetShaderName(const Material& material, const Material::Environment& env) const override;
-        std::string GetShaderName(const Drawable& drawable, const Drawable::Environment& env) const override;
         std::string GetName() const override;
         ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device) const override;
         ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const override;
