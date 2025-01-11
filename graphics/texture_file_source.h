@@ -60,7 +60,7 @@ namespace gfx
         { mName = name; }
         void SetEffect(Effect effect, bool on_off) override
         { mEffects.set(effect, on_off); }
-        void SetColorSpace(ColorSpace colorspace)
+        void SetColorSpace(ColorSpace colorspace) override
         { mColorSpace = colorspace; }
 
         std::string GetGpuId() const override;

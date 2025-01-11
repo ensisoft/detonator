@@ -93,7 +93,7 @@ namespace gfx
         const IBitmap& GetBitmap() const
         { return *mBitmap; }
 
-        void SetColorSpace(ColorSpace colorspace)
+        void SetColorSpace(ColorSpace colorspace) override
         {
             mColorSpace = colorspace;
         }
