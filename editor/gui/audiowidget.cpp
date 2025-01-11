@@ -1187,6 +1187,21 @@ void AudioWidget::InitializeContent()
     mGraphHash = GetHash();
 }
 
+void AudioWidget::InitializeSettings(const UISettings& settings)
+{
+    // try to make the default splitter partitions sane.
+    // looks like this garbage needs to be done *after* the
+    // widget has been shown (of course) so using a timer
+    // hack for a hack
+    QTimer::singleShot(10, this, [this]() {
+        QList<int> sizes;
+        sizes << mUI.leftLayout->sizeHint().width();
+        sizes << mUI.center->sizeHint().width();
+        sizes << mUI.rightSplitter->sizeHint().width() + 40;
+        mUI.mainSplitter->setSizes(sizes);
+    });
+}
+
 QString AudioWidget::GetId() const
 {
     return GetValue(mUI.graphID);

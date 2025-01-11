@@ -90,6 +90,7 @@ namespace gui
        ~AudioWidget();
 
         virtual void InitializeContent() override;
+        virtual void InitializeSettings(const UISettings& settings) override;
         virtual QString GetId() const override;
         virtual bool IsAccelerated() const override;
         virtual bool CanTakeAction(Actions action, const Clipboard*) const override;
