@@ -2207,6 +2207,58 @@ public:
         public:
             std::string GetName() const override
             { return "TestProgram"; }
+
+            std::string GetShaderId(const gfx::Material& material, const gfx::Material::Environment& env) const
+            {
+                return material.GetShaderId(env);
+            }
+            std::string GetShaderId(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env) const
+            {
+                return drawable.GetShaderId(env);
+            }
+
+
+            gfx::ShaderSource GetShader(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env, const gfx::Device& device) const
+            {
+                gfx::ShaderSource source;
+                source.SetType(gfx::ShaderSource::Type::Vertex);
+                source.LoadRawSource(R"(
+#version 300 es
+
+struct VS_OUT {
+    // vertex position in clip space (after projection transformation)
+    vec4 clip_position;
+    // vertx position in eye coordinates (after camera/view transformation)
+    vec4 view_position;
+    // view space surface normal vector
+    vec3 view_normal;
+    // view space surface tagent vector
+    vec3 view_tangent;
+    // view space surface bi-tangent vector
+    vec3 view_bitangent;
+    // point size for GL_POINTS rasterization.
+    float point_size;
+
+    bool need_tbn;
+    bool have_tbn;
+} vs_out;
+
+void VertexShaderMain();
+
+void main() {
+    vs_out.have_tbn = false;
+    vs_out.need_tbn = false;
+    VertexShaderMain();
+
+    gl_PointSize = vs_out.point_size;
+    gl_Position  = vs_out.clip_position;
+}
+)");
+
+                source.Merge(drawable.GetShader(env, device));
+                return source;
+            }
+
             gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
             {
                 auto source = material.GetShader(env, device);
@@ -2521,7 +2573,7 @@ public:
         p.ResetViewMatrix();
         p.SetProjectionMatrix(gfx::MakePerspectiveProjection(gfx::FDegrees { 45.0f }, aspect, 1.0f, 100.0f));
 
-        gfx::GenericShaderProgram program;
+        gfx::FlatShadedColorProgram program;
 
         gfx::Painter::DrawState state;
         state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
@@ -2596,7 +2648,7 @@ public:
         p.ResetViewMatrix();
         p.SetProjectionMatrix(projection);
 
-        gfx::GenericShaderProgram program;
+        gfx::FlatShadedColorProgram program;
 
         gfx::Painter::DrawState state;
         state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
@@ -2880,7 +2932,7 @@ public:
         gfx::Painter::DrawState state;
         state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
 
-        gfx::GenericShaderProgram program;
+        gfx::FlatShadedColorProgram program;
 
         // layer 0
         gfx::Transform trans;
@@ -2955,7 +3007,7 @@ public:
         gfx::Painter::DrawList draw_list;
         draw_list.push_back(cmd);
 
-        gfx::GenericShaderProgram program;
+        gfx::FlatShadedColorProgram program;
         painter.Draw(draw_list, program);
     }
     std::string GetName() const override
@@ -3009,7 +3061,7 @@ public:
         state.culling      = gfx::Painter::Culling::Back;
         state.write_color  = true;
 
-        gfx::GenericShaderProgram program;
+        gfx::FlatShadedColorProgram program;
 
         const auto t = mTime;
 
@@ -3102,7 +3154,7 @@ public:
         gfx::Painter::DrawList draw_list;
         draw_list.push_back(cmd);
 
-        gfx::GenericShaderProgram program;
+        gfx::FlatShadedColorProgram program;
         painter.Draw(draw_list, program);
     }
 
@@ -3171,7 +3223,7 @@ public:
         gfx::Painter::DrawList draw_list;
         draw_list.push_back(cmd);
 
-        gfx::GenericShaderProgram program;
+        gfx::FlatShadedColorProgram program;
         painter.Draw(draw_list, program);
     }
 
@@ -3215,7 +3267,7 @@ public:
         gfx::Painter::DrawState state;
         state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
 
-        gfx::GenericShaderProgram program;
+        gfx::FlatShadedColorProgram program;
 
         {
             gfx::Transform transform;

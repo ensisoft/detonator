@@ -42,7 +42,7 @@ namespace gfx
             state.write_color  = true;
             state.stencil_func = Painter::StencilFunc::Disabled;
             state.depth_test   = Painter::DepthTest::Disabled;
-            GenericShaderProgram program;
+            FlatShadedColorProgram program;
             mPainter.Draw(drawable, transform, material, state, program);
         }
     private:
@@ -127,7 +127,7 @@ namespace gfx
             state.stencil_ref   = mStencilRefValue;
             state.stencil_mask  = 0xff;
 
-            GenericShaderProgram program;
+            FlatShadedColorProgram program;
             mPainter.Draw(drawable, transform, material, state, program);
         }
     private:

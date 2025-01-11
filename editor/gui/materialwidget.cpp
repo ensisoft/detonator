@@ -659,7 +659,7 @@ void MaterialWidget::on_actionShowShader_triggered()
     }
     else
     {
-        gfx::GenericShaderProgram program;
+        gfx::FlatShadedColorProgram program;
         source = program.GetShader(gfx::MaterialInstance(mMaterial), environment, *device);
     }
 
@@ -2739,7 +2739,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
             if (Editor::DebugEditor())
             {
-                gfx::GenericShaderProgram program;
+                gfx::FlatShadedColorProgram program;
                 p.Draw(gfx::NormalMeshInstance(mDrawable), transform,
                        gfx::CreateMaterialFromColor(gfx::Color::HotPink), state, program);
             }
@@ -2747,7 +2747,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
             if (light.type == gfx::BasicLightProgram::LightType::Point ||
                 light.type == gfx::BasicLightProgram::LightType::Spot)
             {
-                gfx::GenericShaderProgram program;
+                gfx::FlatShadedColorProgram program;
                 gfx::Transform transform;
                 transform.Resize(20.0f, 20.0f, 20.0f);
                 transform.Scale(zoom, zoom, zoom);
@@ -2757,25 +2757,25 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         }
         else
         {
-            gfx::GenericShaderProgram program;
+            gfx::FlatShadedColorProgram program;
             p.Draw(*mDrawable, transform, *mMaterialInst, state, program);
         }
 
         {
-            gfx::GenericShaderProgram program;
+            gfx::FlatShadedColorProgram program;
             gfx::LineBatch3D lines;
             lines.AddLine({0.0f, 0.0f, 0.0f}, {0.75f, 0.0f, 0.0f});
             p.Draw(lines, transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), state, program);
         }
         {
-            gfx::GenericShaderProgram program;
+            gfx::FlatShadedColorProgram program;
             gfx::LineBatch3D lines;
             lines.AddLine({0.0f, 0.0f, 0.0f}, {0.0f, 0.75f, 0.0f});
             p.Draw(lines, transform, gfx::CreateMaterialFromColor(gfx::Color::DarkRed), state, program);
         }
 
         {
-            gfx::GenericShaderProgram program;
+            gfx::FlatShadedColorProgram program;
             gfx::LineBatch3D lines;
             lines.AddLine({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.75f});
             p.Draw(lines, transform, gfx::CreateMaterialFromColor(gfx::Color::DarkBlue), state, program);
@@ -2786,7 +2786,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         {
             state.winding = gfx::Painter::PolygonWindigOrder::ClockWise;
 
-            gfx::GenericShaderProgram program;
+            gfx::FlatShadedColorProgram program;
 
             gfx::Transform transform;
             transform.Resize(size*zoom, size*zoom);
@@ -2846,7 +2846,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
                     light_material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
                 }
 
-                gfx::GenericShaderProgram program;
+                gfx::FlatShadedColorProgram program;
                 gfx::Transform transform;
                 transform.Resize(40.0f, 40.0f);
                 transform.Translate(light_position.x, light_position.y);
