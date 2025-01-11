@@ -83,9 +83,10 @@ public:
     void EndFrame(bool display = true) override;
     void GetResourceStats(ResourceStats* stats) const override;
     void GetDeviceCaps(DeviceCaps* caps) const override;
-    gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo = nullptr) const;
+    gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned width, unsigned height,
+                                                 gfx::Framebuffer* fbo) const override;
     gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height,
-                                                 gfx::Framebuffer* fbo = nullptr) const;
+                                                 gfx::Framebuffer* fbo) const override;
 
 private:
     dev::Framebuffer SetupFBO(gfx::Framebuffer* fbo) const;
