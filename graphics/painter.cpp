@@ -208,7 +208,7 @@ void Painter::Draw(const Drawable& drawable,
     state.stencil_func = StencilFunc::Disabled;
     state.depth_test   = DepthTest::Disabled;
 
-    GenericShaderProgram program;
+    FlatShadedColorProgram program;
     Draw(drawable, model, material, state, program, draw_state);
 }
 

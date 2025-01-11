@@ -52,14 +52,14 @@ namespace gfx
         virtual bool FilterDraw(void* user) const { return true; }
         // Get the material object fragment shader device ID.
         // The default implementation will simply call the material in order to generate the ID.
-        virtual std::string GetShaderId(const Material& material, const Material::Environment& env) const;
+        virtual std::string GetShaderId(const Material& material, const Material::Environment& env) const = 0;
         // Get the drawable object vertex shader device ID.
         // The default implementation will simply call the drawable in order to generate the ID.
-        virtual std::string GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const;
+        virtual std::string GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const = 0;
         // Get the device specific material (fragment) shader source.
-        virtual ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device) const;
+        virtual ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device) const = 0;
         // Get the device specific drawable (vertex) shader source.
-        virtual ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const;
+        virtual ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const = 0;
 
         // Get the human-readable name of the shader pass for debugging/logging purposes.
         virtual std::string GetName() const = 0;

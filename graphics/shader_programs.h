@@ -18,25 +18,25 @@
 
 #include "config.h"
 
-#include "graphics/shader_program.h"
+#include "graphics/generic_shader_program.h"
 
 namespace gfx
 {
-    class GenericShaderProgram : public ShaderProgram
+    class FlatShadedColorProgram : public GenericShaderProgram
     {
     public:
-        virtual std::string GetName() const override
-        { return "GenericShaderProgram"; }
+        FlatShadedColorProgram() noexcept
+          : GenericShaderProgram("FlatShadedColorProgram", RenderPass::ColorPass)
+        {}
     private:
     };
 
-    class StencilShaderProgram : public ShaderProgram
+    class StencilShaderProgram : public GenericShaderProgram
     {
     public:
-        virtual RenderPass GetRenderPass() const override { return RenderPass::StencilPass; }
-
-        virtual std::string GetName() const override
-        { return "StencilShaderProgram"; }
+        StencilShaderProgram() noexcept
+           : GenericShaderProgram("StencilShaderProgram", RenderPass::StencilPass)
+        {}
     private:
     };
 
