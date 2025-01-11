@@ -161,12 +161,16 @@ gfx::GeometryPtr MakeQuad(gfx::Device& dev)
 
 std::shared_ptr<gfx::Device> CreateDevice()
 {
-    return dev::CreateDevice(std::make_shared<TestContext>(10, 10))->GetSharedGraphicsDevice();
+    auto context = std::make_shared<TestContext>(10, 10);
+    auto device  = dev::CreateDevice(context);
+    return gfx::CreateDevice(device->GetSharedGraphicsDevice());
 }
 
 std::shared_ptr<gfx::Device> CreateDevice(unsigned render_width, unsigned render_height)
 {
-    return dev::CreateDevice(std::make_shared<TestContext>(render_width, render_height))->GetSharedGraphicsDevice();
+    auto context = std::make_shared<TestContext>(render_width, render_height);
+    auto device  = dev::CreateDevice(context);
+    return gfx::CreateDevice(device->GetSharedGraphicsDevice());
 }
 
 void unit_test_shader()

@@ -292,7 +292,9 @@ private:
 
 std::shared_ptr<gfx::Device> CreateDevice(unsigned width=256, unsigned height=256)
 {
-    return dev::CreateDevice(std::make_shared<TestContext>(width, height))->GetSharedGraphicsDevice();
+    auto context = std::make_shared<TestContext>(width, height);
+    auto device = dev::CreateDevice(context);
+    return gfx::CreateDevice(device->GetSharedGraphicsDevice());
 }
 
 void unit_test_drawable_item()

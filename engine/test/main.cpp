@@ -1253,7 +1253,8 @@ public:
 
     virtual void Init(const InitParams& init, const EngineConfig& conf) override
     {
-        mDevice  = dev::CreateDevice(init.context)->GetSharedGraphicsDevice();
+        auto device = dev::CreateDevice(init.context);
+        mDevice  = gfx::CreateDevice(device->GetSharedGraphicsDevice());
         mPainter = gfx::Painter::Create(mDevice);
         mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
         mPainter->SetEditingMode(false);

@@ -21,9 +21,9 @@
 #include <memory>
 #include <cstdint>
 #include <string>
-#include <optional>
 
 #include "device/types.h"
+#include "device/graphics.h"
 #include "graphics/types.h"
 #include "graphics/color4f.h"
 #include "graphics/bitmap.h"
@@ -49,9 +49,9 @@ namespace gfx
         using ResourceStats = dev::GraphicsDeviceResourceStats;
         using DeviceCaps = dev::GraphicsDeviceCaps;
 
-        virtual ~Device() = default;
-
         using ColorAttachment = gfx::Framebuffer::ColorAttachment;
+
+        virtual ~Device() = default;
 
         virtual void ClearColor(const Color4f& color, Framebuffer* fbo, ColorAttachment attachment) const = 0;
         virtual void ClearStencil(int value, Framebuffer* fbo) const = 0;
@@ -119,6 +119,7 @@ namespace gfx
             // elements that are closest to the pixel.
             Linear
         };
+
         virtual void SetDefaultTextureFilter(MinFilter filter) = 0;
         virtual void SetDefaultTextureFilter(MagFilter filter) = 0;
 
@@ -145,7 +146,7 @@ namespace gfx
 
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const ProgramState& program_state,
-                          const GeometryDrawCommand& geometry, const State& state, Framebuffer* fbo = nullptr) const = 0;
+                          const GeometryDrawCommand& geometry, const State& state, Framebuffer* fbo = nullptr) = 0;
 
         enum GCFlags {
             Textures   = 0x1,
@@ -178,9 +179,11 @@ namespace gfx
         virtual Bitmap<Pixel_RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height, Framebuffer* fbo = nullptr) const = 0;
 
         virtual void GetResourceStats(ResourceStats* stats) const = 0;
-
         virtual void GetDeviceCaps(DeviceCaps* caps) const = 0;
     private:
     };
+
+    std::shared_ptr<Device> CreateDevice(std::shared_ptr<dev::GraphicsDevice> device);
+    std::shared_ptr<Device> CreateDevice(dev::GraphicsDevice* device);
 
 } // namespace

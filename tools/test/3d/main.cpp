@@ -675,7 +675,7 @@ int main(int argc, char* argv[])
 
     auto context = std::make_shared<WindowContext>();
     auto dev_device  = dev::CreateDevice(context);
-    auto gfx_device = dev_device->GetSharedGraphicsDevice();
+    auto gfx_device = gfx::CreateDevice(dev_device->GetSharedGraphicsDevice());
     auto painter = gfx::Painter::Create(gfx_device);
 
     State state;

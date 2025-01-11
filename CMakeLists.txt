@@ -205,6 +205,7 @@ add_library(DataLib
     data/io.cpp)
 add_library(GfxLib
     device/opengles.cpp
+    graphics/device.cpp
     graphics/algo.cpp
     graphics/utility.cpp
     graphics/bitmap.cpp
@@ -273,6 +274,7 @@ add_library(UiLib
     uikit/window.cpp)
 add_library(GfxLibTesting
     device/opengles.cpp
+    graphics/device.cpp
     graphics/algo.cpp
     graphics/bitmap.cpp
     graphics/bitmap_noise.cpp
@@ -798,6 +800,7 @@ install(TARGETS audio_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/audio/test/")
 # needs DETERMINISTIC_RANDOM flag
 add_executable(graphics_test
     device/opengles.cpp
+    graphics/device.cpp
     graphics/algo.cpp
     graphics/utility.cpp
     graphics/bitmap.cpp
