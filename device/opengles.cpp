@@ -606,7 +606,7 @@ public:
             else if (extension == "GL_OES_packed_depth_stencil")
                 mExtensions.OES_packed_depth_stencil = true;
             else if (extension == "GL_EXT_draw_buffers")
-                mExtensions.GL_EXT_draw_buffers;
+                mExtensions.GL_EXT_draw_buffers = true;
 
             VERBOSE("Found extension '%1'", extension);
         }
