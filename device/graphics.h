@@ -16,134 +16,19 @@
 
 #pragma once
 
-#include "warnpush.h"
-#  include <glm/vec2.hpp>
-#  include <glm/vec3.hpp>
-#  include <glm/vec4.hpp>
-#  include <glm/mat4x4.hpp>
-#  include <glm/mat3x3.hpp>
-#  include <glm/mat2x2.hpp>
-#  include <glm/gtc/type_ptr.hpp>
-#include "warnpop.h"
+#include "config.h"
 
 #include <string>
 #include <vector>
 #include <variant>
 
 #include "base/color4f.h"
+#include "device/handle.h"
 #include "device/enum.h"
 #include "device/types.h"
 
 namespace dev
 {
-    namespace detail {
-        template<dev::ResourceType type>
-        struct ResourceHandle {
-            inline bool IsValid() const noexcept
-            { return handle != 0; }
-            inline auto GetHandle() const noexcept
-            { return handle; }
-
-            unsigned handle = 0;
-        };
-
-        template<>
-        struct ResourceHandle<dev::ResourceType::GraphicsShader> {
-            inline bool IsValid() const noexcept
-            { return handle != 0; }
-            inline auto GetHandle() const noexcept
-            { return handle; }
-            inline auto GetType() const noexcept
-            { return type; }
-
-            unsigned handle = 0;
-            ShaderType type = ShaderType::Invalid;
-        };
-
-        template<>
-        struct ResourceHandle<dev::ResourceType::GraphicsBuffer> {
-            inline bool IsValid() const noexcept
-            { return handle != 0; }
-            inline auto GetHandle() const noexcept
-            { return handle; }
-            inline auto GetType() const noexcept
-            { return type; }
-
-            unsigned handle = 0;
-            BufferType type = BufferType::Invalid;
-            size_t buffer_index  = 0;
-            size_t buffer_offset = 0;
-            size_t buffer_bytes  = 0;
-        };
-
-        template<>
-        struct ResourceHandle<dev::ResourceType::Texture> {
-            inline bool IsValid() const noexcept
-            { return handle != 0; }
-            inline auto GetHandle() const noexcept
-            { return handle; }
-            inline auto GetType() const noexcept
-            { return type; }
-
-            unsigned handle = 0;
-            TextureType type = TextureType::Invalid;
-            TextureFormat format = TextureFormat::sRGBA;
-            size_t texture_width  = 0;
-            size_t texture_height = 0;
-            size_t texture_depth  = 0;
-        };
-
-        template<>
-        struct ResourceHandle<dev::ResourceType::FrameBuffer> {
-            inline bool IsValid() const noexcept
-            { return handle != 0xffffffff; }
-            inline auto GetHandle() const noexcept
-            { return handle; }
-            inline auto GetFormat() const noexcept
-            { return format; }
-            inline bool IsDefault() const noexcept
-            { return handle == 0; }
-            inline bool IsCustom() const noexcept
-            { return handle > 0; }
-            inline bool IsMultisampled() const noexcept
-            { return samples > 1; }
-
-            unsigned handle = 0xffffffff;
-            FramebufferFormat format = FramebufferFormat::Invalid;
-            size_t width = 0;
-            size_t height = 0;
-            unsigned samples = 0;
-        };
-
-        template<dev::ResourceType type>
-        inline bool operator==(const ResourceHandle<type>& lhs, const ResourceHandle<type>& rhs) noexcept
-        {
-            return lhs.handle == rhs.handle;
-        }
-        template<dev::ResourceType type>
-        inline bool operator!=(const ResourceHandle<type>& lhs, const ResourceHandle<type> rhs)
-        {
-            return lhs.handle != rhs.handle;
-        }
-
-    } // detail
-
-    struct ProgramState {
-        struct Uniform {
-            std::string name;
-            std::variant<int, float,
-                    base::Color4f,
-                    glm::ivec2,
-                    glm::vec2,
-                    glm::vec3,
-                    glm::vec4,
-                    glm::mat2,
-                    glm::mat3,
-                    glm::mat4> value;
-        };
-        std::vector<const Uniform*> uniforms;
-    };
-
     using GraphicsShader  = detail::ResourceHandle<ResourceType::GraphicsShader>;
     using GraphicsProgram = detail::ResourceHandle<ResourceType::GraphicsProgram>;
     using GraphicsBuffer  = detail::ResourceHandle<ResourceType::GraphicsBuffer>;

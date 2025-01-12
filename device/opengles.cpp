@@ -31,6 +31,10 @@
 #include <string>
 #include <unordered_map>
 
+#include "warnpush.h"
+#  include <glm/gtc/type_ptr.hpp>
+#include "warnpop.h"
+
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/hash.h"
