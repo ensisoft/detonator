@@ -36,7 +36,6 @@
 #include "base/json.h"
 #include "data/json.h"
 #include "graphics/debug_drawable.h"
-#include "graphics/basic_light_program.h"
 #include "graphics/simple_shape.h"
 #include "graphics/linebatch.h"
 #include "graphics/painter.h"
