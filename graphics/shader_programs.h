@@ -40,4 +40,15 @@ namespace gfx
     private:
     };
 
+    class BasicLightProgram : public GenericShaderProgram
+    {
+    public:
+        BasicLightProgram() noexcept
+          : GenericShaderProgram("BasicLightProgram", RenderPass::ColorPass)
+        {
+            EnableFeature(Features::BasicLight, true);
+        }
+    private:
+    };
+
 } // namespace

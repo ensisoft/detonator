@@ -461,6 +461,12 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
                 }
                 continue;
             }
+            if (block.type == ShaderBlockType::PreprocessorToken &&
+                base::StartsWith(base::TrimString(block.data), "#ifdef"))
+            {
+                ss << "\n";
+            }
+
             ss << block.data;
             ss << "\n";
         }

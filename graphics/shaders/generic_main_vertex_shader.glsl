@@ -12,7 +12,7 @@ struct VS_OUT {
     vec4 view_position;
     // view space surface normal vector
     vec3 view_normal;
-    // view space surface tagent vector
+    // view space surface tangent vector
     vec3 view_tangent;
     // view space surface bi-tangent vector
     vec3 view_bitangent;
@@ -23,10 +23,35 @@ struct VS_OUT {
     bool have_tbn;
 } vs_out;
 
+// @varyings
+
+#ifdef ENABLE_BASIC_LIGHT
+  out vec3 vertexViewPosition;
+  out vec3 vertexViewNormal;
+  // tangent, bitangent, normal matrix for normal mapping
+  out mat3 TBN;
+#endif
+
 void main() {
     vs_out.have_tbn = false;
     vs_out.need_tbn = false;
+#ifdef ENABLE_BASIC_LIGHT
+    vs_out.need_tbn = true;
+#endif
+
     VertexShaderMain();
+
+#ifdef ENABLE_BASIC_LIGHT
+    vertexViewPosition = vs_out.view_position.xyz;
+
+    if (vs_out.have_tbn) {
+        vertexViewNormal = vs_out.view_normal;
+
+        TBN = mat3(vs_out.view_tangent,
+                   vs_out.view_bitangent,
+                   vs_out.view_normal);
+    }
+#endif
 
     gl_PointSize = vs_out.point_size;
     gl_Position  = vs_out.clip_position;
