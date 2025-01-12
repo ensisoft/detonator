@@ -16,6 +16,8 @@
 
 #include "config.h"
 
+#include <cstddef>
+
 #include "base/logging.h"
 #include "base/utility.h"
 #include "graphics/shader_source.h"
@@ -144,11 +146,20 @@ void GenericShaderProgram::ApplyLightState(const Device& device, ProgramState& p
 
     struct LightArrayUniformBlock {
         Light lights[MAX_LIGHTS];
+        Vec3 camera_center;
+        uint32_t light_count;
+        float padding1_[1];
     };
+
+    static_assert((offsetof(LightArrayUniformBlock, camera_center) % 16) == 0,
+                  "incorrect std140 layout");
+
 #pragma pack(pop)
 
     UniformBlockData<LightArrayUniformBlock> data;
     data.Resize(1);
+    data[0].light_count   = light_count;
+    data[0].camera_center = ToVec(mCameraCenter);
 
     for (unsigned i=0; i<light_count; ++i)
     {
@@ -164,10 +175,7 @@ void GenericShaderProgram::ApplyLightState(const Device& device, ProgramState& p
         data[0].lights[i].spot_half_angle = light.spot_half_angle.ToRadians();
         data[0].lights[i].type = static_cast<int32_t>(light.type);
     }
-
     program.SetUniformBlock(UniformBlock("LightArray", std::move(data)));
-    program.SetUniform("kLightCount", light_count);
-    program.SetUniform("kCameraCenter", mCameraCenter);
 }
 
 } // namespace
