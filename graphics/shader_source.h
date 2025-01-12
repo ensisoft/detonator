@@ -156,6 +156,7 @@ namespace gfx
 
         void AddSource(std::string source);
         void AddPreprocessorDefinition(std::string name);
+        void AddPreprocessorDefinition(std::string name, unsigned value);
         void AddPreprocessorDefinition(std::string name, int value);
         void AddPreprocessorDefinition(std::string name, float value);
         void AddPreprocessorDefinition(std::string name, std::string value);
