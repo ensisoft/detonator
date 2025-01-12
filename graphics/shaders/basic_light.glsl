@@ -23,18 +23,19 @@ struct Light {
 
 // @uniforms
 
-uniform int kLightCount;
-// normally in a scene with perspective projection the camera origin
-// is in the middle of the screen and when the vertices are transformed
-// to view space computing the direction vector towards the camera is
-// taking the vector towards 0.0,0.0,0.0.
-// But this does not work with orthographic projection since those
-// scenes are typically setup so that the center of the camera does
-// not map to the center of the screen.
-uniform vec3 kCameraCenter;
-
 layout (std140) uniform LightArray {
+    // array of lights
     Light lights[BASIC_LIGHT_MAX_LIGHTS];
+    // normally in a scene with perspective projection the camera origin
+    // is in the middle of the screen and when the vertices are transformed
+    // to view space computing the direction vector towards the camera is
+    // taking the vector towards 0.0,0.0,0.0.
+    // But this does not work with orthographic projection since those
+    // scenes are typically setup so that the center of the camera does
+    // not map to the center of the screen.
+    vec3 camera_center;
+    // number of lights in the above array
+    uint light_count;
 };
 
 // @code
@@ -61,7 +62,7 @@ vec4 ComputeBasicLight() {
 
     vec4 total_color = vec4(0.0);
 
-    for (int i=0; i<kLightCount; ++i) {
+    for (uint i=uint(0); i<light_count; ++i) {
 
         Light light = lights[i];
 
@@ -112,7 +113,7 @@ vec4 ComputeBasicLight() {
 
             if (light_strength > 0.0 && light_reflectance_factor > 0.0) {
 
-                vec3 direction_towards_eye = normalize(kCameraCenter - vertexViewPosition);
+                vec3 direction_towards_eye = normalize(camera_center - vertexViewPosition);
                 vec3 reflected_light_direction = reflect(direction_towards_point, surface_normal);
                 float light_specular_factor = pow(max(dot(direction_towards_eye, reflected_light_direction), 0.0), material_specular_exponent);
 
