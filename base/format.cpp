@@ -243,6 +243,11 @@ std::string ToChars(int value)
     return std::to_string(value);
 }
 
+std::string ToChars(unsigned value)
+{
+    return std::to_string(value);
+}
+
 std::string ToHex(const Color4f& color)
 {
     const uint8_t R = (uint8_t)math::clamp(0.0f, 255.0f, 255.0f * color.Red());

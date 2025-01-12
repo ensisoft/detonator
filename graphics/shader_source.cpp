@@ -23,6 +23,11 @@
 #include "graphics/shader_source.h"
 
 namespace {
+    std::string ToConst(unsigned value)
+    {
+        return base::ToChars(value);
+    }
+
     std::string ToConst(int value)
     {
         return base::ToChars(value);
@@ -234,6 +239,14 @@ void ShaderSource::AddPreprocessorDefinition(std::string name)
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
     block.data = base::FormatString("#define %1", name);
+    mShaderBlocks["preprocessor"].push_back(std::move(block));
+}
+
+void ShaderSource::AddPreprocessorDefinition(std::string name, unsigned value)
+{
+    ShaderBlock block;
+    block.type = ShaderBlockType::PreprocessorDefine;
+    block.data = base::FormatString("#define %1 uint(%2)", name, ToConst(value));
     mShaderBlocks["preprocessor"].push_back(std::move(block));
 }
 

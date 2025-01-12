@@ -66,11 +66,11 @@ ShaderSource GenericShaderProgram::GetShader(const Material& material, const Mat
     if (source.GetPrecision() == ShaderSource::Precision::NotSet)
         source.SetPrecision(ShaderSource::Precision::High);
 
-    source.AddPreprocessorDefinition("BASIC_LIGHT_MAX_LIGHTS", MAX_LIGHTS);
-    source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_AMBIENT",     static_cast<int>(LightType::Ambient));
-    source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_DIRECTIONAL", static_cast<int>(LightType::Directional));
-    source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_SPOT",        static_cast<int>(LightType::Spot));
-    source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_POINT",       static_cast<int>(LightType::Point));
+    source.AddPreprocessorDefinition("BASIC_LIGHT_MAX_LIGHTS", static_cast<unsigned>(MAX_LIGHTS));
+    source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_AMBIENT",     static_cast<unsigned>(LightType::Ambient));
+    source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_DIRECTIONAL", static_cast<unsigned>(LightType::Directional));
+    source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_SPOT",        static_cast<unsigned>(LightType::Spot));
+    source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_POINT",       static_cast<unsigned>(LightType::Point));
 
     if (TestFeature(Features::BasicLight))
     {
@@ -137,7 +137,7 @@ void GenericShaderProgram::ApplyLightState(const Device& device, ProgramState& p
         float constant_attenuation;
         float linear_attenuation;
         float quadratic_attenuation;
-        int32_t type;
+        uint32_t type;
         float padding[1];
     };
     static_assert((sizeof(Light) % 16) == 0);
