@@ -16,13 +16,21 @@
 
 #pragma once
 
+#include "config.h"
+
 #include <cstdint>
+#include <vector>
 
 #include "base/types.h"
 #include "device/enum.h"
+#include "device/uniform.h"
 
 namespace dev
 {
+    struct ProgramState {
+        std::vector<const Uniform*> uniforms;
+    };
+
     // Device state including the rasterizer state
     // that is to be applied for any draw operation.
     struct GraphicsPipelineState {

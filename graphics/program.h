@@ -25,7 +25,6 @@
 #  include <glm/mat4x4.hpp>
 #  include <glm/mat3x3.hpp>
 #  include <glm/mat2x2.hpp>
-#  include <glm/gtc/type_ptr.hpp>
 #include "warnpop.h"
 
 #include <cstring>
@@ -34,7 +33,7 @@
 #include <memory>
 #include <string>
 
-#include "device/graphics.h"
+#include "device/uniform.h"
 #include "graphics/color4f.h"
 #include "graphics/uniform.h"
 
@@ -51,7 +50,7 @@ namespace gfx
             unsigned unit = 0;
             const Texture* texture = nullptr;
         };
-        using Uniform = dev::ProgramState::Uniform;
+        using Uniform = dev::Uniform;
 
         template<typename T>
         inline void SetUniformBlock(std::string name, UniformBlockData<T>&& uniform_data)

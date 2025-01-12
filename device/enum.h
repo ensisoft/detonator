@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "base/assert.h"
+#include "config.h"
 
 namespace dev
 {
