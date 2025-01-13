@@ -21,7 +21,7 @@ uniform vec4 kParticleEndColor;
 // base particle (texture coordinate) rotation.
 uniform float kParticleBaseRotation;
 // particle rotation mode.
-uniform int kParticleRotation;
+uniform uint kParticleRotation;
 
 // @varyings
 

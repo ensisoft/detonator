@@ -501,6 +501,8 @@ namespace gfx
         template<typename T>
         static bool SetUniform(const char* name, const UniformMap* uniforms, const T& backup, ProgramState& program);
 
+        static bool SetUniform(const char* name, const UniformMap* uniforms, unsigned backup, ProgramState& program);
+
         template<typename T>
         bool ReadLegacyValue(const char* name, const char* uniform, const data::Reader& reader);
 
