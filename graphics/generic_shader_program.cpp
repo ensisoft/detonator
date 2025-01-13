@@ -29,7 +29,8 @@ namespace gfx
 std::string GenericShaderProgram::GetShaderId(const Material& material, const Material::Environment& env) const
 {
     std::string id;
-    id += TestFeature(Features::BasicLight) ? "Lit" : "Unlit";
+    id += TestFeature(Features::BasicLight) ? "Lit" : "";
+    id += TestFeature(Features::BasicFog) ? "Fog" : "";
     id += "Material:";
     id += material.GetShaderId(env);
     return id;
@@ -37,7 +38,8 @@ std::string GenericShaderProgram::GetShaderId(const Material& material, const Ma
 std::string GenericShaderProgram::GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const
 {
     std::string id;
-    id += TestFeature(Features::BasicLight) ? "Lit" : "Unlit";
+    id += TestFeature(Features::BasicLight) ? "Lit" : "";
+    id += TestFeature(Features::BasicFog) ? "Fog" : "";
     id += "Drawable:";
     id += drawable.GetShaderId(env);
     return id;
@@ -52,6 +54,9 @@ ShaderSource GenericShaderProgram::GetShader(const Material& material, const Mat
     };
     static const char* basic_light = {
 #include "shaders/basic_light.glsl"
+    };
+    static const char* basic_fog = {
+#include "shaders/basic_fog.glsl"
     };
 
     auto source = material.GetShader(env, device);
@@ -68,17 +73,32 @@ ShaderSource GenericShaderProgram::GetShader(const Material& material, const Mat
     if (source.GetPrecision() == ShaderSource::Precision::NotSet)
         source.SetPrecision(ShaderSource::Precision::High);
 
+    if (!source.HasShaderBlock("PI", ShaderSource::ShaderBlockType::PreprocessorDefine))
+        source.AddPreprocessorDefinition("PI", "3.1415926");
+    if (!source.HasShaderBlock("E", ShaderSource::ShaderBlockType::PreprocessorDefine))
+        source.AddPreprocessorDefinition("E", "2.71828182");
+
     source.AddPreprocessorDefinition("BASIC_LIGHT_MAX_LIGHTS", static_cast<unsigned>(MAX_LIGHTS));
     source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_AMBIENT",     static_cast<unsigned>(LightType::Ambient));
     source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_DIRECTIONAL", static_cast<unsigned>(LightType::Directional));
     source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_SPOT",        static_cast<unsigned>(LightType::Spot));
     source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_POINT",       static_cast<unsigned>(LightType::Point));
 
+    source.AddPreprocessorDefinition("BASIC_FOG_MODE_LINEAR", static_cast<unsigned>(FogMode::Linear));
+    source.AddPreprocessorDefinition("BASIC_FOG_MODE_EXP1", static_cast<unsigned>(FogMode::Exponential1));
+    source.AddPreprocessorDefinition("BASIC_FOG_MODE_EXP2", static_cast<unsigned>(FogMode::Exponential2));
+
     if (TestFeature(Features::BasicLight))
     {
         source.AddPreprocessorDefinition("ENABLE_BASIC_LIGHT");
         source.LoadRawSource(basic_light);
         source.AddShaderSourceUri("shaders/basic_light.glsl");
+    }
+    if (TestFeature(Features::BasicFog))
+    {
+        source.AddPreprocessorDefinition("ENABLE_BASIC_FOG");
+        source.LoadRawSource(basic_fog);
+        source.AddShaderSourceUri("shaders/basic_fog.glsl");
     }
 
     source.LoadRawSource(utility_func);
@@ -110,6 +130,10 @@ ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Dra
     {
         source.AddPreprocessorDefinition("ENABLE_BASIC_LIGHT");
     }
+    if (TestFeature(Features::BasicFog))
+    {
+        source.AddPreprocessorDefinition("ENABLE_BASIC_FOG");
+    }
 
     source.LoadRawSource(vertex_main);
     source.AddShaderSourceUri("shaders/generic_main_vertex_shader.glsl");
@@ -120,6 +144,8 @@ void GenericShaderProgram::ApplyDynamicState(const Device& device, ProgramState&
 {
     if (TestFeature(Features::BasicLight))
         ApplyLightState(device, program);
+    if (TestFeature(Features::BasicFog))
+        ApplyFogState(device, program);
 }
 
 void GenericShaderProgram::ApplyLightState(const Device& device, ProgramState& program) const
@@ -176,6 +202,31 @@ void GenericShaderProgram::ApplyLightState(const Device& device, ProgramState& p
         data[0].lights[i].type = static_cast<int32_t>(light.type);
     }
     program.SetUniformBlock(UniformBlock("LightArray", std::move(data)));
+}
+
+void GenericShaderProgram::ApplyFogState(const Device& device, ProgramState& program) const
+{
+#pragma pack(push, 1)
+    struct Fog {
+        Vec4 color;
+        Vec3 center;
+        float density;
+        float start_dist;
+        float end_dist;
+        uint32_t mode;
+    };
+#pragma pack(pop)
+
+    UniformBlockData<Fog> data;
+    data.Resize(1);
+    data[0].color  = ToVec(mFog.color);
+    data[0].center = ToVec(mCameraCenter);
+    data[0].density = mFog.density;
+    data[0].start_dist = mFog.start_dist;
+    data[0].end_dist   = mFog.end_dist;
+    data[0].mode  = static_cast<uint32_t>(mFog.mode);
+    program.SetUniformBlock(UniformBlock("FogData", std::move(data)));
+
 }
 
 } // namespace

@@ -3297,6 +3297,94 @@ private:
 };
 
 
+class BasicFog3DTest : public GraphicsTest
+{
+public:
+    using FogMode = gfx::GenericShaderProgram::FogMode;
+
+    explicit BasicFog3DTest(FogMode mode) noexcept
+      : mFogMode(mode)
+      , mShapeIndex(2)
+    {}
+
+    void Render(gfx::Painter& painter) override
+    {
+        constexpr auto const aspect = 1024.0 / 768.0f;
+        const float t = std::sin(mTime * 0.4) * 0.5 + 0.5;
+        const auto index = mShapeIndex % 4;
+        std::unique_ptr<gfx::Drawable> drawable;
+        if (index == 0)
+            drawable.reset(new gfx::Sphere);
+        else if (index == 1)
+            drawable.reset(new gfx::Cone);
+        else if (index == 2)
+            drawable.reset(new gfx::Cube);
+        else if (index == 3)
+            drawable.reset(new gfx::Cylinder);
+
+        auto material = gfx::CreateMaterialFromColor(gfx::Color::DarkRed);
+
+        gfx::Painter p(painter);
+        p.ResetViewMatrix();
+        p.SetProjectionMatrix(gfx::MakePerspectiveProjection(gfx::FDegrees { 45.0f }, aspect, 1.0f, 100.0f));
+
+        gfx::Painter::DrawState state;
+        state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
+        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+
+        gfx::GenericShaderProgram program;
+        gfx::GenericShaderProgram::Fog fog;
+        fog.mode = mFogMode;
+        fog.color = gfx::Color4f(gfx::Color::DarkGray);
+        fog.start_dist = 0.0f;
+        fog.end_dist   = 100.0f;
+        fog.density    = 3.0f;
+
+        program.EnableFeature(gfx::GenericShaderProgram::Features::BasicFog, true);
+        program.SetFog(fog);
+
+        for (int i = 0; i<5; ++i)
+        {
+            gfx::Transform transform;
+            transform.Resize(2.0f, 2.0f, 2.0f);
+            transform.RotateAroundY(std::sin(t));
+            transform.RotateAroundX(std::cos(t));
+            transform.MoveTo(-3.5f, 0.0f, -10.0f);
+            transform.Translate(2.0f * std::pow(float(i), 1.873f), 0.0f, -5.0f * std::pow(float(i), 1.5f));
+            p.Draw(*drawable, transform, material, state, program);
+        }
+    }
+    std::string GetName() const override
+    {
+        return base::FormatString("Basic%1FogTest", mFogMode);
+    }
+    void KeyDown(const wdk::WindowEventKeyDown& key) override
+    {
+        if (key.symbol == wdk::Keysym::Space)
+            ++mShapeIndex;
+        else if (key.symbol == wdk::Keysym::Key1)
+            mFogMode = FogMode::Linear;
+        else if (key.symbol == wdk::Keysym::Key2)
+            mFogMode = FogMode ::Exponential1;
+        else if (key.symbol == wdk::Keysym::Key3)
+            mFogMode = FogMode ::Exponential2;
+    }
+    void Start() override
+    {
+        mTime = 0.0f;
+    }
+    void Update(float dt) override
+    {
+        mTime += dt;
+    }
+
+private:
+    FogMode mFogMode = FogMode::Linear;
+    unsigned mShapeIndex = 0;
+    float mTime = 0.0f;
+};
+
+
 class BasicLight3DTest : public GraphicsTest
 {
 public:
@@ -3964,6 +4052,10 @@ int main(int argc, char* argv[])
         tests.emplace_back(new BasicLightNormalMapMaterialTest(BasicLightNormalMapMaterialTest::LightType::Point));
         tests.emplace_back(new BasicLightNormalMapMaterialTest(BasicLightNormalMapMaterialTest::LightType::Spot));
         tests.emplace_back(new BasicLightNormalMapMaterialTest(BasicLightNormalMapMaterialTest::LightType::Directional));
+
+        tests.emplace_back(new BasicFog3DTest(BasicFog3DTest::FogMode::Linear));
+        tests.emplace_back(new BasicFog3DTest(BasicFog3DTest::FogMode::Exponential1));
+        tests.emplace_back(new BasicFog3DTest(BasicFog3DTest::FogMode::Exponential2));
     }
 
     bool stop_for_input = false;

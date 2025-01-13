@@ -634,7 +634,8 @@ bool ShaderSource::LoadRawSource(const std::string& source)
                  base::StartsWith(trimmed, "#ifndef") ||
                  base::StartsWith(trimmed, "#else") ||
                  base::StartsWith(trimmed, "#elif") ||
-                 base::StartsWith(trimmed, "#endif"))
+                 base::StartsWith(trimmed, "#endif") ||
+                 base::StartsWith(trimmed, "#if "))
         {
             ShaderBlock block;
             block.type = ShaderBlockType::PreprocessorToken;
