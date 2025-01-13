@@ -173,7 +173,7 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
         for (size_t i=0; i<scene.GetNumEntities(); ++i)
         {
             const auto& entity = scene.GetEntity(i);
-            for (size_t j=0; j<entity->GetNumNodes(); ++j)
+            for (size_t j=0; j<entity.GetNumNodes(); ++j)
             {
                 const auto& node = entity.GetNode(j);
 
