@@ -30,6 +30,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <type_traits>
 
 #include "warnpush.h"
 #  include <glm/gtc/type_ptr.hpp>
@@ -74,9 +75,6 @@
 // <pname> is RENDERBUFFER_INTERNAL_FORMAT:
 #define GL_DEPTH24_STENCIL8_OES                           0x88F0
 
-// KHR_debug
-typedef void (GL_APIENTRY *GLDEBUGPROC)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
-typedef  void (GL_APIENTRY *PFNGLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC proc, const void* user);
 // https://registry.khronos.org/OpenGL/extensions/KHR/KHR_debug.txt
 // Tokens accepted by the <target> parameters of Enable, Disable, and IsEnabled:
 #define GL_DEBUG_OUTPUT_KHR                                     0x92E0
@@ -147,6 +145,20 @@ typedef  void (GL_APIENTRY *PFNGLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC proc, con
 
 // GL_EXT_draw_buffers
 #define MAX_COLOR_ATTACHMENTS_EXT             0x8CDF
+
+static_assert(sizeof(GLint) == sizeof(int) && sizeof(GLuint) == sizeof(unsigned) && sizeof(GLfloat) == sizeof(float),
+              "Basic OpenGL type sanity check");
+
+static_assert(sizeof(int) == 4 && sizeof(unsigned) == 4 && sizeof(float) == 4 &&
+              sizeof(glm::vec2) == 8 && sizeof(glm::vec3) == 12 && sizeof(glm::vec4) == 16 &&
+              sizeof(glm::ivec2) == 8 && sizeof(glm::ivec3) == 12 && sizeof(glm::ivec4) == 16 &&
+              sizeof(glm::uvec2) == 8 && sizeof(glm::uvec3) == 12 && sizeof(glm::uvec4) == 16,
+              "Basic types sanity check");
+
+// KHR_debug
+typedef void (GL_APIENTRY *GLDEBUGPROC)(GLenum source, GLenum type, GLuint id,GLenum severity, GLsizei length,
+                                        const GLchar* message, const void* userParam);
+typedef void (GL_APIENTRY *PFNGLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC proc, const void* user);
 
 #if !defined(GRAPHICS_CHECK_OPENGL)
 #  pragma message "OpenGL calls are NOT checked!"
@@ -277,8 +289,14 @@ struct OpenGLFunctions
     PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation;
     PFNGLGETUNIFORMBLOCKINDEXPROC    glGetUniformBlockIndex;
     PFNGLUNIFORMBLOCKBINDINGPROC     glUniformBlockBinding;
+    PFNGLUNIFORM1UIPROC              glUniform1ui;
+    PFNGLUNIFORM2UIPROC              glUniform2ui;
+    PFNGLUNIFORM3UIPROC              glUniform3ui;
+    PFNGLUNIFORM4UIPROC              glUniform4ui;
     PFNGLUNIFORM1IPROC               glUniform1i;
     PFNGLUNIFORM2IPROC               glUniform2i;
+    PFNGLUNIFORM3IPROC               glUniform3i;
+    PFNGLUNIFORM4IPROC               glUniform4i;
     PFNGLUNIFORM1FPROC               glUniform1f;
     PFNGLUNIFORM2FPROC               glUniform2f;
     PFNGLUNIFORM3FPROC               glUniform3f;
@@ -479,8 +497,14 @@ public:
         RESOLVE(glGetUniformLocation);
         RESOLVE(glGetUniformBlockIndex);
         RESOLVE(glUniformBlockBinding);
+        RESOLVE(glUniform1ui);
+        RESOLVE(glUniform2ui);
+        RESOLVE(glUniform3ui);
+        RESOLVE(glUniform4ui);
         RESOLVE(glUniform1i);
         RESOLVE(glUniform2i);
+        RESOLVE(glUniform3i);
+        RESOLVE(glUniform4i);
         RESOLVE(glUniform1f);
         RESOLVE(glUniform2f);
         RESOLVE(glUniform3f);
@@ -1706,10 +1730,22 @@ public:
 
             if (const auto* ptr = std::get_if<int>(&value))
                 GL_CALL(glUniform1i(location, *ptr));
+            else if (const auto* ptr = std::get_if<unsigned>(&value))
+                GL_CALL(glUniform1ui(location, *ptr));
             else if (const auto* ptr = std::get_if<float>(&value))
                 GL_CALL(glUniform1f(location, *ptr));
+            else if (const auto* ptr = std::get_if<glm::uvec2>(&value))
+                GL_CALL(glUniform2ui(location, ptr->x, ptr->y));
+            else if (const auto* ptr = std::get_if<glm::uvec3>(&value))
+                GL_CALL(glUniform3ui(location, ptr->x, ptr->y, ptr->z));
+            else if (const auto* ptr = std::get_if<glm::uvec4>(&value))
+                GL_CALL(glUniform4ui(location, ptr->x, ptr->y, ptr->z, ptr->w));
             else if (const auto* ptr = std::get_if<glm::ivec2>(&value))
                 GL_CALL(glUniform2i(location, ptr->x, ptr->y));
+            else if (const auto* ptr = std::get_if<glm::ivec3>(&value))
+                GL_CALL(glUniform3i(location, ptr->x, ptr->y, ptr->z));
+            else if (const auto* ptr = std::get_if<glm::ivec4>(&value))
+                GL_CALL(glUniform4i(location, ptr->x, ptr->y, ptr->z, ptr->w));
             else if (const auto* ptr = std::get_if<glm::vec2>(&value))
                 GL_CALL(glUniform2f(location, ptr->x, ptr->y));
             else if (const auto* ptr = std::get_if<glm::vec3>(&value))

@@ -32,9 +32,14 @@
 
 namespace dev
 {
-    using UniformValType = std::variant<int, float,
+    using UniformValType = std::variant<int, unsigned, float,
             base::Color4f,
             glm::ivec2,
+            glm::ivec3,
+            glm::ivec4,
+            glm::uvec2,
+            glm::uvec3,
+            glm::uvec4,
             glm::vec2,
             glm::vec3,
             glm::vec4,
