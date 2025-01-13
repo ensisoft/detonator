@@ -177,6 +177,7 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetParticleStartColor());
             hash = base::hash_combine(hash, GetParticleEndColor());
             hash = base::hash_combine(hash, GetParticleBaseRotation());
+            hash = base::hash_combine(hash, mSurfaceType);
         }
     }
     else if (mType == Type::BasicLight)
