@@ -43,7 +43,7 @@ namespace gfx {
         { return mShader.IsValid(); }
         std::string GetName() const override
         { return mName; }
-        std::string GetError() const override
+        std::string GetCompileInfo() const override
         { return mCompileInfo; }
 
         inline void SetName(std::string name) noexcept

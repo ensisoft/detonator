@@ -39,7 +39,7 @@ namespace gfx
         // Used for improved debug/log messages.
         virtual std::string GetName() const { return ""; }
         // Get the (human-readable) shader (compile) error string if any.
-        virtual std::string GetError() const { return ""; };
+        virtual std::string GetCompileInfo() const { return ""; };
     private:
     };
 
