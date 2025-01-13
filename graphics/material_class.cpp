@@ -270,9 +270,9 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     if (!source.HasShaderBlock("PI", ShaderSource::ShaderBlockType::PreprocessorDefine))
         source.AddPreprocessorDefinition("PI", "3.1415926");
 
-    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_OPAQUE",      static_cast<int>(SurfaceType::Opaque));
-    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_TRANSPARENT", static_cast<int>(SurfaceType::Transparent));
-    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_EMISSIVE",    static_cast<int>(SurfaceType::Emissive));
+    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_OPAQUE",      static_cast<unsigned>(SurfaceType::Opaque));
+    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_TRANSPARENT", static_cast<unsigned>(SurfaceType::Transparent));
+    source.AddPreprocessorDefinition("MATERIAL_SURFACE_TYPE_EMISSIVE",    static_cast<unsigned>(SurfaceType::Emissive));
     source.AddPreprocessorDefinition("TEXTURE_WRAP_CLAMP",  static_cast<int>(TextureWrapping::Clamp));
     source.AddPreprocessorDefinition("TEXTURE_WRAP_REPEAT", static_cast<int>(TextureWrapping::Repeat));
     source.AddPreprocessorDefinition("TEXTURE_WRAP_MIRROR", static_cast<int>(TextureWrapping::Mirror));
@@ -346,7 +346,7 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
             source.FoldUniform("kTileSize", GetTileSize());
             source.FoldUniform("kTileOffset", GetTileOffset());
             source.FoldUniform("kTilePadding", GetTilePadding());
-            source.FoldUniform("kSurfaceType", static_cast<int>(mSurfaceType));
+            source.FoldUniform("kSurfaceType", static_cast<unsigned>(mSurfaceType));
             source.FoldUniform("kParticleStartColor", GetParticleStartColor());
             source.FoldUniform("kParticleEndColor", GetParticleEndColor());
             source.FoldUniform("kParticleBaseRotation", GetParticleBaseRotation());
@@ -368,7 +368,7 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
 {
     program.SetUniform("kTime", (float)state.material_time);
     program.SetUniform("kEditingMode", (int)state.editing_mode);
-    program.SetUniform("kSurfaceType", static_cast<int>(mSurfaceType));
+    program.SetUniform("kSurfaceType", static_cast<unsigned>(mSurfaceType));
 
     // for the future... for different render passes we got two options
     // either the single shader implements the different render pass
