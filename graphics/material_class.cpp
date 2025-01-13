@@ -283,11 +283,11 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
         source.AddPreprocessorDefinition("PARTICLE_EFFECT_ROTATE", static_cast<int>(ParticleEffect::Rotate));
         if (mType == Type::Particle2D)
         {
-            source.AddPreprocessorDefinition("PARTICLE_ROTATION_NONE", static_cast<int>(ParticleRotation::None));
-            source.AddPreprocessorDefinition("PARTICLE_ROTATION_BASE", static_cast<int>(ParticleRotation::BaseRotation));
-            source.AddPreprocessorDefinition("PARTICLE_ROTATION_RANDOM", static_cast<int>(ParticleRotation::RandomRotation));
-            source.AddPreprocessorDefinition("PARTICLE_ROTATION_DIRECTION", static_cast<int>(ParticleRotation::ParticleDirection));
-            source.AddPreprocessorDefinition("PARTICLE_ROTATION_DIRECTION_AND_BASE", static_cast<int>(ParticleRotation::ParticleDirectionAndBase));
+            source.AddPreprocessorDefinition("PARTICLE_ROTATION_NONE", static_cast<unsigned>(ParticleRotation::None));
+            source.AddPreprocessorDefinition("PARTICLE_ROTATION_BASE", static_cast<unsigned>(ParticleRotation::BaseRotation));
+            source.AddPreprocessorDefinition("PARTICLE_ROTATION_RANDOM", static_cast<unsigned>(ParticleRotation::RandomRotation));
+            source.AddPreprocessorDefinition("PARTICLE_ROTATION_DIRECTION", static_cast<unsigned>(ParticleRotation::ParticleDirection));
+            source.AddPreprocessorDefinition("PARTICLE_ROTATION_DIRECTION_AND_BASE", static_cast<unsigned>(ParticleRotation::ParticleDirectionAndBase));
         }
         else if (mType == Type::BasicLight)
         {
@@ -532,6 +532,37 @@ bool MaterialClass::SetUniform(const char* name, const UniformMap* uniforms, con
         {
             program.SetUniform(name, *ptr);
             return true;
+        }
+    }
+    program.SetUniform(name, backup);
+    return false;
+}
+
+// static
+bool MaterialClass::SetUniform(const char* name, const UniformMap* uniforms, unsigned backup, ProgramState& program)
+{
+    if (uniforms)
+    {
+        auto it = uniforms->find(name);
+        if (it == uniforms->end())
+        {
+            program.SetUniform(name, backup);
+            return true;
+        }
+        const auto& value = it->second;
+        // right now we're only exposing int type in the supported uniforms.
+        // adding unsigned requires all the layers above to change too and
+        // make sure they deal with int vs unsigned int properly. Including
+        // Lua scripting and UI layers...
+        // But since we're only using this as a flag type it should be fine
+        // for now.
+        if (const auto* ptr = std::get_if<int>(&value))
+        {
+            if (*ptr > 0)
+            {
+                program.SetUniform(name, *ptr);
+                return true;
+            }
         }
     }
     program.SetUniform(name, backup);
@@ -1506,7 +1537,7 @@ bool MaterialClass::ApplyParticleDynamicState(const State& state, Device& device
         SetUniform("kParticleEndColor",     state.uniforms, GetParticleEndColor(), program);
         SetUniform("kParticleBaseRotation", state.uniforms, GetParticleBaseRotation(), program);
     }
-    SetUniform("kParticleRotation", state.uniforms, static_cast<int>(GetParticleRotation()), program);
+    SetUniform("kParticleRotation", state.uniforms, static_cast<unsigned>(GetParticleRotation()), program);
 
     return true;
 }
