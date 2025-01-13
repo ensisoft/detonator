@@ -74,15 +74,40 @@ namespace gfx
             mUniformBlocks.push_back(block);
         }
 
+        inline void SetUniform(const char* name, unsigned x)
+        {
+            mUniforms.push_back({ name, x, });
+        }
+        inline void SetUniform(const char* name, unsigned x, unsigned y)
+        {
+            mUniforms.push_back({ name, glm::uvec2{ x, y} });
+        }
+        inline void SetUniform(const char* name, unsigned x, unsigned y, unsigned z)
+        {
+            mUniforms.push_back({ name, glm::uvec3{ x, y, z} });
+        }
+        inline void SetUniform(const char* name, unsigned x, unsigned y, unsigned z, unsigned w)
+        {
+            mUniforms.push_back({ name, glm::uvec4{ x, y, z, w} });
+        }
+
         // Set scalar uniform.
+
         inline void SetUniform(const char* name, int x)
         {
             mUniforms.push_back({ name, x });
         }
-        // Set scalar uniform.
         inline void SetUniform(const char* name, int x, int y)
         {
             mUniforms.push_back({ name, glm::ivec2{x, y} });
+        }
+        inline void SetUniform(const char* name, int x, int y, int z)
+        {
+            mUniforms.push_back({ name, glm::ivec3{x, y, z} });
+        }
+        inline void SetUniform(const char* name, int x, int y, int z, int w)
+        {
+            mUniforms.push_back({ name, glm::ivec4{x, y, z, w} });
         }
 
         // Set scalar uniform.

@@ -875,6 +875,97 @@ void main() {
     }
 
 }
+
+void unit_test_render_set_uint_uniforms()
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto dev = CreateDevice();
+
+    const gfx::Vertex2D verts[] = {
+            {{-1, 1},  {0, 1}},
+            {{-1, -1}, {0, 0}},
+            {{1,  -1}, {1, 0}},
+
+            {{-1, 1},  {0, 1}},
+            {{1,  -1}, {1, 0}},
+            {{1,  1},  {1, 1}}
+    };
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
+
+    constexpr const char* fssrc =
+R"(#version 300 es
+precision mediump float;
+uniform uint kValue;
+uniform uvec2 kVec2;
+
+layout(location=0) out vec4 fragOutColor;
+
+void main() {
+  fragOutColor = vec4(0.0);
+  uint sum = kValue + kVec2.x + kVec2.y;
+  if (sum == uint(1))
+    fragOutColor = vec4(1.0);
+})";
+
+    constexpr const char* vssrc =
+R"(#version 300 es
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})";
+
+    auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+
+
+    gfx::Device::State state;
+    state.blending = gfx::Device::State::BlendOp::None;
+    state.bWriteColor = true;
+    state.viewport = gfx::IRect(0, 0, 10, 10);
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+    gfx::ProgramState program_state;
+    program_state.SetUniform("kValue", 1u);
+    program_state.SetUniform("kVec2", 0u, 0u);
+    dev->Draw(*prog, program_state, *geom, state);
+    dev->EndFrame();
+    {
+        const auto &bmp = dev->ReadColorBuffer(10, 10);
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
+    }
+
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+    program_state.Clear();
+    program_state.SetUniform("kValue", 0u);
+    program_state.SetUniform("kVec2", 1u, 0u);
+    dev->Draw(*prog, program_state, *geom, state);
+    dev->EndFrame();
+    {
+        const auto &bmp = dev->ReadColorBuffer(10, 10);
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
+    }
+
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red);
+    program_state.Clear();
+    program_state.SetUniform("kValue", 0u);
+    program_state.SetUniform("kVec2", 0u, 1u);
+    dev->Draw(*prog, program_state, *geom, state);
+    dev->EndFrame();
+    {
+        const auto &bmp = dev->ReadColorBuffer(10, 10);
+        TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
+    }
+
+}
+
 void unit_test_render_set_matrix2x2_uniform()
 {
     TEST_CASE(test::Type::Feature)
@@ -2897,6 +2988,9 @@ int test_main(int argc, char* argv[])
 
     if (TestContext::GL_ES_Version == 3)
     {
+        // uint requires #version 130 or later
+        unit_test_render_set_uint_uniforms();
+
         unit_test_instanced_rendering();
         unit_test_uniform_buffer();
         unit_test_uniform_buffer_array();
