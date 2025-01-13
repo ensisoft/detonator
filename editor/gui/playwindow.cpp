@@ -480,13 +480,13 @@ public:
     }
     virtual ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override
     {
-        if (name == "_entity_preview_")
+        if (name == "_entity_preview_" | name == mEntityPreview->GetName())
             return mEntityPreview;
         return mWorkspace.FindEntityClassByName(name);
     }
     virtual ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override
     {
-        if (id == "_entity_preview_")
+        if (id == "_entity_preview_" || id == mEntityPreview->GetId())
             return mEntityPreview;
         return mWorkspace.FindEntityClassById(id);
     }
