@@ -19,12 +19,12 @@ uniform vec4 kDiffuseMapRect;
 uniform vec4 kSpecularMapRect;
 uniform vec4 kNormalMapRect;
 
-uniform int kMaterialMaps;
+uniform uint kMaterialMaps;
 
 // @varyings
 in vec2 vTexCoord;
 
-bool TestMap(int map) {
+bool TestMap(uint map) {
     return ((kMaterialMaps & map) == map);
 }
 

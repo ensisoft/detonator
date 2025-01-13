@@ -292,9 +292,9 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
         }
         else if (mType == Type::BasicLight)
         {
-            source.AddPreprocessorDefinition("BASIC_LIGHT_MATERIAL_DIFFUSE_MAP",  static_cast<int>(BasicLightMaterialMap::Diffuse));
-            source.AddPreprocessorDefinition("BASIC_LIGHT_MATERIAL_SPECULAR_MAP", static_cast<int>(BasicLightMaterialMap::Specular));
-            source.AddPreprocessorDefinition("BASIC_LIGHT_MATERIAL_NORMAL_MAP",   static_cast<int>(BasicLightMaterialMap::Normal));
+            source.AddPreprocessorDefinition("BASIC_LIGHT_MATERIAL_DIFFUSE_MAP",  static_cast<unsigned>(BasicLightMaterialMap::Diffuse));
+            source.AddPreprocessorDefinition("BASIC_LIGHT_MATERIAL_SPECULAR_MAP", static_cast<unsigned>(BasicLightMaterialMap::Specular));
+            source.AddPreprocessorDefinition("BASIC_LIGHT_MATERIAL_NORMAL_MAP",   static_cast<unsigned>(BasicLightMaterialMap::Normal));
         }
     }
 
@@ -1547,9 +1547,9 @@ bool MaterialClass::ApplyBasicLightDynamicState(const State& state, Device& devi
 {
     if (!IsStatic())
     {
-        SetUniform("kAmbientColor", state.uniforms, GetAmbientColor(), program);
-        SetUniform("kDiffuseColor", state.uniforms, GetDiffuseColor(), program);
-        SetUniform("kSpecularColor", state.uniforms, GetSpecularColor(), program);
+        SetUniform("kAmbientColor",     state.uniforms, GetAmbientColor(), program);
+        SetUniform("kDiffuseColor",     state.uniforms, GetDiffuseColor(), program);
+        SetUniform("kSpecularColor",    state.uniforms, GetSpecularColor(), program);
         SetUniform("kSpecularExponent", state.uniforms, GetSpecularExponent(), program);
     }
 
@@ -1558,11 +1558,11 @@ bool MaterialClass::ApplyBasicLightDynamicState(const State& state, Device& devi
         const char* texture_rect_name;
         BasicLightMaterialMap type;
     } maps[] = {
-        { "kDiffuseMap", "kDiffuseMapRect", BasicLightMaterialMap::Diffuse },
+        { "kDiffuseMap",  "kDiffuseMapRect",  BasicLightMaterialMap::Diffuse },
         { "kSpecularMap", "kSpecularMapRect", BasicLightMaterialMap::Specular },
-        { "kNormalMap", "kNormalMapRect", BasicLightMaterialMap::Normal }
+        { "kNormalMap",   "kNormalMapRect",   BasicLightMaterialMap::Normal }
     };
-    int map_flags = 0;
+    unsigned map_flags = 0;
 
     for (unsigned i=0; i<base::ArraySize(maps); ++i)
     {
