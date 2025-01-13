@@ -259,7 +259,7 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
         }
         if (!material_shader->IsValid())
         {
-            auto error = material_shader->GetError();
+            auto error = material_shader->GetCompileInfo();
             if (!error.empty())
                 mErrors.push_back(std::move(error));
             return nullptr;
@@ -288,7 +288,7 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
         }
         if (!drawable_shader->IsValid())
         {
-            auto error = drawable_shader->GetError();
+            auto error = drawable_shader->GetCompileInfo();
             if (!error.empty())
                 mErrors.push_back(std::move(error));
             return nullptr;
