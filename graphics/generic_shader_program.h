@@ -78,7 +78,7 @@ namespace gfx
         static constexpr auto MAX_LIGHTS = 10;
 
         enum class Features {
-            BasicLight
+            BasicLight, BasicFog
         };
 
         enum class LightType : int32_t {
@@ -86,6 +86,10 @@ namespace gfx
             Directional,
             Spot,
             Point
+        };
+
+        enum class FogMode : uint32_t {
+            Linear, Exponential1, Exponential2
         };
 
         struct Light {
@@ -104,6 +108,14 @@ namespace gfx
             float constant_attenuation = 1.0f;
             float linear_attenuation = 0.0f;
             float quadratic_attenuation = 0.0f;
+        };
+
+        struct Fog {
+            gfx::Color4f color;
+            float start_dist = 10.0f;
+            float end_dist = 100.0f;
+            float density = 1.0f;
+            FogMode mode = FogMode::Linear;
         };
 
         GenericShaderProgram() = default;
@@ -129,6 +141,9 @@ namespace gfx
         inline void SetLight(Light&& light, size_t index) noexcept
         { base::SafeIndex(mLights, index) = std::move(light); }
 
+        inline void SetFog(const Fog& fog) noexcept
+        { mFog = fog; }
+
         inline void SetCameraCenter(glm::vec3 center) noexcept
         { mCameraCenter = center; }
         inline void SetCameraCenter(float x, float y, float z) noexcept
@@ -153,6 +168,7 @@ namespace gfx
 
         void ApplyDynamicState(const Device& device, ProgramState& program) const override;
         void ApplyLightState(const Device& device, ProgramState& program) const;
+        void ApplyFogState(const Device& device, ProgramState& program) const;
 
     private:
         std::string mName;
@@ -160,5 +176,6 @@ namespace gfx
         glm::vec3 mCameraCenter = {0.0f, 0.0f, 0.0f};
         base::bitflag<Features> mFeatures;
         RenderPass mRenderPass = RenderPass::ColorPass;
+        Fog mFog;
     };
 } // namespace

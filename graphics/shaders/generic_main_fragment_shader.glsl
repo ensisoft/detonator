@@ -26,8 +26,11 @@ struct FS_OUT {
 
 // @varyings
 
-#ifdef ENABLE_BASIC_LIGHT
+#if defined(ENABLE_BASIC_LIGHT) || defined(ENABLE_BASIC_FOG)
   in vec3 vertexViewPosition;
+#endif
+
+#if defined(ENABLE_BASIC_LIGHT)
   in vec3 vertexViewNormal;
   in mat3 TBN;
 #endif
@@ -48,6 +51,10 @@ void main() {
 
     #ifdef ENABLE_BASIC_LIGHT
         out_color = ComputeBasicLight();
+    #endif
+
+    #ifdef ENABLE_BASIC_FOG
+        out_color = ComputeBasicFog(out_color);
     #endif
 
     fragOutColor = sRGB_encode(out_color);

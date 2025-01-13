@@ -25,8 +25,11 @@ struct VS_OUT {
 
 // @varyings
 
-#ifdef ENABLE_BASIC_LIGHT
+#if defined(ENABLE_BASIC_LIGHT) || defined(ENABLE_BASIC_FOG)
   out vec3 vertexViewPosition;
+#endif
+
+#if defined(ENABLE_BASIC_LIGHT)
   out vec3 vertexViewNormal;
   // tangent, bitangent, normal matrix for normal mapping
   out mat3 TBN;
@@ -41,9 +44,11 @@ void main() {
 
     VertexShaderMain();
 
-#ifdef ENABLE_BASIC_LIGHT
+#if defined(ENABLE_BASIC_LIGHT) || defined(ENABLE_BASIC_FOG)
     vertexViewPosition = vs_out.view_position.xyz;
+#endif
 
+#ifdef ENABLE_BASIC_LIGHT
     if (vs_out.have_tbn) {
         vertexViewNormal = vs_out.view_normal;
 
