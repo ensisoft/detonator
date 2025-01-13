@@ -25,7 +25,7 @@
 namespace {
     std::string ToConst(unsigned value)
     {
-        return base::ToChars(value);
+        return "uint(" + base::ToChars(value) + ")";
     }
 
     std::string ToConst(int value)
@@ -114,6 +114,8 @@ namespace {
 
         if (str == "int")
             return t::Int;
+        else if (str == "uint")
+            return t::UInt;
         else if (str == "float")
             return t::Float;
         else if (str == "vec2")
@@ -158,6 +160,8 @@ namespace {
 
         if (type == T::Int)
             return "int";
+        else if(type == T::UInt)
+            return "uint";
         else if (type == T::Float)
             return "float";
         else if (type == T::Vec2f)
@@ -246,7 +250,7 @@ void ShaderSource::AddPreprocessorDefinition(std::string name, unsigned value)
 {
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
-    block.data = base::FormatString("#define %1 uint(%2)", name, ToConst(value));
+    block.data = base::FormatString("#define %1 %2", name, ToConst(value));
     mShaderBlocks["preprocessor"].push_back(std::move(block));
 }
 
@@ -529,6 +533,8 @@ ShaderSource::ShaderDataType ShaderSource::DataTypeFromValue(gfx::ShaderSource::
 {
     if (std::holds_alternative<int>(value))
         return ShaderDataType::Int;
+    else if (std::holds_alternative<unsigned>(value))
+        return ShaderDataType::UInt;
     else if (std::holds_alternative<float>(value))
         return ShaderDataType::Float;
     else if (std::holds_alternative<Color4f>(value))

@@ -44,8 +44,7 @@ namespace gfx
     {
     public:
         enum class ShaderDataType {
-            Int,
-            Float,
+            Int, UInt, Float,
             Vec2f, Vec3f, Vec4f,
             Vec2i, Vec3i, Vec4i,
             Mat2f, Mat3f, Mat4f,
@@ -73,7 +72,7 @@ namespace gfx
         };
 
         using ShaderDataDeclarationValue = std::variant<
-                int,  float,
+                int,  float, unsigned,
                 Color4f,
                 glm::vec2, glm::vec3, glm::vec4,
                 glm::ivec2, glm::ivec3, glm::ivec4,

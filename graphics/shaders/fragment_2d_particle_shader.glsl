@@ -9,7 +9,7 @@ R"CPP_RAW_STRING(//"
 uniform float kTime;
 
 // current surface type value.
-uniform int kSurfaceType;
+uniform uint kSurfaceType;
 // particle alpha mask
 uniform sampler2D kMask;
 // the sub-rectangle in the texture from where to sample
