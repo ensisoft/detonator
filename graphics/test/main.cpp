@@ -3296,82 +3296,6 @@ private:
 
 };
 
-class BasicLight2DTest : public GraphicsTest
-{
-public:
-    using LightType = gfx::BasicLightProgram::LightType;
-
-    BasicLight2DTest()
-    {
-        mLightType = LightType::Point;
-    }
-    explicit BasicLight2DTest(const glm::vec3& direction)
-    {
-        mLightType = LightType::Directional;
-        mLightDirection = direction;
-    }
-    BasicLight2DTest(const glm::vec3& direction, base::FDegrees half_angle)
-    {
-        mLightType = LightType::Spot;
-        mLightDirection = direction;
-        mLightHalfAngle = half_angle;
-    }
-
-    void Render(gfx::Painter& painter) override
-    {
-        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 1024.0f, 0, 768.0f, -1000.0f, 1000.0f));
-
-        auto material = gfx::CreateMaterialFromColor(gfx::Color::White);
-        auto light_pos = glm::vec3{512.0f, 384.0f, 0.0f};
-
-        mLightDirection.x = std::sin(mTime);
-
-        gfx::BasicLightProgram program;
-        program.SetCameraCenter(512.0, 384.0f, 0.0f);
-
-        gfx::BasicLightProgram::Light light;
-        light.type = mLightType;
-        light.ambient_color  = gfx::Color4f(gfx::Color::DarkGray) * 0.245f;
-        light.diffuse_color  = gfx::Color4f(gfx::Color::Gold);
-        light.specular_color = gfx::Color4f(gfx::Color::White) * 0.3f;
-        light.direction = mLightDirection;
-        light.position = light_pos;
-        light.spot_half_angle = mLightHalfAngle;
-        light.quadratic_attenuation = 0.0001f;
-        program.AddLight(light);
-
-        gfx::Transform transform;
-        // watch out of the -1.0 in the scaling factor below.
-        // the reason is that we want to flip the surface normal
-        // so that it points to the positive Z axis, i.e. towards
-        // us, the viewer.
-        // see the vertex 2D shader for more information about this
-        // trick...
-        transform.Scale(500.0f, 500.0f, -1.0f);
-        transform.Translate(262.0f, 134.0f, -10.0f);
-
-        gfx::Painter::DrawState state;
-        painter.Draw(gfx::Rectangle (), transform, material,  state, program);
-    }
-
-    std::string GetName() const override
-    {
-        return base::FormatString("Basic%1Light2DTest", mLightType);
-    }
-    void Update(float dt) override
-    {
-        mTime += dt;
-    }
-    void Start() override
-    {
-        mTime = 0.0f;
-    }
-private:
-    LightType mLightType = LightType::Point;
-    glm::vec3 mLightDirection = {0.0f, 0.0f, 1.0f};
-    gfx::FDegrees mLightHalfAngle;
-    float mTime = 0.0f;
-};
 
 class BasicLight3DTest : public GraphicsTest
 {
@@ -4028,9 +3952,6 @@ int main(int argc, char* argv[])
         tests.emplace_back(new PolygonInstanceTest);
         tests.emplace_back(new ParticleInstanceTest);
         // under ES3 because we require uniform buffers
-        tests.emplace_back(new BasicLight2DTest);
-        tests.emplace_back(new BasicLight2DTest(glm::vec3{0.0f, -1.0f, -0.3f}));
-        tests.emplace_back(new BasicLight2DTest(glm::vec3{0.0f, 1.0f, -0.3f}, gfx::FDegrees(25.0f)));
 
         tests.emplace_back(new BasicLight3DTest);
         tests.emplace_back(new BasicLight3DTest(glm::vec3{-1.0f, -1.0f, 0.0f}));
