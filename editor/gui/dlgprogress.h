@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2024 Sami Väisänen
-// Copyright (C) 2020-2024 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2025 Sami Väisänen
+// Copyright (C) 2020-2025 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,13 +27,16 @@
 #include <vector>
 #include <variant>
 
+#include "editor/app/workspace_observer.h"
+
 namespace Ui {
     class DlgProgress;
 }
 
 namespace gui
 {
-    class DlgProgress : public QDialog
+    class DlgProgress : public QDialog,
+                        public app::WorkspaceAsyncWorkObserver
     {
         Q_OBJECT
 
@@ -46,34 +49,41 @@ namespace gui
         explicit DlgProgress(QWidget* parent) noexcept;
         ~DlgProgress() noexcept;
 
-        void SetMaximum(unsigned max) noexcept;
-        void SetMinimum(unsigned min) noexcept;
-        void UpdateState() noexcept;
-
         void SetSeriousness(Seriousness seriousness) noexcept
         { mSeriousness = seriousness; }
 
-        void SetMessage(const QString& msg) noexcept
+        void EnqueueUpdate(const app::AnyString& message, unsigned step_count, unsigned current_step) override
+        {
+            std::lock_guard<std::mutex> lock(mMutex);
+            struct UpdateMessage msg;
+            msg.msg = message;
+            msg.step_count = step_count;
+            msg.current_step = current_step;
+            mUpdateQueue.push_back(msg);
+        }
+
+        void EnqueueUpdateMessage(const app::AnyString& msg) override
         {
             std::lock_guard<std::mutex> lock(mMutex);
             struct SetMessage set;
             set.msg = msg;
             mUpdateQueue.push_back(set);
         }
-        void SetValue(unsigned value) noexcept
+        void EnqueueStepReset(unsigned count) override
         {
             std::lock_guard<std::mutex> lock(mMutex);
             struct SetValue set;
-            set.value = value;
+            set.count = count;
             mUpdateQueue.push_back(set);
 
         }
-        void StepOne() noexcept
+        void EnqueueStepIncrement() override
         {
             std::lock_guard<std::mutex> lock(mMutex);
             struct StepOne step;
             mUpdateQueue.push_back(step);
         }
+        void ApplyPendingUpdates() override;
     private:
         QString GetMessage(QString msg) const;
 
@@ -82,16 +92,22 @@ namespace gui
     private:
         Seriousness mSeriousness = Seriousness::VerySerious;
     private:
+        struct UpdateMessage {
+            QString msg;
+            unsigned step_count;
+            unsigned current_step;
+        };
+
         struct SetMessage {
             QString msg;
         };
         struct SetValue {
-            unsigned value;
+            unsigned count;
         };
         struct StepOne { };
         using Update = std::variant<struct SetMessage,
-                struct SetValue, struct StepOne>;
-
+                struct SetValue,
+                struct StepOne, UpdateMessage>;
         std::mutex mMutex;
         std::vector<Update> mUpdateQueue;
     };

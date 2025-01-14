@@ -68,7 +68,7 @@
 #include "editor/app/packing.h"
 #include "editor/app/buffer.h"
 #include "editor/app/process.h"
-#include "editor/gui/dlgprogress.h"
+#include "editor/app/workspace_observer.h"
 
 namespace {
 
@@ -86,13 +86,8 @@ bool LoadResources(const char* type,
                    const data::Reader& data,
                    std::vector<std::unique_ptr<app::Resource>>& vector,
                    app::MigrationLog* log = nullptr,
-                   gui::DlgProgress* dlg = nullptr)
+                   app::WorkspaceAsyncWorkObserver* observer = nullptr)
 {
-#if defined(DETONATOR_EDITOR_BUILD)
-    if (dlg)
-        dlg->SetMessage("Loading " + app::toString(type) + "...");
-#endif
-
     DEBUG("Loading resources. [type='%1']", type);
     bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
@@ -123,10 +118,8 @@ bool LoadResources(const char* type,
         vector.push_back(std::move(resource));
         DEBUG("Loaded workspace resource. [name='%1']", name);
 
-#if defined(DETONATOR_EDITOR_BUILD)
-        if (dlg)
-            dlg->StepOne();
-#endif
+        if (observer)
+            observer->EnqueueStepIncrement();
     }
 
     return success;
@@ -137,12 +130,8 @@ bool LoadMaterials(const char* type,
                    const data::Reader& data,
                    std::vector<std::unique_ptr<app::Resource>>& vector,
                    app::MigrationLog* log = nullptr,
-                   gui::DlgProgress* dlg = nullptr)
+                   app::WorkspaceAsyncWorkObserver* observer = nullptr)
 {
-#if defined(DETONATOR_EDITOR_BUILD)
-    if (dlg)
-        dlg->SetMessage("Loading Materials...");
-#endif
 
     DEBUG("Loading resources. [type='%1']", type);
     bool success = true;
@@ -175,10 +164,8 @@ bool LoadMaterials(const char* type,
         vector.push_back(std::move(resource));
         DEBUG("Loaded workspace resource. [name='%1']", name);
 
-#if defined(DETONATOR_EDITOR_BUILD)
-        if (dlg)
-            dlg->StepOne();
-#endif
+        if (observer)
+            observer->EnqueueStepIncrement();
     }
     return success;
 }
@@ -1242,10 +1229,10 @@ gfx::ResourceHandle Workspace::LoadAppResource(const std::string& URI)
     return ret;
 }
 
-bool Workspace::LoadWorkspace(MigrationLog* log, gui::DlgProgress* dlg)
+bool Workspace::LoadWorkspace(MigrationLog* log, WorkspaceAsyncWorkObserver* observer)
 {
-    if (!LoadContent(JoinPath(mWorkspaceDir, "content.json"), log, dlg) ||
-        !LoadProperties(JoinPath(mWorkspaceDir, "workspace.json")))
+    if (!LoadContent(JoinPath(mWorkspaceDir, "content.json"), log, observer) ||
+        !LoadProperties(JoinPath(mWorkspaceDir, "workspace.json"), observer))
         return false;
 
     // we don't really care if this fails or not. nothing permanently
@@ -1392,7 +1379,7 @@ AnyString Workspace::MapFileToFilesystem(const AnyString& uri) const
     return ret;
 }
 
-bool Workspace::LoadContent(const QString& filename, MigrationLog* log, gui::DlgProgress* dlg)
+bool Workspace::LoadContent(const QString& filename, MigrationLog* log, WorkspaceAsyncWorkObserver* observer)
 {
     data::JsonFile file;
     const auto [json_ok, error] = file.Load(app::ToUtf8(filename));
@@ -1403,8 +1390,7 @@ bool Workspace::LoadContent(const QString& filename, MigrationLog* log, gui::Dlg
     }
     data::JsonObject root = file.GetRootObject();
 
-#if defined(DETONATOR_EDITOR_BUILD)
-    if (dlg)
+    if (observer)
     {
         const auto resource_count = root.GetNumChunks("materials") +
                                     root.GetNumChunks("particles") +
@@ -1416,25 +1402,23 @@ bool Workspace::LoadContent(const QString& filename, MigrationLog* log, gui::Dlg
                                     root.GetNumChunks("data_files") +
                                     root.GetNumChunks("audio_graphs") +
                                     root.GetNumChunks("uis");
-        dlg->SetMinimum(0);
-        dlg->SetMaximum(resource_count);
-        dlg->SetValue(0);
+        observer->EnqueueStepReset(resource_count);
 
         std::atomic<bool> load_thread_done = false;
 
-        std::thread loader([this, &root, log, dlg, &load_thread_done] {
-            dlg->SetMessage("Loading workspace...");
+        std::thread loader([this, &root, log, observer, &load_thread_done] {
+            observer->EnqueueUpdateMessage("LOADING RESOURCES");
 
-            LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log, dlg);
-            LoadResources<gfx::ParticleEngineClass>("particles", root, mResources, log, dlg);
-            LoadResources<gfx::PolygonMeshClass>("shapes", root, mResources, log, dlg);
-            LoadResources<game::EntityClass>("entities", root, mResources, log, dlg);
-            LoadResources<game::SceneClass>("scenes", root, mResources, log, dlg);
-            LoadResources<game::TilemapClass>("tilemaps", root, mResources, log, dlg);
-            LoadResources<Script>("scripts", root, mResources, log, dlg);
-            LoadResources<DataFile>("data_files", root, mResources, log, dlg);
-            LoadResources<audio::GraphClass>("audio_graphs", root, mResources, log, dlg);
-            LoadResources<uik::Window>("uis", root, mResources, log, dlg);
+            LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log, observer);
+            LoadResources<gfx::ParticleEngineClass>("particles", root, mResources, log, observer);
+            LoadResources<gfx::PolygonMeshClass>("shapes", root, mResources, log, observer);
+            LoadResources<game::EntityClass>("entities", root, mResources, log, observer);
+            LoadResources<game::SceneClass>("scenes", root, mResources, log, observer);
+            LoadResources<game::TilemapClass>("tilemaps", root, mResources, log, observer);
+            LoadResources<Script>("scripts", root, mResources, log, observer);
+            LoadResources<DataFile>("data_files", root, mResources, log, observer);
+            LoadResources<audio::GraphClass>("audio_graphs", root, mResources, log, observer);
+            LoadResources<uik::Window>("uis", root, mResources, log, observer);
 
             load_thread_done.store(true, std::memory_order_release);
         });
@@ -1446,29 +1430,26 @@ bool Workspace::LoadContent(const QString& filename, MigrationLog* log, gui::Dlg
         // if actually happened really fast.
         while (!load_thread_done.load(std::memory_order_acquire) || timer.SinceStart() < .5)
         {
-            QEventLoop footgun;
-            footgun.processEvents();
-            dlg->UpdateState();
+            observer->ApplyPendingUpdates();
         }
         loader.join();
+
+        DEBUG("Resource load done in %1s", timer.SinceStart());
     }
     else
     {
-#endif
-        LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log, dlg);
-        LoadResources<gfx::ParticleEngineClass>("particles", root, mResources, log, dlg);
-        LoadResources<gfx::PolygonMeshClass>("shapes", root, mResources, log, dlg);
-        LoadResources<game::EntityClass>("entities", root, mResources, log, dlg);
-        LoadResources<game::SceneClass>("scenes", root, mResources, log, dlg);
-        LoadResources<game::TilemapClass>("tilemaps", root, mResources, log, dlg);
-        LoadResources<Script>("scripts", root, mResources, log, dlg);
-        LoadResources<DataFile>("data_files", root, mResources, log, dlg);
-        LoadResources<audio::GraphClass>("audio_graphs", root, mResources, log, dlg);
-        LoadResources<uik::Window>("uis", root, mResources, log, dlg);
-
-#if defined(DETONATOR_EDITOR_BUILD)
+        LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log, nullptr);
+        LoadResources<gfx::ParticleEngineClass>("particles", root, mResources, log, nullptr);
+        LoadResources<gfx::PolygonMeshClass>("shapes", root, mResources, log, nullptr);
+        LoadResources<game::EntityClass>("entities", root, mResources, log, nullptr);
+        LoadResources<game::SceneClass>("scenes", root, mResources, log, nullptr);
+        LoadResources<game::TilemapClass>("tilemaps", root, mResources, log, nullptr);
+        LoadResources<Script>("scripts", root, mResources, log, nullptr);
+        LoadResources<DataFile>("data_files", root, mResources, log, nullptr);
+        LoadResources<audio::GraphClass>("audio_graphs", root, mResources, log, nullptr);
+        LoadResources<uik::Window>("uis", root, mResources, log, nullptr);
     }
-#endif
+
     // create an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.
     // this way the addressing scheme (when user clicks on an item
@@ -1636,7 +1617,7 @@ void Workspace::SaveUserSettings(const QString& filename) const
     INFO("Saved private workspace data in '%1'", filename);
 }
 
-bool Workspace::LoadProperties(const QString& filename)
+bool Workspace::LoadProperties(const QString& filename, WorkspaceAsyncWorkObserver* observer)
 {
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly))
@@ -1722,11 +1703,20 @@ bool Workspace::LoadProperties(const QString& filename)
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();
 
+    if (observer)
+    {
+        observer->EnqueueUpdateMessage("LOADING PROPERTIES");
+        observer->EnqueueStepReset(mResources.size());
+        observer->ApplyPendingUpdates();
+    }
+
     // so we expect that the content has been loaded first.
     // and then ask each resource object to load its additional
     // properties from the workspace file.
-    for (auto& resource : mResources)
+    for (unsigned i=0; i<mResources.size(); ++i)
     {
+        auto& resource = mResources[i];
+
         if (resource->IsPrimitive())
             continue;
 
@@ -1734,6 +1724,12 @@ bool Workspace::LoadProperties(const QString& filename)
         ASSERT(resource->GetProperty("__version", &version));
         resource->LoadProperties(docu.object());
         resource->SetProperty("__version", version);
+
+        if (observer)
+        {
+            observer->EnqueueStepIncrement();
+            observer->ApplyPendingUpdates();
+        }
     }
 
     INFO("Loaded workspace file '%1'", filename);

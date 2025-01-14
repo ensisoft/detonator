@@ -19,11 +19,13 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QCoreApplication>
 #  include <QEventLoop>
 #  include <QMovie>
 #  include "ui_dlgprogress.h"
 #include "warnpop.h"
 
+#include "base/logging.h"
 #include "base/utility.h"
 #include "base/math.h"
 #include "editor/app/format.h"
@@ -50,27 +52,38 @@ DlgProgress::~DlgProgress() noexcept
     delete mUI;
 }
 
-void DlgProgress::SetMaximum(unsigned max) noexcept
+
+void DlgProgress::ApplyPendingUpdates()
 {
-    mUI->progressBar->setMaximum(max);
-}
-void DlgProgress::SetMinimum(unsigned min) noexcept
-{
-    mUI->progressBar->setMinimum(min);
-}
-void DlgProgress::UpdateState() noexcept
-{
-    std::lock_guard<std::mutex> lock(mMutex);
-    for (const auto& update :  mUpdateQueue)
     {
-        //if (auto* ptr = std::get_if<struct SetMessage>(&update))
-            //mUI->message->setText(GetMessage(ptr->msg));
-        if (auto* ptr = std::get_if<struct SetValue>(&update))
-            mUI->progressBar->setValue(ptr->value);
-        else if (auto* ptr = std::get_if<struct StepOne>(&update))
-            mUI->progressBar->setValue(mUI->progressBar->value() + 1);
+        std::lock_guard<std::mutex> lock(mMutex);
+        for (const auto& update: mUpdateQueue)
+        {
+            if (auto* ptr = std::get_if<UpdateMessage>(&update))
+            {
+                mUI->progressBar->setMaximum(ptr->step_count);
+                mUI->progressBar->setValue(ptr->current_step);
+                mUI->progressBar->setFormat(ptr->msg + " %p%");
+            }
+            else if (auto* ptr = std::get_if<struct SetMessage>(&update))
+            {
+                mUI->progressBar->setFormat(ptr->msg + " %p%");
+            }
+            else if (auto* ptr = std::get_if<struct SetValue>(&update))
+            {
+                mUI->progressBar->setMinimum(0);
+                mUI->progressBar->setMaximum(ptr->count);
+                mUI->progressBar->setValue(0);
+            }
+            else if (auto* ptr = std::get_if<struct StepOne>(&update))
+            {
+                mUI->progressBar->setValue(mUI->progressBar->value() + 1);
+            }
+        }
+        mUpdateQueue.clear();
     }
-    mUpdateQueue.clear();
+
+    qApp->processEvents();
 }
 
 QString DlgProgress::GetMessage(QString msg) const
