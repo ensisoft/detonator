@@ -23,17 +23,38 @@
 #  include <QDialog>
 #include "warnpop.h"
 
+#include <mutex>
+#include <vector>
+#include <variant>
+
 #include "editor/app/workspace.h"
+#include "editor/app/workspace_observer.h"
 
 namespace gui
 {
     struct AppSettings;
 
-    class DlgPackage :  public QDialog
+    class DlgPackage :  public QDialog,
+                        public app::WorkspaceAsyncWorkObserver
     {
         Q_OBJECT
     public:
         DlgPackage(QWidget* parent, gui::AppSettings& settings, app::Workspace& workspace);
+
+        void EnqueueUpdate(const app::AnyString& message, unsigned step_count, unsigned current_step) override
+        {
+            std::lock_guard<std::mutex> lock(mMutex);
+            UpdateMessage msg;
+            msg.msg = message;
+            msg.step_count = step_count;
+            msg.current_step = current_step;
+            mUpdateQueue.push_back(msg);
+        }
+
+        void EnqueueUpdateMessage(const app::AnyString& msg) override {}
+        void EnqueueStepReset(unsigned count) override {}
+        void EnqueueStepIncrement() override {}
+        void ApplyPendingUpdates() override;
 
     private slots:
         void on_btnSelectAll_clicked();
@@ -41,14 +62,23 @@ namespace gui
         void on_btnBrowse_clicked();
         void on_btnStart_clicked();
         void on_btnClose_clicked();
-        void ResourcePackingUpdate(const QString& action, int step, int max);
+
     private:
         virtual void closeEvent(QCloseEvent* event) override;
     private:
         Ui::DlgPackage mUI;
     private:
+    private:
+        struct UpdateMessage {
+            QString msg;
+            unsigned step_count;
+            unsigned current_step;
+        };
+
         gui::AppSettings& mSettings;
         app::Workspace& mWorkspace;
+        std::mutex mMutex;
+        std::vector<UpdateMessage> mUpdateQueue;
         bool mPackageInProgress = false;
     };
 } // namespace
