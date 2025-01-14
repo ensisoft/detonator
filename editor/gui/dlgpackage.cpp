@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QCoreApplication>
 #  include <QStringList>
 #  include <QFileDialog>
 #  include <QMessageBox>
@@ -83,9 +84,6 @@ DlgPackage::DlgPackage(QWidget* parent, gui::AppSettings& settings, app::Workspa
 
     SetValue(mUI.editOutDir, path);
     mUI.progressBar->setVisible(false);
-
-    connect(&mWorkspace, &app::Workspace::ResourcePackingUpdate,
-            this, &DlgPackage::ResourcePackingUpdate);
 }
 
 void DlgPackage::on_btnSelectAll_clicked()
@@ -218,7 +216,7 @@ void DlgPackage::on_btnStart_clicked()
     options.write_html5_content_fs_image  = GetValue(mUI.chkGenerateHtml5FS);
     options.python_executable             = mSettings.python_executable;
     options.emsdk_path                    = mSettings.emsdk;
-    const auto success = mWorkspace.BuildReleasePackage(resources, options);
+    const auto success = mWorkspace.BuildReleasePackage(resources, options, this);
 
     mUI.btnStart->setEnabled(true);
     mUI.btnClose->setEnabled(true);
@@ -256,16 +254,25 @@ void DlgPackage::closeEvent(QCloseEvent* event)
     event->accept();
 }
 
-void DlgPackage::ResourcePackingUpdate(const QString& action, int step, int max)
+void DlgPackage::ApplyPendingUpdates()
 {
-    if (step > max)
-        step = max;
-    mUI.progressBar->setValue(step);
-    mUI.progressBar->setMaximum(max);
-    mUI.progressBar->setFormat(QString("%1 %p%").arg(action));
+    {
+        std::lock_guard<std::mutex> lock(mMutex);
+        for (const auto& update: mUpdateQueue)
+        {
+            auto step = update.current_step;
+            auto max = update.step_count;
+            if (step > max)
+                step = max;
 
-    QEventLoop footgun;
-    footgun.processEvents();
+            mUI.progressBar->setMaximum(max);
+            mUI.progressBar->setValue(step);
+            mUI.progressBar->setFormat(update.msg + " %p%");
+        }
+        mUpdateQueue.clear();
+    }
+
+    qApp->processEvents();
 }
 
 } // namespace

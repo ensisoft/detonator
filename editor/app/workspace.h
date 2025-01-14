@@ -714,7 +714,8 @@ namespace app
         // Returns true if everything went smoothly, otherwise false
         // and the package process might have failed in some way.
         // Errors/warnings encountered during the process will be logged.
-        bool BuildReleasePackage(const std::vector<const Resource*>& resources, const ContentPackingOptions& options);
+        bool BuildReleasePackage(const std::vector<const Resource*>& resources, const ContentPackingOptions& options,
+                                 WorkspaceAsyncWorkObserver* observer = nullptr);
 
         static void ClearAppGraphicsCache();
 
@@ -745,13 +746,6 @@ namespace app
         // to the object. After your signal handler returns the pointer
         // is no longer valid!
         void ResourceRemoved(const Resource* resource);
-
-        // This signal is emitted intermittently during  the
-        // execution of BuildReleasePackage.
-        // Action is the name of the current action (human-readable)
-        // and step is the number of the current step out of total
-        // steps under this action.
-        void ResourcePackingUpdate(const QString& action, int step, int total);
 
     private:
         bool LoadContent(const QString& file, MigrationLog* log, WorkspaceAsyncWorkObserver* observer);

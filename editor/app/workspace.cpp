@@ -2784,7 +2784,8 @@ bool Workspace::ImportResourceArchive(ResourceArchive& zip)
     return true;
 }
 
-bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resources, const ContentPackingOptions& options)
+bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resources,
+                                    const ContentPackingOptions& options, WorkspaceAsyncWorkObserver* observer)
 {
     const QString& outdir = JoinPath(options.directory, options.package_name);
     if (!MakePath(outdir))
@@ -2836,13 +2837,18 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
     for (int i=0; i<mutable_copies.size(); ++i)
     {
         const auto& resource = mutable_copies[i];
-        emit ResourcePackingUpdate("Collecting resources...", i, mutable_copies.size());
         if (resource->IsMaterial())
         {
             // todo: maybe move to Resource interface ?
             const gfx::MaterialClass* material = nullptr;
             resource->GetContent(&material);
             material->BeginPacking(&texture_packer);
+        }
+
+        if (observer)
+        {
+            observer->EnqueueUpdate("Collecting resources...", mutable_copies.size(), i);
+            observer->ApplyPendingUpdates();
         }
     }
 
@@ -2862,20 +2868,29 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         }
     }
 
-    texture_packer.PackTextures([this](const std::string& action, int step, int max) {
-        emit ResourcePackingUpdate(FromLatin(action), step, max);
+    texture_packer.PackTextures([observer](const std::string& action, int step, int max) {
+        if (observer)
+        {
+            observer->EnqueueUpdate(action, max, step);
+            observer->ApplyPendingUpdates();
+        }
     }, file_packer);
 
     for (int i=0; i<mutable_copies.size(); ++i)
     {
         const auto& resource = mutable_copies[i];
-        emit ResourcePackingUpdate("Updating resources references...", i, mutable_copies.size());
         if (resource->IsMaterial())
         {
             // todo: maybe move to resource interface ?
             gfx::MaterialClass* material = nullptr;
             resource->GetContent(&material);
             material->FinishPacking(&texture_packer);
+        }
+
+        if (observer)
+        {
+            observer->EnqueueUpdate("Updating resource references...", mutable_copies.size(), i);
+            observer->ApplyPendingUpdates();
         }
     }
 
@@ -2895,7 +2910,12 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
     // write content file ?
     if (options.write_content_file)
     {
-        emit ResourcePackingUpdate("Writing content JSON file...", 0, 0);
+        if (observer)
+        {
+            observer->EnqueueUpdate("Writing content JSON file...", 0, 0);
+            observer->ApplyPendingUpdates();
+        }
+
         // filename of the JSON based descriptor that contains all the
         // resource definitions.
         const auto &json_filename = JoinPath(outdir, "content.json");
@@ -2942,7 +2962,11 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
     // write config file?
     if (options.write_config_file)
     {
-        emit ResourcePackingUpdate("Writing config JSON file...", 0, 0);
+        if (observer)
+        {
+            observer->EnqueueUpdate("Writing config JSON file...", 0, 0);
+            observer->ApplyPendingUpdates();
+        }
 
         nlohmann:: json json;
         base::JsonWrite(json, "json_version",   1);
@@ -3057,7 +3081,11 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
 
     if (options.write_html5_content_fs_image)
     {
-        emit ResourcePackingUpdate("Generating HTML5 filesystem image...", 0, 0);
+        if (observer)
+        {
+            observer->EnqueueUpdate("Generating HTML5 filesystem image...", 0, 0);
+            observer->ApplyPendingUpdates();
+        }
 
         QString package_script = app::JoinPath(options.emsdk_path, "/upstream/emscripten/tools/file_packager.py");
 
