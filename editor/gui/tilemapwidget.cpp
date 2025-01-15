@@ -1924,6 +1924,11 @@ void TilemapWidget::ResourceAdded(const app::Resource* resource)
         for (auto* widget : mPaletteMaterialWidgets)
             widget->UpdateMaterialList(materials);
     }
+
+    if (mDlgTileTool)
+    {
+        mDlgTileTool->ResourceAdded(resource);
+    }
 }
 void TilemapWidget::ResourceRemoved(const app::Resource* resource)
 {
@@ -1947,6 +1952,11 @@ void TilemapWidget::ResourceRemoved(const app::Resource* resource)
             UncheckTools();
         }
     }
+
+    if (mDlgTileTool)
+    {
+        mDlgTileTool->ResourceRemoved(resource);
+    }
 }
 void TilemapWidget::ResourceUpdated(const app::Resource* resource)
 {
@@ -1966,6 +1976,12 @@ void TilemapWidget::ResourceUpdated(const app::Resource* resource)
             UncheckTools();
         }
     }
+
+    if (mDlgTileTool)
+    {
+        mDlgTileTool->ResourceUpdated(resource);
+    }
+
 }
 
 void TilemapWidget::LayerSelectionChanged(const QItemSelection, const QItemSelection)
