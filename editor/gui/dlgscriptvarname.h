@@ -38,20 +38,23 @@ namespace gui
     public:
         explicit DlgScriptVarName(QWidget* parent, QString str, QString backup)
           : QDialog(parent)
-          , mBackup(backup)
         {
             mUI.setupUi(this);
-            SetValue(mUI.name, str);
+            mUI.name->setPlaceholderText(backup);
             mUI.name->setCursorPosition(str.size());
-            UpdateExample();
+            UpdateExample(backup);
         }
         QString GetName() const
         {
-            return GetValue(mUI.name);
+            QString name = GetValue(mUI.name);
+            if (name.isEmpty())
+                return mUI.name->placeholderText();
+
+            return name;
         }
 
     private:
-        void UpdateExample();
+        void UpdateExample(QString name);
 
     private slots:
         void on_btnAccept_clicked()
@@ -66,6 +69,5 @@ namespace gui
 
     private:
         Ui::DlgScriptVarName mUI;
-        QString mBackup;
     };
 } // namespace
