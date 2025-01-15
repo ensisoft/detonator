@@ -165,7 +165,9 @@ public:
     }
 };
 
-MainWindow::MainWindow(QApplication& app) : mApplication(app)
+MainWindow::MainWindow(QApplication& app, base::ThreadPool* threadpool)
+  : mApplication(app)
+  , mThreadPool(threadpool)
 {
     mUI.setupUi(this);
     mUI.actionExit->setShortcut(QKeySequence::Quit);
@@ -732,7 +734,26 @@ void MainWindow::CloseWorkspace()
         ASSERT(mChildWindows.empty());
         ASSERT(mUI.mainTab->count() == 0);
         ASSERT(!mPlayWindow.get());
+        ASSERT(!mThreadPool->HasPendingTasks());
         return;
+    }
+
+
+    // todo: show a dialog here.
+    if (mThreadPool->HasPendingTasks())
+    {
+        DlgProgress dlg(this);
+        dlg.setWindowTitle("Closing workspace...");
+        dlg.setWindowModality(Qt::WindowModal);
+        dlg.EnqueueUpdate("Closing workspace...", 0, 0);
+        dlg.show();
+
+        while (mThreadPool->HasPendingTasks())
+        {
+            mThreadPool->ExecuteMainThread();
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            mApplication.processEvents();
+        }
     }
 
     // note that here we don't care about saving any state.
@@ -2442,6 +2463,9 @@ void MainWindow::RefreshUI()
 
     if (mDlgTilemap && mDlgTilemap->IsClosed())
         mDlgTilemap.reset();
+
+
+    mThreadPool->ExecuteMainThread();
 }
 
 void MainWindow::ShowNote(const app::Event& event)

@@ -1263,6 +1263,11 @@ bool Workspace::LoadContent(const QString& filename, ResourceMigrationLog* log, 
         });
     mUserResourceCount = std::distance(mResources.begin(), primitives_start);
 
+    for (size_t i=0; i<mUserResourceCount; ++i)
+    {
+        emit ResourceLoaded(mResources[i].get());
+    }
+
     INFO("Loaded content file '%1'", filename);
     return true;
 }
