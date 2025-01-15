@@ -167,7 +167,7 @@ namespace base
         static constexpr size_t Worker0ThreadID   = 1 << 8;
         static constexpr size_t Worker1ThreadID   = 2 << 8;
         static constexpr size_t Worker2ThreadID   = 3 << 8;
-        static constexpr size_t Worker3ThreadId   = 4 << 8;
+        static constexpr size_t Worker3ThreadID   = 4 << 8;
 
         static constexpr size_t AnyWorkerThreadID = 0xffff;
 
@@ -183,6 +183,8 @@ namespace base
         void Shutdown();
 
         void WaitAll();
+
+        bool HasPendingTasks() const;
 
         void ExecuteMainThread();
 

@@ -690,6 +690,9 @@ namespace app
         // Emitted when user property is set.
         void UserPropertyUpdated(const QString& name, const QVariant& data);
 
+        // this signal is emitted when a resource is loaded.
+        void ResourceLoaded(const Resource* resource);
+
         // this signal is emitted *after* a new resource has been
         // added to the list of resources.
         void ResourceAdded(const Resource* resource);

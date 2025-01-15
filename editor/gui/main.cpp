@@ -54,6 +54,7 @@
 
 #include "base/logging.h"
 #include "base/cmdline.h"
+#include "base/threadpool.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/gui/types.h"
@@ -459,9 +460,17 @@ void EditorMain(QApplication& app)
 
     copyright();
 
+    base::ThreadPool threadpool;
+    threadpool.AddRealThread(base::ThreadPool::Worker0ThreadID);
+    threadpool.AddRealThread(base::ThreadPool::Worker1ThreadID);
+    threadpool.AddRealThread(base::ThreadPool::Worker2ThreadID);
+    threadpool.AddRealThread(base::ThreadPool::Worker3ThreadID);
+    threadpool.AddMainThread();
+    base::SetGlobalThreadPool(&threadpool);
+
     // Create the application main window into which we add
     // main widgets.
-    gui::MainWindow window(app);
+    gui::MainWindow window(app, &threadpool);
 
     window.LoadSettings();
     window.LoadLastState();
@@ -483,6 +492,10 @@ void EditorMain(QApplication& app)
     }
 
     EventLoop(app, window);
+
+    ASSERT(threadpool.HasPendingTasks() == false);
+    threadpool.Shutdown();
+    base::SetGlobalThreadPool(nullptr);
 }
 
 int Main(int argc, char* argv[])

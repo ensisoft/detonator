@@ -370,6 +370,11 @@ void ThreadPool::WaitAll()
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
+bool ThreadPool::HasPendingTasks() const
+{
+    return mState->num_tasks > 0;
+}
+
 void ThreadPool::ExecuteMainThread()
 {
     if (mMainThread)

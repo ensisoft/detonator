@@ -31,6 +31,7 @@
 #include <memory>
 #include <stack>
 
+#include "base/threadpool.h"
 #include "editor/app/workspace.h"
 #include "editor/app/process.h"
 #include "editor/app/eventlog.h"
@@ -59,7 +60,7 @@ namespace gui
         Q_OBJECT
 
     public:
-        MainWindow(QApplication& app);
+        MainWindow(QApplication& app, base::ThreadPool* threadpool);
        ~MainWindow();
 
         // Load the main editor settings.
@@ -293,6 +294,8 @@ namespace gui
         FocusStack mFocusStack;
         // GFX Resource loader that is used when there's no workspace.
         std::unique_ptr<GfxResourceLoader> mLoader;
+
+        base::ThreadPool* mThreadPool = nullptr;
     };
 
 } // namespace
