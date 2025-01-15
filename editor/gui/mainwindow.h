@@ -203,6 +203,7 @@ namespace gui
         void CleanGarbage();
         void ResourceUpdated(const app::Resource* resource);
         void ResourceAdded(const app::Resource* resource);
+        void ResourceRemoved(const app::Resource* resource);
         void ViewerJsonMessageReceived(const QJsonObject& json);
 
     private:

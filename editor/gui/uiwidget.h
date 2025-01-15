@@ -76,6 +76,9 @@ namespace gui
         virtual bool GetStats(Stats* stats) const override;
         virtual void Refresh() override;
         virtual bool LaunchScript(const app::AnyString& id) override;
+        virtual void OnAddResource(const app::Resource* resource) override;
+        virtual void OnRemoveResource(const app::Resource* resource) override;
+        virtual void OnUpdateResource(const app::Resource* resource) override;
     private slots:
         void on_widgetColor_colorChanged(QColor color);
         void on_actionPlay_triggered();
@@ -168,9 +171,6 @@ namespace gui
         void TreeCurrentWidgetChangedEvent();
         void TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
         void TreeClickEvent(TreeWidget::TreeItem* item);
-        void ResourceAdded(const app::Resource* resource);
-        void ResourceRemoved(const app::Resource* resource);
-        void ResourceUpdated(const app::Resource* resource);
         void WidgetStyleEdited();
     private:
         void PaintScene(gfx::Painter& painter, double sec);

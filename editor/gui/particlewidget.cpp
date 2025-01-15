@@ -290,11 +290,6 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     on_canExpire_stateChanged(0);
     on_when_currentIndexChanged(0);
 
-    // connect workspace signals for resource management
-    connect(mWorkspace, &app::Workspace::ResourceAdded,   this, &ParticleEditorWidget::ResourceAdded);
-    connect(mWorkspace, &app::Workspace::ResourceRemoved, this, &ParticleEditorWidget::ResourceRemoved);
-    connect(mWorkspace, &app::Workspace::ResourceUpdated, this, &ParticleEditorWidget::ResourceUpdated);
-
     connect(mUI.velocity,  &gui::RangeWidget::RangeChanged, this, &ParticleEditorWidget::VelocityChanged);
     connect(mUI.lifetime,  &gui::RangeWidget::RangeChanged, this, &ParticleEditorWidget::LifetimeChanged);
     connect(mUI.pointsize, &gui::RangeWidget::RangeChanged, this, &ParticleEditorWidget::PointsizeChanged);
@@ -1917,7 +1912,7 @@ void ParticleEditorWidget::AlphaChanged(float min, float max)
     MinMax();
 }
 
-void ParticleEditorWidget::ResourceAdded(const app::Resource* resource)
+void ParticleEditorWidget::OnAddResource(const app::Resource* resource)
 {
     // this is simple, just add new resources in the appropriate UI objects.
     if (resource->GetType() == app::Resource::Type::Material)
@@ -1926,7 +1921,7 @@ void ParticleEditorWidget::ResourceAdded(const app::Resource* resource)
     }
 }
 
-void ParticleEditorWidget::ResourceUpdated(const app::Resource* resource)
+void ParticleEditorWidget::OnUpdateResource(const app::Resource* resource)
 {
     if (resource->GetType() == app::Resource::Type::Material)
     {
@@ -1946,7 +1941,7 @@ void ParticleEditorWidget::ResourceUpdated(const app::Resource* resource)
     }
 }
 
-void ParticleEditorWidget::ResourceRemoved(const app::Resource* resource)
+void ParticleEditorWidget::OnRemoveResource(const app::Resource* resource)
 {
     if (resource->GetType() == app::Resource::Type::Material)
     {

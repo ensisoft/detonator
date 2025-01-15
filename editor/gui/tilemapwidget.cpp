@@ -826,10 +826,6 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
 
     connect(mUI.layers->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &TilemapWidget::LayerSelectionChanged);
-    // connect workspace signals for resource management
-    connect(workspace, &app::Workspace::ResourceAdded,   this, &TilemapWidget::ResourceAdded);
-    connect(workspace, &app::Workspace::ResourceRemoved, this, &TilemapWidget::ResourceRemoved);
-    connect(workspace, &app::Workspace::ResourceUpdated, this, &TilemapWidget::ResourceUpdated);
 
     PopulateFromEnum<gui::GridDensity>(mUI.cmbGrid);
     PopulateFromEnum<game::TilemapClass::Perspective>(mUI.cmbPerspective);
@@ -1916,7 +1912,7 @@ void TilemapWidget::StartTool(const QString& id)
     }
 }
 
-void TilemapWidget::ResourceAdded(const app::Resource* resource)
+void TilemapWidget::OnAddResource(const app::Resource* resource)
 {
     if (resource->IsMaterial())
     {
@@ -1930,7 +1926,7 @@ void TilemapWidget::ResourceAdded(const app::Resource* resource)
         mDlgTileTool->ResourceAdded(resource);
     }
 }
-void TilemapWidget::ResourceRemoved(const app::Resource* resource)
+void TilemapWidget::OnRemoveResource(const app::Resource* resource)
 {
     if (resource->IsMaterial())
     {
@@ -1958,7 +1954,7 @@ void TilemapWidget::ResourceRemoved(const app::Resource* resource)
         mDlgTileTool->ResourceRemoved(resource);
     }
 }
-void TilemapWidget::ResourceUpdated(const app::Resource* resource)
+void TilemapWidget::OnUpdateResource(const app::Resource* resource)
 {
     if (resource->IsMaterial())
     {

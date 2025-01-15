@@ -608,10 +608,6 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(mUI.tree, &TreeWidget::currentRowChanged, this, &SceneWidget::TreeCurrentNodeChangedEvent);
     connect(mUI.tree, &TreeWidget::dragEvent,  this, &SceneWidget::TreeDragEvent);
     connect(mUI.tree, &TreeWidget::clickEvent, this, &SceneWidget::TreeClickEvent);
-    // connect workspace signals for resource management
-    connect(workspace, &app::Workspace::ResourceAdded,   this, &SceneWidget::ResourceAdded);
-    connect(workspace, &app::Workspace::ResourceRemoved, this, &SceneWidget::ResourceRemoved);
-    connect(workspace, &app::Workspace::ResourceUpdated, this, &SceneWidget::ResourceUpdated);
 
     PopulateFromEnum<game::SceneClass::SpatialIndex>(mUI.cmbSpatialIndex);
     PopulateFromEnum<engine::GameView::EnumValue>(mUI.cmbPerspective);
@@ -1940,14 +1936,14 @@ void SceneWidget::TreeClickEvent(TreeWidget::TreeItem* item)
     }
 }
 
-void SceneWidget::ResourceAdded(const app::Resource* resource)
+void SceneWidget::OnAddResource(const app::Resource* resource)
 {
     RebuildCombos();
     RebuildMenus();
     DisplaySceneProperties();
     DisplayCurrentNodeProperties();
 }
-void SceneWidget::ResourceRemoved(const app::Resource* resource)
+void SceneWidget::OnRemoveResource(const app::Resource* resource)
 {
     UpdateResourceReferences();
     RebuildCombos();
@@ -1955,7 +1951,7 @@ void SceneWidget::ResourceRemoved(const app::Resource* resource)
     DisplayCurrentNodeProperties();
     DisplaySceneProperties();
 }
-void SceneWidget::ResourceUpdated(const app::Resource* resource)
+void SceneWidget::OnUpdateResource(const app::Resource* resource)
 {
     mState.renderer.ClearPaintState();
 

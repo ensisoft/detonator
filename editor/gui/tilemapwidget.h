@@ -70,6 +70,9 @@ namespace gui
         virtual bool OnKeyDown(QKeyEvent* key) override;
         virtual bool GetStats(Stats* stats) const override;
         virtual void Refresh() override;
+        virtual void OnAddResource(const app::Resource* resource) override;
+        virtual void OnRemoveResource(const app::Resource* resource) override;
+        virtual void OnUpdateResource(const app::Resource* resource) override;
     private slots:
         void on_mapName_textChanged();
         void on_cmbPerspective_currentIndexChanged(int);
@@ -110,9 +113,6 @@ namespace gui
         void SelectSelectedTileMaterial();
 
         void StartToolAction();
-        void ResourceAdded(const app::Resource* resource);
-        void ResourceRemoved(const app::Resource* resource);
-        void ResourceUpdated(const app::Resource* resource);
         void LayerSelectionChanged(const QItemSelection, const QItemSelection);
         void PaletteMaterialChanged(const PaletteMaterial* material);
     private:

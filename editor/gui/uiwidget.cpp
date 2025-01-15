@@ -512,10 +512,6 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(mUI.tree, &TreeWidget::currentRowChanged, this, &UIWidget::TreeCurrentWidgetChangedEvent);
     connect(mUI.tree, &TreeWidget::dragEvent, this, &UIWidget::TreeDragEvent);
     connect(mUI.tree, &TreeWidget::clickEvent, this, &UIWidget::TreeClickEvent);
-    // connect workspace signals for resource management
-    connect(workspace, &app::Workspace::ResourceAdded,   this, &UIWidget::ResourceAdded);
-    connect(workspace, &app::Workspace::ResourceRemoved, this, &UIWidget::ResourceRemoved);
-    connect(workspace, &app::Workspace::ResourceUpdated, this, &UIWidget::ResourceUpdated);
 
     connect(mUI.widgetNormal,   &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
     connect(mUI.widgetDisabled, &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
@@ -2187,11 +2183,11 @@ void UIWidget::TreeClickEvent(TreeWidget::TreeItem* item)
     }
 }
 
-void UIWidget::ResourceAdded(const app::Resource* resource)
+void UIWidget::OnAddResource(const app::Resource* resource)
 {
     RebuildCombos();
 }
-void UIWidget::ResourceRemoved(const app::Resource* resource)
+void UIWidget::OnRemoveResource(const app::Resource* resource)
 {
     UpdateDeletedResourceReferences();
     RebuildCombos();
@@ -2203,7 +2199,7 @@ void UIWidget::ResourceRemoved(const app::Resource* resource)
     if (resource->IsAnyDrawableType())
         mState.painter->DeleteDrawableInstanceByClassId(resource->GetIdUtf8());
 }
-void UIWidget::ResourceUpdated(const app::Resource* resource)
+void UIWidget::OnUpdateResource(const app::Resource* resource)
 {
     RebuildCombos();
     DisplayCurrentWidgetProperties();
