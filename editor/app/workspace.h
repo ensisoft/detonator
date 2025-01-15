@@ -27,7 +27,6 @@
 #  include <QObject>
 #  include <QVariant>
 #  include <glm/glm.hpp>
-#  include <quazip/quazip.h>
 #include "warnpop.h"
 
 #include <memory>
@@ -48,49 +47,9 @@
 #include "editor/app/utility.h"
 #include "editor/app/buffer.h"
 
-class QuaZip;
-
 namespace app
 {
-    class ResourceArchive
-    {
-    public:
-        ResourceArchive();
-
-        bool Open(const QString& zip_file);
-
-        bool ReadFile(const QString& file, QByteArray* array) const;
-
-        void SetImportSubFolderName(const QString& name)
-        { mSubFolderName = name; }
-        void SetResourceNamePrefix(const QString& prefix)
-        { mNamePrefix = prefix; }
-        QString GetImportSubFolderName() const
-        { return mSubFolderName; }
-        QString GetResourceNamePrefix() const
-        { return mNamePrefix; }
-
-        size_t GetNumResources() const
-        { return mResources.size(); }
-        const Resource& GetResource(size_t index) const
-        { return *base::SafeIndex(mResources, index); }
-        void IgnoreResource(size_t index)
-        { mIgnoreSet.insert(index); }
-        bool IsIndexIgnored(size_t index) const
-        { return base::Contains(mIgnoreSet, index); }
-    private:
-        bool FindZipFile(const QString& unix_style_name) const;
-    private:
-        friend class Workspace;
-        QString mZipFile;
-        QString mSubFolderName;
-        QString mNamePrefix;
-        QFile mFile;
-        mutable QuaZip mZip;
-        std::vector<std::unique_ptr<Resource>> mResources;
-        std::set<size_t> mIgnoreSet;
-    };
-
+    class ZipArchive;
 
     class WorkspaceAsyncWorkObserver;
 
@@ -200,7 +159,7 @@ namespace app
 
         // Try to load the contents of the workspace from the current workspace dir.
         // Returns true on success. Any errors are logged.
-        bool LoadWorkspace(MigrationLog* log = nullptr, WorkspaceAsyncWorkObserver* observer = nullptr);
+        bool LoadWorkspace(ResourceMigrationLog* log = nullptr, WorkspaceAsyncWorkObserver* observer = nullptr);
         // Try to save the contents of the workspace into the current workspace dir.
         // Returns true on success. Any errors are logged.
         bool SaveWorkspace();
@@ -655,7 +614,7 @@ namespace app
         };
         bool ExportResourceArchive(const std::vector<const Resource*>& resources, const ExportOptions& options);
 
-        bool ImportResourceArchive(ResourceArchive& zip);
+        bool ImportResourceArchive(ZipArchive& zip);
 
         struct ContentPackingOptions {
             // the output directory into which place the packed content.
@@ -748,7 +707,7 @@ namespace app
         void ResourceRemoved(const Resource* resource);
 
     private:
-        bool LoadContent(const QString& file, MigrationLog* log, WorkspaceAsyncWorkObserver* observer);
+        bool LoadContent(const QString& file, ResourceMigrationLog* log, WorkspaceAsyncWorkObserver* observer);
         bool LoadProperties(const QString& file, WorkspaceAsyncWorkObserver* observer);
         void LoadUserSettings(const QString& file);
         bool SaveContent(const QString& file) const;

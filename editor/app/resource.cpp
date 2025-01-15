@@ -40,8 +40,8 @@
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/app/resource.h"
-#include "editor/app/packer.h"
-
+#include "editor/app/resource_packer.h"
+#include "editor/app/resource_migration_log.h"
 
 namespace {
     void PushBack(QStringList& list, const QString& id)
@@ -767,7 +767,7 @@ bool PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
 }
 
 template<>
-std::unique_ptr<data::Chunk> MigrateResourceDataChunk<game::EntityClass>(std::unique_ptr<data::Chunk> chunk, MigrationLog* log)
+std::unique_ptr<data::Chunk> MigrateResourceDataChunk<game::EntityClass>(std::unique_ptr<data::Chunk> chunk, ResourceMigrationLog* log)
 {
     std::string resource_name;
     std::string resource_id;
@@ -808,7 +808,7 @@ std::unique_ptr<data::Chunk> MigrateResourceDataChunk<game::EntityClass>(std::un
             if (new_type_string != old_type_string)
             {
                 if (log)
-                    log->Log(resource_id, resource_name, "EntityClass", toString("Animator type mapped from '%1' to '%2'", old_type_string, new_type_string));
+                    log->WriteLog(resource_id, resource_name, "EntityClass", toString("Animator type mapped from '%1' to '%2'", old_type_string, new_type_string));
             }
             //actuator_meta_chunk->OverwriteChunk("actuator", std::move(actuator_data_chunk));
             //animation_chunk->OverwriteChunk("actuators", std::move(actuator_meta_chunk), i);
@@ -820,7 +820,7 @@ std::unique_ptr<data::Chunk> MigrateResourceDataChunk<game::EntityClass>(std::un
     return chunk;
 }
 
-void MigrateResource(uik::Window& window, app::MigrationLog* log, unsigned old_version, unsigned  new_version)
+void MigrateResource(uik::Window& window, app::ResourceMigrationLog* log, unsigned old_version, unsigned  new_version)
 {
     // migration path for old data which doesn't yet have tab order values.
     const auto& keymap_uri = window.GetKeyMapFile();
@@ -829,7 +829,7 @@ void MigrateResource(uik::Window& window, app::MigrationLog* log, unsigned old_v
         window.SetKeyMapFile("app://ui/keymap/default.json");
         if (log)
         {
-            log->Log(window, "UI", "Added default keymap file.");
+            log->WriteLog(window, "UI", "Added default keymap file.");
         }
     }
 
@@ -860,7 +860,7 @@ void MigrateResource(uik::Window& window, app::MigrationLog* log, unsigned old_v
 
     if (log)
     {
-        log->Log(window, "UI", "Generated UI widget tab order.");
+        log->WriteLog(window, "UI", "Generated UI widget tab order.");
     }
 
     // generate tab order values if none yet exist.
@@ -874,7 +874,7 @@ void MigrateResource(uik::Window& window, app::MigrationLog* log, unsigned old_v
     }
 }
 
-void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned old_version, unsigned new_version)
+void MigrateResource(gfx::MaterialClass& material, ResourceMigrationLog* log, unsigned old_version, unsigned new_version)
 {
     DEBUG("Migrating material resource. [material='%1']", material.GetName());
 
@@ -890,7 +890,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
                 {
                     ptr->SetColorSpace(gfx::TextureFileSource::ColorSpace::sRGB);
                     DEBUG("Changing material texture color space to sRGB. [material='%1', texture='%2']", material.GetName(), source->GetName());
-                    log->Log(material, "Material", "Changed texture color space to sRGB from linear.");
+                    log->WriteLog(material, "Material", "Changed texture color space to sRGB from linear.");
                 }
             }
         }
@@ -904,7 +904,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         if (shader_uri == "app://shaders/es2/emissive_particle.glsl")
         {
             material.SetShaderUri("app://shaders/es2/basic_particle.glsl");
-            log->Log(material, "Material", "Changed emissive particle to basic particle that does the same thing.");
+            log->WriteLog(material, "Material", "Changed emissive particle to basic particle that does the same thing.");
         }
     }
     if (old_version < 3)
@@ -921,14 +921,14 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
                 else if (value == 1.0f)
                     material.SetUniform("kRotate", 1); // random rotation
 
-                log->Log(material, "Material", "Changed kRotate uniform from float to int.");
+                log->WriteLog(material, "Material", "Changed kRotate uniform from float to int.");
             }
             if (material.HasUniform("kRotationalVelocity") && material.CheckUniformType<float>("kRotationalVelocity"))
             {
                 const auto value = material.GetUniformValue<float>("kRotationalVelocity", 0.0f);
                 material.DeleteUniform("kRotationalVelocity");
                 material.SetUniform("kRotationValue", value);
-                log->Log(material, "Material", "Changed kRotationVelocity uniform to kRotationValue uniform");
+                log->WriteLog(material, "Material", "Changed kRotationVelocity uniform to kRotationValue uniform");
             }
         }
     }
@@ -949,7 +949,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
             if (kRotate > 0) // 0 = OFF = maps to the same value.
                 material.SetParticleRotation(static_cast<gfx::MaterialClass::ParticleRotation>(kRotate+1));
 
-            log->Log(material, "Material", "Migrated to built-in Particle2D material and shader.");
+            log->WriteLog(material, "Material", "Migrated to built-in Particle2D material and shader.");
             if (material.GetNumTextureMaps())
             {
                 auto* map = material.GetTextureMap(0);
@@ -977,7 +977,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         if (Equals(*ptr, gfx::Color::White))
         {
             material.DeleteUniform("kBaseColor");
-            log->Log(material, "Material", "Removed unused default value on 'base color'.");
+            log->WriteLog(material, "Material", "Removed unused default value on 'base color'.");
         }
     }
 
@@ -986,7 +986,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         if (Equals(*ptr, gfx::Color::White))
         {
             material.DeleteUniform("kColor0");
-            log->Log(material, "Material", "Removed unused default value on 'top left gradient color'.");
+            log->WriteLog(material, "Material", "Removed unused default value on 'top left gradient color'.");
         }
     }
 
@@ -995,7 +995,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         if (Equals(*ptr, gfx::Color::White))
         {
             material.DeleteUniform("kColor1");
-            log->Log(material, "Material", "Removed unused default value on 'top right gradient color'.");
+            log->WriteLog(material, "Material", "Removed unused default value on 'top right gradient color'.");
         }
     }
 
@@ -1004,7 +1004,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         if (Equals(*ptr, gfx::Color::White))
         {
             material.DeleteUniform("kColor2");
-            log->Log(material, "Material", "Removed unused default value on 'bottom left gradient color'.");
+            log->WriteLog(material, "Material", "Removed unused default value on 'bottom left gradient color'.");
         }
     }
 
@@ -1013,7 +1013,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         if (Equals(*ptr, gfx::Color::White))
         {
             material.DeleteUniform("kColor3");
-            log->Log(material, "Material", "Removed unused default value on 'bottom right gradient color'.");
+            log->WriteLog(material, "Material", "Removed unused default value on 'bottom right gradient color'.");
         }
     }
 
@@ -1022,7 +1022,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         if (math::equals(*ptr, glm::vec3(0.0f, 0.0f, 0.0f)))
         {
             material.DeleteUniform("kTextureVelocity");
-            log->Log(material, "Material", "Removed unused default value on 'texture velocity'.");
+            log->WriteLog(material, "Material", "Removed unused default value on 'texture velocity'.");
         }
     }
 
@@ -1031,7 +1031,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         if (math::equals(*ptr, glm::vec2(1.0f, 1.0f)))
         {
             material.DeleteUniform("kTextureScale");
-            log->Log(material, "Material", "Removed unused default value on 'texture scale'.");
+            log->WriteLog(material, "Material", "Removed unused default value on 'texture scale'.");
         }
     }
 
@@ -1040,7 +1040,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         if (math::equals(*ptr, 0.0f))
         {
             material.DeleteUniform("kTextureRotation");
-            log->Log(material, "Material", "Removed unused default value on 'texture rotation'.");
+            log->WriteLog(material, "Material", "Removed unused default value on 'texture rotation'.");
         }
     }
 
@@ -1049,7 +1049,7 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         if (math::equals(*ptr, glm::vec2(0.5f, 0.5f)))
         {
             material.DeleteUniform("kWeight");
-            log->Log(material, "Material", "Removed unused default value on 'gradient mix weight'.");
+            log->WriteLog(material, "Material", "Removed unused default value on 'gradient mix weight'.");
         }
     }
 
@@ -1057,13 +1057,13 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
     {
         if (material.HasShaderUri())
         {
-            log->Log(material, "Material", "Built-in material uses a custom shader source. This is no longer supported.");
+            log->WriteLog(material, "Material", "Built-in material uses a custom shader source. This is no longer supported.");
         }
     }
 
 }
 
-void MigrateResource(game::EntityClass& entity, MigrationLog* log, unsigned old_version, unsigned new_version)
+void MigrateResource(game::EntityClass& entity, ResourceMigrationLog* log, unsigned old_version, unsigned new_version)
 {
     if (old_version < 2)
     {
@@ -1092,7 +1092,7 @@ void MigrateResource(game::EntityClass& entity, MigrationLog* log, unsigned old_
         }
         if (did_migrate)
         {
-            log->Log(entity, "Entity", "Migrated to built-in particle 2D material entity node uniforms.");
+            log->WriteLog(entity, "Entity", "Migrated to built-in particle 2D material entity node uniforms.");
         }
     }
 }

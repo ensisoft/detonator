@@ -28,6 +28,7 @@
 
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
+#include "editor/app/resource_migration_log.h"
 #include "editor/gui/viewwindow.h"
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/materialwidget.h"
@@ -405,7 +406,7 @@ void ViewWindow::LoadWorkspace(const QString& file)
         return;
     }
 
-    app::MigrationLog migration;
+    app::ResourceMigrationLog migration;
 
     auto workspace = std::make_unique<app::Workspace>(dir);
     if (!workspace->LoadWorkspace(&migration))
