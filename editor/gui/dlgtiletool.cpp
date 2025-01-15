@@ -60,10 +60,6 @@ DlgTileTool::DlgTileTool(const app::Workspace* workspace, QWidget* parent, ToolB
     SetList(mUI.cmbToolMaterial, materials);
     SetRange(mUI.toolValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
 
-    connect(workspace, &app::Workspace::ResourceAdded,   this, &DlgTileTool::ResourceAdded);
-    connect(workspace, &app::Workspace::ResourceRemoved, this, &DlgTileTool::ResourceRemoved);
-    connect(workspace, &app::Workspace::ResourceUpdated, this, &DlgTileTool::ResourceUpdated);
-
     connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::triggerPaint);
     connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
 
@@ -305,6 +301,8 @@ void DlgTileTool::ResourceRemoved(const app::Resource* resource)
                     tile.material = "_checkerboard";
             }
         }
+
+        ShowCurrentTile();
     }
 }
 void DlgTileTool::ResourceUpdated(const app::Resource* resource)
@@ -322,6 +320,8 @@ void DlgTileTool::ResourceUpdated(const app::Resource* resource)
                     tile.material_instance.reset();
             }
         }
+
+        ShowCurrentTile();
     }
 }
 

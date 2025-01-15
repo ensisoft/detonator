@@ -87,6 +87,9 @@ namespace gui
         void SaveState(Settings& settings) const;
         void LoadState(const Settings& settings);
 
+        void ResourceAdded(const app::Resource* resource);
+        void ResourceRemoved(const app::Resource* resource);
+        void ResourceUpdated(const app::Resource* resource);
 
     private slots:
         void on_cmbTool_currentIndexChanged(int index);
@@ -110,10 +113,6 @@ namespace gui
         void on_tileCol_valueChanged(int);
         void on_tileRow_valueChanged(int);
         void on_tileIndex_valueChanged(int);
-
-        void ResourceAdded(const app::Resource* resource);
-        void ResourceRemoved(const app::Resource* resource);
-        void ResourceUpdated(const app::Resource* resource);
 
     private:
         void PaintScene(gfx::Painter& painter, double);
