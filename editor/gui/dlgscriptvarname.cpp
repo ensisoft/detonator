@@ -6,10 +6,8 @@
 
 namespace gui
 {
-void DlgScriptVarName::UpdateExample()
+void DlgScriptVarName::UpdateExample(QString name)
 {
-    QString name = GetValue(mUI.name);
-
     QString str(R"(
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
@@ -29,8 +27,15 @@ p, li { white-space: pre-wrap; }
 
 void DlgScriptVarName::on_name_textEdited(const QString& text)
 {
+    if (text.isEmpty())
+    {
+        UpdateExample(mUI.name->placeholderText());
+        return;
+    }
+
+    const auto backup = mUI.name->placeholderText();
     const auto pos = mUI.name->cursorPosition();
-    const auto str = app::GenerateScriptVarName(text, mBackup);
+    const auto str = app::GenerateScriptVarName(text, backup);
 
     VERBOSE("script var name %1 => %2", text, str);
 
@@ -39,7 +44,7 @@ void DlgScriptVarName::on_name_textEdited(const QString& text)
         SetValue(mUI.name, str);
         mUI.name->setCursorPosition(str.size());
     }
-    UpdateExample();
+    UpdateExample(mUI.name->text());
 }
 
 }// namespace
