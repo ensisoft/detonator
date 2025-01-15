@@ -35,6 +35,7 @@
 #include "editor/app/resource.h"
 #include "editor/app/workspace.h"
 #include "editor/app/eventlog.h"
+#include "editor/app/zip_archive.h"
 #include "engine/loader.h"
 #include "engine/ui.h"
 #include "game/entity.h"
@@ -1835,7 +1836,7 @@ void unit_test_export_import_basic()
 
         app::Workspace workspace("TestWorkspace");
 
-        app::ResourceArchive zip;
+        app::ZipArchive zip;
         zip.SetImportSubFolderName("test-export");
         TEST_REQUIRE(zip.Open("test-export.zip"));
         TEST_REQUIRE(workspace.ImportResourceArchive(zip));
@@ -1901,7 +1902,7 @@ void unit_test_export_name_dupe()
 
         app::Workspace workspace("TestWorkspace");
 
-        app::ResourceArchive zip;
+        app::ZipArchive zip;
         zip.SetImportSubFolderName("test-export");
         TEST_REQUIRE(zip.Open("test-export2.zip"));
         TEST_REQUIRE(workspace.ImportResourceArchive(zip));

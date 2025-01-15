@@ -453,7 +453,10 @@ add_executable(Detonator
     editor/app/utility.cpp
     editor/app/workspace.h
     editor/app/workspace.cpp
-    editor/app/packer.cpp
+    editor/app/workspace_resource_packer.cpp
+    editor/app/zip_archive.cpp
+    editor/app/zip_archive_exporter.cpp
+    editor/app/zip_archive_importer.cpp
     editor/app/buffer.h
     editor/app/buffer.cpp
     editor/app/packing.cpp
@@ -725,7 +728,10 @@ add_executable(EditorGameHost
     editor/app/packing.cpp
     editor/app/workspace.h
     editor/app/workspace.cpp
-    editor/app/packer.cpp
+    editor/app/workspace_resource_packer.cpp
+    editor/app/zip_archive.cpp
+    editor/app/zip_archive_exporter.cpp
+    editor/app/zip_archive_importer.cpp
     editor/app/resource.cpp
     editor/app/buffer.cpp
     editor/app/window-eventlog.cpp
@@ -945,7 +951,10 @@ add_executable(unit_test_ipc
         editor/app/format.cpp
         editor/app/utility.cpp
         editor/app/workspace.cpp
-        editor/app/packer.cpp
+        editor/app/workspace_resource_packer.cpp
+        editor/app/zip_archive.cpp
+        editor/app/zip_archive_exporter.cpp
+        editor/app/zip_archive_importer.cpp
         editor/app/resource.cpp
         editor/app/buffer.cpp
         editor/app/ipc.cpp
@@ -971,7 +980,10 @@ add_executable(unit_test_workspace
         editor/app/format.cpp
         editor/app/eventlog.cpp
         editor/app/workspace.cpp
-        editor/app/packer.cpp
+        editor/app/workspace_resource_packer.cpp
+        editor/app/zip_archive.cpp
+        editor/app/zip_archive_exporter.cpp
+        editor/app/zip_archive_importer.cpp
         editor/app/resource.cpp
         editor/app/buffer.cpp
         editor/app/packing.cpp

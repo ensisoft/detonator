@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2023 Sami Väisänen
-// Copyright (C) 2020-2023 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2024 Sami Väisänen
+// Copyright (C) 2020-2024 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,33 +18,22 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <QWidget>
-#  include <QColor>
-#  include <QDialog>
-#  include "ui_dlgmigrationlog.h"
-#include "warnpop.h"
+#include "editor/app/types.h"
 
-#include <string>
-#include <memory>
-#include <vector>
-
-namespace app {
-    class ResourceMigrationLog;
-} // namespace
-
-namespace gui
+namespace app
 {
-    class DlgMigrationLog : public QDialog
+    class ResourcePacker
     {
-        Q_OBJECT
-
     public:
-        DlgMigrationLog(QWidget* parent, const app::ResourceMigrationLog& log);
+        virtual ~ResourcePacker() = default;
+        virtual bool CopyFile(const AnyString& uri, const AnyString& dir) = 0;
+        virtual bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) = 0;
+        virtual bool ReadFile(const AnyString& uri, QByteArray* bytes) const = 0;
+        virtual bool HasMapping(const AnyString& uri) const = 0;
+        virtual AnyString MapUri(const AnyString& uri) const = 0;
 
-    private slots:
-        void on_btnClose_clicked();
+        virtual bool IsReleasePackage() const = 0;
     private:
-        Ui::DlgMigrationLog mUI;
     };
+
 } // namespace

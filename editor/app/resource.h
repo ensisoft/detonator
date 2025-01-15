@@ -51,44 +51,7 @@
 namespace app
 {
     class ResourcePacker;
-
-    class MigrationLog
-    {
-    public:
-        struct Action {
-            QString name;
-            QString id;
-            QString message;
-            QString type;
-        };
-        void Log(const AnyString& id, const AnyString& name, const AnyString& type, const AnyString& message)
-        {
-            Action m;
-            m.id      = id;
-            m.name    = name;
-            m.message = message;
-            m.type    = type;
-            mLog.push_back(std::move(m));
-        }
-        template<typename Resource>
-        void Log(const Resource& res, const AnyString& type, const AnyString& message)
-        {
-            Action a;
-            a.id      = FromUtf8(res.GetId());
-            a.name    = FromUtf8(res.GetName());
-            a.message = message;
-            a.type    = type;
-            mLog.push_back(std::move(a));
-        }
-        bool IsEmpty() const
-        { return mLog.empty(); }
-        size_t GetNumActions() const
-        { return mLog.size(); }
-        const Action& GetAction(size_t index) const
-        { return base::SafeIndex(mLog, index); }
-    private:
-        std::vector<Action> mLog;
-    };
+    class ResourceMigrationLog;
 
     // Editor app resource object. These are objects that the user
     // manipulates and manages through the Editor application's UI.
@@ -182,7 +145,7 @@ namespace app
         virtual bool Pack(ResourcePacker& packer) = 0;
 
         // Migrate resource from previous version to the current version.
-        virtual void Migrate(MigrationLog* log) = 0;
+        virtual void Migrate(ResourceMigrationLog* log) = 0;
 
         // helpers
         inline std::string GetNameUtf8() const
@@ -468,19 +431,19 @@ namespace app
         // This stub does nothing and returns the original chunk. Resources that
         // require this functionality should then have a specialization of this stub.
         template<typename ResourceType> inline
-        std::unique_ptr<data::Chunk> MigrateResourceDataChunk(std::unique_ptr<data::Chunk> chunk, MigrationLog* log)
+        std::unique_ptr<data::Chunk> MigrateResourceDataChunk(std::unique_ptr<data::Chunk> chunk, ResourceMigrationLog* log)
         { return chunk; }
 
         template<>
-        std::unique_ptr<data::Chunk> MigrateResourceDataChunk<game::EntityClass>(std::unique_ptr<data::Chunk> chunk, MigrationLog* log);
+        std::unique_ptr<data::Chunk> MigrateResourceDataChunk<game::EntityClass>(std::unique_ptr<data::Chunk> chunk, ResourceMigrationLog* log);
 
         template<typename ResourceType> inline
-        void MigrateResource(const ResourceType&, MigrationLog*, unsigned old_version, unsigned new_version)
+        void MigrateResource(const ResourceType&, ResourceMigrationLog*, unsigned old_version, unsigned new_version)
         {}
 
-        void MigrateResource(uik::Window& window, MigrationLog* log, unsigned old_version, unsigned new_version);
-        void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned old_version, unsigned new_version);
-        void MigrateResource(game::EntityClass& entity, MigrationLog* log, unsigned  old_version, unsigned new_version);
+        void MigrateResource(uik::Window& window, ResourceMigrationLog* log, unsigned old_version, unsigned new_version);
+        void MigrateResource(gfx::MaterialClass& material, ResourceMigrationLog* log, unsigned old_version, unsigned new_version);
+        void MigrateResource(game::EntityClass& entity, ResourceMigrationLog* log, unsigned  old_version, unsigned new_version);
 
     } // detail
 
@@ -626,7 +589,7 @@ namespace app
         { return detail::ListResourceDependencies(*mContent, mProps); }
         virtual bool Pack(ResourcePacker& packer) override
         { return detail::PackResource(*mContent, packer); }
-        virtual void Migrate(MigrationLog* log) override
+        virtual void Migrate(ResourceMigrationLog* log) override
         {
             if constexpr (TypeValue == Resource::Type::Material)
             {

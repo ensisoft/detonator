@@ -35,6 +35,7 @@
 #include "graphics/fwd.h"
 #include "editor/app/workspace.h"
 #include "editor/app/resource.h"
+#include "editor/app/zip_archive.h"
 
 namespace gui
 {
@@ -58,6 +59,6 @@ namespace gui
         Ui::DlgImport mUI;
     private:
         app::Workspace* mWorkspace = nullptr;
-        std::unique_ptr<app::ResourceArchive> mZip;
+        std::unique_ptr<app::ZipArchive> mZip;
     };
 } // namespace

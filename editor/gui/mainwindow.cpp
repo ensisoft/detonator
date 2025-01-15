@@ -47,6 +47,7 @@
 #include "editor/app/process.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
+#include "editor/app/resource_migration_log.h"
 #include "editor/gui/main.h"
 #include "editor/gui/mainwindow.h"
 #include "editor/gui/mainwidget.h"
@@ -437,7 +438,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
 {
     ASSERT(!mWorkspace);
 
-    app::MigrationLog migration_log;
+    app::ResourceMigrationLog migration_log;
 
     DlgProgress dlg(this);
     dlg.SetSeriousness(DlgProgress::Seriousness::NotSoSerious);

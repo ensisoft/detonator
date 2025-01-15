@@ -59,7 +59,7 @@ bool DlgImport::OpenArchive(const QString& file,
                             const QString& folder_suggestion,
                             const QString& prefix_suggestion)
 {
-    auto zip = std::make_unique<app::ResourceArchive>();
+    auto zip = std::make_unique<app::ZipArchive>();
     if (!zip->Open(file))
         return false;
 
@@ -90,7 +90,7 @@ void DlgImport::on_btnSelectFile_clicked()
     if (filename.isEmpty())
         return;
 
-    auto zip = std::make_unique<app::ResourceArchive>();
+    auto zip = std::make_unique<app::ZipArchive>();
     if (!zip->Open(filename))
     {
         QMessageBox msg(this);

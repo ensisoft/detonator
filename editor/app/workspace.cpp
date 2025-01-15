@@ -60,7 +60,8 @@
 #include "graphics/packer.h"
 #include "graphics/material_instance.h"
 #include "editor/app/resource-uri.h"
-#include "editor/app/packer.h"
+#include "editor/app/resource_packer.h"
+#include "editor/app/resource_util.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
 #include "editor/app/utility.h"
@@ -68,7 +69,11 @@
 #include "editor/app/packing.h"
 #include "editor/app/buffer.h"
 #include "editor/app/process.h"
+#include "editor/app/zip_archive.h"
+#include "editor/app/zip_archive_exporter.h"
+#include "editor/app/zip_archive_importer.h"
 #include "editor/app/workspace_observer.h"
+#include "editor/app/workspace_resource_packer.h"
 
 namespace {
 
@@ -81,94 +86,6 @@ gfx::Color4f ToGfx(const QColor& color)
     return gfx::Color4f(r, g, b, a);
 }
 
-template<typename ClassType>
-bool LoadResources(const char* type,
-                   const data::Reader& data,
-                   std::vector<std::unique_ptr<app::Resource>>& vector,
-                   app::MigrationLog* log = nullptr,
-                   app::WorkspaceAsyncWorkObserver* observer = nullptr)
-{
-    DEBUG("Loading resources. [type='%1']", type);
-    bool success = true;
-    for (unsigned i=0; i<data.GetNumChunks(type); ++i)
-    {
-        auto chunk = data.GetChunk(type, i);
-        std::string name;
-        std::string id;
-        if (!chunk->GetReader()->Read("resource_name", &name) ||
-            !chunk->GetReader()->Read("resource_id", &id))
-        {
-            ERROR("Unexpected JSON. Maybe old workspace version?");
-            success = false;
-            continue;
-        }
-        unsigned version = 0;
-        chunk->GetReader()->Read("resource_ver", &version);
-
-        chunk = app::detail::MigrateResourceDataChunk<ClassType>(std::move(chunk), log);
-
-        ClassType ret;
-        if (!ret.FromJson(*chunk->GetReader()))
-        {
-            WARN("Incomplete resource load from JSON. [type='%1', name='%2']", type, name);
-            success = false;
-        }
-        auto resource = std::make_unique<app::GameResource<ClassType>>(std::move(ret), name);
-        resource->SetProperty("__version", version);
-        vector.push_back(std::move(resource));
-        DEBUG("Loaded workspace resource. [name='%1']", name);
-
-        if (observer)
-            observer->EnqueueStepIncrement();
-    }
-
-    return success;
-}
-
-template<typename ClassType>
-bool LoadMaterials(const char* type,
-                   const data::Reader& data,
-                   std::vector<std::unique_ptr<app::Resource>>& vector,
-                   app::MigrationLog* log = nullptr,
-                   app::WorkspaceAsyncWorkObserver* observer = nullptr)
-{
-
-    DEBUG("Loading resources. [type='%1']", type);
-    bool success = true;
-    for (unsigned i=0; i<data.GetNumChunks(type); ++i)
-    {
-        auto chunk = data.GetChunk(type, i);
-        std::string name;
-        std::string id;
-        if (!chunk->GetReader()->Read("resource_name", &name) ||
-            !chunk->GetReader()->Read("resource_id", &id))
-        {
-            ERROR("Unexpected JSON. Maybe old workspace version?");
-            success = false;
-            continue;
-        }
-        unsigned version = 0;
-        chunk->GetReader()->Read("resource_ver", &version);
-
-        chunk = app::detail::MigrateResourceDataChunk<ClassType>(std::move(chunk), log);
-
-        auto ret = ClassType::ClassFromJson(*chunk->GetReader());
-        if (!ret)
-        {
-            WARN("Incomplete resource load from JSON. [type='%1', name='%2']", type, name);
-            success = false;
-            continue;
-        }
-        auto resource = std::make_unique<app::MaterialResource>(std::move(ret), name);
-        resource->SetProperty("__version", version); // a small hack here.
-        vector.push_back(std::move(resource));
-        DEBUG("Loaded workspace resource. [name='%1']", name);
-
-        if (observer)
-            observer->EnqueueStepIncrement();
-    }
-    return success;
-}
 
 class GfxTexturePacker : public gfx::TexturePacker
 {
@@ -637,123 +554,7 @@ private:
 
 namespace app
 {
-ResourceArchive::ResourceArchive()
-{
-    mZip.setAutoClose(true);
-    mZip.setFileNameCodec("UTF-8");
-    mZip.setUtf8Enabled(true);
-    mZip.setZip64Enabled(true);
-}
 
-bool ResourceArchive::Open(const QString& zip_file)
-{
-    mFile.setFileName(zip_file);
-    if (!mFile.open(QIODevice::ReadOnly))
-    {
-        ERROR("Failed to open zip file for reading. [file='%1', error='%2']", zip_file, mFile.errorString());
-        return false;
-    }
-    mZip.setIoDevice(&mFile);
-    if (!mZip.open(QuaZip::mdUnzip))
-    {
-        ERROR("QuaZip open failed. [code=%1]", mZip.getZipError());
-        return false;
-    }
-    DEBUG("QuaZip open successful. [file='%1']", zip_file);
-    mZip.goToFirstFile();
-    do
-    {
-        QuaZipFileInfo info;
-        if (mZip.getCurrentFileInfo(&info))
-        {
-            DEBUG("Found file in zip. [file='%1']", info.name);
-        }
-    } while (mZip.goToNextFile());
-
-    QByteArray content_bytes;
-    QByteArray property_bytes;
-    if (!ReadFile("content.json", &content_bytes))
-    {
-        ERROR("Could not find content.json file in zip archive. [file='%1']", zip_file);
-        return false;
-    }
-    if (!ReadFile("properties.json", &property_bytes))
-    {
-        ERROR("Could not find properties.json file in zip archive. [file='%1']", zip_file);
-        return false;
-    }
-    data::JsonObject content;
-    const auto [ok, error] = content.ParseString(content_bytes.constData(), content_bytes.size());
-    if (!ok)
-    {
-        ERROR("Failed to parse JSON content. [error='%1']", error);
-        return false;
-    }
-
-    LoadMaterials<gfx::MaterialClass>("materials", content, mResources);
-    LoadResources<gfx::ParticleEngineClass>("particles", content, mResources);
-    LoadResources<gfx::PolygonMeshClass>("shapes", content, mResources);
-    LoadResources<game::EntityClass>("entities", content, mResources);
-    LoadResources<game::SceneClass>("scenes", content, mResources);
-    LoadResources<game::TilemapClass>("tilemaps", content, mResources);
-    LoadResources<Script>("scripts", content, mResources);
-    LoadResources<DataFile>("data_files", content, mResources);
-    LoadResources<audio::GraphClass>("audio_graphs", content, mResources);
-    LoadResources<uik::Window>("uis", content, mResources);
-
-    // load property JSONs
-    const auto& docu  = QJsonDocument::fromJson(property_bytes);
-    const auto& props = docu.object();
-    for (auto& resource : mResources)
-    {
-        resource->LoadProperties(props);
-    }
-
-    // Partition the resources such that the data objects come in first.
-    // This is done because some resources such as tilemaps refer to the
-    // data resources by URI and in order for the URI remapping to work
-    // the packer must have packed the data object before packing the
-    // tilemap object.
-    std::partition(mResources.begin(), mResources.end(),
-        [](const auto& resource) {
-            return resource->IsDataFile();
-        });
-
-    mZipFile = zip_file;
-    return true;
-}
-
-bool ResourceArchive::ReadFile(const QString& file, QByteArray* array) const
-{
-    if (!FindZipFile(file))
-        return false;
-    QuaZipFile zip_file(&mZip);
-    zip_file.open(QIODevice::ReadOnly);
-    *array = zip_file.readAll();
-    zip_file.close();
-    return true;
-}
-
-bool ResourceArchive::FindZipFile(const QString& unix_style_name) const
-{
-    if (!mZip.goToFirstFile())
-        return false;
-    // on Windows the zip file paths are also windows style. (why, but of course)
-    QString windows_style_name = unix_style_name;
-    windows_style_name.replace("/", "\\");
-    do
-    {
-        QuaZipFileInfo info;
-        if (!mZip.getCurrentFileInfo(&info))
-            return false;
-        if ((info.name == unix_style_name) ||
-            (info.name == windows_style_name))
-            return true;
-    }
-    while (mZip.goToNextFile());
-    ERROR("Failed to find file in zip. [file='%1']", unix_style_name);
-    return false;
-}
 
 // static
 bool Workspace::mEnableAppResourceCaching = true;
@@ -1229,7 +1030,7 @@ gfx::ResourceHandle Workspace::LoadAppResource(const std::string& URI)
     return ret;
 }
 
-bool Workspace::LoadWorkspace(MigrationLog* log, WorkspaceAsyncWorkObserver* observer)
+bool Workspace::LoadWorkspace(ResourceMigrationLog* log, WorkspaceAsyncWorkObserver* observer)
 {
     if (!LoadContent(JoinPath(mWorkspaceDir, "content.json"), log, observer) ||
         !LoadProperties(JoinPath(mWorkspaceDir, "workspace.json"), observer))
@@ -1379,7 +1180,7 @@ AnyString Workspace::MapFileToFilesystem(const AnyString& uri) const
     return ret;
 }
 
-bool Workspace::LoadContent(const QString& filename, MigrationLog* log, WorkspaceAsyncWorkObserver* observer)
+bool Workspace::LoadContent(const QString& filename, ResourceMigrationLog* log, WorkspaceAsyncWorkObserver* observer)
 {
     data::JsonFile file;
     const auto [json_ok, error] = file.Load(app::ToUtf8(filename));
@@ -2751,7 +2552,7 @@ bool Workspace::ExportResourceArchive(const std::vector<const Resource*>& resour
     return true;
 }
 
-bool Workspace::ImportResourceArchive(ResourceArchive& zip)
+bool Workspace::ImportResourceArchive(ZipArchive& zip)
 {
     const auto& sub_folder = zip.GetImportSubFolderName();
     const auto& name_prefix = zip.GetResourceNamePrefix();

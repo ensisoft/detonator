@@ -26,15 +26,16 @@
 #include <unordered_map>
 #include <vector>
 
-#include "editor/gui/dlgmigrationlog.h"
 #include "editor/app/utility.h"
 #include "editor/app/format.h"
 #include "editor/app/resource.h"
+#include "editor/app/resource_migration_log.h"
+#include "editor/gui/dlgmigrationlog.h"
 
 namespace gui
 {
 
-DlgMigrationLog::DlgMigrationLog(QWidget* parent, const app::MigrationLog& log)
+DlgMigrationLog::DlgMigrationLog(QWidget* parent, const app::ResourceMigrationLog& log)
   : QDialog(parent)
 {
     mUI.setupUi(this);
@@ -50,12 +51,12 @@ DlgMigrationLog::DlgMigrationLog(QWidget* parent, const app::MigrationLog& log)
 
     std::unordered_map<QString, Foobar> messages;
 
-    for (size_t i=0; i<log.GetNumActions(); ++i)
+    for (size_t i=0; i<log.GetNumMigrations(); ++i)
     {
-        const auto& action = log.GetAction(i);
-        messages[action.id].name = action.name;
-        messages[action.id].type = action.type;
-        messages[action.id].messages.push_back(action.message);
+        const auto& migration = log.GetMigration(i);
+        messages[migration.id].name = migration.name;
+        messages[migration.id].type = migration.type;
+        messages[migration.id].messages.push_back(migration.message);
     }
     ss << "The following resources have been migrated/updated to the current version.\n\n";
     for (const auto& [key, foo] : messages)
