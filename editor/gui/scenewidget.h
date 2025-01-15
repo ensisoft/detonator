@@ -113,6 +113,9 @@ namespace gui
         virtual bool OnEscape() override;
         virtual void Refresh() override;
         virtual bool GetStats(Stats* stats) const override;
+        virtual void OnAddResource(const app::Resource* resource) override;
+        virtual void OnRemoveResource(const app::Resource* resource) override;
+        virtual void OnUpdateResource(const app::Resource* resource) override;
         virtual QImage TakeScreenshot() const override;
     private slots:
         void on_widgetColor_colorChanged(QColor color);
@@ -192,9 +195,7 @@ namespace gui
         void TreeCurrentNodeChangedEvent();
         void TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
         void TreeClickEvent(TreeWidget::TreeItem* item);
-        void ResourceAdded(const app::Resource* resource);
-        void ResourceRemoved(const app::Resource* resource);
-        void ResourceUpdated(const app::Resource* resource);
+
     private:
         void PaintScene(gfx::Painter& painter, double secs);
         void MouseMove(QMouseEvent* mickey);

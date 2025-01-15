@@ -68,6 +68,9 @@ namespace gui
         virtual void Save() override;
         virtual bool HasUnsavedChanges() const override;
         virtual bool GetStats(Stats* stats) const override;
+        virtual void OnAddResource(const app::Resource* resource) override;
+        virtual void OnRemoveResource(const app::Resource* resource) override;
+        virtual void OnUpdateResource(const app::Resource* resource) override;
 
     private slots:
         void on_widgetColor_colorChanged(QColor color);
@@ -142,9 +145,6 @@ namespace gui
         void LifetimeChanged(float min, float max);
         void PointsizeChanged(float min, float max);
         void AlphaChanged(float min, float max);
-        void ResourceAdded(const app::Resource* resource);
-        void ResourceUpdated(const app::Resource* resource);
-        void ResourceRemoved(const app::Resource* resource);
         void CreateMaterial();
         bool FindMaterialClass(const std::string& id);
         size_t GetHash() const;

@@ -85,6 +85,9 @@ namespace gui
         virtual bool GetStats(Stats* stats) const override;
         virtual bool OnEscape() override;
         virtual bool LaunchScript(const app::AnyString& id) override;
+        virtual void OnAddResource(const app::Resource* resource) override;
+        virtual void OnRemoveResource(const app::Resource* resource) override;
+        virtual void OnUpdateResource(const app::Resource* resource) override;
 
         std::string GetEntityId() const
         { return mState.entity->GetId(); }
@@ -284,9 +287,6 @@ namespace gui
         void TreeCurrentNodeChangedEvent();
         void TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
         void TreeClickEvent(TreeWidget::TreeItem* item);
-        void ResourceAdded(const app::Resource* resource);
-        void ResourceRemoved(const app::Resource* resource);
-        void ResourceUpdated(const app::Resource* resource);
         void PlaceNewParticleSystem();
         void PlaceNewCustomShape();
 

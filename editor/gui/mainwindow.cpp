@@ -452,6 +452,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
     mWorkspace = std::move(workspace);
     connect(mWorkspace.get(), &app::Workspace::ResourceUpdated, this, &MainWindow::ResourceUpdated);
     connect(mWorkspace.get(), &app::Workspace::ResourceAdded,   this, &MainWindow::ResourceAdded);
+    connect(mWorkspace.get(), &app::Workspace::ResourceRemoved, this, &MainWindow::ResourceRemoved);
 
     gfx::SetResourceLoader(mWorkspace.get());
 
@@ -2717,11 +2718,18 @@ void MainWindow::CleanGarbage()
 
 void MainWindow::ResourceUpdated(const app::Resource* resource)
 {
-    // forward to one function for now
-    ResourceAdded(resource);
-}
-void MainWindow::ResourceAdded(const app::Resource* resource)
-{
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        widget->OnUpdateResource(resource);
+    }
+
+    for (auto* child : mChildWindows)
+    {
+        auto* widget = child->GetWidget();
+        widget->OnUpdateResource(resource);
+    }
+
     for (int i=0; i< GetCount(mUI.mainTab); ++i)
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
@@ -2741,6 +2749,58 @@ void MainWindow::ResourceAdded(const app::Resource* resource)
             child->setWindowTitle(resource->GetName());
             return;
         }
+    }
+
+
+}
+void MainWindow::ResourceAdded(const app::Resource* resource)
+{
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        widget->OnAddResource(resource);
+    }
+
+    for (auto* child : mChildWindows)
+    {
+        auto* widget = child->GetWidget();
+        widget->OnAddResource(resource);
+    }
+
+    for (int i=0; i< GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        if (widget->GetId() == resource->GetId())
+        {
+            widget->setWindowTitle(resource->GetName());
+            mUI.mainTab->setTabText(i, resource->GetName());
+            return;
+        }
+    }
+    for (auto* child : mChildWindows)
+    {
+        auto* widget = child->GetWidget();
+        if (widget->GetId() == resource->GetId())
+        {
+            widget->setWindowTitle(resource->GetName());
+            child->setWindowTitle(resource->GetName());
+            return;
+        }
+    }
+}
+
+void MainWindow::ResourceRemoved(const app::Resource* resource)
+{
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        widget->OnRemoveResource(resource);
+    }
+
+    for (auto* child : mChildWindows)
+    {
+        auto* widget = child->GetWidget();
+        widget->OnRemoveResource(resource);
     }
 }
 

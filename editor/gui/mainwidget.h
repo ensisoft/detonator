@@ -231,6 +231,15 @@ namespace gui
         virtual bool OnKeyDown(QKeyEvent* key)
         { return false; }
 
+        virtual void OnAddResource(const app::Resource* resource)
+        {}
+
+        virtual void OnRemoveResource(const app::Resource* resource)
+        {}
+
+        virtual void OnUpdateResource(const app::Resource* resource)
+        {}
+
         struct Stats {
             double time = 0.0;
             struct {

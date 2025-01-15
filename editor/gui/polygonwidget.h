@@ -58,6 +58,8 @@ namespace gui
         virtual void Save() override;
         virtual bool HasUnsavedChanges() const override;
         virtual bool GetStats(Stats* stats) const override;
+        virtual void OnAddResource(const app::Resource* resource) override;
+        virtual void OnRemoveResource(const app::Resource* resource) override;
 
     private slots:
         void on_widgetColor_colorChanged(QColor color);
@@ -70,8 +72,6 @@ namespace gui
         void on_blueprints_currentIndexChanged(int);
         void on_btnResetBlueprint_clicked();
         void on_staticInstance_stateChanged(int);
-        void ResourceAdded(const app::Resource* resource);
-        void ResourceRemoved(const app::Resource* resource);
 
     private:
         void PaintScene(gfx::Painter& painter, double secs);

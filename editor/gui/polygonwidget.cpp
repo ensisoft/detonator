@@ -103,9 +103,6 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
     setWindowTitle(GetValue(mUI.name));
     setFocusPolicy(Qt::StrongFocus);
 
-    connect(workspace, &app::Workspace::ResourceAdded,   this, &ShapeWidget::ResourceAdded);
-    connect(workspace, &app::Workspace::ResourceRemoved, this, &ShapeWidget::ResourceRemoved);
-
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid20x20);
 }
@@ -425,7 +422,7 @@ void ShapeWidget::on_staticInstance_stateChanged(int)
     mBuilder.SetStatic(GetValue(mUI.staticInstance));
 }
 
-void ShapeWidget::ResourceAdded(const app::Resource* resource)
+void ShapeWidget::OnAddResource(const app::Resource* resource)
 {
     if (resource->GetType() != app::Resource::Type::Material)
         return;
@@ -433,7 +430,7 @@ void ShapeWidget::ResourceAdded(const app::Resource* resource)
     SetList(mUI.blueprints, mWorkspace->ListUserDefinedMaterials());
 }
 
-void ShapeWidget::ResourceRemoved(const app::Resource* resource)
+void ShapeWidget::OnRemoveResource(const app::Resource* resource)
 {
     if (resource->GetType() != app::Resource::Type::Material)
         return;
