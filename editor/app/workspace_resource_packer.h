@@ -20,6 +20,7 @@
 
 #include "warnpush.h"
 #  include <QString>
+
 #include "warnpop.h"
 
 #include <vector>

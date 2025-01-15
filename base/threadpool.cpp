@@ -184,7 +184,7 @@ private:
             }
 
         }
-        DEBUG("Thread pool thread exiting...");
+        DEBUG("Thread pool thread exiting [id=%1]...", mThreadId);
     }
 
 private:

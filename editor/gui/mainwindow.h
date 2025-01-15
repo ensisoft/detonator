@@ -40,6 +40,10 @@
 #include "editor/gui/clipboard.h"
 #include "editor/gui/mainwidget.h"
 
+namespace app {
+    class ResourceCache;
+} // app
+
 namespace gui
 {
     class MainWidget;
@@ -202,6 +206,7 @@ namespace gui
         void OpenRecentWorkspace();
         void ToggleShowResource();
         void CleanGarbage();
+        void ResourceLoaded(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
         void ResourceAdded(const app::Resource* resource);
         void ResourceRemoved(const app::Resource* resource);
@@ -294,6 +299,8 @@ namespace gui
         FocusStack mFocusStack;
         // GFX Resource loader that is used when there's no workspace.
         std::unique_ptr<GfxResourceLoader> mLoader;
+
+        std::unique_ptr<app::ResourceCache> mResourceCache;
 
         base::ThreadPool* mThreadPool = nullptr;
     };
