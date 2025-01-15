@@ -36,7 +36,7 @@ bool LoadResources(const char* type,
                    app::ResourceMigrationLog* log = nullptr,
                    app::WorkspaceAsyncWorkObserver* observer = nullptr)
 {
-    DEBUG("Loading resources. [type='%1']", type);
+    VERBOSE("Loading resources. [type='%1']", type);
     bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
@@ -64,7 +64,7 @@ bool LoadResources(const char* type,
         auto resource = std::make_unique<app::GameResource<ClassType>>(std::move(ret), name);
         resource->SetProperty("__version", version);
         vector.push_back(std::move(resource));
-        DEBUG("Loaded workspace resource. [name='%1']", name);
+        VERBOSE("Loaded workspace resource. [name='%1']", name);
 
         if (observer)
             observer->EnqueueStepIncrement();
@@ -81,7 +81,7 @@ bool LoadMaterials(const char* type,
                    app::WorkspaceAsyncWorkObserver* observer = nullptr)
 {
 
-    DEBUG("Loading resources. [type='%1']", type);
+    VERBOSE("Loading resources. [type='%1']", type);
     bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
@@ -110,7 +110,7 @@ bool LoadMaterials(const char* type,
         auto resource = std::make_unique<app::MaterialResource>(std::move(ret), name);
         resource->SetProperty("__version", version); // a small hack here.
         vector.push_back(std::move(resource));
-        DEBUG("Loaded workspace resource. [name='%1']", name);
+        VERBOSE("Loaded workspace resource. [name='%1']", name);
 
         if (observer)
             observer->EnqueueStepIncrement();

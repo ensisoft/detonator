@@ -404,6 +404,13 @@ namespace app
             property.GetValue(out);
             return true;
         }
+
+        const QVariantMap& GetProperties() const
+        { return mProperties; }
+
+        const QVariantMap& GetUserProperties() const
+        { return mUserProperties; }
+
         using ProjectSettings = app::ProjectSettings;
 
         const ProjectSettings& GetProjectSettings() const

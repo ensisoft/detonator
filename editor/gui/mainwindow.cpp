@@ -47,6 +47,7 @@
 #include "editor/app/process.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
+#include "editor/app/resource_cache.h"
 #include "editor/app/resource_migration_log.h"
 #include "editor/gui/main.h"
 #include "editor/gui/mainwindow.h"
@@ -439,6 +440,7 @@ void MainWindow::LoadDemoWorkspace(const QString& which)
 bool MainWindow::LoadWorkspace(const QString& dir)
 {
     ASSERT(!mWorkspace);
+    ASSERT(!mResourceCache);
 
     app::ResourceMigrationLog migration_log;
 
@@ -453,9 +455,22 @@ bool MainWindow::LoadWorkspace(const QString& dir)
         return false;
 
     mWorkspace = std::move(workspace);
+    connect(mWorkspace.get(), &app::Workspace::ResourceLoaded, this, &MainWindow::ResourceLoaded);
     connect(mWorkspace.get(), &app::Workspace::ResourceUpdated, this, &MainWindow::ResourceUpdated);
     connect(mWorkspace.get(), &app::Workspace::ResourceAdded,   this, &MainWindow::ResourceAdded);
     connect(mWorkspace.get(), &app::Workspace::ResourceRemoved, this, &MainWindow::ResourceRemoved);
+
+    const auto resource_count = mWorkspace->GetNumUserDefinedResources();
+    dlg.EnqueueUpdate("Initialize Workspace Cache...", resource_count, 0);
+
+    mResourceCache = std::make_unique<app::ResourceCache>(mThreadPool);
+    for (size_t i=0; i<resource_count; ++i)
+    {
+        const auto& resource = mWorkspace->GetUserDefinedResource(i);
+        mResourceCache->AddResource(resource.GetIdUtf8(), resource.Copy());
+        dlg.EnqueueStepIncrement();
+        mApplication.processEvents();
+    }
 
     gfx::SetResourceLoader(mWorkspace.get());
 
@@ -470,6 +485,8 @@ bool MainWindow::LoadWorkspace(const QString& dir)
 
     GfxWindow::SetDefaultFilter(settings.default_min_filter);
     GfxWindow::SetDefaultFilter(settings.default_mag_filter);
+
+    mResourceCache->UpdateSettings(settings);
 
     // desktop dimensions
     const QList<QScreen*>& screens = QGuiApplication::screens();
@@ -721,8 +738,18 @@ bool MainWindow::SaveWorkspace()
         mPlayWindow->SaveState("play_window");
     }
 
-    if (!mWorkspace->SaveWorkspace())
-        return false;
+    if (mResourceCache)
+    {
+        // start async save using the cache
+        mResourceCache->SaveWorkspace(mWorkspace->GetProperties(),
+                                      mWorkspace->GetUserProperties(),
+                                      mWorkspace->GetDir());
+    }
+    else
+    {
+        if (!mWorkspace->SaveWorkspace())
+            return false;
+    }
 
     return true;
 }
@@ -738,7 +765,6 @@ void MainWindow::CloseWorkspace()
         return;
     }
 
-
     // todo: show a dialog here.
     if (mThreadPool->HasPendingTasks())
     {
@@ -748,13 +774,25 @@ void MainWindow::CloseWorkspace()
         dlg.EnqueueUpdate("Closing workspace...", 0, 0);
         dlg.show();
 
+        while (mResourceCache && mResourceCache->HasPendingWork())
+        {
+            mThreadPool->ExecuteMainThread();
+            mResourceCache->TickPendingWork();
+
+            mApplication.processEvents();
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+
         while (mThreadPool->HasPendingTasks())
         {
             mThreadPool->ExecuteMainThread();
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
             mApplication.processEvents();
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
+
+    mResourceCache.reset();
 
     // note that here we don't care about saving any state.
     // this is only for closing everything, closing the tabs
@@ -1662,14 +1700,24 @@ void MainWindow::on_actionDependencies_triggered()
 
 void MainWindow::on_actionSaveWorkspace_triggered()
 {
-    if (!mWorkspace->SaveWorkspace())
+    if (mResourceCache)
     {
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Critical);
-        msg.setStandardButtons(QMessageBox::Ok);
-        msg.setText(tr("Workspace saving failed. See the log for more information."));
-        msg.exec();
-        return;
+        // start async saving based on the cache.
+        mResourceCache->SaveWorkspace(mWorkspace->GetProperties(),
+                                      mWorkspace->GetUserProperties(),
+                                      mWorkspace->GetDir());
+    }
+    else
+    {
+        if (!mWorkspace->SaveWorkspace())
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Critical);
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setText(tr("Workspace saving failed. See the log for more information."));
+            msg.exec();
+            return;
+        }
     }
 }
 
@@ -2238,6 +2286,7 @@ void MainWindow::on_actionProjectSettings_triggered()
     QSurfaceFormat::setDefaultFormat(format);
 
     mWorkspace->SetProjectSettings(settings);
+    mResourceCache->UpdateSettings(settings);
 
     GfxWindow::SetDefaultFilter(settings.default_min_filter);
     GfxWindow::SetDefaultFilter(settings.default_mag_filter);
@@ -2466,6 +2515,11 @@ void MainWindow::RefreshUI()
 
 
     mThreadPool->ExecuteMainThread();
+
+    if (mResourceCache)
+    {
+        mResourceCache->TickPendingWork();
+    }
 }
 
 void MainWindow::ShowNote(const app::Event& event)
@@ -2741,8 +2795,21 @@ void MainWindow::CleanGarbage()
     GfxWindow::CleanGarbage();
 }
 
+void MainWindow::ResourceLoaded(const app::Resource* resource)
+{
+    if (mResourceCache)
+    {
+        mResourceCache->AddResource(resource->GetIdUtf8(), resource->Copy());
+    }
+}
+
 void MainWindow::ResourceUpdated(const app::Resource* resource)
 {
+    if (mResourceCache)
+    {
+        mResourceCache->AddResource(resource->GetIdUtf8(), resource->Copy());
+    }
+
     for (int i=0; i<GetCount(mUI.mainTab); ++i)
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
@@ -2780,6 +2847,11 @@ void MainWindow::ResourceUpdated(const app::Resource* resource)
 }
 void MainWindow::ResourceAdded(const app::Resource* resource)
 {
+    if (mResourceCache)
+    {
+        mResourceCache->AddResource(resource->GetIdUtf8(), resource->Copy());
+    }
+
     for (int i=0; i<GetCount(mUI.mainTab); ++i)
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
@@ -2816,6 +2888,11 @@ void MainWindow::ResourceAdded(const app::Resource* resource)
 
 void MainWindow::ResourceRemoved(const app::Resource* resource)
 {
+    if (mResourceCache)
+    {
+        mResourceCache->DelResource(resource->GetIdUtf8());
+    }
+
     for (int i=0; i<GetCount(mUI.mainTab); ++i)
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
@@ -3070,8 +3147,33 @@ void MainWindow::LaunchGame(bool clean)
         // todo: maybe save to some temporary location ?
         // Save workspace for the loading the initial content
         // in the game host
-        if (!mWorkspace->SaveWorkspace())
-            return;
+        if (mResourceCache)
+        {
+            mResourceCache->SaveWorkspace(mWorkspace->GetProperties(),
+                                          mWorkspace->GetUserProperties(),
+                                          mWorkspace->GetDir());
+            DlgProgress dlg(this);
+            dlg.setWindowTitle("Saving workspace...");
+            dlg.setWindowModality(Qt::WindowModal);
+            dlg.EnqueueUpdate("Saving workspace...", 0, 0);
+            dlg.show();
+
+            while (mResourceCache->HasPendingWork())
+            {
+                mThreadPool->ExecuteMainThread();
+                mResourceCache->TickPendingWork();
+
+                mApplication.processEvents();
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+        }
+        else
+        {
+            if (!mWorkspace->SaveWorkspace())
+                return;
+        }
+
+
 
         ASSERT(!mIPCHost);
         app::IPCHost::CleanupSocket("gamestudio-local-socket");

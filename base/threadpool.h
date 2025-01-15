@@ -23,6 +23,7 @@
 #include <memory>
 #include <stdexcept>
 #include <chrono>
+#include <optional>
 
 #include "base/platform.h"
 #include "base/logging.h"
@@ -35,6 +36,11 @@ namespace base
     class ThreadTask
     {
     public:
+        struct Description {
+            std::string name;
+            std::string desc;
+        };
+
         enum class Flags {
             Error, Tracing
         };
@@ -57,6 +63,40 @@ namespace base
         inline bool Failed() const noexcept
         { return TestFlag(Flags::Error); }
 
+        inline void SetDescription(Description description) noexcept
+        { mDescription = std::move(description); }
+        inline void SetTaskDescription(std::string desc) noexcept
+        {
+            if (!mDescription.has_value())
+                mDescription = Description{};
+            mDescription->desc = std::move(desc);
+        }
+        inline void SetTaskName(std::string name) noexcept
+        {
+            if (!mDescription.has_value())
+                mDescription = Description{};
+            mDescription->name = std::move(name);
+        }
+
+        inline bool HasDescription() const noexcept
+        { return mDescription.has_value(); }
+
+        inline std::string GetTaskDescription() const noexcept
+        {
+            if (mDescription.has_value())
+                return mDescription.value().desc;
+            return "";
+        }
+
+        inline std::string GetTaskName() const noexcept
+        {
+            if (mDescription.has_value())
+                return mDescription.value().name;
+            return "";
+        }
+        inline std::string GetErrorString() const noexcept
+        { return mErrorString; }
+
         void Execute()
         {
             try
@@ -78,6 +118,15 @@ namespace base
     protected:
         base::bitflag<Flags> mFlags;
 
+        void SetError(std::string error) noexcept
+        {
+            mFlags.set(Flags::Error, true);
+            mErrorString = std::move(error);
+        }
+        void SetError() noexcept
+        { mFlags.set(Flags::Error, true); }
+
+
     private:
         static size_t GetNextTaskId() noexcept
         {
@@ -89,6 +138,8 @@ namespace base
         std::size_t mTaskId = 0;
         std::exception_ptr mException;
         std::atomic<bool> mDone = {false};
+        std::optional<Description> mDescription;
+        std::string mErrorString;
     };
 
 

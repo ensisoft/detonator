@@ -465,6 +465,7 @@ add_executable(Detonator
     editor/app/process.cpp
     editor/app/ipc.cpp
     editor/app/resource.cpp
+    editor/app/resource_cache.cpp
     editor/app/lua-tools.cpp
     editor/app/lua-doc.cpp
     editor/app/code-tools.cpp
