@@ -26,7 +26,7 @@ namespace gfx
 
 TextMaterial::TextMaterial(const TextBuffer& text)  : mText(text)
 {}
-TextMaterial::TextMaterial(TextBuffer&& text)
+TextMaterial::TextMaterial(TextBuffer&& text) noexcept
   : mText(std::move(text))
 {}
 
@@ -102,10 +102,11 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
 #endif
         texture->SetFilter(Texture::MinFilter::Linear);
         texture->SetFilter(Texture::MagFilter::Linear);
-
     }
+
     program.SetTexture("kTexture", 0, *texture);
     program.SetUniform("kColor", mColor);
+    program.SetUniform("kMaterialFlags", static_cast<unsigned>(mFlags));
     return true;
 }
 
@@ -114,16 +115,18 @@ void TextMaterial::ApplyStaticState(const Environment& env, Device& device, gfx:
 
 ShaderSource TextMaterial::GetShader(const Environment& env, const Device& device) const
 {
+    ShaderSource source;
+    source.SetType(ShaderSource::Type::Fragment);
+    source.SetPrecision(ShaderSource::Precision::High);
+    source.SetVersion(ShaderSource::Version::GLSL_300);
+    source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_BLOOM", static_cast<unsigned>(MaterialFlags::EnableBloom));
+
     const auto format = mText.GetRasterFormat();
     if (format == TextBuffer::RasterFormat::Bitmap)
     {
         static const char* fragment_source = {
 #include "shaders/fragment_text_bitmap_shader.glsl"
         };
-        ShaderSource source;
-        source.SetType(ShaderSource::Type::Fragment);
-        source.SetPrecision(ShaderSource::Precision::High);
-        source.SetVersion(ShaderSource::Version::GLSL_300);
         source.LoadRawSource(fragment_source);
         source.AddShaderName("Text Shader");
         source.AddShaderSourceUri("shaders/fragment_text_bitmap_shader.glsl");
@@ -134,20 +137,16 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
         static const char* fragment_source = {
 #include "shaders/fragment_text_texture_shader.glsl"
         };
-
-        ShaderSource source;
-        source.SetType(ShaderSource::Type::Fragment);
-        source.SetPrecision(ShaderSource::Precision::High);
-        source.SetVersion(ShaderSource::Version::GLSL_300);
         source.LoadRawSource(fragment_source);
         source.AddShaderName("Text Shader");
         source.AddShaderSourceUri("shaders/fragment_text_texture_shader.glsl");
         return source;
     }
     else if (format == TextBuffer::RasterFormat::None)
-        return ShaderSource();
+        return {};
     else BUG("Unhandled texture raster format.");
-    return ShaderSource();
+
+    return {};
 }
 
 std::string TextMaterial::GetShaderId(const Environment& env) const
