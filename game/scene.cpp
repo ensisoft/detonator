@@ -983,25 +983,32 @@ SceneClass& SceneClass::operator=(const SceneClass& other)
 }
 
 Scene::Scene(std::shared_ptr<const SceneClass> klass)
-  : mClass(klass)
+  : mClass(std::move(klass))
 {
-    std::unordered_map<const EntityPlacement*, const Entity*> map;
+    std::unordered_map<const EntityPlacement*, const Entity*> entity_placement_map;
 
     bool spatial_nodes = false;
 
     // spawn an entity instance for each scene node class
     // in the scene class
-    for (size_t i=0; i<klass->GetNumNodes(); ++i)
+    for (size_t i=0; i<mClass->GetNumNodes(); ++i)
     {
-        const auto& node = klass->GetPlacement(i);
+        const auto& placement = mClass->GetPlacement(i);
+        const auto& entity_klass = placement.GetEntityClass();
+        if (entity_klass == nullptr)
+        {
+            ERROR("Entity placement '%1' refers to an entity class that no longer exists.", placement.GetName());
+            continue;
+        }
+
         EntityArgs args;
-        args.klass    = node.GetEntityClass();
-        args.rotation = node.GetRotation();
-        args.position = node.GetTranslation();
-        args.scale    = node.GetScale();
-        args.name     = node.GetName();
-        args.id       = node.GetId();
-        ASSERT(args.klass);
+        args.klass    = entity_klass;
+        args.rotation = placement.GetRotation();
+        args.position = placement.GetTranslation();
+        args.scale    = placement.GetScale();
+        args.name     = placement.GetName();
+        args.id       = placement.GetId();
+
         auto entity   = CreateEntityInstance(args);
 
         for (size_t j=0; j<entity->GetNumNodes(); ++j)
@@ -1013,18 +1020,18 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
 
         // these need always be set for each entity spawned from scene
         // placement node.
-        entity->SetParentNodeClassId(node.GetParentRenderTreeNodeId());
-        entity->SetLayer(node.GetLayer());
+        entity->SetParentNodeClassId(placement.GetParentRenderTreeNodeId());
+        entity->SetLayer(placement.GetLayer());
         entity->SetScene(this);
 
         // optionally set instance settings, if these are not set then
         // entity class defaults apply.
-        if (node.HasIdleAnimationSetting())
-            entity->SetIdleTrackId(node.GetIdleAnimationId());
-        if (node.HasLifetimeSetting())
-            entity->SetLifetime(node.GetLifetime());
-        if (node.HasTag())
-            entity->SetTag(*node.GetTag());
+        if (placement.HasIdleAnimationSetting())
+            entity->SetIdleTrackId(placement.GetIdleAnimationId());
+        if (placement.HasLifetimeSetting())
+            entity->SetLifetime(placement.GetLifetime());
+        if (placement.HasTag())
+            entity->SetTag(*placement.GetTag());
 
         if (entity->HasIdleTrack())
             entity->PlayIdle();
@@ -1034,29 +1041,29 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         // default will apply.
         for (const auto& flag : magic_enum::enum_values<Entity::Flags>())
         {
-            if (node.HasFlagSetting(flag))
-                entity->SetFlag(flag, node.TestFlag(flag));
+            if (placement.HasFlagSetting(flag))
+                entity->SetFlag(flag, placement.TestFlag(flag));
         }
 
         // set the entity script variable values
-        for (size_t i=0; i<node.GetNumScriptVarValues(); ++i)
+        for (size_t i=0; i<placement.GetNumScriptVarValues(); ++i)
         {
-            const auto& val = node.GetScriptVarValue(i);
+            const auto& val = placement.GetScriptVarValue(i);
             auto* var = entity->FindScriptVarById(val.id);
             // deal with potentially stale data in the scene node.
             if (var == nullptr)
             {
-                WARN("SceneNode '%1' refers to entity script variable '%2' that no longer exists.", node.GetName(), val.id);
+                ERROR("Scene entity placement '%1' refers to entity script variable '%2' that no longer exists.", placement.GetName(), val.id);
                 continue;
             }
             else if (ScriptVar::GetTypeFromVariant(val.value) != var->GetType())
             {
-                WARN("SceneNode '%1' refers to entity script variable '%2' with incorrect type.", node.GetName(), val.id);
+                ERROR("Scene entity placement '%1' refers to entity script variable '%2' with incorrect type.", placement.GetName(), val.id);
                 continue;
             }
             else if (var->IsReadOnly())
             {
-                WARN("SceneNode '%1' tries to set a read only script variable '%1'.", node.GetName(), var->GetName());
+                ERROR("Scene entity placement '%1' tries to set a read only script variable '%1'.", placement.GetName(), var->GetName());
                 continue;
             }
             std::visit([var](const auto& variant_value) {
@@ -1065,19 +1072,19 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
             }, val.value);
         }
 
-        map[&node] = entity.get();
+        entity_placement_map[&placement] = entity.get();
         mIdMap[entity->GetId()] = entity.get();
         mNameMap[entity->GetName()] = entity.get();
         mEntities.push_back(std::move(entity));
     }
-    mRenderTree.FromTree(mClass->GetRenderTree(), [&map](const EntityPlacement* node) {
-        return map[node];
+    mRenderTree.FromTree(mClass->GetRenderTree(), [&entity_placement_map](const EntityPlacement* placement) {
+        return entity_placement_map[placement];
     });
 
     // make copies of mutable script variables.
-    for (size_t i=0; i<klass->GetNumScriptVars(); ++i)
+    for (size_t i=0; i<mClass->GetNumScriptVars(); ++i)
     {
-        auto var = klass->GetScriptVar(i);
+        auto var = mClass->GetScriptVar(i);
         if (!var.IsReadOnly())
             mScriptVars.push_back(std::move(var));
     }
