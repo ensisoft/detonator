@@ -32,176 +32,8 @@
 #include "graphics/utility.h"
 #include "graphics/algo.h"
 #include "graphics/drawcmd.h"
+#include "graphics/generic_shader_program.h"
 #include "graphics/particle_engine.h"
-
-namespace {
-class MainShaderProgram : public gfx::ShaderProgram
-{
-public:
-    void SetBloomColor(const gfx::Color4f& color)
-    {
-        mBloomColor = color;
-    }
-    void SetBloomThreshold(float threshold)
-    {
-        mBloomThreshold = threshold;
-    }
-    void EnableBloom(bool on_off)
-    {
-        mEnableBloom = on_off;
-    }
-
-    std::string GetShaderId(const gfx::Material& material, const gfx::Material::Environment& env) const override
-    {
-        auto ret = material.GetShaderId(env);
-        ret += "+main";
-        return ret;
-    }
-    std::string GetShaderId(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env) const override
-    {
-        auto ret = drawable.GetShaderId(env);
-        ret += "+main";
-        return ret;
-    }
-
-    gfx::ShaderSource GetShader(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env, const gfx::Device& device) const
-    {
-        gfx::ShaderSource source;
-        source.SetType(gfx::ShaderSource::Type::Vertex);
-        source.LoadRawSource(R"(
-#version 300 es
-
-struct VS_OUT {
-    // vertex position in clip space (after projection transformation)
-    vec4 clip_position;
-    // vertx position in eye coordinates (after camera/view transformation)
-    vec4 view_position;
-    // view space surface normal vector
-    vec3 view_normal;
-    // view space surface tagent vector
-    vec3 view_tangent;
-    // view space surface bi-tangent vector
-    vec3 view_bitangent;
-    // point size for GL_POINTS rasterization.
-    float point_size;
-
-    bool need_tbn;
-    bool have_tbn;
-} vs_out;
-
-void VertexShaderMain();
-
-void main() {
-    vs_out.have_tbn = false;
-    vs_out.need_tbn = false;
-    VertexShaderMain();
-
-    gl_PointSize = vs_out.point_size;
-    gl_Position  = vs_out.clip_position;
-}
-)");
-
-        source.Merge(drawable.GetShader(env, device));
-        return source;
-    }
-
-
-    gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
-    {
-        gfx::ShaderSource source;
-        source.SetType(gfx::ShaderSource::Type::Fragment);
-        source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
-        source.SetPrecision(gfx::ShaderSource::Precision::High);
-
-        source.LoadRawSource(R"(
-#define SHADER_FLAG_ENABLE_BLOOM 1
-
-struct FS_OUT {
-   vec4 color;
-} fs_out;
-
-uniform int kFlags;
-uniform float kBloomThreshold;
-uniform vec4  kBloomColor;
-
-layout (location=0) out vec4 fragOutColor0; // main image
-layout (location=1) out vec4 fragOutColor1; // bloom image
-
-vec4 Bloom(vec4 color) {
-    float brightness = dot(color.rgb, kBloomColor.rgb); //vec3(0.2126, 0.7252, 0.0722));
-    if (brightness > kBloomThreshold)
-       return color;
-    return vec4(0.0, 0.0, 0.0, 0.0);
-}
-
-float sRGB_encode(float value)
-{
-   return value <= 0.0031308
-       ? value * 12.92
-       : pow(value, 1.0/2.4) * 1.055 - 0.055;
-}
-vec4 sRGB_encode(vec4 color)
-{
-   vec4 ret;
-   ret.r = sRGB_encode(color.r);
-   ret.g = sRGB_encode(color.g);
-   ret.b = sRGB_encode(color.b);
-   ret.a = color.a; // alpha is always linear
-   return ret;
-}
-
-void FragmentShaderMain();
-
-bool TestFlag(int flag) {
-   return (kFlags & flag) == flag;
-}
-
-void main() {
-    FragmentShaderMain();
-
-    fragOutColor0 = sRGB_encode(fs_out.color);
-
-    if (TestFlag(SHADER_FLAG_ENABLE_BLOOM)) {
-      vec4 bloom = Bloom(fs_out.color);
-      fragOutColor1 = sRGB_encode(bloom);
-    }
-
-})");
-        source.Merge(material.GetShader(env, device));
-        return source;
-    }
-    std::string GetName() const override
-    {
-        return "MainShader";
-    }
-    void ApplyDynamicState(const gfx::Device& device, gfx::ProgramState& program, gfx::Device::State& state, void* user) const override
-    {
-        const auto* packet = static_cast<const engine::DrawPacket*>(user);
-        const auto enable_packet_bloom = packet->flags.test(engine::DrawPacket::Flags::PP_Bloom);
-
-        int flags = 0;
-
-        if (enable_packet_bloom && mEnableBloom)
-        {
-            program.SetUniform("kBloomThreshold", mBloomThreshold);
-            program.SetUniform("kBloomColor", mBloomColor);
-            flags |= ShaderFlag_EnableBloom;
-        }
-        program.SetUniform("kFlags", flags);
-        //state.blending = gfx::Device::State::BlendOp::None;
-    }
-
-    enum Flags {
-        ShaderFlag_EnableBloom = 0x1
-    };
-
-private:
-    gfx::Color4f mBloomColor;
-    float mBloomThreshold = 0.0f;
-    bool mEnableBloom = false;
-};
-
-} // namespace
 
 namespace engine
 {
@@ -238,7 +70,7 @@ void LowLevelRenderer::DrawDefault(DrawPacketList& packets) const
         mRenderHook->BeginDraw(mSettings, res);
     }
 
-    MainShaderProgram program;
+    gfx::GenericShaderProgram program;
 
     Draw(packets, nullptr, program);
 
@@ -277,10 +109,10 @@ void LowLevelRenderer::DrawFramebuffer(DrawPacketList& packets) const
     }
 
     const auto& bloom = mSettings.bloom;
-    MainShaderProgram program;
+    gfx::GenericShaderProgram program;
     program.SetBloomColor(gfx::Color4f(bloom.red, bloom.green, bloom.blue, 1.0f));
     program.SetBloomThreshold(bloom.threshold);
-    program.EnableBloom(true);
+    program.EnableFeature(gfx::GenericShaderProgram::OutputFeatures::WriteBloomTarget, true);
 
     Draw(packets, mMainFBO, program);
 

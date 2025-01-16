@@ -253,7 +253,12 @@ public:
         else if (id == "custom")
         {
 constexpr auto* src = R"(
+#version 300 es
+
+// @uniforms
 uniform vec4 kColor;
+
+// @code
 void FragmentShaderMain() {
   fs_out.color = kColor;
 }
