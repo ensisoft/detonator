@@ -563,8 +563,8 @@ namespace game
         using SpatialIndex    = game::SpatialIndex<EntityNode>;
         using BloomFilter     = SceneClass::BloomFilter;
 
-        Scene(std::shared_ptr<const SceneClass> klass);
-        Scene(const SceneClass& klass);
+        explicit Scene(std::shared_ptr<const SceneClass> klass);
+        explicit Scene(const SceneClass& klass);
         Scene(const Scene& other) = delete;
        ~Scene();
 
