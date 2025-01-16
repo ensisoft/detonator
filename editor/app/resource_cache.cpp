@@ -40,7 +40,7 @@ class ResourceCache::AddResourceTask : public base::ThreadTask {
 public:
 public:
     AddResourceTask(std::shared_ptr<CacheState> state, std::string id, std::unique_ptr<Resource> copy)
-       : mState(state)
+       : mState(std::move(state))
        , mResourceId(std::move(id))
        , mResource(std::move(copy))
     {}
@@ -78,7 +78,7 @@ public:
                       const QVariantMap& workspace_properties,
                       const QVariantMap& workspace_user_properties,
                       const QString& workspace_directory)
-      : mState(state)
+      : mState(std::move(state))
       , mWorkspaceProperties(workspace_properties)
       , mWorkspaceUserProperties(workspace_user_properties)
       , mWorkspaceDirectory(workspace_directory)
@@ -201,8 +201,8 @@ private:
 
 class ResourceCache::UpdateSettingsTask : public base::ThreadTask {
 public:
-    UpdateSettingsTask(std::shared_ptr<CacheState> state, ProjectSettings settings)
-        : mState(state)
+    UpdateSettingsTask(std::shared_ptr<CacheState> state, const ProjectSettings& settings)
+        : mState(std::move(state))
         , mSettings(settings)
     {}
 
@@ -267,10 +267,10 @@ void ResourceCache::UpdateSettings(const ProjectSettings& settings)
     if (HasPendingWork())
     {
         auto task = std::make_unique<UpdateSettingsTask>(mState, settings);
-        auto work = mThreadPool->SubmitTask(std::move(task),
-                                            base::ThreadPool::Worker0ThreadID);
         task->SetTaskName("UpdateCacheSettings");
         task->SetTaskDescription("Update project settings in cache.");
+        auto work = mThreadPool->SubmitTask(std::move(task),
+                                            base::ThreadPool::Worker0ThreadID);
         mPendingWork.push_back(work);
         VERBOSE("Update project settings in cache.");
     }
@@ -300,7 +300,7 @@ void ResourceCache::TickPendingWork()
     {
         auto work = mPendingWork.front();
         if (!work.IsComplete())
-            continue;
+            return;
 
         auto* task = work.GetTask();
 
