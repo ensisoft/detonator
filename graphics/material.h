@@ -20,6 +20,7 @@
 
 #include <string>
 
+#include "graphics/enum.h"
 #include "graphics/types.h"
 #include "graphics/device.h"
 
@@ -36,6 +37,8 @@ namespace gfx
     class Material
     {
     public:
+        using Flags = MaterialFlags;
+
         using Uniform    = gfx::Uniform;
         using UniformMap = gfx::UniformMap;
         using RenderPass = gfx::RenderPass;
@@ -56,6 +59,9 @@ namespace gfx
         };
 
         virtual ~Material() = default;
+
+        virtual void SetFlag(Flags flag, bool on_off) noexcept { }
+        virtual bool TestFlag(Flags flag) const noexcept { return false; }
         // Apply the dynamic material properties to the given program object
         // and set the rasterizer state. Dynamic properties are the properties
         // that can change between one material instance to another even when

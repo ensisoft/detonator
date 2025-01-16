@@ -114,7 +114,9 @@ namespace gfx
             // When set, change the transparent blending equation
             // to expect alpha values to be premultiplied in the
             // RGB values.
-            PremultipliedAlpha
+            PremultipliedAlpha,
+            // Enable bloom output
+            EnableBloom
         };
 
         // Action to take on per particle random value. This can
@@ -162,6 +164,9 @@ namespace gfx
             const UniformMap* uniforms = nullptr;
             // Current render pass the material is used in
             RenderPass renderpass = RenderPass::ColorPass;
+
+            // see material flags
+            std::uint32_t flags = 0;
         };
 
         explicit MaterialClass(Type type, std::string id = base::RandomString(10));

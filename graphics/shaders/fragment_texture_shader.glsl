@@ -7,6 +7,7 @@ R"CPP_RAW_STRING(//"
 precision highp float;
 
 // @uniforms
+uniform uint kMaterialFlags;
 
 // The texture to sample from
 uniform sampler2D kTexture;
@@ -109,6 +110,7 @@ void FragmentShaderMain() {
         discard;
 
     fs_out.color = color;
+    fs_out.flags = kMaterialFlags;
 }
 
 )CPP_RAW_STRING"

@@ -20,6 +20,7 @@
 
 #include "base/logging.h"
 #include "base/utility.h"
+#include "graphics/enum.h"
 #include "graphics/shader_source.h"
 #include "graphics/generic_shader_program.h"
 
@@ -81,6 +82,8 @@ ShaderSource GenericShaderProgram::GetShader(const Material& material, const Mat
         source.AddPreprocessorDefinition("PI", "3.1415926");
     if (!source.HasShaderBlock("E", ShaderSource::ShaderBlockType::PreprocessorDefine))
         source.AddPreprocessorDefinition("E", "2.71828182");
+    if (!source.HasShaderBlock("MATERIAL_FLAGS_ENABLE_BLOOM", ShaderSource::ShaderBlockType::PreprocessorDefine))
+        source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_BLOOM", static_cast<unsigned>(MaterialFlags::EnableBloom));
 
     source.AddPreprocessorDefinition("BASIC_LIGHT_MAX_LIGHTS", static_cast<unsigned>(MAX_LIGHTS));
     source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_AMBIENT",     static_cast<unsigned>(LightType::Ambient));

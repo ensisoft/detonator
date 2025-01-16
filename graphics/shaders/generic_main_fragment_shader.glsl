@@ -22,6 +22,7 @@ struct FS_OUT {
     float specular_exponent; // aka shininess
     bool have_material_colors;
     bool have_surface_normal;
+    uint flags;
 } fs_out;
 
 // @uniforms
@@ -84,8 +85,10 @@ void main() {
     #endif
 
     #if defined(ENABLE_BLOOM_OUT)
-        vec4 bloom = Bloom(out_color);
-        fragOutColor1 = sRGB_encode(bloom);
+        if ((fs_out.flags & MATERIAL_FLAGS_ENABLE_BLOOM) == MATERIAL_FLAGS_ENABLE_BLOOM) {
+            vec4 bloom = Bloom(out_color);
+            fragOutColor1 = sRGB_encode(bloom);
+        }
     #endif
 }
 

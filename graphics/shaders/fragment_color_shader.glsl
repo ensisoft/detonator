@@ -7,6 +7,8 @@ R"CPP_RAW_STRING(//"
 
 precision highp float;
 
+uniform uint kMaterialFlags;
+
 // The incoming color value.
 uniform vec4 kBaseColor;
 
@@ -28,6 +30,7 @@ void FragmentShaderMain() {
 
     // out value.
     fs_out.color = color;
+    fs_out.flags = kMaterialFlags;
 }
 
 )CPP_RAW_STRING"

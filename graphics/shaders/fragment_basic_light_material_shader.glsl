@@ -6,6 +6,7 @@ R"CPP_RAW_STRING(//"
 precision highp float;
 
 // @uniforms
+uniform uint kMaterialFlags;
 uniform vec4 kDiffuseColor;
 uniform vec4 kAmbientColor;
 uniform vec4 kSpecularColor;
@@ -62,6 +63,7 @@ void FragmentShaderMain() {
     fs_out.specular_color = specular_color;
     fs_out.specular_exponent = kSpecularExponent;
     fs_out.have_material_colors = true;
+    fs_out.flags = kMaterialFlags;
 }
 
 )CPP_RAW_STRING"
