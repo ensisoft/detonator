@@ -55,6 +55,7 @@ namespace game
     {
     public:
         using DrawableItemType = DrawableItemClass;
+        using TextItemType = TextItemClass;
 
         enum class Flags {
             // Only pertains to editor (todo: maybe this flag should be removed)
@@ -428,6 +429,7 @@ namespace game
     public:
         using Flags = EntityNodeClass::Flags;
         using DrawableItemType = DrawableItem;
+        using TextItemType = TextItem;
 
         explicit EntityNode(std::shared_ptr<const EntityNodeClass> klass, EntityNodeAllocator* allocator = nullptr);
         explicit EntityNode(const EntityNodeClass& klass, EntityNodeAllocator* allocator = nullptr);

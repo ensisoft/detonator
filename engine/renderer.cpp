@@ -853,6 +853,9 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
         if (item->TestFlag(DrawableItemType::Flags::UpdateMaterial))
             paint_node.material->Update(dt * time_scale);
 
+        paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
+            item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
+
         if constexpr (std::is_same_v<EntityNodeType, game::EntityNode>)
         {
             if (item->HasMaterialTimeAdjustment())
@@ -963,6 +966,8 @@ template<typename EntityType, typename EntityNodeType>
 void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
                                    double time, float dt) const
 {
+
+    using TextItemType = typename EntityNodeType::TextItemType;
     const auto* text = entity_node.GetTextItem();
 
     gfx::Transform transform;
@@ -973,6 +978,8 @@ void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeTyp
     if (text && paint_node.material)
     {
         paint_node.material->Update(dt);
+        paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
+            text->TestFlag(TextItemType::Flags::PP_EnableBloom));
     }
     if (text && paint_node.drawable)
     {
@@ -1057,6 +1064,8 @@ void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transf
 template<typename EntityType, typename EntityNodeType>
 void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const
 {
+    using DrawableItemType = typename EntityNodeType::DrawableItemType;
+
     if (const auto* item = entity_node.GetDrawable())
     {
         const auto& material = item->GetMaterialId();
@@ -1071,6 +1080,11 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
             if (!paint_node.material)
                 WARN("No such material class found. [material='%1', entity='%2', node='%3']", material,
                      entity.GetName(), entity_node.GetName());
+            if (paint_node.material)
+            {
+                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
+                    item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
+            }
         }
         if (paint_node.drawableId != drawable)
         {
@@ -1119,6 +1133,8 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
 template<typename EntityType, typename EntityNodeType>
 void Renderer::CreateTextResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const
 {
+    using TextItemType = typename EntityNodeType::TextItemType;
+
     if (const auto* text = entity_node.GetTextItem())
     {
         const auto& node_size = entity_node.GetSize();
@@ -1166,6 +1182,8 @@ void Renderer::CreateTextResources(const EntityType& entity, const EntityNodeTyp
             mat->SetColor(text->GetTextColor());
             paint_node.material = std::move(mat);
             paint_node.materialId = material;
+            paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
+                text->TestFlag(TextItemType::Flags::PP_EnableBloom));
         }
         if (!paint_node.drawable)
         {
