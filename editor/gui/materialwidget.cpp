@@ -1029,29 +1029,54 @@ void MaterialWidget::on_tileTopPadding_valueChanged(int)
 {
     SetMaterialProperties();
 }
-
 void MaterialWidget::on_activeMap_currentIndexChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_alphaCutoff_valueChanged(bool, double value)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_baseColor_colorChanged(QColor color)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_particleAction_currentIndexChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_spriteFps_valueChanged(double)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_chkBlendPreMulAlpha_stateChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_chkStaticInstance_stateChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
+void MaterialWidget::on_chkEnableBloom_stateChanged(int)
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_chkBlendFrames_stateChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_chkLooping_stateChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_spriteCols_valueChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_spriteRows_valueChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_spriteSheet_toggled(bool)
 {
     SetMaterialProperties();
@@ -1075,55 +1100,105 @@ void MaterialWidget::on_spriteDuration_valueChanged(double)
     }
 }
 void MaterialWidget::on_colorMap0_colorChanged(QColor)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_colorMap1_colorChanged(QColor)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_colorMap2_colorChanged(QColor)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_colorMap3_colorChanged(QColor)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_gradientOffsetX_valueChanged(int value)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_gradientOffsetY_valueChanged(int value)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_textureScaleX_valueChanged(double)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_textureScaleY_valueChanged(double)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_textureRotation_valueChanged(double)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_textureVelocityX_valueChanged(double)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_textureVelocityY_valueChanged(double)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_textureVelocityZ_valueChanged(double)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_textureMinFilter_currentIndexChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_textureMagFilter_currentIndexChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_textureWrapX_currentIndexChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_textureWrapY_currentIndexChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_rectX_valueChanged(double value)
-{ SetTextureRect(); }
+{
+    SetTextureRect();
+}
 void MaterialWidget::on_rectY_valueChanged(double value)
-{ SetTextureRect(); }
+{
+    SetTextureRect();
+}
 void MaterialWidget::on_rectW_valueChanged(double value)
-{ SetTextureRect(); }
+{
+    SetTextureRect();
+}
 void MaterialWidget::on_rectH_valueChanged(double value)
-{ SetTextureRect(); }
+{
+    SetTextureRect();
+}
 void MaterialWidget::on_chkAllowPacking_stateChanged(int)
-{ SetTextureFlags(); }
+{
+    SetTextureFlags();
+}
 void MaterialWidget::on_chkAllowResizing_stateChanged(int)
-{ SetTextureFlags(); }
+{
+    SetTextureFlags();
+}
 void MaterialWidget::on_chkPreMulAlpha_stateChanged(int)
-{ SetTextureFlags(); }
+{
+    SetTextureFlags();
+}
 void MaterialWidget::on_chkBlurTexture_stateChanged(int)
-{ SetTextureFlags(); }
+{
+    SetTextureFlags();
+}
 void MaterialWidget::on_chkDetectEdges_stateChanged(int)
-{ SetTextureFlags(); }
+{
+    SetTextureFlags();
+}
 void MaterialWidget::on_cmbColorSpace_currentIndexChanged(int)
 {
     if (auto* source = GetSelectedTextureSrc())
@@ -1475,6 +1550,9 @@ void MaterialWidget::CreateCustomShaderStub()
 #version 300 es
 
 // @uniforms
+
+// bitset of material flags.
+uniform uint kMaterialFlags;
 
 // material time in seconds.
 uniform float kTime;
@@ -1939,6 +2017,7 @@ void MaterialWidget::SetMaterialProperties()
 {
     mMaterial->SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, GetValue(mUI.chkBlendPreMulAlpha));
     mMaterial->SetStatic(GetValue(mUI.chkStaticInstance));
+    mMaterial->SetFlag(gfx::MaterialClass::Flags::EnableBloom, GetValue(mUI.chkEnableBloom));
     mMaterial->SetSurfaceType(GetValue(mUI.surfaceType));
     mMaterial->SetParticleEffect(GetValue(mUI.particleAction));
     mMaterial->SetTextureMinFilter(GetValue(mUI.textureMinFilter));
@@ -2198,6 +2277,7 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.surfaceType,          mMaterial->GetSurfaceType());
     SetValue(mUI.shaderFile,           mMaterial->GetShaderUri());
     SetValue(mUI.chkStaticInstance,    mMaterial->IsStatic());
+    SetValue(mUI.chkEnableBloom, mMaterial->TestFlag(gfx::MaterialClass::Flags::EnableBloom));
     SetValue(mUI.chkBlendPreMulAlpha,  mMaterial->PremultipliedAlpha());
     SetValue(mUI.chkBlendFrames,       mMaterial->BlendFrames());
 
