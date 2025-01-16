@@ -3340,7 +3340,7 @@ public:
         fog.end_dist   = 100.0f;
         fog.density    = 3.0f;
 
-        program.EnableFeature(gfx::GenericShaderProgram::Features::BasicFog, true);
+        program.EnableFeature(gfx::GenericShaderProgram::ShadingFeatures::BasicFog, true);
         program.SetFog(fog);
 
         for (int i = 0; i<5; ++i)

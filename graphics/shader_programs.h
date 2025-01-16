@@ -46,7 +46,7 @@ namespace gfx
         BasicLightProgram() noexcept
           : GenericShaderProgram("BasicLightProgram", RenderPass::ColorPass)
         {
-            EnableFeature(Features::BasicLight, true);
+            EnableFeature(ShadingFeatures::BasicLight, true);
         }
     private:
     };

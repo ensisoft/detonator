@@ -29,8 +29,10 @@ namespace gfx
 std::string GenericShaderProgram::GetShaderId(const Material& material, const Material::Environment& env) const
 {
     std::string id;
-    id += TestFeature(Features::BasicLight) ? "Lit" : "";
-    id += TestFeature(Features::BasicFog) ? "Fog" : "";
+    id += TestFeature(ShadingFeatures::BasicLight) ? "Lit" : "";
+    id += TestFeature(ShadingFeatures::BasicFog) ? "Fog" : "";
+    id += TestFeature(OutputFeatures::WriteBloomTarget) ? "Bloom" : "";
+    id += TestFeature(OutputFeatures::WriteColorTarget) ? "Color" : "";
     id += "Material:";
     id += material.GetShaderId(env);
     return id;
@@ -38,8 +40,10 @@ std::string GenericShaderProgram::GetShaderId(const Material& material, const Ma
 std::string GenericShaderProgram::GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const
 {
     std::string id;
-    id += TestFeature(Features::BasicLight) ? "Lit" : "";
-    id += TestFeature(Features::BasicFog) ? "Fog" : "";
+    id += TestFeature(ShadingFeatures::BasicLight) ? "Lit" : "";
+    id += TestFeature(ShadingFeatures::BasicFog) ? "Fog" : "";
+    id += TestFeature(OutputFeatures::WriteBloomTarget) ? "Bloom" : "";
+    id += TestFeature(OutputFeatures::WriteColorTarget) ? "Color" : "";
     id += "Drawable:";
     id += drawable.GetShaderId(env);
     return id;
@@ -88,17 +92,26 @@ ShaderSource GenericShaderProgram::GetShader(const Material& material, const Mat
     source.AddPreprocessorDefinition("BASIC_FOG_MODE_EXP1", static_cast<unsigned>(FogMode::Exponential1));
     source.AddPreprocessorDefinition("BASIC_FOG_MODE_EXP2", static_cast<unsigned>(FogMode::Exponential2));
 
-    if (TestFeature(Features::BasicLight))
+    if (TestFeature(ShadingFeatures::BasicLight))
     {
         source.AddPreprocessorDefinition("ENABLE_BASIC_LIGHT");
         source.LoadRawSource(basic_light);
         source.AddShaderSourceUri("shaders/basic_light.glsl");
     }
-    if (TestFeature(Features::BasicFog))
+    if (TestFeature(ShadingFeatures::BasicFog))
     {
         source.AddPreprocessorDefinition("ENABLE_BASIC_FOG");
         source.LoadRawSource(basic_fog);
         source.AddShaderSourceUri("shaders/basic_fog.glsl");
+    }
+
+    if (TestFeature(OutputFeatures::WriteBloomTarget))
+    {
+        source.AddPreprocessorDefinition("ENABLE_BLOOM_OUT");
+    }
+    if (TestFeature(OutputFeatures::WriteColorTarget))
+    {
+        source.AddPreprocessorDefinition("ENABLE_COLOR_OUT");
     }
 
     source.LoadRawSource(utility_func);
@@ -126,11 +139,11 @@ ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Dra
         ERROR("Non supported GLSL version. Version must be 300 es. [shader='%1']", source.GetShaderName());
         return {};
     }
-    if (TestFeature(Features::BasicLight))
+    if (TestFeature(ShadingFeatures::BasicLight))
     {
         source.AddPreprocessorDefinition("ENABLE_BASIC_LIGHT");
     }
-    if (TestFeature(Features::BasicFog))
+    if (TestFeature(ShadingFeatures::BasicFog))
     {
         source.AddPreprocessorDefinition("ENABLE_BASIC_FOG");
     }
@@ -142,10 +155,16 @@ ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Dra
 
 void GenericShaderProgram::ApplyDynamicState(const Device& device, ProgramState& program) const
 {
-    if (TestFeature(Features::BasicLight))
+    if (TestFeature(ShadingFeatures::BasicLight))
         ApplyLightState(device, program);
-    if (TestFeature(Features::BasicFog))
+    if (TestFeature(ShadingFeatures::BasicFog))
         ApplyFogState(device, program);
+
+    if (TestFeature(OutputFeatures::WriteBloomTarget))
+    {
+        program.SetUniform("kBloomThreshold", mBloomThreshold);
+        program.SetUniform("kBloomColor", mBloomColor);
+    }
 }
 
 void GenericShaderProgram::ApplyLightState(const Device& device, ProgramState& program) const

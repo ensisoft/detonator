@@ -77,8 +77,12 @@ namespace gfx
     public:
         static constexpr auto MAX_LIGHTS = 10;
 
-        enum class Features {
+        enum class ShadingFeatures {
             BasicLight, BasicFog
+        };
+
+        enum class OutputFeatures {
+            WriteColorTarget, WriteBloomTarget
         };
 
         enum class LightType : int32_t {
@@ -118,10 +122,16 @@ namespace gfx
             FogMode mode = FogMode::Linear;
         };
 
-        GenericShaderProgram() = default;
+        GenericShaderProgram() noexcept
+        {
+            mOutputFeatures.set(OutputFeatures::WriteColorTarget, true);
+        }
+
         explicit GenericShaderProgram(std::string name, RenderPass renderPass) noexcept
           : mName(std::move(name))
-        {}
+        {
+            mOutputFeatures.set(OutputFeatures::WriteColorTarget, true);
+        }
 
         inline auto GetLightCount() const noexcept
         { return mLights.size(); }
@@ -144,16 +154,27 @@ namespace gfx
         inline void SetFog(const Fog& fog) noexcept
         { mFog = fog; }
 
+        inline void SetBloomColor(const gfx::Color4f& color) noexcept
+        { mBloomColor = color; }
+        inline void SetBloomThreshold(float threshold) noexcept
+        { mBloomThreshold = threshold; }
+
         inline void SetCameraCenter(glm::vec3 center) noexcept
         { mCameraCenter = center; }
         inline void SetCameraCenter(float x, float y, float z) noexcept
         { mCameraCenter = glm::vec3 {x, y, z }; }
 
-        inline void EnableFeature(Features feature, bool on_off) noexcept
-        { mFeatures.set(feature, on_off); }
+        inline void EnableFeature(ShadingFeatures feature, bool on_off) noexcept
+        { mShadingFeatures.set(feature, on_off); }
 
-        inline bool TestFeature(Features feature) const noexcept
-        { return mFeatures.test(feature); }
+        inline void EnableFeature(OutputFeatures features, bool on_off) noexcept
+        { mOutputFeatures.set(features, on_off); }
+
+        inline bool TestFeature(ShadingFeatures feature) const noexcept
+        { return mShadingFeatures.test(feature); }
+
+        inline bool TestFeature(OutputFeatures feature) const noexcept
+        { return mOutputFeatures.test(feature); }
 
         std::string GetName() const override
         { return mName; }
@@ -174,7 +195,10 @@ namespace gfx
         std::string mName;
         std::vector<Light> mLights;
         glm::vec3 mCameraCenter = {0.0f, 0.0f, 0.0f};
-        base::bitflag<Features> mFeatures;
+        gfx::Color4f mBloomColor;
+        float mBloomThreshold = 0.0f;
+        base::bitflag<ShadingFeatures> mShadingFeatures;
+        base::bitflag<OutputFeatures> mOutputFeatures;
         RenderPass mRenderPass = RenderPass::ColorPass;
         Fog mFog;
     };
