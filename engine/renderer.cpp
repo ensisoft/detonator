@@ -124,7 +124,10 @@ void Renderer::UpdateRendererState(const game::SceneClass& scene, const game::Ti
     {
         const auto* placement = node.placement;
         // When we're drawing SceneClass object entity is shared_ptr<const EntityClass>
+        // the entity class reference could be nullptr if for example the class was deleted.
         const auto& entity = node.entity;
+        if (entity == nullptr)
+            continue;
 
         gfx::Transform transform(node.node_to_scene);
         CreatePaintNodes<game::EntityClass, game::EntityNodeClass>(*entity, transform, placement->GetId());
