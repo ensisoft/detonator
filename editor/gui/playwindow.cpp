@@ -441,72 +441,72 @@ private:
 class PlayWindow::ClassLibrary : public engine::ClassLibrary
 {
 public:
-    ClassLibrary(const app::Workspace& workspace)
+    explicit ClassLibrary(const app::Workspace& workspace) noexcept
       : mWorkspace(workspace)
     {}
-    virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const override
+    ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const override
     {
         return mWorkspace.FindAudioGraphClassById(id);
     }
-    virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override
+    ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override
     {
         return mWorkspace.FindAudioGraphClassByName(name);
     }
-    virtual ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override
+    ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override
     {
-        if (name == "_ui_preview_")
+        if (name == "_ui_preview_" || (mUIPreview && mUIPreview->GetName() == name))
             return mUIPreview;
 
         return mWorkspace.FindUIByName(name);
     }
-    virtual ClassHandle<const uik::Window> FindUIById(const std::string& id) const override
+    ClassHandle<const uik::Window> FindUIById(const std::string& id) const override
     {
-        if (id == "_ui_preview_")
+        if (id == "_ui_preview_" || (mUIPreview && mUIPreview->GetId() == id))
             return mUIPreview;
 
         return mWorkspace.FindUIById(id);
     }
-    virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override
+    ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override
     {
         return mWorkspace.FindMaterialClassByName(name);
     }
-    virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override
+    ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override
     {
         return mWorkspace.FindMaterialClassById(id);
     }
-    virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override
+    ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override
     {
         return mWorkspace.FindDrawableClassById(id);
     }
-    virtual ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override
+    ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override
     {
-        if (name == "_entity_preview_" | name == mEntityPreview->GetName())
+        if (name == "_entity_preview_" || (mEntityPreview && mEntityPreview->GetName() == name))
             return mEntityPreview;
         return mWorkspace.FindEntityClassByName(name);
     }
-    virtual ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override
+    ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override
     {
-        if (id == "_entity_preview_" || id == mEntityPreview->GetId())
+        if (id == "_entity_preview_" || (mEntityPreview && mEntityPreview->GetId() == id))
             return mEntityPreview;
         return mWorkspace.FindEntityClassById(id);
     }
-    virtual ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override
+    ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override
     {
-        if (name == "_entity_preview_scene_")
+        if (name == "_entity_preview_scene_" || (mEntityPreviewScene && mEntityPreviewScene->GetName() == name))
             return mEntityPreviewScene;
         else if (name == "_scene_preview_")
             return mScenePreview;
         return mWorkspace.FindSceneClassByName(name);
     }
-    virtual ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override
+    ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override
     {
-        if (id == "_entity_preview_scene_")
+        if (id == "_entity_preview_scene_" || (mEntityPreviewScene && mEntityPreviewScene->GetId() == id))
             return mEntityPreviewScene;
         else if (id == "_scene_preview_")
             return mScenePreview;
         return mWorkspace.FindSceneClassById(id);
     }
-    virtual ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override
+    ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override
     {
         return mWorkspace.FindTilemapClassById(id);
     }
