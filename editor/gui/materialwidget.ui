@@ -243,6 +243,13 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QCheckBox" name="chkEnableBloom">
+               <property name="text">
+                <string>Enable bloom</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -2586,6 +2593,7 @@
   <tabstop>chkBlendPreMulAlpha</tabstop>
   <tabstop>chkBlendFrames</tabstop>
   <tabstop>chkStaticInstance</tabstop>
+  <tabstop>chkEnableBloom</tabstop>
   <tabstop>alphaCutoff</tabstop>
   <tabstop>baseColor</tabstop>
   <tabstop>tileWidth</tabstop>
