@@ -469,7 +469,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
         const auto& resource = mWorkspace->GetUserDefinedResource(i);
         mResourceCache->AddResource(resource.GetIdUtf8(), resource.Copy());
         dlg.EnqueueStepIncrement();
-        mApplication.processEvents();
+        QApplication::processEvents();
     }
 
     gfx::SetResourceLoader(mWorkspace.get());
@@ -779,7 +779,7 @@ void MainWindow::CloseWorkspace()
             mThreadPool->ExecuteMainThread();
             mResourceCache->TickPendingWork();
 
-            mApplication.processEvents();
+            QApplication::processEvents();
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
@@ -787,7 +787,7 @@ void MainWindow::CloseWorkspace()
         {
             mThreadPool->ExecuteMainThread();
 
-            mApplication.processEvents();
+            QApplication::processEvents();
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
@@ -3163,7 +3163,7 @@ void MainWindow::LaunchGame(bool clean)
                 mThreadPool->ExecuteMainThread();
                 mResourceCache->TickPendingWork();
 
-                mApplication.processEvents();
+                QApplication::processEvents();
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
         }

@@ -40,7 +40,7 @@ namespace app
     class ResourceCache
     {
     public:
-        ResourceCache(base::ThreadPool* threadpool);
+        explicit ResourceCache(base::ThreadPool* threadpool);
        ~ResourceCache();
 
         void AddResource(std::string id, std::unique_ptr<Resource> copy);
