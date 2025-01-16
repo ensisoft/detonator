@@ -33,6 +33,18 @@ namespace gfx
         explicit MaterialInstance(const MaterialClass& klass, double time = 0.0);
         explicit MaterialInstance(MaterialClass&& klass, double time = 0.0) noexcept;
 
+        void SetFlag(Flags flag, bool on_off) noexcept override
+        {
+            if (on_off)
+                mFlags |= static_cast<uint32_t>(flag);
+            else mFlags &= ~static_cast<uint32_t>(flag);
+        }
+
+        bool TestFlag(Flags flag) const noexcept override
+        {
+            return (mFlags & static_cast<uint32_t>(flag)) != 0;
+        }
+
         // Apply the material properties to the given program object and set the rasterizer state.
         bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const override;
         void ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const override;
@@ -63,8 +75,11 @@ namespace gfx
         inline bool HasError() const noexcept
         { return mError; }
     private:
+        void InitFlags() noexcept;
+    private:
         // This is the "class" object for this material type.
         std::shared_ptr<const MaterialClass> mClass;
+        std::uint32_t mFlags = 0;
         // Current runtime for this material instance.
         double mRuntime = 0.0f;
         // material properties (uniforms) specific to this instance.

@@ -23,19 +23,25 @@
 namespace gfx
 {
 
-    // Create new material instance based on the given material class.
+ // Create new material instance based on the given material class.
 MaterialInstance::MaterialInstance(std::shared_ptr<const MaterialClass> klass, double time)
   : mClass(std::move(klass))
   , mRuntime(time)
-{}
+{
+    InitFlags();
+}
 MaterialInstance::MaterialInstance(const MaterialClass& klass, double time)
   : mClass(klass.Copy())
   , mRuntime(time)
-{}
+{
+    InitFlags();
+}
 MaterialInstance::MaterialInstance(MaterialClass&& klass, double time) noexcept
   : mClass(std::make_shared<MaterialClass>(std::move(klass)))
   , mRuntime(time)
-{}
+{
+    InitFlags();
+}
 
 bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const
 {
@@ -47,6 +53,7 @@ bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device,
     state.material_time  = mRuntime;
     state.uniforms       = &mUniforms;
     state.first_render   = mFirstRender;
+    state.flags          = mFlags;;
 
     mFirstRender = false;
 
@@ -111,6 +118,11 @@ ShaderSource MaterialInstance::GetShader(const Environment& env, const Device& d
     state.material_time  = mRuntime;
     state.uniforms       = &mUniforms;
     return mClass->GetShader(state, device);
+}
+
+void MaterialInstance::InitFlags() noexcept
+{
+    SetFlag(Flags::EnableBloom, mClass->TestFlag(MaterialClass::Flags::EnableBloom));
 }
 
 

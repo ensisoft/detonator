@@ -8,6 +8,7 @@ R"CPP_RAW_STRING(//"
 // the monotonic material instance time in seconds.
 uniform float kTime;
 
+uniform uint kMaterialFlags;
 // current surface type value.
 uniform uint kSurfaceType;
 // particle alpha mask
@@ -138,6 +139,7 @@ void FragmentShaderMain() {
     MixColors(alpha);
 #endif
 
+    fs_out.flags = kMaterialFlags;
 }
 
 )CPP_RAW_STRING"

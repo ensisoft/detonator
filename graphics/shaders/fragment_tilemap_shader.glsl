@@ -12,6 +12,8 @@ precision highp float;
 
 // @uniforms
 
+uniform uint kMaterialFlags;
+
 // Tilemap texture
 uniform sampler2D kTexture;
 
@@ -118,6 +120,7 @@ void FragmentShaderMain() {
         discard;
 
     fs_out.color = color;
+    fs_out.flags = kMaterialFlags;
 }
 
 )CPP_RAW_STRING"

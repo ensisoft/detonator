@@ -34,6 +34,7 @@
 #include "graphics/texture_text_buffer_source.h"
 #include "graphics/packer.h"
 #include "graphics/loader.h"
+#include "graphics/enum.h"
 
 namespace {
     enum class BasicLightMaterialMap : int {
@@ -49,6 +50,7 @@ MaterialClass::MaterialClass(Type type, std::string id)
   , mType(type)
 {
     mFlags.set(Flags::BlendFrames, true);
+    mFlags.set(Flags::EnableBloom, true);
 }
 
 MaterialClass::MaterialClass(const MaterialClass& other, bool copy)
@@ -278,6 +280,8 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     source.AddPreprocessorDefinition("TEXTURE_WRAP_REPEAT", static_cast<int>(TextureWrapping::Repeat));
     source.AddPreprocessorDefinition("TEXTURE_WRAP_MIRROR", static_cast<int>(TextureWrapping::Mirror));
 
+    source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_BLOOM", static_cast<unsigned>(MaterialFlags::EnableBloom));
+
     if (IsBuiltIn())
     {
         source.AddPreprocessorDefinition("PARTICLE_EFFECT_NONE",   static_cast<int>(ParticleEffect::None));
@@ -370,6 +374,7 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     program.SetUniform("kTime", (float)state.material_time);
     program.SetUniform("kEditingMode", (int)state.editing_mode);
     program.SetUniform("kSurfaceType", static_cast<unsigned>(mSurfaceType));
+    program.SetUniform("kMaterialFlags", static_cast<unsigned>(state.flags));
 
     // for the future... for different render passes we got two options
     // either the single shader implements the different render pass

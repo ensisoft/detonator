@@ -8,6 +8,8 @@ R"CPP_RAW_STRING(//"
 precision highp float;
 
 // @uniforms
+uniform uint kMaterialFlags;
+
 // The gradient top left color value.
 uniform vec4 kColor0;
 // The gradient top right color value.
@@ -45,6 +47,7 @@ void FragmentShaderMain() {
 #ifdef GEOMETRY_IS_PARTICLES
   fs_out.color.a *= vParticleAlpha;
 #endif
+  fs_out.flags = kMaterialFlags;
 }
 
 )CPP_RAW_STRING"

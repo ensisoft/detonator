@@ -9,6 +9,8 @@ precision highp float;
 
 // @uniforms
 
+uniform uint kMaterialFlags;
+
 // Texture sampler2 for the two sprite animation frames
 // These may or may not be bound to same texture object
 // depending on whether the frames are in separate textures
@@ -128,6 +130,7 @@ void FragmentShaderMain() {
         discard;
 
     fs_out.color = color;
+    fs_out.flags = kMaterialFlags;
 }
 
 )CPP_RAW_STRING"
