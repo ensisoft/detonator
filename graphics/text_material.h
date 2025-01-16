@@ -32,8 +32,21 @@ namespace gfx
     class TextMaterial : public Material
     {
     public:
-        TextMaterial(const TextBuffer& text);
-        TextMaterial(TextBuffer&& text);
+        explicit TextMaterial(const TextBuffer& text);
+        explicit TextMaterial(TextBuffer&& text) noexcept;
+
+        void SetFlag(Flags flag, bool on_off) noexcept override
+        {
+            if (on_off)
+                mFlags |= static_cast<uint32_t>(flag);
+            else mFlags &= ~static_cast<uint32_t>(flag);
+        }
+
+        bool TestFlag(Flags flag) const noexcept override
+        {
+            return (mFlags & static_cast<uint32_t>(flag)) != 0;
+        }
+
         bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const override;
         void ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
@@ -58,6 +71,7 @@ namespace gfx
         TextBuffer mText;
         Color4f mColor = Color::White;
         bool mPointSampling = true;
+        std::int32_t mFlags = 0;
     };
 
     TextMaterial CreateMaterialFromText(const std::string& text,
