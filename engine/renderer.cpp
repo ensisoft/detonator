@@ -353,18 +353,24 @@ void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook*
         const auto& node = entity.GetNode(i);
 
         bool did_paint = false;
-        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+        if (node.HasDrawable())
         {
-            CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, packets, hook);
-            paint->visited = true;
-            did_paint = true;
+            if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+            {
+                CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, packets, hook);
+                paint->visited = true;
+                did_paint = true;
+            }
         }
 
-        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+        if (node.HasTextItem())
         {
-            CreateTextDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, packets, hook);
-            paint->visited = true;
-            did_paint = true;
+            if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+            {
+                CreateTextDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, packets, hook);
+                paint->visited = true;
+                did_paint = true;
+            }
         }
         if (hook && !did_paint)
         {
