@@ -35,7 +35,7 @@
 #include "base/utility.h"
 #include "base/trace.h"
 #include "base/threadpool.h"
-#include "engine/main/interface.h"
+#include "engine/library/library.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/dlgeventlog.h"
 #include "wdk/events.h"

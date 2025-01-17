@@ -57,7 +57,7 @@
 #include "base/trace.h"
 #include "data/json.h"
 #include "device/device.h"
-#include "engine/main/interface.h"
+#include "engine/library/library.h"
 #include "engine/classlib.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/context.h"
@@ -66,7 +66,6 @@
 #include "wdk/events.h"
 #include "wdk/system.h"
 #include "wdk/videomode.h"
-#include "interface.h"
 
 #include "git.h"
 

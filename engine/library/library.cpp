@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#define GAMESTUDIO_GAMELIB_IMPLEMENTATION
+#define ENGINE_DLL_IMPLEMENTATION
+
 #include "base/logging.h"
 #include "base/threadpool.h"
-#include "engine/main/interface.h"
+#include "engine/library/library.h"
 #include "engine/loader.h"
 
 // helper stuff for dependency management for now.
@@ -29,17 +30,17 @@ namespace interop {
 }
 
 extern "C" {
-GAMESTUDIO_EXPORT void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out)
+ENGINE_DLL_EXPORT void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out)
 {
     out->ContentLoader  = engine::JsonFileClassLoader::Create();
     out->ResourceLoader = engine::FileResourceLoader::Create();
 }
 
-GAMESTUDIO_EXPORT void Gamestudio_CreateRuntime(interop::IRuntime** factory)
+ENGINE_DLL_EXPORT void Gamestudio_CreateRuntime(interop::IRuntime** factory)
 {
     class Runtime : public interop::IRuntime {
     public:
-        virtual ~Runtime()
+       ~Runtime() override
         {
             DEBUG("Delete library binary interop runtime.");
             base::SetGlobalThreadPool(nullptr);
@@ -49,48 +50,48 @@ GAMESTUDIO_EXPORT void Gamestudio_CreateRuntime(interop::IRuntime** factory)
             DEBUG("Created library binary interop runtime.");
             base::SetGlobalThreadPool(&mThreadPool);
         }
-        virtual void AddRealThread(size_t threadId) override
+        void AddRealThread(size_t threadId) override
         {
             mThreadPool.AddRealThread(threadId);
         }
-        virtual void AddMainThread() override
+        void AddMainThread() override
         {
             mThreadPool.AddMainThread();
         }
-        virtual void ShutdownThreads() override
+        void ShutdownThreads() override
         {
             mThreadPool.Shutdown();
         }
-        virtual void ExecuteMainThread() override
+        void ExecuteMainThread() override
         {
             mThreadPool.ExecuteMainThread();
         }
 
-        virtual void SetGlobalLogger(base::Logger* logger) override
+        void SetGlobalLogger(base::Logger* logger) override
         {
             base::SetGlobalLog(logger);
         }
-        virtual void EnableLogEvent(base::LogEvent event, bool on_off) override
+        void EnableLogEvent(base::LogEvent event, bool on_off) override
         {
             base::EnableLogEvent(event, on_off);
         }
-        virtual void SetThisThreadTracer(base::TraceLog* tracer) override
+        void SetThisThreadTracer(base::TraceLog* tracer) override
         {
             base::SetThreadTrace(tracer);
         }
 
-        virtual void SetGlobalTraceWriter(base::TraceWriter* writer) override
+        void SetGlobalTraceWriter(base::TraceWriter* writer) override
         {
             mThreadPool.SetThreadTraceWriter(writer);
         }
-        virtual void EnableTracing(bool on_off) override
+        void EnableTracing(bool on_off) override
         {
             base::EnableTracing(on_off);
 
             mThreadPool.EnableThreadTrace(on_off);
         }
 
-        virtual void Release() override
+        void Release() override
         {
             delete this;
         }

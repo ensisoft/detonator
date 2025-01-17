@@ -29,8 +29,9 @@
 #include "data/json.h"
 #include "wdk/events.h"
 #include "device/device.h"
-#include "engine/main/interface.h"
 #include "engine/loader.h"
+#include "engine/engine.h"
+#include "engine/library/library.h"
 
 // mkdir build
 // cd build
