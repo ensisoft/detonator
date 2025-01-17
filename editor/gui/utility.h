@@ -431,7 +431,7 @@ inline void SetValue(QProgressBar* bar, int value)
     QSignalBlocker s(bar);
     bar->setValue(value);
 }
-inline void SetValue(QProgressBar* bar, QString fmt)
+inline void SetValue(QProgressBar* bar, const app::AnyString& fmt)
 {
     QSignalBlocker s(bar);
     bar->setTextVisible(true);

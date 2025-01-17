@@ -56,6 +56,11 @@ namespace app
 
         void ClearCache();
 
+        base::TaskHandle GetFirstTask() const
+        {
+            return mPendingWork.front();
+        }
+
     private:
         class AddResourceTask;
         class DelResourceTask;

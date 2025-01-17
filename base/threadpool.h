@@ -200,6 +200,15 @@ namespace base
             return IsValid();
         }
 
+        inline std::string GetTaskDescription() const noexcept
+        {
+            return mTask->GetTaskDescription();
+        }
+        inline std::string GetTaskName() const noexcept
+        {
+            return mTask->GetTaskName();
+        }
+
     private:
         std::shared_ptr<ThreadTask> mTask;
         std::size_t mThreadId = 0;

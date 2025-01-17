@@ -53,6 +53,28 @@
         </spacer>
        </item>
        <item>
+        <widget class="QProgressBar" name="worker">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="invertedAppearance">
+          <bool>false</bool>
+         </property>
+         <property name="format">
+          <string>%p%</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="lblVBO">
          <property name="enabled">
           <bool>false</bool>
@@ -179,7 +201,7 @@
      <x>0</x>
      <y>0</y>
      <width>832</width>
-     <height>30</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTemp">
