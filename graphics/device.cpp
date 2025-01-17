@@ -25,12 +25,12 @@
 #include "graphics/device.h"
 #include "graphics/texture.h"
 #include "graphics/drawcmd.h"
-#include "graphics/device_texture.cpp"
-#include "graphics/device_geometry.cpp"
-#include "graphics/device_shader.cpp"
-#include "graphics/device_framebuffer.cpp"
-#include "graphics/device_program.cpp"
-#include "graphics/device_instance.cpp"
+#include "graphics/device_texture.h"
+#include "graphics/device_geometry.h"
+#include "graphics/device_shader.h"
+#include "graphics/device_framebuffer.h"
+#include "graphics/device_program.h"
+#include "graphics/device_instance.h"
 
 namespace {
 class GraphicsDevice : public gfx::Device {

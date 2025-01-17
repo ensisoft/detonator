@@ -192,96 +192,110 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTestThread.wasm"      DESTINATION
 
 add_executable(GameEngine
     main.cpp
-    ../audio/loader.cpp
-    ../audio/player.cpp
     ../audio/element.cpp
     ../audio/format.cpp
     ../audio/graph.cpp
+    ../audio/loader.cpp
     ../audio/mpg123.cpp
-    ../audio/sndfile.cpp
     ../audio/openal.cpp
+    ../audio/player.cpp
+    ../audio/proxy.cpp
     ../audio/sdl.cpp
+    ../audio/sndfile.cpp
     ../audio/sokol.cpp
     ../audio/source.cpp
-    ../audio/proxy.cpp
     ../base/assert.cpp
-    ../base/logging.h
-    ../base/logging.cpp
-    ../base/utility.cpp
     ../base/format.cpp
-    ../base/trace.cpp
-    ../base/threadpool.cpp
     ../base/json.cpp
+    ../base/logging.cpp
+    ../base/logging.h
+    ../base/threadpool.cpp
+    ../base/trace.cpp
+    ../base/utility.cpp
     ../data/json.cpp
     ../data/io.cpp
     ../game/animation.cpp
     ../game/animator.cpp
-    ../game/transform_animator.cpp
+    ../game/entity.cpp
+    ../game/entity_node.cpp
+    ../game/entity_node_drawable_item.cpp
+    ../game/entity_node_fixture.cpp
+    ../game/entity_node_light.cpp
+    ../game/entity_node_rigid_body.cpp
+    ../game/entity_node_rigid_body_joint.cpp
+    ../game/entity_node_spatial_node.cpp
+    ../game/entity_node_text_item.cpp
+    ../game/entity_node_tilemap_node.cpp
+    ../game/entity_node_transformer.cpp
+    ../game/entity_state.cpp
+    ../game/entity_state_controller.cpp
     ../game/kinematic_animator.cpp
     ../game/material_animator.cpp
     ../game/property_animator.cpp
-    ../game/entity.cpp
-    ../game/entity_node.cpp
-    ../game/entity_state.cpp
-    ../game/entity_state_controller.cpp
-    ../game/entity_node_transformer.cpp
-    ../game/entity_node_rigid_body.cpp
-    ../game/entity_node_rigid_body_joint.cpp
-    ../game/entity_node_drawable_item.cpp
-    ../game/entity_node_text_item.cpp
-    ../game/entity_node_spatial_node.cpp
-    ../game/entity_node_fixture.cpp
-    ../game/entity_node_tilemap_node.cpp
-    ../game/entity_node_light.cpp
     ../game/scene.cpp
     ../game/scriptvar.cpp
     ../game/tilemap.cpp
-    ../engine/camera.cpp
+    ../game/transform_animator.cpp
     ../engine/audio.cpp
+    ../engine/camera.cpp
     ../engine/engine.cpp
+    ../engine/graphics.cpp
     ../engine/loader.cpp
-    ../engine/lua_game_runtime.cpp
-    ../engine/lua_util.cpp
     ../engine/lua_base.cpp
     ../engine/lua_data.cpp
-    ../engine/lua_glm.cpp
-    ../engine/lua_wdk.cpp
-    ../engine/lua_uik.cpp
-    ../engine/lua_gfx.cpp
     ../engine/lua_game.cpp
+    ../engine/lua_game_runtime.cpp
+    ../engine/lua_gfx.cpp
+    ../engine/lua_glm.cpp
+    ../engine/lua_uik.cpp
+    ../engine/lua_util.cpp
+    ../engine/lua_wdk.cpp
     ../engine/physics.cpp
     ../engine/renderer.cpp
     ../engine/state.cpp
     ../engine/ui.cpp
-    ../engine/graphics.cpp
     ../device/opengles.cpp
-    ../graphics/device.cpp
+    ../device/vertex.cpp
     ../graphics/algo.cpp
-    ../graphics/generic_shader_program.cpp
-    ../graphics/geometry.cpp
-    ../graphics/shader_program.cpp
-    ../graphics/shader_source.cpp
-    ../graphics/painter.cpp
-    ../graphics/material.cpp
-    ../graphics/texture_map.cpp
-    ../graphics/texture_texture_source.cpp
-    ../graphics/texture_file_source.cpp
-    ../graphics/texture_bitmap_buffer_source.cpp
-    ../graphics/texture_bitmap_generator_source.cpp
-    ../graphics/texture_text_buffer_source.cpp
-    ../graphics/text_material.cpp
-    ../graphics/text_buffer.cpp
-    ../graphics/text_font.cpp
-    ../graphics/material_class.cpp
-    ../graphics/material_instance.cpp
-    ../graphics/drawable.cpp
-    ../graphics/image.cpp
-    ../graphics/loader.cpp
-    ../graphics/drawing.cpp
-    ../graphics/drawcmd.cpp
     ../graphics/bitmap.cpp
     ../graphics/bitmap_noise.cpp
+    ../graphics/debug_drawable.cpp
+    ../graphics/device.cpp
+    ../graphics/device_framebuffer.cpp
+    ../graphics/device_geometry.cpp
+    ../graphics/device_instance.cpp
+    ../graphics/device_program.cpp
+    ../graphics/device_shader.cpp
+    ../graphics/device_texture.cpp
+    ../graphics/drawable.cpp
+    ../graphics/drawcmd.cpp
+    ../graphics/drawing.cpp
+    ../graphics/generic_shader_program.cpp
+    ../graphics/geometry.cpp
+    ../graphics/guidegrid.cpp
+    ../graphics/image.cpp
+    ../graphics/linebatch.cpp
+    ../graphics/loader.cpp
+    ../graphics/material.cpp
+    ../graphics/material_class.cpp
+    ../graphics/material_instance.cpp
+    ../graphics/painter.cpp
+    ../graphics/particle_engine.cpp
     ../graphics/pixel.cpp
+    ../graphics/polygon_mesh.cpp
+    ../graphics/shader_program.cpp
+    ../graphics/shader_source.cpp
+    ../graphics/simple_shape.cpp
+    ../graphics/text_buffer.cpp
+    ../graphics/text_font.cpp
+    ../graphics/text_material.cpp
+    ../graphics/texture_bitmap_buffer_source.cpp
+    ../graphics/texture_bitmap_generator_source.cpp
+    ../graphics/texture_file_source.cpp
+    ../graphics/texture_map.cpp
+    ../graphics/texture_text_buffer_source.cpp
+    ../graphics/texture_texture_source.cpp
+    ../graphics/tilebatch.cpp
     ../graphics/utility.cpp
     ../graphics/vertex.cpp
     ../wdk/wdk/keys.cpp
