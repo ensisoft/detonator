@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "base/format.h"
 #include "graphics/tilebatch.h"
 #include "graphics/program.h"
 #include "graphics/shader_source.h"

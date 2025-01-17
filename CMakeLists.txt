@@ -205,35 +205,49 @@ add_library(DataLib
     data/io.cpp)
 add_library(GfxLib
     device/opengles.cpp
-    graphics/device.cpp
+    device/vertex.cpp
     graphics/algo.cpp
-    graphics/utility.cpp
     graphics/bitmap.cpp
     graphics/bitmap_noise.cpp
-    graphics/pixel.cpp
-    graphics/drawing.cpp
+    graphics/debug_drawable.cpp
+    graphics/device.cpp
+    graphics/device_framebuffer.cpp
+    graphics/device_geometry.cpp
+    graphics/device_instance.cpp
+    graphics/device_program.cpp
+    graphics/device_shader.cpp
+    graphics/device_texture.cpp
     graphics/drawable.cpp
-    graphics/geometry.cpp
     graphics/drawcmd.cpp
-    graphics/vertex.cpp
+    graphics/drawing.cpp
+    graphics/generic_shader_program.cpp
+    graphics/geometry.cpp
+    graphics/guidegrid.cpp
+    graphics/image.cpp
+    graphics/linebatch.cpp
+    graphics/loader.cpp
     graphics/material.cpp
-    graphics/texture_map.cpp
-    graphics/texture_texture_source.cpp
-    graphics/texture_file_source.cpp
-    graphics/texture_bitmap_buffer_source.cpp
-    graphics/texture_bitmap_generator_source.cpp
-    graphics/texture_text_buffer_source.cpp
-    graphics/text_material.cpp
-    graphics/text_buffer.cpp
-    graphics/text_font.cpp
     graphics/material_class.cpp
     graphics/material_instance.cpp
-    graphics/generic_shader_program.cpp
+    graphics/painter.cpp
+    graphics/particle_engine.cpp
+    graphics/pixel.cpp
+    graphics/polygon_mesh.cpp
     graphics/shader_program.cpp
     graphics/shader_source.cpp
-    graphics/image.cpp
-    graphics/painter.cpp
-    graphics/loader.cpp
+    graphics/simple_shape.cpp
+    graphics/text_buffer.cpp
+    graphics/text_font.cpp
+    graphics/text_material.cpp
+    graphics/texture_bitmap_buffer_source.cpp
+    graphics/texture_bitmap_generator_source.cpp
+    graphics/texture_file_source.cpp
+    graphics/texture_map.cpp
+    graphics/texture_text_buffer_source.cpp
+    graphics/texture_texture_source.cpp
+    graphics/tilebatch.cpp
+    graphics/utility.cpp
+    graphics/vertex.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp)
@@ -274,35 +288,49 @@ add_library(UiLib
     uikit/window.cpp)
 add_library(GfxLibTesting
     device/opengles.cpp
-    graphics/device.cpp
+    device/vertex.cpp
     graphics/algo.cpp
     graphics/bitmap.cpp
     graphics/bitmap_noise.cpp
-    graphics/pixel.cpp
-    graphics/utility.cpp
+    graphics/debug_drawable.cpp
+    graphics/device.cpp
+    graphics/device_framebuffer.cpp
+    graphics/device_geometry.cpp
+    graphics/device_instance.cpp
+    graphics/device_program.cpp
+    graphics/device_shader.cpp
+    graphics/device_texture.cpp
+    graphics/drawable.cpp
     graphics/drawcmd.cpp
     graphics/drawing.cpp
-    graphics/drawable.cpp
+    graphics/generic_shader_program.cpp
     graphics/geometry.cpp
-    graphics/vertex.cpp
+    graphics/guidegrid.cpp
+    graphics/image.cpp
+    graphics/linebatch.cpp
+    graphics/loader.cpp
     graphics/material.cpp
-    graphics/texture_map.cpp
-    graphics/texture_texture_source.cpp
-    graphics/texture_file_source.cpp
-    graphics/texture_bitmap_buffer_source.cpp
-    graphics/texture_bitmap_generator_source.cpp
-    graphics/texture_text_buffer_source.cpp
-    graphics/text_material.cpp
-    graphics/text_buffer.cpp
-    graphics/text_font.cpp
     graphics/material_class.cpp
     graphics/material_instance.cpp
-    graphics/generic_shader_program.cpp
+    graphics/painter.cpp
+    graphics/particle_engine.cpp
+    graphics/pixel.cpp
+    graphics/polygon_mesh.cpp
     graphics/shader_program.cpp
     graphics/shader_source.cpp
-    graphics/image.cpp
-    graphics/painter.cpp
-    graphics/loader.cpp
+    graphics/simple_shape.cpp
+    graphics/text_buffer.cpp
+    graphics/text_font.cpp
+    graphics/text_material.cpp
+    graphics/texture_bitmap_buffer_source.cpp
+    graphics/texture_bitmap_generator_source.cpp
+    graphics/texture_file_source.cpp
+    graphics/texture_map.cpp
+    graphics/texture_text_buffer_source.cpp
+    graphics/texture_texture_source.cpp
+    graphics/tilebatch.cpp
+    graphics/utility.cpp
+    graphics/vertex.cpp
     graphics/tool/geometry.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
@@ -808,43 +836,10 @@ install(TARGETS audio_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/audio/test/")
 # graphics test application. Uses the graphics APIs to draw stuff.
 # needs DETERMINISTIC_RANDOM flag
 add_executable(graphics_test
-    device/opengles.cpp
-    graphics/device.cpp
-    graphics/algo.cpp
-    graphics/utility.cpp
-    graphics/bitmap.cpp
-    graphics/bitmap_noise.cpp
-    graphics/pixel.cpp
-    graphics/material.cpp
-    graphics/texture_map.cpp
-    graphics/texture_texture_source.cpp
-    graphics/texture_file_source.cpp
-    graphics/texture_bitmap_buffer_source.cpp
-    graphics/texture_bitmap_generator_source.cpp
-    graphics/texture_text_buffer_source.cpp
-    graphics/text_material.cpp
-    graphics/text_buffer.cpp
-    graphics/text_font.cpp
-    graphics/material_class.cpp
-    graphics/material_instance.cpp
-    graphics/generic_shader_program.cpp
-    graphics/shader_program.cpp
-    graphics/shader_source.cpp
-    graphics/drawable.cpp
-    graphics/geometry.cpp
-    graphics/drawcmd.cpp
-    graphics/vertex.cpp
-    graphics/drawing.cpp
-    graphics/painter.cpp
-    graphics/loader.cpp
-    graphics/image.cpp
     graphics/test/main.cpp
-    graphics/tool/geometry.cpp
-    third_party/stb/stb_image.c
-    third_party/stb/stb_image_write.c
-    third_party/base64/base64.cpp
 )
 target_include_directories(graphics_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/test")
+target_link_libraries(graphics_test GfxLibTesting)
 target_link_libraries(graphics_test BaseLib DataLib)
 target_link_libraries(graphics_test ${CONAN_LIBS})
 target_link_libraries(graphics_test wdk_system wdk_desktop_gl)
@@ -878,7 +873,7 @@ add_library(GameEngine SHARED
     engine/library/library.cpp
 )
 target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
-target_link_libraries(GameEngine PRIVATE GfxLib EngineLib AudioLib UiLib DataLib BaseLib)
+target_link_libraries(GameEngine PRIVATE EngineLib GfxLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(GameEngine PRIVATE ${CONAN_LIBS})
 target_link_libraries(GameEngine PRIVATE wdk_system)
 target_link_libraries(GameEngine PRIVATE Lua)
@@ -895,7 +890,7 @@ add_library(TestEngine SHARED
     engine/library/library.cpp
 )
 target_include_directories(TestEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
-target_link_libraries(TestEngine PRIVATE GfxLib EngineLib AudioLib UiLib DataLib BaseLib)
+target_link_libraries(TestEngine PRIVATE EngineLib GfxLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(TestEngine PRIVATE ${CONAN_LIBS})
 install(TARGETS TestEngine GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
 
@@ -907,7 +902,7 @@ endif()
 # engine perf test app
 add_executable(perf-test engine/test/perftest.cpp)
 target_include_directories(perf-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
-target_link_libraries(perf-test PRIVATE GfxLibTesting EngineLib GfxLibTesting AudioLib UiLib DataLib BaseLib)
+target_link_libraries(perf-test PRIVATE EngineLib GfxLibTesting AudioLib UiLib DataLib BaseLib)
 target_link_libraries(perf-test PRIVATE ${CONAN_LIBS})
 target_link_libraries(perf-test PRIVATE wdk_system wdk_desktop_gl)
 target_link_libraries(perf-test PRIVATE Lua)

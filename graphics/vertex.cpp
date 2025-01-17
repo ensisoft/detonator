@@ -24,9 +24,6 @@
 #include "data/reader.h"
 #include "graphics/vertex.h"
 
-// quick hack here
-#include "device/vertex.cpp"
-
 namespace gfx
 {
 
