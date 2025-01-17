@@ -1017,18 +1017,18 @@ bool ContentLoaderImpl::LoadClasses(const data::Reader& data)
         auto& scene = p.second;
         for (size_t i=0; i<scene->GetNumNodes(); ++i)
         {
-            auto& node = scene->GetPlacement(i);
-            auto klass = FindEntityClassById(node.GetEntityId());
-            if (!klass)
+            auto& placement = scene->GetPlacement(i);
+            const auto& entity_klass = FindEntityClassById(placement.GetEntityId());
+            if (!entity_klass)
             {
                 const auto& scene_name = mSceneNameTable[scene->GetId()];
-                const auto& node_name  = node.GetName();
-                const auto& node_entity_id = node.GetEntityId();
-                ERROR("Scene node refers to entity that is not found. [scene='%1', node='%2', entity=%3]",
-                      scene_name, node_name, node_entity_id);
-                return false;
+                const auto& placement_name = placement.GetName();
+                const auto& placement_entity_class   = placement.GetEntityId();
+                ERROR("Scene entity placement refers to entity that is not found. [scene='%1', placement='%2', entity=%3]",
+                      scene_name, placement_name, placement_entity_class);
+                continue;
             }
-            node.SetEntity(klass);
+            placement.SetEntity(entity_klass);
         }
     }
     return true;
