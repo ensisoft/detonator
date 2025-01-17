@@ -397,8 +397,8 @@ public:
         base::LogEvent type;
         std::string msg;
         std::string file;
-        int line;
-        double time;
+        int line = 0;
+        double time = 0.0;
     };
     MainLogger()
     {
@@ -409,13 +409,14 @@ public:
             base::OStreamLogger logger(std::cout);
             logger.SetStyle(base::OStreamLogger::Style::FancyColor);
 
+            bool run_tread = true;
+
             LogBuffer buffer;
-            while (true) {
+            while (run_tread)
+            {
                 {
                     std::lock_guard<std::mutex> lock(mMutex);
-                    if (!mRunning)
-                        return;
-
+                    run_tread = mRunning;
                     std::swap(buffer, mBuffer);
                 }
                 for (const auto& entry : buffer)
@@ -431,7 +432,7 @@ public:
             }
         });
     }
-    ~MainLogger()
+   ~MainLogger() override
     {
         {
             std::lock_guard<std::mutex> lock(mMutex);
@@ -440,7 +441,7 @@ public:
         mThread.join();
     }
 
-    virtual void Write(base::LogEvent type, const char* file, int line, const char* msg, double time) override
+    void Write(base::LogEvent type, const char* file, int line, const char* msg, double time) override
     {
         LogMessage m;
         m.type = type;
@@ -454,12 +455,12 @@ public:
 
         mBuffer.push_back(std::move(m));
     }
-    virtual void Write(base::LogEvent type, const char* msg) override
+    void Write(base::LogEvent type, const char* msg) override
     { /* not supported */ }
-    virtual void Flush() override
+    void Flush() override
     { /* not supported */ }
 
-    virtual base::bitflag<WriteType> GetWriteMask() const override
+    base::bitflag<WriteType> GetWriteMask() const override
     { return WriteType::WriteRaw; }
 private:
     std::mutex mMutex;
