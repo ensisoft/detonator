@@ -17,7 +17,7 @@
 #include "config.h"
 
 // this translation unit implements the engine library interface.
-#define GAMESTUDIO_GAMELIB_IMPLEMENTATION
+#define ENGINE_DLL_IMPLEMENTATION
 
 #define ENGINE_USE_UPDATE_THREAD
 
@@ -52,7 +52,7 @@
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
 #include "graphics/texture_bitmap_buffer_source.h"
-#include "engine/main/interface.h"
+#include "engine/engine.h"
 #include "engine/audio.h"
 #include "engine/camera.h"
 #include "engine/classlib.h"
@@ -62,6 +62,7 @@
 #include "engine/game.h"
 #include "engine/lua_game_runtime.h"
 #include "engine/format.h"
+#include "engine/library/library.h"
 #include "engine/ui.h"
 #include "engine/state.h"
 #include "uikit/window.h"
@@ -1569,7 +1570,7 @@ private:
 } //namespace
 
 extern "C" {
-GAMESTUDIO_EXPORT engine::Engine* Gamestudio_CreateEngine()
+ENGINE_DLL_EXPORT engine::Engine* Gamestudio_CreateEngine()
 {
 #if defined(NDEBUG)
     DEBUG("DETONATOR 2D Engine in release build. *Kapow!*");

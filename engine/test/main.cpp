@@ -25,9 +25,9 @@
 #include <cstring>
 #include <cmath>
 
-#define GAMESTUDIO_GAMELIB_IMPLEMENTATION
+#define ENGINE_DLL_IMPLEMENTATION
 
-#include "engine/main/interface.h"
+#include "engine/library/library.h"
 #include "base/logging.h"
 #include "base/format.h"
 #include "audio/graph.h"
@@ -225,7 +225,7 @@ public:
         mEngine->Start();
         mEngine->SetSoundEffectGain(mEffectGain);
         // when running WASM code we're single threaded and small (~20ms)
-        // audio buffers are likely going to cause stutter 
+        // audio buffers are likely going to cause stutter
         mEngine->SetBufferSize(40);
     }
     virtual void End() override
@@ -1390,8 +1390,7 @@ private:
 };
 
 extern "C" {
-
-GAMESTUDIO_EXPORT engine::Engine* Gamestudio_CreateEngine()
+ENGINE_DLL_EXPORT engine::Engine* Gamestudio_CreateEngine()
 {
     DEBUG("test engine");
     return new MyApp;

@@ -875,7 +875,7 @@ add_library(GameEngine SHARED
     engine/lua_uik.cpp
     engine/lua_gfx.cpp
     engine/lua_game.cpp
-    engine/main/gamelib.cpp
+    engine/library/library.cpp
 )
 target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
 target_link_libraries(GameEngine PRIVATE GfxLib EngineLib AudioLib UiLib DataLib BaseLib)
@@ -885,14 +885,14 @@ target_link_libraries(GameEngine PRIVATE Lua)
 install(TARGETS GameEngine DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 # hide symbols on linux
 if (UNIX)
-    target_link_options(GameEngine PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
+    target_link_options(GameEngine PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/engine/library/library.txt")
 endif()
 
 # test engine
 add_library(TestEngine SHARED
     engine/loader.cpp
     engine/test/main.cpp
-    engine/main/gamelib.cpp
+    engine/library/library.cpp
 )
 target_include_directories(TestEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
 target_link_libraries(TestEngine PRIVATE GfxLib EngineLib AudioLib UiLib DataLib BaseLib)
@@ -901,7 +901,7 @@ install(TARGETS TestEngine GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engin
 
 # hide symbols on linux
 if (UNIX)
-    target_link_options(TestEngine PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/linux_linker_gamelib.txt")
+    target_link_options(TestEngine PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_LIST_DIR}/engine/library/library.txt")
 endif()
 
 # engine perf test app

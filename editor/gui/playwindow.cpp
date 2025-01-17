@@ -41,7 +41,7 @@
 #include "editor/gui/playwindow.h"
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/utility.h"
-#include "engine/main/interface.h"
+#include "engine/library/library.h"
 #include "engine/loader.h"
 #include "wdk/system.h"
 
