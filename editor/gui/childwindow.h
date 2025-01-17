@@ -85,6 +85,8 @@ namespace gui
 
         bool LaunchScript(const QString& id);
 
+        void UpdateProgressBar(const app::AnyString& message, int value);
+
         // Take the mainwidget inside this child window.
         // The ownership is transferred to the caller!
         MainWidget* TakeWidget();

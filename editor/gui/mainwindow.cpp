@@ -776,12 +776,23 @@ void MainWindow::CloseWorkspace()
 
         while (mResourceCache && mResourceCache->HasPendingWork())
         {
+            const auto progress = mUI.worker->value();
+            const auto& handle = mResourceCache->GetFirstTask();
+            SetValue(mUI.worker, handle.GetTaskDescription());
+            for (auto* child : mChildWindows)
+                child->UpdateProgressBar(handle.GetTaskDescription(), 0);
+
             mThreadPool->ExecuteMainThread();
             mResourceCache->TickPendingWork();
 
             QApplication::processEvents();
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
+
+        SetValue(mUI.worker, "");
+        SetValue(mUI.worker, 0);
+        for (auto* child : mChildWindows)
+            child->UpdateProgressBar("", 0);
 
         while (mThreadPool->HasPendingTasks())
         {
@@ -2518,7 +2529,24 @@ void MainWindow::RefreshUI()
 
     if (mResourceCache)
     {
-        mResourceCache->TickPendingWork();
+        if (mResourceCache->HasPendingWork())
+        {
+            const auto progress = mUI.worker->value();
+            const auto& handle = mResourceCache->GetFirstTask();
+            SetValue(mUI.worker, handle.GetTaskDescription());
+            for (auto* child : mChildWindows)
+                child->UpdateProgressBar(handle.GetTaskDescription(), 0);
+
+            mResourceCache->TickPendingWork();
+
+        }
+        else
+        {
+            SetValue(mUI.worker, "");
+            SetValue(mUI.worker, 0);
+            for (auto* child : mChildWindows)
+                child->UpdateProgressBar("", 0);
+        }
     }
 }
 
@@ -3160,12 +3188,23 @@ void MainWindow::LaunchGame(bool clean)
 
             while (mResourceCache->HasPendingWork())
             {
+                const auto progress = mUI.worker->value();
+                const auto& handle = mResourceCache->GetFirstTask();
+                SetValue(mUI.worker, handle.GetTaskDescription());
+                for (auto* child : mChildWindows)
+                    child->UpdateProgressBar(handle.GetTaskDescription(), 0);
+
                 mThreadPool->ExecuteMainThread();
                 mResourceCache->TickPendingWork();
 
                 QApplication::processEvents();
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
+
+            SetValue(mUI.worker, "");
+            SetValue(mUI.worker, 0);
+            for (auto* child : mChildWindows)
+                child->UpdateProgressBar("", 0);
         }
         else
         {

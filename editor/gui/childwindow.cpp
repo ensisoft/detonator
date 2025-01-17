@@ -89,6 +89,12 @@ void ChildWindow::ShowNote(const QString& note) const
     mUI.statusBar->showMessage(note, 5000);
 }
 
+void ChildWindow::UpdateProgressBar(const app::AnyString& message, int value)
+{
+    SetValue(mUI.worker, message);
+    SetValue(mUI.worker, value);
+}
+
 bool ChildWindow::LaunchScript(const QString& id)
 {
     if (!mWidget || mClosed)
