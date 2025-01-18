@@ -507,35 +507,35 @@ namespace app
             mPrimitive = other.mPrimitive;
         }
 
-        virtual AnyString GetId() const override
+        AnyString GetId() const override
         { return mContent->GetId();  }
-        virtual AnyString GetName() const override
+        AnyString GetName() const override
         { return mContent->GetName(); }
-        virtual Resource::Type GetType() const override
+        Resource::Type GetType() const override
         { return TypeValue; }
-        virtual const Resource::PropertyCollection& GetProperties() const override
+        const Resource::PropertyCollection& GetProperties() const override
         { return mProps; }
-        virtual const Resource::PropertyCollection& GetUserProperties() const override
+        const Resource::PropertyCollection& GetUserProperties() const override
         { return mUserProps; }
-        virtual void SetName(const AnyString& name) override
+        void SetName(const AnyString& name) override
         { mContent->SetName(name); }
 
-        virtual void CopyContent(const Resource& other) override
+        void CopyContent(const Resource& other) override
         {
             const auto* ptr = dynamic_cast<const GameResource*>(&other);
             ASSERT(ptr != nullptr);
             *mContent  = *ptr->mContent;
         }
-        virtual void SetProperties(const Resource::PropertyCollection& props) override
+        void SetProperties(const Resource::PropertyCollection& props) override
         { mProps = props; }
-        virtual void SetUserProperties(const Resource::PropertyCollection& props) override
+        void SetUserProperties(const Resource::PropertyCollection& props) override
         { mUserProps = props; }
 
-        virtual void SetIsPrimitive(bool primitive) override
+        void SetIsPrimitive(bool primitive) override
         { mPrimitive = primitive; }
-        virtual bool IsPrimitive() const override
+        bool IsPrimitive() const override
         { return mPrimitive; }
-        virtual void Serialize(data::Writer& data) const override
+        void Serialize(data::Writer& data) const override
         {
             auto chunk = data.NewWriteChunk();
             mContent->IntoJson(*chunk);
@@ -570,25 +570,25 @@ namespace app
             else if (TypeValue == Resource::Type::Tilemap)
                 data.AppendChunk("tilemaps", std::move(chunk));
         }
-        virtual void SaveProperties(QJsonObject& json) const override
+        void SaveProperties(QJsonObject& json) const override
         { json[GetId()] = QJsonObject::fromVariantMap(mProps); }
-        virtual void SaveUserProperties(QJsonObject& json) const override
+        void SaveUserProperties(QJsonObject& json) const override
         { json[GetId()] = QJsonObject::fromVariantMap(mUserProps); }
-        virtual bool HasProperty(const PropertyKey& key) const override
+        bool HasProperty(const PropertyKey& key) const override
         { return mProps.contains(key); }
-        virtual bool HasUserProperty(const PropertyKey& key) const override
+        bool HasUserProperty(const PropertyKey& key) const override
         { return mUserProps.contains(key); }
-        virtual void LoadProperties(const QJsonObject& object) override
+        void LoadProperties(const QJsonObject& object) override
         { mProps = object[GetId()].toObject().toVariantMap(); }
-        virtual void LoadUserProperties(const QJsonObject& object) override
+        void LoadUserProperties(const QJsonObject& object) override
         { mUserProps = object[GetId()].toObject().toVariantMap(); }
-        virtual void DeleteProperty(const PropertyKey& key) override
+        void DeleteProperty(const PropertyKey& key) override
         { mProps.remove(key); }
-        virtual void DeleteUserProperty(const PropertyKey& key) override
+        void DeleteUserProperty(const PropertyKey& key) override
         { mUserProps.remove(key); }
-        virtual std::unique_ptr<Resource> Copy() const override
+        std::unique_ptr<Resource> Copy() const override
         { return std::make_unique<GameResource>(*this); }
-        virtual std::unique_ptr<Resource> Clone() const override
+        std::unique_ptr<Resource> Clone() const override
         {
             auto ret = std::make_unique<GameResource>(mContent->Clone(), GetName());
             ret->mProps     = detail::DuplicateResourceProperties(*mContent, *ret->mContent, mProps);
@@ -596,11 +596,11 @@ namespace app
             ret->mPrimitive = mPrimitive;
             return ret;
         }
-        virtual QStringList ListDependencies() const override
+        QStringList ListDependencies() const override
         { return detail::ListResourceDependencies(*mContent, mProps); }
-        virtual bool Pack(ResourcePacker& packer) override
+        bool Pack(ResourcePacker& packer) override
         { return detail::PackResource(*mContent, packer); }
-        virtual void Migrate(ResourceMigrationLog* log) override
+        void Migrate(ResourceMigrationLog* log) override
         {
             if constexpr (TypeValue == Resource::Type::Material)
             {
@@ -621,9 +621,9 @@ namespace app
         }
 
         // GameResourceBase
-        virtual std::shared_ptr<const BaseType> GetSharedResource() const override
+        std::shared_ptr<const BaseType> GetSharedResource() const override
         { return mContent; }
-        virtual std::shared_ptr<BaseType> GetSharedResource() override
+        std::shared_ptr<BaseType> GetSharedResource() override
         { return mContent; }
 
         DerivedType* GetContent()
@@ -640,34 +640,34 @@ namespace app
         GameResource& operator=(const GameResource& other) = delete;
 
     protected:
-        virtual void* GetRaw() override
+        void* GetRaw() override
         {
             return mContent.get();
         }
-        virtual const void* GetRaw() const override
+        const void* GetRaw() const override
         {
             return mContent.get();
         }
 
-        virtual void* GetIf(const std::type_info& expected_type) override
+        void* GetIf(const std::type_info& expected_type) override
         {
             if (typeid(DerivedType) == expected_type)
                 return (void*)mContent.get();
             return nullptr;
         }
-        virtual const void* GetIf(const std::type_info& expected_type) const override
+        const void* GetIf(const std::type_info& expected_type) const override
         {
             if (typeid(DerivedType) == expected_type)
                 return (const void*)mContent.get();
             return nullptr;
         }
-        virtual void SetVariantProperty(const PropertyKey& key, const QVariant& value) override
+        void SetVariantProperty(const PropertyKey& key, const QVariant& value) override
         { mProps[key] = value; }
-        virtual void SetUserVariantProperty(const PropertyKey& key, const QVariant& value) override
+        void SetUserVariantProperty(const PropertyKey& key, const QVariant& value) override
         { mUserProps[key] = value; }
-        virtual QVariant GetVariantProperty(const PropertyKey& key) const override
+        QVariant GetVariantProperty(const PropertyKey& key) const override
         { return mProps[key]; }
-        virtual QVariant GetUserVariantProperty(const PropertyKey& key) const override
+        QVariant GetUserVariantProperty(const PropertyKey& key) const override
         { return mUserProps[key]; }
     private:
         std::shared_ptr<DerivedType> mContent;
@@ -726,11 +726,11 @@ namespace app
         {}
         ResourceListModel() = default;
 
-        virtual QVariant data(const QModelIndex& index, int role) const override;
-        virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-        virtual int rowCount(const QModelIndex&) const override
+        QVariant data(const QModelIndex& index, int role) const override;
+        QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+        int rowCount(const QModelIndex&) const override
         { return static_cast<int>(mResources.size()); }
-        virtual int columnCount(const QModelIndex&) const override
+        int columnCount(const QModelIndex&) const override
         { return 2; }
         void SetList(const ResourceList& list);
         void Clear();
