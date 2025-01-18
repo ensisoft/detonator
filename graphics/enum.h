@@ -20,9 +20,89 @@
 
 #include <cstdint>
 
+#include "device/enum.h"
+
 namespace gfx
 {
     enum class MaterialFlags : uint32_t {
         EnableBloom = 0x1
     };
+
+    enum class BasicLightType : int32_t {
+        Ambient,
+        Directional,
+        Spot,
+        Point
+    };
+
+    enum class BasicFogMode : uint32_t {
+        Linear, Exponential1, Exponential2
+    };
+
+    enum class RenderPass {
+        ColorPass,
+        StencilPass,
+        CustomPass = 100
+    };
+
+    // Text alignment inside a rect
+    enum TextAlign {
+        // Vertical text alignment
+        AlignTop     = 0x1,
+        AlignVCenter = 0x2,
+        AlignBottom  = 0x4,
+        // Horizontal text alignment
+        AlignLeft    = 0x10,
+        AlignHCenter = 0x20,
+        AlignRight   = 0x40
+    };
+
+    enum TextProp {
+        None      = 0x0,
+        Underline = 0x1,
+        Blinking  = 0x2
+    };
+
+    using BufferUsage = dev::BufferUsage;
+
+    // Style of the drawable's geometry determines how the geometry
+    // is to be rasterized.
+    enum class DrawPrimitive {
+        Points, Lines, Triangles
+    };
+
+    // broad category of drawables for describing the semantic
+    // meaning of the drawable. Each drawable in this category
+    // has specific constraint and specific requirements in order
+    // for the drawable and material to work together.
+    //
+    // Category    Particle Data  Tile Data  Tris Points  Lines
+    //----------------------------------------------------------
+    // Basic                                  *     *       *
+    // Particles        *                           *       *
+    // TileBatch                     *        *     *
+    //
+    // In other words if we're for example rendering particles
+    // then the material can expect there to be per particle data
+    // and the rasterizer draw primitive is either POINTS or LINES.
+    //
+    // If any material's shader source is written to support
+    // multiple different drawable types then care must be taken
+    // to ensure that the right set of varyings are exposed  in
+    // the vertex-fragment shader interface. In other words if we
+    // have a fragment shader that can module it's output with per
+    // particle alpha but the shader is used with a non-particle
+    // drawable then there's not going to be incoming per particle
+    // alpha value which means that if the fragment shader has
+    // 'in float vParticleAlpha' it will cause a program link error.
+    enum class DrawCategory {
+        // Lines, line batches, polygons, simple shapes such as rect
+        // round rect, circle, 2D and 3D
+        Basic,
+        // Particles with per particle data.
+        Particles,
+        // Tiles with per tile data.
+        TileBatch
+    };
+
 } // namespace

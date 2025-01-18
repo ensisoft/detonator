@@ -26,6 +26,8 @@
 #include <vector>
 
 #include "base/bitflag.h"
+#include "graphics/enum.h"
+#include "graphics/types.h"
 #include "graphics/shader_program.h"
 
 namespace gfx
@@ -85,42 +87,10 @@ namespace gfx
             WriteColorTarget, WriteBloomTarget
         };
 
-        enum class LightType : int32_t {
-            Ambient,
-            Directional,
-            Spot,
-            Point
-        };
-
-        enum class FogMode : uint32_t {
-            Linear, Exponential1, Exponential2
-        };
-
-        struct Light {
-            LightType type = LightType::Ambient;
-            // lights position in view space. in other words the
-            // result of transforming the light with the light's model
-            // view matrix.
-            glm::vec3 position = {0.0f, 0.0f, 0.0f};
-            // light's direction vector that applies to spot and
-            // directional lights.
-            glm::vec3 direction = {0.0f, 0.0f, -1.0f};
-            gfx::Color4f ambient_color;
-            gfx::Color4f diffuse_color;
-            gfx::Color4f specular_color;
-            gfx::FDegrees spot_half_angle;
-            float constant_attenuation = 1.0f;
-            float linear_attenuation = 0.0f;
-            float quadratic_attenuation = 0.0f;
-        };
-
-        struct Fog {
-            gfx::Color4f color;
-            float start_dist = 10.0f;
-            float end_dist = 100.0f;
-            float density = 1.0f;
-            FogMode mode = FogMode::Linear;
-        };
+        using LightType = BasicLightType;
+        using FogMode   = BasicFogMode;
+        using Light     = BasicLight;
+        using Fog       = BasicFog;
 
         GenericShaderProgram() noexcept
         {
