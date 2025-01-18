@@ -1841,7 +1841,11 @@ void Workspace::SaveResource(const Resource& resource)
         auto& res = mResources[i];
         if (res->GetId() != id)
             continue;
-        res->UpdateFrom(resource);
+
+        res->SetUserProperties(resource.GetUserProperties());
+        res->SetProperties(resource.GetProperties());
+        res->CopyContent(resource);
+
         emit ResourceUpdated(mResources[i].get());
         emit dataChanged(index(i, 0), index(i, 1));
         INFO("Saved resource '%1'", resource.GetName());
