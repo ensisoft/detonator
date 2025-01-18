@@ -18,6 +18,8 @@
 
 #include "config.h"
 
+#include "base/assert.h"
+
 namespace dev
 {
     enum class ResourceType {
