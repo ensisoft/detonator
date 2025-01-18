@@ -30,10 +30,10 @@ namespace gfx
 std::string GenericShaderProgram::GetShaderId(const Material& material, const Material::Environment& env) const
 {
     std::string id;
-    id += TestFeature(ShadingFeatures::BasicLight) ? "Lit" : "";
-    id += TestFeature(ShadingFeatures::BasicFog) ? "Fog" : "";
-    id += TestFeature(OutputFeatures::WriteBloomTarget) ? "Bloom" : "";
-    id += TestFeature(OutputFeatures::WriteColorTarget) ? "Color" : "";
+    id += TestFeature(ShadingFeatures::BasicLight) ? "Lit:yes" : "Lit:no";
+    id += TestFeature(ShadingFeatures::BasicFog)   ? "Fog:Yes" : "Fog:no";
+    id += TestFeature(OutputFeatures::WriteBloomTarget) ? "Bloom:yes" : "Bloom:no";
+    id += TestFeature(OutputFeatures::WriteColorTarget) ? "Color:yes" : "Color:no";
     id += "Material:";
     id += material.GetShaderId(env);
     return id;
@@ -41,10 +41,8 @@ std::string GenericShaderProgram::GetShaderId(const Material& material, const Ma
 std::string GenericShaderProgram::GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const
 {
     std::string id;
-    id += TestFeature(ShadingFeatures::BasicLight) ? "Lit" : "";
-    id += TestFeature(ShadingFeatures::BasicFog) ? "Fog" : "";
-    id += TestFeature(OutputFeatures::WriteBloomTarget) ? "Bloom" : "";
-    id += TestFeature(OutputFeatures::WriteColorTarget) ? "Color" : "";
+    id += TestFeature(ShadingFeatures::BasicLight) ? "Lit:yes" : "Lit:no";
+    id += TestFeature(ShadingFeatures::BasicFog)   ? "Fog:yes" : "Fog:no";
     id += "Drawable:";
     id += drawable.GetShaderId(env);
     return id;
