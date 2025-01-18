@@ -1592,6 +1592,46 @@ void MainWindow::on_actionExportZIP_triggered()
     msg.exec();
 }
 
+void MainWindow::on_actionEditTags_triggered()
+{
+    const auto& selected = GetSelection(mUI.workspace);
+    for (int i=0; i<selected.size(); ++i)
+    {
+        auto& resource = mWorkspace->GetResource(selected[i].row());
+
+        QStringList tag_list = resource.ListTags();
+        QString tag_string;
+        for (const auto& tag : tag_list)
+        {
+            tag_string.append("#");
+            tag_string.append(tag);
+            tag_string.append(" ");
+        }
+        if (tag_string.isEmpty())
+            tag_string.chop(1);
+
+        bool accepted = false;
+        const auto& text = QInputDialog::getText(this,
+            tr("Edit Resource Tags"),
+            tr("Tags:"), QLineEdit::Normal, tag_string, &accepted);
+        if (!accepted)
+            continue;
+
+        app::Resource::TagSoup soup;
+
+        tag_list = text.split(" ", Qt::SplitBehaviorFlags::SkipEmptyParts);
+        for (auto tag : tag_list)
+        {
+            if (tag.startsWith("#"))
+                tag = tag.remove(0, 1);
+            soup.insert(tag);
+        }
+        resource.SetTags(soup);
+
+        mWorkspace->UpdateResource(&resource);
+    }
+}
+
 void MainWindow::on_actionEditResource_triggered()
 {
     const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
@@ -1659,9 +1699,11 @@ void MainWindow::on_actionRenameResource_triggered()
         auto& resource = mWorkspace->GetResource(selected[i].row());
 
         bool accepted = false;
-        const auto& name = QInputDialog::getText(this, tr("Rename Resource"),
+        const auto& name = QInputDialog::getText(this,
+            tr("Rename Resource"),
             tr("Resource Name:"), QLineEdit::Normal, resource.GetName(), &accepted);
-        if (!accepted) continue;
+        if (!accepted)
+            continue;
 
         resource.SetName(name);
         mWorkspace->UpdateResource(&resource);
@@ -2121,6 +2163,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     mUI.actionExportZIP->setEnabled(!indices.isEmpty());
     mUI.actionImportZIP->setEnabled(mWorkspace != nullptr);
     mUI.actionRenameResource->setEnabled(!indices.empty());
+    mUI.actionEditTags->setEnabled(!indices.empty());
 
     for (int i=0; i<indices.size(); ++i)
     {
@@ -2204,10 +2247,11 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionEditResourceNewTab);
     menu.addSeparator();
     menu.addAction(mUI.actionRenameResource);
+    menu.addAction(mUI.actionEditTags);
     menu.addAction(mUI.actionDuplicateResource);
-    menu.addMenu(&export_);
-    menu.addSeparator();
     menu.addAction(mUI.actionDependencies);
+    menu.addSeparator();
+    menu.addMenu(&export_);
     menu.addSeparator();
     menu.addAction(mUI.actionDeleteResource);
     menu.addSeparator();

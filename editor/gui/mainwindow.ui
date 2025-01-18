@@ -1592,7 +1592,7 @@
         <bool>false</bool>
        </property>
        <property name="placeholderText">
-        <string>Filter</string>
+        <string>Filter string or #tag</string>
        </property>
        <property name="clearButtonEnabled">
         <bool>true</bool>
@@ -2504,7 +2504,7 @@
      <normaloff>:/16x16_ico_png/deptree.png</normaloff>:/16x16_ico_png/deptree.png</iconset>
    </property>
    <property name="text">
-    <string>Dependencies...</string>
+    <string>List Dependencies...</string>
    </property>
    <property name="toolTip">
     <string>Show resource depedency graph</string>
@@ -2573,6 +2573,18 @@
    </property>
    <property name="toolTip">
     <string>Clear the graphics cache on editor's assets</string>
+   </property>
+  </action>
+  <action name="actionEditTags">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/hashtag.png</normaloff>:/16x16_ico_png/hashtag.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Tags...</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit resource tags</string>
    </property>
   </action>
  </widget>

@@ -2957,8 +2957,26 @@ bool WorkspaceProxy::filterAcceptsRow(int row, const QModelIndex& parent) const
         return false;
     if (mFilterString.isEmpty())
         return true;
-    const auto& name = resource.GetName();
-    return name.contains(mFilterString, Qt::CaseInsensitive);
+
+    bool accepted = false;
+
+    QStringList filter_tokens = mFilterString.split(" " , Qt::SplitBehaviorFlags::SkipEmptyParts);
+    for (auto filter_token : filter_tokens)
+    {
+        if (filter_token.startsWith("#"))
+        {
+            filter_token = filter_token.remove(0, 1);
+            if (resource.HasTag(filter_token))
+                return true;
+        }
+        else
+        {
+            const auto& name = resource.GetName();
+            if (name.contains(filter_token, Qt::CaseInsensitive))
+                return true;
+        }
+    }
+    return false;
 }
 
 void WorkspaceProxy::sort(int column, Qt::SortOrder order)
