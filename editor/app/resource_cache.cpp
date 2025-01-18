@@ -138,7 +138,7 @@ public:
         QJsonObject json;
 
         QJsonObject project;
-        SerializeProjectSettings(project, mState->settings);
+        IntoJson(project, mState->settings);
 
         // serialize the workspace properties into JSON
         json["workspace"] = QJsonObject::fromVariantMap(mWorkspaceProperties);
