@@ -139,6 +139,7 @@ namespace gui
         void on_actionImportJSON_triggered();
         void on_actionImportZIP_triggered();
         void on_actionExportZIP_triggered();
+        void on_actionEditTags_triggered();
         void on_actionEditResource_triggered();
         void on_actionEditResourceNewWindow_triggered();
         void on_actionEditResourceNewTab_triggered();

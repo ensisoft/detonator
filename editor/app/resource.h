@@ -23,6 +23,8 @@
 #  include <QVariant>
 #  include <QVariantMap>
 #  include <QJsonObject>
+#  include <QJsonArray>
+#  include <QSet>
 #  include <QIcon>
 #  include <QAbstractTableModel>
 #  include <boost/logic/tribool.hpp>
@@ -68,6 +70,7 @@ namespace app
     {
     public:
         using PropertyCollection = QVariantMap;
+        using TagSoup = QSet<QString>;
 
         // Type of the resource.
         enum class Type {
@@ -101,6 +104,7 @@ namespace app
         virtual AnyString GetName() const = 0;
         // Get the type of the resource.
         virtual Type GetType() const = 0;
+        virtual const TagSoup& GetTags() const = 0;
         virtual const PropertyCollection& GetProperties() const = 0;
         virtual const PropertyCollection& GetUserProperties() const = 0;
         // Copy the content object from the source resource into this resource
@@ -111,6 +115,7 @@ namespace app
         virtual void SetProperties(const PropertyCollection& props) = 0;
         // Set the per user resource properties
         virtual void SetUserProperties(const PropertyCollection& props) = 0;
+        virtual void SetTags(const TagSoup& soup) = 0;
         // Mark the resource primitive or not.
         virtual void SetIsPrimitive(bool primitive) = 0;
         // Serialize the content into JSON
@@ -145,6 +150,13 @@ namespace app
         virtual std::unique_ptr<Resource> Clone() const = 0;
         // List the IDs of resources that this resource depends on.
         virtual QStringList ListDependencies() const = 0;
+        // List the resource tags.
+        virtual QStringList ListTags() const = 0;
+
+        // Tag management
+        virtual void AddTag(const AnyString& tag) = 0;
+        virtual void DelTag(const AnyString& tag) = 0;
+        virtual bool HasTag(const AnyString& tag) const = 0;
 
         virtual bool Pack(ResourcePacker& packer) = 0;
 
@@ -505,6 +517,7 @@ namespace app
             mProps     = other.mProps;
             mUserProps = other.mUserProps;
             mPrimitive = other.mPrimitive;
+            mTagSoup   = other.mTagSoup;
         }
 
         AnyString GetId() const override
@@ -513,6 +526,8 @@ namespace app
         { return mContent->GetName(); }
         Resource::Type GetType() const override
         { return TypeValue; }
+        const Resource::TagSoup& GetTags() const override
+        { return mTagSoup; }
         const Resource::PropertyCollection& GetProperties() const override
         { return mProps; }
         const Resource::PropertyCollection& GetUserProperties() const override
@@ -530,6 +545,8 @@ namespace app
         { mProps = props; }
         void SetUserProperties(const Resource::PropertyCollection& props) override
         { mUserProps = props; }
+        void SetTags(const Resource::TagSoup& soup) override
+        { mTagSoup = soup; }
 
         void SetIsPrimitive(bool primitive) override
         { mPrimitive = primitive; }
@@ -570,16 +587,42 @@ namespace app
             else if (TypeValue == Resource::Type::Tilemap)
                 data.AppendChunk("tilemaps", std::move(chunk));
         }
-        void SaveProperties(QJsonObject& json) const override
-        { json[GetId()] = QJsonObject::fromVariantMap(mProps); }
+        void SaveProperties(QJsonObject& root) const override
+        {
+            auto object = QJsonObject::fromVariantMap(mProps);
+
+            QJsonArray tags;
+            for (auto tag : mTagSoup)
+                tags.push_back(tag);
+
+            object["__tag_list"] = tags;
+            root[GetId()] = std::move(object);
+        }
         void SaveUserProperties(QJsonObject& json) const override
         { json[GetId()] = QJsonObject::fromVariantMap(mUserProps); }
+
         bool HasProperty(const PropertyKey& key) const override
         { return mProps.contains(key); }
         bool HasUserProperty(const PropertyKey& key) const override
         { return mUserProps.contains(key); }
-        void LoadProperties(const QJsonObject& object) override
-        { mProps = object[GetId()].toObject().toVariantMap(); }
+        void LoadProperties(const QJsonObject& root) override
+        {
+            auto object = root[GetId()].toObject();
+
+            Resource::TagSoup soup;
+
+            if(object.contains("__tag_list"))
+            {
+                const auto tags = object["__tag_list"].toArray();
+                for (const auto t : tags)
+                    soup.insert(t.toString());
+
+                object.remove("__tag_list");
+            }
+
+            mProps = object.toVariantMap();
+            mTagSoup = std::move(soup);
+        }
         void LoadUserProperties(const QJsonObject& object) override
         { mUserProps = object[GetId()].toObject().toVariantMap(); }
         void DeleteProperty(const PropertyKey& key) override
@@ -594,10 +637,22 @@ namespace app
             ret->mProps     = detail::DuplicateResourceProperties(*mContent, *ret->mContent, mProps);
             ret->mUserProps = detail::DuplicateUserResourceProperties(*mContent, *ret->mContent, mUserProps);
             ret->mPrimitive = mPrimitive;
+            ret->mTagSoup   = mTagSoup;
             return ret;
         }
         QStringList ListDependencies() const override
         { return detail::ListResourceDependencies(*mContent, mProps); }
+
+        QStringList ListTags() const override
+        { return mTagSoup.values(); }
+
+        void AddTag(const AnyString& tag)
+        { mTagSoup.insert(tag); }
+        void DelTag(const AnyString& tag)
+        { mTagSoup.remove(tag); }
+        bool HasTag(const AnyString& tag) const
+        { return mTagSoup.contains(tag); }
+
         bool Pack(ResourcePacker& packer) override
         { return detail::PackResource(*mContent, packer); }
         void Migrate(ResourceMigrationLog* log) override
@@ -673,6 +728,7 @@ namespace app
         std::shared_ptr<DerivedType> mContent;
         QVariantMap mProps;
         QVariantMap mUserProps;
+        Resource::TagSoup mTagSoup;
         bool mPrimitive = false;
     };
 

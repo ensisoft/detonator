@@ -221,6 +221,8 @@ void unit_test_save_load()
         resource.SetProperty("str", app::AnyString("hello"));
         resource.SetUserProperty("foo", 444);
         resource.SetUserProperty("bar", 777);
+        resource.AddTag("#foo");
+        resource.AddTag("#bar");
         workspace.SaveResource(resource);
         // workspace properties are specific to the workspace and
         // are saved in the workspace files.
@@ -280,6 +282,8 @@ void unit_test_save_load()
             TEST_REQUIRE(res.GetProperty("str", QString("")) == QString("hello"));
             TEST_REQUIRE(res.GetUserProperty("foo", 0) == 444);
             TEST_REQUIRE(res.GetUserProperty("bar", 0) == 777);
+            TEST_REQUIRE(res.HasTag("#foo"));
+            TEST_REQUIRE(res.HasTag("#bar"));
         }
         TEST_REQUIRE(workspace.GetProjectSettings().multisample_sample_count == 16);
         TEST_REQUIRE(workspace.GetProjectSettings().application_name == "foobar");
@@ -1489,6 +1493,7 @@ void unit_test_json_export_import()
         app::MaterialResource resource(material, "TestMaterial");
         resource.SetProperty("int", 123);
         resource.SetProperty("str", app::AnyString("hello"));
+        resource.AddTag("#foobar");
         workspace.SaveResource(resource);
         workspace.ExportResourceJson(std::vector<size_t>{0}, "test_export_import_content.json");
     }
@@ -1500,6 +1505,7 @@ void unit_test_json_export_import()
         TEST_REQUIRE(resources[0]->GetId() == "foo123");
         TEST_REQUIRE(resources[0]->GetProperty("int", 0) == 123);
         TEST_REQUIRE(resources[0]->GetProperty("str", QString()) == "hello");
+        TEST_REQUIRE(resources[0]->HasTag("#foobar"));
     }
 }
 
@@ -1775,10 +1781,14 @@ void unit_test_export_import_basic()
         texture.SetTextureSource(0, texture_source.Copy());
 
         gfx::CustomMaterialClass material(gfx::MaterialClass::Type::Custom);
+        material.SetName("MyMaterial");
         material.SetNumTextureMaps(1);
         material.SetTextureMap(0, std::move(texture));
         material.SetShaderUri(workspace.MapFileToWorkspace(std::string("TestWorkspace/shaders/es2/my_material.glsl")));
         app::MaterialResource material_resource(material, "material");
+        material_resource.SetName("MyMaterial");
+        material_resource.SetProperty("prop", "some property");
+        material_resource.AddTag("#awesome");
 
         gfx::PolygonMeshClass poly;
         app::CustomShapeResource shape_resource(poly, "poly");
@@ -1841,6 +1851,16 @@ void unit_test_export_import_basic()
         TEST_REQUIRE(zip.Open("test-export.zip"));
         TEST_REQUIRE(workspace.ImportResourceArchive(zip));
         TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 7);
+
+        {
+            const auto* material = workspace.FindResourceByName("MyMaterial", app::Resource::Type::Material);
+            QString property;
+            TEST_REQUIRE(material);
+            TEST_REQUIRE(material->GetProperty("prop", &property));
+            TEST_REQUIRE(property == "some property");
+            TEST_REQUIRE(material->HasTag("#awesome"));
+        }
+
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/shaders/es2/my_material.glsl") == "my_material.glsl");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/lua/game_script.lua") == "game_script.lua");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/audio/music.mp3") == "music.mp3");
