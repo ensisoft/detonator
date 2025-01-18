@@ -313,7 +313,9 @@ int test_main(int argc, char* argv[])
     {
         Resource other("other");
         // copies over the data from r into other
-        other.UpdateFrom(r);
+        other.CopyContent(r);
+        other.SetProperties(r.GetProperties());
+        other.SetUserProperties(r.GetUserProperties());
         TEST_REQUIRE(other.GetName() == "joojoo");
         TEST_REQUIRE(other.HasProperty("int"));
         TEST_REQUIRE(other.HasProperty("c_string"));

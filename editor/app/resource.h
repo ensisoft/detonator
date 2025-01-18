@@ -67,6 +67,8 @@ namespace app
     class Resource
     {
     public:
+        using PropertyCollection = QVariantMap;
+
         // Type of the resource.
         enum class Type {
             // It's a material
@@ -99,14 +101,16 @@ namespace app
         virtual AnyString GetName() const = 0;
         // Get the type of the resource.
         virtual Type GetType() const = 0;
-        // Update the content's of this resource based on
-        // the other resource where the other resource *must*
-        // have the same runtime type.
-        // The updated properties include the underlying content
-        // the  and the properties.
-        virtual void UpdateFrom(const Resource& other) = 0;
+        virtual const PropertyCollection& GetProperties() const = 0;
+        virtual const PropertyCollection& GetUserProperties() const = 0;
+        // Copy the content object from the source resource into this resource
+        virtual void CopyContent(const Resource& source) = 0;
         // Set the name of the resource.
         virtual void SetName(const AnyString& name) = 0;
+        // Set the resource properties
+        virtual void SetProperties(const PropertyCollection& props) = 0;
+        // Set the per user resource properties
+        virtual void SetUserProperties(const PropertyCollection& props) = 0;
         // Mark the resource primitive or not.
         virtual void SetIsPrimitive(bool primitive) = 0;
         // Serialize the content into JSON
@@ -509,17 +513,24 @@ namespace app
         { return mContent->GetName(); }
         virtual Resource::Type GetType() const override
         { return TypeValue; }
+        virtual const Resource::PropertyCollection& GetProperties() const override
+        { return mProps; }
+        virtual const Resource::PropertyCollection& GetUserProperties() const override
+        { return mUserProps; }
         virtual void SetName(const AnyString& name) override
         { mContent->SetName(name); }
 
-        virtual void UpdateFrom(const Resource& other) override
+        virtual void CopyContent(const Resource& other) override
         {
             const auto* ptr = dynamic_cast<const GameResource*>(&other);
             ASSERT(ptr != nullptr);
-            mProps = ptr->mProps;
-            mUserProps = ptr->mUserProps;
             *mContent  = *ptr->mContent;
         }
+        virtual void SetProperties(const Resource::PropertyCollection& props) override
+        { mProps = props; }
+        virtual void SetUserProperties(const Resource::PropertyCollection& props) override
+        { mUserProps = props; }
+
         virtual void SetIsPrimitive(bool primitive) override
         { mPrimitive = primitive; }
         virtual bool IsPrimitive() const override
@@ -619,10 +630,6 @@ namespace app
         { return mContent.get(); }
         const DerivedType* GetContent() const
         { return mContent.get(); }
-        const QVariantMap& GetProperties() const
-        { return mProps;}
-        const QVariantMap& GetUserProperties() const
-        { return mUserProps; }
         void ClearProperties()
         { mProps.clear(); }
         void ClearUserProperties()
