@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <glm/vec3.hpp>
 #  include <glm/vec4.hpp>
 #  include <glm/mat4x4.hpp>
 #include "warnpop.h"
@@ -29,76 +30,11 @@
 
 #include "base/assert.h"
 #include "base/types.h"
-#include "device/enum.h"
+#include "graphics/enum.h"
 #include "graphics/color4f.h"
 
 namespace gfx
 {
-    enum class RenderPass {
-        ColorPass,
-        StencilPass,
-        CustomPass = 100
-    };
-
-    // Text alignment inside a rect
-    enum TextAlign {
-        // Vertical text alignment
-        AlignTop     = 0x1,
-        AlignVCenter = 0x2,
-        AlignBottom  = 0x4,
-        // Horizontal text alignment
-        AlignLeft    = 0x10,
-        AlignHCenter = 0x20,
-        AlignRight   = 0x40
-    };
-
-    enum TextProp {
-        None      = 0x0,
-        Underline = 0x1,
-        Blinking  = 0x2
-    };
-
-    using BufferUsage = dev::BufferUsage;
-
-    // Style of the drawable's geometry determines how the geometry
-    // is to be rasterized.
-    enum class DrawPrimitive {
-        Points, Lines, Triangles
-    };
-
-    // broad category of drawables for describing the semantic
-    // meaning of the drawable. Each drawable in this category
-    // has specific constraint and specific requirements in order
-    // for the drawable and material to work together.
-    //
-    // Category    Particle Data  Tile Data  Tris Points  Lines
-    //----------------------------------------------------------
-    // Basic                                  *     *       *
-    // Particles        *                           *       *
-    // TileBatch                     *        *     *
-    //
-    // In other words if we're for example rendering particles
-    // then the material can expect there to be per particle data
-    // and the rasterizer draw primitive is either POINTS or LINES.
-    //
-    // If any material's shader source is written to support
-    // multiple different drawable types then care must be taken
-    // to ensure that the right set of varyings are exposed  in
-    // the vertex-fragment shader interface. In other words if we
-    // have a fragment shader that can module it's output with per
-    // particle alpha but the shader is used with a non-particle
-    // drawable then there's not going to be incoming per particle
-    // alpha value which means that if the fragment shader has
-    // 'in float vParticleAlpha' it will cause a program link error.
-    enum class DrawCategory {
-        // Lines, line batches, polygons, simple shapes such as rect
-        // round rect, circle, 2D and 3D
-        Basic,
-        // Particles with per particle data.
-        Particles,
-        // Tiles with per tile data.
-        TileBatch
-    };
 
     // type aliases for base types for gfx.
     using FPoint = base::FPoint;
@@ -113,6 +49,33 @@ namespace gfx
     using FCircle = base::FCircle;
     using FRadians = base::FRadians;
     using FDegrees = base::FDegrees;
+
+    struct BasicLight {
+        BasicLightType type = BasicLightType::Ambient;
+        // lights position in view space. in other words the
+        // result of transforming the light with the light's model
+        // view matrix.
+        glm::vec3 position = {0.0f, 0.0f, 0.0f};
+        // light's direction vector that applies to spot and
+        // directional lights.
+        glm::vec3 direction = {0.0f, 0.0f, -1.0f};
+        gfx::Color4f ambient_color;
+        gfx::Color4f diffuse_color;
+        gfx::Color4f specular_color;
+        gfx::FDegrees spot_half_angle;
+        float constant_attenuation = 1.0f;
+        float linear_attenuation = 0.0f;
+        float quadratic_attenuation = 0.0f;
+    };
+
+    struct BasicFog {
+        gfx::Color4f color;
+        float start_dist = 10.0f;
+        float end_dist = 100.0f;
+        float density = 1.0f;
+        BasicFogMode mode = BasicFogMode::Linear;
+    };
+
 
     struct Quad {
         glm::vec4 top_left;
