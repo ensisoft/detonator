@@ -20,7 +20,7 @@
 
 namespace app
 {
-void SerializeProjectSettings(QJsonObject& project, const ProjectSettings& settings)
+void IntoJson(QJsonObject& project, const ProjectSettings& settings)
 {
     JsonWrite(project, "multisample_sample_count",  settings.multisample_sample_count);
     JsonWrite(project, "application_identifier"  ,  settings.application_identifier);
@@ -90,6 +90,78 @@ void SerializeProjectSettings(QJsonObject& project, const ProjectSettings& setti
     JsonWrite(project, "preview_entity_script"   ,  settings.preview_entity_script);
     JsonWrite(project, "preview_scene_script"    ,  settings.preview_scene_script);
     JsonWrite(project, "preview_ui_script"       ,  settings.preview_ui_script);
+}
+
+void FromJson(const QJsonObject& project, ProjectSettings& settings)
+{
+    JsonReadSafe(project, "multisample_sample_count"  , &settings.multisample_sample_count);
+    JsonReadSafe(project, "application_identifier"    , &settings.application_identifier);
+    JsonReadSafe(project, "application_name"          , &settings.application_name);
+    JsonReadSafe(project, "application_version"       , &settings.application_version);
+    JsonReadSafe(project, "application_library_win"   , &settings.application_library_win);
+    JsonReadSafe(project, "application_library_lin"   , &settings.application_library_lin);
+    JsonReadSafe(project, "loading_screen_font"       , &settings.loading_font);
+    JsonReadSafe(project, "debug_font"                , &settings.debug_font);
+    JsonReadSafe(project, "debug_show_fps"            , &settings.debug_show_fps);
+    JsonReadSafe(project, "debug_show_msg"            , &settings.debug_show_msg);
+    JsonReadSafe(project, "debug_draw"                , &settings.debug_draw);
+    JsonReadSafe(project, "debug_print_fps"           , &settings.debug_print_fps);
+    JsonReadSafe(project, "logging_debug"             , &settings.log_debug);
+    JsonReadSafe(project, "logging_warn"              , &settings.log_debug);
+    JsonReadSafe(project, "logging_info"              , &settings.log_debug);
+    JsonReadSafe(project, "logging_error"             , &settings.log_debug);
+    JsonReadSafe(project, "default_min_filter"        , &settings.default_min_filter);
+    JsonReadSafe(project, "default_mag_filter"        , &settings.default_mag_filter);
+    JsonReadSafe(project, "webgl_power_preference"    , &settings.webgl_power_preference);
+    JsonReadSafe(project, "webgl_antialias"           , &settings.webgl_antialias);
+    JsonReadSafe(project, "html5_developer_ui"        , &settings.html5_developer_ui);
+    JsonReadSafe(project, "canvas_mode"               , &settings.canvas_mode);
+    JsonReadSafe(project, "canvas_fs_strategy"        , &settings.canvas_fs_strategy);
+    JsonReadSafe(project, "canvas_width"              , &settings.canvas_width);
+    JsonReadSafe(project, "canvas_height"             , &settings.canvas_height);
+    JsonReadSafe(project, "window_mode"               , &settings.window_mode);
+    JsonReadSafe(project, "window_width"              , &settings.window_width);
+    JsonReadSafe(project, "window_height"             , &settings.window_height);
+    JsonReadSafe(project, "window_can_resize"         , &settings.window_can_resize);
+    JsonReadSafe(project, "window_has_border"         , &settings.window_has_border);
+    JsonReadSafe(project, "window_vsync"              , &settings.window_vsync);
+    JsonReadSafe(project, "window_cursor"             , &settings.window_cursor);
+    JsonReadSafe(project, "config_srgb"               , &settings.config_srgb);
+    JsonReadSafe(project, "grab_mouse"                , &settings.grab_mouse);
+    JsonReadSafe(project, "save_window_geometry"      , &settings.save_window_geometry);
+    JsonReadSafe(project, "ticks_per_second"          , &settings.ticks_per_second);
+    JsonReadSafe(project, "updates_per_second"        , &settings.updates_per_second);
+    JsonReadSafe(project, "working_folder"            , &settings.working_folder);
+    JsonReadSafe(project, "game_home"                 , &settings.game_home);
+    JsonReadSafe(project, "command_line_arguments"    , &settings.command_line_arguments);
+    JsonReadSafe(project, "use_gamehost_process"      , &settings.use_gamehost_process);
+    JsonReadSafe(project, "enable_physics"            , &settings.enable_physics);
+    JsonReadSafe(project, "num_position_iterations"   , &settings.num_position_iterations);
+    JsonReadSafe(project, "num_velocity_iterations"   , &settings.num_velocity_iterations);
+    JsonReadSafe(project, "phys_gravity_x"            , &settings.physics_gravity.x);
+    JsonReadSafe(project, "phys_gravity_y"            , &settings.physics_gravity.y);
+    JsonReadSafe(project, "phys_scale_x"              , &settings.physics_scale.x);
+    JsonReadSafe(project, "phys_scale_y"              , &settings.physics_scale.y);
+    JsonReadSafe(project, "game_viewport_width"       , &settings.viewport_width);
+    JsonReadSafe(project, "game_viewport_height"      , &settings.viewport_height);
+    JsonReadSafe(project, "clear_color"               , &settings.clear_color);
+    JsonReadSafe(project, "mouse_pointer_material"    , &settings.mouse_pointer_material);
+    JsonReadSafe(project, "mouse_pointer_drawable"    , &settings.mouse_pointer_drawable);
+    JsonReadSafe(project, "mouse_pointer_visible"     , &settings.mouse_pointer_visible);
+    JsonReadSafe(project, "mouse_pointer_hotspot"     , &settings.mouse_pointer_hotspot);
+    JsonReadSafe(project, "mouse_pointer_size"        , &settings.mouse_pointer_size);
+    JsonReadSafe(project, "mouse_pointer_units"       , &settings.mouse_pointer_units);
+    JsonReadSafe(project, "game_script"               , &settings.game_script);
+    JsonReadSafe(project, "audio_channels"            , &settings.audio_channels);
+    JsonReadSafe(project, "audio_sample_rate"         , &settings.audio_sample_rate);
+    JsonReadSafe(project, "audio_sample_type"         , &settings.audio_sample_type);
+    JsonReadSafe(project, "audio_buffer_size"         , &settings.audio_buffer_size);
+    JsonReadSafe(project, "enable_audio_pcm_caching"  , &settings.enable_audio_pcm_caching);
+    JsonReadSafe(project, "desktop_audio_io_strategy" , &settings.desktop_audio_io_strategy);
+    JsonReadSafe(project, "wasm_audio_io_strategy"    , &settings.wasm_audio_io_strategy);
+    JsonReadSafe(project, "preview_entity_script"     , &settings.preview_entity_script);
+    JsonReadSafe(project, "preview_scene_script"      , &settings.preview_scene_script);
+    JsonReadSafe(project, "preview_ui_script"         , &settings.preview_ui_script);
 }
 
 } // namespace

@@ -227,6 +227,7 @@ namespace app
         QString preview_ui_script = "app://scripts/preview/ui.lua";
     };
 
-    void SerializeProjectSettings(QJsonObject& json, const ProjectSettings& settings);
+    void IntoJson(QJsonObject& json, const ProjectSettings& settings);
+    void FromJson(const QJsonObject& json, ProjectSettings& settings);
 
 } // app

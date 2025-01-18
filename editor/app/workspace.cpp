@@ -1310,7 +1310,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     QJsonObject json;
 
     QJsonObject project;
-    SerializeProjectSettings(project, mSettings);
+    IntoJson(project, mSettings);
 
     // serialize the workspace properties into JSON
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
@@ -1370,74 +1370,7 @@ bool Workspace::LoadProperties(const QString& filename, WorkspaceAsyncWorkObserv
     QJsonDocument docu(QJsonDocument::fromJson(buff));
 
     const QJsonObject& project = docu["project"].toObject();
-    JsonReadSafe(project, "multisample_sample_count", &mSettings.multisample_sample_count);
-    JsonReadSafe(project, "application_identifier",   &mSettings.application_identifier);
-    JsonReadSafe(project, "application_name",         &mSettings.application_name);
-    JsonReadSafe(project, "application_version",      &mSettings.application_version);
-    JsonReadSafe(project, "application_library_win",  &mSettings.application_library_win);
-    JsonReadSafe(project, "application_library_lin",  &mSettings.application_library_lin);
-    JsonReadSafe(project, "loading_screen_font"     , &mSettings.loading_font);
-    JsonReadSafe(project, "debug_font"              , &mSettings.debug_font);
-    JsonReadSafe(project, "debug_show_fps"          , &mSettings.debug_show_fps);
-    JsonReadSafe(project, "debug_show_msg"          , &mSettings.debug_show_msg);
-    JsonReadSafe(project, "debug_draw"              , &mSettings.debug_draw);
-    JsonReadSafe(project, "debug_print_fps"         , &mSettings.debug_print_fps);
-    JsonReadSafe(project, "logging_debug"           , &mSettings.log_debug);
-    JsonReadSafe(project, "logging_warn"            , &mSettings.log_debug);
-    JsonReadSafe(project, "logging_info"            , &mSettings.log_debug);
-    JsonReadSafe(project, "logging_error"           , &mSettings.log_debug);
-    JsonReadSafe(project, "default_min_filter",       &mSettings.default_min_filter);
-    JsonReadSafe(project, "default_mag_filter",       &mSettings.default_mag_filter);
-    JsonReadSafe(project, "webgl_power_preference"  , &mSettings.webgl_power_preference);
-    JsonReadSafe(project, "webgl_antialias"         , &mSettings.webgl_antialias);
-    JsonReadSafe(project, "html5_developer_ui"      , &mSettings.html5_developer_ui);
-    JsonReadSafe(project, "canvas_mode"             , &mSettings.canvas_mode);
-    JsonReadSafe(project, "canvas_fs_strategy"      , &mSettings.canvas_fs_strategy);
-    JsonReadSafe(project, "canvas_width"            , &mSettings.canvas_width);
-    JsonReadSafe(project, "canvas_height"           , &mSettings.canvas_height);
-    JsonReadSafe(project, "window_mode",              &mSettings.window_mode);
-    JsonReadSafe(project, "window_width",             &mSettings.window_width);
-    JsonReadSafe(project, "window_height",            &mSettings.window_height);
-    JsonReadSafe(project, "window_can_resize",        &mSettings.window_can_resize);
-    JsonReadSafe(project, "window_has_border",        &mSettings.window_has_border);
-    JsonReadSafe(project, "window_vsync",             &mSettings.window_vsync);
-    JsonReadSafe(project, "window_cursor",            &mSettings.window_cursor);
-    JsonReadSafe(project, "config_srgb",              &mSettings.config_srgb);
-    JsonReadSafe(project, "grab_mouse",               &mSettings.grab_mouse);
-    JsonReadSafe(project, "save_window_geometry",     &mSettings.save_window_geometry);
-    JsonReadSafe(project, "ticks_per_second",         &mSettings.ticks_per_second);
-    JsonReadSafe(project, "updates_per_second",       &mSettings.updates_per_second);
-    JsonReadSafe(project, "working_folder",           &mSettings.working_folder);
-    JsonReadSafe(project, "game_home",                &mSettings.game_home);
-    JsonReadSafe(project, "command_line_arguments",   &mSettings.command_line_arguments);
-    JsonReadSafe(project, "use_gamehost_process",     &mSettings.use_gamehost_process);
-    JsonReadSafe(project, "enable_physics",           &mSettings.enable_physics);
-    JsonReadSafe(project, "num_position_iterations",  &mSettings.num_position_iterations);
-    JsonReadSafe(project, "num_velocity_iterations",  &mSettings.num_velocity_iterations);
-    JsonReadSafe(project, "phys_gravity_x",           &mSettings.physics_gravity.x);
-    JsonReadSafe(project, "phys_gravity_y",           &mSettings.physics_gravity.y);
-    JsonReadSafe(project, "phys_scale_x",             &mSettings.physics_scale.x);
-    JsonReadSafe(project, "phys_scale_y",             &mSettings.physics_scale.y);
-    JsonReadSafe(project, "game_viewport_width",      &mSettings.viewport_width);
-    JsonReadSafe(project, "game_viewport_height",     &mSettings.viewport_height);
-    JsonReadSafe(project, "clear_color",              &mSettings.clear_color);
-    JsonReadSafe(project, "mouse_pointer_material",   &mSettings.mouse_pointer_material);
-    JsonReadSafe(project, "mouse_pointer_drawable",   &mSettings.mouse_pointer_drawable);
-    JsonReadSafe(project, "mouse_pointer_visible",    &mSettings.mouse_pointer_visible);
-    JsonReadSafe(project, "mouse_pointer_hotspot",    &mSettings.mouse_pointer_hotspot);
-    JsonReadSafe(project, "mouse_pointer_size",       &mSettings.mouse_pointer_size);
-    JsonReadSafe(project, "mouse_pointer_units",      &mSettings.mouse_pointer_units);
-    JsonReadSafe(project, "game_script",              &mSettings.game_script);
-    JsonReadSafe(project, "audio_channels",           &mSettings.audio_channels);
-    JsonReadSafe(project, "audio_sample_rate",        &mSettings.audio_sample_rate);
-    JsonReadSafe(project, "audio_sample_type",        &mSettings.audio_sample_type);
-    JsonReadSafe(project, "audio_buffer_size",        &mSettings.audio_buffer_size);
-    JsonReadSafe(project, "enable_audio_pcm_caching", &mSettings.enable_audio_pcm_caching);
-    JsonReadSafe(project, "desktop_audio_io_strategy", &mSettings.desktop_audio_io_strategy);
-    JsonReadSafe(project, "wasm_audio_io_strategy"  , &mSettings.wasm_audio_io_strategy);
-    JsonReadSafe(project, "preview_entity_script"   , &mSettings.preview_entity_script);
-    JsonReadSafe(project, "preview_scene_script"    , &mSettings.preview_scene_script);
-    JsonReadSafe(project, "preview_ui_script"       , &mSettings.preview_ui_script);
+    FromJson(project, mSettings);
 
     // load the workspace properties.
     mProperties = docu["workspace"].toObject().toVariantMap();
