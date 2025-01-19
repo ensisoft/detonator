@@ -24,6 +24,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "base/bitflag.h"
 #include "graphics/enum.h"
@@ -108,18 +109,23 @@ namespace gfx
 
         inline const auto& GetLight(size_t index) const noexcept
         { return base::SafeIndex(mLights, index); }
-        inline auto& GetLight(size_t index) noexcept
-        { return base::SafeIndex(mLights, index); }
+        inline auto GetLight(size_t index) noexcept
+        { return *base::SafeIndex(mLights, index); }
 
         inline void AddLight(const Light& light)
-        { mLights.push_back(light); }
+        { mLights.push_back(MakeSharedLight(light)); }
         inline void AddLight(Light&& light)
+        { mLights.push_back(MakeSharedLight(std::move(light))); }
+        inline void AddLight(std::shared_ptr<const Light> light)
         { mLights.push_back(std::move(light)); }
 
         inline void SetLight(const Light& light, size_t index) noexcept
-        { base::SafeIndex(mLights, index) = light; }
+        { base::SafeIndex(mLights, index) = MakeSharedLight(light); }
         inline void SetLight(Light&& light, size_t index) noexcept
-        { base::SafeIndex(mLights, index) = std::move(light); }
+        { base::SafeIndex(mLights, index) = MakeSharedLight(std::move(light)); }
+
+        inline void ClearLights() noexcept
+        { mLights.clear(); }
 
         inline void SetFog(const Fog& fog) noexcept
         { mFog = fog; }
@@ -161,9 +167,18 @@ namespace gfx
         void ApplyLightState(const Device& device, ProgramState& program) const;
         void ApplyFogState(const Device& device, ProgramState& program) const;
 
+        static std::shared_ptr<const Light> MakeSharedLight(const Light& data)
+        {
+            return std::make_shared<Light>(data);
+        }
+        static std::shared_ptr<const Light> MakeSharedLight(Light&& light)
+        {
+            return std::make_shared<Light>(std::move(light));
+        }
+
     private:
         std::string mName;
-        std::vector<Light> mLights;
+        std::vector<std::shared_ptr<const Light>> mLights;
         glm::vec3 mCameraCenter = {0.0f, 0.0f, 0.0f};
         gfx::Color4f mBloomColor;
         float mBloomThreshold = 0.0f;
