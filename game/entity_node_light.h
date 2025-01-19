@@ -18,6 +18,10 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/vec3.hpp>
+#include "warnpop.h"
+
 #include <memory>
 #include <string>
 #include <cstddef>
@@ -31,15 +35,16 @@
 
 namespace game
 {
-    class LightClass
+    class BasicLightClass
     {
     public:
-        enum class LightType {
-            ScreenSpace2DLight
-        };
+        using LightType = BasicLightType;
+
         enum class Flags {
             Enabled
         };
+
+        BasicLightClass();
 
         inline int GetLayer() const noexcept
         { return mLayer; }
@@ -66,54 +71,83 @@ namespace game
         inline void SetLightType(LightType type) noexcept
         { mLightType = type; }
 
-        void SetLightParameter(const std::string& key, LightParam value)
-        { mLightParams[key] = value; }
+        inline void SetDirection(glm::vec3 direction) noexcept
+        { mDirection = direction; }
+        inline void SetTranslation(glm::vec3 translation) noexcept
+        { mTranslation = translation; }
+        inline void SetAmbientColor(const base::Color4f& color) noexcept
+        { mAmbientColor = color; }
+        inline void SetDiffuseColor(const base::Color4f& color) noexcept
+        { mDiffuseColor = color; }
+        inline void SetSpecularColor(const base::Color4f& color) noexcept
+        { mSpecularColor = color; }
+        inline void SetSpotHalfAngle(base::FDegrees degrees) noexcept
+        { mSpotHalfAngle = degrees; }
+        inline void SetSpotHalfAngle(base::FRadians radians) noexcept
+        { mSpotHalfAngle = radians; }
+        inline void SetConstantAttenuation(float attenuation) noexcept
+        { mConstantAttenuation = attenuation; }
+        inline void SetLinearAttenuation(float attenuation) noexcept
+        { mLinearAttenuation = attenuation; }
+        inline void SetQuadraticAttenuation(float attenuation) noexcept
+        { mQuadraticAttenuation = attenuation; }
 
-        bool HasLightParameter(const std::string& key) const noexcept
-        { return base::Contains(mLightParams, key); }
-
-        template<typename T>
-        const T* GetLightParameter(const std::string& key) const noexcept
-        {
-            if (const auto* ptr = base::SafeFind(mLightParams, key))
-            {
-                ASSERT(std::holds_alternative<T>(*ptr));
-                return std::get_if<T>(ptr);
-            }
-            return nullptr;
-        }
-
-        template<typename T>
-        const T GetLightParameter(const std::string& key, const T& value) const noexcept
-        {
-            if (const auto* ptr = base::SafeFind(mLightParams, key))
-            {
-                ASSERT(std::holds_alternative<T>(*ptr));
-                return std::get_if<T>(ptr);
-            }
-            return value;
-        }
+        inline const auto& GetDirection() const noexcept
+        { return mDirection; }
+        inline const auto& GetTranslation() const noexcept
+        { return mTranslation; }
+        inline const auto& GetAmbientColor() const noexcept
+        { return mAmbientColor; }
+        inline const auto& GetDiffuseColor() const noexcept
+        { return mDiffuseColor; }
+        inline const auto& GetSpecularColor() const noexcept
+        { return mSpecularColor; }
+        inline const auto& GetSpotHalfAngle() const noexcept
+        { return mSpotHalfAngle; }
+        inline float GetConstantAttenuation() const noexcept
+        { return mConstantAttenuation; }
+        inline float GetLinearAttenuation() const noexcept
+        { return mLinearAttenuation; }
+        inline float GetQuadraticAttenuation() const noexcept
+        { return mQuadraticAttenuation; }
 
         void IntoJson(data::Writer& data) const;
         bool FromJson(const data::Reader& data);
         size_t GetHash() const;
 
     private:
-        LightType mLightType = LightType::ScreenSpace2DLight;
-        LightParamMap mLightParams;
+        LightType mLightType = LightType::Ambient;
         base::bitflag<Flags> mFlags;
+        glm::vec3 mDirection = {1.0f, 0.0f, 0.0f};
+        glm::vec3 mTranslation = {0.0f, 0.0f, 0.0f};
+        game::Color4f mAmbientColor;
+        game::Color4f mDiffuseColor;
+        game::Color4f mSpecularColor;
+        game::FDegrees mSpotHalfAngle;
+        float mConstantAttenuation  = 1.0f;
+        float mLinearAttenuation    = 0.0f;
+        float mQuadraticAttenuation = 0.0f;
         int mLayer = 0;
     };
 
-    class Light
+    class BasicLight
     {
     public:
-        using Flags = LightClass::Flags;
-        using Type  = LightClass::LightType;
+        using LightType  = BasicLightClass::LightType;
+        using Flags = BasicLightClass::Flags;
 
-        explicit Light(std::shared_ptr<const LightClass> klass) noexcept
+        explicit BasicLight(std::shared_ptr<const BasicLightClass> klass) noexcept
           : mClass(klass)
           , mInstanceFlags(mClass->GetFlags())
+          , mDirection(mClass->GetDirection())
+          , mTranslation(mClass->GetTranslation())
+          , mAmbientColor(mClass->GetAmbientColor())
+          , mDiffuseColor(mClass->GetDiffuseColor())
+          , mSpecularColor(mClass->GetSpecularColor())
+          , mSpotHalfAngle(mClass->GetSpotHalfAngle())
+          , mConstantAttenuation(mClass->GetConstantAttenuation())
+          , mLinearAttenuation(mClass->GetLinearAttenuation())
+          , mQuadraticAttenuation(mClass->GetQuadraticAttenuation())
         {}
 
         inline bool TestFlag(Flags flag) const noexcept
@@ -124,21 +158,48 @@ namespace game
         inline int GetLayer() const noexcept
         { return mClass->GetLayer(); }
 
-        inline Type GetLightType() const noexcept
+        inline LightType GetLightType() const noexcept
         { return mClass->GetLightType(); }
 
         inline bool IsEnabled() const noexcept
         { return TestFlag(Flags::Enabled); }
 
-        inline const LightClass& GetClass() const noexcept
+        inline const auto& GetDirection() const noexcept
+        { return mDirection; }
+        inline const auto& GetTranslation() const noexcept
+        { return mTranslation; }
+        inline const auto& GetAmbientColor() const noexcept
+        { return mAmbientColor; }
+        inline const auto& GetDiffuseColor() const noexcept
+        { return mDiffuseColor; }
+        inline const auto& GetSpecularColor() const noexcept
+        { return mSpecularColor; }
+        inline const auto& GetSpotHalfAngle() const noexcept
+        { return mSpotHalfAngle; }
+        inline float GetConstantAttenuation() const noexcept
+        { return mConstantAttenuation; }
+        inline float GetLinearAttenuation() const noexcept
+        { return mLinearAttenuation; }
+        inline float GetQuadraticAttenuation() const noexcept
+        { return mQuadraticAttenuation; }
+
+        inline const BasicLightClass& GetClass() const noexcept
         { return *mClass; }
-        const LightClass* operator->() const noexcept
+        const BasicLightClass* operator->() const noexcept
         { return mClass.get(); }
 
     private:
-        std::shared_ptr<const LightClass> mClass;
-        base::bitflag<LightClass::Flags> mInstanceFlags;
+        std::shared_ptr<const BasicLightClass> mClass;
+        base::bitflag<Flags> mInstanceFlags;
+        glm::vec3 mDirection = {1.0f, 0.0f, 0.0f};
+        glm::vec3 mTranslation = {0.0f, 0.0f, 0.0f};
+        game::Color4f mAmbientColor;
+        game::Color4f mDiffuseColor;
+        game::Color4f mSpecularColor;
+        game::FDegrees mSpotHalfAngle;
+        float mConstantAttenuation  = 1.0f;
+        float mLinearAttenuation    = 0.0f;
+        float mQuadraticAttenuation = 0.0f;
     };
-
 
 } // namespace

@@ -1475,7 +1475,7 @@ bool Entity::HasLights() const
 {
     for (auto& node : mNodes)
     {
-        if (node->HasLight())
+        if (node->HasBasicLight())
             return true;
     }
     return false;

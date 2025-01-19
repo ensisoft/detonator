@@ -20,6 +20,10 @@
 
 namespace game {
 
+    enum class BasicLightType {
+        Ambient, Directional, Spot, Point
+    };
+
     enum class RigidBodyJointSetting {
         EnableMotor,
         EnableLimit,
