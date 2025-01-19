@@ -61,6 +61,31 @@ namespace gui {
     };
 } // gui
 
+class Vector3WidgetPlugin : public QObject, public QDesignerCustomWidgetInterface
+{
+Q_OBJECT
+    Q_INTERFACES(QDesignerCustomWidgetInterface)
+
+public:
+    Vector3WidgetPlugin(QObject* parent = nullptr);
+
+    virtual bool isContainer() const override;
+    virtual bool isInitialized() const override;
+    virtual QIcon icon() const override;
+    virtual QString domXml() const override;
+    virtual QString group() const override;
+    virtual QString includeFile() const override;
+    virtual QString name() const override;
+    virtual QString toolTip() const override;
+    virtual QString whatsThis() const override;
+    virtual QWidget *createWidget(QWidget *parent) override;
+    virtual void initialize(QDesignerFormEditorInterface *core) override;
+
+private:
+    bool initialized = false;
+};
+
+
 
 class TimeWidgetPlugin : public QObject, public QDesignerCustomWidgetInterface
 {

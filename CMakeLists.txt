@@ -685,6 +685,9 @@ add_executable(Detonator
     editor/gui/uniform.h
     editor/gui/uniform.ui
     editor/gui/uniform.cpp
+    editor/gui/vector3.h
+    editor/gui/vector3.ui
+    editor/gui/vector3.cpp
     editor/gui/palettematerial.h
     editor/gui/palettematerial.ui
     editor/gui/palettematerial.cpp
