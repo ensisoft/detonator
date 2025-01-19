@@ -27,6 +27,7 @@
 #include <QtDesigner/QDesignerPropertySheetExtension>
 
 #include "plugin.h"
+#include "../vector3.h"
 #include "../timewidget.h"
 #include "../doubleslider.h"
 #include "../spinboxwidget.h"
@@ -53,6 +54,67 @@ namespace gui {
     }
 
 }
+
+Vector3WidgetPlugin::Vector3WidgetPlugin(QObject* parent)
+  :  QObject(parent)
+{}
+
+bool Vector3WidgetPlugin::isContainer() const
+{
+    return false;
+}
+bool Vector3WidgetPlugin::isInitialized() const
+{
+    return initialized;
+}
+QIcon Vector3WidgetPlugin::icon() const
+{
+    return QIcon();
+}
+QString Vector3WidgetPlugin::domXml() const
+{
+    return "<ui language=\"c++\">\n"
+           " <widget class=\"gui::Vector3\" name=\"vec3\">\n"
+           "  <property name=\"geometry\">\n"
+           "   <rect>\n"
+           "    <x>0</x>\n"
+           "    <y>0</y>\n"
+           "    <width>200</width>\n"
+           "    <height>20</height>\n"
+           "   </rect>\n"
+           "  </property>\n"
+           " </widget>\n"
+           "</ui>\n";
+}
+QString Vector3WidgetPlugin::group() const
+{
+    return "DETONATOR2D";
+}
+QString Vector3WidgetPlugin::includeFile() const
+{
+    return "vector3.h";
+}
+QString Vector3WidgetPlugin::name() const
+{
+    return "gui::Vector3";
+}
+QString Vector3WidgetPlugin::toolTip() const
+{
+    return "";
+}
+QString Vector3WidgetPlugin::whatsThis() const
+{
+    return "";
+}
+QWidget* Vector3WidgetPlugin::createWidget(QWidget *parent)
+{
+    return new gui::Vector3(parent);
+}
+void Vector3WidgetPlugin::initialize(QDesignerFormEditorInterface *core)
+{
+    initialized = true;
+}
+
 
 TimeWidgetPlugin::TimeWidgetPlugin(QObject* parent)
         : QObject(parent)
@@ -649,6 +711,7 @@ MyCustomWidgets::MyCustomWidgets(QObject* parent)
     widgets.append(new UikWidgetStyleWidgetPlugin(this));
     widgets.append(new CurveWidgetPlugin(this));
     widgets.append(new TimeWidgetPlugin(this));
+    widgets.append(new Vector3WidgetPlugin(this));
 }
 
 QList<QDesignerCustomWidgetInterface*> MyCustomWidgets::customWidgets() const

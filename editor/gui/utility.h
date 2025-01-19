@@ -47,6 +47,7 @@
 #include <algorithm>
 
 #include "base/assert.h"
+#include "base/math.h"
 #include "base/types.h"
 #include "graphics/bitmap.h"
 #include "graphics/color4f.h"
@@ -61,7 +62,7 @@
 #include "editor/gui/uniform.h"
 #include "editor/gui/spinboxwidget.h"
 #include "editor/gui/doubleslider.h"
-
+#include "editor/gui/vector3.h"
 
 // general dumping ground for utility type of functionality
 // related to the GUI and GUI types.
@@ -418,6 +419,12 @@ EnumT EnumFromCombo(const QComboBox* combo)
     const auto& val = magic_enum::enum_cast<EnumT>(value);
     ASSERT(val.has_value());
     return val.value();
+}
+
+inline void SetValue(gui::Vector3* vec, const glm::vec3& value)
+{
+    QSignalBlocker s(vec);
+    vec->SetValue(value);
 }
 
 inline void SetValue(gui::DoubleSpinBox* spin, double value)
@@ -1364,6 +1371,15 @@ struct DoubleSliderValueGetter
     const gui::DoubleSlider* slider = nullptr;
 };
 
+struct Vec3ValueGetter
+{
+    operator glm::vec3() const
+    { return vector->GetValue(); }
+    const gui::Vector3* vector = nullptr;
+};
+
+inline Vec3ValueGetter GetValue(const gui::Vector3* vector)
+{ return Vec3ValueGetter { vector }; }
 inline FontComboValueGetter GetValue(QFontComboBox* cmb)
 { return FontComboValueGetter { cmb }; }
 inline DoubleSliderValueGetter GetValue(const gui::DoubleSlider* slider)
