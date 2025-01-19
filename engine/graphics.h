@@ -27,6 +27,7 @@
 #include <memory>
 
 #include "base/bitflag.h"
+#include "graphics/types.h"
 #include "graphics/painter.h"
 #include "graphics/fwd.h"
 #include "engine/camera.h"
@@ -101,6 +102,23 @@ namespace engine
         float line_width = 1.0f;
     };
 
+    struct Light {
+        std::shared_ptr<gfx::BasicLight> light;
+
+        glm::vec2 sort_point = {0.0f, 0.0f};
+
+        // model to world transform for transforming the light
+        // to world coordinates.
+        glm::mat4 transform;
+
+        std::int32_t render_layer = 0;
+        std::int32_t packet_index = 0;
+
+        std::uint32_t map_row = 0;
+        std::uint32_t map_col = 0;
+        std::uint16_t map_layer = 0;
+    };
+
     class PacketFilter
     {
     public:
@@ -112,11 +130,13 @@ namespace engine
         std::vector<gfx::Painter::DrawCommand> draw_color_list;
         std::vector<gfx::Painter::DrawCommand> mask_cover_list;
         std::vector<gfx::Painter::DrawCommand> mask_expose_list;
+        std::vector<const Light*> layer_lights;
     };
 
     using EntityRenderLayerList = std::vector<RenderLayer>;
     using SceneRenderLayerList  = std::vector<EntityRenderLayerList>;
     using DrawPacketList = std::vector<DrawPacket>;
+    using LightList = std::vector<Light>;
 
     class LowLevelRendererHook
     {
@@ -153,6 +173,7 @@ namespace engine
             Surface surface;
             bool editing_mode = false;
             bool enable_bloom = false;
+            bool enable_lights = false;
             glm::vec2 pixel_ratio = {1.0f, 1.0f};
             BloomParams bloom;
         };
@@ -200,6 +221,11 @@ namespace engine
             mSettings.editing_mode = on_off;
         }
 
+        inline void EnableLights(bool on_off) noexcept
+        {
+            mSettings.enable_lights = on_off;
+        }
+
         inline void EnableBloom(bool on_off) noexcept
         {
             mSettings.enable_bloom = on_off;
@@ -213,8 +239,8 @@ namespace engine
             mPacketFilter = packet_filter;
         }
 
-        void Draw(DrawPacketList& packets) const;
-        void Blit() const;
+        void DrawPackets(DrawPacketList& packets, LightList& lights) const;
+        void BlitImage() const;
 
     private:
         unsigned GetSurfaceWidth() const noexcept
@@ -225,9 +251,9 @@ namespace engine
         {
             return mSettings.surface.size.GetHeight();
         }
-        void DrawDefault(DrawPacketList& packets) const;
-        void DrawFramebuffer(DrawPacketList& packets) const;
-        void Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx::ShaderProgram& program) const;
+        void DrawDefault(DrawPacketList& packets, LightList& lights) const;
+        void DrawFramebuffer(DrawPacketList& packets, LightList& lights) const;
+        void Draw(DrawPacketList& packets, LightList& lights, gfx::Framebuffer* fbo, gfx::GenericShaderProgram& program) const;
         bool CullDrawPacket(const DrawPacket& packet, const glm::mat4& projection, const glm::mat4& modelview) const;
 
     private:

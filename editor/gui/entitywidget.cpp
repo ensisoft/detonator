@@ -753,7 +753,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFontNames(mUI.tiFontName);
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
-    SetValue(mUI.cmbStyle, engine::Renderer::RenderingStyle::Normal);
+    SetValue(mUI.cmbStyle, engine::Renderer::RenderingStyle::FlatColor);
     SetValue(mUI.zoom, 1.0f);
     SetVisible(mUI.transform, false);
 

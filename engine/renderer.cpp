@@ -48,6 +48,7 @@
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
 #include "game/entity_node_tilemap_node.h"
+#include "game/entity_node_light.h"
 #include "engine/renderer.h"
 #include "engine/graphics.h"
 #include "engine/camera.h"
@@ -67,8 +68,11 @@ void Renderer::BeginFrame()
 {
     if (mEditingMode)
     {
-        for (auto& p: mPaintNodes)
-            p.second.visited = false;
+        for (auto& node: mPaintNodes)
+            node.second.visited = false;
+
+        for (auto& light : mLightNodes)
+            light.second.visited = false;
     }
 }
 
@@ -81,7 +85,7 @@ void Renderer::CreateRendererState(const game::Scene& scene, const game::Tilemap
     for (const auto& p : nodes)
     {
         const Entity* entity = p.entity;
-        if (!entity->HasRenderableItems())
+        if (!entity->HasRenderableItems() && !entity->HasLights())
             continue;
 
         gfx::Transform transform(p.node_to_scene);
@@ -106,6 +110,8 @@ void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap
                 const auto& node = entity->GetNode(i);
                 mPaintNodes.erase("drawable/" + node.GetId());
                 mPaintNodes.erase("text-item/" + node.GetId());
+
+                mLightNodes.erase("basic/" + node.GetId());
             }
         }
         else
@@ -155,6 +161,7 @@ void Renderer::UpdateRendererState(const game::Tilemap& map)
 void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
 {
     std::vector<DrawPacket> packets;
+    std::vector<Light> lights;
 
     if (map)
     {
@@ -191,6 +198,12 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
                     CreateTextDrawPackets<Entity, EntityNode>(entity, node, *paint, packets, nullptr);
                     paint->visited = true;
                 }
+
+                if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
+                {
+                    CreateLights<Entity, EntityNode>(entity, node, *light, lights);
+                    light->visited = true;
+                }
             }
         }
 
@@ -203,17 +216,18 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
         // node, map that node to a position on the map tile grid for combining it
         // with the map's tile rendering.
         TRACE_CALL("ComputeTileCoordinates", ComputeTileCoordinates(*map, scene_packet_start_index, packets));
-        TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets));
+        TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets, lights));
         // Sort all packets based on the map based sorting criteria
         TRACE_CALL("SortTilePackets", SortTilePackets(packets));
     }
     else
     {
-        TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets));
+        TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets, lights));
     }
 
     // this is the outcome that the draw function will then actually draw
     std::swap(mRenderBuffer, packets);
+    std::swap(mLightBuffer, lights);
 }
 
 void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* map, SceneClassDrawHook* scene_hook)
@@ -245,6 +259,7 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
     // entity world into tilemap and xy tile position computed.
 
     std::vector<DrawPacket> packets;
+    std::vector<Light> lights;
 
     if (map)
     {
@@ -280,6 +295,7 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
         if (placement->TestFlag(game::EntityPlacement::Flags::VisibleInGame))
         {
             std::vector<DrawPacket> entity_packets;
+            std::vector<Light> entity_lights;
 
             for (size_t i=0; i<entity->GetNumNodes(); ++i)
             {
@@ -296,6 +312,11 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
                     CreateTextDrawPackets<game::EntityClass, game::EntityNodeClass>(*entity, node, *paint, entity_packets, nullptr);
                     paint->visited = true;
                 }
+                if (auto* light = base::SafeFind(mLightNodes, "basic/" + placement->GetId() + "/" + node.GetId()))
+                {
+                    CreateLights<game::EntityClass, game::EntityNodeClass>(*entity, node, *light, entity_lights);
+                    light->visited = true;
+                }
             }
             // generate draw packets uses the entity to ask for the scene layer index.
             // When rendering a SceneClass the entity class doesn't have the layer index
@@ -303,6 +324,10 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
             for (auto& packet: entity_packets)
             {
                 packet.render_layer = placement->GetLayer();
+            }
+            for (auto& light : entity_lights)
+            {
+                light.render_layer = placement->GetLayer();
             }
 
             // Compute tile coordinates for each draw packet created by the entity.
@@ -322,6 +347,8 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
             }
             else base::AppendVector(packets, entity_packets);
 
+            base::AppendVector(lights, entity_lights);
+
         } // visible placement
 
         if (scene_hook)
@@ -336,21 +363,24 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
 
     if (map)
     {
-        OffsetPacketLayers(packets);
+        OffsetPacketLayers(packets, lights);
         SortTilePackets(packets);
     }
     else
     {
-        OffsetPacketLayers(packets);
+        OffsetPacketLayers(packets, lights);
     }
 
     // this is the outcome that the draw function will then actually draw
     std::swap(mRenderBuffer, packets);
+    std::swap(mLightBuffer, lights);
 }
 
 void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook* hook)
 {
     std::vector<DrawPacket> packets;
+    std::vector<Light> lights;
+
     for (size_t i=0; i<entity.GetNumNodes(); ++i)
     {
         const auto& node = entity.GetNode(i);
@@ -375,6 +405,16 @@ void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook*
                 did_paint = true;
             }
         }
+
+        if (node.HasBasicLight())
+        {
+            if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
+            {
+                CreateLights<game::EntityClass, game::EntityNodeClass>(entity, node, *light, lights);
+                light->visited = true;
+            }
+        }
+
         if (hook && !did_paint)
         {
             gfx::Transform transform(entity.FindNodeTransform(&node));
@@ -382,14 +422,17 @@ void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook*
         }
     }
 
-    OffsetPacketLayers(packets);
+    OffsetPacketLayers(packets, lights);
 
     std::swap(mRenderBuffer, packets);
+    std::swap(mLightBuffer, lights);
 }
 
 void Renderer::CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* hook)
 {
     std::vector<DrawPacket> packets;
+    std::vector<Light> lights;
+
     for (size_t i=0; i<entity.GetNumNodes(); ++i)
     {
         const auto& node = entity.GetNode(i);
@@ -408,6 +451,12 @@ void Renderer::CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* h
             paint->visited = true;
             did_paint = true;
         }
+        if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
+        {
+            CreateLights<game::Entity, game::EntityNode>(entity, node, *light, lights);
+            light->visited = true;
+        }
+
         if (hook && !did_paint)
         {
             gfx::Transform transform(entity.FindNodeTransform(&node));
@@ -415,9 +464,10 @@ void Renderer::CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* h
         }
     }
 
-    OffsetPacketLayers(packets);
+    OffsetPacketLayers(packets, lights);
 
     std::swap(mRenderBuffer, packets);
+    std::swap(mLightBuffer, lights);
 }
 
 void Renderer::CreateFrame(const game::Tilemap& map, bool draw_render_layer, bool draw_data_layer, TileBatchDrawHook* hook)
@@ -461,7 +511,9 @@ void Renderer::CreateFrame(const game::Tilemap& map, bool draw_render_layer, boo
     std::vector<DrawPacket> packets;
     GenerateMapDrawPackets(map, batches,packets);
 
-    OffsetPacketLayers(packets);
+    std::vector<Light> lights;
+
+    OffsetPacketLayers(packets, lights);
     SortTilePackets(packets);
 
     // this rendering path doesn't use the runtime rendering path (DrawScenePackets)
@@ -496,19 +548,15 @@ void Renderer::DrawFrame(gfx::Device& device) const
         return;
 
     bool enable_bloom = false;
-    if (mEditingMode)
-    {
-        if (mStyle == RenderingStyle::Normal)
-        {
-            if (IsEnabled(Effects::Bloom))
-                enable_bloom = true;
-        }
-    }
-    else
+    bool enable_lights = false;
+    if (mStyle == RenderingStyle::FlatColor ||
+        mStyle == RenderingStyle::BasicShading)
     {
         if (IsEnabled(Effects::Bloom))
             enable_bloom = true;
     }
+    if (mStyle == RenderingStyle::BasicShading)
+        enable_lights = true;
 
     LowLevelRenderer low_level_renderer(&mRendererName, device);
     low_level_renderer.SetCamera(mCamera);
@@ -518,8 +566,9 @@ void Renderer::DrawFrame(gfx::Device& device) const
     low_level_renderer.SetPacketFilter(mPacketFilter);
     low_level_renderer.SetBloom(mBloom);
     low_level_renderer.EnableBloom(enable_bloom);
-    TRACE_CALL("DrawPackets", low_level_renderer.Draw(mRenderBuffer));
-    TRACE_CALL("BlitImage", low_level_renderer.Blit());
+    low_level_renderer.EnableLights(enable_lights);
+    TRACE_CALL("DrawPackets", low_level_renderer.DrawPackets(mRenderBuffer, mLightBuffer));
+    TRACE_CALL("BlitImage", low_level_renderer.BlitImage());
 }
 
 void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
@@ -572,6 +621,7 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             packet.source       = DrawPacket::Source::Map;
             packet.domain       = DrawPacket::Domain::Scene;
             packet.projection   = DrawPacket::Projection::Orthographic;
+            packet.pass         = DrawPacket::RenderPass::DrawColor;
             packet.material     = batch.material;
             packet.drawable     = std::move(tiles);
             packet.transform    = from_map_to_scene;
@@ -580,7 +630,6 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             packet.map_layer    = batch.layer_index;
             packet.render_layer = batch.render_layer;
             packet.packet_index = 0;
-            packet.pass         = RenderPass::DrawColor;
             packets.push_back(std::move(packet));
         }
         else if (batch.type == TileBatch::Type::Data && mEditingMode)
@@ -595,6 +644,7 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             packet.source       = DrawPacket::Source::Map;
             packet.domain       = DrawPacket::Domain::Editor;
             packet.projection   = DrawPacket::Projection::Orthographic;
+            packet.pass         = DrawPacket::RenderPass::DrawColor;
             packet.material     = batch.material;
             packet.drawable     = std::move(tiles);
             packet.transform    = glm::mat4(1.0f);
@@ -603,7 +653,6 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             packet.map_layer    = batch.layer_index;
             packet.render_layer = batch.render_layer;
             packet.packet_index = 0;
-            packet.pass         = RenderPass::DrawColor;
             packets.push_back(std::move(packet));
         } else BUG("Unhandled tile batch type.");
     }
@@ -751,6 +800,12 @@ void Renderer::Update(const EntityClass& entity, double time, float dt)
             UpdateTextResources<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
             paint->visited = true;
         }
+
+        if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
+        {
+            UpdateLightResources<EntityClass, EntityNodeClass>(entity, node, *light, time, dt);
+            light->visited = true;
+        }
     }
 }
 
@@ -825,12 +880,21 @@ void Renderer::EndFrame()
                 ++it;
             else it = mPaintNodes.erase(it);
         }
+
+        for (auto it = mLightNodes.begin(); it != mLightNodes.end(); )
+        {
+            const auto& light_node = it->second;
+            if (light_node.visited)
+                ++it;
+            else it = mLightNodes.erase(it);
+        }
     }
 }
 
 void Renderer::ClearPaintState()
 {
     mPaintNodes.clear();
+    mLightNodes.clear();
     mTilemapPalette.clear();
 }
 
@@ -1002,6 +1066,13 @@ void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeTyp
 }
 
 template<typename EntityType, typename EntityNodeType>
+void Renderer::UpdateLightResources(const EntityType& entity, const EntityNodeType& entity_node, LightNode& light_node,
+                                    double time, float dt) const
+{
+    CreateLightResources<EntityType, EntityNodeType>(entity, entity_node, light_node);
+}
+
+template<typename EntityType, typename EntityNodeType>
 void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transform, std::string prefix)
 {
     using RenderTree = game::RenderTree<EntityNodeType>;
@@ -1024,7 +1095,7 @@ void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transf
             mTransform.Push(node->GetNodeTransform());
 
             game::FBox box;
-            if  (node->HasDrawable() || node->HasTextItem())
+            if  (node->HasDrawable() || node->HasTextItem() || node->HasBasicLight())
                 box.Transform(mTransform.GetAsMatrix());
 
             if (const auto* item = node->GetDrawable())
@@ -1045,6 +1116,16 @@ void Renderer::CreatePaintNodes(const EntityType& entity, gfx::Transform& transf
                 paint_node.world_scale    = box.GetSize();
                 paint_node.world_rotation = box.GetRotation();
                 mRenderer.CreateTextResources<EntityType, EntityNodeType>(mEntity, *node, paint_node);
+            }
+
+            if (const auto* light = node->GetBasicLight())
+            {
+                auto& light_node = mRenderer.mLightNodes["basic/" + mPrefix + node->GetId()];
+                light_node.visited        = true;
+                light_node.world_pos      = box.GetTopLeft();
+                light_node.world_scale    = box.GetSize();
+                light_node.world_rotation = box.GetRotation();
+                mRenderer.CreateLightResources<EntityType, EntityNodeType>(mEntity, *node, light_node);
             }
         }
         virtual void LeaveNode(const EntityNodeType* node) override
@@ -1194,6 +1275,37 @@ void Renderer::CreateTextResources(const EntityType& entity, const EntityNodeTyp
             paint_node.drawable = gfx::CreateDrawableInstance(klass);
         }
     }
+}
+
+template<typename EntityType, typename EntityNodeType>
+void Renderer::CreateLightResources(const EntityType& entity, const EntityNodeType& entity_node, LightNode& light_node) const
+{
+    if (const auto* light = entity_node.GetBasicLight())
+    {
+       const auto type = light->GetLightType();
+
+       if (!light_node.light)
+           light_node.light = std::make_shared<gfx::BasicLight>();
+
+       if (type == game::BasicLightType::Ambient)
+           light_node.light->type = gfx::BasicLightType::Ambient;
+       else if (type == game::BasicLightType::Directional)
+           light_node.light->type = gfx::BasicLightType::Directional;
+       else if (type == game::BasicLightType::Point)
+           light_node.light->type = gfx::BasicLightType::Point;
+       else if (type == game::BasicLightType::Spot)
+           light_node.light->type = gfx::BasicLightType::Spot;
+       else BUG("Bug on basic light type.");
+
+       light_node.light->ambient_color  = light->GetAmbientColor();
+       light_node.light->diffuse_color  = light->GetDiffuseColor();
+       light_node.light->specular_color = light->GetSpecularColor();
+       light_node.light->constant_attenuation  = light->GetConstantAttenuation();
+       light_node.light->linear_attenuation    = light->GetLinearAttenuation();
+       light_node.light->quadratic_attenuation = light->GetQuadraticAttenuation();
+       light_node.light->direction = light->GetDirection();
+       light_node.light->spot_half_angle = light->GetSpotHalfAngle();
+   }
 }
 
 template<typename EntityType, typename EntityNodeType>
@@ -1378,11 +1490,11 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             packet.flags.set(DrawPacket::Flags::PP_Bloom, text->TestFlag(TextItemClass::Flags::PP_EnableBloom));
             packet.source       = DrawPacket::Source::Scene;
             packet.domain       = DrawPacket::Domain::Scene;
+            packet.pass         = DrawPacket::RenderPass::DrawColor;
             packet.drawable     = paint_node.drawable;
             packet.material     = paint_node.material;
             packet.transform    = transform;
             packet.sort_point   = sort_point;
-            packet.pass         = RenderPass::DrawColor;
             packet.packet_index = text->GetLayer();
             packet.render_layer = entity.GetLayer();
             if (!hook || hook->InspectPacket(&entity_node, packet))
@@ -1401,7 +1513,51 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
     }
 }
 
-void Renderer::OffsetPacketLayers(std::vector<DrawPacket>& packets) const
+template<typename EntityType, typename EntityNodeType>
+void Renderer::CreateLights(const EntityType& entity,
+                            const EntityNodeType& entity_node,
+                            const LightNode& light_node,
+                            std::vector<Light>& lights) const
+{
+    using LightClassType = typename EntityNodeType::LightClassType;
+
+    if (!entity.TestFlag(EntityType::Flags::VisibleInGame))
+        return;
+
+    const auto* node_light = entity_node.GetBasicLight();
+    if (!node_light || !node_light->IsEnabled())
+        return;
+
+    gfx::Transform transform;
+    transform.Scale(light_node.world_scale);
+    transform.RotateAroundZ(light_node.world_rotation * -1.0);
+    transform.Translate(light_node.world_pos);
+    transform.Push();
+         transform.Translate(node_light->GetTranslation());
+
+    glm::vec2 sort_point = {0.5f, 1.0f};
+    if (const auto* map = entity_node.GetMapNode())
+        sort_point = map->GetSortPoint();
+
+    // hack around here to make the light direction in 3D match
+    // what the user expects to see based on the 2D view
+    glm::vec3 direction = node_light->GetDirection();
+    direction.y *= -1.0;
+    direction.z *= -1.0;
+
+    light_node.light->direction = transform * glm::vec4(direction, 0.0f);
+
+    Light light;
+    light.light        = light_node.light;
+    light.transform    = transform;
+    light.render_layer = entity.GetLayer();
+    light.packet_index = node_light->GetLayer();
+    light.sort_point   = sort_point;
+    lights.push_back(light);
+}
+
+
+void Renderer::OffsetPacketLayers(std::vector<DrawPacket>& packets, std::vector<Light>& lights) const
 {
     // the layer values can be negative but for the bucket sorting,
     // sorting packets into layers the indices must be positive.
@@ -1412,12 +1568,26 @@ void Renderer::OffsetPacketLayers(std::vector<DrawPacket>& packets) const
         first_packet_index = std::min(first_packet_index, packet.packet_index);
         first_render_layer = std::min(first_render_layer, packet.render_layer);
     }
+    for (auto& light : lights)
+    {
+        first_packet_index = std::min(first_packet_index, light.packet_index);
+        first_render_layer = std::min(first_render_layer, light.render_layer);
+    }
+
     // offset the layers.
     for (auto &packet : packets)
     {
         packet.packet_index -= first_packet_index;
         packet.render_layer -= first_render_layer;
         ASSERT(packet.packet_index >= 0 && packet.render_layer >= 0);
+    }
+
+    // offset the lights
+    for (auto& light : lights)
+    {
+        light.packet_index -= first_packet_index;
+        light.render_layer -= first_render_layer;
+        ASSERT(light.packet_index >= 0 && light.render_layer >= 0);
     }
 }
 

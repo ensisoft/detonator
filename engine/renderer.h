@@ -33,6 +33,8 @@
 #include "graphics/fwd.h"
 #include "graphics/drawable.h"
 #include "graphics/tilebatch.h"
+#include "graphics/color4f.h"
+#include "graphics/types.h"
 #include "game/enum.h"
 #include "game/tilemap.h"
 #include "game/entity.h"
@@ -41,6 +43,7 @@
 #include "engine/camera.h"
 #include "engine/graphics.h"
 #include "engine/types.h"
+#include "engine/enum.h"
 
 namespace engine
 {
@@ -107,10 +110,7 @@ namespace engine
     class Renderer
     {
     public:
-        enum class RenderingStyle {
-            Normal,
-            Wireframe
-        };
+        using RenderingStyle = engine::RenderingStyle;
 
         enum class Effects {
             Bloom
@@ -224,6 +224,7 @@ namespace engine
         void CreatePaintNodes(const EntityType& entity, gfx::Transform& transform, std::string prefix = "");
 
         struct PaintNode;
+        struct LightNode;
 
         template<typename EntityType, typename EntityNodeType>
         void UpdateDrawableResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
@@ -231,11 +232,16 @@ namespace engine
         template<typename EntityType, typename EntityNodeType>
         void UpdateTextResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
                                  double time, float dt) const;
+        template<typename EntityType, typename EntityNodeType>
+        void UpdateLightResources(const EntityType& entity, const EntityNodeType& entity_node, LightNode& light_node,
+                                  double time, float dt) const;
 
         template<typename EntityType, typename EntityNodeType>
         void CreateDrawableResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const;
         template<typename EntityType, typename EntityNodeType>
         void CreateTextResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const;
+        template<typename EntityType, typename EntityNodeType>
+        void CreateLightResources(const EntityType& entity, const EntityNodeType& entity_node, LightNode& light_node) const;
 
         template<typename EntityType, typename EntityNodeType>
         void CreateDrawableDrawPackets(const EntityType& entity,
@@ -250,7 +256,13 @@ namespace engine
                                    std::vector<DrawPacket>& packets,
                                    EntityDrawHook<EntityNodeType>* hook) const;
 
-        void OffsetPacketLayers(std::vector<DrawPacket>& packets) const;
+        template<typename EntityType, typename EntityNodeType>
+        void CreateLights(const EntityType& entity,
+                          const EntityNodeType& entity_node,
+                          const LightNode& light_node,
+                          std::vector<Light>& lights) const;
+
+        void OffsetPacketLayers(std::vector<DrawPacket>& packets, std::vector<Light>& lights) const;
 
         void GenerateMapDrawPackets(const game::Tilemap& map,
                                     const std::vector<TileBatch>& batches,
@@ -304,7 +316,17 @@ namespace engine
             glm::vec2 world_pos;
             float world_rotation = 0.0f;
         };
+
+        struct LightNode {
+            bool visited = false;
+            std::shared_ptr<gfx::BasicLight> light;
+            glm::vec2 world_scale;
+            glm::vec2 world_pos;
+            float world_rotation = 0.0f;
+        };
+
         std::unordered_map<std::string, PaintNode> mPaintNodes;
+        std::unordered_map<std::string, LightNode> mLightNodes;
 
         struct TilemapLayerPaletteEntry {
             std::string material_id;
@@ -320,7 +342,7 @@ namespace engine
         BloomParams mBloom;
         Camera mCamera;
         Surface mSurface;
-        RenderingStyle mStyle = RenderingStyle::Normal;
+        RenderingStyle mStyle = RenderingStyle::FlatColor;
         // render units (= scene units?)
         // add a little fudge to the renderable tile size in order to try to
         // close any possible gap between the tiles. if the tiles are exactly
@@ -332,6 +354,7 @@ namespace engine
         LowLevelRendererHook* mLowLevelRendererHook = nullptr;
 
         mutable std::vector<DrawPacket> mRenderBuffer;
+        mutable std::vector<Light> mLightBuffer;
 
     };
 
