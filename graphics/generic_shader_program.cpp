@@ -210,16 +210,16 @@ void GenericShaderProgram::ApplyLightState(const Device& device, ProgramState& p
     for (unsigned i=0; i<light_count; ++i)
     {
         const auto& light = mLights[i];
-        data[0].lights[i].diffuse_color  = ToVec(light.diffuse_color);
-        data[0].lights[i].ambient_color  = ToVec(light.ambient_color);
-        data[0].lights[i].specular_color = ToVec(light.specular_color);
-        data[0].lights[i].direction = ToVec(glm::normalize(light.direction));
-        data[0].lights[i].position  = ToVec(light.position);
-        data[0].lights[i].constant_attenuation  = light.constant_attenuation;
-        data[0].lights[i].linear_attenuation    = light.linear_attenuation;
-        data[0].lights[i].quadratic_attenuation = light.quadratic_attenuation;
-        data[0].lights[i].spot_half_angle = light.spot_half_angle.ToRadians();
-        data[0].lights[i].type = static_cast<int32_t>(light.type);
+        data[0].lights[i].diffuse_color  = ToVec(light->diffuse_color);
+        data[0].lights[i].ambient_color  = ToVec(light->ambient_color);
+        data[0].lights[i].specular_color = ToVec(light->specular_color);
+        data[0].lights[i].direction = ToVec(glm::normalize(light->direction));
+        data[0].lights[i].position  = ToVec(light->position);
+        data[0].lights[i].constant_attenuation  = light->constant_attenuation;
+        data[0].lights[i].linear_attenuation    = light->linear_attenuation;
+        data[0].lights[i].quadratic_attenuation = light->quadratic_attenuation;
+        data[0].lights[i].spot_half_angle = light->spot_half_angle.ToRadians();
+        data[0].lights[i].type = static_cast<int32_t>(light->type);
     }
     program.SetUniformBlock(UniformBlock("LightArray", std::move(data)));
 }

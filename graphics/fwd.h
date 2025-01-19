@@ -45,6 +45,7 @@ namespace gfx
     class CommandBuffer;
     class Texture;
     class Geometry;
+    class GenericShaderProgram;
 
 } // namespace
 
