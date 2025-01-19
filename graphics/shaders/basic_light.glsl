@@ -60,7 +60,10 @@ vec4 ComputeBasicLight() {
         surface_normal = TBN * fs_out.surface_normal;
     }
 
-    vec4 total_color = vec4(0.0);
+    // todo: think about the meaning of alpha in this context.
+    // using alpha from the incoming color values since it's
+    // also used with "sprite cutouts".
+    vec4 total_color = vec4(0.0, 0.0, 0.0, color.a);
 
     for (uint i=uint(0); i<light_count; ++i) {
 
