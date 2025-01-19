@@ -38,7 +38,7 @@
 #include "rangewidget.h"
 
 namespace {
-    constexpr auto Margin = 5.0f;
+    constexpr auto Margin = 3.0f;
 } // namespace
 
 namespace gui
@@ -101,19 +101,19 @@ void RangeWidget::paintEvent(QPaintEvent* event)
 
     // draw the line segment between the knobs/handles
     QPen p;
-    p.setWidth(4.0f);
-    p.setColor(palette.color(QPalette::Active, QPalette::Highlight));
+    p.setWidth(12.0f);
+    p.setColor(palette.color(QPalette::Highlight));
     painter.setPen(p);
     painter.drawLine(range_start + mLo * range_width, height*0.5,
                      range_start + mHi * range_width, height*0.5);
 
     // draw both handles, first drop shadow
-    painter.fillRect(lo_handle, palette.color(QPalette::Active, QPalette::Shadow));
-    painter.fillRect(hi_handle, palette.color(QPalette::Active, QPalette::Shadow));
+    painter.fillRect(lo_handle, palette.color(QPalette::Shadow));
+    painter.fillRect(hi_handle, palette.color(QPalette::Shadow));
     lo_handle.adjust(1.0f, 1.0f, -1.0f, -1.0f);
     hi_handle.adjust(1.0f, 1.0f, -1.0f, -1.0f);
-    painter.fillRect(lo_handle, palette.color(QPalette::Active, QPalette::Light));
-    painter.fillRect(hi_handle, palette.color(QPalette::Active, QPalette::Light));
+    painter.fillRect(lo_handle, palette.color(QPalette::AlternateBase));
+    painter.fillRect(hi_handle, palette.color(QPalette::AlternateBase));
 }
 
 void RangeWidget::mouseMoveEvent(QMouseEvent* mickey)
