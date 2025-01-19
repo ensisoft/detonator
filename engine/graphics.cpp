@@ -43,19 +43,19 @@ LowLevelRenderer::LowLevelRenderer(const std::string* name, gfx::Device& device)
   , mDevice(device)
 {}
 
-void LowLevelRenderer::Draw(DrawPacketList& packets) const
+void LowLevelRenderer::DrawPackets(DrawPacketList& packets, LightList& lights) const
 {
     if (mSettings.enable_bloom)
     {
-        DrawFramebuffer(packets);
+        DrawFramebuffer(packets, lights);
     }
     else
     {
-        DrawDefault(packets);
+        DrawDefault(packets, lights);
     }
 }
 
-void LowLevelRenderer::DrawDefault(DrawPacketList& packets) const
+void LowLevelRenderer::DrawDefault(DrawPacketList& packets, LightList& lights) const
 {
     // draw using the default frame buffer
 
@@ -71,8 +71,11 @@ void LowLevelRenderer::DrawDefault(DrawPacketList& packets) const
     }
 
     gfx::GenericShaderProgram program;
+    program.SetCameraCenter(0.0f, 0.0f, 10000.0f);
+    program.EnableFeature(gfx::GenericShaderProgram::OutputFeatures::WriteBloomTarget, false);
+    program.EnableFeature(gfx::GenericShaderProgram::ShadingFeatures::BasicLight, mSettings.enable_lights);
 
-    Draw(packets, nullptr, program);
+    Draw(packets, lights, nullptr, program);
 
     if (mRenderHook)
     {
@@ -84,7 +87,7 @@ void LowLevelRenderer::DrawDefault(DrawPacketList& packets) const
     }
 
 }
-void LowLevelRenderer::DrawFramebuffer(DrawPacketList& packets) const
+void LowLevelRenderer::DrawFramebuffer(DrawPacketList& packets, LightList& lights) const
 {
     // draw using our own frame buffer with a texture color target
     // for post processing or when using bloom
@@ -112,9 +115,11 @@ void LowLevelRenderer::DrawFramebuffer(DrawPacketList& packets) const
     gfx::GenericShaderProgram program;
     program.SetBloomColor(gfx::Color4f(bloom.red, bloom.green, bloom.blue, 1.0f));
     program.SetBloomThreshold(bloom.threshold);
+    program.SetCameraCenter(0.0f, 0.0f, 10000.0f);
     program.EnableFeature(gfx::GenericShaderProgram::OutputFeatures::WriteBloomTarget, true);
+    program.EnableFeature(gfx::GenericShaderProgram::ShadingFeatures::BasicLight, mSettings.enable_lights);
 
-    Draw(packets, mMainFBO, program);
+    Draw(packets, lights, mMainFBO, program);
 
     // after this we have the rendering result in the main image
     // texture FBO color attachment
@@ -131,7 +136,8 @@ void LowLevelRenderer::DrawFramebuffer(DrawPacketList& packets) const
     }
 }
 
-void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx::ShaderProgram& program) const
+void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
+                            gfx::Framebuffer* fbo, gfx::GenericShaderProgram& program) const
 {
     const auto& camera = mSettings.camera;
 
@@ -180,8 +186,8 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx:
     }
 
     gfx::Painter scene_painter(&mDevice);
-    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, camera.viewport));
-    scene_painter.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, camera.position, camera.scale, camera.rotation));
+    scene_painter.SetProjectionMatrix(orthographic);
+    scene_painter.SetViewMatrix(model_view);
     scene_painter.SetViewport(mSettings.surface.viewport);
     scene_painter.SetSurfaceSize(mSettings.surface.size);
     scene_painter.SetEditingMode(mSettings.editing_mode);
@@ -193,6 +199,32 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx:
     // Thus, to have the right ordering both indices of each
     // render packet must be considered!
     std::vector<std::vector<RenderLayer>> layers;
+
+    // assign lights to render layers
+    TRACE_ENTER(LightLayers);
+    for (auto& light : lights)
+    {
+        // transform the light to view space
+        light.light->position = model_view * light.transform * glm::vec4{0.0f, 0.0f, 0.0f, 1.0};
+        //light.light->direction = light.transform * glm::vec4{light.light->direction, 0.0f};
+
+        const auto render_layer_index = light.render_layer;
+        ASSERT(render_layer_index >= 0);
+        if (render_layer_index >= layers.size())
+            layers.resize(render_layer_index + 1);
+
+        auto& render_layer = layers[render_layer_index];
+
+        const auto packet_index = light.packet_index;
+        ASSERT(packet_index >= 0);
+        if (packet_index >= render_layer.size())
+            render_layer.resize(packet_index + 1);
+
+        RenderLayer& layer = render_layer[packet_index];
+        layer.layer_lights.push_back(&light);
+    }
+    TRACE_LEAVE(LightLayers);
+
 
     TRACE_ENTER(CreateDrawCmd);
     for (auto& packet : packets)
@@ -304,6 +336,10 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx:
     {
         for (const auto& entity_layer : scene_layer)
         {
+            program.ClearLights();
+            for (auto* light : entity_layer.layer_lights)
+                program.AddLight(light->light);
+
             if (!entity_layer.mask_cover_list.empty() && !entity_layer.mask_expose_list.empty())
             {
                 gfx::StencilShaderProgram stencil_program;
@@ -379,7 +415,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, gfx::Framebuffer* fbo, gfx:
     }
 }
 
-void LowLevelRenderer::Blit() const
+void LowLevelRenderer::BlitImage() const
 {
     if (!mSettings.enable_bloom)
         return;
