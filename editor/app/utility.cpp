@@ -291,10 +291,10 @@ bool SetStyle(const QString& name)
 #if defined(DETONATOR_EDITOR_BUILD) || defined(DETONATOR_GAMEHOST_BUILD)
     if (name == "Fusion-Dark")
     {
-        QApplication::setStyle(new DarkStyle());
+        auto* style = new DarkStyle();
+        style->setProperty("style", name);
 
-        auto* style = QApplication::style();
-        style->setObjectName("fusion");
+        QApplication::setStyle(style);
 
         QPalette palette;
         style->polish(palette);

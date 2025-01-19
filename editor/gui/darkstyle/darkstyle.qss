@@ -1,3 +1,4 @@
+R"CPP_RAW_STRING(
 QToolTip{
   color:palette(text);
   background-color:palette(base);
@@ -10,11 +11,8 @@ QStatusBar{
 }
 QMenuBar{
   background-color:transparent;
-  spacing:0px;
 }
 QMenuBar::item{
-  spacing:2px;
-  padding:0px 4px;
   background:transparent;
 }
 QMenuBar::item:selected{
@@ -58,15 +56,7 @@ QMenu::indicator{
   width:15px;
   height:15px;
 }
-QMenu::indicator:non-exclusive:checked{
-  padding-left:2px;
-}
-QMenu::indicator:non-exclusive:unchecked{
-  padding-left:2px;
-}
-QMenu::indicator:exclusive:checked{
-  padding-left:2px;
-}
+
 QMenu::indicator:exclusive:unchecked{
   padding-left:2px;
 }
@@ -106,10 +96,10 @@ QComboBox::indicator{
   selection-color:transparent;
 }
 QSplitter::handle:horizontal{
-  width:10px;
+  width:0px;
 }
 QSplitter::handle:vertical{
-  height:10px;
+  height:0px;
 }
 QMainWindow::separator:hover,QSplitter::handle:hover{
   background:palette(highlight);
@@ -121,8 +111,8 @@ QDockWidget::title{
   border-bottom:2px solid rgba(25,25,25,75);
 }
 QDockWidget{
-  titlebar-close-icon:url(:/darkstyle/icon_close.png);
-  titlebar-normal-icon:url(:/darkstyle/icon_restore.png);
+  titlebar-close-icon:url(:/darkstyle/icons/close.svg);
+  titlebar-normal-icon:url(:/darkstyle/icons/restore.svg);
 }
 QDockWidget::close-button,QDockWidget::float-button{
   subcontrol-position:top right;
@@ -192,6 +182,8 @@ QTabBar::tab:!selected{
 QTabBar::close-button {
   border:1px solid transparent;
   border-radius:2px;
+  image: url(:/darkstyle/icons/close.svg);
+  padding: 6px;
 }
 QTabBar::close-button:hover {
   background-color:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 rgba(106,106,106,255),stop:1 rgba(106,106,106,75));
@@ -201,14 +193,16 @@ QTabBar::close-button:pressed {
   background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(25,25,25,127),stop:1 rgba(53,53,53,75));
   border:1px solid palette(base);
 }
+QRadioButton:indicator,
 QCheckBox::indicator{
+  border: 1px solid darkgray;
   width:18px;
   height:18px;
 }
-QRadioButton::indicator{
-  width:18px;
-  height:18px;
+QCheckBox::indicator:checked {
+  background-color:palette(highlight);
 }
+
 QTreeView, QTableView{
   alternate-background-color:palette(window);
   background:palette(base);
@@ -307,3 +301,7 @@ QSlider::sub-page:horizontal{
 QSlider::sub-page:horizontal:disabled{
   background:rgb(80,80,80);
 }
+#mainHelpWidget {
+    border-image: url(:/darkstyle/wave.png) 0 0 0 0 stretch stretch;
+}
+)CPP_RAW_STRING"
