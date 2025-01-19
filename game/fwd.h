@@ -51,8 +51,8 @@ namespace game {
     class RigidBodyJointClass;
     class RigidBodyJoint;
 
-    class Light;
-    class LightClass;
+    class BasicLight;
+    class BasicLightClass;
 
 } // namespace
 

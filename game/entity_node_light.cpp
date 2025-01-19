@@ -26,68 +26,61 @@
 namespace game
 {
 
-void LightClass::IntoJson(data::Writer& data) const
+BasicLightClass::BasicLightClass()
+{
+    mFlags.set(Flags::Enabled, true);
+    mSpotHalfAngle = FDegrees { 30.0f };
+}
+
+void BasicLightClass::IntoJson(data::Writer& data) const
 {
     data.Write("type", mLightType);
     data.Write("flags", mFlags);
     data.Write("layer", mLayer);
-
-    // use an ordered set for persisting the data to make sure
-    // that the order in which the uniforms are written out is
-    // defined in order to avoid unnecessary changes (as perceived
-    // by a version control such as Git) when there's no actual
-    // change in the data.
-    std::set<std::string> keys;
-    for (const auto& uniform : mLightParams)
-        keys.insert(uniform.first);
-
-    for (const auto& key : keys)
-    {
-        const auto* param = base::SafeFind(mLightParams, key);
-        auto chunk = data.NewWriteChunk();
-        chunk->Write("key", key);
-        chunk->Write("val", *param);
-        data.AppendChunk("parameters", std::move(chunk));
-    }
+    data.Write("direction", mDirection);
+    data.Write("translation", mTranslation);
+    data.Write("ambient_color", mAmbientColor);
+    data.Write("diffuse_color", mDiffuseColor);
+    data.Write("specular_color", mSpecularColor);
+    data.Write("spot_half_angle", mSpotHalfAngle);
+    data.Write("constant_attenuation", mConstantAttenuation);
+    data.Write("linear_attenuation", mLinearAttenuation);
+    data.Write("quadratic_attenuation", mQuadraticAttenuation);
 
 }
-bool LightClass::FromJson(const data::Reader& data)
+bool BasicLightClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
-    ok &= data.Read("type", &mLightType);
+    ok &= data.Read("type",  &mLightType);
     ok &= data.Read("flags", &mFlags);
     ok &= data.Read("layer", &mLayer);
-
-    for (unsigned i=0; i<data.GetNumChunks("parameters"); ++i)
-    {
-        const auto& chunk = data.GetReadChunk("parameters", i);
-
-        std::string key;
-        LightParam  val;
-        ok &= chunk->Read("key", &key);
-        ok &= chunk->Read("val", &val);
-        mLightParams[key] = std::move(val);
-    }
+    ok &= data.Read("direction", &mDirection);
+    ok &= data.Read("translation", &mTranslation);
+    ok &= data.Read("ambient_color", &mAmbientColor);
+    ok &= data.Read("diffuse_color", &mDiffuseColor);
+    ok &= data.Read("specular_color", &mSpecularColor);
+    ok &= data.Read("spot_half_angle", &mSpotHalfAngle);
+    ok &= data.Read("constant_attenuation", &mConstantAttenuation);
+    ok &= data.Read("linear_attenuation", &mLinearAttenuation);
+    ok &= data.Read("quadratic_attenuation", &mQuadraticAttenuation);
     return ok;
 }
 
-size_t LightClass::GetHash() const
+size_t BasicLightClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mFlags);
     hash = base::hash_combine(hash, mLightType);
     hash = base::hash_combine(hash, mLayer);
-
-    std::set<std::string> keys;
-    for (const auto& param : mLightParams)
-        keys.insert(param.first);
-
-    for (const auto& key : keys)
-    {
-        const auto* param = base::SafeFind(mLightParams, key);
-        hash = base::hash_combine(hash, key);
-        hash = base::hash_combine(hash, *param);
-    }
+    hash = base::hash_combine(hash, mDirection);
+    hash = base::hash_combine(hash, mTranslation);
+    hash = base::hash_combine(hash, mAmbientColor);
+    hash = base::hash_combine(hash, mDiffuseColor);
+    hash = base::hash_combine(hash, mSpecularColor);
+    hash = base::hash_combine(hash, mSpotHalfAngle);
+    hash = base::hash_combine(hash, mConstantAttenuation);
+    hash = base::hash_combine(hash, mLinearAttenuation);
+    hash = base::hash_combine(hash, mQuadraticAttenuation);
     return hash;
 }
 
