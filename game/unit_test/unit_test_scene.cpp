@@ -139,6 +139,13 @@ void unit_test_scene_class()
     bloom.green     = 3.0f;
     bloom.blue      = 4.0f;
 
+    game::SceneClass::Fog fog;
+    fog.density    = 1.0f;
+    fog.start_dist = 2.0f;
+    fog.end_dist   = 3.0f;
+    fog.mode = game::SceneClass::Fog::Mode::Exp2;
+    fog.color = game::Color::Green;
+
     game::SceneClass klass;
     klass.SetName("my scene");
     klass.SetTilemapId("map123");
@@ -150,6 +157,7 @@ void unit_test_scene_class()
     klass.SetTopBoundary(300.0f);
     klass.SetBottomBoundary(-300.0f);
     klass.SetBloom(bloom);
+    klass.SetFog(fog);
 
     TEST_REQUIRE(klass.GetNumNodes() == 0);
 
@@ -227,6 +235,12 @@ void unit_test_scene_class()
     TEST_REQUIRE(klass.GetBloom()->red       == real::float32(2.0f));
     TEST_REQUIRE(klass.GetBloom()->green     == real::float32(3.0f));
     TEST_REQUIRE(klass.GetBloom()->blue      == real::float32(4.0f));
+    TEST_REQUIRE(klass.GetFog()->density == real::float32(1.0f));
+    TEST_REQUIRE(klass.GetFog()->start_dist == real::float32(2.0f));
+    TEST_REQUIRE(klass.GetFog()->end_dist == real::float32(3.0f));
+    TEST_REQUIRE(klass.GetFog()->mode == game::SceneClass::Fog::Mode::Exp2);
+    TEST_REQUIRE(klass.GetFog()->color == game::Color::Green);
+
 
     klass.LinkChild(nullptr, klass.FindPlacementByName("root"));
     klass.LinkChild(klass.FindPlacementByName("root"), klass.FindPlacementByName("child_1"));

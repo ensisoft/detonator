@@ -48,7 +48,7 @@ SceneClass::SceneClass(const SceneClass& other)
     mRightBoundary           = other.mRightBoundary;
     mTopBoundary             = other.mTopBoundary;
     mBottomBoundary          = other.mBottomBoundary;
-    mBloomFilter             = other.mBloomFilter;
+    mRenderingArgs           = other.mRenderingArgs;
 
     for (const auto& node : other.mNodes)
     {
@@ -488,7 +488,9 @@ size_t SceneClass::GetHash() const
     hash = base::hash_combine(hash, mRightBoundary);
     hash = base::hash_combine(hash, mTopBoundary);
     hash = base::hash_combine(hash, mBottomBoundary);
-    hash = base::hash_combine(hash, mBloomFilter);
+    hash = base::hash_combine(hash, mRenderingArgs.shading);
+    hash = base::hash_combine(hash, mRenderingArgs.bloom);
+    hash = base::hash_combine(hash, mRenderingArgs.fog);
 
     // include the node hashes in the animation hash
     // this covers both the node values and their traversal order
@@ -581,6 +583,7 @@ void SceneClass::IntoJson(data::Writer& data) const
     data.Write("script_file", mScriptFile);
     data.Write("tilemap", mTilemap);
     data.Write("dynamic_spatial_index", mDynamicSpatialIndex);
+    data.Write("shading", mRenderingArgs.shading);
     if (const auto* ptr = GetQuadTreeArgs())
     {
         data.Write("quadtree_max_items", ptr->max_items);
@@ -603,6 +606,16 @@ void SceneClass::IntoJson(data::Writer& data) const
         chunk->Write("green", bloom->green);
         chunk->Write("blue",  bloom->blue);
         data.Write("bloom", std::move(chunk));
+    }
+    if (const auto* fog = GetFog())
+    {
+        auto chunk = data.NewWriteChunk();
+        chunk->Write("mode", fog->mode);
+        chunk->Write("start_distance", fog->start_dist);
+        chunk->Write("end_distance", fog->end_dist);
+        chunk->Write("density", fog->density);
+        chunk->Write("color", fog->color);
+        data.Write("fog", std::move(chunk));
     }
 
     for (const auto& node : mNodes)
@@ -634,6 +647,7 @@ bool SceneClass::FromJson(const data::Reader& data)
     ok &= data.Read("right_boundary",        &mRightBoundary);
     ok &= data.Read("top_boundary",          &mTopBoundary);
     ok &= data.Read("bottom_boundary",       &mBottomBoundary);
+    ok &= data.Read("shading",               &mRenderingArgs.shading);
 
     if (data.HasValue("bloom"))
     {
@@ -643,8 +657,20 @@ bool SceneClass::FromJson(const data::Reader& data)
             chunk->Read("red",       &bloom.red) &&
             chunk->Read("green",     &bloom.green) &&
             chunk->Read("blue",      &bloom.blue))
-            mBloomFilter = bloom;
-        else WARN("Failed to load scene bloom filter property. [scene='%1']", mName);
+            mRenderingArgs.bloom = bloom;
+        else WARN("Failed to load scene bloom filter properties. [scene='%1']", mName);
+    }
+    if (data.HasValue("fog"))
+    {
+        Fog fog;
+        const auto& chunk = data.GetReadChunk("fog");
+        if (chunk->Read("mode",           &fog.mode) &&
+            chunk->Read("start_distance", &fog.start_dist) &&
+            chunk->Read("end_distance",   &fog.end_dist) &&
+            chunk->Read("density",        &fog.density) &&
+            chunk->Read("color",          &fog.color))
+            mRenderingArgs.fog = fog;
+        else WARN("Failed to load scene fog properties. [scene='%1']", mName);
     }
 
     if (mDynamicSpatialIndex == SpatialIndex::QuadTree)
@@ -736,7 +762,7 @@ SceneClass SceneClass::Clone() const
     ret.mRightBoundary           = mRightBoundary;
     ret.mTopBoundary             = mTopBoundary;
     ret.mBottomBoundary          = mBottomBoundary;
-    ret.mBloomFilter             = mBloomFilter;
+    ret.mRenderingArgs           = mRenderingArgs;
     ret.mRenderTree.FromTree(mRenderTree, [&map](const EntityPlacement* node) {
         return map[node];
     });
@@ -762,7 +788,7 @@ SceneClass& SceneClass::operator=(const SceneClass& other)
     mRightBoundary           = std::move(tmp.mRightBoundary);
     mTopBoundary             = std::move(tmp.mTopBoundary);
     mBottomBoundary          = std::move(tmp.mBottomBoundary);
-    mBloomFilter             = std::move(tmp.mBloomFilter);
+    mRenderingArgs           = std::move(tmp.mRenderingArgs);
     return *this;
 }
 
