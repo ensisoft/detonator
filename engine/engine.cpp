@@ -1260,6 +1260,12 @@ private:
         {
             mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, false);
         }
+        const auto shading = (*mScene)->GetShadingMode();
+        if (shading == game::SceneClass::RenderingArgs::ShadingMode::Flat)
+            mRenderer.SetStyle(engine::Renderer::RenderingStyle::FlatColor);
+        else if (shading == game::SceneClass::RenderingArgs::ShadingMode::BasicLight)
+            mRenderer.SetStyle(engine::Renderer::RenderingStyle::BasicShading);
+        else BUG("Bug on renderer shading mode.");
     }
 
     void DrawMousePointer(float dt)
