@@ -87,6 +87,17 @@ std::string TranslateEnum(FileResourceLoader::DefaultAudioIOStrategy strategy)
 } // namespace
 
 namespace game {
+
+std::string TranslateEnum(SceneClass::RenderingArgs::ShadingMode mode)
+{
+    using M = SceneClass::RenderingArgs::ShadingMode;
+    if (mode == M::Flat)
+        return "Flat Color";
+    else if (mode == M::BasicLight)
+        return "Basic Light";
+    else BUG("Bug on translation");
+    return "???";
+}
 std::string TranslateEnum(AnimatorClass::Type type)
 {
     using T = AnimatorClass::Type;

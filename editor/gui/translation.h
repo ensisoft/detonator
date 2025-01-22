@@ -27,6 +27,7 @@
 #include "engine/loader.h"
 #include "graphics/drawable.h"
 #include "game/animator.h"
+#include "game/scene_class.h"
 #include "game/property_animator.h"
 #include "game/kinematic_animator.h"
 #include "game/entity_state_controller.h"
@@ -47,6 +48,7 @@ namespace engine {
 } // namespace
 
 namespace game {
+    std::string TranslateEnum(SceneClass::RenderingArgs::ShadingMode mode);
     std::string TranslateEnum(AnimatorClass::Type type);
     std::string TranslateEnum(PropertyAnimatorClass::PropertyName name);
     std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name);

@@ -64,6 +64,7 @@
 #include "editor/gui/dlgentity.h"
 #include "editor/gui/clipboard.h"
 #include "editor/gui/playwindow.h"
+#include "editor/gui/translation.h"
 
 namespace gui
 {
@@ -610,6 +611,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(mUI.tree, &TreeWidget::clickEvent, this, &SceneWidget::TreeClickEvent);
 
     PopulateFromEnum<game::SceneClass::SpatialIndex>(mUI.cmbSpatialIndex);
+    PopulateFromEnum<game::SceneClass::RenderingArgs::ShadingMode>(mUI.cmbShading);
     PopulateFromEnum<engine::GameView::EnumValue>(mUI.cmbPerspective);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
@@ -664,7 +666,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "variables_group", mUI.sceneVariablesGroup);
     GetUserProperty(resource, "bounds_group", mUI.sceneBoundsGroup);
     GetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
-    GetUserProperty(resource, "bloom_group", mUI.bloomGroup);
+    GetUserProperty(resource, "renderer_group", mUI.rendererGroup);
     GetUserProperty(resource, "bloom_threshold", &mBloom.threshold);
     GetUserProperty(resource, "bloom_red",       &mBloom.red);
     GetUserProperty(resource, "bloom_green",     &mBloom.green);
@@ -756,7 +758,7 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.sceneVariablesGroup);
     settings.SaveWidget("Scene", mUI.sceneBoundsGroup);
     settings.SaveWidget("Scene", mUI.sceneIndexGroup);
-    settings.SaveWidget("Scene", mUI.bloomGroup);
+    settings.SaveWidget("Scene", mUI.rendererGroup);
     settings.SaveWidget("Scene", mUI.cmbPerspective);
     settings.SaveWidget("Scene", mUI.mainSplitter);
     settings.SaveWidget("Scene", mUI.rightSplitter);
@@ -787,7 +789,7 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.sceneVariablesGroup);
     settings.LoadWidget("Scene", mUI.sceneBoundsGroup);
     settings.LoadWidget("Scene", mUI.sceneIndexGroup);
-    settings.LoadWidget("Scene", mUI.bloomGroup);
+    settings.LoadWidget("Scene", mUI.rendererGroup);
     settings.LoadWidget("Scene", mUI.cmbPerspective);
     settings.LoadWidget("Scene", mUI.mainSplitter);
     settings.LoadWidget("Scene", mUI.rightSplitter);
@@ -1286,6 +1288,11 @@ void SceneWidget::on_btnResetBloom_clicked()
     }
 }
 
+void SceneWidget::on_cmbShading_currentIndexChanged(int)
+{
+    mState.scene->SetShadingMode(GetValue(mUI.cmbShading));
+}
+
 void SceneWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -1339,7 +1346,7 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "variables_group", mUI.sceneVariablesGroup);
     SetUserProperty(resource, "bounds_group", mUI.sceneBoundsGroup);
     SetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
-    SetUserProperty(resource, "bloom_group", mUI.bloomGroup);
+    SetUserProperty(resource, "renderer_group", mUI.rendererGroup);
     SetUserProperty(resource, "bloom_threshold", mBloom.threshold);
     SetUserProperty(resource, "bloom_red",       mBloom.red);
     SetUserProperty(resource, "bloom_green",     mBloom.green);
@@ -2063,6 +2070,12 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
         mState.renderer.SetLowLevelRendererHook(&low_level_render_hook);
 
+        const auto shading = (game::SceneClass::RenderingArgs::ShadingMode)GetValue(mUI.cmbShading);
+        if (shading == game::SceneClass::RenderingArgs::ShadingMode::BasicLight)
+            mState.renderer.SetStyle(engine::Renderer::RenderingStyle::BasicShading);
+        else if (shading == game::SceneClass::RenderingArgs::ShadingMode::Flat)
+            mState.renderer.SetStyle(engine::Renderer::RenderingStyle::FlatColor);
+
         if (auto* bloom = mState.scene->GetBloom())
         {
             engine::Renderer::BloomParams bloom_params;
@@ -2496,6 +2509,8 @@ void SceneWidget::DisplaySceneProperties()
         SetEnabled(mUI.bloomBSpin,          false);
         SetEnabled(mUI.bloomBSlide,         false);
     }
+
+    SetValue(mUI.cmbShading, mState.scene->GetShadingMode());
 }
 
 void SceneWidget::DisplayCurrentCameraLocation()
