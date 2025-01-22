@@ -54,6 +54,27 @@ namespace game
             float blue  = 0.0722f;
         };
 
+        struct Fog {
+            enum class Mode {
+                Linear, Exp1, Exp2
+            };
+
+            base::Color4f color;
+            float start_dist = 10.0f;
+            float end_dist   = 100.0f;
+            float density    = 1.0f;
+            Mode mode = Mode::Linear;
+        };
+
+        struct RenderingArgs {
+            enum class ShadingMode {
+                Flat, BasicLight
+            };
+            ShadingMode shading = ShadingMode::Flat;
+            std::optional<BloomFilter> bloom;
+            std::optional<Fog> fog;
+        };
+
         enum class SpatialIndex {
             Disabled,
             QuadTree,
@@ -257,13 +278,26 @@ namespace game
         void SetDynamicSpatialIndexArgs(const QuadTreeArgs& args);
 
         void SetBloom(const BloomFilter& bloom) noexcept
-        { mBloomFilter = bloom; }
+        { mRenderingArgs.bloom = bloom; }
         const BloomFilter* GetBloom() const noexcept
-        { return base::GetOpt(mBloomFilter); }
+        { return base::GetOpt(mRenderingArgs.bloom); }
         BloomFilter* GetBloom() noexcept
-        { return base::GetOpt(mBloomFilter); }
+        { return base::GetOpt(mRenderingArgs.bloom); }
         void ResetBloom() noexcept
-        { mBloomFilter.reset(); }
+        { mRenderingArgs.bloom.reset(); }
+
+        void SetFog(const Fog& fog) noexcept
+        { mRenderingArgs.fog = fog; }
+        const Fog* GetFog() const noexcept
+        { return base::GetOpt(mRenderingArgs.fog); }
+        Fog* GetFog() noexcept
+        { return base::GetOpt(mRenderingArgs.fog); }
+        void ResetFog() noexcept
+        { mRenderingArgs.fog.reset(); }
+        void SetShadingMode(RenderingArgs::ShadingMode shading) noexcept
+        { mRenderingArgs.shading = shading; }
+        auto GetShadingMode() const noexcept
+        { return mRenderingArgs.shading; }
 
         void SetLeftBoundary(float value)  noexcept
         { mLeftBoundary = value; }
@@ -348,7 +382,7 @@ namespace game
         std::optional<float> mTopBoundary;
         std::optional<float> mBottomBoundary;
 
-        std::optional<BloomFilter> mBloomFilter;
+        RenderingArgs mRenderingArgs;
     };
 
 } // namespace game
