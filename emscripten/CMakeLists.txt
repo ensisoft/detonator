@@ -101,6 +101,7 @@ add_executable(UnitTest
     ../game/entity_node_fixture.cpp
     ../game/entity_node_tilemap_node.cpp
     ../game/entity_node_light.cpp
+    ../game/scene_class.cpp
     ../game/scene.cpp
     ../game/scriptvar.cpp
     ../game/tilemap.cpp
@@ -234,6 +235,7 @@ add_executable(GameEngine
     ../game/kinematic_animator.cpp
     ../game/material_animator.cpp
     ../game/property_animator.cpp
+    ../game/scene_class.cpp
     ../game/scene.cpp
     ../game/scriptvar.cpp
     ../game/tilemap.cpp
