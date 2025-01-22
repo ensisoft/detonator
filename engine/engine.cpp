@@ -72,7 +72,7 @@
 namespace
 {
 static const unsigned char DetonatorLOGO[] = {
-#include "engine/detonator-logo.h"
+#include "engine/engine-logo.h"
 };
 // we'll do this dynamically in loading screen.
 static unsigned LogoWidth  = 0;
