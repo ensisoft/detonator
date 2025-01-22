@@ -273,6 +273,7 @@ add_library(EngineLib
     game/entity_node_tilemap_node.cpp
     game/entity_node_light.cpp
     game/scriptvar.cpp
+    game/scene_class.cpp
     game/scene.cpp
     game/tilemap.cpp
     engine/audio.cpp
@@ -1073,6 +1074,7 @@ add_library(GameLibTesting
     game/kinematic_animator.cpp
     game/property_animator.cpp
     game/material_animator.cpp
+    game/scene_class.cpp
     game/scene.cpp
     game/tilemap.cpp)
 add_library(EngineLibTesting
