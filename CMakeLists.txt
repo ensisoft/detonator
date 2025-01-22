@@ -260,6 +260,7 @@ add_library(EngineLib
     game/material_animator.cpp
     game/entity.cpp
     game/entity_node.cpp
+    game/entity_placement.cpp
     game/entity_state.cpp
     game/entity_state_controller.cpp
     game/entity_node_transformer.cpp
@@ -1053,6 +1054,7 @@ target_link_libraries(unit_test_event_log Qt5::Core DataLib BaseLib)
 add_library(GameLibTesting
     game/entity.cpp
     game/entity_node.cpp
+    game/entity_placement.cpp
     game/entity_state.cpp
     game/entity_state_controller.cpp
     game/entity_node_transformer.cpp

@@ -89,6 +89,7 @@ add_executable(UnitTest
     ../game/animation.cpp
     ../game/entity.cpp
     ../game/entity_node.cpp
+    ../game/entity_placement.cpp
     ../game/entity_state.cpp
     ../game/entity_state_controller.cpp
     ../game/entity_node_rigid_body_joint.cpp
@@ -218,6 +219,7 @@ add_executable(GameEngine
     ../game/animator.cpp
     ../game/entity.cpp
     ../game/entity_node.cpp
+    ../game/entity_placement.cpp
     ../game/entity_node_drawable_item.cpp
     ../game/entity_node_fixture.cpp
     ../game/entity_node_light.cpp
