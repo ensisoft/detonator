@@ -246,6 +246,34 @@ std::string TranslateEnum(EntityStateControllerClass::StateTransitionMode mode)
     return "???";
 }
 
+std::string TranslateEnum(BasicLightClass::LightType light)
+{
+    using L = BasicLightClass::LightType;
+    if (light == L::Ambient)
+        return "Ambient";
+    else if (light == L::Directional)
+        return "Directional";
+    else if (light == L::Spot)
+        return "Spot";
+    else if (light == L::Point)
+        return "Point";
+    else BUG("Missing translation.");
+    return "???";
+}
+
+std::string TranslateEnum(RenderPass pass)
+{
+    using P = RenderPass;
+    if (pass == P::MaskExpose)
+        return "Stencil Mask Expose";
+    else if (pass == P::MaskCover)
+        return "Stencil Mask Cover";
+    else if (pass == P::DrawColor)
+        return "Color Buffer Write";
+    else BUG("Missing translation");
+    return "???";
+}
+
 } // namespace
 
 namespace math

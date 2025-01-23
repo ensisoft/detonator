@@ -2,6 +2,7 @@
 <RCC version="1.0">
   <qresource>
     <file>16x16_ico_png/hashtag.png</file>
+    <file>16x16_ico_png/light.png</file>
     <file>16x16_ico_png/vector.png</file>
     <file>16x16_ico_png/object.png</file>
     <file>16x16_ico_png/bricks.png</file>

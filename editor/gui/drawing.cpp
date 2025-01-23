@@ -29,6 +29,7 @@
 #include "base/logging.h"
 #include "engine/camera.h"
 #include "game/types.h"
+#include "editor/app/resource-uri.h"
 #include "editor/app/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
@@ -250,6 +251,34 @@ void DrawInvisibleItemBox(gfx::Transform& model, std::vector<engine::DrawPacket>
         box.line_width        = 2.0f;
         packets.push_back(box);
     model.Pop();
+}
+
+void DrawLightIndicator(gfx::Transform& transform, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect)
+{
+    static const auto shape  = std::make_shared<gfx::Rectangle>();
+    static std::shared_ptr<gfx::Material> light_material;
+    if (!light_material)
+    {
+        auto klass = std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromImage(res::LightIcon));
+        klass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        light_material = gfx::CreateMaterialInstance(klass);
+    }
+    const auto width  = 60.0f;
+    const auto height = 60.0f;
+
+    transform.Push();
+        transform.Scale(width, height);
+        transform.Translate(-width*0.5, -height*0.5);
+        engine::DrawPacket box;
+        box.domain            = engine::DrawPacket::Domain::Editor;
+        box.transform         = transform;
+        box.material          = light_material;
+        box.drawable          = shape;
+        box.render_layer      = 0;
+        box.packet_index      = 0;
+        box.line_width        = 2.0f;
+        packets.push_back(box);
+    transform.Pop();
 }
 
 void DrawEdges(const gfx::Painter& scene_painter,

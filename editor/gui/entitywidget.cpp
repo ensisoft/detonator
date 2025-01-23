@@ -58,6 +58,7 @@
 #include "editor/gui/dlganimator.h"
 #include "editor/gui/clipboard.h"
 #include "editor/gui/playwindow.h"
+#include "editor/gui/translation.h"
 #include "base/assert.h"
 #include "base/format.h"
 #include "base/math.h"
@@ -69,6 +70,7 @@
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_tilemap_node.h"
+#include "game/entity_node_light.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/material_class.h"
@@ -78,6 +80,20 @@
 #include "graphics/types.h"
 #include "graphics/simple_shape.h"
 #include "game/treeop.h"
+
+namespace engine {
+std::string TranslateEnum(Renderer::RenderingStyle style)
+{
+    if (style == Renderer::RenderingStyle::FlatColor)
+        return "Flat Color";
+    else if (style == Renderer::RenderingStyle::BasicShading)
+        return "Basic Shading";
+    else if (style == Renderer::RenderingStyle::Wireframe)
+        return "Wireframe";
+    BUG("Missing translation");
+    return "???";
+}
+} //
 
 namespace gui
 {
@@ -750,6 +766,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::SpatialNodeClass::Shape>(mUI.spnShape);
     PopulateFromEnum<game::FixtureClass::CollisionShape>(mUI.fxShape);
     PopulateFromEnum<game::NodeTransformerClass::Integrator>(mUI.tfIntegrator);
+    PopulateFromEnum<game::BasicLightClass::LightType>(mUI.ltType);
     PopulateFontNames(mUI.tiFontName);
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
@@ -772,6 +789,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.btnAddNodeItem->addAction(mUI.actionAddTextItem);
     mUI.btnAddNodeItem->addAction(mUI.actionAddRigidBody);
     mUI.btnAddNodeItem->addAction(mUI.actionAddFixture);
+    mUI.btnAddNodeItem->addAction(mUI.actionAddLight);
     mUI.btnAddNodeItem->addAction(mUI.actionAddTilemapNode);
     mUI.btnAddNodeItem->addAction(mUI.actionAddSpatialNode);
     mUI.btnAddNodeItem->addAction(mUI.actionAddTransformer);
@@ -1620,10 +1638,14 @@ void EntityWidget::on_actionPreview_triggered()
     }
     else
     {
+        engine::Engine::RendererConfig config;
+        config.style = GetValue(mUI.cmbStyle);
+
         auto preview = std::make_unique<PlayWindow>(*mState.workspace);
         preview->LoadState("preview_window", this);
         preview->ShowWithWAR();
         preview->LoadPreview(mState.entity);
+        preview->ConfigurePreviewRenderer(config);
         mPreview = std::move(preview);
     }
 }
@@ -2874,9 +2896,95 @@ void EntityWidget::on_tfEnabled_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_ltType_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_ltAmbient_colorChanged(const QColor&)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_ltDiffuse_colorChanged(const QColor&)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_ltSpecular_colorChanged(const QColor&)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_ltConstantAttenuation_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_ltLinearAttenuation_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_ltQuadraticAttenuation_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_ltTranslation_ValueChanged(const Vector3*)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_ltDirection_ValueChanged(const Vector3*)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_ltSpotHalfAngle_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_ltLayer_valueChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_ltEnabled_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+
 void EntityWidget::on_btnDelDrawable_clicked()
 {
     ToggleDrawable(false);
+}
+
+void EntityWidget::ToggleLight(bool on)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (on)
+        {
+            if (!node->HasBasicLight())
+            {
+                game::BasicLightClass light;
+                light.SetTranslation(glm::vec3{0.0f, 0.0f, -100.0f});
+                light.SetQuadraticAttenuation(0.00005f);
+                node->SetBasicLight(light);
+
+                ScrollEntityNodeArea();
+
+                DEBUG("Added light to '%1'.", node->GetName());
+            }
+        }
+        else
+        {
+            node->RemoveBasicLight();
+            DEBUG("Removed light from '%1'.", node->GetName());
+        }
+        DisplayCurrentNodeProperties();
+        RealizeEntityChange(mState.entity);
+
+        mUI.basicLight->Collapse(!on);
+    }
 }
 
 void EntityWidget::ToggleDrawable(bool on)
@@ -3025,6 +3133,16 @@ void EntityWidget::on_btnDelSpatialNode_clicked()
 void EntityWidget::on_btnDelTransformer_clicked()
 {
     ToggleTransformer(false);
+}
+
+void EntityWidget::on_btnDelLight_clicked()
+{
+    ToggleLight(false);
+}
+
+void EntityWidget::on_actionAddLight_triggered()
+{
+    ToggleLight(true);
 }
 
 void EntityWidget::on_actionAddDrawable_triggered()
@@ -3972,6 +4090,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetEnabled(mUI.actionAddTilemapNode, true);
     SetEnabled(mUI.actionAddSpatialNode, true);
     SetEnabled(mUI.actionAddTransformer, true);
+    SetEnabled(mUI.actionAddLight,       true);
 
     SetVisible(mUI.drawable,    false);
     SetVisible(mUI.textItem,    false);
@@ -3980,6 +4099,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetVisible(mUI.tilemapNode, false);
     SetVisible(mUI.spatialNode, false);
     SetVisible(mUI.transformer, false);
+    SetVisible(mUI.basicLight,  false);
 
     if (const auto* node = GetCurrentNode())
     {
@@ -4153,6 +4273,25 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.tfAccelY, accel.y);
             SetValue(mUI.tfAccelA, trans->GetAngularAcceleration());
             SetValue(mUI.tfEnabled, trans->IsEnabled());
+        }
+
+        if (const auto* light = node->GetBasicLight())
+        {
+            SetEnabled(mUI.actionAddLight, false);
+            SetVisible(mUI.basicLight, true);
+
+            SetValue(mUI.ltType, light->GetLightType());
+            SetValue(mUI.ltAmbient, light->GetAmbientColor());
+            SetValue(mUI.ltDiffuse, light->GetDiffuseColor());
+            SetValue(mUI.ltSpecular, light->GetSpecularColor());
+            SetValue(mUI.ltConstantAttenuation, light->GetConstantAttenuation());
+            SetValue(mUI.ltLinearAttenuation, light->GetLinearAttenuation());
+            SetValue(mUI.ltQuadraticAttenuation, light->GetQuadraticAttenuation());
+            SetValue(mUI.ltTranslation, light->GetTranslation());
+            SetValue(mUI.ltDirection, light->GetDirection());
+            SetValue(mUI.ltSpotHalfAngle, light->GetSpotHalfAngle());
+            SetValue(mUI.ltLayer, light->GetLayer());
+            SetValue(mUI.ltEnabled, light->IsEnabled());
         }
     }
 }
@@ -4346,6 +4485,23 @@ void EntityWidget::UpdateCurrentNodeProperties()
         trans->SetAngularVelocity(GetValue(mUI.tfVelocityA));
         trans->SetAngularAcceleration(GetValue(mUI.tfAccelA));
         trans->SetFlag(game::NodeTransformerClass::Flags::Enabled, GetValue(mUI.tfEnabled));
+    }
+
+    if (auto* light = node->GetBasicLight())
+    {
+        const game::FDegrees spot_half_angle = GetValue(mUI.ltSpotHalfAngle);
+        light->SetLightType(GetValue(mUI.ltType));
+        light->SetAmbientColor(GetValue(mUI.ltAmbient));
+        light->SetDiffuseColor(GetValue(mUI.ltDiffuse));
+        light->SetSpecularColor(GetValue(mUI.ltSpecular));
+        light->SetLinearAttenuation(GetValue(mUI.ltLinearAttenuation));
+        light->SetConstantAttenuation(GetValue(mUI.ltConstantAttenuation));
+        light->SetQuadraticAttenuation(GetValue(mUI.ltQuadraticAttenuation));
+        light->SetTranslation(GetValue(mUI.ltTranslation));
+        light->SetDirection(GetValue(mUI.ltDirection));
+        light->SetSpotHalfAngle(spot_half_angle);
+        light->SetLayer(GetValue(mUI.ltLayer));
+        light->Enable(GetValue(mUI.ltEnabled));
     }
 
     RealizeEntityChange(mState.entity);
