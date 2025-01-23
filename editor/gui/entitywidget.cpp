@@ -81,20 +81,6 @@
 #include "graphics/simple_shape.h"
 #include "game/treeop.h"
 
-namespace engine {
-std::string TranslateEnum(Renderer::RenderingStyle style)
-{
-    if (style == Renderer::RenderingStyle::FlatColor)
-        return "Flat Color";
-    else if (style == Renderer::RenderingStyle::BasicShading)
-        return "Basic Shading";
-    else if (style == Renderer::RenderingStyle::Wireframe)
-        return "Wireframe";
-    BUG("Missing translation");
-    return "???";
-}
-} //
-
 namespace gui
 {
 
@@ -2120,6 +2106,7 @@ void EntityWidget::on_btnNewTrack_clicked()
     widget->SetShowViewport(GetValue(mUI.chkShowViewport));
     widget->SetSnapGrid(GetValue(mUI.chkSnap));
     widget->SetGrid(GetValue(mUI.cmbGrid));
+    widget->SetRenderingStyle(GetValue(mUI.cmbStyle));
     emit OpenNewWidget(widget);
 }
 void EntityWidget::on_btnEditTrack_clicked()
@@ -2144,6 +2131,7 @@ void EntityWidget::on_btnEditTrack_clicked()
         widget->SetShowOrigin(GetValue(mUI.chkShowOrigin));
         widget->SetSnapGrid(GetValue(mUI.chkSnap));
         widget->SetGrid(GetValue(mUI.cmbGrid));
+        widget->SetRenderingStyle(GetValue(mUI.cmbStyle));
         emit OpenNewWidget(widget);
     }
 }

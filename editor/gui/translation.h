@@ -25,6 +25,7 @@
 #include "audio/loader.h"
 #include "editor/app/workspace.h"
 #include "engine/loader.h"
+#include "engine/enum.h"
 #include "graphics/drawable.h"
 #include "game/animator.h"
 #include "game/scene_class.h"
@@ -72,4 +73,8 @@ namespace gfx {
 namespace audio {
     std::string TranslateEnum(audio::SampleType sampletype);
     std::string TranslateEnum(audio::IOStrategy io);
+}
+
+namespace engine {
+    std::string TranslateEnum(engine::RenderingStyle style);
 }

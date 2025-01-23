@@ -38,6 +38,7 @@
 #include "game/animator.h"
 #include "engine/renderer.h"
 #include "engine/physics.h"
+#include "engine/enum.h"
 
 namespace gui
 {
@@ -86,6 +87,7 @@ namespace gui
         void SetShowViewport(bool on_off);
         void SetSnapGrid(bool on_off);
         void SetGrid(GridDensity grid);
+        void SetRenderingStyle(engine::RenderingStyle style);
         void RealizeEntityChange(std::shared_ptr<const game::EntityClass> klass);
     private slots:
         void on_widgetColor_colorChanged(QColor color);

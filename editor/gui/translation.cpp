@@ -409,3 +409,21 @@ std::string TranslateEnum(audio::IOStrategy io)
 }
 
 } // audio
+
+
+namespace engine
+{
+
+std::string TranslateEnum(engine::RenderingStyle style)
+{
+    if (style == engine::RenderingStyle::FlatColor)
+        return "Flat Color";
+    else if (style == engine::RenderingStyle::BasicShading)
+        return "Basic Shading";
+    else if (style == engine::RenderingStyle::Wireframe)
+        return "Wireframe";
+    BUG("Missing translation");
+    return "???";
+}
+
+} // namespace engine
