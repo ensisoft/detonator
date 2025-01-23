@@ -995,7 +995,8 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
             };
 
             auto mpg123_decoder = std::make_unique<Mpg123Decoder>();
-            if (info && base::HaveGlobalThreadPool())
+            auto* pool = base::GetGlobalThreadPool();
+            if (info && pool && pool->HasThread(base::ThreadPool::AudioThreadID))
             {
                 auto* pool = base::GetGlobalThreadPool();
                 auto task = std::make_unique<OpenDecoderTask>(std::move(mpg123_decoder), std::move(source), mFormat.sample_type);
@@ -1040,7 +1041,8 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
             };
 
             auto snd_file_decoder = std::make_unique<SndFileDecoder>();
-            if (info && base::HaveGlobalThreadPool())
+            auto* pool = base::GetGlobalThreadPool();
+            if (info && pool && pool->HasThread(base::ThreadPool::AudioThreadID))
             {
                 auto* pool = base::GetGlobalThreadPool();
                 auto task = std::make_unique<OpenDecoderTask>(std::move(snd_file_decoder), std::move(source));

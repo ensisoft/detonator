@@ -375,6 +375,19 @@ bool ThreadPool::HasPendingTasks() const
     return mState->num_tasks > 0;
 }
 
+bool ThreadPool::HasThread(std::size_t threadId) const
+{
+    if (threadId == MainThreadID)
+        return !!mMainThread;
+
+    for (auto& thread : mRealThreads)
+    {
+        if (thread->GetThreadId() == threadId)
+            return true;
+    }
+    return false;
+}
+
 void ThreadPool::ExecuteMainThread()
 {
     if (mMainThread)
