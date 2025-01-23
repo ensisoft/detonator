@@ -279,6 +279,9 @@
               <widget class="QComboBox" name="cmbGrid"/>
              </item>
              <item>
+              <widget class="QComboBox" name="cmbStyle"/>
+             </item>
+             <item>
               <spacer name="horizontalSpacer_2">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -844,7 +847,7 @@
              </sizepolicy>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Plain</enum>
@@ -1580,7 +1583,7 @@
              </size>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Panel</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Sunken</enum>
@@ -1785,6 +1788,7 @@
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
+  <tabstop>cmbStyle</tabstop>
   <tabstop>chkSnap</tabstop>
   <tabstop>chkShowViewport</tabstop>
   <tabstop>chkShowOrigin</tabstop>
@@ -1835,6 +1839,7 @@
   <tabstop>itemFlags</tabstop>
   <tabstop>flagTime</tabstop>
   <tabstop>flagAction</tabstop>
+  <tabstop>flagJoint</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
