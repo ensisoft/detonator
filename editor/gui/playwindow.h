@@ -35,6 +35,7 @@
 #include "base/utility.h"
 #include "base/trace.h"
 #include "base/threadpool.h"
+#include "game/scene_class.h"
 #include "engine/library/library.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/dlgeventlog.h"
@@ -84,6 +85,8 @@ namespace gui
         bool LoadPreview(const std::shared_ptr<const game::EntityClass>& entity);
         bool LoadPreview(const std::shared_ptr<const game::SceneClass>& scene);
         bool LoadPreview(const std::shared_ptr<const uik::Window>& window);
+
+        void ConfigurePreviewRenderer(const engine::Engine::RendererConfig& config);
 
         void NotifyClassUpdate(const std::shared_ptr<const uik::Window>& window);
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1952</width>
-    <height>1361</height>
+    <width>2072</width>
+    <height>1576</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -264,7 +264,7 @@
                <x>0</x>
                <y>0</y>
                <width>353</width>
-               <height>831</height>
+               <height>1087</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -1449,8 +1449,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>427</width>
-          <height>905</height>
+          <width>428</width>
+          <height>1052</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -3640,6 +3640,292 @@
                </widget>
               </item>
               <item>
+               <widget class="gui::CollapsibleWidget" name="basicLight">
+                <property name="collapsed" stdset="0">
+                 <bool>true</bool>
+                </property>
+                <property name="text" stdset="0">
+                 <string>Basic Light</string>
+                </property>
+                <property name="frameShape" stdset="0">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <widget class="QWidget" name="page_12">
+                 <layout class="QVBoxLayout" name="verticalLayout_14">
+                  <item>
+                   <layout class="QGridLayout" name="gridLayout_11">
+                    <property name="leftMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>4</number>
+                    </property>
+                    <item row="2" column="0">
+                     <widget class="QLabel" name="label_22">
+                      <property name="text">
+                       <string>Diffuse color</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="0">
+                     <widget class="QLabel" name="label_39">
+                      <property name="text">
+                       <string>Specular color</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1" colspan="2">
+                     <widget class="QComboBox" name="ltType"/>
+                    </item>
+                    <item row="8" column="0">
+                     <widget class="QLabel" name="label_75">
+                      <property name="text">
+                       <string>Translation</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="8" column="1" colspan="2">
+                     <widget class="gui::Vector3" name="ltTranslation">
+                      <property name="focusPolicy">
+                       <enum>Qt::WheelFocus</enum>
+                      </property>
+                      <property name="min" stdset="0">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="max" stdset="0">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="labels" stdset="0">
+                       <bool>false</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="12" column="0">
+                     <widget class="QLabel" name="label_7">
+                      <property name="text">
+                       <string>Flags</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="1" colspan="2">
+                     <widget class="color_widgets::ColorSelector" name="ltSpecular">
+                      <property name="minimumSize">
+                       <size>
+                        <width>30</width>
+                        <height>25</height>
+                       </size>
+                      </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::TabFocus</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="9" column="0">
+                     <widget class="QLabel" name="label_76">
+                      <property name="text">
+                       <string>Direction</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="11" column="0">
+                     <widget class="QLabel" name="label_74">
+                      <property name="text">
+                       <string>Layer</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="7" column="1" colspan="2">
+                     <widget class="QDoubleSpinBox" name="ltQuadraticAttenuation">
+                      <property name="decimals">
+                       <number>5</number>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.010000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="5" column="1" colspan="2">
+                     <widget class="QDoubleSpinBox" name="ltConstantAttenuation">
+                      <property name="minimum">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>100.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.010000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                      <property name="value">
+                       <double>1.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="7" column="0">
+                     <widget class="QLabel" name="label_73">
+                      <property name="text">
+                       <string>Quadratic attn.</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_21">
+                      <property name="text">
+                       <string>Ambient color</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="12" column="1">
+                     <widget class="QCheckBox" name="ltEnabled">
+                      <property name="text">
+                       <string>Enabled</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="9" column="1" colspan="2">
+                     <widget class="gui::Vector3" name="ltDirection">
+                      <property name="focusPolicy">
+                       <enum>Qt::WheelFocus</enum>
+                      </property>
+                      <property name="min" stdset="0">
+                       <double>-1.000000000000000</double>
+                      </property>
+                      <property name="max" stdset="0">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="labels" stdset="0">
+                       <bool>false</bool>
+                      </property>
+                      <property name="suffix">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="11" column="1" colspan="2">
+                     <widget class="QSpinBox" name="ltLayer">
+                      <property name="minimum">
+                       <number>-100</number>
+                      </property>
+                      <property name="maximum">
+                       <number>100</number>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_71">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text">
+                       <string>Type</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1" colspan="2">
+                     <widget class="color_widgets::ColorSelector" name="ltAmbient">
+                      <property name="minimumSize">
+                       <size>
+                        <width>30</width>
+                        <height>25</height>
+                       </size>
+                      </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::TabFocus</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="5" column="0">
+                     <widget class="QLabel" name="label_58">
+                      <property name="text">
+                       <string>Constant attn.</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="6" column="0">
+                     <widget class="QLabel" name="label_72">
+                      <property name="text">
+                       <string>Linear attn.</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="6" column="1" colspan="2">
+                     <widget class="QDoubleSpinBox" name="ltLinearAttenuation">
+                      <property name="decimals">
+                       <number>5</number>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.010000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="1" colspan="2">
+                     <widget class="color_widgets::ColorSelector" name="ltDiffuse">
+                      <property name="minimumSize">
+                       <size>
+                        <width>30</width>
+                        <height>25</height>
+                       </size>
+                      </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::TabFocus</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="10" column="1" colspan="2">
+                     <widget class="QDoubleSpinBox" name="ltSpotHalfAngle">
+                      <property name="suffix">
+                       <string> °</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="10" column="0">
+                     <widget class="QLabel" name="label_77">
+                      <property name="text">
+                       <string>Spot half angle</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnDelLight">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Remove Light</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </widget>
+              </item>
+              <item>
                <widget class="gui::CollapsibleWidget" name="tilemapNode">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -4734,6 +5020,18 @@
     <string>Add particle system from preset</string>
    </property>
   </action>
+  <action name="actionAddLight">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/light.png</normaloff>:/16x16_ico_png/light.png</iconset>
+   </property>
+   <property name="text">
+    <string>Basic Light</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a new light</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -4758,6 +5056,11 @@
    <header>collapsible_widget.h</header>
    <addpagemethod>AddPage</addpagemethod>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>gui::Vector3</class>
+   <extends>QWidget</extends>
+   <header>vector3.h</header>
   </customwidget>
   <customwidget>
    <class>gui::GfxWidget</class>
@@ -4904,6 +5207,20 @@
   <tabstop>fxIsSensor</tabstop>
   <tabstop>btnDelFixture</tabstop>
   <tabstop>tilemapNode</tabstop>
+  <tabstop>basicLight</tabstop>
+  <tabstop>ltType</tabstop>
+  <tabstop>ltAmbient</tabstop>
+  <tabstop>ltDiffuse</tabstop>
+  <tabstop>ltSpecular</tabstop>
+  <tabstop>ltConstantAttenuation</tabstop>
+  <tabstop>ltLinearAttenuation</tabstop>
+  <tabstop>ltQuadraticAttenuation</tabstop>
+  <tabstop>ltTranslation</tabstop>
+  <tabstop>ltDirection</tabstop>
+  <tabstop>ltSpotHalfAngle</tabstop>
+  <tabstop>ltLayer</tabstop>
+  <tabstop>ltEnabled</tabstop>
+  <tabstop>btnDelLight</tabstop>
   <tabstop>mnHCenter</tabstop>
   <tabstop>mnVCenter</tabstop>
   <tabstop>btnDelTilemapNode</tabstop>

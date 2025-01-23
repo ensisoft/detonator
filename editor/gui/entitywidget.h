@@ -261,6 +261,19 @@ namespace gui
         void on_tfAccelY_valueChanged(double);
         void on_tfAccelA_valueChanged(double);
         void on_tfEnabled_stateChanged(int);
+        void on_ltType_currentIndexChanged(int);
+        void on_ltAmbient_colorChanged(const QColor&);
+        void on_ltDiffuse_colorChanged(const QColor&);
+        void on_ltSpecular_colorChanged(const QColor&);
+        void on_ltConstantAttenuation_valueChanged(double);
+        void on_ltLinearAttenuation_valueChanged(double);
+        void on_ltQuadraticAttenuation_valueChanged(double);
+        void on_ltTranslation_ValueChanged(const Vector3*);
+        void on_ltDirection_ValueChanged(const Vector3*);
+        void on_ltSpotHalfAngle_valueChanged(double);
+        void on_ltLayer_valueChanged(int);
+        void on_ltEnabled_stateChanged(int);
+
         void on_btnDelDrawable_clicked();
         void on_btnDelTextItem_clicked();
         void on_btnDelRigidBody_clicked();
@@ -268,6 +281,8 @@ namespace gui
         void on_btnDelTilemapNode_clicked();
         void on_btnDelSpatialNode_clicked();
         void on_btnDelTransformer_clicked();
+        void on_btnDelLight_clicked();
+        void on_actionAddLight_triggered();
         void on_actionAddDrawable_triggered();
         void on_actionAddTextItem_triggered();
         void on_actionAddRigidBody_triggered();
@@ -291,6 +306,7 @@ namespace gui
         void PlaceNewCustomShape();
 
     private:
+        void ToggleLight(bool on);
         void ToggleDrawable(bool on);
         void ToggleRigidBody(bool on);
         void ToggleTextItem(bool on);

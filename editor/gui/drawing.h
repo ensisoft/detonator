@@ -51,6 +51,7 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans);
 void DrawBasisVectors(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets);
 void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
 void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
+void DrawLightIndicator(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
 
 void DrawEdges(const gfx::Painter& scene_painter,
                const gfx::Painter& window_painter,
@@ -328,6 +329,10 @@ private:
         const auto& size = node->GetSize();
         const gfx::FRect rect(0.0f, 0.0f, size.x, size.y);
 
+        if (const auto* light = node->GetBasicLight())
+        {
+            DrawLightIndicator(trans, packets, rect);
+        }
         // if a node is visible in the editor but doesn't draw any game
         // time content, i.e. not visible in game or won't draw anything otherwise
         // then add a visualization for it.

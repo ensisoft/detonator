@@ -1380,7 +1380,7 @@ struct Vec3ValueGetter
 
 inline Vec3ValueGetter GetValue(const gui::Vector3* vector)
 { return Vec3ValueGetter { vector }; }
-inline FontComboValueGetter GetValue(QFontComboBox* cmb)
+    inline FontComboValueGetter GetValue(QFontComboBox* cmb)
 { return FontComboValueGetter { cmb }; }
 inline DoubleSliderValueGetter GetValue(const gui::DoubleSlider* slider)
 { return DoubleSliderValueGetter { slider }; }

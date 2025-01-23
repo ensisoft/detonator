@@ -961,6 +961,11 @@ bool PlayWindow::LoadPreview(const std::shared_ptr<const uik::Window>& window)
     return true;
 }
 
+void PlayWindow::ConfigurePreviewRenderer(const engine::Engine::RendererConfig& config)
+{
+    mEngine->SetRendererConfig(config);
+}
+
 void PlayWindow::NotifyClassUpdate(const std::shared_ptr<const uik::Window>& window)
 {
     if (!mEngine || !mInitDone)
