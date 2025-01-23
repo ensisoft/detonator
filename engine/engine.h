@@ -35,6 +35,7 @@
 #include "engine/classlib.h"
 #include "engine/loader.h"
 #include "engine/color.h"
+#include "engine/enum.h"
 #include "device/device.h"
 #include "graphics/device.h"
 #include "graphics/loader.h"
@@ -181,6 +182,13 @@ namespace engine
         virtual void SetTracer(base::Trace* tracer, base::TraceWriter* writer)
         {}
         virtual void SetTracingOn(bool on_off)
+        {}
+
+        struct RendererConfig {
+            RenderingStyle style = RenderingStyle::BasicShading;
+        };
+
+        virtual void SetRendererConfig(const RendererConfig& config)
         {}
 
         // Parameters pertaining to the environment of the application.

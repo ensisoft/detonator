@@ -409,6 +409,10 @@ public:
         k.id   = klass.id;
         mRuntime->OnContentClassUpdate(k);
     }
+    virtual void SetRendererConfig(const RendererConfig& config) override
+    {
+        mRendererConfig = config;
+    }
 
     virtual bool Load() override
     {
@@ -1266,6 +1270,12 @@ private:
         else if (shading == game::SceneClass::RenderingArgs::ShadingMode::BasicLight)
             mRenderer.SetStyle(engine::Renderer::RenderingStyle::BasicShading);
         else BUG("Bug on renderer shading mode.");
+
+        if (mRendererConfig.has_value())
+        {
+            const auto& value = mRendererConfig.value();
+            mRenderer.SetStyle(value.style);
+        }
     }
 
     void DrawMousePointer(float dt)
@@ -1571,6 +1581,9 @@ private:
     engine::KeyValueStore mStateStore;
     // debug stepping flag to control taking a single update step.
     bool mStepForward = false;
+    // renderer config set explicitly. Used to override
+    // the normal renderer config when doing previews etc.
+    std::optional<engine::Engine::RendererConfig> mRendererConfig;
 };
 
 } //namespace
