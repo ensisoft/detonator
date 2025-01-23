@@ -151,6 +151,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     mUI.timeline->SetModel(mTimelineModel.get());
 
     const auto& settings = workspace->GetProjectSettings();
+    PopulateFromEnum<engine::RenderingStyle>(mUI.cmbStyle);
     PopulateFromEnum<game::TransformAnimatorClass::Interpolation>(mUI.transformInterpolation);
     PopulateFromEnum<game::PropertyAnimatorClass::Interpolation>(mUI.setvalInterpolation);
     PopulateFromEnum<game::PropertyAnimatorClass::PropertyName>(mUI.setvalName);
@@ -329,6 +330,7 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     settings.SaveWidget("TrackWidget", mUI.rotation);
     settings.SaveWidget("TrackWidget", mUI.zoom);
     settings.SaveWidget("TrackWidget", mUI.cmbGrid);
+    settings.SaveWidget("TrackWidget", mUI.cmbStyle);
     settings.SaveWidget("TrackWidget", mUI.chkShowOrigin);
     settings.SaveWidget("TrackWidget", mUI.chkShowGrid);
     settings.SaveWidget("TrackWidget", mUI.chkShowViewport);
@@ -369,6 +371,7 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.LoadWidget("TrackWidget", mUI.rotation);
     settings.LoadWidget("TrackWidget", mUI.zoom);
     settings.LoadWidget("TrackWidget", mUI.cmbGrid);
+    settings.LoadWidget("TrackWidget", mUI.cmbStyle);
     settings.LoadWidget("TrackWidget", mUI.chkShowOrigin);
     settings.LoadWidget("TrackWidget", mUI.chkShowGrid);
     settings.LoadWidget("TrackWidget", mUI.chkShowViewport);
@@ -613,6 +616,11 @@ void AnimationTrackWidget::SetGrid(GridDensity grid)
 void AnimationTrackWidget::SetShowViewport(bool on_off)
 {
     SetValue(mUI.chkShowViewport, on_off);
+}
+
+void AnimationTrackWidget::SetRenderingStyle(engine::RenderingStyle style)
+{
+    SetValue(mUI.cmbStyle, style);
 }
 
 void AnimationTrackWidget::RealizeEntityChange(std::shared_ptr<const game::EntityClass> klass)
@@ -1863,6 +1871,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     mRenderer.SetSurface(surface);
 
     mRenderer.SetEditingMode(true);
+    mRenderer.SetStyle(GetValue(mUI.cmbStyle));
     mRenderer.SetClassLibrary(mWorkspace);
     mRenderer.SetName("AnimationWidgetRenderer/" + mState.entity->GetId());
     mRenderer.SetLowLevelRendererHook(&low_level_render_hook);
