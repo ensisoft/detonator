@@ -1854,6 +1854,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     camera.rotation    = camera_rotation;
     camera.scale       = camera_scale * zoom;
     camera.viewport    = game::FRect(-width*0.5f, -height*0.5f, width, height);
+    camera.ppa         = engine::ComputePerspectiveProjection(camera.viewport);
     mRenderer.SetCamera(camera);
 
     engine::Renderer::Surface surface;
