@@ -246,6 +246,8 @@ namespace base
 
         bool HasPendingTasks() const;
 
+        bool HasThread(std::size_t threadId) const;
+
         void ExecuteMainThread();
 
         void SetThreadTraceWriter(base::TraceWriter* writer);
