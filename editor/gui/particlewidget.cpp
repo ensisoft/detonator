@@ -794,17 +794,12 @@ void ParticleEditorWidget::on_actionLoadPreset_triggered()
     }
     mClass->SetParams(particle->GetParams());
 
-    if (mWorkspace->IsValidMaterial(material->GetId()))
-    {
-        SetValue(mUI.materials, ListItemId(material->GetId()));
-        mMaterial.reset();
-        mMaterialClass.reset();
-    }
-    else
-    {
-        mMaterial.reset();
-        mMaterialClass = material->Clone();
-    }
+    mMaterial.reset();
+    mMaterialClass = material->Clone();
+    mMaterialClass->SetName((std::string)GetValue(mUI.name) + std::string(" Particle"));
+
+    SetValue(mUI.materials, -1);
+    SetValue(mUI.materials, mMaterialClass->GetName());
 
     ShowParams();
 
@@ -1035,8 +1030,8 @@ void ParticleEditorWidget::ShowParams()
     const auto* file_texture_src = dynamic_cast<const gfx::TextureFileSource*>(texture_src);
 
     SetValue(mUI.cmbSurface, mMaterialClass->GetSurfaceType());
-    SetValue(mUI.startColor, mMaterialClass->GetUniformValue("kParticleStartColor", gfx::Color4f(gfx::Color::White)));
-    SetValue(mUI.endColor, mMaterialClass->GetUniformValue("kParticleEndColor", gfx::Color4f(gfx::Color::White)));
+    SetValue(mUI.startColor, mMaterialClass->GetParticleStartColor());
+    SetValue(mUI.endColor, mMaterialClass->GetParticleEndColor());
     SetValue(mUI.cmbParticle, ListItemId(file_texture_src->GetFilename()));
     if (const auto bitmap = texture_src->GetData())
     {
@@ -1274,7 +1269,7 @@ void ParticleEditorWidget::on_startColor_colorChanged(QColor)
     if (!mMaterialClass)
         return;
 
-    mMaterialClass->SetUniform("kStartColor", GetValue(mUI.startColor));
+    mMaterialClass->SetParticleStartColor(GetValue(mUI.startColor));
 }
 
 void ParticleEditorWidget::on_endColor_colorChanged(QColor)
@@ -1282,7 +1277,7 @@ void ParticleEditorWidget::on_endColor_colorChanged(QColor)
     if (!mMaterialClass)
         return;
 
-    mMaterialClass->SetUniform("kEndColor", GetValue(mUI.endColor));
+    mMaterialClass->SetParticleEndColor(GetValue(mUI.endColor));
 }
 
 void ParticleEditorWidget::on_primitive_currentIndexChanged(int)
