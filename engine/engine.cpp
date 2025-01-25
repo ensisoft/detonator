@@ -489,41 +489,43 @@ public:
         // run at the same time when we're drawing.
         TRACE_CALL("Renderer::DrawFrame", mRenderer.DrawFrame(*mDevice));
 
+#if defined(ENGINE_USE_UPDATE_THREAD)
+        base::TaskHandle next_frame_task;
+
         // if we had updates running in parallel then complete (wait)
         // the tasks here. This is unfortunately needed in order to
         // make sure that the update thread is no longer touching
         // the UI system or the scene.
-#if defined(ENGINE_USE_UPDATE_THREAD)
-        base::TaskHandle update_renderer_task;
-
         if (!mUpdateTasks.empty())
         {
+            // Wait each update task
             for (auto& task: mUpdateTasks)
             {
                 TRACE_CALL("WaitSceneUpdate", task.Wait(base::TaskHandle::WaitStrategy::BusyLoop));
             }
             mUpdateTasks.clear();
 
-            class UpdateRendererStateTask : public base::ThreadTask {
+            class CreateNextFrameTask : public base::ThreadTask {
             public:
-                explicit UpdateRendererStateTask(GameStudioEngine* engine)
+                explicit CreateNextFrameTask(GameStudioEngine* engine)
                   : mEngine(engine)
                 {}
             protected:
                 void DoTask() override
                 {
-                    mEngine->CreateRenderPackets();
+                    mEngine->CreateNextFrame();
                 }
 
             private:
                 GameStudioEngine* mEngine = nullptr;
             };
 
+            // create task to create the next frame in the renderer
+            // we can do this in parallel while this thread can proceed
+            // to draw game UI, debug objects etc.
             auto* thread_pool = base::GetGlobalThreadPool();
-            auto thread_task = std::make_unique<UpdateRendererStateTask>(this);
-            {
-                update_renderer_task = thread_pool->SubmitTask(std::move(thread_task), base::ThreadPool::UpdateThreadID);
-            }
+            auto thread_task = std::make_unique<CreateNextFrameTask>(this);
+            next_frame_task = thread_pool->SubmitTask(std::move(thread_task), base::ThreadPool::UpdateThreadID);
 
             // update the debug draws only after updating the game
             // if this is done per each frame they will not be seen
@@ -533,7 +535,7 @@ public:
             std::swap(mDebugDraws, debug_draws);
         }
 #else
-        CreateRenderPackets();
+        CreateNextFrame();
 #endif
         // Continue drawing more stuff while the renderer update
         // task runs in parallel.
@@ -549,9 +551,9 @@ public:
 #if defined(ENGINE_USE_UPDATE_THREAD)
         // complete the update/render loop, wait this task here
         // so that the update/rendering stay in sync.
-        if (update_renderer_task)
+        if (next_frame_task)
         {
-            TRACE_CALL("WaitRendererUpdate", update_renderer_task.Wait(base::TaskHandle::WaitStrategy::BusyLoop));
+            TRACE_CALL("WaitCreateFrame", next_frame_task.Wait(base::TaskHandle::WaitStrategy::BusyLoop));
         }
 #endif
 
@@ -1138,7 +1140,7 @@ private:
         }
     }
 
-    void CreateRenderPackets()
+    void CreateNextFrame()
     {
         const auto now = mGameTimeTotal;
         if (mRenderTimeStamp == 0.0)
