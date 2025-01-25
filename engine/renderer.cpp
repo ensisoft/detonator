@@ -1080,7 +1080,31 @@ template<typename EntityType, typename EntityNodeType>
 void Renderer::UpdateLightResources(const EntityType& entity, const EntityNodeType& entity_node, LightNode& light_node,
                                     double time, float dt) const
 {
-    CreateLightResources<EntityType, EntityNodeType>(entity, entity_node, light_node);
+    if (const auto* light = entity_node.GetBasicLight())
+    {
+        if (light_node.light)
+        {
+            const auto type = light->GetLightType();
+            if (type == game::BasicLightType::Ambient)
+                light_node.light->type = gfx::BasicLightType::Ambient;
+            else if (type == game::BasicLightType::Directional)
+                light_node.light->type = gfx::BasicLightType::Directional;
+            else if (type == game::BasicLightType::Point)
+                light_node.light->type = gfx::BasicLightType::Point;
+            else if (type == game::BasicLightType::Spot)
+                light_node.light->type = gfx::BasicLightType::Spot;
+            else BUG("Bug on basic light type.");
+
+            light_node.light->ambient_color = light->GetAmbientColor();
+            light_node.light->diffuse_color = light->GetDiffuseColor();
+            light_node.light->specular_color = light->GetSpecularColor();
+            light_node.light->constant_attenuation = light->GetConstantAttenuation();
+            light_node.light->linear_attenuation = light->GetLinearAttenuation();
+            light_node.light->quadratic_attenuation = light->GetQuadraticAttenuation();
+            light_node.light->direction = light->GetDirection();
+            light_node.light->spot_half_angle = light->GetSpotHalfAngle();
+        }
+    }
 }
 
 template<typename EntityType, typename EntityNodeType>
@@ -1291,31 +1315,41 @@ void Renderer::CreateTextResources(const EntityType& entity, const EntityNodeTyp
 template<typename EntityType, typename EntityNodeType>
 void Renderer::CreateLightResources(const EntityType& entity, const EntityNodeType& entity_node, LightNode& light_node) const
 {
+    // do not touch the light here if it already exists,
+    // only create a new light if/when needed. The light
+    // object itself can be used by the current frame that
+    // is being drawn out in another thread that is currently
+    // calling DrawFrame.
+
+    // The light state can be updated in the UpdateLightResources
+    // which is called after frame rendering has finished.
+
     if (const auto* light = entity_node.GetBasicLight())
     {
-       const auto type = light->GetLightType();
-
        if (!light_node.light)
+       {
+           const auto type = light->GetLightType();
            light_node.light = std::make_shared<gfx::BasicLight>();
 
-       if (type == game::BasicLightType::Ambient)
-           light_node.light->type = gfx::BasicLightType::Ambient;
-       else if (type == game::BasicLightType::Directional)
-           light_node.light->type = gfx::BasicLightType::Directional;
-       else if (type == game::BasicLightType::Point)
-           light_node.light->type = gfx::BasicLightType::Point;
-       else if (type == game::BasicLightType::Spot)
-           light_node.light->type = gfx::BasicLightType::Spot;
-       else BUG("Bug on basic light type.");
+           if (type == game::BasicLightType::Ambient)
+               light_node.light->type = gfx::BasicLightType::Ambient;
+           else if (type == game::BasicLightType::Directional)
+               light_node.light->type = gfx::BasicLightType::Directional;
+           else if (type == game::BasicLightType::Point)
+               light_node.light->type = gfx::BasicLightType::Point;
+           else if (type == game::BasicLightType::Spot)
+               light_node.light->type = gfx::BasicLightType::Spot;
+           else BUG("Bug on basic light type.");
 
-       light_node.light->ambient_color  = light->GetAmbientColor();
-       light_node.light->diffuse_color  = light->GetDiffuseColor();
-       light_node.light->specular_color = light->GetSpecularColor();
-       light_node.light->constant_attenuation  = light->GetConstantAttenuation();
-       light_node.light->linear_attenuation    = light->GetLinearAttenuation();
-       light_node.light->quadratic_attenuation = light->GetQuadraticAttenuation();
-       light_node.light->direction = light->GetDirection();
-       light_node.light->spot_half_angle = light->GetSpotHalfAngle();
+           light_node.light->ambient_color = light->GetAmbientColor();
+           light_node.light->diffuse_color = light->GetDiffuseColor();
+           light_node.light->specular_color = light->GetSpecularColor();
+           light_node.light->constant_attenuation = light->GetConstantAttenuation();
+           light_node.light->linear_attenuation = light->GetLinearAttenuation();
+           light_node.light->quadratic_attenuation = light->GetQuadraticAttenuation();
+           light_node.light->direction = light->GetDirection();
+           light_node.light->spot_half_angle = light->GetSpotHalfAngle();
+       }
    }
 }
 
