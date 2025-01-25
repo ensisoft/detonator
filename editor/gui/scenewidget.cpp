@@ -1314,6 +1314,7 @@ void SceneWidget::on_actionStop_triggered()
     mUI.actionPlay->setEnabled(true);
     mUI.actionPause->setEnabled(false);
     mUI.actionStop->setEnabled(false);
+    mState.renderer.ClearPaintState();
 }
 void SceneWidget::on_actionSave_triggered()
 {

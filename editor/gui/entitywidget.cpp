@@ -1358,6 +1358,11 @@ void EntityWidget::Update(double secs)
         mState.renderer.Update(*mState.entity, mEntityTime, secs);
         mEntityTime += secs;
     }
+    else
+    {
+        mState.renderer.Update(*mState.entity, 0.0f, 0.0f);
+    }
+
     mCurrentTime += secs;
 
     mAnimator.Update(mUI, mState);
