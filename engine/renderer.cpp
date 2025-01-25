@@ -100,7 +100,7 @@ void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap
     for (const auto& node : nodes)
     {
         const Entity* entity = node.entity;
-        if (!entity->HasRenderableItems())
+        if (!entity->HasRenderableItems() && !entity->HasLights())
             continue;
 
         if (entity->HasBeenKilled())
@@ -826,6 +826,12 @@ void Renderer::Update(const Entity& entity, double time, float dt)
             UpdateTextResources<Entity, EntityNode>(entity, node, *paint, time, dt);
             paint->visited = true;
         }
+
+        if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
+        {
+            UpdateLightResources<Entity, EntityNode>(entity, node, *light, time, dt);
+            light->visited = true;
+        }
     }
 }
 
@@ -850,6 +856,11 @@ void Renderer::Update(const SceneClass& scene, const game::Tilemap* map, double 
             {
                 UpdateTextResources<EntityClass, EntityNodeClass>(*entity, node, *paint, time, dt);
                 paint->visited = true;
+            }
+            if (auto* light = base::SafeFind(mLightNodes, "basic/" + placement.GetId() + "/" + node.GetId()))
+            {
+                UpdateLightResources<EntityClass, EntityNodeClass>(*entity, node, *light, time, dt);
+                light->visited = true;
             }
         }
     }
