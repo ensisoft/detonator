@@ -331,7 +331,10 @@ private:
 
         if (const auto* light = node->GetBasicLight())
         {
-            DrawLightIndicator(trans, packets, rect);
+            if (!is_playing)
+            {
+                DrawLightIndicator(trans, packets, rect);
+            }
         }
         // if a node is visible in the editor but doesn't draw any game
         // time content, i.e. not visible in game or won't draw anything otherwise
