@@ -38,6 +38,7 @@
 #include "game/entity_node_text_item.h"
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_fixture.h"
+#include "game/entity_node_light.h"
 
 void apply_flag(game::BooleanPropertyAnimatorClass::PropertyName flag,
                 game::BooleanPropertyAnimatorClass::PropertyAction action,
@@ -168,11 +169,16 @@ void unit_test_setflag_actuator()
         text_class.SetFlag(game::TextItemClass::Flags::BlinkText, true);
         node_klass.SetTextItem(text_class);
 
+        game::BasicLightClass light_class;
+        light_class.SetFlag(game::BasicLightClass::Flags::Enabled, false);
+        node_klass.SetBasicLight(light_class);
+
         // create node instance
         game::EntityNode node(node_klass);
         const auto* draw = node.GetDrawable();
         const auto* body = node.GetRigidBody();
         const auto* text = node.GetTextItem();
+        const auto* light = node.GetBasicLight();
 
         // drawable flags.
         apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_VisibleInGame,
@@ -258,6 +264,17 @@ void unit_test_setflag_actuator()
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::BlinkText) == true);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::UnderlineText) == true);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::VisibleInGame) == true);
+
+        // Basic light flags.
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::BasicLight_Enabled,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::On, node);
+        TEST_REQUIRE(light->TestFlag(game::BasicLightClass::Flags::Enabled) == true);
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::BasicLight_Enabled,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
+        TEST_REQUIRE(light->TestFlag(game::BasicLightClass::Flags::Enabled) == false);
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::BasicLight_Enabled,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
+        TEST_REQUIRE(light->TestFlag(game::BasicLightClass::Flags::Enabled) == true);
     }
 }
 
@@ -338,22 +355,58 @@ void unit_test_setval_actuator()
         text_class.SetTextColor(game::Color::HotPink);
         node_klass.SetTextItem(text_class);
 
-        game::EntityNode node(node_klass);
+        game::BasicLightClass light_class;
+        light_class.SetDirection(glm::vec3{1.0f, 0.0f, 0.0f});
+        light_class.SetTranslation(glm::vec3(0.0f, 0.0f, 0.0f));
+        light_class.SetAmbientColor(game::Color::White);
+        light_class.SetDiffuseColor(game::Color::White);
+        light_class.SetSpecularColor(game::Color::White);
+        light_class.SetConstantAttenuation(1.0f);
+        light_class.SetLinearAttenuation(0.0f);
+        light_class.SetQuadraticAttenuation(0.0f);
+        light_class.SetSpotHalfAngle(game::FDegrees(0.0f));
+        node_klass.SetBasicLight(light_class);
 
-        apply_value(game::PropertyAnimatorClass::PropertyName::Drawable_TimeScale, 2.0f, node);
-        apply_value(game::PropertyAnimatorClass::PropertyName::RigidBody_LinearVelocity, glm::vec2(-1.0f, -1.0f), node);
-        apply_value(game::PropertyAnimatorClass::PropertyName::RigidBody_AngularVelocity, 4.0f, node);
-        apply_value(game::PropertyAnimatorClass::PropertyName::TextItem_Text, std::string("hello"), node);
-        apply_value(game::PropertyAnimatorClass::PropertyName::TextItem_Color, game::Color::Blue, node);
+        game::EntityNode node(node_klass);
 
         const auto* draw = node.GetDrawable();
         const auto* body = node.GetRigidBody();
         const auto* text = node.GetTextItem();
+        const auto* light = node.GetBasicLight();
+
+        apply_value(game::PropertyAnimatorClass::PropertyName::Drawable_TimeScale, 2.0f, node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::RigidBody_LinearVelocity, glm::vec2(-1.0f, -1.0f), node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::RigidBody_AngularVelocity, 4.0f, node);
         TEST_REQUIRE(draw->GetTimeScale() == real::float32(2.0f));
         TEST_REQUIRE(body->GetLinearVelocityAdjustment() == glm::vec2(-1.0f, -1.0f));
         TEST_REQUIRE(body->GetAngularVelocityAdjustment() == real::float32(4.0f));
+
+
+        apply_value(game::PropertyAnimatorClass::PropertyName::TextItem_Text, std::string("hello"), node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::TextItem_Color, game::Color::Blue, node);
         TEST_REQUIRE(text->GetTextColor() == game::Color4f(game::Color::Blue));
         TEST_REQUIRE(text->GetText() == "hello");
+
+        // basic light
+        apply_value(game::PropertyAnimatorClass::PropertyName::BasicLight_Direction, glm::vec3(0.0f, 1.0f, 0.0f), node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::BasicLight_Translation, glm::vec3(0.0f, 0.0f, 100.0f), node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::BasicLight_AmbientColor, game::Color::Red, node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::BasicLight_DiffuseColor, game::Color::Green, node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::BasicLight_SpecularColor, game::Color::Blue, node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::BasicLight_ConstantAttenuation, 2.0f, node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::BasicLight_LinearAttenuation, 3.0f, node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::BasicLight_QuadraticAttenuation, 4.0f, node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::BasicLight_SpotHalfAngle, 180.0f, node);
+
+        TEST_REQUIRE(light->GetDirection() == glm::vec3(0.0f, 1.0f, 0.0f));
+        TEST_REQUIRE(light->GetTranslation() == glm::vec3(0.0f, 0.0f, 100.0f));
+        TEST_REQUIRE(light->GetAmbientColor() == game::Color::Red);
+        TEST_REQUIRE(light->GetDiffuseColor() == game::Color::Green);
+        TEST_REQUIRE(light->GetSpecularColor() == game::Color::Blue);
+        TEST_REQUIRE(light->GetConstantAttenuation() == 2.0f);
+        TEST_REQUIRE(light->GetLinearAttenuation() == 3.0f);
+        TEST_REQUIRE(light->GetQuadraticAttenuation() == 4.0f);
+        TEST_REQUIRE(light->GetSpotHalfAngle().ToDegrees() == 180.0f);
     }
 
 }

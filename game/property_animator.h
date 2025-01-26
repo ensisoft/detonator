@@ -60,11 +60,20 @@ namespace game
             RigidBodyJoint_MotorSpeed,
             RigidBodyJoint_MotorForce,
             RigidBodyJoint_Stiffness,
-            RigidBodyJoint_Damping
+            RigidBodyJoint_Damping,
+            BasicLight_Direction,
+            BasicLight_Translation,
+            BasicLight_AmbientColor,
+            BasicLight_DiffuseColor,
+            BasicLight_SpecularColor,
+            BasicLight_SpotHalfAngle,
+            BasicLight_ConstantAttenuation,
+            BasicLight_LinearAttenuation,
+            BasicLight_QuadraticAttenuation
         };
 
         using PropertyValue = std::variant<float,
-                std::string, glm::vec2, Color4f>;
+                std::string, glm::vec2, glm::vec3, Color4f>;
 
         // The interpolation method.
         using Interpolation = math::Interpolation;
@@ -147,7 +156,8 @@ namespace game
             SpatialNode_Enabled,
             Transformer_Enabled,
             RigidBodyJoint_EnableMotor,
-            RigidBodyJoint_EnableLimits
+            RigidBodyJoint_EnableLimits,
+            BasicLight_Enabled
         };
 
         enum class PropertyAction {
