@@ -95,7 +95,7 @@ namespace game
         T* GetEndValue()
         { return std::get_if<T>(&mEndValue); }
         void SetEndValue(PropertyValue value)
-        { mEndValue = value; }
+        { mEndValue = std::move(value); }
 
         void SetJointId(std::string id) noexcept
         { mJointId = std::move(id); }
@@ -114,11 +114,11 @@ namespace game
             return false;
         }
 
-        virtual Type GetType() const override
+        Type GetType() const override
         { return Type::PropertyAnimator; }
-        virtual std::size_t GetHash() const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
+        std::size_t GetHash() const override;
+        void IntoJson(data::Writer& data) const override;
+        bool FromJson(const data::Reader& data) override;
     private:
         // the interpolation method to be used.
         Interpolation mInterpolation = Interpolation::Linear;
@@ -163,11 +163,11 @@ namespace game
         enum class PropertyAction {
             On, Off, Toggle
         };
-        virtual Type GetType() const override
+        Type GetType() const override
         { return Type::BooleanPropertyAnimator;}
-        virtual std::size_t GetHash() const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
+        std::size_t GetHash() const override;
+        void IntoJson(data::Writer& data) const override;
+        bool FromJson(const data::Reader& data) override;
 
         inline PropertyAction GetFlagAction() const noexcept
         { return mFlagAction; }
@@ -218,23 +218,23 @@ namespace game
         explicit PropertyAnimator(PropertyAnimatorClass&& klass)
             : mClass(std::make_shared<PropertyAnimatorClass>(std::move(klass)))
         {}
-        virtual void Start(EntityNode& node) override;
-        virtual void Apply(EntityNode& node, float t) override;
-        virtual void Finish(EntityNode& node) override;
+        void Start(EntityNode& node) override;
+        void Apply(EntityNode& node, float t) override;
+        void Finish(EntityNode& node) override;
 
-        virtual float GetStartTime() const override
+        float GetStartTime() const override
         { return mClass->GetStartTime(); }
-        virtual float GetDuration() const override
+        float GetDuration() const override
         { return mClass->GetDuration(); }
-        virtual std::string GetNodeId() const override
+        std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
-        virtual std::string GetClassId() const override
+        std::string GetClassId() const override
         { return mClass->GetId(); }
-        virtual std::string GetClassName() const override
+        std::string GetClassName() const override
         { return mClass->GetName(); }
-        virtual std::unique_ptr<Animator> Copy() const override
+        std::unique_ptr<Animator> Copy() const override
         { return std::make_unique<PropertyAnimator>(*this); }
-        virtual Type GetType() const override
+        Type GetType() const override
         { return Type::PropertyAnimator; }
         bool CanApply(EntityNode& node, bool verbose) const;
     private:
@@ -289,22 +289,22 @@ namespace game
             : mClass(std::make_shared<BooleanPropertyAnimatorClass>(std::move(klass)))
             , mTime(mClass->GetTime())
         {}
-        virtual void Start(EntityNode& node) override;
-        virtual void Apply(EntityNode& node, float t) override;
-        virtual void Finish(EntityNode& node) override;
-        virtual float GetStartTime() const override
+        void Start(EntityNode& node) override;
+        void Apply(EntityNode& node, float t) override;
+        void Finish(EntityNode& node) override;
+        float GetStartTime() const override
         { return mClass->GetStartTime(); }
-        virtual float GetDuration() const override
+        float GetDuration() const override
         { return mClass->GetDuration(); }
-        virtual std::string GetNodeId() const override
+        std::string GetNodeId() const override
         { return mClass->GetNodeId(); }
-        virtual std::string GetClassId() const override
+        std::string GetClassId() const override
         { return mClass->GetId(); }
-        virtual std::string GetClassName() const override
+        std::string GetClassName() const override
         { return mClass->GetName(); }
-        virtual std::unique_ptr<Animator> Copy() const override
+        std::unique_ptr<Animator> Copy() const override
         { return std::make_unique<BooleanPropertyAnimator>(*this); }
-        virtual Type GetType() const override
+        Type GetType() const override
         { return Type::BooleanPropertyAnimator; }
 
         bool CanApply(EntityNode& node, bool verbose) const;
