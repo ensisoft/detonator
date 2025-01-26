@@ -425,6 +425,8 @@ QString CodeAssistant::DiscoverDynamicCompletions(const QString& word)
         return "game.Scene";
     else if (word.endsWith("body"))
         return "game.RigidBody";
+    else if (word.endsWith("light"))
+        return "game.BasicLight";
     else if (word.endsWith("widget"))
         return "uik.Widget";
     else if (word.endsWith("ui"))

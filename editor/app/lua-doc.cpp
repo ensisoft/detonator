@@ -1278,6 +1278,50 @@ void InitLuaDoc()
                                                     "Possible values. 'Box', 'Circle', 'RightTriangle', 'IsoscelesTriangle', 'Trapezoid', 'Parallelogram', 'SemiCircle', 'Polygon'<br>"
                                                     "When the type is 'Polygon' you can get the shape's ID through GetPolygonShapeId.");
 
+    DOC_TABLE("game.BasicLight");
+    DOC_METHOD_0("bool", "IsEnabled", "Check whether the light is enabled or not.");
+    DOC_METHOD_1("void", "Enable", "Enable or disable the light.", "bool", "enable");
+    DOC_METHOD_0("glm.vec3", "GetDirection", "Get the light direction that applies to spot and directional lights."
+                                             "The direction vector is relative to the node. In order to transform the light"
+                                             "direction to world coordinates you can use Scene.MapVectorFromEntityNode.");
+    DOC_METHOD_0("glm.vec3", "GetTranslation", "Get the light's 3D translation relative to the entity node.");
+    DOC_METHOD_0("base.Color4f", "GetAmbientColor", "Get the light's ambient color component.");
+    DOC_METHOD_0("base.Color4f", "GetDiffuseColor", "Get the light's diffuse color component.");
+    DOC_METHOD_0("base.Color4f", "GetSpecularColor", "Get the light's specular color component.");
+    DOC_METHOD_0("float", "GetSpotHalfAngle", "Get spotlight's light cone's half angle. I.e. the angle formed between the "
+                                              "direction vector and the light cone's upper or lower edge. The angle is measure in degrees.");
+    DOC_METHOD_0("float", "GetConstantAttenuation", "Get the light's constant attenuation factor. ");
+    DOC_METHOD_0("float", "GetLinearAttenuation", "Get the light's linear attenuation factor. Linear attenuation is the linear reduction of the light's "
+                                                  "strength over distance from surface.");
+    DOC_METHOD_0("float", "GetQuadraticAttenuation", "Get the light's quadratic attenuation factor. Quadratic attenuation is the quadratic reduction of the light's "
+                                                     "strength over distance from surface.");
+    DOC_METHOD_0("int", "GetLayer", "Get the entity layer assigned to the light.");
+    DOC_METHOD_0("string", "GetType", "Get the light type. Possible types:<br>"
+                                      "Ambient: Applies ambient light only.<br>"
+                                      "Directional: Applies light that is infinitely far away with all rays of the light parallel to each other.<br>"
+                                      "Point: Applies local point light that radiates light evenly in all directions and attenuates over distance.<br>"
+                                      "Spot: Applies local light that has a light bean in a cone shape that attenuates over distance.");
+    DOC_METHOD_1("void", "SetDirection", "Set the light's local direction vector relative to the entity node. If the vector is a null vector the results are undefined.", "glm.vec3", "direction");
+    DOC_METHOD_1("void", "SetTranslation", "Set the light's 3D translation relative to the entity node.", "glm.vec3", "translation");
+    DOC_METHOD_1("void", "SetAmbientColor", "Set the light's ambient color component.", "base.Color4f", "color");
+    DOC_METHOD_1("void", "SetDiffuseColor", "Set the light's diffuse color component.", "base.Color4f", "color");
+    DOC_METHOD_1("void", "SetSpecularColor", "Set the light's specular color component.", "base.Color4f", "color");
+    DOC_METHOD_1("void", "SetSpotHalfAngle",
+                 "Sets the spotlight's light cone half-angle in degrees. The valid range is [0.0, 180.0]. Applies only when the light type is 'Spot'.",
+                 "float", "angle");
+
+    DOC_METHOD_1("void", "SetConstantAttenuation",
+                 "Sets the light's constant attenuation factor. The value must be >= 1.0. Applies only when the light type is 'Spot' or 'Point'.",
+                 "float", "attenuation");
+
+    DOC_METHOD_1("void", "SetLinearAttenuation",
+                 "Sets the light's linear attenuation factor. The value must be >= 0.0. Applies only when the light type is 'Spot' or 'Point'.",
+                 "float", "attenuation");
+
+    DOC_METHOD_1("void", "SetQuadraticAttenuation",
+                 "Sets the light's quadratic attenuation factor. The value must be >= 0.0. Applies only when the light type is 'Spot' or 'Point'.",
+                 "float", "attenuation");
+
     DOC_TABLE("game.TextItem");
     DOC_METHOD_0("string", "GetText", "Get the current UTF-8 encoded text.");
     DOC_METHOD_0("base.Color4f", "GetColor", "Get the current text color.");
@@ -1372,6 +1416,8 @@ void InitLuaDoc()
     DOC_METHOD_0("bool", "HasTextItem", "Checks whether the node has a text item.");
     DOC_METHOD_0("bool", "HasDrawable", "Checks whether the node has a drawable item.");
     DOC_METHOD_0("bool", "HasSpatialNode", "Checks whether the node has a spatial indexing node.");
+    DOC_METHOD_0("bool", "HasBasicLight", "Checks whether the node has a basic light attachment.");
+    DOC_METHOD_0("game.BasicLight", "GetBasicLight", "Get the node's basic light if any. Returns nil if node has no light.");
     DOC_METHOD_0("game.RigidBody", "GetRigidBody", "Get the node's rigid body item if any. Returns nil if node has no rigid body.");
     DOC_METHOD_0("game.TextItem", "GetTextItem", "Get the node's text item if any. Returns nil if node has no text item.");
     DOC_METHOD_0("game.Drawable", "GetDrawable", "Get the node's drawable item if any. Returns nil if node has no drawable item.");
@@ -1407,7 +1453,7 @@ void InitLuaDoc()
     DOC_METHOD_0("string", "GetId", "Get the animator class ID.");
     DOC_METHOD_0("string", "GetNodeId", "Get the entity node ID that the animator will apply on.");
     DOC_METHOD_0("float", "GetStartTime", "Get the animation time in seconds when the animator will start.");
-    DOC_METHOD_0("float", "GetDuration", "Get the duration of the animators's operation in seconds.");
+    DOC_METHOD_0("float", "GetDuration", "Get the duration of the animator's operation in seconds.");
     DOC_METHOD_0("string", "GetType", "Get the type of animator. <br>"
                                       "One of: 'TransformAnimator', 'KinematicAnimator', 'PropertyAnimator', 'BooleanPropertyAnimator', 'MaterialAnimator'");
     DOC_TABLE("game.Animator");

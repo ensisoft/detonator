@@ -25,9 +25,11 @@
 #include <memory>
 #include <string>
 #include <cstddef>
+#include <algorithm>
 
 #include "base/assert.h"
 #include "base/bitflag.h"
+#include "base/math.h"
 #include "base/utility.h"
 #include "data/fwd.h"
 #include "game/enum.h"
@@ -164,6 +166,9 @@ namespace game
         inline bool IsEnabled() const noexcept
         { return TestFlag(Flags::Enabled); }
 
+        inline void Enable(bool enable) noexcept
+        { SetFlag(Flags::Enabled, enable); }
+
         inline const auto& GetDirection() const noexcept
         { return mDirection; }
         inline const auto& GetTranslation() const noexcept
@@ -182,6 +187,25 @@ namespace game
         { return mLinearAttenuation; }
         inline float GetQuadraticAttenuation() const noexcept
         { return mQuadraticAttenuation; }
+
+        void SetDirection(const glm::vec3& direction) noexcept
+        { mDirection = direction; }
+        void SetTranslation(const glm::vec3& translation) noexcept
+        { mTranslation = translation; }
+        void SetAmbientColor(const Color4f& color) noexcept
+        { mAmbientColor = color; }
+        void SetDiffuseColor(const Color4f& color) noexcept
+        { mDiffuseColor = color; }
+        void SetSpecularColor(const Color4f& color) noexcept
+        { mSpecularColor = color; }
+        void SetSpotHalfAngle(float degrees) noexcept
+        { mSpotHalfAngle = FDegrees(math::clamp(0.0f, 180.0f, degrees)); }
+        void SetLinearAttenuation(float attenuation) noexcept
+        { mLinearAttenuation = std::max(attenuation, 0.0f); }
+        void SetConstantAttenuation(float attenuation) noexcept
+        { mConstantAttenuation = std::max(attenuation, 1.0f); }
+        void SetQuadraticAttenuation(float attenuation) noexcept
+        { mQuadraticAttenuation = std::max(attenuation, 0.0f);  }
 
         inline const BasicLightClass& GetClass() const noexcept
         { return *mClass; }
