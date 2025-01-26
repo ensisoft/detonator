@@ -48,6 +48,7 @@
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_tilemap_node.h"
+#include "game/entity_node_light.h"
 #include "game/scriptvar.h"
 #include "game/tilemap.h"
 #include "uikit/window.h"
@@ -748,6 +749,35 @@ void BindGameLib(sol::state& L)
         return magic_enum::enum_name(item->GetCollisionShape());
     };
 
+    auto light = table.new_usertype<BasicLight>("BasicLight");
+    light["IsEnabled"]               = &BasicLight::IsEnabled;
+    light["Enable"]                  = &BasicLight::Enable;
+    light["GetDirection"]            = &BasicLight::GetDirection;
+    light["GetTranslation"]          = &BasicLight::GetTranslation;
+    light["GetAmbientColor"]         = &BasicLight::GetAmbientColor;
+    light["GetDiffuseColor"]         = &BasicLight::GetDiffuseColor;
+    light["GetSpecularColor"]        = &BasicLight::GetSpecularColor;
+    light["GetConstantAttenuation"]  = &BasicLight::GetConstantAttenuation;
+    light["GetLinearAttenuation"]    = &BasicLight::GetLinearAttenuation;
+    light["GetQuadraticAttenuation"] = &BasicLight::GetQuadraticAttenuation;
+    light["GetLayer"]                = &BasicLight::GetLayer;
+    light["SetDirection"]            = &BasicLight::SetDirection;
+    light["SetTranslation"]          = &BasicLight::SetTranslation;
+    light["SetAmbientColor"]         = &BasicLight::SetAmbientColor;
+    light["SetDiffuseColor"]         = &BasicLight::SetDiffuseColor;
+    light["SetSpecularColor"]        = &BasicLight::SetSpecularColor;
+    light["SetSpotHalfAngle"]        = &BasicLight::SetSpotHalfAngle;
+    light["SetConstantAttenuation"]  = &BasicLight::SetConstantAttenuation;
+    light["SetLinearAttenuation"]    = &BasicLight::SetLinearAttenuation;
+    light["SetQuadraticAttenuation"] = &BasicLight::SetQuadraticAttenuation;
+    light["GetType"] = [](const BasicLight& light)  {
+        return magic_enum::enum_name(light.GetLightType());
+    };
+    light["GetSpotHalfAngle"] = [](const BasicLight& light) {
+        return light.GetSpotHalfAngle().ToDegrees();
+    };
+
+
     auto text = table.new_usertype<TextItem>("TextItem");
     text["GetText"]       = &TextItem::GetText;
     text["GetColor"]      = &TextItem::GetTextColor;
@@ -807,6 +837,8 @@ void BindGameLib(sol::state& L)
     entity_node["HasTextItem"]    = &EntityNode::HasTextItem;
     entity_node["HasDrawable"]    = &EntityNode::HasDrawable;
     entity_node["HasSpatialNode"] = &EntityNode::HasSpatialNode;
+    entity_node["HasBasicLight"]  = &EntityNode::HasBasicLight;
+    entity_node["GetBasicLight"]  = GetMutable(&EntityNode::GetBasicLight);
     entity_node["GetDrawable"]    = GetMutable(&EntityNode::GetDrawable);
     entity_node["GetRigidBody"]   = GetMutable(&EntityNode::GetRigidBody);
     entity_node["GetTextItem"]    = GetMutable(&EntityNode::GetTextItem);
