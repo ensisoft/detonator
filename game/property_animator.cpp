@@ -27,6 +27,7 @@
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_transformer.h"
 #include "game/entity_node_rigid_body_joint.h"
+#include "game/entity_node_light.h"
 #include "game/property_animator.h"
 
 namespace game
@@ -87,6 +88,7 @@ void BooleanPropertyAnimator::Start(EntityNode& node)
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
     const auto* spatial = node.GetSpatialNode();
+    const auto* light = node.GetBasicLight();
     const auto* transformer= node.GetTransformer();
 
     using FlagName = BooleanPropertyAnimatorClass::PropertyName;
@@ -142,7 +144,8 @@ void BooleanPropertyAnimator::Start(EntityNode& node)
         const auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
         mStartState = joint->GetCurrentJointValue<bool>(RigidBodyJointSetting::EnableMotor);
     }
-
+    else if (flag == FlagName::BasicLight_Enabled)
+        mStartState = light->IsEnabled();
     else BUG("Unhandled property.");
 
     if (mTime == 0.0f)
@@ -189,6 +192,7 @@ void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
     auto* draw = node.GetDrawable();
     auto* body = node.GetRigidBody();
     auto* text = node.GetTextItem();
+    auto* light = node.GetBasicLight();
     auto* spatial = node.GetSpatialNode();
     auto* transformer = node.GetTransformer();
 
@@ -245,6 +249,8 @@ void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
         auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
         joint->AdjustJoint(RigidBodyJointSetting::EnableLimit, next_value);
     }
+    else if (flag == FlagName::BasicLight_Enabled)
+        light->SetFlag(BasicLight::Flags::Enabled, next_value);
     else BUG("Unhandled property.");
 
     // spams the log
@@ -256,6 +262,7 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     auto* draw = node.GetDrawable();
     auto* body = node.GetRigidBody();
     auto* text = node.GetTextItem();
+    auto* light = node.GetBasicLight();
     auto* spatial = node.GetSpatialNode();
     auto* transformer = node.GetTransformer();
 
@@ -344,6 +351,15 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
             return  false;
         }
     }
+    else if (flag == FlagName::BasicLight_Enabled)
+    {
+        if (!light && verbose)
+        {
+            WARN("Property animator can't apply a basic light flag on a node without a basic light. [animator='%1', node='%2', flag=%3]",
+                 mClass->GetName(), node.GetName(), flag);
+        }
+        return light != nullptr;
+    }
     else BUG("Unhandled property.");
     return true;
 }
@@ -403,6 +419,7 @@ void PropertyAnimator::Start(EntityNode& node)
     const auto* draw = node.GetDrawable();
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
+    const auto* light = node.GetBasicLight();
     const auto* transformer = node.GetTransformer();
 
     const RigidBodyJoint* joint = nullptr;
@@ -469,6 +486,24 @@ void PropertyAnimator::Start(EntityNode& node)
         mStartValue = joint->GetCurrentJointValue<float>(RigidBodyJointSetting::Stiffness);
     else if (param == PropertyName::RigidBodyJoint_Damping)
         mStartValue = joint->GetCurrentJointValue<float>(RigidBodyJointSetting::Damping);
+    else if (param == PropertyName::BasicLight_Direction)
+        mStartValue = light->GetDirection();
+    else if (param == PropertyName::BasicLight_Translation)
+        mStartValue = light->GetTranslation();
+    else if (param == PropertyName::BasicLight_AmbientColor)
+        mStartValue = light->GetAmbientColor();
+    else if (param == PropertyName::BasicLight_DiffuseColor)
+        mStartValue = light->GetDiffuseColor();
+    else if (param == PropertyName::BasicLight_SpecularColor)
+        mStartValue = light->GetSpecularColor();
+    else if (param == PropertyName::BasicLight_SpotHalfAngle)
+        mStartValue = light->GetSpotHalfAngle().ToDegrees();
+    else if (param == PropertyName::BasicLight_ConstantAttenuation)
+        mStartValue = light->GetConstantAttenuation();
+    else if (param == PropertyName::BasicLight_LinearAttenuation)
+        mStartValue = light->GetLinearAttenuation();
+    else if (param == PropertyName::BasicLight_QuadraticAttenuation)
+        mStartValue = light->GetQuadraticAttenuation();
     else BUG("Unhandled property.");
 }
 
@@ -490,6 +525,7 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
     auto* draw = node.GetDrawable();
     auto* body = node.GetRigidBody();
     auto* text = node.GetTextItem();
+    auto* light = node.GetBasicLight();
     auto* transformer = node.GetTransformer();
 
     if (param == PropertyName::Drawable_TimeScale)
@@ -644,6 +680,24 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
             joint->AdjustJoint(RigidBodyJointSetting::Damping, Interpolate<float>(t, interpolate));
         else BUG("Missing joint setting");
     }
+    else if (param == PropertyName::BasicLight_Direction)
+        light->SetDirection(Interpolate<glm::vec3>(t, interpolate));
+    else if (param == PropertyName::BasicLight_Translation)
+        light->SetTranslation(Interpolate<glm::vec3>(t, interpolate));
+    else if (param == PropertyName::BasicLight_AmbientColor)
+        light->SetAmbientColor(Interpolate<Color4f>(t, interpolate));
+    else if (param == PropertyName::BasicLight_DiffuseColor)
+        light->SetDiffuseColor(Interpolate<Color4f>(t, interpolate));
+    else if (param == PropertyName::BasicLight_SpecularColor)
+        light->SetSpecularColor(Interpolate<Color4f>(t, interpolate));
+    else if (param == PropertyName::BasicLight_SpotHalfAngle)
+        light->SetSpotHalfAngle(Interpolate<float>(t, interpolate));
+    else if (param == PropertyName::BasicLight_ConstantAttenuation)
+        light->SetConstantAttenuation(Interpolate<float>(t, interpolate));
+    else if (param == PropertyName::BasicLight_LinearAttenuation)
+        light->SetLinearAttenuation(Interpolate<float>(t, interpolate));
+    else if (param == PropertyName::BasicLight_QuadraticAttenuation)
+        light->SetQuadraticAttenuation(Interpolate<float>(t, interpolate));
     else BUG("Unhandled property.");
 }
 
@@ -658,6 +712,7 @@ bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     const auto* draw = node.GetDrawable();
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
+    const auto* light = node.GetBasicLight();
     const auto* transformer = node.GetTransformer();
 
     if (param == PropertyName::Drawable_TimeScale ||
@@ -753,6 +808,23 @@ bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
             return false;
         }
         return true;
+    }
+    else if (param == PropertyName::BasicLight_Direction ||
+             param == PropertyName::BasicLight_Translation ||
+             param == PropertyName::BasicLight_AmbientColor ||
+             param == PropertyName::BasicLight_DiffuseColor ||
+             param == PropertyName::BasicLight_SpecularColor ||
+             param == PropertyName::BasicLight_SpotHalfAngle ||
+             param == PropertyName::BasicLight_ConstantAttenuation ||
+             param == PropertyName::BasicLight_LinearAttenuation ||
+             param == PropertyName::BasicLight_QuadraticAttenuation)
+    {
+        if (!light && verbose)
+        {
+            WARN("Property animator can't set a light value on a a node without a light attachment. [animator='%1', node='%2', value=%3]",
+                 mClass->GetName(), node.GetName(), param);
+        }
+        return light != nullptr;
     }
     else BUG("Unhandled property.");
 
