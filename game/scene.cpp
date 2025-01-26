@@ -653,6 +653,11 @@ glm::vec2 Scene::MapVectorFromEntityNode(const Entity* entity, const EntityNode*
     const auto& from_entity_to_world = FindEntityNodeTransform(entity, node);
     return TransformVector(from_entity_to_world, vector);
 }
+glm::vec3 Scene::MapVectorFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec3& vector) const
+{
+    const auto& from_entity_to_world = FindEntityNodeTransform(entity, node);
+    return TransformVector(from_entity_to_world, vector);
+}
 
 glm::vec2 Scene::MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& point) const
 {
