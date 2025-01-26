@@ -142,7 +142,7 @@ std::string TranslateEnum(PropertyAnimatorClass::PropertyName name)
     else if (name == P::RigidBody_AngularVelocity)
         return "Rigid Body Angular Velocity";
     else if (name == P::TextItem_Text)
-        return "Text";
+        return "Text String";
     else if (name == P::TextItem_Color)
         return "Text Color";
     else if (name == P::Transformer_LinearVelocity)
@@ -171,6 +171,24 @@ std::string TranslateEnum(PropertyAnimatorClass::PropertyName name)
         return "Rigid Body Joint Damping";
     else if (name == P::RigidBodyJoint_Stiffness)
         return "Rigid Body Joint Stiffness";
+    else if (name == P::BasicLight_Direction)
+        return "Basic Light Direction";
+    else if (name == P::BasicLight_Translation)
+        return "Basic Light Translation";
+    else if (name == P::BasicLight_AmbientColor)
+        return "Basic Light Ambient Color";
+    else if (name == P::BasicLight_DiffuseColor)
+        return "Basic Light Diffuse Color";
+    else if (name == P::BasicLight_SpecularColor)
+        return "Basic Light Specular Color";
+    else if (name == P::BasicLight_SpotHalfAngle)
+        return "Basic Light Spot Half-Angle";
+    else if (name == P::BasicLight_LinearAttenuation)
+        return "Basic Light Linear Attenuation";
+    else if (name == P::BasicLight_ConstantAttenuation)
+        return "Basic Light Constant Attenuation";
+    else if (name == P::BasicLight_QuadraticAttenuation)
+        return "Basic Light Quadratic Attenuation";
     else BUG("Missing translation");
     return "???";
 }
@@ -178,49 +196,51 @@ std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name)
 {
     using P = BooleanPropertyAnimatorClass::PropertyName;
     if (name == P::Drawable_VisibleInGame)
-        return "Set Drawable Visible";
+        return "Set Drawable Visibility in Game";
     else if (name == P::Drawable_UpdateMaterial)
-        return "Update Drawable Material";
+        return "Set Drawable Material Update";
     else if (name == P::Drawable_UpdateDrawable)
-        return "Update Drawable Shape";
+        return "Set Drawable Shape Update";
     else if (name == P::Drawable_Restart)
-        return "Set Drawable Restarting";
+        return "Set Drawable Restart";
     else if (name == P::Drawable_FlipHorizontally)
-        return "Set Drawable Horizontal Flip";
+        return "Enable Horizontal Flip for Drawable";
     else if (name == P::Drawable_FlipVertically)
-        return "Set Drawable Vertical Flip";
+        return "Enable Vertical Flip for Drawable";
     else if (name == P::Drawable_DoubleSided)
-        return "Set Drawable Double Sided";
+        return "Enable Double-Sided Drawable";
     else if (name == P::Drawable_DepthTest)
-        return "Enable Drawable Depth Test";
+        return "Enable Depth Test for Drawable";
     else if (name == P::Drawable_PPEnableBloom)
-        return "Enable Bloom on Drawable";
+        return "Enable Bloom for Drawable";
     else if (name == P::RigidBody_Bullet)
-        return "Set Rigid Body Bullet";
+        return "Enable Rigid Body as Bullet";
     else if (name == P::RigidBody_Sensor)
-        return "Set Rigid Body Sensor";
+        return "Enable Rigid Body as Sensor";
     else if (name == P::RigidBody_Enabled)
         return "Enable Rigid Body Simulation";
     else if (name == P::RigidBody_CanSleep)
         return "Enable Rigid Body Sleeping";
     else if (name == P::RigidBody_DiscardRotation)
-        return "Set Rigid Body Rotation Discard";
+        return "Enable Rigid Body Rotation Discard";
     else if (name == P::TextItem_VisibleInGame)
-        return "Set Text Visible";
+        return "Set Text Visibility in Game";
     else if (name == P::TextItem_Blink)
-        return "Set Text Blinking";
+        return "Enable Text Blinking";
     else if (name == P::TextItem_Underline)
-        return "Set Text Underlining";
+        return "Enable Text Underlining";
     else if (name == P::TextItem_PPEnableBloom)
-        return "Enable Bloom on Text";
+        return "Enable Bloom for Text";
     else if (name == P::SpatialNode_Enabled)
         return "Enable Spatial Node";
     else if (name == P::Transformer_Enabled)
-        return "Enable Node Transformer";
+        return "Enable Transformer";
     else if (name == P::RigidBodyJoint_EnableLimits)
         return "Enable Joint Limits";
     else if (name == P::RigidBodyJoint_EnableMotor)
         return "Enable Joint Motor";
+    else if (name == P::BasicLight_Enabled)
+        return "Enable Basic Light";
     else BUG("Missing translation");
     return "???";
 }
