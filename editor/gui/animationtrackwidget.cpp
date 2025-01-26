@@ -1440,6 +1440,51 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
             mUI.setvalEndValue->SetType(Uniform::Type::Float);
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
+        else if (name == Name::BasicLight_Direction)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Vec3);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsVec3());
+        }
+        else if (name == Name::BasicLight_Translation)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Vec3);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsVec3());
+        }
+        else if (name == Name::BasicLight_AmbientColor)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Color);
+            setter->SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
+        }
+        else if (name == Name::BasicLight_DiffuseColor)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Color);
+            setter->SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
+        }
+        else if (name == Name::BasicLight_SpecularColor)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Color);
+            setter->SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
+        }
+        else if (name == Name::BasicLight_SpotHalfAngle)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::BasicLight_LinearAttenuation)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::BasicLight_ConstantAttenuation)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::BasicLight_QuadraticAttenuation)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
         else BUG("Unhandled value actuator value type.");
 
         setter->SetInterpolation(GetValue(mUI.setvalInterpolation));
@@ -1692,6 +1737,24 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         else if (name == Name::RigidBodyJoint_Stiffness)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
         else if (name == Name::RigidBodyJoint_Damping)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::BasicLight_Direction)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec3>());
+        else if (name == Name::BasicLight_Translation)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec3>());
+        else if (name == Name::BasicLight_AmbientColor)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<base::Color4f>());
+        else if (name == Name::BasicLight_DiffuseColor)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<base::Color4f>());
+        else if (name == Name::BasicLight_SpecularColor)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<base::Color4f>());
+        else if (name == Name::BasicLight_SpotHalfAngle)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " °");
+        else if (name == Name::BasicLight_ConstantAttenuation)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::BasicLight_LinearAttenuation)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::BasicLight_QuadraticAttenuation)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
         else BUG("Unhandled set value actuator value type.");
 
@@ -2169,6 +2232,24 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
         else if (value == ValName::RigidBodyJoint_Stiffness)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
         else if (value == ValName::RigidBodyJoint_Damping)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::BasicLight_Direction)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsVec3());
+        else if (value == ValName::BasicLight_Translation)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsVec3());
+        else if (value == ValName::BasicLight_AmbientColor)
+            klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
+        else if (value == ValName::BasicLight_DiffuseColor)
+            klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
+        else if (value == ValName::BasicLight_SpecularColor)
+            klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
+        else if (value == ValName::BasicLight_SpotHalfAngle)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::BasicLight_ConstantAttenuation)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::BasicLight_LinearAttenuation)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::BasicLight_QuadraticAttenuation)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
         else BUG("Unhandled value actuator value type.");
 
