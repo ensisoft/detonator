@@ -62,13 +62,27 @@ void VertexShaderMain() {
     vParticleTime        = aData.w;
 
     // base vertex shader
-    mat4 instance_matrix = GetInstanceTransform();
-
-    vec4 view_position = kModelViewMatrix * instance_matrix * vertex;
+    mat4 model_inst_matrix = GetInstanceTransform();
+    mat4 model_view_matrix = kModelViewMatrix * model_inst_matrix;
+    vec4 view_position = model_view_matrix * vertex;
 
     vs_out.view_position = view_position;
     vs_out.clip_position = kProjectionMatrix * view_position;
     vs_out.point_size    = aData.x;
+
+    if (vs_out.need_tbn) {
+        // with point rendering we can simply hardcode the
+        // tangent vectors since the rasterized surface is always
+        // parallel to the projection plane and in view coordinates
+        // the only thing changes is the translation
+        const vec3 normal = vec3(0.0, 0.0, 1.0);
+        const vec3 tangent = vec3(1.0, 0.0, 0.0);
+        const vec3 bitangent = vec3(0.0, 1.0, 0.0);
+        vs_out.view_normal    = normal;
+        vs_out.view_tangent   = tangent;
+        vs_out.view_bitangent = bitangent;
+        vs_out.have_tbn = true;
+    }
 }
 
 )CPP_RAW_STRING"
