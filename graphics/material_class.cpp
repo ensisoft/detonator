@@ -1264,7 +1264,9 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         static const char* source = {
 #include "shaders/fragment_basic_light_material_shader.glsl"
         };
+        src.LoadRawSource(base_shader);
         src.LoadRawSource(source);
+        src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_basic_light_material_shader.glsl");
     }
     else BUG("Unknown material type.");
