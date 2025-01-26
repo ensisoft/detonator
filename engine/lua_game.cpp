@@ -1356,6 +1356,9 @@ void BindGameLib(sol::state& L)
         },
         [](const Scene& scene, const Entity* entity, const EntityNode* node, const glm::vec2& vec) {
             return scene.MapVectorFromEntityNode(entity, node, vec);
+        },
+        [](const Scene& scene, const Entity* entity, const EntityNode* node, const glm::vec3& vec) {
+            return scene.MapVectorFromEntityNode(entity, node, vec);
         });
     scene["MapPointFromEntityNode"]     = sol::overload(
         [](const Scene& scene, const Entity* entity, const EntityNode* node, float x, float y) {

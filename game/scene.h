@@ -182,6 +182,7 @@ namespace game
         // If the entity is not in the scene or if the node is not part of the
         // entity the result is undefined.
         glm::vec2 MapVectorFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& vector) const;
+        glm::vec3 MapVectorFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec3& vector) const;
         // Map a point relative to the entity node's local origin into a world space point.
         // If the entity is not in the scene or if the node is not part of the entity
         // the result is undefined.

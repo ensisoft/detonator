@@ -1822,9 +1822,9 @@ void InitLuaDoc()
                  "game.Entity", "entity", "game.EntityNode", "node");
     DOC_METHOD_2("base.FBox", "FindEntityNodeBoundingBox", "Find the object oriented bounding box (OOB) for the entity node in the scene.",
                  "game.Entity", "entity", "game.EntityNode", "node");
-    DOC_METHOD_3("glm.vec2", "MapVectorFromEntityNode", "Map a vector (such as a direction vector) relative to entity node coordinate basis to game world space.<br>"
+    DOC_METHOD_3("glm.vec2|glm.vec3", "MapVectorFromEntityNode", "Map a vector (such as a direction vector) relative to entity node coordinate basis to game world space.<br>"
                                                     "The resulting vector is not translated, unit length direction vector in game world space.",
-                 "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "vector");
+                 "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2|glm.vec3", "vector");
     DOC_METHOD_4("float, float", "MapVectorFromEntityNode", "Map a vector (such as a direction vector) relative to entity node coordinate basis to game world space.<br>"
                                                         "The resulting vector is not translated, unit length direction vector in game world space.",
                  "game.Entity", "entity", "game.EntityNode", "node", "float", "x", "float", "y");
