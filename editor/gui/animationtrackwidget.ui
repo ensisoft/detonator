@@ -18,6 +18,18 @@
     <normaloff>:/16x16_ico_png/animation_track.png</normaloff>:/16x16_ico_png/animation_track.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QSplitter" name="mainSplitter">
      <property name="orientation">
@@ -51,6 +63,9 @@
           </property>
           <property name="title">
            <string>Base properties</string>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_8">
            <item>
@@ -196,6 +211,9 @@
           <property name="title">
            <string>Did you know ...</string>
           </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
             <widget class="QLabel" name="label_4">
@@ -229,9 +247,15 @@
         </sizepolicy>
        </property>
        <property name="title">
-        <string>Viewport</string>
+        <string/>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <property name="topMargin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="gui::GfxWidget" name="widget" native="true">
           <property name="sizePolicy">
@@ -253,7 +277,22 @@
         </item>
         <item>
          <widget class="QWidget" name="widget_2" native="true">
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
@@ -561,12 +600,15 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>300</width>
          <height>0</height>
         </size>
        </property>
        <property name="title">
         <string>Render tree</string>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
@@ -623,6 +665,9 @@
        <property name="title">
         <string>Timeline</string>
        </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
        <property name="checkable">
         <bool>false</bool>
        </property>
@@ -669,6 +714,9 @@
        </property>
        <property name="title">
         <string>Animator</string>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>

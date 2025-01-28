@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>2072</width>
-    <height>1576</height>
+    <height>1522</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,6 +18,18 @@
     <normaloff>:/16x16_ico_png/entity.png</normaloff>:/16x16_ico_png/entity.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QSplitter" name="mainSplitter">
      <property name="orientation">
@@ -41,6 +53,9 @@
          </property>
          <property name="title">
           <string>Base properties</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="7" column="0">
@@ -202,6 +217,9 @@
          <property name="title">
           <string>Entity state controller</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <property name="checkable">
           <bool>true</bool>
          </property>
@@ -238,7 +256,10 @@
           </size>
          </property>
          <property name="title">
-          <string>Entity properties</string>
+          <string/>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_16">
           <item>
@@ -264,7 +285,7 @@
                <x>0</x>
                <y>0</y>
                <width>353</width>
-               <height>1087</height>
+               <height>1059</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -969,6 +990,9 @@
          <property name="title">
           <string>Did you know ...</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
            <widget class="QLabel" name="lblHelp">
@@ -1002,9 +1026,15 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Viewport</string>
+       <string/>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
+       <property name="topMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="gui::GfxWidget" name="widget" native="true">
          <property name="sizePolicy">
@@ -1027,6 +1057,18 @@
        <item>
         <widget class="QWidget" name="widget_3" native="true">
          <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
@@ -1382,6 +1424,9 @@
        <property name="title">
         <string>Render tree</string>
        </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="gui::TreeWidget" name="tree">
@@ -1450,7 +1495,7 @@
           <x>0</x>
           <y>0</y>
           <width>428</width>
-          <height>1052</height>
+          <height>1021</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1472,7 +1517,10 @@
             </size>
            </property>
            <property name="title">
-            <string>Node properties</string>
+            <string/>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_9">
             <item>
@@ -1621,7 +1669,10 @@
             </size>
            </property>
            <property name="title">
-            <string>Node transform</string>
+            <string/>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
            </property>
            <property name="checkable">
             <bool>false</bool>
@@ -1998,42 +2049,51 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="nodeItems">
-           <property name="title">
-            <string>Node attachments</string>
+          <widget class="QToolButton" name="btnAddNodeItem">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
+           <property name="text">
+            <string>Add node attachment</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../resource/resource.qrc">
+             <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+           </property>
+           <property name="popupMode">
+            <enum>QToolButton::InstantPopup</enum>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextBesideIcon</enum>
+           </property>
+           <property name="autoRaise">
+            <bool>false</bool>
+           </property>
+           <property name="arrowType">
+            <enum>Qt::NoArrow</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QWidget" name="nodeItems" native="true">
            <layout class="QVBoxLayout" name="verticalLayout_8">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_26">
-              <item>
-               <widget class="QToolButton" name="btnAddNodeItem">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Add node attachment</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
-                </property>
-                <property name="popupMode">
-                 <enum>QToolButton::InstantPopup</enum>
-                </property>
-                <property name="toolButtonStyle">
-                 <enum>Qt::ToolButtonTextBesideIcon</enum>
-                </property>
-                <property name="autoRaise">
-                 <bool>false</bool>
-                </property>
-                <property name="arrowType">
-                 <enum>Qt::DownArrow</enum>
-                </property>
-               </widget>
-              </item>
               <item>
                <widget class="gui::CollapsibleWidget" name="drawable">
                 <property name="collapsed" stdset="0">

@@ -18,6 +18,18 @@
     <normaloff>:/32x32_ico_png/particle.png</normaloff>:/32x32_ico_png/particle.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QSplitter" name="mainSplitter">
      <property name="orientation">
@@ -41,6 +53,9 @@
          </property>
          <property name="title">
           <string>Base properties</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_9">
           <item row="5" column="0">
@@ -319,15 +334,15 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>450</width>
-            <height>859</height>
+            <width>327</width>
+            <height>867</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
             <widget class="gui::CollapsibleWidget" name="materialGroup">
              <property name="collapsed" stdset="0">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="text" stdset="0">
               <string>Particle material</string>
@@ -488,7 +503,7 @@
            <item>
             <widget class="gui::CollapsibleWidget" name="particleEmissionGroup">
              <property name="collapsed" stdset="0">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="text" stdset="0">
               <string>Particle emission</string>
@@ -1221,9 +1236,15 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Viewport</string>
+       <string/>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="topMargin">
+        <number>0</number>
+       </property>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
@@ -1353,6 +1374,9 @@
          <property name="title">
           <string>Initial particle properties (min/max)</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
            <layout class="QGridLayout" name="gridLayout">
@@ -1401,6 +1425,12 @@
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_3">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>Velocity</string>
               </property>
@@ -1574,6 +1604,9 @@
          <property name="title">
           <string>Particle rate of change in size</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <property name="checkable">
           <bool>false</bool>
          </property>
@@ -1708,6 +1741,9 @@
         <widget class="QGroupBox" name="alphaDerivatives">
          <property name="title">
           <string>Particle rate of change in alpha</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <property name="checkable">
           <bool>false</bool>

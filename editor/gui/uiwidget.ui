@@ -18,6 +18,18 @@
     <normaloff>:/16x16_ico_png/ui.png</normaloff>:/16x16_ico_png/ui.png</iconset>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QSplitter" name="mainSplitter">
      <property name="orientation">
@@ -418,6 +430,9 @@
          <property name="title">
           <string>Did you know ...</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
            <widget class="QLabel" name="lblHelp">
@@ -451,9 +466,15 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Viewport</string>
+       <string/>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_14" stretch="0,0">
+       <property name="topMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="gui::GfxWidget" name="widget" native="true">
          <property name="sizePolicy">
@@ -470,6 +491,18 @@
        <item>
         <widget class="QWidget" name="widget_2" native="true">
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
@@ -865,6 +898,9 @@
           <property name="title">
            <string>Widget tree</string>
           </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
             <widget class="gui::TreeWidget" name="tree">
@@ -923,8 +959,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>517</width>
-             <height>1322</height>
+             <width>368</width>
+             <height>987</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -950,6 +986,9 @@
               </property>
               <property name="title">
                <string>Widget properties</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
               <layout class="QGridLayout" name="gridLayout_2">
                <item row="4" column="1" colspan="3">
@@ -1404,6 +1443,9 @@
               </property>
               <property name="title">
                <string>Widget data</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_9">
                <item>
@@ -2133,6 +2175,9 @@
               <property name="title">
                <string>Widget styling</string>
               </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
               <layout class="QVBoxLayout" name="verticalLayout_10">
                <item>
                 <widget class="gui::CollapsibleWidget" name="normalGroup">
@@ -2143,7 +2188,7 @@
                   </sizepolicy>
                  </property>
                  <property name="collapsed" stdset="0">
-                  <bool>false</bool>
+                  <bool>true</bool>
                  </property>
                  <property name="text" stdset="0">
                   <string>normal</string>

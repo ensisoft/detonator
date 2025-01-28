@@ -4073,8 +4073,9 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tfAccelA, 0.0f);
     SetValue(mUI.tfEnabled, false);
     SetEnabled(mUI.nodeProperties, false);
-    SetEnabled(mUI.nodeTransform, false);
-    SetEnabled(mUI.nodeItems, false);
+    SetEnabled(mUI.nodeTransform,  false);
+    SetEnabled(mUI.nodeItems,      false);
+    SetEnabled(mUI.btnAddNodeItem, false);
 
     SetEnabled(mUI.actionAddDrawable,    true);
     SetEnabled(mUI.actionAddTextItem,    true);
@@ -4097,8 +4098,9 @@ void EntityWidget::DisplayCurrentNodeProperties()
     if (const auto* node = GetCurrentNode())
     {
         SetEnabled(mUI.nodeProperties, true);
-        SetEnabled(mUI.nodeTransform, true);
-        SetEnabled(mUI.nodeItems, true);
+        SetEnabled(mUI.nodeTransform,  true);
+        SetEnabled(mUI.nodeItems,      true);
+        SetEnabled(mUI.btnAddNodeItem, true);
 
         const auto& translate = node->GetTranslation();
         const auto& size = node->GetSize();

@@ -18,6 +18,18 @@
     <normaloff>:/16x16_ico_png/polygon.png</normaloff>:/16x16_ico_png/polygon.png</iconset>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
@@ -36,6 +48,9 @@
        </property>
        <property name="title">
         <string>Base properties</string>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
@@ -129,9 +144,15 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Viewport</string>
+      <string/>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
