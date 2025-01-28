@@ -18,6 +18,18 @@
     <normaloff>:/16x16_ico_png/scene.png</normaloff>:/16x16_ico_png/scene.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QSplitter" name="mainSplitter">
      <property name="orientation">
@@ -47,6 +59,9 @@
          </property>
          <property name="title">
           <string>Base properties</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="1" column="1">
@@ -260,7 +275,10 @@
           </size>
          </property>
          <property name="title">
-          <string>Scene properties</string>
+          <string/>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
@@ -289,7 +307,7 @@
                <x>0</x>
                <y>0</y>
                <width>272</width>
-               <height>720</height>
+               <height>746</height>
               </rect>
              </property>
              <property name="maximumSize">
@@ -764,7 +782,7 @@
                  </sizepolicy>
                 </property>
                 <property name="collapsed" stdset="0">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text" stdset="0">
                  <string>Renderer config</string>
@@ -988,6 +1006,9 @@
          <property name="title">
           <string>Did you know ... </string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
            <widget class="QLabel" name="label_11">
@@ -1021,9 +1042,15 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Viewport</string>
+       <string/>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="topMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="gui::GfxWidget" name="widget" native="true">
          <property name="sizePolicy">
@@ -1046,6 +1073,18 @@
        <item>
         <widget class="QWidget" name="widget_2" native="true">
          <layout class="QVBoxLayout" name="verticalLayout_6">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
@@ -1407,6 +1446,9 @@
        <property name="title">
         <string>Scene graph</string>
        </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="gui::TreeWidget" name="tree">
@@ -1464,7 +1506,10 @@
            </size>
           </property>
           <property name="title">
-           <string>Entity properties</string>
+           <string/>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_9">
            <item>
@@ -1634,7 +1679,10 @@
            </size>
           </property>
           <property name="title">
-           <string>Entity transform</string>
+           <string/>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
           <property name="checkable">
            <bool>false</bool>

@@ -18,6 +18,18 @@
     <normaloff>:/16x16_ico_png/audio.png</normaloff>:/16x16_ico_png/audio.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QSplitter" name="mainSplitter">
      <property name="orientation">
@@ -41,6 +53,9 @@
          </property>
          <property name="title">
           <string>Base properties</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="0">
@@ -99,6 +114,9 @@
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
           <string>Graph output</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="0">
@@ -161,9 +179,15 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Graph</string>
+       <string/>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="topMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QGraphicsView" name="view">
          <property name="sizePolicy">
@@ -268,6 +292,9 @@
           <property name="title">
            <string>Elements</string>
           </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
             <widget class="QListWidget" name="elements">
@@ -329,7 +356,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>473</width>
+             <width>440</width>
              <height>794</height>
             </rect>
            </property>
@@ -359,6 +386,9 @@
               </property>
               <property name="title">
                <string>Element properties</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_9">
                <item>
@@ -714,6 +744,9 @@
               </property>
               <property name="title">
                <string>Audio file properties</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
                <item>

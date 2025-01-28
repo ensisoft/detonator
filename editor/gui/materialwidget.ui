@@ -24,6 +24,18 @@
     <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_4">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QSplitter" name="mainSplitter">
      <property name="orientation">
@@ -47,6 +59,9 @@
          </property>
          <property name="title">
           <string>Base properties</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
@@ -272,6 +287,9 @@
          </property>
          <property name="title">
           <string>Material properties and uniforms</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
@@ -746,7 +764,7 @@
           <string>Gradient map</string>
          </property>
          <property name="flat">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
@@ -980,6 +998,9 @@
          <property name="title">
           <string>Custom shader uniforms</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
@@ -1001,6 +1022,9 @@
          </property>
          <property name="title">
           <string>Texture coords</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
           <item row="0" column="2">
@@ -1248,6 +1272,9 @@
          <property name="title">
           <string>Texture filtering and wrapping</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <layout class="QGridLayout" name="gridLayout_7">
           <item row="2" column="0">
            <widget class="QLabel" name="label_31">
@@ -1361,9 +1388,15 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Viewport</string>
+       <string/>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="topMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="gui::GfxWidget" name="widget" native="true">
          <property name="sizePolicy">
@@ -1526,6 +1559,9 @@
        <property name="title">
         <string>Texture map(s)</string>
        </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
          <widget class="QLineEdit" name="findMap">
@@ -1592,7 +1628,7 @@
           <x>0</x>
           <y>0</y>
           <width>440</width>
-          <height>1003</height>
+          <height>1008</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -1617,7 +1653,10 @@
             </sizepolicy>
            </property>
            <property name="title">
-            <string>Texture map</string>
+            <string>Texture map properties</string>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
@@ -1926,6 +1965,9 @@
            </property>
            <property name="title">
             <string>Texture properties</string>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_12">
             <item>
