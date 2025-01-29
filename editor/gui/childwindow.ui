@@ -247,8 +247,8 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>26</width>
-     <height>26</height>
+     <width>32</width>
+     <height>32</height>
     </size>
    </property>
    <property name="toolButtonStyle">

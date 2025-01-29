@@ -347,6 +347,7 @@ namespace gui
         QMenu* mParticleSystems = nullptr;
         // menu for the custom shapes
         QMenu* mCustomShapes = nullptr;
+        QMenu* mBasicShapes = nullptr;
 
         UIAnimator mAnimator;
     private:

@@ -1036,6 +1036,9 @@
         <number>0</number>
        </property>
        <item>
+        <layout class="QVBoxLayout" name="toolbarLayout"/>
+       </item>
+       <item>
         <widget class="gui::GfxWidget" name="widget" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -4514,7 +4517,7 @@
      <normaloff>:/32x32_ico_png/rectangle.png</normaloff>:/32x32_ico_png/rectangle.png</iconset>
    </property>
    <property name="text">
-    <string>Rect</string>
+    <string>Sharp Rectangle</string>
    </property>
    <property name="toolTip">
     <string>Place new rectangle</string>
@@ -4601,7 +4604,7 @@
      <normaloff>:/32x32_ico_png/isoceles_triangle.png</normaloff>:/32x32_ico_png/isoceles_triangle.png</iconset>
    </property>
    <property name="text">
-    <string>Triangle</string>
+    <string>Isosceles Triangle</string>
    </property>
    <property name="toolTip">
     <string>Place new isosceles triangle</string>
@@ -4634,7 +4637,7 @@
      <normaloff>:/32x32_ico_png/round_rect.png</normaloff>:/32x32_ico_png/round_rect.png</iconset>
    </property>
    <property name="text">
-    <string>Rect</string>
+    <string>Round Rectangle</string>
    </property>
    <property name="toolTip">
     <string>Place new rounded rect</string>
@@ -4652,7 +4655,7 @@
      <normaloff>:/32x32_ico_png/right_triangle.png</normaloff>:/32x32_ico_png/right_triangle.png</iconset>
    </property>
    <property name="text">
-    <string>Triangle</string>
+    <string>Right Triangle</string>
    </property>
    <property name="toolTip">
     <string>Place new right angled triangle</string>
@@ -4757,10 +4760,10 @@
      <normaloff>:/32x32_ico_png/semi_circle.png</normaloff>:/32x32_ico_png/semi_circle.png</iconset>
    </property>
    <property name="text">
-    <string>Semi</string>
+    <string>Semicircle</string>
    </property>
    <property name="toolTip">
-    <string>Place a new semi circle</string>
+    <string>Place a new semicircle</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+4</string>
@@ -4883,7 +4886,7 @@
      <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
    </property>
    <property name="text">
-    <string>New Animation</string>
+    <string>New Entity Animation</string>
    </property>
    <property name="toolTip">
     <string>Add new animation</string>
@@ -4916,7 +4919,7 @@
   <action name="actionPreview">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
+     <normaloff>:/32x32_ico_png/joystick.png</normaloff>:/32x32_ico_png/joystick.png</iconset>
    </property>
    <property name="text">
     <string>Test Run</string>

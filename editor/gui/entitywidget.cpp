@@ -724,10 +724,34 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mParticleSystems->menuAction()->setIcon(QIcon("icons:particle.png"));
     mParticleSystems->menuAction()->setText("Particles");
     mParticleSystems->menuAction()->setCheckable(true);
+    mParticleSystems->menuAction()->setToolTip(tr("Place new particle system"));
     mCustomShapes = new QMenu(this);
     mCustomShapes->menuAction()->setIcon(QIcon("icons:polygon.png"));
     mCustomShapes->menuAction()->setText("Custom Shapes");
     mCustomShapes->menuAction()->setCheckable(true);
+    mCustomShapes->menuAction()->setToolTip(tr("Place new custom shape"));
+    mBasicShapes = new QMenu(this);
+    mBasicShapes->menuAction()->setIcon(QIcon("icons32:rectangle.png"));
+    mBasicShapes->menuAction()->setText("Basic Shapes");
+    mBasicShapes->menuAction()->setToolTip(tr("Place new basic shape"));
+    mBasicShapes->menuAction()->setCheckable(true);
+    mBasicShapes->addAction(mUI.actionNewRect);
+    mBasicShapes->addAction(mUI.actionNewRoundRect);
+    mBasicShapes->addAction(mUI.actionNewCircle);
+    mBasicShapes->addAction(mUI.actionNewSemiCircle);
+    mBasicShapes->addAction(mUI.actionNewIsoscelesTriangle);
+    mBasicShapes->addAction(mUI.actionNewRightTriangle);
+    mBasicShapes->addAction(mUI.actionNewTrapezoid);
+    mBasicShapes->addAction(mUI.actionNewParallelogram);
+    mBasicShapes->addAction(mUI.actionNewCapsule);
+
+    auto* buttonbar = new QToolBar(this);
+    buttonbar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
+    buttonbar->setIconSize(QSize(16, 16));
+    buttonbar->addAction(mBasicShapes->menuAction());
+    buttonbar->addAction(mCustomShapes->menuAction());
+    buttonbar->addAction(mParticleSystems->menuAction());
+    mUI.toolbarLayout->addWidget(buttonbar);
 
     mState.workspace = workspace;
     mState.renderer.SetClassLibrary(workspace);
@@ -941,20 +965,6 @@ void EntityWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionPreview);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
-    bar.addSeparator();
-    bar.addAction(mUI.actionNewRect);
-    bar.addAction(mUI.actionNewRoundRect);
-    bar.addAction(mUI.actionNewCircle);
-    bar.addAction(mUI.actionNewSemiCircle);
-    bar.addAction(mUI.actionNewIsoscelesTriangle);
-    bar.addAction(mUI.actionNewRightTriangle);
-    bar.addAction(mUI.actionNewTrapezoid);
-    bar.addAction(mUI.actionNewParallelogram);
-    bar.addAction(mUI.actionNewCapsule);
-    bar.addSeparator();
-    bar.addAction(mCustomShapes->menuAction());
-    bar.addSeparator();
-    bar.addAction(mParticleSystems->menuAction());
 }
 
 void EntityWidget::AddActions(QMenu& menu)
@@ -965,19 +975,11 @@ void EntityWidget::AddActions(QMenu& menu)
     create_menu->addAction(mUI.actionScriptVarAdd);
     create_menu->addAction(mUI.actionAnimationAdd);
 
-    auto* place_shape_menu =new QMenu(&menu);
-    place_shape_menu->setTitle(tr("Place New Shape"));
-    place_shape_menu->addAction(mUI.actionNewRect);
-    place_shape_menu->addAction(mUI.actionNewRoundRect);
-    place_shape_menu->addAction(mUI.actionNewCircle);
-    place_shape_menu->addAction(mUI.actionNewSemiCircle);
-    place_shape_menu->addAction(mUI.actionNewIsoscelesTriangle);
-    place_shape_menu->addAction(mUI.actionNewRightTriangle);
-    place_shape_menu->addAction(mUI.actionNewTrapezoid);
-    place_shape_menu->addAction(mUI.actionNewParallelogram);
-    place_shape_menu->addAction(mUI.actionNewCapsule);
-    place_shape_menu->addAction(mCustomShapes->menuAction());
-    place_shape_menu->addAction(mParticleSystems->menuAction());
+    auto* place_menu =new QMenu(&menu);
+    place_menu->setTitle(tr("Place"));
+    place_menu->addAction(mBasicShapes->menuAction());
+    place_menu->addAction(mCustomShapes->menuAction());
+    place_menu->addAction(mParticleSystems->menuAction());
 
     auto* tool_menu = new QMenu(this);
     tool_menu->setTitle(tr("Apply Tool"));
@@ -988,7 +990,6 @@ void EntityWidget::AddActions(QMenu& menu)
     edit_menu->addAction(mUI.actionEditEntityScript);
     edit_menu->addAction(mUI.actionEditControllerScript);
 
-
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
     menu.addAction(mUI.actionStop);
@@ -998,8 +999,9 @@ void EntityWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
     menu.addMenu(create_menu);
-    menu.addMenu(place_shape_menu);
+    menu.addMenu(place_menu);
     menu.addMenu(tool_menu);
+    menu.addSeparator();
     menu.addMenu(edit_menu);
 }
 
