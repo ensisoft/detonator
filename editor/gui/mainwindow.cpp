@@ -3587,7 +3587,7 @@ void MainWindow::ShowHelpWidget()
         mUI.mainTab->setVisible(false);
         mUI.mainToolBar->clear();
         auto* spacer = new QWidget();
-        spacer->setMinimumHeight(32);
+        spacer->setMinimumHeight(40);
         spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
         mUI.mainToolBar->addWidget(spacer);
     }
