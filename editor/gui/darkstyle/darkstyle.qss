@@ -195,12 +195,8 @@ QTabBar::close-button:pressed {
 }
 QRadioButton:indicator,
 QCheckBox::indicator{
-  border: 1px solid darkgray;
   width:18px;
   height:18px;
-}
-QCheckBox::indicator:checked {
-  background-color:palette(highlight);
 }
 
 QTreeView, QTableView{
