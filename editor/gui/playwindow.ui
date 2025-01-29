@@ -15,6 +15,18 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
      <widget class="QGroupBox" name="groupBox">
       <property name="sizePolicy">
@@ -24,9 +36,24 @@
        </sizepolicy>
       </property>
       <property name="title">
-       <string>Application window</string>
+       <string/>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QWidget" name="problem" native="true">
          <property name="styleSheet">
@@ -262,7 +289,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
      <x>0</x>
      <y>0</y>
      <width>1053</width>
-     <height>30</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -377,6 +404,12 @@ font: 16pt &quot;Sans Serif&quot;;</string>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_5">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
      <item>
       <widget class="QGroupBox" name="groupBox_2">
        <property name="sizePolicy">
@@ -386,9 +419,24 @@ font: 16pt &quot;Sans Serif&quot;;</string>
         </sizepolicy>
        </property>
        <property name="title">
-        <string>Application log</string>
+        <string/>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
