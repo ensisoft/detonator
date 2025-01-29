@@ -187,6 +187,7 @@ MainWindow::MainWindow(QApplication& app, base::ThreadPool* threadpool)
     mUI.actionUndo->setShortcut(QKeySequence::Undo);
     mUI.workspace->installEventFilter(this);
 
+    UpdateMainToolbar();
     ShowHelpWidget();
 
     // start periodic refresh timer. this is low frequency timer that is used
@@ -1031,8 +1032,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(index));
 
         widget->Activate();
-        widget->AddActions(*mUI.mainToolBar);
-        widget->AddActions(*mUI.menuTemp);
+        UpdateActions(widget);
 
         QString name = widget->metaObject()->className();
         name.remove("gui::");
@@ -2728,10 +2728,7 @@ void MainWindow::RefreshWidgetActions()
     auto* widget = dynamic_cast<MainWidget*>(sender());
     if (widget == mCurrentWidget)
     {
-        mUI.mainToolBar->clear();
-        mUI.menuTemp->clear();
-        widget->AddActions(*mUI.mainToolBar);
-        widget->AddActions(*mUI.menuTemp);
+        UpdateActions(widget);
     }
     else
     {
@@ -3589,30 +3586,10 @@ void MainWindow::ShowHelpWidget()
         mUI.mainHelpWidget->setCurrentIndex(0);
         mUI.mainTab->setVisible(false);
         mUI.mainToolBar->clear();
-        mUI.mainToolBar->addAction(mUI.actionNewMaterial);
-        mUI.mainToolBar->addAction(mUI.actionNewParticleSystem);
-        mUI.mainToolBar->addAction(mUI.actionNewCustomShape);
-        mUI.mainToolBar->addAction(mUI.actionNewEntity);
-        mUI.mainToolBar->addAction(mUI.actionNewScene);
-        mUI.mainToolBar->addAction(mUI.actionNewScript);
-        mUI.mainToolBar->addAction(mUI.actionNewUI);
-        mUI.mainToolBar->addAction(mUI.actionNewTilemap);
-        mUI.mainToolBar->addAction(mUI.actionNewAudioGraph);
-        mUI.mainToolBar->addSeparator();
-
-        if (mImportMenu == nullptr)
-        {
-            mImportMenu = new QMenu(this);
-            mImportMenu->setIcon(QIcon("icons:import.png"));
-            mImportMenu->setTitle("Import Resource...");
-            mImportMenu->addAction(mUI.actionImportModel);
-            mImportMenu->addAction(mUI.actionImportTiles);
-            mImportMenu->addAction(mUI.actionImportAudioFile);
-            mImportMenu->addAction(mUI.actionImportImageFile);
-            mImportMenu->addAction(mUI.actionImportJSON);
-            mImportMenu->addAction(mUI.actionImportZIP);
-        }
-        mUI.mainToolBar->addAction(mImportMenu->menuAction());
+        auto* spacer = new QWidget();
+        spacer->setMinimumHeight(32);
+        spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+        mUI.mainToolBar->addWidget(spacer);
     }
     else
     {
@@ -3737,6 +3714,67 @@ void MainWindow::FocusPreviousTab()
         }
         mFocusStack.pop();
     }
+}
+
+void MainWindow::UpdateActions(MainWidget* widget)
+{
+    mUI.mainToolBar->clear();
+    mUI.menuTemp->clear();
+
+    widget->AddActions(*mUI.mainToolBar);
+    widget->AddActions(*mUI.menuTemp);
+}
+
+void MainWindow::UpdateMainToolbar()
+{
+    if (mCreateMenu == nullptr)
+    {
+        mCreateMenu = new QMenu(this);
+        mCreateMenu->setIcon(QIcon("icons64:create.png"));
+        mCreateMenu->setTitle("Create");
+        mCreateMenu->addAction(mUI.actionNewMaterial);
+        mCreateMenu->addAction(mUI.actionNewParticleSystem);
+        mCreateMenu->addAction(mUI.actionNewCustomShape);
+        mCreateMenu->addAction(mUI.actionNewEntity);
+        mCreateMenu->addAction(mUI.actionNewScene);
+        mCreateMenu->addAction(mUI.actionNewScript);
+        mCreateMenu->addAction(mUI.actionNewUI);
+        mCreateMenu->addAction(mUI.actionNewTilemap);
+        mCreateMenu->addAction(mUI.actionNewAudioGraph);
+    }
+
+    if (mImportMenu == nullptr)
+    {
+        mImportMenu = new QMenu(this);
+        mImportMenu->setIcon(QIcon("icons64:import.png"));
+        mImportMenu->setTitle("Import");
+        mImportMenu->addAction(mUI.actionImportModel);
+        mImportMenu->addAction(mUI.actionImportTiles);
+        mImportMenu->addAction(mUI.actionImportAudioFile);
+        mImportMenu->addAction(mUI.actionImportImageFile);
+        mImportMenu->addAction(mUI.actionImportJSON);
+        mImportMenu->addAction(mUI.actionImportZIP);
+    }
+
+    auto* play = new QAction(this);
+    play->setIcon(QIcon("icons64:play.png"));
+    play->setToolTip("Play the game!");
+    play->setText("Play");
+    connect(play, &QAction::triggered, this, &MainWindow::on_actionProjectPlay_triggered);
+
+    auto* package = new QAction(this);
+    package->setIcon(QIcon("icons64:package.png"));
+    package->setToolTip("Package the game");
+    package->setText("Package");
+    connect(package, &QAction::triggered, this, &MainWindow::on_actionPackageResources_triggered);
+
+    auto* toolbar = new QToolBar(this);
+    toolbar->setIconSize(QSize(20, 20));
+    toolbar->addAction(play);
+    toolbar->addAction(mCreateMenu->menuAction());
+    toolbar->addAction(mImportMenu->menuAction());
+    toolbar->addAction(package);
+    mUI.statusToolbarLayout->addWidget(toolbar);
 }
 
 } // namespace
