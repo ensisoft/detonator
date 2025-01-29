@@ -227,6 +227,8 @@ namespace gui
         void ImportFiles(const QStringList& files);
         void UpdateStats();
         void FocusPreviousTab();
+        void UpdateActions(MainWidget* widget);
+        void UpdateMainToolbar();
         ChildWindow* ShowWidget(MainWidget* widget, bool new_window);
         MainWidget* MakeWidget(app::Resource::Type type, const app::Resource* resource = nullptr);
 
@@ -243,6 +245,7 @@ namespace gui
     private:
         Ui::MainWindow mUI;
         QMenu* mImportMenu = nullptr;
+        QMenu* mCreateMenu = nullptr;
     private:
         class GfxResourceLoader;
 

@@ -561,6 +561,7 @@ int Main(int argc, char* argv[])
     // set the aliases for icon search paths
     QDir::setSearchPaths("icons", QStringList(":/16x16_ico_png"));
     QDir::setSearchPaths("level", QStringList(":/32x32_ico_png"));
+    QDir::setSearchPaths("icons64", QStringList(":/64x64_ico_png"));
 
     // Set default surface format.
     // note that the alpha channel is not used on purpose.

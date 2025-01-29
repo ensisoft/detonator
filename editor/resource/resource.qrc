@@ -155,10 +155,16 @@
     <file>32x32_ico_png/refresh.png</file>
     <file>32x32_ico_png/connect.png</file>
 
+    <file>64x64_ico_png/create.png</file>
+    <file>64x64_ico_png/import.png</file>
+    <file>64x64_ico_png/package.png</file>
+    <file>64x64_ico_png/play.png</file>
+
     <file>texture.png</file>
     <file>music.png</file>
     <file>splash.gif</file>
     <file>about.gif</file>
+    <file>detonator-tiny.png</file>
     <file>detonator-transparent.png</file>
     <file>detonator-transparent-cropped.png</file>
 
