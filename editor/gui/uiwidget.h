@@ -87,18 +87,6 @@ namespace gui
         void on_actionClose_triggered();
         void on_actionSave_triggered();
         void on_actionPreview_triggered();
-        void on_actionNewForm_triggered();
-        void on_actionNewLabel_triggered();
-        void on_actionNewPushButton_triggered();
-        void on_actionNewGroupBox_triggered();
-        void on_actionNewCheckBox_triggered();
-        void on_actionNewSpinBox_triggered();
-        void on_actionNewSlider_triggered();
-        void on_actionNewProgressBar_triggered();
-        void on_actionNewRadioButton_triggered();
-        void on_actionNewToggleBox_triggered();
-        void on_actionNewScrollArea_triggered();
-        void on_actionNewShapeWidget_triggered();
         void on_actionWidgetDelete_triggered();
         void on_actionWidgetDuplicate_triggered();
         void on_actionWidgetOrder_triggered();
@@ -199,6 +187,7 @@ namespace gui
         uik::FSize GetFormSize() const;
     private:
         Ui::UIWidget mUI;
+        QMenu* mWidgets = nullptr;
     private:
         class TreeModel;
         class PlaceWidgetTool;

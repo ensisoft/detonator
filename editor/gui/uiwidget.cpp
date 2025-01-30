@@ -201,18 +201,48 @@ wdk::Keysym MapQtKeySym(int from_qt)
 enum WidgetIndex {
     Label,
     PushButton,
-    CheckBox,
-    GroupBox,
-    Spinbox,
-    Slider,
-    ProgresBar,
     RadioButton,
+    CheckBox,
     ToggleBox,
+    SpinBox,
+    Slider,
+    ProgressBar,
+    GroupBox,
     Form,
     ScrollArea,
     ShapeWidget,
     LAST
 };
+
+QString ToString(WidgetIndex index)
+{
+    if (index == WidgetIndex::Label)
+        return "Label";
+    else if (index == WidgetIndex::PushButton)
+        return "Push Button";
+    else if (index == WidgetIndex::RadioButton)
+        return "Radio Button";
+    else if (index == WidgetIndex::CheckBox)
+        return "Checkbox";
+    else if (index == WidgetIndex::ToggleBox)
+        return "Toggle Box";
+    else if (index == WidgetIndex::SpinBox)
+        return "Spin Box";
+    else if (index == WidgetIndex::Slider)
+        return "Slider";
+    else if (index == WidgetIndex::ProgressBar)
+        return "Progress Bar";
+    else if (index == WidgetIndex::GroupBox)
+        return "Group Box";
+    else if (index == WidgetIndex::Form)
+        return "Form";
+    else if (index == WidgetIndex::ScrollArea)
+        return "Scroll Area";
+    else if (index == WidgetIndex::ShapeWidget)
+        return "2D Drawable";
+    BUG("Bug on widget index translation");
+    return "???";
+}
 
 
 } // namespace
@@ -494,16 +524,16 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.widgetMoused->SetPropertySelector("/mouse-over");
     mUI.widgetPressed->SetPropertySelector("/pressed");
 
-    mUI.widget->onMouseMove    = std::bind(&UIWidget::MouseMove, this, std::placeholders::_1);
-    mUI.widget->onMousePress   = std::bind(&UIWidget::MousePress, this, std::placeholders::_1);
-    mUI.widget->onMouseRelease = std::bind(&UIWidget::MouseRelease, this, std::placeholders::_1);
-    mUI.widget->onMouseWheel   = std::bind(&UIWidget::MouseWheel, this, std::placeholders::_1);
-    mUI.widget->onKeyPress     = std::bind(&UIWidget::KeyPress, this, std::placeholders::_1);
-    mUI.widget->onKeyRelease   = std::bind(&UIWidget::KeyRelease, this, std::placeholders::_1);
-    mUI.widget->onZoomIn       = std::bind(&UIWidget::ZoomIn, this);
-    mUI.widget->onZoomOut      = std::bind(&UIWidget::ZoomOut, this);
-    mUI.widget->onPaintScene   = std::bind(&UIWidget::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onInitScene    = [this](unsigned width, unsigned height) {
+    mUI.viewport->onMouseMove    = std::bind(&UIWidget::MouseMove, this, std::placeholders::_1);
+    mUI.viewport->onMousePress   = std::bind(&UIWidget::MousePress, this, std::placeholders::_1);
+    mUI.viewport->onMouseRelease = std::bind(&UIWidget::MouseRelease, this, std::placeholders::_1);
+    mUI.viewport->onMouseWheel   = std::bind(&UIWidget::MouseWheel, this, std::placeholders::_1);
+    mUI.viewport->onKeyPress     = std::bind(&UIWidget::KeyPress, this, std::placeholders::_1);
+    mUI.viewport->onKeyRelease   = std::bind(&UIWidget::KeyRelease, this, std::placeholders::_1);
+    mUI.viewport->onZoomIn       = std::bind(&UIWidget::ZoomIn, this);
+    mUI.viewport->onZoomOut      = std::bind(&UIWidget::ZoomOut, this);
+    mUI.viewport->onPaintScene   = std::bind(&UIWidget::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
+    mUI.viewport->onInitScene    = [this](unsigned width, unsigned height) {
         if (!mCameraWasLoaded) {
             on_btnResetTransform_clicked();
         }
@@ -518,6 +548,31 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(mUI.widgetFocused,  &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
     connect(mUI.widgetMoused,   &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
     connect(mUI.widgetPressed,  &WidgetStyleWidget::StyleEdited, this, &UIWidget::WidgetStyleEdited);
+
+    mWidgets = new QMenu(this);
+    mWidgets->menuAction()->setIcon(QIcon("icons:widget.png"));
+    mWidgets->menuAction()->setText("Widgets");
+    mWidgets->menuAction()->setToolTip(tr("Place a new widget"));
+
+    for (unsigned widget_index=0; widget_index<WidgetIndex::LAST; ++widget_index)
+    {
+        auto* action = new QAction(this);
+        action->setIcon(QIcon("icons:widget.png"));
+        action->setText(ToString(static_cast<WidgetIndex>(widget_index)));
+        if (widget_index < 9)
+            action->setShortcut(QKeySequence(Qt::CTRL | (Qt::Key_1 + widget_index)));
+
+        connect(action, &QAction::triggered, this, [this, widget_index]() {
+            PlaceNewWidget(widget_index);
+        });
+        mWidgets->addAction(action);
+    }
+
+    auto* buttonbar = new QToolBar(this);
+    buttonbar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
+    buttonbar->setIconSize(QSize(16, 16));
+    buttonbar->addAction(mWidgets->menuAction());
+    mUI.toolbar->addWidget(buttonbar);
 
     mUI.widgetNormal->SetParentWAR(this);
     mUI.widgetDisabled->SetParentWAR(this);
@@ -592,7 +647,7 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     GetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
     GetUserProperty(resource, "show_tab_order", mUI.chkShowTabOrder);
     GetUserProperty(resource, "clip_widgets", mUI.chkClipWidgets);
-    GetUserProperty(resource, "widget", mUI.widget);
+    GetUserProperty(resource, "viewport", mUI.viewport);
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
     GetUserProperty(resource, "camera_rotation", mUI.rotation);
@@ -719,22 +774,13 @@ void UIWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionPreview);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
-    bar.addSeparator();
-    bar.addAction(mUI.actionNewLabel);
-    bar.addAction(mUI.actionNewPushButton);
-    bar.addAction(mUI.actionNewCheckBox);
-    bar.addAction(mUI.actionNewGroupBox);
-    bar.addAction(mUI.actionNewSpinBox);
-    bar.addAction(mUI.actionNewSlider);
-    bar.addAction(mUI.actionNewProgressBar);
-    bar.addAction(mUI.actionNewRadioButton);
-    bar.addAction(mUI.actionNewToggleBox);
-    bar.addAction(mUI.actionNewForm);
-    bar.addAction(mUI.actionNewScrollArea);
-    bar.addAction(mUI.actionNewShapeWidget);
 }
 void UIWidget::AddActions(QMenu& menu)
 {
+    auto* place_menu = new QMenu(&menu);
+    place_menu->setTitle(tr("Place"));
+    place_menu->addAction(mWidgets->menuAction());
+
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
     menu.addAction(mUI.actionStop);
@@ -745,18 +791,7 @@ void UIWidget::AddActions(QMenu& menu)
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
-    menu.addAction(mUI.actionNewLabel);
-    menu.addAction(mUI.actionNewPushButton);
-    menu.addAction(mUI.actionNewCheckBox);
-    menu.addAction(mUI.actionNewGroupBox);
-    menu.addAction(mUI.actionNewSpinBox);
-    menu.addAction(mUI.actionNewSlider);
-    menu.addAction(mUI.actionNewProgressBar);
-    menu.addAction(mUI.actionNewRadioButton);
-    menu.addAction(mUI.actionNewToggleBox);
-    menu.addAction(mUI.actionNewForm);
-    menu.addAction(mUI.actionNewScrollArea);
-    menu.addAction(mUI.actionNewShapeWidget);
+    menu.addMenu(place_menu);
 }
 bool UIWidget::SaveState(Settings& settings) const
 {
@@ -777,7 +812,7 @@ bool UIWidget::SaveState(Settings& settings) const
     settings.SaveWidget("UI", mUI.chkSnap);
     settings.SaveWidget("UI", mUI.cmbGrid);
     settings.SaveWidget("UI", mUI.zoom);
-    settings.SaveWidget("UI", mUI.widget);
+    settings.SaveWidget("UI", mUI.viewport);
     settings.SaveWidget("UI", mUI.mainSplitter);
     settings.SaveWidget("UI", mUI.rightSplitter);
     return true;
@@ -802,7 +837,7 @@ bool UIWidget::LoadState(const Settings& settings)
     settings.LoadWidget("UI", mUI.chkShowTabOrder);
     settings.LoadWidget("UI", mUI.chkClipWidgets);
     settings.LoadWidget("UI", mUI.zoom);
-    settings.LoadWidget("UI", mUI.widget);
+    settings.LoadWidget("UI", mUI.viewport);
     settings.LoadWidget("UI", mUI.mainSplitter);
     settings.LoadWidget("UI", mUI.rightSplitter);
 
@@ -901,7 +936,7 @@ void UIWidget::Paste(const Clipboard& clipboard)
         return;
     }
 
-    mUI.widget->setFocus();
+    mUI.viewport->setFocus();
 
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
@@ -909,7 +944,7 @@ void UIWidget::Paste(const Clipboard& clipboard)
     view.RotateAroundZ(qDegreesToRadians((float) GetValue(mUI.rotation)));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
+    const auto& mickey = mUI.viewport->mapFromGlobal(QCursor::pos());
     const auto& view_to_scene  = glm::inverse(view.GetAsMatrix());
     const auto& mouse_in_scene = view_to_scene * ToVec4(mickey);
 
@@ -1002,11 +1037,11 @@ void UIWidget::ZoomOut()
 }
 void UIWidget::ReloadShaders()
 {
-    mUI.widget->reloadShaders();
+    mUI.viewport->reloadShaders();
 }
 void UIWidget::ReloadTextures()
 {
-    mUI.widget->reloadTextures();
+    mUI.viewport->reloadTextures();
 
     // so actually what we want to do here is to make sure that
     // changes in packed textures are reflected as well. When an
@@ -1045,7 +1080,7 @@ void UIWidget::Shutdown()
         mPreview.reset();
     }
 
-    mUI.widget->dispose();
+    mUI.viewport->dispose();
 }
 void UIWidget::Update(double dt)
 {
@@ -1070,7 +1105,7 @@ void UIWidget::Update(double dt)
 }
 void UIWidget::Render()
 {
-    mUI.widget->triggerPaint();
+    mUI.viewport->triggerPaint();
 }
 void UIWidget::Save()
 {
@@ -1154,9 +1189,9 @@ bool UIWidget::GetStats(Stats* stats) const
 {
     stats->time  = mPlayTime;
     stats->graphics.valid = true;
-    stats->graphics.fps   = mUI.widget->getCurrentFPS();
-    stats->graphics.vsync = mUI.widget->haveVSYNC();
-    const auto& dev_stats = mUI.widget->getDeviceResourceStats();
+    stats->graphics.fps   = mUI.viewport->getCurrentFPS();
+    stats->graphics.vsync = mUI.viewport->haveVSYNC();
+    const auto& dev_stats = mUI.viewport->getDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
     stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;
     stats->device.dynamic_vbo_mem_alloc   = dev_stats.dynamic_vbo_mem_alloc;
@@ -1240,7 +1275,7 @@ bool UIWidget::LaunchScript(const app::AnyString& id)
 
 void UIWidget::on_widgetColor_colorChanged(QColor color)
 {
-    mUI.widget->SetClearColor(ToGfx(color));
+    mUI.viewport->SetClearColor(ToGfx(color));
 }
 
 void UIWidget::on_actionPlay_triggered()
@@ -1254,26 +1289,14 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.actionPause,          true);
     SetEnabled(mUI.actionStop,           true);
     SetEnabled(mUI.actionClose,          true);
-    SetEnabled(mUI.baseProperties,       false);
+    SetEnabled(mUI.scriptProperties,     false);
     SetEnabled(mUI.transform,            false);
     SetEnabled(mUI.widgetTree,           false);
     SetEnabled(mUI.widgetProperties,     false);
     SetEnabled(mUI.widgetStyle,          false);
     SetEnabled(mUI.widgetData,           false);
-    SetEnabled(mUI.actionNewCheckBox,    false);
-    SetEnabled(mUI.actionNewSpinBox,     false);
-    SetEnabled(mUI.actionNewSlider,      false);
-    SetEnabled(mUI.actionNewProgressBar, false);
-    SetEnabled(mUI.actionNewRadioButton, false);
-    SetEnabled(mUI.actionNewToggleBox,   false);
-    SetEnabled(mUI.actionNewGroupBox,    false);
-    SetEnabled(mUI.actionNewForm,        false);
-    SetEnabled(mUI.actionNewLabel,       false);
-    SetEnabled(mUI.actionNewPushButton,  false);
-    SetEnabled(mUI.actionNewScrollArea,  false);
-    SetEnabled(mUI.actionNewShapeWidget, false);
-
-    mUI.widget->setFocus();
+    SetEnabled(mWidgets,                 false);
+    mUI.viewport->setFocus();
 }
 void UIWidget::on_actionPause_triggered()
 {
@@ -1296,31 +1319,20 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.actionPause,         false);
     SetEnabled(mUI.actionStop,          false);
     SetEnabled(mUI.actionClose,         false);
-    SetEnabled(mUI.baseProperties,      true);
+    SetEnabled(mUI.scriptProperties,    true);
     SetEnabled(mUI.transform,           true);
     SetEnabled(mUI.widgetTree,          true);
     SetEnabled(mUI.widgetProperties,    true);
     SetEnabled(mUI.widgetStyle,         true);
     SetEnabled(mUI.widgetData,          true);
-    SetEnabled(mUI.actionNewForm,       true);
-    SetEnabled(mUI.actionNewCheckBox,   true);
-    SetEnabled(mUI.actionNewLabel,      true);
-    SetEnabled(mUI.actionNewPushButton, true);
-    SetEnabled(mUI.actionNewGroupBox,   true);
-    SetEnabled(mUI.actionNewSpinBox,    true);
-    SetEnabled(mUI.actionNewSlider,     true);
-    SetEnabled(mUI.actionNewProgressBar, true);
-    SetEnabled(mUI.actionNewRadioButton, true);
-    SetEnabled(mUI.actionNewToggleBox,   true);
-    SetEnabled(mUI.actionNewScrollArea,  true);
-    SetEnabled(mUI.actionNewShapeWidget, true);
-    SetEnabled(mUI.cmbGrid,              true);
-    SetEnabled(mUI.zoom,                 true);
-    SetEnabled(mUI.chkSnap,              true);
-    SetEnabled(mUI.chkShowOrigin,        true);
-    SetEnabled(mUI.chkShowGrid,          true);
-    SetEnabled(mUI.chkShowBounds,        true);
-    SetEnabled(mUI.chkShowTabOrder,      true);
+    SetEnabled(mUI.cmbGrid,             true);
+    SetEnabled(mUI.zoom,                true);
+    SetEnabled(mUI.chkSnap,             true);
+    SetEnabled(mUI.chkShowOrigin,       true);
+    SetEnabled(mUI.chkShowGrid,         true);
+    SetEnabled(mUI.chkShowBounds,       true);
+    SetEnabled(mUI.chkShowTabOrder,     true);
+    SetEnabled(mWidgets,                true);
     mMessageQueue.clear();
     DisplayCurrentWidgetProperties();
 }
@@ -1352,7 +1364,7 @@ void UIWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
     SetUserProperty(resource, "show_tab_order", mUI.chkShowTabOrder);
-    SetUserProperty(resource, "widget", mUI.widget);
+    SetUserProperty(resource, "viewport", mUI.viewport);
     SetUserProperty(resource, "clip_widgets", mUI.chkClipWidgets);
     SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
@@ -1380,66 +1392,6 @@ void UIWidget::on_actionPreview_triggered()
         preview->LoadPreview(mState.window);
         mPreview = std::move(preview);
     }
-}
-
-void UIWidget::on_actionNewForm_triggered()
-{
-    PlaceNewWidget(WidgetIndex::Form);
-}
-
-void UIWidget::on_actionNewLabel_triggered()
-{
-    PlaceNewWidget(WidgetIndex::Label);
-}
-
-void UIWidget::on_actionNewPushButton_triggered()
-{
-    PlaceNewWidget(WidgetIndex::PushButton);
-}
-
-void UIWidget::on_actionNewCheckBox_triggered()
-{
-    PlaceNewWidget(WidgetIndex::CheckBox);
-}
-
-void UIWidget::on_actionNewSpinBox_triggered()
-{
-    PlaceNewWidget(WidgetIndex::Spinbox);
-}
-
-void UIWidget::on_actionNewSlider_triggered()
-{
-    PlaceNewWidget(WidgetIndex::Slider);
-}
-
-void UIWidget::on_actionNewProgressBar_triggered()
-{
-    PlaceNewWidget(WidgetIndex::ProgresBar);
-}
-
-void UIWidget::on_actionNewRadioButton_triggered()
-{
-    PlaceNewWidget(WidgetIndex::RadioButton);
-}
-
-void UIWidget::on_actionNewToggleBox_triggered()
-{
-    PlaceNewWidget(WidgetIndex::ToggleBox);
-}
-
-void UIWidget::on_actionNewScrollArea_triggered()
-{
-    PlaceNewWidget(WidgetIndex::ScrollArea);
-}
-
-void UIWidget::on_actionNewShapeWidget_triggered()
-{
-    PlaceNewWidget(WidgetIndex::ShapeWidget);
-}
-
-void UIWidget::on_actionNewGroupBox_triggered()
-{
-    PlaceNewWidget(WidgetIndex::GroupBox);
 }
 
 void UIWidget::on_actionWidgetDelete_triggered()
@@ -1709,8 +1661,8 @@ void UIWidget::on_btnMoreViewportSettings_clicked()
 void UIWidget::on_btnResetTransform_clicked()
 {
     const auto& form_size = GetFormSize();
-    const auto width = mUI.widget->width();
-    const auto height = mUI.widget->height();
+    const auto width = mUI.viewport->width();
+    const auto height = mUI.viewport->height();
     const auto rotation = mUI.rotation->value();
     mState.camera_offset_x = width * 0.5f - form_size.GetWidth() * 0.5;
     mState.camera_offset_y = height * 0.5f - form_size.GetHeight() * 0.5;
@@ -2221,13 +2173,13 @@ void UIWidget::WidgetStyleEdited()
 
 void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 {
-    const auto surface_width  = mUI.widget->width();
-    const auto surface_height = mUI.widget->height();
+    const auto surface_width  = mUI.viewport->width();
+    const auto surface_height = mUI.viewport->height();
     const auto zoom   = (float)GetValue(mUI.zoom);
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
+    SetValue(mUI.widgetColor, mUI.viewport->GetCurrentClearColor());
 
     const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
@@ -2446,7 +2398,7 @@ void FragmentShaderMain()
     painter.ResetViewMatrix();
 
     if (mPlayState == PlayState::Stopped)
-        PrintMousePos(view, painter, mUI.widget);
+        PrintMousePos(view, painter, mUI.viewport);
 }
 
 void UIWidget::MouseMove(QMouseEvent* mickey)
@@ -2997,8 +2949,8 @@ void UIWidget::DisplayCurrentWidgetProperties()
 void UIWidget::DisplayCurrentCameraLocation()
 {
     const auto& form = GetFormSize();
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
+    const auto width  = mUI.viewport->width();
+    const auto height = mUI.viewport->height();
     const auto camera_center_x = width * 0.5f - form.GetWidth() * 0.5;
     const auto camera_center_y = height * 0.5f - form.GetHeight() * 0.5;
 
@@ -3054,69 +3006,57 @@ void UIWidget::PlaceNewWidget(unsigned int index)
     if (index == WidgetIndex::Label)
     {
         widget = std::make_unique<uik::Label>();
-        mUI.actionNewLabel->setChecked(true);
     }
     else if (index == WidgetIndex::PushButton)
     {
         widget = std::make_unique<uik::PushButton>();
-        mUI.actionNewPushButton->setChecked(true);
     }
     else if (index == WidgetIndex::CheckBox)
     {
         widget = std::make_unique<uik::CheckBox>();
-        mUI.actionNewCheckBox->setChecked(true);
     }
     else if (index == WidgetIndex::GroupBox)
     {
         widget = std::make_unique<uik::GroupBox>();
-        mUI.actionNewGroupBox->setChecked(true);
     }
-    else if (index == WidgetIndex::Spinbox)
+    else if (index == WidgetIndex::SpinBox)
     {
         auto spin = std::make_unique<uik::SpinBox>();
         spin->SetMin(0);
         spin->SetMax(100);
         spin->SetValue(GetValue(mUI.spinVal));
         widget = std::move(spin);
-        mUI.actionNewSpinBox->setChecked(true);
     }
     else if (index == WidgetIndex::Slider)
     {
         widget = std::make_unique<uik::Slider>();
-        mUI.actionNewSlider->setChecked(true);
     }
-    else if (index == WidgetIndex::ProgresBar)
+    else if (index == WidgetIndex::ProgressBar)
     {
-        auto prog = std::make_unique<uik::ProgressBar>();
-        prog->SetText("%1%");
-        prog->SetValue(0.5f);
-        widget = std::move(prog);
-        mUI.actionNewProgressBar->setChecked(true);
+        auto progress = std::make_unique<uik::ProgressBar>();
+        progress->SetText("%1%");
+        progress->SetValue(0.5f);
+        widget = std::move(progress);
     }
     else if (index == WidgetIndex::RadioButton)
     {
         widget = std::make_unique<uik::RadioButton>();
-        mUI.actionNewRadioButton->setChecked(true);
     }
     else if (index == WidgetIndex::ToggleBox)
     {
         widget = std::make_unique<uik::ToggleBox>();
-        mUI.actionNewToggleBox->setChecked(true);
     }
     else if (index == WidgetIndex::Form)
     {
         widget = std::make_unique<uik::Form>();
-        mUI.actionNewForm->setChecked(true);
     }
     else if (index == WidgetIndex::ScrollArea)
     {
         widget = std::make_unique<uik::ScrollArea>();
-        mUI.actionNewScrollArea->setChecked(true);
     }
     else if (index == WidgetIndex::ShapeWidget)
     {
         widget = std::make_unique<uik::ShapeWidget>("_rect", "_checkerboard");
-        mUI.actionNewShapeWidget->setChecked(true);
     }
     else BUG("Unhandled widget index.");
 
@@ -3128,12 +3068,12 @@ void UIWidget::PlaceNewWidget(unsigned int index)
     tool->SetWidgetIndex(index);
 
     // where's the mouse in the widget
-    const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
+    const auto& mickey = mUI.viewport->mapFromGlobal(QCursor::pos());
     // can't use underMouse here because of the way the gfx widget
     // is constructed i.e. QWindow and Widget as container
     if (mickey.x() >= 0 && mickey.y() >= 0 &&
-        mickey.x() < mUI.widget->width() &&
-        mickey.y() < mUI.widget->height())
+        mickey.x() < mUI.viewport->width() &&
+        mickey.y() < mUI.viewport->height())
     {
         gfx::Transform view;
         view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
@@ -3281,18 +3221,6 @@ bool UIWidget::LoadKeysQuiet(const std::string& uri)
 
 void UIWidget::UncheckPlacementActions()
 {
-    mUI.actionNewForm->setChecked(false);
-    mUI.actionNewLabel->setChecked(false);
-    mUI.actionNewPushButton->setChecked(false);
-    mUI.actionNewCheckBox->setChecked(false);
-    mUI.actionNewGroupBox->setChecked(false);
-    mUI.actionNewSpinBox->setChecked(false);
-    mUI.actionNewSlider->setChecked(false);
-    mUI.actionNewRadioButton->setChecked(false);
-    mUI.actionNewProgressBar->setChecked(false);
-    mUI.actionNewToggleBox->setChecked(false);
-    mUI.actionNewScrollArea->setChecked(false);
-    mUI.actionNewShapeWidget->setChecked(false);
 }
 
 void UIWidget::UpdateDeletedResourceReferences()
