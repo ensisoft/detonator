@@ -39,6 +39,7 @@
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/app/workspace.h"
+#include "editor/app/resource-uri.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/treewidget.h"
 #include "editor/gui/treemodel.h"
@@ -83,6 +84,30 @@
 
 namespace gui
 {
+
+bool CheckEntityNodeNameAvailability(const game::EntityClass& entity, const std::string& name)
+{
+    for (size_t i=0; i<entity.GetNumNodes(); ++i)
+    {
+        const auto& node = entity.GetNode(i);
+        if (node.GetName() == name)
+            return false;
+    }
+    return true;
+}
+
+std::string GenerateEntityNodeName(const game::EntityClass& entity, const std::string& prefix)
+{
+    std::string name;
+    for (size_t i=0; i<666666; ++i)
+    {
+        name = prefix + std::to_string(i);
+        if (CheckEntityNodeNameAvailability(entity, name))
+            break;
+    }
+    return name;
+}
+
 
 class EntityWidget::JointModel : public QAbstractTableModel
 {
@@ -494,6 +519,64 @@ private:
 
 };
 
+class EntityWidget::PlaceLightTool : public MouseTool
+{
+public:
+    PlaceLightTool(EntityWidget::State& state, game::BasicLightClass::LightType type)
+      : mType(type)
+      , mState(state)
+    {
+        auto klass = std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromImage(res::LightIcon));
+        klass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        mMaterial = gfx::CreateMaterialInstance(klass);
+    }
+    void Render(gfx::Painter& painter, gfx::Painter& entity) const override
+    {
+        gfx::Transform model;
+        model.Scale(60.0f, 60.0f); // same size as in gui/drawing DrawLightIndicator
+        model.Translate(mMousePos);
+        model.Translate(-30.0f, -30.0f);
+        entity.Draw(gfx::Rectangle(), model, *mMaterial);
+    }
+    void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
+    {
+        mMousePos = mickey.MapToPlane();
+    }
+    void MousePress(const MouseEvent& mickey, gfx::Transform&) override
+    {
+        const auto name = GenerateEntityNodeName(*mState.entity, base::FormatString("%1 Light ", mType));
+
+        game::BasicLightClass light;
+        light.SetLightType(mType);
+
+        game::EntityNodeClass node;
+        node.SetBasicLight(light);
+        node.SetName(name);
+        node.SetTranslation(mMousePos);
+        node.SetSize(100.0f, 100.0f); // irrelevant, but larger node size makes it easier to move it
+        node.SetScale(1.0f, 1.0f); // irrelevant
+
+        auto* child = mState.entity->AddNode(std::move(node));
+        mState.entity->LinkChild(nullptr, child);
+        mState.view->tree->Rebuild();
+        mState.view->tree->SelectItemById(child->GetId());
+        mState.view->basicLight->Collapse(false);
+        DEBUG("Added new light '%1'", name);
+    }
+    bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
+    {
+        return false;
+    }
+private:
+    const game::BasicLightClass::LightType mType;
+    EntityWidget::State& mState;
+    // the current object ending position in model coordinates.
+    // the object occupies the rectangular space between the start
+    // and current positions on the X and Y axis.
+    glm::vec2 mMousePos = {0.0f, 0.0f};
+    std::unique_ptr<gfx::Material> mMaterial;
+};
+
 class EntityWidget::PlaceShapeTool : public MouseTool
 {
 public:
@@ -581,13 +664,7 @@ public:
         if (diff.x <= 0.0f || diff.y <= 0.0f)
             return true;
 
-        std::string name;
-        for (size_t i=0; i<666666; ++i)
-        {
-            name = "Node " + std::to_string(i);
-            if (CheckNameAvailability(name))
-                break;
-        }
+        const auto name = GenerateEntityNodeName(*mState.entity, "Node ");
 
         const float xpos = mStart.x;
         const float ypos = mStart.y;
@@ -614,16 +691,7 @@ public:
         DEBUG("Added new shape '%1'", name);
         return true;
     }
-    bool CheckNameAvailability(const std::string& name) const
-    {
-        for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
-        {
-            const auto& node = mState.entity->GetNode(i);
-            if (node.GetName() == name)
-                return false;
-        }
-        return true;
-    }
+
 private:
     void CommitPresetParticleEngine()
     {
@@ -744,6 +812,15 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mBasicShapes->addAction(mUI.actionNewTrapezoid);
     mBasicShapes->addAction(mUI.actionNewParallelogram);
     mBasicShapes->addAction(mUI.actionNewCapsule);
+    mBasicLights = new QMenu(this);
+    mBasicLights->menuAction()->setIcon(QIcon("icons:light.png"));
+    mBasicLights->menuAction()->setText(tr("Basic Lights"));
+    mBasicLights->menuAction()->setCheckable(true);
+    mBasicLights->menuAction()->setToolTip(tr("Place new basic light"));
+    mBasicLights->addAction(mUI.actionNewAmbientLight);
+    mBasicLights->addAction(mUI.actionNewDirectionalLght);
+    mBasicLights->addAction(mUI.actionNewPointLight);
+    mBasicLights->addAction(mUI.actionNewSpotlight);
 
     auto* buttonbar = new QToolBar(this);
     buttonbar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
@@ -751,6 +828,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     buttonbar->addAction(mBasicShapes->menuAction());
     buttonbar->addAction(mCustomShapes->menuAction());
     buttonbar->addAction(mParticleSystems->menuAction());
+    buttonbar->addAction(mBasicLights->menuAction());
     mUI.toolbarLayout->addWidget(buttonbar);
 
     mState.workspace = workspace;
@@ -980,6 +1058,7 @@ void EntityWidget::AddActions(QMenu& menu)
     place_menu->addAction(mBasicShapes->menuAction());
     place_menu->addAction(mCustomShapes->menuAction());
     place_menu->addAction(mParticleSystems->menuAction());
+    place_menu->addAction(mBasicLights->menuAction());
 
     auto* tool_menu = new QMenu(this);
     tool_menu->setTitle(tr("Apply Tool"));
@@ -1717,6 +1796,23 @@ void EntityWidget::on_actionNewParallelogram_triggered()
 
     UncheckPlacementActions();
     mUI.actionNewParallelogram->setChecked(true);
+}
+
+void EntityWidget::on_actionNewAmbientLight_triggered()
+{
+    mCurrentTool.reset(new PlaceLightTool(mState, game::BasicLightClass::LightType::Ambient));
+}
+void EntityWidget::on_actionNewDirectionalLight_triggered()
+{
+    mCurrentTool.reset(new PlaceLightTool(mState, game::BasicLightClass::LightType::Directional));
+}
+void EntityWidget::on_actionNewPointLight_triggered()
+{
+    mCurrentTool.reset(new PlaceLightTool(mState, game::BasicLightClass::LightType::Point));
+}
+void EntityWidget::on_actionNewSpotlight_triggered()
+{
+    mCurrentTool.reset(new PlaceLightTool(mState, game::BasicLightClass::LightType::Spot));
 }
 
 void EntityWidget::on_actionNodeDelete_triggered()

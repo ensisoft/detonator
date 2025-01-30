@@ -3928,7 +3928,7 @@
                     <item row="6" column="1" colspan="2">
                      <widget class="QDoubleSpinBox" name="ltLinearAttenuation">
                       <property name="decimals">
-                       <number>5</number>
+                       <number>3</number>
                       </property>
                       <property name="singleStep">
                        <double>0.010000000000000</double>
@@ -5095,6 +5095,38 @@
     <string>Add a new light</string>
    </property>
   </action>
+  <action name="actionNewSpotlight">
+   <property name="text">
+    <string>Spotlight</string>
+   </property>
+   <property name="toolTip">
+    <string>Place new spotlight</string>
+   </property>
+  </action>
+  <action name="actionNewPointLight">
+   <property name="text">
+    <string>Point Light</string>
+   </property>
+   <property name="toolTip">
+    <string>Place new point light</string>
+   </property>
+  </action>
+  <action name="actionNewDirectionalLght">
+   <property name="text">
+    <string>Directional Lght</string>
+   </property>
+   <property name="toolTip">
+    <string>Place new directional light</string>
+   </property>
+  </action>
+  <action name="actionNewAmbientLight">
+   <property name="text">
+    <string>Ambient Light</string>
+   </property>
+   <property name="toolTip">
+    <string>Place new ambient light</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -5133,7 +5165,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>widget</tabstop>
   <tabstop>entityName</tabstop>
   <tabstop>entityID</tabstop>
   <tabstop>entityTag</tabstop>
@@ -5301,6 +5332,7 @@
   <tabstop>tfAccelA</tabstop>
   <tabstop>tfEnabled</tabstop>
   <tabstop>btnDelTransformer</tabstop>
+  <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>cmbStyle</tabstop>
