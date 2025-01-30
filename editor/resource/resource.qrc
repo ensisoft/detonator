@@ -1,6 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
   <qresource>
+    <file>16x16_ico_png/widget.png</file>
     <file>16x16_ico_png/joystick.png</file>
     <file>16x16_ico_png/hashtag.png</file>
     <file>16x16_ico_png/light.png</file>
@@ -99,6 +100,7 @@
     <file>16x16_ico_png/transmit_error.png</file>
     <file>16x16_ico_png/transmit_go.png</file>
 
+    <file>32x32_ico_png/widget.png</file>
     <file>32x32_ico_png/joystick.png</file>
     <file>32x32_ico_png/swap.png</file>
     <file>32x32_ico_png/brush.png</file>
