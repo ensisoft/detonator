@@ -2106,7 +2106,7 @@
   <action name="actionPreview">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
+     <normaloff>:/32x32_ico_png/joystick.png</normaloff>:/32x32_ico_png/joystick.png</iconset>
    </property>
    <property name="text">
     <string>Test Run</string>
