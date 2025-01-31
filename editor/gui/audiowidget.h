@@ -155,6 +155,7 @@ namespace gui
 
     private:
         Ui::AudioWidget mUI;
+        QMenu* mElements = nullptr;
     private:
         app::Workspace* mWorkspace = nullptr;
         std::unique_ptr<AudioGraphScene> mScene;

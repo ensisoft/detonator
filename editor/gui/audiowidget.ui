@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1683</width>
-    <height>1058</height>
+    <width>1602</width>
+    <height>1006</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -189,9 +189,12 @@
         <number>0</number>
        </property>
        <item>
+        <layout class="QVBoxLayout" name="toolbarLayout"/>
+       </item>
+       <item>
         <widget class="QGraphicsView" name="view">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>

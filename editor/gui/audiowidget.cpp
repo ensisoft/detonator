@@ -1115,6 +1115,27 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
     GetSelectedElementProperties();
     mGraphHash = GetHash();
 
+    const auto& map = GetElementMap();
+
+    mElements = new QMenu(this);
+    mElements->menuAction()->setIcon(QIcon("icons32:plugin-add.png"));
+    mElements->menuAction()->setText("Elements");
+    mElements->menuAction()->setToolTip(tr("Place new audio element"));
+    for (const auto& pair : map)
+    {
+        auto* action = mElements->addAction(app::toString("%1", pair.first));
+        action->setIcon(QIcon("level:plugin-add.png"));
+        action->setData(app::FromUtf8(pair.first));
+        action->setProperty("source", "toolbar");
+        connect(action, &QAction::triggered, this, &AudioWidget::AddElementAction);
+    }
+
+    auto* buttonbar = new QToolBar(this);
+    buttonbar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
+    buttonbar->setIconSize(QSize(16, 16));
+    buttonbar->addAction(mElements->menuAction());
+    mUI.toolbarLayout->addWidget(buttonbar);
+
     // Add random resize since the fucking scroll area
     // always has wrong size in the beginning and is either
     // too wide or too narrow! why is this such fucking
@@ -1242,27 +1263,21 @@ void AudioWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
-    bar.addSeparator();
-
-    const auto& map = GetElementMap();
-    for (const auto& pair : map)
-    {
-        auto* action = bar.addAction(app::toString("%1", pair.first));
-        action->setIcon(QIcon("level:plugin-add.png"));
-        action->setData(app::FromUtf8(pair.first));
-        action->setProperty("source", "toolbar");
-        connect(action, &QAction::triggered, this, &AudioWidget::AddElementAction);
-    }
-
 }
 void AudioWidget::AddActions(QMenu& menu)
 {
+    auto* place_menu = new QMenu(&menu);
+    place_menu->setTitle("Place");
+    place_menu->addAction(mElements->menuAction());
+
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
     menu.addSeparator();
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
+    menu.addSeparator();
+    menu.addMenu(place_menu);
 }
 void AudioWidget::Save()
 {
@@ -1724,8 +1739,6 @@ void AudioWidget::on_actionRemoveOutputPort_triggered()
 
 void AudioWidget::on_view_customContextMenuRequested(QPoint pos)
 {
-    QMenu menu(this);
-
     const auto& mouse_pos = mUI.view->mapFromGlobal(QCursor::pos());
     const auto& scene_pos = mUI.view->mapToScene(mouse_pos);
     const auto* item = dynamic_cast<AudioElement*>(mScene->itemAt(scene_pos, QTransform()));
@@ -1736,16 +1749,21 @@ void AudioWidget::on_view_customContextMenuRequested(QPoint pos)
     mUI.actionRemoveInputPort->setEnabled(!selected.isEmpty() && item != nullptr && item->CanRemoveInputPort());
     mUI.actionAddOutputPort->setEnabled(!selected.isEmpty() && item != nullptr && item->CanAddOutputPort());
     mUI.actionRemoveOutputPort->setEnabled(!selected.isEmpty() && item != nullptr && item->CanRemoveOutputPort());
+
+    QMenu place_menu("Place");
+
     const auto& map = GetElementMap();
     for (const auto& pair : map)
     {
-        auto* action = menu.addAction(app::toString("New %1", pair.first));
+        auto* action = place_menu.addAction(app::toString("%1", pair.first));
         action->setIcon(QIcon("icons:add.png"));
         action->setData(app::FromUtf8(pair.first));
         action->setProperty("source", "context-menu");
         connect(action, &QAction::triggered, this, &AudioWidget::AddElementAction);
     }
 
+    QMenu menu(this);
+    menu.addMenu(&place_menu);
     menu.addSeparator();
     QMenu input_port_menu("Input Ports");
     input_port_menu.addAction(mUI.actionAddInputPort);
