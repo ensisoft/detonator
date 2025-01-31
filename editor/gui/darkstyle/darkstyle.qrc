@@ -5,4 +5,10 @@
       <file>icons/restore.svg</file>
       <file>icons/close.svg</file>
    </qresource>
+
+   <qresource prefix="/combinear">
+      <file>icons/down_arrow.png</file>
+      <file>icons/check_check.png</file>
+      <file>icons/check_indeterminate.png</file>
+   </qresource>
 </RCC>

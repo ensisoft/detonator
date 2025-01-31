@@ -73,7 +73,7 @@ namespace gui
         // QtSvg.dll also needs to be deployed.
         // kvantum is also available on linux through various package
         // managers.
-        QString style_name = "Fusion-Dark";
+        QString style_name = "DETONATOR";
 
         // Whether to save widgets with unsaved changes automatically
         // on play or whether to ask

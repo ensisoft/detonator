@@ -258,6 +258,8 @@ void PopulateQtStyles(QComboBox* cmb)
     QSignalBlocker s(cmb);
     cmb->clear();
 
+    cmb->addItem("DETONATOR"); //
+
     // add Qt's built-in / plugin styles.
     const auto& styles = QStyleFactory::keys();
     for (const auto& style : styles)
