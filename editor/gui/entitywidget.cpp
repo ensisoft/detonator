@@ -791,18 +791,15 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mParticleSystems = new QMenu(this);
     mParticleSystems->menuAction()->setIcon(QIcon("icons:particle.png"));
     mParticleSystems->menuAction()->setText("Particles");
-    mParticleSystems->menuAction()->setCheckable(true);
     mParticleSystems->menuAction()->setToolTip(tr("Place new particle system"));
     mCustomShapes = new QMenu(this);
     mCustomShapes->menuAction()->setIcon(QIcon("icons:polygon.png"));
     mCustomShapes->menuAction()->setText("Custom Shapes");
-    mCustomShapes->menuAction()->setCheckable(true);
     mCustomShapes->menuAction()->setToolTip(tr("Place new custom shape"));
     mBasicShapes = new QMenu(this);
     mBasicShapes->menuAction()->setIcon(QIcon("icons32:rectangle.png"));
     mBasicShapes->menuAction()->setText("Basic Shapes");
     mBasicShapes->menuAction()->setToolTip(tr("Place new basic shape"));
-    mBasicShapes->menuAction()->setCheckable(true);
     mBasicShapes->addAction(mUI.actionNewRect);
     mBasicShapes->addAction(mUI.actionNewRoundRect);
     mBasicShapes->addAction(mUI.actionNewCircle);
@@ -815,10 +812,9 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mBasicLights = new QMenu(this);
     mBasicLights->menuAction()->setIcon(QIcon("icons:light.png"));
     mBasicLights->menuAction()->setText(tr("Basic Lights"));
-    mBasicLights->menuAction()->setCheckable(true);
     mBasicLights->menuAction()->setToolTip(tr("Place new basic light"));
     mBasicLights->addAction(mUI.actionNewAmbientLight);
-    mBasicLights->addAction(mUI.actionNewDirectionalLght);
+    mBasicLights->addAction(mUI.actionNewDirectionalLight);
     mBasicLights->addAction(mUI.actionNewPointLight);
     mBasicLights->addAction(mUI.actionNewSpotlight);
 
@@ -873,14 +869,25 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
 
     mUI.tiFontName->lineEdit()->setReadOnly(true);
 
-    mUI.btnAddNodeItem->addAction(mUI.actionAddDrawable);
-    mUI.btnAddNodeItem->addAction(mUI.actionAddTextItem);
-    mUI.btnAddNodeItem->addAction(mUI.actionAddRigidBody);
-    mUI.btnAddNodeItem->addAction(mUI.actionAddFixture);
-    mUI.btnAddNodeItem->addAction(mUI.actionAddLight);
-    mUI.btnAddNodeItem->addAction(mUI.actionAddTilemapNode);
-    mUI.btnAddNodeItem->addAction(mUI.actionAddSpatialNode);
-    mUI.btnAddNodeItem->addAction(mUI.actionAddTransformer);
+    connect(mUI.btnAddNodeItem, &QPushButton::clicked, this, [this]() {
+        QPoint point;
+        point.setX(0);
+        point.setY(mUI.btnAddNodeItem->height());
+
+        if (mAttachments == nullptr)
+        {
+            mAttachments = new QMenu(this);
+            mAttachments->addAction(mUI.actionAddDrawable);
+            mAttachments->addAction(mUI.actionAddTextItem);
+            mAttachments->addAction(mUI.actionAddRigidBody);
+            mAttachments->addAction(mUI.actionAddFixture);
+            mAttachments->addAction(mUI.actionAddLight);
+            mAttachments->addAction(mUI.actionAddTilemapNode);
+            mAttachments->addAction(mUI.actionAddSpatialNode);
+            mAttachments->addAction(mUI.actionAddTransformer);
+        }
+        mAttachments->popup(mUI.btnAddNodeItem->mapToGlobal(point));
+    });
 
     QTimer::singleShot(10, this, [this]() {
         mUI.widget->activateWindow();
