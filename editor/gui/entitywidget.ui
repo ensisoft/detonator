@@ -227,6 +227,9 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_9">
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item row="0" column="0">
            <widget class="QPushButton" name="btnEditAnimator">
             <property name="sizePolicy">
@@ -262,6 +265,18 @@
           <bool>true</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_16">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QScrollArea" name="scrollArea">
             <property name="sizePolicy">
@@ -284,8 +299,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>353</width>
-               <height>1059</height>
+               <width>361</width>
+               <height>1071</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -2052,12 +2067,18 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="btnAddNodeItem">
+          <widget class="QPushButton" name="btnAddNodeItem">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>50</height>
+            </size>
            </property>
            <property name="text">
             <string>Add node attachment</string>
@@ -2065,18 +2086,6 @@
            <property name="icon">
             <iconset resource="../resource/resource.qrc">
              <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
-           </property>
-           <property name="popupMode">
-            <enum>QToolButton::InstantPopup</enum>
-           </property>
-           <property name="toolButtonStyle">
-            <enum>Qt::ToolButtonTextBesideIcon</enum>
-           </property>
-           <property name="autoRaise">
-            <bool>false</bool>
-           </property>
-           <property name="arrowType">
-            <enum>Qt::NoArrow</enum>
            </property>
           </widget>
          </item>
@@ -5111,7 +5120,7 @@
     <string>Place new point light</string>
    </property>
   </action>
-  <action name="actionNewDirectionalLght">
+  <action name="actionNewDirectionalLight">
    <property name="text">
     <string>Directional Lght</string>
    </property>
