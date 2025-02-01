@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QApplication>
 #  include <QCoreApplication>
 #  include <QKeyEvent>
 #  include <QPaintEvent>
@@ -39,34 +40,35 @@
 namespace {
 
 void RenderTreeItem(const gui::TreeWidget::TreeItem& item, const QRect& box, const QPalette& palette, QPainter& painter,
-    bool selected, bool hovered)
+    bool selected, bool hovered, bool have_focus)
 {
     const unsigned kBaseLevel = 3;
     const unsigned kLevelOffset = 16; // px
     const auto offset = kBaseLevel * kLevelOffset + item.GetLevel() * kLevelOffset;
+    const auto color_group = have_focus ? QPalette::ColorGroup::Active : QPalette::ColorGroup::Inactive;
 
     if (selected)
     {
         QPen pen;
-        pen.setColor(palette.color(QPalette::HighlightedText));
+        pen.setColor(palette.color(color_group, QPalette::HighlightedText));
         painter.setPen(pen);
-        painter.fillRect(box, palette.color(QPalette::Highlight));
+        painter.fillRect(box, palette.color(color_group, QPalette::Highlight));
         painter.drawText(box.translated(offset, 0), Qt::AlignVCenter | Qt::AlignLeft, item.GetText());
     }
     else if (hovered)
     {
         QPen pen;
+        pen.setColor(palette.color(color_group, QPalette::Text));
         painter.setPen(pen);
-        pen.setColor(QColor(0x14, 0x8C, 0xD2)); //palette.color(QPalette::BrightText));
-        painter.fillRect(box.translated(offset, 0), QColor(50, 65, 75, 255));
+        painter.fillRect(box.translated(offset, 0), palette.color(color_group, QPalette::AlternateBase));
         painter.drawText(box.translated(offset, 0), Qt::AlignVCenter | Qt::AlignLeft, item.GetText());
     }
     else
     {
         QPen pen;
-        pen.setColor(palette.color(QPalette::Text));
+        pen.setColor(palette.color(color_group, QPalette::Text));
         painter.setPen(pen);
-        painter.fillRect(box, palette.color(QPalette::Base));
+        painter.fillRect(box, palette.color(color_group, QPalette::Base));
         painter.drawText(box.translated(offset, 0), Qt::AlignVCenter | Qt::AlignLeft, item.GetText());
     }
     const QIcon& ico = item.GetIcon();
@@ -193,7 +195,7 @@ void TreeWidget::focusInEvent(QFocusEvent* ford)
 
 void TreeWidget::paintEvent(QPaintEvent* event)
 {
-    const QPalette& palette = this->palette();
+    //const QPalette& palette = this->palette();
 
     const unsigned kBaseLevel    = 1;
     const unsigned kLevelOffset  = 15; // px
@@ -206,8 +208,12 @@ void TreeWidget::paintEvent(QPaintEvent* event)
     const unsigned window_width  = rect.width();
     const unsigned window_height = rect.height();
 
+    const auto& palette = QApplication::palette();
+    const auto color_group = hasFocus() ? QPalette::ColorGroup::Active : QPalette::ColorGroup::Inactive;
+
     QPainter painter(viewport());
-    painter.fillRect(viewport()->rect(), palette.color(QPalette::Base));
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.fillRect(viewport()->rect(), palette.color(color_group, QPalette::Base));
 
     QTransform transform;
     transform.translate(2.0f, 2.0f);
@@ -221,7 +227,7 @@ void TreeWidget::paintEvent(QPaintEvent* event)
         const bool selected = &item == mSelected;
         const bool hovered  = &item == mHovered;
         const QRect box(0, ypos, window_width, mItemHeight);
-        RenderTreeItem(item, box, palette, painter, selected, hovered);
+        RenderTreeItem(item, box, palette, painter, selected, hovered, hasFocus());
 
         // draw the connecting lines between child/parent items.
         QPen line;
@@ -277,7 +283,7 @@ void TreeWidget::paintEvent(QPaintEvent* event)
             painter.setOpacity(0.5f);
             // render the item being dragged.
             RenderTreeItem(item, QRect(xpos, ypos, window_width, mItemHeight),
-                           palette, painter, true, false);
+                           palette, painter, true, false, true);
         }
     }
 
@@ -287,7 +293,7 @@ void TreeWidget::paintEvent(QPaintEvent* event)
 
         QPen pen;
         pen.setWidth(1.0);
-        pen.setColor(QColor(0x14, 0x8c, 0xd2, 0xff));
+        pen.setColor(palette.color(QPalette::Highlight));
         painter.setPen(pen);
 
         auto rect = viewport()->rect();
