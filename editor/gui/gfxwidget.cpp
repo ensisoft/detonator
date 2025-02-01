@@ -305,8 +305,11 @@ void GfxWindow::paintGL()
             // Testing on Linux with kvantum as the theme the focus rect is blue but there's
             // no such blue in any of the palette color combinations.
             // going to use some hardcoded blue here for now.
-            material->SetBaseColor(gfx::Color4f(0x14, 0x8c, 0xD2, 0xFF));
+            //material->SetBaseColor(gfx::Color4f(0x14, 0x8c, 0xD2, 0xFF));
         }
+        const auto& palette = QApplication::palette();
+        material->SetBaseColor(ToGfx(palette.color(QPalette::Highlight)));
+
         gfx::Rectangle rect(gfx::SimpleShapeStyle::Outline);
         gfx::Transform transform;
         transform.Resize(width()-2.0f, height()-2.0f);
