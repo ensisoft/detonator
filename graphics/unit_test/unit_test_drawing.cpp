@@ -293,6 +293,10 @@ public:
     {}
     void DeleteTextures() override
     {}
+    void DeleteTexture(const std::string& gpuId) override
+    {
+
+    }
     void DeleteFramebuffers() override
     {}
     void DeleteFramebuffer(const std::string&) override
