@@ -488,6 +488,10 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     gfx::PolygonMeshClass poly(mPolygon.GetId());
     mBuilder.BuildPoly(poly);
 
+    // set to true since we're constructing this polygon on every frame
+    // without this we'll eat all the static vertex/index buffers. argh!
+    poly.SetDynamic(true);
+
     painter.Draw(gfx::PolygonMeshInstance(poly), view, gfx::MaterialInstance(color));
 
     // visualize the vertices.
