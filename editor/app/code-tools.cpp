@@ -102,6 +102,22 @@ CodeAssistant::~CodeAssistant()
     delete mHilight;
 }
 
+void CodeAssistant::SetTheme(const QString& theme)
+{
+    if (theme == "Monokai")
+        mTheme.SetTheme(app::LuaTheme::Theme::Monokai);
+    else if (theme == "Solar Flare")
+        mTheme.SetTheme(app::LuaTheme::Theme::SolarFlare);
+    else if (theme == "Pastel Dream")
+        mTheme.SetTheme(app::LuaTheme::Theme::PastelDream);
+    else if (theme == "Dark Mirage")
+        mTheme.SetTheme(app::LuaTheme::Theme::DarkMirage);
+    else if (theme == "Cyber Flux")
+        mTheme.SetTheme(app::LuaTheme::Theme::CyberFlux);
+    else if (theme == "Orange Crush")
+        mTheme.SetTheme(app::LuaTheme::Theme::OrangeCrush);
+}
+
 const LuaParser::Symbol* CodeAssistant::FindSymbol(const QString& name) const
 {
     return mParser.FindSymbol(name);

@@ -62,6 +62,7 @@ end
 
 )");
 
+    mAssistant.SetTheme(mScriptSettings.theme);
     mAssistant.ParseSource(mSampleCode);
     mAssistant.ApplyHighlight(mSampleCode);
 
@@ -73,9 +74,20 @@ end
     PopulateQtStyles(mUI.cmbStyle);
 
     mUI.editorTheme->addItem("Monokai");
+    mUI.editorTheme->addItem("Solar Flare");
+    mUI.editorTheme->addItem("Pastel Dream");
+    mUI.editorTheme->addItem("Dark Mirage");
+    mUI.editorTheme->addItem("Cyber Flux");
+    mUI.editorTheme->addItem("Orange Crush");
     mUI.code->SetDocument(&mSampleCode);
     mUI.code->SetSettings(script.editor_settings);
     mUI.code->ApplySettings();
+
+    connect(mUI.editorTheme, &QComboBox::currentTextChanged, this, [this](QString theme) {
+        mAssistant.SetTheme(theme);
+        mAssistant.RemoveHighlight(mSampleCode);
+        mAssistant.ApplyHighlight(mSampleCode);
+    });
 
     // general application settings.
     SetUIValue(mUI.edtImageEditorExecutable,    settings.image_editor_executable);

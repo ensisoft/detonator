@@ -101,6 +101,8 @@ namespace app
         explicit CodeAssistant(app::Workspace* workspace);
         virtual ~CodeAssistant();
 
+        void SetTheme(const QString& theme);
+
         const Symbol* FindSymbol(const QString& name) const;
 
         virtual bool StartCompletion(const QKeyEvent* event,

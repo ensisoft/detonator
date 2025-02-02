@@ -57,7 +57,12 @@ namespace app
     {
     public:
         enum class Theme {
-            Monokai
+            Monokai,
+            SolarFlare,
+            PastelDream,
+            DarkMirage,
+            CyberFlux,
+            OrangeCrush
         };
         using Key = LuaSyntax;
 

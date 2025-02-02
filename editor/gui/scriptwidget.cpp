@@ -75,6 +75,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     mLuaHelpFilter.SetTableModel(&mLuaHelpData);
     mLuaHelpFilter.setSourceModel(&mLuaHelpData);
     mAssistant.reset(new app::CodeAssistant(workspace));
+    mAssistant->SetTheme(mSettings.theme);
     mAssistant->SetCodeCompletionHeuristics(mSettings.use_code_heuristics);
 
     auto* layout = new QPlainTextDocumentLayout(&mDocument);
@@ -1023,9 +1024,13 @@ void ScriptWidget::SetDefaultSettings(const Settings& settings)
         widget->mUI.code->SetSettings(settings.editor_settings);
         widget->mUI.code->ApplySettings();
         widget->mAssistant->SetCodeCompletionHeuristics(settings.use_code_heuristics);
+        widget->mAssistant->SetTheme(settings.theme);
+
         if (settings.editor_settings.highlight_syntax)
             widget->mAssistant->ApplyHighlight(widget->mDocument);
         else widget->mAssistant->RemoveHighlight(widget->mDocument);
+
+        widget->mAssistant->ParseSource(widget->mDocument);
     }
 }
 // static
