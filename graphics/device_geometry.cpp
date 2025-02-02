@@ -53,28 +53,33 @@ void DeviceGeometry::Upload() const
     if (vertex_bytes == 0)
         return;
 
-    mVertexBuffer = mDevice->AllocateBuffer(vertex_bytes, mUsage, dev::BufferType::VertexBuffer);
-    mDevice->UploadBuffer(mVertexBuffer, vertex_ptr, vertex_bytes);
-
-    mVertexLayout     = std::move(upload.GetLayout());
-    mDrawCommands     = std::move(upload.GetDrawCommands());
-
-    if (mUsage == gfx::BufferUsage::Static)
+    if (mVertexBuffer.buffer_bytes != vertex_bytes)
     {
-        DEBUG("Uploaded geometry vertices. [name='%1', bytes='%2', usage='%3']", mName, vertex_bytes, mUsage);
+        mVertexBuffer = mDevice->AllocateBuffer(vertex_bytes, mUsage, dev::BufferType::VertexBuffer);
+        if (mUsage == gfx::BufferUsage::Static)
+        {
+            DEBUG("Uploaded geometry vertices. [name='%1', bytes='%2', usage='%3']", mName, vertex_bytes, mUsage);
+        }
     }
+
+    mDevice->UploadBuffer(mVertexBuffer, vertex_ptr, vertex_bytes);
+    mVertexLayout = std::move(upload.GetLayout());
+    mDrawCommands = std::move(upload.GetDrawCommands());
+
     if (index_bytes == 0)
         return;
 
-    mIndexBuffer = mDevice->AllocateBuffer(index_bytes, mUsage, dev::BufferType::IndexBuffer);
-    mDevice->UploadBuffer(mIndexBuffer, index_ptr, index_bytes);
-
-    mIndexBufferType = upload.GetIndexType();
-
-    if (mUsage == gfx::BufferUsage::Static)
+    if (mIndexBuffer.buffer_bytes != index_bytes)
     {
-        DEBUG("Uploaded geometry indices. [name='%1', bytes='%2', usage='%3']", mName, index_bytes, mUsage);
+        mIndexBuffer = mDevice->AllocateBuffer(index_bytes, mUsage, dev::BufferType::IndexBuffer);
+        if (mUsage == gfx::BufferUsage::Static)
+        {
+            DEBUG("Uploaded geometry indices. [name='%1', bytes='%2', usage='%3']", mName, index_bytes, mUsage);
+        }
     }
+
+    mDevice->UploadBuffer(mIndexBuffer, index_ptr, index_bytes);
+    mIndexBufferType = upload.GetIndexType();
 }
 
 } // namespace
