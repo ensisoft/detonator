@@ -548,6 +548,9 @@ public:
 
         game::BasicLightClass light;
         light.SetLightType(mType);
+        light.SetAmbientColor(gfx::Color4f(0.2f, 0.2f, 0.2f, 1.0f));
+        light.SetTranslation(glm::vec3(0.0f, 0.0f, -100.0f));
+        light.SetQuadraticAttenuation(0.00005f);
 
         game::EntityNodeClass node;
         node.SetBasicLight(light);
@@ -3069,6 +3072,7 @@ void EntityWidget::ToggleLight(bool on)
             if (!node->HasBasicLight())
             {
                 game::BasicLightClass light;
+                light.SetAmbientColor(gfx::Color4f(0.2f, 0.2f, 0.2f, 1.0f));
                 light.SetTranslation(glm::vec3{0.0f, 0.0f, -100.0f});
                 light.SetQuadraticAttenuation(0.00005f);
                 node->SetBasicLight(light);
