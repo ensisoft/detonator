@@ -234,6 +234,7 @@ namespace gui
 
         using ScriptGen = QString(*)(QString);
         void GenerateNewScript(const QString& script_name, const QString& arg_name, ScriptGen gen);
+        void DrawResourcePreview(gfx::Painter& painter, double secs);
 
     private:
         virtual bool event(QEvent* event)  override;
