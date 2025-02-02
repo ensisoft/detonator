@@ -227,6 +227,15 @@ QDoubleSpinBox {
     border-radius : 2px;
 }
 
+QSpinBox,
+QDoubleSpinBox::up-button {
+	image: url(":combinear/icons/up_arrow.png");
+}
+
+QSpinBox,
+QDoubleSpinBox::down-button {
+	image: url(":combinear/icons/down_arrow.png");
+}
 
 /*
 QSpinBox::up-button {
