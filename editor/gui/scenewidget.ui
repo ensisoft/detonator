@@ -281,6 +281,18 @@
           <bool>true</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QScrollArea" name="scrollArea">
             <property name="sizePolicy">
@@ -306,8 +318,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>272</width>
-               <height>746</height>
+               <width>280</width>
+               <height>754</height>
               </rect>
              </property>
              <property name="maximumSize">
