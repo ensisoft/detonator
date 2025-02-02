@@ -308,6 +308,15 @@ namespace gui
         std::unique_ptr<app::ResourceCache> mResourceCache;
 
         base::ThreadPool* mThreadPool = nullptr;
+
+        struct Preview {
+            std::string textureId;
+            std::string resourceId;
+            std::unique_ptr<gfx::Drawable> drawable;
+            std::unique_ptr<gfx::Material> material;
+            app::Resource::Type type;
+        };
+        Preview mPreview;
     };
 
 } // namespace

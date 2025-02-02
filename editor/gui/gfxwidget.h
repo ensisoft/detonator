@@ -154,6 +154,7 @@ namespace gui
         static gfx::Color4f& GetDefaultClearColor()
         { return ClearColor; }
         static void CleanGarbage();
+        static void DeleteTexture(const std::string& gpuId);
 
         static void BeginFrame();
         static bool EndFrame();
