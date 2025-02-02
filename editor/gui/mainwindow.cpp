@@ -183,7 +183,6 @@ MainWindow::MainWindow(QApplication& app, base::ThreadPool* threadpool)
     mUI.actionWindowNext->setShortcut(QKeySequence::Forward);
     mUI.actionWindowPrev->setShortcut(QKeySequence::Back);
     mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
-    mUI.statusBarFrame->setVisible(false);
     mUI.statusbar->setVisible(true);
     mUI.mainToolBar->setVisible(true);
     mUI.actionViewToolbar->setChecked(true);
@@ -1028,7 +1027,6 @@ void MainWindow::on_mainTab_currentChanged(int index)
     if (mCurrentWidget)
     {
         mCurrentWidget->Deactivate();
-        mUI.statusBarFrame->setVisible(false);
         mFocusStack.push(mCurrentWidget->GetId());
     }
 
@@ -1060,7 +1058,6 @@ void MainWindow::on_mainTab_currentChanged(int index)
         mUI.actionReloadShaders->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanReloadShaders));
         mUI.actionReloadTextures->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanReloadTextures));
         mUI.actionTakeScreenshot->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanScreenshot));
-        mUI.statusBarFrame->setVisible(widget->HasStats());
     }
     else
     {
