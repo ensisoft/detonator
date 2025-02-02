@@ -74,6 +74,7 @@ public:
     void DeleteTextures() override;
     void DeleteFramebuffers() override;
     void DeleteFramebuffer(const std::string& id) override;
+    void DeleteTexture(const std::string& id) override;
 
     void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
               const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) override;
@@ -328,6 +329,17 @@ void GraphicsDevice::DeleteFramebuffers()
 void GraphicsDevice::DeleteFramebuffer(const std::string& id)
 {
     mFBOs.erase(id);
+}
+void GraphicsDevice::DeleteTexture(const std::string& id)
+{
+    auto it = mTextures.find(id);
+    if (it == mTextures.end())
+        return;
+
+    auto* texture = static_cast<gfx::DeviceTexture*>(it->second.get());
+    ASSERT(IsTextureFBOTarget(texture) == false);
+
+    mTextures.erase(it);
 }
 
 void GraphicsDevice::Draw(const gfx::Program& program,

@@ -143,6 +143,7 @@ namespace gfx
         virtual void DeleteTextures() = 0;
         virtual void DeleteFramebuffers() = 0;
         virtual void DeleteFramebuffer(const std::string& id) = 0;
+        virtual void DeleteTexture(const std::string& id) = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const ProgramState& program_state,
