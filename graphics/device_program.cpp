@@ -58,6 +58,12 @@ bool DeviceProgram::Build(const std::vector<gfx::ShaderPtr>& shaders)
     if (!program.IsValid())
     {
         ERROR("Program build error. [error='%1']", build_info);
+
+        for (const auto& shader : shaders)
+        {
+            const auto* ptr = static_cast<const gfx::DeviceShader*>(shader.get());
+            ptr->DumpSource();
+        }
         return false;
     }
 
