@@ -41,12 +41,18 @@
 #include "data/json.h"
 #include "graphics/resource.h"
 #include "graphics/loader.h"
+#include "graphics/material.h"
+#include "graphics/material_class.h"
+#include "graphics/material_instance.h"
+#include "graphics/simple_shape.h"
+#include "graphics/painter.h"
 #include "editor/app/buffer.h"
 #include "editor/app/format.h"
 #include "editor/app/platform.h"
 #include "editor/app/process.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
+#include "editor/app/resource-uri.h"
 #include "editor/app/resource_cache.h"
 #include "editor/app/resource_migration_log.h"
 #include "editor/gui/main.h"
@@ -89,6 +95,7 @@
 #include "editor/gui/uiwidget.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/types.h"
+#include "editor/gui/drawing.h"
 
 namespace {
 // returns number of seconds elapsed since the last call
@@ -187,6 +194,9 @@ MainWindow::MainWindow(QApplication& app, base::ThreadPool* threadpool)
     mUI.actionUndo->setShortcut(QKeySequence::Undo);
     mUI.workspace->installEventFilter(this);
 
+    mUI.preview->onPaintScene = std::bind(&MainWindow::DrawResourcePreview, this,
+                                          std::placeholders::_1, std::placeholders::_2);
+
     UpdateMainToolbar();
     ShowHelpWidget();
 
@@ -220,7 +230,9 @@ MainWindow::MainWindow(QApplication& app, base::ThreadPool* threadpool)
 }
 
 MainWindow::~MainWindow()
-{}
+{
+    mUI.preview->dispose();
+}
 
 void MainWindow::LoadSettings()
 {
@@ -966,6 +978,8 @@ void MainWindow::RunGameLoopOnce()
     {
         mPlayWindow->RunGameLoopOnce();
     }
+
+    mUI.preview->triggerPaint();
 
     UpdateStats();
 
@@ -3775,6 +3789,16 @@ void MainWindow::UpdateMainToolbar()
     toolbar->addAction(mImportMenu->menuAction());
     toolbar->addAction(package);
     mUI.statusToolbarLayout->addWidget(toolbar);
+}
+
+void MainWindow::DrawResourcePreview(gfx::Painter& painter, double dt)
+{
+    const float width  = mUI.preview->width();
+    const float height = mUI.preview->height();
+    painter.SetViewport(0, 0, (unsigned)width, (unsigned)height);
+
+    ShowInstruction("No preview available",
+                    gfx::FRect(0.0f, 0.0f, width, height), painter);
 }
 
 } // namespace
