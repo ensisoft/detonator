@@ -45,6 +45,11 @@ out float vParticleAlpha;
 out float vParticleTime;
 out float vParticleAngle;
 
+// this is a dummy we don't currently support
+// vertex based texture coordinates for any
+// particle geometry (lines)
+out vec2 vTexCoord;
+
 void VertexShaderMain() {
     vec4 vertex = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
 
@@ -60,6 +65,9 @@ void VertexShaderMain() {
     vParticleRandomValue = aData.y;
     vParticleAlpha       = aData.z;
     vParticleTime        = aData.w;
+
+    // dummy out
+    vTexCoord = vec2(0.0, 0.0);
 
     // base vertex shader
     mat4 model_inst_matrix = GetInstanceTransform();
