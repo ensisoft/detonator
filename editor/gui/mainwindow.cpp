@@ -29,6 +29,8 @@
 #  include <QProcess>
 #  include <QSurfaceFormat>
 #  include <QAbstractEventDispatcher>
+#  include <QPainter>
+#  include <QImage>
 #include "warnpop.h"
 
 #if defined(__GCC__)
@@ -226,6 +228,8 @@ MainWindow::MainWindow(QApplication& app, base::ThreadPool* threadpool)
     // hack but we need to set the mainwindow object
     // as the receiver of these events
     ActionEvent::GetReceiver() = this;
+
+    SetVisible(mUI.preview, false);
 }
 
 MainWindow::~MainWindow()
@@ -643,6 +647,8 @@ bool MainWindow::LoadWorkspace(const QString& dir)
         dlg.exec();
     }
 
+    SetVisible(mUI.preview, true);
+
     return success;
 }
 
@@ -914,6 +920,8 @@ void MainWindow::CloseWorkspace()
     ShowHelpWidget();
 
     mFocusStack = FocusStack();
+
+    SetVisible(mUI.preview, false);
 }
 
 void MainWindow::showWindow()
@@ -2902,6 +2910,62 @@ void MainWindow::ResourceUpdated(const app::Resource* resource)
         widget->OnUpdateResource(resource);
     }
 
+    // Create a preview image that is used with some resource types
+    // in the preview window. This is used as a shortcut since rendering
+    // live previews of some stuff is too complicated. Alternative would
+    // be to use the main widgets in the preview.
+    auto UpdatePreviewImage = [this](const MainWidget* widget) {
+        const auto& screenshot = widget->TakeScreenshot();
+        if (screenshot.isNull())
+            return;
+
+        const auto& cache_dir = mWorkspace->MapFileToFilesystem("ws://.cache");
+        const auto& preview_dir = mWorkspace->MapFileToFilesystem("ws://.cache/preview");
+        if (!app::MakePath(cache_dir) || !app::MakePath(preview_dir))
+            return;
+
+        const auto& filename = mWorkspace->MapFileToFilesystem(app::toString("ws://.cache/preview/%1.png", widget->GetId()));
+
+        const auto preview_width = 1024;
+        const auto preview_height = 512;
+
+        QImage buffer(preview_width, preview_height, QImage::Format::Format_RGBA8888);
+        buffer.fill(Qt::transparent);
+
+        QPainter painter(&buffer);
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+        const int src_width  = std::min(preview_width, screenshot.width());
+        const int src_height = std::min(preview_height, screenshot.height());
+        const int dst_xpos = (preview_width - src_width) / 2;
+        const int dst_ypos = (preview_height - src_height) / 2;
+        const int src_xpos = (screenshot.width() - src_width) / 2;
+        const int src_ypos = (screenshot.height() - src_height) / 2;
+        painter.drawImage(QRectF(dst_xpos, dst_ypos, src_width, src_height), screenshot,
+                          QRectF(src_xpos, src_ypos, src_width, src_height));
+
+        QImageWriter writer;
+        writer.setFormat("PNG");
+        writer.setQuality(80);
+        writer.setFileName(filename);
+        if (!writer.write(buffer))
+        {
+            ERROR("Failed to write resource preview image. [file='%1']", filename);
+            return;
+        }
+        DEBUG("Wrote resource preview image. [file='%1']", filename);
+    };
+
+    if (mPreview.resourceId == resource->GetIdUtf8())
+    {
+        GfxWindow::DeleteTexture(mPreview.textureId);
+        mPreview.drawable.reset();
+        mPreview.material.reset();
+        mPreview.resourceId.clear();
+        mPreview.textureId.clear();
+    }
+
     for (int i=0; i< GetCount(mUI.mainTab); ++i)
     {
         auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
@@ -2909,6 +2973,7 @@ void MainWindow::ResourceUpdated(const app::Resource* resource)
         {
             widget->setWindowTitle(resource->GetName());
             mUI.mainTab->setTabText(i, resource->GetName());
+            UpdatePreviewImage(widget);
             return;
         }
     }
@@ -2919,11 +2984,10 @@ void MainWindow::ResourceUpdated(const app::Resource* resource)
         {
             widget->setWindowTitle(resource->GetName());
             child->setWindowTitle(resource->GetName());
+            UpdatePreviewImage(widget);
             return;
         }
     }
-
-
 }
 void MainWindow::ResourceAdded(const app::Resource* resource)
 {
@@ -2972,6 +3036,10 @@ void MainWindow::ResourceRemoved(const app::Resource* resource)
     {
         mResourceCache->DelResource(resource->GetIdUtf8());
     }
+
+    const auto& preview_uri = app::toString("ws://.cache/preview/%1.png", resource->GetId());
+    const auto& preview_png = mWorkspace->MapFileToFilesystem(preview_uri);
+    QFile::remove(preview_png);
 
     for (int i=0; i<GetCount(mUI.mainTab); ++i)
     {
@@ -3794,8 +3862,128 @@ void MainWindow::DrawResourcePreview(gfx::Painter& painter, double dt)
     const float height = mUI.preview->height();
     painter.SetViewport(0, 0, (unsigned)width, (unsigned)height);
 
-    ShowInstruction("No preview available",
-                    gfx::FRect(0.0f, 0.0f, width, height), painter);
+    const auto& selected = GetSelection(mUI.workspace);
+    if (selected.isEmpty())
+    {
+        mPreview.resourceId.clear();
+        mPreview.material.reset();
+        mPreview.drawable.reset();
+    }
+    else
+    {
+        const auto& resource = mWorkspace->GetResource(selected[0]);
+        const auto& resourceId = resource.GetIdUtf8();
+        if (resourceId != mPreview.resourceId)
+        {
+            mPreview.resourceId = resourceId;
+            mPreview.material.reset();
+            mPreview.drawable.reset();
+            mPreview.type = resource.GetType();
+
+            if (resource.GetType() == app::Resource::Type::ParticleSystem)
+            {
+                const auto& klass = resource.GetContent<gfx::ParticleEngineClass>();
+                mPreview.drawable = std::make_unique<gfx::ParticleEngineInstance>(*klass);
+
+                QString materialId;
+                resource.GetProperty("material", &materialId);
+                auto material_class = mWorkspace->FindMaterialClassById(app::ToUtf8(materialId));
+                if (!material_class)
+                    material_class = mWorkspace->FindMaterialClassById("_checkerboard");
+
+                mPreview.material = std::make_unique<gfx::MaterialInstance>(material_class);
+
+            }
+            else if (resource.GetType() == app::Resource::Type::Shape)
+            {
+                const auto& klass = resource.GetContent<gfx::PolygonMeshClass>();
+                mPreview.drawable = std::make_unique<gfx::PolygonMeshInstance>(*klass);
+                auto material_class = mWorkspace->FindMaterialClassById("_checkerboard");
+                mPreview.material = std::make_unique<gfx::MaterialInstance>(material_class);
+            }
+            else
+            {
+                const auto& preview_uri = app::toString("ws://.cache/preview/%1.png", resourceId);
+                const auto& preview_png = mWorkspace->MapFileToFilesystem(preview_uri);
+                if (app::FileExists(preview_png))
+                {
+                    gfx::TextureMap texture;
+                    texture.SetType(gfx::TextureMap::Type::Texture2D);
+                    texture.SetNumTextures(1);
+                    texture.SetTextureSource(0, gfx::LoadTextureFromFile(app::ToUtf8(preview_uri)));
+                    mPreview.textureId = texture.GetTextureSource(0)->GetGpuId();
+
+                    gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
+                    klass.SetNumTextureMaps(1);
+                    klass.SetTextureMap(0, std::move(texture));
+
+                    mPreview.material = std::make_unique<gfx::MaterialInstance>(klass);
+                    mPreview.drawable = std::make_unique<gfx::Rectangle>();
+                }
+            }
+        }
+    }
+    if (mPreview.drawable && mPreview.material)
+    {
+        float viz_width = 0.0f;
+        float viz_height = 0.0f;
+        if (mPreview.type == app::Resource::Type::ParticleSystem)
+        {
+            viz_width = width * 0.8f;
+            viz_height = height * 0.8f;
+        }
+        else if (mPreview.type == app::Resource::Type::Shape)
+        {
+            viz_width = std::min(width, height) * 0.95f;
+            viz_height = viz_width;
+        }
+        else
+        {
+            // the aspect ratio assumes preview image
+            const auto scaler = std::min(width / 1024.0f, height / 512.0f);
+            viz_width = 1024.0f * scaler;
+            viz_height = 512.0f * scaler;
+        }
+
+        gfx::Transform transform;
+        transform.Resize(viz_width, viz_height);
+        transform.Translate(width*0.5f, height*0.5f);
+        transform.Translate(-viz_width*0.5f, -viz_height*0.5f);
+
+        const auto model_to_world = transform.GetAsMatrix();
+        const auto world_matrix = glm::mat4(1.0f);
+
+        gfx::Drawable::Environment env;
+        env.editing_mode = false;
+        env.pixel_ratio  = glm::vec2{1.0f, 1.0f};
+        env.model_matrix = &model_to_world;
+        env.world_matrix = &world_matrix; // todo: needed for dimetric projection
+        if (!mPreview.drawable->IsAlive())
+            mPreview.drawable->Restart(env);
+
+        if (mPreview.drawable->GetType() == gfx::Drawable::Type::ParticleEngine)
+        {
+            auto* engine = static_cast<gfx::ParticleEngineInstance*>(mPreview.drawable.get());
+            if (engine->GetParams().mode == gfx::ParticleEngineClass::SpawnPolicy::Command)
+            {
+                if (engine->GetNumParticlesAlive() == 0)
+                {
+                    gfx::Drawable::Command cmd;
+                    cmd.name = "EmitParticles";
+                    engine->Execute(env, cmd);
+                }
+            }
+        }
+
+        mPreview.material->Update(dt);
+        mPreview.drawable->Update(env, dt);
+        painter.Draw(*mPreview.drawable, transform, *mPreview.material);
+    }
+    else
+    {
+        ShowInstruction("No preview available",
+                        gfx::FRect(0.0f, 0.0f, width, height), painter);
+    }
 }
 
 } // namespace

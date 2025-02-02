@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1872</width>
-    <height>1354</height>
+    <width>1861</width>
+    <height>1345</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -833,22 +833,6 @@
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-               <spacer name="horizontalSpacer_4">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Expanding</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
                <layout class="QGridLayout" name="gridLayout_2">
                 <item row="2" column="3">
                  <widget class="QPushButton" name="btnDemoCharacter">
@@ -1325,22 +1309,6 @@
                 </item>
                </layout>
               </item>
-              <item>
-               <spacer name="horizontalSpacer_5">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Expanding</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
              </layout>
             </widget>
            </item>
@@ -1387,7 +1355,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1872</width>
+     <width>1861</width>
      <height>28</height>
     </rect>
    </property>

@@ -548,6 +548,16 @@ void GfxWindow::CleanGarbage()
 }
 
 // static
+void GfxWindow::DeleteTexture(const std::string& gpuId)
+{
+    auto device = shared_gfx_device.lock();
+    if (!device)
+        return;
+
+    device->DeleteTexture(gpuId);
+}
+
+// static
 void GfxWindow::BeginFrame()
 {
     if (should_have_vsync)
