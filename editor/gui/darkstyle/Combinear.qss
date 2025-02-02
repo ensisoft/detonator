@@ -50,10 +50,11 @@ QMenu {
 }
 QMenu::item {
     background-color: transparent;
-    padding: 2px 20px 2px 20px;
+	padding: 2px 20px 2px 20px;
+	border: 1px solid transparent;
 }
 QMenu::separator {
-   	background-color: rgb(183, 134, 32);
+   	background-color: #555;
 	height: 1px;
 }
 QMenu::item:disabled {
@@ -517,7 +518,6 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
 QProgressBar {
     border: 1px solid #666666;
     text-align: center;
-	color: #000;
 	font-weight: bold;
 }
 QProgressBar::chunk {
