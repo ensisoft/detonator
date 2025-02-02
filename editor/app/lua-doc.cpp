@@ -2425,7 +2425,6 @@ QString GenerateLuaDocHtml()
     <title>Lua API</title>
     <style type="text/css">
     body {
-      font-size: 16px;
     }
     div {
       margin:0px;
@@ -2443,7 +2442,7 @@ QString GenerateLuaDocHtml()
     }
     span.return {
        font-weight: bold;
-       color: DarkRed;
+       color: orange;
     }
     span.method {
        font-style: italic;
@@ -2451,15 +2450,17 @@ QString GenerateLuaDocHtml()
     }
     span.arg {
        font-weight: bold;
-       color: DarkRed;
+       color: orange;
     }
     span.table_name {
-       font-size: 20px;
        font-weight: bold;
-       font-style: italic;
     }
     span.table_desc {
-        font-size: 18px;
+    }
+
+    a {
+       color: darkOrange;
+       font-style: italic;
     }
 
   </style>
