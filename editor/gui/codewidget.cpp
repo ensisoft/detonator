@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QApplication>
 #  include <QPainter>
 #  include <QPalette>
 #  include <QTextBlock>
@@ -423,12 +424,13 @@ void TextEditor::HighlightCurrentLine()
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
-    const auto& palette = this->palette();
+    const auto& palette = QApplication::palette();
+    const auto color_group = hasFocus() ? QPalette::ColorGroup::Active : QPalette::ColorGroup::Inactive;
 
     if (mSettings.highlight_current_line)
     {
         QTextEdit::ExtraSelection selection;
-        selection.format.setBackground(palette.color(QPalette::Midlight));
+        selection.format.setBackground(palette.color(color_group, QPalette::AlternateBase));
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();
