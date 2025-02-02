@@ -3586,7 +3586,6 @@ void EntityWidget::PlaceNewParticleSystem()
     if (!mState.workspace->IsValidMaterial(material))
         material = "_checkerboard";
     mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable, MapMouseCursorToWorld()));
-    mParticleSystems->menuAction()->setChecked(true);
 }
 void EntityWidget::PlaceNewCustomShape()
 {
@@ -3600,7 +3599,6 @@ void EntityWidget::PlaceNewCustomShape()
     if (!mState.workspace->IsValidMaterial(material))
         material = "_checkerboard";
     mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable, MapMouseCursorToWorld()));
-    mCustomShapes->menuAction()->setChecked(true);
 }
 
 void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)

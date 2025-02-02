@@ -299,7 +299,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>361</width>
+               <width>353</width>
                <height>1071</height>
               </rect>
              </property>
@@ -1446,6 +1446,9 @@
         <bool>true</bool>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="gui::TreeWidget" name="tree">
           <property name="sizePolicy">
