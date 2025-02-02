@@ -25,6 +25,7 @@
 #  include <QTextDocument>
 #  include <QFileSystemWatcher>
 #  include <QDialog>
+#  include <QUrl>
 #include "warnpop.h"
 
 #include "editor/app/lua-doc.h"
