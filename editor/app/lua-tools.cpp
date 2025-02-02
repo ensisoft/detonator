@@ -83,8 +83,6 @@ void LuaTheme::SetTheme(Theme theme)
 {
     if (theme == Theme::Monokai)
     {
-        const QColor Background("#2e2e2e");
-        const QColor Comments("#797979");
         const QColor White("#d6d6d6");
         const QColor Yellow("#e5b567");
         const QColor Green("#b4d273");
@@ -104,6 +102,114 @@ void LuaTheme::SetTheme(Theme theme)
         mTable[Key::Operator]     = Orange;
         mTable[Key::Bracket]      = Green;
     }
+    else if (theme == Theme::SolarFlare)
+    {
+        const QColor White("#dcdcdc");      // Soft white for default text
+        const QColor Yellow("#d19a66");     // Warm gold for properties
+        const QColor Green("#98c379");      // Softer green for brackets and structure
+        const QColor Orange("#e06c75");     // Red-orange for important elements
+        const QColor Purple("#c678dd");     // Soft violet for literals
+        const QColor Pink("#e88388");       // Subtle pink for keywords
+        const QColor Blue("#61afef");       // Light blue for function calls
+
+        mTable[Key::Keyword]      = Pink;
+        mTable[Key::Comment]      = Green;
+        mTable[Key::BuiltIn]      = Orange;
+        mTable[Key::FunctionBody] = Orange;
+        mTable[Key::FunctionCall] = Blue;
+        mTable[Key::MethodCall]   = Blue;
+        mTable[Key::Property]     = Yellow;
+        mTable[Key::Literal]      = Purple;
+        mTable[Key::Operator]     = Orange;
+        mTable[Key::Bracket]      = Green;
+    }
+    else if (theme == Theme::PastelDream)
+    {
+        const QColor White("#e5e9f0");      // Off-white for default text
+        const QColor Yellow("#f6d6a5");     // Warm pastel gold for properties
+        const QColor Green("#b1e3ad");      // Soft mint green for brackets
+        const QColor Orange("#f4a988");     // Peach-orange for built-ins
+        const QColor Purple("#d6b8ff");     // Pastel lavender for literals
+        const QColor Pink("#f3a6b4");       // Muted pink for keywords
+        const QColor Blue("#aac8e4");       // Sky blue for function calls
+
+        mTable[Key::Keyword]      = Pink;
+        mTable[Key::Comment]      = Green;
+        mTable[Key::BuiltIn]      = Orange;
+        mTable[Key::FunctionBody] = Orange;
+        mTable[Key::FunctionCall] = Blue;
+        mTable[Key::MethodCall]   = Blue;
+        mTable[Key::Property]     = Yellow;
+        mTable[Key::Literal]      = Purple;
+        mTable[Key::Operator]     = Orange;
+        mTable[Key::Bracket]      = Green;
+    }
+    else if (theme == Theme::DarkMirage)
+    {
+        const QColor White("#c8ccd4");      // Soft off-white for default text
+        const QColor Yellow("#e6b455");     // Warm gold for properties
+        const QColor Green("#81c19b");      // Soft teal-green for brackets
+        const QColor Orange("#e98a55");     // Warm orange for built-ins
+        const QColor Purple("#ba91f2");     // Muted violet for literals
+        const QColor Pink("#e26e92");       // Dark pink for keywords
+        const QColor Blue("#6ca7ec");       // Vibrant cool blue for function calls
+
+        mTable[Key::Keyword]      = Pink;
+        mTable[Key::Comment]      = Green;
+        mTable[Key::BuiltIn]      = Orange;
+        mTable[Key::FunctionBody] = Orange;
+        mTable[Key::FunctionCall] = Blue;
+        mTable[Key::MethodCall]   = Blue;
+        mTable[Key::Property]     = Yellow;
+        mTable[Key::Literal]      = Purple;
+        mTable[Key::Operator]     = Orange;
+        mTable[Key::Bracket]      = Green;
+    }
+    else if (theme == Theme::CyberFlux)
+    {
+        const QColor Violet("#a56eff");     // Soft violet for comments
+        const QColor White("#d8d8d8");      // Off-white for default text
+        const QColor Yellow("#ffbb66");     // Muted warm yellow for properties
+        const QColor Green("#44cc88");      // Softer mint green for brackets
+        const QColor Orange("#ff7755");     // Sunset orange for built-ins
+        const QColor Purple("#bb88ff");     // Pastel purple for literals
+        const QColor Pink("#ff6699");       // Softer hot pink for keywords
+        const QColor Blue("#66ccff");       // Muted neon blue for function calls
+
+        mTable[Key::Keyword]      = Pink;
+        mTable[Key::Comment]      = Violet;
+        mTable[Key::BuiltIn]      = Orange;
+        mTable[Key::FunctionBody] = Orange;
+        mTable[Key::FunctionCall] = Blue;
+        mTable[Key::MethodCall]   = Blue;
+        mTable[Key::Property]     = Yellow;
+        mTable[Key::Literal]      = Purple;
+        mTable[Key::Operator]     = Green;
+        mTable[Key::Bracket]      = Green;
+    }
+    else if (theme == Theme::OrangeCrush)
+    {
+        const QColor Gray("#808080");
+        const QColor White("#e8e0d7");
+        const QColor Yellow("#f5c56d");
+        const QColor Green("#9ccf7d");
+        const QColor Orange("orange");
+        const QColor Purple("#c58aff");
+        const QColor Pink("#ff7e79");
+        const QColor Blue("#7fbde7");
+
+        mTable[Key::Keyword]      = Pink;   // Keywords (if, then, function)
+        mTable[Key::Comment]      = Orange; // Comments
+        mTable[Key::BuiltIn]      = Blue; // Built-in functions
+        mTable[Key::FunctionBody] = Green; // Function definitions
+        mTable[Key::FunctionCall] = Blue;   // Function calls
+        mTable[Key::MethodCall]   = Blue;   // Method calls
+        mTable[Key::Property]     = Yellow; // Table properties
+        mTable[Key::Literal]      = Pink; // Numbers, strings, literals
+        mTable[Key::Operator]     = Orange; // Operators
+        mTable[Key::Bracket]      = Green;  // Parentheses, brackets, braces
+    }
+
 }
 
 const QColor* LuaTheme::GetColor(Key key) const noexcept
