@@ -687,6 +687,11 @@ QString UIWidget::GetId() const
     return GetValue(mUI.windowID);
 }
 
+QImage UIWidget::TakeScreenshot() const
+{
+    return mUI.viewport->TakeSreenshot();
+}
+
 void UIWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.zoom,          settings.zoom);

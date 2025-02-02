@@ -199,6 +199,11 @@ QString MaterialWidget::GetId() const
     return GetValue(mUI.materialID);
 }
 
+QImage MaterialWidget::TakeScreenshot() const
+{
+    return mUI.widget->TakeSreenshot();
+}
+
 void MaterialWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.zoom, settings.zoom);

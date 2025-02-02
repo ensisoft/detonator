@@ -47,6 +47,7 @@ namespace gui
        ~TilemapWidget();
 
         virtual QString GetId() const override;
+        virtual QImage TakeScreenshot() const override;
         virtual void InitializeSettings(const UISettings& settings) override;
         virtual void AddActions(QToolBar& bar) override;
         virtual void AddActions(QMenu& menu) override;

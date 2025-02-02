@@ -974,6 +974,11 @@ QString TilemapWidget::GetId() const
 {
     return app::FromUtf8(mState.klass->GetId());
 }
+QImage TilemapWidget::TakeScreenshot() const
+{
+    return mUI.widget->TakeSreenshot();
+}
+
 void TilemapWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.chkShowViewport, settings.show_viewport);
