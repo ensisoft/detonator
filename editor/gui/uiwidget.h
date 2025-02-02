@@ -50,6 +50,7 @@ namespace gui
        ~UIWidget() override;
 
         virtual QString GetId() const override;
+        virtual QImage TakeScreenshot() const override;
         virtual void InitializeSettings(const UISettings& settings) override;
         virtual void InitializeContent() override;
         virtual void SetViewerMode() override;

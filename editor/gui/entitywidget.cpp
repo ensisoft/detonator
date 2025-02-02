@@ -982,6 +982,11 @@ QString EntityWidget::GetId() const
     return GetValue(mUI.entityID);
 }
 
+QImage EntityWidget::TakeScreenshot() const
+{
+    return mUI.widget->TakeSreenshot();
+}
+
 void EntityWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.chkSnap,         settings.snap_to_grid);
