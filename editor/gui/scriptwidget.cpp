@@ -95,7 +95,22 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     // capture some special key presses in order to move the
     // selection (current item) in the list widget more conveniently.
     mUI.filter->installEventFilter(this);
-    mUI.textBrowser->setHtml(app::GenerateLuaDocHtml());
+
+    // using setHtml doesn't work well with the navigation and document
+    // history since that seems to be based on URLs. So to workaround that
+    // we need to load the document via URL but that requires either
+    // subclassing the QTextBrowser (???) or then an document that can
+    // be pointed to by URL. So dump the Lua API document contents to
+    // disk and then load that with a URL.
+    static bool wrote_html = false;
+    if (!wrote_html)
+    {
+        app::WriteTextFile("lua-doc.html", app::GenerateLuaDocHtml());
+        wrote_html = true;
+    }
+    mUI.textBrowser->setSource(QUrl("lua-doc.html"));
+    // for posterity.
+    //mUI.textBrowser->setHtml(app::GenerateLuaDocHtml());
 
     PopulateFontSizes(mUI.editorFontSize);
     SetValue(mUI.editorFontName, -1);
@@ -823,11 +838,11 @@ void ScriptWidget::on_filter_textChanged(const QString& text)
 }
 void ScriptWidget::on_textBrowser_backwardAvailable(bool available)
 {
-    mUI.btnNavBack->setEnabled(available);
+    SetEnabled(mUI.btnNavBack, mUI.textBrowser->isBackwardAvailable());
 }
 void ScriptWidget::on_textBrowser_forwardAvailable(bool available)
 {
-    mUI.btnNavForward->setEnabled(available);
+    SetEnabled(mUI.btnNavForward, mUI.textBrowser->isForwardAvailable());
 }
 
 void ScriptWidget::FileWasChanged()
