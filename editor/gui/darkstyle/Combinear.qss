@@ -227,12 +227,12 @@ QDoubleSpinBox {
     border-radius : 2px;
 }
 
-QSpinBox,
+QSpinBox::up-button,
 QDoubleSpinBox::up-button {
 	image: url(":combinear/icons/up_arrow.png");
 }
 
-QSpinBox,
+QSpinBox::down-button,
 QDoubleSpinBox::down-button {
 	image: url(":combinear/icons/down_arrow.png");
 }
