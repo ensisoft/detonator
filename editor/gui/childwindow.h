@@ -28,6 +28,8 @@ namespace app {
     class Workspace;
 } // namespace
 
+class FramelessWindow;
+
 namespace gui
 {
     class MainWidget;
@@ -45,6 +47,15 @@ namespace gui
         // takes ownership of the widget.
         ChildWindow(MainWidget* widget, Clipboard* clipboard);
        ~ChildWindow();
+
+        void SetWindow(FramelessWindow* window)
+        {
+            mWindow = window;
+        }
+        FramelessWindow* GetWindow()
+        {
+            return mWindow;
+        }
 
         // Returns true if the widget requires an accelerated
         // update and render loop.
@@ -114,6 +125,7 @@ namespace gui
     private:
         Ui::ChildWindow mUI;
     private:
+        FramelessWindow* mWindow = nullptr;
         MainWidget* mWidget = nullptr;
         Clipboard* mClipboard = nullptr;
         bool mClosed = false;

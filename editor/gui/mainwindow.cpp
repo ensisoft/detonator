@@ -867,7 +867,8 @@ void MainWindow::CloseWorkspace()
     {
         child->Shutdown();
         child->close();
-        delete child;
+        delete child->GetWindow();
+
     }
     mChildWindows.clear();
 
@@ -2534,13 +2535,16 @@ void MainWindow::RefreshUI()
     for (size_t i=0; i<mChildWindows.size(); )
     {
         ChildWindow* child = mChildWindows[i];
+        FramelessWindow* window = child->GetWindow();
+
         if (child->ShouldPopIn())
         {
             MainWidget* widget = child->TakeWidget();
-            // save the child window geometry for later "pop out"
-            mWorkspace->SetUserProperty("_child_window_geometry_" + widget->GetId(), child->saveGeometry());
 
-            child->close();
+            // save the child window geometry for later "pop out"
+            mWorkspace->SetUserProperty("_child_window_geometry_" + widget->GetId(), window->saveGeometry());
+
+            window->close();
             // careful about not fucking up the iteration of this loop
             // however we're going to add as a tab so the widget will
             // go into the main tab not into mChildWindows.
@@ -2562,8 +2566,8 @@ void MainWindow::RefreshUI()
             const auto last = mChildWindows.size() - 1;
             std::swap(mChildWindows[i], mChildWindows[last]);
             mChildWindows.pop_back();
-            child->close();
-            delete child;
+            window->close();
+            delete window;
         }
         else
         {
@@ -3564,13 +3568,19 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
     if (new_window)
     {
         // create a new child window that will hold the widget.
-        ChildWindow* child = new ChildWindow(widget, &mClipboard);
+        auto* child = new ChildWindow(widget, &mClipboard);
         child->SetSharedWorkspaceMenu(mUI.menuWorkspace);
+
+        // Create a new frameless window to hold the child window.
+        auto* window = new FramelessWindow();
+        window->enableShadow(false);
+        window->init();
+        window->setContent(child);
 
         QByteArray geometry;
         if (mWorkspace->GetUserProperty("_child_window_geometry_" + widget->GetId(), &geometry))
         {
-            child->restoreGeometry(geometry);
+            window->restoreGeometry(geometry);
         }
         else
         {
@@ -3581,15 +3591,21 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
             const auto height = std::max((int) (this->height() * 0.8), child->height());
             const auto xpos = x() + (this->width() - width) / 2;
             const auto ypos = y() + (this->height() - height) / 2;
-            child->resize(width, height);
-            child->move(xpos, ypos);
+            window->resize(width, height);
+            window->move(xpos, ypos);
         }
         // showing the widget *after* resize/move might produce incorrect
         // results since apparently the window's dimensions are not fully
         // know until it has been show (presumably some layout is done)
         // however doing the show first and then move/resize is visually
         // not very pleasing.
-        child->show();
+        //child->show();
+        window->show();
+        // we're just going to store the frameless window object pointer
+        // in the child window, since we really use the child window.
+        // the frameless window now owns the child in the Qt object
+        // hierarchy though so we must be careful.
+        child->SetWindow(window);
 
         mChildWindows.push_back(child);
         return child;
