@@ -98,6 +98,7 @@
 #include "editor/gui/drawing.h"
 #include "editor/gui/types.h"
 #include "editor/gui/drawing.h"
+#include "editor/gui/framelesswindow/framelesswindow.h"
 
 namespace {
 // returns number of seconds elapsed since the last call
@@ -333,7 +334,7 @@ void MainWindow::LoadSettings()
 }
 
 
-void MainWindow::LoadLastState()
+void MainWindow::LoadLastState(FramelessWindow* window)
 {
     const auto& file = app::GetAppHomeFilePath("state.json");
     Settings settings(file);
@@ -353,6 +354,17 @@ void MainWindow::LoadLastState()
     const auto show_workspace = settings.GetValue("MainWindow", "show_workspace", true);
     const auto& dock_state    = settings.GetValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
     settings.GetValue("MainWindow", "recent_workspaces", &mRecentWorkspaces);
+
+    if (window)
+    {
+        const auto window_width = settings.GetValue("FramelessWindow", "width", window->width());
+        const auto window_height = settings.GetValue("FramelessWindow", "height", window->height());
+        const auto window_xpos = settings.GetValue("FramelessWindow", "xpos", window->x());
+        const auto window_ypos = settings.GetValue("FramelessWindow", "ypos", window->y());
+        window->resize(window_width, window_height);
+        window->move(window_xpos, window_ypos);
+        mFramelessWindow = window;
+    }
 
     mEventLog.SetShowBits(log_bits);
     mEventLog.invalidate();
@@ -926,7 +938,8 @@ void MainWindow::CloseWorkspace()
 
 void MainWindow::showWindow()
 {
-    show();
+    if (!mFramelessWindow)
+        show();
 
     if (!mSettings.style_name.isEmpty())
     {
@@ -3511,6 +3524,15 @@ bool MainWindow::SaveState()
     settings.SetValue("MainWindow", "current_workspace", (mWorkspace ? mWorkspace->GetDir() : ""));
     settings.SetValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
     settings.SetValue("MainWindow", "recent_workspaces", mRecentWorkspaces);
+
+    if (mFramelessWindow)
+    {
+        settings.SetValue("FramelessWindow", "width", mFramelessWindow->width());
+        settings.SetValue("FramelessWindow", "height", mFramelessWindow->height());
+        settings.SetValue("FramelessWindow", "xpos", mFramelessWindow->x());
+        settings.SetValue("FramelessWindow", "ypos", mFramelessWindow->y());
+    }
+
     return settings.Save();
 }
 

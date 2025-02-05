@@ -40,6 +40,8 @@
 #include "editor/gui/clipboard.h"
 #include "editor/gui/mainwidget.h"
 
+class FramelessWindow;
+
 namespace app {
     class ResourceCache;
 } // app
@@ -71,7 +73,7 @@ namespace gui
         void LoadSettings();
 
         // Load previous application state.
-        void LoadLastState();
+        void LoadLastState(FramelessWindow* window);
 
         void LoadLastWorkspace();
 
@@ -317,6 +319,8 @@ namespace gui
             app::Resource::Type type;
         };
         Preview mPreview;
+
+        FramelessWindow* mFramelessWindow = nullptr;
     };
 
 } // namespace

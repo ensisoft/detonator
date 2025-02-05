@@ -714,6 +714,13 @@ add_executable(Detonator
     editor/gui/darkstyle/stylecommon.h
     editor/gui/darkstyle/stylecommon.cpp
     editor/gui/darkstyle/darkstyle.qrc
+
+    editor/gui/framelesswindow/framelesswindow.h
+    editor/gui/framelesswindow/framelesswindow.ui
+    editor/gui/framelesswindow/framelesswindow.cpp
+    editor/gui/framelesswindow/windowdragger.h
+    editor/gui/framelesswindow/windowdragger.cpp
+    editor/gui/framelesswindow/framelesswindow.qrc
 )
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # suppress some noise coming from Qt (Qt-Color-Widgets)
@@ -725,6 +732,7 @@ target_compile_definitions(Detonator PRIVATE "QTCOLORWIDGETS_LIBRARY")
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 # add this include for the promoted widgets
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
+target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui/framelesswindow")
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
