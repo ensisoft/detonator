@@ -94,6 +94,8 @@ namespace gui
         void on_btnReplaceAll_clicked();
         void on_btnNavBack_clicked();
         void on_btnNavForward_clicked();
+        void on_btnZoomIn_clicked();
+        void on_btnZoomOut_clicked();
         void on_btnRejectReload_clicked();
         void on_btnAcceptReload_clicked();
         void on_btnResetFont_clicked();
@@ -128,6 +130,7 @@ namespace gui
         QString mResourceID;
         QString mResourceName;
         std::size_t mFileHash = 0;
+        int mZoom = 0;
         static Settings mSettings;
     };
 
