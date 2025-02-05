@@ -170,7 +170,7 @@ namespace gui
         void on_workspaceFilter_textChanged(const QString&);
         void on_actionPackageResources_triggered();
         void on_actionSelectResourceForEditing_triggered();
-        void on_actionNewResource_triggered();
+        void on_actionCreateResource_triggered();
         void on_actionProjectSettings_triggered();
         void on_actionProjectPlay_triggered();
         void on_actionProjectPlayClean_triggered();

@@ -1337,35 +1337,35 @@ void MainWindow::on_actionTakeScreenshot_triggered()
 
 void MainWindow::on_actionNewMaterial_triggered()
 {
-    OpenNewWidget(new MaterialWidget(mWorkspace.get()));
+    OpenNewWidget(MakeWidget(app::Resource::Type::Material));
 }
 
 void MainWindow::on_actionNewParticleSystem_triggered()
 {
-    OpenNewWidget(new ParticleEditorWidget(mWorkspace.get()));
+    OpenNewWidget(MakeWidget(app::Resource::Type::ParticleSystem));
 }
 
 void MainWindow::on_actionNewCustomShape_triggered()
 {
-    OpenNewWidget(new ShapeWidget(mWorkspace.get()));
+    OpenNewWidget(MakeWidget(app::Resource::Type::Shape));
 }
 void MainWindow::on_actionNewEntity_triggered()
 {
-    OpenNewWidget(new EntityWidget(mWorkspace.get()));
+    OpenNewWidget(MakeWidget(app::Resource::Type::Entity));
 }
 void MainWindow::on_actionNewScene_triggered()
 {
-    OpenNewWidget(new SceneWidget(mWorkspace.get()));
+    OpenNewWidget(MakeWidget(app::Resource::Type::Scene));
 }
 
 void MainWindow::on_actionNewScript_triggered()
 {
-    OpenNewWidget(new ScriptWidget(mWorkspace.get()));
+    OpenNewWidget(MakeWidget(app::Resource::Type::Script));
 }
 
 void MainWindow::on_actionNewBlankScript_triggered()
 {
-    OpenNewWidget(new ScriptWidget(mWorkspace.get()));
+    OpenNewWidget(MakeWidget(app::Resource::Type::Script));
 }
 void MainWindow::on_actionNewEntityScript_triggered()
 {
@@ -1429,16 +1429,16 @@ void MainWindow::on_actionNewAnimatorScript_triggered()
 
 void MainWindow::on_actionNewTilemap_triggered()
 {
-    OpenNewWidget(new TilemapWidget(mWorkspace.get()));
+    OpenNewWidget(MakeWidget(app::Resource::Type::Tilemap));
 }
 
 void MainWindow::on_actionNewUI_triggered()
 {
-    OpenNewWidget(new UIWidget(mWorkspace.get()));
+    OpenNewWidget(MakeWidget(app::Resource::Type::UI));
 }
 void MainWindow::on_actionNewAudioGraph_triggered()
 {
-    OpenNewWidget(new AudioWidget(mWorkspace.get()));
+    OpenNewWidget(MakeWidget(app::Resource::Type::AudioGraph));
 }
 
 void MainWindow::on_actionImportModel_triggered()
@@ -2237,13 +2237,25 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     }
 
     QMenu script;
-    script.setTitle("New Script");
+    script.setTitle("Create New Script");
     script.setIcon(QIcon("icons:add.png"));
     script.addAction(mUI.actionNewBlankScript);
     script.addAction(mUI.actionNewEntityScript);
     script.addAction(mUI.actionNewSceneScript);
     script.addAction(mUI.actionNewUIScript);
     script.addAction(mUI.actionNewAnimatorScript);
+
+    QMenu resource;
+    resource.setTitle("Create New Resource");
+    resource.setIcon(QIcon("icons:add.png"));
+    resource.addAction(mUI.actionNewMaterial);
+    resource.addAction(mUI.actionNewParticleSystem);
+    resource.addAction(mUI.actionNewCustomShape);
+    resource.addAction(mUI.actionNewEntity);
+    resource.addAction(mUI.actionNewScene);
+    resource.addAction(mUI.actionNewUI);
+    resource.addAction(mUI.actionNewTilemap);
+    resource.addAction(mUI.actionNewAudioGraph);
 
     QMenu import;
     import.setIcon(QIcon("icons:import.png"));
@@ -2262,14 +2274,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     export_.setEnabled(!indices.isEmpty());
 
     QMenu menu(this);
-    menu.addAction(mUI.actionNewMaterial);
-    menu.addAction(mUI.actionNewParticleSystem);
-    menu.addAction(mUI.actionNewCustomShape);
-    menu.addAction(mUI.actionNewEntity);
-    menu.addAction(mUI.actionNewScene);
-    menu.addAction(mUI.actionNewUI);
-    menu.addAction(mUI.actionNewTilemap);
-    menu.addAction(mUI.actionNewAudioGraph);
+    menu.addMenu(&resource);
     menu.addMenu(&script);
     menu.addSeparator();
     //menu.addMenu(&import);
@@ -2340,7 +2345,7 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
     }
 }
 
-void MainWindow::on_actionNewResource_triggered()
+void MainWindow::on_actionCreateResource_triggered()
 {
     if (!mWorkspace)
         return;
@@ -3687,10 +3692,11 @@ void MainWindow::ShowHelpWidget()
         mUI.mainHelpWidget->setCurrentIndex(0);
         mUI.mainTab->setVisible(false);
         mUI.mainToolBar->clear();
-        auto* spacer = new QWidget();
-        spacer->setMinimumHeight(40);
-        spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-        mUI.mainToolBar->addWidget(spacer);
+        mUI.mainToolBar->addAction(mUI.actionProjectPlay);
+        mUI.mainToolBar->addSeparator();
+        mUI.mainToolBar->addAction(mUI.actionCreateResource);
+        mUI.mainToolBar->addAction(mUI.actionPackageResources);
+
     }
     else
     {

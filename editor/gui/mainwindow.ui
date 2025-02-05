@@ -1460,19 +1460,25 @@
      <addaction name="actionImportJSON"/>
      <addaction name="actionImportZIP"/>
     </widget>
-    <addaction name="actionNewMaterial"/>
-    <addaction name="actionNewParticleSystem"/>
-    <addaction name="actionNewCustomShape"/>
-    <addaction name="actionNewEntity"/>
-    <addaction name="actionNewScene"/>
-    <addaction name="actionNewUI"/>
-    <addaction name="actionNewTilemap"/>
-    <addaction name="actionNewAudioGraph"/>
-    <addaction name="actionNewScript"/>
+    <widget class="QMenu" name="menuCreate_Resource">
+     <property name="title">
+      <string>Create Resource</string>
+     </property>
+     <addaction name="actionNewMaterial"/>
+     <addaction name="actionNewParticleSystem"/>
+     <addaction name="actionNewCustomShape"/>
+     <addaction name="actionNewEntity"/>
+     <addaction name="actionNewScene"/>
+     <addaction name="actionNewUI"/>
+     <addaction name="actionNewTilemap"/>
+     <addaction name="actionNewAudioGraph"/>
+     <addaction name="actionNewScript"/>
+    </widget>
     <addaction name="separator"/>
-    <addaction name="actionNewResource"/>
-    <addaction name="actionSelectResourceForEditing"/>
+    <addaction name="menuCreate_Resource"/>
+    <addaction name="actionCreateResource"/>
     <addaction name="menuImport"/>
+    <addaction name="actionSelectResourceForEditing"/>
     <addaction name="separator"/>
     <addaction name="actionProjectSync"/>
     <addaction name="separator"/>
@@ -2052,21 +2058,6 @@
     <string>Ctrl+Shift+O</string>
    </property>
   </action>
-  <action name="actionNewResource">
-   <property name="icon">
-    <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
-   </property>
-   <property name="text">
-    <string>New Resource...</string>
-   </property>
-   <property name="toolTip">
-    <string>Create new resource</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+N</string>
-   </property>
-  </action>
   <action name="actionProjectSettings">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
@@ -2082,7 +2073,7 @@
   <action name="actionProjectPlay">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/play.png</normaloff>:/32x32_ico_png/play.png</iconset>
+     <normaloff>:/32x32_ico_png/joystick.png</normaloff>:/32x32_ico_png/joystick.png</iconset>
    </property>
    <property name="text">
     <string>Play Game</string>
@@ -2589,7 +2580,7 @@
   <action name="actionProjectPlayClean">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/play.png</normaloff>:/32x32_ico_png/play.png</iconset>
+     <normaloff>:/32x32_ico_png/joystick.png</normaloff>:/32x32_ico_png/joystick.png</iconset>
    </property>
    <property name="text">
     <string>Play Game (Clean Game Home)</string>
@@ -2646,6 +2637,18 @@
    </property>
    <property name="toolTip">
     <string>Edit resource tags</string>
+   </property>
+  </action>
+  <action name="actionCreateResource">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Resource</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+N</string>
    </property>
   </action>
  </widget>
