@@ -61,6 +61,7 @@
 #include "editor/gui/main.h"
 #include "editor/gui/mainwindow.h"
 #include "editor/gui/viewwindow.h"
+#include "editor/gui/framelesswindow/framelesswindow.h"
 
 namespace gui {
 
@@ -111,6 +112,12 @@ void copyright()
     const auto boost_major    = BOOST_VERSION / 100000;
     const auto boost_minor    = BOOST_VERSION / 100 % 1000;
     const auto boost_revision = BOOST_VERSION % 100;
+
+    INFO("https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle");
+    INFO("Frameless window");
+    INFO("Copyright (c) 2018 Juergen Skrotzky");
+    INFO("https://github.com/Jorgen-VikingGod");
+    INFO("JorgenVikingGod@gmail.com");
 
     INFO("https://github.com/antonypro/QGoodWindow");
     INFO("Qt DarkStyle");
@@ -468,13 +475,20 @@ void EditorMain(QApplication& app)
     threadpool.AddMainThread();
     base::SetGlobalThreadPool(&threadpool);
 
+    FramelessWindow framelessWindow;
+    framelessWindow.enableShadow(false);
+    framelessWindow.init();
+
     // Create the application main window into which we add
     // main widgets.
     gui::MainWindow window(app, &threadpool);
 
     window.LoadSettings();
-    window.LoadLastState();
+    window.LoadLastState(&framelessWindow);
     window.showWindow();
+
+    framelessWindow.setContent(&window);
+    framelessWindow.show();
 
     bool load_last_workspace = true;
     // check if we have a flag to disable workspace loading.

@@ -1,0 +1,10 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="">
+      <file>icons/window_restore.svg</file>
+      <file>icons/window_close.svg</file>
+      <file>icons/window_minimize.svg</file>
+      <file>icons/window_maximize.svg</file>
+      <file>icons/window_icon.png</file>
+   </qresource>
+</RCC>
