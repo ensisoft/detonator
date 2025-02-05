@@ -289,6 +289,7 @@ bool ScriptWidget::SaveState(gui::Settings& settings) const
     settings.SetValue("Script", "show_settings", mUI.settings->isVisible());
     settings.SetValue("Script", "cursor_position", mUI.code->GetCursorPosition());
     settings.SetValue("Script", "scroll_position", mUI.code->verticalScrollBar()->value());
+    settings.SetValue("Script", "help_zoom", mZoom);
     settings.SaveWidget("Script", mUI.findText);
     settings.SaveWidget("Script", mUI.replaceText);
     settings.SaveWidget("Script", mUI.findBackwards);
@@ -322,6 +323,7 @@ bool ScriptWidget::LoadState(const gui::Settings& settings)
     settings.GetValue("Script", "show_settings", &show_settings);
     settings.GetValue("Script", "cursor_position", &cursor_position);
     settings.GetValue("Script", "scroll_position", &scroll_position);
+    settings.GetValue("Script", "help_zoom", &mZoom);
     settings.LoadWidget("Script", mUI.findText);
     settings.LoadWidget("Script", mUI.replaceText);
     settings.LoadWidget("Script", mUI.findBackwards);
@@ -332,6 +334,15 @@ bool ScriptWidget::LoadState(const gui::Settings& settings)
     settings.LoadWidget("Script", mUI.tableView);
     SetVisible(mUI.settings, show_settings);
     SetEnabled(mUI.actionSettings, !show_settings);
+
+    QSignalBlocker s(mUI.textBrowser);
+    for (int i=0; i<std::abs(mZoom); ++i)
+    {
+        if (mZoom > 0)
+            mUI.textBrowser->zoomIn(1);
+        else if (mZoom < 0)
+            mUI.textBrowser->zoomOut(1);
+    }
 
     QString font_name;
     if (settings.GetValue("Script", "font_name", &font_name))
@@ -773,6 +784,18 @@ void ScriptWidget::on_btnNavForward_clicked()
 {
     mUI.textBrowser->forward();
 }
+
+void ScriptWidget::on_btnZoomIn_clicked()
+{
+    mZoom++;
+    mUI.textBrowser->zoomIn(1);
+}
+void ScriptWidget::on_btnZoomOut_clicked()
+{
+    mZoom--;
+    mUI.textBrowser->zoomOut(1);
+}
+
 void ScriptWidget::on_btnRejectReload_clicked()
 {
     SetEnabled(mUI.code, true);

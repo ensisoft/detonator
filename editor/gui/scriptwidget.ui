@@ -495,6 +495,40 @@ p, li { white-space: pre-wrap; }
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
+           <widget class="QPushButton" name="btnZoomIn">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/zoom_in.png</normaloff>:/16x16_ico_png/zoom_in.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnZoomOut">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/zoom_out.png</normaloff>:/16x16_ico_png/zoom_out.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_5">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -705,6 +739,8 @@ p, li { white-space: pre-wrap; }
   <tabstop>filter</tabstop>
   <tabstop>tableView</tabstop>
   <tabstop>textBrowser</tabstop>
+  <tabstop>btnZoomIn</tabstop>
+  <tabstop>btnZoomOut</tabstop>
   <tabstop>btnNavBack</tabstop>
   <tabstop>btnNavForward</tabstop>
  </tabstops>
