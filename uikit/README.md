@@ -1,7 +1,7 @@
 DETONATOR 2D 💥💣
 ===================
 
-## User Interface Kit (UIK For Short) ##
+## UI Library (UIK)
 UIK is a system to create  in-game user interfaces using a retained mode widget model. 
 The widgets can be arranged in a hierarchy where container widgets contain other widgets. 
 All widgets are then contained inside a window object which provides the "housing" of any
@@ -191,12 +191,6 @@ The key frames act as control points that define the major transitions in the an
 <i><b>Interpolation Methods</i></b><br>
 Easing functions specify the rate of change of a parameter over time to give it more natural movement where the objects velocity is continuously adjusted.
 For example an object that is dropped will first accelerate downwards and then bounce upwards after hitting the floor.
-
-<i><b>Event-Driven Animation</b></i><br>
-This type of animation is triggered by specific events (such as user interactions, system events,
-or other predefined conditions). Each event triggers an action that occurs over a specified duration
-and affects certain properties. both <i>Timeline</i> and </i>key frame</i> animations are event driven.
-
 
 <details><summary>List of Interpolation Methods</summary>
 

@@ -1,9 +1,9 @@
 DETONATOR 2D 💥💣
 ===============
 
-Audio Subsystem 🎼
+Audio Library 🎼
 ---------------------
-The audio subsystem is divided into following core components that take part in playing audio.
+The audio library is divided into following core components that take part in playing audio.
 
 * Device 
    - An abstract interface for accessing some underlying platform API for playing audio.
