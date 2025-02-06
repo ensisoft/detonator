@@ -1563,6 +1563,9 @@
         <bool>true</bool>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_6">
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QLineEdit" name="findMap">
           <property name="sizePolicy">
