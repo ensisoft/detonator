@@ -1,6 +1,6 @@
 # DETONATOR 2D 💥💣
 
-## Graphics Subsystem
+## Graphics Library
 
 todo:
 

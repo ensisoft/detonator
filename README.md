@@ -1,8 +1,13 @@
 ![logo](logo/detonator.png)
 
+
 DETONATOR 2D 💣💥
 ===================
-An OpenGL ES based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
+
+<strong> 🚀 <i>Ignite creativity, explode possibilities.</i> 💥 </strong>
+
+
+An OpenGL ES3 based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
 as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time strategy and tactics 🗺️.
 
 ![Demos](screens/demos.gif "Animated demo content GIF")
@@ -72,7 +77,6 @@ If you want to remove the app simply:
 
 #### Install from Sources
 
-<i>
 If you want to:
 
 * Use the latest development version
@@ -80,7 +84,7 @@ If you want to:
 * Hack on the engine or the editor
 
 then follow the [Build Instructions](BUILDING.md)
-</i>
+
 
 ## SCREENSHOTS
 
@@ -133,8 +137,8 @@ and knobs that control the particle effect.</i><br><br>
 
 ## DEV ZONE 👨🏼‍💻
 ### [Build Instructions](BUILDING.md)
-### [System Architecture](ARCHITECTURE.md)
-### [Design Document](DESIGN.md)
+### [Software Architecture](ARCHITECTURE.md)
+### [Software Design](DESIGN.md)
 ### [Tracing & Profiling](PROFILING.md)
 ### [Development Roadmap](ROADMAP.md)
 
