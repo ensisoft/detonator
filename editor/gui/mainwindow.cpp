@@ -3707,12 +3707,20 @@ void MainWindow::ShowHelpWidget()
         mUI.mainHelpWidget->setVisible(true);
         mUI.mainHelpWidget->setCurrentIndex(0);
         mUI.mainTab->setVisible(false);
+
         mUI.mainToolBar->clear();
         mUI.mainToolBar->addAction(mUI.actionProjectPlay);
         mUI.mainToolBar->addSeparator();
         mUI.mainToolBar->addAction(mUI.actionCreateResource);
         mUI.mainToolBar->addAction(mUI.actionPackageResources);
 
+        if (!mUI.mainToolBar->property("did-workaround-height-fuckup").toBool())
+        {
+            QTimer::singleShot(0, this, [this]() {
+                mUI.mainToolBar->setFixedHeight(mUI.mainToolBar->height());
+                mUI.mainToolBar->setProperty("did-workaround-height-fuckup", true);
+            });
+        }
     }
     else
     {
@@ -3722,6 +3730,14 @@ void MainWindow::ShowHelpWidget()
         mUI.mainHelpWidget->setCurrentIndex(1);
         mUI.mainHelpWidget->setVisible(true);
         mUI.mainTab->setVisible(false);
+        
+        if (!mUI.mainToolBar->property("did-workaround-height-fuckup").toBool())
+        {
+            QTimer::singleShot(0, this, [this]() {
+                mUI.mainToolBar->setFixedHeight(mUI.mainToolBar->height());
+                mUI.mainToolBar->setProperty("did-workaround-height-fuckup", true);
+            });
+        }
     }
 }
 
