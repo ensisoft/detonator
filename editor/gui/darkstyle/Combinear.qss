@@ -48,6 +48,10 @@ QMenu {
     padding: 4px;
 	color: #fff;
 }
+QMenuBar:disabled {
+	color: #555;
+}
+
 QMenu::item {
     background-color: transparent;
 	padding: 2px 20px 2px 20px;
