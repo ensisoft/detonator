@@ -273,6 +273,11 @@ void DlgVCS::BeginScan()
                 mModel->AddItem((std::move(file)));
                 files_outside_workspace = true;
             }
+            else if (uri.startsWith("app://"))
+            {
+                AppendLog(app::toString("Found app resource file '%1'.", uri));
+                AppendLog(app::toString("No VCS action required on '%1'.", uri));
+            }
             else
             {
                 AppendLog(app::toString("Don't know how to handle fle '%1'.", uri));
