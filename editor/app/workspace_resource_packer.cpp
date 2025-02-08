@@ -199,7 +199,7 @@ QString WorkspaceResourcePacker::CreateFileName(const QString& src_file, const Q
 }
 QString WorkspaceResourcePacker::MapFileToFilesystem(const AnyString& uri) const
 {
-    return MapWorkspaceUri(uri, mWorkspaceDir);
+    return MapUriToFile(uri, mWorkspaceDir);
 }
 QString WorkspaceResourcePacker::MapFileToPackage(const QString& file) const
 {
