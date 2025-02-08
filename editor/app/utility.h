@@ -62,8 +62,22 @@ QString FindJsonImageFile(const QString& json_file);
 
 QString GetAppDir();
 QString FixWorkspacePath(QString path);
-AnyString MapWorkspaceUri(const AnyString& uri, const QString& workspace);
-AnyString MapFileName(const AnyString& uri, const QString& workspace);
+
+// Map a URI such as app://something to a file in the filesystem.
+// The supported URI schemes are:
+//
+// Scheme   Desc
+// ---------------------------------------------------------------
+// app://   Resolves relative to the application/executable install
+//          directory.
+// fs://    Resolves as an absolute file system path.
+// ws://    Resolves relative to the workspace root, i.w where the
+//          workspace.json file is
+AnyString MapUriToFile(const AnyString& uri, const AnyString& ws_dir);
+
+// Map a filesystem file to an URI using one of the URI  schemes
+// supported by the MapUriToFile.
+AnyString MapFileToUri(const AnyString& file, const AnyString& ws_dir);
 
 // Center the source rectangle on target by applying a scale and translation.
 QRect CenterRectOnTarget(const QRect& target, const QRect& source);

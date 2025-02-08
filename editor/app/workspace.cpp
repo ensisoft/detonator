@@ -1100,84 +1100,12 @@ QString Workspace::GetSubDir(const QString& dir, bool create) const
 
 AnyString Workspace::MapFileToWorkspace(const AnyString& name) const
 {
-    const QString filepath = name;
-    if (filepath.isEmpty())
-        return AnyString("");
-
-    // don't remap already mapped files.
-    if (filepath.startsWith("app://") ||
-        filepath.startsWith("fs://") ||
-        filepath.startsWith("ws://"))
-        return filepath;
-
-    // when the user is adding resource files to this project (workspace) there's the problem
-    // of making the workspace "portable".
-    // Portable here means two things:
-    // * portable from one operating system to another (from Windows to Linux or vice versa)
-    // * portable from one user's environment to another user's environment even when on
-    //   the same operating system (i.e. from Windows to Windows or Linux to Linux)
-    //
-    // Using relative file paths (as opposed to absolute file paths) solves the problem
-    // but then the problem is that the relative paths need to be resolved at runtime
-    // and also some kind of "landmark" is needed in order to make the files
-    // relative something to.
-    //
-    // The expectation is that during content creation most of the game resources
-    // would be placed in a place relative to the workspace. In this case the
-    // runtime path resolution would use paths relative to the current workspace.
-    // However there's also some content (such as the pre-built shaders) that
-    // is bundled with the Editor application and might be used from that location
-    // as a game resource.
-
-    // We could always copy the files into some location under the workspace to
-    // solve this problem but currently this is not yet done.
-
-    // if the file is in the current workspace path or in the path of the current executable
-    // we can then express this path as a relative path.
-    const auto& appdir = GetAppDir();
-    const auto& file = CleanPath(filepath);
-
-    if (file.startsWith(mWorkspaceDir))
-    {
-        QString ret = file;
-        ret.remove(0, mWorkspaceDir.count());
-        if (ret.startsWith("/") || ret.startsWith("\\"))
-            ret.remove(0, 1);
-        ret = ret.replace("\\", "/");
-        return QString("ws://%1").arg(ret);
-    }
-    else if (file.startsWith(appdir))
-    {
-        QString ret = file;
-        ret.remove(0, appdir.count());
-        if (ret.startsWith("/") || ret.startsWith("\\"))
-            ret.remove(0, 1);
-        ret = ret.replace("\\", "/");
-        return QString("app://%1").arg(ret);
-    }
-    // mapping other paths to identity. will not be portable to another
-    // user's computer to another system, unless it's accessible on every
-    // machine using the same path (for example a shared file system mount)
-    return toString("fs://%1", file);
+    return MapFileToUri(name, mWorkspaceDir);
 }
 
 AnyString Workspace::MapFileToFilesystem(const AnyString& uri) const
 {
-    // see comments in AddFileToWorkspace.
-    // this is basically the same as MapFilePath except this API
-    // is internal to only this application whereas MapFilePath is part of the
-    // API exposed to the graphics/ subsystem.
-
-    QString ret = uri;
-    if (ret.startsWith("ws://"))
-        ret = CleanPath(ret.replace("ws://", mWorkspaceDir));
-    else if (ret.startsWith("app://"))
-        ret = CleanPath(ret.replace("app://", GetAppDir()));
-    else if (ret.startsWith("fs://"))
-        ret.remove(0, 5);
-
-    // return as is
-    return ret;
+    return MapUriToFile(uri, mWorkspaceDir);
 }
 
 bool Workspace::LoadContent(const QString& filename, ResourceMigrationLog* log, WorkspaceAsyncWorkObserver* observer)

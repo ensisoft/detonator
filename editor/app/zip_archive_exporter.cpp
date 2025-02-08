@@ -197,7 +197,7 @@ bool ZipArchiveExporter::Open()
 
 QString ZipArchiveExporter::MapFileToFilesystem(const app::AnyString& uri) const
 {
-    return MapWorkspaceUri(uri, mWorkspaceDir);
+    return MapUriToFile(uri, mWorkspaceDir);
 }
 
 
