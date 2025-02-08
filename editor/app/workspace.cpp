@@ -61,6 +61,7 @@
 #include "graphics/material_instance.h"
 #include "editor/app/resource-uri.h"
 #include "editor/app/resource_packer.h"
+#include "editor/app/resource_tracker.h"
 #include "editor/app/resource_util.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
@@ -74,6 +75,9 @@
 #include "editor/app/zip_archive_importer.h"
 #include "editor/app/workspace_observer.h"
 #include "editor/app/workspace_resource_packer.h"
+
+// hack
+#include "editor/app/resource_tracker.cpp"
 
 namespace {
 
@@ -1608,76 +1612,9 @@ ResourceList Workspace::ListResourceUsers(const ModelIndexList& list) const
 
 QStringList Workspace::ListFileResources(const ModelIndexList& indices) const
 {
-    // setup a phoney resource packer that actually does no packing
-    // but only captures all the resource URIs
-    class Phoney : public ResourcePacker {
-    public:
-        explicit Phoney(const Workspace* workspace)
-          : mWorkspace(workspace)
-        {}
+    std::unordered_set<AnyString> uris;
 
-        virtual bool CopyFile(const AnyString& uri, const AnyString& dir) override
-        {
-            RecordURI(uri);
-            return true;
-        }
-
-        virtual bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) override
-        {
-            RecordURI(uri);
-            return true;
-        }
-        virtual bool ReadFile(const AnyString& uri, QByteArray* bytes) const override
-        {
-            return app::detail::LoadArrayBuffer(mWorkspace->MapFileToFilesystem(uri), bytes);
-        }
-        virtual AnyString MapUri(const AnyString& uri) const override
-        { return uri; }
-        virtual bool HasMapping(const AnyString& uri) const override
-        { return true; }
-        virtual bool IsReleasePackage() const override
-        { return false; }
-
-        QStringList ListUris() const
-        {
-            QStringList ret;
-            for (const auto& uri : mURIs)
-                ret.push_back(uri);
-            return ret;
-        }
-        void RecordURI(const AnyString& uri)
-        {
-            if (uri.EndsWith("png", Qt::CaseInsensitive) ||
-                uri.EndsWith("jpg", Qt::CaseInsensitive) ||
-                uri.EndsWith("jpeg", Qt::CaseInsensitive)  ||
-                uri.EndsWith("bmp", Qt::CaseInsensitive))
-            {
-                const auto image_file = mWorkspace->MapFileToFilesystem(uri);
-                const auto image_desc = FindImageJsonFile(image_file);
-                if (!image_desc.isEmpty())
-                {
-                    mURIs.insert(mWorkspace->MapFileToWorkspace(image_desc));
-                }
-            }
-
-            // hack for now to copy the bitmap font image.
-            // this will not work if:
-            // - the file extension is not .png
-            // - the file name is same as the .json file base name
-            if (uri.Contains("fonts/") && uri.EndsWith(".json"))
-            {
-                const auto& src_png_uri = ReplaceAll(uri, ".json", ".png");
-                mURIs.insert(src_png_uri);
-            }
-            mURIs.insert(uri); // keep track of the URIs we're seeing
-        }
-
-    private:
-        const Workspace* mWorkspace;
-    private:
-        mutable std::unordered_set<app::AnyString> mURIs;
-
-    } packer(this);
+    ResourceTracker tracker(mWorkspaceDir, &uris);
 
     for (size_t index : indices)
     {
@@ -1687,9 +1624,14 @@ QStringList Workspace::ListFileResources(const ModelIndexList& indices) const
         // be refactored into 2 steps, first iterate and transact on
         // the resources and then update the resources.
         const auto& resource  = GetUserDefinedResource(index);
-        const_cast<Resource&>(resource).Pack(packer);
+        const_cast<Resource&>(resource).Pack(tracker);
     }
-    return packer.ListUris();
+
+    QStringList list;
+    for (auto uri : uris)
+        list.append(uri);
+
+    return list;
 }
 
 void Workspace::SaveResource(const Resource& resource)
