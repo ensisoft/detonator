@@ -217,8 +217,8 @@ private:
 };
 
 
-ResourceCache::ResourceCache(base::ThreadPool* threadpool)
-  : mThreadPool(threadpool)
+ResourceCache::ResourceCache(SubmitTask submit_function)
+  : mSubmitTask(submit_function)
   , mState(std::make_shared<CacheState>())
 {}
 
@@ -234,8 +234,7 @@ void ResourceCache::AddResource(std::string id, std::unique_ptr<Resource> copy)
         auto task = std::make_unique<AddResourceTask>(mState, std::move(id), std::move(copy));
         task->SetTaskName("AddCacheResource");
         task->SetTaskDescription("Add resource to cache.");
-        auto work = mThreadPool->SubmitTask(std::move(task),
-                                            base::ThreadPool::Worker0ThreadID);
+        auto work = mSubmitTask(std::move(task), base::ThreadPool::Worker0ThreadID);
         mPendingWork.push_back(work);
     }
     else
@@ -251,8 +250,7 @@ void ResourceCache::DelResource(std::string id)
         auto task = std::make_unique<DelResourceTask>(mState, std::move(id));
         task->SetTaskName("DeleteCacheResource");
         task->SetTaskDescription("Delete resource from cache.");
-        auto work = mThreadPool->SubmitTask(std::move(task),
-                                            base::ThreadPool::Worker0ThreadID);
+        auto work = mSubmitTask(std::move(task), base::ThreadPool::Worker0ThreadID);
         mPendingWork.push_back(work);
     }
     else
@@ -269,8 +267,7 @@ void ResourceCache::UpdateSettings(const ProjectSettings& settings)
         auto task = std::make_unique<UpdateSettingsTask>(mState, settings);
         task->SetTaskName("UpdateCacheSettings");
         task->SetTaskDescription("Update project settings in cache.");
-        auto work = mThreadPool->SubmitTask(std::move(task),
-                                            base::ThreadPool::Worker0ThreadID);
+        auto work = mSubmitTask(std::move(task), base::ThreadPool::Worker0ThreadID);
         mPendingWork.push_back(work);
         VERBOSE("Update project settings in cache.");
     }
@@ -289,8 +286,7 @@ void ResourceCache::SaveWorkspace(const QVariantMap& workspace_properties,
                                                     workspace_user_properties, workspace_directory);
     task->SetTaskName("SaveWorkspace");
     task->SetTaskDescription("Save project workspace.");
-    auto work = mThreadPool->SubmitTask(std::move(task),
-                                        base::ThreadPool::Worker0ThreadID);
+    auto work = mSubmitTask(std::move(task), base::ThreadPool::Worker0ThreadID);
     mPendingWork.push_back(work);
 }
 

@@ -491,7 +491,10 @@ bool MainWindow::LoadWorkspace(const QString& dir)
     const auto resource_count = mWorkspace->GetNumUserDefinedResources();
     dlg.EnqueueUpdate("Initialize Workspace Cache...", resource_count, 0);
 
-    mResourceCache = std::make_unique<app::ResourceCache>(mThreadPool);
+    mResourceCache = std::make_unique<app::ResourceCache>([this](std::unique_ptr<base::ThreadTask> task, size_t threadId) {
+        return mThreadPool->SubmitTask(std::move(task), threadId);
+    });
+
     for (size_t i=0; i<resource_count; ++i)
     {
         const auto& resource = mWorkspace->GetUserDefinedResource(i);
