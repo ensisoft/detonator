@@ -29,6 +29,7 @@
 #include <mutex>
 #include <queue>
 #include <deque>
+#include <functional>
 
 #include "base/threadpool.h"
 #include "editor/app/project_settings.h"
@@ -40,7 +41,10 @@ namespace app
     class ResourceCache
     {
     public:
-        explicit ResourceCache(base::ThreadPool* threadpool);
+        using TaskPtr = std::unique_ptr<base::ThreadTask>;
+        using SubmitTask = std::function<base::TaskHandle (TaskPtr task, size_t threadId)>;
+
+        explicit ResourceCache(SubmitTask submit_function);
        ~ResourceCache();
 
         void AddResource(std::string id, std::unique_ptr<Resource> copy);
@@ -75,7 +79,7 @@ namespace app
             ProjectSettings settings;
         };
 
-        base::ThreadPool* mThreadPool = nullptr;
+        SubmitTask mSubmitTask;
         std::shared_ptr<CacheState> mState;
         std::deque<base::TaskHandle> mPendingWork;
     };
