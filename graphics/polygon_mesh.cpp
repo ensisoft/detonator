@@ -381,8 +381,8 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
     const auto usage = mStatic ? Geometry::Usage::Static
                                : Geometry::Usage::Dynamic;
 
-    auto& geometry = create.buffer;
-    ASSERT(geometry.GetNumDrawCmds() == 0);
+    auto& geometry_buffer = create.buffer;
+    ASSERT(geometry_buffer.GetNumDrawCmds() == 0);
 
     if (mData.has_value())
     {
@@ -391,15 +391,15 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
         create.content_hash = GetContentHash();
         create.content_name = mName;
 
-        geometry.SetVertexLayout(data.layout);
-        geometry.UploadVertices(data.vertices.data(), data.vertices.size());
+        geometry_buffer.SetVertexLayout(data.layout);
+        geometry_buffer.UploadVertices(data.vertices.data(), data.vertices.size());
 
         if (!data.indices.empty())
-            geometry.UploadIndices(data.indices.data(), data.indices.size(), data.index_type);
+            geometry_buffer.UploadIndices(data.indices.data(), data.indices.size(), data.index_type);
 
         for (const auto& cmd : data.cmds)
         {
-            geometry.AddDrawCmd(cmd);
+            geometry_buffer.AddDrawCmd(cmd);
         }
     }
 
@@ -410,15 +410,15 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
     desc.uri  = mContentUri;
     desc.id   = mId;
     desc.type = gfx::Loader::Type::Mesh;
-    const auto& buffer = LoadResource(desc);
-    if (!buffer)
+    const auto& data_buffer = LoadResource(desc);
+    if (!data_buffer)
     {
         ERROR("Failed to load polygon mesh. [uri='%1']", mContentUri);
         return false;
     }
 
-    const char* beg = (const char*)buffer->GetData();
-    const char* end = (const char*)buffer->GetData() + buffer->GetByteSize();
+    const char* beg = (const char*)data_buffer->GetData();
+    const char* end = (const char*)data_buffer->GetData() + data_buffer->GetByteSize();
     auto [success, json, error] = base::JsonParse(beg, end);
     if (!success)
     {
@@ -458,10 +458,10 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
     create.content_name = mName;
     create.content_hash = GetContentHash();
 
-    geometry.SetVertexLayout(vertex_buffer.GetLayout());
-    geometry.UploadVertices(vertex_buffer.GetBufferPtr(), vertex_buffer.GetBufferSize());
-    geometry.UploadIndices(index_buffer.GetBufferPtr(), index_buffer.GetBufferSize(), index_buffer.GetType());
-    geometry.SetDrawCommands(command_buffer.GetCommandBuffer());
+    geometry_buffer.SetVertexLayout(vertex_buffer.GetLayout());
+    geometry_buffer.UploadVertices(vertex_buffer.GetBufferPtr(), vertex_buffer.GetBufferSize());
+    geometry_buffer.UploadIndices(index_buffer.GetBufferPtr(), index_buffer.GetBufferSize(), index_buffer.GetType());
+    geometry_buffer.SetDrawCommands(command_buffer.GetCommandBuffer());
     return true;
 }
 
