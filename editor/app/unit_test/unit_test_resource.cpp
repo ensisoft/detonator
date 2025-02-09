@@ -118,8 +118,11 @@ namespace app {
     }
 }
 
-int test_main(int argc, char* argv[])
+
+void unit_test_resource()
 {
+    TEST_CASE(test::Type::Feature)
+
     TestResource0 res1;
     res1.SetFloat1(123.0f);
     res1.SetFloat2(321.0f);
@@ -342,6 +345,13 @@ int test_main(int argc, char* argv[])
         Resource r(test, "test");
         auto clone = r.Clone();
     }
+}
 
+
+EXPORT_TEST_MAIN(
+int test_main(int argc, char* argv[])
+{
+    unit_test_resource();
     return 0;
 }
+) // TEST_MAIN

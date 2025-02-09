@@ -465,7 +465,7 @@ void MainWindow::LoadDemoWorkspace(const QString& which)
     LoadWorkspace(app::JoinPath(where, which));
 }
 
-bool MainWindow::LoadWorkspace(const QString& dir)
+bool MainWindow::LoadWorkspace(const QString& workspace_dir)
 {
     ASSERT(!mWorkspace);
     ASSERT(!mResourceCache);
@@ -478,7 +478,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
     dlg.setWindowModality(Qt::WindowModal);
     dlg.show();
 
-    auto workspace = std::make_unique<app::Workspace>(dir);
+    auto workspace = std::make_unique<app::Workspace>(workspace_dir);
     if (!workspace->LoadWorkspace(&migration_log, &dlg))
         return false;
 
@@ -488,16 +488,21 @@ bool MainWindow::LoadWorkspace(const QString& dir)
     connect(mWorkspace.get(), &app::Workspace::ResourceAdded,   this, &MainWindow::ResourceAdded);
     connect(mWorkspace.get(), &app::Workspace::ResourceRemoved, this, &MainWindow::ResourceRemoved);
 
-    const auto resource_count = mWorkspace->GetNumUserDefinedResources();
+    // we're reflecting all the resources (including primitives) in the
+    // resource cache to make it simpler to deal with resources. i.e. no
+    // need to special case primitives.
+    const auto resource_count = mWorkspace->GetNumResources();
     dlg.EnqueueUpdate("Initialize Workspace Cache...", resource_count, 0);
 
-    mResourceCache = std::make_unique<app::ResourceCache>([this](std::unique_ptr<base::ThreadTask> task, size_t threadId) {
-        return mThreadPool->SubmitTask(std::move(task), threadId);
+    mResourceCache = std::make_unique<app::ResourceCache>(workspace_dir,
+            [this](std::unique_ptr<base::ThreadTask> task) {
+        return mThreadPool->SubmitTask(std::move(task), base::ThreadPool::Worker0ThreadID);
     });
 
+    // do the initial cache build and add all the resources to the cache.
     for (size_t i=0; i<resource_count; ++i)
     {
-        const auto& resource = mWorkspace->GetUserDefinedResource(i);
+        const auto& resource = mWorkspace->GetResource(i);
         mResourceCache->AddResource(resource.GetIdUtf8(), resource.Copy());
         dlg.EnqueueStepIncrement();
         QApplication::processEvents();
@@ -518,6 +523,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
     GfxWindow::SetDefaultFilter(settings.default_mag_filter);
 
     mResourceCache->UpdateSettings(settings);
+    mResourceCache->BuildCache();
 
     // desktop dimensions
     const QList<QScreen*>& screens = QGuiApplication::screens();
@@ -809,11 +815,12 @@ void MainWindow::CloseWorkspace()
 
         while (mResourceCache && mResourceCache->HasPendingWork())
         {
-            const auto progress = mUI.worker->value();
-            const auto& handle = mResourceCache->GetFirstTask();
-            SetValue(mUI.worker, handle.GetTaskDescription());
-            for (auto* child : mChildWindows)
-                child->UpdateProgressBar(handle.GetTaskDescription(), 0);
+            if (const auto& handle = mResourceCache->GetFirstTask())
+            {
+                SetValue(mUI.worker, handle.GetTaskDescription());
+                for (auto* child: mChildWindows)
+                    child->UpdateProgressBar(handle.GetTaskDescription(), 0);
+            }
 
             mThreadPool->ExecuteMainThread();
             mResourceCache->TickPendingWork();
@@ -2622,11 +2629,12 @@ void MainWindow::RefreshUI()
     {
         if (mResourceCache->HasPendingWork())
         {
-            const auto progress = mUI.worker->value();
-            const auto& handle = mResourceCache->GetFirstTask();
-            SetValue(mUI.worker, handle.GetTaskDescription());
-            for (auto* child : mChildWindows)
-                child->UpdateProgressBar(handle.GetTaskDescription(), 0);
+            if (const auto& handle = mResourceCache->GetFirstTask())
+            {
+                SetValue(mUI.worker, handle.GetTaskDescription());
+                for (auto* child: mChildWindows)
+                    child->UpdateProgressBar(handle.GetTaskDescription(), 0);
+            }
 
             mResourceCache->TickPendingWork();
 
@@ -2637,6 +2645,22 @@ void MainWindow::RefreshUI()
             SetValue(mUI.worker, 0);
             for (auto* child : mChildWindows)
                 child->UpdateProgressBar("", 0);
+        }
+
+        app::ResourceCache::ResourceUpdateList updates;
+        mResourceCache->DequeuePendingUpdates(&updates);
+        for (const auto& update : updates)
+        {
+            if (const auto* ptr = std::get_if<app::ResourceCache::AnalyzeResourceReport>(&update))
+            {
+                auto* resource = mWorkspace->FindResourceById(app::FromUtf8(ptr->id));
+                if (resource == nullptr)
+                    continue;
+
+                resource->SetProperty("_is_valid_", ptr->valid);
+                VERBOSE("Resource analyze report. [type=%1, resource=%2, valid=%3]",
+                        resource->GetType(), resource->GetName(), ptr->valid);
+            }
         }
     }
 }
@@ -3336,11 +3360,12 @@ void MainWindow::LaunchGame(bool clean)
 
             while (mResourceCache->HasPendingWork())
             {
-                const auto progress = mUI.worker->value();
-                const auto& handle = mResourceCache->GetFirstTask();
-                SetValue(mUI.worker, handle.GetTaskDescription());
-                for (auto* child : mChildWindows)
-                    child->UpdateProgressBar(handle.GetTaskDescription(), 0);
+                if (const auto& handle = mResourceCache->GetFirstTask())
+                {
+                    SetValue(mUI.worker, handle.GetTaskDescription());
+                    for (auto* child: mChildWindows)
+                        child->UpdateProgressBar(handle.GetTaskDescription(), 0);
+                }
 
                 mThreadPool->ExecuteMainThread();
                 mResourceCache->TickPendingWork();
