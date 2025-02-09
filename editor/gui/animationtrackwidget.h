@@ -145,6 +145,7 @@ namespace gui
         void on_btnMaterialParameters_clicked();
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
+        void DeleteSelectedItem(const TimelineWidget::TimelineItem* item);
         void ToggleShowResource();
         void AddActuatorAction();
         void AddNodeTimelineAction();

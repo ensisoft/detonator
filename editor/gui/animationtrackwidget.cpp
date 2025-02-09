@@ -175,10 +175,9 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     mUI.widget->onPaintScene   = std::bind(&AnimationTrackWidget::PaintScene, this,
                                            std::placeholders::_1, std::placeholders::_2);
 
-    connect(mUI.timeline, &TimelineWidget::SelectedItemChanged,
-        this, &AnimationTrackWidget::SelectedItemChanged);
-    connect(mUI.timeline, &TimelineWidget::SelectedItemDragged,
-            this, &AnimationTrackWidget::SelectedItemDragged);
+    connect(mUI.timeline, &TimelineWidget::SelectedItemChanged, this, &AnimationTrackWidget::SelectedItemChanged);
+    connect(mUI.timeline, &TimelineWidget::SelectedItemDragged, this, &AnimationTrackWidget::SelectedItemDragged);
+    connect(mUI.timeline, &TimelineWidget::DeleteSelectedItem,  this, &AnimationTrackWidget::DeleteSelectedItem);
 
     SetActuatorUIDefaults();
     SetActuatorUIEnabled(false);
@@ -1000,9 +999,9 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
         action->setIcon(QIcon("icons:add.png"));
         action->setProperty("type", static_cast<int>(act.type));
         action->setEnabled(false);
-        if (act.name == "Rigid Body")
+        if (act.name.contains("Rigid Body"))
             action->setProperty("kinematic_target", static_cast<int>(game::KinematicAnimatorClass::Target::RigidBody));
-        else if (act.name == "Transformer")
+        else if (act.name.contains("Node Transformer"))
             action->setProperty("kinematic_target", static_cast<int>(game::KinematicAnimatorClass::Target::Transformer));
 
         connect(action, &QAction::triggered, this, &AnimationTrackWidget::AddActuatorAction);
@@ -1826,6 +1825,11 @@ void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineIte
     SetValue(mUI.actuatorGroup, tr("Animator - %1, %2s").arg(item->text).arg(len));
 }
 
+void AnimationTrackWidget::DeleteSelectedItem(const TimelineWidget::TimelineItem* item)
+{
+    on_actionDeleteActuator_triggered();
+}
+
 void AnimationTrackWidget::ToggleShowResource()
 {
     QAction* action = qobject_cast<QAction*>(sender());
@@ -1854,7 +1858,8 @@ void AnimationTrackWidget::AddActuatorAction()
     {
         const auto target = static_cast<game::KinematicAnimatorClass::Target>(action->property("kinematic_target").toInt());
 
-        if (auto* selected = GetCurrentActuator()) {
+        if (auto* selected = GetCurrentActuator())
+        {
             auto* ptr = dynamic_cast<game::KinematicAnimatorClass*>(selected);
             ptr->SetTarget(target);
             SetValue(mUI.kinematicTarget, target);

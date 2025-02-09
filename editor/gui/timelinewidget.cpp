@@ -638,6 +638,17 @@ void TimelineWidget::resizeEvent(QResizeEvent* event)
     mNumVisibleTimelines = max_num_visible_timelines;
 }
 
+void TimelineWidget::keyPressEvent(QKeyEvent* event)
+{
+    if(auto* item = GetSelectedItem())
+    {
+        const auto key = event->key();
+        if (key == Qt::Key_Delete)
+            emit DeleteSelectedItem(item);
+    }
+    QWidget::keyPressEvent(event);
+}
+
 void TimelineWidget::ComputeVerticalScrollbars()
 {
     const unsigned window_width = viewport()->width();
