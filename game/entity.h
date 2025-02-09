@@ -101,6 +101,9 @@ namespace game
             WantsMouseEvents,
         };
 
+        // for testing purposes make it easier to create an entity class
+        // with a known ID.
+        explicit EntityClass(std::string id);
         EntityClass();
         EntityClass(const EntityClass& other);
 

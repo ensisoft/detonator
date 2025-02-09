@@ -29,8 +29,11 @@
 namespace game
 {
 
-SceneClass::SceneClass()
-  : mClassId(base::RandomString(10))
+SceneClass::SceneClass(std::string id)
+  : mClassId(std::move(id))
+{}
+
+SceneClass::SceneClass() : SceneClass(base::RandomString(10))
 {}
 
 SceneClass::SceneClass(const SceneClass& other)
