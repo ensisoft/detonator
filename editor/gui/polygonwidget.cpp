@@ -110,11 +110,10 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
 ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resource) : ShapeWidget(workspace)
 {
     DEBUG("Editing shape '%1'", resource.GetName());
+
     mPolygon = *resource.GetContent<gfx::PolygonMeshClass>();
     mOriginalHash = mPolygon.GetHash();
-
     mBuilder.InitFrom(mPolygon);
-
 
     QString material;
     GetProperty(resource, "material", &material);
@@ -485,7 +484,16 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
     color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
-    gfx::PolygonMeshClass poly(mPolygon.GetId());
+    // hack hack if we have the main window preview window displaying this
+    // same custom shape then we have a competition of hash values used
+    // to compare the polygon data content against the content in the GPU
+    // buffer. And the competition is between the class object stored in
+    // the workspace that has the same Class ID but different content hash
+    // and *this* polygon class instance here that is a copy but maps to
+    // the same class ID but with different hash (because it has different
+    // content when it's being edited).
+    // so hack around this problem by adding a suffix here.
+    gfx::PolygonMeshClass poly(mPolygon.GetId() + "_1");
     mBuilder.BuildPoly(poly);
 
     // set to true since we're constructing this polygon on every frame
@@ -540,6 +548,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 
     gfx::PolygonMeshClass current(mPolygon.GetId() + "_2");
     builder.BuildPoly(current);
+    current.SetStatic(false);
 
     painter.Draw(gfx::PolygonMeshInstance(current), view, gfx::MaterialInstance(color));
 }
