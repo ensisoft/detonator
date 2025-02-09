@@ -2540,12 +2540,15 @@ void MainWindow::RefreshUI()
         ChildWindow* child = mChildWindows[i];
         FramelessWindow* window = child->GetWindow();
 
+        if (child->ShouldPopIn() || child->IsClosed())
+        {
+            // save the child window geometry for later "pop out"
+            mWorkspace->SetUserProperty("_child_window_geometry_" + child->GetId(), window->saveGeometry());
+        }
+
         if (child->ShouldPopIn())
         {
             MainWidget* widget = child->TakeWidget();
-
-            // save the child window geometry for later "pop out"
-            mWorkspace->SetUserProperty("_child_window_geometry_" + widget->GetId(), window->saveGeometry());
 
             window->close();
             // careful about not fucking up the iteration of this loop
@@ -3590,10 +3593,10 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
             // resize and relocate on the desktop, by default the window seems
             // to be at a position that requires it to be immediately used and
             // resize by the user. ugh
-            const auto width = std::max((int) (this->width() * 0.8), child->width());
-            const auto height = std::max((int) (this->height() * 0.8), child->height());
-            const auto xpos = x() + (this->width() - width) / 2;
-            const auto ypos = y() + (this->height() - height) / 2;
+            const auto width = std::max((int) (mFramelessWindow->width() * 0.8), window->width());
+            const auto height = std::max((int) (mFramelessWindow->height() * 0.8), window->height());
+            const auto xpos = mFramelessWindow->x() + (mFramelessWindow->width() - width) / 2;
+            const auto ypos = mFramelessWindow->y() + (mFramelessWindow->height() - height) / 2;
             window->resize(width, height);
             window->move(xpos, ypos);
         }

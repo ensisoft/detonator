@@ -68,6 +68,7 @@ ChildWindow::ChildWindow(MainWidget* widget, Clipboard* clipboard)
     mWidget->Activate();
     mWidget->AddActions(*mUI.toolBar);
     mWidget->AddActions(*mUI.menuTemp);
+    mWidgetId = mWidget->GetId();
 }
 
 ChildWindow::~ChildWindow()
