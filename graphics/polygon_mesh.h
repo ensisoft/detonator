@@ -116,19 +116,19 @@ namespace gfx
 
         const DrawCmd* GetSubMeshDrawCmd(const std::string& key) const noexcept;
 
-        virtual Type GetType() const override
+        Type GetType() const override
         { return Type::Polygon; }
-        virtual std::string GetId() const override
+        std::string GetId() const override
         { return mId; }
-        virtual std::string GetName() const override
+        std::string GetName() const override
         { return mName; }
-        virtual void SetName(const std::string& name) override
+        void SetName(const std::string& name) override
         { mName = name; }
-        virtual std::size_t GetHash() const override;
-        virtual std::unique_ptr<DrawableClass> Clone() const override;
-        virtual std::unique_ptr<DrawableClass> Copy() const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
+        std::size_t GetHash() const override;
+        std::unique_ptr<DrawableClass> Clone() const override;
+        std::unique_ptr<DrawableClass> Copy() const override;
+        void IntoJson(data::Writer& data) const override;
+        bool FromJson(const data::Reader& data) override;
 
     private:
         std::string mId;

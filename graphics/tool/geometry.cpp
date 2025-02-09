@@ -196,6 +196,9 @@ void PolygonBuilder::BuildPoly(PolygonMeshClass& polygon) const
 
 void PolygonBuilder::InitFrom(const PolygonMeshClass& polygon)
 {
+    mDrawCommands.clear();
+    mVertices.clear();
+
     if (polygon.HasInlineData())
     {
         ASSERT(*polygon.GetVertexLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
@@ -212,11 +215,6 @@ void PolygonBuilder::InitFrom(const PolygonMeshClass& polygon)
         {
             mDrawCommands.push_back(*polygon.GetDrawCmd(i));
         }
-    }
-    else
-    {
-        mDrawCommands.clear();
-        mVertices.clear();
     }
     mStatic = polygon.IsStatic();
 }
