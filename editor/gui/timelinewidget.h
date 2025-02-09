@@ -144,6 +144,7 @@ namespace gui
         void TimeDragged(float seconds);
         void SelectedItemChanged(const TimelineItem* selected);
         void SelectedItemDragged(const TimelineItem* selected);
+        void DeleteSelectedItem(const TimelineItem* selected);
 
     private:
         virtual void paintEvent(QPaintEvent* event) override;
@@ -155,6 +156,7 @@ namespace gui
         virtual void enterEvent(QEvent*) override;
         virtual void leaveEvent(QEvent*) override;
         virtual void resizeEvent(QResizeEvent* event) override;
+        virtual void keyPressEvent(QKeyEvent* event) override;
     private:
         void ComputeVerticalScrollbars();
         void ComputeHorizontalScrollbars();
