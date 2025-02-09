@@ -32,10 +32,12 @@
 #include "base/logging.h"
 #include "base/utility.h"
 #include "base/json.h"
+#include "base/threadpool.h"
 #include "editor/app/resource.h"
 #include "editor/app/workspace.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/zip_archive.h"
+#include "editor/app/resource_cache.h"
 #include "engine/loader.h"
 #include "engine/ui.h"
 #include "game/entity.h"
@@ -2083,16 +2085,370 @@ void unit_test_delete_with_data()
     }
 }
 
+void unit_test_resource_cache()
+{
+    TEST_CASE(test::Type::Feature)
 
+    DeleteDir("TestWorkspace");
+    MakeDir("TestWorkspace");
+    MakeDir("TestWorkspace/textures");
+
+    app::ResourceCache cache("TestWorkspace",
+                             [](std::unique_ptr<base::ThreadTask> task) {
+        task->Execute();
+        base::TaskHandle handle(std::move(task), 0);
+        return handle;
+
+    });
+    app::Workspace workspace("TestWorkspace");
+
+    gfx::RgbBitmap bitmap[2];
+    bitmap[0].Resize(64, 64);
+    bitmap[0].Fill(gfx::Color::Blue);
+    bitmap[1].Resize(64, 64);
+    bitmap[1].Fill(gfx::Color::Red);
+
+    gfx::WritePNG(bitmap[0], "TestWorkspace/textures/test_bitmap0.png");
+    gfx::WritePNG(bitmap[1], "TestWorkspace/textures/test_bitmap1.png");
+
+    // initialize.
+    {
+
+        {
+            gfx::MaterialClass material0(gfx::MaterialClass::Type::Texture, "material0");
+            material0.SetTexture(gfx::LoadTextureFromFile("ws://textures/test_bitmap0.png"));
+            app::MaterialResource resource(material0, "material0");
+            workspace.SaveResource(resource);
+        }
+
+        {
+            gfx::MaterialClass material1(gfx::MaterialClass::Type::Texture, "material1");
+            material1.SetTexture(gfx::LoadTextureFromFile("ws://textures/test_bitmap1.png"));
+            app::MaterialResource resource(material1, "material1");
+            workspace.SaveResource(resource);
+        }
+
+        {
+            game::DrawableItemClass drawable;
+            drawable.SetDrawableId("_rect");
+            drawable.SetMaterialId("material0");
+
+            game::EntityNodeClass node;
+            node.SetName("node");
+            node.SetDrawable(drawable);
+
+            game::EntityClass entity("entity0");
+            entity.SetName("entity");
+            entity.AddNode(node);
+            app::EntityResource resource(entity, "entity0");
+            workspace.SaveResource(resource);
+        }
+
+        {
+            game::DrawableItemClass drawable;
+            drawable.SetDrawableId("_rect");
+            drawable.SetMaterialId("material1");
+
+            game::EntityNodeClass node;
+            node.SetName("node");
+            node.SetDrawable(drawable);
+
+            game::EntityClass entity("entity1");
+            entity.SetName("entity");
+            entity.AddNode(node);
+            app::EntityResource resource(entity, "entity1");
+            workspace.SaveResource(resource);
+        }
+
+        {
+            game::SceneClass scene0("scene0");
+            scene0.SetName("scene0");
+
+            game::EntityPlacement placement;
+            placement.SetEntityId("entity0");
+            placement.SetTranslation(100.0f, 100.0f);
+            scene0.PlaceEntity(placement);
+
+            app::SceneResource resource(scene0, "scene0");
+            workspace.SaveResource(resource);
+        }
+
+        {
+            game::SceneClass scene0("scene1");
+            scene0.SetName("scene1");
+
+            game::EntityPlacement placement0;
+            placement0.SetEntityId("entity0");
+            placement0.SetTranslation(100.0f, 100.0f);
+            scene0.PlaceEntity(placement0);
+
+            game::EntityPlacement placement1;
+            placement1.SetEntityId("entity1");
+            placement1.SetTranslation(200.0f, 100.0f);
+            scene0.PlaceEntity(placement1);
+
+            app::SceneResource resource(scene0, "scene1");
+            workspace.SaveResource(resource);
+        }
+
+        // initialize cache.
+        for (unsigned i=0; i<workspace.GetNumResources(); ++i)
+        {
+            const auto& resource = workspace.GetResource(i);
+            cache.AddResource(resource.GetIdUtf8(), resource.Copy());
+        }
+        cache.BuildCache();
+        while (cache.HasPendingWork())
+            cache.TickPendingWork();
+
+        const auto& table = cache.GetResourceTable_UNSAFE();
+        auto graph = cache.GetResourceGraph_UNSAFE();
+        TEST_REQUIRE(table.size() == workspace.GetNumResources());
+        TEST_REQUIRE(base::SafeFind(table, "material0")->GetId() == "material0");
+        TEST_REQUIRE(base::SafeFind(table, "material0")->GetType() == app::Resource::Type::Material);
+        TEST_REQUIRE(base::SafeFind(table, "material1")->GetId() == "material1");
+        TEST_REQUIRE(base::SafeFind(table, "material1")->GetType() == app::Resource::Type::Material);
+        TEST_REQUIRE(base::SafeFind(table, "entity0")->GetId() == "entity0");
+        TEST_REQUIRE(base::SafeFind(table, "entity0")->GetType() == app::Resource::Type::Entity);
+        TEST_REQUIRE(base::SafeFind(table, "entity1")->GetId() == "entity1");
+        TEST_REQUIRE(base::SafeFind(table, "entity1")->GetType() == app::Resource::Type::Entity);
+        TEST_REQUIRE(base::SafeFind(table, "scene0")->GetId() == "scene0");
+        TEST_REQUIRE(base::SafeFind(table, "scene0")->GetType() == app::Resource::Type::Scene);
+        TEST_REQUIRE(base::SafeFind(table, "scene1")->GetId() == "scene1");
+        TEST_REQUIRE(base::SafeFind(table, "scene1")->GetType() == app::Resource::Type::Scene);
+
+        TEST_REQUIRE(base::Contains(graph, "material0"));
+        TEST_REQUIRE(base::Contains(graph, "material1"));
+        TEST_REQUIRE(base::Contains(graph, "entity0"));
+        TEST_REQUIRE(base::Contains(graph, "entity1"));
+        TEST_REQUIRE(base::Contains(graph, "scene0"));
+        TEST_REQUIRE(base::Contains(graph, "scene1"));
+
+        TEST_REQUIRE(graph["material0"].used_by.size() == 1);
+        TEST_REQUIRE(graph["material1"].used_by.size() == 1);
+        TEST_REQUIRE(base::Contains(graph["material0"].used_by, "entity0"));
+        TEST_REQUIRE(base::Contains(graph["material1"].used_by, "entity1"));
+
+        TEST_REQUIRE(graph["entity0"].used_by.size() == 2);
+        TEST_REQUIRE(graph["entity1"].used_by.size() == 1);
+        TEST_REQUIRE(base::Contains(graph["entity0"].used_by, "scene0"));
+        TEST_REQUIRE(base::Contains(graph["entity0"].used_by, "scene1"));
+        TEST_REQUIRE(base::Contains(graph["entity1"].used_by, "scene1"));
+
+        TEST_REQUIRE(graph["scene0"].used_by.empty());
+        TEST_REQUIRE(graph["scene1"].used_by.empty());
+
+        app::ResourceCache::ResourceUpdateList updates;
+        cache.DequeuePendingUpdates(&updates);
+
+        for (const auto& update : updates)
+        {
+            const auto* ptr = std::get_if<app::ResourceCache::AnalyzeResourceReport>(&update);
+            TEST_REQUIRE(ptr);
+            TEST_REQUIRE(ptr->valid);
+        }
+    }
+
+    // delete resource file, this breaks material
+    // which should propagate "broken" to its users
+    {
+        DeleteFile("TestWorkspace/textures/test_bitmap0.png");
+
+        cache.AddResource("material0", workspace.FindResourceById("material0")->Copy());
+
+        while (cache.HasPendingWork())
+            cache.TickPendingWork();
+
+        app::ResourceCache::ResourceUpdateList updates;
+        cache.DequeuePendingUpdates(&updates);
+
+        std::unordered_set<std::string> broken_resources;
+        std::unordered_set<std::string> fixed_resources;
+        for (const auto& update : updates)
+        {
+            const auto* ptr = std::get_if<app::ResourceCache::AnalyzeResourceReport>(&update);
+            TEST_REQUIRE(ptr);
+            if (ptr->valid)
+                fixed_resources.insert(ptr->id);
+            else
+                broken_resources.insert(ptr->id);
+        }
+        TEST_REQUIRE(fixed_resources.size() == 0);
+        TEST_REQUIRE(broken_resources.size() == 4);
+        TEST_REQUIRE(base::Contains(broken_resources, "material0"));
+        TEST_REQUIRE(base::Contains(broken_resources, "entity0"));
+        TEST_REQUIRE(base::Contains(broken_resources, "scene0"));
+        TEST_REQUIRE(base::Contains(broken_resources, "scene1"));
+    }
+
+    // add resource file, this fixes material that was previously broken
+    // this should fix also its users
+    {
+        gfx::WritePNG(bitmap[0], "TestWorkspace/textures/test_bitmap0.png");
+
+        cache.AddResource("material0", workspace.FindResourceById("material0")->Copy());
+
+        while (cache.HasPendingWork())
+            cache.TickPendingWork();
+
+        app::ResourceCache::ResourceUpdateList updates;
+        cache.DequeuePendingUpdates(&updates);
+
+        std::unordered_set<std::string> broken_resources;
+        std::unordered_set<std::string> fixed_resources;
+        for (const auto& update : updates)
+        {
+            const auto* ptr = std::get_if<app::ResourceCache::AnalyzeResourceReport>(&update);
+            TEST_REQUIRE(ptr);
+            if (ptr->valid)
+                fixed_resources.insert(ptr->id);
+            else
+                broken_resources.insert(ptr->id);
+        }
+        TEST_REQUIRE(broken_resources.size() == 0);
+        TEST_REQUIRE(fixed_resources.size() == 4);
+        TEST_REQUIRE(base::Contains(fixed_resources, "material0"));
+        TEST_REQUIRE(base::Contains(fixed_resources, "entity0"));
+        TEST_REQUIRE(base::Contains(fixed_resources, "scene0"));
+        TEST_REQUIRE(base::Contains(fixed_resources, "scene1"));
+    }
+
+    // break entity1 by using a broken material reference
+    // this should invalidate (break) entity1 and scene1
+    {
+
+        {
+            game::DrawableItemClass drawable;
+            drawable.SetDrawableId("_rect");
+            drawable.SetMaterialId("invalid_material");
+
+            game::EntityNodeClass node;
+            node.SetName("node");
+            node.SetDrawable(drawable);
+
+            game::EntityClass entity("entity1");
+            entity.SetName("entity");
+            entity.AddNode(node);
+            app::EntityResource resource(entity, "entity1");
+            workspace.SaveResource(resource);
+        }
+
+        cache.AddResource("entity1", workspace.FindResourceById("entity1")->Copy());
+
+        while (cache.HasPendingWork())
+            cache.TickPendingWork();
+
+        app::ResourceCache::ResourceUpdateList updates;
+        cache.DequeuePendingUpdates(&updates);
+
+        std::unordered_set<std::string> broken_resources;
+        std::unordered_set<std::string> fixed_resources;
+        for (const auto& update : updates)
+        {
+            const auto* ptr = std::get_if<app::ResourceCache::AnalyzeResourceReport>(&update);
+            TEST_REQUIRE(ptr);
+            if (ptr->valid)
+                fixed_resources.insert(ptr->id);
+            else
+                broken_resources.insert(ptr->id);
+        }
+        TEST_REQUIRE(fixed_resources.size() == 0);
+        TEST_REQUIRE(broken_resources.size() == 2);
+        TEST_REQUIRE(base::Contains(broken_resources, "entity1"));
+        TEST_REQUIRE(base::Contains(broken_resources, "scene1"));
+    }
+
+    // fix entity1 material reference
+    {
+
+        {
+            game::DrawableItemClass drawable;
+            drawable.SetDrawableId("_rect");
+            drawable.SetMaterialId("material1");
+
+            game::EntityNodeClass node;
+            node.SetName("node");
+            node.SetDrawable(drawable);
+
+            game::EntityClass entity("entity1");
+            entity.SetName("entity");
+            entity.AddNode(node);
+            app::EntityResource resource(entity, "entity1");
+            workspace.SaveResource(resource);
+        }
+
+        cache.AddResource("entity1", workspace.FindResourceById("entity1")->Copy());
+
+        while (cache.HasPendingWork())
+            cache.TickPendingWork();
+
+        app::ResourceCache::ResourceUpdateList updates;
+        cache.DequeuePendingUpdates(&updates);
+
+        std::unordered_set<std::string> broken_resources;
+        std::unordered_set<std::string> fixed_resources;
+        for (const auto& update : updates)
+        {
+            const auto* ptr = std::get_if<app::ResourceCache::AnalyzeResourceReport>(&update);
+            TEST_REQUIRE(ptr);
+            if (ptr->valid)
+                fixed_resources.insert(ptr->id);
+            else
+                broken_resources.insert(ptr->id);
+        }
+
+        TEST_REQUIRE(broken_resources.size() == 0);
+        TEST_REQUIRE(fixed_resources.size() == 2);
+        TEST_REQUIRE(base::Contains(fixed_resources, "entity1"));
+        TEST_REQUIRE(base::Contains(fixed_resources, "scene1"));
+    }
+
+    // delete material0, this should break entity0, scene0 and scene1
+    {
+        cache.DelResource("material0");
+
+        while (cache.HasPendingWork())
+            cache.TickPendingWork();
+
+        app::ResourceCache::ResourceUpdateList updates;
+        cache.DequeuePendingUpdates(&updates);
+
+        std::unordered_set<std::string> broken_resources;
+        std::unordered_set<std::string> fixed_resources;
+        for (const auto& update : updates)
+        {
+            const auto* ptr = std::get_if<app::ResourceCache::AnalyzeResourceReport>(&update);
+            TEST_REQUIRE(ptr);
+            if (ptr->valid)
+                fixed_resources.insert(ptr->id);
+            else
+                broken_resources.insert(ptr->id);
+        }
+        TEST_REQUIRE(fixed_resources.size() == 0);
+        TEST_REQUIRE(broken_resources.size() == 3);
+        TEST_REQUIRE(base::Contains(broken_resources, "entity0"));
+        TEST_REQUIRE(base::Contains(broken_resources, "scene0"));
+        TEST_REQUIRE(base::Contains(broken_resources, "scene1"));
+    }
+
+}
 
 
 int test_main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
 
+    bool enable_verbose = false;
+    for (int i=0; i<argc; ++i)
+    {
+        if (!std::strcmp(argv[i], "--verbose"))
+            enable_verbose = true;
+    }
+
     base::OStreamLogger logger(std::cout);
     base::SetGlobalLog(&logger);
     base::EnableDebugLog(true);
+    base::EnableLogEvent(base::LogEvent::Verbose, enable_verbose);
     app::EventLog::get().OnNewEvent = [](const app::Event& event) {
         std::cout << app::ToUtf8(event.message);
         std::cout << std::endl;
@@ -2116,8 +2472,8 @@ int test_main(int argc, char* argv[])
     unit_test_list_deps();
     unit_test_export_import_basic();
     unit_test_export_name_dupe();
-
     unit_test_duplicate_with_data();
     unit_test_delete_with_data();
+    unit_test_resource_cache();
     return 0;
 }

@@ -264,6 +264,7 @@ namespace app
         // Get resource at a specific index in the list of all resources.
         // This will get any resource regardless user defined or not.
         Resource& GetResource(const ModelIndex& index);
+        Resource& GetResource(size_t index);
         // Get a user defined resource.
         Resource& GetUserDefinedResource(size_t index);
         // Get a primitive (built-in) resource.

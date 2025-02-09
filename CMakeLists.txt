@@ -998,6 +998,7 @@ add_executable(unit_test_workspace
         editor/app/zip_archive_exporter.cpp
         editor/app/zip_archive_importer.cpp
         editor/app/resource.cpp
+        editor/app/resource_cache.cpp
         editor/app/buffer.cpp
         editor/app/packing.cpp
         editor/app/process.cpp)

@@ -638,15 +638,20 @@ QVariant Workspace::data(const QModelIndex& index, int role) const
         return QSize(0, 16);
     else if (role == Qt::DisplayRole)
     {
-        switch (index.column())
-        {
-            case 0: return toString(res->GetType());
-            case 1: return res->GetName();
-        }
+        if (index.column() == 0)
+            return toString(res->GetType());
+        else if (index.column() == 1)
+            return res->GetName();
     }
-    else if (role == Qt::DecorationRole && index.column() == 0)
+    else if (role == Qt::DecorationRole)
     {
-        return res->GetIcon();
+        if (index.column() == 0)
+            return res->GetIcon();
+        else if (index.column() == 1)
+        {
+            if (!res->GetProperty("_is_valid_", true))
+                return QIcon("icons:problem.png");
+        }
     }
     return QVariant();
 }
@@ -1760,6 +1765,11 @@ bool Workspace::IsUserDefinedResource(const AnyString& id) const
 }
 
 Resource& Workspace::GetResource(const ModelIndex& index)
+{
+    ASSERT(index < mResources.size());
+    return *mResources[index];
+}
+Resource& Workspace::GetResource(size_t index)
 {
     ASSERT(index < mResources.size());
     return *mResources[index];
