@@ -685,43 +685,54 @@ bool PackResource(uik::Window& window, ResourcePacker& packer)
         auto style_string = widget->GetStyleString();
         if (style_string.empty())
             return;
-        DEBUG("Original widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
+
+        if (packer.IsReleasePackage())
+            DEBUG("Original widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
+
         engine::UIStyle style;
         style.ParseStyleString(widget->GetId(), style_string);
 
         ok &= PackUIStyleResources(style, packer);
 
-        style_string = style.MakeStyleString(widget->GetId());
-        // this is a bit of a hack but we know that the style string
-        // contains the widget id for each property. removing the
-        // widget id from the style properties:
-        // a) saves some space
-        // b) makes the style string copyable from one widget to another as-s
-        boost::erase_all(style_string, widget->GetId() + "/");
-        DEBUG("Updated widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
-        widget->SetStyleString(std::move(style_string));
+        if (packer.IsReleasePackage())
+        {
+            style_string = style.MakeStyleString(widget->GetId());
+            // this is a bit of a hack but we know that the style string
+            // contains the widget id for each property. removing the
+            // widget id from the style properties:
+            // a) saves some space
+            // b) makes the style string copyable from one widget to another as-s
+            boost::erase_all(style_string, widget->GetId() + "/");
+            DEBUG("Updated widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
+            widget->SetStyleString(std::move(style_string));
+        }
     });
 
     // parse the window style string if any and gather/remap font properties.
     auto window_style_string = window.GetStyleString();
     if (!window_style_string.empty())
     {
-        DEBUG("Original window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
+        if (packer.IsReleasePackage())
+            DEBUG("Original window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
+
         engine::UIStyle style;
         style.ParseStyleString("window", window_style_string);
 
         ok &= PackUIStyleResources(style, packer);
 
-        window_style_string = style.MakeStyleString("window");
-        // this is a bit of a hack, but we know that the style string
-        // contains the prefix "window" for each property. removing the
-        // prefix from the style properties:
-        // a) saves some space
-        // b) makes the style string copyable from one widget to another as-s
-        boost::erase_all(window_style_string, "window/");
-        // set the actual style string.
-        DEBUG("Updated window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
-        window.SetStyleString(std::move(window_style_string));
+        if (packer.IsReleasePackage())
+        {
+            window_style_string = style.MakeStyleString("window");
+            // this is a bit of a hack, but we know that the style string
+            // contains the prefix "window" for each property. removing the
+            // prefix from the style properties:
+            // a) saves some space
+            // b) makes the style string copyable from one widget to another as-s
+            boost::erase_all(window_style_string, "window/");
+            // set the actual style string.
+            DEBUG("Updated window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
+            window.SetStyleString(std::move(window_style_string));
+        }
     }
     return ok;
 }
