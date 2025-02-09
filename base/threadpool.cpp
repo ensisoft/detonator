@@ -100,7 +100,7 @@ public:
 private:
     void ThreadMain()
     {
-        DEBUG("Hello from thread pool thread %1.", mThreadId);
+        DEBUG("Hello from thread pool thread. [id=%1]", mThreadId);
         std::unique_ptr<base::TraceLog> trace;
 
         while (true)
@@ -184,7 +184,7 @@ private:
             }
 
         }
-        DEBUG("Thread pool thread exiting [id=%1]...", mThreadId);
+        DEBUG("Thread pool thread exiting... [id=%1]", mThreadId);
     }
 
 private:
