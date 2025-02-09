@@ -137,11 +137,26 @@ T* GetOpt(std::optional<T>& opt)
 
 template<typename Key> inline
 bool Contains(const std::unordered_set<Key>& set, const Key& k)
-{ return set.find(k) != set.end(); }
+{
+    return set.find(k) != set.end();
+}
+inline
+bool Contains(const std::unordered_set<std::string>& set, const std::string& key)
+{
+    return set.find(key) != set.end();
+}
 
 template<typename Key, typename Val> inline
 bool Contains(const std::unordered_map<Key, Val>& map, const Key& k)
-{ return map.find(k) != map.end(); }
+{
+    return map.find(k) != map.end();
+}
+
+template<typename Val> inline
+bool Contains(const std::unordered_map<std::string, Val>& map, const std::string& key)
+{
+    return map.find(key) != map.end();
+}
 
 template<typename Key> inline
 bool Contains(const std::set<Key>& set, const Key& k)
@@ -196,6 +211,14 @@ T* SafeFind(std::unordered_map<K, T>& map, const K& key)
         return nullptr;
     return &it->second;
 }
+template<typename T>
+T* SafeFind(std::unordered_map<std::string, T>& map, const std::string& key)
+{
+    auto it = map.find(key);
+    if (it == map.end())
+        return nullptr;
+    return &it->second;
+}
 
 template<typename K, typename T>
 T* SafeFind(std::unordered_map<K, std::unique_ptr<T>>& map, const K& key)
@@ -205,8 +228,26 @@ T* SafeFind(std::unordered_map<K, std::unique_ptr<T>>& map, const K& key)
         return nullptr;
     return it->second.get();
 }
+template<typename T>
+T* SafeFind(std::unordered_map<std::string, std::unique_ptr<T>>& map, const std::string& key)
+{
+    auto it = map.find(key);
+    if (it == map.end())
+        return nullptr;
+    return it->second.get();
+}
+
+
 template<typename K, typename T>
 const T* SafeFind(const std::unordered_map<K, T>& map, const K& key)
+{
+    auto it = map.find(key);
+    if (it == map.end())
+        return nullptr;
+    return &it->second;
+}
+template<typename T>
+const T* SafeFind(const std::unordered_map<std::string, T>& map, const std::string& key)
 {
     auto it = map.find(key);
     if (it == map.end())
@@ -222,7 +263,14 @@ const T* SafeFind(const std::unordered_map<K, std::unique_ptr<T>>& map, const K&
         return nullptr;
     return it->second.get();
 }
-
+template<typename T>
+const T* SafeFind(const std::unordered_map<std::string, std::unique_ptr<T>>& map, const std::string& key)
+{
+    auto it = map.find(key);
+    if (it == map.end())
+        return nullptr;
+    return it->second.get();
+}
 
 template<typename T>
 T& SafeIndex(std::vector<T>& vector, std::size_t index)
