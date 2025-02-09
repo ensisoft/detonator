@@ -90,6 +90,10 @@ namespace game
         };
         using SpatialIndexArgs = std::variant<QuadTreeArgs, DenseGridArgs>;
 
+        // for testing purposes, make it easier to create a scene class with
+        // a known ID
+        explicit SceneClass(std::string id);
+
         SceneClass();
         // Copy construct a deep copy of the scene.
         SceneClass(const SceneClass& other);

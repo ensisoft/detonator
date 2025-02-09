@@ -47,9 +47,9 @@
 namespace game
 {
 
-EntityClass::EntityClass()
+EntityClass::EntityClass(std::string id)
+  : mClassId(std::move(id))
 {
-    mClassId = base::RandomString(10);
     mFlags.set(Flags::VisibleInEditor, true);
     mFlags.set(Flags::VisibleInGame,   true);
     mFlags.set(Flags::LimitLifetime,   false);
@@ -62,6 +62,8 @@ EntityClass::EntityClass()
     mFlags.set(Flags::WantsKeyEvents,  false);
     mFlags.set(Flags::WantsMouseEvents,false);
 }
+EntityClass::EntityClass() : EntityClass(base::RandomString(10))
+{}
 
 EntityClass::EntityClass(const EntityClass& other)
 {
