@@ -57,6 +57,11 @@ namespace gui
             return mWindow;
         }
 
+        QString GetId() const
+        {
+            return mWidgetId;
+        }
+
         // Returns true if the widget requires an accelerated
         // update and render loop.
         bool IsAccelerated() const;
@@ -125,6 +130,7 @@ namespace gui
     private:
         Ui::ChildWindow mUI;
     private:
+        QString mWidgetId;
         FramelessWindow* mWindow = nullptr;
         MainWidget* mWidget = nullptr;
         Clipboard* mClipboard = nullptr;

@@ -1906,7 +1906,7 @@
      <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
    </property>
    <property name="text">
-    <string>Open</string>
+    <string>Open in Default</string>
    </property>
    <property name="toolTip">
     <string>Open resource for editing</string>
