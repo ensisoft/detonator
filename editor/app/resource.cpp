@@ -1064,6 +1064,29 @@ void MigrateResource(gfx::MaterialClass& material, ResourceMigrationLog* log, un
         }
     }
 
+    if (material.GetType() == gfx::MaterialClass::Type::Gradient)
+    {
+        if (const auto* ptr = material.FindUniformValue<glm::vec2>("kWeight"))
+        {
+            material.SetUniform("kGradientWeight", *ptr);
+            material.DeleteUniform("kWeight");
+            log->WriteLog(material, "Material", "Changed gradient uniform name from kWeight to kGradientWeight");
+        }
+
+        for (int i=0; i<4; ++i)
+        {
+            const auto& old_name = base::FormatString("kColor%1", i);
+            const auto& new_name = base::FormatString("kGradientColor%1", i);
+            if (const auto* ptr = material.FindUniformValue<gfx::Color4f>(old_name))
+            {
+                material.SetUniform(new_name, *ptr);
+                material.DeleteUniform(old_name);
+                log->WriteLog(material, "Material", base::FormatString("Changed gradient uniform name from %1 to %2",
+                    old_name, new_name));
+            }
+        }
+    }
+
     if (material.GetType() != gfx::MaterialClass::Type::Custom)
     {
         if (material.HasShaderUri())

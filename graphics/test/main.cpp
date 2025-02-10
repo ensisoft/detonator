@@ -414,10 +414,10 @@ public:
         transform.MoveTo(200, 200);
 
         gfx::GradientClass material(gfx::MaterialClass::Type::Gradient);
-        material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::TopLeft);
-        material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::TopRight);
-        material.SetColor(gfx::Color::Black,  gfx::GradientClass::ColorIndex::BottomLeft);
-        material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::BottomRight);
+        material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::GradientColor0);
+        material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::GradientColor1);
+        material.SetColor(gfx::Color::Black,  gfx::GradientClass::ColorIndex::GradientColor2);
+        material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::GradientColor3);
         painter.Draw(gfx::PolygonMeshInstance(mPoly), transform, gfx::MaterialInstance(material));
 
         // eye
@@ -665,10 +665,10 @@ public:
         // draw a gradient in the background
         {
             gfx::GradientClass material(gfx::MaterialClass::Type::Gradient);
-            material.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::TopLeft);
-            material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::BottomLeft);
-            material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::BottomRight);
-            material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::TopRight);
+            material.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::GradientColor0);
+            material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::GradientColor2);
+            material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::GradientColor3);
+            material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::GradientColor1);
             gfx::Transform transform;
             transform.Resize(1024, 768);
             painter.Draw(gfx::Rectangle(), transform, gfx::MaterialInstance(material));
@@ -910,23 +910,23 @@ public:
     void Render(gfx::Painter& painter) override
     {
         gfx::GradientClass material(gfx::MaterialClass::Type::Gradient);
-        material.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::TopLeft);
-        material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::BottomLeft);
-        material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::BottomRight);
-        material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::TopRight);
+        material.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::GradientColor0);
+        material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::GradientColor2);
+        material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::GradientColor3);
+        material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::GradientColor1);
         gfx::FillRect(painter, gfx::FRect(0, 0, 400, 400), gfx::MaterialInstance(material));
 
         // *perceptually* linear gradient ramp
-        material.SetColor(gfx::Color::Black,   gfx::GradientClass::ColorIndex::TopLeft);
-        material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::BottomLeft);
-        material.SetColor(gfx::Color::White,  gfx::GradientClass::ColorIndex::BottomRight);
-        material.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
+        material.SetColor(gfx::Color::Black,   gfx::GradientClass::ColorIndex::GradientColor0);
+        material.SetColor(gfx::Color::Black,   gfx::GradientClass::ColorIndex::GradientColor2);
+        material.SetColor(gfx::Color::White,   gfx::GradientClass::ColorIndex::GradientColor3);
+        material.SetColor(gfx::Color::White,   gfx::GradientClass::ColorIndex::GradientColor1);
         gfx::FillRect(painter, gfx::FRect(500, 20, 400, 100), gfx::MaterialInstance(material));
 
-        material.SetColorWeight(glm::vec2(0.75, 0.0f));
+        material.SetGradientWeight(glm::vec2(0.75, 0.0f));
         gfx::FillRect(painter, gfx::FRect(500, 140, 400, 100), gfx::MaterialInstance(material));
 
-        material.SetColorWeight(glm::vec2(0.25, 0.0f));
+        material.SetGradientWeight(glm::vec2(0.25, 0.0f));
         gfx::FillRect(painter, gfx::FRect(500, 260, 400, 100), gfx::MaterialInstance(material));
     }
     std::string GetName() const override

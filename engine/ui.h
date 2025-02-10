@@ -150,10 +150,10 @@ namespace engine
                        const gfx::Color4f& bottom_left,
                        const gfx::Color4f& bottom_right)
             {
-                SetColor(top_left, ColorIndex::TopLeft);
-                SetColor(top_right, ColorIndex::TopRight);
-                SetColor(bottom_left, ColorIndex ::BottomLeft);
-                SetColor(bottom_right, ColorIndex::BottomRight);
+                SetColor(top_left,     ColorIndex::GradientColor0);
+                SetColor(top_right,    ColorIndex::GradientColor1);
+                SetColor(bottom_left,  ColorIndex::GradientColor2);
+                SetColor(bottom_right, ColorIndex::GradientColor3);
             }
 
             virtual MaterialClass GetClass(const ClassLibrary*, const Loader* ) const override;
@@ -163,26 +163,26 @@ namespace engine
             virtual void IntoJson(nlohmann::json& json) const override;
             UIGradient& SetColor(const gfx::Color4f& color, ColorIndex index)
             {
-                if (index == ColorIndex::TopLeft)
+                if (index == ColorIndex::GradientColor0)
                     mColorMap[0] = color;
-                else if (index == ColorIndex::TopRight)
+                else if (index == ColorIndex::GradientColor1)
                     mColorMap[1] = color;
-                else if (index == ColorIndex::BottomLeft)
+                else if (index == ColorIndex::GradientColor2)
                     mColorMap[2] = color;
-                else if (index == ColorIndex::BottomRight)
+                else if (index == ColorIndex::GradientColor3)
                     mColorMap[3] = color;
                 else BUG("incorrect color index");
                 return *this;
             }
             gfx::Color4f GetColor(ColorIndex index) const
             {
-                if (index == ColorIndex::TopLeft)
+                if (index == ColorIndex::GradientColor0)
                     return mColorMap[0];
-                else if (index == ColorIndex::TopRight)
+                else if (index == ColorIndex::GradientColor1)
                     return mColorMap[1];
-                else if (index == ColorIndex::BottomLeft)
+                else if (index == ColorIndex::GradientColor2)
                     return mColorMap[2];
-                else if (index == ColorIndex::BottomRight)
+                else if (index == ColorIndex::GradientColor3)
                     return mColorMap[3];
                 else BUG("incorrect color index");
                 return gfx::Color4f();

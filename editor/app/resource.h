@@ -659,7 +659,7 @@ namespace app
         {
             if constexpr (TypeValue == Resource::Type::Material)
             {
-                unsigned current_version = 4;
+                unsigned current_version = 5;
                 unsigned saved_version;
                 ASSERT(Resource::GetProperty("__version", &saved_version));
                 if (saved_version < current_version)

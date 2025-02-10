@@ -2129,31 +2129,31 @@ void MaterialWidget::SetMaterialProperties()
     else mMaterial->SetTextureVelocity(linear_texture_velocity, angular_texture_velocity);
 
     if (Equals(GetValue(mUI.colorMap0), gfx::Color::White))
-        mMaterial->DeleteUniform("kColor0");
-    else mMaterial->SetUniform("kColor0", GetValue(mUI.colorMap0));
+        mMaterial->DeleteUniform(gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor0));
+    else mMaterial->SetColor(GetValue(mUI.colorMap0), gfx::MaterialClass::ColorIndex::GradientColor0);
 
     if (Equals(GetValue(mUI.colorMap1), gfx::Color::White))
-        mMaterial->DeleteUniform("kColor1");
-    else mMaterial->SetUniform("kColor1", GetValue(mUI.colorMap1));
+        mMaterial->DeleteUniform(gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor1));
+    else mMaterial->SetColor(GetValue(mUI.colorMap1), gfx::MaterialClass::ColorIndex::GradientColor1);
 
     if (Equals(GetValue(mUI.colorMap2), gfx::Color::White))
-        mMaterial->DeleteUniform("kColor2");
-    else mMaterial->SetUniform("kColor2", GetValue(mUI.colorMap2));
+        mMaterial->DeleteUniform(gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor2));
+    else mMaterial->SetColor(GetValue(mUI.colorMap2), gfx::MaterialClass::ColorIndex::GradientColor2);
 
     if (Equals(GetValue(mUI.colorMap3), gfx::Color::White))
-        mMaterial->DeleteUniform("kColor3");
-    else mMaterial->SetUniform("kColor3", GetValue(mUI.colorMap3));
+        mMaterial->DeleteUniform(gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor3));
+    else mMaterial->SetColor(GetValue(mUI.colorMap3), gfx::MaterialClass::ColorIndex::GradientColor3);
 
     if (Equals(GetValue(mUI.baseColor), gfx::Color::White))
-        mMaterial->DeleteUniform("kBaseColor");
-    else mMaterial->SetUniform("kBaseColor", GetValue(mUI.baseColor));
+        mMaterial->DeleteUniform(gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::BaseColor));
+    else mMaterial->SetColor(GetValue(mUI.baseColor), gfx::MaterialClass::ColorIndex::BaseColor);
 
     glm::vec2 gradient_offset;
     gradient_offset.x = GetNormalizedValue(mUI.gradientOffsetX);
     gradient_offset.y = GetNormalizedValue(mUI.gradientOffsetY);
     if (math::equals(gradient_offset, glm::vec2(0.5f, 0.5f)))
-        mMaterial->DeleteUniform("kWeight");
-    else mMaterial->SetColorWeight(gradient_offset);
+        mMaterial->DeleteUniform("kGradientWeight");
+    else mMaterial->SetGradientWeight(gradient_offset);
 
     for (auto* widget : mUniforms)
     {
@@ -2306,11 +2306,11 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.particleBaseRotation, qRadiansToDegrees(mMaterial->GetParticleBaseRotation()));
 
     // gradient values.
-    const auto& offset = mMaterial->GetColorWeight();
-    SetValue(mUI.colorMap0, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::TopLeft));
-    SetValue(mUI.colorMap1, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::TopRight));
-    SetValue(mUI.colorMap2, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::BottomLeft));
-    SetValue(mUI.colorMap3, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::BottomRight));
+    const auto& offset = mMaterial->GetGradientWeight();
+    SetValue(mUI.colorMap0, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::GradientColor0));
+    SetValue(mUI.colorMap1, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::GradientColor1));
+    SetValue(mUI.colorMap2, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::GradientColor2));
+    SetValue(mUI.colorMap3, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::GradientColor3));
     SetValue(mUI.gradientOffsetX, NormalizedFloat(offset.x));
     SetValue(mUI.gradientOffsetY, NormalizedFloat(offset.y));
 

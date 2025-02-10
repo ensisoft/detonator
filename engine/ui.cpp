@@ -165,10 +165,10 @@ UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary*, const Loader
 {
     auto material = std::make_shared<gfx::GradientClass>(gfx::MaterialClass::Type::Gradient);
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    material->SetColor(mColorMap[0], ColorIndex::TopLeft);
-    material->SetColor(mColorMap[1], ColorIndex::TopRight);
-    material->SetColor(mColorMap[2], ColorIndex::BottomLeft);
-    material->SetColor(mColorMap[3], ColorIndex::BottomRight);
+    material->SetColor(mColorMap[0], ColorIndex::GradientColor0);
+    material->SetColor(mColorMap[1], ColorIndex::GradientColor1);
+    material->SetColor(mColorMap[2], ColorIndex::GradientColor2);
+    material->SetColor(mColorMap[3], ColorIndex::GradientColor3);
     material->SetName("UIGradient");
     return material;
 }

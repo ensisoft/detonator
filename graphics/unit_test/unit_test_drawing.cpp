@@ -443,10 +443,11 @@ void unit_test_material_uniforms()
         gfx::ProgramState program;
 
         gfx::MaterialClass test(gfx::MaterialClass::Type::Gradient);
-        test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
-        test.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::TopLeft);
-        test.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
-        test.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::TopRight);
+        test.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::GradientColor0);
+        test.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::GradientColor1);
+        test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::GradientColor2);
+        test.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::GradientColor3);
+
         test.SetStatic(false);
 
         gfx::FlatShadedColorProgram pass;
@@ -458,10 +459,10 @@ void unit_test_material_uniforms()
         gfx::Color4f color1;
         gfx::Color4f color2;
         gfx::Color4f color3;
-        TEST_REQUIRE(program.GetUniform("kColor0", &color0));
-        TEST_REQUIRE(program.GetUniform("kColor1", &color1));
-        TEST_REQUIRE(program.GetUniform("kColor2", &color2));
-        TEST_REQUIRE(program.GetUniform("kColor3", &color3));
+        TEST_REQUIRE(program.GetUniform("kGradientColor0", &color0));
+        TEST_REQUIRE(program.GetUniform("kGradientColor1", &color1));
+        TEST_REQUIRE(program.GetUniform("kGradientColor2", &color2));
+        TEST_REQUIRE(program.GetUniform("kGradientColor3", &color3));
         TEST_REQUIRE(color0 == gfx::Color::DarkGreen);
         TEST_REQUIRE(color1 == gfx::Color::DarkGray);
         TEST_REQUIRE(color2 == gfx::Color::DarkBlue);
@@ -629,10 +630,10 @@ void unit_test_material_uniforms()
         gfx::ProgramState program;
 
         gfx::MaterialClass test(gfx::MaterialClass::Type::Gradient);
-        test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
-        test.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::TopLeft);
-        test.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
-        test.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::TopRight);
+        test.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::GradientColor0);
+        test.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::GradientColor1);
+        test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::GradientColor2);
+        test.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::GradientColor3);
         test.SetStatic(true);
 
         gfx::FlatShadedColorProgram pass;
@@ -644,10 +645,10 @@ void unit_test_material_uniforms()
         gfx::Color4f color1;
         gfx::Color4f color2;
         gfx::Color4f color3;
-        TEST_REQUIRE(program.GetUniform("kColor0", &color0));
-        TEST_REQUIRE(program.GetUniform("kColor1", &color1));
-        TEST_REQUIRE(program.GetUniform("kColor2", &color2));
-        TEST_REQUIRE(program.GetUniform("kColor3", &color3));
+        TEST_REQUIRE(program.GetUniform("kGradientColor0", &color0));
+        TEST_REQUIRE(program.GetUniform("kGradientColor1", &color1));
+        TEST_REQUIRE(program.GetUniform("kGradientColor2", &color2));
+        TEST_REQUIRE(program.GetUniform("kGradientColor3", &color3));
         TEST_REQUIRE(color0 == gfx::Color::DarkGreen);
         TEST_REQUIRE(color1 == gfx::Color::DarkGray);
         TEST_REQUIRE(color2 == gfx::Color::DarkBlue);
@@ -797,10 +798,10 @@ void unit_test_material_uniforms()
     {
         gfx::MaterialClass foo(gfx::MaterialClass::Type::Gradient);
         foo.SetStatic(true);
-        foo.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
-        foo.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::TopLeft);
-        foo.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
-        foo.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::TopRight);
+        foo.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::GradientColor2);
+        foo.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::GradientColor0);
+        foo.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::GradientColor3);
+        foo.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::GradientColor1);
 
         gfx::FlatShadedColorProgram pass;
         gfx::MaterialClass::State state;
@@ -808,16 +809,16 @@ void unit_test_material_uniforms()
         auto bar = foo;
         TEST_REQUIRE(foo.GetShaderId(state) == bar.GetShaderId(state));
 
-        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::BottomLeft);
+        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::GradientColor2);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
-        foo.SetColor(gfx::Color::White,gfx::GradientClass::ColorIndex::TopLeft);
+        foo.SetColor(gfx::Color::White,gfx::GradientClass::ColorIndex::GradientColor3);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
-        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::BottomRight);
+        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::GradientColor0);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
-        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
+        foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::GradientColor1);
         TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
     }
 
@@ -1237,21 +1238,21 @@ void unit_test_material_uniform_folding()
         TestDevice device;
 
         gfx::MaterialClass klass(gfx::MaterialClass::Type::Gradient);
-        klass.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::BottomLeft);
-        klass.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::TopLeft);
-        klass.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::BottomRight);
-        klass.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
+        klass.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::GradientColor2);
+        klass.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::GradientColor0);
+        klass.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::GradientColor3);
+        klass.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::GradientColor1);
         klass.SetStatic(true);
         const auto& source = klass.GetShader(state, device);
         const auto& sauce = source.GetSource();
-        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kColor0;") == false);
-        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kColor1;") == false);
-        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kColor2;") == false);
-        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kColor3;") == false);
-        TEST_REQUIRE(base::Contains(sauce, "const vec4 kColor0 = vec4(0.00,1.00,0.00,1.00);"));
-        TEST_REQUIRE(base::Contains(sauce, "const vec4 kColor1 = vec4(1.00,1.00,1.00,1.00);"));
-        TEST_REQUIRE(base::Contains(sauce, "const vec4 kColor2 = vec4(0.00,0.00,1.00,1.00);"));
-        TEST_REQUIRE(base::Contains(sauce, "const vec4 kColor3 = vec4(1.00,0.00,0.00,1.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kGradientColor0;") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kGradientColor1;") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kGradientColor2;") == false);
+        TEST_REQUIRE(base::Contains(sauce, "uniform vec4 kGradientColor3;") == false);
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kGradientColor0 = vec4(0.00,1.00,0.00,1.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kGradientColor1 = vec4(1.00,1.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kGradientColor2 = vec4(0.00,0.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(sauce, "const vec4 kGradientColor3 = vec4(1.00,0.00,0.00,1.00);"));
     }
 
     {

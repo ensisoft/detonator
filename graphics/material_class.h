@@ -60,10 +60,10 @@ namespace gfx
         // texture coordinate space.
         enum class ColorIndex {
             BaseColor,
-            TopLeft,
-            TopRight,
-            BottomLeft,
-            BottomRight
+            GradientColor0, // top left
+            GradientColor1, // top right
+            GradientColor2, // bottom left
+            GradientColor3, // bottom right
         };
 
         // Control the rasterizer blending operation and how the
@@ -271,8 +271,8 @@ namespace gfx
                                          : SetUniform("kParticleEffect", static_cast<int>(action)); }
         inline void SetAlphaCutoff(float cutoff) noexcept
         { SetUniform("kAlphaCutoff", cutoff); }
-        inline void SetColorWeight(glm::vec2 weight) noexcept
-        { SetUniform("kWeight", weight); }
+        inline void SetGradientWeight(glm::vec2 weight) noexcept
+        { SetUniform("kGradientWeight", weight); }
         inline void SetBaseColor(const Color4f& color) noexcept
         { SetColor(color, ColorIndex::BaseColor); }
         inline void SetColor(const Color4f& color, ColorIndex index) noexcept
@@ -315,8 +315,8 @@ namespace gfx
         { return GetUniformValue<Color4f>(GetColorUniformName(index), Color::White); }
         inline Color4f GetBaseColor() const noexcept
         { return GetColor(ColorIndex::BaseColor); }
-        inline glm::vec2 GetColorWeight() const noexcept
-        { return GetUniformValue<glm::vec2>("kWeight", {0.5f, 0.5f}); }
+        inline glm::vec2 GetGradientWeight() const noexcept
+        { return GetUniformValue<glm::vec2>("kGradientWeight", {0.5f, 0.5f}); }
         inline float GetTextureScaleX() const noexcept
         { return GetTextureScale().x; }
         inline float GetTextureScaleY() const noexcept
