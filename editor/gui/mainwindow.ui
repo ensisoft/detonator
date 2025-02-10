@@ -1406,6 +1406,7 @@
     <addaction name="actionViewStatusbar"/>
     <addaction name="actionViewEventlog"/>
     <addaction name="actionViewWorkspace"/>
+    <addaction name="actionViewPreview"/>
     <addaction name="separator"/>
     <addaction name="menuEvent_log"/>
    </widget>
@@ -2651,6 +2652,20 @@
     <string>Ctrl+Shift+N</string>
    </property>
   </action>
+  <action name="actionViewPreview">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Preview</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle preview window on or off</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -2753,6 +2768,22 @@
     <hint type="destinationlabel">
      <x>128</x>
      <y>346</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionViewPreview</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>previewDock</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>140</x>
+     <y>1021</y>
     </hint>
    </hints>
   </connection>

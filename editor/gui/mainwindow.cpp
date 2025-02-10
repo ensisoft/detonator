@@ -352,6 +352,7 @@ void MainWindow::LoadLastState(FramelessWindow* window)
     const auto show_toolbar   = settings.GetValue("MainWindow", "show_toolbar", true);
     const auto show_eventlog  = settings.GetValue("MainWindow", "show_event_log", true);
     const auto show_workspace = settings.GetValue("MainWindow", "show_workspace", true);
+    const auto show_preview   = settings.GetValue("MainWindow", "show_preview", true);
     const auto& dock_state    = settings.GetValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
     settings.GetValue("MainWindow", "recent_workspaces", &mRecentWorkspaces);
 
@@ -386,10 +387,12 @@ void MainWindow::LoadLastState(FramelessWindow* window)
     mUI.statusbar->setVisible(show_statbar);
     mUI.eventlogDock->setVisible(show_eventlog);
     mUI.workspaceDock->setVisible(show_workspace);
+    mUI.previewDock->setVisible(show_preview);
     mUI.actionViewToolbar->setChecked(show_toolbar);
     mUI.actionViewStatusbar->setChecked(show_statbar);
     mUI.actionViewEventlog->setChecked(show_eventlog);
     mUI.actionViewWorkspace->setChecked(show_workspace);
+    mUI.actionViewPreview->setChecked(show_preview);
 
     if (!dock_state.isEmpty())
         QMainWindow::restoreState(dock_state);
@@ -3561,6 +3564,7 @@ bool MainWindow::SaveState()
     settings.SetValue("MainWindow", "show_statusbar", mUI.statusbar->isVisible());
     settings.SetValue("MainWindow", "show_eventlog", mUI.eventlogDock->isVisible());
     settings.SetValue("MainWindow", "show_workspace", mUI.workspaceDock->isVisible());
+    settings.SetValue("MainWindow", "show_preview", mUI.previewDock->isVisible());
     settings.SetValue("MainWindow", "current_workspace", (mWorkspace ? mWorkspace->GetDir() : ""));
     settings.SetValue("MainWindow", "toolbar_and_dock_state", QMainWindow::saveState());
     settings.SetValue("MainWindow", "recent_workspaces", mRecentWorkspaces);
