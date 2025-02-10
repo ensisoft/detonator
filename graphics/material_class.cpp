@@ -129,11 +129,11 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetColor(ColorIndex::TopLeft));
-            hash = base::hash_combine(hash, GetColor(ColorIndex::TopRight));
-            hash = base::hash_combine(hash, GetColor(ColorIndex::BottomLeft));
-            hash = base::hash_combine(hash, GetColor(ColorIndex::BottomRight));
-            hash = base::hash_combine(hash, GetColorWeight());
+            hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor0));
+            hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor1));
+            hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor2));
+            hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor3));
+            hash = base::hash_combine(hash, GetGradientWeight());
             hash = base::hash_combine(hash, mSurfaceType);
         }
     }
@@ -221,11 +221,11 @@ std::size_t MaterialClass::GetHash() const noexcept
     hash = base::hash_combine(hash, GetTextureScale());
     hash = base::hash_combine(hash, GetTextureVelocity());
     hash = base::hash_combine(hash, GetColor(ColorIndex::BaseColor));
-    hash = base::hash_combine(hash, GetColor(ColorIndex::TopLeft));
-    hash = base::hash_combine(hash, GetColor(ColorIndex::TopRight));
-    hash = base::hash_combine(hash, GetColor(ColorIndex::BottomLeft));
-    hash = base::hash_combine(hash, GetColor(ColorIndex::BottomRight));
-    hash = base::hash_combine(hash, GetColorWeight());
+    hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor0));
+    hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor1));
+    hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor2));
+    hash = base::hash_combine(hash, GetColor(ColorIndex::GradientColor3));
+    hash = base::hash_combine(hash, GetGradientWeight());
     hash = base::hash_combine(hash, GetAlphaCutoff());
     hash = base::hash_combine(hash, GetTileSize());
     hash = base::hash_combine(hash, GetTileOffset());
@@ -338,11 +338,11 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
             // the tradeoff is that this creates more shader programs!
             source.FoldUniform("kAlphaCutoff", GetAlphaCutoff());
             source.FoldUniform("kBaseColor", GetColor(ColorIndex::BaseColor));
-            source.FoldUniform("kColor0", GetColor(ColorIndex::TopLeft));
-            source.FoldUniform("kColor1", GetColor(ColorIndex::TopRight));
-            source.FoldUniform("kColor2", GetColor(ColorIndex::BottomLeft));
-            source.FoldUniform("kColor3", GetColor(ColorIndex::BottomRight));
-            source.FoldUniform("kOffset", GetColorWeight());
+            source.FoldUniform("kGradientColor0", GetColor(ColorIndex::GradientColor0));
+            source.FoldUniform("kGradientColor1", GetColor(ColorIndex::GradientColor1));
+            source.FoldUniform("kGradientColor2", GetColor(ColorIndex::GradientColor2));
+            source.FoldUniform("kGradientColor3", GetColor(ColorIndex::GradientColor3));
+            source.FoldUniform("kGradientWeight", GetGradientWeight());
             source.FoldUniform("kTextureVelocity", GetTextureVelocity());
             source.FoldUniform("kTextureVelocityXY", glm::vec2(GetTextureVelocity()));
             source.FoldUniform("kTextureVelocityZ", GetTextureVelocity().z);
@@ -392,11 +392,11 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     {
         if (!IsStatic())
         {
-            SetUniform("kColor0", state.uniforms, GetColor(ColorIndex::TopLeft),     program);
-            SetUniform("kColor1", state.uniforms, GetColor(ColorIndex::TopRight),    program);
-            SetUniform("kColor2", state.uniforms, GetColor(ColorIndex::BottomLeft),  program);
-            SetUniform("kColor3", state.uniforms, GetColor(ColorIndex::BottomRight), program);
-            SetUniform("kOffset", state.uniforms, GetColorWeight(), program);
+            SetUniform("kGradientColor0", state.uniforms, GetColor(ColorIndex::GradientColor0), program);
+            SetUniform("kGradientColor1", state.uniforms, GetColor(ColorIndex::GradientColor1), program);
+            SetUniform("kGradientColor2", state.uniforms, GetColor(ColorIndex::GradientColor2), program);
+            SetUniform("kGradientColor3", state.uniforms, GetColor(ColorIndex::GradientColor3), program);
+            SetUniform("kGradientWeight", state.uniforms, GetGradientWeight(), program);
         }
     }
     else if (mType == Type::Sprite)
@@ -424,11 +424,11 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
     }
     else if (mType == Type::Gradient)
     {
-        program.SetUniform("kColor0", GetColor(ColorIndex::TopLeft));
-        program.SetUniform("kColor1", GetColor(ColorIndex::TopRight));
-        program.SetUniform("kColor2", GetColor(ColorIndex::BottomLeft));
-        program.SetUniform("kColor3", GetColor(ColorIndex::BottomRight));
-        program.SetUniform("kOffset", GetColorWeight());
+        program.SetUniform("kGradientColor0", GetColor(ColorIndex::GradientColor0));
+        program.SetUniform("kGradientColor1", GetColor(ColorIndex::GradientColor1));
+        program.SetUniform("kGradientColor2", GetColor(ColorIndex::GradientColor2));
+        program.SetUniform("kGradientColor3", GetColor(ColorIndex::GradientColor3));
+        program.SetUniform("kGradientWeight", GetGradientWeight());
     }
     else if (mType == Type::Sprite)
     {
@@ -612,7 +612,7 @@ bool MaterialClass::FromJson(const data::Reader& data)
     ok &= ReadLegacyValue<Color4f>("color_map1", "kColor1", data);
     ok &= ReadLegacyValue<Color4f>("color_map2", "kColor2", data);
     ok &= ReadLegacyValue<Color4f>("color_map3", "kColor3", data);
-    ok &= ReadLegacyValue<glm::vec2>("color_weight", "kWeight", data);
+    ok &= ReadLegacyValue<glm::vec2>("color_weight", "kGradientWeight", data);
     ok &= ReadLegacyValue<glm::vec2>("texture_scale", "kTextureScale", data);
     ok &= ReadLegacyValue<glm::vec3>("texture_velocity", "kTextureVelocity", data);
     ok &= ReadLegacyValue<float>("texture_rotation", "kTextureRotation", data);
@@ -642,6 +642,8 @@ bool MaterialClass::FromJson(const data::Reader& data)
     {
         if (data.HasValue("offset"))
             ok &= ReadLegacyValue<glm::vec2>("offset", "kWeight", data);
+        if (data.HasValue("kWeight"))
+            ok &= ReadLegacyValue<glm::vec2>("kWeight", "kGradientWeight", data);
     }
     else if (mType == Type::Texture)
     {
@@ -1054,14 +1056,14 @@ std::string MaterialClass::GetColorUniformName(ColorIndex index)
 {
     if (index == ColorIndex::BaseColor)
         return "kBaseColor";
-    else if (index == ColorIndex::TopLeft)
-        return "kColor0";
-    else if (index == ColorIndex::TopRight)
-        return "kColor1";
-    else if (index == ColorIndex::BottomLeft)
-        return "kColor2";
-    else if (index == ColorIndex::BottomRight)
-        return "kColor3";
+    else if (index == ColorIndex::GradientColor0)
+        return "kGradientColor0";
+    else if (index == ColorIndex::GradientColor1)
+        return "kGradientColor1";
+    else if (index == ColorIndex::GradientColor2)
+        return "kGradientColor2";
+    else if (index == ColorIndex::GradientColor3)
+        return "kGradientColor3";
     else BUG("Unknown color index.");
     return "";
 }
@@ -1678,10 +1680,10 @@ GradientClass CreateMaterialClassFromColor(const Color4f& top_left,
                                            const Color4f& bottom_right)
 {
     MaterialClass material(MaterialClass::Type::Gradient, std::string(""));
-    material.SetColor(top_left, GradientClass::ColorIndex::TopLeft);
-    material.SetColor(top_right, GradientClass::ColorIndex::TopRight);
-    material.SetColor(bottom_left, GradientClass::ColorIndex::BottomLeft);
-    material.SetColor(bottom_right, GradientClass::ColorIndex::BottomRight);
+    material.SetColor(top_left, GradientClass::ColorIndex::GradientColor0);
+    material.SetColor(top_right, GradientClass::ColorIndex::GradientColor1);
+    material.SetColor(bottom_left, GradientClass::ColorIndex::GradientColor2);
+    material.SetColor(bottom_right, GradientClass::ColorIndex::GradientColor3);
     return material;
 }
 

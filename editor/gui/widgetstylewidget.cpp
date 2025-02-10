@@ -521,10 +521,10 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
                                                                QColor color2,
                                                                QColor color3) {
             engine::detail::UIGradient gradient;
-            gradient.SetColor(ToGfx(color0), Index::TopLeft);
-            gradient.SetColor(ToGfx(color1), Index::TopRight);
-            gradient.SetColor(ToGfx(color2), Index::BottomLeft);
-            gradient.SetColor(ToGfx(color3), Index::BottomRight);
+            gradient.SetColor(ToGfx(color0), Index::GradientColor0);
+            gradient.SetColor(ToGfx(color1), Index::GradientColor1);
+            gradient.SetColor(ToGfx(color2), Index::GradientColor2);
+            gradient.SetColor(ToGfx(color3), Index::GradientColor3);
             mStyle->SetMaterial(MapProperty(key), gradient);
             mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
         });
@@ -533,10 +533,10 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
         {
             if (const auto* p = dynamic_cast<const engine::detail::UIGradient*>(material))
             {
-                const auto color_top_left = p->GetColor(Index::TopLeft);
-                const auto color_top_right = p->GetColor(Index::TopRight);
-                const auto color_bot_left = p->GetColor(Index::BottomLeft);
-                const auto color_bot_right = p->GetColor(Index::BottomRight);
+                const auto color_top_left = p->GetColor(Index::GradientColor0);
+                const auto color_top_right = p->GetColor(Index::GradientColor1);
+                const auto color_bot_left = p->GetColor(Index::GradientColor2);
+                const auto color_bot_right = p->GetColor(Index::GradientColor3);
 
                 previous_gradient = *p;
 

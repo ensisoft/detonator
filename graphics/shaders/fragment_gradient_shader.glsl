@@ -11,15 +11,15 @@ precision highp float;
 uniform uint kMaterialFlags;
 
 // The gradient top left color value.
-uniform vec4 kColor0;
+uniform vec4 kGradientColor0;
 // The gradient top right color value.
-uniform vec4 kColor1;
+uniform vec4 kGradientColor1;
 // The gradient bottom left color value.
-uniform vec4 kColor2;
+uniform vec4 kGradientColor2;
 // The gradient bottom right color value.
-uniform vec4 kColor3;
+uniform vec4 kGradientColor3;
 // The gradient X and Y axis mixing/blending weights.
-uniform vec2 kOffset;
+uniform vec2 kGradientWeight;
 
 // @varyings
 #ifdef GEOMETRY_IS_PARTICLES
@@ -28,8 +28,8 @@ uniform vec2 kOffset;
 #endif
 
 vec4 MixGradient(vec2 coords) {
-  vec4 top = mix(kColor0, kColor1, coords.x);
-  vec4 bot = mix(kColor2, kColor3, coords.x);
+  vec4 top = mix(kGradientColor0, kGradientColor1, coords.x);
+  vec4 bot = mix(kGradientColor2, kGradientColor3, coords.x);
   vec4 color = mix(top, bot, coords.y);
   return color;
 }
@@ -37,7 +37,7 @@ vec4 MixGradient(vec2 coords) {
 void FragmentShaderMain() {
 
   vec2 coords = GetTextureCoords();
-  coords = (coords - kOffset) + vec2(0.5, 0.5);
+  coords = (coords - kGradientWeight) + vec2(0.5, 0.5);
   coords = clamp(coords, vec2(0.0, 0.0), vec2(1.0, 1.0));
   vec4 color  = MixGradient(coords);
 

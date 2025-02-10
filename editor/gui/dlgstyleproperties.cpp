@@ -977,10 +977,10 @@ void DlgWidgetStyleProperties::SetWidgetGradient()
     {
         if (const auto* p = dynamic_cast<const engine::detail::UIGradient*>(material))
         {
-            const auto color_top_left = p->GetColor(Index::TopLeft);
-            const auto color_top_right = p->GetColor(Index::TopRight);
-            const auto color_bot_left = p->GetColor(Index::BottomLeft);
-            const auto color_bot_right = p->GetColor(Index::BottomRight);
+            const auto color_top_left = p->GetColor(Index::GradientColor0);
+            const auto color_top_right = p->GetColor(Index::GradientColor1);
+            const auto color_bot_left = p->GetColor(Index::GradientColor2);
+            const auto color_bot_right = p->GetColor(Index::GradientColor3);
 
             dlg.SetColor(FromGfx(color_top_left), 0);
             dlg.SetColor(FromGfx(color_top_right), 1);
@@ -992,10 +992,10 @@ void DlgWidgetStyleProperties::SetWidgetGradient()
         return;
 
     engine::detail::UIGradient gradient;
-    gradient.SetColor(ToGfx(dlg.GetColor(0)), Index::TopLeft);
-    gradient.SetColor(ToGfx(dlg.GetColor(1)), Index::TopRight);
-    gradient.SetColor(ToGfx(dlg.GetColor(2)), Index::BottomLeft);
-    gradient.SetColor(ToGfx(dlg.GetColor(3)), Index::BottomRight);
+    gradient.SetColor(ToGfx(dlg.GetColor(0)), Index::GradientColor0);
+    gradient.SetColor(ToGfx(dlg.GetColor(1)), Index::GradientColor1);
+    gradient.SetColor(ToGfx(dlg.GetColor(2)), Index::GradientColor2);
+    gradient.SetColor(ToGfx(dlg.GetColor(3)), Index::GradientColor3);
     mStyle->SetMaterial(property_key, std::move(gradient));
 
     mPainter->DeleteMaterialInstanceByKey(property_key);
