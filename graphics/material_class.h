@@ -137,7 +137,7 @@ namespace gfx
         };
 
         enum class GradientType : int {
-            Bilinear
+            Bilinear, Radial, Conical
         };
 
         // The current material state to apply when applying the

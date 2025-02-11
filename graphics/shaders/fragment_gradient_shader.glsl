@@ -37,6 +37,14 @@ vec4 MixGradient(vec2 coords) {
     vec4 top = mix(kGradientColor0, kGradientColor1, coords.x);
     vec4 bot = mix(kGradientColor2, kGradientColor3, coords.x);
     color = mix(top, bot, coords.y);
+  } else if (kGradientType == GRADIENT_TYPE_RADIAL) {
+    float distance_from_center = length(vec2(0.5, 0.5) - coords);
+    distance_from_center = min(distance_from_center, 1.0);
+    color = mix(kGradientColor0, kGradientColor1, distance_from_center);
+  } else if (kGradientType == GRADIENT_TYPE_CONICAL) {
+    float angle = atan(coords.y - 0.5, coords.x - 0.5); // -pi to pi
+    float mixer = (angle + PI) / (2.0 * PI);
+    color = mix(kGradientColor0, kGradientColor1, mixer);
   }
 
   return color;
