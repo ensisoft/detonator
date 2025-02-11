@@ -136,6 +136,10 @@ namespace gfx
             ParticleDirectionAndBase
         };
 
+        enum class GradientType : int {
+            Bilinear
+        };
+
         // The current material state to apply when applying the
         // material's *dynamic* state onto the program object.
         // The dynamic state is state that can change over time and
@@ -266,6 +270,9 @@ namespace gfx
         inline void SetSpecularExponent(float exponent) noexcept
         { SetUniform("kSpecularExponent", exponent); }
 
+        inline void SetGradientType(GradientType gradient) noexcept
+        { SetUniform("kGradientType", static_cast<int>(gradient)); }
+
         inline void SetParticleEffect(ParticleEffect action) noexcept
         { action == ParticleEffect::None ? DeleteUniform("kParticleEffect")
                                          : SetUniform("kParticleEffect", static_cast<int>(action)); }
@@ -299,6 +306,9 @@ namespace gfx
         { GetUniformValue<glm::vec2>("kTileOffset", {0.0, 0.0f}) = offset; }
         inline void SetTilePadding(const glm::vec2& padding) noexcept
         { GetUniformValue<glm::vec2>("kTilePadding", {0.0f, 0.0f}) = padding; }
+
+        inline GradientType GetGradientType() const noexcept
+        { return static_cast<GradientType>(GetUniformValue("kGradientType", static_cast<int>(GradientType::Bilinear))); }
 
         inline Color4f GetParticleStartColor() const noexcept
         { return GetUniformValue<Color4f>("kParticleStartColor", Color::White); }

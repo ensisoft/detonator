@@ -27,6 +27,7 @@
 #include "engine/loader.h"
 #include "engine/enum.h"
 #include "graphics/drawable.h"
+#include "graphics/material_class.h"
 #include "game/animator.h"
 #include "game/scene_class.h"
 #include "game/property_animator.h"
@@ -68,6 +69,7 @@ namespace gfx {
     std::string TranslateEnum(gfx::ParticleEngineClass::CoordinateSpace space);
     std::string TranslateEnum(gfx::ParticleEngineClass::Motion motion);
     std::string TranslateEnum(gfx::ParticleEngineClass::SpawnPolicy spawn);
+    std::string TranslateEnum(gfx::MaterialClass::GradientType gradient);
 }
 
 namespace audio {

@@ -294,13 +294,10 @@
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
            <layout class="QGridLayout" name="gridLayout_2">
-            <item row="6" column="1" colspan="2">
-             <widget class="QComboBox" name="particleAction"/>
-            </item>
-            <item row="10" column="0">
-             <widget class="QLabel" name="lblParticleRotationMode">
+            <item row="5" column="0">
+             <widget class="QLabel" name="lblTilePadding">
               <property name="text">
-               <string>Rotation mode</string>
+               <string>Tile padding</string>
               </property>
              </widget>
             </item>
@@ -311,52 +308,57 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="lblParticleEffect">
+            <item row="10" column="0">
+             <widget class="QLabel" name="lblParticleRotationMode">
               <property name="text">
-               <string>Particle effect</string>
+               <string>Rotation mode</string>
               </property>
              </widget>
             </item>
-            <item row="10" column="1" colspan="2">
-             <widget class="QComboBox" name="particleRotationMode"/>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="lblTilePadding">
-              <property name="text">
-               <string>Tile padding</string>
+            <item row="0" column="1" colspan="2">
+             <widget class="gui::DoubleSpinBox" name="alphaCutoff">
+              <property name="focusPolicy">
+               <enum>Qt::WheelFocus</enum>
+              </property>
+              <property name="specialValueText" stdset="0">
+               <string>Disabled</string>
+              </property>
+              <property name="stepType" stdset="0">
+               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+              </property>
+              <property name="maximum" stdset="0">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="clearButtonIcon" stdset="0">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
               </property>
              </widget>
             </item>
-            <item row="14" column="1" colspan="2">
-             <widget class="color_widgets::ColorSelector" name="specularColor">
+            <item row="15" column="0">
+             <widget class="QLabel" name="lblSpecularExponent">
+              <property name="text">
+               <string>Specular exponent</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1" colspan="2">
+             <widget class="QComboBox" name="activeMap">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="focusPolicy">
-               <enum>Qt::TabFocus</enum>
-              </property>
-              <property name="color">
-               <color>
-                <red>255</red>
-                <green>255</green>
-                <blue>255</blue>
-               </color>
-              </property>
-              <property name="display_mode" stdset="0">
-               <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-              </property>
-              <property name="background">
-               <brush brushstyle="Dense3Pattern">
-                <color alpha="255">
-                 <red>128</red>
-                 <green>128</green>
-                 <blue>128</blue>
-                </color>
-               </brush>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="lblTileSize">
+              <property name="text">
+               <string>Tile size</string>
               </property>
              </widget>
             </item>
@@ -370,124 +372,8 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="1" colspan="2">
-             <layout class="QHBoxLayout" name="horizontalLayout_5">
-              <item>
-               <widget class="QSpinBox" name="tileWidth">
-                <property name="suffix">
-                 <string> px</string>
-                </property>
-                <property name="maximum">
-                 <number>1024</number>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="tileHeight">
-                <property name="suffix">
-                 <string> px</string>
-                </property>
-                <property name="maximum">
-                 <number>1024</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="13" column="1" colspan="2">
-             <widget class="color_widgets::ColorSelector" name="diffuseColor">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="focusPolicy">
-               <enum>Qt::TabFocus</enum>
-              </property>
-              <property name="color">
-               <color>
-                <red>255</red>
-                <green>255</green>
-                <blue>255</blue>
-               </color>
-              </property>
-              <property name="display_mode" stdset="0">
-               <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-              </property>
-              <property name="background">
-               <brush brushstyle="Dense3Pattern">
-                <color alpha="255">
-                 <red>128</red>
-                 <green>128</green>
-                 <blue>128</blue>
-                </color>
-               </brush>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="QSpinBox" name="tileLeftPadding">
-              <property name="suffix">
-               <string> px</string>
-              </property>
-             </widget>
-            </item>
-            <item row="13" column="0">
-             <widget class="QLabel" name="lblDiffuseColor">
-              <property name="text">
-               <string>Diffuse color</string>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="0">
-             <widget class="QLabel" name="lblParticleStartColor">
-              <property name="text">
-               <string>Start color</string>
-              </property>
-             </widget>
-            </item>
-            <item row="12" column="1" colspan="2">
-             <widget class="color_widgets::ColorSelector" name="ambientColor">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="focusPolicy">
-               <enum>Qt::TabFocus</enum>
-              </property>
-              <property name="color">
-               <color>
-                <red>255</red>
-                <green>255</green>
-                <blue>255</blue>
-               </color>
-              </property>
-              <property name="display_mode" stdset="0">
-               <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-              </property>
-              <property name="background">
-               <brush brushstyle="Dense3Pattern">
-                <color alpha="255">
-                 <red>128</red>
-                 <green>128</green>
-                 <blue>128</blue>
-                </color>
-               </brush>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="0">
-             <widget class="QLabel" name="lblParticleEndColor">
-              <property name="text">
-               <string>End color</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="1" colspan="2">
-             <widget class="color_widgets::ColorSelector" name="particleEndColor">
+            <item row="8" column="1" colspan="2">
+             <widget class="color_widgets::ColorSelector" name="particleStartColor">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -525,24 +411,10 @@
               </property>
              </widget>
             </item>
-            <item row="7" column="0">
-             <widget class="QLabel" name="lblActiveTextureMap">
-              <property name="text">
-               <string>Active texture map</string>
-              </property>
-             </widget>
-            </item>
-            <item row="11" column="0">
-             <widget class="QLabel" name="lblParticleBaseRotation">
-              <property name="text">
-               <string>Rotation base</string>
-              </property>
-             </widget>
-            </item>
-            <item row="12" column="0">
-             <widget class="QLabel" name="lblAmbientColor">
-              <property name="text">
-               <string>Ambient color</string>
+            <item row="5" column="1">
+             <widget class="QSpinBox" name="tileLeftPadding">
+              <property name="suffix">
+               <string> px</string>
               </property>
              </widget>
             </item>
@@ -553,74 +425,8 @@
               </property>
              </widget>
             </item>
-            <item row="5" column="2">
-             <widget class="QSpinBox" name="tileTopPadding">
-              <property name="suffix">
-               <string> px</string>
-              </property>
-              <property name="maximum">
-               <number>1024</number>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="1" colspan="2">
-             <widget class="QComboBox" name="activeMap">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="2">
-             <widget class="QSpinBox" name="tileTopOffset">
-              <property name="suffix">
-               <string> px</string>
-              </property>
-              <property name="maximum">
-               <number>1024</number>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1" colspan="2">
-             <widget class="gui::DoubleSpinBox" name="alphaCutoff">
-              <property name="focusPolicy">
-               <enum>Qt::WheelFocus</enum>
-              </property>
-              <property name="specialValueText" stdset="0">
-               <string>Disabled</string>
-              </property>
-              <property name="stepType" stdset="0">
-               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-              </property>
-              <property name="maximum" stdset="0">
-               <double>1.000000000000000</double>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="clearButtonIcon" stdset="0">
-               <iconset resource="../resource/resource.qrc">
-                <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="lblBaseColor">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Base color</string>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="1" colspan="2">
-             <widget class="color_widgets::ColorSelector" name="particleStartColor">
+            <item row="14" column="1" colspan="2">
+             <widget class="color_widgets::ColorSelector" name="specularColor">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -650,6 +456,124 @@
                </brush>
               </property>
              </widget>
+            </item>
+            <item row="6" column="1" colspan="2">
+             <widget class="QComboBox" name="particleAction"/>
+            </item>
+            <item row="9" column="0">
+             <widget class="QLabel" name="lblParticleEndColor">
+              <property name="text">
+               <string>End color</string>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="0">
+             <widget class="QLabel" name="lblParticleBaseRotation">
+              <property name="text">
+               <string>Rotation base</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0">
+             <widget class="QLabel" name="lblParticleStartColor">
+              <property name="text">
+               <string>Start color</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="lblBaseColor">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Base color</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1" colspan="2">
+             <widget class="color_widgets::ColorSelector" name="particleEndColor">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::TabFocus</enum>
+              </property>
+              <property name="color">
+               <color>
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </property>
+              <property name="display_mode" stdset="0">
+               <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+              </property>
+              <property name="background">
+               <brush brushstyle="Dense3Pattern">
+                <color alpha="255">
+                 <red>128</red>
+                 <green>128</green>
+                 <blue>128</blue>
+                </color>
+               </brush>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="1" colspan="2">
+             <widget class="color_widgets::ColorSelector" name="ambientColor">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::TabFocus</enum>
+              </property>
+              <property name="color">
+               <color>
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </property>
+              <property name="display_mode" stdset="0">
+               <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+              </property>
+              <property name="background">
+               <brush brushstyle="Dense3Pattern">
+                <color alpha="255">
+                 <red>128</red>
+                 <green>128</green>
+                 <blue>128</blue>
+                </color>
+               </brush>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="lblActiveTextureMap">
+              <property name="text">
+               <string>Active texture map</string>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="0">
+             <widget class="QLabel" name="lblDiffuseColor">
+              <property name="text">
+               <string>Diffuse color</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1" colspan="2">
+             <widget class="QComboBox" name="particleRotationMode"/>
             </item>
             <item row="2" column="1" colspan="2">
              <widget class="color_widgets::ColorSelector" name="baseColor">
@@ -683,10 +607,51 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="lblTileSize">
-              <property name="text">
-               <string>Tile size</string>
+            <item row="15" column="1" colspan="2">
+             <widget class="QDoubleSpinBox" name="specularExponent">
+              <property name="minimum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>128.000000000000000</double>
+              </property>
+              <property name="stepType">
+               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+              </property>
+              <property name="value">
+               <double>4.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="1" colspan="2">
+             <widget class="color_widgets::ColorSelector" name="diffuseColor">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::TabFocus</enum>
+              </property>
+              <property name="color">
+               <color>
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </property>
+              <property name="display_mode" stdset="0">
+               <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+              </property>
+              <property name="background">
+               <brush brushstyle="Dense3Pattern">
+                <color alpha="255">
+                 <red>128</red>
+                 <green>128</green>
+                 <blue>128</blue>
+                </color>
+               </brush>
               </property>
              </widget>
             </item>
@@ -715,28 +680,79 @@
               </property>
              </widget>
             </item>
-            <item row="15" column="0">
-             <widget class="QLabel" name="lblSpecularExponent">
+            <item row="12" column="0">
+             <widget class="QLabel" name="lblAmbientColor">
               <property name="text">
-               <string>Specular exponent</string>
+               <string>Ambient color</string>
               </property>
              </widget>
             </item>
-            <item row="15" column="1" colspan="2">
-             <widget class="QDoubleSpinBox" name="specularExponent">
-              <property name="minimum">
-               <double>1.000000000000000</double>
+            <item row="4" column="2">
+             <widget class="QSpinBox" name="tileTopOffset">
+              <property name="suffix">
+               <string> px</string>
               </property>
               <property name="maximum">
-               <double>128.000000000000000</double>
-              </property>
-              <property name="stepType">
-               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-              </property>
-              <property name="value">
-               <double>4.000000000000000</double>
+               <number>1024</number>
               </property>
              </widget>
+            </item>
+            <item row="5" column="2">
+             <widget class="QSpinBox" name="tileTopPadding">
+              <property name="suffix">
+               <string> px</string>
+              </property>
+              <property name="maximum">
+               <number>1024</number>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="lblParticleEffect">
+              <property name="text">
+               <string>Particle effect</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" colspan="2">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QSpinBox" name="tileWidth">
+                <property name="suffix">
+                 <string> px</string>
+                </property>
+                <property name="maximum">
+                 <number>1024</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="tileHeight">
+                <property name="suffix">
+                 <string> px</string>
+                </property>
+                <property name="maximum">
+                 <number>1024</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="16" column="0">
+             <widget class="QLabel" name="gradientType">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Gradient</string>
+              </property>
+             </widget>
+            </item>
+            <item row="16" column="1" colspan="2">
+             <widget class="QComboBox" name="cmbGradientType"/>
             </item>
            </layout>
           </item>
@@ -771,71 +787,33 @@
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <layout class="QGridLayout" name="gridLayout_6">
+              <item row="1" column="4">
+               <widget class="QLabel" name="label_7">
+                <property name="text">
+                 <string>1, 0</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2" colspan="2">
+               <widget class="QSlider" name="gradientOffsetX">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximum">
+                 <number>100</number>
+                </property>
+                <property name="value">
+                 <number>50</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
               <item row="1" column="3">
-               <widget class="color_widgets::ColorSelector" name="colorMap3">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-                <property name="color">
-                 <color>
-                  <red>255</red>
-                  <green>255</green>
-                  <blue>255</blue>
-                 </color>
-                </property>
-                <property name="display_mode" stdset="0">
-                 <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                </property>
-                <property name="background">
-                 <brush brushstyle="Dense3Pattern">
-                  <color alpha="255">
-                   <red>128</red>
-                   <green>128</green>
-                   <blue>128</blue>
-                  </color>
-                 </brush>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="2">
-               <widget class="color_widgets::ColorSelector" name="colorMap0">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>25</height>
-                 </size>
-                </property>
-                <property name="focusPolicy">
-                 <enum>Qt::TabFocus</enum>
-                </property>
-                <property name="color">
-                 <color>
-                  <red>255</red>
-                  <green>255</green>
-                  <blue>255</blue>
-                 </color>
-                </property>
-                <property name="display_mode" stdset="0">
-                 <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                </property>
-                <property name="background">
-                 <brush brushstyle="Dense3Pattern">
-                  <color alpha="255">
-                   <red>128</red>
-                   <green>128</green>
-                   <blue>128</blue>
-                  </color>
-                 </brush>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="3">
                <widget class="color_widgets::ColorSelector" name="colorMap1">
                 <property name="minimumSize">
                  <size>
@@ -867,36 +845,39 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="2" colspan="2">
-               <widget class="QSlider" name="gradientOffsetX">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+              <item row="2" column="3">
+               <widget class="color_widgets::ColorSelector" name="colorMap3">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>25</height>
+                 </size>
                 </property>
-                <property name="maximum">
-                 <number>100</number>
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
                 </property>
-                <property name="value">
-                 <number>50</number>
+                <property name="color">
+                 <color>
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
                 </property>
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                <property name="display_mode" stdset="0">
+                 <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+                </property>
+                <property name="background">
+                 <brush brushstyle="Dense3Pattern">
+                  <color alpha="255">
+                   <red>128</red>
+                   <green>128</green>
+                   <blue>128</blue>
+                  </color>
+                 </brush>
                 </property>
                </widget>
               </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_10">
-                <property name="text">
-                 <string>0, 1</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2">
+              <item row="2" column="2">
                <widget class="color_widgets::ColorSelector" name="colorMap2">
                 <property name="minimumSize">
                  <size>
@@ -928,31 +909,14 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_9">
-                <property name="text">
-                 <string>0, 0</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="4">
+              <item row="2" column="4">
                <widget class="QLabel" name="label_8">
                 <property name="text">
                  <string>1, 1</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="4">
-               <widget class="QLabel" name="label_7">
-                <property name="text">
-                 <string>1, 0</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1" rowspan="2">
+              <item row="1" column="1" rowspan="2">
                <widget class="QSlider" name="gradientOffsetY">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -971,6 +935,58 @@
                 </property>
                 <property name="invertedAppearance">
                  <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="color_widgets::ColorSelector" name="colorMap0">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>25</height>
+                 </size>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::TabFocus</enum>
+                </property>
+                <property name="color">
+                 <color>
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </property>
+                <property name="display_mode" stdset="0">
+                 <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+                </property>
+                <property name="background">
+                 <brush brushstyle="Dense3Pattern">
+                  <color alpha="255">
+                   <red>128</red>
+                   <green>128</green>
+                   <blue>128</blue>
+                  </color>
+                 </brush>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>0, 0</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_10">
+                <property name="text">
+                 <string>0, 1</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -2657,6 +2673,7 @@
   <tabstop>diffuseColor</tabstop>
   <tabstop>specularColor</tabstop>
   <tabstop>specularExponent</tabstop>
+  <tabstop>cmbGradientType</tabstop>
   <tabstop>gradientOffsetY</tabstop>
   <tabstop>colorMap0</tabstop>
   <tabstop>colorMap2</tabstop>

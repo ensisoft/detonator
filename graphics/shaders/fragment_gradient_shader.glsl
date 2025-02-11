@@ -21,6 +21,8 @@ uniform vec4 kGradientColor3;
 // The gradient X and Y axis mixing/blending weights.
 uniform vec2 kGradientWeight;
 
+uniform uint kGradientType;
+
 // @varyings
 #ifdef GEOMETRY_IS_PARTICLES
   // Incoming per particle alpha value.
@@ -28,9 +30,15 @@ uniform vec2 kGradientWeight;
 #endif
 
 vec4 MixGradient(vec2 coords) {
-  vec4 top = mix(kGradientColor0, kGradientColor1, coords.x);
-  vec4 bot = mix(kGradientColor2, kGradientColor3, coords.x);
-  vec4 color = mix(top, bot, coords.y);
+
+  vec4 color;
+
+  if (kGradientType == GRADIENT_TYPE_BILINEAR) {
+    vec4 top = mix(kGradientColor0, kGradientColor1, coords.x);
+    vec4 bot = mix(kGradientColor2, kGradientColor3, coords.x);
+    color = mix(top, bot, coords.y);
+  }
+
   return color;
 }
 
