@@ -397,6 +397,15 @@ std::string TranslateEnum(gfx::ParticleEngineClass::SpawnPolicy spawn)
     return "???";
 }
 
+std::string TranslateEnum(gfx::MaterialClass::GradientType gradient)
+{
+    using T = gfx::MaterialClass::GradientType;
+    if (gradient == T::Bilinear)
+        return "Bilinear Gradient";
+    else BUG("Missing translation");
+    return "???";
+}
+
 } // namespace
 
 namespace audio

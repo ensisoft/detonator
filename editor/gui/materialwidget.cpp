@@ -141,7 +141,9 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::TextureMap::Type>(mUI.textureMapType);
     PopulateFromEnum<gfx::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
     PopulateFromEnum<gfx::MaterialClass::ParticleRotation>(mUI.particleRotationMode);
+    PopulateFromEnum<gfx::MaterialClass::GradientType>(mUI.cmbGradientType);
     PopulateFromEnum<PreviewScene>(mUI.cmbScene);
+
 
     // leave this out for now. particle UI can take care
     // PopulateShaderList(mUI.shaderFile);
@@ -1050,6 +1052,11 @@ void MaterialWidget::on_particleAction_currentIndexChanged(int)
 {
     SetMaterialProperties();
 }
+void MaterialWidget::on_cmbGradientType_currentIndexChanged(int)
+{
+    SetMaterialProperties();
+}
+
 void MaterialWidget::on_spriteFps_valueChanged(double)
 {
     SetMaterialProperties();
@@ -2099,6 +2106,10 @@ void MaterialWidget::SetMaterialProperties()
         mMaterial->DeleteUniform("kSpecularExponent");
     }
 
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Gradient)
+    {
+        mMaterial->SetGradientType(GetValue(mUI.cmbGradientType));
+    }
 
     // set of known uniforms if they differ from the defaults.
     // todo: this assumes implicit knowledge about the internals
@@ -2275,6 +2286,8 @@ void MaterialWidget::ShowMaterialProperties()
     SetVisible(mUI.specularColor,       false);
     SetVisible(mUI.specularExponent,    false);
 
+    SetVisible(mUI.gradientType,       false);
+    SetVisible(mUI.cmbGradientType,    false);
 
     SetValue(mUI.materialName,         mMaterial->GetName());
     SetValue(mUI.materialID,           mMaterial->GetId());
@@ -2313,6 +2326,7 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.colorMap3, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::GradientColor3));
     SetValue(mUI.gradientOffsetX, NormalizedFloat(offset.x));
     SetValue(mUI.gradientOffsetY, NormalizedFloat(offset.y));
+    SetValue(mUI.cmbGradientType, mMaterial->GetGradientType());
 
     /// basic light material
     SetValue(mUI.ambientColor, mMaterial->GetAmbientColor());
@@ -2390,7 +2404,10 @@ void MaterialWidget::ShowMaterialProperties()
         }
         else if (mMaterial->GetType() == gfx::MaterialClass::Type::Gradient)
         {
-            SetVisible(mUI.gradientMap, true);
+            SetVisible(mUI.builtInProperties, true);
+            SetVisible(mUI.gradientMap,       true);
+            SetVisible(mUI.gradientType,      true);
+            SetVisible(mUI.cmbGradientType,   true);
         }
         else if (mMaterial->GetType() == gfx::MaterialClass::Type::Texture ||
                  mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)

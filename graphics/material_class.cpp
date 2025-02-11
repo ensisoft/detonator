@@ -300,6 +300,10 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
             source.AddPreprocessorDefinition("BASIC_LIGHT_MATERIAL_SPECULAR_MAP", static_cast<unsigned>(BasicLightMaterialMap::Specular));
             source.AddPreprocessorDefinition("BASIC_LIGHT_MATERIAL_NORMAL_MAP",   static_cast<unsigned>(BasicLightMaterialMap::Normal));
         }
+        else if (mType == Type::Gradient)
+        {
+            source.AddPreprocessorDefinition("GRADIENT_TYPE_BILINEAR", static_cast<unsigned>(GradientType::Bilinear));
+        }
     }
 
     if (state.draw_primitive == DrawPrimitive::Triangles)
@@ -343,6 +347,7 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
             source.FoldUniform("kGradientColor2", GetColor(ColorIndex::GradientColor2));
             source.FoldUniform("kGradientColor3", GetColor(ColorIndex::GradientColor3));
             source.FoldUniform("kGradientWeight", GetGradientWeight());
+            source.FoldUniform("kGradientType", static_cast<unsigned>(GetGradientType()));
             source.FoldUniform("kTextureVelocity", GetTextureVelocity());
             source.FoldUniform("kTextureVelocityXY", glm::vec2(GetTextureVelocity()));
             source.FoldUniform("kTextureVelocityZ", GetTextureVelocity().z);
@@ -397,6 +402,7 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
             SetUniform("kGradientColor2", state.uniforms, GetColor(ColorIndex::GradientColor2), program);
             SetUniform("kGradientColor3", state.uniforms, GetColor(ColorIndex::GradientColor3), program);
             SetUniform("kGradientWeight", state.uniforms, GetGradientWeight(), program);
+            SetUniform("kGradientType", state.uniforms, static_cast<unsigned>(GetGradientType()), program);
         }
     }
     else if (mType == Type::Sprite)
@@ -429,6 +435,7 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
         program.SetUniform("kGradientColor2", GetColor(ColorIndex::GradientColor2));
         program.SetUniform("kGradientColor3", GetColor(ColorIndex::GradientColor3));
         program.SetUniform("kGradientWeight", GetGradientWeight());
+        program.SetUniform("kGradientType", static_cast<unsigned>(GetGradientType()));
     }
     else if (mType == Type::Sprite)
     {

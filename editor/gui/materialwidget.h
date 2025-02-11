@@ -125,6 +125,7 @@ namespace gui
         void on_alphaCutoff_valueChanged(bool, double);
         void on_baseColor_colorChanged(QColor color);
         void on_particleAction_currentIndexChanged(int);
+        void on_cmbGradientType_currentIndexChanged(int);
         void on_spriteFps_valueChanged(double);
         void on_chkBlendPreMulAlpha_stateChanged(int);
         void on_chkStaticInstance_stateChanged(int);
