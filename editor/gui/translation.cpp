@@ -402,6 +402,10 @@ std::string TranslateEnum(gfx::MaterialClass::GradientType gradient)
     using T = gfx::MaterialClass::GradientType;
     if (gradient == T::Bilinear)
         return "Bilinear Gradient";
+    else if (gradient == T::Radial)
+        return "Radial Gradient";
+    else if (gradient == T::Conical)
+        return "Conical Gradient";
     else BUG("Missing translation");
     return "???";
 }

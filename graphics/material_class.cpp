@@ -303,6 +303,8 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
         else if (mType == Type::Gradient)
         {
             source.AddPreprocessorDefinition("GRADIENT_TYPE_BILINEAR", static_cast<unsigned>(GradientType::Bilinear));
+            source.AddPreprocessorDefinition("GRADIENT_TYPE_RADIAL", static_cast<unsigned>(GradientType::Radial));
+            source.AddPreprocessorDefinition("GRADIENT_TYPE_CONICAL", static_cast<unsigned>(GradientType::Conical));
         }
     }
 
