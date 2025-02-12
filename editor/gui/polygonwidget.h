@@ -29,7 +29,7 @@
 #include "editor/app/workspace.h"
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
-#include "graphics/tool/geometry.h"
+#include "graphics/tool/polygon.h"
 
 namespace gui
 {

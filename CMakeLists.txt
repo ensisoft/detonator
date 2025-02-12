@@ -333,7 +333,7 @@ add_library(GfxLibTesting
     graphics/tilebatch.cpp
     graphics/utility.cpp
     graphics/vertex.cpp
-    graphics/tool/geometry.cpp
+    graphics/tool/polygon.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp)
@@ -465,7 +465,7 @@ add_executable(Detonator
     audio/element.cpp
     audio/graph.cpp
     audio/proxy.cpp
-    graphics/tool/geometry.cpp
+        graphics/tool/polygon.cpp
     editor/app/import.h
     editor/app/import.cpp
     editor/app/event.h
