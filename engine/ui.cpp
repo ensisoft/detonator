@@ -163,12 +163,13 @@ namespace detail {
 
 UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary*, const Loader*) const
 {
-    auto material = std::make_shared<gfx::GradientClass>(gfx::MaterialClass::Type::Gradient);
+    auto material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Gradient);
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetColor(mColorMap[0], ColorIndex::GradientColor0);
     material->SetColor(mColorMap[1], ColorIndex::GradientColor1);
     material->SetColor(mColorMap[2], ColorIndex::GradientColor2);
     material->SetColor(mColorMap[3], ColorIndex::GradientColor3);
+    material->SetGradientType(mGradient);
     material->SetName("UIGradient");
     return material;
 }
@@ -179,6 +180,7 @@ bool UIGradient::FromJson(const nlohmann::json& json)
         !ReadColor(json, "color2", &mColorMap[2]) ||
         !ReadColor(json, "color3", &mColorMap[3]))
         return false;
+    base::JsonReadSafe(json, "gradient", &mGradient);
     return true;
 }
 void UIGradient::IntoJson(nlohmann::json& json) const
@@ -187,6 +189,7 @@ void UIGradient::IntoJson(nlohmann::json& json) const
     base::JsonWrite(json, "color1", mColorMap[1]);
     base::JsonWrite(json, "color2", mColorMap[2]);
     base::JsonWrite(json, "color3", mColorMap[3]);
+    base::JsonWrite(json, "gradient", mGradient);
     if (mGamma)
         base::JsonWrite(json, "gamma", mGamma.value());
 }

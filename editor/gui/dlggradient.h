@@ -24,6 +24,9 @@
 #include "warnpop.h"
 
 #include "base/assert.h"
+#include "graphics/material_class.h"
+#include "editor/gui/utility.h"
+#include "editor/gui/translation.h"
 
 namespace gui
 {
@@ -39,17 +42,19 @@ namespace gui
             connect(mUI.colorMap1, &color_widgets::ColorSelector::colorChanged, this, &DlgGradient::ColorMapColorChanged);
             connect(mUI.colorMap2, &color_widgets::ColorSelector::colorChanged, this, &DlgGradient::ColorMapColorChanged);
             connect(mUI.colorMap3, &color_widgets::ColorSelector::colorChanged, this, &DlgGradient::ColorMapColorChanged);
+            PopulateFromEnum<gfx::MaterialClass::GradientType>(mUI.cmbGradientType);
+            SetValue(mUI.cmbGradientType, gfx::MaterialClass::GradientType::Bilinear);
         }
         void SetColor(const QColor& color, int index)
         {
             if (index == 0)
-                mUI.colorMap0->setColor(color);
+                SetValue(mUI.colorMap0, color);
             else if (index == 1)
-                mUI.colorMap1->setColor(color);
+                SetValue(mUI.colorMap1, color);
             else if (index == 2)
-                mUI.colorMap2->setColor(color);
+                SetValue(mUI.colorMap2, color);
             else if (index == 3)
-                mUI.colorMap3->setColor(color);
+                SetValue(mUI.colorMap3, color);
             else BUG("Incorrect color index.");
         }
         QColor GetColor(int index) const
@@ -65,8 +70,16 @@ namespace gui
             else BUG("Incorrect color index.");
             return QColor();
         }
+        void SetGradientType(gfx::MaterialClass::GradientType type)
+        {
+            SetValue(mUI.cmbGradientType, type);
+        }
+        gfx::MaterialClass::GradientType GetGradientType()
+        {
+            return GetValue(mUI.cmbGradientType);
+        }
     signals:
-        void ColorChanged(QColor color0, QColor color1, QColor color2, QColor color3);
+        void GradientChanged(DlgGradient* dlg);
 
     private slots:
         void on_btnAccept_clicked()
@@ -77,12 +90,13 @@ namespace gui
         {
             reject();
         }
+        void on_cmbGradientType_currentIndexChanged(int)
+        {
+            emit GradientChanged(this);
+        }
         void ColorMapColorChanged(QColor color)
         {
-            emit ColorChanged(mUI.colorMap0->color(),
-                              mUI.colorMap1->color(),
-                              mUI.colorMap2->color(),
-                              mUI.colorMap3->color());
+            emit GradientChanged(this);
         }
     private:
         Ui::DlgGradient mUI;

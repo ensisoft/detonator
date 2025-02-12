@@ -516,15 +516,13 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
 
         DlgGradient dlg(this);
 
-        connect(&dlg, &DlgGradient::ColorChanged, [this, &key](QColor color0,
-                                                               QColor color1,
-                                                               QColor color2,
-                                                               QColor color3) {
+        connect(&dlg, &DlgGradient::GradientChanged, [this, &key](DlgGradient* dlg) {
             engine::detail::UIGradient gradient;
-            gradient.SetColor(ToGfx(color0), Index::GradientColor0);
-            gradient.SetColor(ToGfx(color1), Index::GradientColor1);
-            gradient.SetColor(ToGfx(color2), Index::GradientColor2);
-            gradient.SetColor(ToGfx(color3), Index::GradientColor3);
+            gradient.SetColor(ToGfx(dlg->GetColor(0)), Index::GradientColor0);
+            gradient.SetColor(ToGfx(dlg->GetColor(1)), Index::GradientColor1);
+            gradient.SetColor(ToGfx(dlg->GetColor(2)), Index::GradientColor2);
+            gradient.SetColor(ToGfx(dlg->GetColor(3)), Index::GradientColor3);
+            gradient.SetGradient(dlg->GetGradientType());
             mStyle->SetMaterial(MapProperty(key), gradient);
             mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
         });
@@ -544,6 +542,7 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
                 dlg.SetColor(FromGfx(color_top_right), 1);
                 dlg.SetColor(FromGfx(color_bot_left), 2);
                 dlg.SetColor(FromGfx(color_bot_right), 3);
+                dlg.SetGradientType(p->GetGradient());
             }
         }
         if (dlg.exec() == QDialog::Rejected)
