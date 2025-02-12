@@ -236,18 +236,38 @@ bool JsonReadSafe(const nlohmann::json& json, const char* name, FSize* size)
 
 bool JsonReadSafe(const nlohmann::json& json, const char* name, Color4f* color)
 {
-    if (!json.contains(name) || !json[name].is_object())
+    if (!json.contains(name))
         return false;
-    const auto& object = json[name];
 
-    float r, g, b, a;
-    if (!base::JsonReadSafe(object, "r", &r) ||
-        !base::JsonReadSafe(object, "g", &g) ||
-        !base::JsonReadSafe(object, "b", &b) ||
-        !base::JsonReadSafe(object, "a", &a))
-        return false;
-    *color = Color4f(r, g, b, a);
-    return true;
+    if (json[name].is_object())
+    {
+        const auto& object = json[name];
+
+        float r, g, b, a;
+        if (!base::JsonReadSafe(object, "r", &r) ||
+            !base::JsonReadSafe(object, "g", &g) ||
+            !base::JsonReadSafe(object, "b", &b) ||
+            !base::JsonReadSafe(object, "a", &a))
+            return false;
+        *color = Color4f(r, g, b, a);
+        return true;
+    }
+    else if (json[name].is_string())
+    {
+        std::string str;
+        str = json[name];
+        if (str.empty())
+            return false;
+        if (str[0] == '#')
+            return base::FromHex(str, color);
+
+        const auto enum_val = magic_enum::enum_cast<Color>(str);
+        if (!enum_val.has_value())
+            return false;
+        *color = enum_val.value();
+        return true;
+    }
+    return false;
 }
 
 bool JsonReadSafe(const nlohmann::json& json, const char* name, Rotator* rotator)

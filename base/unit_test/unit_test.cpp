@@ -630,6 +630,13 @@ void unit_test_color()
 
     {
         base::Color4f color;
+        TEST_REQUIRE(FromHex("#ffFFff", &color));
+        TEST_REQUIRE(color == base::Color::White);
+    }
+
+    {
+        base::Color4f color;
+        TEST_REQUIRE(!FromHex("", &color));
         TEST_REQUIRE(!FromHex("#ffFFffFFasg", &color));
         TEST_REQUIRE(!FromHex("#as", &color));
         TEST_REQUIRE(!FromHex("#ff", &color));

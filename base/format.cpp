@@ -290,24 +290,31 @@ bool FromChars(const std::string& str, unsigned* value)
 
 bool FromHex(const std::string& str, Color4f* value)
 {
-    if (str.size() != 9)
+    // #aabbccff or #aabbcc
+    const bool length_ok = str.size() == 9 || str.size() == 7;
+    if (!length_ok)
         return false;
 
     int r = 0;
     int g = 0;
     int b = 0;
     int a = 0;
-    char hex_string[10];
-    if (std::sscanf(str.c_str(), "#%8s", hex_string) != 1)
-        return false;
 
     // Parse the hex value into the rgba components
-    if (std::sscanf(hex_string, "%2x%2x%2x%2x", &r, &g, &b, &a) != 4)
-        return false;
+    if (std::sscanf(str.c_str(), "#%2x%2x%2x%2x", &r, &g, &b, &a) == 4)
+    {
+        *value = Color4f{r, g, b, a};
+        return true;
+    }
 
-    *value = Color4f{r, g, b, a};
+    // Parse the hex value into the rgba components
+    if (std::sscanf(str.c_str(), "#%2x%2x%2x", &r, &g, &b) == 3)
+    {
+        *value = Color4f{r, g, b, 0xff};
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 Color4f ColorFromHex(const std::string& str, const Color4f& backup)
