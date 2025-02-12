@@ -629,13 +629,13 @@ void DlgWidgetStyleProperties::ShowPropertyValue()
         {
             const auto type = material->GetType();
             if (type == engine::UIMaterial::Type::Null)
-                SetValue(mUI.widgetMaterial, QString("UI_None"));
+                SetValue(mUI.widgetMaterial, ListItemId("_ui_none"));
             else if (type == engine::UIMaterial::Type::Color)
-                SetValue(mUI.widgetMaterial, QString("UI_Color"));
+                SetValue(mUI.widgetMaterial, ListItemId("_ui_color"));
             else if (type == engine::UIMaterial::Type::Gradient)
-                SetValue(mUI.widgetMaterial, QString("UI_Gradient"));
+                SetValue(mUI.widgetMaterial, ListItemId("_ui_gradient"));
             else if (type == engine::UIMaterial::Type::Texture)
-                SetValue(mUI.widgetMaterial, QString("UI_Image"));
+                SetValue(mUI.widgetMaterial, ListItemId("_ui_image"));
             else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 SetValue(mUI.widgetMaterial, ListItemId(p->GetMaterialId()));
         }
