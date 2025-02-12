@@ -105,4 +105,8 @@ namespace gfx
         TileBatch
     };
 
+    enum class UniformType {
+        Int, Float, Vec2, Vec3, Vec4, Color, String
+    };
+
 } // namespace
