@@ -482,16 +482,32 @@ void MaterialWidget::on_actionSave_triggered()
 
 void MaterialWidget::on_actionNewMap_triggered()
 {
-    auto map = std::make_unique<gfx::TextureMap>();
-    if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite) {
-        map->SetType(gfx::TextureMap::Type::Sprite);
-        map->SetName("Sprite");
-    } else if (mMaterial->GetType() == gfx::MaterialClass::Type::Texture) {
-        map->SetType(gfx::TextureMap::Type::Texture2D);
-        map->SetName("Texture");
-    } else return;
-
+    const auto type = mMaterial->GetType();
     const auto maps = mMaterial->GetNumTextureMaps();
+
+    auto map = std::make_unique<gfx::TextureMap>();
+    if (type == gfx::MaterialClass::Type::Sprite)
+    {
+        map->SetType(gfx::TextureMap::Type::Sprite);
+        map->SetName(base::FormatString("Sprite %1", maps));
+    }
+    else if (type == gfx::MaterialClass::Type::Texture)
+    {
+        map->SetType(gfx::TextureMap::Type::Texture2D);
+        map->SetName(base::FormatString("Texture %1", maps));
+    }
+    else if (type == gfx::MaterialClass::Type::Tilemap)
+    {
+        map->SetType(gfx::TextureMap::Type::Texture2D);
+        map->SetName(base::FormatString("Tilemap %1", maps));
+    }
+    else if (type == gfx::MaterialClass::Type::Particle2D)
+    {
+        map->SetType(gfx::TextureMap::Type::Texture2D);
+        map->SetName(base::FormatString("Particle Alpha Mask %1", maps));
+    }
+    else return;
+
     mMaterial->SetNumTextureMaps(maps + 1);
     mMaterial->SetTextureMap(maps, std::move(map));
     ShowMaterialProperties();
@@ -858,6 +874,13 @@ void MaterialWidget::on_textures_customContextMenuRequested(const QPoint&)
     add.setIcon(QIcon("icons:add.png"));
     add.setEnabled(tag == "map");
 
+    const auto type = mMaterial->GetType();
+    if (type == gfx::MaterialClass::Type::Color ||
+        type == gfx::MaterialClass::Type::Gradient ||
+        type == gfx::MaterialClass::Type::BasicLight ||
+        type == gfx::MaterialClass::Type::Custom)
+        SetEnabled(mUI.actionNewMap, false);
+
     QMenu menu(this);
     menu.addAction(mUI.actionNewMap);
     menu.addSeparator();
@@ -959,21 +982,6 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
 void MaterialWidget::on_surfaceType_currentIndexChanged(int)
 {
     SetMaterialProperties();
-    ShowMaterialProperties();
-}
-void MaterialWidget::on_shaderFile_currentIndexChanged(int)
-{
-    const std::string uri = GetItemId(mUI.shaderFile);
-
-    // this changes the type to custom shader.
-    SetValue(mUI.materialType, gfx::MaterialClass::Type::Custom);
-    on_materialType_currentIndexChanged(0);
-
-    // use the URI from the shader list.
-    mMaterial->SetShaderUri(uri);
-
-    ApplyShaderDescription();
-    ReloadShaders();
     ShowMaterialProperties();
 }
 
@@ -1873,13 +1881,13 @@ void MaterialWidget::ApplyShaderDescription()
             else if (type == Uniform::Type::Color)
             {
                 gfx::Color4f value = gfx::Color::White;
-                base::JsonReadSafe(name, "value", &value);
+                base::JsonReadSafe(json.value(), "value", &value);
                 mMaterial->SetUniform(name, value);
             }
             else if (type == Uniform::Type::Int)
             {
                 int value = 0;
-                base::JsonReadSafe(name, "value", &value);
+                base::JsonReadSafe(json.value(), "value", &value);
                 mMaterial->SetUniform(name, value);
             }
             else BUG("Unhandled uniform type.");
@@ -2360,8 +2368,6 @@ void MaterialWidget::ShowMaterialProperties()
         const auto& file = mWorkspace->MapFileToFilesystem(uri);
         // ignores duplicates
         mFileWatcher.addPath(file);
-        if (auto* edit = mUI.shaderFile->lineEdit())
-            edit->setReadOnly(true);
     }
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
@@ -2458,6 +2464,8 @@ void MaterialWidget::ShowMaterialProperties()
             SetVisible(mUI.particleBaseRotation,    true);
             SetVisible(mUI.particleRotationMode,    true);
             SetVisible(mUI.textureFilters,          true);
+            SetVisible(mUI.lblActiveTextureMap,     true);
+            SetVisible(mUI.activeMap,               true);
         }
     }
 

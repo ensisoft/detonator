@@ -106,7 +106,6 @@ namespace gui
         void on_materialName_textChanged(const QString& text);
         void on_materialType_currentIndexChanged(int);
         void on_surfaceType_currentIndexChanged(int);
-        void on_shaderFile_currentIndexChanged(int);
         void on_particleStartColor_colorChanged(QColor color);
         void on_particleEndColor_colorChanged(QColor color);
         void on_diffuseColor_colorChanged(QColor color);
