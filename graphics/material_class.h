@@ -64,6 +64,11 @@ namespace gfx
             GradientColor1, // top right
             GradientColor2, // bottom left
             GradientColor3, // bottom right
+            AmbientColor,
+            DiffuseColor,
+            SpecularColor,
+            ParticleStartColor,
+            ParticleEndColor
         };
 
         // Control the rasterizer blending operation and how the

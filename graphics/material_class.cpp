@@ -1073,6 +1073,16 @@ std::string MaterialClass::GetColorUniformName(ColorIndex index)
         return "kGradientColor2";
     else if (index == ColorIndex::GradientColor3)
         return "kGradientColor3";
+    else if (index == ColorIndex::AmbientColor)
+        return "kAmbientColor";
+    else if (index == ColorIndex::DiffuseColor)
+        return "kDiffuseColor";
+    else if (index == ColorIndex::SpecularColor)
+        return "kSpecularColor";
+    else if (index == ColorIndex::ParticleStartColor)
+        return "kParticleStartColor";
+    else if (index == ColorIndex::ParticleEndColor)
+        return "kParticleEndColor";
     else BUG("Unknown color index.");
     return "";
 }
