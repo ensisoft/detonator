@@ -142,7 +142,8 @@ namespace engine
         class UIGradient : public UIMaterial
         {
         public:
-            using ColorIndex = gfx::GradientClass::ColorIndex;
+            using ColorIndex   = gfx::GradientClass::ColorIndex;
+            using GradientType = gfx::MaterialClass::GradientType;
 
             UIGradient() = default;
             UIGradient(const gfx::Color4f& top_left,
@@ -156,11 +157,15 @@ namespace engine
                 SetColor(bottom_right, ColorIndex::GradientColor3);
             }
 
-            virtual MaterialClass GetClass(const ClassLibrary*, const Loader* ) const override;
-            virtual Type GetType() const override
-            { return Type::Gradient; }
-            virtual bool FromJson(const nlohmann::json& json) override;
-            virtual void IntoJson(nlohmann::json& json) const override;
+            MaterialClass GetClass(const ClassLibrary*, const Loader* ) const override;
+            bool FromJson(const nlohmann::json& json) override;
+            void IntoJson(nlohmann::json& json) const override;
+
+            Type GetType() const override
+            {
+                return Type::Gradient;
+            }
+
             UIGradient& SetColor(const gfx::Color4f& color, ColorIndex index)
             {
                 if (index == ColorIndex::GradientColor0)
@@ -192,9 +197,18 @@ namespace engine
                 ASSERT(index < 4);
                 return mColorMap[index];
             }
+            GradientType GetGradient() const
+            {
+                return mGradient;
+            }
+            void SetGradient(GradientType gradient)
+            {
+                mGradient = gradient;
+            }
         private:
             gfx::Color4f mColorMap[4];
             std::optional<float> mGamma;
+            GradientType mGradient = GradientType::Bilinear;
         };
         // Create material from a color spec.
         class UIColor : public UIMaterial
