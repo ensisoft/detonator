@@ -55,7 +55,7 @@
 #include "graphics/guidegrid.h"
 #include "graphics/debug_drawable.h"
 #include "graphics/utility.h"
-#include "graphics/tool/geometry.h"
+#include "graphics/tool/polygon.h"
 #include "graphics/texture_texture_source.h"
 #include "graphics/texture_file_source.h"
 #include "graphics/text_buffer.h"

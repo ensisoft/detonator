@@ -23,7 +23,7 @@
 #include "graphics/drawable.h"
 #include "graphics/drawcmd.h"
 #include "graphics/polygon_mesh.h"
-#include "graphics/tool/geometry.h"
+#include "graphics/tool/polygon.h"
 
 namespace gfx {
 namespace tool {
