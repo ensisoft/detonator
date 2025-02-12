@@ -366,13 +366,13 @@ void WidgetStyleWidget::ShowWidgetProperties()
         {
             const auto type = material->GetType();
             if (type == engine::UIMaterial::Type::Null)
-                SetValue(mUI.widgetBackground, QString("UI_None"));
+                SetValue(mUI.widgetBackground, ListItemId("_ui_none"));
             else if (type == engine::UIMaterial::Type::Color)
-                SetValue(mUI.widgetBackground, QString("UI_Color"));
+                SetValue(mUI.widgetBackground, ListItemId("_ui_color"));
             else if (type == engine::UIMaterial::Type::Gradient)
-                SetValue(mUI.widgetBackground, QString("UI_Gradient"));
+                SetValue(mUI.widgetBackground, ListItemId("_ui_gradient"));
             else if (type == engine::UIMaterial::Type::Texture)
-                SetValue(mUI.widgetBackground, QString("UI_Image"));
+                SetValue(mUI.widgetBackground, ListItemId("_ui_image"));
             else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 SetValue(mUI.widgetBackground, ListItemId(p->GetMaterialId()));
         }
@@ -380,13 +380,13 @@ void WidgetStyleWidget::ShowWidgetProperties()
         {
             const auto type = material->GetType();
             if (type == engine::UIMaterial::Type::Null)
-                SetValue(mUI.widgetBorder, QString("UI_None"));
+                SetValue(mUI.widgetBorder, ListItemId("_ui_none"));
             else if (type == engine::UIMaterial::Type::Color)
-                SetValue(mUI.widgetBorder, QString("UI_Color"));
+                SetValue(mUI.widgetBorder, ListItemId("_ui_color"));
             else if (type == engine::UIMaterial::Type::Gradient)
-                SetValue(mUI.widgetBorder, QString("UI_Gradient"));
+                SetValue(mUI.widgetBorder, ListItemId("_ui_gradient"));
             else if (type == engine::UIMaterial::Type::Texture)
-                SetValue(mUI.widgetBorder, QString("UI_Image"));
+                SetValue(mUI.widgetBorder, ListItemId("_ui_image"));
             else if (const auto* p = dynamic_cast<const engine::detail::UIMaterialReference*>(material))
                 SetValue(mUI.widgetBorder, ListItemId(p->GetMaterialId()));
         }
