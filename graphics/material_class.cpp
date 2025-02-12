@@ -1524,14 +1524,13 @@ bool MaterialClass::ApplyTilemapDynamicState(const State& state, Device& device,
 
 bool MaterialClass::ApplyParticleDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
 {
-    if (mTextureMaps.empty())
+    auto* texture_map = SelectTextureMap(state);
+    if (texture_map == nullptr)
     {
         if (state.first_render)
-            ERROR("Particle2D Material alpha mask texture map is not set.");
-
+            ERROR("Failed to select material texture map. [material='%1']", mName);
         return false;
     }
-    auto* texture_map = mTextureMaps[0].get();
 
     TextureMap::BindingState ts;
     ts.dynamic_content = state.editing_mode || !IsStatic();
