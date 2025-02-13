@@ -68,7 +68,8 @@ namespace gfx
             // this is a comment
             Comment,
             StructDeclaration,
-            ShaderCode
+            ShaderCode,
+            TokenReplacement
         };
 
         using ShaderDataDeclarationValue = std::variant<
@@ -169,6 +170,8 @@ namespace gfx
 
         void FoldUniform(const std::string& name, ShaderDataDeclarationValue value);
 
+        void ReplaceToken(std::string token, std::string source);
+
         inline bool HasUniform(const std::string& name) const
         { return HasDataDeclaration(name, ShaderDataDeclarationType::Uniform); }
         inline bool HasVarying(const std::string& name) const
@@ -210,5 +213,6 @@ namespace gfx
            std::vector<ShaderBlock>> mShaderBlocks;
 
         std::vector<DebugInfo> mDebugInfos;
+        std::unordered_map<std::string, std::string> mTokenReplacements;
     };
 } // namespace

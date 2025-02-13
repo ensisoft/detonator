@@ -410,6 +410,11 @@ void ShaderSource::FoldUniform(const std::string& name, ShaderDataDeclarationVal
     }
 }
 
+void ShaderSource::ReplaceToken(std::string key, std::string source)
+{
+    mTokenReplacements[std::move(key)] = std::move(source);
+}
+
 std::string ShaderSource::GetShaderName() const
 {
     for (const auto& info : mDebugInfos)
@@ -482,6 +487,15 @@ std::string ShaderSource::GetSource(SourceVariant variant) const
                 base::StartsWith(base::TrimString(block.data), "#ifdef"))
             {
                 ss << "\n";
+            }
+            else if (block.type == ShaderBlockType::TokenReplacement)
+            {
+                if (const auto* replacement = base::SafeFind(mTokenReplacements, block.data))
+                {
+                    ss << *replacement;
+                    ss << "\n";
+                }
+                continue;
             }
 
             ss << block.data;
@@ -616,8 +630,21 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             group = trimmed.substr(3);
             continue;
         }
-
-        if (base::StartsWith(trimmed, "#version"))
+        else if (base::StartsWith(trimmed, "// $"))
+        {
+            ShaderBlock block;
+            block.type = ShaderBlockType::TokenReplacement;
+            block.data = trimmed.substr(4);
+            mShaderBlocks[group].push_back(std::move(block));
+        }
+        else if (base::StartsWith(trimmed, "//$"))
+        {
+            ShaderBlock block;
+            block.type = ShaderBlockType::TokenReplacement;
+            block.data = trimmed.substr(3);
+            mShaderBlocks[group].push_back(std::move(block));
+        }
+        else if (base::StartsWith(trimmed, "#version"))
         {
             if (base::Contains(trimmed, "100"))
                 SetVersion(ShaderSource::Version::GLSL_100);
@@ -790,7 +817,21 @@ bool ShaderSource::LoadRawSource(const std::string& source)
     {
         auto line = line_buffer[line_buffer_index];
         auto trimmed = base::TrimString(line);
-        if (base::StartsWith(trimmed, "//"))
+        if (base::StartsWith(trimmed, "// $"))
+        {
+            ShaderBlock block;
+            block.type = ShaderBlockType::TokenReplacement;
+            block.data = trimmed.substr(4);
+            mShaderBlocks["code"].push_back(std::move(block));
+        }
+        else if (base::StartsWith(trimmed, "//$"))
+        {
+            ShaderBlock block;
+            block.type = ShaderBlockType::TokenReplacement;
+            block.data = trimmed.substr(3);
+            mShaderBlocks["code"].push_back(std::move(block));
+        }
+        else if (base::StartsWith(trimmed, "//"))
         {
             ShaderBlock block;
             block.type = ShaderBlockType::Comment;
