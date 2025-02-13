@@ -71,7 +71,7 @@ DlgTextureRect::DlgTextureRect(QWidget* parent, const gfx::FRect& rect, std::uni
     // do the graphics dispose in finished handler which is triggered
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
-    this->FUDialog::finished = [this]() {
+    this->FUDialog::finished = [this](int result) {
         mUI.widget->dispose();
     };
     // render on timer.
