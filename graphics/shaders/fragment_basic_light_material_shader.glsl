@@ -26,6 +26,7 @@ bool TestMap(uint map) {
     return ((kMaterialMaps & map) == map);
 }
 
+#ifndef CUSTOM_FRAGMENT_MAIN
 void FragmentShaderMain() {
 
     vec4 ambient_color = kAmbientColor;
@@ -64,5 +65,6 @@ void FragmentShaderMain() {
     fs_out.have_material_colors = true;
     fs_out.flags = kMaterialFlags;
 }
+#endif // CUSTOM_FRAGMENT_MAIN
 
 )CPP_RAW_STRING"
