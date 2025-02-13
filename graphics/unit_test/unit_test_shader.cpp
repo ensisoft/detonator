@@ -438,7 +438,7 @@ float SomeFunction() {
 }
 )");
     auto src = source.GetSource();
-    std::cout << src;
+    //std::cout << src;
     TEST_REQUIRE(CleanStr(src) == CleanStr(R"(#version 300 es
 in vec4 kBleh;
 #ifdef FOOBAR
@@ -452,6 +452,44 @@ float SomeFunction() {
 
 }
 
+void unit_test_token_replacement()
+{
+    TEST_CASE(test::Type::Feature)
+    gfx::ShaderSource source;
+    source.SetType(gfx::ShaderSource::Type::Vertex);
+    source.ReplaceToken("MY_TOKEN", "vec4 x = vec4(1.0);");
+    source.LoadRawSource(R"(
+#version 300 es
+
+// @attributes
+in vec4 kBleh;
+
+#ifdef FOOBAR
+  in vec4 kFoobar;
+#endif
+
+float SomeFunction() {
+   return 1.0;
+
+  // $MY_TOKEN
+}
+)");
+    auto src = source.GetSource();
+    //std::cout << src;
+    TEST_REQUIRE(CleanStr(src) == CleanStr(R"(#version 300 es
+in vec4 kBleh;
+#ifdef FOOBAR
+  in vec4 kFoobar;
+#endif
+
+float SomeFunction() {
+   return 1.0;
+vec4 x = vec4(1.0);
+}
+)"));
+}
+
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -459,8 +497,8 @@ int test_main(int argc, char* argv[])
     unit_test_raw_source_es300();
     unit_test_generation();
     unit_test_raw_source_combine();
-
     unit_test_conditional_data();
+    unit_test_token_replacement();
     return 0;
 }
 ) // EXPORT_TEST_MAIN
