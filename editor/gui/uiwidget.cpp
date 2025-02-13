@@ -1743,7 +1743,7 @@ void UIWidget::on_btnEditWidgetStyleString_clicked()
         DlgTextEdit dlg(this);
         dlg.SetText(old_style_string, "JSON");
         dlg.SetTitle("Style String");
-        if (dlg.exec() == QDialog::Rejected)
+        if (dlg.execFU() == QDialog::Rejected)
             return;
 
         const std::string new_style_string = dlg.GetText("JSON");
@@ -1787,7 +1787,7 @@ void UIWidget::on_btnEditWidgetAnimationString_clicked()
         DlgTextEdit dlg(this);
         dlg.SetText(old_animation_string, "TEXT");
         dlg.SetTitle("Animation String");
-        if (dlg.exec() == QDialog::Rejected)
+        if (dlg.execFU() == QDialog::Rejected)
             return;
 
         const std::string new_animation_string = dlg.GetText("JSON");
@@ -1945,7 +1945,7 @@ void UIWidget::on_btnEditWindowStyleString_clicked()
     DlgTextEdit dlg(this);
     dlg.SetText(old_style_string, "JSON");
     dlg.SetTitle("Style String");
-    if (dlg.exec() == QDialog::Rejected)
+    if (dlg.execFU() == QDialog::Rejected)
         return;
 
     const std::string new_style_string = dlg.GetText();

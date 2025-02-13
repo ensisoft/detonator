@@ -690,7 +690,7 @@ void MaterialWidget::on_actionShowShader_triggered()
     dlg.SetReadOnly(true);
     dlg.SetTitle("Shader Source");
     dlg.LoadGeometry(mWorkspace, "shader-source-dialog-geometry");
-    dlg.exec();
+    dlg.execFU();
     dlg.SaveGeometry(mWorkspace, "shader-source-dialog-geometry");
 
 }
@@ -835,11 +835,11 @@ void MaterialWidget::on_btnSelectTextureRect_clicked()
         auto rect = mMaterial->FindTextureRect(src->GetId());
         DlgTextureRect dlg(this, rect, src->Clone());
         dlg.LoadGeometry(mWorkspace, "texture-rect-dialog-geometry");
-        dlg.LoadState(mWorkspace, "texture-rect-dialog-geometry", src->GetId());
+        dlg.LoadState(mWorkspace, "texture-rect-dialog", src->GetId());
 
-        const auto ret = dlg.exec();
+        const auto ret = dlg.execFU();
         dlg.SaveGeometry(mWorkspace, "texture-rect-dialog-geometry");
-        dlg.SaveState(mWorkspace, "texture-rect-dialog-geometry", src->GetId());
+        dlg.SaveState(mWorkspace, "texture-rect-dialog", src->GetId());
         if (ret == QDialog::Rejected)
             return;
 

@@ -45,20 +45,22 @@ namespace gui
         void LoadGeometry(const app::Workspace* workspace, const QString& key);
         void SaveGeometry(app::Workspace* workspace, const QString& key) const;
 
-        int exec();
-        void close();
+        int execFU();
+        void closeFU();
+        void showFU();
 
         bool HandleEvent(QEvent* event);
 
         // this class isn't based on QObject (because the derived
         // classes must inherit from QWidget which is another QObject
         // inheritance hierarchy....
-        std::function<void()> finished;
-
+        std::function<void(int result)> finished;
     protected:
         void accept();
         void reject();
         void SetupFU(QWidget* widget);
+        int InvokeFU(bool block);
+        void CloseFU(int result);
 
     private:
         QWidget* mParent = nullptr;
@@ -67,6 +69,7 @@ namespace gui
         QEventLoop mSatan;
         QByteArray mGeometry;
         bool mDidLoadGeometry = false;
+        bool mBlocking = false;
     };
 
     class FUWindowEventFilter : public QObject

@@ -72,7 +72,7 @@ FUDialog::FUDialog(QWidget* parent) : mParent(parent)
 {
     mWindowEventFilter = new FUWindowEventFilter(this);
     mWindow = new QMainWindow;
-    mWindow->setWindowModality(Qt::WindowModality::ApplicationModal);
+
     mWindow->setWindowFlags(Qt::Dialog);
     mWindow->installEventFilter(mWindowEventFilter);
 }
@@ -90,11 +90,11 @@ FUDialog::~FUDialog()
 void FUDialog::LoadGeometry(const app::Workspace* workspace, const QString& key)
 {
     QByteArray geometry;
-    if (workspace->GetUserProperty(key + "_geometry", &mGeometry))
+    if (workspace->GetUserProperty(key, &mGeometry))
     {
         if (Editor::DebugEditor())
         {
-            VERBOSE("Previous FU dialog geometry.");
+            VERBOSE("Previous FU dialog geometry. [key=%1]", key);
         }
         mWindow->restoreGeometry(mGeometry);
         mDidLoadGeometry = true;
@@ -102,38 +102,22 @@ void FUDialog::LoadGeometry(const app::Workspace* workspace, const QString& key)
 }
 void FUDialog::SaveGeometry(app::Workspace* workspace, const QString& key) const
 {
-    workspace->SetUserProperty(key + "_geometry", mGeometry);
+    workspace->SetUserProperty(key, mGeometry);
 }
 
-int FUDialog::exec()
+void FUDialog::showFU()
 {
-    if (mParent && !mDidLoadGeometry)
-    {
-        const auto* widget = mWindow->centralWidget();
-        auto parent_pos = mParent->mapToGlobal(mParent->pos());
-        auto parent_size = mParent->size();
-        auto widget_size = widget->size();
+    InvokeFU(false);
+}
 
-        const auto size = (parent_size  - widget_size) / 2;
-        QPoint widget_pos;
-        widget_pos.setX(parent_pos.x() + size.width());
-        widget_pos.setY(parent_pos.y() + size.height());
+int FUDialog::execFU()
+{
+    return InvokeFU(true);
+}
 
-        mWindow->resize(widget_size);
-        mWindow->move(widget_pos);
-    }
-
-    mWindow->show();
-
-    auto ret = mSatan.exec();
-
-    if (finished)
-        finished();
-
-    mGeometry = mWindow->saveGeometry();
-    mWindow->removeEventFilter(mWindowEventFilter);
+void FUDialog::closeFU()
+{
     mWindow->close();
-    return ret;
 }
 
 bool FUDialog::HandleEvent(QEvent* event)
@@ -176,7 +160,14 @@ void FUDialog::accept()
     if (Editor::DebugEditor())
         VERBOSE("FU Dialog accept");
 
-    mSatan.exit(QDialog::Accepted);
+    if (mBlocking)
+    {
+        mSatan.exit(QDialog::Accepted);
+    }
+    else
+    {
+        CloseFU(QDialog::Accepted);
+    }
 
 }
 void FUDialog::reject()
@@ -184,12 +175,62 @@ void FUDialog::reject()
     if (Editor::DebugEditor())
         VERBOSE("FU dialog reject");
 
-    mSatan.exit(QDialog::Rejected);
+    if (mBlocking)
+    {
+        mSatan.exit(QDialog::Rejected);
+    }
+    else
+    {
+        CloseFU(QDialog::Rejected);
+    }
 }
 
 void FUDialog::SetupFU(QWidget* widget)
 {
     mWindow->setCentralWidget(widget);
+}
+
+int FUDialog::InvokeFU(bool block)
+{
+    if (mParent && !mDidLoadGeometry)
+    {
+        const auto* widget = mWindow->centralWidget();
+        auto parent_pos = mParent->mapToGlobal(mParent->pos());
+        auto parent_size = mParent->size();
+        auto widget_size = widget->size();
+
+        const auto size = (parent_size  - widget_size) / 2;
+        QPoint widget_pos;
+        widget_pos.setX(parent_pos.x() + size.width());
+        widget_pos.setY(parent_pos.y() + size.height());
+
+        mWindow->resize(widget_size);
+        mWindow->move(widget_pos);
+    }
+
+    if (block)
+        mWindow->setWindowModality(Qt::WindowModality::ApplicationModal);
+
+    mWindow->show();
+    if (!block)
+        return -1;
+
+    mBlocking = true;
+    auto ret = mSatan.exec();
+
+    CloseFU(ret);
+    return ret;
+}
+
+void FUDialog::CloseFU(int result)
+{
+    mGeometry = mWindow->saveGeometry();
+
+    if (finished)
+        finished(result);
+
+    mWindow->removeEventFilter(mWindowEventFilter);
+    mWindow->close();
 }
 
 } // namespace
