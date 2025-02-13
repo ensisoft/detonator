@@ -50,6 +50,13 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="btnApply">
+       <property name="text">
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btnAccept">
        <property name="text">
         <string>OK</string>
@@ -74,6 +81,12 @@
    <header>codewidget.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>text</tabstop>
+  <tabstop>btnApply</tabstop>
+  <tabstop>btnAccept</tabstop>
+  <tabstop>btnCancel</tabstop>
+ </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>

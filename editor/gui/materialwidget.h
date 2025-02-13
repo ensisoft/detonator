@@ -48,6 +48,7 @@ namespace gui
 {
     class Uniform;
     class Sampler;
+    class DlgTextEdit;
 
     class MaterialWidget : public MainWidget
     {
@@ -95,6 +96,7 @@ namespace gui
         void on_actionSelectShader_triggered();
         void on_actionEditShader_triggered();
         void on_actionShowShader_triggered();
+        void on_actionCustomizeShader_triggered();
         void on_btnResetShader_clicked();
         void on_btnAddTextureMap_clicked();
         void on_btnResetTextureMap_clicked();
@@ -223,5 +225,8 @@ namespace gui
         MouseState mMouseState = MouseState::Nada;
 
         QFileSystemWatcher mFileWatcher;
+
+        DlgTextEdit* mShaderEditor = nullptr;
+        std::string mCustomizedSource;
     };
 } // namespace
