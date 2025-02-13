@@ -33,6 +33,7 @@
 #include "editor/app/eventlog.h"
 #include "editor/gui/dlgtextedit.h"
 #include "editor/app/utility.h"
+#include "editor/gui/utility.h"
 
 namespace gui
 {
@@ -267,6 +268,8 @@ DlgTextEdit::DlgTextEdit(QWidget* parent)
 
     mUI.setupUi(this);
 
+    SetEnabled(mUI.btnApply, false);
+
     SetupFU(this);
 }
 
@@ -345,6 +348,16 @@ app::AnyString DlgTextEdit::GetText(const std::string& format) const
     return ret;
 }
 
+void DlgTextEdit::SetReadOnly(bool readonly)
+{
+    mUI.text->setReadOnly(readonly);
+    mUI.btnCancel->setVisible(!readonly);
+}
+void DlgTextEdit::EnableApply(bool on_off)
+{
+    SetEnabled(mUI.btnApply, on_off);
+}
+
 void DlgTextEdit::on_btnAccept_clicked()
 {
      accept();
@@ -352,6 +365,12 @@ void DlgTextEdit::on_btnAccept_clicked()
 void DlgTextEdit::on_btnCancel_clicked()
 {
      reject();
+}
+
+void DlgTextEdit::on_btnApply_clicked()
+{
+    if (apply)
+        apply();
 }
 
 } // namespace

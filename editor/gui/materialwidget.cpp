@@ -124,6 +124,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
         menu->addAction(mUI.actionCreateShader);
         menu->addAction(mUI.actionSelectShader);
         menu->addAction(mUI.actionEditShader);
+        menu->addAction(mUI.actionCustomizeShader);
         menu->addAction(mUI.actionShowShader);
         mUI.btnAddShader->setMenu(menu);
     }
@@ -385,6 +386,13 @@ void MaterialWidget::ReloadTextures()
 void MaterialWidget::Shutdown()
 {
     mUI.widget->dispose();
+
+    if (mShaderEditor)
+    {
+        mShaderEditor->closeFU();
+        delete mShaderEditor;
+        mShaderEditor = nullptr;
+    }
 }
 
 void MaterialWidget::Update(double secs)
@@ -695,6 +703,65 @@ void MaterialWidget::on_actionShowShader_triggered()
 
 }
 
+void MaterialWidget::on_actionCustomizeShader_triggered()
+{
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
+        return;
+
+    if (mShaderEditor)
+    {
+        mShaderEditor->activateWindow();
+        return;
+    }
+
+    mCustomizedSource = mMaterial->GetShaderSrc();
+
+    // todo: improve the stub somehow. extract it from the shader source?
+    // todo: add the material interface somewhere, i.e. the varyings and
+    // and the uniforms.
+
+    if (!mMaterial->HasShaderSrc())
+    {
+        mMaterial->SetShaderSrc(R"(
+// this is your custom fragment (material) shader main.
+// this will replace the built-in function but uses the
+// same uniform interface.
+void CustomFragmentShaderMain() {
+  vec4 color = vec4(0.3);
+
+  #ifdef GEOMETRY_IS_PARTICLES
+    color.a *= vParticleAlpha;
+  #endif
+
+  fs_out.color = color;
+  fs_out.flags =  kMaterialFlags;
+}
+
+)");
+    }
+
+    mShaderEditor = new DlgTextEdit(this);
+    mShaderEditor->LoadGeometry(mWorkspace, "shader-editor-geometry");
+    mShaderEditor->SetText(mMaterial->GetShaderSrc(), "GLSL");
+    mShaderEditor->SetTitle("Shader Source");
+    mShaderEditor->EnableApply(true);
+    mShaderEditor->showFU();
+    mShaderEditor->finished = [this](int ret) {
+        if (ret == QDialog::Rejected)
+            mMaterial->SetShaderSrc(mCustomizedSource);
+        else if (ret == QDialog::Accepted)
+            mMaterial->SetShaderSrc(mShaderEditor->GetText());
+        mShaderEditor->SaveGeometry(mWorkspace, "shader-editor-geometry");
+        mShaderEditor->deleteLater();
+        mShaderEditor = nullptr;
+        ShowMaterialProperties();
+    };
+    mShaderEditor->apply = [this]() {
+        mMaterial->SetShaderSrc(mShaderEditor->GetText());
+        on_actionReloadShaders_triggered();
+    };
+}
+
 void MaterialWidget::on_btnResetShader_clicked()
 {
     if (mMaterial->HasShaderUri())
@@ -704,6 +771,11 @@ void MaterialWidget::on_btnResetShader_clicked()
         SetEnabled(mUI.btnResetShader, false);
         SetValue(mUI.shaderFile, QString(""));
         ClearCustomUniforms();
+        ShowMaterialProperties();
+    }
+    else if (mMaterial->HasShaderSrc())
+    {
+        mMaterial->ClearShaderSrc();
         ShowMaterialProperties();
     }
 }
@@ -2377,6 +2449,7 @@ void MaterialWidget::ShowMaterialProperties()
         SetEnabled(mUI.shaderFile,         true);
         SetEnabled(mUI.actionSelectShader, true);
         SetEnabled(mUI.actionCreateShader, true);
+        SetEnabled(mUI.actionCustomizeShader, false);
         SetEnabled(mUI.actionEditShader,   mMaterial->HasShaderUri());
         SetEnabled(mUI.btnResetShader,     mMaterial->HasShaderUri());
         SetVisible(mUI.grpRenderFlags,     false);
@@ -2389,6 +2462,8 @@ void MaterialWidget::ShowMaterialProperties()
         SetEnabled(mUI.btnAddShader,        true);
         SetVisible(mUI.grpRenderFlags,      true);
         SetVisible(mUI.chkStaticInstance,   true);
+        SetEnabled(mUI.actionCustomizeShader, true);
+        SetEnabled(mUI.btnResetShader, mMaterial->HasShaderSrc());
 
         if (mMaterial->GetType() == gfx::MaterialClass::Type::BasicLight)
         {

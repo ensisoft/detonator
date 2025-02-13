@@ -30,6 +30,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <functional>
 
 #include "app/types.h"
 #include "editor/gui/fudialog.h"
@@ -48,15 +49,15 @@ namespace gui
         app::AnyString GetText() const;
         app::AnyString GetText(const std::string& format) const;
 
-        void SetReadOnly(bool readonly)
-        {
-            mUI.text->setReadOnly(readonly);
-            mUI.btnCancel->setVisible(!readonly);
-        }
+        void SetReadOnly(bool readonly);
+        void EnableApply(bool on_off);
+
+        std::function<void()> apply;
 
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
+        void on_btnApply_clicked();
     private:
         Ui::DlgTextEdit mUI;
     private:
