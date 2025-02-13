@@ -12,6 +12,9 @@ uniform uint kMaterialFlags;
 // The incoming color value.
 uniform vec4 kBaseColor;
 
+// current material time.
+uniform float kTime;
+
 // @varyings
 
 #ifdef GEOMETRY_IS_PARTICLES
@@ -19,18 +22,21 @@ uniform vec4 kBaseColor;
   in float vParticleAlpha;
 #endif
 
-void FragmentShaderMain() {
+// @code
 
+#ifndef CUSTOM_FRAGMENT_MAIN
+void FragmentShaderMain() {
     vec4 color = kBaseColor;
 
-#ifdef GEOMETRY_IS_PARTICLES
-    // modulate by alpha
-    color.a *= vParticleAlpha;
-#endif
+    #ifdef GEOMETRY_IS_PARTICLES
+        // modulate by alpha
+        color.a *= vParticleAlpha;
+    #endif
 
     // out value.
     fs_out.color = color;
     fs_out.flags = kMaterialFlags;
 }
+#endif // CUSTOM_FRAGMENT_MAIN
 
 )CPP_RAW_STRING"

@@ -66,32 +66,50 @@ uniform ivec2 kTextureWrap;
   in float vParticleAlpha;
 #endif
 
-vec2 RotateCoords(vec2 coords) {
+// @code
+
+vec2 RotateCoords(vec2 texture_coords, float time) {
     float random_angle = 0.0;
 
-#ifdef GEOMETRY_IS_PARTICLES
-    if (kParticleEffect == PARTICLE_EFFECT_ROTATE)
-        random_angle = mix(0.0, 3.1415926, vParticleRandomValue);
-#endif
+    #ifdef GEOMETRY_IS_PARTICLES
+        if (kParticleEffect == PARTICLE_EFFECT_ROTATE) {
+            random_angle = mix(0.0, 3.1415926, vParticleRandomValue);
+        }
+    #endif
 
-    float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle;
-    return RotateTextureCoords(coords, angle);
+    float angle = kTextureRotation + kTextureVelocity.z * time + random_angle;
+    return RotateTextureCoords(texture_coords, angle);
 }
 
+vec2 ScrollCoords(vec2 texture_coords, float time) {
+    return texture_coords + kTextureVelocity.xy * time;
+}
+
+vec2 ScaleCoords(vec2 texture_coords) {
+    return texture_coords * kTextureScale;
+}
+
+// apply texture box transformation to the incoming texture coordinates.
+// this applies when the original texture is packaged inside another
+// larger texture the texture coordinates must be mapped to a sub
+// rectangle inside the larger texture.
+vec2 MapTextureCoords(vec2 coords, vec4 texture_box) {
+    vec2 trans_tex = texture_box.xy;
+    vec2 scale_tex = texture_box.zw;
+    // scale and transform based on texture box. (todo: maybe use texture matrix?)
+    return WrapTextureCoords(coords * scale_tex, scale_tex, kTextureWrap) + trans_tex;
+}
+
+#ifndef CUSTOM_FRAGMENT_MAIN
 void FragmentShaderMain() {
 
     vec2 coords = GetTextureCoords();
-    coords = RotateCoords(coords);
-
-    coords += kTextureVelocity.xy * kTime;
-    coords = coords * kTextureScale;
+    coords = RotateCoords(coords, kTime);
+    coords = ScrollCoords(coords, kTime);
+    coords = ScaleCoords(coords);
 
     // apply texture box transformation.
-    vec2 scale_tex = kTextureBox.zw;
-    vec2 trans_tex = kTextureBox.xy;
-
-    // scale and transform based on texture box. (todo: maybe use texture matrix?)
-    coords = WrapTextureCoords(coords * scale_tex, scale_tex, kTextureWrap) + trans_tex;
+    coords = MapTextureCoords(coords, kTextureBox);
 
     // sample textures, if texture is a just an alpha mask we use
     // only the alpha channel later.
@@ -112,5 +130,6 @@ void FragmentShaderMain() {
     fs_out.color = color;
     fs_out.flags = kMaterialFlags;
 }
+#endif // CUSTOM_FRAGMENT_MAIN
 
 )CPP_RAW_STRING"

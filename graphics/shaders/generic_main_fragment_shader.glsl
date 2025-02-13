@@ -64,11 +64,17 @@ vec4 Bloom(vec4 color) {
 }
 #endif
 
+// $CUSTOM_FRAGMENT_MAIN
 
 void main() {
     fs_out.have_material_colors = false;
     fs_out.have_surface_normal = false;
-    FragmentShaderMain();
+
+    #if defined(CUSTOM_FRAGMENT_MAIN)
+        CustomFragmentShaderMain();
+    #else
+        FragmentShaderMain();
+    #endif
 
     vec4 out_color = fs_out.color;
 
@@ -90,6 +96,7 @@ void main() {
             fragOutColor1 = sRGB_encode(bloom);
         }
     #endif
+
 }
 
 )CPP_RAW_STRING"

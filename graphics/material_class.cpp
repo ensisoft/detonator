@@ -1292,6 +1292,11 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     }
     else BUG("Unknown material type.");
 
+    if (!mShaderSrc.empty())
+    {
+        src.AddPreprocessorDefinition("CUSTOM_FRAGMENT_MAIN");
+        src.ReplaceToken("CUSTOM_FRAGMENT_MAIN", mShaderSrc);
+    }
     return src;
 }
 
