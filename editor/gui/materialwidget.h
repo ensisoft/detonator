@@ -109,6 +109,7 @@ namespace gui
         void on_materialType_currentIndexChanged(int);
         void on_surfaceType_currentIndexChanged(int);
         void on_particleStartColor_colorChanged(QColor color);
+        void on_particleMidColor_colorChanged(QColor color);
         void on_particleEndColor_colorChanged(QColor color);
         void on_diffuseColor_colorChanged(QColor color);
         void on_ambientColor_colorChanged(QColor color);

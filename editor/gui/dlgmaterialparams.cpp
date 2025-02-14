@@ -145,6 +145,9 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
         mColorUniforms.push_back({"Start color",
                                   material->GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleStartColor),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::ParticleStartColor)});
+        mColorUniforms.push_back({"Mid color",
+                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleMidColor),
+                                  material->GetColor(gfx::MaterialClass::ColorIndex::ParticleMidColor)});
         mColorUniforms.push_back({"End color",
                                   material->GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleEndColor),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::ParticleEndColor)});

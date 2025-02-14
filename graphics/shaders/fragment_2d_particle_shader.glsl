@@ -15,8 +15,10 @@ uniform uint kSurfaceType;
 uniform sampler2D kMask;
 // the sub-rectangle in the texture from where to sample
 uniform vec4 kMaskRect;
-// particle start color
+// particle start color when time is 0.0
 uniform vec4 kParticleStartColor;
+// particle mid phase color when time is 0.5
+uniform vec4 kParticleMidColor;
 // particle end color when time is 1.0
 uniform vec4 kParticleEndColor;
 // base particle (texture coordinate) rotation.
@@ -53,7 +55,11 @@ uniform uint kParticleRotation;
 
 void MixColors(float alpha) {
 
-    vec4 color = mix(kParticleStartColor, kParticleEndColor, vParticleTime);
+    float first_half_time = min(vParticleTime, 0.5) / 0.5;
+    float second_half_time = max(0.0, vParticleTime-0.5) / 0.5;
+    vec4 first_half = mix(kParticleStartColor, kParticleMidColor, first_half_time);
+
+    vec4 color = mix(first_half, kParticleEndColor, second_half_time);
 
     if (kSurfaceType == MATERIAL_SURFACE_TYPE_TRANSPARENT) {
         // blend with straight alpha and with transparent surface

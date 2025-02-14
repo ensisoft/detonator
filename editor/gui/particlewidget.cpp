@@ -989,10 +989,11 @@ void ParticleEditorWidget::ShowParams()
 
     SetValue(mUI.delay, params.delay);
 
-    SetEnabled(mUI.cmbSurface, false);
+    SetEnabled(mUI.cmbSurface,  false);
     SetEnabled(mUI.cmbParticle, false);
-    SetEnabled(mUI.startColor, false);
-    SetEnabled(mUI.endColor, false);
+    SetEnabled(mUI.startColor,  false);
+    SetEnabled(mUI.endColor,    false);
+    SetEnabled(mUI.endColor,    false);
     SetValue(mUI.cmbSurface, -1);
     SetValue(mUI.cmbParticle, -1);
 
@@ -1001,6 +1002,7 @@ void ParticleEditorWidget::ShowParams()
     SetEnabled(mUI.lifetime, can_expire);
 
     mUI.startColor->clearColor();
+    mUI.midColor->clearColor();
     mUI.endColor->clearColor();
 
     SetImage(mUI.preview, QPixmap(":texture.png"));
@@ -1030,6 +1032,7 @@ void ParticleEditorWidget::ShowParams()
 
     SetValue(mUI.cmbSurface, mMaterialClass->GetSurfaceType());
     SetValue(mUI.startColor, mMaterialClass->GetParticleStartColor());
+    SetValue(mUI.midColor, mMaterialClass->GetParticleMidColor());
     SetValue(mUI.endColor, mMaterialClass->GetParticleEndColor());
     SetValue(mUI.cmbParticle, ListItemId(file_texture_src->GetFilename()));
     if (const auto bitmap = texture_src->GetData())
@@ -1041,10 +1044,11 @@ void ParticleEditorWidget::ShowParams()
         });
     }
 
-    SetEnabled(mUI.cmbSurface, true);
+    SetEnabled(mUI.cmbSurface,  true);
     SetEnabled(mUI.cmbParticle, true);
-    SetEnabled(mUI.startColor, true);
-    SetEnabled(mUI.endColor, true);
+    SetEnabled(mUI.startColor,  true);
+    SetEnabled(mUI.midColor,    true);
+    SetEnabled(mUI.endColor,    true);
 }
 
 void ParticleEditorWidget::MinMax()
@@ -1207,6 +1211,7 @@ void ParticleEditorWidget::on_btnCreateMaterial_clicked()
     mMaterialClass->SetTextureMap(0, std::move(map));
     mMaterialClass->SetName((std::string)GetValue(mUI.name) + std::string(" Particle"));
     mMaterialClass->SetParticleStartColor(GetValue(mUI.startColor));
+    mMaterialClass->SetParticleMidColor(GetValue(mUI.midColor));
     mMaterialClass->SetParticleEndColor(GetValue(mUI.endColor));
     mMaterialClass->SetParticleBaseRotation(0.0f);
     mMaterialClass->SetParticleRotation(gfx::MaterialClass::ParticleRotation::ParticleDirectionAndBase);
@@ -1269,6 +1274,14 @@ void ParticleEditorWidget::on_startColor_colorChanged(QColor)
         return;
 
     mMaterialClass->SetParticleStartColor(GetValue(mUI.startColor));
+}
+
+void ParticleEditorWidget::on_midColor_colorChanged(QColor)
+{
+    if (!mMaterialClass)
+        return;
+
+    mMaterialClass->SetParticleMidColor(GetValue(mUI.midColor));
 }
 
 void ParticleEditorWidget::on_endColor_colorChanged(QColor)

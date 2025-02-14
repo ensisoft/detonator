@@ -68,6 +68,7 @@ namespace gfx
             DiffuseColor,
             SpecularColor,
             ParticleStartColor,
+            ParticleMidColor,
             ParticleEndColor
         };
 
@@ -263,6 +264,8 @@ namespace gfx
         { SetUniform("kParticleStartColor", color); }
         inline void SetParticleEndColor(const Color4f& color) noexcept
         { SetUniform("kParticleEndColor", color); }
+        inline void SetParticleMidColor(const Color4f& color) noexcept
+        { SetUniform("kParticleMidColor", color); }
         inline void SetParticleBaseRotation(float rotation_angle) noexcept
         { SetUniform("kParticleBaseRotation", rotation_angle); }
 
@@ -319,6 +322,9 @@ namespace gfx
         { return GetUniformValue<Color4f>("kParticleStartColor", Color::White); }
         inline Color4f GetParticleEndColor() const noexcept
         { return GetUniformValue<Color4f>("kParticleEndColor", Color::White); }
+        inline Color4f GetParticleMidColor() const noexcept
+        { return GetUniformValue<Color4f>("kParticleMidColor", Color::White); }
+
         inline ParticleRotation GetParticleRotation() const noexcept
         { return static_cast<ParticleRotation>(GetUniformValue("kParticleRotation", static_cast<int>(ParticleRotation::None))); }
         inline float GetParticleBaseRotation() const noexcept
