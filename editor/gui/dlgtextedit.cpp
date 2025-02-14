@@ -290,6 +290,7 @@ void DlgTextEdit::SetText(const app::AnyString& str, const std::string& format)
 
     const QFont default_font;
     TextEditor::Settings settings;
+    settings.keymap = TextEditor::Keymap::Basic;
     settings.highlight_current_line = false;
     settings.show_line_numbers      = false;
     settings.highlight_syntax       = false;

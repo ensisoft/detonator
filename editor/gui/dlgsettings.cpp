@@ -70,6 +70,7 @@ end
     PopulateFromEnum<MainWidget::GridDensity>(mUI.cmbGrid);
     PopulateFromEnum<GfxWindow::MouseCursor>(mUI.cmbMouseCursor);
     PopulateFromEnum<QTabWidget::TabPosition>(mUI.cmbTabPosition);
+    PopulateFromEnum<TextEditor::Keymap>(mUI.cmbKeymap);
     PopulateFontSizes(mUI.editorFontSize);
     PopulateQtStyles(mUI.cmbStyle);
 
@@ -122,12 +123,14 @@ end
     SetUIValue(mUI.chkShowOrigin,               widget.show_origin);
     SetUIValue(mUI.chkShowViewport,             widget.show_viewport);
     SetUIValue(mUI.chkSnapToGrid,               widget.snap_to_grid);
+
     // Lua script editor settings
     SetUIValue(mUI.editorTheme,                 script.theme);
     SetUIValue(mUI.edtLuaFormatterExec,         script.lua_formatter_exec);
     SetUIValue(mUI.edtLuaFormatterArgs,         script.lua_formatter_args);
     SetUIValue(mUI.editorFormatOnSave,          script.lua_format_on_save);
     SetUIValue(mUI.chkUseCodeHeuristics,        script.use_code_heuristics);
+    SetUIValue(mUI.cmbKeymap,                   script.editor_settings.keymap);
     SetUIValue(mUI.chkUseCodeCompletion,        script.editor_settings.use_code_completer);
     SetUIValue(mUI.editorShowLineNumbers,       script.editor_settings.show_line_numbers);
     SetUIValue(mUI.editorHightlightCurrentLine, script.editor_settings.highlight_current_line);
@@ -197,6 +200,7 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.edtLuaFormatterArgs,         &mScriptSettings.lua_formatter_args);
     GetUIValue(mUI.editorFormatOnSave,          &mScriptSettings.lua_format_on_save);
     GetUIValue(mUI.chkUseCodeHeuristics,        &mScriptSettings.use_code_heuristics);
+    GetUIValue(mUI.cmbKeymap,                   &mScriptSettings.editor_settings.keymap);
     GetUIValue(mUI.chkUseCodeCompletion,        &mScriptSettings.editor_settings.use_code_completer);
     GetUIValue(mUI.editorShowLineNumbers,       &mScriptSettings.editor_settings.show_line_numbers);
     GetUIValue(mUI.editorHightlightCurrentLine, &mScriptSettings.editor_settings.highlight_current_line);

@@ -77,7 +77,12 @@ namespace gui
         Q_OBJECT
 
     public:
+        enum class Keymap {
+            Basic, Emacs
+        };
+
         struct Settings {
+            Keymap keymap = Keymap::Basic;
             QString font_description;
             bool show_line_numbers        = true;
             bool highlight_syntax         = true;
