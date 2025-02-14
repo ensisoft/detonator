@@ -719,6 +719,7 @@ private:
         if (!mState.workspace->IsValidDrawable(mPresetParticleEngine->GetId()))
         {
             app::ParticleSystemResource resource(mPresetParticleEngine->Copy(), mPresetParticleEngine->GetName());
+            resource.SetProperty("material", mPresetParticleEngineMaterial->GetId());
             mState.workspace->SaveResource(resource);
         }
         mDrawableClass = mPresetParticleEngine;
@@ -727,7 +728,7 @@ private:
         {
             app::MaterialResource resource(mPresetParticleEngineMaterial->Copy(),
                                            mPresetParticleEngineMaterial->GetName());
-            resource.SetProperty("particle-engine-class-id", mDrawableClass->GetId());
+            resource.SetProperty("particle-engine-class-id", mPresetParticleEngine->GetId());
             mState.workspace->SaveResource(resource);
         }
         mMaterialClass = mPresetParticleEngineMaterial;
