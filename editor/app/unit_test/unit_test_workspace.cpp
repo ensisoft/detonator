@@ -2433,6 +2433,69 @@ void unit_test_resource_cache()
 
 }
 
+// We have 2 resources A and B so that B  depends on A
+// schedule a delete for both
+// Deleting A will create a "validate" command for B
+// but by the time we execute validate on B it has been
+// deleted.
+void unit_test_resource_cache_delete_bug()
+{
+    TEST_CASE(test::Type::Feature)
+
+    DeleteDir("TestWorkspace");
+    MakeDir("TestWorkspace");
+    MakeDir("TestWorkspace/textures");
+
+    app::ResourceCache cache("TestWorkspace",
+                             [](std::unique_ptr<base::ThreadTask> task) {
+                                 task->Execute();
+                                 base::TaskHandle handle(std::move(task), 0);
+                                 return handle;
+
+                             });
+    app::Workspace workspace("TestWorkspace");
+
+    // initialize
+    {
+        {
+            gfx::MaterialClass material0(gfx::MaterialClass::Type::Color, "material0");
+            app::MaterialResource resource(material0, "material0");
+            workspace.SaveResource(resource);
+        }
+        {
+            game::DrawableItemClass drawable;
+            drawable.SetDrawableId("_rect");
+            drawable.SetMaterialId("material0");
+
+            game::EntityNodeClass node;
+            node.SetName("node");
+            node.SetDrawable(drawable);
+
+            game::EntityClass entity("entity0");
+            entity.SetName("entity");
+            entity.AddNode(node);
+            app::EntityResource resource(entity, "entity0");
+            workspace.SaveResource(resource);
+        }
+
+        // initialize cache.
+        for (unsigned i=0; i<workspace.GetNumResources(); ++i)
+        {
+            const auto& resource = workspace.GetResource(i);
+            cache.AddResource(resource.GetIdUtf8(), resource.Copy());
+        }
+        cache.BuildCache();
+        while (cache.HasPendingWork())
+            cache.TickPendingWork();
+    }
+
+    cache.DelResource("material0");
+    cache.DelResource("entity0");
+
+    while (cache.HasPendingWork())
+        cache.TickPendingWork();
+}
+
 
 int test_main(int argc, char* argv[])
 {
@@ -2475,5 +2538,6 @@ int test_main(int argc, char* argv[])
     unit_test_duplicate_with_data();
     unit_test_delete_with_data();
     unit_test_resource_cache();
+    unit_test_resource_cache_delete_bug();
     return 0;
 }
