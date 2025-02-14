@@ -15,6 +15,10 @@ QWidget {
 	selection-color: #000;
 }
 
+QWidget:disabled {
+	color: #555;
+}
+
 QDockWidget {
 	font-weight: bold;
 	color: rgb(183, 134, 32);
