@@ -127,14 +127,19 @@ void DlgParticle::PaintScene(gfx::Painter& painter, double dt)
     if (!mMaterial)
     {
         if (!mMaterialClass)
+        {
+            ShowError("The material class failed to load.", Point2Df(20.0f, 20.0f), painter);
             return;
-
+        }
         mMaterial = gfx::CreateMaterialInstance(mMaterialClass);
     }
     if (!mEngine)
     {
         if (!mParticleClass)
+        {
+            ShowError("The particle class failed to load.", Point2Df(20.0f, 20.0f), painter);
             return;
+        }
         mEngine = std::make_unique<gfx::ParticleEngineInstance>(mParticleClass);
     }
 
@@ -185,6 +190,9 @@ void DlgParticle::PaintScene(gfx::Painter& painter, double dt)
 
 void DlgParticle::MousePress(QMouseEvent* mickey)
 {
+    if (!mEngine)
+        return;
+
     // using mouse press to emit particles avoids the
     // issue that the keyboard focus is not on the gfx widget..
     if (mEngine->GetParams().mode == gfx::ParticleEngineClass::SpawnPolicy::Command)
@@ -202,6 +210,9 @@ void DlgParticle::MouseWheel(QWheelEvent* wheel)
 }
 bool DlgParticle::KeyPress(QKeyEvent* key)
 {
+    if (!mEngine)
+        return false;
+
     if (mEngine->GetParams().mode == gfx::ParticleEngineClass::SpawnPolicy::Command)
     {
         mEmitOnce = true;
