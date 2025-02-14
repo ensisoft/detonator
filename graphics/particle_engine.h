@@ -28,6 +28,7 @@
 #include <memory>
 #include <mutex>
 
+#include "base/bitflag.h"
 #include "base/utility.h"
 #include "graphics/drawable.h"
 
@@ -165,8 +166,14 @@ namespace gfx
             Point, FullLine, PartialLineBackward, PartialLineForward
         };
 
+        enum class Flags {
+            ParticlesCanExpire
+        };
+
         // initial engine configuration params
         struct Params {
+            base::bitflag<Flags> flags = GetDefaultFlags();
+
             DrawPrimitive primitive = DrawPrimitive::Point;
 
             Direction direction = Direction::Sector;
@@ -232,6 +239,13 @@ namespace gfx
             float rate_of_change_in_alpha_wrt_dist = 0.0f;
             // the gravity that applies when using projectile particles.
             glm::vec2 gravity = {0.0f, 0.3f};
+
+            static base::bitflag<Flags> GetDefaultFlags()
+            {
+                base::bitflag<Flags> f;
+                f.set(Flags::ParticlesCanExpire, true);
+                return f;
+            }
         };
         using EngineParamsPtr = std::shared_ptr<Params>;
 
@@ -284,6 +298,8 @@ namespace gfx
 
         // Get the params.
         inline const Params& GetParams() const noexcept
+        { return *mParams; }
+        inline Params& GetParams() noexcept
         { return *mParams; }
         // Set the params.
         inline void SetParams(const Params& params) noexcept

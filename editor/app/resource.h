@@ -459,6 +459,7 @@ namespace app
 
         void MigrateResource(uik::Window& window, ResourceMigrationLog* log, unsigned old_version, unsigned new_version);
         void MigrateResource(gfx::MaterialClass& material, ResourceMigrationLog* log, unsigned old_version, unsigned new_version);
+        void MigrateResource(gfx::ParticleEngineClass& drawable, ResourceMigrationLog* log, unsigned old_version, unsigned new_version);
         void MigrateResource(game::EntityClass& entity, ResourceMigrationLog* log, unsigned  old_version, unsigned new_version);
 
     } // detail
@@ -565,11 +566,14 @@ namespace app
 
             if constexpr (TypeValue == Resource::Type::Material)
             {
-                chunk->Write("resource_ver", 4);
+                chunk->Write("resource_ver", 5);
                 data.AppendChunk("materials", std::move(chunk));
             }
             else if (TypeValue == Resource::Type::ParticleSystem)
+            {
+                chunk->Write("resource_ver", 2);
                 data.AppendChunk("particles", std::move(chunk));
+            }
             else if (TypeValue == Resource::Type::Shape)
                 data.AppendChunk("shapes", std::move(chunk));
             else if (TypeValue == Resource::Type::Entity)
@@ -657,22 +661,19 @@ namespace app
         { return detail::PackResource(*mContent, packer); }
         void Migrate(ResourceMigrationLog* log) override
         {
+            unsigned current_version = 0;
+            unsigned saved_version   = 0;
+
+            // DON'T FORGET TO UPDATE THE SAVE with the version number!
             if constexpr (TypeValue == Resource::Type::Material)
-            {
-                unsigned current_version = 5;
-                unsigned saved_version;
-                ASSERT(Resource::GetProperty("__version", &saved_version));
-                if (saved_version < current_version)
-                    detail::MigrateResource(*mContent, log, saved_version, current_version);
-            }
-            else
-            {
-                unsigned current_version = 2;
-                unsigned saved_version = 1;
-                ASSERT(Resource::GetProperty("__version", &saved_version));
-                if (saved_version < current_version)
-                    detail::MigrateResource(*mContent, log, saved_version, current_version);
-            }
+                current_version = 5;
+            else if (TypeValue == Resource::Type::ParticleSystem)
+                current_version = 2;
+            else current_version = 2;
+
+            ASSERT(Resource::GetProperty("__version", &saved_version));
+            if (saved_version < current_version)
+                detail::MigrateResource(*mContent, log, saved_version, current_version);
         }
 
         // GameResourceBase
