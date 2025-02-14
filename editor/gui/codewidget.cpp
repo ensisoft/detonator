@@ -333,6 +333,8 @@ void TextEditor::keyPressEvent(QKeyEvent* event)
             return;
         }
     }
+    if (mSettings.keymap == Keymap::Basic)
+        return QPlainTextEdit::keyPressEvent(event);
 
     if (ctrl && (key == Qt::Key_D))
     {

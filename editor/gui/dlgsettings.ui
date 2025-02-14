@@ -1403,6 +1403,21 @@
                 </property>
                </widget>
               </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_24">
+             <property name="title">
+              <string>Keymap</string>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_22">
+              <item>
+               <widget class="QComboBox" name="cmbKeymap"/>
+              </item>
               <item>
                <spacer name="verticalSpacer_3">
                 <property name="orientation">
@@ -1555,6 +1570,7 @@
   <tabstop>editorFormatOnSave</tabstop>
   <tabstop>chkUseCodeCompletion</tabstop>
   <tabstop>chkUseCodeHeuristics</tabstop>
+  <tabstop>cmbKeymap</tabstop>
   <tabstop>code</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>

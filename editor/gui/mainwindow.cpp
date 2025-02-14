@@ -315,6 +315,7 @@ void MainWindow::LoadSettings()
     settings.GetValue("ScriptWidget", "lua_formatter_exec",             &script_widget_settings.lua_formatter_exec);
     settings.GetValue("ScriptWidget", "lua_formatter_args",             &script_widget_settings.lua_formatter_args);
     settings.GetValue("ScriptWidget", "lua_format_on_save",             &script_widget_settings.lua_format_on_save);
+    settings.GetValue("ScriptWidget", "editor_keymap",                  &script_widget_settings.editor_settings.keymap);
     settings.GetValue("ScriptWidget", "editor_font_name",               &script_widget_settings.editor_settings.font_description);
     settings.GetValue("ScriptWidget", "editor_font_size",               &script_widget_settings.editor_settings.font_size);
     settings.GetValue("ScriptWidget", "editor_show_line_numbers",       &script_widget_settings.editor_settings.show_line_numbers);
@@ -3537,6 +3538,7 @@ void MainWindow::SaveSettings()
     settings.SetValue("ScriptWidget", "lua_formatter_exec",             script_widget_settings.lua_formatter_exec);
     settings.SetValue("ScriptWidget", "lua_formatter_args",             script_widget_settings.lua_formatter_args);
     settings.SetValue("ScriptWidget", "lua_format_on_save",             script_widget_settings.lua_format_on_save);
+    settings.SetValue("ScriptWidget", "editor_keymap",                  script_widget_settings.editor_settings.keymap);
     settings.SetValue("ScriptWidget", "editor_font_name",               script_widget_settings.editor_settings.font_description);
     settings.SetValue("ScriptWidget", "editor_font_size",               script_widget_settings.editor_settings.font_size);
     settings.SetValue("ScriptWidget", "editor_show_line_numbers",       script_widget_settings.editor_settings.show_line_numbers);
