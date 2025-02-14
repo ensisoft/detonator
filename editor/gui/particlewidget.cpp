@@ -325,7 +325,6 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetProperty(resource, "transform_width", mUI.scaleX);
     GetProperty(resource, "transform_height", mUI.scaleY);
     GetProperty(resource, "transform_rotation", mUI.rotation);
-    GetProperty(resource, "use_lifetime", mUI.canExpire);
     GetProperty(resource, "local_emitter_x", mUI.initX);
     GetProperty(resource, "local_emitter_y", mUI.initY);
     GetProperty(resource, "local_emitter_w", mUI.initWidth);
@@ -470,7 +469,6 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Particle", mUI.scaleX);
     settings.SaveWidget("Particle", mUI.scaleY);
     settings.SaveWidget("Particle", mUI.rotation);
-    settings.SaveWidget("Particle", mUI.canExpire);
     settings.SaveWidget("Particle", mUI.chkShowGrid);
     settings.SaveWidget("Particle", mUI.chkShowBounds);
     settings.SaveWidget("Particle", mUI.chkShowEmitter);
@@ -510,7 +508,6 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Particle", mUI.scaleX);
     settings.LoadWidget("Particle", mUI.scaleY);
     settings.LoadWidget("Particle", mUI.rotation);
-    settings.LoadWidget("Particle", mUI.canExpire);
     settings.LoadWidget("Particle", mUI.chkShowGrid);
     settings.LoadWidget("Particle", mUI.chkShowBounds);
     settings.LoadWidget("Particle", mUI.chkShowEmitter);
@@ -719,7 +716,6 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetProperty(particle_resource, "transform_width", mUI.scaleX);
     SetProperty(particle_resource, "transform_height", mUI.scaleY);
     SetProperty(particle_resource, "transform_rotation", mUI.rotation);
-    SetProperty(particle_resource, "use_lifetime", mUI.canExpire);
     SetProperty(particle_resource, "local_emitter_x", mUI.initX);
     SetProperty(particle_resource, "local_emitter_y", mUI.initY);
     SetProperty(particle_resource, "local_emitter_w", mUI.initWidth);
@@ -897,16 +893,9 @@ void ParticleEditorWidget::SetParams()
     params.rate_of_change_in_alpha_wrt_dist = GetValue(mUI.distAlphaDerivative);
     params.direction_sector_start_angle     = qDegreesToRadians((float)mUI.dirStartAngle->value());
     params.direction_sector_size            = qDegreesToRadians((float)mUI.dirSizeAngle->value());
-    if (GetValue(mUI.canExpire))
-    {
-        params.min_lifetime   = GetValue(mUI.minLifetime);
-        params.max_lifetime   = GetValue(mUI.maxLifetime);
-    }
-    else
-    {
-        params.min_lifetime   = std::numeric_limits<float>::max();
-        params.max_lifetime   = std::numeric_limits<float>::max();
-    }
+    params.min_lifetime                     = GetValue(mUI.minLifetime);
+    params.max_lifetime                     = GetValue(mUI.maxLifetime);
+
     params.min_time = GetValue(mUI.minTime);
     params.max_time = GetValue(mUI.maxTime);
     if (params.max_time == 0.0f)
@@ -929,12 +918,17 @@ void ParticleEditorWidget::SetParams()
         params.init_rect_width  = 1.0f;
         params.init_rect_height = 1.0f;
     }
+    params.flags.set(gfx::ParticleEngineClass::Flags::ParticlesCanExpire, GetValue(mUI.canExpire));
+
     mClass->SetParams(params);
 }
 
 void ParticleEditorWidget::ShowParams()
 {
     const auto& params = mClass->GetParams();
+    const auto can_expire = params.flags.test(gfx::ParticleEngineClass::Flags::ParticlesCanExpire);
+
+    SetValue(mUI.canExpire,           can_expire);
     SetValue(mUI.primitive,           params.primitive);
     SetValue(mUI.space,               params.coordinate_space);
     SetValue(mUI.motion,              params.motion);
@@ -1001,6 +995,11 @@ void ParticleEditorWidget::ShowParams()
     SetEnabled(mUI.endColor, false);
     SetValue(mUI.cmbSurface, -1);
     SetValue(mUI.cmbParticle, -1);
+
+    SetEnabled(mUI.minLifetime, can_expire);
+    SetEnabled(mUI.maxLifetime, can_expire);
+    SetEnabled(mUI.lifetime, can_expire);
+
     mUI.startColor->clearColor();
     mUI.endColor->clearColor();
 
@@ -1559,16 +1558,9 @@ void ParticleEditorWidget::on_daPerDist_valueChanged()
 
 void ParticleEditorWidget::on_canExpire_stateChanged(int)
 {
-    if (GetValue(mUI.canExpire))
-    {
-        SetEnabled(mUI.minLifetime, true);
-        SetEnabled(mUI.maxLifetime, true);
-    }
-    else
-    {
-        SetEnabled(mUI.minLifetime, false);
-        SetEnabled(mUI.maxLifetime, false);
-    }
+    SetEnabled(mUI.minLifetime, GetValue(mUI.canExpire));
+    SetEnabled(mUI.maxLifetime, GetValue(mUI.canExpire));
+    SetEnabled(mUI.lifetime, GetValue(mUI.canExpire));
     SetParams();
 }
 

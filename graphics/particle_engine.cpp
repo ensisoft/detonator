@@ -496,6 +496,7 @@ void ParticleEngineClass::IntoJson(data::Writer& data) const
     data.Write("alpha_over_time",              mParams->rate_of_change_in_alpha_wrt_time);
     data.Write("alpha_over_dist",              mParams->rate_of_change_in_alpha_wrt_dist);
     data.Write("gravity",                      mParams->gravity);
+    data.Write("flags",                        mParams->flags);
 }
 
 
@@ -539,6 +540,10 @@ bool ParticleEngineClass::FromJson(const data::Reader& data)
     ok &= data.Read("alpha_over_time",              &params.rate_of_change_in_alpha_wrt_time);
     ok &= data.Read("alpha_over_dist",              &params.rate_of_change_in_alpha_wrt_dist);
     ok &= data.Read("gravity",                      &params.gravity);
+
+    if (data.HasValue("flags"))
+        ok &= data.Read("flags", &params.flags);
+
     SetParams(params);
     return ok;
 }
@@ -790,6 +795,12 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceStatePtr
 // static
 void ParticleEngineClass::InitParticles(const Environment& env, const Params& params, ParticleBuffer& particles, size_t num)
 {
+    // basic sanity to avoid division by zero.
+    if (params.max_lifetime <= 0.0f || params.max_lifetime < params.min_lifetime)
+        return;
+
+    const bool can_expire = params.flags.test(Flags::ParticlesCanExpire);
+
     const auto count = particles.size();
     particles.resize(count + num);
 
@@ -873,7 +884,7 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
             // direction vector in order to save space.
             auto& particle = particles[count+i];
             particle.time       = 0.0f;
-            particle.time_scale = math::rand(params.min_lifetime, params.max_lifetime) / params.max_lifetime;
+            particle.time_scale = can_expire ? math::rand(params.min_lifetime, params.max_lifetime) / params.max_lifetime : 1.0f;
             particle.pointsize  = math::rand(params.min_point_size, params.max_point_size);
             particle.alpha      = math::rand(params.min_alpha, params.max_alpha);
             particle.position   = glm::vec2(world.x, world.y);
@@ -988,7 +999,7 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
             // direction vector in order to save space.
             auto& particle      = particles[count+i];
             particle.time       = 0.0f;
-            particle.time_scale = math::rand(params.min_lifetime, params.max_lifetime) / params.max_lifetime;
+            particle.time_scale = can_expire ? math::rand(params.min_lifetime, params.max_lifetime) / params.max_lifetime : 1.0f;
             particle.pointsize  = math::rand(params.min_point_size, params.max_point_size);
             particle.alpha      = math::rand(params.min_alpha, params.max_alpha);
             particle.position   = position;
@@ -1014,8 +1025,12 @@ bool ParticleEngineClass::UpdateParticle(const Environment& env, const Params& p
     auto& p = particles[i];
 
     p.time += dt;
-    if (p.time > p.time_scale * params.max_lifetime)
-        return false;
+
+    if (params.flags.test(Flags::ParticlesCanExpire))
+    {
+        if (p.time > p.time_scale * params.max_lifetime)
+            return false;
+    }
 
     const auto p0 = p.position;
 

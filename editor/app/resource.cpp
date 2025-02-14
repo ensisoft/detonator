@@ -26,6 +26,7 @@
 #include "warnpop.h"
 
 #include <unordered_map>
+#include <limits>
 
 #include "base/assert.h"
 #include "data/chunk.h"
@@ -1096,6 +1097,21 @@ void MigrateResource(gfx::MaterialClass& material, ResourceMigrationLog* log, un
         }
     }
 
+}
+
+void MigrateResource(gfx::ParticleEngineClass& particles, ResourceMigrationLog* log, unsigned old_version, unsigned  new_version)
+{
+    auto& params = particles.GetParams();
+
+    if (old_version < 2)
+    {
+        if (params.min_lifetime == std::numeric_limits<float>::max() &&
+            params.max_lifetime == std::numeric_limits<float>::max())
+        {
+            params.flags.set(gfx::ParticleEngineClass::Flags::ParticlesCanExpire, false);
+            log->WriteLog(particles, "Particles", "Enabled particle expiration flag.");
+        }
+    }
 }
 
 void MigrateResource(game::EntityClass& entity, ResourceMigrationLog* log, unsigned old_version, unsigned new_version)
