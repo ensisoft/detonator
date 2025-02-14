@@ -126,7 +126,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
           <item>
            <widget class="QLineEdit" name="statFileCache">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -155,7 +155,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
           <item>
            <widget class="QLineEdit" name="statVBO">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -184,7 +184,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
           <item>
            <widget class="QLineEdit" name="wallTime">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="minimumSize">
              <size>
@@ -210,7 +210,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
           <item>
            <widget class="QLineEdit" name="gameTime">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="minimumSize">
              <size>
@@ -236,7 +236,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
           <item>
            <widget class="QLineEdit" name="frames">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="minimumSize">
              <size>
@@ -262,7 +262,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
           <item>
            <widget class="QLineEdit" name="fps">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="minimumSize">
              <size>
