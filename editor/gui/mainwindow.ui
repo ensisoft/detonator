@@ -114,7 +114,7 @@
           <item>
            <widget class="QLineEdit" name="statVBO">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -123,6 +123,9 @@
              </sizepolicy>
             </property>
             <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="readOnly">
              <bool>true</bool>
             </property>
            </widget>
@@ -140,7 +143,7 @@
           <item>
            <widget class="QLineEdit" name="statTime">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -175,7 +178,7 @@
           <item>
            <widget class="QLineEdit" name="statFps">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -210,7 +213,7 @@
           <item>
            <widget class="QLineEdit" name="statVsync">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -225,6 +228,9 @@
              </size>
             </property>
             <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="readOnly">
              <bool>true</bool>
             </property>
            </widget>
