@@ -288,12 +288,18 @@ public:
         // users must be inspected whether all their other dependent
         // resources are valid too.
 
+        auto* resource = base::SafeFind(mState->resources, mResourceId);
+        if (!resource)
+        {
+            DEBUG("Aborting resource analyze since the resource has already been deleted. [id=%1, name='%2']",
+                  mResourceId, mResourceName);
+            return;
+        }
+
         const auto is_valid = ValidateResource(mResourceId);
 
         VERBOSE("Analyzing resource. [id=%1, name='%2', valid=%3]", mResourceId, mResourceName, is_valid);
 
-        auto* resource = base::SafeFind(mState->resources, mResourceId);
-        ASSERT(resource);
         resource->SetProperty("is-valid", is_valid);
 
         // push a report pertaining to this resource.
