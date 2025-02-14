@@ -342,7 +342,7 @@
            <item>
             <widget class="gui::CollapsibleWidget" name="materialGroup">
              <property name="collapsed" stdset="0">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
              <property name="text" stdset="0">
               <string>Particle material</string>
@@ -354,41 +354,8 @@
               <layout class="QVBoxLayout" name="verticalLayout_7">
                <item>
                 <layout class="QGridLayout" name="gridLayout_6">
-                 <item row="3" column="1" colspan="2">
-                  <widget class="color_widgets::ColorSelector" name="startColor">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>30</height>
-                    </size>
-                   </property>
-                   <property name="focusPolicy">
-                    <enum>Qt::TabFocus</enum>
-                   </property>
-                   <property name="hascolor" stdset="0">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_13">
-                   <property name="text">
-                    <string>Particle</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_2">
-                   <property name="text">
-                    <string>Surface</string>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="1" column="1" colspan="2">
                   <widget class="QComboBox" name="cmbSurface"/>
-                 </item>
-                 <item row="2" column="1" colspan="2">
-                  <widget class="QComboBox" name="cmbParticle"/>
                  </item>
                  <item row="0" column="1" colspan="3">
                   <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -441,13 +408,10 @@
                    </item>
                   </layout>
                  </item>
-                 <item row="1" column="3" rowspan="3">
-                  <widget class="QLabel" name="preview">
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_2">
                    <property name="text">
-                    <string/>
-                   </property>
-                   <property name="pixmap">
-                    <pixmap resource="../resource/resource.qrc">:/texture.png</pixmap>
+                    <string>Surface</string>
                    </property>
                   </widget>
                  </item>
@@ -464,7 +428,24 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="5" column="1" colspan="2">
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_18">
+                   <property name="text">
+                    <string>Start color</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1" colspan="2">
+                  <widget class="QComboBox" name="cmbParticle"/>
+                 </item>
+                 <item row="6" column="0">
+                  <widget class="QLabel" name="label_41">
+                   <property name="text">
+                    <string>End color</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1" colspan="2">
                   <widget class="color_widgets::ColorSelector" name="endColor">
                    <property name="minimumSize">
                     <size>
@@ -480,17 +461,59 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="label_18">
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_13">
                    <property name="text">
-                    <string>Start color</string>
+                    <string>Particle</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="5" column="0">
-                  <widget class="QLabel" name="label_41">
+                 <item row="1" column="3" rowspan="3">
+                  <widget class="QLabel" name="preview">
                    <property name="text">
-                    <string>End color</string>
+                    <string/>
+                   </property>
+                   <property name="pixmap">
+                    <pixmap resource="../resource/resource.qrc">:/texture.png</pixmap>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1" colspan="2">
+                  <widget class="color_widgets::ColorSelector" name="startColor">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>30</height>
+                    </size>
+                   </property>
+                   <property name="focusPolicy">
+                    <enum>Qt::TabFocus</enum>
+                   </property>
+                   <property name="hascolor" stdset="0">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1" colspan="2">
+                  <widget class="color_widgets::ColorSelector" name="midColor">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>30</height>
+                    </size>
+                   </property>
+                   <property name="focusPolicy">
+                    <enum>Qt::TabFocus</enum>
+                   </property>
+                   <property name="hascolor" stdset="0">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="label_34">
+                   <property name="text">
+                    <string>Mid color</string>
                    </property>
                   </widget>
                  </item>
@@ -2046,6 +2069,7 @@
   <tabstop>cmbSurface</tabstop>
   <tabstop>cmbParticle</tabstop>
   <tabstop>startColor</tabstop>
+  <tabstop>midColor</tabstop>
   <tabstop>endColor</tabstop>
   <tabstop>particleEmissionGroup</tabstop>
   <tabstop>when</tabstop>

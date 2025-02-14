@@ -977,6 +977,21 @@ void MigrateResource(gfx::MaterialClass& material, ResourceMigrationLog* log, un
         }
     }
 
+    if (old_version < 6)
+    {
+        if (material.GetType() == gfx::MaterialClass::Type::Particle2D)
+        {
+            if (!material.HasUniform("kParticleMidColor"))
+            {
+                const auto& start_color = material.GetParticleStartColor();
+                const auto& end_color = material.GetParticleEndColor();
+                const auto& mid_color = start_color*0.5f + end_color *0.5f;
+                material.SetParticleMidColor(mid_color);
+                log->WriteLog(material, "Material", "Added new particle mid-way color value.");
+            }
+        }
+    }
+
     // the uniform values were refactored inside the material class
     // and they only exist now if they have been set explicitly.
     // we can clean away the uniforms that have *not* been set by the

@@ -1078,6 +1078,10 @@ void MaterialWidget::on_particleStartColor_colorChanged(QColor color)
 {
     SetMaterialProperties();
 }
+void MaterialWidget::on_particleMidColor_colorChanged(QColor color)
+{
+    SetMaterialProperties();
+}
 void MaterialWidget::on_particleEndColor_colorChanged(QColor color)
 {
     SetMaterialProperties();
@@ -2159,6 +2163,7 @@ void MaterialWidget::SetMaterialProperties()
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Particle2D)
     {
         mMaterial->SetParticleStartColor(GetValue(mUI.particleStartColor));
+        mMaterial->SetParticleMidColor(GetValue(mUI.particleMidColor));
         mMaterial->SetParticleEndColor(GetValue(mUI.particleEndColor));
         mMaterial->SetParticleBaseRotation(qDegreesToRadians((float)GetValue(mUI.particleBaseRotation)));
         mMaterial->SetParticleRotation(GetValue(mUI.particleRotationMode));
@@ -2166,6 +2171,7 @@ void MaterialWidget::SetMaterialProperties()
     else
     {
         mMaterial->DeleteUniform("kParticleStartColor");
+        mMaterial->DeleteUniform("kParticleMidColor");
         mMaterial->DeleteUniform("kParticleEndColor");
         mMaterial->DeleteUniform("kParticleBaseRotation");
         mMaterial->DeleteUniform("kParticleRotation");
@@ -2339,10 +2345,12 @@ void MaterialWidget::ShowMaterialProperties()
     SetVisible(mUI.tileTopPadding,     false);
 
     SetVisible(mUI.lblParticleStartColor,   false);
+    SetVisible(mUI.lblParticleMidColor,     false);
     SetVisible(mUI.lblParticleEndColor,     false);
     SetVisible(mUI.lblParticleBaseRotation, false);
     SetVisible(mUI.lblParticleRotationMode, false);
     SetVisible(mUI.particleStartColor,      false);
+    SetVisible(mUI.particleMidColor,        false);
     SetVisible(mUI.particleEndColor,        false);
     SetVisible(mUI.particleBaseRotation,    false);
     SetVisible(mUI.particleRotationMode,    false);
@@ -2395,6 +2403,7 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.particleAction,       mMaterial->GetParticleEffect());
     SetValue(mUI.particleRotationMode, mMaterial->GetParticleRotation());
     SetValue(mUI.particleStartColor,   mMaterial->GetParticleStartColor());
+    SetValue(mUI.particleMidColor,     mMaterial->GetParticleMidColor());
     SetValue(mUI.particleEndColor,     mMaterial->GetParticleEndColor());
     SetValue(mUI.particleBaseRotation, qRadiansToDegrees(mMaterial->GetParticleBaseRotation()));
 
@@ -2532,9 +2541,11 @@ void MaterialWidget::ShowMaterialProperties()
             SetVisible(mUI.builtInProperties,       true);
             SetVisible(mUI.lblParticleStartColor,   true);
             SetVisible(mUI.lblParticleEndColor,     true);
+            SetVisible(mUI.lblParticleMidColor,     true);
             SetVisible(mUI.lblParticleBaseRotation, true);
             SetVisible(mUI.lblParticleRotationMode, true);
             SetVisible(mUI.particleStartColor,      true);
+            SetVisible(mUI.particleMidColor,        true);
             SetVisible(mUI.particleEndColor,        true);
             SetVisible(mUI.particleBaseRotation,    true);
             SetVisible(mUI.particleRotationMode,    true);

@@ -566,7 +566,7 @@ namespace app
 
             if constexpr (TypeValue == Resource::Type::Material)
             {
-                chunk->Write("resource_ver", 5);
+                chunk->Write("resource_ver", 6);
                 data.AppendChunk("materials", std::move(chunk));
             }
             else if (TypeValue == Resource::Type::ParticleSystem)
@@ -666,7 +666,7 @@ namespace app
 
             // DON'T FORGET TO UPDATE THE SAVE with the version number!
             if constexpr (TypeValue == Resource::Type::Material)
-                current_version = 5;
+                current_version = 6;
             else if (TypeValue == Resource::Type::ParticleSystem)
                 current_version = 2;
             else current_version = 2;

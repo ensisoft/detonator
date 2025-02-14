@@ -361,6 +361,7 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
             source.FoldUniform("kSurfaceType", static_cast<unsigned>(mSurfaceType));
             source.FoldUniform("kParticleStartColor", GetParticleStartColor());
             source.FoldUniform("kParticleEndColor", GetParticleEndColor());
+            source.FoldUniform("kParticleMidColor", GetParticleMidColor());
             source.FoldUniform("kParticleBaseRotation", GetParticleBaseRotation());
 
             source.FoldUniform("kAmbientColor", GetAmbientColor());
@@ -466,6 +467,7 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
     {
         program.SetUniform("kParticleStartColor",   GetParticleStartColor());
         program.SetUniform("kParticleEndColor",     GetParticleEndColor());
+        program.SetUniform("kParticleMidColor",     GetParticleMidColor());
         program.SetUniform("kParticleBaseRotation", GetParticleBaseRotation());
     }
     else if (mType == Type::BasicLight)
@@ -717,6 +719,20 @@ bool MaterialClass::FromJson(const data::Reader& data)
         ok &= chunk->Read("name", &name);
         ok &= chunk->Read("value", &uniform);
         mUniforms[std::move(name)] = std::move(uniform);
+    }
+
+    // this migration here is duplicate (there's also a migration in the
+    // editor resource system) exists to simplify the preset particle
+    // migration since those don't use the editor's resource system.
+    if (base::Contains(mUniforms, "kParticleStartColor") &&
+        base::Contains(mUniforms, "kParticleEndColor") &&
+        !base::Contains(mUniforms, "kParticleMidColor"))
+    {
+        const auto& start_color = GetParticleStartColor();
+        const auto& end_color = GetParticleEndColor();
+        const auto& mid_color = start_color * 0.5f + end_color * 0.5f;
+        SetParticleMidColor(mid_color);
+        DEBUG("Fabricated particle material mid-way color value. [name='%1']", mName);
     }
 
     for (unsigned i=0; i<data.GetNumChunks("texture_maps"); ++i)
@@ -1083,6 +1099,8 @@ std::string MaterialClass::GetColorUniformName(ColorIndex index)
         return "kParticleStartColor";
     else if (index == ColorIndex::ParticleEndColor)
         return "kParticleEndColor";
+    else if (index == ColorIndex::ParticleMidColor)
+        return "kParticleMidColor";
     else BUG("Unknown color index.");
     return "";
 }
@@ -1568,6 +1586,7 @@ bool MaterialClass::ApplyParticleDynamicState(const State& state, Device& device
     {
         SetUniform("kParticleStartColor",   state.uniforms, GetParticleStartColor(), program);
         SetUniform("kParticleEndColor",     state.uniforms, GetParticleEndColor(), program);
+        SetUniform("kParticleMidColor",     state.uniforms, GetParticleMidColor(), program);
         SetUniform("kParticleBaseRotation", state.uniforms, GetParticleBaseRotation(), program);
     }
     SetUniform("kParticleRotation", state.uniforms, static_cast<unsigned>(GetParticleRotation()), program);
