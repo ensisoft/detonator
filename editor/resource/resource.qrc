@@ -164,11 +164,15 @@
     <file>64x64_ico_png/import.png</file>
     <file>64x64_ico_png/package.png</file>
     <file>64x64_ico_png/play.png</file>
+    <file>64x64_ico_png/warning.png</file>
+    <file>64x64_ico_png/folder.png</file>
 
     <file>logo/html5.png</file>
     <file>logo/linux.png</file>
     <file>logo/windows.png</file>
 
+
+    <file>party.png</file>
     <file>texture.png</file>
     <file>music.png</file>
     <file>splash.gif</file>
