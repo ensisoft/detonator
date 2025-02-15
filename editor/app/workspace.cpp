@@ -2712,7 +2712,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         };
         for (const auto& file : files)
         {
-            const auto& src = app::GetAppInstFilePath(file.name);
+            const auto& src = app::GetAppInstFilePath("html5/" + file.name);
             const auto& dst = app::JoinPath(options.directory, file.name);
             auto[success, error] = app::CopyFile(src, dst);
             if (!success)
