@@ -25,6 +25,7 @@
 #  include <QMessageBox>
 #  include <QEventLoop>
 #  include <QDir>
+#  include <QRegularExpression>
 #include "warnpop.h"
 
 #include "base/platform.h"
@@ -36,6 +37,41 @@
 #include "editor/gui/dlgpackage.h"
 #include "editor/gui/dlgsettings.h"
 #include "editor/gui/dlgcomplete.h"
+
+//#include "git.h"
+extern "C" const char* git_CommitSHA1();
+extern "C" const char* git_Branch();
+extern "C" bool git_AnyUncommittedChanges();
+
+namespace {
+    bool VerifyWasmBuildVersion(QString* sha)
+    {
+        const auto& wasm_version_file = app::GetAppInstFilePath("html5/GameEngineVersion.txt");
+        const auto& wasm_version_data = app::ReadTextFile(wasm_version_file);
+        if (wasm_version_data.isEmpty())
+            return false;
+
+        const auto& lines = wasm_version_data.split("\n", Qt::SkipEmptyParts);
+        int index = 0;
+        for (index=0; index<lines.size(); ++index)
+        {
+            if (lines[index].contains("git_CommitSHA1"))
+                break;
+        }
+        if (++index >= lines.size())
+            return false;
+
+        const QRegularExpression regex(R"(return\s*\"([a-fA-F0-9]{40})\";)");
+        QRegularExpressionMatch match = regex.match(lines[index]);
+
+        if (match.hasMatch())
+        {
+            *sha = match.captured(1);  // Capture group 1 (SHA-1 hash)
+            return true;
+        }
+        return false;
+    }
+} // namespace
 
 namespace gui
 {
@@ -96,6 +132,22 @@ DlgPackage::DlgPackage(QWidget* parent, gui::AppSettings& settings, app::Workspa
 #endif
     SetValue(mUI.btnNative, copy_native);
     SetValue(mUI.btnHtml5, copy_html5);
+    SetVisible(mUI.warning, false);
+
+    QString wasm_sha;
+    if (!VerifyWasmBuildVersion(&wasm_sha))
+    {
+        SetVisible(mUI.warning, true);
+        SetValue(mUI.message, "Failed to verify HTML5/WASM build version.\n"
+                              "Rebuild with Emscripten.");
+    }
+    else if (wasm_sha != git_CommitSHA1())
+    {
+        mWasmBuildWarning = true;
+        SetVisible(mUI.warning, true);
+        SetValue(mUI.message, "Your HTML5/WASM build is outdated.\n"
+                              "Rebuild with Emscripten.");
+    }
 
 }
 
@@ -135,14 +187,29 @@ void DlgPackage::on_btnStart_clicked()
     else if (!MustHaveNumber(mUI.cmbMaxTexWidth))
         return;
 
+    if (mUI.btnHtml5->isChecked() && mWasmBuildWarning)
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Warning);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setWindowTitle("HTML5 WARNING");
+        msg.setText(tr("Your HTML5/WASM engine build seems to be out of sync.\n"
+                       "This can cause unexpected behaviour and failures.\n"
+                       "You should rebuild the engine with Emscripten.\n\n"
+                       "Are you sure you want to continue?"));
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+
     const QString& path = GetValue(mUI.editOutDir);
     QDir dir(path);
     if (dir.exists() && !dir.isEmpty() && GetValue(mUI.chkDelete))
     {
         QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Question);
+        msg.setIcon(QMessageBox::Warning);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msg.setText(tr("You've chosen to delete the previous contents of\n%1.\n"
+        msg.setWindowTitle("Delete Output Folder+");
+        msg.setText(tr("You've chosen to delete the previous contents of\n%1.\n\n"
                        "Are you sure you want to proceed?").arg(path));
         if (msg.exec() == QMessageBox::No)
             return;
@@ -150,9 +217,9 @@ void DlgPackage::on_btnStart_clicked()
     else if (dir.exists() && !dir.isEmpty())
     {
         QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Question);
+        msg.setIcon(QMessageBox::Warning);
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msg.setText(tr("The directory\n%1\ncontains files that might get overwritten.\n"
+        msg.setText(tr("The directory\n%1\ncontains files that will get overwritten.\n\n"
             "Are you sure you want to proceed?").arg(path));
         if (msg.exec() == QMessageBox::No)
             return;
@@ -166,10 +233,11 @@ void DlgPackage::on_btnStart_clicked()
         if (mSettings.emsdk.isEmpty())
         {
             QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Question);
+            msg.setIcon(QMessageBox::Critical);
             msg.setStandardButtons(QMessageBox::Ok);
             msg.setText(tr("You haven't given any Emscripten SDK path.\n"
-                           "Emscripten SDK is needed in order to package the game content for the web."));
+                           "Emscripten SDK is needed in order to package the game content for the web.\n\n"
+                           "You need to configure the Emscripten SDK in the settings."));
             //todo: open the settings maybe
             msg.exec();
             return;
