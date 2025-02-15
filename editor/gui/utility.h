@@ -451,6 +451,13 @@ inline void SetValue(QAction* action, bool on_off)
     action->setChecked(on_off);
 }
 
+inline void SetValue(QPushButton* btn, bool checked)
+{
+    QSignalBlocker s(btn);
+    ASSERT(btn->isCheckable());
+    btn->setChecked(checked);
+}
+
 inline void SetPlaceholderText(QComboBox* cmb, const app::AnyString& text)
 {
     QSignalBlocker s(cmb);
