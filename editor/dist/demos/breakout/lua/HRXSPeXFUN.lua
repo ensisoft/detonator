@@ -6,6 +6,8 @@
 local powerup_time = 0
 local message_clear = 0
 
+local paddle_move_time = 0
+
 function SetMessage(message)
     local hud = Game:GetTopUI()
     hud.message:SetText(message)
@@ -15,15 +17,47 @@ end
 
 function EndPowerup(paddle)
     local hud = Game:GetTopUI()
-    local body = paddle:GetNode(0)
+    local body_node = paddle:GetNode(0)
+    local skin_node = paddle:GetNode(1)
+    local skin_draw = skin_node:GetDrawable()
 
-    body:SetScale(1.0, 1.0)
-    body:SetScale(1.0, 1.0)
-    paddle:PlayAnimationByName('Restore')
+    body_node:SetScale(1.0, 1.0)
+    body_node:SetScale(1.0, 1.0)
+    skin_draw:SetActiveTextureMap('Blue')
+
     paddle.sticky = false
 
     hud.powerup:SetVisible(false)
     powerup_time = 0
+end
+
+function IdleAnimation(paddle)
+    local time = util.GetSeconds()
+    local idle = time - paddle_move_time
+    if idle < 1.0 then
+        return
+    end
+
+    if paddle:HasPendingAnimations() then
+        return
+    end
+
+    if paddle:IsAnimating() then
+        return
+    end
+
+    local t = math.sin(time * 15.0)
+    local skin_node = paddle:GetNode(1)
+    skin_node:SetTranslation(0.0, t * 2.0)
+end
+
+function Powerup(paddle)
+    Audio:PlayMusic('Power Up')
+    paddle:PlayAnimation('Powerup')
+
+    paddle:EmitParticles('Power Up Emitter1')
+    paddle:EmitParticles('Power Up Emitter2')
+
 end
 
 function BeginPlay(paddle, scene, map)
@@ -53,11 +87,42 @@ end
 function Update(paddle, game_time, dt)
     -- figure out the current paddle velocity based on the distance
     -- traveled since last update.
-    local body = paddle:GetNode(0)
-    local pos = body:GetTranslation()
-    local dist = pos.x - paddle.position
-    paddle.velocity = dist / dt
-    paddle.position = pos.x
+    local body_node = paddle:GetNode(0)
+    local skin_node = paddle:GetNode(1)
+    local skin_draw = skin_node:GetDrawable()
+
+    local position = body_node:GetTranslation()
+    local distance = position.x - paddle.position
+    local velocity = distance / dt
+    paddle.velocity = velocity
+    paddle.position = position.x
+
+    local normalized_velocity = math.min(math.abs(velocity) / 1000.0, 1.0)
+    local slow = base.Color4f:new(255, 165, 0, 0)
+    local fast = base.Color4f:new(255, 0, 0, 255)
+
+    local left_burn_zone_node = paddle:FindNode('Left Burn Zone')
+    local right_burn_zone_node = paddle:FindNode('Right Burn Zone')
+    local left_burn_zone_draw = left_burn_zone_node:GetDrawable()
+    local right_burn_zone_draw = right_burn_zone_node:GetDrawable()
+
+    if velocity > 0.0 then
+        body_node:SetRotation(math.rad(0.5))
+        right_burn_zone_draw:SetUniform('kBaseColor', util.lerp(slow, fast,
+                                                                normalized_velocity))
+        right_burn_zone_draw:SetVisible(true)
+        left_burn_zone_draw:SetVisible(false)
+    elseif velocity < 0.0 then
+        body_node:SetRotation(math.rad(-0.5))
+        left_burn_zone_draw:SetUniform('kBaseColor', util.lerp(slow, fast,
+                                                               normalized_velocity))
+        left_burn_zone_draw:SetVisible(true)
+        right_burn_zone_draw:SetVisible(false)
+    else
+        IdleAnimation(paddle)
+        left_burn_zone_draw:SetVisible(false)
+        right_burn_zone_draw:SetVisible(false)
+    end
 
     if powerup_time <= 0 then
         return
@@ -90,33 +155,41 @@ function OnEndContact(paddle, node_, other, other_node)
 
     other:Die()
 
-    local node = paddle:GetNode(0)
+    local body_node = paddle:GetNode(0)
+    local skin_node = paddle:GetNode(1)
+    local skin_draw = skin_node:GetDrawable()
+
     local message = nil
 
     if string.find(klass, 'Enlarge') then
         SetMessage('Large paddle!')
         EndPowerup(paddle)
-        paddle:PlayAnimationByName('Enlarge')
-        node:SetScale(1.5, 1.0)
+        Powerup(paddle)
+
+        body_node:SetScale(1.5, 1.0)
         powerup_time = 10
         message = 'Large paddle!'
-        Audio:PlaySoundEffect('Power Up')
 
     elseif string.find(klass, 'Shrink') then
         SetMessage('Oh no! Small paddle!')
         EndPowerup(paddle)
-        paddle:PlayAnimationByName('Shrink')
-        node:SetScale(0.5, 1.0)
+
+        skin_draw:SetActiveTextureMap('Red')
+
+        body_node:SetScale(0.5, 1.0)
         powerup_time = 10
+        -- todo better audio
         Audio:PlaySoundEffect('Power Up')
 
     elseif string.find(klass, 'Sticky') then
         SetMessage('Your paddle is sticky')
         EndPowerup(paddle)
-        paddle:PlayAnimationByName('Make Sticky')
+        Powerup(paddle)
+
+        skin_draw:SetActiveTextureMap('Green')
+
         paddle.sticky = true
         powerup_time = 10
-        Audio:PlayMusic('Power Up')
 
     elseif string.find(klass, 'Points') then
         SetMessage(tostring(other.points) .. ' points!')
@@ -135,7 +208,7 @@ function OnEndContact(paddle, node_, other, other_node)
         balls:ForEach(function(ball)
             CallMethod(ball, 'SplitBall', ball)
         end)
-        Audio:PlaySoundEffect('Power Up')
+        Powerup(paddle)
         return
     elseif string.find(klass, 'Heavy Ball') then
         SetMessage('Heavy Ball')
@@ -143,7 +216,7 @@ function OnEndContact(paddle, node_, other, other_node)
         balls:ForEach(function(ball)
             CallMethod(ball, 'SetBallWeight', 'Heavy')
         end)
-        Audio:PlaySoundEffect('Power Up')
+        Powerup(paddle)
         return
     end
 
@@ -174,10 +247,12 @@ end
 -- Called on mouse move events.
 function OnMouseMove(paddle, mouse)
     if mouse.over_scene then
-        local node = paddle:FindNodeByClassName('Body')
-        local pos = node:GetTranslation()
-        pos.x = mouse.scene_coord.x
-        node:SetTranslation(pos)
+        local body_node = paddle:GetNode(0)
+        local position = body_node:GetTranslation()
+        position.x = mouse.scene_coord.x
+        body_node:SetTranslation(position)
+
+        paddle_move_time = util.GetSeconds()
     end
 end
 

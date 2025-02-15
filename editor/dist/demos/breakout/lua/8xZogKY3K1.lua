@@ -282,13 +282,27 @@ function Update(ball, game_time, dt)
     -- check for a collisition with the paddle rect
     paddle_rect = scene:FindEntityNodeBoundingRect(paddle, paddle_body)
     if paddle_rect:TestPoint(ball_position) then
+        local ball_xpos = ball_position.x
+        local paddle_width = paddle_rect:GetWidth()
+        local paddle_xpos = paddle_rect:GetX()
+        local paddle_hitpoint = (ball_xpos - paddle_xpos) / paddle_width
+
+        local ball_angle = -150.0 + paddle_hitpoint * 120.0
+        local ball_speed = glm.length(ball_velocity)
+
+        ball_velocity = util.RotateVectorAroundZ(game.X, math.rad(ball_angle)) *
+                            ball_speed
         ball_position.y = 350.0
-        ball_velocity.y = -ball_velocity.y
-        ball_velocity.x = paddle.velocity -- we're transferring the horizontal velocity from the paddle to the ball
-        if paddle.sticky and not ball.heavy then
+
+        if paddle.sticky and not ball.heavy and not paddle.has_ball then
             ball.velocity = glm.vec2:new(0, 0)
             ball_position = glm.vec2:new(paddle_position.x, 340)
             ball.launched = false
+            paddle.has_ball = true
+        else
+            if not paddle:IsAnimating() then
+                paddle:PlayAnimation('Bounce')
+            end
         end
     end
 
@@ -323,8 +337,14 @@ function OnMousePress(ball, mouse)
         return
     end
 
+    local paddle = Scene:FindEntity('Paddle')
+    if paddle == nil then
+        return
+    end
+
     ball.launched = true
     ball.velocity = glm.vec2:new(0.0, -650.0)
+    paddle.has_ball = false
 end
 
 -- Called on mouse button release events.

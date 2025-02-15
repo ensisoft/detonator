@@ -12,6 +12,9 @@ function BeginPlay(mainmenu, map)
         local body = node:GetRigidBody()
         body:Enable(true)
     end
+
+    Audio:PlayMusic('ctr_title')
+
 end
 
 -- Called when the scene ends play.
