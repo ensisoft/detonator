@@ -80,6 +80,7 @@ namespace gui
         std::mutex mMutex;
         std::vector<UpdateMessage> mUpdateQueue;
         bool mPackageInProgress = false;
+        bool mWasmBuildWarning = false;
     };
 } // namespace
 
