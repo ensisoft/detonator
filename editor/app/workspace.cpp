@@ -2705,7 +2705,10 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
             // this is just a helper file for convenience
             {"http-server.py", false},
             // this is needed for the trace file save
-            {"FileSaver.js", false}
+            {"FileSaver.js", false},
+            // This is just for version information. The file is
+            // produced by the Emscripten build using CMake-git-version-tracking
+            {"GameEngineVersion.txt", false}
         };
         for (const auto& file : files)
         {
@@ -2714,8 +2717,17 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
             auto[success, error] = app::CopyFile(src, dst);
             if (!success)
             {
-                ERROR("Failed to copy game engine file. [src='%1', dst='%2', error='%3']", src, dst, error);
-                ++errors;
+                if (file.mandatory)
+                {
+                    ERROR("Failed to copy game engine file. [src='%1', dst='%2', error='%3']", src, dst, error);
+                    ++errors;
+                }
+                else
+                {
+                    WARN("Failed to copy game engine file. [src='%1', dst='%2', error='%3']", src, dst, error);
+                    WARN("This file is not absolutely essential so you may proceed,");
+                    WARN("But there might be limited functionality.");
+                }
             }
         }
     }

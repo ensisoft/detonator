@@ -12,6 +12,15 @@ message(STATUS "
     https://github.com/ensisoft/detonator
 ")
 
+# https://cmake.org/cmake/help/latest/module/FetchContent.html#examples
+# https://jonathanhamberg.com/post/cmake-embedding-git-hash/
+include(FetchContent)
+FetchContent_Declare(cmake_git_version_tracking
+        GIT_REPOSITORY https://github.com/ensisoft/cmake-git-version-tracking.git
+        GIT_TAG 7b0d0fcb7e6f5fcadd238dd1292350e9e1363d36
+        )
+FetchContent_MakeAvailable(cmake_git_version_tracking)
+
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}")
@@ -313,6 +322,8 @@ add_executable(GameEngine
 
 target_compile_definitions(GameEngine PRIVATE DETONATOR_GAME_ENGINE_WASM_BUILD)
 
+target_link_libraries(GameEngine cmake_git_version_tracking)
+
 target_link_libraries(GameEngine box2d)
 target_link_libraries(GameEngine sndfile)
 target_link_libraries(GameEngine samplerate)
@@ -372,4 +383,9 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.wasm" DESTINATION "${CMAKE
 
 # uncomment this in order to enable threading
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.worker.js" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist")
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_deps/cmake_git_version_tracking-build/git.c"
+        DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/../editor/dist"
+        RENAME "GameEngineVersion.txt")
+
 
