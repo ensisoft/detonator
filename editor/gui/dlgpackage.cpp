@@ -27,6 +27,7 @@
 #  include <QDir>
 #include "warnpop.h"
 
+#include "base/platform.h"
 #include "editor/gui/appsettings.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/packing.h"
@@ -71,8 +72,6 @@ DlgPackage::DlgPackage(QWidget* parent, gui::AppSettings& settings, app::Workspa
     GetProperty(workspace, "packing_param_resize_large_textures", mUI.chkResizeTextures);
     GetProperty(workspace, "packing_param_delete_prev", mUI.chkDelete);
     GetProperty(workspace, "packing_param_write_config", mUI.chkWriteConfig);
-    GetProperty(workspace, "packing_param_copy_native", mUI.chkCopyNative);
-    GetProperty(workspace, "packing_param_copy_html5", mUI.chkCopyHtml5);
     GetProperty(workspace, "packing_param_generate_html5", mUI.chkGenerateHtml5);
     GetProperty(workspace, "packing_param_generate_html5_filesys", mUI.chkGenerateHtml5FS);
     GetProperty(workspace, "packing_param_output_dir", &path);
@@ -84,6 +83,20 @@ DlgPackage::DlgPackage(QWidget* parent, gui::AppSettings& settings, app::Workspa
 
     SetValue(mUI.editOutDir, path);
     mUI.progressBar->setVisible(false);
+
+    bool copy_native = false;
+    bool copy_html5  = false;
+    GetProperty(workspace, "packing_param_copy_native", &copy_native);
+    GetProperty(workspace, "packing_param_copy_html5",  &copy_html5);
+
+#if defined(WINDOWS_OS)
+    mUI.btnNative->setIcon(QIcon(":/logo/windows.png"));
+#elif defined(LINUX_OS)
+    mUI.btnNative->setIcon(QIcon(":/logo/linux.png"));
+#endif
+    SetValue(mUI.btnNative, copy_native);
+    SetValue(mUI.btnHtml5, copy_html5);
+
 }
 
 void DlgPackage::on_btnSelectAll_clicked()
@@ -192,8 +205,8 @@ void DlgPackage::on_btnStart_clicked()
     SetProperty(mWorkspace, "packing_param_resize_large_textures", mUI.chkResizeTextures);
     SetProperty(mWorkspace, "packing_param_delete_prev", mUI.chkDelete);
     SetProperty(mWorkspace, "packing_param_write_config", mUI.chkWriteConfig);
-    SetProperty(mWorkspace, "packing_param_copy_native", mUI.chkCopyNative);
-    SetProperty(mWorkspace, "packing_param_copy_html5", mUI.chkCopyHtml5);
+    SetProperty(mWorkspace, "packing_param_copy_native", mUI.btnNative->isChecked());
+    SetProperty(mWorkspace, "packing_param_copy_html5", mUI.btnHtml5->isChecked());
     SetProperty(mWorkspace, "packing_param_generate_html5", mUI.chkGenerateHtml5);
     SetProperty(mWorkspace, "packing_param_generate_html5_filesys", mUI.chkGenerateHtml5FS);
     SetProperty(mWorkspace, "packing_param_output_dir", mWorkspace.MapFileToWorkspace(path));
@@ -210,8 +223,8 @@ void DlgPackage::on_btnStart_clicked()
     options.write_config_file             = GetValue(mUI.chkWriteConfig);
     options.texture_padding               = GetValue(mUI.spinTexPadding);
     options.write_content_file            = true; // seems pointless to not write this ever
-    options.copy_native_files             = GetValue(mUI.chkCopyNative);
-    options.copy_html5_files              = GetValue(mUI.chkCopyHtml5);
+    options.copy_native_files             = mUI.btnNative->isChecked();
+    options.copy_html5_files              = mUI.btnHtml5->isChecked();
     options.write_html5_game_file         = GetValue(mUI.chkGenerateHtml5);
     options.write_html5_content_fs_image  = GetValue(mUI.chkGenerateHtml5FS);
     options.python_executable             = mSettings.python_executable;
