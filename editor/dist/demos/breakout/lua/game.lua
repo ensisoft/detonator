@@ -139,6 +139,7 @@ function OnUIAction(ui, action)
         Game:Quit(0)
     elseif action.name == 'play' then
         Audio:PlaySoundEffect('Menu Confirm')
+        Audio:KillAllMusic()
         Game:CloseUI(0)
         Game:Play('Level 1')
         Game:ShowMouse(false)

@@ -102,26 +102,52 @@ end
 
 function BallHit(brick, ball)
     if brick.immortal and not ball.heavy then
+        brick:PlayAnimation('Nope')
         return
     end
 
-    brick.hit_count = brick.hit_count - 1
+    local destroyed = false
+    local hits_needed = 1
+
+    brick.hit_count = brick.hit_count + 1
+
+    local klass = brick:GetClassName()
+
+    if string.find(klass, 'Blue') then
+        hits_needed = 1
+    elseif string.find(klass, 'Green') then
+        hits_needed = 1
+    elseif string.find(klass, 'Yellow') then
+        hits_needed = 2
+    elseif string.find(klass, 'Red') then
+        hits_needed = 3
+    elseif string.find(klass, 'Purple') then
+        hits_needed = 4
+    end
 
     -- heavy ball smashes the brick at one go
     if ball.heavy then
-        brick.hit_count = 0
+        destroyed = true
+    elseif brick.hit_count == hits_needed then
+        destroyed = true
     end
 
-    if brick.hit_count > 0 then
+    if not destroyed then
+        local brick_node = brick:GetNode(0)
+        local brick_draw = brick_node:GetDrawable()
+        brick_draw:SetUniform('kBaseColor',
+                              base.Color4f:new(255, 255, 255, 255) * 0.8 ^
+                                  brick.hit_count)
+
         return
     end
-    local class = brick:GetClass()
+
     Audio:PlaySoundEffect('Kill Brick', 0)
     local kill_brick = game.GameEvent:new()
     kill_brick.from = 'brick'
     kill_brick.to = 'game'
     kill_brick.message = 'kill-brick'
-    kill_brick.value = class.hit_count * 100
+    kill_brick.value = hits_needed * 100
     Game:PostEvent(kill_brick)
 
     brick:Die()
