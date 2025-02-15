@@ -28,7 +28,7 @@ uniform uint kParticleRotation;
 
 // @varyings
 
-#ifdef GEOMETRY_IS_PARTICLES
+#if defined(GEOMETRY_IS_PARTICLES)
   // Normalized lifetime of the particle
   in float vParticleTime;
   // Particle alpha value.
@@ -53,6 +53,8 @@ uniform uint kParticleRotation;
 #endif
 
 
+// @code
+
 void MixColors(float alpha) {
 
     float first_half_time = min(vParticleTime, 0.5) / 0.5;
@@ -69,14 +71,37 @@ void MixColors(float alpha) {
     } else if (kSurfaceType == MATERIAL_SURFACE_TYPE_EMISSIVE) {
         // not blending transparently, alpha does not control
         // transparency but modulates the intensity of the color
-        fs_out.color.rgb = color.rgb * alpha * vParticleAlpha;
+        fs_out.color.rgb = color.rgb * color.a * alpha * vParticleAlpha;
         fs_out.color.a = 1.0;
     } else {
         fs_out.color.rgb = color.rgb;
     }
 }
 
-float ReadTextureAlpha(vec2 coord) {
+vec2 RotateTextureCoords(vec2 coords, float angle) {
+    // discard fragments if the rotated texture coordinates would
+    // fall outside of the 0.0-1.0 range.
+    float len = length(coords - vec2(0.5, 0.5));
+    if (len > 0.5)
+        discard;
+
+    coords -= vec2(0.5, 0.5);
+    coords  = mat2(cos(angle), -sin(angle),
+                  sin(angle),  cos(angle)) * coords;
+    coords += vec2(0.5, 0.5);
+    return coords;
+}
+
+vec2 MapTextureCoords(vec2 coords) {
+    // apply texture rect transform to get the final coordinates
+    // for sampling the texture. this transformation allows for
+    // texture packing to be done.
+    vec2 texture_trans = kMaskRect.xy;
+    vec2 texture_scale = kMaskRect.zw;
+    return coords * texture_scale + texture_trans;
+}
+
+float ReadTextureAlpha(vec2 coords) {
 
     float angle = 0.0;
 
@@ -93,29 +118,16 @@ float ReadTextureAlpha(vec2 coord) {
 
     // rotate texture coords
     if (kParticleRotation != PARTICLE_ROTATION_NONE) {
-        // discard fragments if the rotated texture coordinates would
-        // fall outside of the 0.0-1.0 range.
-        float len = length(coord - vec2(0.5, 0.5));
-        if (len > 0.5)
-            discard;
-
-        coord -= vec2(0.5, 0.5);
-        coord  = mat2(cos(angle), -sin(angle),
-                      sin(angle),  cos(angle)) * coord;
-        coord += vec2(0.5, 0.5);
+        coords = RotateTextureCoords(coords, angle);
     }
 
-    // apply texture rect transform to get the final coordinates
-    // for sampling the texture. this transformation allows for
-    // texture packing to be done.
-    vec2 texture_trans = kMaskRect.xy;
-    vec2 texture_scale = kMaskRect.zw;
-    coord = coord * texture_scale + texture_trans;
+    coords = MapTextureCoords(coords);
 
-    float alpha = texture(kMask,  coord).r;
+    float alpha = texture(kMask,  coords).r;
     return alpha;
 }
 
+#ifndef CUSTOM_FRAGMENT_MAIN
 void FragmentShaderMain() {
 
 #ifdef DRAW_POINTS
@@ -147,5 +159,6 @@ void FragmentShaderMain() {
 
     fs_out.flags = kMaterialFlags;
 }
+#endif // CUSTOM_FRAGMENT_MAIN
 
 )CPP_RAW_STRING"
