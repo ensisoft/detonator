@@ -1228,9 +1228,16 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 
     ShaderSource src;
     src.SetType(gfx::ShaderSource::Type::Fragment);
-    if (IsStatic())
-        src.AddShaderName(mName);
-    else src.AddShaderName(base::FormatString("%1 Shader", mType));
+    if (IsStatic() || !mShaderSrc.empty())
+    {
+        src.AddDebugInfo("Shader", base::FormatString("%1 Shader", mType));
+        src.AddDebugInfo("Material Name", mName);
+        src.AddDebugInfo("Material ID", mClassId);
+    }
+    else
+    {
+        src.AddDebugInfo("Shader", base::FormatString("%1 Shader", mType));
+    }
 
     if (mType == Type::Color)
     {
