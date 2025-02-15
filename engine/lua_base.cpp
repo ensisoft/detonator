@@ -299,6 +299,12 @@ void BindBase(sol::state& L)
         return sol::make_object(lua, color);
     };
     color.set_function(sol::meta_function::to_string, [](const base::Color4f& color) { return base::ToString(color); });
+    color.set_function(sol::meta_function::multiplication, [](const base::Color4f& color, float value) {
+        return color * value;
+    });
+    color.set_function(sol::meta_function::division, [](const base::Color4f& color, float value) {
+        return color / value;
+    });
 }
 
 } // namespace

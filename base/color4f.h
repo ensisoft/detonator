@@ -209,6 +209,17 @@ namespace base
         const auto a = color.Alpha();
         return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
     }
+    inline Color4f operator/(const Color4f& color, float scalar) noexcept
+    {
+        const auto r = color.Red();
+        const auto g = color.Green();
+        const auto b = color.Blue();
+        const auto a = color.Alpha();
+
+        scalar = 1.0f / scalar;
+        return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
+    }
+
     inline Color4f operator*(float scalar, const Color4f& color) noexcept
     {
         const auto r = color.Red();
@@ -217,12 +228,31 @@ namespace base
         const auto a = color.Alpha();
         return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
     }
+    inline Color4f operator/(float scalar, const Color4f& color) noexcept
+    {
+        const auto r = color.Red();
+        const auto g = color.Green();
+        const auto b = color.Blue();
+        const auto a = color.Alpha();
+
+        scalar = 1.0f/ scalar;
+        return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
+    }
+
     inline Color4f operator+(const Color4f& lhs, const Color4f& rhs) noexcept
     {
-        return Color4f(lhs.Red()    + rhs.Red(),
+        return Color4f(lhs.Red() + rhs.Red(),
                        lhs.Green() + rhs.Green(),
-                       lhs.Blue()   + rhs.Blue(),
+                       lhs.Blue() + rhs.Blue(),
                        lhs.Alpha() + rhs.Alpha());
+
+    }
+    inline Color4f operator/(const Color4f& lhs, const Color4f& rhs) noexcept
+    {
+        return Color4f(lhs.Red() / rhs.Red(),
+                       lhs.Green() / rhs.Green(),
+                       lhs.Blue() / rhs.Blue(),
+                       lhs.Alpha() / rhs.Alpha());
 
     }
 
