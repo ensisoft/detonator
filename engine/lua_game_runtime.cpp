@@ -195,6 +195,7 @@ bool CallLua(const sol::environment& env, const char* name, const Args&... args)
     const sol::error err = result;
 
     ERROR("Error in calling into Lua. [function='%1']", name);
+    ERROR(err.what());
     // todo: Lua code has failed. This information should likely be
     // propagated in a logical Lua error object rather than by
     // throwing an exception.
@@ -231,6 +232,7 @@ bool CallLua(Ret* retval, const sol::environment& env, const char* name, const A
     const sol::error err = result;
 
     ERROR("Error in calling into Lua. [function='%1']", name);
+    ERROR(err.what());
     // todo: Lua code has failed. This information should likely be
     // propagated in a logical Lua error object rather than by
     // throwing an exception.

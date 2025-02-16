@@ -63,6 +63,9 @@ namespace base
         inline bool Failed() const noexcept
         { return TestFlag(Flags::Error); }
 
+        bool HasException() const noexcept
+        { return !!mException; }
+
         inline void SetDescription(Description description) noexcept
         { mDescription = std::move(description); }
         inline void SetTaskDescription(std::string desc) noexcept
@@ -109,6 +112,12 @@ namespace base
             }
             mDone.store(true, std::memory_order_release);
         }
+
+        void RethrowException() const
+        {
+            std::rethrow_exception(mException);
+        }
+
         virtual void GetValue(const char* key, void* ptr)
         {}
 
