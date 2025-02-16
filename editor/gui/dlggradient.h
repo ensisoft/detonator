@@ -98,6 +98,40 @@ namespace gui
         {
             emit GradientChanged(this);
         }
+
+        void on_btnSwap01_clicked()
+        {
+            const QColor color0 = GetValue(mUI.colorMap0);
+            const QColor color1 = GetValue(mUI.colorMap1);
+            SetValue(mUI.colorMap0, color1);
+            SetValue(mUI.colorMap1, color0);
+            emit GradientChanged(this);
+        }
+        void on_btnSwap23_clicked()
+        {
+            const QColor color2 = GetValue(mUI.colorMap2);
+            const QColor color3 = GetValue(mUI.colorMap3);
+            SetValue(mUI.colorMap2, color3);
+            SetValue(mUI.colorMap3, color2);
+            emit GradientChanged(this);
+        }
+        void on_btnSwap02_clicked()
+        {
+            const QColor color0 = GetValue(mUI.colorMap0);
+            const QColor color2 = GetValue(mUI.colorMap2);
+            SetValue(mUI.colorMap0, color2);
+            SetValue(mUI.colorMap2, color0);
+            emit GradientChanged(this);
+        }
+        void on_btnSwap13_clicked()
+        {
+            const QColor color1 = GetValue(mUI.colorMap1);
+            const QColor color3 = GetValue(mUI.colorMap3);
+            SetValue(mUI.colorMap1, color3);
+            SetValue(mUI.colorMap3, color1);
+            emit GradientChanged(this);
+        }
+
     private:
         Ui::DlgGradient mUI;
     };
