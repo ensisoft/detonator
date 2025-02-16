@@ -1575,6 +1575,7 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "SetTag", "Set entity tag string.", "string", "tag");
     DOC_METHOD_0("bool", "IsVisible", "Checks whether the entity is currently visible or not.");
     DOC_METHOD_0("bool", "IsAnimating", "Checks whether the entity is currently playing an animation or not.");
+    DOC_METHOD_0("bool", "HasPendingAnimations", "Checks whether the entity has any pending (queued) animations.");
     DOC_METHOD_0("bool", "IsDying", "Checks whether the entity has been killed, I.e. someone called Die or KillEntity on it.");
     DOC_METHOD_0("bool", "HasExpired", "Checks whether the entity has expired, i.e. exceeded it's max lifetime.");
     DOC_METHOD_0("bool", "HasBeenKilled", "Checks whether the entity has been killed.<br>"

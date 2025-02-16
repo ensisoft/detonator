@@ -674,6 +674,8 @@ namespace game
         bool IsDying() const;
         // Returns true if an animation is currently playing.
         bool IsAnimating() const;
+        // Returns true if there are pending (queued) animations
+        bool HasPendingAnimations() const;
         // Returns true if the entity lifetime has been exceeded.
         bool HasExpired() const;
         // Returns true if the kill control flag has been set.
