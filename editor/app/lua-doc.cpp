@@ -1646,6 +1646,16 @@ void InitLuaDoc()
                  "float", "x", "float", "y");
     DOC_METHOD_1("game.EntityNodeList", "HitTest", "Perform a simplistic hit test to see which nodes boxes intersect with the given point.",
                  "glm.vec2|base.FPoint", "point");
+    DOC_METHOD_1("bool", "EmitParticles", "Send a command to a drawable attached to the entity node to emit particles.<br>"
+                                          "If the entity has no such node or the node has no drawable or the drawable is not a particle engine nothing is done.<br>"
+                                          "The number of particles to emitted is controlled by the particle engine's emission parameter.<br>"
+                                          "Returns false on error or true on success.",
+                 "string", "emitter_node_name");
+    DOC_METHOD_2("bool", "EmitParticles", "Send a command to a drawable attached to the entity node to emit particles.<br>"
+                                          "If the entity has no such node or the node has no drawable or the drawable is not a particle engine nothing is done.<br>"
+                                          "Count parameter can be used to control the number of particles to be emitted.<br>"
+                                          "Returns false on error or true on success.",
+                 "string", "emitter_node_name", "unsigned", "count");
 
 
     DOC_TABLE("game.EntityNodeList");
