@@ -1153,6 +1153,48 @@ void BindGameLib(sol::state& L)
             return EntityNodeList(std::move(hits));
         });
     entity["FindNode"] = GetMutable(&Entity::FindNodeByClassName);
+    entity["EmitParticles"] = sol::overload(
+        [](game::Entity& entity, const std::string& emitter_node) {
+            auto* node = entity.FindNodeByClassName(emitter_node);
+            if (node == nullptr)
+            {
+                WARN("Failed to emit particles. No such particle emitter node was found. [entity='%1', node='%2']",
+                     entity.GetName(), emitter_node);
+                return false;
+            }
+            auto* drawable = node->GetDrawable();
+            if (drawable == nullptr)
+            {
+                WARN("Failed to emit particles. Entity node has no particle system. [entity='%1', node='%2']",
+                        entity.GetName(), emitter_node);
+                return false;
+            }
+            DrawableItem::Command cmd;
+            cmd.name = "EmitParticles";
+            drawable->EnqueueCommand(std::move(cmd));
+            return true;
+        },
+        [](game::Entity& entity, const std::string& emitter_node, unsigned count) {
+            auto* node = entity.FindNodeByClassName(emitter_node);
+            if (node == nullptr)
+            {
+                WARN("Failed to emit particles. No such particle emitter node was found. [entity='%1', node='%2']",
+                     entity.GetName(), emitter_node);
+                return false;
+            }
+            auto* drawable = node->GetDrawable();
+            if (drawable == nullptr)
+            {
+                WARN("Failed to emit particles. Entity node has no particle system. [entity='%1', node='%2']",
+                     entity.GetName(), emitter_node);
+                return false;
+            }
+            DrawableItem::Command cmd;
+            cmd.name = "EmitParticles";
+            cmd.args["count"] = static_cast<int>(count);
+            drawable->EnqueueCommand(std::move(cmd));
+            return true;
+    });
 
     auto entity_posted_event = table.new_usertype<Entity::PostedEvent>("EntityEvent", sol::constructors<Entity::PostedEvent()>());
     entity_posted_event["message"] = &Entity::PostedEvent::message;
