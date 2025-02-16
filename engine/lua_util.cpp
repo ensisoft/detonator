@@ -144,6 +144,9 @@ namespace engine
         },
         [](const glm::vec4& y0, const glm::vec4& y1, float t) {
             return math::lerp(y0, y1, t);
+        },
+        [](const base::Color4f& y0, const base::Color4f& y1, float t) {
+            return math::lerp(y0, y1, t);
         });
 
     util["GetRotationFromMatrix"]     = &GetRotationFromMatrix;
