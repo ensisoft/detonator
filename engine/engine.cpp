@@ -499,9 +499,12 @@ public:
         if (!mUpdateTasks.empty())
         {
             // Wait each update task
-            for (auto& task: mUpdateTasks)
+            for (auto& handle: mUpdateTasks)
             {
-                TRACE_CALL("WaitSceneUpdate", task.Wait(base::TaskHandle::WaitStrategy::BusyLoop));
+                TRACE_CALL("WaitSceneUpdate", handle.Wait(base::TaskHandle::WaitStrategy::BusyLoop));
+                const auto* task = handle.GetTask();
+                if (task->HasException())
+                    task->RethrowException();
             }
             mUpdateTasks.clear();
 
