@@ -1429,6 +1429,11 @@ bool Entity::IsAnimating() const
     return !mCurrentAnimations.empty();
 }
 
+bool Entity::HasPendingAnimations() const
+{
+    return !mAnimationQueue.empty();
+}
+
 bool Entity::HasExpired() const
 {
     if (!mFlags.test(EntityClass::Flags::LimitLifetime))

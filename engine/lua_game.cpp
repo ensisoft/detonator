@@ -1084,6 +1084,7 @@ void BindGameLib(sol::state& L)
     entity["IsDying"]              = &Entity::IsDying;
     entity["IsVisible"]            = &Entity::IsVisible;
     entity["IsAnimating"]          = &Entity::IsAnimating;
+    entity["HasPendingAnimations"] = &Entity::HasPendingAnimations;
     entity["HasExpired"]           = &Entity::HasExpired;
     entity["HasBeenKilled"]        = &Entity::HasBeenKilled;
     entity["HasBeenSpawned"]       = &Entity::HasBeenSpawned;
