@@ -1238,7 +1238,17 @@ void Entity::Update(float dt, std::vector<Event>* events)
     }
 
     if (mCurrentAnimations.empty())
+    {
+        if (mAnimationQueue.empty())
+            return;
+
+        auto animation = std::move(mAnimationQueue.front());
+        VERBOSE("Starting next queued entity animation. [entity='%1/%2', animation='%3']",
+                mClass->GetName(), mInstanceName, animation->GetClassName());
+        mCurrentAnimations.push_back(std::move(animation));
+        mAnimationQueue.pop();
         return;
+    }
 
     // Update the animation state.
     for (auto& animation : mCurrentAnimations)
@@ -1290,18 +1300,6 @@ void Entity::Update(float dt, std::vector<Event>* events)
     base::EraseRemove(mCurrentAnimations, [](const auto& animation) {
         return !animation;
     });
-
-    if (mCurrentAnimations.empty())
-        return;
-
-    if (mAnimationQueue.empty())
-        return;
-
-    auto animation = std::move(mAnimationQueue.front());
-    VERBOSE("Starting next queued entity animation. [entity='%1/%2', animation='%3']",
-            mClass->GetName(), mInstanceName, animation->GetClassName());
-    mCurrentAnimations.push_back(std::move(animation));
-    mAnimationQueue.pop();
 }
 
 void Entity::UpdateStateController(float dt, std::vector<EntityStateUpdate>* updates)
@@ -1387,9 +1385,10 @@ Animation* Entity::PlayAnimationById(const std::string& id)
 Animation* Entity::QueueAnimation(std::unique_ptr<Animation> animation)
 {
     mAnimationQueue.push(std::move(animation));
+    auto* ret = mAnimationQueue.back().get();
     VERBOSE("Queued new entity animation. [entity='%1/%2', animation='%3']",
-            mClass->GetClassName(), mInstanceName, animation->GetClassName());
-    return mAnimationQueue.back().get();
+            mClass->GetClassName(), mInstanceName, ret->GetClassName());
+    return ret;
 }
 
 Animation* Entity::QueueAnimationByName(const std::string& name)
