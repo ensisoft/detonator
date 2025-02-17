@@ -64,6 +64,7 @@ float GetTileIndex() {
     return kTileIndex;
 }
 
+#ifndef CUSTOM_FRAGMENT_MAIN
 void FragmentShaderMain() {
     // the tile rendering can provide geometry also through GL_POINTS.
     // that means we must then use gl_PointCoord as the texture coordinates
@@ -122,5 +123,5 @@ void FragmentShaderMain() {
     fs_out.color = color;
     fs_out.flags = kMaterialFlags;
 }
-
+#endif // CUSTOM_FRAGMENT_MAIN
 )CPP_RAW_STRING"
