@@ -757,7 +757,7 @@ bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
             const auto step_change = interpolation == math::Interpolation::Step ||
                                      interpolation == math::Interpolation::StepEnd ||
                                      interpolation == math::Interpolation::StepStart;
-            if (!step_change && verbose)
+            if (!step_change && verbose && param == PropertyName ::TextItem_Text)
             {
                 WARN("Property animator can't apply interpolation on text. [animator='%1', node='%2', interpolation=%3]",
                      mClass->GetName(), node.GetName(), interpolation);
