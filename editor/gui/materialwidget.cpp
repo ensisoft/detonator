@@ -722,10 +722,52 @@ void MaterialWidget::on_actionCustomizeShader_triggered()
 
     if (!mMaterial->HasShaderSrc())
     {
-        mMaterial->SetShaderSrc(R"(
+        auto* device = mUI.widget->GetDevice();
+
+        gfx::ShaderSource source;
+        gfx::Material::Environment environment;
+        environment.editing_mode = true;
+
+        gfx::FlatShadedColorProgram program;
+        source = program.GetShader(gfx::MaterialInstance(mMaterial), environment, *device);
+
+        const auto& src = app::FromUtf8(source.GetSource(gfx::ShaderSource::SourceVariant::Development));
+        const auto& lines = src.split("\n", Qt::KeepEmptyParts);
+
+        unsigned start = 0;
+        unsigned end = 0;
+        for (unsigned i=0; i<lines.size(); ++i)
+        {
+            const auto& line = lines[i];
+            if (line.contains("void FragmentShaderMain() {"))
+                start = i;
+            else if (start > 0 && line == "}" && end == 0)
+                end = i;
+
+            if (start && end)
+                break;
+        }
+
+        QString starter;
+        starter.append(R"(
 // this is your custom fragment (material) shader main.
 // this will replace the built-in function but uses the
 // same uniform interface.
+)");
+
+        if (start && end && start < lines.size() && end <lines.size())
+        {
+            for (; start <= end; ++start)
+            {
+                starter.append(lines[start]);
+                starter.append("\n");
+            }
+
+            starter = starter.replace("FragmentShaderMain", "CustomFragmentShaderMain");
+        }
+        else
+        {
+            starter.append(R"(
 void CustomFragmentShaderMain() {
   vec4 color = vec4(0.3);
 
@@ -738,6 +780,8 @@ void CustomFragmentShaderMain() {
 }
 
 )");
+        }
+        mMaterial->SetShaderSrc(app::ToUtf8(starter));
     }
 
     mShaderEditor = new DlgTextEdit(this);
