@@ -247,6 +247,15 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.widget->onMousePress   = std::bind(&ParticleEditorWidget::MousePress, this, std::placeholders::_1);
     mUI.widget->onZoomIn       = std::bind(&ParticleEditorWidget::ZoomIn, this);
     mUI.widget->onZoomOut      = std::bind(&ParticleEditorWidget::ZoomOut, this);
+    mUI.widget->onKeyPress     = [this](QKeyEvent* key) {
+        const auto mod = key->modifiers();
+        const auto sym = key->key();
+        if (mod & Qt::CTRL && sym == Qt::Key_Space) {
+            on_actionEmit_triggered();
+            return true;
+        }
+        return false;
+    };
 
     // if you change this change the UI widget values min/max values too!
     mUI.velocity->SetScale(1000.0f);
@@ -400,20 +409,26 @@ void ParticleEditorWidget::InitializeSettings(const UISettings& settings)
 
 void ParticleEditorWidget::SetViewerMode()
 {
-    SetVisible(mUI.baseProperties,     false);
-    SetVisible(mUI.dirSector,          false);
-    SetVisible(mUI.localSpace,         false);
-    SetVisible(mUI.localEmitter,       false);
-    SetVisible(mUI.transform,          false);
-    SetVisible(mUI.particleProperties, false);
-    SetVisible(mUI.sizeDerivatives,    false);
-    SetVisible(mUI.alphaDerivatives,   false);
-    SetVisible(mUI.materials,          false);
-    SetVisible(mUI.btnSelectMaterial,  false);
-    SetVisible(mUI.chkShowEmitter,     false);
-    SetVisible(mUI.chkShowBounds,      false);
-    SetValue(mUI.chkShowEmitter,       false);
-    SetValue(mUI.chkShowBounds,        false);
+    SetVisible(mUI.baseProperties,        false);
+    SetVisible(mUI.materialGroup,         false);
+    SetVisible(mUI.particleEmissionGroup, false);
+    SetVisible(mUI.simulationSpaceGroup,  false);
+    SetVisible(mUI.localEmitterGroup,     false);
+    SetVisible(mUI.vizGroup,              false);
+    SetVisible(mUI.particleProperties,    false);
+    SetVisible(mUI.sizeDerivatives,       false);
+    SetVisible(mUI.alphaDerivatives,      false);
+    SetVisible(mUI.cmbGrid,               false);
+    SetVisible(mUI.chkShowEmitter,        false);
+    SetVisible(mUI.chkShowBounds,         false);
+    SetVisible(mUI.chkShowGrid,           false);
+
+    SetValue(mUI.chkShowEmitter, false);
+    SetValue(mUI.chkShowBounds,  false);
+    SetValue(mUI.chkShowGrid,    false);
+
+    mUI.mainSplitter->setSizes({0, 100, 0});
+
     mViewMode = true;
     on_actionPlay_triggered();
 }
@@ -1694,7 +1709,7 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
     // Draw the visualization for the particle direction sector
     // we draw this in the widget/window coordinates in the top right
     const gfx::ParticleEngineClass::Direction particle_direction = GetValue(mUI.direction);
-    if (particle_direction == gfx::ParticleEngineClass::Direction::Sector)
+    if (particle_direction == gfx::ParticleEngineClass::Direction::Sector && !mViewMode)
     {
         const float dir_angle_start = GetValue(mUI.dirStartAngle);
         const float dir_angle_size  = GetValue(mUI.dirSizeAngle);

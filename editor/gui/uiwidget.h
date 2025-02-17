@@ -189,6 +189,7 @@ namespace gui
     private:
         Ui::UIWidget mUI;
         QMenu* mWidgets = nullptr;
+        QToolBar* mButtonBar = nullptr;
     private:
         class TreeModel;
         class PlaceWidgetTool;
@@ -228,6 +229,7 @@ namespace gui
         double mViewTransformStartTime = 0.0;
         float  mViewTransformRotation  = 0.0f;
         bool mCameraWasLoaded = false;
+        bool mViewerMode = false;
 
         unsigned mRefreshTick = 0;
         std::deque<std::string> mMessageQueue;

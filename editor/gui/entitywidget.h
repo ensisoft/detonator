@@ -356,6 +356,7 @@ namespace gui
         QMenu* mBasicShapes = nullptr;
         QMenu* mBasicLights = nullptr;
         QMenu* mAttachments = nullptr;
+        QToolBar* mButtonBar = nullptr;
 
         UIAnimator mAnimator;
     private:
@@ -399,6 +400,7 @@ namespace gui
         std::unordered_map<std::string, QString> mComments;
         // the entity preview window if any.
         std::unique_ptr<PlayWindow> mPreview;
+        bool mViewerMode = false;
     };
 
     QString GenerateEntityScriptSource(QString entity);

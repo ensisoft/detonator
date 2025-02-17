@@ -1466,6 +1466,7 @@
      <addaction name="actionImportImageFile"/>
      <addaction name="actionImportJSON"/>
      <addaction name="actionImportZIP"/>
+     <addaction name="actionImportProjectResource"/>
     </widget>
     <widget class="QMenu" name="menuCreate_Resource">
      <property name="title">
@@ -1527,7 +1528,6 @@
     <addaction name="menuBitmap_Tools"/>
     <addaction name="menuVector_Tools"/>
     <addaction name="separator"/>
-    <addaction name="actionLaunchViewer"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -2473,16 +2473,16 @@
     <string>Export selected resource(s) to a resource package</string>
    </property>
   </action>
-  <action name="actionLaunchViewer">
+  <action name="actionImportProjectResource">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/application.png</normaloff>:/16x16_ico_png/application.png</iconset>
+     <normaloff>:/16x16_ico_png/project.png</normaloff>:/16x16_ico_png/project.png</iconset>
    </property>
    <property name="text">
-    <string>Workspace Viewer </string>
+    <string>From Another Project</string>
    </property>
    <property name="toolTip">
-    <string>Launch workspace viewer</string>
+    <string>Import resource(s) from another project</string>
    </property>
   </action>
   <action name="actionImageViewer">

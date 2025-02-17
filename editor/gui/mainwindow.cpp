@@ -2091,7 +2091,7 @@ void MainWindow::on_actionTilemap_triggered()
     mDlgTilemap->activateWindow();
 }
 
-void MainWindow::on_actionLaunchViewer_triggered()
+void MainWindow::on_actionImportProjectResource_triggered()
 {
     if (!mWorkspace)
         return;
@@ -2125,7 +2125,7 @@ void MainWindow::on_actionLaunchViewer_triggered()
 
         mIPCHost2->Close();
         mIPCHost2.reset();
-        SetEnabled(mUI.actionLaunchViewer, true);
+        SetEnabled(mUI.actionImportProjectResource, true);
     };
     mViewerProcess.Start(exec_file, viewer_args, log_file, viewer_cwd);
     mIPCHost2 = std::move(ipc);
@@ -2143,7 +2143,7 @@ void MainWindow::on_actionLaunchViewer_triggered()
         });
     QObject::connect(mIPCHost2.get(), &app::IPCHost::JsonMessageReceived, this, &MainWindow::ViewerJsonMessageReceived);
 
-    SetEnabled(mUI.actionLaunchViewer, false);
+    SetEnabled(mUI.actionImportProjectResource, false);
 }
 
 void MainWindow::on_actionClearLog_triggered()
