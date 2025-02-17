@@ -159,7 +159,7 @@ namespace gui
         void on_actionSvgViewer_triggered();
         void on_actionFontMap_triggered();
         void on_actionTilemap_triggered();
-        void on_actionLaunchViewer_triggered();
+        void on_actionImportProjectResource_triggered();
         void on_actionClearLog_triggered();
         void on_actionLogShowInfo_toggled(bool val);
         void on_actionLogShowWarning_toggled(bool val);

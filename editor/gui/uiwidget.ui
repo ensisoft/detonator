@@ -79,7 +79,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_4">
+        <widget class="QGroupBox" name="styleString">
          <property name="title">
           <string>Style string</string>
          </property>
@@ -173,7 +173,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="styleFile">
          <property name="title">
           <string>Style file</string>
          </property>
@@ -238,7 +238,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_3">
+        <widget class="QGroupBox" name="keymapFile">
          <property name="title">
           <string>Keymap file</string>
          </property>

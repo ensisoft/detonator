@@ -822,14 +822,14 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mBasicLights->addAction(mUI.actionNewPointLight);
     mBasicLights->addAction(mUI.actionNewSpotlight);
 
-    auto* buttonbar = new QToolBar(this);
-    buttonbar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
-    buttonbar->setIconSize(QSize(16, 16));
-    buttonbar->addAction(mBasicShapes->menuAction());
-    buttonbar->addAction(mCustomShapes->menuAction());
-    buttonbar->addAction(mParticleSystems->menuAction());
-    buttonbar->addAction(mBasicLights->menuAction());
-    mUI.toolbarLayout->addWidget(buttonbar);
+    mButtonBar = new QToolBar(this);
+    mButtonBar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
+    mButtonBar->setIconSize(QSize(16, 16));
+    mButtonBar->addAction(mBasicShapes->menuAction());
+    mButtonBar->addAction(mCustomShapes->menuAction());
+    mButtonBar->addAction(mParticleSystems->menuAction());
+    mButtonBar->addAction(mBasicLights->menuAction());
+    mUI.toolbarLayout->addWidget(mButtonBar);
 
     mState.workspace = workspace;
     mState.renderer.SetClassLibrary(workspace);
@@ -1025,10 +1025,12 @@ void EntityWidget::SetViewerMode()
     SetVisible(mUI.nodeProperties,  false);
     SetVisible(mUI.nodeTransform,   false);
     SetVisible(mUI.nodeItems,       false);
+    SetVisible(mUI.cmbGrid,         false);
     SetVisible(mUI.chkShowComments, false);
     SetVisible(mUI.chkShowViewport, false);
     SetVisible(mUI.chkSnap,         false);
     SetVisible(mUI.chkShowOrigin,   false);
+    SetVisible(mUI.chkShowGrid,     false);
     SetVisible(mUI.help,            false);
     SetVisible(mUI.renderTree,      false);
     SetVisible(mUI.nodeProperties,  false);
@@ -1036,6 +1038,7 @@ void EntityWidget::SetViewerMode()
     SetVisible(mUI.nodeItems,       false);
     SetVisible(mUI.nodeScrollArea,  false);
     SetVisible(mUI.cmbStyle,        false);
+    SetVisible(mButtonBar,          false);
 
     SetValue(mUI.chkShowGrid,       false);
     SetValue(mUI.chkShowOrigin,     false);
@@ -1043,8 +1046,12 @@ void EntityWidget::SetViewerMode()
     SetValue(mUI.chkShowOrigin,     false);
     SetValue(mUI.chkSnap,           false);
     SetValue(mUI.chkShowComments,   false);
+    SetValue(mUI.chkShowOrigin,     false);
+    SetValue(mUI.chkShowGrid,       false);
 
     mUI.mainSplitter->setSizes({0, 100, 0});
+
+    mViewerMode = true;
 
     QTimer::singleShot(10, this, &EntityWidget::on_btnViewReset_clicked);
     on_actionPlay_triggered();
@@ -3862,9 +3869,10 @@ void EntityWidget::MouseMove(QMouseEvent* event)
 }
 void EntityWidget::MousePress(QMouseEvent* event)
 {
+
     const MouseEvent mickey(event, mUI, mState);
 
-    if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
+    if (!mCurrentTool && !mViewerMode && (mickey->button() == Qt::LeftButton))
     {
         const auto snap = (bool)GetValue(mUI.chkSnap);
         const auto grid = (GridDensity)GetValue(mUI.cmbGrid);

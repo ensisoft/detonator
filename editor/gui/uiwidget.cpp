@@ -568,11 +568,11 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
         mWidgets->addAction(action);
     }
 
-    auto* buttonbar = new QToolBar(this);
-    buttonbar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
-    buttonbar->setIconSize(QSize(16, 16));
-    buttonbar->addAction(mWidgets->menuAction());
-    mUI.toolbar->addWidget(buttonbar);
+    mButtonBar = new QToolBar(this);
+    mButtonBar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
+    mButtonBar->setIconSize(QSize(16, 16));
+    mButtonBar->addAction(mWidgets->menuAction());
+    mUI.toolbar->addWidget(mButtonBar);
 
     mUI.widgetNormal->SetParentWAR(this);
     mUI.widgetDisabled->SetParentWAR(this);
@@ -746,6 +746,10 @@ void UIWidget::InitializeContent()
 void UIWidget::SetViewerMode()
 {
     SetVisible(mUI.baseProperties,   false);
+    SetVisible(mUI.styleString,      false);
+    SetVisible(mUI.styleFile,        false);
+    SetVisible(mUI.keymapFile,       false);
+    SetVisible(mUI.scriptProperties, false);
     SetVisible(mUI.transform,        false);
     SetVisible(mUI.widgetTree,       false);
     SetVisible(mUI.widgetProperties, false);
@@ -758,12 +762,21 @@ void UIWidget::SetViewerMode()
     SetVisible(mUI.chkShowTabOrder,  false);
     SetVisible(mUI.help,             false);
     SetVisible(mUI.scrollArea,       false);
+    SetVisible(mUI.cmbGrid,          false);
+    SetVisible(mUI.chkShowGrid,      false);
+    SetVisible(mUI.chkClipWidgets,   false);
+    SetVisible(mButtonBar,           false);
 
     SetValue(mUI.chkSnap,            false);
     SetValue(mUI.chkShowOrigin,      false);
     SetValue(mUI.chkShowBounds,      false);
     SetValue(mUI.chkShowTabOrder,    false);
     SetValue(mUI.chkClipWidgets,     true);
+
+    mViewerMode = true;
+
+    mUI.mainSplitter->setSizes({0, 100, 0});
+
     QTimer::singleShot(10, this, &UIWidget::on_btnResetTransform_clicked);
     on_actionPlay_triggered();
 }
@@ -2221,13 +2234,16 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         );
     }
 
-    gfx::FRect rect(10.0f, 10.0f, 500.0f, 20.0f);
-    for (const auto& print : mMessageQueue)
+    if (!mViewerMode)
     {
-        gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.4f));
-        gfx::DrawTextRect(painter, print, "app://fonts/orbitron-medium.otf", 14, rect,
-                          gfx::Color::HotPink, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
-        rect.Translate(0.0f, 20.0f);
+        gfx::FRect rect(10.0f, 10.0f, 500.0f, 20.0f);
+        for (const auto& print: mMessageQueue)
+        {
+            gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.4f));
+            gfx::DrawTextRect(painter, print, "app://fonts/orbitron-medium.otf", 14, rect,
+                              gfx::Color::HotPink, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+            rect.Translate(0.0f, 20.0f);
+        }
     }
 
     painter.SetViewMatrix(view.GetAsMatrix());
