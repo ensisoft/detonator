@@ -1819,6 +1819,7 @@ void MainWindow::on_actionSaveWorkspace_triggered()
             return;
         }
     }
+    NOTE("Save workspace.");
 }
 
 void MainWindow::on_actionLoadWorkspace_triggered()
@@ -3930,6 +3931,7 @@ void MainWindow::UpdateMainToolbar()
         mImportMenu->addAction(mUI.actionImportImageFile);
         mImportMenu->addAction(mUI.actionImportJSON);
         mImportMenu->addAction(mUI.actionImportZIP);
+        mImportMenu->addAction(mUI.actionImportProjectResource);
     }
 
     auto* play = new QAction(this);
