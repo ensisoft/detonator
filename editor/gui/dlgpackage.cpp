@@ -134,21 +134,28 @@ DlgPackage::DlgPackage(QWidget* parent, gui::AppSettings& settings, app::Workspa
     SetValue(mUI.btnHtml5, copy_html5);
     SetVisible(mUI.warning, false);
 
+
+    QString warning;
     QString wasm_sha;
     if (!VerifyWasmBuildVersion(&wasm_sha))
     {
-        SetVisible(mUI.warning, true);
-        SetValue(mUI.message, "Failed to verify HTML5/WASM build version.\n"
-                              "Rebuild with Emscripten.");
+        warning += "Failed to verify HTML5/WASM build version. Rebuild with Emscripten.\n";
     }
     else if (wasm_sha != git_CommitSHA1())
     {
         mWasmBuildWarning = true;
-        SetVisible(mUI.warning, true);
-        SetValue(mUI.message, "Your HTML5/WASM build is outdated.\n"
-                              "Rebuild with Emscripten.");
+        warning += "Your HTML5/WASM build is outdated. Rebuild with Emscripten.\n";
+    }
+    if (mWorkspace.GetProjectSettings().log_debug)
+    {
+        warning += "Debug logging is enabled. This can cause slow performance.\n";
     }
 
+    if (!warning.isEmpty())
+    {
+        SetVisible(mUI.warning, true);
+        SetValue(mUI.message, warning);
+    }
 }
 
 void DlgPackage::on_btnSelectAll_clicked()
