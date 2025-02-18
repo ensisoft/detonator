@@ -126,6 +126,8 @@ namespace app
         bool webgl_antialias = true;
         // flag to control HTML5 developer UI
         bool html5_developer_ui = false;
+        // flag to control HTML5 pointer lol locking
+        bool html5_pointer_lock = false;
         // default texture minification filter.
         gfx::Device::MinFilter default_min_filter = gfx::Device::MinFilter::Trilinear;
         // default texture magnification filter.

@@ -43,6 +43,7 @@ void IntoJson(QJsonObject& project, const ProjectSettings& settings)
     JsonWrite(project, "webgl_power_preference"  ,  settings.webgl_power_preference);
     JsonWrite(project, "webgl_antialias"         ,  settings.webgl_antialias);
     JsonWrite(project, "html5_developer_ui"      ,  settings.html5_developer_ui);
+    JsonWrite(project, "html5_pointer_lock"      ,  settings.html5_pointer_lock);
     JsonWrite(project, "canvas_mode"             ,  settings.canvas_mode);
     JsonWrite(project, "canvas_fs_strategy"      ,  settings.canvas_fs_strategy);
     JsonWrite(project, "canvas_width"            ,  settings.canvas_width);
@@ -115,6 +116,7 @@ void FromJson(const QJsonObject& project, ProjectSettings& settings)
     JsonReadSafe(project, "webgl_power_preference"    , &settings.webgl_power_preference);
     JsonReadSafe(project, "webgl_antialias"           , &settings.webgl_antialias);
     JsonReadSafe(project, "html5_developer_ui"        , &settings.html5_developer_ui);
+    JsonReadSafe(project, "html5_pointer_lock"        , &settings.html5_pointer_lock);
     JsonReadSafe(project, "canvas_mode"               , &settings.canvas_mode);
     JsonReadSafe(project, "canvas_fs_strategy"        , &settings.canvas_fs_strategy);
     JsonReadSafe(project, "canvas_width"              , &settings.canvas_width);
