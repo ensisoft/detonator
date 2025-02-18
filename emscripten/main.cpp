@@ -1065,7 +1065,7 @@ public:
             wdk::WindowEventMousePress event;
             event.window_x  = render_target_x;
             event.window_y  = render_target_y;
-            event.global_y = emsc_event->screenX;
+            event.global_x  = emsc_event->screenX;
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
             event.btn       = btn;
@@ -1077,7 +1077,7 @@ public:
             wdk::WindowEventMouseRelease event;
             event.window_x  = render_target_x;
             event.window_y  = render_target_y;
-            event.global_y  = emsc_event->screenX;
+            event.global_x  = emsc_event->screenX;
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
             event.btn       = btn;
@@ -1089,7 +1089,7 @@ public:
             wdk::WindowEventMouseMove event;
             event.window_x  = render_target_x;
             event.window_y  = render_target_y;
-            event.global_y  = emsc_event->screenX;
+            event.global_x  = emsc_event->screenX;
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
             event.btn       = btn;
