@@ -1482,9 +1482,20 @@
      <addaction name="actionNewAudioGraph"/>
      <addaction name="actionNewScript"/>
     </widget>
+    <widget class="QMenu" name="menuCreate_Script">
+     <property name="title">
+      <string>Create Script</string>
+     </property>
+     <addaction name="actionNewBlankScript"/>
+     <addaction name="actionNewEntityScript"/>
+     <addaction name="actionNewSceneScript"/>
+     <addaction name="actionNewUIScript"/>
+     <addaction name="actionNewAnimatorScript"/>
+    </widget>
     <addaction name="separator"/>
-    <addaction name="menuCreate_Resource"/>
     <addaction name="actionCreateResource"/>
+    <addaction name="menuCreate_Resource"/>
+    <addaction name="menuCreate_Script"/>
     <addaction name="menuImport"/>
     <addaction name="actionSelectResourceForEditing"/>
     <addaction name="separator"/>
