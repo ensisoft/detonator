@@ -941,6 +941,13 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="chkPointerLock">
+            <property name="text">
+             <string>Engage pointer lock</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -974,8 +981,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>818</width>
-            <height>836</height>
+            <width>810</width>
+            <height>824</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -2129,6 +2136,7 @@
   <tabstop>cmbPowerPref</tabstop>
   <tabstop>cmbWasmAudioIO</tabstop>
   <tabstop>chkDevUI</tabstop>
+  <tabstop>chkPointerLock</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>ticksPerSecond</tabstop>
   <tabstop>updatesPerSecond</tabstop>

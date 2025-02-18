@@ -118,6 +118,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.chkLogWarnings, mSettings.log_warn);
     SetUIValue(mUI.chkLogErrors, mSettings.log_error);
     SetUIValue(mUI.chkDevUI, mSettings.html5_developer_ui);
+    SetUIValue(mUI.chkPointerLock, mSettings.html5_pointer_lock);
     SetUIValue(mUI.cmbDebugFont, mSettings.debug_font);
     SetUIValue(mUI.chkDebugShowFps, mSettings.debug_show_fps);
     SetUIValue(mUI.chkDebugShowMsg, mSettings.debug_show_msg);
@@ -187,6 +188,7 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.chkLogWarnings, &mSettings.log_warn);
     GetUIValue(mUI.chkLogErrors, &mSettings.log_error);
     GetUIValue(mUI.chkDevUI, &mSettings.html5_developer_ui);
+    GetUIValue(mUI.chkPointerLock, &mSettings.html5_pointer_lock);
     GetUIValue(mUI.cmbDebugFont, &mSettings.debug_font);
     GetUIValue(mUI.chkDebugShowFps, &mSettings.debug_show_fps);
     GetUIValue(mUI.chkDebugShowMsg, &mSettings.debug_show_msg);

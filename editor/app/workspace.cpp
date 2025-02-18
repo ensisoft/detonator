@@ -2580,6 +2580,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         base::JsonWrite(json["html5"], "webgl_power_pref", mSettings.webgl_power_preference);
         base::JsonWrite(json["html5"], "webgl_antialias", mSettings.webgl_antialias);
         base::JsonWrite(json["html5"], "developer_ui", mSettings.html5_developer_ui);
+        base::JsonWrite(json["html5"], "pointer_lock", mSettings.html5_pointer_lock);
         base::JsonWrite(json["wasm"], "audio_io_strategy", mSettings.wasm_audio_io_strategy);
         base::JsonWrite(json["engine"], "default_min_filter", mSettings.default_min_filter);
         base::JsonWrite(json["engine"], "default_mag_filter", mSettings.default_mag_filter);

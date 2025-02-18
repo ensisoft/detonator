@@ -253,6 +253,7 @@ public:
         unsigned canvas_height = 0;
         bool antialias = true;
         bool developer_ui = false;
+        bool pointer_lock = false;
         base::JsonReadSafe(json["html5"], "canvas_fs_strategy", &mCanvasFullScreenStrategy);
         base::JsonReadSafe(json["html5"], "canvas_mode", &canvas_mode);
         base::JsonReadSafe(json["html5"], "canvas_width", &canvas_width);
@@ -260,6 +261,7 @@ public:
         base::JsonReadSafe(json["html5"], "webgl_power_pref", &power_pref);
         base::JsonReadSafe(json["html5"], "webgl_antialias", &antialias);
         base::JsonReadSafe(json["html5"], "developer_ui", &developer_ui);
+        base::JsonReadSafe(json["html5"], "pointer_lock", &pointer_lock);
         mDevicePixelRatio = emscripten_get_device_pixel_ratio();
         DEBUG("Device pixel ratio = %1.", mDevicePixelRatio);
 
@@ -280,6 +282,12 @@ public:
         {
             DEBUG("Enter full screen canvas mode.");
             SetFullScreen(true);
+        }
+
+        if (pointer_lock)
+        {
+            DEBUG("Engaging pointer lock.");
+            EngagePointerLock(true);
         }
 
         mContentLoader  = engine::JsonFileClassLoader::Create();
@@ -464,6 +472,17 @@ public:
         return true;
     }
 
+    EM_BOOL OnPointerLockChange(int event_type, const EmscriptenPointerlockChangeEvent* event)
+    {
+        DEBUG("Pointer lock state changed. [active=%1]", event->isActive);
+        mPointerLock = event->isActive;
+        return EM_TRUE;
+    }
+    EM_BOOL OnPointerLockError(int event_type, const void* reserved)
+    {
+        ERROR("Failed to engage pointer lock.");
+        return EM_TRUE;
+    }
 
     EM_BOOL OnCanvasResize(int event_type)
     {
@@ -738,7 +757,7 @@ public:
 
         mThreadPool->Shutdown();
         mThreadPool.reset();
-                
+
         mContext.reset();
         return EM_FALSE;
     }
@@ -800,6 +819,29 @@ public:
             mEngine->SetTracingOn(false);
             mThreadPool->SetThreadTraceWriter(nullptr);
             mThreadPool->EnableThreadTrace(false);
+        }
+    }
+
+    void EngagePointerLock(bool locked)
+    {
+        if (mPointerLock == locked)
+            return;
+
+        if (locked)
+        {
+            const auto defer_until_user_interaction_handler = EM_TRUE;
+            if (emscripten_request_pointerlock("canvas",
+                    defer_until_user_interaction_handler) != EMSCRIPTEN_RESULT_SUCCESS)
+            {
+                ERROR("Failed to engage pointer lock.");
+            }
+        }
+        else
+        {
+            if (emscripten_exit_pointerlock() != EMSCRIPTEN_RESULT_SUCCESS)
+            {
+                ERROR("Failed to release pointer lock.");
+            }
         }
     }
 
@@ -938,7 +980,6 @@ public:
     }
     void HandleEngineRequest(const engine::Engine::GrabMouse& mickey)
     {
-        // todo: pointer lock ?
         WARN("Mouse grab is not supported.");
     }
     void HandleEngineRequest(const engine::Engine::QuitApp& quit)
@@ -966,11 +1007,36 @@ public:
         const auto canvas_display_width  = (int)mCanvasDisplayWidth;
         const auto canvas_display_height = (int)mCanvasDisplayHeight;
 
+        auto canvas_coordinate_x = emsc_event->targetX;
+        auto canvas_coordinate_y = emsc_event->targetY;
+        if (mPointerLock)
+        {
+            // if pointer lock is engaged the mouse coordinates change from absolute coordinates
+            // to movement deltas, which means that in order to have absolute mouse coordinates
+            // we must reckon the deltas ourselves.
+
+            const auto dx = (float)emsc_event->movementX;
+            const auto dy = (float)emsc_event->movementY;
+            // DEBUG("mouse move dx = %1 dy = %2", dx, dy);
+            mMousePos.x = math::clamp(0.0f, (float)mCanvasDisplayWidth, mMousePos.x + dx);
+            mMousePos.y = math::clamp(0.0f, (float)mCanvasDisplayHeight, mMousePos.y + dy);
+            canvas_coordinate_x = mMousePos.x;
+            canvas_coordinate_y = mMousePos.y;
+        }
+        else
+        {
+            mMousePos = glm::vec2 { canvas_coordinate_x, canvas_coordinate_y };
+        }
+
+        auto render_target_x = canvas_coordinate_x;
+        auto render_target_y = canvas_coordinate_y;
+
         // the mouse x,y coordinates are in CSS logical pixel units.
         // if the display size of the canvas is not the same as the
         // render target size the mouse coordinates must be mapped.
-        auto render_target_x = emsc_event->targetX;
-        auto render_target_y = emsc_event->targetY;
+        // using the coordinates in the render target size matches
+        // what the native side does with mouse coordinates that
+        // are expressed in window (client area) coordinates.
         if ((canvas_display_width != mRenderTargetWidth) ||
             (canvas_display_height != mRenderTargetHeight))
         {
@@ -979,8 +1045,8 @@ public:
             const auto scaled_render_width = mRenderTargetWidth * scale;
             const auto scaled_render_height = mRenderTargetHeight * scale;
 
-            const auto css_xpos = emsc_event->targetX;
-            const auto css_ypos = emsc_event->targetY;
+            const auto css_xpos = canvas_coordinate_x;
+            const auto css_ypos = canvas_coordinate_y;
             const auto css_offset_x = (mCanvasDisplayWidth - scaled_render_width) * 0.5;
             const auto css_offset_y = (mCanvasDisplayHeight - scaled_render_height) * 0.5;
 
@@ -999,12 +1065,12 @@ public:
             wdk::WindowEventMousePress event;
             event.window_x  = render_target_x;
             event.window_y  = render_target_y;
-            event.global_y  = emsc_event->screenX;
+            event.global_y = emsc_event->screenX;
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
             event.btn       = btn;
             mEventQueue.push_back(event);
-            DEBUG("Mouse down event. [x=%1, y=%2]", event.window_x, event.window_y);
+            //DEBUG("Mouse down event. [x=%1, y=%2, btn=%3]", event.window_x, event.window_y, event.btn);
         }
         else if (emsc_type == EMSCRIPTEN_EVENT_MOUSEUP)
         {
@@ -1016,6 +1082,7 @@ public:
             event.modifiers = mods;
             event.btn       = btn;
             mEventQueue.push_back(event);
+            //DEBUG("Mouse up event. [x=%1, y=%2, btn=%3]", event.window_x, event.window_y, event.btn);
         }
         else if (emsc_type == EMSCRIPTEN_EVENT_MOUSEMOVE)
         {
@@ -1027,6 +1094,8 @@ public:
             event.modifiers = mods;
             event.btn       = btn;
             mEventQueue.push_back(event);
+            //DEBUG("Mouse move event. [x=%1, y=%2]", event.window_x, event.window_y);
+
         } else WARN("Unhandled mouse event.[emsc_type=%1]", emsc_type);
         return EM_TRUE;
     }
@@ -1185,6 +1254,13 @@ private:
 
     // flag to indicate whether currently in soft fullscreen or not
     bool mFullScreen = false;
+    bool mPointerLock = false;
+
+    // mouse position in logical CSS coordinates when
+    // the pointer lock is on. the mouse event only provides
+    // movement data so the position must be reckoned by
+    // adding all the deltas together.
+    glm::vec2 mMousePos = {0.0f, 0.0f};
 
     double mSeconds = 0;
     unsigned mCounter = 0;
@@ -1214,6 +1290,16 @@ private:
         double time_avg = 0.0;
     } mLoopCounter;
 };
+
+EM_BOOL OnPointerLockChange(int event_type, const EmscriptenPointerlockChangeEvent* event, void* user_data)
+{
+    return static_cast<Application*>(user_data)->OnPointerLockChange(event_type, event);
+}
+
+EM_BOOL OnPointerLockError(int event_type, const void* reserved, void* user_data)
+{
+    return static_cast<Application*>(user_data)->OnPointerLockError(event_type, reserved);
+}
 
 EM_BOOL OnWindowSizeChanged(int emsc_type, const EmscriptenUiEvent* emsc_event, void* user_data)
 {
@@ -1283,11 +1369,13 @@ EM_BOOL OnAnimationFrame(double time, void* user_data)
     emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,  nullptr, true, nullptr);
     emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,    nullptr, true, nullptr);
     emscripten_set_keypress_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, true, nullptr);
-    emscripten_set_mousedown_callback("canvas",  nullptr, true, nullptr);
-    emscripten_set_mouseup_callback("canvas",    nullptr, true, nullptr);
-    emscripten_set_mousemove_callback("canvas",  nullptr, true, nullptr);
-    emscripten_set_mouseenter_callback("canvas", nullptr, true, nullptr);
-    emscripten_set_mouseleave_callback("canvas", nullptr, true, nullptr);
+    emscripten_set_mousedown_callback("#canvas",  nullptr, true, nullptr);
+    emscripten_set_mouseup_callback("#canvas",    nullptr, true, nullptr);
+    emscripten_set_mousemove_callback("#canvas",  nullptr, true, nullptr);
+    emscripten_set_mouseenter_callback("#canvas", nullptr, true, nullptr);
+    emscripten_set_mouseleave_callback("#canvas", nullptr, true, nullptr);
+    emscripten_set_pointerlockchange_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, true, nullptr);
+    emscripten_set_pointerlockerror_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,  nullptr, true, nullptr);
 
     DEBUG("Delete canvas element.");
     emscripten_run_script("var el = document.getElementById('canvas'); el.remove();");
@@ -1335,6 +1423,9 @@ int main()
     emscripten_set_mousemove_callback("canvas",  app, true, OnMouseEvent);
     emscripten_set_mouseenter_callback("canvas", app, true, OnMouseEvent);
     emscripten_set_mouseleave_callback("canvas", app, true, OnMouseEvent);
+
+    emscripten_set_pointerlockchange_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, app, true, OnPointerLockChange);
+    emscripten_set_pointerlockerror_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,  app, true, OnPointerLockError);
     // note that this thread will return after calling this.
     // and after exiting the main function will go call OnAnimationFrame
     // when the browser sees fit.
