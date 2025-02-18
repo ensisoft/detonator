@@ -287,6 +287,7 @@ public:
         if (pointer_lock)
         {
             DEBUG("Engaging pointer lock.");
+            mPointerLockWanted = true;
             EngagePointerLock(true);
         }
 
@@ -475,12 +476,16 @@ public:
     EM_BOOL OnPointerLockChange(int event_type, const EmscriptenPointerlockChangeEvent* event)
     {
         DEBUG("Pointer lock state changed. [active=%1]", event->isActive);
-        mPointerLock = event->isActive;
+        mPointerLockActual  = event->isActive;
+        mPointerLockRequest = false;
+        mPointerLockErrors  = 0;
         return EM_TRUE;
     }
     EM_BOOL OnPointerLockError(int event_type, const void* reserved)
     {
-        ERROR("Failed to engage pointer lock.");
+        ERROR("Pointer lock error callback.");
+        mPointerLockRequest = false;
+        mPointerLockErrors++;
         return EM_TRUE;
     }
 
@@ -740,6 +745,20 @@ public:
             mEngine->SetHostStats(stats);
             mCounter = 0;
             mSeconds = 0;
+
+            // re-request pointer lock if the user cancelled it but the
+            // game still wants it.
+            if (mPointerLockWanted && !mPointerLockActual && !mPointerLockRequest)
+            {
+                if (mPointerLockErrors < 10)
+                {
+                    EngagePointerLock(true);
+                }
+                else
+                {
+                    EngagePointerLock(false);
+                }
+            }
         }
 
         if (!quit)
@@ -824,8 +843,42 @@ public:
 
     void EngagePointerLock(bool locked)
     {
-        if (mPointerLock == locked)
+        // because of the poor quality of the pointer lol lock API the we can
+        // only allow 1 request at a time.
+        // Basically there's no way to understand when all the pointer lock
+        // change requests made by the application have completed.
+        // You could think that you could use the callbacks but the problem
+        // is that the same Change callback is also invoked if the user
+        // exits the pointer lock state.
+
+        // So essentially if the game enqueues pointer lock changes such as
+        // [true, false], it might happen so that the true executes and
+        // pointer lock is turned on.
+        // Then maybe the user presses cancel and this might invoke the
+        // callback telling our code here that pointer lock is off. Then
+        // we would incorrectly determine that game wants pointer lock to
+        // be on, but the user turned it off, let's turn it back on in
+        // the first mouse click. This would then enqueue another request
+        // to turn the pointer lock on, but there might still be that second
+        // request made by the application flight. Then we'd end up with
+        // wrong state.
+
+        // The reason why 1 request queue works is because we know the initial
+        // state is false, we can only make a request to change to true, the
+        // user cannot cancel pointer lock if it isn't on, the only event that
+        // can come as a response to user cancelling pointer lock can only happen
+        // *after* our request to turn it on has completed.
+
+        if (locked == mPointerLockActual)
             return;
+
+        if (mPointerLockRequest)
+        {
+            WARN("We have a pending pointer lock request already still in flight.");
+            WARN("Because of the low quality of pointer locking WEB API we cannot");
+            WARN("process this request right now. Too bad.");
+            return;
+        }
 
         if (locked)
         {
@@ -834,6 +887,8 @@ public:
                     defer_until_user_interaction_handler) != EMSCRIPTEN_RESULT_SUCCESS)
             {
                 ERROR("Failed to engage pointer lock.");
+                mPointerLockErrors++;
+                return;
             }
         }
         else
@@ -841,8 +896,11 @@ public:
             if (emscripten_exit_pointerlock() != EMSCRIPTEN_RESULT_SUCCESS)
             {
                 ERROR("Failed to release pointer lock.");
+                return;
             }
         }
+        DEBUG("Request pointer lock state change. [locked=%1]", locked);
+        mPointerLockRequest = true;
     }
 
     void SetFullScreen(bool fullscreen)
@@ -1007,29 +1065,29 @@ public:
         const auto canvas_display_width  = (int)mCanvasDisplayWidth;
         const auto canvas_display_height = (int)mCanvasDisplayHeight;
 
-        auto canvas_coordinate_x = emsc_event->targetX;
-        auto canvas_coordinate_y = emsc_event->targetY;
-        if (mPointerLock)
+
+        if (mPointerLockActual)
         {
             // if pointer lock is engaged the mouse coordinates change from absolute coordinates
             // to movement deltas, which means that in order to have absolute mouse coordinates
             // we must reckon the deltas ourselves.
-
-            const auto dx = (float)emsc_event->movementX;
-            const auto dy = (float)emsc_event->movementY;
-            // DEBUG("mouse move dx = %1 dy = %2", dx, dy);
-            mMousePos.x = math::clamp(0.0f, (float)mCanvasDisplayWidth, mMousePos.x + dx);
-            mMousePos.y = math::clamp(0.0f, (float)mCanvasDisplayHeight, mMousePos.y + dy);
-            canvas_coordinate_x = mMousePos.x;
-            canvas_coordinate_y = mMousePos.y;
+            if (emsc_type == EMSCRIPTEN_EVENT_MOUSEMOVE)
+            {
+                const auto dx = (float)emsc_event->movementX;
+                const auto dy = (float)emsc_event->movementY;
+                // DEBUG("mouse move dx = %1 dy = %2", dx, dy);
+                mMousePos.x = math::clamp(0.0f, (float) mCanvasDisplayWidth, mMousePos.x + dx);
+                mMousePos.y = math::clamp(0.0f, (float) mCanvasDisplayHeight, mMousePos.y + dy);
+            }
         }
         else
         {
-            mMousePos = glm::vec2 { canvas_coordinate_x, canvas_coordinate_y };
+            mMousePos.x = emsc_event->targetX;
+            mMousePos.y = emsc_event->targetY;
         }
 
-        auto render_target_x = canvas_coordinate_x;
-        auto render_target_y = canvas_coordinate_y;
+        auto render_target_x = mMousePos.x;
+        auto render_target_y = mMousePos.y;
 
         // the mouse x,y coordinates are in CSS logical pixel units.
         // if the display size of the canvas is not the same as the
@@ -1045,8 +1103,8 @@ public:
             const auto scaled_render_width = mRenderTargetWidth * scale;
             const auto scaled_render_height = mRenderTargetHeight * scale;
 
-            const auto css_xpos = canvas_coordinate_x;
-            const auto css_ypos = canvas_coordinate_y;
+            const auto css_xpos = mMousePos.x;
+            const auto css_ypos = mMousePos.y;
             const auto css_offset_x = (mCanvasDisplayWidth - scaled_render_width) * 0.5;
             const auto css_offset_y = (mCanvasDisplayHeight - scaled_render_height) * 0.5;
 
@@ -1254,7 +1312,10 @@ private:
 
     // flag to indicate whether currently in soft fullscreen or not
     bool mFullScreen = false;
-    bool mPointerLock = false;
+    bool mPointerLockWanted = false;
+    bool mPointerLockActual = false;
+    bool mPointerLockRequest = false;
+    unsigned mPointerLockErrors = 0;
 
     // mouse position in logical CSS coordinates when
     // the pointer lock is on. the mouse event only provides
