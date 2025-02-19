@@ -41,7 +41,7 @@ uniform uint kParticleRotation;
 #else
   // currently only used when in the material editor
   // make these dummies
-  #define vParticleTime kTime
+  #define vParticleTime fract(kTime)
   #define vParticleAlpha 1.0
   #define vParticleRandomValue 0.0
   #define vParticleAngle 0.0
