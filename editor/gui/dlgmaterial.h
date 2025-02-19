@@ -25,6 +25,7 @@
 #include "warnpop.h"
 
 #include <vector>
+#include <unordered_set>
 
 #include "graphics/fwd.h"
 #include "editor/app/types.h"
@@ -78,5 +79,6 @@ namespace gui
         bool mFirstPaint = true;
         app::ResourceList mMaterials;
         Size2Df mPreviewScale;
+        std::unordered_set<std::string> mFailedMaterials;
     };
 }

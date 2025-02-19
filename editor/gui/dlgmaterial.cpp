@@ -26,11 +26,13 @@
 #include "editor/app/eventlog.h"
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/drawing.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/material_instance.h"
 #include "graphics/drawable.h"
 #include "graphics/drawing.h"
+#include "graphics/material_class.h"
 
 namespace {
     constexpr unsigned BoxMargin = 20;
@@ -208,11 +210,22 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
         if (!DoesIntersect(rect, gfx::FRect(0.0f, 0.0f, width, height)))
             continue;
 
-        gfx::MaterialInstance material(klass);
-        material.SetRuntime(mUI.widget->GetTime());
-        material.SetUniform("kTileIndex", (float)GetValue(mUI.tileIndex));
-
-        gfx::FillRect(painter, rect, material);
+        if (!base::Contains(mFailedMaterials, klass->GetId()))
+        {
+            gfx::MaterialInstance material(klass);
+            material.SetRuntime(mUI.widget->GetTime());
+            material.SetUniform("kTileIndex", (float) GetValue(mUI.tileIndex));
+            gfx::FillRect(painter, rect, material);
+            if (material.HasError())
+            {
+                mFailedMaterials.insert(klass->GetId());
+            }
+        }
+        else
+        {
+            const auto [corner, _1, _2, _3] = rect.GetCorners();
+            ShowError("Broken\nMaterial", corner, painter);
+        }
 
         if (mMaterials[index].id != mSelectedMaterialId)
             continue;
