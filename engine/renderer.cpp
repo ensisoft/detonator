@@ -1373,7 +1373,8 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
     if (const auto* map = entity_node.GetMapNode())
         sort_point = map->GetSortPoint();
 
-    if (const auto* item = entity_node.GetDrawable())
+    const auto* item = entity_node.GetDrawable();
+    if (item && paint_node.drawable && paint_node.material)
     {
         const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
@@ -1514,7 +1515,8 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
     if (const auto* map = entity_node.GetMapNode())
         sort_point = map->GetSortPoint();
 
-    if (const auto* text = entity_node.GetTextItem())
+    const auto* text = entity_node.GetTextItem();
+    if (text && paint_node.drawable && paint_node.material)
     {
         bool visible_now = true;
         if (text->TestFlag(TextItemClass::Flags::BlinkText))
@@ -1570,7 +1572,7 @@ void Renderer::CreateLights(const EntityType& entity,
         return;
 
     const auto* node_light = entity_node.GetBasicLight();
-    if (!node_light || !node_light->IsEnabled())
+    if (!node_light || !node_light->IsEnabled() || !light_node.light)
         return;
 
     gfx::Transform transform;
