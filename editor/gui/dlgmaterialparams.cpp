@@ -181,6 +181,7 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
                     {
                         SetValue(selector, *color);
                         reset->setEnabled(true);
+                        mKnownChanges.insert(uniform.name);
                     }
                 }
 
@@ -189,17 +190,25 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
                 layout->addWidget(reset,    row, 2);
 
                 QObject::connect(selector, &color_widgets::ColorSelector::colorChanged, this, [uniform, this, selector, reset](const QColor& color) {
-                    if (!mItem->HasMaterialParam(uniform.name)) {
-                        mItem->SetMaterialParam(uniform.name, uniform.material_default);
-                    }
                     mActuator->SetMaterialParam(uniform.name, gui::ToGfx(color));
+                });
+                QObject::connect(selector, &color_widgets::ColorSelector::acceptChange, this, [uniform, this, selector, reset]() {
+                    mKnownChanges.insert(uniform.name);
                     reset->setEnabled(true);
+                    // DEBUG("color change accept");
+                });
+                QObject::connect(selector, &color_widgets::ColorSelector::rejectChange, this, [uniform, this, selector, reset]() {
+                    if (!base::Contains(mKnownChanges, uniform.name))
+                        mActuator->DeleteMaterialParam(uniform.name);
+
+                    // DEBUG("color change reject");
                 });
 
                 QObject::connect(reset, &QToolButton::clicked, this, [uniform, this, selector, reset]() {
                     mActuator->DeleteMaterialParam(uniform.name);
                     selector->clearColor();
                     reset->setEnabled(false);
+                    mKnownChanges.erase(uniform.name);
                 });
             }
             SetVisible(mUI.colorUniforms, true);
@@ -223,6 +232,7 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
                 auto* selector = new color_widgets::ColorSelector(this);
                 selector->clearColor();
                 selector->setPlaceholderText("Material Default");
+                selector->setComparisonColor(FromGfx(uniform.material_default));
 
                 if (const auto* param = mItem->FindMaterialParam(uniform.name))
                 {
@@ -230,6 +240,7 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
                     {
                         SetValue(selector, *color);
                         reset->setEnabled(true);
+                        mKnownChanges.insert(uniform.name);
                     }
                 }
 
@@ -239,10 +250,22 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
 
                 QObject::connect(selector, &color_widgets::ColorSelector::colorChanged, this, [uniform, this, selector, reset](const QColor& color) {
                     mItem->SetMaterialParam(uniform.name, gui::ToGfx(color));
+                    // DEBUG("color change");
+                });
+                QObject::connect(selector, &color_widgets::ColorSelector::acceptChange, this, [uniform, this, selector, reset]() {
+                    mKnownChanges.insert(uniform.name);
                     reset->setEnabled(true);
+                    // DEBUG("color change accept");
+                });
+                QObject::connect(selector, &color_widgets::ColorSelector::rejectChange, this, [uniform, this, selector, reset]() {
+                    if (!base::Contains(mKnownChanges, uniform.name))
+                        mItem->DeleteMaterialParam(uniform.name);
+
+                    // DEBUG("color change reject");
                 });
 
                 QObject::connect(reset, &QToolButton::clicked, this, [uniform, this, selector, reset]() {
+                    mKnownChanges.erase(uniform.name);
                     mItem->DeleteMaterialParam(uniform.name);
                     selector->clearColor();
                     reset->setEnabled(false);

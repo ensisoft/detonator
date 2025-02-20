@@ -106,6 +106,10 @@ Q_SIGNALS:
     /// Emitted on setColor
     void colorChanged(QColor);
 
+    void acceptChange();
+
+    void rejectChange();
+
 protected:
     void paintEvent(QPaintEvent *);
     void resizeEvent(QResizeEvent *);
