@@ -97,7 +97,7 @@ void ColorSelector::showDialog()
 {
     p->old_color = color();
     p->had_color = hasColor();
-    p->dialog->setColor(p->old_color);
+    p->dialog->setColor(hasColor() ? color() : comparisonColor());
     connect_dialog();
     p->dialog->show();
 }
@@ -124,6 +124,8 @@ void ColorSelector::accept_dialog()
 {
     setColor(p->dialog->color());
     p->old_color = color();
+
+    emit acceptChange();
 }
 
 void ColorSelector::reject_dialog()
@@ -131,6 +133,8 @@ void ColorSelector::reject_dialog()
     setColor(p->old_color);
     setHasColor(p->had_color);
     Q_EMIT colorChanged(p->old_color);
+
+    emit rejectChange();
 }
 
 void ColorSelector::update_old_color(const QColor &c)

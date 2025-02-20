@@ -24,6 +24,7 @@
 #include "warnpop.h"
 
 #include <vector>
+#include <unordered_set>
 
 #include "editor/app/workspace.h"
 #include "game/fwd.h"
@@ -65,6 +66,8 @@ namespace gui
         };
         // know built-in color uniforms
         std::vector<ColorUniform> mColorUniforms;
+
+        std::unordered_set<std::string> mKnownChanges;
     };
 
 } // namespace
