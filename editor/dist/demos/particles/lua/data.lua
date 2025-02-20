@@ -15,6 +15,7 @@ Particles = {
     'Summoning Circle',
     'Blood Impact',
     'Fireworks',
-    'Spaceship'
+    'Spaceship',
+    'Hyperspace'
 }
 
