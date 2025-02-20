@@ -577,7 +577,10 @@ namespace app
             else if (TypeValue == Resource::Type::Shape)
                 data.AppendChunk("shapes", std::move(chunk));
             else if (TypeValue == Resource::Type::Entity)
+            {
+                chunk->Write("resource_ver", 3);
                 data.AppendChunk("entities", std::move(chunk));
+            }
             else if (TypeValue == Resource::Type::Scene)
                 data.AppendChunk("scenes", std::move(chunk));
             else if (TypeValue == Resource::Type::Script)
@@ -669,6 +672,8 @@ namespace app
                 current_version = 6;
             else if (TypeValue == Resource::Type::ParticleSystem)
                 current_version = 2;
+            else if (TypeValue == Resource::Type::Entity)
+                current_version = 3;
             else current_version = 2;
 
             ASSERT(Resource::GetProperty("__version", &saved_version));

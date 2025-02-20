@@ -1161,6 +1161,30 @@ void MigrateResource(game::EntityClass& entity, ResourceMigrationLog* log, unsig
             log->WriteLog(entity, "Entity", "Migrated to built-in particle 2D material entity node uniforms.");
         }
     }
+    if (old_version < 3)
+    {
+        for (unsigned i=0; i<entity.GetNumNodes(); ++i)
+        {
+            auto& node = entity.GetNode(i);
+            if (!node.HasDrawable())
+                continue;
+
+            auto* drawable = node.GetDrawable();
+            if (drawable->HasMaterialParam("kParticleStartColor") &&
+                drawable->HasMaterialParam("kParticleEndColor") &&
+                !drawable->HasMaterialParam("kParticleMidColor"))
+            {
+                const auto* start_color = drawable->GetMaterialParamValue<game::Color4f>("kParticleStartColor");
+                const auto* end_color = drawable->GetMaterialParamValue<game::Color4f>("kParticleEndColor");
+                if (start_color && end_color)
+                {
+                    const auto& mid_color = *start_color*0.5f + *end_color*0.5f;
+                    drawable->SetMaterialParam("kParticleMidColor", mid_color);
+                    log->WriteLog(entity, "Entity", "Fabricated entity drawable particle mid color value.");
+                }
+            }
+        }
+    }
 }
 
 } // namespace
