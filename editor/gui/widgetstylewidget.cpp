@@ -523,6 +523,7 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
             gradient.SetColor(ToGfx(dlg->GetColor(2)), Index::GradientColor2);
             gradient.SetColor(ToGfx(dlg->GetColor(3)), Index::GradientColor3);
             gradient.SetGradient(dlg->GetGradientType());
+            gradient.SetGamma(dlg->GetGamma());
             mStyle->SetMaterial(MapProperty(key), gradient);
             mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
         });
@@ -543,6 +544,7 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
                 dlg.SetColor(FromGfx(color_bot_left), 2);
                 dlg.SetColor(FromGfx(color_bot_right), 3);
                 dlg.SetGradientType(p->GetGradient());
+                dlg.SetGamma(p->GetGamma());
             }
         }
         if (dlg.exec() == QDialog::Rejected)

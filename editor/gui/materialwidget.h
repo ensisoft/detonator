@@ -144,6 +144,7 @@ namespace gui
         void on_colorMap3_colorChanged(QColor);
         void on_gradientOffsetX_valueChanged(int value);
         void on_gradientOffsetY_valueChanged(int value);
+        void on_gradientGamma_valueChanged(double);
         void on_textureScaleX_valueChanged(double);
         void on_textureScaleY_valueChanged(double);
         void on_textureRotation_valueChanged(double);

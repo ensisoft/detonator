@@ -78,6 +78,14 @@ namespace gui
         {
             return GetValue(mUI.cmbGradientType);
         }
+        void SetGamma(float gamma)
+        {
+            SetValue(mUI.gamma, gamma);
+        }
+        float GetGamma() const
+        {
+            return GetValue(mUI.gamma);
+        }
     signals:
         void GradientChanged(DlgGradient* dlg);
 
@@ -95,6 +103,10 @@ namespace gui
             emit GradientChanged(this);
         }
         void ColorMapColorChanged(QColor color)
+        {
+            emit GradientChanged(this);
+        }
+        void on_gamma_valueChanged(double)
         {
             emit GradientChanged(this);
         }
