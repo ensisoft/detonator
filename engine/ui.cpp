@@ -164,23 +164,29 @@ namespace detail {
 UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary*, const Loader*) const
 {
     auto material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Gradient);
+    material->SetName("UIGradient");
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetColor(mColorMap[0], ColorIndex::GradientColor0);
     material->SetColor(mColorMap[1], ColorIndex::GradientColor1);
     material->SetColor(mColorMap[2], ColorIndex::GradientColor2);
     material->SetColor(mColorMap[3], ColorIndex::GradientColor3);
     material->SetGradientType(mGradient);
-    material->SetName("UIGradient");
+    material->SetGradientGamma(mGamma);
     return material;
 }
 bool UIGradient::FromJson(const nlohmann::json& json)
 {
-    if (!ReadColor(json, "color0", &mColorMap[0]) ||
-        !ReadColor(json, "color1", &mColorMap[1]) ||
-        !ReadColor(json, "color2", &mColorMap[2]) ||
-        !ReadColor(json, "color3", &mColorMap[3]))
-        return false;
-    base::JsonReadSafe(json, "gradient", &mGradient);
+    bool ok = true;
+    ok &= ReadColor(json, "color0", &mColorMap[0]);
+    ok &= ReadColor(json, "color1", &mColorMap[1]);
+    ok &= ReadColor(json, "color2", &mColorMap[2]);
+    ok &= ReadColor(json, "color3", &mColorMap[3]);
+    ok &= base::JsonReadSafe(json, "gradient", &mGradient);
+    if (!base::JsonReadSafe(json, "gamma", &mGamma))
+        mGamma = 2.2f;
+    ok &= base::JsonReadSafe(json, "gamma", &mGamma);
+    if (!ok)
+        VERBOSE("Failed to fully parse UI gradient value.");
     return true;
 }
 void UIGradient::IntoJson(nlohmann::json& json) const
@@ -190,8 +196,7 @@ void UIGradient::IntoJson(nlohmann::json& json) const
     base::JsonWrite(json, "color2", mColorMap[2]);
     base::JsonWrite(json, "color3", mColorMap[3]);
     base::JsonWrite(json, "gradient", mGradient);
-    if (mGamma)
-        base::JsonWrite(json, "gamma", mGamma.value());
+    base::JsonWrite(json, "gamma", mGamma);
 }
 
 UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary*, const Loader*) const

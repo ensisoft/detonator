@@ -1263,6 +1263,11 @@ void MaterialWidget::on_gradientOffsetY_valueChanged(int value)
 {
     SetMaterialProperties();
 }
+void MaterialWidget::on_gradientGamma_valueChanged(double)
+{
+    SetMaterialProperties();
+}
+
 void MaterialWidget::on_textureScaleX_valueChanged(double)
 {
     SetMaterialProperties();
@@ -2239,12 +2244,18 @@ void MaterialWidget::SetMaterialProperties()
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Gradient)
     {
         mMaterial->SetGradientType(GetValue(mUI.cmbGradientType));
+        mMaterial->SetGradientGamma(GetValue(mUI.gradientGamma));
+
+        const float gamma = GetValue(mUI.gradientGamma);
+        if (math::equals(gamma, 1.0f))
+            mMaterial->DeleteUniform("kGradientGamma");
     }
 
     // set of known uniforms if they differ from the defaults.
     // todo: this assumes implicit knowledge about the internals
     // of the material class. refactor these names away and the
     // default values away
+
 
     if (auto cutoff = mUI.alphaCutoff->GetValue())
         mMaterial->SetAlphaCutoff(cutoff.value());
@@ -2420,6 +2431,8 @@ void MaterialWidget::ShowMaterialProperties()
 
     SetVisible(mUI.gradientType,       false);
     SetVisible(mUI.cmbGradientType,    false);
+    SetVisible(mUI.gradientGamma,      false);
+    SetVisible(mUI.lblGradientGamma,   false);
 
     SetValue(mUI.materialName,         mMaterial->GetName());
     SetValue(mUI.materialID,           mMaterial->GetId());
@@ -2460,6 +2473,7 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.gradientOffsetX, NormalizedFloat(offset.x));
     SetValue(mUI.gradientOffsetY, NormalizedFloat(offset.y));
     SetValue(mUI.cmbGradientType, mMaterial->GetGradientType());
+    SetValue(mUI.gradientGamma, mMaterial->GetGradientGamma());
 
     /// basic light material
     SetValue(mUI.ambientColor, mMaterial->GetAmbientColor());
@@ -2542,6 +2556,8 @@ void MaterialWidget::ShowMaterialProperties()
             SetVisible(mUI.gradientMap,       true);
             SetVisible(mUI.gradientType,      true);
             SetVisible(mUI.cmbGradientType,   true);
+            SetVisible(mUI.gradientGamma,     true);
+            SetVisible(mUI.lblGradientGamma,  true);
         }
         else if (mMaterial->GetType() == gfx::MaterialClass::Type::Texture ||
                  mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)

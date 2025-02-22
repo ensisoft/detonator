@@ -205,9 +205,17 @@ namespace engine
             {
                 mGradient = gradient;
             }
+            void SetGamma(float gamma)
+            {
+                mGamma = gamma;
+            }
+            float GetGamma() const
+            {
+                return mGamma;
+            }
         private:
             gfx::Color4f mColorMap[4];
-            std::optional<float> mGamma;
+            float mGamma = 1.0f;
             GradientType mGradient = GradientType::Bilinear;
         };
         // Create material from a color spec.
