@@ -348,6 +348,7 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
             source.FoldUniform("kGradientColor1", GetColor(ColorIndex::GradientColor1));
             source.FoldUniform("kGradientColor2", GetColor(ColorIndex::GradientColor2));
             source.FoldUniform("kGradientColor3", GetColor(ColorIndex::GradientColor3));
+            source.FoldUniform("kGradientGamma", GetGradientGamma());
             source.FoldUniform("kGradientWeight", GetGradientWeight());
             source.FoldUniform("kGradientType", static_cast<unsigned>(GetGradientType()));
             source.FoldUniform("kTextureVelocity", GetTextureVelocity());
@@ -405,6 +406,7 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
             SetUniform("kGradientColor2", state.uniforms, GetColor(ColorIndex::GradientColor2), program);
             SetUniform("kGradientColor3", state.uniforms, GetColor(ColorIndex::GradientColor3), program);
             SetUniform("kGradientWeight", state.uniforms, GetGradientWeight(), program);
+            SetUniform("kGradientGamma",  state.uniforms, GetGradientGamma(), program);
             SetUniform("kGradientType", state.uniforms, static_cast<unsigned>(GetGradientType()), program);
         }
     }
@@ -438,6 +440,7 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
         program.SetUniform("kGradientColor2", GetColor(ColorIndex::GradientColor2));
         program.SetUniform("kGradientColor3", GetColor(ColorIndex::GradientColor3));
         program.SetUniform("kGradientWeight", GetGradientWeight());
+        program.SetUniform("kGradientGamma",  GetGradientGamma());
         program.SetUniform("kGradientType", static_cast<unsigned>(GetGradientType()));
     }
     else if (mType == Type::Sprite)
