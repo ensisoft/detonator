@@ -418,6 +418,7 @@ public:
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::GradientColor1);
         material.SetColor(gfx::Color::Black,  gfx::GradientClass::ColorIndex::GradientColor2);
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::GradientColor3);
+        material.SetGradientGamma(2.2f);
         painter.Draw(gfx::PolygonMeshInstance(mPoly), transform, gfx::MaterialInstance(material));
 
         // eye
@@ -669,6 +670,7 @@ public:
             material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::GradientColor2);
             material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::GradientColor3);
             material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::GradientColor1);
+            material.SetGradientGamma(2.2f);
             gfx::Transform transform;
             transform.Resize(1024, 768);
             painter.Draw(gfx::Rectangle(), transform, gfx::MaterialInstance(material));
@@ -914,6 +916,7 @@ public:
         material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::GradientColor2);
         material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::GradientColor3);
         material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::GradientColor1);
+        material.SetGradientGamma(2.2f);
         gfx::FillRect(painter, gfx::FRect(0, 0, 400, 400), gfx::MaterialInstance(material));
 
         // *perceptually* linear gradient ramp

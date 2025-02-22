@@ -22,6 +22,11 @@ uniform vec4 kGradientColor3;
 uniform vec2 kGradientWeight;
 // The gradient type.
 uniform uint kGradientType;
+// the gamma (in)correction value. Typically 2.2 for
+// the incorrect result that users expect and 1.0 for
+// the physically correct mix but what users don't want.
+uniform float kGradientGamma;
+
 // current material time.
 uniform float kTime;
 
@@ -32,12 +37,12 @@ uniform float kTime;
 #endif
 
 vec4 GammaEncode(vec4 color) {
-    const float g = 2.2;
+    float g = kGradientGamma;
     return vec4(pow(color.rgb, vec3(1.0/g)), color.a);
 }
 
 vec4 GammaDecode(vec4 color) {
-  const float g = 2.2;
+  float g = kGradientGamma;
   return vec4(pow(color.rgb, vec3(g)), color.a);
 }
 

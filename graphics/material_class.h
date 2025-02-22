@@ -288,6 +288,8 @@ namespace gfx
         { SetUniform("kAlphaCutoff", cutoff); }
         inline void SetGradientWeight(glm::vec2 weight) noexcept
         { SetUniform("kGradientWeight", weight); }
+        inline void SetGradientGamma(float gamma) noexcept
+        { SetUniform("kGradientGamma", gamma); }
         inline void SetBaseColor(const Color4f& color) noexcept
         { SetColor(color, ColorIndex::BaseColor); }
         inline void SetColor(const Color4f& color, ColorIndex index) noexcept
@@ -329,6 +331,9 @@ namespace gfx
         { return static_cast<ParticleRotation>(GetUniformValue("kParticleRotation", static_cast<int>(ParticleRotation::None))); }
         inline float GetParticleBaseRotation() const noexcept
         { return GetUniformValue<float>("kParticleBaseRotation", 0.0f); }
+
+        inline float GetGradientGamma() const noexcept
+        { return GetUniformValue<float>("kGradientGamma", 1.0); }
 
         inline float GetAlphaCutoff() const noexcept
         { return GetUniformValue<float>("kAlphaCutoff", -1.0f); }
