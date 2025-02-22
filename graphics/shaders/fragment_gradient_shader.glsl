@@ -31,27 +31,37 @@ uniform float kTime;
   in float vParticleAlpha;
 #endif
 
+vec4 GammaEncode(vec4 color) {
+    const float g = 2.2;
+    return vec4(pow(color.rgb, vec3(1.0/g)), color.a);
+}
+
+vec4 GammaDecode(vec4 color) {
+  const float g = 2.2;
+  return vec4(pow(color.rgb, vec3(g)), color.a);
+}
+
 vec4 MixGradient(vec2 coords) {
 
   vec4 color;
 
   if (kGradientType == GRADIENT_TYPE_BILINEAR) {
-      vec4 top = mix(kGradientColor0, kGradientColor1, coords.x);
-      vec4 bot = mix(kGradientColor2, kGradientColor3, coords.x);
+      vec4 top = mix(GammaEncode(kGradientColor0), GammaEncode(kGradientColor1), coords.x);
+      vec4 bot = mix(GammaEncode(kGradientColor2), GammaEncode(kGradientColor3), coords.x);
       color = mix(top, bot, coords.y);
 
   } else if (kGradientType == GRADIENT_TYPE_RADIAL) {
       float distance_from_center = length(vec2(0.5, 0.5) - coords);
       distance_from_center = min(distance_from_center, 1.0);
-      color = mix(kGradientColor0, kGradientColor1, distance_from_center);
+      color = mix(GammaEncode(kGradientColor0), GammaEncode(kGradientColor1), distance_from_center);
 
   } else if (kGradientType == GRADIENT_TYPE_CONICAL) {
       float angle = atan(coords.y - 0.5, coords.x - 0.5); // -pi to pi
       float mixer = (angle + PI) / (2.0 * PI);
-      color = mix(kGradientColor0, kGradientColor1, mixer);
+      color = mix(GammaEncode(kGradientColor0), GammaEncode(kGradientColor1), mixer);
   }
 
-  return color;
+  return GammaDecode(color);
 }
 
 #ifndef CUSTOM_FRAGMENT_MAIN
@@ -62,7 +72,7 @@ void FragmentShaderMain() {
   coords = clamp(coords, vec2(0.0, 0.0), vec2(1.0, 1.0));
   vec4 color  = MixGradient(coords);
 
-  fs_out.color.rgb = vec3(pow(color.rgb, vec3(2.2)));
+  fs_out.color.rgb = color.rgb;
   fs_out.color.a   = color.a;
 
 #ifdef GEOMETRY_IS_PARTICLES
