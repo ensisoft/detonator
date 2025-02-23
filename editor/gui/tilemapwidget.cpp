@@ -877,6 +877,22 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
         }
         mState.selection.reset();
     });
+
+    connect(mUI.btnHamburger, &QPushButton::clicked, this, [this]() {
+        if (mHamburger == nullptr)
+        {
+            mHamburger = new QMenu(this);
+            mHamburger->addAction(mUI.chkShowViewport);
+            mHamburger->addAction(mUI.chkShowOrigin);
+            mHamburger->addAction(mUI.chkShowGrid);
+            mHamburger->addAction(mUI.chkShowDataLayers);
+            mHamburger->addAction(mUI.chkShowRenderLayers);
+        }
+        QPoint point;
+        point.setX(0);
+        point.setY(mUI.btnHamburger->width());
+        mHamburger->popup(mUI.btnHamburger->mapToGlobal(point));
+    });
 }
 
 TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -986,6 +1002,8 @@ void TilemapWidget::InitializeSettings(const UISettings& settings)
     SetValue(mUI.chkShowOrigin,   settings.show_origin);
     SetValue(mUI.cmbGrid,         settings.grid);
     SetValue(mUI.zoom,            settings.zoom);
+    SetValue(mUI.chkShowRenderLayers, true);
+    SetValue(mUI.chkShowDataLayers,   true);
 }
 void TilemapWidget::AddActions(QToolBar& bar)
 {

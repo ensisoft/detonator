@@ -230,6 +230,7 @@ namespace gui
         // there doesn't seem to be a way to do this in the designer
         // so we create our menu for Entities.
         QMenu* mEntities = nullptr;
+        QMenu* mHamburger = nullptr;
 
         UIAnimator mAnimator;
     private:

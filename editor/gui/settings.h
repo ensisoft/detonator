@@ -148,6 +148,7 @@ namespace gui
         void SaveWidget(const QString& module, const QDoubleSpinBox* spin);
         void SaveWidget(const QString& module, const QGroupBox* grp);
         void SaveWidget(const QString& module, const QCheckBox* chk);
+        void SaveWidget(const QString& module, const QAction* action);
         void SaveWidget(const QString& module, const QSplitter* splitter);
         void SaveWidget(const QString& module, const gui::CollapsibleWidget* widget);
 
@@ -158,6 +159,7 @@ namespace gui
         void LoadWidget(const QString& module, QTableView* table) const;
         void LoadWidget(const QString& module, QComboBox* cmb) const;
         void LoadWidget(const QString& module, QCheckBox* chk) const;
+        void LoadWidget(const QString& module, QAction* action) const;
         void LoadWidget(const QString& module, QGroupBox* grp) const;
         void LoadWidget(const QString& module, QDoubleSpinBox* spin) const;
         void LoadWidget(const QString& module, QSpinBox* spin) const;

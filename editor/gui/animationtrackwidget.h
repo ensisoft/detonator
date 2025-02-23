@@ -173,6 +173,7 @@ namespace gui
     private:
         Ui::AnimationTrack mUI;
         UIAnimator mAnimator;
+        QMenu* mHamburger = nullptr;
     private:
         using TreeModel = RenderTreeModel<game::EntityClass>;
         class TimelineModel;

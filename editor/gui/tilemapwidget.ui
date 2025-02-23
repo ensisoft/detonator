@@ -386,7 +386,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="gui::GfxWidget" name="widget" native="true">
+        <widget class="gui::GfxWidget" name="widget">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -460,52 +460,13 @@
              </spacer>
             </item>
             <item>
-             <widget class="QCheckBox" name="chkShowDataLayers">
+             <widget class="QPushButton" name="btnHamburger">
               <property name="text">
-               <string>Show data layers</string>
+               <string/>
               </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowRenderLayers">
-              <property name="text">
-               <string>Show render layers</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowViewport">
-              <property name="text">
-               <string>Show viewport</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowOrigin">
-              <property name="text">
-               <string>Show origin</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowGrid">
-              <property name="text">
-               <string>Show grid</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/hamburger.png</normaloff>:/16x16_ico_png/hamburger.png</iconset>
               </property>
              </widget>
             </item>
@@ -1182,8 +1143,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>100</width>
-                   <height>30</height>
+                   <width>341</width>
+                   <height>452</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
@@ -1393,6 +1354,46 @@
     <string>Ctrl+T</string>
    </property>
   </action>
+  <action name="chkShowViewport">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show viewport</string>
+   </property>
+  </action>
+  <action name="chkShowOrigin">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show origin</string>
+   </property>
+  </action>
+  <action name="chkShowGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show grid</string>
+   </property>
+  </action>
+  <action name="chkShowDataLayers">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show data layers</string>
+   </property>
+  </action>
+  <action name="chkShowRenderLayers">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show render layers</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1426,11 +1427,7 @@
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
-  <tabstop>chkShowDataLayers</tabstop>
-  <tabstop>chkShowRenderLayers</tabstop>
-  <tabstop>chkShowViewport</tabstop>
-  <tabstop>chkShowOrigin</tabstop>
-  <tabstop>chkShowGrid</tabstop>
+  <tabstop>btnHamburger</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>btnMoreViewportSettings</tabstop>
   <tabstop>translateX</tabstop>

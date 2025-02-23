@@ -337,6 +337,12 @@ void Settings::SaveWidget(const QString& module, const QCheckBox* chk)
 {
     SetValue(module, chk->objectName(), chk->isChecked());
 }
+
+void Settings::SaveWidget(const QString& module, const QAction* action)
+{
+    SetValue(module, action->objectName(), action->isChecked());
+}
+
 // Save the UI state of a widget.
 void Settings::SaveWidget(const QString& module, const QSplitter* splitter)
 {
@@ -410,6 +416,13 @@ void Settings::LoadWidget(const QString& module, QCheckBox* chk) const
     QSignalBlocker s(chk);
     chk->setChecked(value);
 }
+void Settings::LoadWidget(const QString& module, QAction* action) const
+{
+    const bool value = GetValue<bool>(module, action->objectName(), action->isChecked());
+    QSignalBlocker s(action);
+    action->setChecked(value);
+}
+
 void Settings::LoadWidget(const QString& module, QGroupBox* grp) const
 {
     const bool value = GetValue<bool>(module, grp->objectName(),

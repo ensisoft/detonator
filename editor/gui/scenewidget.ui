@@ -1064,7 +1064,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="gui::GfxWidget" name="widget" native="true">
+        <widget class="gui::GfxWidget" name="widget">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -1181,52 +1181,13 @@
              </spacer>
             </item>
             <item>
-             <widget class="QCheckBox" name="chkSnap">
+             <widget class="QPushButton" name="btnHamburger">
               <property name="text">
-               <string>Snap to grid</string>
+               <string/>
               </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowViewport">
-              <property name="text">
-               <string>Show viewport</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowOrigin">
-              <property name="text">
-               <string>Show origin</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowGrid">
-              <property name="text">
-               <string>Show grid</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowMap">
-              <property name="text">
-               <string>Show map</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/hamburger.png</normaloff>:/16x16_ico_png/hamburger.png</iconset>
               </property>
              </widget>
             </item>
@@ -2182,6 +2143,46 @@
     <string>Open the entity class for editing</string>
    </property>
   </action>
+  <action name="actionSnapGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Snap to grid</string>
+   </property>
+  </action>
+  <action name="actionShowViewport">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show viewport</string>
+   </property>
+  </action>
+  <action name="actionShowOrigin">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show origin</string>
+   </property>
+  </action>
+  <action name="actionShowGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show grid</string>
+   </property>
+  </action>
+  <action name="actionShowMap">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show map</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -2269,11 +2270,7 @@
   <tabstop>cmbPerspective</tabstop>
   <tabstop>cmbUIOverlay</tabstop>
   <tabstop>btnResetUI</tabstop>
-  <tabstop>chkSnap</tabstop>
-  <tabstop>chkShowViewport</tabstop>
-  <tabstop>chkShowOrigin</tabstop>
-  <tabstop>chkShowGrid</tabstop>
-  <tabstop>chkShowMap</tabstop>
+  <tabstop>btnHamburger</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>btnMoreViewportSettings</tabstop>
   <tabstop>translateX</tabstop>

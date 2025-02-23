@@ -479,7 +479,7 @@
         <layout class="QVBoxLayout" name="toolbar"/>
        </item>
        <item>
-        <widget class="gui::GfxWidget" name="viewport" native="true">
+        <widget class="gui::GfxWidget" name="viewport">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -544,59 +544,13 @@
              </spacer>
             </item>
             <item>
-             <widget class="QCheckBox" name="chkSnap">
+             <widget class="QPushButton" name="btnHamburger">
               <property name="text">
-               <string>Snap to grid</string>
+               <string/>
               </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowOrigin">
-              <property name="text">
-               <string>Show origin</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowGrid">
-              <property name="text">
-               <string>Show grid</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowBounds">
-              <property name="text">
-               <string>Show bounds</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowTabOrder">
-              <property name="text">
-               <string>Show tab order</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkClipWidgets">
-              <property name="text">
-               <string>Clip widgets</string>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/hamburger.png</normaloff>:/16x16_ico_png/hamburger.png</iconset>
               </property>
              </widget>
             </item>
@@ -2514,6 +2468,54 @@
     <string>F6</string>
    </property>
   </action>
+  <action name="chkSnap">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Snap to grid</string>
+   </property>
+  </action>
+  <action name="chkShowOrigin">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show origin</string>
+   </property>
+  </action>
+  <action name="chkShowGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show grid</string>
+   </property>
+  </action>
+  <action name="chkShowBounds">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show bounds</string>
+   </property>
+  </action>
+  <action name="chkShowTabOrder">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show tab order</string>
+   </property>
+  </action>
+  <action name="chkClipWidgets">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Cliip widgets</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -2575,12 +2577,6 @@
   <tabstop>viewport</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
-  <tabstop>chkSnap</tabstop>
-  <tabstop>chkShowOrigin</tabstop>
-  <tabstop>chkShowGrid</tabstop>
-  <tabstop>chkShowBounds</tabstop>
-  <tabstop>chkShowTabOrder</tabstop>
-  <tabstop>chkClipWidgets</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>btnMoreViewportSettings</tabstop>
   <tabstop>translateX</tabstop>

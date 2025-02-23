@@ -627,6 +627,23 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.windowKeyMap->lineEdit()->setReadOnly(true);
     mUI.windowStyleFile->lineEdit()->setReadOnly(true);
 
+    connect(mUI.btnHamburger, &QPushButton::clicked, this, [this]() {
+        if (mHamburger == nullptr)
+        {
+            mHamburger = new QMenu(this);
+            mHamburger->addAction(mUI.chkSnap);
+            mHamburger->addAction(mUI.chkShowOrigin);
+            mHamburger->addAction(mUI.chkShowGrid);
+            mHamburger->addAction(mUI.chkShowBounds);
+            mHamburger->addAction(mUI.chkShowTabOrder);
+            mHamburger->addAction(mUI.chkClipWidgets);
+        }
+        QPoint point;
+        point.setX(0);
+        point.setY(mUI.btnHamburger->width());
+        mHamburger->popup(mUI.btnHamburger->mapToGlobal(point));
+    });
+
 }
 
 UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : UIWidget(workspace)
@@ -694,11 +711,13 @@ QImage UIWidget::TakeScreenshot() const
 
 void UIWidget::InitializeSettings(const UISettings& settings)
 {
-    SetValue(mUI.zoom,          settings.zoom);
-    SetValue(mUI.cmbGrid,       settings.grid);
-    SetValue(mUI.chkSnap,       settings.snap_to_grid);
-    SetValue(mUI.chkShowOrigin, settings.show_origin);
-    SetValue(mUI.chkShowGrid,   settings.show_grid);
+    SetValue(mUI.zoom,           settings.zoom);
+    SetValue(mUI.cmbGrid,        settings.grid);
+    SetValue(mUI.chkSnap,        settings.snap_to_grid);
+    SetValue(mUI.chkShowOrigin,  settings.show_origin);
+    SetValue(mUI.chkShowGrid,    settings.show_grid);
+    SetValue(mUI.chkShowBounds,  true);
+    SetValue(mUI.chkShowTabOrder,true);
 }
 
 void UIWidget::InitializeContent()
@@ -756,16 +775,11 @@ void UIWidget::SetViewerMode()
     SetVisible(mUI.widgetStyle,      false);
     SetVisible(mUI.widgetData,       false);
     SetVisible(mUI.lblHelp,          false);
-    SetVisible(mUI.chkSnap,          false);
-    SetVisible(mUI.chkShowOrigin,    false);
-    SetVisible(mUI.chkShowBounds,    false);
-    SetVisible(mUI.chkShowTabOrder,  false);
     SetVisible(mUI.help,             false);
     SetVisible(mUI.scrollArea,       false);
     SetVisible(mUI.cmbGrid,          false);
-    SetVisible(mUI.chkShowGrid,      false);
-    SetVisible(mUI.chkClipWidgets,   false);
     SetVisible(mButtonBar,           false);
+    SetVisible(mUI.btnHamburger,     false);
 
     SetValue(mUI.chkSnap,            false);
     SetValue(mUI.chkShowOrigin,      false);
