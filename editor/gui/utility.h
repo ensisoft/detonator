@@ -1590,6 +1590,9 @@ template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, const QCheckBox* chk)
 { res.SetUserProperty(key, chk->isChecked()); }
 template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const QAction* chk)
+{ res.SetUserProperty(key, chk->isChecked()); }
+template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, const QGroupBox* chk)
 { res.SetUserProperty(key, chk->isChecked()); }
 template<typename Resource>
@@ -1852,6 +1855,21 @@ inline bool GetUserProperty(const Resource& res, const PropertyKey& key, QCheckB
     }
     return false;
 }
+
+template<typename Resource>
+inline bool GetUserProperty(const Resource& res, const PropertyKey& key, QAction* chk)
+{
+    QSignalBlocker s(chk);
+
+    bool value = false;
+    if (res.GetUserProperty(key, &value))
+    {
+        chk->setChecked(value);
+        return true;
+    }
+    return false;
+}
+
 template<typename Resource>
 inline bool GetUserProperty(const Resource& res, const PropertyKey& key, QGroupBox* chk)
 {

@@ -893,6 +893,23 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
         mAttachments->popup(mUI.btnAddNodeItem->mapToGlobal(point));
     });
 
+
+    connect(mUI.btnHamburger, &QPushButton::clicked, this, [this]() {
+        if (mHamburger == nullptr)
+        {
+            mHamburger = new QMenu(this);
+            mHamburger->addAction(mUI.chkSnap);
+            mHamburger->addAction(mUI.chkShowViewport);
+            mHamburger->addAction(mUI.chkShowOrigin);
+            mHamburger->addAction(mUI.chkShowGrid);
+            mHamburger->addAction(mUI.chkShowComments);
+        }
+        QPoint point;
+        point.setX(0);
+        point.setY(mUI.btnHamburger->width());
+        mHamburger->popup(mUI.btnHamburger->mapToGlobal(point));
+    });
+
     QTimer::singleShot(10, this, [this]() {
         mUI.widget->activateWindow();
         mUI.widget->setFocus();
@@ -1026,11 +1043,7 @@ void EntityWidget::SetViewerMode()
     SetVisible(mUI.nodeTransform,   false);
     SetVisible(mUI.nodeItems,       false);
     SetVisible(mUI.cmbGrid,         false);
-    SetVisible(mUI.chkShowComments, false);
-    SetVisible(mUI.chkShowViewport, false);
-    SetVisible(mUI.chkSnap,         false);
-    SetVisible(mUI.chkShowOrigin,   false);
-    SetVisible(mUI.chkShowGrid,     false);
+    SetVisible(mUI.btnHamburger,    false);
     SetVisible(mUI.help,            false);
     SetVisible(mUI.renderTree,      false);
     SetVisible(mUI.nodeProperties,  false);

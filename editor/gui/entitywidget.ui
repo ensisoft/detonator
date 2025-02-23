@@ -1054,7 +1054,7 @@
         <layout class="QVBoxLayout" name="toolbarLayout"/>
        </item>
        <item>
-        <widget class="gui::GfxWidget" name="widget" native="true">
+        <widget class="gui::GfxWidget" name="widget">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -1131,52 +1131,13 @@
              </spacer>
             </item>
             <item>
-             <widget class="QCheckBox" name="chkSnap">
+             <widget class="QPushButton" name="btnHamburger">
               <property name="text">
-               <string>Snap to grid</string>
+               <string/>
               </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowViewport">
-              <property name="text">
-               <string>Show viewport</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowOrigin">
-              <property name="text">
-               <string>Show origin</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowGrid">
-              <property name="text">
-               <string>Show grid</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chkShowComments">
-              <property name="text">
-               <string>Show comments</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/hamburger.png</normaloff>:/16x16_ico_png/hamburger.png</iconset>
               </property>
              </widget>
             </item>
@@ -5139,6 +5100,46 @@
     <string>Place new ambient light</string>
    </property>
   </action>
+  <action name="chkSnap">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Snap to grid</string>
+   </property>
+  </action>
+  <action name="chkShowViewport">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show viewport</string>
+   </property>
+  </action>
+  <action name="chkShowOrigin">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show origin</string>
+   </property>
+  </action>
+  <action name="chkShowGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show grid</string>
+   </property>
+  </action>
+  <action name="chkShowComments">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show comments</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -5348,11 +5349,7 @@
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>cmbStyle</tabstop>
-  <tabstop>chkSnap</tabstop>
-  <tabstop>chkShowViewport</tabstop>
-  <tabstop>chkShowOrigin</tabstop>
-  <tabstop>chkShowGrid</tabstop>
-  <tabstop>chkShowComments</tabstop>
+  <tabstop>btnHamburger</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>btnMoreViewportSettings</tabstop>
   <tabstop>translateX</tabstop>

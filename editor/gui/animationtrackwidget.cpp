@@ -179,6 +179,22 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     connect(mUI.timeline, &TimelineWidget::SelectedItemDragged, this, &AnimationTrackWidget::SelectedItemDragged);
     connect(mUI.timeline, &TimelineWidget::DeleteSelectedItem,  this, &AnimationTrackWidget::DeleteSelectedItem);
 
+
+    connect(mUI.btnHamburger, &QPushButton::clicked, this, [this]() {
+        if (mHamburger == nullptr)
+        {
+            mHamburger = new QMenu(this);
+            mHamburger->addAction(mUI.chkSnap);
+            mHamburger->addAction(mUI.chkShowViewport);
+            mHamburger->addAction(mUI.chkShowOrigin);
+            mHamburger->addAction(mUI.chkShowGrid);
+        }
+        QPoint point;
+        point.setX(0);
+        point.setY(mUI.btnHamburger->width());
+        mHamburger->popup(mUI.btnHamburger->mapToGlobal(point));
+    });
+
     SetActuatorUIDefaults();
     SetActuatorUIEnabled(false);
     RegisterTrackWidget(this);

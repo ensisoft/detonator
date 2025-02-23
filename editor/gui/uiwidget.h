@@ -189,6 +189,7 @@ namespace gui
     private:
         Ui::UIWidget mUI;
         QMenu* mWidgets = nullptr;
+        QMenu* mHamburger = nullptr;
         QToolBar* mButtonBar = nullptr;
     private:
         class TreeModel;

@@ -161,6 +161,7 @@ namespace gui
 
     private:
         Ui::Tilemap mUI;
+        QMenu* mHamburger = nullptr;
     private:
         class LayerModel;
         class LayerData;

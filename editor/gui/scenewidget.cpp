@@ -598,6 +598,22 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     mEntities->menuAction()->setIcon(QIcon("level:entity.png"));
     mEntities->menuAction()->setText("Place Entity");
 
+    connect(mUI.btnHamburger, &QPushButton::clicked, this, [this]() {
+        if (mHamburger == nullptr)
+        {
+            mHamburger = new QMenu(this);
+            mHamburger->addAction(mUI.actionSnapGrid);
+            mHamburger->addAction(mUI.actionShowViewport);
+            mHamburger->addAction(mUI.actionShowOrigin);
+            mHamburger->addAction(mUI.actionShowGrid);
+            mHamburger->addAction(mUI.actionShowMap);
+        }
+        QPoint point;
+        point.setX(0);
+        point.setY(mUI.btnHamburger->width());
+        mHamburger->popup(mUI.btnHamburger->mapToGlobal(point));
+    });
+
     mState.scene->SetName("My Scene");
     mState.workspace = workspace;
     mState.renderer.SetClassLibrary(workspace);
@@ -646,12 +662,12 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
 
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
-    GetUserProperty(resource, "snap", mUI.chkSnap);
+    GetUserProperty(resource, "snap", mUI.actionSnapGrid);
     GetUserProperty(resource, "perspective", mUI.cmbPerspective);
-    GetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
-    GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
-    GetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
-    GetUserProperty(resource, "show_map", mUI.chkShowMap);
+    GetUserProperty(resource, "show_origin", mUI.actionShowOrigin);
+    GetUserProperty(resource, "show_grid", mUI.actionShowGrid);
+    GetUserProperty(resource, "show_viewport", mUI.actionShowViewport);
+    GetUserProperty(resource, "show_map", mUI.actionShowMap);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
@@ -700,12 +716,14 @@ QString SceneWidget::GetId() const
 
 void SceneWidget::InitializeSettings(const UISettings& settings)
 {
-    SetValue(mUI.chkSnap,         settings.snap_to_grid);
-    SetValue(mUI.chkShowViewport, settings.show_viewport);
-    SetValue(mUI.chkShowOrigin,   settings.show_origin);
-    SetValue(mUI.chkShowGrid,     settings.show_grid);
-    SetValue(mUI.cmbGrid,         settings.grid);
-    SetValue(mUI.zoom,            settings.zoom);
+    SetValue(mUI.actionSnapGrid,     settings.snap_to_grid);
+    SetValue(mUI.actionShowViewport, settings.show_viewport);
+    SetValue(mUI.actionShowOrigin,   settings.show_origin);
+    SetValue(mUI.actionShowGrid,     settings.show_grid);
+    SetValue(mUI.cmbGrid,            settings.grid);
+    SetValue(mUI.zoom,               settings.zoom);
+    SetValue(mUI.actionShowMap,      true);
+
 }
 
 void SceneWidget::AddActions(QToolBar& bar)
@@ -751,12 +769,12 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.scaleX);
     settings.SaveWidget("Scene", mUI.scaleY);
     settings.SaveWidget("Scene", mUI.rotation);
-    settings.SaveWidget("Scene", mUI.chkShowOrigin);
-    settings.SaveWidget("Scene", mUI.chkShowGrid);
-    settings.SaveWidget("Scene", mUI.chkShowViewport);
-    settings.SaveWidget("Scene", mUI.chkSnap);
+    settings.SaveWidget("Scene", mUI.actionShowOrigin);
+    settings.SaveWidget("Scene", mUI.actionShowGrid);
+    settings.SaveWidget("Scene", mUI.actionShowViewport);
+    settings.SaveWidget("Scene", mUI.actionSnapGrid);
     settings.SaveWidget("Scene", mUI.cmbGrid);
-    settings.SaveWidget("Scene", mUI.chkShowMap);
+    settings.SaveWidget("Scene", mUI.actionShowMap);
     settings.SaveWidget("Scene", mUI.zoom);
     settings.SaveWidget("Scene", mUI.widget);
     settings.SaveWidget("Scene", mUI.sceneVariablesGroup);
@@ -783,12 +801,12 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.scaleX);
     settings.LoadWidget("Scene", mUI.scaleY);
     settings.LoadWidget("Scene", mUI.rotation);
-    settings.LoadWidget("Scene", mUI.chkShowOrigin);
-    settings.LoadWidget("Scene", mUI.chkShowGrid);
-    settings.LoadWidget("Scene", mUI.chkShowViewport);
-    settings.LoadWidget("Scene", mUI.chkSnap);
+    settings.LoadWidget("Scene", mUI.actionShowOrigin);
+    settings.LoadWidget("Scene", mUI.actionShowGrid);
+    settings.LoadWidget("Scene", mUI.actionShowViewport);
+    settings.LoadWidget("Scene", mUI.actionSnapGrid);
     settings.LoadWidget("Scene", mUI.cmbGrid);
-    settings.LoadWidget("Scene", mUI.chkShowMap);
+    settings.LoadWidget("Scene", mUI.actionShowMap);
     settings.LoadWidget("Scene", mUI.zoom);
     settings.LoadWidget("Scene", mUI.widget);
     settings.LoadWidget("Scene", mUI.sceneVariablesGroup);
@@ -1348,12 +1366,12 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "camera_rotation", mUI.rotation);
     SetUserProperty(resource, "zoom", mUI.zoom);
     SetUserProperty(resource, "grid", mUI.cmbGrid);
-    SetUserProperty(resource, "snap", mUI.chkSnap);
+    SetUserProperty(resource, "snap", mUI.actionSnapGrid);
     SetUserProperty(resource, "perspective", mUI.cmbPerspective);
-    SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
-    SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
-    SetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
-    SetUserProperty(resource, "show_map", mUI.chkShowMap);
+    SetUserProperty(resource, "show_origin", mUI.actionShowOrigin);
+    SetUserProperty(resource, "show_grid", mUI.actionShowGrid);
+    SetUserProperty(resource, "show_viewport", mUI.actionShowViewport);
+    SetUserProperty(resource, "show_map", mUI.actionShowMap);
     SetUserProperty(resource, "widget", mUI.widget);
     SetUserProperty(resource, "quadtree_max_items", mUI.spQuadMaxItems);
     SetUserProperty(resource, "quadtree_max_levels", mUI.spQuadMaxLevels);
@@ -1922,7 +1940,7 @@ void SceneWidget::on_scriptVarList_customContextMenuRequested(QPoint)
 
 void SceneWidget::PlaceAnyEntity()
 {
-    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto snap = (bool)GetValue(mUI.actionSnapGrid);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     const auto grid_size = (unsigned)grid;
     auto tool = std::make_unique<PlaceEntityTool>(mState, snap, grid_size);
@@ -1936,7 +1954,7 @@ void SceneWidget::PlaceNewEntity()
     const auto klassid = action->data().toString();
     auto entity = mState.workspace->GetEntityClassById(klassid);
 
-    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto snap = (bool)GetValue(mUI.actionSnapGrid);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     const auto grid_size = (unsigned)grid;
     mCurrentTool = std::make_unique<PlaceEntityTool>(mState, entity, snap, grid_size);
@@ -2089,7 +2107,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
                 width, height,
                 zoom,
                 grid,
-                GetValue(mUI.chkShowGrid));
+                GetValue(mUI.actionShowGrid));
 
         engine::Renderer::Camera camera;
         camera.clear_color = mUI.widget->GetCurrentClearColor();
@@ -2133,7 +2151,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         // visibility in the scene overall and then the layers are controlled
         // by the map klass setting (which are available currently only in the
         // map editor...)
-        const bool show_map = GetValue(mUI.chkShowMap);
+        const bool show_map = GetValue(mUI.actionShowMap);
         const auto* map = show_map ? mTilemap.get() : nullptr;
 
         mState.renderer.BeginFrame();
@@ -2179,13 +2197,13 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     }
 
     // right arrow
-    if (GetValue(mUI.chkShowOrigin))
+    if (GetValue(mUI.actionShowOrigin))
     {
         gfx::Transform view;
         DrawBasisVectors(tile_painter, view);
     }
 
-    if (GetValue(mUI.chkShowViewport))
+    if (GetValue(mUI.actionShowViewport))
     {
         gfx::Transform view;
         MakeViewTransform(mUI, mState, view);
@@ -2261,7 +2279,7 @@ void SceneWidget::MousePress(QMouseEvent* event)
 
     if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
     {
-        const auto snap = (bool)GetValue(mUI.chkSnap);
+        const auto snap = (bool)GetValue(mUI.actionSnapGrid);
         const auto grid_type = (GridDensity)GetValue(mUI.cmbGrid);
         const auto grid_size = static_cast<unsigned>(grid_type);
         const auto& click_point = mickey->pos();

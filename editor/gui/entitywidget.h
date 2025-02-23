@@ -356,6 +356,7 @@ namespace gui
         QMenu* mBasicShapes = nullptr;
         QMenu* mBasicLights = nullptr;
         QMenu* mAttachments = nullptr;
+        QMenu* mHamburger = nullptr;
         QToolBar* mButtonBar = nullptr;
 
         UIAnimator mAnimator;
