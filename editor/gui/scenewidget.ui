@@ -1125,6 +1125,46 @@
              <widget class="QComboBox" name="cmbPerspective"/>
             </item>
             <item>
+             <widget class="QLabel" name="label_20">
+              <property name="text">
+               <string>UI</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cmbUIOverlay">
+              <property name="editable">
+               <bool>false</bool>
+              </property>
+              <property name="currentText">
+               <string/>
+              </property>
+              <property name="placeholderText">
+               <string>None</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnResetUI">
+              <property name="toolTip">
+               <string>Reset scene script to nothing</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="horizontalSpacer_2">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -2227,6 +2267,8 @@
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
   <tabstop>cmbPerspective</tabstop>
+  <tabstop>cmbUIOverlay</tabstop>
+  <tabstop>btnResetUI</tabstop>
   <tabstop>chkSnap</tabstop>
   <tabstop>chkShowViewport</tabstop>
   <tabstop>chkShowOrigin</tabstop>

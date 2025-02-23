@@ -823,6 +823,7 @@ namespace engine
                          std::vector<WindowAction>* window_actions);
 
         void Draw(gfx::Device& device);
+        void Draw(const gfx::FRect& rect, gfx::Device& device);
 
         void OpenUI(std::shared_ptr<uik::Window> window);
         void CloseUI(const std::string& window_name,

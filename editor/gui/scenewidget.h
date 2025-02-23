@@ -32,7 +32,9 @@
 
 #include "game/scene.h"
 #include "game/fwd.h"
+#include "uikit/fwd.h"
 #include "engine/renderer.h"
+#include "engine/ui.h"
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
 #include "editor/gui/tool.h"
@@ -174,6 +176,7 @@ namespace gui
         void on_btnViewMinus90_clicked();
         void on_btnViewReset_clicked();
         void on_btnMoreViewportSettings_clicked();
+        void on_btnResetUI_clicked();
         void on_nodeName_textChanged(const QString& text);
         void on_nodeEntity_currentIndexChanged(const QString& name);
         void on_nodeLayer_valueChanged(int layer);
@@ -244,6 +247,11 @@ namespace gui
             TreeWidget* view = nullptr;
             QString last_placed_entity;
         } mState;
+
+        struct UIOverlayState {
+            std::string id;
+            std::unique_ptr<engine::UIEngine> ui;
+        } mUIOverlayState;
 
         // Tree model impl for displaying scene's render tree
         // in the tree widget.

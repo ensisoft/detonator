@@ -2207,6 +2207,42 @@ void UIEngine::Draw(gfx::Device& device)
     }
 }
 
+void UIEngine::Draw(const gfx::FRect& rect,  gfx::Device& device)
+{
+    if (auto* state = GetState())
+    {
+        const auto surface_width = rect.GetWidth();
+        const auto surface_height = rect.GetHeight();
+
+        const auto& window_rect = state->window->GetBoundingRect();
+        const float window_width = window_rect.GetWidth();
+        const float window_height = window_rect.GetHeight();
+        const float scale = std::min(surface_width / window_width, surface_height / window_height);
+
+        const auto scaled_window_width  = window_width * scale;
+        const auto scaled_window_height = window_height * scale;
+        const auto window_xpos = (surface_width - scaled_window_width) * 0.5;
+        const auto window_ypos = (surface_height - scaled_window_height) * 0.5;
+
+        gfx::Transform transform;
+        transform.Scale(scale, scale);
+        transform.MoveTo(rect.GetX(), rect.GetY());
+        transform.Translate(window_xpos, window_ypos);
+
+        gfx::Painter painter(&device);
+        painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+        painter.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
+        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, mSurfaceWidth, mSurfaceHeight));
+        painter.SetEditingMode(mEditingMode);
+        painter.SetViewMatrix(transform);
+        // todo: pixel ratio
+
+        state->painter.SetPainter(&painter);
+        state->window->Paint(state->window_state, state->painter, base::GetTime(), nullptr);
+        state->painter.SetPainter(nullptr);
+    }
+}
+
 void UIEngine::OpenUI(std::shared_ptr<uik::Window> window)
 {
     OpenUIAction action;
