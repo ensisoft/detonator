@@ -109,12 +109,12 @@ namespace gfx
         virtual void FinishPacking(const TexturePacker* packer) {}
 
         // Create a similar clone of this texture source but with a new unique ID.
-        inline std::unique_ptr<TextureSource> Clone()
+        inline std::unique_ptr<TextureSource> Clone() const
         {
             return this->MakeCopy(base::RandomString(10));
         }
         // Create an exact bitwise copy of this texture source object.
-        inline std::unique_ptr<TextureSource> Copy()
+        inline std::unique_ptr<TextureSource> Copy() const
         {
             return this->MakeCopy(GetId());
         }
