@@ -110,6 +110,8 @@ namespace gui
         void on_actionWindowNext_triggered();
         void on_actionWindowPrev_triggered();
         void on_actionWindowPopOut_triggered();
+        void on_actionTabClose_triggered();
+        void on_actionTabPopOut_triggered();
         void on_actionCut_triggered();
         void on_actionCopy_triggered();
         void on_actionPaste_triggered();
@@ -216,6 +218,8 @@ namespace gui
         void ViewerJsonMessageReceived(const QJsonObject& json);
 
     private:
+        void CloseTab(int index);
+        void FloatTab(int index);
         void LaunchGame(bool clean);
         void BuildRecentWorkspacesMenu();
         void SaveSettings();
@@ -249,6 +253,7 @@ namespace gui
         Ui::MainWindow mUI;
         QMenu* mImportMenu = nullptr;
         QMenu* mCreateMenu = nullptr;
+        QMenu* mTabMenu = nullptr;
     private:
         class GfxResourceLoader;
 
