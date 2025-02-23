@@ -230,6 +230,7 @@ public:
     {
         mId = transition.GetId();
         mName = app::FromUtf8(transition.GetName());
+        mDuration = transition.GetDuration();
     }
 
     void SaveProperties(QVariantMap& props) const
@@ -879,6 +880,11 @@ void DlgAnimator::on_stateName_textChanged(const QString&)
 }
 
 void DlgAnimator::on_linkName_textChanged(const QString&)
+{
+    SetLinkProperties(GetSelectedLink());
+}
+
+void DlgAnimator::on_linkDuration_valueChanged(double)
 {
     SetLinkProperties(GetSelectedLink());
 }

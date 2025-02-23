@@ -102,6 +102,7 @@ namespace gui
         void on_actionLinkDel_triggered();
         void on_stateName_textChanged(const QString&);
         void on_linkName_textChanged(const QString&);
+        void on_linkDuration_valueChanged(double);
 
         void SceneSelectionChanged();
         void UpdateScriptList();
