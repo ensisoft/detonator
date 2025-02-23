@@ -266,22 +266,28 @@ DlgTextEdit::DlgTextEdit(QWidget* parent)
     layout->setParent(this);
     mDocument.setDocumentLayout(layout);
 
-    mUI.setupUi(this);
+    mUI = new Ui::DlgTextEdit();
+    mUI->setupUi(this);
 
-    SetEnabled(mUI.btnApply, false);
+    SetEnabled(mUI->btnApply, false);
 
     SetupFU(this);
 }
 
 DlgTextEdit::~DlgTextEdit() noexcept
 {
+    //QFont defaultFont;
+    //mUI->text->setFont(defaultFont);
+    CleanupFU();
+
     delete mSyntaxHighlight;
+    delete mUI;
 }
 
 void DlgTextEdit::SetTitle(const QString& str)
 {
     setWindowTitle(str);
-    mUI.groupBox->setTitle(str);
+    mUI->groupBox->setTitle(str);
 }
 
 void DlgTextEdit::SetText(const app::AnyString& str, const std::string& format)
@@ -320,10 +326,10 @@ void DlgTextEdit::SetText(const app::AnyString& str, const std::string& format)
         mSyntaxHighlight = new GLSLSyntax(&mDocument);
     }
 
-    mUI.text->SetDocument(&mDocument);
-    mUI.text->SetSettings(settings);
+    mUI->text->SetDocument(&mDocument);
+    mUI->text->SetSettings(settings);
     mDocument.setPlainText(kek);
-    mUI.text->ApplySettings();
+    mUI->text->ApplySettings();
 }
 
 app::AnyString DlgTextEdit::GetText() const
@@ -351,12 +357,12 @@ app::AnyString DlgTextEdit::GetText(const std::string& format) const
 
 void DlgTextEdit::SetReadOnly(bool readonly)
 {
-    mUI.text->setReadOnly(readonly);
-    mUI.btnCancel->setVisible(!readonly);
+    mUI->text->setReadOnly(readonly);
+    mUI->btnCancel->setVisible(!readonly);
 }
 void DlgTextEdit::EnableApply(bool on_off)
 {
-    SetEnabled(mUI.btnApply, on_off);
+    SetEnabled(mUI->btnApply, on_off);
 }
 
 void DlgTextEdit::on_btnAccept_clicked()

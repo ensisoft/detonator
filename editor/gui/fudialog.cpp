@@ -79,8 +79,10 @@ FUDialog::FUDialog(QWidget* parent) : mParent(parent)
 
 FUDialog::~FUDialog()
 {
-    mWindow->centralWidget()->setParent(nullptr);
-    mWindow->setCentralWidget(nullptr);
+    auto* centralWidget = mWindow->centralWidget();
+    // if this blows up you have' missed to call CleanupFU
+    ASSERT(centralWidget == nullptr);
+
     delete mWindowEventFilter;
     delete mWindow;
     if (Editor::DebugEditor())
@@ -188,6 +190,12 @@ void FUDialog::reject()
 void FUDialog::SetupFU(QWidget* widget)
 {
     mWindow->setCentralWidget(widget);
+}
+
+void FUDialog::CleanupFU()
+{
+    mWindow->centralWidget()->setParent(nullptr);
+    mWindow->setCentralWidget(nullptr);
 }
 
 int FUDialog::InvokeFU(bool block)

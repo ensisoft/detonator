@@ -96,6 +96,11 @@ DlgTextureRect::DlgTextureRect(QWidget* parent, const gfx::FRect& rect, std::uni
     SetValue(mUI.zoom, 1.0f);
 }
 
+DlgTextureRect::~DlgTextureRect() noexcept
+{
+    CleanupFU();
+}
+
 void DlgTextureRect::LoadState(const app::Workspace* workspace,
                                const app::AnyString& dialog, const app::AnyString& uri)
 {

@@ -59,6 +59,7 @@ namespace gui
         void accept();
         void reject();
         void SetupFU(QWidget* widget);
+        void CleanupFU();
         int InvokeFU(bool block);
         void CloseFU(int result);
 
