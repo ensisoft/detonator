@@ -41,6 +41,7 @@ namespace gui
     public:
         DlgTextureRect(QWidget* parent, const gfx::FRect& rect,
             std::unique_ptr<gfx::TextureSource> texture);
+        ~DlgTextureRect() noexcept;
 
         void LoadState(const app::Workspace* workspace,
                        const app::AnyString& dialog,

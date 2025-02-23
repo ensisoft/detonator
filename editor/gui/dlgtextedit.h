@@ -59,7 +59,7 @@ namespace gui
         void on_btnCancel_clicked();
         void on_btnApply_clicked();
     private:
-        Ui::DlgTextEdit mUI;
+        Ui::DlgTextEdit* mUI = nullptr;
     private:
         QTextDocument mDocument;
         QSyntaxHighlighter* mSyntaxHighlight = nullptr;
