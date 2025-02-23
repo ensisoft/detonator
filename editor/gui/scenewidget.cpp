@@ -47,6 +47,7 @@
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
+#include "graphics/utility.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/app/workspace.h"
@@ -628,6 +629,8 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     DisplayCurrentNodeProperties();
     DisplayCurrentCameraLocation();
     setWindowTitle("My Scene");
+
+    SetValue(mUI.cmbUIOverlay,-1);
 }
 
 SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -673,6 +676,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "bloom_blue",      &mBloom.blue);
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
+    GetUserProperty(resource, "ui_overlay", mUI.cmbUIOverlay);
 
     UpdateResourceReferences();
     DisplayCurrentNodeProperties();
@@ -762,6 +766,7 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.cmbPerspective);
     settings.SaveWidget("Scene", mUI.mainSplitter);
     settings.SaveWidget("Scene", mUI.rightSplitter);
+    settings.SaveWidget("Scene", mUI.cmbUIOverlay);
     return true;
 }
 bool SceneWidget::LoadState(const Settings& settings)
@@ -793,6 +798,7 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.cmbPerspective);
     settings.LoadWidget("Scene", mUI.mainSplitter);
     settings.LoadWidget("Scene", mUI.rightSplitter);
+    settings.LoadWidget("Scene", mUI.cmbUIOverlay);
 
     if (!mState.scene->FromJson(json))
         WARN("Failed to restore scene state.");
@@ -1004,7 +1010,7 @@ void SceneWidget::Shutdown()
 
     mUI.widget->dispose();
 }
-void SceneWidget::Update(double secs)
+void SceneWidget::Update(double dt)
 {
     // todo: we're passing nullptr for the tilemap here even though we
     // might have one associated with the scene. Right now though we know
@@ -1018,10 +1024,18 @@ void SceneWidget::Update(double secs)
         // might have one associated with the scene. Right now though we know
         // that the renderer update doesn't use it, but this assumption should
         // be fixed.
-        mState.renderer.Update(*mState.scene, nullptr, mSceneTime, secs);
-        mSceneTime += secs;
+        mState.renderer.Update(*mState.scene, nullptr, mSceneTime, dt);
+        mSceneTime += dt;
+
+        if (mUIOverlayState.ui)
+        {
+            std::vector<engine::UIEngine::WidgetAction> widget_actions;
+            std::vector<engine::UIEngine::WindowAction> window_actions;
+            mUIOverlayState.ui->UpdateWindow(mSceneTime, dt, &widget_actions);
+            mUIOverlayState.ui->UpdateState(mSceneTime, dt, &window_actions);
+        }
     }
-    mCurrentTime += secs;
+    mCurrentTime += dt;
 
     mAnimator.Update(mUI, mState);
 
@@ -1299,6 +1313,11 @@ void SceneWidget::on_actionPlay_triggered()
     mUI.actionPlay->setEnabled(false);
     mUI.actionPause->setEnabled(true);
     mUI.actionStop->setEnabled(true);
+
+    // the only way to reset the state is to create a new instance of UI
+    mUIOverlayState.ui.reset();
+    mUIOverlayState.id.clear();
+
 }
 void SceneWidget::on_actionPause_triggered()
 {
@@ -1354,6 +1373,7 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "bloom_blue",      mBloom.blue);
     SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
+    SetUserProperty(resource, "ui_overlay", mUI.cmbUIOverlay);
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.scene->GetHash();
@@ -1703,6 +1723,13 @@ void SceneWidget::on_btnMoreViewportSettings_clicked()
     else mUI.btnMoreViewportSettings->setArrowType(Qt::ArrowType::UpArrow);
 }
 
+void SceneWidget::on_btnResetUI_clicked()
+{
+    mUIOverlayState.id.clear();
+    mUIOverlayState.ui.reset();
+    SetValue(mUI.cmbUIOverlay, -1);
+}
+
 void SceneWidget::on_widgetColor_colorChanged(QColor color)
 {
     mUI.widget->SetClearColor(ToGfx(color));
@@ -1966,6 +1993,15 @@ void SceneWidget::OnUpdateResource(const app::Resource* resource)
     RebuildCombos();
     RebuildMenus();
 
+    if (resource->IsUI())
+    {
+        if (resource->GetId() == mUIOverlayState.id)
+        {
+            mUIOverlayState.id.clear();
+            mUIOverlayState.ui.reset();
+        }
+    }
+
     if (!resource->IsTilemap())
         return;
 
@@ -2158,6 +2194,51 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         const float game_height = settings.viewport_height;
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
+
+    auto CreateUserInterfaceOverlay = [this]() {
+        const std::string& id = GetItemId(mUI.cmbUIOverlay);
+        if (id.empty()) {
+            mUIOverlayState.ui.reset();
+            mUIOverlayState.id.clear();
+            return;
+        }
+        if (mUIOverlayState.ui && mUIOverlayState.id == id)
+            return;
+        const auto& window_klass = mState.workspace->FindUIById(id);
+        if (!window_klass)
+            return;
+        auto window = std::make_shared<uik::Window>(*window_klass);
+
+        auto ui = std::make_unique<engine::UIEngine>();
+        ui->SetClassLibrary(mState.workspace);
+        ui->SetLoader(mState.workspace);
+        ui->SetEditingMode(false);
+        ui->OpenWindowStackState(window);
+        mUIOverlayState.ui = std::move(ui);
+        mUIOverlayState.id = id;
+    };
+
+    CreateUserInterfaceOverlay();
+
+    if (mUIOverlayState.ui)
+    {
+        const auto& settings = mState.workspace->GetProjectSettings();
+
+        gfx::Transform view;
+        MakeViewTransform(mUI, mState, view);
+        game::FBox viewport(settings.viewport_width, settings.viewport_height);
+        viewport.Transform(view.GetAsMatrix());
+
+        const auto viewport_width = viewport.GetWidth();
+        const auto viewport_height = viewport.GetHeight();
+        const auto xpos = (width - viewport_width) / 2;
+        const auto ypos = (height - viewport_height) / 2;
+
+        auto* device = painter.GetDevice();
+        mUIOverlayState.ui->SetSurfaceSize(width, height);
+        mUIOverlayState.ui->Draw(gfx::FRect(xpos, ypos, viewport_width, viewport_height), *device);
+    }
+
     PrintMousePos(painter);
 }
 
@@ -2576,6 +2657,7 @@ void SceneWidget::RebuildCombos()
     SetList(mUI.nodeEntity, mState.workspace->ListUserDefinedEntities());
     SetList(mUI.cmbScripts, mState.workspace->ListUserDefinedScripts());
     SetList(mUI.cmbTilemaps, mState.workspace->ListUserDefinedMaps());
+    SetList(mUI.cmbUIOverlay, mState.workspace->ListUserDefinedUIs());
 }
 
 void SceneWidget::UpdateResourceReferences()
@@ -2616,6 +2698,17 @@ void SceneWidget::UpdateResourceReferences()
             WARN("Scene tilemap is no longer available. [map='%1']", mapId);
             mState.scene->ResetTilemap();
             SetEnabled(mUI.btnEditMap, false);
+        }
+    }
+
+    if (!mUIOverlayState.id.empty())
+    {
+        if (!mState.workspace->IsValidUI(mUIOverlayState.id))
+        {
+            WARN("UI for scene overlay is no longer available. [id='%1']", mUIOverlayState.id);
+            mUIOverlayState.ui.reset();
+            mUIOverlayState.id.clear();
+            SetValue(mUI.cmbUIOverlay, -1);
         }
     }
 }

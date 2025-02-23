@@ -1378,6 +1378,11 @@ Workspace::ResourceList Workspace::ListPrimitiveMaterials() const
     return ListResources(Resource::Type::Material, true, true);
 }
 
+Workspace::ResourceList  Workspace::ListUserDefinedUIs() const
+{
+    return ListResources(Resource::Type::UI, false, true);
+}
+
 Workspace::ResourceList Workspace::ListUserDefinedMaps() const
 {
     return ListResources(Resource::Type::Tilemap, false, true);
@@ -1761,6 +1766,16 @@ bool Workspace::IsUserDefinedResource(const AnyString& id) const
         }
     }
     BUG("No such material was found.");
+    return false;
+}
+
+bool Workspace::IsValidUI(const AnyString& id) const
+{
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetId() == id && resource->IsUI())
+            return true;
+    }
     return false;
 }
 

@@ -185,6 +185,7 @@ namespace app
         QString GetSubDir(const QString& dir, bool create = true) const;
 
         using ResourceList = app::ResourceList;
+        ResourceList ListUserDefinedUIs() const;
         // Get a list of user defined tile map resources.
         ResourceList ListUserDefinedMaps() const;
         // Get a list of user defined script resources.
@@ -246,6 +247,8 @@ namespace app
         bool IsValidTilemap(const AnyString& id) const;
 
         bool IsUserDefinedResource(const AnyString& id) const;
+
+        bool IsValidUI(const AnyString& id) const;
 
         // Get the Qt data model implementation for2 displaying the
         // workspace resources in a Qt widget (table widget)
