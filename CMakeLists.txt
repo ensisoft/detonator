@@ -707,6 +707,9 @@ add_executable(Detonator
     editor/gui/imgpack.cpp
     editor/gui/translation.h
     editor/gui/translation.cpp
+    editor/gui/spritewidget.h
+    editor/gui/spritewidget.ui
+    editor/gui/spritewidget.cpp
     editor/resource/resource.qrc
     editor/welcome.qrc
     editor/gui/darkstyle/darkstyle.cpp

@@ -1460,20 +1460,36 @@
        <bool>true</bool>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
-       <property name="topMargin">
-        <number>0</number>
-       </property>
        <item>
-        <widget class="gui::GfxWidget" name="widget" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="QSplitter" name="spriteSplitter">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <property name="focusPolicy">
-          <enum>Qt::StrongFocus</enum>
-         </property>
+         <widget class="gui::GfxWidget" name="widget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+         </widget>
+         <widget class="gui::SpriteWidget" name="sprite" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
         </widget>
        </item>
        <item>
@@ -2702,6 +2718,12 @@
    <class>gui::GfxWidget</class>
    <extends>QWidget</extends>
    <header>gfxwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>gui::SpriteWidget</class>
+   <extends>QWidget</extends>
+   <header>spritewidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
