@@ -167,6 +167,9 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
 
     mModelRotationTotal.x = glm::radians(-45.0f);
     mModelRotationTotal.y = glm::radians(15.0f);
+
+    mUI.sprite->SetMaterial(mMaterial);
+    mUI.sprite->RenderTimeBar(true);
 }
 
 MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
@@ -186,10 +189,26 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     GetUserProperty(resource, "model_rotation", &mModelRotationTotal);
     GetUserProperty(resource, "light_position", &mLightPositionTotal);
 
+    // Because of the Qt bugs related to having any effin sanity
+    // when it comes to being able to have a splitter division
+    // sized reasonably we're setting off a timer in InitializeSettings.
+    // However, if we actually were able to recover the splitter
+    // geometry then that timer should not do anything.
+    if (!GetUserProperty(resource, "sprite_splitter", mUI.spriteSplitter))
+    {
+        QTimer::singleShot(10, this, [this]() {
+            if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
+                mUI.spriteSplitter->setSizes({80, 20});
+            else mUI.spriteSplitter->setSizes({100, 0});
+        });
+    }
+
     ApplyShaderDescription();
     ShowMaterialProperties();
     ShowTextureMapProperties();
     ShowTextureProperties();
+
+    mUI.sprite->SetMaterial(mMaterial);
 }
 
 MaterialWidget::~MaterialWidget()
@@ -210,6 +229,10 @@ QImage MaterialWidget::TakeScreenshot() const
 void MaterialWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.zoom, settings.zoom);
+
+    QTimer::singleShot(10, this, [this]() {
+        mUI.spriteSplitter->setSizes({100, 0});
+    });
 }
 
 void MaterialWidget::SetViewerMode()
@@ -285,6 +308,7 @@ bool MaterialWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Material", mUI.kTileIndex);
     settings.LoadWidget("Material", mUI.mainSplitter);
     settings.LoadWidget("Material", mUI.rightSplitter);
+    settings.LoadWidget("Material", mUI.spriteSplitter);
 
     mMaterial = gfx::MaterialClass::ClassFromJson(json);
     if (!mMaterial)
@@ -302,6 +326,8 @@ bool MaterialWidget::LoadState(const Settings& settings)
 
     ShowTextureMapProperties();
     ShowTextureProperties();
+
+    mUI.sprite->SetMaterial(mMaterial);
     return true;
 }
 
@@ -322,6 +348,7 @@ bool MaterialWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Material", mUI.kTileIndex);
     settings.SaveWidget("Material", mUI.mainSplitter);
     settings.SaveWidget("Material", mUI.rightSplitter);
+    settings.SaveWidget("Material", mUI.spriteSplitter);
     if (auto* item = GetSelectedItem(mUI.textures))
         settings.SetValue("Material", "selected_item", (QString)GetItemId(item));
     return true;
@@ -434,11 +461,13 @@ bool MaterialWidget::GetStats(Stats* stats) const
 void MaterialWidget::Render()
 {
     mUI.widget->triggerPaint();
+    mUI.sprite->Render();
 }
 
 void MaterialWidget::on_widgetColor_colorChanged(QColor color)
 {
-    mUI.widget->SetClearColor(ToGfx(color));
+    mUI.widget->SetClearColor(color);
+    mUI.sprite->SetClearColor(color);
 }
 
 void MaterialWidget::on_actionPlay_triggered()
@@ -481,6 +510,7 @@ void MaterialWidget::on_actionSave_triggered()
     SetUserProperty(resource, "time", mUI.kTime);
     SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
+    SetUserProperty(resource, "sprite_splitter", mUI.spriteSplitter);
     SetUserProperty(resource, "model_rotation", mModelRotationTotal);
     SetUserProperty(resource, "light_position", mLightPositionTotal);
 
@@ -2923,7 +2953,8 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         aspect_ratio = tile_width / tile_height;
     }
 
-    const auto time = mState == PlayState::Playing ? mTime : GetValue(mUI.kTime);
+    const auto time = mState == PlayState::Playing || mState == PlayState::Paused
+                      ? mTime : GetValue(mUI.kTime);
     const auto zoom = (float)GetValue(mUI.zoom);
 
     if (!mDrawable)
@@ -2936,6 +2967,8 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
     mMaterialInst->SetRuntime(time);
     mMaterialInst->SetUniform("kTileIndex", (float)GetValue(mUI.kTileIndex));
+
+    mUI.sprite->SetTime(time);
 
     if (gfx::Is3DShape(*mDrawable))
     {
