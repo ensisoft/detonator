@@ -1777,7 +1777,7 @@ inline bool GetUserProperty(const Resource& res, const PropertyKey& key, QSplitt
         splitter->restoreState(state);
         return true;
     }
-    return true;
+    return false;
 }
 
 template<typename Resource>
