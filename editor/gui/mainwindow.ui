@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1861</width>
-    <height>1345</height>
+    <height>1179</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -2681,6 +2681,24 @@
    </property>
    <property name="toolTip">
     <string>Toggle preview window on or off</string>
+   </property>
+  </action>
+  <action name="actionTabClose">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/app_close_window.png</normaloff>:/16x16_ico_png/app_close_window.png</iconset>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </action>
+  <action name="actionTabPopOut">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/app_pop_out_window.png</normaloff>:/16x16_ico_png/app_pop_out_window.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pop Out</string>
    </property>
   </action>
  </widget>

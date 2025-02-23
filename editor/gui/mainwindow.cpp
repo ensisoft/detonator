@@ -210,7 +210,25 @@ MainWindow::MainWindow(QApplication& app, base::ThreadPool* threadpool)
     mRefreshTimer.start();
 
     auto& events = app::EventLog::get();
-    QObject::connect(&events, SIGNAL(newEvent(const app::Event&)),this, SLOT(ShowNote(const app::Event&)));
+    QObject::connect(&events, &app::EventLog::newEvent, this, &MainWindow::ShowNote);
+
+    mUI.mainTab->tabBar()->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+
+    QObject::connect(mUI.mainTab->tabBar(), &QTabBar::customContextMenuRequested, this, [this](QPoint point) {
+        if (mTabMenu == nullptr) {
+            mTabMenu = new QMenu(this);
+            mTabMenu->addAction(mUI.actionTabClose);
+            mTabMenu->addAction(mUI.actionTabPopOut);
+        }
+        const auto tabIndex = mUI.mainTab->tabBar()->tabAt(point);
+        if (tabIndex == -1)
+            return;
+
+        mUI.actionTabClose->setProperty("index", tabIndex);
+        mUI.actionTabPopOut->setProperty("index", tabIndex);
+        mTabMenu->popup(mUI.mainTab->tabBar()->mapToGlobal(point));
+    });
+
     mEventLog.SetModel(&events);
     mEventLog.setSourceModel(&events);
     mUI.eventlist->setModel(&mEventLog);
@@ -1109,37 +1127,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
 
 void MainWindow::on_mainTab_tabCloseRequested(int index)
 {
-    auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(index));
-    if (widget->HasUnsavedChanges())
-    {
-        QMessageBox msg(this);
-        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-        msg.setIcon(QMessageBox::Question);
-        msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
-        const auto ret = msg.exec();
-        if (ret == QMessageBox::Cancel)
-            return;
-        else if (ret == QMessageBox::Yes)
-            widget->Save();
-    }
-    if (widget == mCurrentWidget)
-        mCurrentWidget = nullptr;
-
-    // does not delete the widget.
-    mUI.mainTab->removeTab(index);
-
-    widget->Shutdown();
-    //               !!!!! WARNING !!!!!
-    // setParent(nullptr) will cause an OpenGL memory leak
-    //
-    // https://forum.qt.io/topic/92179/xorg-vram-leak-because-of-qt-opengl-application/12
-    // https://community.khronos.org/t/xorg-vram-leak-because-of-qt-opengl-application/76910/2
-    // https://bugreports.qt.io/browse/QTBUG-69429
-    //
-    //widget->setParent(nullptr);
-    delete widget;
-
-    // rebuild window menu.
+    CloseTab(index);
     UpdateWindowMenu();
     FocusPreviousTab();
 
@@ -1211,30 +1199,23 @@ void MainWindow::on_actionWindowPopOut_triggered()
     if (index == -1)
         return;
 
-    auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(index));
+    FloatTab(index);
+}
 
-    // does not delete the widget. should trigger currentChanged.
-    mUI.mainTab->removeTab(index);
-    widget->setParent(nullptr);
+void MainWindow::on_actionTabClose_triggered()
+{
+    const auto* action = qobject_cast<QAction*>(sender());
+    const auto tabIndex = action->property("index").toInt();
 
-    ChildWindow* window = ShowWidget(widget, true);
-    widget->show();
-    widget->updateGeometry();
-    window->updateGeometry();
+    CloseTab(tabIndex);
 
-    QByteArray geometry;
-    if (mWorkspace->GetUserProperty(widget->GetId(), &geometry)) {
-        window->restoreGeometry(geometry);
-    }
+}
+void MainWindow::on_actionTabPopOut_triggered()
+{
+    const auto* action = qobject_cast<QAction*>(sender());
+    const auto tabIndex = action->property("index").toInt();
 
-    // seems that we need some delay (presumably to allow some
-    // event processing to take place) on Windows before
-    // calling the update geometry. Without this the window is  
-    // somewhat fucked up in its appearance. (Layout is off)
-    QTimer::singleShot(10, window, &QWidget::updateGeometry);
-    QTimer::singleShot(10, widget, &QWidget::updateGeometry);
-
-    FocusPreviousTab();
+    FloatTab(tabIndex);
 }
 
 void MainWindow::on_actionCut_triggered()
@@ -3288,6 +3269,67 @@ bool MainWindow::eventFilter(QObject* destination, QEvent* event)
         return true;
     }
     return false;
+}
+
+void MainWindow::CloseTab(int index)
+{
+    auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(index));
+    if (widget->HasUnsavedChanges())
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        msg.setIcon(QMessageBox::Question);
+        msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
+        const auto ret = msg.exec();
+        if (ret == QMessageBox::Cancel)
+            return;
+        else if (ret == QMessageBox::Yes)
+            widget->Save();
+    }
+    if (widget == mCurrentWidget)
+        mCurrentWidget = nullptr;
+
+    // does not delete the widget.
+    mUI.mainTab->removeTab(index);
+
+    widget->Shutdown();
+    //               !!!!! WARNING !!!!!
+    // setParent(nullptr) will cause an OpenGL memory leak
+    //
+    // https://forum.qt.io/topic/92179/xorg-vram-leak-because-of-qt-opengl-application/12
+    // https://community.khronos.org/t/xorg-vram-leak-because-of-qt-opengl-application/76910/2
+    // https://bugreports.qt.io/browse/QTBUG-69429
+    //
+    //widget->setParent(nullptr);
+    delete widget;
+}
+
+void MainWindow::FloatTab(int index)
+{
+    auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(index));
+
+    // does not delete the widget. should trigger currentChanged.
+    mUI.mainTab->removeTab(index);
+    widget->setParent(nullptr);
+
+    ChildWindow* window = ShowWidget(widget, true);
+    widget->show();
+    widget->updateGeometry();
+    window->updateGeometry();
+
+    QByteArray geometry;
+    if (mWorkspace->GetUserProperty(widget->GetId(), &geometry)) {
+        window->restoreGeometry(geometry);
+    }
+
+    // seems that we need some delay (presumably to allow some
+    // event processing to take place) on Windows before
+    // calling the update geometry. Without this the window is
+    // somewhat fucked up in its appearance. (Layout is off)
+    QTimer::singleShot(10, window, &QWidget::updateGeometry);
+    QTimer::singleShot(10, widget, &QWidget::updateGeometry);
+
+    FocusPreviousTab();
 }
 
 void MainWindow::LaunchGame(bool clean)
