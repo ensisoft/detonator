@@ -19,6 +19,7 @@
 #include <QIcon>
 #include <QString>
 #include <QtPlugin>
+#include <QPainter>
 #include <QtDesigner/QExtensionFactory>
 #include <QtDesigner/QExtensionManager>
 #include <QtDesigner/QDesignerFormEditorInterface>
@@ -53,7 +54,85 @@ namespace gui {
         delete style;
     }
 
+    GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
+    {
+
+    }
+    GfxWidget::~GfxWidget()
+    {
+
+    }
+    void GfxWidget::paintEvent(QPaintEvent* paint)
+    {
+        auto rect = this->rect();
+
+        QPainter painter(this);
+        painter.fillRect(rect, QColor(0x23, 0x23, 0x23, 0xff));
+        painter.drawText(rect, Qt::AlignVCenter | Qt::AlignHCenter, "DETONATOR\nIS\nAWESOME!");
+    }
+
+} // namespace
+
+GfxWidgetPlugin::GfxWidgetPlugin(QObject* parent)
+        :  QObject(parent)
+{}
+
+bool GfxWidgetPlugin::isContainer() const
+{
+    return false;
 }
+bool GfxWidgetPlugin::isInitialized() const
+{
+    return initialized;
+}
+QIcon GfxWidgetPlugin::icon() const
+{
+    return QIcon();
+}
+QString GfxWidgetPlugin::domXml() const
+{
+    return "<ui language=\"c++\">\n"
+           " <widget class=\"gui::GfxWidget\" name=\"widget\">\n"
+           "  <property name=\"geometry\">\n"
+           "   <rect>\n"
+           "    <x>0</x>\n"
+           "    <y>0</y>\n"
+           "    <width>200</width>\n"
+           "    <height>200</height>\n"
+           "   </rect>\n"
+           "  </property>\n"
+           " </widget>\n"
+           "</ui>\n";
+}
+QString GfxWidgetPlugin::group() const
+{
+    return "DETONATOR2D";
+}
+QString GfxWidgetPlugin::includeFile() const
+{
+    return "gfxwidget.h";
+}
+QString GfxWidgetPlugin::name() const
+{
+    return "gui::GfxWidget";
+}
+QString GfxWidgetPlugin::toolTip() const
+{
+    return "";
+}
+QString GfxWidgetPlugin::whatsThis() const
+{
+    return "";
+}
+QWidget* GfxWidgetPlugin::createWidget(QWidget *parent)
+{
+    return new gui::GfxWidget(parent);
+}
+void GfxWidgetPlugin::initialize(QDesignerFormEditorInterface *core)
+{
+    initialized = true;
+}
+
 
 Vector3WidgetPlugin::Vector3WidgetPlugin(QObject* parent)
   :  QObject(parent)
@@ -712,6 +791,7 @@ MyCustomWidgets::MyCustomWidgets(QObject* parent)
     widgets.append(new CurveWidgetPlugin(this));
     widgets.append(new TimeWidgetPlugin(this));
     widgets.append(new Vector3WidgetPlugin(this));
+    widgets.append(new GfxWidgetPlugin(this));
 }
 
 QList<QDesignerCustomWidgetInterface*> MyCustomWidgets::customWidgets() const
