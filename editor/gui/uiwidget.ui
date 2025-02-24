@@ -87,9 +87,6 @@
           <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_16">
-          <property name="leftMargin">
-           <number>4</number>
-          </property>
           <property name="rightMargin">
            <number>4</number>
           </property>
@@ -181,9 +178,6 @@
           <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_14">
-          <property name="leftMargin">
-           <number>4</number>
-          </property>
           <property name="rightMargin">
            <number>4</number>
           </property>
@@ -246,9 +240,6 @@
           <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_15">
-          <property name="leftMargin">
-           <number>4</number>
-          </property>
           <property name="rightMargin">
            <number>4</number>
           </property>
@@ -318,9 +309,6 @@
           <bool>true</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
-          <property name="leftMargin">
-           <number>4</number>
-          </property>
           <property name="rightMargin">
            <number>4</number>
           </property>
