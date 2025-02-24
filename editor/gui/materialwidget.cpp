@@ -427,6 +427,18 @@ void MaterialWidget::Update(double secs)
     if (mState == PlayState::Playing)
     {
         mTime += secs;
+        if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
+        {
+            const auto& texture_map_id = mMaterial->GetActiveTextureMap();
+            const auto* texture_map = mMaterial->FindTextureMapById(texture_map_id);
+            if (!texture_map)
+                return;
+            if (!texture_map->IsSpriteLooping())
+            {
+                if (mTime >= texture_map->GetSpriteCycleDuration())
+                    on_actionStop_triggered();
+            }
+        }
     }
 }
 
