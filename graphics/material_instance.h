@@ -52,11 +52,11 @@ namespace gfx
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
         std::string GetClassId() const override;
+        bool Execute(const Environment& env, const Command& cmd) override;
+        void Update(float dt) override;
+        void SetRuntime(double runtime) override;
+        bool GetValue(const std::string& key, RuntimeValue* value) const override;
 
-        void Update(float dt) override
-        { mRuntime += dt; }
-        void SetRuntime(double runtime) override
-        { mRuntime = runtime; }
         void SetUniform(const std::string& name, Uniform value) override
         { mUniforms[name] = std::move(value); }
         void ResetUniforms()  override
@@ -84,6 +84,17 @@ namespace gfx
         double mRuntime = 0.0f;
         // material properties (uniforms) specific to this instance.
         UniformMap mUniforms;
+
+        struct SpriteCycleRun {
+            float delay = 0.0f;
+            bool started = false;
+            double runtime = 0.0;
+            // ID of the texture map that runs this sprite animation cycle
+            std::string id;
+            std::string name;
+        };
+        std::optional<SpriteCycleRun> mSpriteCycle;
+
         // I don't like this flag but when trying to make it easier for the
         // game developer to figure out what's wrong we need logging
         // but it'd be nice if the problem was logged only once instead

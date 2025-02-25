@@ -177,6 +177,13 @@ namespace gfx
 
             // see material flags
             std::uint32_t flags = 0;
+            // This setting overrides the active texture map set in the class.
+            // Used for things like
+            // a) game wants to parametrize the material and change the appearance
+            //    long term
+            // b) a sprite cycle is being run and while the sprite cycle runs the
+            //    sprite cycle texture map changes
+            std::string active_texture_map_id;
         };
 
         explicit MaterialClass(Type type, std::string id = base::RandomString(10));
