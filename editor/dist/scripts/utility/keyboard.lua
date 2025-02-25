@@ -67,3 +67,7 @@ end
 KB.ClearAll = function()
     keydown_bits = 0
 end
+
+KB.AnyKeyDown = function()
+    return keydown_bits ~= 0
+end
