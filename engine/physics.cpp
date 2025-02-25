@@ -995,10 +995,8 @@ void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::En
                     world_body->SetTransform(b2Vec2(node_pos_in_world.x, node_pos_in_world.y), box.GetRotation());
                 mTransform.Pop();
 
-                if (rigid_body->HasAngularVelocityAdjustment())
-                    WARN("Angular velocity adjustment on static body will not work. [node='%1']", phys_node->debug_name);
-                if (rigid_body->HasLinearVelocityAdjustment())
-                    WARN("Linear velocity adjustment on static body will not work. [node='%1']", phys_node->debug_name);
+                if (rigid_body->HasAnyPhysicsAdjustment())
+                    WARN("Can't apply any dynamic change (impulse, velocity, or force) to a static body. [node='%1']", phys_node->debug_name);
             }
             else
             {
@@ -1009,6 +1007,8 @@ void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::En
                     world_body->SetLinearVelocity(ToBox2D(rigid_body->GetLinearVelocityAdjustment()));
                 if (rigid_body->HasCenterImpulse())
                     world_body->ApplyLinearImpulseToCenter(ToBox2D(rigid_body->GetLinearImpulseToCenter()), true /*wake*/);
+                if (rigid_body->HasCenterForce())
+                    world_body->ApplyForceToCenter(ToBox2D(rigid_body->GetForceToCenter()), true /* wake */);
 
                 rigid_body->ClearPhysicsAdjustments();
             }

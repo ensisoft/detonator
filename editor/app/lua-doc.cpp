@@ -1248,6 +1248,14 @@ void InitLuaDoc()
                                        "Unlike ApplyImpulse this method will combine the impulse with any previous impulse "
                                        "thus letting the impulses to accumulate.",
                  "float", "x", "float", "y");
+    DOC_METHOD_2("void", "ApplyForce", "Apply force to the center of the body.<br>"
+                                       "The force will be applied on the next iteration of the physics update.<br"
+                                       "Warning: This method will overwrite any previously set pending force!",
+                 "float", "x", "float", "y");
+    DOC_METHOD_1("void", "ApplyForce", "Apply force to the center of the body.<br>"
+                                       "The force will be applied on the next iteration of the physics update.<br"
+                                       "Warning: This method will overwrite any previously set pending force!",
+                 "glm.vec2", "force");
     DOC_METHOD_0("void", "ClearImpulse", "Clear any pending impulse set on the rigid body.");
     DOC_METHOD_0("bool", "HasPendingImpulse", "Check whether the rigid body has a any currently pending impulse.");
     DOC_METHOD_0("bool", "HasPendingLinearVelocityAdjustment", "Check whether the rigid body has any currently pending linear velocity adjustment.");

@@ -76,6 +76,14 @@ void RigidBody::ApplyLinearImpulseToCenter(const glm::vec2& impulse) noexcept
     mCenterImpulse = impulse;
 }
 
+void RigidBody::ApplyForceToCenter(const glm::vec2& force) noexcept
+{
+    if (mCenterForce.has_value())
+        WARN("Overwriting pending force on rigid body.");
+
+    mCenterForce = force;
+}
+
 void RigidBody::AddLinearImpulseToCenter(const glm::vec2& impulse) noexcept
 {
     mCenterImpulse = GetLinearImpulseToCenter() + impulse;
