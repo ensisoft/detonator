@@ -741,6 +741,14 @@ void BindGameLib(sol::state& L)
         [](RigidBody& body, float x, float y) {
             body.AddLinearImpulseToCenter(glm::vec2{x, y});
         });
+    body["ApplyForce"] = sol::overload(
+        [](RigidBody& body, const glm::vec2& force) {
+            body.ApplyForceToCenter(force);
+        },
+        [](RigidBody& body, float x, float y) {
+            body.ApplyForceToCenter(glm::vec2(x, y));
+        }
+    );
 
     body["GetSimulationType"] = [](const RigidBody* item) {
         return magic_enum::enum_name(item->GetSimulation());

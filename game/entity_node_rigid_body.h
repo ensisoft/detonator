@@ -218,6 +218,8 @@ namespace game
         // Use AddLinearImpulseToCenter in order to combine the impulses.
         void ApplyLinearImpulseToCenter(const glm::vec2& impulse) noexcept;
 
+        void ApplyForceToCenter(const glm::vec2& force) noexcept;
+
         // Add (accumulate) a linear impulse to be applied to the center
         // of the rigid body on the next update of the physics engine.
         // The impulse is added to any previous impulse and the combination
@@ -233,6 +235,17 @@ namespace game
         // is in radians per second.
         void AdjustAngularVelocity(float radians) noexcept;
 
+        bool HasAnyPhysicsAdjustment() const noexcept
+        {
+            return mCenterForce.has_value() ||
+                   mCenterImpulse.has_value() ||
+                   mLinearVelocityAdjustment.has_value() ||
+                   mAngularVelocityAdjustment.has_value();
+        }
+
+        bool HasCenterForce() const noexcept
+        { return mCenterForce.has_value(); }
+
         bool HasCenterImpulse() const noexcept
         { return mCenterImpulse.has_value(); }
         bool HasLinearVelocityAdjustment() const noexcept
@@ -244,12 +257,15 @@ namespace game
         glm::vec2 GetLinearVelocityAdjustment() const noexcept
         { return mLinearVelocityAdjustment.value_or(glm::vec2(0.0f, 0.0f)); }
         glm::vec2 GetLinearImpulseToCenter() const noexcept
-        { return mCenterImpulse.value_or(glm::vec2(0.0f, 0.0f)); };
+        { return mCenterImpulse.value_or(glm::vec2(0.0f, 0.0f)); }
+        glm::vec2 GetForceToCenter() const noexcept
+        { return mCenterForce.value_or(glm::vec2(0.0f, 0.0f)); }
         void ClearPhysicsAdjustments() const noexcept
         {
             mLinearVelocityAdjustment.reset();
             mAngularVelocityAdjustment.reset();
             mCenterImpulse.reset();
+            mCenterForce.reset();
         }
         void ClearImpulse() noexcept
         { mCenterImpulse.reset(); }
@@ -294,6 +310,7 @@ namespace game
         mutable std::optional<float> mAngularVelocityAdjustment;
         // Current pending impulse in the center of the body.
         mutable std::optional<glm::vec2> mCenterImpulse;
+        mutable std::optional<glm::vec2> mCenterForce;
     };
 
 
