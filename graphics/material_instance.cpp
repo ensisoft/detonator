@@ -16,6 +16,7 @@
 
 #include "config.h"
 
+#include "base/logging.h"
 #include "graphics/material_class.h"
 #include "graphics/material_instance.h"
 #include "graphics/texture_texture_source.h"
@@ -54,6 +55,27 @@ bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device,
     state.uniforms       = &mUniforms;
     state.first_render   = mFirstRender;
     state.flags          = mFlags;;
+
+    if (mSpriteCycle.has_value())
+    {
+        const auto& cycle = mSpriteCycle.value();
+        if (cycle.started)
+        {
+            state.active_texture_map_id  = cycle.id;
+            state.material_time = cycle.runtime;
+        }
+    }
+    else
+    {
+        // todo: refactor this away from *uniforms*
+        if (const auto* active_texture = base::SafeFind(mUniforms, "active_texture_map"))
+        {
+            if (const auto* id = std::get_if<std::string>(active_texture))
+                state.active_texture_map_id = *id;
+            else if (mFirstRender)
+                WARN("Incorrect material parameter type set on 'active_texture_map'. String ID expected.");
+        }
+    }
 
     mFirstRender = false;
 
@@ -108,6 +130,122 @@ std::string MaterialInstance::GetClassId() const
     return mClass->GetId();
 }
 
+bool MaterialInstance::Execute(const Environment& env, const Command& cmd)
+{
+    if (cmd.name != "RunSpriteCycle")
+        return false;
+    if (mClass->GetType() != gfx::MaterialClass::Type::Sprite)
+        return false;
+    if (mSpriteCycle.has_value())
+        return false;
+
+    const auto* sprite_cycle_id = base::SafeFind(cmd.args, std::string("id"));
+    if (!sprite_cycle_id || !std::holds_alternative<std::string>(*sprite_cycle_id))
+        return false;
+
+    const auto* texture_map = mClass->FindTextureMapById(std::get<std::string>(*sprite_cycle_id));
+    if (!texture_map)
+        return false;
+
+    float delay = 0.0f;
+    if (const auto* p = base::SafeFind(cmd.args, "delay"))
+    {
+        if (std::holds_alternative<float>(*p))
+            delay = std::get<float>(*p);
+    }
+    else
+    {
+        const TextureMap* map = nullptr;
+        if (const auto* active = base::SafeFind(mUniforms, "active_texture_map"))
+        {
+            if (std::holds_alternative<std::string>(*active))
+                map = mClass->FindTextureMapById(std::get<std::string>(*active));
+        }
+        else
+        {
+            const auto& id = mClass->GetActiveTextureMap();
+            map = mClass->FindTextureMapById(id);
+        }
+        if (!map || !map->IsSpriteMap())
+            return false;
+
+        const auto d = map->GetSpriteCycleDuration();
+        if (map->IsSpriteLooping())
+        {
+            const auto t = fmod(mRuntime, d);
+            delay = d - t;
+        }
+        else
+        {
+            if (mRuntime < d)
+                delay = d - mRuntime;
+        }
+    }
+
+    SpriteCycleRun cycle;
+    cycle.name    = texture_map->GetName();
+    cycle.id      = std::get<std::string>(*sprite_cycle_id);
+    cycle.delay   = delay;
+    cycle.runtime = 0.0;
+    cycle.started = false;
+    mSpriteCycle  = cycle;
+    return true;
+
+}
+
+void MaterialInstance::Update(float dt)
+{
+    const auto t = mRuntime;
+
+    mRuntime += dt;
+
+    if (!mSpriteCycle.has_value())
+        return;
+
+    auto& cycle = mSpriteCycle.value();
+    if (cycle.started)
+    {
+        cycle.runtime += dt;
+
+        const auto* map = mClass->FindTextureMapById(cycle.id);
+        if (cycle.runtime >= map->GetSpriteCycleDuration())
+            mSpriteCycle.reset();
+    }
+    else
+    {
+        cycle.delay -= dt;
+        if (cycle.delay <= 0.0f)
+            cycle.started = true;
+    }
+}
+
+void MaterialInstance::SetRuntime(double runtime)
+{
+    if (runtime > mRuntime)
+    {
+        const auto dt = runtime - mRuntime;
+        Update(dt);
+    }
+    else
+    {
+        mRuntime = runtime;
+    }
+}
+
+bool MaterialInstance::GetValue(const std::string& key, RuntimeValue* value) const
+{
+    if (key == "SpriteCycleTime" && mSpriteCycle.has_value())
+    {
+        *value = mSpriteCycle->runtime;
+        return true;
+    }
+    else if (key == "SpriteCycleName" && mSpriteCycle.has_value())
+    {
+        *value = mSpriteCycle->name;
+        return true;
+    }
+    return false;
+}
 
 ShaderSource MaterialInstance::GetShader(const Environment& env, const Device& device) const
 {

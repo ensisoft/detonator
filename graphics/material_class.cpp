@@ -1154,20 +1154,16 @@ TextureMap* MaterialClass::SelectTextureMap(const State& state) const noexcept
         return nullptr;
     }
 
-    if (state.uniforms)
+    if (!state.active_texture_map_id.empty())
     {
-        if (const auto* active_texture = base::SafeFind(*state.uniforms, std::string("active_texture_map")))
+        for (auto& map : mTextureMaps)
         {
-            const auto* map_id = std::get_if<std::string>(active_texture);
-            ASSERT(map_id  && "Active texture map selection has wrong (non-string) uniform type.");
-            for (auto& map : mTextureMaps)
-            {
-                if (map->GetId() == *map_id)
-                    return map.get();
-            }
-            if (state.first_render)
-                WARN("No such texture map found in material. Falling back on default. [name='%1', map=%2]", mName, *map_id);
+            if (map->GetId() == state.active_texture_map_id)
+                return map.get();
         }
+        if (state.first_render)
+            WARN("No such texture map found in material. Falling back on default. [name='%1', map=%2]", mName,
+                 state.active_texture_map_id);
     }
 
     // keep previous semantics, so default to the first map for the

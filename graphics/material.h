@@ -19,7 +19,11 @@
 #include "config.h"
 
 #include <string>
+#include <variant>
+#include <vector>
+#include <unordered_map>
 
+#include "base/assert.h"
 #include "graphics/enum.h"
 #include "graphics/types.h"
 #include "graphics/device.h"
@@ -57,6 +61,15 @@ namespace gfx
             Blending blending = Blending::None;
             bool premultiplied_alpha = false;
         };
+
+        using RuntimeValue = std::variant<double, float, int, std::string>;
+
+        using CommandArg = std::variant<float, int, std::string>;
+        struct Command {
+            std::string name;
+            std::unordered_map<std::string, CommandArg> args;
+        };
+        using CommandList = std::vector<Command>;
 
         virtual ~Material() = default;
 
@@ -96,9 +109,27 @@ namespace gfx
         virtual void ResetUniforms() {}
         // Get the current material time.
         virtual double GetRuntime() const { return 0.0; }
+        // Execute a material command to change the material in some way
+        // or for example run a sprite cycle animation.
+        virtual bool Execute(const Environment& env, const Command& command) { return true; }
+
+        virtual bool GetValue(const std::string& key, RuntimeValue* value) const { return false; }
         // Get the material class instance if any. Warning, this may be null for
         // material objects that aren't based on any material clas!
         virtual const MaterialClass* GetClass() const  { return nullptr; }
+
+        template<typename T>
+        inline bool GetValue(const std::string& key, T* out) const noexcept
+        {
+            RuntimeValue value;
+            if (GetValue(key, &value))
+            {
+                ASSERT(std::holds_alternative<T>(value));
+                *out = std::get<T>(value);
+                return true;
+            }
+            return false;
+        }
     private:
     };
 
