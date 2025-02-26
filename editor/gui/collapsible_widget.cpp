@@ -32,10 +32,35 @@ CollapsibleWidget::CollapsibleWidget(QWidget* parent)
     mUI = std::make_unique<Ui::CollapsibleWidget>();
     mUI->setupUi(this);
     mUI->collapsible_widget_label->installEventFilter(this);
+    mUI->icon->installEventFilter(this);
+    mUI->icon->setVisible(false);
     setFocusPolicy(Qt::FocusPolicy::TabFocus);
 }
 
 CollapsibleWidget::~CollapsibleWidget() = default;
+
+QIcon CollapsibleWidget::GetIcon() const
+{
+    if (const auto* px = mUI->icon->pixmap())
+        return QIcon(*px);
+
+    return QIcon();
+}
+void CollapsibleWidget::SetIcon(QIcon icon)
+{
+    if (icon.isNull())
+        mUI->icon->setPixmap(QPixmap());
+    else mUI->icon->setPixmap(icon.pixmap(16, 16));
+}
+
+bool CollapsibleWidget::IsIconVisible() const
+{
+    return mUI->icon->isVisible();
+}
+void CollapsibleWidget::SetIconVisible(bool visible)
+{
+    mUI->icon->setVisible(visible);
+}
 
 void CollapsibleWidget::Collapse(bool value)
 {
@@ -106,15 +131,17 @@ void CollapsibleWidget::on_collapsible_widget_button_clicked()
 
 bool CollapsibleWidget::eventFilter(QObject* destination, QEvent* event)
 {
-    if (destination != mUI->collapsible_widget_label)
-        return QWidget::eventFilter(destination, event);
-
-    if (event->type() == QEvent::MouseButtonPress)
+    if (destination == mUI->collapsible_widget_label ||
+        destination == mUI->icon)
     {
-        Collapse(!mCollapsed);
-        return true;
+        if (event->type() == QEvent::MouseButtonPress)
+        {
+            Collapse(!mCollapsed);
+            return true;
+        }
+        return false;
     }
-    return false;
+    return QWidget::eventFilter(destination, event);
 }
 
 void CollapsibleWidget::focusInEvent(QFocusEvent* ford)
