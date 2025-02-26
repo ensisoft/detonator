@@ -2974,7 +2974,8 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     {
         const auto avg_width = texture_width_sum / float(texture_count);
         const auto avg_height = texture_height_sum / float(texture_count);
-        aspect_ratio = avg_width / avg_height;
+        if (avg_height > 0.0f && avg_width > 0.0f)
+            aspect_ratio = avg_width / avg_height;
     }
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Tilemap)
@@ -2982,7 +2983,8 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         const auto tile_size = mMaterial->GetTileSize();
         const auto tile_width = tile_size.x > 0.0f ? (unsigned)tile_size.x : 0u;
         const auto tile_height = tile_size.y > 0.0f ? (unsigned)tile_size.y : 0u;
-        aspect_ratio = tile_width / tile_height;
+        if (tile_width && tile_height)
+            aspect_ratio = float(tile_width) / float(tile_height);
     }
 
     const auto time = mState == PlayState::Playing || mState == PlayState::Paused
