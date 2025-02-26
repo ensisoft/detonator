@@ -526,8 +526,20 @@ void MaterialWidget::on_actionSave_triggered()
     SetUserProperty(resource, "model_rotation", mModelRotationTotal);
     SetUserProperty(resource, "light_position", mLightPositionTotal);
 
-    mWorkspace->SaveResource(resource);
+    // WARNING WARNING WARNING WARNING unsafe code!
+    // We have a stupid ass recursion happening when we call
+    // SaveResource since that will invoke callbacks which
+    // will then end up calling back here in ResourceUpdate.
+    // The reason why we have ResourceUpdated implementation
+    // is to realize changes done to this material in the
+    // particle editor.
+    //
+    // We differentiate between the two cases with the hash
+    // value by writing it here first before saving.
     mOriginalHash = mMaterial->GetHash();
+
+    // callback hell!
+    mWorkspace->SaveResource(resource);
 }
 
 void MaterialWidget::on_actionNewMap_triggered()
@@ -1679,14 +1691,22 @@ void MaterialWidget::ShaderFileChanged()
 
 void MaterialWidget::ResourceUpdated(const app::Resource* resource)
 {
+    // we're interested here to realize an update that was done to
+    // *this* material elsewhere and that elsewhere is the particle
+    // editor.
+
     if (resource->GetIdUtf8() != mMaterial->GetId())
+        return;
+
+    // if we saved it, we already wrote the new hash value, so skip
+    if (mOriginalHash == mMaterial->GetHash())
         return;
 
     mMaterial = resource->GetContent<gfx::MaterialClass>()->Copy();
     mMaterialInst.reset();
 
     ShowMaterialProperties();
-    ShowTextureProperties();
+    ShowTextureMapProperties();
     ShowTextureProperties();
 
     mOriginalHash = mMaterial->GetHash();
