@@ -452,7 +452,7 @@ QString CodeAssistant::DiscoverDynamicCompletions(const QString& word)
     else if (word.endsWith("drawable"))
         return "game.Drawable";
     else if (word.endsWith("item"))
-        if (word.contains("draw"))
+        if (word.contains("draw") || word.contains("skin"))
             return "game.Drawable";
         else if (word.contains("text"))
             return "game.TextItem";
