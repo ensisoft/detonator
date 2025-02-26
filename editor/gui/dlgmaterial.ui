@@ -40,7 +40,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="gui::GfxWidget" name="widget" native="true">
+         <widget class="gui::GfxWidget" name="widget">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -73,7 +73,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="lblTileIndex">
           <property name="text">
            <string>Tile index</string>
           </property>

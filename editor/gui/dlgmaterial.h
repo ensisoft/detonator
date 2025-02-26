@@ -81,4 +81,45 @@ namespace gui
         Size2Df mPreviewScale;
         std::unordered_set<std::string> mFailedMaterials;
     };
-}
+
+    class DlgTileChooser : public QDialog
+    {
+        Q_OBJECT
+    public:
+        DlgTileChooser(QWidget* parent, std::shared_ptr<const gfx::MaterialClass> klass) noexcept;
+
+        unsigned GetTileIndex() const noexcept
+        {
+            return mTileIndex;
+        }
+        void SetTileIndex(unsigned index) noexcept
+        {
+            mTileIndex = index;
+        }
+
+    private slots:
+        void on_btnAccept_clicked();
+        void on_btnCancel_clicked();
+        void on_vScroll_valueChanged();
+
+    private:
+        void PaintScene(gfx::Painter& painter, double secs);
+        void MousePress(QMouseEvent* mickey);
+        void MouseDoubleClick(QMouseEvent* mickey);
+        void MouseWheel(QWheelEvent* wheel);
+        bool KeyPress(QKeyEvent* key);
+
+    private:
+        Ui::DlgMaterial mUI;
+
+    private:
+        std::shared_ptr<const gfx::MaterialClass> mMaterial;
+        unsigned mTileIndex = 0;
+        unsigned mScrollOffsetRow = 0;
+        unsigned mNumVisibleRows = 0;
+        unsigned mTileRows = 0;
+        unsigned mTileCols = 0;
+        Size2Df mPreviewScale;
+    };
+
+} // namespace
