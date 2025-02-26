@@ -1,6 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
   <qresource>
+    <file>16x16_ico_png/physics.png</file>
     <file>16x16_ico_png/hamburger.png</file>
     <file>16x16_ico_png/project.png</file>
     <file>16x16_ico_png/swap-vertical.png</file>
