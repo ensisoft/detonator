@@ -620,6 +620,45 @@ void BindGameLib(sol::state& L)
         WARN("No such texture map. [name='%1']", name);
         return false;
     };
+    drawable["RunSpriteCycle"] = [](DrawableItem& item, const std::string& name, sol::this_state this_state) {
+        sol::state_view L(this_state);
+        ClassLibrary* lib = L["ClassLib"];
+
+        const auto ret = lib->FindMaterialClassById(item.GetMaterialId());
+        if (!ret)
+        {
+            WARN("No such material class. [name='%1']", name);
+            return false;
+        }
+        for (unsigned i=0; i<ret->GetNumTextureMaps(); ++i) {
+            const auto* map = ret->GetTextureMap(i);
+            if (map->GetName() == name)
+            {
+                DrawableItem::Command cmd;
+                cmd.name = "RunSpriteCycle";
+                cmd.args["id"]   = map->GetId();
+                cmd.args["delay"] = 0.0f; // NOW
+                item.EnqueueCommand(std::move(cmd));
+                return true;
+            }
+        }
+        WARN("No such sprite cycle was found. [name='%1']", name);
+        return false;
+    };
+
+    drawable["GetSpriteCycleName"] = [](const DrawableItem& item) {
+        if (const auto* cycle = item.GetCurrentSpriteCycle()) {
+            return cycle->name;
+        }
+        return std::string {};
+    };
+    drawable["GetSpriteCycleTime"] = [](const DrawableItem& item) {
+        if (const auto* cycle = item.GetCurrentSpriteCycle()) {
+            return cycle->time;
+        }
+        return 0.0;
+    };
+    drawable["HasSpriteCycle"]            = &DrawableItem::HasSpriteCycle;
     drawable["TestFlag"]                  = &TestFlag<DrawableItem>;
     drawable["SetFlag"]                   = &SetFlag<DrawableItem>;
     drawable["SetMaterialId"]             = &DrawableItem::SetMaterialId;

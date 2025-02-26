@@ -1147,6 +1147,12 @@ void InitLuaDoc()
     DOC_METHOD_1("bool", "SetActiveTextureMap", "Set the currently active texture map on this drawable item's material to the one identified by its name."
                                                 "If no such material map exists no change is done. Returns true on success or false on failure.",
                  "string", "name");
+    DOC_METHOD_1("bool", "RunSpriteCycle", "Run a material map sprite cycle on the drawable item."
+                                           "If no such sprite cycle (material map) exists nothing is done. Returns true on success or false on failure.",
+                 "string", "name");
+    DOC_METHOD_0("float", "GetSpriteCycleTime", "Get the current sprite cycle time if any. If there's no current sprite cycle returns 0.0.");
+    DOC_METHOD_0("string", "GetSpriteCycleName", "Get the current sprite cycle name if any. If there's no current sprite cycle returns an empty string.");
+    DOC_METHOD_0("bool", "HasSpriteCycle", "Returns whether the drawable has a current sprite cycle.");
     DOC_METHOD_0("string", "GetMaterialId", "Get the graphics subsystem material ID.");
     DOC_METHOD_0("string", "GetDrawableId", "Get the graphics subsystem drawable ID.");
     DOC_METHOD_0("int", "GetLayer", "Get the render layer index.");
