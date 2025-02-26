@@ -942,11 +942,37 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
                 paint_node.material->SetRuntime(adjusted_time);
                 item->ClearMaterialTimeAdjustment();
             }
+
+            gfx::Material::Environment env;
+            env.editing_mode   = mEditingMode;
+            env.draw_primitive = paint_node.drawable->GetDrawPrimitive();
+            env.draw_category  = paint_node.drawable->GetDrawCategory();
+            env.renderpass     = gfx::RenderPass::ColorPass;
+
+            for (size_t i=0; i<item->GetNumCommands(); ++i)
+            {
+                const auto& src_cmd = item->GetCommand(i);
+                gfx::Material::Command gfx_cmd;
+                gfx_cmd.name = src_cmd.name;
+                gfx_cmd.args = src_cmd.args;
+                paint_node.material->Execute(env, gfx_cmd);
+            }
         }
 
         if constexpr (std::is_same_v<EntityNodeType, game::EntityNode>)
         {
             item->SetCurrentMaterialTime(paint_node.material->GetRuntime());
+
+            DrawableItem::SpriteCycle sprite_cycle;
+            if (paint_node.material->GetValue("SpriteCycleName", &sprite_cycle.name) &&
+                paint_node.material->GetValue("SpriteCycleTime", &sprite_cycle.time))
+            {
+                item->SetCurrentSpriteCycle(std::move(sprite_cycle));
+            }
+            else
+            {
+                item->ClearCurrentSpriteCycle();
+            }
         }
     }
     if (item && paint_node.drawable)
@@ -1025,7 +1051,6 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
                 gfx_cmd.args = src_cmd.args;
                 paint_node.drawable->Execute(env, gfx_cmd);
             }
-            item->ClearCommands();
         }
 
         // pop model transform.
@@ -1036,6 +1061,14 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
             // pop view based model transform
             transform.Pop();
             transform.Pop();
+        }
+    }
+
+    if (item)
+    {
+        if constexpr (std::is_same_v<EntityNodeType, game::EntityNode>)
+        {
+            item->ClearCommands();
         }
     }
 }

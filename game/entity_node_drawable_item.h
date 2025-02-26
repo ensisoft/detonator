@@ -246,6 +246,11 @@ namespace game
             std::unordered_map<std::string, CommandArg> args;
         };
 
+        struct SpriteCycle {
+            std::string name;
+            double time = 0.0;
+        };
+
         explicit DrawableItem(std::shared_ptr<const DrawableItemClass> klass) noexcept
           : mClass(std::move(klass))
           , mMaterialId(mClass->GetMaterialId())
@@ -397,6 +402,25 @@ namespace game
                 mMaterialParams.value().erase("active_texture_map");
         }
 
+        void SetCurrentSpriteCycle(SpriteCycle cycle) const
+        {
+            mSpriteCycle = std::move(cycle);
+        }
+        bool HasSpriteCycle() const noexcept
+        {
+            return mSpriteCycle.has_value();
+        }
+        void ClearCurrentSpriteCycle() const noexcept
+        {
+            mSpriteCycle.reset();
+        }
+        const SpriteCycle* GetCurrentSpriteCycle() const noexcept
+        {
+            if (mSpriteCycle.has_value())
+                return &mSpriteCycle.value();
+            return nullptr;
+        }
+
         void SetCurrentMaterialTime(double time) const noexcept
         { mMaterialTime = time; }
         double GetCurrentMaterialTime() const noexcept
@@ -432,9 +456,8 @@ namespace game
         mutable double mMaterialTime = 0.0f;
         mutable std::optional<double> mTimeAdjustment;
         mutable std::vector<Command> mCommands;
+        mutable std::optional<SpriteCycle> mSpriteCycle;
         std::optional<MaterialParamMap> mMaterialParams;
     };
-
-
 
 } // namespace
