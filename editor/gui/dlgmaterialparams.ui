@@ -72,10 +72,24 @@ You can change this in the material editor by toggling off &quot;static instance
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
        <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="1">
+         <widget class="QComboBox" name="textureMaps">
+          <property name="placeholderText">
+           <string>Material Default</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="lblTextureMap">
+          <property name="text">
+           <string>Active texture map</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="2">
          <widget class="QToolButton" name="btnResetActiveMap">
           <property name="toolTip">
-           <string>Reset idle track to nothing</string>
+           <string>Reset active texture map to class default</string>
           </property>
           <property name="text">
            <string>...</string>
@@ -92,17 +106,33 @@ You can change this in the material editor by toggling off &quot;static instance
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QComboBox" name="textureMaps">
-          <property name="placeholderText">
-           <string>Material Default</string>
+        <item row="1" column="0">
+         <widget class="QLabel" name="lblTileIndex">
+          <property name="text">
+           <string>Tile index</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="lblTextureMap">
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="tileIndex"/>
+        </item>
+        <item row="1" column="2">
+         <widget class="QToolButton" name="btnResetTileIndex">
+          <property name="toolTip">
+           <string>Reset tile index to class default (0)</string>
+          </property>
           <property name="text">
-           <string>Active texture map</string>
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>false</bool>
+          </property>
+          <property name="arrowType">
+           <enum>Qt::NoArrow</enum>
           </property>
          </widget>
         </item>
@@ -173,6 +203,7 @@ You can change this in the material editor by toggling off &quot;static instance
  <tabstops>
   <tabstop>textureMaps</tabstop>
   <tabstop>btnResetActiveMap</tabstop>
+  <tabstop>tileIndex</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>
