@@ -47,6 +47,8 @@ namespace gui
     private slots:
         void on_textureMaps_currentIndexChanged(int);
         void on_btnResetActiveMap_clicked();
+        void on_tileIndex_valueChanged(int);
+        void on_btnResetTileIndex_clicked();
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void UniformValueChanged(const gui::Uniform* uniform);

@@ -75,6 +75,10 @@ DlgMaterialParams::DlgMaterialParams(QWidget* parent, game::DrawableItemClass* i
     SetVisible(mUI.grpMessage,     false);
     SetVisible(mUI.customUniforms, false);
     SetVisible(mUI.colorUniforms,  false);
+
+    SetVisible(mUI.lblTileIndex,   false);
+    SetVisible(mUI.tileIndex,      false);
+    SetVisible(mUI.btnResetTileIndex, false);
 }
 
 DlgMaterialParams::DlgMaterialParams(QWidget* parent, game::DrawableItemClass* item, game::MaterialAnimatorClass* actuator)
@@ -88,6 +92,10 @@ DlgMaterialParams::DlgMaterialParams(QWidget* parent, game::DrawableItemClass* i
     SetVisible(mUI.grpMessage,     false);
     SetVisible(mUI.customUniforms, false);
     SetVisible(mUI.colorUniforms,  false);
+
+    SetVisible(mUI.lblTileIndex,   false);
+    SetVisible(mUI.tileIndex,      false);
+    SetVisible(mUI.btnResetTileIndex, false);
 }
 
 void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gfx::MaterialClass* material)
@@ -294,6 +302,17 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
 
             SetVisible(mUI.colorUniforms, !mColorUniforms.empty());
             SetVisible(mUI.builtInParams, !maps.empty());
+
+            if (type == gfx::MaterialClass::Type::Tilemap)
+            {
+                SetVisible(mUI.lblTileIndex,      true);
+                SetVisible(mUI.tileIndex,         true);
+                SetVisible(mUI.btnResetTileIndex, true);
+                if (const auto* ptr = mItem->GetMaterialParamValue<float>("kTileIndex"))
+                {
+                    SetValue(mUI.tileIndex, (int)*ptr);
+                }
+            }
         }
     }
     else if (type == gfx::MaterialClass::Type::Custom)
@@ -479,6 +498,16 @@ void DlgMaterialParams::on_btnResetActiveMap_clicked()
     {
         mItem->ResetActiveTextureMap();
     }
+}
+
+void DlgMaterialParams::on_tileIndex_valueChanged(int value)
+{
+    mItem->SetMaterialParam("kTileIndex", (float)value);
+}
+void DlgMaterialParams::on_btnResetTileIndex_clicked()
+{
+    mItem->DeleteMaterialParam("kTileIndex");
+    SetValue(mUI.tileIndex, 0);
 }
 
 void DlgMaterialParams::on_btnAccept_clicked()
