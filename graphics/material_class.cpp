@@ -1544,10 +1544,8 @@ bool MaterialClass::ApplyTilemapDynamicState(const State& state, Device& device,
         SetUniform("kTilePadding",       state.uniforms, GetTilePadding(), program);
     }
 
-    if (state.editing_mode)
-    {
+    if (state.draw_category == DrawCategory::Basic)
         SetUniform("kTileIndex", state.uniforms, GetUniformValue("kTileIndex", 0.0f), program);
-    }
     return true;
 }
 
