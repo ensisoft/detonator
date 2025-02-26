@@ -1024,6 +1024,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.widget->onMouseRelease = std::bind(&EntityWidget::MouseRelease, this, std::placeholders::_1);
     mUI.widget->onKeyPress     = std::bind(&EntityWidget::KeyPress, this, std::placeholders::_1);
     mUI.widget->onMouseDoubleClick = std::bind(&EntityWidget::MouseDoubleClick, this, std::placeholders::_1);
+    mUI.widget->onMouseWheel   = std::bind(&EntityWidget::MouseWheel, this, std::placeholders::_1);
     mUI.widget->onPaintScene   = std::bind(&EntityWidget::PaintScene, this, std::placeholders::_1,
                                            std::placeholders::_2);
 
@@ -4288,6 +4289,39 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* event)
     }
 }
 
+void EntityWidget::MouseWheel(QWheelEvent* wheel)
+{
+    // we know this is for zoom
+    if (wheel->modifiers() & Qt::ControlModifier)
+        return;
+
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* draw = node->GetDrawable())
+        {
+            const auto& id = draw->GetMaterialId();
+            const auto& mat = mState.workspace->FindMaterialClassById(id);
+            if (mat == nullptr)
+                return;
+            if (mat->GetType() != gfx::MaterialClass::Type::Tilemap)
+                return;
+
+            int index = 0;
+            if (const auto* ptr = draw->GetMaterialParamValue<float>("kTileIndex"))
+                index = *ptr;
+
+            const QPoint& num_degrees = wheel->angleDelta() / 8;
+            const QPoint& num_steps = num_degrees / 15;
+            if (num_steps.y() > 0)
+                --index;
+            else ++index;
+
+            index = std::max(index, 0);
+            draw->SetMaterialParam("kTileIndex", static_cast<float>(index));
+        }
+    }
+}
+
 bool EntityWidget::KeyPress(QKeyEvent* key)
 {
     // handle key press events coming from the gfx widget
@@ -4324,6 +4358,29 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
                 std::string str = text->GetText();
                 str += app::ToUtf8(key->text());
                 text->SetText(std::move(str));
+                return true;
+            }
+        }
+        else if (auto* draw = node->GetDrawable())
+        {
+            const auto& id = draw->GetMaterialId();
+            const auto& mat = mState.workspace->FindMaterialClassById(id);
+            if (mat && mat->GetType() == gfx::MaterialClass::Type::Tilemap && key->key() == Qt::Key_T)
+            {
+                DlgTileChooser dlg(this, mat);
+                if (const auto* ptr = draw->GetMaterialParamValue<float>("kTileIndex"))
+                    dlg.SetTileIndex(static_cast<unsigned>(*ptr));
+
+                if (dlg.exec() == QDialog::Accepted)
+                {
+                    draw->SetMaterialParam("kTileIndex", static_cast<float>(dlg.GetTileIndex()));
+                }
+                QTimer::singleShot(100, this, [this]() {
+                    //qApp->focusWidget()->clearFocus();
+                    //mUI.widget->raise();
+                    mUI.widget->activateWindow();
+                    mUI.widget->setFocus();
+                });
                 return true;
             }
         }
