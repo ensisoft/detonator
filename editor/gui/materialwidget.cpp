@@ -1153,7 +1153,8 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
 void MaterialWidget::on_surfaceType_currentIndexChanged(int)
 {
     SetMaterialProperties();
-    ShowMaterialProperties();
+    ShowTextureMapProperties();
+    ShowTextureProperties();
 }
 
 void MaterialWidget::on_diffuseColor_colorChanged(QColor color)
