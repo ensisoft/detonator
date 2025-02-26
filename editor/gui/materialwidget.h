@@ -192,6 +192,7 @@ namespace gui
         void MouseMove(QMouseEvent* mickey);
         void MousePress(QMouseEvent* mickey);
         void MouseRelease(QMouseEvent* mickey);
+        bool KeyPress(QKeyEvent* key);
         gfx::TextureMap* GetSelectedTextureMap();
         gfx::TextureSource* GetSelectedTextureSrc();
     private:

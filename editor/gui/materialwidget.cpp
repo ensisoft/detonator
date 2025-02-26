@@ -104,6 +104,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mUI.widget->onMouseMove    = std::bind(&MaterialWidget::MouseMove, this, std::placeholders::_1);
     mUI.widget->onMousePress   = std::bind(&MaterialWidget::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseRelease = std::bind(&MaterialWidget::MouseRelease, this, std::placeholders::_1);
+    mUI.widget->onKeyPress     = std::bind(&MaterialWidget::KeyPress, this, std::placeholders::_1);
     mUI.actionPause->setEnabled(false);
     mUI.actionPlay->setEnabled(true);
     mUI.actionStop->setEnabled(false);
@@ -3191,6 +3192,18 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
         ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
     }
+
+    if (type == gfx::MaterialClass::Type::Sprite && mState == PlayState::Playing)
+    {
+        for (unsigned i=0; i<mMaterial->GetNumTextureMaps(); ++i)
+        {
+            const auto* map = mMaterial->GetTextureMap(i);
+            if (!map->IsSpriteMap())
+                continue;
+
+            ShowMessage(base::FormatString("Press %1 for '%2'", i, map->GetName()), gfx::FPoint(20.0f, 20.0f  + i * 20.0f), painter);
+        }
+    }
 }
 
 void MaterialWidget::MouseMove(QMouseEvent* mickey)
@@ -3246,6 +3259,51 @@ void MaterialWidget::MouseRelease(QMouseEvent* mickey)
         mLightPositionDelta = glm::vec3{0.0f, 0.0f, 0.0f};
     }
     mMouseState = MouseState::Nada;
+}
+
+bool MaterialWidget::KeyPress(QKeyEvent* key)
+{
+    if (mMaterial->GetType() != gfx::MaterialClass::Type::Sprite)
+        return false;
+    if (mState != PlayState::Playing)
+        return false;
+
+    static const std::unordered_map<int, unsigned> map {
+        {Qt::Key_0, 0},
+        {Qt::Key_1, 1},
+        {Qt::Key_2, 2},
+        {Qt::Key_3, 3},
+        {Qt::Key_4, 4},
+        {Qt::Key_5, 5},
+        {Qt::Key_6, 6},
+        {Qt::Key_7, 7},
+        {Qt::Key_8, 8},
+        {Qt::Key_9, 9}
+    };
+    auto it = map.find(key->key());
+    if (it == map.end())
+        return false;
+
+    const auto index = it->second;
+    if (index >= mMaterial->GetNumTextureMaps())
+        return false;
+
+    const auto* texture_map = mMaterial->GetTextureMap(index);
+    if (!texture_map->IsSpriteMap())
+        return false;
+
+    gfx::Material::Environment env;
+    env.editing_mode = true;
+    env.draw_primitive = gfx::DrawPrimitive::Triangles;
+    env.draw_category  = gfx::DrawCategory::Basic;
+    env.renderpass     = gfx::RenderPass::ColorPass;
+
+    gfx::Material::Command cmd;
+    cmd.name = "RunSpriteCycle";
+    cmd.args["id"]  = texture_map->GetId();
+    cmd.args["delay"] = 0.0f;
+    mMaterialInst->Execute(env, cmd);
+    return true;
 }
 
 gfx::TextureMap* MaterialWidget::GetSelectedTextureMap()
