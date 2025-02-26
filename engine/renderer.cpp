@@ -1236,6 +1236,8 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
             {
                 paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
                     item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
+                if (const auto* params = item->GetMaterialParams())
+                    paint_node.material->SetUniforms(*params);
             }
         }
         if (paint_node.drawableId != drawable)
