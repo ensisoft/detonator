@@ -116,6 +116,8 @@ namespace gui
         void on_actionNewDirectionalLight_triggered();
         void on_actionNewPointLight_triggered();
         void on_actionNewSpotlight_triggered();
+        void on_actionNewText_triggered();
+        void on_actionNewStaticRigidBody_triggered();
 
         void on_actionNodeDelete_triggered();
         void on_actionNodeCut_triggered();
@@ -355,6 +357,8 @@ namespace gui
         QMenu* mCustomShapes = nullptr;
         QMenu* mBasicShapes = nullptr;
         QMenu* mBasicLights = nullptr;
+        QMenu* mTextItems = nullptr;
+        QMenu* mPhysItems = nullptr;
         QMenu* mAttachments = nullptr;
         QMenu* mHamburger = nullptr;
         QToolBar* mButtonBar = nullptr;
@@ -362,6 +366,8 @@ namespace gui
         UIAnimator mAnimator;
     private:
         class JointTool;
+        class PlaceRigidBodyTool;
+        class PlaceTextTool;
         class PlaceLightTool;
         class PlaceShapeTool;
         class ScriptVarModel;

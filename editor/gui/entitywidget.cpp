@@ -80,6 +80,7 @@
 #include "graphics/drawing.h"
 #include "graphics/types.h"
 #include "graphics/simple_shape.h"
+#include "graphics/text_material.h"
 #include "game/treeop.h"
 
 namespace gui
@@ -580,6 +581,242 @@ private:
     std::unique_ptr<gfx::Material> mMaterial;
 };
 
+class EntityWidget::PlaceRigidBodyTool : public MouseTool
+{
+public:
+    PlaceRigidBodyTool(EntityWidget::State& state) : mState(state)
+    {
+    }
+
+    void Render(gfx::Painter& painter, gfx::Painter& entity) const override
+    {
+        if (!mEngaged)
+        {
+            gfx::FRect rect(0.0f, 0.0f, 200.0f, 20.0f);
+            rect.Translate(mCurrent.x, mCurrent.y);
+            rect.Translate(20.0f, 20.0f);
+            ShowMessage("Click + hold to draw!", rect, entity);
+            return;
+        }
+
+        const auto& diff = mCurrent - mStart;
+        if (diff.x <= 0.0f || diff.y <= 0.0f)
+            return;
+
+        const float xpos = mStart.x;
+        const float ypos = mStart.y;
+        const float hypotenuse = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+        const float width = mAlwaysSquare ? hypotenuse : diff.x;
+        const float height = mAlwaysSquare ? hypotenuse : diff.y;
+
+        gfx::Transform model;
+        model.Scale(width, height);
+        model.Translate(xpos, ypos);
+
+        // draw a selection rect around it.
+        entity.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), model,
+                    gfx::CreateMaterialFromColor(gfx::Color::Green));
+    }
+    void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
+    {
+        mCurrent = mickey.MapToPlane();
+        mAlwaysSquare = mickey->modifiers() & Qt::ControlModifier;
+    }
+    void MousePress(const MouseEvent& mickey, gfx::Transform&) override
+    {
+        const auto button = mickey->button();
+        if (button == Qt::LeftButton)
+        {
+            mStart = mickey.MapToPlane();
+            mCurrent = mStart;
+            mEngaged = true;
+        }
+    }
+    bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
+    {
+        const auto button = mickey->button();
+        if (button != Qt::LeftButton)
+            return false;
+
+        ASSERT(mEngaged);
+
+        mEngaged = false;
+        const auto& diff = mCurrent - mStart;
+        if (diff.x <= 0.0f || diff.y <= 0.0f)
+            return true;
+
+        const auto name = GenerateEntityNodeName(*mState.entity, "Static Body ");
+
+        const float xpos = mStart.x;
+        const float ypos = mStart.y;
+        const float hypotenuse = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+        const float width = mAlwaysSquare ? hypotenuse : diff.x;
+        const float height = mAlwaysSquare ? hypotenuse : diff.y;
+
+        game::RigidBodyClass body;
+        body.SetSimulation(game::RigidBodyClass::Simulation::Static);
+        body.SetCollisionShape(game::RigidBodyClass::CollisionShape::Box);
+
+        game::DrawableItemClass draw;
+        draw.SetMaterialId("_checkerboard");
+        draw.SetDrawableId("_rect");
+
+        game::EntityNodeClass node;
+        node.SetDrawable(draw);
+        node.SetRigidBody(body);
+        node.SetName(name);
+        node.SetTranslation(glm::vec2(xpos + 0.5*width, ypos + 0.5*height));
+        node.SetSize(glm::vec2(width, height));
+        node.SetScale(glm::vec2(1.0f, 1.0f));
+
+        // by default we're appending to the root item.
+        auto* child = mState.entity->AddNode(std::move(node));
+        mState.entity->LinkChild(nullptr, child);
+        mState.view->tree->Rebuild();
+        mState.view->tree->SelectItemById(child->GetId());
+        mState.view->drawable->Collapse(false);
+        DEBUG("Added new  text '%1'", name);
+        return true;
+    }
+private:
+    EntityWidget::State& mState;
+private:
+    // the starting object position in model coordinates of the placement
+    // based on the mouse position at the time.
+    glm::vec2 mStart = {0.0f, 0.0f};
+    // the current object ending position in model coordinates.
+    // the object occupies the rectangular space between the start
+    // and current positions on the X and Y axis.
+    glm::vec2 mCurrent = {0.0f, 0.0f};
+    bool mEngaged = false;
+    bool mAlwaysSquare = false;
+};
+
+
+class EntityWidget::PlaceTextTool : public MouseTool
+{
+public:
+    PlaceTextTool(EntityWidget::State& state) : mState(state)
+    {
+        gfx::TextBuffer::Text text_and_style;
+        text_and_style.text       = "text";
+        text_and_style.font       = "app://fonts/KomikaTitle.ttf";
+        text_and_style.fontsize   = 20;
+        text_and_style.lineheight = 1.0f;
+        text_and_style.underline  = false;
+
+        gfx::TextBuffer buffer(200, 200);
+        buffer.SetAlignment(gfx::TextBuffer::VerticalAlignment::AlignCenter);
+        buffer.SetAlignment(gfx::TextBuffer::HorizontalAlignment::AlignCenter);
+        buffer.SetText(std::move(text_and_style));
+
+        mMaterial = gfx::CreateMaterialInstance(std::move(buffer));
+    }
+    void Render(gfx::Painter& painter, gfx::Painter& entity) const override
+    {
+        if (!mEngaged)
+        {
+            gfx::FRect rect(0.0f, 0.0f, 200.0f, 20.0f);
+            rect.Translate(mCurrent.x, mCurrent.y);
+            rect.Translate(20.0f, 20.0f);
+            ShowMessage("Click + hold to draw!", rect, entity);
+            return;
+        }
+
+        const auto& diff = mCurrent - mStart;
+        if (diff.x <= 0.0f || diff.y <= 0.0f)
+            return;
+
+        const float xpos = mStart.x;
+        const float ypos = mStart.y;
+        const float hypotenuse = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+        const float width = mAlwaysSquare ? hypotenuse : diff.x;
+        const float height = mAlwaysSquare ? hypotenuse : diff.y;
+
+        gfx::Transform model;
+        model.Scale(width, height);
+        model.Translate(xpos, ypos);
+        entity.Draw(gfx::Rectangle(), model, *mMaterial);
+
+        // draw a selection rect around it.
+        entity.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), model,
+                    gfx::CreateMaterialFromColor(gfx::Color::Green));
+    }
+    void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
+    {
+        mCurrent = mickey.MapToPlane();
+        mAlwaysSquare = mickey->modifiers() & Qt::ControlModifier;
+    }
+    void MousePress(const MouseEvent& mickey, gfx::Transform&) override
+    {
+        const auto button = mickey->button();
+        if (button == Qt::LeftButton)
+        {
+            mStart = mickey.MapToPlane();
+            mCurrent = mStart;
+            mEngaged = true;
+        }
+    }
+    bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
+    {
+        const auto button = mickey->button();
+        if (button != Qt::LeftButton)
+            return false;
+
+        ASSERT(mEngaged);
+
+        mEngaged = false;
+        const auto& diff = mCurrent - mStart;
+        if (diff.x <= 0.0f || diff.y <= 0.0f)
+            return true;
+
+        const auto name = GenerateEntityNodeName(*mState.entity, "Text ");
+
+        const float xpos = mStart.x;
+        const float ypos = mStart.y;
+        const float hypotenuse = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+        const float width = mAlwaysSquare ? hypotenuse : diff.x;
+        const float height = mAlwaysSquare ? hypotenuse : diff.y;
+
+        game::TextItemClass text;
+        text.SetFontSize(20);
+        text.SetFontName("app://fonts/KomikaTitle.ttf");
+        text.SetText("Hello");
+        text.SetLayer(0);
+
+        game::EntityNodeClass node;
+        node.SetTextItem(text);
+        node.SetName(name);
+        node.SetTranslation(glm::vec2(xpos + 0.5*width, ypos + 0.5*height));
+        node.SetSize(glm::vec2(width, height));
+        node.SetScale(glm::vec2(1.0f, 1.0f));
+
+        // by default we're appending to the root item.
+        auto* child = mState.entity->AddNode(std::move(node));
+        mState.entity->LinkChild(nullptr, child);
+        mState.view->tree->Rebuild();
+        mState.view->tree->SelectItemById(child->GetId());
+        mState.view->drawable->Collapse(false);
+        DEBUG("Added new  text '%1'", name);
+        return true;
+    }
+private:
+    EntityWidget::State& mState;
+private:
+    // the starting object position in model coordinates of the placement
+    // based on the mouse position at the time.
+    glm::vec2 mStart = {0.0f, 0.0f};
+    // the current object ending position in model coordinates.
+    // the object occupies the rectangular space between the start
+    // and current positions on the X and Y axis.
+    glm::vec2 mCurrent = {0.0f, 0.0f};
+    bool mEngaged = false;
+    bool mAlwaysSquare = false;
+private:
+    std::unique_ptr<gfx::Material> mMaterial;
+};
+
+
 class EntityWidget::PlaceShapeTool : public MouseTool
 {
 public:
@@ -822,6 +1059,18 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mBasicLights->addAction(mUI.actionNewPointLight);
     mBasicLights->addAction(mUI.actionNewSpotlight);
 
+    mTextItems = new QMenu(this);
+    mTextItems->menuAction()->setIcon(QIcon("icons:text.png"));
+    mTextItems->menuAction()->setText(tr("Text"));
+    mTextItems->menuAction()->setToolTip(tr("Place text"));
+    mTextItems->addAction(mUI.actionNewText);
+
+    mPhysItems = new QMenu(this);
+    mPhysItems->menuAction()->setIcon(QIcon("icons:physics.png"));
+    mPhysItems->menuAction()->setText(tr("Physics"));
+    mPhysItems->menuAction()->setToolTip(tr("Place physics objects"));
+    mPhysItems->addAction(mUI.actionNewStaticRigidBody);
+
     mButtonBar = new QToolBar(this);
     mButtonBar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
     mButtonBar->setIconSize(QSize(16, 16));
@@ -829,6 +1078,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mButtonBar->addAction(mCustomShapes->menuAction());
     mButtonBar->addAction(mParticleSystems->menuAction());
     mButtonBar->addAction(mBasicLights->menuAction());
+    mButtonBar->addAction(mTextItems->menuAction());
+    mButtonBar->addAction(mPhysItems->menuAction());
     mUI.toolbarLayout->addWidget(mButtonBar);
 
     mState.workspace = workspace;
@@ -1849,6 +2100,15 @@ void EntityWidget::on_actionNewPointLight_triggered()
 void EntityWidget::on_actionNewSpotlight_triggered()
 {
     mCurrentTool.reset(new PlaceLightTool(mState, game::BasicLightClass::LightType::Spot));
+}
+void EntityWidget::on_actionNewText_triggered()
+{
+    mCurrentTool.reset(new PlaceTextTool(mState));
+}
+
+void EntityWidget::on_actionNewStaticRigidBody_triggered()
+{
+    mCurrentTool.reset(new PlaceRigidBodyTool(mState));
 }
 
 void EntityWidget::on_actionNodeDelete_triggered()
@@ -4006,6 +4266,8 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* event)
     if (!hitnode)
         return;
 
+    const bool did_have_focus = mUI.widget->hasFocus() || mUI.widget->hasInputFocus();
+
     if (auto* drawable = hitnode->GetDrawable())
     {
         on_btnSelectMaterial_clicked();
@@ -4014,6 +4276,16 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* event)
     {
         on_btnSelectFont_clicked();
     }
+
+    // losing focus when opening the dialog, try to
+    // restore the focus.
+    if (did_have_focus)
+    {
+        QTimer::singleShot(10, this, [this]() {
+            mUI.widget->activateWindow();
+            mUI.widget->setFocus();
+        });
+    }
 }
 
 bool EntityWidget::KeyPress(QKeyEvent* key)
@@ -4021,6 +4293,41 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
     // handle key press events coming from the gfx widget
     if (mCurrentTool && mCurrentTool->KeyPress(key))
         return true;
+
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* text = node->GetTextItem())
+        {
+            if (key->key() == Qt::Key_Delete)
+            {
+                std::string str = text->GetText();
+                if (!str.empty())
+                {
+                    str.clear();
+                    text->SetText(std::move(str));
+                    return true;
+                }
+
+            }
+            else if (key->key() == Qt::Key_Backspace)
+            {
+                std::string str = text->GetText();
+                if (!str.empty())
+                {
+                    str.pop_back();
+                    text->SetText(std::move(str));
+                    return true;
+                }
+            }
+            else if (std::isprint(key->key()))
+            {
+                std::string str = text->GetText();
+                str += app::ToUtf8(key->text());
+                text->SetText(std::move(str));
+                return true;
+            }
+        }
+    }
 
     switch (key->key())
     {
