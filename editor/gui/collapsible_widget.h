@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QIcon>
 #  include <QWidget>
 #  include <QFrame>
 #  include <QtUiPlugin/QDesignerExportWidget>
@@ -35,6 +36,8 @@ namespace gui
     class DESIGNER_PLUGIN_EXPORT CollapsibleWidget : public QWidget
     {
         Q_OBJECT
+        Q_PROPERTY(QIcon icon READ GetIcon WRITE SetIcon DESIGNABLE true)
+        Q_PROPERTY(bool iconVisible READ IsIconVisible WRITE SetIconVisible DESIGNABLE true)
         Q_PROPERTY(bool collapsed READ IsCollapsed WRITE Collapse DESIGNABLE true)
         Q_PROPERTY(QString text READ GetText WRITE SetText DESIGNABLE true)
         Q_PROPERTY(QFrame::Shape frameShape READ GetFrameShape WRITE SetFrameShape DESIGNABLE true)
@@ -42,6 +45,12 @@ namespace gui
     public:
         explicit CollapsibleWidget(QWidget* parent = nullptr);
         ~CollapsibleWidget();
+
+        QIcon GetIcon() const;
+        void SetIcon(QIcon icon);
+
+        bool IsIconVisible() const;
+        void SetIconVisible(bool visible);
 
         bool IsCollapsed() const
         { return mCollapsed; }
