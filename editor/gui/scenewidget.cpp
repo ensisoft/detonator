@@ -62,6 +62,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/dlgscriptvar.h"
+#include "editor/gui/dlgscriptvarname.h"
 #include "editor/gui/dlgentity.h"
 #include "editor/gui/clipboard.h"
 #include "editor/gui/playwindow.h"
@@ -1581,7 +1582,6 @@ void SceneWidget::on_btnAddScript_clicked()
     // file even if the entity is later renamed.
     const auto& uri  = app::toString("ws://lua/%1.lua", script.GetId());
     const auto& file = mState.workspace->MapFileToFilesystem(uri);
-    const auto& name = GetValue(mUI.name);
 
     if (app::FileExists(file))
     {
@@ -1593,6 +1593,18 @@ void SceneWidget::on_btnAddScript_clicked()
         if (msg.exec() == QMessageBox::Cancel)
             return;
     }
+
+    bool accepted = false;
+
+    QString name = app::GenerateScriptVarName(GetValue(mUI.name), "scene");
+
+    DlgScriptVarName dlg(this, name, "scene");
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    name = dlg.GetName();
+    if (name.isEmpty())
+        return;
 
     QString source = GenerateSceneScriptSource(name);
 

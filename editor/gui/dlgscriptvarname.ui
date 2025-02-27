@@ -17,23 +17,14 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>What should your entity argument be called ? </string>
+      <string>Whats the name of of your game object?</string>
      </property>
      <property name="flat">
       <bool>true</bool>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="leftMargin">
-       <number>10</number>
-      </property>
       <property name="topMargin">
        <number>4</number>
-      </property>
-      <property name="rightMargin">
-       <number>10</number>
-      </property>
-      <property name="bottomMargin">
-       <number>10</number>
       </property>
       <item>
        <widget class="QLineEdit" name="name"/>
