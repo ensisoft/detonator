@@ -309,6 +309,9 @@ public:
             AnalyzeResourceReport report;
             report.valid = is_valid;
             report.id    = mResourceId;
+            if (!is_valid)
+                resource->GetProperty("problem", &report.msg);
+
             mState->update_queue.emplace_back(std::move(report));
         }
 
@@ -378,6 +381,7 @@ public:
             if (!ValidateResource(app::ToUtf8(dep_id)))
             {
                 resource->SetProperty("is-valid", false);
+                resource->SetProperty("problem", app::toString("Missing dependency '%1'", dep_id));
                 return false;
             }
         }
@@ -395,6 +399,7 @@ public:
             if (!app::FileExists(file))
             {
                 resource->SetProperty("is-valid", false);
+                resource->SetProperty("problem", app::toString("Missing resource file '%1'", file));
                 return false;
             }
         }

@@ -2644,6 +2644,7 @@ void MainWindow::RefreshUI()
                     continue;
 
                 resource->SetProperty("_is_valid_", ptr->valid);
+                resource->SetProperty("_problem_", ptr->msg);
                 VERBOSE("Resource analyze report. [type=%1, resource=%2, valid=%3]",
                         resource->GetType(), resource->GetName(), ptr->valid);
             }
