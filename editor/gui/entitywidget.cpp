@@ -5103,7 +5103,13 @@ void EntityWidget::UpdateDeletedResourceReferences()
                 {
                     WARN("Entity node '%1' uses rigid body shape which is no longer available.", node.GetName());
                     body->ResetPolygonShapeId();
+                    body->SetCollisionShape(game::RigidBodyClass::CollisionShape::Box);
                 }
+            }
+            else
+            {
+                // clean away this stale data
+                body->ResetPolygonShapeId();
             }
         }
         if (auto* fixture = node.GetFixture())
@@ -5114,7 +5120,13 @@ void EntityWidget::UpdateDeletedResourceReferences()
                 {
                     WARN("Entity node '%1' fixture uses rigid body shape which is no longer available.", node.GetName());
                     fixture->ResetPolygonShapeId();
+                    fixture->SetCollisionShape(game::RigidBodyClass::CollisionShape::Box);
                 }
+            }
+            else
+            {
+                // clean away stale data.
+                fixture->ResetPolygonShapeId();
             }
         }
     }
