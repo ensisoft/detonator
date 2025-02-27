@@ -653,6 +653,12 @@ QVariant Workspace::data(const QModelIndex& index, int role) const
                 return QIcon("icons:problem.png");
         }
     }
+    else if (role == Qt::ToolTipRole)
+    {
+        std::string problem;
+        if (res->GetProperty("_problem_", &problem))
+            return app::toString(problem);
+    }
     return QVariant();
 }
 
