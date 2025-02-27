@@ -71,6 +71,12 @@ void FragmentShaderMain() {
     // for the fragment.
     vec2 frag_texture_coords = GetTextureCoords();
 
+    // compensate a few pixels for texture sampling looking
+    // at the neighboring pixels. When we're at the border of
+    // the tile we don't want the empty pixels (padding pixels)
+    // to get filtered in causing artifacts.
+    const vec2 oversampling_margin = vec2(2.0, 2.0);
+
     // apply texture box transformation
     vec2 texture_box_size      = kTextureBox.zw;
     vec2 texture_box_translate = kTextureBox.xy;
@@ -78,9 +84,10 @@ void FragmentShaderMain() {
     vec2 texture_size = vec2(textureSize(kTexture, 0));
 
     vec2 tile_texture_offset   = kTileOffset / texture_size;
-    vec2 tile_texture_size     = kTileSize / texture_size;
+    vec2 tile_texture_size     = (kTileSize - 2.0*oversampling_margin) / texture_size;
     vec2 tile_texture_padding  = kTilePadding / texture_size;
-    vec2 tile_texture_box_size = tile_texture_size + (tile_texture_padding * 2.0);
+    vec2 tile_texture_box_size = (kTileSize + 2.0*kTilePadding) / texture_size;
+    vec2 tile_texture_margin   = oversampling_margin / texture_size;
 
     vec2 tile_map_size = texture_box_size - tile_texture_offset;
     vec2 tile_map_dims = tile_map_size / tile_texture_box_size; // rows and cols
@@ -107,7 +114,17 @@ void FragmentShaderMain() {
     // the tile coordinate.
     texture_coords += vec2(float(tile_col), float(tile_row)) * tile_texture_box_size;
 
+    // go over the padding (transparent pixels around the tile)
     texture_coords += tile_texture_padding;
+
+    // offset some more in order to compensate for texture
+    // filtering artifacts where texture filtering causes
+    // neighboring pixels to be mixed in the. essentially
+    // if we're sampling a pixel at the tile border and right
+    // next to it we have an "empty" pixel this empty pixel
+    // can get mixed in with the real pixel. This will cause
+    // artifacts.
+    texture_coords += tile_texture_margin;
 
     // add the frag coordinate relative to the tile's top left
     texture_coords += tile_texture_size * frag_texture_coords;
