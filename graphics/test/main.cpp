@@ -450,6 +450,60 @@ private:
 
 };
 
+class TileOverdrawTest : public GraphicsTest
+{
+public:
+    void Start() override
+    {
+        gfx::TextureMap2D map;
+        map.SetNumTextures(1);
+        map.SetTextureSource(0, gfx::LoadTextureFromFile("textures/tilemap_128x128.png"));
+        map.SetSamplerName("kTexture");
+        map.SetName("Tilemap");
+
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Tilemap);
+        klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        klass.SetNumTextureMaps(1);
+        klass.SetTextureMap(0, map);
+        klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Linear);
+        klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
+        klass.SetTileSize(glm::vec2(128.0f, 128.0f));
+        klass.SetTilePadding(glm::vec2(2.0f, 2.0f));
+        klass.SetTileOffset(glm::vec2(0.0f, 0.0f));
+        mTileset = gfx::CreateMaterialInstance(klass);
+    }
+    void Render(gfx::Painter& painter) override
+    {
+        const float tile_indices[9] = {
+            3.0f, 14.0f, 13.0f,
+            0.0f, 12.0f, 10.0f,
+            1.0f, 9.0f, 4.0f
+        };
+        for (unsigned row=0; row<3; ++row)
+        {
+            for (unsigned col=0; col<3; ++col)
+            {
+                gfx::FRect rect;
+                rect.Resize(128.0f, 128.0f);
+                rect.Move((1024.0f - 3.0f*128.0f) * 0.5f,
+                          (768.0f - 3.0f*128.0f) * 0.5f);
+                rect.Translate(col*128.0f, row*128.0f);
+
+                mTileset->SetUniform("kTileIndex", tile_indices[row*3 + col]);
+                gfx::FillRect(painter, rect, *mTileset);
+            }
+        }
+    }
+    std::string GetName() const override
+    {
+        return "TileOverdrawTest";
+    }
+
+private:
+    std::unique_ptr<gfx::Material> mTileset;
+};
+
+
 class TileBatchTest : public GraphicsTest
 {
 public:
@@ -4019,6 +4073,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new StencilTest);
     tests.emplace_back(new PolygonTest);
     tests.emplace_back(new TileBatchTest);
+    tests.emplace_back(new TileOverdrawTest);
     tests.emplace_back(new JankTest);
     tests.emplace_back(new MegaParticleTest);
     tests.emplace_back(new VSyncTest);
