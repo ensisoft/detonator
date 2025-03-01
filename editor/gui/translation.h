@@ -59,6 +59,7 @@ namespace game {
     std::string TranslateEnum(EntityStateControllerClass::StateTransitionMode mode);
     std::string TranslateEnum(BasicLightClass::LightType light);
     std::string TranslateEnum(RenderPass pass);
+    std::string TranslateEnum(CoordinateSpace space);
 } // namespace
 
 namespace math {

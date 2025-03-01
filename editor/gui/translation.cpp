@@ -293,6 +293,16 @@ std::string TranslateEnum(RenderPass pass)
     else BUG("Missing translation");
     return "???";
 }
+std::string TranslateEnum(CoordinateSpace space)
+{
+    using S = CoordinateSpace;
+    if (space == S::Scene)
+        return "Scene Space";
+    else if (space == S::Camera)
+        return "Camera Space";
+    else BUG("Missing translation");
+    return "???";
+}
 
 } // namespace
 
