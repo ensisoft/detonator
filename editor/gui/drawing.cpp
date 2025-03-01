@@ -597,6 +597,17 @@ void ShowError(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& pai
                       gfx::TextProp::Blinking);
 }
 
+void ShowError(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter, unsigned font_size_px)
+{
+    // using 0 for rect width and height, this will create a raster buffer
+    // with dimensions derived from the rasterized text extents.
+    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px,
+                      rect,
+                      gfx::Color::Red,
+                      gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignHCenter,
+                      gfx::TextProp::Blinking);
+}
+
 void ShowInstruction(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter, unsigned font_size_px)
 {
     gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px,
@@ -606,7 +617,6 @@ void ShowInstruction(const app::AnyString& msg, const Rect2Df& rect, gfx::Painte
                       gfx::TextProp::None,
                       2.0f);
 }
-
 
 void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* widget)
 {

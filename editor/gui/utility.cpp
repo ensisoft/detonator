@@ -52,6 +52,25 @@ QPixmap ToGrayscale(QPixmap p)
     return QPixmap::fromImage(img);
 }
 
+std::vector<QString> ListWSFonts(const QString& workspace_dir)
+{
+    std::vector<QString> ret;
+
+    QStringList filters;
+    filters << "*.ttf" << "*.otf" << "*.json";
+    const auto& fontdir = app::JoinPath(workspace_dir , "fonts");
+    QDir dir;
+    dir.setPath(fontdir);
+    dir.setNameFilters(filters);
+    const QStringList& font_files = dir.entryList();
+    for (const auto& font_file : font_files)
+    {
+        const QFileInfo info(font_file);
+        ret.push_back(QString("ws://fonts/" + info.fileName()));
+    }
+    return ret;
+}
+
 std::vector<QString> ListAppFonts()
 {
     std::vector<QString> ret;

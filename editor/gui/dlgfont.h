@@ -26,6 +26,7 @@
 #include "warnpop.h"
 
 #include <vector>
+#include <unordered_set>
 
 #include "graphics/fwd.h"
 #include "editor/app/types.h"
@@ -72,6 +73,7 @@ namespace gui
         unsigned mBoxHeight = 0;
         std::vector<QString> mFonts;
         std::vector<QString> mAllFonts;
+        std::unordered_set<QString> mFailedFonts;
         QString mSelectedFontURI;
     };
 }
