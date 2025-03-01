@@ -55,6 +55,7 @@ std::size_t DrawableItemClass::GetHash() const
     hash = base::hash_combine(hash, mDepth);
     hash = base::hash_combine(hash, mRotator);
     hash = base::hash_combine(hash, mOffset);
+    hash = base::hash_combine(hash, mCoordinateSpace);
 
     // remember the *unordered* nature of unordered_map
     std::set<std::string> keys;
@@ -85,6 +86,7 @@ void DrawableItemClass::IntoJson(data::Writer& data) const
     data.Write("depth",       mDepth);
     data.Write("rotator",     mRotator);
     data.Write("offset",      mOffset);
+    data.Write("coordinate_space", mCoordinateSpace);
 
     // use an ordered set for persisting the data to make sure
     // that the order in which the uniforms are written out is
@@ -131,6 +133,8 @@ bool DrawableItemClass::FromJson(const data::Reader& data)
     ok &= data.Read("depth",       &mDepth);
     ok &= data.Read("rotator",     &mRotator);
     ok &= data.Read("offset",      &mOffset);
+    if (data.HasValue("coordinate_space"))
+        ok &= data.Read("coordinate_space", &mCoordinateSpace);
 
     for (unsigned i=0; i<data.GetNumChunks("material_params"); ++i)
     {
