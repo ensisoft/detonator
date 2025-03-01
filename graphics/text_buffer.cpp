@@ -582,7 +582,10 @@ Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, const std::stri
     // upload the font texture onto the device.
     auto* font_texture = UploadBitmapFont(*font, device);
     if (!font_texture)
+    {
+        ERROR("Failed to upload bitmap font texture. [font='%1']", mText.font);
         return nullptr;
+    }
 
     // create the render target texture that will contain the
     // rasterized texture after we're done. it'll be used as a
@@ -663,6 +666,9 @@ Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, const std::stri
             const float glyph_height = px_height * glyph_scaler;
             if (font_glyph == nullptr)
             {
+                WARN("No such glyph found in font texture. [font='%1', glyph=%2, char=%3]",
+                    mText.font, static_cast<int>(char_), char_);
+
                 xpos += glyph_width;
                 continue;
             }
