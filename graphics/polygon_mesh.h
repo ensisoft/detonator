@@ -84,8 +84,14 @@ namespace gfx
         { mMesh = type; }
         inline std::string GetContentUri() const
         { return mContentUri; }
+        inline std::string GetShaderSrc() const
+        { return mShaderSrc; }
         inline MeshType GetMeshType() const noexcept
         { return mMesh; }
+        void SetShaderSrc(std::string src) noexcept
+        { mShaderSrc = std::move(src); }
+        bool HasShaderSrc() const noexcept
+        { return !mShaderSrc.empty(); }
 
         void SetIndexBuffer(IndexBuffer&& buffer) noexcept;
         void SetIndexBuffer(const IndexBuffer& buffer);
@@ -109,6 +115,9 @@ namespace gfx
         const Geometry::DrawCommand* GetDrawCmd(size_t index) const noexcept;
 
         std::string GetGeometryId(const Environment& env) const;
+        std::string GetShaderId(const Environment& env) const;
+        std::string GetShaderName(const Environment& env) const;
+        ShaderSource GetShader(const Environment& env, const Device& device) const;
 
         bool Construct(const Environment& env, Geometry::CreateArgs& create) const;
 
@@ -136,6 +145,8 @@ namespace gfx
         std::size_t mContentHash = 0;
         // Content URI for a larger mesh (see InlineData)
         std::string mContentUri;
+        // customized part of the vertex shader vertex transform.
+        std::string mShaderSrc;
         // this is to support the simple 2D geometry with
         // only a few vertices. Could be migrated to use
         // a separate file but this is simply just so much
@@ -161,14 +172,8 @@ namespace gfx
         using MeshType = PolygonMeshClass::MeshType;
 
         explicit PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass,
-                                     std::string sub_mesh_key = "") noexcept
-          : mClass(std::move(klass))
-          , mSubMeshKey(std::move(sub_mesh_key))
-        {}
-        explicit PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key = "")
-          : mClass(std::make_shared<PolygonMeshClass>(klass))
-          , mSubMeshKey(std::move(sub_mesh_key))
-        {}
+                                     std::string sub_mesh_key = "") noexcept;
+        explicit PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key = "");
 
         inline MeshType GetMeshType() const noexcept
         { return mClass->GetMeshType(); }
@@ -176,6 +181,10 @@ namespace gfx
         { return mSubMeshKey; }
         inline void SetSubMeshKey(std::string key) noexcept
         { mSubMeshKey = std::move(key); }
+        inline void SetTime(double time) noexcept
+        { mTime = time; }
+        inline void SetRandomValue(float value) noexcept
+        { mRandom = value; }
 
         void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
@@ -184,6 +193,7 @@ namespace gfx
         std::string GetGeometryId(const Environment& env) const override;
         bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
         bool Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
+        void Update(const Environment& env, float dt) override;
 
         DrawCmd GetDrawCmd() const override;
 
@@ -198,10 +208,11 @@ namespace gfx
 
         const DrawableClass* GetClass() const override
         { return mClass.get(); }
-
     private:
         std::shared_ptr<const PolygonMeshClass> mClass;
         std::string mSubMeshKey;
+        double mTime = 0.0;
+        float mRandom = 0.0f;
         mutable bool mError = false;
     };
 

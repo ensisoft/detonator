@@ -19,6 +19,7 @@
 #include "warnpop.h"
 
 #include "base/assert.h"
+#include "base/math.h"
 #include "base/logging.h"
 #include "data/reader.h"
 #include "data/writer.h"
@@ -169,6 +170,48 @@ std::string PolygonMeshClass::GetGeometryId(const Environment& env) const
     return mId;
 }
 
+std::string PolygonMeshClass::GetShaderId(const Environment& env) const
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mMesh);
+    hash = base::hash_combine(hash, mShaderSrc);
+    hash = base::hash_combine(hash, env.instanced_draw);
+    return std::to_string(hash);
+}
+
+std::string PolygonMeshClass::GetShaderName(const Environment& env) const
+{
+    if (HasShaderSrc())
+        return mName;
+
+    return base::FormatString("%1,%2",
+        env.instanced_draw ? "Instanced" : "", mMesh);
+}
+
+ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& device) const
+{
+    ShaderSource src;
+
+    const auto mesh = GetMeshType();
+    if (mesh == MeshType::Simple2D)
+        src = MakeSimple2DVertexShader(device, env.instanced_draw);
+    else if (mesh == MeshType::Simple3D)
+        src = MakeSimple3DVertexShader(device, env.instanced_draw);
+    else if (mesh == MeshType::Model3D)
+        src = MakeModel3DVertexShader(device, env.instanced_draw); // todo:
+    else BUG("No such vertex shader");
+
+    if (!mShaderSrc.empty())
+    {
+        src.ReplaceToken("CUSTOM_VERTEX_TRANSFORM", mShaderSrc);
+        src.AddPreprocessorDefinition("CUSTOM_VERTEX_TRANSFORM");
+        src.AddDebugInfo("Mesh Class Name", mName);
+        src.AddDebugInfo("Mesh Class ID", mId);
+        src.AddDebugInfo("Mesh Type", base::ToString(mMesh));
+    }
+    return src;
+}
+
 void PolygonMeshClass::SetSubMeshDrawCmd(const std::string& key, const DrawCmd& cmd)
 {
     mSubMeshes[key] = cmd;
@@ -187,6 +230,7 @@ std::size_t PolygonMeshClass::GetHash() const
     hash = base::hash_combine(hash, mStatic);
     hash = base::hash_combine(hash, mContentHash);
     hash = base::hash_combine(hash, mContentUri);
+    hash = base::hash_combine(hash, mShaderSrc);
     hash = base::hash_combine(hash, mMesh);
 
     std::set<std::string> keys;
@@ -237,6 +281,7 @@ void PolygonMeshClass::IntoJson(data::Writer& writer) const
     writer.Write("name",   mName);
     writer.Write("static", mStatic);
     writer.Write("uri",    mContentUri);
+    writer.Write("src",    mShaderSrc);
     writer.Write("mesh",   mMesh);
 
     if (mData.has_value())
@@ -285,6 +330,8 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
     ok &= reader.Read("static", &mStatic);
     ok &= reader.Read("uri",    &mContentUri);
     ok &= reader.Read("mesh",   &mMesh);
+    if (reader.HasValue("src"))
+        ok &= reader.Read("src", &mShaderSrc);
 
     if (const auto& inline_chunk = reader.GetReadChunk("inline_data"))
     {
@@ -465,24 +512,31 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
     return true;
 }
 
+PolygonMeshInstance::PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass, std::string sub_mesh_key ) noexcept
+    : mClass(std::move(klass))
+    , mSubMeshKey(std::move(sub_mesh_key))
+    , mRandom(math::rand<0x12e4584>(0.0f, 1.0f))
+{}
+
+PolygonMeshInstance::PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key)
+    : mClass(std::make_shared<PolygonMeshClass>(klass))
+    , mSubMeshKey(std::move(sub_mesh_key))
+    , mRandom(math::rand<0x12e4584>(0.0f, 1.0f))
+{}
+
 void PolygonMeshInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
+    program.SetUniform("kTime", (float)mTime);
+    program.SetUniform("kRandom",(float)mRandom);
 }
+
 ShaderSource PolygonMeshInstance::GetShader(const Environment& env, const Device& device) const
 {
-    const auto mesh = GetMeshType();
-    if (mesh == MeshType::Simple2D)
-        return MakeSimple2DVertexShader(device, env.instanced_draw);
-    else if (mesh == MeshType::Simple3D)
-        return MakeSimple3DVertexShader(device, env.instanced_draw);
-    else if (mesh == MeshType::Model3D)
-        return MakeModel3DVertexShader(device, env.instanced_draw); // todo:
-    else BUG("No such vertex shader");
-    return {};
+    return mClass->GetShader(env, device);
 }
 
 std::string PolygonMeshInstance::GetGeometryId(const Environment& env) const
@@ -521,6 +575,11 @@ bool PolygonMeshInstance::Construct(const Environment& env, const InstancedDraw&
     return true;
 }
 
+void PolygonMeshInstance::Update(const Environment& env, float dt)
+{
+    mTime += dt;
+}
+
 Drawable::DrawCmd PolygonMeshInstance::GetDrawCmd() const
 {
     if (mSubMeshKey.empty())
@@ -553,28 +612,12 @@ size_t PolygonMeshInstance::GetGeometryHash() const
 
 std::string PolygonMeshInstance::GetShaderId(const Environment& env) const
 {
-    const auto mesh = GetMeshType();
-    if (mesh == MeshType::Simple2D)
-        return env.instanced_draw ? "simple-instanced-2D-vertex-shader" : "simple-2D-vertex-shader";
-    else if (mesh == MeshType::Simple3D)
-        return env.instanced_draw ? "simple-instanced-3D-vertex-shader" : "simple-3D-vertex-shader";
-    else if (mesh == MeshType::Model3D) // todo
-        return env.instanced_draw ? "instanced-3D-vertex-shader" : "3D-vertex-shader";
-    else BUG("No such vertex shader.");
-    return "";
+    return mClass->GetShaderId(env);
 }
 
 std::string PolygonMeshInstance::GetShaderName(const Environment& env) const
 {
-    const auto mesh = GetMeshType();
-    if (mesh == MeshType::Simple2D)
-        return env.instanced_draw ? "SimpleInstanced2DVertexShader" : "Simple2DVertexShader";
-    else if (mesh == MeshType::Simple3D)
-        return env.instanced_draw ? "SimpleInstanced3DVertexShader" : "Simple3DVertexShader";
-    else if (mesh == MeshType::Model3D)
-        return env.instanced_draw ? "Instanced3DVertexShader" : "3DVertexShader";
-    else BUG("No such vertex shader");
-    return "";
+    return mClass->GetShaderName(env);
 }
 
 } // namespace

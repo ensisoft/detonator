@@ -52,6 +52,7 @@
 #include "graphics/drawcmd.h"
 #include "graphics/texture_file_source.h"
 #include "graphics/texture_bitmap_buffer_source.h"
+#include "graphics/shader_source.h"
 #include "graphics/tool/polygon.h"
 
 bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
@@ -1598,6 +1599,73 @@ void unit_test_polygon_mesh()
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
     }
+}
+
+void unit_test_polygon_shader()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // test shader ID generation
+    {
+        gfx::PolygonMeshClass klass0;
+        klass0.SetName("klass0");
+        klass0.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2D);
+        klass0.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+
+        gfx::PolygonMeshClass klass1;
+        klass1.SetName("klass1");
+        klass1.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2D);
+        klass1.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+
+        gfx::DrawableClass::Environment env;
+        env.instanced_draw = false;
+        TEST_REQUIRE(klass0.GetShaderId(env) == klass1.GetShaderId(env));
+
+        env.instanced_draw = true;
+        TEST_REQUIRE(klass0.GetShaderId(env) == klass1.GetShaderId(env));
+
+        env.instanced_draw = true;
+        std::string id0 = klass0.GetShaderId(env);
+        env.instanced_draw = false;
+        std::string id1 = klass1.GetShaderId(env);
+        TEST_REQUIRE(id0 != id1);
+
+
+        klass0.SetShaderSrc(R"(
+void CustomVertexTransform(inout VertexData vs) {
+  vs.vertex = vec4(0.0);
+}
+        )");
+        env.instanced_draw = false;
+        TEST_REQUIRE(klass0.GetShaderId(env) != klass1.GetShaderId(env));
+
+    }
+
+    // test shader source generation
+    {
+        gfx::PolygonMeshClass klass;
+        klass.SetName("klass0");
+        klass.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2D);
+        klass.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        klass.SetShaderSrc(R"(
+void CustomVertexTransform(inout VertexData vs) {
+  // bla
+  vs.vertex = vec4(0.0);
+}
+        )");
+
+        TestDevice dev;
+        gfx::DrawableClass::Environment env;
+        env.instanced_draw = false;
+
+        const auto& src = klass.GetShader(env, dev);
+        const auto& source = src.GetSource();
+        //std::cout << source;
+        TEST_REQUIRE(base::Contains(source, "#define CUSTOM_VERTEX_TRANSFORM"));
+        TEST_REQUIRE(base::Contains(source, "void CustomVertexTransform(inout VertexData vs"));
+        TEST_REQUIRE(base::Contains(source, "// bla"));
+
+    }
 
 }
 
@@ -2301,6 +2369,7 @@ int test_main(int argc, char* argv[])
     unit_test_custom_textures();
     unit_test_polygon_inline_data();
     unit_test_polygon_mesh();
+    unit_test_polygon_shader();
     unit_test_local_particles();
     unit_test_global_particles();
     unit_test_particles();
