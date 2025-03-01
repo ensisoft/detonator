@@ -57,6 +57,7 @@ namespace game
         using RenderStyle      = game::RenderStyle;
         using RenderView       = game::RenderView;
         using RenderProjection = game::RenderProjection;
+        using CoordinateSpace  = game::CoordinateSpace;
 
         enum class Flags {
             // Whether the item is currently visible or not.
@@ -111,6 +112,8 @@ namespace game
         { mRenderView = view;  }
         void SetRenderProjection(RenderProjection projection) noexcept
         { mRenderProjection = projection; }
+        void SetCoordinateSpace(CoordinateSpace space) noexcept
+        { mCoordinateSpace = space; }
         void SetTimeScale(float scale) noexcept
         { mTimeScale = scale; }
         void SetDepth(float depth) noexcept
@@ -153,6 +156,8 @@ namespace game
         { return mRenderView; }
         RenderProjection GetRenderProjection() const noexcept
         { return mRenderProjection; }
+        CoordinateSpace  GetCoordinateSpace() const noexcept
+        { return mCoordinateSpace; }
         base::bitflag<Flags> GetFlags() const noexcept
         { return mBitFlags; }
         MaterialParamMap GetMaterialParams() noexcept
@@ -226,6 +231,7 @@ namespace game
         RenderStyle  mRenderStyle = RenderStyle::Solid;
         RenderView mRenderView = RenderView::AxisAligned;
         RenderProjection mRenderProjection = RenderProjection::Orthographic;
+        CoordinateSpace  mCoordinateSpace = CoordinateSpace::Scene;
         MaterialParamMap mMaterialParams;
     };
 
@@ -239,6 +245,7 @@ namespace game
         using RenderStyle      = DrawableItemClass::RenderStyle;
         using RenderView       = DrawableItemClass::RenderView;
         using RenderProjection = DrawableItemClass::RenderProjection;
+        using CoordinateSpace  = DrawableItemClass::CoordinateSpace;
 
         using CommandArg = std::variant<float, int, std::string>;
         struct Command {
@@ -288,6 +295,8 @@ namespace game
         { return mClass->GetRenderView(); }
         RenderProjection GetRenderProjection() const noexcept
         { return mClass->GetRenderProjection(); }
+        CoordinateSpace GetCoordinateSpace() const noexcept
+        { return mClass->GetCoordinateSpace(); }
         Rotator GetRotator() const noexcept
         { return mInstanceRotator; }
         glm::vec3 GetOffset() const noexcept

@@ -26,6 +26,7 @@
 #include "base/hash.h"
 #include "data/fwd.h"
 #include "game/color.h"
+#include "game/enum.h"
 
 namespace game
 {
@@ -66,6 +67,8 @@ namespace game
             // Contribute to bloom post-processing effect.
             PP_EnableBloom
         };
+        using CoordinateSpace = game::CoordinateSpace;
+
         TextItemClass()
         {
             mBitFlags.set(Flags::VisibleInGame, true);
@@ -98,6 +101,8 @@ namespace game
         { mRasterWidth = width;}
         void SetRasterHeight(unsigned height) noexcept
         { mRasterHeight = height; }
+        void SetCoordinateSpace(CoordinateSpace space) noexcept
+        { mCoordinateSpace = space; }
 
         // class getters
         bool TestFlag(Flags flag) const noexcept
@@ -126,6 +131,8 @@ namespace game
         { return mHAlign; }
         VerticalTextAlign GetVAlign() const noexcept
         { return mVAlign; }
+        CoordinateSpace  GetCoordinateSpace() const noexcept
+        { return mCoordinateSpace; }
 
         void IntoJson(data::Writer& data) const;
 
@@ -143,6 +150,7 @@ namespace game
         unsigned mRasterHeight = 0;
         float mLineHeight = 1.0f;
         Color4f mTextColor = Color::White;
+        CoordinateSpace mCoordinateSpace = CoordinateSpace::Scene;
     };
 
     class TextItem
@@ -151,6 +159,8 @@ namespace game
         using Flags = TextItemClass::Flags;
         using VerticalTextAlign = TextItemClass::VerticalTextAlign;
         using HorizontalTextAlign = TextItemClass::HorizontalTextAlign;
+        using CoordinateSpace = TextItemClass::CoordinateSpace;
+
         explicit TextItem(std::shared_ptr<const TextItemClass> klass) noexcept
           : mClass(std::move(klass))
         {
@@ -176,6 +186,8 @@ namespace game
         { return mClass->GetRasterWidth(); }
         unsigned GetRasterHeight() const noexcept
         { return mClass->GetRasterHeight(); }
+        CoordinateSpace  GetCoordinateSpace() const noexcept
+        { return mClass->GetCoordinateSpace(); }
         HorizontalTextAlign GetHAlign() const noexcept
         { return mClass->GetHAlign(); }
         VerticalTextAlign GetVAlign() const noexcept

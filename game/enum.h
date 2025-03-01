@@ -84,4 +84,15 @@ namespace game {
         Orthographic, Perspective
     };
 
+    enum class CoordinateSpace {
+        // The entity exists in scene space, meaning it is positioned and transformed
+        // relative to the game world. It moves as the camera moves.
+        Scene,
+
+        // The entity exists in camera space, meaning it stays fixed relative to
+        // the camera. Useful for UI elements or background effects that should
+        // always remain in the viewport.
+        Camera
+    };
+
 } // namespace
