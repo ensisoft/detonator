@@ -153,6 +153,10 @@ namespace gfx
                 return true;
             return false;
         }
+        bool HasSize() const noexcept
+        {
+            return GetWidth() && GetHeight();
+        }
 
         // Allocate texture storage based on the texture format and dimensions.
         // The contents of the texture are unspecified and any previous contents

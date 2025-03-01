@@ -652,6 +652,8 @@ Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, const std::stri
         ypos = ((float)buffer_height - text_height);
     }
 
+    bool have_glyphs = false;
+
     for (const auto& line : lines)
     {
         float xpos = 0;
@@ -683,6 +685,7 @@ Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, const std::stri
             glyph.texture_height = font_glyph->height;
             glyphs.push_back(glyph);
             xpos += glyph_width;
+            have_glyphs = true;
         }
 
         if (mHorizontalAlign == HorizontalAlignment::AlignCenter)
@@ -703,6 +706,13 @@ Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, const std::stri
         }
         ypos += mText.lineheight * mText.fontsize;
     }
+
+    // if all the glyphs failed, then we have no text to rasterize/composite
+    // treat this as a failure and propagate this information back to the
+    // caller. depending on the use case (such as a font choosing dialog)
+    // we might want to display some alternative text.
+    if (!have_glyphs)
+        return nullptr;
 
     result_texture->Allocate(buffer_width, buffer_height, gfx::Texture::Format::sRGBA);
 
