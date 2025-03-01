@@ -103,12 +103,13 @@ void DlgImgPack::on_btnBrowseImage_clicked()
         }
     }
 
-    ClearList(mUI.listWidget);
+    // why would we clear here??
+    //ClearList(mUI.listWidget);
     for (const auto& source : sources)
         AddItem(mUI.listWidget, source.file);
 
-    mSources = std::move(sources);
-
+    base::AppendVector(mSources, sources);
+    
     SetCurrentRow(mUI.listWidget, 0);
     on_listWidget_currentRowChanged(0);
 
