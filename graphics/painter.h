@@ -226,7 +226,7 @@ namespace gfx
         // which provides the geometrical information of the object to be drawn, a material,
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
-        void Draw(const DrawList& list, const ShaderProgram& program) const;
+        bool Draw(const DrawList& list, const ShaderProgram& program) const;
 
         // legacy draw functions.
 
@@ -255,12 +255,12 @@ namespace gfx
 
         // Similar to the legacy draw except that allows the device state to be
         // changed through state and shader pass objects.
-        void Draw(const Drawable& shape,
+        bool Draw(const Drawable& shape,
                   const glm::mat4& model,
                   const Material& material,
                   const DrawState& state,
                   const ShaderProgram& program) const;
-        void Draw(const Drawable& shape,
+        bool Draw(const Drawable& shape,
                   const glm::mat4& model,
                   const Material& material,
                   const DrawState& state,
@@ -277,7 +277,7 @@ namespace gfx
         // function is not efficient since the device state is changed on every draw
         // to the required state. If possible prefer the vector format which allows
         // to draw multiple objects at once.
-        void Draw(const Drawable& drawable,
+        bool Draw(const Drawable& drawable,
                   const glm::mat4& model,
                   const Material& material,
                   const LegacyDrawState& draw_state = LegacyDrawState()) const;

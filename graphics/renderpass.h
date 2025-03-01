@@ -71,7 +71,7 @@ namespace gfx
           , mStencilFunc(func)
           , mPainter(painter)
         {}
-        void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
+        bool Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
             Painter::DrawState state;
             state.write_color   = false;
@@ -99,7 +99,7 @@ namespace gfx
             }
 
             StencilShaderProgram program;
-            mPainter.Draw(drawable, transform, material, state, program);
+            return mPainter.Draw(drawable, transform, material, state, program);
         }
     private:
         const WriteValue mStencilWriteValue = 1;
@@ -116,7 +116,7 @@ namespace gfx
             : mStencilRefValue(stencil_pass_value)
             , mPainter(painter)
         {}
-        void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
+        bool Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
             Painter::DrawState state;
             state.write_color   = true;
@@ -128,7 +128,7 @@ namespace gfx
             state.stencil_mask  = 0xff;
 
             FlatShadedColorProgram program;
-            mPainter.Draw(drawable, transform, material, state, program);
+            return mPainter.Draw(drawable, transform, material, state, program);
         }
     private:
         const PassValue mStencilRefValue;

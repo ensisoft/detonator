@@ -56,7 +56,7 @@ gfx::MaterialInstance MakeMaterial(const gfx::Color4f& color)
 namespace gfx
 {
 
-void DrawTextRect(Painter& painter,
+bool DrawTextRect(Painter& painter,
     const std::string& text,
     const std::string& font,
     unsigned font_size_px,
@@ -81,7 +81,7 @@ void DrawTextRect(Painter& painter,
         const auto half_period = full_period * 0.5;
         const auto time = fmodf(base::GetTime(), full_period);
         if (time >= half_period)
-            return;
+            return true;
     }
 
     TextMaterial material = CreateMaterialFromText(text, font, color, font_size_px,
@@ -113,25 +113,25 @@ void DrawTextRect(Painter& painter,
     Transform t;
     t.Resize(raster_width, raster_height);
     t.MoveTo(rect);
-    painter.Draw(Rectangle(), t, material);
+    return painter.Draw(Rectangle(), t, material);
 }
 
-void FillRect(Painter& painter, const FRect& rect, const Color4f& color)
+bool FillRect(Painter& painter, const FRect& rect, const Color4f& color)
 {
-    FillRect(painter, rect, MakeMaterial(color));
+    return FillRect(painter, rect, MakeMaterial(color));
 }
 
-void FillRect(Painter& painter, const FRect& rect, const Material& material)
+bool FillRect(Painter& painter, const FRect& rect, const Material& material)
 {
-    FillShape(painter, rect, Rectangle(), material);
+    return FillShape(painter, rect, Rectangle(), material);
 }
 
-void FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Color4f& color)
+bool FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Color4f& color)
 {
     const float alpha = color.Alpha();
-    FillShape(painter, rect, shape, MakeMaterial(color));
+    return FillShape(painter, rect, shape, MakeMaterial(color));
 }
-void FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Material& material)
+bool FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Material& material)
 {
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
@@ -141,25 +141,25 @@ void FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const
     Transform trans;
     trans.Resize(width, height);
     trans.Translate(x, y);
-    painter.Draw(shape, trans, material);
+    return painter.Draw(shape, trans, material);
 }
 
-void DrawRectOutline(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
+bool DrawRectOutline(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
 {
-    DrawRectOutline(painter, rect, MakeMaterial(color));
+    return DrawRectOutline(painter, rect, MakeMaterial(color));
 }
 
-void DrawRectOutline(Painter& painter, const FRect& rect, const Material& material, float line_width)
+bool DrawRectOutline(Painter& painter, const FRect& rect, const Material& material, float line_width)
 {
-    DrawShapeOutline(painter, rect, gfx::Rectangle(), material, line_width);
+    return DrawShapeOutline(painter, rect, gfx::Rectangle(), material, line_width);
 }
 
-void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
+bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
                       const Color4f& color, float line_width)
 {
-    DrawShapeOutline(painter, rect, shape, MakeMaterial(color), line_width);
+    return DrawShapeOutline(painter, rect, shape, MakeMaterial(color), line_width);
 }
-void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
+bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
                       const Material& material, float line_width)
 {
     const auto width  = rect.GetWidth();
@@ -182,9 +182,8 @@ void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape
             batch.AddLine(x+width-lw50, y+lw50, x+width-lw50, y+height);
 
             gfx::Transform transform;
-            painter.Draw(batch, transform, material,
-                         Painter::LegacyDrawState(line_width));
-            return;
+            return painter.Draw(batch, transform, material,
+                                Painter::LegacyDrawState(line_width));
         }
     }
 
@@ -204,16 +203,19 @@ void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape
 
     const StencilMaskPass mask(1, 0, painter);
     const StencilTestColorWritePass cover(1, painter);
-    mask.Draw(shape, mask_transform, material);
-    cover.Draw(shape, outline_transform, material);
+
+    bool ok = true;
+    ok &= mask.Draw(shape, mask_transform, material);
+    ok &= cover.Draw(shape, outline_transform, material);
+    return ok;
 }
 
-void DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width)
+bool DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width)
 {
-    DebugDrawLine(painter, a, b, MakeMaterial(color), line_width);
+    return DebugDrawLine(painter, a, b, MakeMaterial(color), line_width);
 }
 
-void DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width)
+bool DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width)
 {
     // The line shape defines a horizontal line so in order to
     // support lines with arbitrary directions we need to figure
@@ -239,15 +241,15 @@ void DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Mat
     trans.Translate(a);
 
     // Draw the shape (line)
-    painter.Draw(StaticLine(), trans, material, line_width);
+    return painter.Draw(StaticLine(), trans, material, line_width);
 }
 
-void DebugDrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width)
+bool DebugDrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width)
 {
-    DebugDrawCircle(painter, circle, MakeMaterial(color), line_width);
+    return DebugDrawCircle(painter, circle, MakeMaterial(color), line_width);
 }
 
-void DebugDrawCircle(Painter& painter, const FCircle & circle, const Material& material, float line_width)
+bool DebugDrawCircle(Painter& painter, const FCircle & circle, const Material& material, float line_width)
 {
     const auto radius = circle.GetRadius();
 
@@ -255,20 +257,22 @@ void DebugDrawCircle(Painter& painter, const FCircle & circle, const Material& m
     trans.Resize(circle.Inscribe());
     trans.Translate(circle.GetCenter());
     trans.Translate(-radius, -radius);
-    painter.Draw(Circle(SimpleShapeStyle::Outline), trans, material, line_width);
+    return painter.Draw(Circle(SimpleShapeStyle::Outline), trans, material, line_width);
 }
 
-void DebugDrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
+bool DebugDrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
 {
-    DebugDrawRect(painter, rect, MakeMaterial(color), line_width);
+    return DebugDrawRect(painter, rect, MakeMaterial(color), line_width);
 }
-void DebugDrawRect(Painter& painter, const FRect& rect, const Material& material, float line_width)
+bool DebugDrawRect(Painter& painter, const FRect& rect, const Material& material, float line_width)
 {
+    bool ok = true;
     const auto [c0, c1, c2, c3] = rect.GetCorners();
-    gfx::DebugDrawLine(painter, c0, c1, material, line_width);
-    gfx::DebugDrawLine(painter, c1, c3, material, line_width);
-    gfx::DebugDrawLine(painter, c3, c2, material, line_width);
-    gfx::DebugDrawLine(painter, c2, c0, material, line_width);
+    ok &= gfx::DebugDrawLine(painter, c0, c1, material, line_width);
+    ok &= gfx::DebugDrawLine(painter, c1, c3, material, line_width);
+    ok &= gfx::DebugDrawLine(painter, c3, c2, material, line_width);
+    ok &= gfx::DebugDrawLine(painter, c2, c0, material, line_width);
+    return ok;
 }
 
 

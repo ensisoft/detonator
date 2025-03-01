@@ -65,7 +65,7 @@ class Material;
 class Drawable;
 
 // Draw text inside the given rectangle.
-void DrawTextRect(Painter& painter,
+bool DrawTextRect(Painter& painter,
     const std::string& text,
     const std::string& font,
     unsigned font_size_px,
@@ -76,36 +76,36 @@ void DrawTextRect(Painter& painter,
     float line_height = 1.0f);
 
 // Draw a rectangle filled with the desired color or material.
-void FillRect(Painter& painter, const FRect& rect, const Color4f& color);
-void FillRect(Painter& painter, const FRect& rect, const Material& material);
+bool FillRect(Painter& painter, const FRect& rect, const Color4f& color);
+bool FillRect(Painter& painter, const FRect& rect, const Material& material);
 
 // Fill a shape within the specified rectangle with the desired color or material.
-void FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Color4f& color);
-void FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Material& material);
+bool FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Color4f& color);
+bool FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Material& material);
 
 // Draw the outline of a rectangle. the rectangle is defined in pixels
 // and positioned relative to the top left corer of the render target/surface.
 // If rotation is non-zero the rect is first rotated *then* translated.
-void DrawRectOutline(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
-void DrawRectOutline(Painter& painter, const FRect& rect, const Material& material, float line_width = 1.0f);
+bool DrawRectOutline(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
+bool DrawRectOutline(Painter& painter, const FRect& rect, const Material& material, float line_width = 1.0f);
 
-void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
+bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
                       const Color4f& color, float line_width = 1.0f);
-void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
+bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
                       const Material& material, float line_width = 1.0f);
 
 // Draw a line from the center of point A to the center of point B
 // using the given line width (if possible) and with the given color.
 // Points A and B are relative to the top left corner of the rendering
 // target (e.g the window surface).
-void DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width = 1.0f);
+bool DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width = 1.0f);
 // Like above but instead use a material for rasterizing the line fragments.
-void DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width = 1.0f);
+bool DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width = 1.0f);
 
-void DebugDrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width = 1.0f);
-void DebugDrawCircle(Painter& painter, const FCircle& circle, const Material& material, float line_width = 1.0f);
+bool DebugDrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width = 1.0f);
+bool DebugDrawCircle(Painter& painter, const FCircle& circle, const Material& material, float line_width = 1.0f);
 
-void DebugDrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
-void DebugDrawRect(Painter& painter, const FRect& rect, const Material& material, float line_width = 1.0f);
+bool DebugDrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
+bool DebugDrawRect(Painter& painter, const FRect& rect, const Material& material, float line_width = 1.0f);
 
 } // namespace
