@@ -104,6 +104,12 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         texture->SetFilter(Texture::MagFilter::Linear);
     }
 
+    // might have been allocated but failed to rasterize any content.
+    // we keep it around to avoid re-rasterizing unless the content
+    // actually changes.
+    if (!texture->HasSize())
+        return false;
+
     program.SetTexture("kTexture", 0, *texture);
     program.SetUniform("kColor", mColor);
     program.SetUniform("kMaterialFlags", static_cast<unsigned>(mFlags));
