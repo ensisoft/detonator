@@ -68,7 +68,7 @@ void Painter::Prime(DrawCommand& draw) const
         draw.instance_draw_ptr = GetGpuInstancedDraw(draw.instanced_draw.value(), *draw.drawable, drawable_env);
 }
 
-void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
+bool Painter::Draw(const DrawList& list, const ShaderProgram& program) const
 {
     static const glm::mat4 Identity(1.0f);
 
@@ -77,6 +77,8 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
     device_state.scissor  = MapToDevice(mScissor);
 
     std::unordered_set<std::string> used_programs;
+
+    bool success = false;
 
     for (const auto& draw : list)
     {
@@ -162,10 +164,14 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
                                           cmd_params.draw_cmd_count,
                                           instanced_draw),
                       device_state, mFrameBuffer);
+
+        // we supposedly rendered something, mark this as success.
+        success = true;
     }
+    return success;
 }
 
-void Painter::Draw(const Drawable& shape,
+bool Painter::Draw(const Drawable& shape,
                    const glm::mat4& model,
                    const Material& material,
                    const DrawState& state,
@@ -177,10 +183,10 @@ void Painter::Draw(const Drawable& shape,
     list[0].material = &material;
     list[0].model    = &model;
     list[0].state    = state;
-    Draw(list, program);
+    return Draw(list, program);
 }
 
-void Painter::Draw(const Drawable& shape,
+bool Painter::Draw(const Drawable& shape,
                    const glm::mat4& model,
                    const Material& material,
                    const DrawState& state,
@@ -195,10 +201,10 @@ void Painter::Draw(const Drawable& shape,
     list[0].state    = state;
     list[0].state.line_width = legacy_draw_state.line_width;
     list[0].state.culling    = legacy_draw_state.culling;
-    Draw(list, program);
+    return Draw(list, program);
 }
 
-void Painter::Draw(const Drawable& drawable,
+bool Painter::Draw(const Drawable& drawable,
                    const glm::mat4& model,
                    const Material& material,
                    const LegacyDrawState& draw_state) const
@@ -209,7 +215,7 @@ void Painter::Draw(const Drawable& drawable,
     state.depth_test   = DepthTest::Disabled;
 
     FlatShadedColorProgram program;
-    Draw(drawable, model, material, state, program, draw_state);
+    return Draw(drawable, model, material, state, program, draw_state);
 }
 
 // static
