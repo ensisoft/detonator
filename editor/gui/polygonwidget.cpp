@@ -24,10 +24,6 @@
 
 #include "base/math.h"
 #include "data/json.h"
-#include "editor/app/eventlog.h"
-#include "editor/gui/polygonwidget.h"
-#include "editor/gui/utility.h"
-#include "editor/gui/settings.h"
 #include "graphics/material.h"
 #include "graphics/material_class.h"
 #include "graphics/material_instance.h"
@@ -38,6 +34,12 @@
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/guidegrid.h"
+#include "editor/app/eventlog.h"
+#include "editor/gui/polygonwidget.h"
+#include "editor/gui/utility.h"
+#include "editor/gui/settings.h"
+#include "editor/gui/dlgtextedit.h"
+#include "editor/gui/drawing.h"
 
 namespace {
 
@@ -92,6 +94,11 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
     mUI.widget->onKeyPress = std::bind(&ShapeWidget::OnKeyPressEvent,
         this, std::placeholders::_1);
 
+    auto* menu = new QMenu(this);
+    menu->addAction(mUI.actionCustomizeShader);
+    menu->addAction(mUI.actionShowShader);
+    mUI.btnAddShader->setMenu(menu);
+
     mOriginalHash = mPolygon.GetHash();
 
     SetList(mUI.blueprints, workspace->ListUserDefinedMaterials());
@@ -100,6 +107,7 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
     SetValue(mUI.name, QString("My Shape"));
     SetValue(mUI.ID, mPolygon.GetId());
     SetValue(mUI.staticInstance, mPolygon.IsStatic());
+    SetValue(mUI.shaderFile, "Built-in Shader");
     setWindowTitle(GetValue(mUI.name));
     setFocusPolicy(Qt::StrongFocus);
 
@@ -126,9 +134,10 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
     SetValue(mUI.name, resource.GetName());
     SetValue(mUI.ID, mPolygon.GetId());
     SetValue(mUI.staticInstance, mPolygon.IsStatic());
-    SetValue(mUI.blueprints, ListItemId(material));
-
+    SetValue(mUI.shaderFile, mPolygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
+    SetEnabled(mUI.btnResetShader, mPolygon.HasShaderSrc());
     SetEnabled(mUI.actionClear, mPolygon.HasInlineData());
+    SetValue(mUI.blueprints, ListItemId(material));
 
     if (!material.isEmpty())
     {
@@ -238,6 +247,8 @@ bool ShapeWidget::LoadState(const Settings& settings)
     SetValue(mUI.ID, mPolygon.GetId());
     SetValue(mUI.staticInstance, mPolygon.IsStatic());
     SetValue(mUI.blueprints, ListItemId(material));
+    SetValue(mUI.shaderFile, mPolygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
+    SetEnabled(mUI.btnResetShader, mPolygon.HasShaderSrc());
     SetEnabled(mUI.actionClear, mPolygon.HasInlineData());
 
     mBuilder.InitFrom(mPolygon);
@@ -359,6 +370,7 @@ void ShapeWidget::on_actionStop_triggered()
     mUI.actionPlay->setEnabled(true);
     mPaused = false;
     mPlaying = false;
+    mTime = 0.0;
 }
 
 void ShapeWidget::on_actionSave_triggered()
@@ -393,6 +405,72 @@ void ShapeWidget::on_actionNewTriangleFan_toggled(bool checked)
     }
 }
 
+void ShapeWidget::on_actionShowShader_triggered()
+{
+    auto* device = mUI.widget->GetDevice();
+
+    gfx::Drawable::Environment environment;
+    environment.editing_mode  = false; // we want to see the shader as it will be, so using false here
+    environment.instanced_draw = false;
+    const auto& source = mPolygon.GetShader(environment, *device);
+
+    DlgTextEdit dlg(this);
+    dlg.SetText(source.GetSource(), "GLSL");
+    dlg.SetReadOnly(true);
+    dlg.SetTitle("Shader Source");
+    dlg.LoadGeometry(mWorkspace, "polygon-shader-source-dialog-geometry");
+    dlg.execFU();
+    dlg.SaveGeometry(mWorkspace, "polygon-shader-source-dialog-geometry");
+}
+
+void ShapeWidget::on_actionCustomizeShader_triggered()
+{
+    if (mShaderEditor)
+    {
+        mShaderEditor->activateWindow();
+        return;
+    }
+
+    mCustomizedSource = mPolygon.GetShaderSrc();
+    if (!mPolygon.HasShaderSrc())
+    {
+        mPolygon.SetShaderSrc(R"(
+// this is your custom vertex transform function.
+// you can modify the incoming vertex data here as want.
+void CustomVertexTransform(inout VertexData vs) {
+
+   // your code here
+
+})");
+    }
+
+    mShaderEditor = new DlgTextEdit(this);
+    mShaderEditor->LoadGeometry(mWorkspace, "polygon-shader-editor-geometry");
+    mShaderEditor->SetText(mPolygon.GetShaderSrc(), "GLSL");
+    mShaderEditor->SetTitle("Shader Source");
+    mShaderEditor->EnableApply(true);
+    mShaderEditor->showFU();
+    mShaderEditor->finished = [this](int ret) {
+        if (ret == QDialog::Rejected)
+            mPolygon.SetShaderSrc(mCustomizedSource);
+        else if (ret == QDialog::Accepted)
+            mPolygon.SetShaderSrc(mShaderEditor->GetText());
+        mShaderEditor->SaveGeometry(mWorkspace, "polygon-shader-editor-geometry");
+        mShaderEditor->deleteLater();
+        mShaderEditor = nullptr;
+
+        SetValue(mUI.shaderFile, mPolygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
+        SetEnabled(mUI.btnResetShader, mPolygon.HasShaderSrc());
+
+        mUI.widget->GetPainter()->ClearErrors();
+    };
+    mShaderEditor->apply = [this]() {
+        mPolygon.SetShaderSrc(mShaderEditor->GetText());
+
+        mUI.widget->GetPainter()->ClearErrors();
+    };
+}
+
 void ShapeWidget::on_actionClear_triggered()
 {
     mBuilder.ClearVertices();
@@ -408,6 +486,15 @@ void ShapeWidget::on_blueprints_currentIndexChanged(int)
 
     auto klass = mWorkspace->GetMaterialClassById(GetItemId(mUI.blueprints));
     mBlueprint = gfx::CreateMaterialInstance(klass);
+}
+
+void ShapeWidget::on_btnResetShader_clicked()
+{
+    mPolygon.SetShaderSrc(std::string{});
+    SetValue(mUI.shaderFile, "Built-In Shader");
+    SetEnabled(mUI.btnResetShader, false);
+
+    mUI.widget->GetPainter()->ClearErrors();
 }
 
 void ShapeWidget::on_btnResetBlueprint_clicked()
@@ -494,13 +581,19 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     // content when it's being edited).
     // so hack around this problem by adding a suffix here.
     gfx::PolygonMeshClass poly(mPolygon.GetId() + "_1");
+    poly.SetShaderSrc(mPolygon.GetShaderSrc());
+    poly.SetName(mPolygon.GetName());
     mBuilder.BuildPoly(poly);
 
     // set to true since we're constructing this polygon on every frame
     // without this we'll eat all the static vertex/index buffers. argh!
     poly.SetDynamic(true);
 
-    painter.Draw(gfx::PolygonMeshInstance(poly), view, gfx::MaterialInstance(color));
+    gfx::PolygonMeshInstance mesh(poly);
+    mesh.SetTime(mTime);
+    mesh.SetRandomValue(0.123423); // random!
+
+    painter.Draw(mesh, view, gfx::MaterialInstance(color));
 
     // visualize the vertices.
     view.Resize(6, 6);
@@ -519,6 +612,12 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         {
             painter.Draw(gfx::Circle(), view, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
         }
+    }
+
+    if (painter.GetErrorCount())
+    {
+        ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
+        ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
     }
 
     if (!mActive)

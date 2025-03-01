@@ -33,6 +33,8 @@
 
 namespace gui
 {
+    class DlgTextEdit;
+
     class ShapeWidget : public MainWidget
     {
         Q_OBJECT
@@ -69,7 +71,10 @@ namespace gui
         void on_actionSave_triggered();
         void on_actionNewTriangleFan_toggled(bool checked);
         void on_actionClear_triggered();
+        void on_actionShowShader_triggered();
+        void on_actionCustomizeShader_triggered();
         void on_blueprints_currentIndexChanged(int);
+        void on_btnResetShader_clicked();
         void on_btnResetBlueprint_clicked();
         void on_staticInstance_stateChanged(int);
 
@@ -121,5 +126,7 @@ namespace gui
         // check against if there are unsaved changes.
         std::size_t mOriginalHash = 0;
     private:
+        DlgTextEdit* mShaderEditor = nullptr;
+        std::string mCustomizedSource;
     };
 } // namespace
