@@ -25,6 +25,7 @@
 #include "editor/app/eventlog.h"
 #include "editor/gui/dlgfont.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/drawing.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
@@ -48,12 +49,24 @@ DlgFont::DlgFont(QWidget* parent, const app::Workspace* workspace, const app::An
   , mDisplay(disp)
   , mSelectedFontURI(font)
 {
+    base::AppendVector(mFonts, ListWSFonts(workspace->GetDir()));
+    base::AppendVector(mFonts, ListAppFonts());
+
     if (!mSelectedFontURI.isEmpty())
     {
-        if (!mSelectedFontURI.startsWith("app://fonts"))
+        bool found_font = false;
+        for (const auto& font : mFonts)
+        {
+            if (font == mSelectedFontURI)
+            {
+                found_font = true;
+                break;
+            }
+        }
+        if (!found_font)
             mFonts.push_back(mSelectedFontURI);
     }
-    base::AppendVector(mFonts, ListAppFonts());
+
     mAllFonts = mFonts;
 
     // total fudge. the current size of the box for visualizing the
@@ -159,25 +172,36 @@ void DlgFont::PaintScene(gfx::Painter& painter, double secs)
         const auto xpos = xoffset + col * (box_width + BoxMargin);
         const auto ypos = yoffset + row * (box_height + BoxMargin);
 
-        gfx::TextBuffer::Text text_and_style;
-        text_and_style.text = "Quick brown fox\njumps over\nthe lazy dog.";
-        text_and_style.font = app::ToUtf8(uri);
-        text_and_style.fontsize   = mDisplay.font_size;
-        text_and_style.underline  = mDisplay.underline;
-        text_and_style.lineheight = 1.0f;
-        gfx::TextBuffer text;
-        text.SetBufferSize(box_width, box_height);
-        text.SetText(std::move(text_and_style));
-        gfx::TextMaterial material(std::move(text));
-        material.SetRuntime(mUI.widget->GetTime());
-        material.SetPointSampling(true);
-        material.SetColor(ToGfx(mDisplay.text_color));
-
-        gfx::FRect  rect;
+        gfx::FRect rect;
         rect.Resize(box_width, box_height);
         rect.Move(xpos, ypos);
-        rect.Translate(BoxMargin*0.5f, BoxMargin*0.5f);
-        gfx::FillRect(painter, rect, material);
+        rect.Translate(BoxMargin * 0.5f, BoxMargin * 0.5f);
+
+        if (!base::Contains(mFailedFonts, uri))
+        {
+            gfx::TextBuffer::Text text_and_style;
+            text_and_style.text = "Quick brown fox\njumps over\nthe lazy dog.";
+            text_and_style.font = app::ToUtf8(uri);
+            text_and_style.fontsize = mDisplay.font_size;
+            text_and_style.underline = mDisplay.underline;
+            text_and_style.lineheight = 1.0f;
+
+            gfx::TextBuffer text;
+            text.SetBufferSize(box_width, box_height);
+            text.SetText(std::move(text_and_style));
+
+            gfx::TextMaterial material(std::move(text));
+            material.SetRuntime(mUI.widget->GetTime());
+            material.SetPointSampling(true);
+            material.SetColor(ToGfx(mDisplay.text_color));
+
+            if (!gfx::FillRect(painter, rect, material))
+                mFailedFonts.insert(uri);
+        }
+        else
+        {
+            ShowError("Limited font\nor font raster error.", rect, painter, mDisplay.font_size);
+        }
 
         if (uri == mSelectedFontURI)
         {

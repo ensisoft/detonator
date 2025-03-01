@@ -1986,6 +1986,8 @@ inline bool MustHaveNumber(QComboBox* box)
 
 QPixmap ToGrayscale(QPixmap pixmap);
 
+std::vector<QString> ListWSFonts(const QString& workspace_dir);
+
 // List the font's installed with the application.
 // returns a list of font uris, i.e. app://fonts/foo.otf
 std::vector<QString> ListAppFonts();
