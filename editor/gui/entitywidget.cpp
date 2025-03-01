@@ -1099,10 +1099,12 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::DrawableItemClass::RenderStyle>(mUI.dsRenderStyle);
     PopulateFromEnum<game::DrawableItemClass::RenderView>(mUI.dsRenderView);
     PopulateFromEnum<game::DrawableItemClass::RenderProjection>(mUI.dsRenderProj);
+    PopulateFromEnum<game::DrawableItemClass::CoordinateSpace>(mUI.dsCoordinateSpace);
     PopulateFromEnum<game::RigidBodyClass::Simulation>(mUI.rbSimulation);
     PopulateFromEnum<game::RigidBodyClass::CollisionShape>(mUI.rbShape);
     PopulateFromEnum<game::TextItemClass::VerticalTextAlign>(mUI.tiVAlign);
     PopulateFromEnum<game::TextItemClass::HorizontalTextAlign>(mUI.tiHAlign);
+    PopulateFromEnum<game::TextItemClass::CoordinateSpace>(mUI.tiCoordinateSpace);
     PopulateFromEnum<game::SpatialNodeClass::Shape>(mUI.spnShape);
     PopulateFromEnum<game::FixtureClass::CollisionShape>(mUI.fxShape);
     PopulateFromEnum<game::NodeTransformerClass::Integrator>(mUI.tfIntegrator);
@@ -2926,6 +2928,11 @@ void EntityWidget::on_dsRenderProj_currentIndexChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_dsCoordinateSpace_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_dsLayer_valueChanged(int value)
 {
     UpdateCurrentNodeProperties();
@@ -3106,6 +3113,11 @@ void EntityWidget::on_tiRasterHeight_valueChanged(int)
 {
     UpdateCurrentNodeProperties();
 }
+void EntityWidget::on_tiCoordinateSpace_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_tiText_textChanged()
 {
     UpdateCurrentNodeProperties();
@@ -4514,6 +4526,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.dsRenderPass, -1);
     SetValue(mUI.dsRenderView, -1);
     SetValue(mUI.dsRenderProj, -1);
+    SetValue(mUI.dsCoordinateSpace, -1);
     SetValue(mUI.dsRenderStyle, -1);
     SetValue(mUI.dsLineWidth, 1.0f);
     SetValue(mUI.dsTimeScale, 1.0f);
@@ -4544,6 +4557,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiLayer, 0);
     SetValue(mUI.tiRasterWidth, 0);
     SetValue(mUI.tiRasterHeight, 0);
+    SetValue(mUI.tiCoordinateSpace, -1);
     SetValue(mUI.tiText, QString(""));
     SetValue(mUI.tiVisible, true);
     SetValue(mUI.tiUnderline, false);
@@ -4627,6 +4641,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsRenderStyle, item->GetRenderStyle());
             SetValue(mUI.dsRenderView, item->GetRenderView());
             SetValue(mUI.dsRenderProj, item->GetRenderProjection());
+            SetValue(mUI.dsCoordinateSpace, item->GetCoordinateSpace());
             SetValue(mUI.dsLayer, item->GetLayer());
             SetValue(mUI.dsLineWidth, item->GetLineWidth());
             SetValue(mUI.dsTimeScale, item->GetTimeScale());
@@ -4699,6 +4714,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.tiTextColor, text->GetTextColor());
             SetValue(mUI.tiLineHeight, text->GetLineHeight());
             SetValue(mUI.tiLayer, text->GetLayer());
+            SetValue(mUI.tiCoordinateSpace, text->GetCoordinateSpace());
             SetValue(mUI.tiRasterWidth, text->GetRasterWidth());
             SetValue(mUI.tiRasterHeight, text->GetRasterHeight());
             SetValue(mUI.tiText, text->GetText());
@@ -4864,6 +4880,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetRenderPass(GetValue(mUI.dsRenderPass));
         item->SetRenderView(GetValue(mUI.dsRenderView));
         item->SetRenderProjection(GetValue(mUI.dsRenderProj));
+        item->SetCoordinateSpace(GetValue(mUI.dsCoordinateSpace));
         item->SetDepth(GetValue(mUI.dsDepth));
 
         game::Rotator rotator = base::Rotator::FromEulerXYZ(
@@ -4918,6 +4935,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         text->SetLineHeight(GetValue(mUI.tiLineHeight));
         text->SetText(GetValue(mUI.tiText));
         text->SetLayer(GetValue(mUI.tiLayer));
+        text->SetCoordinateSpace(GetValue(mUI.tiCoordinateSpace));
         text->SetRasterWidth(GetValue(mUI.tiRasterWidth));
         text->SetRasterHeight(GetValue(mUI.tiRasterHeight));
         // flags

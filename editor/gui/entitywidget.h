@@ -196,6 +196,7 @@ namespace gui
         void on_dsRenderStyle_currentIndexChanged(const QString&);
         void on_dsRenderView_currentIndexChanged(int);
         void on_dsRenderProj_currentIndexChanged(int);
+        void on_dsCoordinateSpace_currentIndexChanged(int);
         void on_dsLayer_valueChanged(int layer);
         void on_dsLineWidth_valueChanged(double value);
         void on_dsTimeScale_valueChanged(double value);
@@ -237,6 +238,7 @@ namespace gui
         void on_tiLayer_valueChanged(int);
         void on_tiRasterWidth_valueChanged(int);
         void on_tiRasterHeight_valueChanged(int);
+        void on_tiCoordinateSpace_currentIndexChanged(int);
         void on_tiText_textChanged();
         void on_tiVisible_stateChanged(int);
         void on_tiUnderline_stateChanged(int);
