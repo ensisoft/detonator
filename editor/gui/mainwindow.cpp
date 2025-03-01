@@ -4027,9 +4027,9 @@ void MainWindow::DrawResourcePreview(gfx::Painter& painter, double dt)
                 const auto& klass = resource.GetContent<gfx::ParticleEngineClass>();
                 mPreview.drawable = std::make_unique<gfx::ParticleEngineInstance>(*klass);
 
-                QString materialId;
+                std::string materialId;
                 resource.GetProperty("material", &materialId);
-                auto material_class = mWorkspace->FindMaterialClassById(app::ToUtf8(materialId));
+                auto material_class = mWorkspace->FindMaterialClassById(materialId);
                 if (!material_class)
                     material_class = mWorkspace->FindMaterialClassById("_checkerboard");
 
@@ -4038,9 +4038,14 @@ void MainWindow::DrawResourcePreview(gfx::Painter& painter, double dt)
             }
             else if (resource.GetType() == app::Resource::Type::Shape)
             {
+                std::string materialId;
+                resource.GetProperty("material", &materialId);
+                auto material_class = mWorkspace->FindMaterialClassById(materialId);
+                if (!material_class)
+                    material_class = mWorkspace->FindMaterialClassById("_checkerboard");
+
                 const auto& klass = resource.GetContent<gfx::PolygonMeshClass>();
                 mPreview.drawable = std::make_unique<gfx::PolygonMeshInstance>(*klass);
-                auto material_class = mWorkspace->FindMaterialClassById("_checkerboard");
                 mPreview.material = std::make_unique<gfx::MaterialInstance>(material_class);
             }
             else
