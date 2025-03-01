@@ -42,6 +42,7 @@ namespace engine
         using Culling    = gfx::Painter::Culling;
         using RenderPass = game::RenderPass;
         using Projection = game::RenderProjection;
+        using CoordinateSpace = game::CoordinateSpace;
 
         enum class Flags {
             PP_Bloom, CullPacket
@@ -57,6 +58,7 @@ namespace engine
 
         RenderPass pass = RenderPass::DrawColor;
         Projection projection = Projection::Orthographic;
+        CoordinateSpace coordinate_space = CoordinateSpace::Scene;
 
         Culling culling = Culling::Back;
 
