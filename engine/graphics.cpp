@@ -147,7 +147,8 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
     const auto logical_viewport_width = camera.viewport.GetWidth();
     const auto logical_viewport_height = camera.viewport.GetHeight();
 
-    const auto& model_view = CreateModelViewMatrix(GameView::AxisAligned, camera.position, camera.scale, camera.rotation);
+    const auto& model_view_camera = CreateModelViewMatrix(GameView::AxisAligned, glm::vec2{0.0f, 0.0f}, camera.scale, camera.rotation);
+    const auto& model_view_scene  = CreateModelViewMatrix(GameView::AxisAligned, camera.position, camera.scale, camera.rotation);
     const auto& orthographic = CreateProjectionMatrix(Projection::Orthographic, camera.viewport);
     const auto& perspective  = CreateProjectionMatrix(camera.viewport, camera.ppa);
     const auto& pixel_ratio = window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * camera.scale;
@@ -187,7 +188,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
 
     gfx::Painter scene_painter(&mDevice);
     scene_painter.SetProjectionMatrix(orthographic);
-    scene_painter.SetViewMatrix(model_view);
+    scene_painter.SetViewMatrix(model_view_scene);
     scene_painter.SetViewport(mSettings.surface.viewport);
     scene_painter.SetSurfaceSize(mSettings.surface.size);
     scene_painter.SetEditingMode(mSettings.editing_mode);
@@ -205,7 +206,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
     for (auto& light : lights)
     {
         // transform the light to view space
-        light.light->position = model_view * light.transform * glm::vec4{0.0f, 0.0f, 0.0f, 1.0};
+        light.light->position = model_view_scene * light.transform * glm::vec4{0.0f, 0.0f, 0.0f, 1.0};
         //light.light->direction = light.transform * glm::vec4{light.light->direction, 0.0f};
 
         const auto render_layer_index = light.render_layer;
@@ -239,12 +240,22 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
             projection = &orthographic;
         else if (packet.projection == DrawPacket::Projection::Perspective)
             projection = &perspective;
-        else BUG("Missing draw packet projection mapping.");
+        else BUG("Bug on draw packet projection.");
 
-        if (CullDrawPacket(packet, *projection, model_view))
+        const glm::mat4* view = nullptr;
+        if (packet.coordinate_space == DrawPacket::CoordinateSpace::Scene)
+            view = &model_view_scene;
+        else if (packet.coordinate_space == DrawPacket::CoordinateSpace::Camera)
+            view = &model_view_camera;
+        else BUG("Bug on draw packet coordinate space.");
+
+        if (packet.coordinate_space == DrawPacket::CoordinateSpace::Scene)
         {
-            packet.flags.set(DrawPacket::Flags::CullPacket, true);
-            //DEBUG("culled packet %1", packet.name);
+            if (CullDrawPacket(packet, *projection, model_view_scene))
+            {
+                packet.flags.set(DrawPacket::Flags::CullPacket, true);
+                //DEBUG("culled packet %1", packet.name);
+            }
         }
 
         if (mPacketFilter && !mPacketFilter->InspectPacket(packet))
@@ -263,7 +274,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
         draw.state.depth_test   = packet.depth_test;
         draw.state.write_color  = true;
         draw.state.stencil_func = gfx::Painter::StencilFunc ::Disabled;
-        draw.view               = &model_view;
+        draw.view               = view;
         draw.projection         = projection;
         scene_painter.Prime(draw);
 

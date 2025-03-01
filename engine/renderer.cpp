@@ -1486,6 +1486,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             packet.projection   = item->GetRenderProjection();
             packet.packet_index = item->GetLayer();
             packet.line_width   = item->GetLineWidth();
+            packet.coordinate_space = item->GetCoordinateSpace();
 
             if (mEditingMode)
             {
@@ -1579,6 +1580,7 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             packet.sort_point   = sort_point;
             packet.packet_index = text->GetLayer();
             packet.render_layer = entity.GetLayer();
+            packet.coordinate_space = text->GetCoordinateSpace();
             if (!hook || hook->InspectPacket(&entity_node, packet))
                 packets.push_back(std::move(packet));
 
