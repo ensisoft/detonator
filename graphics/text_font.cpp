@@ -48,8 +48,6 @@ bool BitmapFontGlyphPack::ParseFont(const std::string& uri)
 
     unsigned texture_width  = 0;
     unsigned texture_height = 0;
-    unsigned font_width  = 0;
-    unsigned font_height = 0;
     std::string texture_file;
 
     if (!base::JsonReadSafe(json, "image_width",  &texture_width))
@@ -61,11 +59,13 @@ bool BitmapFontGlyphPack::ParseFont(const std::string& uri)
 
     bool premultiply_alpha_hint = false;
     bool case_sensitive = true;
+    unsigned font_width  = 0;
+    unsigned font_height = 0;
 
-    if (!base::JsonReadSafe(json, "font_width", &font_width))
-        WARN("Bitmap font is missing 'font_width' attribute.[file='%1']", uri);
-    if (!base::JsonReadSafe(json, "font_height", &font_height))
-        WARN("Bitmap font is missing 'font_height' attribute.[file='%1']", uri);
+    // these are optional if the per glyph width and height are used.
+    base::JsonReadSafe(json, "font_width", &font_width);
+    base::JsonReadSafe(json, "font_height", &font_height);
+
     if (!base::JsonReadSafe(json, "premultiply_alpha_hint", &premultiply_alpha_hint))
         WARN("Bitmap font is missing 'premultiply_alpha_hint' attribute. [file='%1']", uri);
     if (!base::JsonReadSafe(json, "case_sensitive", &case_sensitive))
@@ -90,7 +90,7 @@ bool BitmapFontGlyphPack::ParseFont(const std::string& uri)
             WARN("Font glyph is missing 'ypos' attribute. [file='%1']", uri);
         else if (!base::JsonReadSafe(img_json, "width",  &width) && !font_width)
             WARN("Font glyph is missing 'width' attribute. [file='%1']", uri);
-        else if (!base::JsonReadSafe(img_json, "height",  &width) && !font_height)
+        else if (!base::JsonReadSafe(img_json, "height",  &height) && !font_height)
             WARN("Font glyph is missing 'height' attribute. [file='%1']", uri);
         else success = true;
 
@@ -112,6 +112,42 @@ bool BitmapFontGlyphPack::ParseFont(const std::string& uri)
         // taking only the first character of the string into account.
         glyphs[wide_char_string[0]] = std::move(glyph);
     }
+
+    if (!font_width && !font_height)
+    {
+        bool have_valid_sizes = false;
+
+        unsigned total_width  = 0;
+        unsigned total_height = 0;
+        unsigned valid_glyph_count = 0;
+
+        for (const auto& pair: glyphs)
+        {
+            const auto& glyph = pair.second;
+            if (glyph.px_width && glyph.px_height)
+            {
+                have_valid_sizes = true;
+                total_height += glyph.px_height;
+                total_width += glyph.px_width;
+                ++valid_glyph_count;
+            }
+        }
+        if (!have_valid_sizes)
+        {
+            ERROR("Bitmap font is missing per glyph pixel sizes and fixed width/height font size is not set.");
+            ERROR("This font will not be able to render. Either specify a glyph width/height or use per font");
+            ERROR("font_width and font_height parameter. [font='%1']", uri);
+            return false;
+        }
+        ASSERT(valid_glyph_count);
+        // conjure up font width and height, this is needed when doing text
+        // shaping and encountering a glyph that doesn't exist.
+        font_width = total_width / valid_glyph_count;
+        font_height = total_height / valid_glyph_count;
+        DEBUG("Font uses variable width and height glyphs. Using average glyph width and height as the font size. [width=%1, height%2]",
+              font_width, font_height);
+    }
+
     mTextureHeight = texture_height;
     mTextureWidth  = texture_width;
     mFontWidth     = font_width;
