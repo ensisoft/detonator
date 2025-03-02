@@ -57,15 +57,8 @@ void ResourceTracker::RecordURI(const AnyString& uri)
         }
     }
 
-    // hack for now to copy the bitmap font image.
-    // this will not work if:
-    // - the file extension is not .png
-    // - the file name is same as the .json file base name
-    if (uri.Contains("fonts/") && uri.EndsWith(".json"))
-    {
-        const auto& src_png_uri = ReplaceAll(uri, ".json", ".png");
-        mResultSet->insert(src_png_uri);
-    }
+    if (IsBitmapFontJsonUri(uri))
+        mResultSet->insert(FontBitmapUriFromJsonUri(uri));
 
     mResultSet->insert(uri); // keep track of the URIs we're seeing
 }

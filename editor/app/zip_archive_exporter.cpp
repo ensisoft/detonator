@@ -81,14 +81,19 @@ bool ZipArchiveExporter::CopyFile(const AnyString& uri, const AnyString& dir)
     // this will not work if:
     // - the file extension is not .png
     // - the file name is same as the .json file base name
-    if (base::Contains(dir, "fonts/") && base::EndsWith(uri, ".json"))
+    if (IsBitmapFontJsonUri(uri))
     {
-        const auto& src_png_uri  = app::ReplaceAll(uri, ".json", ".png");
-        const auto& src_png_file = MapFileToFilesystem(src_png_uri);
-        auto png_name = src_name;
-        png_name.replace(".json", ".png");
-        CopyFile(src_png_file, app::JoinPath(dst_dir, png_name));
+        const auto& font_bitmap_uri = FontBitmapUriFromJsonUri(uri);
+        const auto& font_bitmap_file = MapFileToFilesystem(font_bitmap_uri);
+        QString png_name = src_name;
+        if (png_name.endsWith(".png.json"))
+            png_name = png_name.replace(".json", "");
+        else if (png_name.endsWith(".json"))
+            png_name = png_name.replace(".json", ".png");
+
+        CopyFile(font_bitmap_file, app::JoinPath(dst_dir, png_name));
     }
+
     return true;
 }
 bool ZipArchiveExporter::WriteFile(const app::AnyString& uri, const AnyString& dir, const void* data, size_t len)

@@ -68,11 +68,11 @@ bool WorkspaceResourcePacker::CopyFile(const AnyString& uri, const AnyString& di
     mUriMapping[uri] = dst_uri;
 
     // if the font is a .json+.png font then copy the .png file too!
-    if (base::Contains(uri, "fonts/") && base::EndsWith(uri, ".json"))
+    if (IsBitmapFontJsonUri(uri))
     {
-        const auto& png_uri  = ReplaceAll(uri, ".json", ".png");
-        const auto& png_file = MapFileToFilesystem(png_uri);
-        DoCopyFile(png_file, dir);
+        const auto& font_bitmap_uri = FontBitmapUriFromJsonUri(uri);
+        const auto& font_bitmap_file = MapFileToFilesystem(font_bitmap_uri);
+        DoCopyFile(font_bitmap_file, dir);
     }
     return true;
 }

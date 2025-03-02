@@ -83,6 +83,28 @@ Rect center_rect_on_target(const Rect& target, const Rect& source)
 namespace app
 {
 
+bool IsBitmapFontJsonUri(const AnyString& uri)
+{
+    if (uri.Contains("fonts/") && uri.EndsWith(".json"))
+        return true;
+    return false;
+}
+
+AnyString FontBitmapUriFromJsonUri(const AnyString& uri)
+{
+    // hack for now to copy the bitmap font image.
+    // this will not work if:
+    // - the font image file extension is not .png
+    // - the font image file name is same as the .json file base name
+
+    if (uri.Contains("fonts/") && uri.EndsWith(".png.json"))
+        return ReplaceAll(uri, ".json", "");
+    else if (uri.Contains("fonts/") && uri.EndsWith(".json"))
+        return ReplaceAll(uri, ".json", ".png");
+
+    return "";
+}
+
 QString GenerateScriptVarName(QString suggestion, QString backup)
 {
     if (auto pos = suggestion.lastIndexOf('/'); pos != -1)
