@@ -106,9 +106,17 @@ public:
     }
     ~AutoEnabler()
     {
-        QSignalBlocker s(mWidget);
-        mWidget->setEnabled(true);
+        if (mWidget)
+        {
+            QSignalBlocker s(mWidget);
+            mWidget->setEnabled(true);
+        }
     }
+    void Release()
+    {
+        mWidget = nullptr;
+    }
+
     AutoEnabler(const AutoEnabler&) = delete;
     AutoEnabler& operator=(const AutoEnabler&) = delete;
 private:

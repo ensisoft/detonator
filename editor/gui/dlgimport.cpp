@@ -99,6 +99,10 @@ void DlgImport::on_btnSelectFile_clicked()
         msg.setText(tr("Failed to import resource(s) from the zip file.\n"
                        "Please see the application log for more details."));
         msg.exec();
+        // Disable running this again, the importing has side effects (yes I know...)
+        // that changes the data (resources that were created based on the zip and
+        // doing another import attempt is likely going to either crash or assert.
+        SetEnabled(mUI.btnImport, false);
         return;
     }
 
@@ -162,6 +166,11 @@ void DlgImport::on_btnImport_clicked()
         msg.setText(tr("Failed to import resources from zip.\n"
                        "Please see the application log for details."));
         msg.exec();
+        // Disable running this again, the importing has side effects (yes I know...)
+        // that changes the data (resources that were created based on the zip and
+        // doing another import attempt is likely going to either crash or assert.
+        SetEnabled(mUI.btnImport, false);
+        import_btn.Release();
         return;
     }
     NOTE("Imported %1 resource(s) into workspace.", import_count);
