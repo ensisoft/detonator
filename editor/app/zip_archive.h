@@ -39,6 +39,7 @@ namespace app
         bool Open(const QString& zip_file);
 
         bool ReadFile(const QString& file, QByteArray* array) const;
+        bool ReadFile(const QString& file, QString* text) const;
 
         void SetImportSubFolderName(const QString& name)
         { mSubFolderName = name; }
@@ -57,7 +58,7 @@ namespace app
         { mIgnoreSet.insert(index); }
         bool IsIndexIgnored(size_t index) const
         { return base::Contains(mIgnoreSet, index); }
-    private:
+
         bool FindZipFile(const QString& unix_style_name) const;
     private:
         friend class Workspace;

@@ -36,13 +36,13 @@ namespace app
     public:
         WorkspaceResourcePacker(const QString& package_dir, const QString& workspace_dir);
 
-        virtual bool CopyFile(const AnyString& uri, const AnyString& dir) override;
-        virtual bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) override;
-        virtual bool ReadFile(const AnyString& uri, QByteArray* bytes) const override;
-        virtual bool HasMapping(const AnyString& uri) const override;
-        virtual AnyString MapUri(const AnyString& uri) const override;
-        virtual bool IsReleasePackage() const override
-        { return true; }
+        bool CopyFile(const AnyString& uri, const AnyString& dir) override;
+        bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) override;
+        bool ReadFile(const AnyString& uri, QByteArray* bytes) const override;
+        bool HasMapping(const AnyString& uri) const override;
+        AnyString MapUri(const AnyString& uri) const override;
+        Operation GetOp() const override
+        { return Operation::Deploy; }
 
         using app::ResourcePacker::HasMapping;
         using app::ResourcePacker::MapUri;

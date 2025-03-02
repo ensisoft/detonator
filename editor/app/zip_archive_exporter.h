@@ -34,13 +34,13 @@ namespace app
     {
     public:
         ZipArchiveExporter(const QString& filename, const QString& workspace_dir);
-        virtual bool CopyFile(const AnyString& uri, const AnyString& dir) override;
-        virtual bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) override;
-        virtual bool ReadFile(const AnyString& uri, QByteArray* array) const override;
-        virtual bool HasMapping(const AnyString& uri) const override;
-        virtual AnyString MapUri(const AnyString& uri) const override;
-        virtual bool IsReleasePackage() const override
-        { return false; }
+        bool CopyFile(const AnyString& uri, const AnyString& dir) override;
+        bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) override;
+        bool ReadFile(const AnyString& uri, QByteArray* array) const override;
+        bool HasMapping(const AnyString& uri) const override;
+        AnyString MapUri(const AnyString& uri) const override;
+        Operation GetOp() const override
+        { return Operation::Export; }
 
         void WriteText(const std::string& text, const char* name);
         void WriteBytes(const QByteArray& bytes, const char* name);

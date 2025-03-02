@@ -67,7 +67,7 @@ namespace {
             std::string src_font_uri;
             std::string dst_font_uri;
             p.prop.GetValue(&src_font_uri);
-            ok &= packer.CopyFile(src_font_uri, "fonts/");
+            ok &= packer.CopyFile(src_font_uri, "ui/fonts/");
             dst_font_uri = packer.MapUri(src_font_uri);
             p.prop.SetValue(dst_font_uri);
             style.SetProperty(p.key, p.prop);
@@ -87,13 +87,13 @@ namespace {
             std::string src_texture_uri;
             std::string dst_texture_uri;
             src_texture_uri = texture->GetTextureUri();
-            ok &= packer.CopyFile(src_texture_uri, "/ui/textures/");
+            ok &= packer.CopyFile(src_texture_uri, "ui/textures/");
             dst_texture_uri = packer.MapUri(src_texture_uri);
             texture->SetTextureUri(dst_texture_uri);
             src_texture_uri = texture->GetMetafileUri();
             if (src_texture_uri.empty())
                 continue;
-            ok &= packer.CopyFile(src_texture_uri, "/ui/textures/");
+            ok &= packer.CopyFile(src_texture_uri, "ui/textures/");
             dst_texture_uri = packer.MapUri(src_texture_uri);
             texture->SetMetafileUri(dst_texture_uri);
         }
@@ -688,14 +688,14 @@ bool PackResource(uik::Window& window, ResourcePacker& packer)
             return;
 
         if (packer.IsReleasePackage())
-            DEBUG("Original widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
+            VERBOSE("Original widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
 
         engine::UIStyle style;
         style.ParseStyleString(widget->GetId(), style_string);
 
         ok &= PackUIStyleResources(style, packer);
 
-        if (packer.IsReleasePackage())
+        if (packer.NeedsRemapping())
         {
             style_string = style.MakeStyleString(widget->GetId());
             // this is a bit of a hack but we know that the style string
@@ -704,9 +704,11 @@ bool PackResource(uik::Window& window, ResourcePacker& packer)
             // a) saves some space
             // b) makes the style string copyable from one widget to another as-s
             boost::erase_all(style_string, widget->GetId() + "/");
-            DEBUG("Updated widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
-            widget->SetStyleString(std::move(style_string));
+            widget->SetStyleString(style_string);
         }
+
+        if (packer.IsReleasePackage())
+            VERBOSE("Updated widget style string. [widget='%1', style='%2']", widget->GetId(), style_string);
     });
 
     // parse the window style string if any and gather/remap font properties.
@@ -714,14 +716,14 @@ bool PackResource(uik::Window& window, ResourcePacker& packer)
     if (!window_style_string.empty())
     {
         if (packer.IsReleasePackage())
-            DEBUG("Original window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
+            VERBOSE("Original window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
 
         engine::UIStyle style;
         style.ParseStyleString("window", window_style_string);
 
         ok &= PackUIStyleResources(style, packer);
 
-        if (packer.IsReleasePackage())
+        if (packer.NeedsRemapping())
         {
             window_style_string = style.MakeStyleString("window");
             // this is a bit of a hack, but we know that the style string
@@ -731,9 +733,12 @@ bool PackResource(uik::Window& window, ResourcePacker& packer)
             // b) makes the style string copyable from one widget to another as-s
             boost::erase_all(window_style_string, "window/");
             // set the actual style string.
-            DEBUG("Updated window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
-            window.SetStyleString(std::move(window_style_string));
+            window.SetStyleString(window_style_string);
         }
+
+        if (packer.IsReleasePackage())
+            VERBOSE("Updated window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
+
     }
     return ok;
 }

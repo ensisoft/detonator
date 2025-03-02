@@ -129,6 +129,18 @@ bool ZipArchive::ReadFile(const QString& file, QByteArray* array) const
     return true;
 }
 
+bool ZipArchive::ReadFile(const QString& file, QString* text) const
+{
+    if (!FindZipFile(file))
+        return false;
+
+    QuaZipFile zip_file(&mZip);
+    zip_file.open(QIODevice::ReadOnly);
+    *text = QString::fromUtf8(zip_file.readAll());
+    zip_file.close();
+    return true;
+}
+
 bool ZipArchive::FindZipFile(const QString& unix_style_name) const
 {
     if (!mZip.goToFirstFile())

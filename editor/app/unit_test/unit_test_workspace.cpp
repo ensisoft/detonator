@@ -25,6 +25,8 @@
 
 #include <chrono>
 #include <iostream>
+#include <algorithm>
+#include <vector>
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
@@ -49,6 +51,30 @@
 #include "graphics/image.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
+
+quint32 StringHash(const QString& str) {
+    std::vector<char> chars;
+    for (int i=0; i<str.size(); ++i)
+    {
+        const auto& c = str[i];
+        if (c == ' ' || c == '\n' || c == '\r')
+            continue;
+
+        chars.push_back(c.toLatin1());
+    }
+    std::sort(chars.begin(), chars.end()); // Sort the characters
+
+    return qHash(QString::fromLatin1(&chars[0], chars.size()));
+}
+
+bool CreateDummyImage(const app::AnyString& where, unsigned width = 128, unsigned height=128)
+{
+    gfx::RgbBitmap bitmap;
+    bitmap.Resize(128, 100);
+    bitmap.Fill(gfx::Color::Yellow);
+    gfx::WritePNG(bitmap, where);
+    return app::FileExists(where);
+}
 
 void DeleteFile(const QString& file)
 {
@@ -91,6 +117,8 @@ size_t CountPixels(const gfx::Bitmap<gfx::Pixel_A>& bmp, int value)
 
 void unit_test_path_mapping()
 {
+    TEST_CASE(test::Type::Feature)
+
     const auto& cwd = QDir::currentPath();
     const auto& app = QCoreApplication::applicationDirPath();
 
@@ -139,6 +167,8 @@ void unit_test_path_mapping()
 
 void unit_test_resource()
 {
+    TEST_CASE(test::Type::Feature)
+
     DeleteDir("TestWorkspace");
     MakeDir("TestWorkspace");
 
@@ -206,6 +236,8 @@ void unit_test_resource()
 
 void unit_test_save_load()
 {
+    TEST_CASE(test::Type::Feature)
+
     DeleteDir("TestWorkspace");
     MakeDir("TestWorkspace"); // initially empty workspace folder.
 
@@ -312,6 +344,8 @@ void unit_test_save_load()
 
 void unit_test_packing_basic()
 {
+    TEST_CASE(test::Type::Feature)
+
     DeleteDir("TestWorkspace");
     DeleteDir("TestPackage");
 
@@ -510,6 +544,8 @@ R"(
 
 void unit_test_packing_texture_composition(unsigned padding)
 {
+    TEST_CASE(test::Type::Feature)
+
     // generate some test textures.
     gfx::RgbBitmap bitmap[4];
     bitmap[0].Resize(64, 64);
@@ -835,6 +871,8 @@ void unit_test_packing_texture_composition(unsigned padding)
 
 void unit_test_packing_texture_composition_format()
 {
+    TEST_CASE(test::Type::Feature)
+
     // source textures with different formats should not be combined
     // but rather only textures with the same format should be combined.
     // in other words, rgba textures can go into a rgba atlas, rgb textures
@@ -945,6 +983,8 @@ void unit_test_packing_texture_composition_format()
 
 void unit_test_packing_texture_composition_rects(unsigned padding)
 {
+    TEST_CASE(test::Type::Feature)
+
     // generate a test texture.
     gfx::RgbBitmap bitmap[2];
     bitmap[0].Resize(64, 64);
@@ -1092,6 +1132,8 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
 
 void unit_test_packing_texture_name_collision()
 {
+    TEST_CASE(test::Type::Feature)
+
     DeleteDir("TestWorkspace");
     DeleteDir("TestPackage");
     MakeDir("TestWorkspace");
@@ -1168,6 +1210,8 @@ void unit_test_packing_texture_name_collision()
 
 void unit_test_packing_ui_style_resources()
 {
+    TEST_CASE(test::Type::Feature)
+
     DeleteDir("TestWorkspace");
     DeleteDir("TestPackage");
     QDir d;
@@ -1269,15 +1313,15 @@ void unit_test_packing_ui_style_resources()
     const auto& style_string = app::ReadTextFile("TestPackage/test/ui/style/style.json");
     TEST_REQUIRE(style_string.contains("properties"));
     TEST_REQUIRE(style_string.contains("materials"));
-    TEST_REQUIRE(style_string.contains("pck://fonts/style_font.otf"));
+    TEST_REQUIRE(style_string.contains("pck://ui/fonts/style_font.otf"));
     TEST_REQUIRE(!style_string.contains("ws://fonts/style_font.otf"));
     TEST_REQUIRE(style_string.contains("pck://ui/textures/background.png"));
     TEST_REQUIRE(!style_string.contains("ws://ui/textures/background.png"));
 
     // UI Font files should be copied into fonts/
-    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/widget_font.otf") == "widget_font.otf");
-    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/window_font.otf") == "window_font.otf");
-    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/fonts/style_font.otf") == "style_font.otf");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/fonts/widget_font.otf") == "widget_font.otf");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/fonts/window_font.otf") == "window_font.otf");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/fonts/style_font.otf") == "style_font.otf");
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/textures/background.png") == "background.png");
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/textures/button.png") == "button.png");
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/ui/textures/form.png") == "form.png");
@@ -1287,6 +1331,8 @@ void unit_test_packing_ui_style_resources()
 // but the output name collides with another texture name.
 void unit_test_packing_texture_name_collision_resample_bug()
 {
+    TEST_CASE(test::Type::Feature)
+
     DeleteDir("TestWorkspace");
     DeleteDir("TestPackage");
     MakeDir("TestWorkspace");
@@ -1369,6 +1415,8 @@ void unit_test_packing_texture_name_collision_resample_bug()
 // try packing scripts that depend on other scripts identified by URI.
 void unit_test_packing_dependent_scripts()
 {
+    TEST_CASE(test::Type::Feature)
+
     DeleteDir("TestWorkspace");
     DeleteDir("TestPackage");
 
@@ -1420,6 +1468,8 @@ void unit_test_packing_dependent_scripts()
 
 void unit_test_packing_dependent_scripts_subfolder()
 {
+    TEST_CASE(test::Type::Feature)
+
     DeleteDir("TestWorkspace");
     DeleteDir("TestPackage");
 
@@ -1484,6 +1534,8 @@ void unit_test_packing_dependent_scripts_subfolder()
 
 void unit_test_json_export_import()
 {
+    TEST_CASE(test::Type::Feature)
+
     DeleteDir("TestWorkspace");
     MakeDir("TestWorkspace"); // initially empty workspace folder.
 
@@ -1523,6 +1575,8 @@ app::ResourceListItem* FindResourceItem(const QString& name, app::ResourceList& 
 
 void unit_test_list_deps()
 {
+    TEST_CASE(test::Type::Feature)
+
     // material depends on nothing
     // polygon depends on material (for display only)
     // particle engine depends on material (for display only)
@@ -1709,6 +1763,8 @@ void unit_test_list_deps()
 
 void unit_test_export_import_basic()
 {
+    TEST_CASE(test::Type::Feature)
+
     {
         DeleteDir("TestWorkspace");
         DeleteFile("test-export.zip");
@@ -1867,9 +1923,9 @@ void unit_test_export_import_basic()
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/lua/game_script.lua") == "game_script.lua");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/audio/music.mp3") == "music.mp3");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/data/levels.txt") == "levels.txt");
-        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/fonts/font.otf") == "font.otf");
-        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/fonts/bitmap_font.png") == "bitmap_font.png");
-        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/fonts/bitmap_font.json") == "bitmap_font.json");
+        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/ui/fonts/font.otf") == "font.otf");
+        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/ui/fonts/bitmap_font.png") == "bitmap_font.png");
+        TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/ui/fonts/bitmap_font.json") == "bitmap_font.json");
         TEST_REQUIRE(app::ReadTextFile("TestWorkspace/test-export/ui/keymap/keymap.json") == "keymap.json");
         const auto& style_string = app::ReadTextFile("TestWorkspace/test-export/ui/style/style.json");
         TEST_REQUIRE(!style_string.isEmpty());
@@ -1883,8 +1939,320 @@ void unit_test_export_import_basic()
     }
 }
 
+void unit_test_export_import_ui_style_resources()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // setup export package
+    {
+        DeleteDir("TestWorkspace");
+        DeleteFile("test-export.zip");
+
+        QDir d;
+        // setup dummy shaders and data.
+        TEST_REQUIRE(d.mkpath("TestWorkspace"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/fonts"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/textures"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/ui"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/ui/fonts"));
+        TEST_REQUIRE(d.mkpath("TestWorkspace/ui/textures"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/fonts/widget-font.otf", "widget-font.otf"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/fonts/font.otf", "font.otf"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/fonts/bitmap_font.png", "bitmap_font.png"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/fonts/bitmap_font.json", "bitmap_font.json"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/textures/texture.png", "fake-texture.png"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/fonts/ui-font.otf", "ui-font.otf"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/textures/ui-texture.png", "fake-ui-texture.png"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/textures/ui-texture-map.png", "fake-ui-texture-map.png"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/textures/ui-texture-map.json", "fake-ui-texture-map.json"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/textures/ui-pack.png", "fake-ui-texture-pack.png"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/textures/ui-pack.png.json", "fake-ui-texture-pack.png.json"));
+
+        // setup dummy UI style file
+        QString style(R"({
+  "properties": [
+     {
+       "key": "widget/border-width",
+       "value": 1.0
+     },
+     {
+       "key": "widget/text-font",
+       "value": "ws://fonts/font.otf"
+     },
+     {
+        "key": "label/text-font",
+        "value": "ws://fonts/bitmap_font.json"
+     },
+     {
+        "key": "progress-bar/text-font",
+        "value": "ws://ui/fonts/ui-font.otf"
+     },
+     {
+        "key": "push-button/text-font",
+        "value": "app://fonts/2Dumb.ttf"
+     }
+   ],
+
+  "materials": [
+     {
+       "key": "widget/background",
+       "type": "Null"
+     },
+     {
+       "key": "widget/border",
+       "type": "Texture",
+       "texture": "ws://textures/texture.png"
+     },
+     {
+        "key": "push-button/background",
+        "type": "Texture",
+        "texture": "ws://ui/textures/ui-texture.png"
+     },
+     {
+        "key": "progress-bar/background",
+        "type": "Texture",
+        "texture": "app://textures/awesome.png"
+     },
+     {
+        "key": "button-background",
+        "type": "Texture",
+        "texture": "ws://ui/textures/ui-texture-map.png",
+        "metafile": "ws://ui/textures/ui-texture-map.json",
+        "name": "button-background"
+     }
+  ]
+})");
+
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/style.json", style));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/keymap.json", "keymap.json"));
+
+        uik::Form form;
+        form.SetName("form");
+        form.SetSize(100.0f, 100.0f);
+        form.SetStyleString(R"({
+  "materials": [
+    {
+      "key": "border",
+      "type": "Null"
+    },
+    {
+      "key": "background",
+      "metafile": "ws://ui/textures/ui-pack.png.json",
+      "name": "level",
+      "texture": "ws://ui/textures/ui-pack.png",
+      "type": "Texture"
+    }
+  ],
+  "properties": [
+      {
+         "key": "text-font",
+         "value": "ws://fonts/widget-font.otf"
+      }
+   ]
+})");
+
+        uik::Window window;
+        window.SetStyleName("ws://ui/style.json");
+        window.SetKeyMapFile("ws://ui/keymap.json");
+        window.LinkChild(nullptr, window.AddWidget(form));
+        app::UIResource ui_resource(window, "UI");
+
+        app::Workspace workspace("TestWorkspace");
+        workspace.SaveResource(ui_resource);
+
+        app::Workspace::ExportOptions options;
+        options.zip_file = "test-export.zip";
+
+        std::vector<const app::Resource*> resources;
+        resources.push_back(&workspace.GetUserDefinedResource(0));
+        TEST_REQUIRE(workspace.ExportResourceArchive(resources, options));
+
+        // check the zip package contents
+        app::ZipArchive zip;
+        zip.SetImportSubFolderName("test-export");
+        TEST_REQUIRE(zip.Open("test-export.zip"));
+        TEST_REQUIRE(zip.FindZipFile("ui/style/style.json"));
+        TEST_REQUIRE(zip.FindZipFile("ui/keymap/keymap.json"));
+        TEST_REQUIRE(zip.FindZipFile("ui/fonts/ui-font.otf"));
+        TEST_REQUIRE(zip.FindZipFile("ui/fonts/widget-font.otf"));
+        TEST_REQUIRE(zip.FindZipFile("ui/fonts/font.otf"));
+        TEST_REQUIRE(zip.FindZipFile("ui/fonts/bitmap_font.json"));
+        TEST_REQUIRE(zip.FindZipFile("ui/fonts/bitmap_font.png"));
+        TEST_REQUIRE(zip.FindZipFile("ui/textures/texture.png"));
+        TEST_REQUIRE(zip.FindZipFile("ui/textures/ui-texture.png"));
+        TEST_REQUIRE(zip.FindZipFile("ui/textures/ui-texture-map.png"));
+        TEST_REQUIRE(zip.FindZipFile("ui/textures/ui-texture-map.json"));
+        TEST_REQUIRE(zip.FindZipFile("ui/textures/ui-pack.png"));
+        TEST_REQUIRE(zip.FindZipFile("ui/textures/ui-pack.png.json"));
+
+        // check style file contents
+        {
+            QString style;
+            TEST_REQUIRE(zip.ReadFile("ui/style/style.json", &style));
+
+            TEST_REQUIRE(StringHash(style) == StringHash(R"({
+  "materials": [
+    {
+      "key": "button-background",
+      "metafile": "zip://ui/textures/ui-texture-map.json",
+      "name": "button-background",
+      "texture": "zip://ui/textures/ui-texture-map.png",
+      "type": "Texture"
+    },
+    {
+      "key": "push-button/background",
+      "metafile": "",
+      "name": "",
+      "texture": "zip://ui/textures/ui-texture.png",
+      "type": "Texture"
+    },
+    {
+      "key": "progress-bar/background",
+      "metafile": "",
+      "name": "",
+      "texture": "app://textures/awesome.png",
+      "type": "Texture"
+    },
+    {
+      "key": "widget/border",
+      "metafile": "",
+      "name": "",
+      "texture": "zip://ui/textures/texture.png",
+      "type": "Texture"
+    },
+    {
+      "key": "widget/background",
+      "type": "Null"
+    }
+  ],
+  "properties": [
+    {
+      "key": "progress-bar/text-font",
+      "value": "zip://ui/fonts/ui-font.otf"
+    },
+    {
+      "key": "label/text-font",
+      "value": "zip://ui/fonts/bitmap_font.json"
+    },
+    {
+      "key": "widget/text-font",
+      "value": "zip://ui/fonts/font.otf"
+    },
+    {
+      "key": "push-button/text-font",
+      "value": "app://fonts/2Dumb.ttf"
+    },
+    {
+      "key": "widget/border-width",
+      "value": 1.0
+    }
+  ]
+})"));
+        } // check style file
+    }
+
+
+    // import
+    {
+        DeleteDir("TestWorkspace");
+
+        app::Workspace workspace("TestWorkspace");
+
+        app::ZipArchive zip;
+        zip.SetImportSubFolderName("test-export");
+        TEST_REQUIRE(zip.Open("test-export.zip"));
+        TEST_REQUIRE(workspace.ImportResourceArchive(zip));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/style/style.json"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/keymap/keymap.json"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/fonts/ui-font.otf"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/fonts/font.otf"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/fonts/widget-font.otf"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/fonts/bitmap_font.json"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/fonts/bitmap_font.png"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/textures/texture.png"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/textures/ui-texture.png"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/textures/ui-texture-map.png"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/textures/ui-texture-map.json"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/textures/ui-pack.png"));
+        TEST_REQUIRE(base::FileExists("TestWorkspace/test-export/ui/textures/ui-pack.png.json"));
+
+        const auto& style_json = app::ReadTextFile("TestWorkspace/test-export/ui/style/style.json");
+        std::cout << app::ToUtf8(style_json);
+        std::cout << std::endl;
+        TEST_REQUIRE(StringHash(style_json) == StringHash(R"({
+  "materials": [
+    {
+      "key": "widget/background",
+      "type": "Null"
+    },
+    {
+      "key": "widget/border",
+      "metafile": "",
+      "name": "",
+      "texture": "ws://test-export/ui/textures/texture.png",
+      "type": "Texture"
+    },
+    {
+      "key": "progress-bar/background",
+      "metafile": "",
+      "name": "",
+      "texture": "app://textures/awesome.png",
+      "type": "Texture"
+    },
+    {
+      "key": "push-button/background",
+      "metafile": "",
+      "name": "",
+      "texture": "ws://test-export/ui/textures/ui-texture.png",
+      "type": "Texture"
+    },
+    {
+      "key": "button-background",
+      "metafile": "ws://test-export/ui/textures/ui-texture-map.json",
+      "name": "button-background",
+      "texture": "ws://test-export/ui/textures/ui-texture-map.png",
+      "type": "Texture"
+    }
+  ],
+  "properties": [
+    {
+      "key": "widget/border-width",
+      "value": 1.0
+    },
+    {
+      "key": "push-button/text-font",
+      "value": "app://fonts/2Dumb.ttf"
+    },
+    {
+      "key": "widget/text-font",
+      "value": "ws://test-export/ui/fonts/font.otf"
+    },
+    {
+      "key": "label/text-font",
+      "value": "ws://test-export/ui/fonts/bitmap_font.json"
+    },
+    {
+      "key": "progress-bar/text-font",
+      "value": "ws://test-export/ui/fonts/ui-font.otf"
+    }
+  ]
+})"));
+        const auto& resource = workspace.GetUserDefinedResource(0);
+        const uik::Window* window;
+        resource.GetContent(&window);
+        TEST_REQUIRE(window->GetNumWidgets() == 1);
+        const auto& style = window->GetWidget(0).GetStyleString();
+        std::cout << style;
+        TEST_REQUIRE(base::Contains(style, "\"metafile\":\"ws://test-export/ui/textures/ui-pack.png.json\""));
+        TEST_REQUIRE(base::Contains(style, "\"texture\":\"ws://test-export/ui/textures/ui-pack.png\""));
+        TEST_REQUIRE(base::Contains(style, "\"value\":\"ws://test-export/ui/fonts/widget-font.otf\""));
+    }
+}
+
 void unit_test_export_name_dupe()
 {
+    TEST_CASE(test::Type::Feature)
+
     gfx::RgbBitmap bitmap[2];
     bitmap[0].Resize(64, 64);
     bitmap[0].Fill(gfx::Color::Green);
@@ -1962,6 +2330,8 @@ void unit_test_export_name_dupe()
 
 void unit_test_duplicate_with_data()
 {
+    TEST_CASE(test::Type::Feature)
+
     // check duplication of tilemap layer data.
     {
         DeleteDir("TestWorkspace");
@@ -2031,6 +2401,8 @@ void unit_test_duplicate_with_data()
 
 void unit_test_delete_with_data()
 {
+    TEST_CASE(test::Type::Feature)
+
     // check deletion of tilemap layer data.
     {
         DeleteDir("TestWorkspace");
@@ -2497,6 +2869,7 @@ void unit_test_resource_cache_delete_bug()
 }
 
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
@@ -2534,6 +2907,7 @@ int test_main(int argc, char* argv[])
     unit_test_json_export_import();
     unit_test_list_deps();
     unit_test_export_import_basic();
+    unit_test_export_import_ui_style_resources();
     unit_test_export_name_dupe();
     unit_test_duplicate_with_data();
     unit_test_delete_with_data();
@@ -2541,3 +2915,4 @@ int test_main(int argc, char* argv[])
     unit_test_resource_cache_delete_bug();
     return 0;
 }
+) // TEST_MAIN
