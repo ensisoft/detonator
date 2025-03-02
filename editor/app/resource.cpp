@@ -100,6 +100,75 @@ namespace {
         return ok;
     }
 
+    bool PackUIKeymapFile(uik::Window& window, app::ResourcePacker& packer)
+    {
+        const auto& keymap_uri = window.GetKeyMapFile();
+        if (keymap_uri.empty())
+            return true;
+
+        const auto packing_op = packer.GetOp();
+        if (packing_op == app::ResourcePacker::Operation::Import)
+        {
+            if (base::StartsWith(keymap_uri, "app://"))
+            {
+                DEBUG("Skip importing UI resource that is part of the editor. [UI='%1', uri='%2']",
+                      window.GetName(), keymap_uri);
+                return true;
+            }
+        }
+
+        bool ok = true;
+        ok &= packer.CopyFile(keymap_uri, "ui/keymap/");
+        window.SetKeyMapFile(packer.MapUri(keymap_uri));
+        return ok;
+    }
+
+    bool PackUIStyleFile(uik::Window& window, app::ResourcePacker& packer)
+    {
+        const auto& style_uri = window.GetStyleName();
+
+        // if we're importing and the resource is a resource that is part of
+        // the editor itself (i.e. starts with app://) then skip importing it
+        const auto packing_op = packer.GetOp();
+        if  (packing_op == app::ResourcePacker::Operation::Import)
+        {
+            if (base::StartsWith(style_uri, "app://"))
+            {
+                DEBUG("Skip importing UI resource that is part of the editor. [UI='%1', uri='%2']",
+                      window.GetName(), style_uri);
+                return true;
+            }
+        }
+        bool ok = true;
+
+        // package the style resources that are use by the window's
+        // main style file. these include raw texture and font URIs.
+
+        QByteArray style_array;
+        if (!packer.ReadFile(style_uri, &style_array))
+        {
+            ERROR("Failed to load UI style file. [UI='%1', style='%2']", window.GetName(), style_uri);
+            ok = false;
+        }
+
+        engine::UIStyle style;
+        if (!style.LoadStyle(app::EngineBuffer("style", std::move(style_array))))
+        {
+            ERROR("Failed to parse UI style. [UI='%1', style='%2']", window.GetName(), style_uri);
+            ok = false;
+        }
+        ok &= PackUIStyleResources(style, packer);
+
+        nlohmann::json style_json;
+        style.SaveStyle(style_json);
+        const auto& style_string_json = style_json.dump(2);
+
+        packer.WriteFile(style_uri, "ui/style/", style_string_json.data(), style_string_json.size());
+        window.SetStyleName(packer.MapUri(style_uri));
+        return ok;
+    }
+
+
     // Create an anchor using the URI for resolving relative scripts.
     // For example if we have a script URI such as ws://something/lua/foobar.lua
     // which refers to scripts in the same folder the ws://something/lua as
@@ -648,38 +717,8 @@ bool PackResource(game::TilemapClass& map, ResourcePacker& packer)
 bool PackResource(uik::Window& window, ResourcePacker& packer)
 {
     bool ok = true;
-
-    engine::UIStyle style;
-
-    const auto& keymap_uri = window.GetKeyMapFile();
-    if (!keymap_uri.empty())
-    {
-        ok &= packer.CopyFile(keymap_uri, "ui/keymap/");
-        window.SetKeyMapFile(packer.MapUri(keymap_uri));
-    }
-
-    // package the style resources. currently, this is only the font files.
-    const auto& style_uri  = window.GetStyleName();
-
-    QByteArray style_array;
-    if (!packer.ReadFile(style_uri, &style_array))
-    {
-        ERROR("Failed to load UI style file. [UI='%1', style='%2']", window.GetName(), style_uri);
-        ok = false;
-    }
-    if (!style.LoadStyle(app::EngineBuffer("style", std::move(style_array))))
-    {
-        ERROR("Failed to parse UI style. [UI='%1', style='%2']", window.GetName(), style_uri);
-        ok = false;
-    }
-    ok &= PackUIStyleResources(style, packer);
-
-    nlohmann::json style_json;
-    style.SaveStyle(style_json);
-    const auto& style_string_json = style_json.dump(2);
-    packer.WriteFile(style_uri, "ui/style/", style_string_json.data(), style_string_json.size());
-
-    window.SetStyleName(packer.MapUri(style_uri));
+    ok &= PackUIKeymapFile(window, packer);
+    ok &= PackUIStyleFile(window, packer);
 
     // for each widget, parse the style string and see if there are more font-name props.
     window.ForEachWidget([&packer, &ok](uik::Widget* widget) {
