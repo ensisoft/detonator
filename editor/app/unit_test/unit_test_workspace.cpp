@@ -2868,6 +2868,57 @@ void unit_test_resource_cache_delete_bug()
         cache.TickPendingWork();
 }
 
+void unit_test_resource_import_bug_ui_style()
+{
+    TEST_CASE(test::Type::Feature)
+
+    DeleteDir("TestWorkspace");
+    DeleteFile("test-export.zip");
+    DeleteDir("ui");
+
+    QDir d;
+    // setup dummy shaders and data.
+    TEST_REQUIRE(d.mkpath("TestWorkspace"));
+    TEST_REQUIRE(d.mkpath("TestWorkspace/ui"));
+
+    TEST_REQUIRE(d.mkpath("ui"));
+    TEST_REQUIRE(d.mkpath("ui/style"));
+    TEST_REQUIRE(d.mkpath("ui/keymap"));
+    TEST_REQUIRE(app::WriteTextFile("ui/style/default.json", "{}")); // empty json
+    TEST_REQUIRE(app::WriteTextFile("ui/keymap/default.json", "{}")); // empty json
+
+    // bug, exporting with app://ui/style.json causes an import error.
+
+    // export
+    {
+        uik::Window window;
+        window.SetStyleName("app://ui/style/default.json");
+        window.SetKeyMapFile("app://ui/keymap/default.json");
+        app::UIResource ui_resource(window, "UI");
+
+        app::Workspace workspace("TestWorkspace");
+        workspace.SaveResource(ui_resource);
+
+        app::Workspace::ExportOptions options;
+        options.zip_file = "test-export.zip";
+
+        std::vector<const app::Resource*> resources;
+        resources.push_back(&workspace.GetUserDefinedResource(0));
+
+        TEST_REQUIRE(workspace.ExportResourceArchive(resources, options));
+    }
+
+    // import
+    {
+        app::Workspace workspace("TestWorkspace");
+
+        app::ZipArchive zip;
+        zip.SetImportSubFolderName("test");
+        TEST_REQUIRE(zip.Open("test-export.zip"));
+        TEST_REQUIRE(workspace.ImportResourceArchive(zip));
+    }
+}
+
 
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
@@ -2913,6 +2964,7 @@ int test_main(int argc, char* argv[])
     unit_test_delete_with_data();
     unit_test_resource_cache();
     unit_test_resource_cache_delete_bug();
+    unit_test_resource_import_bug_ui_style();
     return 0;
 }
 ) // TEST_MAIN
