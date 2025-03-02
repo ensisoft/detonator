@@ -18,6 +18,7 @@
 
 #include "config.h"
 
+#include "base/assert.h"
 #include "editor/app/types.h"
 
 namespace app
@@ -25,14 +26,32 @@ namespace app
     class ResourcePacker
     {
     public:
+        enum class Operation {
+            Deploy, Import, Export, Track
+        };
+
         virtual ~ResourcePacker() = default;
         virtual bool CopyFile(const AnyString& uri, const AnyString& dir) = 0;
         virtual bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) = 0;
         virtual bool ReadFile(const AnyString& uri, QByteArray* bytes) const = 0;
         virtual bool HasMapping(const AnyString& uri) const = 0;
         virtual AnyString MapUri(const AnyString& uri) const = 0;
+        virtual Operation GetOp() const = 0;
 
-        virtual bool IsReleasePackage() const = 0;
+        bool IsReleasePackage() const
+        {
+            return GetOp() == Operation::Deploy;
+        }
+        bool NeedsRemapping() const
+        {
+            const auto op = GetOp();
+            if (op == Operation::Deploy || op == Operation::Import ||
+                op == Operation::Export)
+                return true;
+            else if (op == Operation::Track)
+                return false;
+            BUG("Bug on resource packer operation.");
+        }
     private:
     };
 

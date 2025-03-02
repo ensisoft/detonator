@@ -34,18 +34,20 @@ namespace app
     {
     public:
         ZipArchiveImporter(const QString& zip_file, const QString& zip_dir, const QString& workspace_dir, QuaZip& zip);
-        virtual bool CopyFile(const AnyString& uri, const AnyString& dir) override;
-        virtual bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) override;
-        virtual bool ReadFile(const AnyString& uri, QByteArray* array) const override;
-        virtual bool HasMapping(const AnyString& uri) const override;
-        virtual AnyString MapUri(const AnyString& uri) const override;
-        virtual bool IsReleasePackage() const override
-        { return false; }
+        bool CopyFile(const AnyString& uri, const AnyString& dir) override;
+        bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) override;
+        bool ReadFile(const AnyString& uri, QByteArray* array) const override;
+        bool HasMapping(const AnyString& uri) const override;
+        AnyString MapUri(const AnyString& uri) const override;
+        Operation GetOp() const override
+        { return Operation::Import; }
+
         bool CopyFile(const QString& src_file, const AnyString& dir, QString*  dst_name);
 
     private:
         QString MapUriToZipFile(const std::string& uri) const;
         bool FindZipFile(const QString& unix_style_name) const;
+        void AddUriMapping(const AnyString& uri, const QString& name);
     private:
         const QString mZipFile;
         const QString mZipDir;

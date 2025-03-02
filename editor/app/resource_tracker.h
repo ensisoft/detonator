@@ -39,10 +39,10 @@ namespace app
 
         AnyString MapUri(const AnyString& uri) const override
         { return uri; }
+        Operation GetOp() const override
+        { return Operation::Track; }
         bool HasMapping(const AnyString& uri) const override
         { return true; }
-        bool IsReleasePackage() const override
-        { return false; }
 
     private:
         void RecordURI(const AnyString& uri);

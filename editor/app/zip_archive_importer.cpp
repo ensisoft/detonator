@@ -22,6 +22,13 @@
 #include "editor/app/utility.h"
 #include "editor/app/zip_archive_importer.h"
 
+namespace {
+QString ToForwardSlash(QString str)
+{
+    return str.replace("\\", "/");
+}
+} // namespace
+
 namespace app
 {
 
@@ -44,9 +51,7 @@ bool ZipArchiveImporter::CopyFile(const AnyString& uri, const AnyString& dir)
 
     if (CopyFile(src_file, dir, &dst_name))
     {
-        auto mapping = toString("ws://%1/%2", mZipDir, dst_name);
-        DEBUG("New zip URI mapping. [uri='%1', mapping='%2']", uri, mapping);
-        mUriMapping[uri] = mapping;
+        AddUriMapping(uri, dst_name);
     }
 
     // hack for now to copy the bitmap font image.
@@ -100,9 +105,9 @@ bool ZipArchiveImporter::WriteFile(const AnyString& uri, const AnyString& dir, c
     }
     file.write((const char*)data, len);
     file.close();
-    auto mapping = toString("ws://%1/%2", mZipDir, info.name);
-    DEBUG("New zip URI mapping. [uri='%1', mapping='%2']", uri, mapping);
-    mUriMapping[uri] = std::move(mapping);
+
+    AddUriMapping(uri, info.name);
+
     return true;
 }
 bool ZipArchiveImporter::ReadFile(const AnyString& uri, QByteArray* array) const
@@ -209,6 +214,13 @@ bool ZipArchiveImporter::FindZipFile(const QString& unix_style_name) const
     while (mZip.goToNextFile());
     ERROR("Failed to find file in zip. [file='%1']", unix_style_name);
     return false;
+}
+
+void ZipArchiveImporter::AddUriMapping(const AnyString& uri, const QString& name)
+{
+    auto mapping = toString("ws://%1/%2", mZipDir, ToForwardSlash(name));
+    DEBUG("New zip URI mapping. [uri='%1', mapping='%2']", uri, mapping);
+    mUriMapping[uri] = std::move(mapping);
 }
 
 } // namespace
