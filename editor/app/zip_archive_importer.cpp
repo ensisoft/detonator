@@ -53,13 +53,13 @@ bool ZipArchiveImporter::CopyFile(const AnyString& uri, const AnyString& dir)
     // this will not work if:
     // - the file extension is not .png
     // - the file name is same as the .json file base name
-    if (base::Contains(dir, "fonts/") && base::EndsWith(uri, ".json"))
+    if (IsBitmapFontJsonUri(uri))
     {
-        const auto& src_png_uri  = ReplaceAll(uri, ".json", ".png");
-        const auto& src_png_file = MapUriToZipFile(src_png_uri);
+        const auto& font_bitmap_uri = FontBitmapUriFromJsonUri(uri);
+        const auto& font_bitmap_file = MapUriToZipFile(font_bitmap_uri);
 
         QString dst_png_name;
-        CopyFile(src_png_file, dir, &dst_png_name);
+        CopyFile(font_bitmap_file, dir, &dst_png_name);
     }
     return true;
 }

@@ -53,6 +53,10 @@
 namespace app
 {
 
+bool IsBitmapFontJsonUri(const AnyString& uri);
+
+AnyString FontBitmapUriFromJsonUri(const AnyString& json_uri);
+
 QString GenerateScriptVarName(QString suggestion, QString backup = "var");
 
 // Find the json file associated with an image file (if any)
