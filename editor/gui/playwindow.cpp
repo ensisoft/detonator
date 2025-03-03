@@ -860,7 +860,7 @@ void PlayWindow::RunGameLoopOnce()
     }
     catch (const std::exception& e)
     {
-        DEBUG("Exception in App Update/Draw.");
+        ERROR("Exception in engine in game loop. [what='%1']", e.what());
         Barf(e.what());
     }
 }
@@ -1808,6 +1808,15 @@ void PlayWindow::SetDebugOptions()
 
 void PlayWindow::Barf(const std::string& msg)
 {
+    // make sure to wait and cancel and shutdown all work in the engine
+    // background threadpool before pulling the plug on the engine itself.
+    if (mInteropRuntime)
+    {
+        mInteropRuntime->ShutdownThreads();
+        mInteropRuntime->SetGlobalLogger(nullptr);
+        mInteropRuntime.Reset();
+    }
+
     mEngine.reset();
     mContainer->setVisible(false);
     mUI.problem->setVisible(true);
