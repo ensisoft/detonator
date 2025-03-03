@@ -502,10 +502,17 @@ public:
             for (auto& handle: mUpdateTasks)
             {
                 TRACE_CALL("WaitSceneUpdate", handle.Wait(base::TaskHandle::WaitStrategy::BusyLoop));
+            }
+
+            // make sure that we first wait everything and only then throw
+            // if anything failed.
+            for (auto& handle : mUpdateTasks)
+            {
                 const auto* task = handle.GetTask();
                 if (task->HasException())
                     task->RethrowException();
             }
+
             mUpdateTasks.clear();
 
             class CreateNextFrameTask : public base::ThreadTask {
