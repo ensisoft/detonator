@@ -126,8 +126,19 @@ void KinematicAnimator::Apply(EntityNode& node, float t)
                                                            mClass->GetEndLinearVelocity(), t, method);
             const auto angular_velocity = math::interpolate(mStartAngularVelocity,
                                                             mClass->GetEndAngularVelocity(), t, method);
-            body->AdjustLinearVelocity(linear_velocity);
-            body->AdjustAngularVelocity(angular_velocity);
+            // don't set any adjustment on the rigid body if we still have a
+            // pending  adjustment. currently this causes a warning which is
+            // really intended for the *game*
+            // we might be producing values here faster than the physics engine
+            // can consume since likely the animation runs at a higher Hz than
+            // the physics.
+            // todo: maybe the better thing to do here would be just to overwrite
+            // the value? But how would that work with the game doing adjustments?
+            // (which it probably shouldn't)
+            if (!body->HasLinearVelocityAdjustment())
+                body->AdjustLinearVelocity(linear_velocity);
+            if (!body->HasAngularVelocityAdjustment())
+                body->AdjustAngularVelocity(angular_velocity);
         }
     }
     else if (target == KinematicAnimatorClass::Target::Transformer)

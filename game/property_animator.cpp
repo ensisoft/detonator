@@ -585,23 +585,35 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
     }
     else if (param == PropertyName::RigidBody_AngularVelocity)
     {
-        body->AdjustAngularVelocity(Interpolate<float>(t, interpolate));
+        if (!body->HasAngularVelocityAdjustment())
+        {
+            body->AdjustAngularVelocity(Interpolate<float>(t, interpolate));
+        }
     }
     else if (param == PropertyName::RigidBody_LinearVelocityX)
     {
-        auto velocity = body->GetLinearVelocity();
-        velocity.x = Interpolate<float>(t, interpolate);
-        body->AdjustLinearVelocity(velocity);
+        if (!body->HasLinearVelocityAdjustment())
+        {
+            auto velocity = body->GetLinearVelocity();
+            velocity.x = Interpolate<float>(t, interpolate);
+            body->AdjustLinearVelocity(velocity);
+        }
     }
     else if (param == PropertyName::RigidBody_LinearVelocityY)
     {
-        auto velocity = body->GetLinearVelocity();
-        velocity.y = Interpolate<float>(t, interpolate);
-        body->AdjustLinearVelocity(velocity);
+        if (!body->HasLinearVelocityAdjustment())
+        {
+            auto velocity = body->GetLinearVelocity();
+            velocity.y = Interpolate<float>(t, interpolate);
+            body->AdjustLinearVelocity(velocity);
+        }
     }
     else if (param == PropertyName::RigidBody_LinearVelocity)
     {
-        body->AdjustLinearVelocity(Interpolate<glm::vec2>(t, interpolate));
+        if (!body->HasLinearVelocityAdjustment())
+        {
+            body->AdjustLinearVelocity(Interpolate<glm::vec2>(t, interpolate));
+        }
     }
     else if (param == PropertyName::Transformer_LinearVelocity)
     {
