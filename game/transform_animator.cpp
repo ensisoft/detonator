@@ -21,6 +21,7 @@
 #include "data/writer.h"
 #include "game/transform_animator.h"
 #include "game/entity_node.h"
+#include "game/entity_node_rigid_body.h"
 
 namespace game
 {
@@ -109,6 +110,10 @@ void TransformAnimator::Apply(EntityNode& node, float t)
     node.SetSize(s);
     node.SetRotation(r);
     node.SetScale(f);
+
+    if (auto* rigid_body = node.GetRigidBody())
+        rigid_body->ResetTransform();
+
 }
 void TransformAnimator::Finish(EntityNode& node)
 {
@@ -118,6 +123,9 @@ void TransformAnimator::Finish(EntityNode& node)
     node.SetRotation(inst.end_rotation);
     node.SetSize(inst.end_size);
     node.SetScale(inst.end_scale);
+
+    if (auto* rigid_body = node.GetRigidBody())
+        rigid_body->ResetTransform();
 }
 
 void TransformAnimator::SetEndPosition(const glm::vec2& pos)

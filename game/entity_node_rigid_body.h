@@ -212,6 +212,8 @@ namespace game
         void SetFlag(Flags flag, bool on_off) noexcept
         { mInstanceFlags.set(flag, on_off); }
 
+        void ResetTransform() noexcept;
+
         // Set an impulse to be applied to the center of the rigid
         // body on the next update of the physics engine. Warning,
         // this method will overwrite any previous impulse.
@@ -240,8 +242,11 @@ namespace game
             return mCenterForce.has_value() ||
                    mCenterImpulse.has_value() ||
                    mLinearVelocityAdjustment.has_value() ||
-                   mAngularVelocityAdjustment.has_value();
+                   mAngularVelocityAdjustment.has_value() ||
+                   mResetTransform;
         }
+        bool HasTransformReset() const noexcept
+        { return mResetTransform; }
 
         bool HasCenterForce() const noexcept
         { return mCenterForce.has_value(); }
@@ -266,6 +271,7 @@ namespace game
             mAngularVelocityAdjustment.reset();
             mCenterImpulse.reset();
             mCenterForce.reset();
+            mResetTransform = false;
         }
         void ClearImpulse() noexcept
         { mCenterImpulse.reset(); }
@@ -311,6 +317,7 @@ namespace game
         // Current pending impulse in the center of the body.
         mutable std::optional<glm::vec2> mCenterImpulse;
         mutable std::optional<glm::vec2> mCenterForce;
+        mutable bool mResetTransform = false;
     };
 
 

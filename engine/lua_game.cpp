@@ -788,6 +788,7 @@ void BindGameLib(sol::state& L)
             body.ApplyForceToCenter(glm::vec2(x, y));
         }
     );
+    body["ResetTransform"] = &RigidBody::ResetTransform;
 
     body["GetSimulationType"] = [](const RigidBody* item) {
         return magic_enum::enum_name(item->GetSimulation());
