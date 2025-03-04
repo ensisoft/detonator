@@ -68,6 +68,11 @@ bool RigidBodyClass::FromJson(const data::Reader& data)
     return ok;
 }
 
+void RigidBody::ResetTransform() noexcept
+{
+    mResetTransform = true;
+}
+
 void RigidBody::ApplyLinearImpulseToCenter(const glm::vec2& impulse) noexcept
 {
     if (mCenterImpulse.has_value())
@@ -92,7 +97,7 @@ void RigidBody::AddLinearImpulseToCenter(const glm::vec2& impulse) noexcept
 void RigidBody::AdjustLinearVelocity(const glm::vec2& velocity) noexcept
 {
     if (mLinearVelocityAdjustment.has_value())
-        WARN("Overwriting pending rigid body linear adjustment.");
+        WARN("Overwriting pending rigid body linear velocity adjustment.");
 
     mLinearVelocityAdjustment = velocity;
 }

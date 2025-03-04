@@ -1000,6 +1000,23 @@ void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::En
             }
             else
             {
+                // if the body has a flag set we'll let the physics world body be moved based on the
+                // transformation set on the node.  The idea is that this lets the game to do some small
+                // changes such as make sure that some object is at the right place after some physics
+                // movement. For example in a physics platformer an elevator might be moved over some time
+                // in one direction by setting its velocity and then moved back over some time by setting
+                // its velocity to the inverse value. The problem with this is that of course this isn't
+                // exact and the objects position might change slightly depending on how many time steps
+                // are taken in each direction.
+                if (rigid_body->HasTransformReset())
+                {
+                    mTransform.Push(node->GetModelTransform());
+                    const FBox box(mTransform);
+                    const auto& node_pos_in_world = box.GetCenter();
+                    world_body->SetTransform(b2Vec2(node_pos_in_world.x, node_pos_in_world.y), box.GetRotation());
+                    mTransform.Pop();
+                }
+
                 // apply any adjustment done by the animation/game to the physics body.
                 if (rigid_body->HasAngularVelocityAdjustment())
                     world_body->SetAngularVelocity(rigid_body->GetAngularVelocityAdjustment());

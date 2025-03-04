@@ -1293,6 +1293,9 @@ void InitLuaDoc()
     DOC_METHOD_0("string", "GetCollisionShapeType", "Get the rigid body collision shape.<br>"
                                                     "Possible values. 'Box', 'Circle', 'RightTriangle', 'IsoscelesTriangle', 'Trapezoid', 'Parallelogram', 'SemiCircle', 'Polygon'<br>"
                                                     "When the type is 'Polygon' you can get the shape's ID through GetPolygonShapeId.");
+    DOC_METHOD_0("void", "ResetTransform", "Force the physics engine to reset the body's world transformation from the node transformation.<br>"
+                                           "Essentially if you're moving the entity node yourself and want the physics engine to realize those changes then you need to call this "
+                                           "method to let the physics engine know that someone else has messed with the node's world transform.");
 
     DOC_TABLE("game.BasicLight");
     DOC_METHOD_0("bool", "IsEnabled", "Check whether the light is enabled or not.");
