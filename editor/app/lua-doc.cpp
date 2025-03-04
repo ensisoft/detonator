@@ -2223,7 +2223,29 @@ void InitLuaDoc()
     DOC_TABLE_PROPERTY("number", "pi", "The value of pi.");
     DOC_TABLE_PROPERTY("number", "huge", "The value HUGE_VAL, a value larger than or equal to any other numerical value.");
 
-    // Lua scripts that are packaged with the editor.
+    DOC_TABLE("string");
+    DOC_FUNCTION_2("string", "format", "This function returns a formatted version of its variable number of arguments following the description "
+                                       "given in its first argument (which must be a string). The format string follows the same rules as the printf "
+                                       "family of standard C functions. The only differences are that the options/modifiers * , l , L , n , p , and h are not supported, "
+                                       "and there is an extra option, q . This option formats a string in a form suitable to be safely read back by the Lua interpreter. "
+                                       "The string is written between double quotes, and all double quotes, returns and backslashes in the string are correctly escaped when written.",
+                   "string", "format", "...", "args...");
+    DOC_FUNCTION_4("number", "strfind", "Receives two string arguments, and returns a number. This number indicates the first position where the second argument appears in the first argument. "
+                                        "If the second argument is not a substring of the first one, then strfind returns nil . A third optional numerical argument specifies where to start "
+                                        "the search. Another optional numerical argument specifies where to stop it. ",
+                                        "string", "str", "string", "substring", "number", "start", "number", "end");
+    DOC_FUNCTION_1("number", "string", "Return the string length.", "string", "str");
+    DOC_FUNCTION_3("string", "strsub", "Returns another string, which is a substring of s , starting at i and runing until j . "
+                                       "If j is absent, it is assumed to be equal to the length of s . Particularly, the call strsub(s,1,j) returns a prefix of s with length j , "
+                                       "while the call strsub(s,i) returns a suffix of s , starting at i.",
+                   "string", "str", "number", "i", "number", "j");
+    DOC_FUNCTION_1("string", "strlower", "Receives a string and returns a copy of that string with all upper case letters changed to lower case. All other characters are left unchanged.",
+                   "string", "str");
+    DOC_FUNCTION_1("string", "strupper", "Receives a string and returns a copy of that string with all lower case letters changed to upper case. All other characters are left unchanged.",
+                   "string", "str");
+    DOC_FUNCTION_2("number", "ascii", "Returns the ascii code of the character s[i] . If i is absent, it is assumed to be 1.", "string", "string", "number", "i");
+
+            // Lua scripts that are packaged with the editor.
 
     // Keyboard script
     DOC_TABLE2("KB", "Keyboard utilities for common keyboard handling functionality such as mapping wdk.Keys to logical action keys.<br>"
