@@ -139,7 +139,7 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classl
     else if (shape == RigidBodyClass::CollisionShape::Circle)
     {
         auto circle = std::make_unique<b2CircleShape>();
-        circle->m_radius = std::max(shape_size.x * 0.5, shape_size.y * 0.5);
+        circle->m_radius = std::min(shape_size.x * 0.5, shape_size.y * 0.5);
         circle->m_p = ToBox2D(shape_offset);
         collision_shape = std::move(circle);
     }
@@ -838,9 +838,13 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
                 polygon = ptr->GetPolygonShapeId();
             } else BUG("Unexpected fixture without node attachment.");
 
+            auto shape_size = fixture_data->shape_size;
+            if (shape == RigidBodyClass::CollisionShape::Circle)
+                shape_size.x = shape_size.y = std::min(shape_size.x, shape_size.y);
+
             model.Push();
-            model.Scale(fixture_data->shape_size);
-            model.Translate(fixture_data->shape_size * -0.5f);
+            model.Scale(shape_size);
+            model.Translate(shape_size * -0.5f);
             model.RotateAroundZ(fixture_data->shape_rotation);
             model.Translate(fixture_data->shape_offset);
 
