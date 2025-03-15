@@ -267,6 +267,10 @@ void InitLuaDoc()
     DOC_TABLE("gfx.Material");
 
     DOC_TABLE("util");
+    DOC_FUNCTION_1("int", "signum", "Find the sign of the number. Returns -1 if the value is negative, zero if the value is zero or 1 if the value is positive.",
+                   "int|float", "value");
+    DOC_FUNCTION_2("glm.vec2", "ScaleVector", "Scale the vector so that it has the required magnitude without changing direction.",
+                   "glm.vec2", "vector", "float", "magnitude");
     DOC_FUNCTION_3("glm.vec2", "FindImpulse", "Find the required impulse in order to change the current velocity of an object to target velocity.",
                                               "glm.vec2", "current_velocity", "glm.vec2", "target_velocity", "float", "mass");
     DOC_FUNCTION_3("bool", "DistanceIsLess", "Check whether the distance between two points is less than the maximum.",
@@ -971,6 +975,7 @@ void InitLuaDoc()
                                                    "The returned widget will already be downcast to the right widget type.<br>"
                                                    "Returns nil if there's no such widget.",
                  "string", "name");
+    DOC_METHOD_1("uik.Widget", "FindWidget", "Shorthand for FindWidgetByName", "string", "name");
     DOC_METHOD_1("uik.Widget", "FindWidgetParent", "Find the parent widget of the given widget.<br>"
                                                    "Returns nil if the widget is the root widget and doesn't have a parent."
                                                    "The returned widget will already be downcast to the right widget type.<br>",

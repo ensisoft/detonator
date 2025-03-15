@@ -197,6 +197,19 @@ namespace engine
         return dV * mass;
     };
 
+    util["ScaleVector"] = [](const glm::vec2& vector, float magnitude) {
+        const auto length = glm::length(vector);
+        const auto scaler = magnitude / length;
+        return vector * scaler;
+    };
+    util["signum"] = sol::overload(
+        [](float value) {
+            return math::signum(value);
+        },
+        [](int value) {
+            return math::signum(value);
+        });
+
     // see comments at RandomEngine about why this is done.
     util["RandomSeed"] = &RandomEngine::SeedGlobal;
     util["Random"] = sol::overload(
