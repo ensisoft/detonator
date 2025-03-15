@@ -257,6 +257,14 @@ void BindUIK(sol::state& L)
             return sol::make_object(lua, sol::nil);
         return WidgetObjectCast(state, widget);
     };
+    window["FindWidget"] =  [](sol::this_state state, uik::Window* window, const std::string& name) {
+        sol::state_view lua(state);
+        auto* widget = window->FindWidgetByName(name);
+        if (!widget)
+            return sol::make_object(lua, sol::nil);
+        return WidgetObjectCast(state, widget);
+    };
+
     window["FindWidgetParent"] = [](sol::this_state state, uik::Window* window, uik::Widget* child) {
         return WidgetObjectCast(state, window->FindParent(child));
     };
