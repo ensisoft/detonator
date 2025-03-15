@@ -773,8 +773,8 @@ void InitLuaDoc()
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "glm.vec2", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec2", "normalize", "Return a normalized copy of the vector.");
-    DOC_OBJECT_PROPERTY("float", "x", "X component of the vector.");
-    DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "x", "X component of the vector 2.");
+    DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector 2.");
     DOC_METHOD_2("void", "mul_add", "Add a multiple of some vector to this vector in place.",
                  "glm.vec2", "vec", "float", "multiple");
 
@@ -789,9 +789,9 @@ void InitLuaDoc()
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "glm.vec3", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec3", "normalize", "Return a normalized copy of the vector.");
-    DOC_OBJECT_PROPERTY("float", "x", "X component of the vector.");
-    DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector.");
-    DOC_OBJECT_PROPERTY("float", "z", "Z component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "x", "X component of the vector 3.");
+    DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector 3.");
+    DOC_OBJECT_PROPERTY("float", "z", "Z component of the vector 3.");
     DOC_METHOD_2("void", "mul_add", "Add a multiple of some vector to this vector in place.",
                  "glm.vec3", "vec", "float", "multiple");
 
@@ -806,10 +806,10 @@ void InitLuaDoc()
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "glm.vec4", "vec");
     DOC_METHOD_0("float", "length", "Return length (magnitude) of the vector.");
     DOC_METHOD_0("glm.vec4", "normalize", "Return a normalized copy of the vector.");
-    DOC_OBJECT_PROPERTY("float", "x", "X component of the vector.");
-    DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector.");
-    DOC_OBJECT_PROPERTY("float", "z", "Z component of the vector.");
-    DOC_OBJECT_PROPERTY("float", "w", "W component of the vector.");
+    DOC_OBJECT_PROPERTY("float", "x", "X component of the vector 4.");
+    DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector 4.");
+    DOC_OBJECT_PROPERTY("float", "z", "Z component of the vector 4.");
+    DOC_OBJECT_PROPERTY("float", "w", "W component of the vector 4.");
     DOC_METHOD_2("void", "mul_add", "Add a multiple of some vector to this vector in place.",
                  "glm.vec4", "vec", "float", "multiple");
 
@@ -2770,11 +2770,16 @@ bool LuaDocModelProxy::filterAcceptsRow(int row, const QModelIndex& parent) cons
     }
     if (!mTableName.isEmpty())
     {
-        table_name_string_match = doc.table.endsWith(mTableName);
+        table_name_string_match = doc.table.endsWith(mTableName, Qt::CaseSensitive);
     }
     if (!mFieldName.isEmpty())
     {
-        field_name_string_match = doc.name.startsWith(mFieldName, Qt::CaseInsensitive);
+        // if we're trying to complete something like 'vector.x' then we want the
+        // completion to find the x property exactly. otherwise hope that that the
+        // longer field name helps to make it non-ambiguous to the user.
+        const auto casing = mFieldName.size() == 1 ? Qt::CaseSensitive
+                                                   : Qt::CaseInsensitive;
+        field_name_string_match = doc.name.startsWith(mFieldName, casing);
     }
     return find_string_match && table_name_string_match && field_name_string_match;
 }

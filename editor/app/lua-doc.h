@@ -84,10 +84,10 @@ namespace app
           : mMode(mode)
         {}
 
-        virtual QVariant data(const QModelIndex& index, int role) const override;
-        virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-        virtual int rowCount(const QModelIndex&) const override;
-        virtual int columnCount(const QModelIndex&) const override;
+        QVariant data(const QModelIndex& index, int role) const override;
+        QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+        int rowCount(const QModelIndex&) const override;
+        int columnCount(const QModelIndex&) const override;
 
         const LuaMemberDoc& GetDocItem(size_t index) const;
         const LuaMemberDoc& GetDocItem(const QModelIndex& index)  const;
