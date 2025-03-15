@@ -190,6 +190,7 @@ bool CodeAssistant::StartCompletion(const QKeyEvent* event,
         if (key == Qt::Key_Period)
         {
             mProxy.SetVisible(0); // nothing
+            mProxy.SetVisible(app::LuaDocModelProxy::Show::ObjectProperty, true);
             mProxy.SetVisible(app::LuaDocModelProxy::Show::TableProperty, true);
             mProxy.SetVisible(app::LuaDocModelProxy::Show::Function, true);
             mProxy.SetVisible(app::LuaDocModelProxy::Show::Table, true);
