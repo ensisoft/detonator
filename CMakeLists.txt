@@ -21,6 +21,7 @@ https://github.com/ensisoft/detonator
 
 find_package(ZLIB REQUIRED)
 find_package(HARFBUZZ REQUIRED)
+find_package(FREETYPE REQUIRED)
 find_package(MPG123 REQUIRED)
 find_package(Boost REQUIRED)
 find_package(assimp REQUIRED)
