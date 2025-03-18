@@ -8,37 +8,22 @@
 --        the native services for interfacing with the game engine.
 -- viewport into the game world, we move it as the game
 -- advances to follow the player
-Viewport = base.FRect:new(0.0, 0.0, 1200, 800.0)
-
-_States = {
+GameStates = {
     Menu,
     Play
 }
+local GameViewport = nil
+local GameState = 'Menu'
+local Lives = 2
 
-_State = _States.Menu
-_Lives = 2
-
-function _SetTimeScale(entity, node_name, scale)
-    local node = entity:FindNodeByClassName(node_name)
-    local draw = node:GetDrawable()
-    draw:SetTimeScale(scale)
-end
-
-function _SetBackgroundVelocity(velocity)
-    local bg = Scene:FindEntityByInstanceName('Background')
-    _SetTimeScale(bg, 'Layer0', velocity * 1.0)
-    _SetTimeScale(bg, 'Layer1', velocity * 1.0)
-    _SetTimeScale(bg, 'Layer2', velocity * 1.0)
-end
-
-function _GameOver()
+function GameOver()
     Game:CloseUI(0)
     Game:Play('Menu Scene')
     Game:OpenUI('Menu UI')
     Game:SetViewport(-600, -400, 1200, 800)
 end
 
-function _RespawnLevel()
+function RespawnLevel()
     Game:Delay(1.0)
     Game:Play('Level 0')
 end
@@ -47,38 +32,19 @@ end
 
 -- start the game and show some initial content.
 function StartGame()
-    Game:SetViewport(-600, -400, 1200, 800)
+    local w = 1200.0
+    local h = 800
+    GameViewport = base.FRect:new(-w * 0.5, -h * 0.5, w, h)
+
+    Game:SetViewport(GameViewport)
     Game:Play('Menu Scene')
     Game:OpenUI('Menu UI')
+    Game:SetCameraPosition(0.0, 0.0)
 end
 
 -- Called when the scene begins to play
 function BeginPlay(scene, map)
-    if scene:GetClassName() == 'Level 0' then
-        local ui = Game:GetTopUI()
-        if ui == nil then
-            return
-        end
-        local l0 = ui:FindWidgetByName('life0')
-        local l1 = ui:FindWidgetByName('life1')
-        Game:DebugPrint(tostring(l0))
-        Game:DebugPrint(tostring(l1))
 
-        if true then
-            return
-        end
-
-        if _Lives == 2 then
-            l0:SetVisible(true)
-            l1:SetVisible(true)
-        elseif _Lives == 1 then
-            l0:SetVisible(false)
-            l1:SetVisible(true)
-        elseif _Lives == 0 then
-            l0:SetVisible(false)
-            l1:SetVisible(false)
-        end
-    end
 end
 
 -- Called when the scene play ends.
@@ -91,33 +57,28 @@ function Tick(game_time, dt)
 end
 
 function Update(game_time, dt)
+
     if Scene == nil then
         return
     end
     local player = Scene:FindEntityByInstanceName('Player')
-    if player == nil or player.died then
+    if player == nil then
         return
     end
 
-    local ui = Game:GetTopUI()
+    local player_body_node = player:FindNodeByClassName('Body')
+    local player_rigid_body = player_body_node:GetRigidBody()
+    local player_velocity = player_rigid_body:GetLinearVelocity()
 
-    --    local coins = ui:FindWidgetByName('coins')
-    --    coins:SetText('x' .. tostring(player.coins))
+    local background = Scene:FindEntityByInstanceName('Background')
+    if background == nil then
+        return
+    end
 
-    local node = player:FindNodeByClassName('Body')
-    local pos = node:GetTranslation()
-    local body = node:GetRigidBody()
-    local velo = body:GetLinearVelocity()
+    local background_node = background:GetNode(0)
+    local background_draw = background_node:GetDrawable()
+    background_draw:SetTimeScale(player_velocity.x * 0.01)
 
-    -- adjust the scrolling speed of the background layers by
-    -- adjusting the time scale of the background layer drawables
-    _SetBackgroundVelocity(velo.x)
-
-    -- move the game viewport to follow the player.
-    local viewport_offset = glm.vec2:new(200, 600)
-    local viewport_pos = pos - viewport_offset
-    Viewport:Move(viewport_pos.x, viewport_pos.y)
-    Game:SetViewport(Viewport)
 end
 
 function OnBeginContact(entityA, entityB, nodeA, nodeB)
@@ -131,8 +92,12 @@ end
 -- input event handlers
 function OnKeyDown(symbol, modifier_bits)
     if symbol == wdk.Keys.Escape then
-        if _State == _States.Menu then
+        if GameState == 'Menu' then
             Game:Quit(0)
+
+        elseif GameState == 'Play' then
+            Game:CloseUI(0)
+            StartGame()
         end
     end
 end
@@ -142,34 +107,17 @@ function OnKeyUp(symbol, modifier_bits)
 end
 
 function OnGameEvent(event)
-    if event.from == 'player' and event.message == 'died' then
-        Game:DebugPrint('Player died')
-        if Scene:GetClassName() == 'Menu Scene' then
-            Game:Play('Menu Scene')
-        else
-            _SetBackgroundVelocity(0.0)
-            _Lives = _Lives - 1
-            if (_Lives == -1) then
-                _GameOver()
-                return
-            end
-            _RespawnLevel()
-        end
-    elseif event.from == 'player' and event.message == 'level-complete' then
-        Game:DebugPrint('Level complete')
-        _GameOver()
-    end
+
 end
 
 function OnUIAction(ui, action)
     if action.name == 'quit' then
         Game:Quit(0)
     elseif action.name == 'play' then
-        _State = _States.Play
-        _Lives = 2
+        GameState = 'Play'
+        Lives = 2
         Game:CloseUI(0)
         Game:Play('Level 0')
         Game:OpenUI('Game UI')
-
     end
 end

@@ -1,0 +1,117 @@
+{
+  "image_file": "tilemap_128x128.png",
+  "image_height": 529,
+  "image_width": 529,
+  "images": [
+    {
+      "height": 129,
+      "index": 3,
+      "name": "4",
+      "width": 129,
+      "xpos": 2,
+      "ypos": 2
+    },
+    {
+      "height": 128,
+      "index": 12,
+      "name": "16",
+      "width": 128,
+      "xpos": 2,
+      "ypos": 135
+    },
+    {
+      "height": 128,
+      "index": 11,
+      "name": "12",
+      "width": 128,
+      "xpos": 135,
+      "ypos": 2
+    },
+    {
+      "height": 128,
+      "index": 10,
+      "name": "11",
+      "width": 128,
+      "xpos": 135,
+      "ypos": 134
+    },
+    {
+      "height": 128,
+      "index": 9,
+      "name": "10",
+      "width": 128,
+      "xpos": 2,
+      "ypos": 267
+    },
+    {
+      "height": 128,
+      "index": 8,
+      "name": "9",
+      "width": 128,
+      "xpos": 134,
+      "ypos": 267
+    },
+    {
+      "height": 128,
+      "index": 7,
+      "name": "8",
+      "width": 128,
+      "xpos": 267,
+      "ypos": 2
+    },
+    {
+      "height": 128,
+      "index": 6,
+      "name": "7",
+      "width": 128,
+      "xpos": 267,
+      "ypos": 134
+    },
+    {
+      "height": 128,
+      "index": 5,
+      "name": "6",
+      "width": 128,
+      "xpos": 267,
+      "ypos": 266
+    },
+    {
+      "height": 128,
+      "index": 4,
+      "name": "5",
+      "width": 128,
+      "xpos": 2,
+      "ypos": 399
+    },
+    {
+      "height": 128,
+      "index": 2,
+      "name": "3",
+      "width": 128,
+      "xpos": 134,
+      "ypos": 399
+    },
+    {
+      "height": 128,
+      "index": 1,
+      "name": "2",
+      "width": 128,
+      "xpos": 266,
+      "ypos": 399
+    },
+    {
+      "height": 128,
+      "index": 0,
+      "name": "1",
+      "width": 128,
+      "xpos": 399,
+      "ypos": 2
+    }
+  ],
+  "json_version": 1,
+  "made_with_app": "DETONATOR 2D",
+  "made_with_ver": "rel-???",
+  "padding": 2,
+  "power_of_two": false,
+  "premultiply_alpha": false
+}

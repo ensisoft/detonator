@@ -1,0 +1,31 @@
+{
+    "uniforms": [
+       {
+          "type": "Color",
+          "name": "kBaseColor",
+          "desc": "Base Color",
+          "value": "#ffffff"
+       },
+       {
+           "type": "Color",
+           "name": "kShadowColor",
+           "desc": "Shadow Color",
+           "value": "#000000"
+       }
+    ],
+    "maps": [
+       {
+          "type": "Texture2D",
+          "name": "kLetter",
+          "rect": "kLetterRect",
+          "desc": "Letter"
+       },
+
+       {
+          "type": "Texture2D",
+          "name": "kMask",
+          "rect": "kMaskRect",
+          "desc": "Mask"
+       }
+    ]
+  }

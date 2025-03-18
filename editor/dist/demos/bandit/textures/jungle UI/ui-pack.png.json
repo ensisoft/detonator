@@ -1,0 +1,53 @@
+{
+  "image_file": "ui-pack.png",
+  "image_height": 279,
+  "image_width": 371,
+  "images": [
+    {
+      "height": 36,
+      "index": 0,
+      "name": "health",
+      "width": 367,
+      "xpos": 2,
+      "ypos": 2
+    },
+    {
+      "height": 71,
+      "index": 3,
+      "name": "table",
+      "width": 224,
+      "xpos": 2,
+      "ypos": 42
+    },
+    {
+      "height": 61,
+      "index": 2,
+      "name": "level",
+      "width": 219,
+      "xpos": 2,
+      "ypos": 117
+    },
+    {
+      "height": 95,
+      "index": 4,
+      "name": "clock",
+      "width": 82,
+      "xpos": 2,
+      "ypos": 182
+    },
+    {
+      "height": 51,
+      "index": 1,
+      "name": "star_3",
+      "width": 91,
+      "xpos": 230,
+      "ypos": 42
+    }
+  ],
+  "json_version": 1,
+  "made_with_app": "DETONATOR 2D",
+  "made_with_ver": "rel-???",
+  "padding": 2,
+  "power_of_two": false,
+  "premultiply_alpha": false
+}
