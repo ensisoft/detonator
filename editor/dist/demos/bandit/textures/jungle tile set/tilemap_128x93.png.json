@@ -1,0 +1,37 @@
+{
+  "image_file": "tilemap_128x93.png",
+  "image_height": 291,
+  "image_width": 132,
+  "images": [
+    {
+      "height": 93,
+      "index": 2,
+      "name": "15",
+      "width": 128,
+      "xpos": 2,
+      "ypos": 2
+    },
+    {
+      "height": 93,
+      "index": 1,
+      "name": "14",
+      "width": 128,
+      "xpos": 2,
+      "ypos": 99
+    },
+    {
+      "height": 93,
+      "index": 0,
+      "name": "13",
+      "width": 128,
+      "xpos": 2,
+      "ypos": 196
+    }
+  ],
+  "json_version": 1,
+  "made_with_app": "DETONATOR 2D",
+  "made_with_ver": "rel-???",
+  "padding": 2,
+  "power_of_two": false,
+  "premultiply_alpha": false
+}

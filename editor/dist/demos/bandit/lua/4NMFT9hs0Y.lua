@@ -29,7 +29,7 @@ end
 
 -- Called on collision events with other objects.
 function OnBeginContact(stoneblock, node, other, other_node)
-    if other:GetClassName() == 'Player' then
+    if other:GetClassName() == 'Dino' then
         local body = node:GetRigidBody()
         stoneblock:PlayAnimationByName('Fall Down')
     end

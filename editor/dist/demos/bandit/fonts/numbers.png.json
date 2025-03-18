@@ -1,0 +1,103 @@
+{
+  "image_file": "numbers.png",
+  "image_height": 260,
+  "image_width": 178,
+  "images": [
+    {
+      "char": "0",
+      "height": 63,
+      "index": 0,
+      "name": "0",
+      "width": 50,
+      "xpos": 2,
+      "ypos": 2
+    },
+    {
+      "char": "3",
+      "height": 62,
+      "index": 3,
+      "name": "3",
+      "width": 42,
+      "xpos": 2,
+      "ypos": 69
+    },
+    {
+      "char": "8",
+      "height": 61,
+      "index": 9,
+      "name": "9",
+      "width": 46,
+      "xpos": 56,
+      "ypos": 2
+    },
+    {
+      "char": "6",
+      "height": 61,
+      "index": 6,
+      "name": "6",
+      "width": 46,
+      "xpos": 56,
+      "ypos": 67
+    },
+    {
+      "char": "2",
+      "height": 61,
+      "index": 2,
+      "name": "2",
+      "width": 44,
+      "xpos": 2,
+      "ypos": 135
+    },
+    {
+      "char": "8",
+      "height": 60,
+      "index": 8,
+      "name": "8",
+      "width": 46,
+      "xpos": 50,
+      "ypos": 135
+    },
+    {
+      "char": "1",
+      "height": 60,
+      "index": 1,
+      "name": "1",
+      "width": 24,
+      "xpos": 106,
+      "ypos": 2
+    },
+    {
+      "char": "5",
+      "height": 59,
+      "index": 5,
+      "name": "5",
+      "width": 42,
+      "xpos": 134,
+      "ypos": 2
+    },
+    {
+      "char": "7",
+      "height": 58,
+      "index": 7,
+      "name": "7",
+      "width": 43,
+      "xpos": 2,
+      "ypos": 200
+    },
+    {
+      "char": "4",
+      "height": 58,
+      "index": 4,
+      "name": "4",
+      "width": 44,
+      "xpos": 49,
+      "ypos": 200
+    }
+  ],
+  "json_version": 1,
+  "made_with_app": "DETONATOR 2D",
+  "made_with_ver": "rel-???",
+  "padding": 2,
+  "power_of_two": false,
+  "premultiply_alpha": false
+}

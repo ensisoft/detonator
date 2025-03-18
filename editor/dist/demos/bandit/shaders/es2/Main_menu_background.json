@@ -1,0 +1,26 @@
+
+{
+  "uniforms": [
+     {
+        "type": "Color",
+        "name": "kColor",
+        "desc": "Color",
+        "value": {"r":1.0, "g":1.0, "b":1.0, "a":1.0}
+     }
+  ],
+  "maps": [
+     {
+        "type": "Texture2D",
+        "name": "kBackground",
+        "rect": "kBackgroundRect",
+        "desc": "Background"
+     },
+
+     {
+        "type": "Texture2D",
+        "name": "kMask",
+        "rect": "kMaskRect",
+        "desc": "Mask"
+     }
+  ]
+}
