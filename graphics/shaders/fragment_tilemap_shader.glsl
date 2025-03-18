@@ -93,10 +93,20 @@ void FragmentShaderMain() {
     vec2 tile_map_dims = tile_map_size / tile_texture_box_size; // rows and cols
 
     int tile_index = int(GetTileIndex());
-    int tile_cols = int(tile_map_dims.x);
-    int tile_rows = int(tile_map_dims.y);
+    int tile_cols = int(round(tile_map_dims.x));
+    int tile_rows = int(round(tile_map_dims.y));
     int tile_row = tile_index / tile_cols;
     int tile_col = tile_index - (tile_row * tile_cols);
+
+    if (tile_cols == 0) {
+        fs_out.color = vec4(1.0, 0.0, 0.0, 1.0);
+        return;
+    }
+
+    if (tile_rows == 0) {
+        fs_out.color = vec4(0.0, 1.0, 0.0, 1.0);
+        return;
+    }
 
     // build the final texture coordinate by successively adding offsets
     // in order to map the frag coord to the right texture position inside
