@@ -237,6 +237,969 @@
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
+      "id": "CaLjAijfzQ",
+      "idle_track": "l0Ljq8Cayv",
+      "lifetime": 0.0,
+      "name": "Points 100",
+      "nodes": [
+        {
+          "class": "0f03OL4uHi",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 1.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "yZllA8JJYo",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 60.0,
+            "y": 20.0
+          },
+          "spatial_node": {
+            "flags": {
+              "Enabled": true,
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
+          },
+          "tag": "",
+          "text_item": {
+            "coordinate_space": "Scene",
+            "flags": {
+              "BlinkText": false,
+              "PP_EnableBloom": true,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/ethnocentric rg it.otf",
+            "font_size": 18,
+            "horizontal_align": "Center",
+            "layer": 0,
+            "line_height": 1.100000023841858,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "+100",
+            "text_color": {
+              "a": 1.0,
+              "b": 1.0,
+              "g": 1.0,
+              "r": 1.0
+            },
+            "vertical_align": "Center"
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "0f03OL4uHi"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "CaLjAijfzQ",
+      "resource_name": "Points 100",
+      "resource_ver": 3,
+      "script_file": "",
+      "tag": "",
+      "tracks": [
+        {
+          "animators": [
+            {
+              "animator": {
+                "cname": "Animator_0",
+                "duration": 0.3360030949115753,
+                "flags": {
+                  "StaticInstance": false
+                },
+                "id": "lz2dGJbyuB",
+                "joint_id": "",
+                "method": "Cosine",
+                "name": "TextItem_Color",
+                "node": "0f03OL4uHi",
+                "starttime": 0.0,
+                "value": {
+                  "a": 1.0,
+                  "b": 0.8355230093002319,
+                  "g": 0.09396505355834961,
+                  "r": 0.11546501517295837
+                }
+              },
+              "type": "PropertyAnimator"
+            },
+            {
+              "animator": {
+                "cname": "Animator_1",
+                "duration": 0.3463000953197479,
+                "flags": {
+                  "StaticInstance": false
+                },
+                "id": "nQEhu8f6Fd",
+                "joint_id": "",
+                "method": "Cosine",
+                "name": "TextItem_Color",
+                "node": "0f03OL4uHi",
+                "starttime": 0.3360030949115753,
+                "value": {
+                  "a": 1.0,
+                  "b": 0.6911726593971252,
+                  "g": 0.09396505355834961,
+                  "r": 0.8355230093002319
+                }
+              },
+              "type": "PropertyAnimator"
+            },
+            {
+              "animator": {
+                "cname": "Animator_2",
+                "duration": 0.31769680976867676,
+                "flags": {
+                  "StaticInstance": false
+                },
+                "id": "PsS4e8gsYL",
+                "joint_id": "",
+                "method": "Cosine",
+                "name": "TextItem_Color",
+                "node": "0f03OL4uHi",
+                "starttime": 0.6823031902313232,
+                "value": {
+                  "a": 1.0,
+                  "b": 0.09396505355834961,
+                  "g": 0.766308069229126,
+                  "r": 0.8355230093002319
+                }
+              },
+              "type": "PropertyAnimator"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 0.30000001192092896,
+          "id": "l0Ljq8Cayv",
+          "looping": true,
+          "name": "Rainbow Colors"
+        }
+      ],
+      "vars": [
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
+          "id": "zigPTCU6RG",
+          "ints": [
+            100
+          ],
+          "name": "points"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "dJCYf3a5vx",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Powerup Double Ball",
+      "nodes": [
+        {
+          "class": "omyQ6afIog",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "10togPdjU7",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 1.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 40.0,
+            "y": 20.0
+          },
+          "spatial_node": {
+            "flags": {
+              "Enabled": true,
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
+          },
+          "tag": ""
+        },
+        {
+          "class": "bFTLN2fimL",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "vSs0xqS3fS",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 1",
+          "position": {
+            "x": 8.100000381469727,
+            "y": -20.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 10.0,
+            "y": 10.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "I5LlUuBW7O",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "vSs0xqS3fS",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 2",
+          "position": {
+            "x": -10.40999984741211,
+            "y": -20.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 10.0,
+            "y": 10.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "bFTLN2fimL"
+                }
+              },
+              {
+                "node": {
+                  "id": "I5LlUuBW7O"
+                }
+              }
+            ],
+            "node": {
+              "id": "omyQ6afIog"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "dJCYf3a5vx",
+      "resource_name": "Powerup Double Ball",
+      "resource_ver": 3,
+      "script_file": "",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": false,
+        "UpdateEntity": false,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "YOZ0Sp88fq",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Red Brick",
+      "nodes": [
+        {
+          "class": "Qv0PsreOKT",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "_round_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "KeITJIrx1I",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 40.0,
+            "y": 20.0
+          },
+          "spatial_node": {
+            "flags": {
+              "Enabled": true,
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "Qv0PsreOKT"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "YOZ0Sp88fq",
+      "resource_name": "Red Brick",
+      "resource_ver": 3,
+      "script_file": "viXTDKHRIB",
+      "tag": "brick",
+      "vars": [
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "5UG4twU3FH",
+          "ints": [
+            0
+          ],
+          "name": "hit_count"
+        },
+        {
+          "bools": [
+            0
+          ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
+          "id": "vCxEuX7z0Z",
+          "name": "immortal"
+        },
+        {
+          "colors": [
+            {
+              "object": {
+                "a": 1.0,
+                "b": 0.1109025701880455,
+                "g": 0.1109025701880455,
+                "r": 0.8137941360473633
+              }
+            }
+          ],
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": true
+          },
+          "id": "kNyUZy7JAn",
+          "name": "color"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "E65Ptr22QY",
+      "idle_track": "",
+      "lifetime": 2.0,
+      "name": "Confetti",
+      "nodes": [
+        {
+          "class": "PseXINzA2Q",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "5xCJbUrrKL",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "AOdUyA9mYj",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.051499199122190475,
+                  "g": 0.051499199122190475,
+                  "r": 0.7978789806365967
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": -200.0,
+            "y": -200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 300.0,
+            "y": 200.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "nwSjgvWjoU",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "5xCJbUrrKL",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "AOdUyA9mYj",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.6505531668663025,
+                  "g": 0.27521172165870667,
+                  "r": 0.17822538316249847
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 1",
+          "position": {
+            "x": 50.0,
+            "y": -150.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 300.0,
+            "y": 300.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "svrvsEZnfH",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "5xCJbUrrKL",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "AOdUyA9mYj",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.6787060499191284,
+                  "g": 0.051499199122190475,
+                  "r": 0.7978789806365967
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 2",
+          "position": {
+            "x": 300.0,
+            "y": -250.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 200.0,
+            "y": 200.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "J5BMM4hBXC",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "5xCJbUrrKL",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "AOdUyA9mYj",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.6787060499191284,
+                  "g": 0.051499199122190475,
+                  "r": 0.7978789806365967
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 3",
+          "position": {
+            "x": -350.0,
+            "y": -250.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 200.0,
+            "y": 200.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "aCadWfGAx7",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "5xCJbUrrKL",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "AOdUyA9mYj",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.08213931322097778,
+                  "g": 0.5804226994514465,
+                  "r": 0.2054627239704132
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 4",
+          "position": {
+            "x": -0.0,
+            "y": -250.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 300.0,
+            "y": 300.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "PseXINzA2Q"
+            }
+          },
+          {
+            "node": {
+              "id": "nwSjgvWjoU"
+            }
+          },
+          {
+            "node": {
+              "id": "svrvsEZnfH"
+            }
+          },
+          {
+            "node": {
+              "id": "J5BMM4hBXC"
+            }
+          },
+          {
+            "node": {
+              "id": "aCadWfGAx7"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "E65Ptr22QY",
+      "resource_name": "Confetti",
+      "resource_ver": 3,
+      "script_file": "",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
       "id": "A37AEUMH3I",
       "idle_track": "wOgEPQeIma",
       "lifetime": 0.0,
@@ -287,6 +1250,7 @@
           },
           "tag": "",
           "text_item": {
+            "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
               "PP_EnableBloom": true,
@@ -324,7 +1288,7 @@
       },
       "resource_id": "A37AEUMH3I",
       "resource_name": "Points 250",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -423,387 +1387,6 @@
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": true,
-        "LimitLifetime": true,
-        "PostUpdate": true,
-        "TickEntity": true,
-        "UpdateEntity": true,
-        "UpdateNodes": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
-        "WantsMouseEvents": false
-      },
-      "id": "E65Ptr22QY",
-      "idle_track": "",
-      "lifetime": 2.0,
-      "name": "Confetti",
-      "nodes": [
-        {
-          "class": "PseXINzA2Q",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "5xCJbUrrKL",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "AOdUyA9mYj",
-            "material_params": [
-              {
-                "name": "kBaseColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.051499199122190475,
-                  "g": 0.051499199122190475,
-                  "r": 0.7978789806365967
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 0",
-          "position": {
-            "x": -200.0,
-            "y": -200.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 300.0,
-            "y": 200.0
-          },
-          "tag": ""
-        },
-        {
-          "class": "nwSjgvWjoU",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "5xCJbUrrKL",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "AOdUyA9mYj",
-            "material_params": [
-              {
-                "name": "kBaseColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.6505531668663025,
-                  "g": 0.27521172165870667,
-                  "r": 0.17822538316249847
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 1",
-          "position": {
-            "x": 50.0,
-            "y": -150.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 300.0,
-            "y": 300.0
-          },
-          "tag": ""
-        },
-        {
-          "class": "svrvsEZnfH",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "5xCJbUrrKL",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "AOdUyA9mYj",
-            "material_params": [
-              {
-                "name": "kBaseColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.6787060499191284,
-                  "g": 0.051499199122190475,
-                  "r": 0.7978789806365967
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 2",
-          "position": {
-            "x": 300.0,
-            "y": -250.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 200.0,
-            "y": 200.0
-          },
-          "tag": ""
-        },
-        {
-          "class": "J5BMM4hBXC",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "5xCJbUrrKL",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "AOdUyA9mYj",
-            "material_params": [
-              {
-                "name": "kBaseColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.6787060499191284,
-                  "g": 0.051499199122190475,
-                  "r": 0.7978789806365967
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 3",
-          "position": {
-            "x": -350.0,
-            "y": -250.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 200.0,
-            "y": 200.0
-          },
-          "tag": ""
-        },
-        {
-          "class": "aCadWfGAx7",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "5xCJbUrrKL",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "AOdUyA9mYj",
-            "material_params": [
-              {
-                "name": "kBaseColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.08213931322097778,
-                  "g": 0.5804226994514465,
-                  "r": 0.2054627239704132
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 4",
-          "position": {
-            "x": -0.0,
-            "y": -250.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 300.0,
-            "y": 300.0
-          },
-          "tag": ""
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "node": {
-              "id": "PseXINzA2Q"
-            }
-          },
-          {
-            "node": {
-              "id": "nwSjgvWjoU"
-            }
-          },
-          {
-            "node": {
-              "id": "svrvsEZnfH"
-            }
-          },
-          {
-            "node": {
-              "id": "J5BMM4hBXC"
-            }
-          },
-          {
-            "node": {
-              "id": "aCadWfGAx7"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "E65Ptr22QY",
-      "resource_name": "Confetti",
-      "resource_ver": 1,
-      "script_file": "",
-      "tag": ""
-    },
-    {
-      "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
         "LimitLifetime": false,
         "PostUpdate": true,
         "TickEntity": false,
@@ -814,50 +1397,17 @@
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
-      "id": "YOZ0Sp88fq",
+      "id": "mSF0NAZ4A5",
       "idle_track": "",
       "lifetime": 0.0,
-      "name": "Red Brick",
+      "name": "Gray Brick",
       "nodes": [
         {
-          "class": "Qv0PsreOKT",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "_round_rect",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "KeITJIrx1I",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
+          "class": "S9juUdy3La",
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Node 0",
+          "name": "Brick",
           "position": {
             "x": 0.0,
             "y": 0.0
@@ -879,56 +1429,194 @@
             "shape": "AABB"
           },
           "tag": ""
+        },
+        {
+          "class": "RSlPfF89SX",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "_round_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "9wG7A0qhYE",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 1.0,
+                  "r": 1.0
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Skin",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 40.0,
+            "y": 20.0
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
         "children": [
           {
+            "children": [
+              {
+                "node": {
+                  "id": "RSlPfF89SX"
+                }
+              }
+            ],
             "node": {
-              "id": "Qv0PsreOKT"
+              "id": "S9juUdy3La"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "YOZ0Sp88fq",
-      "resource_name": "Red Brick",
-      "resource_ver": 1,
+      "resource_id": "mSF0NAZ4A5",
+      "resource_name": "Gray Brick",
+      "resource_ver": 3,
       "script_file": "viXTDKHRIB",
       "tag": "brick",
+      "tracks": [
+        {
+          "animators": [
+            {
+              "animator": {
+                "duration": 0.43135008215904236,
+                "flags": {
+                  "StaticInstance": false
+                },
+                "id": "RiUhZrQQOW",
+                "method": "Cosine",
+                "name": "Animator_0",
+                "node": "RSlPfF89SX",
+                "position": {
+                  "x": -1.0499999523162842,
+                  "y": -7.369999885559082
+                },
+                "rotation": 0.0,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 40.0,
+                  "y": 20.0
+                },
+                "starttime": 0.0
+              },
+              "type": "TransformAnimator"
+            },
+            {
+              "animator": {
+                "duration": 0.5686498880386353,
+                "flags": {
+                  "StaticInstance": false
+                },
+                "id": "W59REQjYDS",
+                "method": "Cosine",
+                "name": "Animator_1",
+                "node": "RSlPfF89SX",
+                "position": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rotation": 0.0,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 40.0,
+                  "y": 20.0
+                },
+                "starttime": 0.43135008215904236
+              },
+              "type": "TransformAnimator"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 0.20000000298023224,
+          "id": "NrEWjFeYAB",
+          "looping": false,
+          "name": "Nope"
+        }
+      ],
       "vars": [
         {
-          "flags": {
-            "Array": false,
-            "Private": false,
-            "ReadOnly": false
-          },
-          "id": "5UG4twU3FH",
-          "ints": [
-            0
-          ],
-          "name": "hit_count"
-        },
-        {
           "bools": [
-            0
+            1
           ],
           "flags": {
             "Array": false,
             "Private": false,
             "ReadOnly": true
           },
-          "id": "vCxEuX7z0Z",
+          "id": "ixZGSIICeW",
           "name": "immortal"
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "id": "I9is0z6WOX",
+          "ints": [
+            0
+          ],
+          "name": "hit_count"
         },
         {
           "colors": [
             {
               "object": {
                 "a": 1.0,
-                "b": 0.1109025701880455,
-                "g": 0.1109025701880455,
-                "r": 0.8137941360473633
+                "b": 0.7529411911964417,
+                "g": 0.7529411911964417,
+                "r": 0.7529411911964417
               }
             }
           ],
@@ -937,7 +1625,7 @@
             "Private": true,
             "ReadOnly": true
           },
-          "id": "kNyUZy7JAn",
+          "id": "iMq6YvUo5s",
           "name": "color"
         }
       ]
@@ -964,6 +1652,7 @@
         {
           "class": "OwEjn76unJ",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -1018,6 +1707,7 @@
         {
           "class": "gW6NjEkLfo",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_isosceles_triangle",
             "flags": {
@@ -1114,6 +1804,7 @@
         {
           "class": "gaM59OlYN3",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_isosceles_triangle",
             "flags": {
@@ -1168,6 +1859,7 @@
         {
           "class": "DPQ1nWvM1N",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -1222,6 +1914,7 @@
         {
           "class": "TDYAovtIs3",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "z5W9266mJC",
             "flags": {
@@ -1320,7 +2013,7 @@
       },
       "resource_id": "ijOB1QBrNK",
       "resource_name": "Background",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -1457,682 +2150,6 @@
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
-      "id": "mSF0NAZ4A5",
-      "idle_track": "",
-      "lifetime": 0.0,
-      "name": "Gray Brick",
-      "nodes": [
-        {
-          "class": "S9juUdy3La",
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Brick",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 40.0,
-            "y": 20.0
-          },
-          "spatial_node": {
-            "flags": {
-              "Enabled": true,
-              "ReportOverlap": false
-            },
-            "shape": "AABB"
-          },
-          "tag": ""
-        },
-        {
-          "class": "RSlPfF89SX",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "_round_rect",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "9wG7A0qhYE",
-            "material_params": [
-              {
-                "name": "kBaseColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 1.0,
-                  "g": 1.0,
-                  "r": 1.0
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Skin",
-          "position": {
-            "x": 0.0,
-            "y": -0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 40.0,
-            "y": 20.0
-          },
-          "tag": ""
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "children": [
-              {
-                "node": {
-                  "id": "RSlPfF89SX"
-                }
-              }
-            ],
-            "node": {
-              "id": "S9juUdy3La"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "mSF0NAZ4A5",
-      "resource_name": "Gray Brick",
-      "resource_ver": 1,
-      "script_file": "viXTDKHRIB",
-      "tag": "brick",
-      "tracks": [
-        {
-          "animators": [
-            {
-              "animator": {
-                "duration": 0.43135008215904236,
-                "flags": {
-                  "StaticInstance": false
-                },
-                "id": "RiUhZrQQOW",
-                "method": "Cosine",
-                "name": "Animator_0",
-                "node": "RSlPfF89SX",
-                "position": {
-                  "x": -1.0499999523162842,
-                  "y": -7.369999885559082
-                },
-                "rotation": 0.0,
-                "scale": {
-                  "x": 1.0,
-                  "y": 1.0
-                },
-                "size": {
-                  "x": 40.0,
-                  "y": 20.0
-                },
-                "starttime": 0.0
-              },
-              "type": "TransformAnimator"
-            },
-            {
-              "animator": {
-                "duration": 0.5686498880386353,
-                "flags": {
-                  "StaticInstance": false
-                },
-                "id": "W59REQjYDS",
-                "method": "Cosine",
-                "name": "Animator_1",
-                "node": "RSlPfF89SX",
-                "position": {
-                  "x": 0.0,
-                  "y": 0.0
-                },
-                "rotation": 0.0,
-                "scale": {
-                  "x": 1.0,
-                  "y": 1.0
-                },
-                "size": {
-                  "x": 40.0,
-                  "y": 20.0
-                },
-                "starttime": 0.43135008215904236
-              },
-              "type": "TransformAnimator"
-            }
-          ],
-          "delay": 0.0,
-          "duration": 0.20000000298023224,
-          "id": "NrEWjFeYAB",
-          "looping": false,
-          "name": "Nope"
-        }
-      ],
-      "vars": [
-        {
-          "bools": [
-            1
-          ],
-          "flags": {
-            "Array": false,
-            "Private": false,
-            "ReadOnly": true
-          },
-          "id": "ixZGSIICeW",
-          "name": "immortal"
-        },
-        {
-          "flags": {
-            "Array": false,
-            "Private": true,
-            "ReadOnly": false
-          },
-          "id": "I9is0z6WOX",
-          "ints": [
-            0
-          ],
-          "name": "hit_count"
-        },
-        {
-          "colors": [
-            {
-              "object": {
-                "a": 1.0,
-                "b": 0.7529411911964417,
-                "g": 0.7529411911964417,
-                "r": 0.7529411911964417
-              }
-            }
-          ],
-          "flags": {
-            "Array": false,
-            "Private": true,
-            "ReadOnly": true
-          },
-          "id": "iMq6YvUo5s",
-          "name": "color"
-        }
-      ]
-    },
-    {
-      "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
-        "LimitLifetime": false,
-        "PostUpdate": true,
-        "TickEntity": true,
-        "UpdateEntity": true,
-        "UpdateNodes": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
-        "WantsMouseEvents": false
-      },
-      "id": "dJCYf3a5vx",
-      "idle_track": "",
-      "lifetime": 0.0,
-      "name": "Powerup Double Ball",
-      "nodes": [
-        {
-          "class": "omyQ6afIog",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "_rect",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "10togPdjU7",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 0",
-          "position": {
-            "x": 0.0,
-            "y": -0.0
-          },
-          "rigid_body": {
-            "angular_damping": 0.5,
-            "density": 1.0,
-            "flags": {
-              "Bullet": false,
-              "CanSleep": true,
-              "DiscardRotation": false,
-              "Enabled": true,
-              "Sensor": false
-            },
-            "friction": 0.30000001192092896,
-            "linear_damping": 0.5,
-            "polygon": "",
-            "restitution": 0.5,
-            "shape": "Box",
-            "simulation": "Dynamic"
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 40.0,
-            "y": 20.0
-          },
-          "spatial_node": {
-            "flags": {
-              "Enabled": true,
-              "ReportOverlap": false
-            },
-            "shape": "AABB"
-          },
-          "tag": ""
-        },
-        {
-          "class": "bFTLN2fimL",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "_circle",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "vSs0xqS3fS",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 1",
-          "position": {
-            "x": 8.100000381469727,
-            "y": -20.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 10.0,
-            "y": 10.0
-          },
-          "tag": ""
-        },
-        {
-          "class": "I5LlUuBW7O",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "_circle",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "vSs0xqS3fS",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 2",
-          "position": {
-            "x": -10.40999984741211,
-            "y": -20.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 10.0,
-            "y": 10.0
-          },
-          "tag": ""
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "children": [
-              {
-                "node": {
-                  "id": "bFTLN2fimL"
-                }
-              },
-              {
-                "node": {
-                  "id": "I5LlUuBW7O"
-                }
-              }
-            ],
-            "node": {
-              "id": "omyQ6afIog"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "dJCYf3a5vx",
-      "resource_name": "Powerup Double Ball",
-      "resource_ver": 1,
-      "script_file": "",
-      "tag": ""
-    },
-    {
-      "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
-        "LimitLifetime": false,
-        "PostUpdate": true,
-        "TickEntity": true,
-        "UpdateEntity": true,
-        "UpdateNodes": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
-        "WantsMouseEvents": false
-      },
-      "id": "CaLjAijfzQ",
-      "idle_track": "l0Ljq8Cayv",
-      "lifetime": 0.0,
-      "name": "Points 100",
-      "nodes": [
-        {
-          "class": "0f03OL4uHi",
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 0",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rigid_body": {
-            "angular_damping": 0.5,
-            "density": 1.0,
-            "flags": {
-              "Bullet": false,
-              "CanSleep": true,
-              "DiscardRotation": false,
-              "Enabled": true,
-              "Sensor": false
-            },
-            "friction": 0.30000001192092896,
-            "linear_damping": 0.5,
-            "polygon": "yZllA8JJYo",
-            "restitution": 0.5,
-            "shape": "Box",
-            "simulation": "Dynamic"
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 60.0,
-            "y": 20.0
-          },
-          "spatial_node": {
-            "flags": {
-              "Enabled": true,
-              "ReportOverlap": false
-            },
-            "shape": "AABB"
-          },
-          "tag": "",
-          "text_item": {
-            "flags": {
-              "BlinkText": false,
-              "PP_EnableBloom": true,
-              "StaticContent": false,
-              "UnderlineText": false,
-              "VisibleInGame": true
-            },
-            "font_name": "app://fonts/ethnocentric rg it.otf",
-            "font_size": 18,
-            "horizontal_align": "Center",
-            "layer": 0,
-            "line_height": 1.100000023841858,
-            "raster_height": 0,
-            "raster_width": 0,
-            "text": "+100",
-            "text_color": {
-              "a": 1.0,
-              "b": 1.0,
-              "g": 1.0,
-              "r": 1.0
-            },
-            "vertical_align": "Center"
-          }
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "node": {
-              "id": "0f03OL4uHi"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "CaLjAijfzQ",
-      "resource_name": "Points 100",
-      "resource_ver": 1,
-      "script_file": "",
-      "tag": "",
-      "tracks": [
-        {
-          "animators": [
-            {
-              "animator": {
-                "cname": "Animator_0",
-                "duration": 0.3360030949115753,
-                "flags": {
-                  "StaticInstance": false
-                },
-                "id": "lz2dGJbyuB",
-                "joint_id": "",
-                "method": "Cosine",
-                "name": "TextItem_Color",
-                "node": "0f03OL4uHi",
-                "starttime": 0.0,
-                "value": {
-                  "a": 1.0,
-                  "b": 0.8355230093002319,
-                  "g": 0.09396505355834961,
-                  "r": 0.11546501517295837
-                }
-              },
-              "type": "PropertyAnimator"
-            },
-            {
-              "animator": {
-                "cname": "Animator_1",
-                "duration": 0.3463000953197479,
-                "flags": {
-                  "StaticInstance": false
-                },
-                "id": "nQEhu8f6Fd",
-                "joint_id": "",
-                "method": "Cosine",
-                "name": "TextItem_Color",
-                "node": "0f03OL4uHi",
-                "starttime": 0.3360030949115753,
-                "value": {
-                  "a": 1.0,
-                  "b": 0.6911726593971252,
-                  "g": 0.09396505355834961,
-                  "r": 0.8355230093002319
-                }
-              },
-              "type": "PropertyAnimator"
-            },
-            {
-              "animator": {
-                "cname": "Animator_2",
-                "duration": 0.31769680976867676,
-                "flags": {
-                  "StaticInstance": false
-                },
-                "id": "PsS4e8gsYL",
-                "joint_id": "",
-                "method": "Cosine",
-                "name": "TextItem_Color",
-                "node": "0f03OL4uHi",
-                "starttime": 0.6823031902313232,
-                "value": {
-                  "a": 1.0,
-                  "b": 0.09396505355834961,
-                  "g": 0.766308069229126,
-                  "r": 0.8355230093002319
-                }
-              },
-              "type": "PropertyAnimator"
-            }
-          ],
-          "delay": 0.0,
-          "duration": 0.30000001192092896,
-          "id": "l0Ljq8Cayv",
-          "looping": true,
-          "name": "Rainbow Colors"
-        }
-      ],
-      "vars": [
-        {
-          "flags": {
-            "Array": false,
-            "Private": false,
-            "ReadOnly": true
-          },
-          "id": "zigPTCU6RG",
-          "ints": [
-            100
-          ],
-          "name": "points"
-        }
-      ]
-    },
-    {
-      "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
-        "LimitLifetime": false,
-        "PostUpdate": true,
-        "TickEntity": false,
-        "UpdateEntity": false,
-        "UpdateNodes": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
-        "WantsMouseEvents": false
-      },
       "id": "J160KPStMB",
       "idle_track": "",
       "lifetime": 0.0,
@@ -2141,6 +2158,7 @@
         {
           "class": "8ApxuFjM8q",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -2212,7 +2230,7 @@
       },
       "resource_id": "J160KPStMB",
       "resource_name": "Blue Brick",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "viXTDKHRIB",
       "tag": "brick",
       "vars": [
@@ -2283,6 +2301,7 @@
         {
           "class": "Ez48JJPwlB",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -2364,7 +2383,7 @@
       },
       "resource_id": "KA0GT192DW",
       "resource_name": "Wall",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "",
       "tag": ""
     },
@@ -2411,6 +2430,7 @@
         {
           "class": "EmqTxBzJEm",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -2465,6 +2485,7 @@
         {
           "class": "w9atEDaYRN",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -2519,6 +2540,7 @@
         {
           "class": "rK7eEMtkQf",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "fb4IaFw1R2",
             "flags": {
@@ -2600,7 +2622,7 @@
       },
       "resource_id": "9G2p8G3zMT",
       "resource_name": "Ball",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "8xZogKY3K1",
       "tag": "",
       "vars": [
@@ -2693,6 +2715,7 @@
         {
           "class": "iwdFQ6Isf0",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -2771,6 +2794,7 @@
         {
           "class": "kSxTUHLd2d",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_circle",
             "flags": {
@@ -2842,7 +2866,7 @@
       },
       "resource_id": "Gou7Wgfk1C",
       "resource_name": "Powerup Heavy Ball",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "",
       "tag": ""
     },
@@ -2868,6 +2892,7 @@
         {
           "class": "zoQd2IkbRD",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -2956,7 +2981,7 @@
       },
       "resource_id": "Jw14oLX1CD",
       "resource_name": "Yellow Brick",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "viXTDKHRIB",
       "tag": "brick",
       "vars": [
@@ -3027,6 +3052,7 @@
         {
           "class": "rvstkGSTml",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -3098,7 +3124,7 @@
       },
       "resource_id": "kkBOwiYNRn",
       "resource_name": "Purple Brick",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "viXTDKHRIB",
       "tag": "brick",
       "vars": [
@@ -3169,6 +3195,7 @@
         {
           "class": "C4PXv84PoK",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -3247,6 +3274,7 @@
         {
           "class": "Udp7gxZBCi",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "yZllA8JJYo",
             "flags": {
@@ -3301,6 +3329,7 @@
         {
           "class": "IOAkT7MOY2",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "yZllA8JJYo",
             "flags": {
@@ -3377,7 +3406,7 @@
       },
       "resource_id": "xttv1jSmTp",
       "resource_name": "Powerup Shrink",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -3468,6 +3497,7 @@
         {
           "class": "abydQXbENJ",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -3556,7 +3586,7 @@
       },
       "resource_id": "p1xeOon2ua",
       "resource_name": "Powerup Sticky",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "",
       "tag": ""
     },
@@ -3582,6 +3612,7 @@
         {
           "class": "BRTD8xxbwl",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -3660,6 +3691,7 @@
         {
           "class": "ESN3M54I6j",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "yZllA8JJYo",
             "flags": {
@@ -3714,6 +3746,7 @@
         {
           "class": "JFpPZIPERW",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "yZllA8JJYo",
             "flags": {
@@ -3790,7 +3823,7 @@
       },
       "resource_id": "3IA4wv52oL",
       "resource_name": "Powerup Enlarge",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -3919,6 +3952,7 @@
         {
           "class": "Afa0MGoR0m",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -3984,6 +4018,7 @@
         {
           "class": "Hj36beFq5o",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "xqp8TaU6I2",
             "flags": {
@@ -4038,6 +4073,7 @@
         {
           "class": "SCDdF73ql8",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "xqp8TaU6I2",
             "flags": {
@@ -4092,6 +4128,7 @@
         {
           "class": "BYTyMJ3yBu",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -4157,6 +4194,7 @@
         {
           "class": "q6QHm45637",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -4261,7 +4299,7 @@
       },
       "resource_id": "ltMbxDy6wk",
       "resource_name": "Paddle",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "HRXSPeXFUN",
       "tag": "",
       "tracks": [
@@ -4607,6 +4645,7 @@
           },
           "tag": "",
           "text_item": {
+            "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
               "PP_EnableBloom": true,
@@ -4644,7 +4683,7 @@
       },
       "resource_id": "hu9jOD5B5Z",
       "resource_name": "Points 500",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -4761,6 +4800,7 @@
         {
           "class": "YmSfngBxpE",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "dn9XJGsQt0",
             "flags": {
@@ -4825,7 +4865,7 @@
       },
       "resource_id": "gQ4nsFs4L3",
       "resource_name": "Brick Particles",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "RvaCI57v3k",
       "tag": "",
       "vars": [
@@ -4872,6 +4912,7 @@
         {
           "class": "f3zfn3lyPQ",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -4934,6 +4975,7 @@
           },
           "tag": "",
           "text_item": {
+            "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
               "PP_EnableBloom": true,
@@ -4971,7 +5013,7 @@
       },
       "resource_id": "IQlAouf52m",
       "resource_name": "Help",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "",
       "tag": ""
     },
@@ -4997,6 +5039,7 @@
         {
           "class": "pDgWQNCf5A",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -5068,7 +5111,7 @@
       },
       "resource_id": "eX85urYgUe",
       "resource_name": "Green Brick",
-      "resource_ver": 1,
+      "resource_ver": 3,
       "script_file": "viXTDKHRIB",
       "tag": "brick",
       "vars": [
@@ -5119,6 +5162,71 @@
     }
   ],
   "materials": [
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "4zi9n5RIXq",
+      "name": "Blue Brick",
+      "resource_id": "4zi9n5RIXq",
+      "resource_name": "Blue Brick",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Opaque",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "5J61shS6l1",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/element_blue_rectangle_glossy.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "IfPXOd3Ckr",
+              "name": "element_blue_rectangle_glossy",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
+    },
     {
       "active_texture_map": "",
       "flags": {
@@ -5185,6 +5293,130 @@
             "y": 0.0,
             "z": 10.000039100646973
           }
+        }
+      ]
+    },
+    {
+      "active_texture_map": "CuMfAbA1vX",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "EtyRugQve2",
+      "name": "Green Brick",
+      "resource_id": "EtyRugQve2",
+      "resource_name": "Green Brick",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Opaque",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "CuMfAbA1vX",
+          "looping": true,
+          "name": "Texture",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/element_green_rectangle_glossy.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "AK6mQUBG3A",
+              "name": "element_green_rectangle_glossy",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "hhgetGS5Y3",
+      "name": "Paddle Red",
+      "resource_id": "hhgetGS5Y3",
+      "resource_name": "Paddle Red",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "aEs6Et7s3o",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/paddle_01.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Ote1UvsQfW",
+              "name": "paddle_01",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
         }
       ]
     },
@@ -5285,6 +5517,278 @@
       ]
     },
     {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "9wG7A0qhYE",
+      "name": "Gray Brick",
+      "resource_id": "9wG7A0qhYE",
+      "resource_name": "Gray Brick",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Opaque",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "j7yBedbaAe",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/element_grey_rectangle_glossy.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "6epMauMCop",
+              "name": "element_grey_rectangle_glossy",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "rAn0G88CKj",
+      "name": "Sliding Glint",
+      "resource_id": "rAn0G88CKj",
+      "resource_name": "Sliding Glint",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/sliding_glint_effect.glsl",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Custom"
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "MUQDA03a25",
+      "name": "Purple Brick",
+      "resource_id": "MUQDA03a25",
+      "resource_name": "Purple Brick",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Opaque",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "k8R5rsd2OF",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/element_purple_rectangle_glossy.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "IPwfsHtC5k",
+              "name": "element_purple_rectangle_glossy",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "KeITJIrx1I",
+      "name": "Red Brick",
+      "resource_id": "KeITJIrx1I",
+      "resource_name": "Red Brick",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Opaque",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "bShNL7zgyN",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/element_red_rectangle_glossy.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "UadbRD19J6",
+              "name": "element_red_rectangle_glossy",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "BmtOPylP8d",
+      "name": "My Material",
+      "resource_id": "BmtOPylP8d",
+      "resource_name": "My Material",
+      "resource_ver": 6,
+      "shader_src": "\nmat2 r2d(in float degree)\n{\n  float rad = radians(degree);\n  float c = cos(rad);\n  float s = sin(rad);\n  return mat2 (vec2 (c, s),vec2 (-s, c));\n}\n\n\n// using a slightly adapted implementation of iq's simplex noise from\n// https://www.shadertoy.com/view/Msf3WH with hash(), noise() and fbm()\nvec2 hash(in vec2 p)\n{\n  p = vec2(dot(p, vec2(127.1, 311.7)),\n           dot(p, vec2(269.5, 183.3)));\n\n   return -1. + 2.*fract(sin(p)*43758.5453123);\n}\n\nfloat noise(in vec2 p)\n{\n    const float K1 = .366025404;\n    const float K2 = .211324865;\n\n    vec2 i = floor(p + (p.x + p.y)*K1);\n    vec2 a = p - i + (i.x + i.y)*K2;\n    vec2 o = step(a.yx, a.xy);    \n    vec2 b = a - o + K2;\n    vec2 c = a - 1. + 2.*K2;\n    vec3 h = max(.5 - vec3(dot(a, a), dot(b, b), dot(c, c) ), .0);\n    vec3 n = h*h*h*h*vec3(dot(a, hash (i + .0)),\n                          dot(b, hash (i + o)),\n                          dot(c, hash (i + 1.)));\n\n    return dot(n, vec3(70.));\n}\n\nfloat fbm(in vec2 p)\n{\n    mat2 rot = r2d(27.5);\n    float d = noise(p);  p *= rot;\n    d += .5*noise(p);    p *= rot;\n    d += .25*noise(p);   p *= rot;\n    d += .125*noise(p);  p *= rot;\n    d += .0625*noise(p);\n    d /= (1. + .5 + .25 + .125 + .0625);\n    return .5 + .5*d;\n}\n\nvec2 cart2polar(in vec2 cart)\n{\n    float r = length(cart);\n    float phi = atan(cart.y, cart.x);\n    return vec2(r, phi); \n}\n\nvec2 polar2cart(in vec2 polar)\n{\n    float x = polar.x * cos(polar.y);\n    float y = polar.x * sin(polar.y);\n    return vec2(x, y); \n}\n\n\n// this is your custom fragment (material) shader main.\n// this will replace the built-in function but uses the\n// same uniform interface.\nvoid CustomFragmentShaderMain() {\n\n    vec2 uv = (vTexCoord - vec2(0.5, 0.5)) * 2.25;\n    uv.x -= 0.4;\n//    uv *= r2d(12.*kTime);\n    float len = length(uv);\n    float thickness = 3.55;\n    float haze = 0.86;\n\n    // distort UVs a bit\n    uv = cart2polar (uv);\n    uv.y += .2*(.5 + .5*sin(cos(uv.x)*len));\n    uv = polar2cart (uv);\n\n    float d1 = abs((uv.x*haze)*thickness / (uv.x + fbm (uv + 1.25*kTime)));\n    float d2 = abs((uv.y*haze)*thickness / (uv.y + fbm (uv - 1.5*kTime)));\n    float d3 = abs((uv.x*uv.y*haze)*thickness / (uv.x*uv.y + fbm (uv - 2.*kTime)));\n    vec3 col = vec3(.0);\n    float size = .075;\n    col += d1*size * kGradientColor0.rgb; \n//    col += d2*size * kGradientColor1.rgb; \n//    col += d3*size * kGradientColor2.rgb; \n\n    fs_out.color = vec4(col, d1 * size);\n}\n",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Gradient",
+      "uniforms": [
+        {
+          "name": "kGradientColor0",
+          "value": {
+            "a": 1.0,
+            "b": 0.9133898019790649,
+            "g": 0.24235904216766357,
+            "r": 0.18269626796245575
+          }
+        },
+        {
+          "name": "kGradientColor1",
+          "value": {
+            "a": 0.0,
+            "b": 0.8438544273376465,
+            "g": 0.2049744427204132,
+            "r": 0.1252155303955078
+          }
+        },
+        {
+          "name": "kGradientColor2",
+          "value": {
+            "a": 1.0,
+            "b": 0.0790112167596817,
+            "g": 0.8189975023269653,
+            "r": 0.8107271194458008
+          }
+        },
+        {
+          "name": "kGradientType",
+          "value": 0
+        }
+      ]
+    },
+    {
       "active_texture_map": "XRe2eOPx4n",
       "flags": {
         "BlendFrames": true,
@@ -5379,6 +5883,205 @@
           }
         }
       ]
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "1Oau6Iem5r",
+      "name": "Dim",
+      "resource_id": "1Oau6Iem5r",
+      "resource_name": "Dim",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Gradient",
+      "uniforms": [
+        {
+          "name": "kGamma",
+          "value": 0.800000011920929
+        },
+        {
+          "name": "kGradientColor0",
+          "value": {
+            "a": 0.10196078568696976,
+            "b": 0.1771724969148636,
+            "g": 0.1771724969148636,
+            "r": 0.1771724969148636
+          }
+        },
+        {
+          "name": "kGradientColor1",
+          "value": {
+            "a": 0.5607843399047852,
+            "b": 0.21913480758666992,
+            "g": 0.21913480758666992,
+            "r": 0.21913480758666992
+          }
+        },
+        {
+          "name": "kGradientColor2",
+          "value": {
+            "a": 0.30980393290519714,
+            "b": 0.0,
+            "g": 0.0,
+            "r": 0.0
+          }
+        },
+        {
+          "name": "kGradientColor3",
+          "value": {
+            "a": 0.29411765933036804,
+            "b": 0.0,
+            "g": 0.0,
+            "r": 0.0
+          }
+        },
+        {
+          "name": "kGradientType",
+          "value": 0
+        },
+        {
+          "name": "kGradientWeight",
+          "value": {
+            "x": 0.5400000214576721,
+            "y": 0.5
+          }
+        }
+      ]
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "AdiJbNNuTp",
+      "name": "Gray Ball",
+      "resource_id": "AdiJbNNuTp",
+      "resource_name": "Gray Ball",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "lOSfwn7aeQ",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/ballGrey_05.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "FejzO6Dm1j",
+              "name": "ballGrey_05",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "gRY0JNbDCj",
+      "name": "Yellow Brick",
+      "resource_id": "gRY0JNbDCj",
+      "resource_name": "Yellow Brick",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Opaque",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "jFPfGp8iD5",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/element_yellow_rectangle_glossy.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "zyuF1qAgw6",
+              "name": "element_yellow_rectangle_glossy",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
     },
     {
       "active_texture_map": "",
@@ -5587,260 +6290,6 @@
       ]
     },
     {
-      "active_texture_map": "",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "gRY0JNbDCj",
-      "name": "Yellow Brick",
-      "resource_id": "gRY0JNbDCj",
-      "resource_name": "Yellow Brick",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Opaque",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 0.0,
-          "id": "jFPfGp8iD5",
-          "looping": true,
-          "name": "Default",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/element_yellow_rectangle_glossy.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "zyuF1qAgw6",
-              "name": "element_yellow_rectangle_glossy",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Texture2D"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "active_texture_map": "",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "AdiJbNNuTp",
-      "name": "Gray Ball",
-      "resource_id": "AdiJbNNuTp",
-      "resource_name": "Gray Ball",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 0.0,
-          "id": "lOSfwn7aeQ",
-          "looping": true,
-          "name": "Default",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/ballGrey_05.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "FejzO6Dm1j",
-              "name": "ballGrey_05",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Texture2D"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture",
-      "uniforms": [
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
-        }
-      ]
-    },
-    {
-      "active_texture_map": "",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "MUQDA03a25",
-      "name": "Purple Brick",
-      "resource_id": "MUQDA03a25",
-      "resource_name": "Purple Brick",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Opaque",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 0.0,
-          "id": "k8R5rsd2OF",
-          "looping": true,
-          "name": "Default",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/element_purple_rectangle_glossy.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "IPwfsHtC5k",
-              "name": "element_purple_rectangle_glossy",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Texture2D"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture",
-      "uniforms": [
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
-        }
-      ]
-    },
-    {
-      "active_texture_map": "",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "mJ0wHRoy15",
-      "name": "Paddle Green",
-      "resource_id": "mJ0wHRoy15",
-      "resource_name": "Paddle Green",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 0.0,
-          "id": "j3UKqZEvI0",
-          "looping": true,
-          "name": "Default",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/paddle_09.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "LjSIC7inqd",
-              "name": "paddle_09",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Texture2D"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture",
-      "uniforms": [
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
-        }
-      ]
-    },
-    {
       "active_texture_map": "pnizt57sKg",
       "flags": {
         "BlendFrames": true,
@@ -5977,19 +6426,19 @@
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "id": "9wG7A0qhYE",
-      "name": "Gray Brick",
-      "resource_id": "9wG7A0qhYE",
-      "resource_name": "Gray Brick",
+      "id": "mJ0wHRoy15",
+      "name": "Paddle Green",
+      "resource_id": "mJ0wHRoy15",
+      "resource_name": "Paddle Green",
       "resource_ver": 6,
       "shader_src": "",
       "shader_uri": "",
-      "surface": "Opaque",
+      "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
-          "id": "j7yBedbaAe",
+          "id": "j3UKqZEvI0",
           "looping": true,
           "name": "Default",
           "rect_name0": "",
@@ -6003,14 +6452,14 @@
                 "Blur": false,
                 "Edges": false
               },
-              "file": "ws://textures/element_grey_rectangle_glossy.png",
+              "file": "ws://textures/paddle_09.png",
               "flags": {
                 "AllowPacking": true,
                 "AllowResizing": true,
                 "PremulAlpha": false
               },
-              "id": "6epMauMCop",
-              "name": "element_grey_rectangle_glossy",
+              "id": "LjSIC7inqd",
+              "name": "paddle_09",
               "rect": {
                 "h": 1.0,
                 "w": 1.0,
@@ -6031,412 +6480,6 @@
         {
           "name": "kTextureRotation",
           "value": 0.0
-        }
-      ]
-    },
-    {
-      "active_texture_map": "",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "rAn0G88CKj",
-      "name": "Sliding Glint",
-      "resource_id": "rAn0G88CKj",
-      "resource_name": "Sliding Glint",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "ws://shaders/es2/sliding_glint_effect.glsl",
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Custom"
-    },
-    {
-      "active_texture_map": "",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "hhgetGS5Y3",
-      "name": "Paddle Red",
-      "resource_id": "hhgetGS5Y3",
-      "resource_name": "Paddle Red",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 0.0,
-          "id": "aEs6Et7s3o",
-          "looping": true,
-          "name": "Default",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/paddle_01.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "Ote1UvsQfW",
-              "name": "paddle_01",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Texture2D"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture",
-      "uniforms": [
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
-        }
-      ]
-    },
-    {
-      "active_texture_map": "CuMfAbA1vX",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "EtyRugQve2",
-      "name": "Green Brick",
-      "resource_id": "EtyRugQve2",
-      "resource_name": "Green Brick",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Opaque",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 0.0,
-          "id": "CuMfAbA1vX",
-          "looping": true,
-          "name": "Texture",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/element_green_rectangle_glossy.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "AK6mQUBG3A",
-              "name": "element_green_rectangle_glossy",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Texture2D"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "active_texture_map": "",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "4zi9n5RIXq",
-      "name": "Blue Brick",
-      "resource_id": "4zi9n5RIXq",
-      "resource_name": "Blue Brick",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Opaque",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 0.0,
-          "id": "5J61shS6l1",
-          "looping": true,
-          "name": "Default",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/element_blue_rectangle_glossy.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "IfPXOd3Ckr",
-              "name": "element_blue_rectangle_glossy",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Texture2D"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture",
-      "uniforms": [
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
-        }
-      ]
-    },
-    {
-      "active_texture_map": "",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "KeITJIrx1I",
-      "name": "Red Brick",
-      "resource_id": "KeITJIrx1I",
-      "resource_name": "Red Brick",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Opaque",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 0.0,
-          "id": "bShNL7zgyN",
-          "looping": true,
-          "name": "Default",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/element_red_rectangle_glossy.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "UadbRD19J6",
-              "name": "element_red_rectangle_glossy",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Texture2D"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture",
-      "uniforms": [
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
-        }
-      ]
-    },
-    {
-      "active_texture_map": "",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "BmtOPylP8d",
-      "name": "My Material",
-      "resource_id": "BmtOPylP8d",
-      "resource_name": "My Material",
-      "resource_ver": 6,
-      "shader_src": "\nmat2 r2d(in float degree)\n{\n  float rad = radians(degree);\n  float c = cos(rad);\n  float s = sin(rad);\n  return mat2 (vec2 (c, s),vec2 (-s, c));\n}\n\n\n// using a slightly adapted implementation of iq's simplex noise from\n// https://www.shadertoy.com/view/Msf3WH with hash(), noise() and fbm()\nvec2 hash(in vec2 p)\n{\n  p = vec2(dot(p, vec2(127.1, 311.7)),\n           dot(p, vec2(269.5, 183.3)));\n\n   return -1. + 2.*fract(sin(p)*43758.5453123);\n}\n\nfloat noise(in vec2 p)\n{\n    const float K1 = .366025404;\n    const float K2 = .211324865;\n\n    vec2 i = floor(p + (p.x + p.y)*K1);\n    vec2 a = p - i + (i.x + i.y)*K2;\n    vec2 o = step(a.yx, a.xy);    \n    vec2 b = a - o + K2;\n    vec2 c = a - 1. + 2.*K2;\n    vec3 h = max(.5 - vec3(dot(a, a), dot(b, b), dot(c, c) ), .0);\n    vec3 n = h*h*h*h*vec3(dot(a, hash (i + .0)),\n                          dot(b, hash (i + o)),\n                          dot(c, hash (i + 1.)));\n\n    return dot(n, vec3(70.));\n}\n\nfloat fbm(in vec2 p)\n{\n    mat2 rot = r2d(27.5);\n    float d = noise(p);  p *= rot;\n    d += .5*noise(p);    p *= rot;\n    d += .25*noise(p);   p *= rot;\n    d += .125*noise(p);  p *= rot;\n    d += .0625*noise(p);\n    d /= (1. + .5 + .25 + .125 + .0625);\n    return .5 + .5*d;\n}\n\nvec2 cart2polar(in vec2 cart)\n{\n    float r = length(cart);\n    float phi = atan(cart.y, cart.x);\n    return vec2(r, phi); \n}\n\nvec2 polar2cart(in vec2 polar)\n{\n    float x = polar.x * cos(polar.y);\n    float y = polar.x * sin(polar.y);\n    return vec2(x, y); \n}\n\n\n// this is your custom fragment (material) shader main.\n// this will replace the built-in function but uses the\n// same uniform interface.\nvoid CustomFragmentShaderMain() {\n\n    vec2 uv = (vTexCoord - vec2(0.5, 0.5)) * 2.25;\n    uv.x -= 0.4;\n//    uv *= r2d(12.*kTime);\n    float len = length(uv);\n    float thickness = 3.55;\n    float haze = 0.86;\n\n    // distort UVs a bit\n    uv = cart2polar (uv);\n    uv.y += .2*(.5 + .5*sin(cos(uv.x)*len));\n    uv = polar2cart (uv);\n\n    float d1 = abs((uv.x*haze)*thickness / (uv.x + fbm (uv + 1.25*kTime)));\n    float d2 = abs((uv.y*haze)*thickness / (uv.y + fbm (uv - 1.5*kTime)));\n    float d3 = abs((uv.x*uv.y*haze)*thickness / (uv.x*uv.y + fbm (uv - 2.*kTime)));\n    vec3 col = vec3(.0);\n    float size = .075;\n    col += d1*size * kGradientColor0.rgb; \n//    col += d2*size * kGradientColor1.rgb; \n//    col += d3*size * kGradientColor2.rgb; \n\n    fs_out.color = vec4(col, d1 * size);\n}\n",
-      "shader_uri": "",
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Gradient",
-      "uniforms": [
-        {
-          "name": "kGradientColor0",
-          "value": {
-            "a": 1.0,
-            "b": 0.9133898019790649,
-            "g": 0.24235904216766357,
-            "r": 0.18269626796245575
-          }
-        },
-        {
-          "name": "kGradientColor1",
-          "value": {
-            "a": 0.0,
-            "b": 0.8438544273376465,
-            "g": 0.2049744427204132,
-            "r": 0.1252155303955078
-          }
-        },
-        {
-          "name": "kGradientColor2",
-          "value": {
-            "a": 1.0,
-            "b": 0.0790112167596817,
-            "g": 0.8189975023269653,
-            "r": 0.8107271194458008
-          }
-        },
-        {
-          "name": "kGradientType",
-          "value": 0
-        }
-      ]
-    },
-    {
-      "active_texture_map": "",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "1Oau6Iem5r",
-      "name": "Dim",
-      "resource_id": "1Oau6Iem5r",
-      "resource_name": "Dim",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Gradient",
-      "uniforms": [
-        {
-          "name": "kGamma",
-          "value": 0.800000011920929
-        },
-        {
-          "name": "kGradientColor0",
-          "value": {
-            "a": 0.10196078568696976,
-            "b": 0.1771724969148636,
-            "g": 0.1771724969148636,
-            "r": 0.1771724969148636
-          }
-        },
-        {
-          "name": "kGradientColor1",
-          "value": {
-            "a": 0.5607843399047852,
-            "b": 0.21913480758666992,
-            "g": 0.21913480758666992,
-            "r": 0.21913480758666992
-          }
-        },
-        {
-          "name": "kGradientColor2",
-          "value": {
-            "a": 0.30980393290519714,
-            "b": 0.0,
-            "g": 0.0,
-            "r": 0.0
-          }
-        },
-        {
-          "name": "kGradientColor3",
-          "value": {
-            "a": 0.29411765933036804,
-            "b": 0.0,
-            "g": 0.0,
-            "r": 0.0
-          }
-        },
-        {
-          "name": "kGradientType",
-          "value": 0
-        },
-        {
-          "name": "kGradientWeight",
-          "value": {
-            "x": 0.5400000214576721,
-            "y": 0.5
-          }
         }
       ]
     },
@@ -32356,6 +32399,16 @@
       "uri": "ws://lua/ZadrbaYdqx.lua"
     },
     {
+      "id": "RvaCI57v3k",
+      "name": "Brick Particles",
+      "owner": "",
+      "resource_id": "RvaCI57v3k",
+      "resource_name": "Brick Particles",
+      "resource_ver": 1,
+      "type": "Unspecified",
+      "uri": "ws://lua/RvaCI57v3k.lua"
+    },
+    {
       "id": "Bl5XaXGkl0",
       "name": "Powerup",
       "owner": "",
@@ -32376,14 +32429,14 @@
       "uri": "ws://lua/8xZogKY3K1.lua"
     },
     {
-      "id": "RvaCI57v3k",
-      "name": "Brick Particles",
+      "id": "WGNKEJwulf",
+      "name": "Level",
       "owner": "",
-      "resource_id": "RvaCI57v3k",
-      "resource_name": "Brick Particles",
+      "resource_id": "WGNKEJwulf",
+      "resource_name": "Level",
       "resource_ver": 1,
       "type": "Unspecified",
-      "uri": "ws://lua/RvaCI57v3k.lua"
+      "uri": "ws://lua/WGNKEJwulf.lua"
     },
     {
       "id": "HRXSPeXFUN",
@@ -32394,16 +32447,6 @@
       "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/HRXSPeXFUN.lua"
-    },
-    {
-      "id": "WGNKEJwulf",
-      "name": "Level",
-      "owner": "",
-      "resource_id": "WGNKEJwulf",
-      "resource_name": "Level",
-      "resource_ver": 1,
-      "type": "Unspecified",
-      "uri": "ws://lua/WGNKEJwulf.lua"
     }
   ],
   "shapes": [
@@ -32442,6 +32485,7 @@
       "resource_id": "yZllA8JJYo",
       "resource_name": "Arrow",
       "resource_ver": 1,
+      "src": "",
       "static": true,
       "uri": ""
     }

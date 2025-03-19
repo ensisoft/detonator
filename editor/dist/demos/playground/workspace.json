@@ -1,6 +1,8 @@
 {
     "00QMHmSzSt": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "comment_9FSUMBPaiu": "",
         "comment_AYzXdMzYdx": "",
         "comment_Fogdqf6asE": "",
@@ -14,6 +16,7 @@
         "comment_ekJ9ylb4XR": "",
         "comment_v87llCMg4m": "",
         "comment_zzSLz7poNs": "",
+        "is-valid": true,
         "track_nsFKLRhwR9": {
             "Dfl2BY8S4g": "CC7Qp7QktD",
             "timeline_0_node_id": "zzSLz7poNs",
@@ -25,7 +28,9 @@
         }
     },
     "0dmT3Z3FHx": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
         "comment_3G3oqeEyop": "",
         "comment_3RiKNWdnGt": "",
@@ -73,28 +78,40 @@
         "comment_xaC8DKI64j": "",
         "comment_ytovb3u92D": "",
         "comment_zAQBZB62C3": "",
-        "comment_zYhfd59Wi8": ""
+        "comment_zYhfd59Wi8": "",
+        "is-valid": true
     },
     "0gsBaQh3gG": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
         "comment_1gtE2LrFBy": "",
         "comment_5v5bG75wrG": "",
         "comment_LkejTNB3bF": "",
         "comment_OzguChCMWN": "",
         "comment_SB3soZozyb": "",
-        "comment_p1SOl5u50I": ""
+        "comment_p1SOl5u50I": "",
+        "is-valid": true
     },
     "0whhJXfg3t": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "2rSIWqteXS": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "50YhrrBTZy": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
         "comment_6kokqtxuKI": "",
         "comment_8iqSLDHIUv": "",
@@ -109,18 +126,25 @@
         "comment_kPe9HBASoq": "",
         "comment_pAmhSWQvxI": "",
         "comment_uPT2R6pKmJ": "",
-        "comment_xpaCqpLl9m": ""
+        "comment_xpaCqpLl9m": "",
+        "is-valid": true
     },
     "5KUxLyDMdS": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "5uDea9Wvry": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
         "comment_WEI61eiEOE": "",
         "comment_fUJx4OyC4z": "",
         "comment_gu1bvRvusB": "",
+        "is-valid": true,
         "track_avP3rIJ4jE": {
             "KzHpj4vlsn": "5yKMnkM9QL",
             "QUSNiSOjGk": "3uuPO1C5ij",
@@ -139,149 +163,241 @@
         }
     },
     "67oHYYDttT": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "6M7kjbtJOK": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
-        "comment_FXED8Wa7Of": ""
+        "comment_FXED8Wa7Of": "",
+        "is-valid": true
     },
     "6XbPDf5din": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "8v8KMi39RJ": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "91zq35Pw74": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "9jMLWUyAWj": {
-        "__version": 1,
-        "checked_for_packing": true
-    },
-    "AKwmKiP2Wr": {
+        "__tag_list": [
+        ],
         "__version": 1,
         "checked_for_packing": true,
+        "is-valid": true
+    },
+    "AKwmKiP2Wr": {
+        "__tag_list": [
+        ],
+        "__version": 3,
+        "checked_for_packing": true,
         "comment_Btz6FPZ3x9": "",
-        "comment_oSRr4BjhzU": ""
+        "comment_oSRr4BjhzU": "",
+        "is-valid": true
     },
     "C2J85i8wGW": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
         "comment_78POfNygjo": "",
         "comment_EvvsEwsUZM": "",
-        "comment_ToDnHsvlKQ": ""
+        "comment_ToDnHsvlKQ": "",
+        "is-valid": true
     },
     "CHxdJlF4hy": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
         "comment_H40xKvd4rk": "",
         "comment_Nvdbiq1Hbm": "",
         "comment_P7XihnI23W": "",
         "comment_lXHBN7xw1X": "",
-        "comment_o4isvTtn89": ""
+        "comment_o4isvTtn89": "",
+        "is-valid": true
     },
     "E16J1jPh3e": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
         "comment_B1dPebfxFq": "",
         "comment_Mgs9eFOmAK": "",
         "comment_he0IF53pNl": "",
         "comment_sL88eOluT3": "",
-        "comment_uuG7xKxCd0": ""
+        "comment_uuG7xKxCd0": "",
+        "is-valid": true
     },
     "ETnTKLXRXi": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
-        "comment_fTLOPJMsQ3": ""
+        "comment_fTLOPJMsQ3": "",
+        "is-valid": true
     },
     "EsFlY7oEfM": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
-        "comment_1MPsnG38m5": ""
+        "comment_1MPsnG38m5": "",
+        "is-valid": true
     },
     "Fwn9yS1gWF": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
         "comment_a0Pfoh2tIx": "",
-        "comment_xw2qQ4qDJe": ""
+        "comment_xw2qQ4qDJe": "",
+        "is-valid": true
     },
     "HjpI2ov2Uf": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "HkWn4XMjQu": {
-        "__version": 1,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 3,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "JhzGly7HEo": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "Kk02rATEFs": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "LeswpwTmim": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "Od4ASPzqb7": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "P6qp0Clu3U": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "QCSIpWak63": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "SDWDwiNlOp": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "UWnXOsuD6o": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "WiBLRaLxr6": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "Xg0GdRiaQU": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "XwQTFkhxPJ": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "YAWlC9mfq8": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "a8UWU1fUNZ": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
-        "comment_x5LUp0CItR": ""
+        "comment_x5LUp0CItR": "",
+        "is-valid": true
     },
     "bpOdKJ2WFi": {
-        "__version": 1,
-        "checked_for_packing": true
-    },
-    "dK1EdyK1h8": {
+        "__tag_list": [
+        ],
         "__version": 1,
         "checked_for_packing": true,
-        "comment_6w1qxl64Dk": ""
+        "is-valid": true
+    },
+    "dK1EdyK1h8": {
+        "__tag_list": [
+        ],
+        "__version": 3,
+        "checked_for_packing": true,
+        "comment_6w1qxl64Dk": "",
+        "is-valid": true
     },
     "dgbRAN2Z8Q": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
         "comment_5n8aH5AqXj": "",
         "comment_CYBkERgaLw": "",
@@ -300,50 +416,80 @@
         "comment_o8SlA3ZSQH": "",
         "comment_pOWOB5S0p9": "",
         "comment_s4G40JS3pT": "",
-        "comment_vSRMetoMdI": ""
+        "comment_vSRMetoMdI": "",
+        "is-valid": true
     },
     "dgq5ss7Iy9": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
-        "comment_xPnegFZrhB": ""
+        "comment_xPnegFZrhB": "",
+        "is-valid": true
     },
     "gq19L0R1vB": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "hLwuC0RD7O": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "isAzfBPIpr": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "j2ofYbIJ19": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "j3IkLhQmfq": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "k4Stm2rLJJ": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "kpR98Mlxaz": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
         "comment_FFW46rIdfi": "",
         "comment_QeRCmrPDmR": "",
-        "comment_kMOWg6MbOn": ""
+        "comment_kMOWg6MbOn": "",
+        "is-valid": true
     },
     "kppKkQuA0g": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "lCSj0gMTqU": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
         "comment_0yFT4fPdB1": "",
         "comment_11IsfiUDjs": "",
@@ -361,28 +507,44 @@
         "comment_fBdB6MvNul": "",
         "comment_msrIJrFjPY": "",
         "comment_pPoSISmFZh": "",
-        "comment_xAMylSIBUS": ""
+        "comment_xAMylSIBUS": "",
+        "is-valid": true
     },
     "lTi7YXjdsz": {
-        "__version": 1,
-        "checked_for_packing": true
-    },
-    "mRaJ8E2T2X": {
-        "__version": 1,
-        "checked_for_packing": true
-    },
-    "n9hH3dGv20": {
-        "__version": 1,
-        "checked_for_packing": true
-    },
-    "pATaRMBTR7": {
-        "__version": 1,
-        "checked_for_packing": true
-    },
-    "pK3rRC7a5h": {
+        "__tag_list": [
+        ],
         "__version": 1,
         "checked_for_packing": true,
-        "comment_dqzf0vCHTn": ""
+        "is-valid": true
+    },
+    "mRaJ8E2T2X": {
+        "__tag_list": [
+        ],
+        "__version": 1,
+        "checked_for_packing": true,
+        "is-valid": true
+    },
+    "n9hH3dGv20": {
+        "__tag_list": [
+        ],
+        "__version": 1,
+        "checked_for_packing": true,
+        "is-valid": true
+    },
+    "pATaRMBTR7": {
+        "__tag_list": [
+        ],
+        "__version": 1,
+        "checked_for_packing": true,
+        "is-valid": true
+    },
+    "pK3rRC7a5h": {
+        "__tag_list": [
+        ],
+        "__version": 3,
+        "checked_for_packing": true,
+        "comment_dqzf0vCHTn": "",
+        "is-valid": true
     },
     "project": {
         "application_identifier": "I1ULdjZPMrzH",
@@ -417,6 +579,7 @@
         "game_viewport_width": 1000,
         "grab_mouse": false,
         "html5_developer_ui": true,
+        "html5_pointer_lock": false,
         "loading_screen_font": "app://fonts/orbitron-bold.otf",
         "logging_debug": false,
         "logging_error": false,
@@ -461,34 +624,52 @@
         "working_folder": "${workspace}"
     },
     "rFu8E6tjzf": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "sCQDCzRWej": {
-        "__version": 3,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "sTGqtln7OZ": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": true,
-        "comment_7w8O3vR1G1": ""
+        "comment_7w8O3vR1G1": "",
+        "is-valid": true
     },
     "tHryztXiQ3": {
-        "__version": 1,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 3,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "uhYlthZ4sC": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "v8AR2h5m8R": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "workspace": {
         "packing_param_combine_textures": true,
-        "packing_param_copy_html5": true,
-        "packing_param_copy_native": true,
+        "packing_param_copy_html5": 1,
+        "packing_param_copy_native": 1,
         "packing_param_delete_prev": true,
         "packing_param_generate_html5": true,
         "packing_param_generate_html5_filesys": true,
@@ -503,20 +684,32 @@
         "packing_param_write_content": true
     },
     "wtkuOomt3P": {
-        "__version": 1,
-        "checked_for_packing": true
-    },
-    "x6nxsa4XuD": {
-        "__version": 1,
-        "checked_for_packing": true
-    },
-    "xlPb8LHBFS": {
-        "__version": 3,
-        "checked_for_packing": true
-    },
-    "zFZFKpipES": {
+        "__tag_list": [
+        ],
         "__version": 1,
         "checked_for_packing": true,
-        "comment_BAaFunDDPL": ""
+        "is-valid": true
+    },
+    "x6nxsa4XuD": {
+        "__tag_list": [
+        ],
+        "__version": 1,
+        "checked_for_packing": true,
+        "is-valid": true
+    },
+    "xlPb8LHBFS": {
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
+    },
+    "zFZFKpipES": {
+        "__tag_list": [
+        ],
+        "__version": 3,
+        "checked_for_packing": true,
+        "comment_BAaFunDDPL": "",
+        "is-valid": true
     }
 }
