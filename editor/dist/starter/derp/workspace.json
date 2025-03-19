@@ -1,31 +1,41 @@
 {
     "8UZOHE5ijx": {
-        "__version": 4,
-        "checked_for_packing": 1
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": 1,
+        "is-valid": true
     },
     "9CxQaKSgMC": {
-        "__version": 4,
-        "checked_for_packing": 1
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": 1,
+        "is-valid": true
     },
     "9fLWNBkZvX": {
-        "__version": 4,
-        "checked_for_packing": 1
-    },
-    "E0qZ7nA8br": {
-        "__version": 4,
-        "checked_for_packing": 1
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": 1,
+        "is-valid": true
     },
     "Fj66N4PDUG": {
-        "__version": 4,
-        "checked_for_packing": 1
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "is-valid": true
     },
     "HwObefYJNC": {
+        "__tag_list": [
+        ],
         "__version": 1,
         "checked_for_packing": 1,
         "elem_EGGlghTtgy_pos_x": 265,
         "elem_EGGlghTtgy_pos_y": -110,
         "elem_qZy6ISYxl7_pos_x": -6,
         "elem_qZy6ISYxl7_pos_y": -86,
+        "is-valid": true,
         "link_BRzeFhx5Zg_dst_x": 265,
         "link_BRzeFhx5Zg_dst_y": -57,
         "link_BRzeFhx5Zg_src_x": 194,
@@ -37,45 +47,72 @@
         "mapping_count": 2
     },
     "IxyHIKNMIn": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": 1,
-        "comment_p46dK0RAxd": ""
+        "comment_p46dK0RAxd": "",
+        "is-valid": true
     },
     "LPH6tgo9eN": {
-        "__version": 4,
-        "checked_for_packing": 1
+        "__tag_list": [
+        ],
+        "is-valid": true
+    },
+    "LnRkG51o2z": {
+        "__tag_list": [
+        ],
+        "is-valid": true
     },
     "SfDYJTRhGz": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "is-valid": true
     },
     "Ytj4tDET1a": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": 1,
         "comment_Bft0bWhpnE": "",
-        "comment_Q6Pq01QoEA": ""
+        "comment_Q6Pq01QoEA": "",
+        "is-valid": true
     },
     "e1zlPY8HTm": {
+        "__tag_list": [
+        ],
         "__version": 1,
         "checked_for_packing": 1,
+        "is-valid": true,
         "material": "Fj66N4PDUG"
     },
     "id5BsoCSrO": {
-        "__version": 1,
-        "checked_for_packing": 1
+        "__tag_list": [
+        ],
+        "is-valid": true
     },
     "iiKBwhkDbI": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "is-valid": true
     },
     "lQlseaZOEX": {
+        "__tag_list": [
+        ],
         "__version": 1,
         "checked_for_packing": 1,
         "elem_NwwdP8ZHwL_pos_x": -108,
         "elem_NwwdP8ZHwL_pos_y": -68,
+        "is-valid": true,
         "mapping_count": 0
     },
     "nQu4kueY9z": {
+        "__tag_list": [
+        ],
         "__version": 1,
         "checked_for_packing": 1,
         "elem_IA8Bo38BRj_pos_x": -147,
@@ -84,6 +121,7 @@
         "elem_WK3PiWWhSR_pos_y": -83,
         "elem_hs5HughOro_pos_x": 129,
         "elem_hs5HughOro_pos_y": -219,
+        "is-valid": true,
         "link_GQOTzYYbUH_dst_x": 128,
         "link_GQOTzYYbUH_dst_y": -168,
         "link_GQOTzYYbUH_src_x": 53,
@@ -135,6 +173,7 @@
         "game_viewport_width": 1000,
         "grab_mouse": false,
         "html5_developer_ui": false,
+        "html5_pointer_lock": false,
         "loading_screen_font": "app://fonts/orbitron-bold.otf",
         "logging_debug": false,
         "logging_error": false,
@@ -179,20 +218,29 @@
         "working_folder": "${workspace}"
     },
     "qv7w7J7Aiv": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "checked_for_packing": 1,
-        "comment_0EZszTO4jB": ""
+        "comment_0EZszTO4jB": "",
+        "is-valid": true
     },
     "sUAHqYkAPp": {
-        "__version": 4,
-        "checked_for_packing": 1
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": 1,
+        "is-valid": true
     },
     "tqHo3nK0b9": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 3,
         "comment_2qZDXrpOrX": "",
         "comment_mmd8qzxl3w": "",
         "comment_mqxbWFGIg9": "",
         "comment_xYSBrgLxKL": "",
+        "is-valid": true,
         "track_0YxK4CGXbf": {
             "KG5fOHpMYa": "AzUofLOAMl",
             "OHFoxLJrUF": "xzg62aztGL",
@@ -208,24 +256,27 @@
         }
     },
     "workspace": {
-        "packing_param_combine_textures": 1,
+        "packing_param_combine_textures": true,
         "packing_param_copy_html5": 1,
         "packing_param_copy_native": 1,
-        "packing_param_delete_prev": 1,
-        "packing_param_generate_html5": 1,
-        "packing_param_generate_html5_filesys": 1,
+        "packing_param_delete_prev": true,
+        "packing_param_generate_html5": true,
+        "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "256",
         "packing_param_max_tex_width": "256",
         "packing_param_output_dir": "ws://dist",
         "packing_param_pack_height": "1024",
         "packing_param_pack_width": "1024",
-        "packing_param_resize_large_textures": 1,
+        "packing_param_resize_large_textures": true,
         "packing_param_tex_padding": 2,
-        "packing_param_write_config": 1,
+        "packing_param_write_config": true,
         "packing_param_write_content": true
     },
     "zJgI2SZT3X": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "is-valid": true
     }
 }
