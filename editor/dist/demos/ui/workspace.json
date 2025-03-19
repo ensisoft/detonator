@@ -1,7 +1,10 @@
 {
     "04w68bxEMa": {
-        "__version": 1,
+        "__tag_list": [
+        ],
+        "__version": 2,
         "checked_for_packing": true,
+        "is-valid": true,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
         "local_emitter_x": 0,
@@ -15,81 +18,136 @@
         "use_lifetime": true
     },
     "1zSKHEEMX8": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "26yFL7iuTt": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "2a9dGQ8L9R": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "2xdUYgjtvl": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "3vHBKZi4PZ": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "4pCEHuZXY0": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "5omg0eLKCh": {
+        "__tag_list": [
+        ],
         "__version": 1,
         "checked_for_packing": true,
         "elem_OkowxZ29ux_pos_x": 0,
         "elem_OkowxZ29ux_pos_y": 0,
+        "is-valid": true,
         "mapping_count": 0
     },
     "6FH0rTKGMv": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "CKyBnR2qsM": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "CYmQaZ42Q9": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "DdXp2xRthF": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "Hee8rxTCrr": {
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "is-valid": true
     },
     "PJjQktY8ud": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "QmmO5gXYjv": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "SNExgliw9W": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "SPlS2A5D4Y": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "Uy6jWgursh": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "WE8iUAEdzI": {
+        "__tag_list": [
+        ],
         "__version": 1,
         "checked_for_packing": true,
         "elem_PKbbAQYuEO_pos_x": -171,
         "elem_PKbbAQYuEO_pos_y": -276,
         "elem_kPKulBh456_pos_x": -477,
         "elem_kPKulBh456_pos_y": -210,
+        "is-valid": true,
         "link_IHmberqEyX_dst_x": -171,
         "link_IHmberqEyX_dst_y": -227,
         "link_IHmberqEyX_src_x": -277,
@@ -101,28 +159,46 @@
         "mapping_count": 2
     },
     "WG0kYpqr3q": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "Xg0GdRiaQU": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "YHgTw82r0o": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "hz6w2tG1gv": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "lqOQq8yDtn": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "oTENvjff4e": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "project": {
         "application_identifier": "nzHsJhRp8RDr",
@@ -157,6 +233,7 @@
         "game_viewport_width": 1024,
         "grab_mouse": false,
         "html5_developer_ui": false,
+        "html5_pointer_lock": false,
         "loading_screen_font": "app://fonts/orbitron-bold.otf",
         "logging_debug": true,
         "logging_error": true,
@@ -201,17 +278,23 @@
         "working_folder": "${workspace}"
     },
     "qNrtwb1b52": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "is-valid": false,
+        "problem": "Missing dependency 'XFp2yP7TDj'"
     },
     "uI5i13YzFU": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "workspace": {
         "packing_param_combine_textures": true,
-        "packing_param_copy_html5": true,
-        "packing_param_copy_native": true,
+        "packing_param_copy_html5": 1,
+        "packing_param_copy_native": 1,
         "packing_param_delete_prev": true,
         "packing_param_generate_html5": true,
         "packing_param_generate_html5_filesys": true,
@@ -226,28 +309,43 @@
         "packing_param_write_content": true
     },
     "x8itAE59QO": {
+        "__tag_list": [
+        ],
         "__version": 1,
-        "checked_for_packing": true
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "y8X809gLGr": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "yA7p0YO8u3": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "yTsaLXKonJ": {
-        "__version": 4,
-        "checked_for_packing": true
+        "__tag_list": [
+        ],
+        "__version": 6,
+        "checked_for_packing": true,
+        "is-valid": true
     },
     "zNOWw04fYZ": {
+        "__tag_list": [
+        ],
         "__version": 1,
         "checked_for_packing": true,
         "elem_0sroSvwwzT_pos_x": -292,
         "elem_0sroSvwwzT_pos_y": -134,
         "elem_GhszDt2nDm_pos_x": -560,
         "elem_GhszDt2nDm_pos_y": -109,
+        "is-valid": true,
         "link_wE822ZDz3i_dst_x": -292,
         "link_wE822ZDz3i_dst_y": -84,
         "link_wE822ZDz3i_src_x": -360,

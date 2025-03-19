@@ -61,7 +61,6 @@ function Powerup(paddle)
 end
 
 function BeginPlay(paddle, scene, map)
-
 end
 
 -- Called when the game play ends for an entity in the scene.

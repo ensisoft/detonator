@@ -12,18 +12,19 @@
         "VisibleInEditor": true,
         "VisibleInGame": true,
         "WantsKeyEvents": false,
-        "WantsMouseEvents": false
+        "WantsMouseEvents": true
       },
-      "id": "fufgFP3SyQ",
+      "id": "qGhg1ub3rt",
       "idle_track": "",
       "lifetime": 0.0,
-      "name": "Hyperspace",
+      "name": "Summoning Circle",
       "nodes": [
         {
-          "class": "3uQGC10emt",
+          "class": "8nrJSYACm5",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
-            "drawable": "jdjNl1Joh3",
+            "drawable": "y0ZBwlFRes",
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
@@ -37,7 +38,40 @@
             },
             "layer": 0,
             "linewidth": 1.0,
-            "material": "quun8rd0La",
+            "material": "HA5M7RGQpK",
+            "material_params": [
+              {
+                "name": "kParticleEndColor",
+                "value": {
+                  "a": 0.0,
+                  "b": 0.4903334081172943,
+                  "g": 0.9716029763221741,
+                  "r": 0.7354543209075928
+                }
+              },
+              {
+                "name": "kParticleMidColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.24516670405864716,
+                  "g": 0.9857938289642334,
+                  "r": 0.5573510527610779
+                }
+              },
+              {
+                "name": "kParticleStartColor",
+                "value": {
+                  "a": 0.4000000059604645,
+                  "b": 0.0,
+                  "g": 1.0,
+                  "r": 0.3791714310646057
+                }
+              },
+              {
+                "name": "kRotationalVelocity",
+                "value": 2.0
+              }
+            ],
             "offset": {
               "x": 0.0,
               "y": 0.0,
@@ -49,7 +83,7 @@
             "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
-              "y": 0.0,
+              "y": -0.0,
               "z": 0.0
             },
             "timescale": 1.0
@@ -57,7 +91,112 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Node 0",
+          "name": "Circle",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 173.4228057861328,
+            "y": 203.40750122070313
+          },
+          "tag": ""
+        },
+        {
+          "class": "0Un9haOtia",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 68.05929565429688,
+            "y": 69.99932861328125
+          },
+          "tag": ""
+        },
+        {
+          "class": "9U8gNMwG3Q",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "K5fmwRUujU",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "eySa2QEq4I",
+            "material_params": [
+              {
+                "name": "kParticleEndColor",
+                "value": {
+                  "a": 0.0,
+                  "b": 0.29130998253822327,
+                  "g": 0.8361638784408569,
+                  "r": 0.3764858543872833
+                }
+              },
+              {
+                "name": "kParticleMidColor",
+                "value": {
+                  "a": 0.4117647111415863,
+                  "b": 0.18051423132419586,
+                  "g": 0.8366979360580444,
+                  "r": 0.2538948655128479
+                }
+              },
+              {
+                "name": "kParticleStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.06971847265958786,
+                  "g": 0.8372472524642944,
+                  "r": 0.13124284148216248
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Magic smoke",
           "position": {
             "x": -0.0,
             "y": -0.0
@@ -68,8 +207,209 @@
             "y": 1.0
           },
           "size": {
-            "x": 47.01649475097656,
-            "y": 43.98420715332031
+            "x": 25.67803955078125,
+            "y": 34.95629119873047
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "8nrJSYACm5"
+                }
+              },
+              {
+                "node": {
+                  "id": "9U8gNMwG3Q"
+                }
+              }
+            ],
+            "node": {
+              "id": "0Un9haOtia"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "qGhg1ub3rt",
+      "resource_name": "Summoning Circle",
+      "resource_ver": 3,
+      "script_file": "nIkywmIbBJ",
+      "tag": "",
+      "vars": [
+        {
+          "bools": [
+            0
+          ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "udJPMW8the",
+          "name": "dragging"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "KALE2Cn77Q",
+      "idle_track": "",
+      "lifetime": 2.0,
+      "name": "Fireworks Explosion Green",
+      "nodes": [
+        {
+          "class": "2QmI7rXsbZ",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "rBqJ2LlkXC",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": false,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "dZDA63fz8X",
+            "material_params": [
+              {
+                "name": "kParticleEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.07074082642793655,
+                  "g": 0.9555962681770325,
+                  "r": 0.6389563083648682
+                }
+              },
+              {
+                "name": "kParticleMidColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.061005569994449615,
+                  "g": 0.9409552216529846,
+                  "r": 0.3527657091617584
+                }
+              },
+              {
+                "name": "kParticleStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.05127031356096268,
+                  "g": 0.9263141751289368,
+                  "r": 0.06657510995864868
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Sparks",
+          "position": {
+            "x": -0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 30.351303100585938,
+            "y": 38.91896438598633
+          },
+          "tag": ""
+        },
+        {
+          "class": "loTkslEBZQ",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "02kw3C4wix",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": false,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "dZDA63fz8X",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Explosion",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 21.0,
+            "y": 29.059999465942383
           },
           "tag": ""
         }
@@ -78,16 +418,21 @@
         "children": [
           {
             "node": {
-              "id": "3uQGC10emt"
+              "id": "2QmI7rXsbZ"
+            }
+          },
+          {
+            "node": {
+              "id": "loTkslEBZQ"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "fufgFP3SyQ",
-      "resource_name": "Hyperspace",
+      "resource_id": "KALE2Cn77Q",
+      "resource_name": "Fireworks Explosion Green",
       "resource_ver": 3,
-      "script_file": "wBGTUem9UB",
+      "script_file": "",
       "tag": ""
     },
     {
@@ -102,150 +447,19 @@
         "VisibleInEditor": true,
         "VisibleInGame": true,
         "WantsKeyEvents": false,
-        "WantsMouseEvents": true
-      },
-      "id": "BbEpeqHSYG",
-      "idle_track": "",
-      "lifetime": 0.0,
-      "name": "Basic Flame",
-      "nodes": [
-        {
-          "class": "WP4oD64913",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "w3S1bxiRIU",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "dZDA63fz8X",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Flame",
-          "position": {
-            "x": -0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 14.16534423828125,
-            "y": 13.76336669921875
-          },
-          "tag": ""
-        },
-        {
-          "class": "fo1iBtE2PJ",
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Body",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 50.0,
-            "y": 50.0
-          },
-          "tag": ""
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "children": [
-              {
-                "node": {
-                  "id": "WP4oD64913"
-                }
-              }
-            ],
-            "node": {
-              "id": "fo1iBtE2PJ"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "BbEpeqHSYG",
-      "resource_name": "Basic Flame",
-      "resource_ver": 3,
-      "script_file": "nIkywmIbBJ",
-      "tag": "",
-      "vars": [
-        {
-          "bools": [
-            0
-          ],
-          "flags": {
-            "Array": false,
-            "Private": false,
-            "ReadOnly": false
-          },
-          "id": "BEvkjRXES2",
-          "name": "dragging"
-        }
-      ]
-    },
-    {
-      "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
-        "LimitLifetime": false,
-        "PostUpdate": true,
-        "TickEntity": true,
-        "UpdateEntity": true,
-        "UpdateNodes": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
-      "id": "tyNkXUoRPJ",
+      "id": "ZnvR8kE3vD",
       "idle_track": "",
       "lifetime": 0.0,
-      "name": "Blood Impact",
+      "name": "My Entity",
       "nodes": [
         {
-          "class": "daXCUJOp0z",
+          "class": "7hGhRTTZC5",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
-            "drawable": "KSwh4OhJxA",
+            "drawable": "_rect",
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
@@ -259,7 +473,7 @@
             },
             "layer": 0,
             "linewidth": 1.0,
-            "material": "K9D27CRUwq",
+            "material": "_checkerboard",
             "offset": {
               "x": 0.0,
               "y": 0.0,
@@ -279,10 +493,10 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Splatter",
+          "name": "Node 0",
           "position": {
-            "x": 0.5,
-            "y": 0.5
+            "x": -153.5,
+            "y": -151.5
           },
           "rotation": 0.0,
           "scale": {
@@ -290,112 +504,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 566.140625,
-            "y": 561.7544555664063
-          },
-          "tag": ""
-        },
-        {
-          "class": "PLozCzYgnd",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "LnUnRULvIo",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "dZDA63fz8X",
-            "material_params": [
-              {
-                "name": "kParticleEndColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.02561989799141884,
-                  "g": 0.02561989799141884,
-                  "r": 0.17975127696990967
-                }
-              },
-              {
-                "name": "kParticleMidColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.01902800053358078,
-                  "g": 0.01902800053358078,
-                  "r": 0.2484245002269745
-                }
-              },
-              {
-                "name": "kParticleStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.012436103075742722,
-                  "g": 0.012436103075742722,
-                  "r": 0.3170977234840393
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Red Mess",
-          "position": {
-            "x": 0.5,
-            "y": 0.5
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 350.9735107421875,
-            "y": 332.8275146484375
-          },
-          "tag": ""
-        },
-        {
-          "class": "L30Ob5LLSH",
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Body",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 78.0,
-            "y": 77.0
+            "x": 217.0,
+            "y": 240.0
           },
           "tag": ""
         }
@@ -403,27 +513,15 @@
       "render_tree": {
         "children": [
           {
-            "children": [
-              {
-                "node": {
-                  "id": "daXCUJOp0z"
-                }
-              },
-              {
-                "node": {
-                  "id": "PLozCzYgnd"
-                }
-              }
-            ],
             "node": {
-              "id": "L30Ob5LLSH"
+              "id": "7hGhRTTZC5"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "tyNkXUoRPJ",
-      "resource_name": "Blood Impact",
+      "resource_id": "ZnvR8kE3vD",
+      "resource_name": "My Entity",
       "resource_ver": 3,
       "script_file": "",
       "tag": ""
@@ -442,35 +540,15 @@
         "WantsKeyEvents": false,
         "WantsMouseEvents": true
       },
-      "id": "4POqhfHWQE",
+      "id": "1RlBexDBsu",
       "idle_track": "",
       "lifetime": 0.0,
-      "name": "Magic",
+      "name": "Dark Magic",
       "nodes": [
         {
-          "class": "GUiFWkmvod",
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Body",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 40.0,
-            "y": 40.0
-          },
-          "tag": ""
-        },
-        {
-          "class": "prtmyMahzR",
+          "class": "Q1sAHPvbpB",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "K5fmwRUujU",
             "flags": {
@@ -484,9 +562,19 @@
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
-            "layer": 1,
+            "layer": 0,
             "linewidth": 1.0,
             "material": "eySa2QEq4I",
+            "material_params": [
+              {
+                "name": "kRotate",
+                "value": 1.0
+              },
+              {
+                "name": "kRotationalVelocity",
+                "value": 0.10000000149011612
+              }
+            ],
             "offset": {
               "x": 0.0,
               "y": 0.0,
@@ -517,97 +605,15 @@
             "y": 1.0
           },
           "size": {
-            "x": 40.0,
-            "y": 40.0
+            "x": 263.2249755859375,
+            "y": 264.82073974609375
           },
           "tag": ""
         },
         {
-          "class": "IodUr6ANW9",
+          "class": "xigLkRQnix",
           "drawable_item": {
-            "depth": 1.0,
-            "drawable": "6PwXHnbnzY",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 2,
-            "linewidth": 1.0,
-            "material": "dZDA63fz8X",
-            "material_params": [
-              {
-                "name": "kParticleEndColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.7411764860153198,
-                  "g": 0.0,
-                  "r": 0.399984747171402
-                }
-              },
-              {
-                "name": "kParticleMidColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.8302204608917236,
-                  "g": 0.44654765725135803,
-                  "r": 0.6328603029251099
-                }
-              },
-              {
-                "name": "kParticleStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.9192644953727722,
-                  "g": 0.8930953145027161,
-                  "r": 0.8657358884811401
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Core",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 169.8300018310547,
-            "y": 166.32000732421875
-          },
-          "tag": ""
-        },
-        {
-          "class": "POOIwyXizO",
-          "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "X983sNLRSh",
             "flags": {
@@ -629,18 +635,18 @@
                 "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
-                  "b": 0.8028839826583862,
-                  "g": 0.1413748413324356,
-                  "r": 0.5338674187660217
+                  "b": 1.0,
+                  "g": 0.0,
+                  "r": 0.6471656560897827
                 }
               },
               {
                 "name": "kParticleMidColor",
                 "value": {
                   "a": 1.0,
-                  "b": 0.9014419913291931,
-                  "g": 0.3087586760520935,
-                  "r": 0.5112459063529968
+                  "b": 1.0,
+                  "g": 0.0,
+                  "r": 0.48599985241889954
                 }
               },
               {
@@ -648,8 +654,8 @@
                 "value": {
                   "a": 1.0,
                   "b": 1.0,
-                  "g": 0.4761425256729126,
-                  "r": 0.4886243939399719
+                  "g": 0.0,
+                  "r": 0.32483404874801636
                 }
               }
             ],
@@ -674,6 +680,111 @@
           },
           "name": "Smoke",
           "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 44.1961669921875,
+            "y": 43.633365631103516
+          },
+          "tag": ""
+        },
+        {
+          "class": "aHEFYjzLCw",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 93.0,
+            "y": 84.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "Gk9IjnvIpH",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "X983sNLRSh",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "8qJeAKQFtw",
+            "material_params": [
+              {
+                "name": "kParticleEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 0.0,
+                  "r": 0.6471656560897827
+                }
+              },
+              {
+                "name": "kParticleMidColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 0.0,
+                  "r": 0.48599985241889954
+                }
+              },
+              {
+                "name": "kParticleStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 0.0,
+                  "r": 0.32483404874801636
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Smoke 2",
+          "position": {
             "x": 0.5,
             "y": 0.5
           },
@@ -683,8 +794,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 77.9726333618164,
-            "y": 77.94207000732422
+            "x": 44.1961669921875,
+            "y": 43.633365631103516
           },
           "tag": ""
         }
@@ -695,29 +806,29 @@
             "children": [
               {
                 "node": {
-                  "id": "prtmyMahzR"
+                  "id": "Q1sAHPvbpB"
                 }
               },
               {
                 "node": {
-                  "id": "IodUr6ANW9"
+                  "id": "xigLkRQnix"
                 }
               },
               {
                 "node": {
-                  "id": "POOIwyXizO"
+                  "id": "Gk9IjnvIpH"
                 }
               }
             ],
             "node": {
-              "id": "GUiFWkmvod"
+              "id": "aHEFYjzLCw"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "4POqhfHWQE",
-      "resource_name": "Magic",
+      "resource_id": "1RlBexDBsu",
+      "resource_name": "Dark Magic",
       "resource_ver": 3,
       "script_file": "nIkywmIbBJ",
       "tag": "",
@@ -731,8 +842,127 @@
             "Private": false,
             "ReadOnly": false
           },
-          "id": "gtAlh44Upa",
+          "id": "tKvHfmYnJH",
           "name": "dragging"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": false,
+        "KillAtLifetime": false,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": false,
+        "UpdateEntity": false,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "JUOysDXYJL",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Background",
+      "nodes": [
+        {
+          "class": "lvqGGnspNa",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "y6vxOLdMaI",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Background",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1200.0,
+            "y": 800.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "lvqGGnspNa"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "JUOysDXYJL",
+      "resource_name": "Background",
+      "resource_ver": 3,
+      "script_file": "",
+      "tag": "",
+      "tracks": [
+        {
+          "animators": [
+            {
+              "animator": {
+                "action": "Toggle",
+                "duration": 1.0,
+                "flag": "Drawable_VisibleInGame",
+                "flags": {
+                  "StaticInstance": false
+                },
+                "id": "4YB78hLjoJ",
+                "joint_id": "",
+                "name": "Actuator_0",
+                "node": "lvqGGnspNa",
+                "starttime": 0.0,
+                "time": 1.0
+              },
+              "type": "BooleanPropertyAnimator"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 0.10000000149011612,
+          "id": "zH8aNnYeSH",
+          "looping": false,
+          "name": "Toggle"
         }
       ]
     },
@@ -750,14 +980,15 @@
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
-      "id": "96IAS00DCm",
+      "id": "4ZgNL1JNfD",
       "idle_track": "",
       "lifetime": 0.0,
-      "name": "Basic Snow + Flakes",
+      "name": "Basic Snow",
       "nodes": [
         {
-          "class": "BxtDTZjfaW",
+          "class": "dXIJ5XTkCN",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "3Y7QCvLmnD",
             "flags": {
@@ -793,7 +1024,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Node 0",
+          "name": "Snow",
           "position": {
             "x": 0.0,
             "y": -0.0
@@ -810,8 +1041,9 @@
           "tag": ""
         },
         {
-          "class": "nu4YHKCyYm",
+          "class": "NBz08JfnHl",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "3Y7QCvLmnD",
             "flags": {
@@ -847,7 +1079,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Copy of Node 0",
+          "name": "Snow",
           "position": {
             "x": 0.0,
             "y": 0.0
@@ -862,84 +1094,25 @@
             "y": 1030.6385498046875
           },
           "tag": ""
-        },
-        {
-          "class": "qxTtAvSNiB",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "DEnBflg7Re",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "sv05U2SGGE",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 1",
-          "position": {
-            "x": -0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 1240.3343505859375,
-            "y": 882.1421508789063
-          },
-          "tag": ""
         }
       ],
       "render_tree": {
         "children": [
           {
             "node": {
-              "id": "BxtDTZjfaW"
+              "id": "dXIJ5XTkCN"
             }
           },
           {
             "node": {
-              "id": "nu4YHKCyYm"
-            }
-          },
-          {
-            "node": {
-              "id": "qxTtAvSNiB"
+              "id": "NBz08JfnHl"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "96IAS00DCm",
-      "resource_name": "Basic Snow + Flakes",
+      "resource_id": "4ZgNL1JNfD",
+      "resource_name": "Basic Snow",
       "resource_ver": 3,
       "script_file": "",
       "tag": ""
@@ -966,6 +1139,7 @@
         {
           "class": "GroRP5vz1A",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "Jv6CJCIheq",
             "flags": {
@@ -1020,6 +1194,7 @@
         {
           "class": "rFAKTZFLb6",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "28lGaDWqAm",
             "flags": {
@@ -1074,6 +1249,7 @@
         {
           "class": "8iMd3g8RxH",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -1228,7 +1404,7 @@
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": true,
-        "LimitLifetime": true,
+        "LimitLifetime": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -1236,146 +1412,19 @@
         "VisibleInEditor": true,
         "VisibleInGame": true,
         "WantsKeyEvents": false,
-        "WantsMouseEvents": false
+        "WantsMouseEvents": true
       },
-      "id": "1XgDNiDXTz",
+      "id": "4POqhfHWQE",
       "idle_track": "",
-      "lifetime": 2.0,
-      "name": "Fireworks Explosion Red",
+      "lifetime": 0.0,
+      "name": "Magic",
       "nodes": [
         {
-          "class": "58zAWbfzpR",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "rBqJ2LlkXC",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": false,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 1,
-            "linewidth": 1.0,
-            "material": "dZDA63fz8X",
-            "material_params": [
-              {
-                "name": "kParticleEndColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.0,
-                  "g": 0.0,
-                  "r": 1.0
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
+          "class": "GUiFWkmvod",
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Sparsk",
-          "position": {
-            "x": -0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 18.3799991607666,
-            "y": 20.700000762939453
-          },
-          "tag": ""
-        },
-        {
-          "class": "AXp3uJ3dLF",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "02kw3C4wix",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": false,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "dZDA63fz8X",
-            "material_params": [
-              {
-                "name": "kParticleEndColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.0,
-                  "g": 0.0,
-                  "r": 1.0
-                }
-              },
-              {
-                "name": "kParticleMidColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.0,
-                  "g": 0.0,
-                  "r": 1.0
-                }
-              },
-              {
-                "name": "kParticleStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.0,
-                  "g": 0.0,
-                  "r": 1.0
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Explosion",
+          "name": "Body",
           "position": {
             "x": 0.0,
             "y": 0.0
@@ -1386,8 +1435,463 @@
             "y": 1.0
           },
           "size": {
-            "x": 100.0,
-            "y": 100.0
+            "x": 40.0,
+            "y": 40.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "prtmyMahzR",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "K5fmwRUujU",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "eySa2QEq4I",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Magic",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 40.0,
+            "y": 40.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "IodUr6ANW9",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "6PwXHnbnzY",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 2,
+            "linewidth": 1.0,
+            "material": "dZDA63fz8X",
+            "material_params": [
+              {
+                "name": "kParticleEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.7411764860153198,
+                  "g": 0.0,
+                  "r": 0.399984747171402
+                }
+              },
+              {
+                "name": "kParticleMidColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.8302204608917236,
+                  "g": 0.44654765725135803,
+                  "r": 0.6328603029251099
+                }
+              },
+              {
+                "name": "kParticleStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.9192644953727722,
+                  "g": 0.8930953145027161,
+                  "r": 0.8657358884811401
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Core",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 169.8300018310547,
+            "y": 166.32000732421875
+          },
+          "tag": ""
+        },
+        {
+          "class": "POOIwyXizO",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "X983sNLRSh",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "8qJeAKQFtw",
+            "material_params": [
+              {
+                "name": "kParticleEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.8028839826583862,
+                  "g": 0.1413748413324356,
+                  "r": 0.5338674187660217
+                }
+              },
+              {
+                "name": "kParticleMidColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.9014419913291931,
+                  "g": 0.3087586760520935,
+                  "r": 0.5112459063529968
+                }
+              },
+              {
+                "name": "kParticleStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 0.4761425256729126,
+                  "r": 0.4886243939399719
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Smoke",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 77.9726333618164,
+            "y": 77.94207000732422
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "prtmyMahzR"
+                }
+              },
+              {
+                "node": {
+                  "id": "IodUr6ANW9"
+                }
+              },
+              {
+                "node": {
+                  "id": "POOIwyXizO"
+                }
+              }
+            ],
+            "node": {
+              "id": "GUiFWkmvod"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "4POqhfHWQE",
+      "resource_name": "Magic",
+      "resource_ver": 3,
+      "script_file": "nIkywmIbBJ",
+      "tag": "",
+      "vars": [
+        {
+          "bools": [
+            0
+          ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "gtAlh44Upa",
+          "name": "dragging"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "96IAS00DCm",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Basic Snow + Flakes",
+      "nodes": [
+        {
+          "class": "BxtDTZjfaW",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "3Y7QCvLmnD",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "N5AZXzLO89",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1242.9920654296875,
+            "y": 835.5192260742188
+          },
+          "tag": ""
+        },
+        {
+          "class": "nu4YHKCyYm",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "3Y7QCvLmnD",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": true,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "N5AZXzLO89",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Copy of Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1274.970947265625,
+            "y": 1030.6385498046875
+          },
+          "tag": ""
+        },
+        {
+          "class": "qxTtAvSNiB",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "DEnBflg7Re",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "sv05U2SGGE",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 1",
+          "position": {
+            "x": -0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1240.3343505859375,
+            "y": 882.1421508789063
           },
           "tag": ""
         }
@@ -1396,19 +1900,24 @@
         "children": [
           {
             "node": {
-              "id": "58zAWbfzpR"
+              "id": "BxtDTZjfaW"
             }
           },
           {
             "node": {
-              "id": "AXp3uJ3dLF"
+              "id": "nu4YHKCyYm"
+            }
+          },
+          {
+            "node": {
+              "id": "qxTtAvSNiB"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "1XgDNiDXTz",
-      "resource_name": "Fireworks Explosion Red",
+      "resource_id": "96IAS00DCm",
+      "resource_name": "Basic Snow + Flakes",
       "resource_ver": 3,
       "script_file": "",
       "tag": ""
@@ -1427,14 +1936,15 @@
         "WantsKeyEvents": false,
         "WantsMouseEvents": true
       },
-      "id": "SX0ABkBEq9",
+      "id": "BtXKsAOnPr",
       "idle_track": "",
       "lifetime": 0.0,
-      "name": "Basic Flame + Sparks + Smoke",
+      "name": "Basic Flame + Sparks",
       "nodes": [
         {
-          "class": "6hZs8iMUZy",
+          "class": "CdrNWNobGx",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "w3S1bxiRIU",
             "flags": {
@@ -1487,7 +1997,7 @@
           "tag": ""
         },
         {
-          "class": "H20g2RPrlS",
+          "class": "vxZmpCf2oY",
           "flags": {
             "VisibleInEditor": true
           },
@@ -1508,8 +2018,9 @@
           "tag": ""
         },
         {
-          "class": "bO0zByQW4b",
+          "class": "an64HQ9TIM",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "OpgNJAMhhQ",
             "flags": {
@@ -1560,60 +2071,6 @@
             "y": 46.0338134765625
           },
           "tag": ""
-        },
-        {
-          "class": "AdZCosqgbx",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "vIf7bfadSt",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "8qJeAKQFtw",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Node 0",
-          "position": {
-            "x": 3.0,
-            "y": -34.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 87.7998046875,
-            "y": 40.49715805053711
-          },
-          "tag": ""
         }
       ],
       "render_tree": {
@@ -1622,29 +2079,24 @@
             "children": [
               {
                 "node": {
-                  "id": "6hZs8iMUZy"
+                  "id": "CdrNWNobGx"
                 }
               },
               {
                 "node": {
-                  "id": "bO0zByQW4b"
-                }
-              },
-              {
-                "node": {
-                  "id": "AdZCosqgbx"
+                  "id": "an64HQ9TIM"
                 }
               }
             ],
             "node": {
-              "id": "H20g2RPrlS"
+              "id": "vxZmpCf2oY"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "SX0ABkBEq9",
-      "resource_name": "Basic Flame + Sparks + Smoke",
+      "resource_id": "BtXKsAOnPr",
+      "resource_name": "Basic Flame + Sparks",
       "resource_ver": 3,
       "script_file": "nIkywmIbBJ",
       "tag": "",
@@ -1658,7 +2110,7 @@
             "Private": false,
             "ReadOnly": false
           },
-          "id": "aQiDUBhvIu",
+          "id": "xL1u8XEHD5",
           "name": "dragging"
         }
       ]
@@ -1685,6 +2137,7 @@
         {
           "class": "Prgaus7Ure",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_round_rect",
             "flags": {
@@ -1760,6 +2213,7 @@
         {
           "class": "wz8y0ZBNW1",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "HG7v1manRC",
             "flags": {
@@ -1843,6 +2297,7 @@
         {
           "class": "nXDrspw3Nd",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "MSCSkjl4Su",
             "flags": {
@@ -1946,6 +2401,89 @@
         "VisibleInEditor": true,
         "VisibleInGame": true,
         "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "jaXpNTpHBe",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Fireworks",
+      "nodes": [
+        {
+          "class": "e4q4k8PhOs",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "LaunchBox0",
+          "position": {
+            "x": -250.0,
+            "y": 250.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 36.41761779785156,
+            "y": 49.95903015136719
+          },
+          "tag": ""
+        },
+        {
+          "class": "qs1jYIlq3l",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "LaunchBox1",
+          "position": {
+            "x": 150.0,
+            "y": 300.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 36.41761779785156,
+            "y": 49.95903015136719
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "e4q4k8PhOs"
+            }
+          },
+          {
+            "node": {
+              "id": "qs1jYIlq3l"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "jaXpNTpHBe",
+      "resource_name": "Fireworks",
+      "resource_ver": 3,
+      "script_file": "f3llpkZaRE",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
         "WantsMouseEvents": true
       },
       "id": "BkQRl3PzCr",
@@ -1956,6 +2494,7 @@
         {
           "class": "Xj59nidqe6",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "yMhrtzh9Pp",
             "flags": {
@@ -2060,6 +2599,7 @@
         {
           "class": "oXHhzCub1P",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "DX5iTPFmEZ",
             "flags": {
@@ -2114,6 +2654,7 @@
         {
           "class": "J6TlFJbE81",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "q2YkyQYmdd",
             "flags": {
@@ -2285,6 +2826,7 @@
         {
           "class": "7FRI6l2I5f",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "0BT4ANr30T",
             "flags": {
@@ -2339,6 +2881,7 @@
         {
           "class": "NfHZHD1xnU",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "obukJs0rJC",
             "flags": {
@@ -2393,6 +2936,7 @@
         {
           "class": "1pGkxSwCiL",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "R0XaXuWEBU",
             "flags": {
@@ -2511,7 +3055,7 @@
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": true,
-        "LimitLifetime": false,
+        "LimitLifetime": true,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -2521,182 +3065,29 @@
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
-      "id": "jaXpNTpHBe",
+      "id": "1XgDNiDXTz",
       "idle_track": "",
-      "lifetime": 0.0,
-      "name": "Fireworks",
+      "lifetime": 2.0,
+      "name": "Fireworks Explosion Red",
       "nodes": [
         {
-          "class": "e4q4k8PhOs",
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "LaunchBox0",
-          "position": {
-            "x": -250.0,
-            "y": 250.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 36.41761779785156,
-            "y": 49.95903015136719
-          },
-          "tag": ""
-        },
-        {
-          "class": "qs1jYIlq3l",
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "LaunchBox1",
-          "position": {
-            "x": 150.0,
-            "y": 300.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 36.41761779785156,
-            "y": 49.95903015136719
-          },
-          "tag": ""
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "node": {
-              "id": "e4q4k8PhOs"
-            }
-          },
-          {
-            "node": {
-              "id": "qs1jYIlq3l"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "jaXpNTpHBe",
-      "resource_name": "Fireworks",
-      "resource_ver": 3,
-      "script_file": "f3llpkZaRE",
-      "tag": ""
-    },
-    {
-      "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
-        "LimitLifetime": false,
-        "PostUpdate": true,
-        "TickEntity": true,
-        "UpdateEntity": true,
-        "UpdateNodes": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
-        "WantsMouseEvents": false
-      },
-      "id": "om7tHo4XiA",
-      "idle_track": "",
-      "lifetime": 0.0,
-      "name": "Firework Rocket",
-      "nodes": [
-        {
-          "class": "pfkeOSHYlD",
+          "class": "58zAWbfzpR",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
-            "drawable": "_rect",
+            "drawable": "rBqJ2LlkXC",
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "RestartDrawable": true,
+              "RestartDrawable": false,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "_White",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Rocket",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rigid_body": {
-            "angular_damping": 0.5,
-            "density": 20.0,
-            "flags": {
-              "Bullet": false,
-              "CanSleep": true,
-              "DiscardRotation": false,
-              "Enabled": true,
-              "Sensor": false
-            },
-            "friction": 0.30000001192092896,
-            "linear_damping": 0.5,
-            "polygon": "",
-            "restitution": 0.5,
-            "shape": "Box",
-            "simulation": "Dynamic"
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 2.0,
-            "y": 10.0
-          },
-          "tag": ""
-        },
-        {
-          "class": "ZUCdMli3MR",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "6604Fhgq27",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
+            "layer": 1,
             "linewidth": 1.0,
             "material": "dZDA63fz8X",
             "material_params": [
@@ -2704,26 +3095,8 @@
                 "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
-                  "b": 0.9850614070892334,
-                  "g": 0.9850614070892334,
-                  "r": 0.9850614070892334
-                }
-              },
-              {
-                "name": "kParticleMidColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.622316300868988,
-                  "g": 0.622316300868988,
-                  "r": 0.9925307035446167
-                }
-              },
-              {
-                "name": "kParticleStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.25957122445106506,
-                  "g": 0.25957122445106506,
+                  "b": 0.0,
+                  "g": 0.0,
                   "r": 1.0
                 }
               }
@@ -2747,7 +3120,91 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Node 0",
+          "name": "Sparsk",
+          "position": {
+            "x": -0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 18.3799991607666,
+            "y": 20.700000762939453
+          },
+          "tag": ""
+        },
+        {
+          "class": "AXp3uJ3dLF",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "02kw3C4wix",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": false,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "dZDA63fz8X",
+            "material_params": [
+              {
+                "name": "kParticleEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.0,
+                  "g": 0.0,
+                  "r": 1.0
+                }
+              },
+              {
+                "name": "kParticleMidColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.0,
+                  "g": 0.0,
+                  "r": 1.0
+                }
+              },
+              {
+                "name": "kParticleStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.0,
+                  "g": 0.0,
+                  "r": 1.0
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Explosion",
           "position": {
             "x": 0.0,
             "y": 0.0
@@ -2758,8 +3215,235 @@
             "y": 1.0
           },
           "size": {
-            "x": 18.940000534057617,
-            "y": 24.260000228881836
+            "x": 100.0,
+            "y": 100.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "58zAWbfzpR"
+            }
+          },
+          {
+            "node": {
+              "id": "AXp3uJ3dLF"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "1XgDNiDXTz",
+      "resource_name": "Fireworks Explosion Red",
+      "resource_ver": 3,
+      "script_file": "",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": true
+      },
+      "id": "SX0ABkBEq9",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Basic Flame + Sparks + Smoke",
+      "nodes": [
+        {
+          "class": "6hZs8iMUZy",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "w3S1bxiRIU",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "dZDA63fz8X",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Flame",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 30.0,
+            "y": 30.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "H20g2RPrlS",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 57.540000915527344,
+            "y": 50.09000015258789
+          },
+          "tag": ""
+        },
+        {
+          "class": "bO0zByQW4b",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "OpgNJAMhhQ",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "dZDA63fz8X",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Sparks",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 65.79751586914063,
+            "y": 46.0338134765625
+          },
+          "tag": ""
+        },
+        {
+          "class": "AdZCosqgbx",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "vIf7bfadSt",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "8qJeAKQFtw",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 3.0,
+            "y": -34.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 87.7998046875,
+            "y": 40.49715805053711
           },
           "tag": ""
         }
@@ -2770,21 +3454,136 @@
             "children": [
               {
                 "node": {
-                  "id": "ZUCdMli3MR"
+                  "id": "6hZs8iMUZy"
+                }
+              },
+              {
+                "node": {
+                  "id": "bO0zByQW4b"
+                }
+              },
+              {
+                "node": {
+                  "id": "AdZCosqgbx"
                 }
               }
             ],
             "node": {
-              "id": "pfkeOSHYlD"
+              "id": "H20g2RPrlS"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "om7tHo4XiA",
-      "resource_name": "Firework Rocket",
+      "resource_id": "SX0ABkBEq9",
+      "resource_name": "Basic Flame + Sparks + Smoke",
       "resource_ver": 3,
-      "script_file": "nZkUdw95Ds",
+      "script_file": "nIkywmIbBJ",
+      "tag": "",
+      "vars": [
+        {
+          "bools": [
+            0
+          ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "aQiDUBhvIu",
+          "name": "dragging"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "fufgFP3SyQ",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Hyperspace",
+      "nodes": [
+        {
+          "class": "3uQGC10emt",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "jdjNl1Joh3",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "quun8rd0La",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": -0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 47.01649475097656,
+            "y": 43.98420715332031
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "3uQGC10emt"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "fufgFP3SyQ",
+      "resource_name": "Hyperspace",
+      "resource_ver": 3,
+      "script_file": "wBGTUem9UB",
       "tag": ""
     },
     {
@@ -2809,6 +3608,7 @@
         {
           "class": "S3msAki3LW",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "n6ykHi9xRi",
             "flags": {
@@ -2892,6 +3692,7 @@
         {
           "class": "2dRqezf2Ot",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "y7WyC5UeQM",
             "flags": {
@@ -2998,6 +3799,7 @@
         {
           "class": "ISPnm2QqYE",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "Jv6CJCIheq",
             "flags": {
@@ -3052,6 +3854,7 @@
         {
           "class": "DKjYlWCCSk",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -3140,7 +3943,7 @@
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": true,
-        "LimitLifetime": true,
+        "LimitLifetime": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -3148,61 +3951,33 @@
         "VisibleInEditor": true,
         "VisibleInGame": true,
         "WantsKeyEvents": false,
-        "WantsMouseEvents": false
+        "WantsMouseEvents": true
       },
-      "id": "RDi65JlZls",
+      "id": "BbEpeqHSYG",
       "idle_track": "",
-      "lifetime": 2.0,
-      "name": "Fireworks Explosion Blue",
+      "lifetime": 0.0,
+      "name": "Basic Flame",
       "nodes": [
         {
-          "class": "REyT7HYYhL",
+          "class": "WP4oD64913",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
-            "drawable": "rBqJ2LlkXC",
+            "drawable": "w3S1bxiRIU",
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "RestartDrawable": false,
+              "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
-            "layer": 1,
+            "layer": 0,
             "linewidth": 1.0,
             "material": "dZDA63fz8X",
-            "material_params": [
-              {
-                "name": "kParticleEndColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.6473335027694702,
-                  "r": 0.0
-                }
-              },
-              {
-                "name": "kParticleMidColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.4519188404083252,
-                  "r": 0.0
-                }
-              },
-              {
-                "name": "kParticleStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.2565041482448578,
-                  "r": 0.0
-                }
-              }
-            ],
             "offset": {
               "x": 0.0,
               "y": 0.0,
@@ -3222,7 +3997,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Sparks",
+          "name": "Flame",
           "position": {
             "x": -0.0,
             "y": 0.0
@@ -3233,23 +4008,157 @@
             "y": 1.0
           },
           "size": {
-            "x": 18.3799991607666,
-            "y": 20.700000762939453
+            "x": 14.16534423828125,
+            "y": 13.76336669921875
           },
           "tag": ""
         },
         {
-          "class": "ECfe9aS5xS",
+          "class": "fo1iBtE2PJ",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 50.0,
+            "y": 50.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "WP4oD64913"
+                }
+              }
+            ],
+            "node": {
+              "id": "fo1iBtE2PJ"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "BbEpeqHSYG",
+      "resource_name": "Basic Flame",
+      "resource_ver": 3,
+      "script_file": "nIkywmIbBJ",
+      "tag": "",
+      "vars": [
+        {
+          "bools": [
+            0
+          ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "BEvkjRXES2",
+          "name": "dragging"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "tyNkXUoRPJ",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Blood Impact",
+      "nodes": [
+        {
+          "class": "daXCUJOp0z",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
-            "drawable": "02kw3C4wix",
+            "drawable": "KSwh4OhJxA",
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "RestartDrawable": false,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "K9D27CRUwq",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Splatter",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 566.140625,
+            "y": 561.7544555664063
+          },
+          "tag": ""
+        },
+        {
+          "class": "PLozCzYgnd",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "LnUnRULvIo",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
@@ -3262,27 +4171,27 @@
                 "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.0,
-                  "r": 0.04899672046303749
+                  "b": 0.02561989799141884,
+                  "g": 0.02561989799141884,
+                  "r": 0.17975127696990967
                 }
               },
               {
                 "name": "kParticleMidColor",
                 "value": {
                   "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.19366750121116638,
-                  "r": 0.024498360231518745
+                  "b": 0.01902800053358078,
+                  "g": 0.01902800053358078,
+                  "r": 0.2484245002269745
                 }
               },
               {
                 "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.38733500242233276,
-                  "r": 0.0
+                  "b": 0.012436103075742722,
+                  "g": 0.012436103075742722,
+                  "r": 0.3170977234840393
                 }
               }
             ],
@@ -3305,7 +4214,28 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Explosion",
+          "name": "Red Mess",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 350.9735107421875,
+            "y": 332.8275146484375
+          },
+          "tag": ""
+        },
+        {
+          "class": "L30Ob5LLSH",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
           "position": {
             "x": 0.0,
             "y": 0.0
@@ -3316,8 +4246,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 100.0,
-            "y": 100.0
+            "x": 78.0,
+            "y": 77.0
           },
           "tag": ""
         }
@@ -3325,20 +4255,27 @@
       "render_tree": {
         "children": [
           {
+            "children": [
+              {
+                "node": {
+                  "id": "daXCUJOp0z"
+                }
+              },
+              {
+                "node": {
+                  "id": "PLozCzYgnd"
+                }
+              }
+            ],
             "node": {
-              "id": "REyT7HYYhL"
-            }
-          },
-          {
-            "node": {
-              "id": "ECfe9aS5xS"
+              "id": "L30Ob5LLSH"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "RDi65JlZls",
-      "resource_name": "Fireworks Explosion Blue",
+      "resource_id": "tyNkXUoRPJ",
+      "resource_name": "Blood Impact",
       "resource_ver": 3,
       "script_file": "",
       "tag": ""
@@ -3365,6 +4302,7 @@
         {
           "class": "bidH6CXYrb",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "w3S1bxiRIU",
             "flags": {
@@ -3440,6 +4378,7 @@
         {
           "class": "EFLTpOBTxf",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "OpgNJAMhhQ",
             "flags": {
@@ -3494,6 +4433,7 @@
         {
           "class": "wLFbL7zKvp",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "vIf7bfadSt",
             "flags": {
@@ -3636,790 +4576,15 @@
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
-      "id": "4ZgNL1JNfD",
+      "id": "om7tHo4XiA",
       "idle_track": "",
       "lifetime": 0.0,
-      "name": "Basic Snow",
+      "name": "Firework Rocket",
       "nodes": [
         {
-          "class": "dXIJ5XTkCN",
+          "class": "pfkeOSHYlD",
           "drawable_item": {
-            "depth": 1.0,
-            "drawable": "3Y7QCvLmnD",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "N5AZXzLO89",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Snow",
-          "position": {
-            "x": 0.0,
-            "y": -0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 1242.9920654296875,
-            "y": 835.5192260742188
-          },
-          "tag": ""
-        },
-        {
-          "class": "NBz08JfnHl",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "3Y7QCvLmnD",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": true,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "N5AZXzLO89",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Snow",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 1274.970947265625,
-            "y": 1030.6385498046875
-          },
-          "tag": ""
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "node": {
-              "id": "dXIJ5XTkCN"
-            }
-          },
-          {
-            "node": {
-              "id": "NBz08JfnHl"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "4ZgNL1JNfD",
-      "resource_name": "Basic Snow",
-      "resource_ver": 3,
-      "script_file": "",
-      "tag": ""
-    },
-    {
-      "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
-        "LimitLifetime": false,
-        "PostUpdate": true,
-        "TickEntity": true,
-        "UpdateEntity": true,
-        "UpdateNodes": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
-        "WantsMouseEvents": true
-      },
-      "id": "BtXKsAOnPr",
-      "idle_track": "",
-      "lifetime": 0.0,
-      "name": "Basic Flame + Sparks",
-      "nodes": [
-        {
-          "class": "CdrNWNobGx",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "w3S1bxiRIU",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "dZDA63fz8X",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Flame",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 30.0,
-            "y": 30.0
-          },
-          "tag": ""
-        },
-        {
-          "class": "vxZmpCf2oY",
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Body",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 57.540000915527344,
-            "y": 50.09000015258789
-          },
-          "tag": ""
-        },
-        {
-          "class": "an64HQ9TIM",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "OpgNJAMhhQ",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "dZDA63fz8X",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Sparks",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 65.79751586914063,
-            "y": 46.0338134765625
-          },
-          "tag": ""
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "children": [
-              {
-                "node": {
-                  "id": "CdrNWNobGx"
-                }
-              },
-              {
-                "node": {
-                  "id": "an64HQ9TIM"
-                }
-              }
-            ],
-            "node": {
-              "id": "vxZmpCf2oY"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "BtXKsAOnPr",
-      "resource_name": "Basic Flame + Sparks",
-      "resource_ver": 3,
-      "script_file": "nIkywmIbBJ",
-      "tag": "",
-      "vars": [
-        {
-          "bools": [
-            0
-          ],
-          "flags": {
-            "Array": false,
-            "Private": false,
-            "ReadOnly": false
-          },
-          "id": "xL1u8XEHD5",
-          "name": "dragging"
-        }
-      ]
-    },
-    {
-      "flags": {
-        "KillAtBoundary": false,
-        "KillAtLifetime": false,
-        "LimitLifetime": false,
-        "PostUpdate": true,
-        "TickEntity": false,
-        "UpdateEntity": false,
-        "UpdateNodes": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
-        "WantsMouseEvents": false
-      },
-      "id": "JUOysDXYJL",
-      "idle_track": "",
-      "lifetime": 0.0,
-      "name": "Background",
-      "nodes": [
-        {
-          "class": "lvqGGnspNa",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "_rect",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": false,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "y6vxOLdMaI",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Background",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 1200.0,
-            "y": 800.0
-          },
-          "tag": ""
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "node": {
-              "id": "lvqGGnspNa"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "JUOysDXYJL",
-      "resource_name": "Background",
-      "resource_ver": 3,
-      "script_file": "",
-      "tag": "",
-      "tracks": [
-        {
-          "animators": [
-            {
-              "animator": {
-                "action": "Toggle",
-                "duration": 1.0,
-                "flag": "Drawable_VisibleInGame",
-                "flags": {
-                  "StaticInstance": false
-                },
-                "id": "4YB78hLjoJ",
-                "joint_id": "",
-                "name": "Actuator_0",
-                "node": "lvqGGnspNa",
-                "starttime": 0.0,
-                "time": 1.0
-              },
-              "type": "BooleanPropertyAnimator"
-            }
-          ],
-          "delay": 0.0,
-          "duration": 0.10000000149011612,
-          "id": "zH8aNnYeSH",
-          "looping": false,
-          "name": "Toggle"
-        }
-      ]
-    },
-    {
-      "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
-        "LimitLifetime": false,
-        "PostUpdate": true,
-        "TickEntity": true,
-        "UpdateEntity": true,
-        "UpdateNodes": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
-        "WantsMouseEvents": true
-      },
-      "id": "1RlBexDBsu",
-      "idle_track": "",
-      "lifetime": 0.0,
-      "name": "Dark Magic",
-      "nodes": [
-        {
-          "class": "Q1sAHPvbpB",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "K5fmwRUujU",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "eySa2QEq4I",
-            "material_params": [
-              {
-                "name": "kRotate",
-                "value": 1.0
-              },
-              {
-                "name": "kRotationalVelocity",
-                "value": 0.10000000149011612
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Magic",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 263.2249755859375,
-            "y": 264.82073974609375
-          },
-          "tag": ""
-        },
-        {
-          "class": "xigLkRQnix",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "X983sNLRSh",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "8qJeAKQFtw",
-            "material_params": [
-              {
-                "name": "kParticleEndColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.0,
-                  "r": 0.6471656560897827
-                }
-              },
-              {
-                "name": "kParticleMidColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.0,
-                  "r": 0.48599985241889954
-                }
-              },
-              {
-                "name": "kParticleStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.0,
-                  "r": 0.32483404874801636
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Smoke",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 44.1961669921875,
-            "y": 43.633365631103516
-          },
-          "tag": ""
-        },
-        {
-          "class": "aHEFYjzLCw",
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Body",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 93.0,
-            "y": 84.0
-          },
-          "tag": ""
-        },
-        {
-          "class": "Gk9IjnvIpH",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "X983sNLRSh",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "8qJeAKQFtw",
-            "material_params": [
-              {
-                "name": "kParticleEndColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.0,
-                  "r": 0.6471656560897827
-                }
-              },
-              {
-                "name": "kParticleMidColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.0,
-                  "r": 0.48599985241889954
-                }
-              },
-              {
-                "name": "kParticleStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 1.0,
-                  "g": 0.0,
-                  "r": 0.32483404874801636
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Smoke 2",
-          "position": {
-            "x": 0.5,
-            "y": 0.5
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 44.1961669921875,
-            "y": 43.633365631103516
-          },
-          "tag": ""
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "children": [
-              {
-                "node": {
-                  "id": "Q1sAHPvbpB"
-                }
-              },
-              {
-                "node": {
-                  "id": "xigLkRQnix"
-                }
-              },
-              {
-                "node": {
-                  "id": "Gk9IjnvIpH"
-                }
-              }
-            ],
-            "node": {
-              "id": "aHEFYjzLCw"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "1RlBexDBsu",
-      "resource_name": "Dark Magic",
-      "resource_ver": 3,
-      "script_file": "nIkywmIbBJ",
-      "tag": "",
-      "vars": [
-        {
-          "bools": [
-            0
-          ],
-          "flags": {
-            "Array": false,
-            "Private": false,
-            "ReadOnly": false
-          },
-          "id": "tKvHfmYnJH",
-          "name": "dragging"
-        }
-      ]
-    },
-    {
-      "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
-        "LimitLifetime": false,
-        "PostUpdate": true,
-        "TickEntity": true,
-        "UpdateEntity": true,
-        "UpdateNodes": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
-        "WantsMouseEvents": false
-      },
-      "id": "ZnvR8kE3vD",
-      "idle_track": "",
-      "lifetime": 0.0,
-      "name": "My Entity",
-      "nodes": [
-        {
-          "class": "7hGhRTTZC5",
-          "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "_rect",
             "flags": {
@@ -4435,7 +4600,108 @@
             },
             "layer": 0,
             "linewidth": 1.0,
-            "material": "_checkerboard",
+            "material": "_White",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": -0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Rocket",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 20.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 2.0,
+            "y": 10.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "ZUCdMli3MR",
+          "drawable_item": {
+            "coordinate_space": "Scene",
+            "depth": 1.0,
+            "drawable": "6604Fhgq27",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "dZDA63fz8X",
+            "material_params": [
+              {
+                "name": "kParticleEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.9850614070892334,
+                  "g": 0.9850614070892334,
+                  "r": 0.9850614070892334
+                }
+              },
+              {
+                "name": "kParticleMidColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.622316300868988,
+                  "g": 0.622316300868988,
+                  "r": 0.9925307035446167
+                }
+              },
+              {
+                "name": "kParticleStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.25957122445106506,
+                  "g": 0.25957122445106506,
+                  "r": 1.0
+                }
+              }
+            ],
             "offset": {
               "x": 0.0,
               "y": 0.0,
@@ -4457,8 +4723,8 @@
           },
           "name": "Node 0",
           "position": {
-            "x": -153.5,
-            "y": -151.5
+            "x": 0.0,
+            "y": 0.0
           },
           "rotation": 0.0,
           "scale": {
@@ -4466,8 +4732,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 217.0,
-            "y": 240.0
+            "x": 18.940000534057617,
+            "y": 24.260000228881836
           },
           "tag": ""
         }
@@ -4475,17 +4741,24 @@
       "render_tree": {
         "children": [
           {
+            "children": [
+              {
+                "node": {
+                  "id": "ZUCdMli3MR"
+                }
+              }
+            ],
             "node": {
-              "id": "7hGhRTTZC5"
+              "id": "pfkeOSHYlD"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "ZnvR8kE3vD",
-      "resource_name": "My Entity",
+      "resource_id": "om7tHo4XiA",
+      "resource_name": "Firework Rocket",
       "resource_ver": 3,
-      "script_file": "",
+      "script_file": "nZkUdw95Ds",
       "tag": ""
     },
     {
@@ -4502,14 +4775,15 @@
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
-      "id": "KALE2Cn77Q",
+      "id": "RDi65JlZls",
       "idle_track": "",
       "lifetime": 2.0,
-      "name": "Fireworks Explosion Green",
+      "name": "Fireworks Explosion Blue",
       "nodes": [
         {
-          "class": "2QmI7rXsbZ",
+          "class": "REyT7HYYhL",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "rBqJ2LlkXC",
             "flags": {
@@ -4531,27 +4805,27 @@
                 "name": "kParticleEndColor",
                 "value": {
                   "a": 1.0,
-                  "b": 0.07074082642793655,
-                  "g": 0.9555962681770325,
-                  "r": 0.6389563083648682
+                  "b": 1.0,
+                  "g": 0.6473335027694702,
+                  "r": 0.0
                 }
               },
               {
                 "name": "kParticleMidColor",
                 "value": {
                   "a": 1.0,
-                  "b": 0.061005569994449615,
-                  "g": 0.9409552216529846,
-                  "r": 0.3527657091617584
+                  "b": 1.0,
+                  "g": 0.4519188404083252,
+                  "r": 0.0
                 }
               },
               {
                 "name": "kParticleStartColor",
                 "value": {
                   "a": 1.0,
-                  "b": 0.05127031356096268,
-                  "g": 0.9263141751289368,
-                  "r": 0.06657510995864868
+                  "b": 1.0,
+                  "g": 0.2565041482448578,
+                  "r": 0.0
                 }
               }
             ],
@@ -4577,7 +4851,7 @@
           "name": "Sparks",
           "position": {
             "x": -0.0,
-            "y": -0.0
+            "y": 0.0
           },
           "rotation": 0.0,
           "scale": {
@@ -4585,14 +4859,15 @@
             "y": 1.0
           },
           "size": {
-            "x": 30.351303100585938,
-            "y": 38.91896438598633
+            "x": 18.3799991607666,
+            "y": 20.700000762939453
           },
           "tag": ""
         },
         {
-          "class": "loTkslEBZQ",
+          "class": "ECfe9aS5xS",
           "drawable_item": {
+            "coordinate_space": "Scene",
             "depth": 1.0,
             "drawable": "02kw3C4wix",
             "flags": {
@@ -4609,6 +4884,35 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "dZDA63fz8X",
+            "material_params": [
+              {
+                "name": "kParticleEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 0.0,
+                  "r": 0.04899672046303749
+                }
+              },
+              {
+                "name": "kParticleMidColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 0.19366750121116638,
+                  "r": 0.024498360231518745
+                }
+              },
+              {
+                "name": "kParticleStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 1.0,
+                  "g": 0.38733500242233276,
+                  "r": 0.0
+                }
+              }
+            ],
             "offset": {
               "x": 0.0,
               "y": 0.0,
@@ -4639,8 +4943,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 21.0,
-            "y": 29.059999465942383
+            "x": 100.0,
+            "y": 100.0
           },
           "tag": ""
         }
@@ -4649,374 +4953,25 @@
         "children": [
           {
             "node": {
-              "id": "2QmI7rXsbZ"
+              "id": "REyT7HYYhL"
             }
           },
           {
             "node": {
-              "id": "loTkslEBZQ"
+              "id": "ECfe9aS5xS"
             }
           }
         ],
         "node": null
       },
-      "resource_id": "KALE2Cn77Q",
-      "resource_name": "Fireworks Explosion Green",
+      "resource_id": "RDi65JlZls",
+      "resource_name": "Fireworks Explosion Blue",
       "resource_ver": 3,
       "script_file": "",
       "tag": ""
-    },
-    {
-      "flags": {
-        "KillAtBoundary": true,
-        "KillAtLifetime": true,
-        "LimitLifetime": false,
-        "PostUpdate": true,
-        "TickEntity": true,
-        "UpdateEntity": true,
-        "UpdateNodes": false,
-        "VisibleInEditor": true,
-        "VisibleInGame": true,
-        "WantsKeyEvents": false,
-        "WantsMouseEvents": true
-      },
-      "id": "qGhg1ub3rt",
-      "idle_track": "",
-      "lifetime": 0.0,
-      "name": "Summoning Circle",
-      "nodes": [
-        {
-          "class": "8nrJSYACm5",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "y0ZBwlFRes",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "HA5M7RGQpK",
-            "material_params": [
-              {
-                "name": "kParticleEndColor",
-                "value": {
-                  "a": 0.0,
-                  "b": 0.4903334081172943,
-                  "g": 0.9716029763221741,
-                  "r": 0.7354543209075928
-                }
-              },
-              {
-                "name": "kParticleMidColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.24516670405864716,
-                  "g": 0.9857938289642334,
-                  "r": 0.5573510527610779
-                }
-              },
-              {
-                "name": "kParticleStartColor",
-                "value": {
-                  "a": 0.4000000059604645,
-                  "b": 0.0,
-                  "g": 1.0,
-                  "r": 0.3791714310646057
-                }
-              },
-              {
-                "name": "kRotationalVelocity",
-                "value": 2.0
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Circle",
-          "position": {
-            "x": 0.5,
-            "y": 0.5
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 173.4228057861328,
-            "y": 203.40750122070313
-          },
-          "tag": ""
-        },
-        {
-          "class": "0Un9haOtia",
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Body",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 68.05929565429688,
-            "y": 69.99932861328125
-          },
-          "tag": ""
-        },
-        {
-          "class": "9U8gNMwG3Q",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "K5fmwRUujU",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 1,
-            "linewidth": 1.0,
-            "material": "eySa2QEq4I",
-            "material_params": [
-              {
-                "name": "kParticleEndColor",
-                "value": {
-                  "a": 0.0,
-                  "b": 0.29130998253822327,
-                  "g": 0.8361638784408569,
-                  "r": 0.3764858543872833
-                }
-              },
-              {
-                "name": "kParticleMidColor",
-                "value": {
-                  "a": 0.4117647111415863,
-                  "b": 0.18051423132419586,
-                  "g": 0.8366979360580444,
-                  "r": 0.2538948655128479
-                }
-              },
-              {
-                "name": "kParticleStartColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.06971847265958786,
-                  "g": 0.8372472524642944,
-                  "r": 0.13124284148216248
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Magic smoke",
-          "position": {
-            "x": -0.0,
-            "y": -0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 25.67803955078125,
-            "y": 34.95629119873047
-          },
-          "tag": ""
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "children": [
-              {
-                "node": {
-                  "id": "8nrJSYACm5"
-                }
-              },
-              {
-                "node": {
-                  "id": "9U8gNMwG3Q"
-                }
-              }
-            ],
-            "node": {
-              "id": "0Un9haOtia"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "qGhg1ub3rt",
-      "resource_name": "Summoning Circle",
-      "resource_ver": 3,
-      "script_file": "nIkywmIbBJ",
-      "tag": "",
-      "vars": [
-        {
-          "bools": [
-            0
-          ],
-          "flags": {
-            "Array": false,
-            "Private": false,
-            "ReadOnly": false
-          },
-          "id": "udJPMW8the",
-          "name": "dragging"
-        }
-      ]
     }
   ],
   "materials": [
-    {
-      "active_texture_map": "Gz3DfEwNwl",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "quun8rd0La",
-      "name": "Warp Lines Particle",
-      "resource_id": "quun8rd0La",
-      "resource_name": "Warp Lines Particle",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 0.0,
-          "id": "Gz3DfEwNwl",
-          "looping": true,
-          "name": "kMask",
-          "rect_name0": "kMaskRect",
-          "rect_name1": "",
-          "sampler_name0": "kMask",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "app://textures/particles/circle_02.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "rTmuZkuKEn",
-              "name": "Texture",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Texture2D"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Particle2D",
-      "uniforms": [
-        {
-          "name": "kParticleBaseRotation",
-          "value": 0.0
-        },
-        {
-          "name": "kParticleEndColor",
-          "value": {
-            "a": 1.0,
-            "b": 0.7547112107276917,
-            "g": 0.7378957867622375,
-            "r": 0.696513295173645
-          }
-        },
-        {
-          "name": "kParticleMidColor",
-          "value": {
-            "a": 1.0,
-            "b": 1.0,
-            "g": 1.0,
-            "r": 1.0
-          }
-        },
-        {
-          "name": "kParticleRotation",
-          "value": 4
-        },
-        {
-          "name": "kParticleStartColor",
-          "value": {
-            "a": 0.21176470816135406,
-            "b": 0.0,
-            "g": 0.0,
-            "r": 0.0
-          }
-        }
-      ]
-    },
     {
       "active_texture_map": "uDy3rMK6ZK",
       "flags": {
@@ -5059,65 +5014,6 @@
               },
               "id": "LwFJ9fmS9O",
               "name": "blood-splatter-png-14061",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Texture2D"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Texture"
-    },
-    {
-      "active_texture_map": "9GKYPtjwHZ",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "y6vxOLdMaI",
-      "name": "Background",
-      "resource_id": "y6vxOLdMaI",
-      "resource_name": "Background",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Opaque",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 0.0,
-          "id": "9GKYPtjwHZ",
-          "looping": true,
-          "name": "Default",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/wallpaperflare.com_wallpaper.jpg",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "ahxidE7ZOU",
-              "name": "wallpaperflare",
               "rect": {
                 "h": 1.0,
                 "w": 1.0,
@@ -5234,6 +5130,65 @@
           "value": 0.0
         }
       ]
+    },
+    {
+      "active_texture_map": "9GKYPtjwHZ",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "y6vxOLdMaI",
+      "name": "Background",
+      "resource_id": "y6vxOLdMaI",
+      "resource_name": "Background",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Opaque",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "9GKYPtjwHZ",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/wallpaperflare.com_wallpaper.jpg",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ahxidE7ZOU",
+              "name": "wallpaperflare",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
     },
     {
       "active_texture_map": "w5Ddxdddt7",
@@ -5705,6 +5660,102 @@
       ]
     },
     {
+      "active_texture_map": "Gz3DfEwNwl",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "quun8rd0La",
+      "name": "Warp Lines Particle",
+      "resource_id": "quun8rd0La",
+      "resource_name": "Warp Lines Particle",
+      "resource_ver": 6,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "Gz3DfEwNwl",
+          "looping": true,
+          "name": "kMask",
+          "rect_name0": "kMaskRect",
+          "rect_name1": "",
+          "sampler_name0": "kMask",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "app://textures/particles/circle_02.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "rTmuZkuKEn",
+              "name": "Texture",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Particle2D",
+      "uniforms": [
+        {
+          "name": "kParticleBaseRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kParticleEndColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.7547112107276917,
+            "g": 0.7378957867622375,
+            "r": 0.696513295173645
+          }
+        },
+        {
+          "name": "kParticleMidColor",
+          "value": {
+            "a": 1.0,
+            "b": 1.0,
+            "g": 1.0,
+            "r": 1.0
+          }
+        },
+        {
+          "name": "kParticleRotation",
+          "value": 4
+        },
+        {
+          "name": "kParticleStartColor",
+          "value": {
+            "a": 0.21176470816135406,
+            "b": 0.0,
+            "g": 0.0,
+            "r": 0.0
+          }
+        }
+      ]
+    },
+    {
       "active_texture_map": "",
       "flags": {
         "BlendFrames": true,
@@ -5963,106 +6014,6 @@
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "id": "HA5M7RGQpK",
-      "name": "Summoning Circle",
-      "resource_id": "HA5M7RGQpK",
-      "resource_name": "Summoning Circle",
-      "resource_ver": 6,
-      "shader_src": "\n// this is your custom fragment (material) shader main.\n// this will replace the built-in function but uses the\n// same uniform interface.\nvoid CustomFragmentShaderMain() {\n\n#ifdef DRAW_POINTS\n    // this is the normal particle rendering path\n    // using point rendering. texture sampling works\n    // but since the geometry is points the texture\n    // coordinates are not from vertex data but provided\n    // by the rasterizer in gl_PointCoord\n    vec2 coords = RotateTextureCoords(gl_PointCoord, kTime);\n\n    float alpha = ReadTextureAlpha(coords);\n\n    MixColors(alpha);\n#endif\n\n#ifdef DRAW_LINES\n    // right now we're not supporting texture sampling\n    // or rather.. the particle engine doesn't provide\n    // texture coordinates for non point geometry (lines)\n    MixColors(1.0);\n#endif\n\n#ifdef DRAW_TRIANGLES\n    // this path is only taken when the material widget renders\n    // the preview, right now it doesn't know about point rendering\n    // yet so it uses a textured shape.\n    vec2 coords = RotateTextureCoords(vTexCoord, kTime);\n\n    float alpha = ReadTextureAlpha(coords);\n\n    MixColors(alpha);\n#endif\n\n    fs_out.flags = kMaterialFlags;\n}\n",
-      "shader_uri": "",
-      "surface": "Emissive",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 0.0,
-          "id": "Dp1O4UmvUE",
-          "looping": true,
-          "name": "Particle Alpha Mask",
-          "rect_name0": "kMaskRect",
-          "rect_name1": "",
-          "sampler_name0": "kMask",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/circle4a.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "ZIqdW1pzNx",
-              "name": "circle4a",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Texture2D"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Particle2D",
-      "uniforms": [
-        {
-          "name": "kParticleBaseRotation",
-          "value": 0.0
-        },
-        {
-          "name": "kParticleEndColor",
-          "value": {
-            "a": 1.0,
-            "b": 0.0003356984816491604,
-            "g": 1.0,
-            "r": 0.0
-          }
-        },
-        {
-          "name": "kParticleMidColor",
-          "value": {
-            "a": 1.0,
-            "b": 0.0001678492408245802,
-            "g": 0.5,
-            "r": 0.5
-          }
-        },
-        {
-          "name": "kParticleRotation",
-          "value": 2
-        },
-        {
-          "name": "kParticleStartColor",
-          "value": {
-            "a": 1.0,
-            "b": 0.0,
-            "g": 0.0,
-            "r": 1.0
-          }
-        },
-        {
-          "name": "kRotation",
-          "value": 0.0
-        }
-      ]
-    },
-    {
-      "active_texture_map": "",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
       "id": "eySa2QEq4I",
       "name": "Magic Particle",
       "resource_id": "eySa2QEq4I",
@@ -6147,6 +6098,106 @@
             "b": 0.800000011920929,
             "g": 0.0,
             "r": 0.7921263575553894
+          }
+        },
+        {
+          "name": "kRotation",
+          "value": 0.0
+        }
+      ]
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "EnableBloom": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "HA5M7RGQpK",
+      "name": "Summoning Circle",
+      "resource_id": "HA5M7RGQpK",
+      "resource_name": "Summoning Circle",
+      "resource_ver": 6,
+      "shader_src": "\n// this is your custom fragment (material) shader main.\n// this will replace the built-in function but uses the\n// same uniform interface.\nvoid CustomFragmentShaderMain() {\n\n#ifdef DRAW_POINTS\n    // this is the normal particle rendering path\n    // using point rendering. texture sampling works\n    // but since the geometry is points the texture\n    // coordinates are not from vertex data but provided\n    // by the rasterizer in gl_PointCoord\n    vec2 coords = RotateTextureCoords(gl_PointCoord, kTime);\n\n    float alpha = ReadTextureAlpha(coords);\n\n    MixColors(alpha);\n#endif\n\n#ifdef DRAW_LINES\n    // right now we're not supporting texture sampling\n    // or rather.. the particle engine doesn't provide\n    // texture coordinates for non point geometry (lines)\n    MixColors(1.0);\n#endif\n\n#ifdef DRAW_TRIANGLES\n    // this path is only taken when the material widget renders\n    // the preview, right now it doesn't know about point rendering\n    // yet so it uses a textured shape.\n    vec2 coords = RotateTextureCoords(vTexCoord, kTime);\n\n    float alpha = ReadTextureAlpha(coords);\n\n    MixColors(alpha);\n#endif\n\n    fs_out.flags = kMaterialFlags;\n}\n",
+      "shader_uri": "",
+      "surface": "Emissive",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "Dp1O4UmvUE",
+          "looping": true,
+          "name": "Particle Alpha Mask",
+          "rect_name0": "kMaskRect",
+          "rect_name1": "",
+          "sampler_name0": "kMask",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/circle4a.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ZIqdW1pzNx",
+              "name": "circle4a",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Particle2D",
+      "uniforms": [
+        {
+          "name": "kParticleBaseRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kParticleEndColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.0003356984816491604,
+            "g": 1.0,
+            "r": 0.0
+          }
+        },
+        {
+          "name": "kParticleMidColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.0001678492408245802,
+            "g": 0.5,
+            "r": 0.5
+          }
+        },
+        {
+          "name": "kParticleRotation",
+          "value": 2
+        },
+        {
+          "name": "kParticleStartColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.0,
+            "g": 0.0,
+            "r": 1.0
           }
         },
         {
@@ -6255,52 +6306,6 @@
   "particles": [
     {
       "alpha_over_dist": 0.0,
-      "alpha_over_time": 0.0,
-      "boundary": "Clamp",
-      "coordinate_space": "Global",
-      "delay": 0.0,
-      "direction": "Outwards",
-      "direction_sector_size": 6.2831854820251465,
-      "direction_sector_start_angle": 0.0,
-      "flags": {
-        "ParticlesCanExpire": true
-      },
-      "gravity": {
-        "x": 0.0,
-        "y": 0.30000001192092896
-      },
-      "growth_over_dist": 0.0,
-      "growth_over_time": 0.0,
-      "id": "jdjNl1Joh3",
-      "init_rect_height": 1.0,
-      "init_rect_width": 1.0,
-      "init_rect_xpos": 0.0,
-      "init_rect_ypos": 0.0,
-      "max_alpha": 1.0,
-      "max_lifetime": 1.0,
-      "max_point_size": 1041.0,
-      "max_time": 3.4028234663852886e+38,
-      "max_velocity": 989.239990234375,
-      "max_xpos": 1.0,
-      "max_ypos": 1.0,
-      "min_alpha": 1.0,
-      "min_lifetime": 1.0,
-      "min_point_size": 486.0,
-      "min_time": 0.0,
-      "min_velocity": 721.0599975585938,
-      "mode": "Continuous",
-      "motion": "Linear",
-      "name": "Warp Lines",
-      "num_particles": 100.0,
-      "placement": "Edge",
-      "primitive": "PartialLineForward",
-      "resource_id": "jdjNl1Joh3",
-      "resource_name": "Warp Lines",
-      "resource_ver": 2,
-      "shape": "Circle"
-    },
-    {
-      "alpha_over_dist": 0.0,
       "alpha_over_time": -0.23999999463558197,
       "boundary": "Clamp",
       "coordinate_space": "Global",
@@ -6347,243 +6352,13 @@
     },
     {
       "alpha_over_dist": 0.0,
-      "alpha_over_time": 0.0,
-      "boundary": "Kill",
-      "coordinate_space": "Local",
-      "delay": 0.0,
-      "direction": "Sector",
-      "direction_sector_size": 0.3839724361896515,
-      "direction_sector_start_angle": 1.0122909545898438,
-      "flags": {
-        "ParticlesCanExpire": true
-      },
-      "gravity": {
-        "x": 0.0,
-        "y": 0.009999999776482582
-      },
-      "growth_over_dist": 0.0,
-      "growth_over_time": 0.0,
-      "id": "DEnBflg7Re",
-      "init_rect_height": 0.12999999523162842,
-      "init_rect_width": 1.0,
-      "init_rect_xpos": 0.0,
-      "init_rect_ypos": 0.0,
-      "max_alpha": 0.9200000166893005,
-      "max_lifetime": 24.549999237060547,
-      "max_point_size": 12.0,
-      "max_time": 3.4028234663852886e+38,
-      "max_velocity": 0.05000000074505806,
-      "max_xpos": 1.0,
-      "max_ypos": 1.0,
-      "min_alpha": 0.9200000166893005,
-      "min_lifetime": 21.0,
-      "min_point_size": 8.0,
-      "min_time": 0.0,
-      "min_velocity": 0.019999999552965164,
-      "mode": "Maintain",
-      "motion": "Linear",
-      "name": "Snow Flakes",
-      "num_particles": 10.0,
-      "placement": "Inside",
-      "primitive": "Point",
-      "resource_id": "DEnBflg7Re",
-      "resource_name": "Snow Flakes",
-      "resource_ver": 2,
-      "shape": "Rectangle"
-    },
-    {
-      "alpha_over_dist": 0.0,
-      "alpha_over_time": -0.550000011920929,
-      "boundary": "Clamp",
-      "coordinate_space": "Local",
-      "delay": 0.0,
-      "direction": "Outwards",
-      "direction_sector_size": 6.2831854820251465,
-      "direction_sector_start_angle": 0.0,
-      "flags": {
-        "ParticlesCanExpire": true
-      },
-      "gravity": {
-        "x": 0.0,
-        "y": 0.30000001192092896
-      },
-      "growth_over_dist": 99.0,
-      "growth_over_time": 99.0,
-      "id": "obukJs0rJC",
-      "init_rect_height": 0.009999999776482582,
-      "init_rect_width": 0.009999999776482582,
-      "init_rect_xpos": 0.5,
-      "init_rect_ypos": 0.5,
-      "max_alpha": 1.0,
-      "max_lifetime": 0.5,
-      "max_point_size": 523.0,
-      "max_time": 1.5,
-      "max_velocity": 0.009999999776482582,
-      "max_xpos": 1.0,
-      "max_ypos": 1.0,
-      "min_alpha": 1.0,
-      "min_lifetime": 0.5,
-      "min_point_size": 360.0,
-      "min_time": 1.5,
-      "min_velocity": 0.0,
-      "mode": "Once",
-      "motion": "Linear",
-      "name": "Energy Explosion Plasma",
-      "num_particles": 1.0,
-      "placement": "Inside",
-      "primitive": "Point",
-      "resource_id": "obukJs0rJC",
-      "resource_name": "Energy Explosion Plasma",
-      "resource_ver": 2,
-      "shape": "Rectangle"
-    },
-    {
-      "alpha_over_dist": 0.0,
-      "alpha_over_time": -0.23999999463558197,
-      "boundary": "Clamp",
-      "coordinate_space": "Global",
-      "delay": 0.0,
-      "direction": "Outwards",
-      "direction_sector_size": 6.2831854820251465,
-      "direction_sector_start_angle": 0.0,
-      "flags": {
-        "ParticlesCanExpire": true
-      },
-      "gravity": {
-        "x": 0.0,
-        "y": 0.30000001192092896
-      },
-      "growth_over_dist": 0.0,
-      "growth_over_time": 0.0,
-      "id": "X983sNLRSh",
-      "init_rect_height": 1.0,
-      "init_rect_width": 1.0,
-      "init_rect_xpos": 0.0,
-      "init_rect_ypos": 0.0,
-      "max_alpha": 0.7099999785423279,
-      "max_lifetime": 7.550000190734863,
-      "max_point_size": 126.0,
-      "max_time": 3.4028234663852886e+38,
-      "max_velocity": 59.04999923706055,
-      "max_xpos": 1.0,
-      "max_ypos": 1.0,
-      "min_alpha": 0.5600000023841858,
-      "min_lifetime": 7.550000190734863,
-      "min_point_size": 35.0,
-      "min_time": 0.0,
-      "min_velocity": 21.489999771118164,
-      "mode": "Continuous",
-      "motion": "Linear",
-      "name": "Magic Smoke",
-      "num_particles": 10.0,
-      "placement": "Center",
-      "primitive": "Point",
-      "resource_id": "X983sNLRSh",
-      "resource_name": "Magic Smoke",
-      "resource_ver": 2,
-      "shape": "Rectangle"
-    },
-    {
-      "alpha_over_dist": 0.0,
-      "alpha_over_time": -0.8299999833106995,
-      "boundary": "Clamp",
-      "coordinate_space": "Global",
-      "delay": 0.0,
-      "direction": "Outwards",
-      "direction_sector_size": 6.2831854820251465,
-      "direction_sector_start_angle": 0.0,
-      "flags": {
-        "ParticlesCanExpire": true
-      },
-      "gravity": {
-        "x": 0.0,
-        "y": 200.0
-      },
-      "growth_over_dist": 0.0,
-      "growth_over_time": -1.0,
-      "id": "rBqJ2LlkXC",
-      "init_rect_height": 1.0,
-      "init_rect_width": 1.0,
-      "init_rect_xpos": 0.0,
-      "init_rect_ypos": 0.0,
-      "max_alpha": 1.0,
-      "max_lifetime": 1.399999976158142,
-      "max_point_size": 7.0,
-      "max_time": 3.4028234663852886e+38,
-      "max_velocity": 142.4600067138672,
-      "max_xpos": 1.0,
-      "max_ypos": 1.0,
-      "min_alpha": 1.0,
-      "min_lifetime": 1.399999976158142,
-      "min_point_size": 2.0,
-      "min_time": 0.0,
-      "min_velocity": 10.3100004196167,
-      "mode": "Once",
-      "motion": "Projectile",
-      "name": "Fireworks Sparks",
-      "num_particles": 1000.0,
-      "placement": "Edge",
-      "primitive": "Point",
-      "resource_id": "rBqJ2LlkXC",
-      "resource_name": "Fireworks Sparks",
-      "resource_ver": 2,
-      "shape": "Circle"
-    },
-    {
-      "alpha_over_dist": 0.0,
-      "alpha_over_time": 0.0,
-      "boundary": "Clamp",
-      "coordinate_space": "Global",
-      "delay": 0.0,
-      "direction": "Outwards",
-      "direction_sector_size": 0.0,
-      "direction_sector_start_angle": -0.24434609711170197,
-      "flags": {
-        "ParticlesCanExpire": true
-      },
-      "gravity": {
-        "x": 0.0,
-        "y": 0.30000001192092896
-      },
-      "growth_over_dist": 0.0,
-      "growth_over_time": 0.0,
-      "id": "6PwXHnbnzY",
-      "init_rect_height": 1.0,
-      "init_rect_width": 1.0,
-      "init_rect_xpos": 0.0,
-      "init_rect_ypos": 0.0,
-      "max_alpha": 0.8399999737739563,
-      "max_lifetime": 1.090000033378601,
-      "max_point_size": 121.0,
-      "max_time": 3.4028234663852886e+38,
-      "max_velocity": 13.609999656677246,
-      "max_xpos": 1.0,
-      "max_ypos": 1.0,
-      "min_alpha": 0.7099999785423279,
-      "min_lifetime": 1.090000033378601,
-      "min_point_size": 38.0,
-      "min_time": 0.0,
-      "min_velocity": 1.9199999570846558,
-      "mode": "Continuous",
-      "motion": "Linear",
-      "name": "Magic Core",
-      "num_particles": 40.0,
-      "placement": "Center",
-      "primitive": "Point",
-      "resource_id": "6PwXHnbnzY",
-      "resource_name": "Magic Core",
-      "resource_ver": 2,
-      "shape": "Rectangle"
-    },
-    {
-      "alpha_over_dist": 0.0,
-      "alpha_over_time": -0.25999999046325684,
+      "alpha_over_time": -0.7799999713897705,
       "boundary": "Clamp",
       "coordinate_space": "Global",
       "delay": 0.0,
       "direction": "Sector",
-      "direction_sector_size": 0.05235987901687622,
-      "direction_sector_start_angle": -1.5707963705062866,
+      "direction_sector_size": 0.6108652353286743,
+      "direction_sector_start_angle": -1.919862151145935,
       "flags": {
         "ParticlesCanExpire": true
       },
@@ -6593,79 +6368,33 @@
       },
       "growth_over_dist": 0.0,
       "growth_over_time": 0.0,
-      "id": "vIf7bfadSt",
+      "id": "OpgNJAMhhQ",
       "init_rect_height": 1.0,
       "init_rect_width": 1.0,
       "init_rect_xpos": 0.0,
       "init_rect_ypos": 0.0,
       "max_alpha": 1.0,
-      "max_lifetime": 7.900000095367432,
-      "max_point_size": 78.0,
+      "max_lifetime": 2.450000047683716,
+      "max_point_size": 8.0,
       "max_time": 3.4028234663852886e+38,
-      "max_velocity": 132.9499969482422,
+      "max_velocity": 198.6199951171875,
       "max_xpos": 1.0,
       "max_ypos": 1.0,
       "min_alpha": 1.0,
       "min_lifetime": 2.450000047683716,
-      "min_point_size": 10.0,
+      "min_point_size": 5.0,
       "min_time": 0.0,
-      "min_velocity": 1.0,
+      "min_velocity": 130.30999755859375,
       "mode": "Continuous",
       "motion": "Linear",
-      "name": "Basic Flame Smoke",
-      "num_particles": 10.0,
-      "placement": "Inside",
+      "name": "Basic Flame Sparks",
+      "num_particles": 40.0,
+      "placement": "Edge",
       "primitive": "Point",
-      "resource_id": "vIf7bfadSt",
-      "resource_name": "Basic Flame Smoke",
+      "resource_id": "OpgNJAMhhQ",
+      "resource_name": "Basic Flame Sparks",
       "resource_ver": 2,
       "shape": "Circle"
-    },
-    {
-      "alpha_over_dist": 0.0,
-      "alpha_over_time": 0.0,
-      "boundary": "Kill",
-      "coordinate_space": "Local",
-      "delay": 0.0,
-      "direction": "Sector",
-      "direction_sector_size": 0.0,
-      "direction_sector_start_angle": 1.7627825736999512,
-      "flags": {
-        "ParticlesCanExpire": true
-      },
-      "gravity": {
-        "x": 0.0,
-        "y": 0.30000001192092896
-      },
-      "growth_over_dist": 0.0,
-      "growth_over_time": 0.0,
-      "id": "Jv6CJCIheq",
-      "init_rect_height": 0.009999999776482582,
-      "init_rect_width": 1.0,
-      "init_rect_xpos": 0.0,
-      "init_rect_ypos": 0.0,
-      "max_alpha": 1.0,
-      "max_lifetime": 3.0,
-      "max_point_size": 4.0,
-      "max_time": 3.4028234663852886e+38,
-      "max_velocity": 0.8999999761581421,
-      "max_xpos": 1.0,
-      "max_ypos": 1.0,
-      "min_alpha": 1.0,
-      "min_lifetime": 2.0,
-      "min_point_size": 1.0,
-      "min_time": 0.0,
-      "min_velocity": 0.5400000214576721,
-      "mode": "Maintain",
-      "motion": "Linear",
-      "name": "Rain",
-      "num_particles": 200.0,
-      "placement": "Inside",
-      "primitive": "Point",
-      "resource_id": "Jv6CJCIheq",
-      "resource_name": "Rain",
-      "resource_ver": 2,
-      "shape": "Rectangle"
     },
     {
       "alpha_over_dist": 0.0,
@@ -6762,6 +6491,144 @@
     {
       "alpha_over_dist": 0.0,
       "alpha_over_time": 0.0,
+      "boundary": "Kill",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Sector",
+      "direction_sector_size": 0.0,
+      "direction_sector_start_angle": 1.7627825736999512,
+      "flags": {
+        "ParticlesCanExpire": true
+      },
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "Jv6CJCIheq",
+      "init_rect_height": 0.009999999776482582,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 1.0,
+      "max_lifetime": 3.0,
+      "max_point_size": 4.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 0.8999999761581421,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 2.0,
+      "min_point_size": 1.0,
+      "min_time": 0.0,
+      "min_velocity": 0.5400000214576721,
+      "mode": "Maintain",
+      "motion": "Linear",
+      "name": "Rain",
+      "num_particles": 200.0,
+      "placement": "Inside",
+      "primitive": "Point",
+      "resource_id": "Jv6CJCIheq",
+      "resource_name": "Rain",
+      "resource_ver": 2,
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -0.25999999046325684,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Sector",
+      "direction_sector_size": 0.05235987901687622,
+      "direction_sector_start_angle": -1.5707963705062866,
+      "flags": {
+        "ParticlesCanExpire": true
+      },
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "vIf7bfadSt",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 1.0,
+      "max_lifetime": 7.900000095367432,
+      "max_point_size": 78.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 132.9499969482422,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 2.450000047683716,
+      "min_point_size": 10.0,
+      "min_time": 0.0,
+      "min_velocity": 1.0,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "name": "Basic Flame Smoke",
+      "num_particles": 10.0,
+      "placement": "Inside",
+      "primitive": "Point",
+      "resource_id": "vIf7bfadSt",
+      "resource_name": "Basic Flame Smoke",
+      "resource_ver": 2,
+      "shape": "Circle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 0.0,
+      "direction_sector_start_angle": -0.24434609711170197,
+      "flags": {
+        "ParticlesCanExpire": true
+      },
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "6PwXHnbnzY",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.8399999737739563,
+      "max_lifetime": 1.090000033378601,
+      "max_point_size": 121.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 13.609999656677246,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.7099999785423279,
+      "min_lifetime": 1.090000033378601,
+      "min_point_size": 38.0,
+      "min_time": 0.0,
+      "min_velocity": 1.9199999570846558,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "name": "Magic Core",
+      "num_particles": 40.0,
+      "placement": "Center",
+      "primitive": "Point",
+      "resource_id": "6PwXHnbnzY",
+      "resource_name": "Magic Core",
+      "resource_ver": 2,
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
       "boundary": "Clamp",
       "coordinate_space": "Global",
       "delay": 0.0,
@@ -6807,13 +6674,13 @@
     },
     {
       "alpha_over_dist": 0.0,
-      "alpha_over_time": -0.7799999713897705,
+      "alpha_over_time": -0.23999999463558197,
       "boundary": "Clamp",
       "coordinate_space": "Global",
       "delay": 0.0,
-      "direction": "Sector",
-      "direction_sector_size": 0.6108652353286743,
-      "direction_sector_start_angle": -1.919862151145935,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
       "flags": {
         "ParticlesCanExpire": true
       },
@@ -6823,31 +6690,261 @@
       },
       "growth_over_dist": 0.0,
       "growth_over_time": 0.0,
-      "id": "OpgNJAMhhQ",
+      "id": "X983sNLRSh",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.7099999785423279,
+      "max_lifetime": 7.550000190734863,
+      "max_point_size": 126.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 59.04999923706055,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.5600000023841858,
+      "min_lifetime": 7.550000190734863,
+      "min_point_size": 35.0,
+      "min_time": 0.0,
+      "min_velocity": 21.489999771118164,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "name": "Magic Smoke",
+      "num_particles": 10.0,
+      "placement": "Center",
+      "primitive": "Point",
+      "resource_id": "X983sNLRSh",
+      "resource_name": "Magic Smoke",
+      "resource_ver": 2,
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -0.8299999833106995,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "flags": {
+        "ParticlesCanExpire": true
+      },
+      "gravity": {
+        "x": 0.0,
+        "y": 200.0
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": -1.0,
+      "id": "rBqJ2LlkXC",
       "init_rect_height": 1.0,
       "init_rect_width": 1.0,
       "init_rect_xpos": 0.0,
       "init_rect_ypos": 0.0,
       "max_alpha": 1.0,
-      "max_lifetime": 2.450000047683716,
-      "max_point_size": 8.0,
+      "max_lifetime": 1.399999976158142,
+      "max_point_size": 7.0,
       "max_time": 3.4028234663852886e+38,
-      "max_velocity": 198.6199951171875,
+      "max_velocity": 142.4600067138672,
       "max_xpos": 1.0,
       "max_ypos": 1.0,
       "min_alpha": 1.0,
-      "min_lifetime": 2.450000047683716,
-      "min_point_size": 5.0,
+      "min_lifetime": 1.399999976158142,
+      "min_point_size": 2.0,
       "min_time": 0.0,
-      "min_velocity": 130.30999755859375,
-      "mode": "Continuous",
-      "motion": "Linear",
-      "name": "Basic Flame Sparks",
-      "num_particles": 40.0,
+      "min_velocity": 10.3100004196167,
+      "mode": "Once",
+      "motion": "Projectile",
+      "name": "Fireworks Sparks",
+      "num_particles": 1000.0,
       "placement": "Edge",
       "primitive": "Point",
-      "resource_id": "OpgNJAMhhQ",
-      "resource_name": "Basic Flame Sparks",
+      "resource_id": "rBqJ2LlkXC",
+      "resource_name": "Fireworks Sparks",
+      "resource_ver": 2,
+      "shape": "Circle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Kill",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Sector",
+      "direction_sector_size": 0.3839724361896515,
+      "direction_sector_start_angle": 1.0122909545898438,
+      "flags": {
+        "ParticlesCanExpire": true
+      },
+      "gravity": {
+        "x": 0.0,
+        "y": 0.009999999776482582
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "DEnBflg7Re",
+      "init_rect_height": 0.12999999523162842,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.9200000166893005,
+      "max_lifetime": 24.549999237060547,
+      "max_point_size": 12.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 0.05000000074505806,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.9200000166893005,
+      "min_lifetime": 21.0,
+      "min_point_size": 8.0,
+      "min_time": 0.0,
+      "min_velocity": 0.019999999552965164,
+      "mode": "Maintain",
+      "motion": "Linear",
+      "name": "Snow Flakes",
+      "num_particles": 10.0,
+      "placement": "Inside",
+      "primitive": "Point",
+      "resource_id": "DEnBflg7Re",
+      "resource_name": "Snow Flakes",
+      "resource_ver": 2,
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -0.550000011920929,
+      "boundary": "Clamp",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "flags": {
+        "ParticlesCanExpire": true
+      },
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 99.0,
+      "growth_over_time": 99.0,
+      "id": "obukJs0rJC",
+      "init_rect_height": 0.009999999776482582,
+      "init_rect_width": 0.009999999776482582,
+      "init_rect_xpos": 0.5,
+      "init_rect_ypos": 0.5,
+      "max_alpha": 1.0,
+      "max_lifetime": 0.5,
+      "max_point_size": 523.0,
+      "max_time": 1.5,
+      "max_velocity": 0.009999999776482582,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 0.5,
+      "min_point_size": 360.0,
+      "min_time": 1.5,
+      "min_velocity": 0.0,
+      "mode": "Once",
+      "motion": "Linear",
+      "name": "Energy Explosion Plasma",
+      "num_particles": 1.0,
+      "placement": "Inside",
+      "primitive": "Point",
+      "resource_id": "obukJs0rJC",
+      "resource_name": "Energy Explosion Plasma",
+      "resource_ver": 2,
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -0.800000011920929,
+      "boundary": "Kill",
+      "coordinate_space": "Local",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "flags": {
+        "ParticlesCanExpire": true
+      },
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "0BT4ANr30T",
+      "init_rect_height": 0.3799999952316284,
+      "init_rect_width": 0.3799999952316284,
+      "init_rect_xpos": 0.3199999928474426,
+      "init_rect_ypos": 0.30000001192092896,
+      "max_alpha": 1.0,
+      "max_lifetime": 10.0,
+      "max_point_size": 243.0,
+      "max_time": 1.5,
+      "max_velocity": 0.4099999964237213,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 1.0,
+      "min_point_size": 10.0,
+      "min_time": 1.5,
+      "min_velocity": 0.0,
+      "mode": "Once",
+      "motion": "Linear",
+      "name": "Energy Explosion Smoke",
+      "num_particles": 10.0,
+      "placement": "Edge",
+      "primitive": "Point",
+      "resource_id": "0BT4ANr30T",
+      "resource_name": "Energy Explosion Smoke",
+      "resource_ver": 2,
+      "shape": "Circle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "flags": {
+        "ParticlesCanExpire": true
+      },
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "jdjNl1Joh3",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 1.0,
+      "max_lifetime": 1.0,
+      "max_point_size": 1041.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 989.239990234375,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 1.0,
+      "min_point_size": 486.0,
+      "min_time": 0.0,
+      "min_velocity": 721.0599975585938,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "name": "Warp Lines",
+      "num_particles": 100.0,
+      "placement": "Edge",
+      "primitive": "PartialLineForward",
+      "resource_id": "jdjNl1Joh3",
+      "resource_name": "Warp Lines",
       "resource_ver": 2,
       "shape": "Circle"
     },
@@ -6991,52 +7088,6 @@
     },
     {
       "alpha_over_dist": 0.0,
-      "alpha_over_time": -1.0,
-      "boundary": "Clamp",
-      "coordinate_space": "Global",
-      "delay": 0.0,
-      "direction": "Outwards",
-      "direction_sector_size": 6.2831854820251465,
-      "direction_sector_start_angle": -0.3490658402442932,
-      "flags": {
-        "ParticlesCanExpire": true
-      },
-      "gravity": {
-        "x": 0.0,
-        "y": 200.0
-      },
-      "growth_over_dist": 0.0,
-      "growth_over_time": 0.0,
-      "id": "02kw3C4wix",
-      "init_rect_height": 1.0,
-      "init_rect_width": 1.0,
-      "init_rect_xpos": 0.0,
-      "init_rect_ypos": 0.0,
-      "max_alpha": 1.0,
-      "max_lifetime": 1.0,
-      "max_point_size": 39.0,
-      "max_time": 3.4028234663852886e+38,
-      "max_velocity": 107.33000183105469,
-      "max_xpos": 1.0,
-      "max_ypos": 1.0,
-      "min_alpha": 0.07999999821186066,
-      "min_lifetime": 0.10000000149011612,
-      "min_point_size": 1.0,
-      "min_time": 0.0,
-      "min_velocity": 1.0,
-      "mode": "Once",
-      "motion": "Projectile",
-      "name": "Fireworks Explosion",
-      "num_particles": 10.0,
-      "placement": "Center",
-      "primitive": "Point",
-      "resource_id": "02kw3C4wix",
-      "resource_name": "Fireworks Explosion",
-      "resource_ver": 2,
-      "shape": "Rectangle"
-    },
-    {
-      "alpha_over_dist": 0.0,
       "alpha_over_time": -0.23000000417232513,
       "boundary": "Clamp",
       "coordinate_space": "Global",
@@ -7078,6 +7129,52 @@
       "primitive": "Point",
       "resource_id": "n6ykHi9xRi",
       "resource_name": "Basic Waterfall",
+      "resource_ver": 2,
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -1.0,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": -0.3490658402442932,
+      "flags": {
+        "ParticlesCanExpire": true
+      },
+      "gravity": {
+        "x": 0.0,
+        "y": 200.0
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "02kw3C4wix",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 1.0,
+      "max_lifetime": 1.0,
+      "max_point_size": 39.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 107.33000183105469,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.07999999821186066,
+      "min_lifetime": 0.10000000149011612,
+      "min_point_size": 1.0,
+      "min_time": 0.0,
+      "min_velocity": 1.0,
+      "mode": "Once",
+      "motion": "Projectile",
+      "name": "Fireworks Explosion",
+      "num_particles": 10.0,
+      "placement": "Center",
+      "primitive": "Point",
+      "resource_id": "02kw3C4wix",
+      "resource_name": "Fireworks Explosion",
       "resource_ver": 2,
       "shape": "Rectangle"
     },
@@ -7448,52 +7545,6 @@
       "resource_name": "Basic Explosion Sparks",
       "resource_ver": 2,
       "shape": "Circle"
-    },
-    {
-      "alpha_over_dist": 0.0,
-      "alpha_over_time": -0.800000011920929,
-      "boundary": "Kill",
-      "coordinate_space": "Local",
-      "delay": 0.0,
-      "direction": "Outwards",
-      "direction_sector_size": 6.2831854820251465,
-      "direction_sector_start_angle": 0.0,
-      "flags": {
-        "ParticlesCanExpire": true
-      },
-      "gravity": {
-        "x": 0.0,
-        "y": 0.30000001192092896
-      },
-      "growth_over_dist": 0.0,
-      "growth_over_time": 0.0,
-      "id": "0BT4ANr30T",
-      "init_rect_height": 0.3799999952316284,
-      "init_rect_width": 0.3799999952316284,
-      "init_rect_xpos": 0.3199999928474426,
-      "init_rect_ypos": 0.30000001192092896,
-      "max_alpha": 1.0,
-      "max_lifetime": 10.0,
-      "max_point_size": 243.0,
-      "max_time": 1.5,
-      "max_velocity": 0.4099999964237213,
-      "max_xpos": 1.0,
-      "max_ypos": 1.0,
-      "min_alpha": 1.0,
-      "min_lifetime": 1.0,
-      "min_point_size": 10.0,
-      "min_time": 1.5,
-      "min_velocity": 0.0,
-      "mode": "Once",
-      "motion": "Linear",
-      "name": "Energy Explosion Smoke",
-      "num_particles": 10.0,
-      "placement": "Edge",
-      "primitive": "Point",
-      "resource_id": "0BT4ANr30T",
-      "resource_name": "Energy Explosion Smoke",
-      "resource_ver": 2,
-      "shape": "Circle"
     }
   ],
   "scenes": [
@@ -7572,14 +7623,14 @@
   ],
   "scripts": [
     {
-      "id": "nZkUdw95Ds",
-      "name": "Firework Rocket",
+      "id": "2JJndZoBDS",
+      "name": "UI",
       "owner": "",
-      "resource_id": "nZkUdw95Ds",
-      "resource_name": "Firework Rocket",
+      "resource_id": "2JJndZoBDS",
+      "resource_name": "UI",
       "resource_ver": 1,
       "type": "Unspecified",
-      "uri": "ws://lua/nZkUdw95Ds.lua"
+      "uri": "ws://lua/2JJndZoBDS.lua"
     },
     {
       "id": "wBGTUem9UB",
@@ -7592,14 +7643,14 @@
       "uri": "ws://lua/gwRRGrAei4.lua"
     },
     {
-      "id": "2JJndZoBDS",
-      "name": "UI",
+      "id": "nZkUdw95Ds",
+      "name": "Firework Rocket",
       "owner": "",
-      "resource_id": "2JJndZoBDS",
-      "resource_name": "UI",
+      "resource_id": "nZkUdw95Ds",
+      "resource_name": "Firework Rocket",
       "resource_ver": 1,
       "type": "Unspecified",
-      "uri": "ws://lua/2JJndZoBDS.lua"
+      "uri": "ws://lua/nZkUdw95Ds.lua"
     },
     {
       "id": "nIkywmIbBJ",
