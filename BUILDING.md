@@ -433,11 +433,27 @@ don't have any automated way of verifying the test output.
   * The *result* image will be the actual result image.
   * The *delta* image will help visualize the pixels that were not the same between the *result* and the *gold* image.
 * Using multiple CMake "jobs" to run tests can confuse the rendering tests. 
-  * A safer alternative is to *NOT* use the -jN parameter but only use a single job. 
+  * A safer alternative is to *NOT* use the -jN parameter but only use a single job.
+* If you want to run a single unit test application simply run the executable but please mind the current working folder.
+  * On Windows some tests can fail because of this!
+  * unit_test_workspace.exe needs to run in `build\Release` folder.
+  * unit_test_image.exe needs to run in `build` folder.
+
 
 #### [See this list for known Issues](ISSUES.md)
 
 ### On the Desktop Linux 🐧
+
+<details><summary>How to run a single test</summary>
+
+```
+$ cd detonator/build
+$ ./unit_test_workspace
+$ ./unit_test_entity
+$ ...
+```
+
+</details>
 
 <details><summary>How to run all tests</summary>
 
@@ -477,36 +493,63 @@ Run all tests with MSAA4. (Use --help for more information):
 
 ### On the Desktop Windows 🪟
 
-<details><summary>How to run all tests</summary>
+> [!IMPORTANT]<br>
+> Before the tests can run you need to make sure that you have the Qt libraries available for launching the test applications.
+> Either copy the libraries from the Qt bin folder to the build folder or add the Qt bin to your PATH
 
-* Before the tests can run you need to make sure that you have the Qt libraries available for loading.
-* For testing in release:
+<details><summary>How to copy Qt libraries for testing</summary>
+
+* For testing in release: 
   * Copy `QtCore.dll`, `QtGui.dll`, `QtNetwork.dll`, `QtSvg.dll`,  `QtWidgets.dll` and `QtXml.dll` to `detonator\build\Release` folder.
   * Copy Qt `plugins\platforms` folder to `detonator\build\Release` folder.
   * Copy Qt `plugins\imageformats` folder to `detonator\build\Release` folder.
-
-* For testing in debug: 
+<br><br>
+* For testing in debug:
   * Copy `QtCored.dll`, `QtGuid.dll`, `QtNetworkd.dll`, `QtSvgd.dll`,  `QtWidgetsd.dll` and `QtXmld.dll` to `detonator\build_d\Debug` folder.
   * Copy Qt `plugins\platforms` folder to `detonator\build_d\Debug\` folder.
   * Copy Qt `plugins\imageformats` folder to `detonator\build_d\Debug\` folder.
 
-Run all tests including unit tests, graphics and audio tests:
+</details>
+
+<details><summary>How to run a single test</summary>
+
+```
+  $ cd detonator\build\Release
+  $ unit_test_workspace.exe
+  $ unit_test_entity.exe
+  $ ...
+```
+
+</details>
+
+
+<details><summary>How to run all tests</summary>
+
+Release build
 
 ```
   $ cd detonator\build
   $ ctest -C Release
-  ...
+```
+
+Debug build
+
+```
   $ cd detonator\build_d
   $ ctest -C Debug
 ```
+
 </details>
 
+
 ### On the Web (WASM+HTML5) 💩
-*Currently, only some unit tests are available on the web. More tests will be enabled as needed.*
+
+> [!NOTE]<br>
+> Currently, only some unit tests are available on the web. More tests will be enabled as needed.
 
 <details><summary>How to run unit tests</summary>
 
-<i>The `detonator/emscripten/bin` folder should contain the following build artifacts:</i>
+After successful build the `detonator/emscripten/bin` folder should contain the following build artifacts:
 
   * http-server.py
   * unit-test.html

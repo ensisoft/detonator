@@ -88,8 +88,7 @@ then follow the [Build Instructions](BUILDING.md)
 
 ## SCREENSHOTS
 
-![Demos](screens/editor-demo.gif "Animated demo content GIF")
-<br><i>Everything visual can be completed in the editor. Cool, huh?</i> 😎
+![Demos](screens/detonator.png "Animated demo content GIF")
 
 <details><summary><strong>Click here for more screenshots...</strong></summary>
 <br>
