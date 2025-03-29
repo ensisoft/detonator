@@ -27,8 +27,9 @@ namespace audio
     class StereoSplitter : public Element
     {
     public:
-        StereoSplitter(const std::string& name, const std::string& id);
-        StereoSplitter(const std::string& name);
+        StereoSplitter(std::string name, std::string id);
+        StereoSplitter(std::string name);
+
         std::string GetId() const override
         { return mId; }
         std::string GetName() const override

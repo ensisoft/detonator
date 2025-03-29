@@ -25,12 +25,12 @@ namespace audio
     class SineSource : public Element
     {
     public:
-        SineSource(const std::string& name,
-                   const std::string& id,
+        SineSource(std::string name,
+                   std::string id,
                    const Format& format,
                    unsigned frequency,
                    unsigned millisecs = 0);
-        SineSource(const std::string& name,
+        SineSource(std::string name,
                    const Format& format,
                    unsigned frequency,
                    unsigned millisecs = 0);

@@ -30,9 +30,10 @@ namespace audio
     class Mixer : public Element
     {
     public:
-        Mixer(const std::string& name, unsigned num_srcs = 2);
-        Mixer(const std::string& name, const std::string& id, unsigned num_srcs = 2);
-        Mixer(const std::string& name, const std::string& id, const std::vector<PortDesc>& srcs);
+        Mixer(std::string name, unsigned num_srcs = 2);
+        Mixer(std::string name, std::string id, unsigned num_srcs = 2);
+        Mixer(std::string name, std::string id, const std::vector<PortDesc>& srcs);
+
         std::string GetId() const override
         { return mId; }
         std::string GetName() const override

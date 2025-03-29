@@ -29,8 +29,9 @@ namespace audio
     class StereoJoiner : public Element
     {
     public:
-        StereoJoiner(const std::string& name, const std::string& id);
-        StereoJoiner(const std::string& name);
+        StereoJoiner(std::string name, std::string id);
+        explicit StereoJoiner(std::string name);
+
         std::string GetId() const override
         { return mId; }
         std::string GetName() const override
@@ -56,7 +57,7 @@ namespace audio
         }
     private:
         template<typename Type>
-        void Join(Allocator& allocator, BufferHandle left, BufferHandle right);
+        void Join(Allocator& allocator, const BufferHandle& left, const BufferHandle& right);
     private:
         const std::string mName;
         const std::string mId;

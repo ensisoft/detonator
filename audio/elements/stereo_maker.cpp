@@ -24,15 +24,16 @@
 namespace audio
 {
 
-StereoMaker::StereoMaker(const std::string& name, const std::string& id, Channel which)
-  : mName(name)
-  , mId(id)
+StereoMaker::StereoMaker(std::string name, std::string id, Channel which)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mChannel(which)
   , mOut("out")
   , mIn("in")
 {}
-StereoMaker::StereoMaker(const std::string& name, Channel which)
-  : StereoMaker(name, base::RandomString(10), which)
+
+StereoMaker::StereoMaker(std::string name, Channel which)
+  : StereoMaker(std::move(name), base::RandomString(10), which)
 {}
 
 bool StereoMaker::Prepare(const Loader& loader, const PrepareParams& params)

@@ -24,9 +24,9 @@
 namespace audio
 {
 
-Playlist::Playlist(const std::string& name, const std::string& id, const std::vector<PortDesc>& srcs)
-  : mName(name)
-  , mId(id)
+Playlist::Playlist(std::string name, std::string id, const std::vector<PortDesc>& srcs)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mOut("out")
 {
     for (const auto& desc : srcs)
@@ -35,8 +35,8 @@ Playlist::Playlist(const std::string& name, const std::string& id, const std::ve
         mSrcs.push_back(std::move(p));
     }
 }
-Playlist::Playlist(const std::string& name, const std::vector<PortDesc>& srcs)
-  : Playlist(name, base::RandomString(10), srcs)
+Playlist::Playlist(std::string name, const std::vector<PortDesc>& srcs)
+  : Playlist(std::move(name), base::RandomString(10), srcs)
 {}
 
 bool Playlist::Prepare(const Loader& loader, const PrepareParams& params)

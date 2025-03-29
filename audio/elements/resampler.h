@@ -28,8 +28,8 @@ namespace audio
     class Resampler : public Element
     {
     public:
-        Resampler(const std::string& name, unsigned sample_rate);
-        Resampler(const std::string& name, const std::string& id, unsigned sample_rate);
+        Resampler(std::string name, unsigned sample_rate);
+        Resampler(std::string name, std::string id, unsigned sample_rate);
        ~Resampler();
 
         std::string GetId() const override

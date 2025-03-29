@@ -31,8 +31,8 @@ namespace audio
             float gain = 1.0f;
         };
 
-        Gain(const std::string& name, float gain = 1.0f);
-        Gain(const std::string& name, const std::string& id, float gain = 1.0f);
+        Gain(std::string name, float gain = 1.0f);
+        Gain(std::string name, std::string id, float gain = 1.0f);
 
         std::string GetId() const override
         { return mId; }

@@ -210,8 +210,8 @@ int main(int argc, char* argv[])
 
     if (flac_files)
     {
-        test_files.push_back("FLAC/gs-16b-1c-44100hz.flac");
-        test_files.push_back("FLAC/gs-16b-2c-44100hz.flac");
+        test_files.emplace_back("FLAC/gs-16b-1c-44100hz.flac");
+        test_files.emplace_back("FLAC/gs-16b-2c-44100hz.flac");
         // todo: handle broken files properly somewhere and then
         // enable this test case.
         //test_files.push_back("FLAC/broken/silentbreed-syncin-sample10sec.flac");
@@ -220,89 +220,89 @@ int main(int argc, char* argv[])
     if (ogg_files)
     {
         // https://github.com/UniversityRadioYork/ury-playd/issues/111
-        test_files.push_back("OGG/testshort.ogg");
-        test_files.push_back("OGG/a2002011001-e02-128k.ogg");
-        test_files.push_back("OGG/a2002011001-e02-32k.ogg");
-        test_files.push_back("OGG/a2002011001-e02-64k.ogg");
-        test_files.push_back("OGG/a2002011001-e02-96k.ogg");
+        test_files.emplace_back("OGG/testshort.ogg");
+        test_files.emplace_back("OGG/a2002011001-e02-128k.ogg");
+        test_files.emplace_back("OGG/a2002011001-e02-32k.ogg");
+        test_files.emplace_back("OGG/a2002011001-e02-64k.ogg");
+        test_files.emplace_back("OGG/a2002011001-e02-96k.ogg");
     }
     if (mp3_files)
     {
-        test_files.push_back("MP3/ff-16b-1c-11025hz.mp3");
-        test_files.push_back("MP3/ff-16b-1c-12000hz.mp3");
-        test_files.push_back("MP3/ff-16b-1c-16000hz.mp3");
-        test_files.push_back("MP3/ff-16b-1c-22050hz.mp3");
-        test_files.push_back("MP3/ff-16b-1c-24000hz.mp3");
-        test_files.push_back("MP3/ff-16b-1c-32000hz.mp3");
-        test_files.push_back("MP3/ff-16b-1c-44100hz.mp3");
-        test_files.push_back("MP3/ff-16b-1c-8000hz.mp3");
-        test_files.push_back("MP3/ff-16b-2c-11025hz.mp3");
-        test_files.push_back("MP3/ff-16b-2c-12000hz.mp3");
-        test_files.push_back("MP3/ff-16b-2c-16000hz.mp3");
-        test_files.push_back("MP3/ff-16b-2c-22050hz.mp3");
-        test_files.push_back("MP3/ff-16b-2c-24000hz.mp3");
-        test_files.push_back("MP3/ff-16b-2c-32000hz.mp3");
-        test_files.push_back("MP3/ff-16b-2c-44100hz.mp3");
-        test_files.push_back("MP3/ff-16b-2c-8000hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-1c-11025hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-1c-12000hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-1c-16000hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-1c-22050hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-1c-24000hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-1c-32000hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-1c-44100hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-1c-8000hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-2c-11025hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-2c-12000hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-2c-16000hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-2c-22050hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-2c-24000hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-2c-32000hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-2c-44100hz.mp3");
+        test_files.emplace_back("MP3/ff-16b-2c-8000hz.mp3");
 
     }
 
     if (pcm_8bit_files)
     {
-        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 11025Hz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 16kHz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 22050Hz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 32kHz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 44.1kHz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 48kHz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm mono 8 bit 8kHz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 11025Hz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 16kHz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 22050Hz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 32kHz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 44.1kHz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 48kHz.wav");
-        test_files.push_back("WAV/PCM 8 bit/pcm stereo 8 bit 8kHz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm mono 8 bit 11025Hz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm mono 8 bit 16kHz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm mono 8 bit 22050Hz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm mono 8 bit 32kHz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm mono 8 bit 44.1kHz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm mono 8 bit 48kHz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm mono 8 bit 8kHz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm stereo 8 bit 11025Hz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm stereo 8 bit 16kHz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm stereo 8 bit 22050Hz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm stereo 8 bit 32kHz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm stereo 8 bit 44.1kHz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm stereo 8 bit 48kHz.wav");
+        test_files.emplace_back("WAV/PCM 8 bit/pcm stereo 8 bit 8kHz.wav");
     }
 
     if (pcm_16bit_files)
     {
-        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 11025Hz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 16kHz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 22050Hz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 32kHz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 44.1kHz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 48kHz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm mono 16 bit 8kHz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 11025Hz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 16kHz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 22050Hz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 32kHz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 44.1kHz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 48kHz.wav");
-        test_files.push_back("WAV/PCM 16 bit/pcm stereo 16 bit 8kHz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm mono 16 bit 11025Hz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm mono 16 bit 16kHz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm mono 16 bit 22050Hz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm mono 16 bit 32kHz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm mono 16 bit 44.1kHz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm mono 16 bit 48kHz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm mono 16 bit 8kHz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm stereo 16 bit 11025Hz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm stereo 16 bit 16kHz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm stereo 16 bit 22050Hz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm stereo 16 bit 32kHz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm stereo 16 bit 44.1kHz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm stereo 16 bit 48kHz.wav");
+        test_files.emplace_back("WAV/PCM 16 bit/pcm stereo 16 bit 8kHz.wav");
     }
 
     if (pcm_24bit_files)
     {
-        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 11025Hz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 16kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 22050Hz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 32kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 44.1kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 48kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 88.2kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 8kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm mono 24 bit 96kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 11025Hz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 16kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 22050Hz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 32kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 44.1kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 48kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 88.2kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 8kHz.wav");
-        test_files.push_back("WAV/PCM 24 bit/pcm stereo 24 bit 96kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm mono 24 bit 11025Hz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm mono 24 bit 16kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm mono 24 bit 22050Hz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm mono 24 bit 32kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm mono 24 bit 44.1kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm mono 24 bit 48kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm mono 24 bit 88.2kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm mono 24 bit 8kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm mono 24 bit 96kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm stereo 24 bit 11025Hz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm stereo 24 bit 16kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm stereo 24 bit 22050Hz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm stereo 24 bit 32kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm stereo 24 bit 44.1kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm stereo 24 bit 48kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm stereo 24 bit 88.2kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm stereo 24 bit 8kHz.wav");
+        test_files.emplace_back("WAV/PCM 24 bit/pcm stereo 24 bit 96kHz.wav");
     }
 
     for (const auto& file : test_files)

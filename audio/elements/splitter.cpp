@@ -24,13 +24,13 @@
 namespace audio
 {
 
-Splitter::Splitter(const std::string& name, unsigned num_outs)
-  : Splitter(name, base::RandomString(10), num_outs)
+Splitter::Splitter(std::string name, unsigned num_outs)
+  : Splitter(std::move(name), base::RandomString(10), num_outs)
 {}
 
-Splitter::Splitter(const std::string& name, const std::string& id, unsigned num_outs)
-  : mName(name)
-  , mId(id)
+Splitter::Splitter(std::string name, std::string id, unsigned num_outs)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mIn("in")
 {
     ASSERT(num_outs);
@@ -40,9 +40,9 @@ Splitter::Splitter(const std::string& name, const std::string& id, unsigned num_
         mOuts.push_back(std::move(port));
     }
 }
-Splitter::Splitter(const std::string& name, const std::string& id, const std::vector<PortDesc>& outs)
-  : mName(name)
-  , mId(id)
+Splitter::Splitter(std::string name, std::string id, const std::vector<PortDesc>& outs)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mIn("in")
 {
     for (const auto& out : outs)

@@ -30,8 +30,9 @@ namespace audio
         enum class Channel {
             Left = 0, Right = 1, Both
         };
-        StereoMaker(const std::string& name, const std::string& id, Channel which = Channel::Left);
-        StereoMaker(const std::string& name, Channel which = Channel::Left);
+        StereoMaker(std::string name, std::string id, Channel which = Channel::Left);
+        StereoMaker(std::string name, Channel which = Channel::Left);
+
         std::string GetId() const override
         { return mId; }
         std::string GetName() const override

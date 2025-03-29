@@ -19,27 +19,28 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/trace.h"
+#include "base/utility.h"
 #include "audio/algo.h"
 #include "audio/elements/effect.h"
 
 namespace audio
 {
 
-Effect::Effect(const std::string& name, const std::string& id, unsigned time, unsigned duration, Kind effect)
-  : mName(name)
-  , mId(id)
+Effect::Effect(std::string name, std::string id, unsigned time, unsigned duration, Kind effect)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mIn("in")
   , mOut("out")
 {
     SetEffect(effect, time, duration);
 }
 
-Effect::Effect(const std::string& name, unsigned time, unsigned duration, Kind effect)
-  : Effect(name, base::RandomString(10), time, duration, effect)
+Effect::Effect(std::string name, unsigned time, unsigned duration, Kind effect)
+  : Effect(std::move(name), base::RandomString(10), time, duration, effect)
 {}
 
-Effect::Effect(const std::string& name)
-  : mName(name)
+Effect::Effect(std::string name)
+  : mName(std::move(name))
   , mId(base::RandomString(10))
   , mIn("in")
   , mOut("out")

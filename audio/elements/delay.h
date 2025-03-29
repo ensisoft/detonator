@@ -25,8 +25,8 @@ namespace audio
     class Delay : public Element
     {
     public:
-        Delay(const std::string& name, const std::string& id, unsigned delay = 0);
-        Delay(const std::string& name, unsigned delay = 0);
+        Delay(std::string name, std::string id, unsigned delay = 0);
+        Delay(std::string name, unsigned delay = 0);
 
         std::string GetId() const override
         { return mId; }

@@ -26,9 +26,10 @@ namespace audio
     class Splitter : public Element
     {
     public:
-        Splitter(const std::string& name, unsigned num_outs = 2);
-        Splitter(const std::string& name, const std::string& id, unsigned num_outs = 2);
-        Splitter(const std::string& name, const std::string& id, const std::vector<PortDesc>& outs);
+        Splitter(std::string name, unsigned num_outs = 2);
+        Splitter(std::string name, std::string id, unsigned num_outs = 2);
+        Splitter(std::string name, std::string id, const std::vector<PortDesc>& outs);
+
         std::string GetId() const override
         { return mId; }
         std::string GetName() const override

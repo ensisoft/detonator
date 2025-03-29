@@ -26,9 +26,9 @@
 namespace audio
 {
 
-Mixer::Mixer(const std::string& name, const std::string& id, unsigned int num_srcs)
-  : mName(name)
-  , mId(id)
+Mixer::Mixer(std::string name, std::string id, unsigned int num_srcs)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mOut("out")
 {
     // mixer requires at least 1 src port.
@@ -40,14 +40,13 @@ Mixer::Mixer(const std::string& name, const std::string& id, unsigned int num_sr
     }
 }
 
-Mixer::Mixer(const std::string& name, unsigned num_srcs)
-  : Mixer(name, base::RandomString(10), num_srcs)
+Mixer::Mixer(std::string name, unsigned num_srcs)
+  : Mixer(std::move(name), base::RandomString(10), num_srcs)
 {}
 
-Mixer::Mixer(const std::string& name, const std::string& id,
-             const std::vector<PortDesc>& srcs)
-  : mName(name)
-  , mId(id)
+Mixer::Mixer(std::string name, std::string id, const std::vector<PortDesc>& srcs)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mOut("out")
 {
     for (const auto& desc : srcs)

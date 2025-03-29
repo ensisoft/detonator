@@ -26,9 +26,9 @@ namespace audio
     class Queue : public Element
     {
     public:
-        Queue(const std::string& name, const std::string& id)
-          : mName(name)
-          , mId(id)
+        Queue(std::string name, std::string id)
+          : mName(std::move(name))
+          , mId(std::move(id))
           , mIn("in")
           , mOut("out")
         {}

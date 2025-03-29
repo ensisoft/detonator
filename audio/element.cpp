@@ -16,9 +16,7 @@
 
 #include "config.h"
 
-#include "base/assert.h"
 #include "base/utility.h"
-#include "base/math.h"
 #include "base/logging.h"
 #include "audio/element.h"
 #include "audio/elements/delay.h"
@@ -103,21 +101,21 @@ std::vector<std::string> ListAudioElements()
     static std::vector<std::string> list;
     if (list.empty())
     {
-        list.push_back("SineSource");
-        list.push_back("ZeroSource");
-        list.push_back("FileSource");
-        list.push_back("Resampler");
-        list.push_back("Effect");
-        list.push_back("Gain");
-        list.push_back("Null");
-        list.push_back("StereoSplitter");
-        list.push_back("StereoJoiner");
-        list.push_back("StereoMaker");
-        list.push_back("Splitter");
-        list.push_back("Mixer");
-        list.push_back("Delay");
-        list.push_back("Playlist");
-        list.push_back("Queue");
+        list.emplace_back("SineSource");
+        list.emplace_back("ZeroSource");
+        list.emplace_back("FileSource");
+        list.emplace_back("Resampler");
+        list.emplace_back("Effect");
+        list.emplace_back("Gain");
+        list.emplace_back("Null");
+        list.emplace_back("StereoSplitter");
+        list.emplace_back("StereoJoiner");
+        list.emplace_back("StereoMaker");
+        list.emplace_back("Splitter");
+        list.emplace_back("Mixer");
+        list.emplace_back("Delay");
+        list.emplace_back("Playlist");
+        list.emplace_back("Queue");
     }
     return list;
 }
