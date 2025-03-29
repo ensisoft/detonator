@@ -130,7 +130,12 @@ void main() {
     state.stencil_func = Device::State::StencilFunc::Disabled;
     state.culling      = Device::State::Culling::None;
     state.blending     = Device::State::BlendOp::None;
-    state.viewport     = IRect(0, 0, dst->GetWidthI(), dst->GetHeightI());
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = IRect(0, 0, dst->GetWidthI(), dst->GetHeightI());
+
+    gfx::DeviceState ds(device);
+    ds.SetState(vs);
 
     device->Draw(*program, program_state, *quad, state, fbo);
 
@@ -291,7 +296,12 @@ void main() {
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
     state.culling      = gfx::Device::State::Culling::None;
     state.blending     = gfx::Device::State::BlendOp::None;
-    state.viewport     = gfx::IRect(0, 0, (int)src_width, (int)src_height);
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, (int)src_width, (int)src_height);
+
+    gfx::DeviceState ds(device);
+    ds.SetState(vs);
 
     gfx::Texture* textures[] = {tmp, texture};
     for (unsigned i=0; i<iterations; ++i)
@@ -377,7 +387,13 @@ void main() {
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
     state.culling      = gfx::Device::State::Culling::None;
     state.blending     = gfx::Device::State::BlendOp::None;
-    state.viewport     = gfx::IRect(0, 0, dst_width, dst_height);
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, dst_width, dst_height);
+
+    gfx::DeviceState ds(device);
+    ds.SetState(vs);
+
     device->Draw(*program, program_state, *quad, state, fbo);
 
     fbo->Resolve(nullptr);
@@ -469,7 +485,13 @@ void main() {
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
     state.culling      = gfx::Device::State::Culling::None;
     state.blending     = gfx::Device::State::BlendOp::None;
-    state.viewport     = gfx::IRect(0, 0, dst_width, dst_height);
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, dst_width, dst_height);
+
+    gfx::DeviceState ds(device);
+    ds.SetState(vs);
+
     device->Draw(*program, program_state, *quad, state, fbo);
 
     fbo->SetColorTarget(nullptr);

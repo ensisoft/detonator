@@ -72,9 +72,12 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program) const
 {
     static const glm::mat4 Identity(1.0f);
 
-    Device::State device_state;
-    device_state.viewport = MapToDevice(mViewport);
-    device_state.scissor  = MapToDevice(mScissor);
+    gfx::Device::ViewportState vs;
+    vs.viewport = MapToDevice(mViewport);
+    vs.scissor  = MapToDevice(mScissor);
+
+    gfx::DeviceState ds(mDevice);
+    ds.SetState(vs);
 
     std::unordered_set<std::string> used_programs;
 
@@ -129,6 +132,7 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         drawable_raster_state.line_width = draw.state.line_width;
         draw.drawable->ApplyDynamicState(drawable_env, gpu_program_state, drawable_raster_state);
 
+        Device::State device_state;
         device_state.blending      = material_raster_state.blending;
         device_state.premulalpha   = material_raster_state.premultiplied_alpha;
         device_state.line_width    = drawable_raster_state.line_width;

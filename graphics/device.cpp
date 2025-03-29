@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include <unordered_map>
+#include <stack>
 
 #include "base/assert.h"
 #include "base/logging.h"
@@ -76,6 +77,10 @@ public:
     void DeleteFramebuffer(const std::string& id) override;
     void DeleteTexture(const std::string& id) override;
 
+    StateKey PushState() override;
+    void PopState(StateKey key) override;
+    void SetViewportState(const ViewportState& state) const override;
+
     void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
               const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) override;
 
@@ -106,6 +111,11 @@ private:
     std::unordered_map<std::string, std::unique_ptr<gfx::Texture>> mTextures;
     std::unordered_map<std::string, std::unique_ptr<gfx::Framebuffer>> mFBOs;
     std::size_t mFrameNumber = 0;
+
+    struct State {
+        ViewportState vs;
+    };
+    mutable std::stack<State> mStateStack;
 };
 
 
@@ -114,11 +124,13 @@ GraphicsDevice::GraphicsDevice(std::shared_ptr<dev::GraphicsDevice> device) noex
   , mDevice(mDeviceImpl.get())
 {
     DEBUG("Create gfx::Device");
+    mStateStack.push({});
 }
 GraphicsDevice::GraphicsDevice(dev::GraphicsDevice* device) noexcept
   : mDevice(device)
 {
     DEBUG("Create gfx::Device");
+    mStateStack.push({});
 }
 
 GraphicsDevice::~GraphicsDevice()
@@ -340,6 +352,30 @@ void GraphicsDevice::DeleteTexture(const std::string& id)
     ASSERT(IsTextureFBOTarget(texture) == false);
 
     mTextures.erase(it);
+}
+
+GraphicsDevice::StateKey GraphicsDevice::PushState()
+{
+    mStateStack.push({});
+    return static_cast<StateKey>(mStateStack.size());
+}
+
+void GraphicsDevice::PopState(StateKey key)
+{
+    ASSERT(key == static_cast<StateKey>(mStateStack.size()));
+    mStateStack.pop();
+
+    ASSERT(!mStateStack.empty());
+    const auto& top = mStateStack.top();
+    mDevice->SetViewportState(top.vs);
+}
+
+void GraphicsDevice::SetViewportState(const ViewportState& state) const
+{
+    ASSERT(!mStateStack.empty());
+    auto& top = mStateStack.top();
+    top.vs = state;
+    mDevice->SetViewportState(state);
 }
 
 void GraphicsDevice::Draw(const gfx::Program& program,

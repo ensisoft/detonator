@@ -46,6 +46,7 @@ namespace gfx
     {
     public:
         using State = dev::GraphicsPipelineState;
+        using ViewportState = dev::ViewportState;
         using ResourceStats = dev::GraphicsDeviceResourceStats;
         using DeviceCaps = dev::GraphicsDeviceCaps;
 
@@ -145,6 +146,12 @@ namespace gfx
         virtual void DeleteFramebuffer(const std::string& id) = 0;
         virtual void DeleteTexture(const std::string& id) = 0;
 
+        using StateKey = unsigned;
+
+        virtual StateKey PushState() = 0;
+        virtual void PopState(StateKey key) = 0;
+        virtual void SetViewportState(const ViewportState& state) const = 0;
+
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const ProgramState& program_state,
                           const GeometryDrawCommand& geometry, const State& state, Framebuffer* fbo = nullptr) = 0;
@@ -183,6 +190,37 @@ namespace gfx
         virtual void GetDeviceCaps(DeviceCaps* caps) const = 0;
     private:
     };
+
+    class DeviceState
+    {
+    public:
+        using ViewportState = Device::ViewportState;
+
+        explicit DeviceState(Device& device)
+          : mDevice(device)
+        {
+            mKey = mDevice.PushState();
+        }
+        explicit DeviceState(Device* device) : DeviceState(*device)
+        {}
+
+        ~DeviceState()
+        {
+            mDevice.PopState(mKey);
+        }
+
+        void SetState(const ViewportState& vs)
+        {
+            mDevice.SetViewportState(vs);
+        }
+
+        DeviceState(const DeviceState&) = delete;
+        DeviceState& operator=(const DeviceState&) = delete;
+    private:
+        Device& mDevice;
+        Device::StateKey mKey;
+    };
+
 
     std::shared_ptr<Device> CreateDevice(std::shared_ptr<dev::GraphicsDevice> device);
     std::shared_ptr<Device> CreateDevice(dev::GraphicsDevice* device);

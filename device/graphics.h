@@ -89,6 +89,7 @@ namespace dev
         virtual void BindVertexBuffer(const GraphicsBuffer& buffer, const GraphicsProgram& program, const VertexLayout& layout) const = 0;
         virtual void BindIndexBuffer(const GraphicsBuffer& buffer) const = 0;
 
+        virtual void SetViewportState(const ViewportState& state) const = 0;
         virtual void SetPipelineState(const GraphicsPipelineState& state) const = 0;
         virtual void SetProgramState(const GraphicsProgram& program, const ProgramState& state) const = 0;
         virtual void BindProgramBuffer(const GraphicsProgram& program, const GraphicsBuffer& buffer,

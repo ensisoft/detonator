@@ -301,9 +301,18 @@ public:
     void DeleteFramebuffers() override
     {}
     void DeleteFramebuffer(const std::string&) override
-    {
+    {}
 
+    StateKey PushState() override
+    {
+        return 0;
     }
+    void PopState(StateKey key) override
+    {}
+
+    void SetViewportState(const ViewportState&) const override
+    {}
+
     void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
               const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) override
     {}
