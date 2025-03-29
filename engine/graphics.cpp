@@ -464,25 +464,28 @@ void main() {
 
     // transfer the main image to the default frame buffer as-is
     {
-        gfx::ProgramState program_state;
-        program_state.SetTextureCount(1);
-        program_state.SetTexture("kTexture", 0, *mMainImage);
+        gfx::DeviceState ds(mDevice);
+
+        gfx::ProgramState ps;
+        ps.SetTextureCount(1);
+        ps.SetTexture("kTexture", 0, *mMainImage);
 
         gfx::Device::State state;
-        state.depth_test   = gfx::Device::State::DepthTest::Disabled;
-        state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
         state.culling      = gfx::Device::State::Culling::None;
         state.blending     = gfx::Device::State::BlendOp::None;
-        state.bWriteColor  = true;
         state.premulalpha  = false;
+
+        gfx::Device::ColorDepthStencilState dss;
+        dss.bWriteColor  = true;
+        dss.depth_test   = gfx::Device::ColorDepthStencilState::DepthTest::Disabled;
+        dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
 
         gfx::Device::ViewportState vs;
         vs.viewport = gfx::IRect(0, 0, surface_width, surface_height);
 
-        gfx::DeviceState ds(mDevice);
-        ds.SetState(vs);
-
-        mDevice.Draw(*program, program_state, *quad, state, nullptr /*framebuffer*/);
+        mDevice.SetColorDepthStencilState(dss);
+        mDevice.SetViewportState(vs);
+        mDevice.Draw(*program, ps, *quad, state, nullptr /*framebuffer*/);
     }
 
     // blend in the bloom image if any
@@ -490,25 +493,28 @@ void main() {
     {
         gfx::algo::ApplyBlur(*mRendererName + "BloomImage", mBloomImage, &mDevice, 8);
 
-        gfx::ProgramState program_state;
-        program_state.SetTextureCount(1);
-        program_state.SetTexture("kTexture", 0, *mBloomImage);
+        gfx::DeviceState ds(mDevice);
+
+        gfx::ProgramState ps;
+        ps.SetTextureCount(1);
+        ps.SetTexture("kTexture", 0, *mBloomImage);
 
         gfx::Device::State state;
-        state.depth_test   = gfx::Device::State::DepthTest::Disabled;
-        state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
         state.culling      = gfx::Device::State::Culling::None;
         state.blending     = gfx::Device::State::BlendOp::Additive;
-        state.bWriteColor  = true;
         state.premulalpha  = false;
+
+        gfx::Device::ColorDepthStencilState dss;
+        dss.depth_test   = gfx::Device::ColorDepthStencilState::DepthTest::Disabled;
+        dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+        dss.bWriteColor  = true;
 
         gfx::Device::ViewportState vs;
         vs.viewport = gfx::IRect(0, 0, surface_width, surface_height);
 
-        gfx::DeviceState ds(mDevice);
-        ds.SetState(vs);
-
-        mDevice.Draw(*program, program_state, *quad, state, nullptr /*framebuffer*/);
+        mDevice.SetViewportState(vs);
+        mDevice.SetColorDepthStencilState(dss);
+        mDevice.Draw(*program, ps, *quad, state, nullptr /*framebuffer*/);
     }
 }
 

@@ -1810,34 +1810,6 @@ public:
             GL_CALL(glEnable(GL_CULL_FACE));
             GL_CALL(glCullFace(GL_FRONT_AND_BACK));
         } else BUG("Bug on cull face state.");
-
-        // depth testing
-        if (state.depth_test == dev::DepthTest::Disabled) {
-            GL_CALL(glDisable(GL_DEPTH_TEST));
-        } else if (state.depth_test == dev::DepthTest::LessOrEQual) {
-            GL_CALL(glEnable(GL_DEPTH_TEST));
-            GL_CALL(glDepthFunc(GL_LEQUAL));
-        } else BUG("Bug on depth test state.");
-
-        // stencil test and stencil func
-        if (state.stencil_func == dev::StencilFunc::Disabled) {
-            GL_CALL(glDisable(GL_STENCIL_TEST));
-        } else {
-            const auto stencil_func = GetEnum(state.stencil_func);
-            const auto stencil_fail = GetEnum(state.stencil_fail);
-            const auto stencil_dpass = GetEnum(state.stencil_dpass);
-            const auto stencil_dfail = GetEnum(state.stencil_dfail);
-            GL_CALL(glEnable(GL_STENCIL_TEST));
-            GL_CALL(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
-            GL_CALL(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
-        }
-
-        // color mask
-        if (state.bWriteColor) {
-            GL_CALL(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
-        } else {
-            GL_CALL(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
-        }
     }
 
     void BindProgramBuffer(const dev::GraphicsProgram& program, const dev::GraphicsBuffer& buffer,
@@ -1869,6 +1841,37 @@ public:
             GL_CALL(glEnable(GL_SCISSOR_TEST));
             GL_CALL(glScissor(state.scissor.GetX(), state.scissor.GetY(),
                               state.scissor.GetWidth(), state.scissor.GetHeight()));
+        }
+    }
+
+    void SetColorDepthStencilState(const dev::ColorDepthStencilState& state) const override
+    {
+        // depth testing
+        if (state.depth_test == dev::DepthTest::Disabled) {
+            GL_CALL(glDisable(GL_DEPTH_TEST));
+        } else if (state.depth_test == dev::DepthTest::LessOrEQual) {
+            GL_CALL(glEnable(GL_DEPTH_TEST));
+            GL_CALL(glDepthFunc(GL_LEQUAL));
+        } else BUG("Bug on depth test state.");
+
+        // stencil test and stencil func
+        if (state.stencil_func == dev::StencilFunc::Disabled) {
+            GL_CALL(glDisable(GL_STENCIL_TEST));
+        } else {
+            const auto stencil_func = GetEnum(state.stencil_func);
+            const auto stencil_fail = GetEnum(state.stencil_fail);
+            const auto stencil_dpass = GetEnum(state.stencil_dpass);
+            const auto stencil_dfail = GetEnum(state.stencil_dfail);
+            GL_CALL(glEnable(GL_STENCIL_TEST));
+            GL_CALL(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
+            GL_CALL(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
+        }
+
+        // color mask
+        if (state.bWriteColor) {
+            GL_CALL(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
+        } else {
+            GL_CALL(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
         }
     }
 

@@ -137,14 +137,6 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         device_state.premulalpha   = material_raster_state.premultiplied_alpha;
         device_state.line_width    = drawable_raster_state.line_width;
         device_state.culling       = drawable_raster_state.culling;
-        device_state.stencil_func  = draw.state.stencil_func;
-        device_state.stencil_dpass = draw.state.stencil_dpass;
-        device_state.stencil_dfail = draw.state.stencil_dfail;
-        device_state.stencil_fail  = draw.state.stencil_fail;
-        device_state.stencil_mask  = draw.state.stencil_mask;
-        device_state.stencil_ref   = draw.state.stencil_ref;
-        device_state.bWriteColor   = draw.state.write_color;
-        device_state.depth_test    = draw.state.depth_test;
         device_state.winding_order = draw.state.winding;
 
         // apply shader program state dynamically once on the GPU program object
@@ -160,6 +152,17 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         // sequence of more primitive draw commands set on the geometry
         // in order to render only a part of the geometry. i.e. a sub-mesh.
         const auto& cmd_params = draw.drawable->GetDrawCmd();
+
+        Device::ColorDepthStencilState dss;
+        dss.stencil_func  = draw.state.stencil_func;
+        dss.stencil_dpass = draw.state.stencil_dpass;
+        dss.stencil_dfail = draw.state.stencil_dfail;
+        dss.stencil_fail  = draw.state.stencil_fail;
+        dss.stencil_mask  = draw.state.stencil_mask;
+        dss.stencil_ref   = draw.state.stencil_ref;
+        dss.bWriteColor   = draw.state.write_color;
+        dss.depth_test    = draw.state.depth_test;
+        mDevice->SetColorDepthStencilState(dss);
 
         mDevice->Draw(*gpu_program,
                       gpu_program_state,
