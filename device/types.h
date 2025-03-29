@@ -69,15 +69,15 @@ namespace dev
 
     // Device state including the rasterizer state
     // that is to be applied for any draw operation.
-    struct GraphicsPipelineState {
+    struct RasterState {
         using Culling     = dev::Culling;
         using BlendOp     = dev::BlendOp;
-        using PolygonWindingOrder = dev::PolygonWindingOrder;
+        using WindingOrder = dev::PolygonWindingOrder;
 
         // polygon face culling setting.
         Culling culling = Culling::Back;
 
-        PolygonWindingOrder winding_order = PolygonWindingOrder::CounterClockWise;
+        WindingOrder winding_order = WindingOrder::CounterClockWise;
 
         BlendOp blending = BlendOp::None;
 

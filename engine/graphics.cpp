@@ -470,9 +470,9 @@ void main() {
         ps.SetTextureCount(1);
         ps.SetTexture("kTexture", 0, *mMainImage);
 
-        gfx::Device::State state;
-        state.culling      = gfx::Device::State::Culling::None;
-        state.blending     = gfx::Device::State::BlendOp::None;
+        gfx::Device::RasterState state;
+        state.culling      = gfx::Device::RasterState::Culling::None;
+        state.blending     = gfx::Device::RasterState::BlendOp::None;
         state.premulalpha  = false;
 
         gfx::Device::ColorDepthStencilState dss;
@@ -499,9 +499,9 @@ void main() {
         ps.SetTextureCount(1);
         ps.SetTexture("kTexture", 0, *mBloomImage);
 
-        gfx::Device::State state;
-        state.culling      = gfx::Device::State::Culling::None;
-        state.blending     = gfx::Device::State::BlendOp::Additive;
+        gfx::Device::RasterState state;
+        state.culling      = gfx::Device::RasterState::Culling::None;
+        state.blending     = gfx::Device::RasterState::BlendOp::Additive;
         state.premulalpha  = false;
 
         gfx::Device::ColorDepthStencilState dss;

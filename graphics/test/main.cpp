@@ -3586,7 +3586,7 @@ public:
 
             // ground plane
             {
-                //state.winding = gfx::Painter::PolygonWindigOrder::ClockWise;
+                //state.winding = gfx::Painter::WindigOrder::ClockWise;
 
                 gfx::Transform transform;
                 // careful here, using 0.0 for the resize factor on the Z axis is easy mistake

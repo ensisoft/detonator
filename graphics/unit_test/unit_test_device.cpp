@@ -315,8 +315,8 @@ void main() {
   gl_FragColor = texture2D(kTexture, vTexCoord.xy);
 })", "p1");
 
-    gfx::Device::State state;
-    state.blending     = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending     = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -436,8 +436,8 @@ void main() {
 
     auto prog = MakeTestProgram(*dev, vertex_src, fragment_src);
 
-    gfx::Device::State state;
-    state.blending     = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending     = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -578,8 +578,8 @@ void main() {
     gfx::ProgramState program_state;
     program_state.SetTexture("kTexture", 0, *texture);
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -671,8 +671,8 @@ void main() {
     program_state.SetTexture("kTexture2", 2, *tex2);
     program_state.SetTexture("kTexture3", 3, *tex3);
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -736,8 +736,8 @@ void main() {
 
     auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -862,8 +862,8 @@ void main() {
     auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -958,8 +958,8 @@ void main() {
     auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -1053,8 +1053,8 @@ void main() {
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -1123,8 +1123,8 @@ void main() {
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -1195,8 +1195,8 @@ void main() {
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -1273,8 +1273,8 @@ void main() {
 })";
     auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -1301,8 +1301,8 @@ void unit_test_clean_textures()
 
     auto dev = CreateDevice();
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -1761,8 +1761,8 @@ void main() {
     gfx::ProgramState program_state;
     program_state.SetUniform("kColor", gfx::Color::Green);
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -1859,8 +1859,8 @@ void main() {
     gfx::Bitmap<gfx::Pixel_RGBA> bmp(10, 10);
     bmp.Fill(gfx::Color::Green);
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -1976,8 +1976,8 @@ void main() {
         gfx::Bitmap<gfx::Pixel_RGBA> bmp(10, 10);
         bmp.Fill(gfx::Color::Green);
 
-        gfx::Device::State state;
-        state.blending = gfx::Device::State::BlendOp::None;
+        gfx::Device::RasterState state;
+        state.blending = gfx::Device::RasterState::BlendOp::None;
 
         gfx::Device::ColorDepthStencilState dss;
         dss.bWriteColor  = true;
@@ -2054,8 +2054,8 @@ void main() {
         program_state.SetTexture("kTexture2", 2, *tex2);
         program_state.SetTexture("kTexture3", 3, *tex3);
 
-        gfx::Device::State state;
-        state.blending = gfx::Device::State::BlendOp::None;
+        gfx::Device::RasterState state;
+        state.blending = gfx::Device::RasterState::BlendOp::None;
 
         gfx::Device::ColorDepthStencilState dss;
         dss.bWriteColor  = true;
@@ -2201,8 +2201,8 @@ void main() {
 
     auto program = MakeTestProgram(*dev, vertex_src, fragment_src);
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -2370,8 +2370,8 @@ void main() {
 }
 )", "p0");
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -2502,8 +2502,8 @@ void main() {
     block.GetAs<Testing>().lights[1].light = gfx::ToVec(gfx::Color::Green);
     block.GetAs<Testing>().lights[2].light = gfx::ToVec(gfx::Color::Blue);
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -2580,8 +2580,8 @@ void main() {
 }
 )", "p0");
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -2815,8 +2815,8 @@ void main() {
 
     auto program = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -2946,8 +2946,8 @@ void main() {
 
     auto quad = MakeQuad(*dev);
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -3042,8 +3042,8 @@ void main() {
 
     auto prog = MakeTestProgram(*dev, vertex_src, fragment_src);
 
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;

@@ -3108,7 +3108,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
         if (Editor::DebugEditor())
         {
-            state.winding = gfx::Painter::PolygonWindigOrder::ClockWise;
+            state.winding = gfx::Painter::WindigOrder::ClockWise;
 
             gfx::FlatShadedColorProgram program;
 

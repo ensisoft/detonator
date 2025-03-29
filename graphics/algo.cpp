@@ -136,10 +136,10 @@ void main() {
     ds.SetState(vs);
     ds.SetState(dss);
 
-    gfx::Device::State state;
+    gfx::Device::RasterState state;
     state.premulalpha  = false;
-    state.culling      = Device::State::Culling::None;
-    state.blending     = Device::State::BlendOp::None;
+    state.culling      = Device::RasterState::Culling::None;
+    state.blending     = Device::RasterState::BlendOp::None;
     device->Draw(*program, program_state, *quad, state, fbo);
 
     fbo->SetColorTarget(nullptr);
@@ -292,10 +292,10 @@ void main() {
 
     auto quad = gfx::MakeFullscreenQuad(*device);
 
-    gfx::Device::State state;
+    gfx::Device::RasterState state;
     state.premulalpha  = false;
-    state.culling      = gfx::Device::State::Culling::None;
-    state.blending     = gfx::Device::State::BlendOp::None;
+    state.culling      = gfx::Device::RasterState::Culling::None;
+    state.blending     = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, (int)src_width, (int)src_height);
@@ -386,10 +386,10 @@ void main() {
     const auto dst_width  = dst->GetWidthI();
     const auto dst_height = dst->GetHeightI();
 
-    gfx::Device::State state;
+    gfx::Device::RasterState state;
     state.premulalpha  = false;
-    state.culling      = gfx::Device::State::Culling::None;
-    state.blending     = gfx::Device::State::BlendOp::None;
+    state.culling      = gfx::Device::RasterState::Culling::None;
+    state.blending     = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ColorDepthStencilState dss;
     dss.bWriteColor  = true;
@@ -487,10 +487,10 @@ void main() {
     const auto dst_width  = dst->GetWidthI();
     const auto dst_height = dst->GetHeightI();
 
-    gfx::Device::State state;
+    gfx::Device::RasterState state;
     state.premulalpha  = false;
-    state.culling      = gfx::Device::State::Culling::None;
-    state.blending     = gfx::Device::State::BlendOp::None;
+    state.culling      = gfx::Device::RasterState::Culling::None;
+    state.blending     = gfx::Device::RasterState::BlendOp::None;
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, dst_width, dst_height);

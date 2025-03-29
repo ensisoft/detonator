@@ -52,7 +52,7 @@ namespace gfx
     class DrawableClass
     {
     public:
-        using Culling = Device::State::Culling;
+        using Culling = Device::RasterState::Culling;
 
         using Usage = Geometry::Usage;
 

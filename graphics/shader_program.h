@@ -68,7 +68,7 @@ namespace gfx
         // required to draw. I.e. the state coming in is the combination of the state from the
         // drawable, material and painter. This applies both to the program and the state object.
         // This is called for every painter draw command.
-        virtual void ApplyDynamicState(const Device& device, ProgramState& program, Device::State& state, void* user) const {}
+        virtual void ApplyDynamicState(const Device& device, ProgramState& program, Device::RasterState& state, void* user) const {}
 
         // Apply any shader program state dynamically once on the GPU program when the
         // program is used for the first time for the current draw command list.

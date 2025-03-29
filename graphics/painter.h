@@ -162,8 +162,8 @@ namespace gfx
         using StencilFunc = Device::ColorDepthStencilState::StencilFunc;
         using StencilOp   = Device::ColorDepthStencilState::StencilOp;
         using DepthTest   = Device::ColorDepthStencilState::DepthTest;
-        using Culling     = Device::State::Culling;
-        using PolygonWindigOrder = Device::State::PolygonWindingOrder;
+        using Culling     = Device::RasterState::Culling;
+        using WindigOrder = Device::RasterState::WindingOrder;
 
         struct DrawState {
             bool write_color = true;
@@ -185,7 +185,7 @@ namespace gfx
 
             Culling culling = Culling::Back;
 
-            PolygonWindigOrder  winding = PolygonWindigOrder::CounterClockWise;
+            WindigOrder  winding = WindigOrder::CounterClockWise;
 
             // line width setting used to rasterize lines when the drawable style is Lines
             float line_width = 1.0f;

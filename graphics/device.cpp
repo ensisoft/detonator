@@ -83,7 +83,7 @@ public:
     void SetColorDepthStencilState(const ColorDepthStencilState& state) const override;
 
     void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
-              const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) override;
+              const gfx::GeometryDrawCommand& geometry, const RasterState& state, gfx::Framebuffer* fbo) override;
 
     void CleanGarbage(size_t max_num_idle_frames, unsigned flags) override;
     void BeginFrame() override;
@@ -391,7 +391,7 @@ void GraphicsDevice::SetColorDepthStencilState(const ColorDepthStencilState& sta
 
 void GraphicsDevice::Draw(const gfx::Program& program,
                           const gfx::ProgramState& program_state,
-                          const gfx::GeometryDrawCommand& geometry, const Device::State& state, gfx::Framebuffer* fbo)
+                          const gfx::GeometryDrawCommand& geometry, const Device::RasterState& state, gfx::Framebuffer* fbo)
 {
     dev::Framebuffer framebuffer = SetupFBO(fbo);
     if (!framebuffer.IsValid())
@@ -415,7 +415,7 @@ void GraphicsDevice::Draw(const gfx::Program& program,
     if (mygeom->IsEmpty())
         return;
 
-    TRACE_CALL("SetPipelineState", mDevice->SetPipelineState(state));
+    TRACE_CALL("SetRasterState", mDevice->SetRasterState(state));
 
     // set program texture bindings
     const auto num_textures = program_state.GetSamplerCount();
