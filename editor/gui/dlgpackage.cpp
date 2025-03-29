@@ -235,7 +235,7 @@ void DlgPackage::on_btnStart_clicked()
     {
         dir.removeRecursively();
     }
-    if (GetValue(mUI.chkGenerateHtml5FS))
+    if (GetValue(mUI.chkGenerateHtml5FS) && mUI.btnHtml5->isChecked())
     {
         if (mSettings.emsdk.isEmpty())
         {
