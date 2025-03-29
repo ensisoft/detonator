@@ -53,6 +53,8 @@ add_executable(UnitTest
     ../audio/elements/effect.cpp
     ../audio/elements/file_source.cpp
     ../audio/elements/gain.cpp
+    ../audio/elements/graph_class.cpp
+    ../audio/elements/graph.cpp
     ../audio/elements/mixer.cpp
     ../audio/elements/mixer_source.cpp
     ../audio/elements/playlist.cpp
@@ -173,6 +175,8 @@ add_executable(UnitTestThread
         ../audio/elements/effect.cpp
         ../audio/elements/file_source.cpp
         ../audio/elements/gain.cpp
+        ../audio/elements/graph_class.cpp
+        ../audio/elements/graph.cpp
         ../audio/elements/mixer.cpp
         ../audio/elements/mixer_source.cpp
         ../audio/elements/playlist.cpp
@@ -240,6 +244,8 @@ add_executable(GameEngine
     ../audio/elements/effect.cpp
     ../audio/elements/file_source.cpp
     ../audio/elements/gain.cpp
+    ../audio/elements/graph_class.cpp
+    ../audio/elements/graph.cpp
     ../audio/elements/mixer.cpp
     ../audio/elements/mixer_source.cpp
     ../audio/elements/playlist.cpp

@@ -31,6 +31,8 @@
 #include "audio/format.h"
 #include "audio/player.h"
 #include "audio/device.h"
+#include "audio/elements/graph_class.h"
+#include "audio/elements/graph.h"
 #include "data/json.h"
 
 #include "editor/app/workspace.h"
@@ -1006,7 +1008,10 @@ QGraphicsItem* AudioGraphScene::FindItem(const std::string& id)
         if (auto* elem = dynamic_cast<AudioElement*>(item))
             if (elem->GetId() == id) return elem;
         else if (auto* link = dynamic_cast<AudioLink*>(item))
-            if (link->GetLinkId() == id) return link;
+        {
+            if (link->GetLinkId() == id)
+                return link;
+        }
     }
     return nullptr;
 }

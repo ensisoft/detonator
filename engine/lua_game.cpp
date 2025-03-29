@@ -21,7 +21,7 @@
 #include "warnpop.h"
 
 #include "base/logging.h"
-#include "audio/graph.h"
+#include "audio/elements/graph_class.h"
 #include "engine/lua.h"
 #include "engine/lua_array.h"
 #include "engine/audio.h"

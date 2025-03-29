@@ -35,7 +35,7 @@
 #include "base/logging.h"
 #include "base/trace.h"
 #include "base/threadpool.h"
-#include "audio/graph.h"
+#include "audio/elements/graph_class.h"
 #include "game/entity.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/treeop.h"

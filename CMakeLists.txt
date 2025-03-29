@@ -203,6 +203,8 @@ add_library(AudioLib
     audio/elements/effect.cpp
     audio/elements/file_source.cpp
     audio/elements/gain.cpp
+    audio/elements/graph.cpp
+    audio/elements/graph_class.cpp
     audio/elements/mixer.cpp
     audio/elements/mixer_source.cpp
     audio/elements/playlist.cpp
@@ -484,6 +486,8 @@ add_executable(Detonator
     audio/elements/effect.cpp
     audio/elements/file_source.cpp
     audio/elements/gain.cpp
+    audio/elements/graph.cpp
+    audio/elements/graph_class.cpp
     audio/elements/mixer.cpp
     audio/elements/mixer_source.cpp
     audio/elements/playlist.cpp
@@ -866,6 +870,8 @@ add_executable(audio_test
     audio/elements/effect.cpp
     audio/elements/file_source.cpp
     audio/elements/gain.cpp
+    audio/elements/graph.cpp
+    audio/elements/graph_class.cpp
     audio/elements/mixer.cpp
     audio/elements/mixer_source.cpp
     audio/elements/playlist.cpp
@@ -1251,6 +1257,8 @@ add_executable(unit_test_audio_graph
         audio/elements/effect.cpp
         audio/elements/file_source.cpp
         audio/elements/gain.cpp
+        audio/elements/graph.cpp
+        audio/elements/graph_class.cpp
         audio/elements/mixer.cpp
         audio/elements/mixer_source.cpp
         audio/elements/playlist.cpp
