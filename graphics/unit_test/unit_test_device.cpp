@@ -318,8 +318,11 @@ void main() {
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.bWriteColor  = true;
-    state.viewport     = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     // let the FBO allocate the color target buffer.
     {
@@ -434,7 +437,10 @@ void main() {
     state.bWriteColor  = true;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
-    state.viewport     = gfx::IRect(0, 0, 10, 10);
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     // draw using vertex buffer only
     {
@@ -569,8 +575,11 @@ void main() {
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
-    state.viewport = gfx::IRect(0, 0, 4, 4);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    dev::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 4, 4);
+    dev->SetViewportState(vs);
 
     dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
@@ -656,8 +665,11 @@ void main() {
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
-    state.viewport = gfx::IRect(0, 0, 4, 4);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 4, 4);
+    dev->SetViewportState(vs);
 
     dev->Draw(*prog, program_state, *geom, state);
     dev->EndFrame();
@@ -715,8 +727,11 @@ void main() {
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
-    state.viewport = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
@@ -835,8 +850,11 @@ void main() {
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
-    state.viewport = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState  vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
@@ -925,8 +943,11 @@ void main() {
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
-    state.viewport = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
@@ -1013,8 +1034,11 @@ void main() {
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
-    state.viewport = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     const glm::mat2 matrix = {
         {0.25f, 0.25f},
@@ -1073,11 +1097,15 @@ void main() {
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
+
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
-    state.viewport = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     const glm::mat3 matrix = {
         {0.25f, 0.25f, 0.50f},
@@ -1138,11 +1166,15 @@ void main() {
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
+
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
-    state.viewport = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     const glm::mat4 matrix = {
         {0.25f, 0.25, 0.25f, 0.25f},
@@ -1213,8 +1245,11 @@ void main() {
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
     state.bWriteColor = true;
-    state.viewport = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     // set the texture that isn't actually set  since the shader
     // doesn't use it.
@@ -1235,8 +1270,11 @@ void unit_test_clean_textures()
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.bWriteColor  = true;
-    state.viewport     = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState  vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     const gfx::Pixel_RGB pixels[2 * 3] = {
         gfx::Color::White, gfx::Color::White,
@@ -1689,8 +1727,11 @@ void main() {
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.bWriteColor  = true;
-    state.viewport     = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     // this doesn't actually draw anything (and it cannot draw) because
     // there's no vertex data that has been put in the geometry.
@@ -1782,7 +1823,10 @@ void main() {
     state.blending     = gfx::Device::State::BlendOp::None;
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
     state.bWriteColor  = true;
-    state.viewport     = gfx::IRect(0, 0, 10, 10);
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     for (unsigned  i=0; i<caps.num_texture_units; ++i)
     {
@@ -1893,7 +1937,10 @@ void main() {
         state.blending     = gfx::Device::State::BlendOp::None;
         state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
         state.bWriteColor  = true;
-        state.viewport     = gfx::IRect(0, 0, 10, 10);
+
+        gfx::Device::ViewportState vs;
+        vs.viewport = gfx::IRect(0, 0, 10, 10);
+        dev->SetViewportState(vs);
 
         for (unsigned  i=0; i<caps.num_texture_units; ++i)
         {
@@ -1964,8 +2011,11 @@ void main() {
         gfx::Device::State state;
         state.blending = gfx::Device::State::BlendOp::None;
         state.bWriteColor = true;
-        state.viewport = gfx::IRect(0, 0, 10, 10);
         state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+        gfx::Device::ViewportState vs;
+        vs.viewport = gfx::IRect(0, 0, 10, 10);
+        dev->SetViewportState(vs);
 
         dev->Draw(*program, program_state, *geom, state);
         dev->EndFrame();
@@ -2106,7 +2156,10 @@ void main() {
     state.bWriteColor  = true;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
-    state.viewport     = gfx::IRect(0, 0, 200, 200);
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 200, 200);
+    dev->SetViewportState(vs);
 
 #pragma pack(push, 1)
     struct InstanceAttribute {
@@ -2268,8 +2321,11 @@ void main() {
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.bWriteColor  = true;
-    state.viewport     = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     gfx::GeometryDrawCommand draw_command(*geom);
     gfx::ProgramState program_state;
@@ -2394,8 +2450,11 @@ void main() {
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.bWriteColor  = true;
-    state.viewport     = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     gfx::GeometryDrawCommand draw_command(*geom);
 
@@ -2466,8 +2525,11 @@ void main() {
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.bWriteColor  = true;
-    state.viewport     = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     // let the FBO allocate the color target buffers.
     {
@@ -2695,8 +2757,11 @@ void main() {
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.bWriteColor  = true;
-    state.viewport     = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     gfx::ProgramState program_state;
     program_state.SetUniform("kColor", gfx::Color4f(gfx::Color::Red));
@@ -2821,25 +2886,26 @@ void main() {
     state.bWriteColor  = true;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
-    state.viewport     = gfx::IRect(0, 0, 10, 10);
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     dev->BeginFrame();
-
-    gfx::ProgramState program_state;
-    program_state.SetTextureCount(1);
-    program_state.SetTexture("kTexture", 0, *red);
-    dev->Draw(*program, program_state, *quad, state, nullptr);
+      gfx::ProgramState program_state;
+      program_state.SetTextureCount(1);
+      program_state.SetTexture("kTexture", 0, *red);
+      dev->Draw(*program, program_state, *quad, state, nullptr);
     dev->EndFrame();
 
     const auto& result_red = dev->ReadColorBuffer(10, 10);
     TEST_REQUIRE(result_red.PixelCompare(gfx::Color::Red));
 
     dev->BeginFrame();
-
-    program_state.Clear();
-    program_state.SetTextureCount(1);
-    program_state.SetTexture("kTexture", 0, *green);
-    dev->Draw(*program, program_state, *quad, state, nullptr);
+      program_state.Clear();
+      program_state.SetTextureCount(1);
+      program_state.SetTexture("kTexture", 0, *green);
+      dev->Draw(*program, program_state, *quad, state, nullptr);
     dev->EndFrame();
 
     const auto& result_green = dev->ReadColorBuffer(10, 10, nullptr);
@@ -2913,7 +2979,10 @@ void main() {
     state.bWriteColor  = true;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
-    state.viewport     = gfx::IRect(0, 0, 10, 10);
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
 
     constexpr const gfx::Vertex2D vertices[] = {
         { {-1,  1}, {0, 1} },

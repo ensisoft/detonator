@@ -1775,17 +1775,6 @@ public:
     void SetPipelineState(const dev::GraphicsPipelineState& state) const override
     {
         GL_CALL(glLineWidth(state.line_width));
-        GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
-                           state.viewport.GetWidth(), state.viewport.GetHeight()));
-
-        // scissor
-        if (state.scissor.IsEmpty()) {
-            GL_CALL(glDisable(GL_SCISSOR_TEST));
-        } else {
-            GL_CALL(glEnable(GL_SCISSOR_TEST));
-            GL_CALL(glScissor(state.scissor.GetX(), state.scissor.GetY(),
-                              state.scissor.GetWidth(), state.scissor.GetHeight()));
-        }
 
         // polygon winding order
         if (state.winding_order == dev::PolygonWindingOrder::CounterClockWise) {
@@ -1867,6 +1856,20 @@ public:
         GL_CALL(glUniformBlockBinding(program.handle, uniform_block.location, binding_index));
         GL_CALL(glBindBufferRange(GL_UNIFORM_BUFFER, binding_index, buffer.handle, buffer.buffer_offset,
                                   buffer.buffer_bytes));
+    }
+
+    void SetViewportState(const dev::ViewportState& state) const override
+    {
+        GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
+                           state.viewport.GetWidth(), state.viewport.GetHeight()));
+        // scissor
+        if (state.scissor.IsEmpty()) {
+            GL_CALL(glDisable(GL_SCISSOR_TEST));
+        } else {
+            GL_CALL(glEnable(GL_SCISSOR_TEST));
+            GL_CALL(glScissor(state.scissor.GetX(), state.scissor.GetY(),
+                              state.scissor.GetWidth(), state.scissor.GetHeight()));
+        }
     }
 
     void Draw(dev::DrawType draw_primitive, dev::IndexType index_type,

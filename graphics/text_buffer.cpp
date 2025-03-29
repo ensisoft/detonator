@@ -809,9 +809,15 @@ void main() {
     state.culling     = Device::State::Culling::Back;
     state.depth_test  = Device::State::DepthTest::Disabled;
     state.premulalpha = false; // todo:
-    state.scissor     = IRect(); // disabled
-    state.viewport    = IRect(0, 0, buffer_width, buffer_height);
     state.stencil_func = Device::State::StencilFunc::Disabled;
+
+    Device::ViewportState vs;
+    vs.viewport = IRect(0, 0, buffer_width, buffer_height);
+    vs.scissor  = IRect(); // disabled
+
+    DeviceState ds(device);
+    ds.SetState(vs);
+
     device.Draw(*program, program_state, *geometry, state, fbo);
     return result_texture;
 }

@@ -31,6 +31,17 @@ namespace dev
         std::vector<const Uniform*> uniforms;
     };
 
+    struct ViewportState {
+        // the device viewport into the render target. the viewport is in
+        // device coordinates (pixels, texels) and the origin is at the bottom
+        // left and Y axis grows upwards (towards the window top)
+        base::IRect viewport;
+        // the device scissor that can be used to limit the rendering to the
+        // area inside the scissor. if the scissor rect is an empty rect
+        // the scissor test is disabled.
+        base::IRect scissor;
+    };
+
     // Device state including the rasterizer state
     // that is to be applied for any draw operation.
     struct GraphicsPipelineState {
@@ -61,14 +72,6 @@ namespace dev
         std::uint8_t stencil_mask  = 0xff;
         // todo:
         std::uint8_t stencil_ref   = 0x0;
-        // the device viewport into the render target. the viewport is in
-        // device coordinates (pixels, texels) and the origin is at the bottom
-        // left and Y axis grows upwards (towards the window top)
-        base::IRect viewport;
-        // the device scissor that can be used to limit the rendering to the
-        // area inside the scissor. if the scissor rect is an empty rect
-        // the scissor test is disabled.
-        base::IRect scissor;
 
         // rasterizer setting for line width when rasterizing
         // geometries with lines.

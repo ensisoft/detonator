@@ -475,7 +475,13 @@ void main() {
         state.blending     = gfx::Device::State::BlendOp::None;
         state.bWriteColor  = true;
         state.premulalpha  = false;
-        state.viewport     = gfx::IRect(0, 0, surface_width, surface_height);
+
+        gfx::Device::ViewportState vs;
+        vs.viewport = gfx::IRect(0, 0, surface_width, surface_height);
+
+        gfx::DeviceState ds(mDevice);
+        ds.SetState(vs);
+
         mDevice.Draw(*program, program_state, *quad, state, nullptr /*framebuffer*/);
     }
 
@@ -495,7 +501,13 @@ void main() {
         state.blending     = gfx::Device::State::BlendOp::Additive;
         state.bWriteColor  = true;
         state.premulalpha  = false;
-        state.viewport     = gfx::IRect(0, 0, surface_width, surface_height);
+
+        gfx::Device::ViewportState vs;
+        vs.viewport = gfx::IRect(0, 0, surface_width, surface_height);
+
+        gfx::DeviceState ds(mDevice);
+        ds.SetState(vs);
+
         mDevice.Draw(*program, program_state, *quad, state, nullptr /*framebuffer*/);
     }
 }
