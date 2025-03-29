@@ -199,6 +199,22 @@ add_library(AudioLib
     audio/source.cpp
     audio/player.cpp
     audio/element.cpp
+    audio/elements/delay.cpp
+    audio/elements/effect.cpp
+    audio/elements/file_source.cpp
+    audio/elements/gain.cpp
+    audio/elements/mixer.cpp
+    audio/elements/mixer_source.cpp
+    audio/elements/playlist.cpp
+    audio/elements/queue.cpp
+    audio/elements/resampler.cpp
+    audio/elements/sine_source.cpp
+    audio/elements/splitter.cpp
+    audio/elements/stereo_joiner.cpp
+    audio/elements/stereo_maker.cpp
+    audio/elements/stereo_splitter.cpp
+    audio/elements/stream_source.cpp
+    audio/elements/zero_source.cpp
     audio/graph.cpp
     audio/proxy.cpp)
 add_library(DataLib
@@ -464,9 +480,25 @@ add_executable(Detonator
     audio/source.cpp
     audio/player.cpp
     audio/element.cpp
+    audio/elements/delay.cpp
+    audio/elements/effect.cpp
+    audio/elements/file_source.cpp
+    audio/elements/gain.cpp
+    audio/elements/mixer.cpp
+    audio/elements/mixer_source.cpp
+    audio/elements/playlist.cpp
+    audio/elements/queue.cpp
+    audio/elements/resampler.cpp
+    audio/elements/sine_source.cpp
+    audio/elements/splitter.cpp
+    audio/elements/stereo_joiner.cpp
+    audio/elements/stereo_maker.cpp
+    audio/elements/stereo_splitter.cpp
+    audio/elements/stream_source.cpp
+    audio/elements/zero_source.cpp
     audio/graph.cpp
     audio/proxy.cpp
-        graphics/tool/polygon.cpp
+    graphics/tool/polygon.cpp
     editor/app/import.h
     editor/app/import.cpp
     editor/app/event.h
@@ -830,6 +862,22 @@ add_executable(audio_test
     audio/source.cpp
     audio/player.cpp
     audio/element.cpp
+    audio/elements/delay.cpp
+    audio/elements/effect.cpp
+    audio/elements/file_source.cpp
+    audio/elements/gain.cpp
+    audio/elements/mixer.cpp
+    audio/elements/mixer_source.cpp
+    audio/elements/playlist.cpp
+    audio/elements/queue.cpp
+    audio/elements/resampler.cpp
+    audio/elements/sine_source.cpp
+    audio/elements/splitter.cpp
+    audio/elements/stereo_joiner.cpp
+    audio/elements/stereo_maker.cpp
+    audio/elements/stereo_splitter.cpp
+    audio/elements/stream_source.cpp
+    audio/elements/zero_source.cpp
     audio/graph.cpp
     audio/proxy.cpp
     audio/test/main.cpp
@@ -1199,6 +1247,22 @@ add_executable(unit_test_audio_graph
         audio/mpg123.cpp
         audio/sndfile.cpp
         audio/element.cpp
+        audio/elements/delay.cpp
+        audio/elements/effect.cpp
+        audio/elements/file_source.cpp
+        audio/elements/gain.cpp
+        audio/elements/mixer.cpp
+        audio/elements/mixer_source.cpp
+        audio/elements/playlist.cpp
+        audio/elements/queue.cpp
+        audio/elements/resampler.cpp
+        audio/elements/sine_source.cpp
+        audio/elements/splitter.cpp
+        audio/elements/stereo_joiner.cpp
+        audio/elements/stereo_maker.cpp
+        audio/elements/stereo_splitter.cpp
+        audio/elements/stream_source.cpp
+        audio/elements/zero_source.cpp
         audio/format.cpp
         audio/graph.cpp)
 target_include_directories(unit_test_audio_graph PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
