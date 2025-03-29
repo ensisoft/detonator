@@ -1772,7 +1772,7 @@ public:
         }
     }
 
-    void SetPipelineState(const dev::GraphicsPipelineState& state) const override
+    void SetRasterState(const dev::RasterState& state) const override
     {
         GL_CALL(glLineWidth(state.line_width));
 

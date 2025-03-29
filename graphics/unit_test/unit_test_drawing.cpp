@@ -316,7 +316,7 @@ public:
     {}
 
     void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
-              const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) override
+              const gfx::GeometryDrawCommand& geometry, const RasterState& state, gfx::Framebuffer* fbo) override
     {}
 
     void CleanGarbage(size_t, unsigned) override

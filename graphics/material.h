@@ -57,7 +57,7 @@ namespace gfx
             RenderPass renderpass = RenderPass::ColorPass;
         };
         struct RasterState {
-            using Blending = Device::State::BlendOp;
+            using Blending = Device::RasterState::BlendOp;
             Blending blending = Blending::None;
             bool premultiplied_alpha = false;
         };

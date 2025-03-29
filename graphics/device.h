@@ -45,7 +45,7 @@ namespace gfx
     class Device
     {
     public:
-        using State = dev::GraphicsPipelineState;
+        using RasterState = dev::RasterState;
         using ViewportState = dev::ViewportState;
         using ColorDepthStencilState = dev::ColorDepthStencilState;
         using ResourceStats = dev::GraphicsDeviceResourceStats;
@@ -156,7 +156,7 @@ namespace gfx
 
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const ProgramState& program_state,
-                          const GeometryDrawCommand& geometry, const State& state, Framebuffer* fbo = nullptr) = 0;
+                          const GeometryDrawCommand& geometry, const RasterState& state, Framebuffer* fbo = nullptr) = 0;
 
         enum GCFlags {
             Textures   = 0x1,

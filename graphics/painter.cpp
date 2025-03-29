@@ -132,7 +132,7 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         drawable_raster_state.line_width = draw.state.line_width;
         draw.drawable->ApplyDynamicState(drawable_env, gpu_program_state, drawable_raster_state);
 
-        Device::State device_state;
+        Device::RasterState device_state;
         device_state.blending      = material_raster_state.blending;
         device_state.premulalpha   = material_raster_state.premultiplied_alpha;
         device_state.line_width    = drawable_raster_state.line_width;

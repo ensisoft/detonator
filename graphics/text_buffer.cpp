@@ -803,9 +803,9 @@ void main() {
 
     device.ClearColor(gfx::Color4f(0.0f, 0.0f, 0.0f, 0.0f), fbo);
 
-    Device::State state;
-    state.blending    = Device::State::BlendOp::Transparent;
-    state.culling     = Device::State::Culling::Back;
+    Device::RasterState state;
+    state.blending    = Device::RasterState::BlendOp::Transparent;
+    state.culling     = Device::RasterState::Culling::Back;
     state.premulalpha = false; // todo:
 
     Device::ViewportState vs;
