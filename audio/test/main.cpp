@@ -30,6 +30,13 @@
 #include "audio/element.h"
 #include "audio/loader.h"
 #include "audio/graph.h"
+#include "audio/elements/mixer_source.h"
+#include "audio/elements/file_source.h"
+#include "audio/elements/sine_source.h"
+#include "audio/elements/stereo_splitter.h"
+#include "audio/elements/null.h"
+#include "audio/elements/mixer.h"
+#include "audio/elements/gain.h"
 
 // audio test application
 

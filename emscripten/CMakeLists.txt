@@ -49,6 +49,22 @@ add_executable(UnitTest
     ../game/unit_test/unit_test_animation.cpp
     ../engine/unit_test/unit_test_lua.cpp
     ../audio/element.cpp
+    ../audio/elements/delay.cpp
+    ../audio/elements/effect.cpp
+    ../audio/elements/file_source.cpp
+    ../audio/elements/gain.cpp
+    ../audio/elements/mixer.cpp
+    ../audio/elements/mixer_source.cpp
+    ../audio/elements/playlist.cpp
+    ../audio/elements/queue.cpp
+    ../audio/elements/resampler.cpp
+    ../audio/elements/sine_source.cpp
+    ../audio/elements/splitter.cpp
+    ../audio/elements/stereo_joiner.cpp
+    ../audio/elements/stereo_maker.cpp
+    ../audio/elements/stereo_splitter.cpp
+    ../audio/elements/stream_source.cpp
+    ../audio/elements/zero_source.cpp
     ../audio/format.cpp
     ../audio/graph.cpp
     ../audio/loader.cpp
@@ -153,6 +169,22 @@ add_executable(UnitTestThread
         ../audio/loader.cpp
         ../audio/player.cpp
         ../audio/element.cpp
+        ../audio/elements/delay.cpp
+        ../audio/elements/effect.cpp
+        ../audio/elements/file_source.cpp
+        ../audio/elements/gain.cpp
+        ../audio/elements/mixer.cpp
+        ../audio/elements/mixer_source.cpp
+        ../audio/elements/playlist.cpp
+        ../audio/elements/queue.cpp
+        ../audio/elements/resampler.cpp
+        ../audio/elements/sine_source.cpp
+        ../audio/elements/splitter.cpp
+        ../audio/elements/stereo_joiner.cpp
+        ../audio/elements/stereo_maker.cpp
+        ../audio/elements/stereo_splitter.cpp
+        ../audio/elements/stream_source.cpp
+        ../audio/elements/zero_source.cpp
         ../audio/format.cpp
         ../audio/mpg123.cpp
         ../audio/sndfile.cpp
@@ -204,6 +236,22 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTestThread.wasm"      DESTINATION
 add_executable(GameEngine
     main.cpp
     ../audio/element.cpp
+    ../audio/elements/delay.cpp
+    ../audio/elements/effect.cpp
+    ../audio/elements/file_source.cpp
+    ../audio/elements/gain.cpp
+    ../audio/elements/mixer.cpp
+    ../audio/elements/mixer_source.cpp
+    ../audio/elements/playlist.cpp
+    ../audio/elements/queue.cpp
+    ../audio/elements/resampler.cpp
+    ../audio/elements/sine_source.cpp
+    ../audio/elements/splitter.cpp
+    ../audio/elements/stereo_joiner.cpp
+    ../audio/elements/stereo_maker.cpp
+    ../audio/elements/stereo_splitter.cpp
+    ../audio/elements/stream_source.cpp
+    ../audio/elements/zero_source.cpp
     ../audio/format.cpp
     ../audio/graph.cpp
     ../audio/loader.cpp

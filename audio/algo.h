@@ -18,6 +18,8 @@
 
 #include "config.h"
 
+#include <cmath> // for pow
+
 #include "audio/buffer.h"
 #include "audio/format.h"
 

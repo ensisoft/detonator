@@ -28,6 +28,7 @@
 #include "data/reader.h"
 #include "audio/graph.h"
 #include "audio/element.h"
+#include "audio/elements/queue.h"
 
 namespace {
     template<typename T>
