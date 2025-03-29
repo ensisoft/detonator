@@ -804,19 +804,22 @@ void main() {
     device.ClearColor(gfx::Color4f(0.0f, 0.0f, 0.0f, 0.0f), fbo);
 
     Device::State state;
-    state.bWriteColor = true;
     state.blending    = Device::State::BlendOp::Transparent;
     state.culling     = Device::State::Culling::Back;
-    state.depth_test  = Device::State::DepthTest::Disabled;
     state.premulalpha = false; // todo:
-    state.stencil_func = Device::State::StencilFunc::Disabled;
 
     Device::ViewportState vs;
     vs.viewport = IRect(0, 0, buffer_width, buffer_height);
     vs.scissor  = IRect(); // disabled
 
+    Device::ColorDepthStencilState dss;
+    dss.bWriteColor = true;
+    dss.depth_test  = Device::ColorDepthStencilState ::DepthTest::Disabled;
+    dss.stencil_func = Device::ColorDepthStencilState ::StencilFunc::Disabled;
+
     DeviceState ds(device);
     ds.SetState(vs);
+    ds.SetState(dss);
 
     device.Draw(*program, program_state, *geometry, state, fbo);
     return result_texture;

@@ -80,6 +80,7 @@ public:
     StateKey PushState() override;
     void PopState(StateKey key) override;
     void SetViewportState(const ViewportState& state) const override;
+    void SetColorDepthStencilState(const ColorDepthStencilState& state) const override;
 
     void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
               const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) override;
@@ -114,6 +115,7 @@ private:
 
     struct State {
         ViewportState vs;
+        ColorDepthStencilState ds;
     };
     mutable std::stack<State> mStateStack;
 };
@@ -367,7 +369,9 @@ void GraphicsDevice::PopState(StateKey key)
 
     ASSERT(!mStateStack.empty());
     const auto& top = mStateStack.top();
+
     mDevice->SetViewportState(top.vs);
+    mDevice->SetColorDepthStencilState(top.ds);
 }
 
 void GraphicsDevice::SetViewportState(const ViewportState& state) const
@@ -376,6 +380,13 @@ void GraphicsDevice::SetViewportState(const ViewportState& state) const
     auto& top = mStateStack.top();
     top.vs = state;
     mDevice->SetViewportState(state);
+}
+void GraphicsDevice::SetColorDepthStencilState(const ColorDepthStencilState& state) const
+{
+    ASSERT(!mStateStack.empty());
+    auto& top = mStateStack.top();
+    top.ds = state;
+    mDevice->SetColorDepthStencilState(state);
 }
 
 void GraphicsDevice::Draw(const gfx::Program& program,

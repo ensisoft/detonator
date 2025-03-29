@@ -42,24 +42,14 @@ namespace dev
         base::IRect scissor;
     };
 
-    // Device state including the rasterizer state
-    // that is to be applied for any draw operation.
-    struct GraphicsPipelineState {
-        using DepthTest   = dev::DepthTest;
-        using Culling     = dev::Culling;
-        using BlendOp     = dev::BlendOp;
+    struct ColorDepthStencilState {
+        using DepthTest = dev::DepthTest;
+        using StencilOp = dev::StencilOp;
         using StencilFunc = dev::StencilFunc;
-        using StencilOp   = dev::StencilOp;
-        using PolygonWindingOrder = dev::PolygonWindingOrder;
 
         DepthTest depth_test = DepthTest::Disabled;
 
-        // polygon face culling setting.
-        Culling culling = Culling::Back;
 
-        PolygonWindingOrder winding_order = PolygonWindingOrder::CounterClockWise;
-
-        BlendOp blending = BlendOp::None;
         // the stencil test function.
         StencilFunc  stencil_func  = StencilFunc::Disabled;
         // what to do when the stencil test fails.
@@ -73,11 +63,27 @@ namespace dev
         // todo:
         std::uint8_t stencil_ref   = 0x0;
 
+        // should write color buffer or not.
+        bool bWriteColor = true;
+    };
+
+    // Device state including the rasterizer state
+    // that is to be applied for any draw operation.
+    struct GraphicsPipelineState {
+        using Culling     = dev::Culling;
+        using BlendOp     = dev::BlendOp;
+        using PolygonWindingOrder = dev::PolygonWindingOrder;
+
+        // polygon face culling setting.
+        Culling culling = Culling::Back;
+
+        PolygonWindingOrder winding_order = PolygonWindingOrder::CounterClockWise;
+
+        BlendOp blending = BlendOp::None;
+
         // rasterizer setting for line width when rasterizing
         // geometries with lines.
         float line_width = 1.0f;
-        // should write color buffer or not.
-        bool bWriteColor = true;
 
         bool premulalpha = false;
     };

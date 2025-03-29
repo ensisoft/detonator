@@ -159,9 +159,9 @@ namespace gfx
         void ClearStencil(const StencilClearValue& stencil) const;
         void ClearDepth(float depth) const;
 
-        using StencilFunc = Device::State::StencilFunc;
-        using StencilOp   = Device::State::StencilOp;
-        using DepthTest   = Device::State::DepthTest;
+        using StencilFunc = Device::ColorDepthStencilState::StencilFunc;
+        using StencilOp   = Device::ColorDepthStencilState::StencilOp;
+        using DepthTest   = Device::ColorDepthStencilState::DepthTest;
         using Culling     = Device::State::Culling;
         using PolygonWindigOrder = Device::State::PolygonWindingOrder;
 

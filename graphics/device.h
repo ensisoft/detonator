@@ -47,6 +47,7 @@ namespace gfx
     public:
         using State = dev::GraphicsPipelineState;
         using ViewportState = dev::ViewportState;
+        using ColorDepthStencilState = dev::ColorDepthStencilState;
         using ResourceStats = dev::GraphicsDeviceResourceStats;
         using DeviceCaps = dev::GraphicsDeviceCaps;
 
@@ -151,6 +152,7 @@ namespace gfx
         virtual StateKey PushState() = 0;
         virtual void PopState(StateKey key) = 0;
         virtual void SetViewportState(const ViewportState& state) const = 0;
+        virtual void SetColorDepthStencilState(const ColorDepthStencilState& state) const = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const ProgramState& program_state,
@@ -195,6 +197,7 @@ namespace gfx
     {
     public:
         using ViewportState = Device::ViewportState;
+        using ColorDepthStencilState = Device::ColorDepthStencilState;
 
         explicit DeviceState(Device& device)
           : mDevice(device)
@@ -212,6 +215,10 @@ namespace gfx
         void SetState(const ViewportState& vs)
         {
             mDevice.SetViewportState(vs);
+        }
+        void SetState(const ColorDepthStencilState& state)
+        {
+            mDevice.SetColorDepthStencilState(state);
         }
 
         DeviceState(const DeviceState&) = delete;

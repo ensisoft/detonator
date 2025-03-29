@@ -317,12 +317,15 @@ void main() {
 
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
-    state.bWriteColor  = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
     dev->SetViewportState(vs);
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState ::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     // let the FBO allocate the color target buffer.
     {
@@ -434,13 +437,16 @@ void main() {
     auto prog = MakeTestProgram(*dev, vertex_src, fragment_src);
 
     gfx::Device::State state;
-    state.bWriteColor  = true;
     state.blending     = gfx::Device::State::BlendOp::None;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
     dev->SetViewportState(vs);
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     // draw using vertex buffer only
     {
@@ -574,8 +580,11 @@ void main() {
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
-    state.bWriteColor = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     dev::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 4, 4);
@@ -664,8 +673,11 @@ void main() {
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
-    state.bWriteColor = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 4, 4);
@@ -726,8 +738,11 @@ void main() {
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
-    state.bWriteColor = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -849,8 +864,11 @@ void main() {
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
-    state.bWriteColor = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState  vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -942,8 +960,11 @@ void main() {
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
-    state.bWriteColor = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -1031,10 +1052,14 @@ void main() {
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
+
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
-    state.bWriteColor = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -1100,8 +1125,11 @@ void main() {
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
-    state.bWriteColor = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -1169,8 +1197,11 @@ void main() {
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
-    state.bWriteColor = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -1244,8 +1275,11 @@ void main() {
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
-    state.bWriteColor = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -1268,9 +1302,12 @@ void unit_test_clean_textures()
     auto dev = CreateDevice();
 
     gfx::Device::State state;
-    state.blending     = gfx::Device::State::BlendOp::None;
-    state.bWriteColor  = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.blending = gfx::Device::State::BlendOp::None;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState  vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -1725,9 +1762,12 @@ void main() {
     program_state.SetUniform("kColor", gfx::Color::Green);
 
     gfx::Device::State state;
-    state.blending     = gfx::Device::State::BlendOp::None;
-    state.bWriteColor  = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.blending = gfx::Device::State::BlendOp::None;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -1820,9 +1860,12 @@ void main() {
     bmp.Fill(gfx::Color::Green);
 
     gfx::Device::State state;
-    state.blending     = gfx::Device::State::BlendOp::None;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
-    state.bWriteColor  = true;
+    state.blending = gfx::Device::State::BlendOp::None;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -1934,9 +1977,12 @@ void main() {
         bmp.Fill(gfx::Color::Green);
 
         gfx::Device::State state;
-        state.blending     = gfx::Device::State::BlendOp::None;
-        state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
-        state.bWriteColor  = true;
+        state.blending = gfx::Device::State::BlendOp::None;
+
+        gfx::Device::ColorDepthStencilState dss;
+        dss.bWriteColor  = true;
+        dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+        dev->SetColorDepthStencilState(dss);
 
         gfx::Device::ViewportState vs;
         vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -2010,8 +2056,11 @@ void main() {
 
         gfx::Device::State state;
         state.blending = gfx::Device::State::BlendOp::None;
-        state.bWriteColor = true;
-        state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+
+        gfx::Device::ColorDepthStencilState dss;
+        dss.bWriteColor  = true;
+        dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+        dev->SetColorDepthStencilState(dss);
 
         gfx::Device::ViewportState vs;
         vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -2153,9 +2202,12 @@ void main() {
     auto program = MakeTestProgram(*dev, vertex_src, fragment_src);
 
     gfx::Device::State state;
-    state.bWriteColor  = true;
-    state.blending     = gfx::Device::State::BlendOp::None;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.blending = gfx::Device::State::BlendOp::None;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 200, 200);
@@ -2319,9 +2371,12 @@ void main() {
 )", "p0");
 
     gfx::Device::State state;
-    state.blending     = gfx::Device::State::BlendOp::None;
-    state.bWriteColor  = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.blending = gfx::Device::State::BlendOp::None;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -2448,9 +2503,12 @@ void main() {
     block.GetAs<Testing>().lights[2].light = gfx::ToVec(gfx::Color::Blue);
 
     gfx::Device::State state;
-    state.blending     = gfx::Device::State::BlendOp::None;
-    state.bWriteColor  = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.blending = gfx::Device::State::BlendOp::None;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -2523,9 +2581,12 @@ void main() {
 )", "p0");
 
     gfx::Device::State state;
-    state.blending     = gfx::Device::State::BlendOp::None;
-    state.bWriteColor  = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.blending = gfx::Device::State::BlendOp::None;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -2755,9 +2816,12 @@ void main() {
     auto program = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     gfx::Device::State state;
-    state.blending     = gfx::Device::State::BlendOp::None;
-    state.bWriteColor  = true;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.blending = gfx::Device::State::BlendOp::None;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -2883,9 +2947,12 @@ void main() {
     auto quad = MakeQuad(*dev);
 
     gfx::Device::State state;
-    state.bWriteColor  = true;
-    state.blending     = gfx::Device::State::BlendOp::None;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.blending = gfx::Device::State::BlendOp::None;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
@@ -2976,9 +3043,12 @@ void main() {
     auto prog = MakeTestProgram(*dev, vertex_src, fragment_src);
 
     gfx::Device::State state;
-    state.bWriteColor  = true;
-    state.blending     = gfx::Device::State::BlendOp::None;
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.blending = gfx::Device::State::BlendOp::None;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
 
     gfx::Device::ViewportState vs;
     vs.viewport = gfx::IRect(0, 0, 10, 10);
