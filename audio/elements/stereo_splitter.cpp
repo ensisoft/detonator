@@ -24,15 +24,16 @@
 namespace audio
 {
 
-StereoSplitter::StereoSplitter(const std::string& name, const std::string& id)
-  : mName(name)
-  , mId(id)
+StereoSplitter::StereoSplitter(std::string name, std::string id)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mIn("in")
   , mOutLeft("left")
   , mOutRight("right")
 {}
-StereoSplitter::StereoSplitter(const std::string& name)
-  : StereoSplitter(name, base::RandomString(10))
+
+StereoSplitter::StereoSplitter(std::string name)
+  : StereoSplitter(std::move(name), base::RandomString(10))
 {}
 
 bool StereoSplitter::Prepare(const Loader& loader, const PrepareParams& params)

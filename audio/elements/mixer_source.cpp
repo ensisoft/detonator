@@ -39,7 +39,7 @@ void MixerSource::FadeIn::Apply(BufferHandle buffer)
 template<typename DataType, unsigned ChannelCount>
 void MixerSource::FadeIn::ApplyFadeIn(BufferHandle buffer)
 {
-    mTime = FadeBuffer<DataType, ChannelCount>(buffer, mTime, 0.0f, mDuration, true);
+    mTime = FadeBuffer<DataType, ChannelCount>(std::move(buffer), mTime, 0.0f, mDuration, true);
 }
 
 void MixerSource::FadeOut::Apply(BufferHandle buffer)
@@ -56,11 +56,11 @@ void MixerSource::FadeOut::Apply(BufferHandle buffer)
 template<typename DataType, unsigned ChannelCount>
 void MixerSource::FadeOut::ApplyFadeOut(BufferHandle buffer)
 {
-    mTime = FadeBuffer<DataType, ChannelCount>(buffer, mTime, 0.0f, mDuration, false);
+    mTime = FadeBuffer<DataType, ChannelCount>(std::move(buffer), mTime, 0.0f, mDuration, false);
 }
 
-MixerSource::MixerSource(const std::string& name, const Format& format)
-  : mName(name)
+MixerSource::MixerSource(std::string name, const Format& format)
+  : mName(std::move(name))
   , mId(base::RandomString(10))
   , mFormat(format)
   , mOut("out")
@@ -266,19 +266,19 @@ void MixerSource::ReceiveCommand(Command& cmd)
     else if (auto* ptr = cmd.GetIf<DeleteSourceCmd>())
     {
         if (ptr->millisecs)
-            mCommands.push_back(*ptr);
+            mCommands.emplace_back(*ptr);
         else DeleteSource(ptr->name);
     }
     else if (auto* ptr = cmd.GetIf<PauseSourceCmd>())
     {
         if (ptr->millisecs)
-            mCommands.push_back(*ptr);
+            mCommands.emplace_back(*ptr);
         else PauseSource(ptr->name, ptr->paused);
     }
     else if (auto* ptr = cmd.GetIf<DeleteAllSrcCmd>())
     {
         if (ptr->millisecs)
-            mCommands.push_back(*ptr);
+            mCommands.emplace_back(*ptr);
         else DeleteSources();
     }
     else BUG("Unexpected command.");

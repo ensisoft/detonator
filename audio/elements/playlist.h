@@ -29,8 +29,8 @@ namespace audio
     class Playlist : public Element
     {
     public:
-        Playlist(const std::string& name, const std::string& id,const std::vector<PortDesc>& srcs);
-        Playlist(const std::string&, const std::vector<PortDesc>& srcs);
+        Playlist(std::string name, std::string id, const std::vector<PortDesc>& srcs);
+        Playlist(std::string, const std::vector<PortDesc>& srcs);
         std::string GetId() const override
         { return mId; }
         std::string GetName() const override

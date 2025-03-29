@@ -19,20 +19,22 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/trace.h"
+#include "base/utility.h"
 #include "audio/elements/stereo_joiner.h"
 
 namespace audio
 {
 
-StereoJoiner::StereoJoiner(const std::string& name, const std::string& id)
-  : mName(name)
-  , mId(id)
+StereoJoiner::StereoJoiner(std::string name, std::string id)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mOut("out")
   , mInLeft("left")
   , mInRight("right")
 {}
-StereoJoiner::StereoJoiner(const std::string& name)
-  : StereoJoiner(name, base::RandomString(10))
+
+StereoJoiner::StereoJoiner(std::string name)
+  : StereoJoiner(std::move(name), base::RandomString(10))
 {}
 
 bool StereoJoiner::Prepare(const Loader& loader, const PrepareParams& params)
@@ -83,7 +85,7 @@ void StereoJoiner::Process(Allocator& allocator, EventQueue& events, unsigned mi
 }
 
 template<typename Type>
-void StereoJoiner::Join(Allocator& allocator, BufferHandle left, BufferHandle right)
+void StereoJoiner::Join(Allocator& allocator, const BufferHandle& left, const BufferHandle& right)
 {
     using StereoFrameType = StereoFrame<Type>;
     using MonoFrameType   = MonoFrame<Type>;

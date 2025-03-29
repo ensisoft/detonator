@@ -21,22 +21,23 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/trace.h"
+#include "base/utility.h"
 #include "audio/elements/resampler.h"
 
 namespace audio
 {
 
-Resampler::Resampler(const std::string& name, unsigned sample_rate)
-  : mName(name)
+Resampler::Resampler(std::string name, unsigned sample_rate)
+  : mName(std::move(name))
   , mId(base::RandomString(10))
   , mSampleRate(sample_rate)
   , mIn("in")
   , mOut("out")
 {}
 
-Resampler::Resampler(const std::string& name, const std::string& id,  unsigned sample_rate)
-  : mName(name)
-  , mId(id)
+Resampler::Resampler(std::string name, std::string id,  unsigned sample_rate)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mSampleRate(sample_rate)
   , mIn("in")
   , mOut("out")

@@ -134,7 +134,7 @@ namespace audio
         };
 
         // Create a new mixer with the given name and format.
-        MixerSource(const std::string& name, const Format& format);
+        MixerSource(std::string name, const Format& format);
         MixerSource(MixerSource&& other);
 
         // Add a new source element to the mixer. The element must be a source

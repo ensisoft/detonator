@@ -94,20 +94,20 @@ FileSource::PCMCache FileSource::pcm_cache;
 // static
 FileSource::FileInfoCache FileSource::file_info_cache;
 
-FileSource::FileSource(const std::string& name, const std::string& file, SampleType type, unsigned loops)
-  : mName(name)
+FileSource::FileSource(std::string name, std::string file, SampleType type, unsigned loops)
+  : mName(std::move(name))
   , mId(base::RandomString(10))
-  , mFile(file)
+  , mFile(std::move(file))
   , mPort("out")
   , mLoopCount(loops)
 {
     mFormat.sample_type = type;
 }
 
-FileSource::FileSource(const std::string& name, const std::string& id, const std::string& file, SampleType type, unsigned loops)
-  : mName(name)
-  , mId(id)
-  , mFile(file)
+FileSource::FileSource(std::string name, std::string id, std::string file, SampleType type, unsigned loops)
+  : mName(std::move(name))
+  , mId(std::move(id))
+  , mFile(std::move(file))
   , mPort("out")
   , mLoopCount(loops)
 {

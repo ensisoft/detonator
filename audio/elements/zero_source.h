@@ -27,8 +27,8 @@ namespace audio
     class ZeroSource : public Element
     {
     public:
-        ZeroSource(const std::string& name, const std::string& id, const Format& format);
-        ZeroSource(const std::string& name, const Format& format);
+        ZeroSource(std::string name, std::string id, const Format& format);
+        ZeroSource(std::string name, const Format& format);
 
         std::string GetId() const override
         { return mId; }

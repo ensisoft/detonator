@@ -19,22 +19,24 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/trace.h"
+#include "base/utility.h"
 #include "audio/algo.h"
 #include "audio/elements/gain.h"
 
 namespace audio
 {
 
-Gain::Gain(const std::string& name, float gain)
-  : mName(name)
+Gain::Gain(std::string name, float gain)
+  : mName(std::move(name))
   , mId(base::RandomString(10))
   , mIn("in")
   , mOut("out")
   , mGain(gain)
 {}
-Gain::Gain(const std::string& name, const std::string& id, float gain)
-  : mName(name)
-  , mId(id)
+
+Gain::Gain(std::string name, std::string id, float gain)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mIn("in")
   , mOut("out")
   , mGain(gain)

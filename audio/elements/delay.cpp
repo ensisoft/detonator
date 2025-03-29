@@ -25,16 +25,16 @@
 namespace audio
 {
 
-Delay::Delay(const std::string& name, const std::string& id, unsigned delay)
-  : mName(name)
-  , mId(id)
+Delay::Delay(std::string name, std::string id, unsigned delay)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mIn("in")
   , mOut("out")
   , mDelay(delay)
 {}
 
-Delay::Delay(const std::string& name, unsigned delay)
-  : Delay(name, base::RandomString(10), delay)
+Delay::Delay(std::string name, unsigned delay)
+  : Delay(std::move(name), base::RandomString(10), delay)
 {}
 
 bool Delay::Prepare(const Loader& loader, const PrepareParams& params)

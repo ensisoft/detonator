@@ -28,14 +28,14 @@ namespace audio
     class Null : public Element
     {
     public:
-        Null(const std::string& name)
-          : mName(name)
+        Null(std::string name)
+          : mName(std::move(name))
           , mId(base::RandomString(10))
           , mIn("in")
         {}
-        Null(const std::string& name, const std::string& id)
-          : mName(name)
-          , mId(id)
+        Null(std::string name, std::string id)
+          : mName(std::move(name))
+          , mId(std::move(id))
           , mIn("in")
         {}
         std::string GetId() const override

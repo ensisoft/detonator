@@ -32,13 +32,13 @@ namespace audio
     public:
         using IOStrategy = audio::IOStrategy;
 
-        FileSource(const std::string& name,
-                   const std::string& file,
+        FileSource(std::string name,
+                   std::string file,
                    SampleType type = SampleType::Int16,
                    unsigned loops = 1);
-        FileSource(const std::string& name,
-                   const std::string& id,
-                   const std::string& file,
+        FileSource(std::string name,
+                   std::string id,
+                   std::string file,
                    SampleType type = SampleType::Int16,
                    unsigned loops = 1);
         FileSource(FileSource&& other);

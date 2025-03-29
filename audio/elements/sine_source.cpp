@@ -24,13 +24,13 @@
 namespace audio
 {
 
-SineSource::SineSource(const std::string& name,
-                       const std::string& id,
+SineSource::SineSource(std::string name,
+                       std::string id,
                        const Format& format,
                        unsigned frequency,
                        unsigned millisecs)
-  : mName(name)
-  , mId(id)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mDuration(millisecs)
   , mFrequency(frequency)
   , mPort("out")
@@ -39,11 +39,11 @@ SineSource::SineSource(const std::string& name,
     mPort.SetFormat(mFormat);
 }
 
-SineSource::SineSource(const std::string& name,
+SineSource::SineSource(std::string name,
                        const Format& format,
                        unsigned frequency,
                        unsigned millisecs)
-  : SineSource(name, base::RandomString(10), format, frequency, millisecs)
+  : SineSource(std::move(name), base::RandomString(10), format, frequency, millisecs)
 {}
 
 bool SineSource::Prepare(const Loader& loader, const PrepareParams& params)

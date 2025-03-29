@@ -24,16 +24,16 @@
 namespace audio
 {
 
-ZeroSource::ZeroSource(const std::string& name, const std::string& id, const Format& format)
-  : mName(name)
-  , mId(id)
+ZeroSource::ZeroSource(std::string name, std::string id, const Format& format)
+  : mName(std::move(name))
+  , mId(std::move(id))
   , mFormat(format)
   , mOut("out")
 {
     mOut.SetFormat(format);
 }
-ZeroSource::ZeroSource(const std::string& name, const Format& format)
-  : ZeroSource(name, base::RandomString(10), format)
+ZeroSource::ZeroSource(std::string name, const Format& format)
+  : ZeroSource(std::move(name), base::RandomString(10), format)
 {}
 
 bool ZeroSource::Prepare(const Loader& loader, const PrepareParams& params)

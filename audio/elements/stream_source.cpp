@@ -19,6 +19,7 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/trace.h"
+#include "base/utility.h"
 #include "audio/mpg123.h"
 #include "audio/sndfile.h"
 #include "audio/elements/stream_source.h"
@@ -26,9 +27,9 @@
 namespace audio
 {
 
-StreamSource::StreamSource(const std::string& name, std::shared_ptr<const SourceStream> buffer,
+StreamSource::StreamSource(std::string name, std::shared_ptr<const SourceStream> buffer,
                            Format format, SampleType type)
-  : mName(name)
+  : mName(std::move(name))
   , mId(base::RandomString(10))
   , mInputFormat(format)
   , mBuffer(std::move(buffer))

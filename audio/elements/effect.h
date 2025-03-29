@@ -41,9 +41,9 @@ namespace audio
             Kind effect = Kind::FadeIn;
         };
 
-        Effect(const std::string& name, const std::string& id, unsigned time, unsigned duration, Kind effect);
-        Effect(const std::string& name, unsigned time, unsigned duration, Kind effect);
-        Effect(const std::string& name);
+        Effect(std::string name, std::string id, unsigned time, unsigned duration, Kind effect);
+        Effect(std::string name, unsigned time, unsigned duration, Kind effect);
+        explicit Effect(std::string name);
 
         std::string GetId() const override
         { return mId; }

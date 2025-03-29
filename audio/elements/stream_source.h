@@ -31,7 +31,7 @@ namespace audio
         enum class Format {
             Mp3, Ogg, Flac, Wav
         };
-        StreamSource(const std::string& name, std::shared_ptr<const SourceStream> buffer,
+        StreamSource(std::string name, std::shared_ptr<const SourceStream> buffer,
                      Format format, SampleType type = SampleType::Int16);
         StreamSource(StreamSource&& other);
        ~StreamSource();
