@@ -31,6 +31,8 @@
 #include "base/logging.h"
 #include "base/format.h"
 #include "audio/graph.h"
+#include "audio/elements/graph.h"
+#include "audio/elements/graph_class.h"
 #include "audio/loader.h"
 #include "device/device.h"
 #include "graphics/image.h"

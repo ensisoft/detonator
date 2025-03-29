@@ -29,6 +29,8 @@
 #include "audio/format.h"
 #include "audio/loader.h"
 #include "audio/graph.h"
+#include "audio/elements/graph.h"
+#include "audio/elements/graph_class.h"
 #include "device/device.h"
 #include "graphics/device.h"
 #include "graphics/painter.h"

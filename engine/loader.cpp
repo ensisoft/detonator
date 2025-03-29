@@ -61,7 +61,8 @@
 #include "game/tilemap.h"
 #include "engine/loader.h"
 #include "uikit/window.h"
-#include "audio/graph.h"
+#include "audio/elements/graph_class.h"
+#include "audio/elements/graph.h"
 
 namespace engine
 {

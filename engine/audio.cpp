@@ -29,6 +29,8 @@
 #include "audio/elements/mixer_source.h"
 #include "audio/elements/gain.h"
 #include "audio/elements/mixer.h"
+#include "audio/elements/graph_class.h"
+#include "audio/elements/graph.h"
 #include "engine/loader.h"
 #include "engine/data.h"
 

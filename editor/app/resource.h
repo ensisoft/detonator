@@ -37,7 +37,7 @@
 #include "base/assert.h"
 #include "data/writer.h"
 #include "data/reader.h"
-#include "audio/graph.h"
+#include "audio/elements/graph_class.h"
 #include "graphics/drawable.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/particle_engine.h"
