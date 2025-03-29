@@ -28,6 +28,7 @@
 #include "base/utility.h"
 #include "base/assert.h"
 #include "base/threadpool.h"
+#include "audio/port.h"
 #include "audio/buffer.h"
 #include "audio/format.h"
 #include "audio/command.h"
@@ -38,95 +39,6 @@ typedef struct SRC_STATE_tag SRC_STATE;
 namespace audio
 {
     class Decoder;
-
-    struct PortDesc {
-        std::string name;
-    };
-
-    // Port provides an input/output abstraction for connecting
-    // elements and their output ports to input ports.
-    // A port is used to push and pull data buffers in and out.
-    // Each port additionally specifies the format that it supports
-    // and understand.
-    class Port
-    {
-    public:
-        using BufferHandle = audio::BufferHandle;
-        using Format = audio::Format;
-
-        explicit Port(const std::string& name)
-          : mName(name)
-        {}
-
-        // Push a new buffer for into the port.
-        // The audio graph will *pull* from the source output ports
-        // and *push* into the destination input ports.
-        // An element will *pull* from its input ports and *push*
-        // into its output ports.
-        // Returns false if the queue overflowed and buffer could
-        // not be pushed.
-        bool PushBuffer(BufferHandle buffer) noexcept
-        {
-            if (mBuffer)
-                return false;
-            mBuffer = std::move(buffer);
-            return true;
-        }
-
-        // Pull a buffer out of the port.
-        // The audio graph will *pull* from the source output ports
-        // and *push* into the destination input ports.
-        // An element will *pull* from its input ports and *push*
-        // into its output ports.
-        // Returns false if the port was empty and no buffer was available.
-        bool PullBuffer(BufferHandle& buffer) noexcept
-        {
-            if (!mBuffer)
-                return false;
-            buffer = std::move(mBuffer);
-            mBuffer = BufferHandle {};
-            return true;
-        }
-
-        // Get the human -readable name of the port.
-        inline std::string GetName() const
-        { return mName; }
-
-        // Get the port's data format. The format is undefined until
-        // the whole audio graph has been prepared.
-        inline  Format GetFormat() const noexcept
-        { return mFormat; }
-
-        // Set the result of the port format negotiation.
-        inline void SetFormat(const Format& format) noexcept
-        { mFormat = format; }
-
-        // Perform format compatibility check by checking against the given
-        // suggested audio stream format. Should return true if the format
-        // is accepted or false to indicate that the format is not supported.
-        inline bool CanAccept(const Format& format) const noexcept
-        {
-            return true;
-        }
-
-        // Return true if there are pending buffers in the port's buffer queue.
-        inline bool HasBuffers() const noexcept
-        {
-            return mBuffer ? true : false;
-        }
-
-        // Return true if the port is full and cannot queue more.
-        inline bool IsFull() const noexcept
-        {
-            return mBuffer ? true : false;
-        }
-    private:
-        const std::string mName;
-        Format mFormat;
-        BufferHandle mBuffer;
-    };
-
-    using SingleSlotPort = Port;
 
     // Audio processing element. Each element can have multiple input
     // and output ports with various port format settings. During
