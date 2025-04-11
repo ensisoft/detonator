@@ -93,6 +93,7 @@ namespace dev
         virtual void SetColorDepthStencilState(const ColorDepthStencilState& state) const = 0;
         virtual void SetRasterState(const RasterState& state) const = 0;
         virtual void SetProgramState(const GraphicsProgram& program, const ProgramState& state) const = 0;
+        virtual void ModifyState(const StateValue& value, StateName state) const = 0;
         virtual void BindProgramBuffer(const GraphicsProgram& program, const GraphicsBuffer& buffer,
                                        const std::string& interface_block_name, unsigned binding_index) = 0;
 

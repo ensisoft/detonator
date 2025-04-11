@@ -164,10 +164,12 @@ namespace gfx
         using DepthTest   = Device::ColorDepthStencilState::DepthTest;
         using Culling     = Device::RasterState::Culling;
         using WindigOrder = Device::RasterState::WindingOrder;
+        using BlendOp     = Device::RasterState::BlendOp;
+        using RasterState = Device::RasterState;
+        using ColorDepthStencilState = Device::ColorDepthStencilState;
 
         struct DrawState {
             bool write_color = true;
-            StencilOp stencil_op = StencilOp::DontModify;
             // the stencil test function.
             StencilFunc  stencil_func  = StencilFunc::Disabled;
             // what to do when the stencil test fails.
@@ -211,7 +213,14 @@ namespace gfx
             void* user = nullptr;
             // State aggregate for the device state for depth testing
             // stencil testing etc.
-            DrawState state;
+            struct State {
+                DepthTest depth_test = DepthTest::LessOrEQual;
+                Culling culling = Culling::Back;
+                WindigOrder winding = WindigOrder::CounterClockWise;
+                BlendOp blending = BlendOp::None;
+                float line_width = 1.0f;
+                bool premulalpha = false;
+            } state;
 
             std::optional<InstancedDraw> instanced_draw;
 
@@ -226,7 +235,7 @@ namespace gfx
         // which provides the geometrical information of the object to be drawn, a material,
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
-        bool Draw(const DrawList& list, const ShaderProgram& program) const;
+        bool Draw(const DrawList& list, const ShaderProgram& program, const ColorDepthStencilState& cds) const;
 
         // legacy draw functions.
 

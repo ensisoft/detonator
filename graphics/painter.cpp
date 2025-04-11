@@ -68,16 +68,18 @@ void Painter::Prime(DrawCommand& draw) const
         draw.instance_draw_ptr = GetGpuInstancedDraw(draw.instanced_draw.value(), *draw.drawable, drawable_env);
 }
 
-bool Painter::Draw(const DrawList& list, const ShaderProgram& program) const
+bool Painter::Draw(const DrawList& list, const ShaderProgram& program, const ColorDepthStencilState& cds) const
 {
     static const glm::mat4 Identity(1.0f);
+
+    gfx::DeviceState ds(mDevice);
 
     gfx::Device::ViewportState vs;
     vs.viewport = MapToDevice(mViewport);
     vs.scissor  = MapToDevice(mScissor);
 
-    gfx::DeviceState ds(mDevice);
-    ds.SetState(vs);
+    mDevice->SetViewportState(vs);
+    mDevice->SetColorDepthStencilState(cds);
 
     std::unordered_set<std::string> used_programs;
 
@@ -153,16 +155,8 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         // in order to render only a part of the geometry. i.e. a sub-mesh.
         const auto& cmd_params = draw.drawable->GetDrawCmd();
 
-        Device::ColorDepthStencilState dss;
-        dss.stencil_func  = draw.state.stencil_func;
-        dss.stencil_dpass = draw.state.stencil_dpass;
-        dss.stencil_dfail = draw.state.stencil_dfail;
-        dss.stencil_fail  = draw.state.stencil_fail;
-        dss.stencil_mask  = draw.state.stencil_mask;
-        dss.stencil_ref   = draw.state.stencil_ref;
-        dss.bWriteColor   = draw.state.write_color;
-        dss.depth_test    = draw.state.depth_test;
-        mDevice->SetColorDepthStencilState(dss);
+        // modify the depth testing state since this is per draw right now.
+        mDevice->ModifyState(draw.state.depth_test, Device::StateName::DepthTest);
 
         mDevice->Draw(*gpu_program,
                       gpu_program_state,
@@ -186,11 +180,24 @@ bool Painter::Draw(const Drawable& shape,
 {
     std::vector<DrawCommand> list;
     list.resize(1);
-    list[0].drawable = &shape;
-    list[0].material = &material;
-    list[0].model    = &model;
-    list[0].state    = state;
-    return Draw(list, program);
+    list[0].drawable   = &shape;
+    list[0].material   = &material;
+    list[0].model      = &model;
+    list[0].state.line_width = state.line_width;
+    list[0].state.culling    = state.culling;
+    list[0].state.depth_test = state.depth_test;
+
+    ColorDepthStencilState cds;
+    cds.depth_test    = state.depth_test;
+    cds.stencil_func  = state.stencil_func;
+    cds.stencil_fail  = state.stencil_fail;
+    cds.stencil_dpass = state.stencil_dpass;
+    cds.stencil_dfail = state.stencil_dfail;
+    cds.stencil_mask  = state.stencil_mask;
+    cds.stencil_ref   = state.stencil_ref;
+    cds.bWriteColor   = state.write_color;
+
+    return Draw(list, program, cds);
 }
 
 bool Painter::Draw(const Drawable& shape,
@@ -202,13 +209,26 @@ bool Painter::Draw(const Drawable& shape,
 {
     std::vector<DrawCommand> list;
     list.resize(1);
-    list[0].drawable = &shape;
-    list[0].material = &material;
-    list[0].model    = &model;
-    list[0].state    = state;
+    list[0].drawable   = &shape;
+    list[0].material   = &material;
+    list[0].model      = &model;
+    list[0].state.culling    = state.culling;
+    list[0].state.winding    = state.winding;
+    list[0].state.depth_test = state.depth_test;
     list[0].state.line_width = legacy_draw_state.line_width;
     list[0].state.culling    = legacy_draw_state.culling;
-    return Draw(list, program);
+
+    ColorDepthStencilState cds;
+    cds.depth_test    = state.depth_test;
+    cds.stencil_func  = state.stencil_func;
+    cds.stencil_fail  = state.stencil_fail;
+    cds.stencil_dpass = state.stencil_dpass;
+    cds.stencil_dfail = state.stencil_dfail;
+    cds.stencil_mask  = state.stencil_mask;
+    cds.stencil_ref   = state.stencil_ref;
+    cds.bWriteColor   = state.write_color;
+
+    return Draw(list, program, cds);
 }
 
 bool Painter::Draw(const Drawable& drawable,
@@ -220,6 +240,9 @@ bool Painter::Draw(const Drawable& drawable,
     state.write_color  = true;
     state.stencil_func = StencilFunc::Disabled;
     state.depth_test   = DepthTest::Disabled;
+    state.winding      = WindigOrder::CounterClockWise;
+    state.culling      = draw_state.culling;
+    state.line_width   = draw_state.line_width;
 
     FlatShadedColorProgram program;
     return Draw(drawable, model, material, state, program, draw_state);

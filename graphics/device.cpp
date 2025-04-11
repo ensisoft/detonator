@@ -81,6 +81,7 @@ public:
     void PopState(StateKey key) override;
     void SetViewportState(const ViewportState& state) const override;
     void SetColorDepthStencilState(const ColorDepthStencilState& state) const override;
+    void ModifyState(const StateValue& value, StateName name) const override;
 
     void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
               const gfx::GeometryDrawCommand& geometry, const RasterState& state, gfx::Framebuffer* fbo) override;
@@ -388,6 +389,22 @@ void GraphicsDevice::SetColorDepthStencilState(const ColorDepthStencilState& sta
     top.ds = state;
     mDevice->SetColorDepthStencilState(state);
 }
+
+void GraphicsDevice::ModifyState(const StateValue& value, StateName name) const
+{
+    ASSERT(!mStateStack.empty());
+    auto& top = mStateStack.top();
+
+    if (name == StateName::DepthTest)
+    {
+        ASSERT(std::holds_alternative<DepthTest>(value));
+        top.ds.depth_test = std::get<DepthTest>(value);
+
+    } else BUG("Bug on render state.");
+
+    mDevice->ModifyState(value, name);
+}
+
 
 void GraphicsDevice::Draw(const gfx::Program& program,
                           const gfx::ProgramState& program_state,

@@ -272,8 +272,6 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
         draw.state.culling      = packet.culling;
         draw.state.line_width   = packet.line_width;
         draw.state.depth_test   = packet.depth_test;
-        draw.state.write_color  = true;
-        draw.state.stencil_func = gfx::Painter::StencilFunc ::Disabled;
         draw.view               = view;
         draw.projection         = projection;
         scene_painter.Prime(draw);
@@ -301,48 +299,36 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
     }
     TRACE_LEAVE(CreateDrawCmd);
 
-    // set the state for each draw packet.
-    TRACE_ENTER(ArrangeLayers);
-    for (auto& scene_layer : layers)
-    {
-        for (auto& entity_layer : scene_layer)
-        {
-            const auto needs_stencil = !entity_layer.mask_cover_list.empty() ||
-                                       !entity_layer.mask_expose_list.empty();
-            if (needs_stencil)
-            {
-                for (auto& draw : entity_layer.mask_expose_list)
-                {
-                    draw.state.write_color   = false;
-                    draw.state.stencil_ref   = 1;
-                    draw.state.stencil_mask  = 0xff;
-                    draw.state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
-                    draw.state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
-                    draw.state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
-                }
-                for (auto& draw : entity_layer.mask_cover_list)
-                {
-                    draw.state.write_color   = false;
-                    draw.state.stencil_ref   = 0;
-                    draw.state.stencil_mask  = 0xff;
-                    draw.state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
-                    draw.state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
-                    draw.state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
-                }
-                for (auto& draw : entity_layer.draw_color_list)
-                {
-                    draw.state.write_color   = true;
-                    draw.state.stencil_ref   = 1;
-                    draw.state.stencil_mask  = 0xff;
-                    draw.state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
-                    draw.state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
-                    draw.state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
-                }
-            }
-        }
-    }
-    TRACE_LEAVE(ArrangeLayers);
+    gfx::Painter::ColorDepthStencilState mask_cover_state;
+    mask_cover_state.bWriteColor   = false;
+    mask_cover_state.stencil_ref   = 0;
+    mask_cover_state.stencil_mask  = 0xff;
+    mask_cover_state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+    mask_cover_state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+    mask_cover_state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
 
+    gfx::Painter::ColorDepthStencilState mask_expose_state;
+    mask_expose_state.bWriteColor   = false;
+    mask_expose_state.stencil_ref   = 1;
+    mask_expose_state.stencil_mask  = 0xff;
+    mask_expose_state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+    mask_expose_state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+    mask_expose_state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+
+    gfx::Painter::ColorDepthStencilState mask_draw_color_state;
+    mask_draw_color_state.bWriteColor   = true;
+    mask_draw_color_state.stencil_ref   = 1;
+    mask_draw_color_state.stencil_mask  = 0xff;
+    mask_draw_color_state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
+    mask_draw_color_state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
+    mask_draw_color_state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
+
+    gfx::Painter::ColorDepthStencilState draw_color_state;
+    draw_color_state.bWriteColor = true;
+    draw_color_state.stencil_ref = 0;
+    draw_color_state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+
+    TRACE_ENTER(DrawLayers);
     for (const auto& scene_layer : layers)
     {
         for (const auto& entity_layer : scene_layer)
@@ -356,29 +342,29 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
                 gfx::StencilShaderProgram stencil_program;
 
                 scene_painter.ClearStencil(gfx::StencilClearValue(1));
-                scene_painter.Draw(entity_layer.mask_cover_list, stencil_program);
-                scene_painter.Draw(entity_layer.mask_expose_list, stencil_program);
-                scene_painter.Draw(entity_layer.draw_color_list, program);
+                scene_painter.Draw(entity_layer.mask_cover_list,  stencil_program, mask_cover_state);
+                scene_painter.Draw(entity_layer.mask_expose_list, stencil_program, mask_expose_state);
+                scene_painter.Draw(entity_layer.draw_color_list,  program, mask_draw_color_state);
             }
             else if (!entity_layer.mask_cover_list.empty())
             {
                 gfx::StencilShaderProgram stencil_program;
 
                 scene_painter.ClearStencil(gfx::StencilClearValue(1));
-                scene_painter.Draw(entity_layer.mask_cover_list, stencil_program);
-                scene_painter.Draw(entity_layer.draw_color_list, program);
+                scene_painter.Draw(entity_layer.mask_cover_list, stencil_program, mask_cover_state);
+                scene_painter.Draw(entity_layer.draw_color_list, program, mask_draw_color_state);
             }
             else if (!entity_layer.mask_expose_list.empty())
             {
                 gfx::StencilShaderProgram stencil_program;
 
                 scene_painter.ClearStencil(gfx::StencilClearValue(0));
-                scene_painter.Draw(entity_layer.mask_expose_list, stencil_program);
-                scene_painter.Draw(entity_layer.draw_color_list, program);
+                scene_painter.Draw(entity_layer.mask_expose_list, stencil_program, mask_expose_state);
+                scene_painter.Draw(entity_layer.draw_color_list, program, mask_draw_color_state);
             }
             else if (!entity_layer.draw_color_list.empty())
             {
-                scene_painter.Draw(entity_layer.draw_color_list, program);
+                scene_painter.Draw(entity_layer.draw_color_list, program, draw_color_state);
             }
 
             if (mRenderHook)
@@ -395,6 +381,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
             }
         }
     }
+    TRACE_LEAVE(DrawLayers);
 
     // draw editor packets
     if (mSettings.editing_mode)
