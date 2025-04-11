@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <variant>
 
 #include "base/types.h"
 #include "device/enum.h"
@@ -87,6 +88,13 @@ namespace dev
 
         bool premulalpha = false;
     };
+
+    enum class StateName {
+        Culling, Blending, WindingOrder, DepthTest
+    };
+    using StateValue = std::variant<dev::Culling,
+            dev::BlendOp, dev::PolygonWindingOrder,
+            dev::DepthTest>;
 
     struct GraphicsDeviceResourceStats {
         // vertex buffer objects

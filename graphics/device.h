@@ -50,6 +50,9 @@ namespace gfx
         using ColorDepthStencilState = dev::ColorDepthStencilState;
         using ResourceStats = dev::GraphicsDeviceResourceStats;
         using DeviceCaps = dev::GraphicsDeviceCaps;
+        using StateName = dev::StateName;
+        using StateValue = dev::StateValue;
+        using DepthTest = dev::DepthTest;
 
         using ColorAttachment = gfx::Framebuffer::ColorAttachment;
 
@@ -153,6 +156,7 @@ namespace gfx
         virtual void PopState(StateKey key) = 0;
         virtual void SetViewportState(const ViewportState& state) const = 0;
         virtual void SetColorDepthStencilState(const ColorDepthStencilState& state) const = 0;
+        virtual void ModifyState(const StateValue& value, StateName name) const = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
         virtual void Draw(const Program& program, const ProgramState& program_state,

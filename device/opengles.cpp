@@ -1830,6 +1830,63 @@ public:
                                   buffer.buffer_bytes));
     }
 
+    void ModifyState(const dev::StateValue& value, dev::StateName state) const override
+    {
+        if (state == dev::StateName::DepthTest)
+        {
+            ASSERT(std::holds_alternative<dev::DepthTest>(value));
+            const auto depth_test = std::get<dev::DepthTest>(value);
+            if (depth_test == dev::DepthTest::Disabled) {
+                GL_CALL(glDisable(GL_DEPTH_TEST));
+            } else if (depth_test == dev::DepthTest::LessOrEQual) {
+                GL_CALL(glDepthFunc(GL_LEQUAL));
+                GL_CALL(glEnable(GL_DEPTH_TEST));
+            } else BUG("Missing depth test.");
+        }
+        else if (state == dev::StateName::Culling)
+        {
+            ASSERT(std::holds_alternative<dev::Culling>(value));
+            const auto culling = std::get<dev::Culling>(value);
+            if (culling == dev::Culling::None) {
+                GL_CALL(glDisable(GL_CULL_FACE));
+            } else if (culling == dev::Culling::Front) {
+                GL_CALL(glEnable(GL_CULL_FACE));
+                GL_CALL(glCullFace(GL_FRONT));
+            } else if (culling == dev::Culling::Back) {
+                GL_CALL(glEnable(GL_CULL_FACE));
+                GL_CALL(glCullFace(GL_BACK));
+            } else if (culling == dev::Culling::FrontAndBack) {
+                GL_CALL(glEnable(GL_CULL_FACE));
+                GL_CALL(glCullFace(GL_FRONT_AND_BACK));
+            } else BUG("Bug on cull face state.");
+
+        } else if (state == dev::StateName::Blending) {
+
+            ASSERT(std::holds_alternative<dev::BlendOp>(value));
+            const auto blending = std::get<dev::BlendOp>(value);
+            if (blending == dev::BlendOp::None) {
+                GL_CALL(glDisable(GL_BLEND));
+            } else if (blending == dev::BlendOp::Transparent) {
+                GL_CALL(glEnable(GL_BLEND));
+                GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+            } else if (blending == dev::BlendOp::Additive) {
+                GL_CALL(glEnable(GL_BLEND));
+                GL_CALL(glBlendFunc(GL_ONE, GL_ONE));
+            } else BUG("Bug on blend state.");
+
+        } else if (state == dev::StateName::WindingOrder) {
+
+            ASSERT(std::holds_alternative<dev::PolygonWindingOrder>(value));
+            const auto winding_order = std::get<dev::PolygonWindingOrder>(value);
+
+            if (winding_order == dev::PolygonWindingOrder::CounterClockWise) {
+                GL_CALL(glFrontFace(GL_CCW));
+            } else if (winding_order == dev::PolygonWindingOrder::ClockWise) {
+                GL_CALL(glFrontFace(GL_CW));
+            } else BUG("Bug on polygon winding order.");
+        }
+    }
+
     void SetViewportState(const dev::ViewportState& state) const override
     {
         GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),

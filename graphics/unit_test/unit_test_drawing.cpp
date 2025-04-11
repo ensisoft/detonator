@@ -314,6 +314,8 @@ public:
     {}
     void SetColorDepthStencilState(const ColorDepthStencilState&) const override
     {}
+    void ModifyState(const StateValue&, StateName) const override
+    {}
 
     void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
               const gfx::GeometryDrawCommand& geometry, const RasterState& state, gfx::Framebuffer* fbo) override

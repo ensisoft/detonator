@@ -3064,7 +3064,13 @@ public:
         draw_list.push_back(cmd);
 
         gfx::FlatShadedColorProgram program;
-        painter.Draw(draw_list, program);
+
+        gfx::Painter::ColorDepthStencilState cds;
+        cds.depth_test   = gfx::Painter::DepthTest::Disabled;
+        cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        cds.bWriteColor  = true;
+
+        painter.Draw(draw_list, program, cds);
     }
     std::string GetName() const override
     {
@@ -3146,13 +3152,18 @@ public:
         gfx::Painter::DrawCommand cmd;
         cmd.drawable = &drawable;
         cmd.material = &material;
-        cmd.state    = state;
+        cmd.state.culling  = gfx::Painter::Culling::Back;
         cmd.instanced_draw = instanced;
 
         gfx::Painter::DrawList draw_list;
         draw_list.push_back(cmd);
 
-        p.Draw(draw_list, program);
+        gfx::Painter::ColorDepthStencilState cds;
+        cds.depth_test   = gfx::Painter::DepthTest::Disabled;
+        cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        cds.bWriteColor  = true;
+
+        p.Draw(draw_list, program, cds);
     }
     void Update(float dt) override
     {
@@ -3210,8 +3221,13 @@ public:
         gfx::Painter::DrawList draw_list;
         draw_list.push_back(cmd);
 
+        gfx::Painter::ColorDepthStencilState cds;
+        cds.depth_test   = gfx::Painter::DepthTest::Disabled;
+        cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        cds.bWriteColor  = true;
+
         gfx::FlatShadedColorProgram program;
-        painter.Draw(draw_list, program);
+        painter.Draw(draw_list, program, cds);
     }
 
     std::string GetName() const override
@@ -3279,8 +3295,13 @@ public:
         gfx::Painter::DrawList draw_list;
         draw_list.push_back(cmd);
 
+        gfx::Painter::ColorDepthStencilState cds;
+        cds.depth_test   = gfx::Painter::DepthTest::Disabled;
+        cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        cds.bWriteColor  = true;
+
         gfx::FlatShadedColorProgram program;
-        painter.Draw(draw_list, program);
+        painter.Draw(draw_list, program, cds);
     }
 
     void Start() override
