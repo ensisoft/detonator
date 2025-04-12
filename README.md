@@ -14,6 +14,8 @@ as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time 
 
 ### CURRENT TOP FEATURES 🔥
 
+* <b>Run everything locally on your machine</b> 💻
+  * <i>No accounts, no tracking, no fuss. Just extract the binary and run!</i>  
 * <b>Supports Windows, Linux and HTML5/WASM</b> 🪟🐧🌐
   * <i>Game packages for all platforms built directly in the editor</i> 
 * <b>Fully featured editor for game development </b> 💯
@@ -26,7 +28,6 @@ as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time 
   * <i>Multiple demo projects ready to run!</i>  
 
 <details><summary><strong>Click here for more features...</strong></summary>
-<br>
 
 * Windows, Linux and HTML5/WASM support
 * Qt5 based WYSIWYG editor
@@ -135,6 +136,7 @@ and knobs that control the particle effect.</i><br><br>
 </details>
 
 ## DEV ZONE 👨🏼‍💻
+
 ### [Build Instructions](BUILDING.md)
 ### [Software Architecture](ARCHITECTURE.md)
 ### [Software Design](DESIGN.md)
