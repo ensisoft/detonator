@@ -53,6 +53,8 @@
 
 namespace engine
 {
+    using EventListener = wdk::WindowListener;
+
     // The engine interface provides an abstract interface and a binary
     // firewall for separating the actual game engine implementation from
     // the host application and its environment. The host application will
@@ -394,7 +396,7 @@ namespace engine
 
         // Get the window listener object that is used to handle
         // the window events coming from the current application window.
-        virtual wdk::WindowListener* GetWindowListener()
+        virtual EventListener* GetWindowListener()
         { return nullptr; }
 
         // Statistics collected by the host application (process).
