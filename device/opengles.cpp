@@ -406,6 +406,11 @@ private:
     mutable std::unordered_map<unsigned, TextureState> mTextureState;
     mutable std::unordered_map<unsigned, FramebufferState> mFramebufferState;
 
+    // cached state used to cull superfluous state setting calls.
+    mutable dev::RasterState mRasterState;
+    mutable dev::ColorDepthStencilState mColorDepthStencilState;
+    mutable dev::ViewportState mViewportState;
+
     // vertex buffers at index 0 and index buffers at index 1, uniform buffers at index 2
     std::vector<BufferObject> mBuffers[3];
 
@@ -455,6 +460,102 @@ private:
         block.hash = 0;
         cache[name] = block;
         return cache[name];
+    }
+
+    void SetState(dev::BlendOp blending, bool premulalpha) const noexcept
+    {
+        // blending
+        if (mRasterState.blending != blending  ||
+            (mRasterState.blending == dev::BlendOp::Transparent && mRasterState.premulalpha != premulalpha))
+        {
+            if (blending == dev::BlendOp::None)
+            {
+                GL_CALL(glDisable(GL_BLEND));
+            }
+            else if (blending == dev::BlendOp::Transparent && premulalpha)
+            {
+                GL_CALL(glEnable(GL_BLEND));
+                GL_CALL(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+            }
+            else if (blending == dev::BlendOp::Transparent)
+            {
+                GL_CALL(glEnable(GL_BLEND));
+                GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+            }
+            else if (blending == dev::BlendOp::Additive)
+            {
+                GL_CALL(glEnable(GL_BLEND));
+                GL_CALL(glBlendFunc(GL_ONE, GL_ONE));
+            }
+            else BUG("Bug on blend state.");
+
+            mRasterState.blending = blending;
+            mRasterState.premulalpha = premulalpha;
+        }
+    }
+    void SetState(dev::PolygonWindingOrder winding_order) const noexcept
+    {
+        if (mRasterState.winding_order == winding_order)
+            return;
+
+        if (winding_order == dev::PolygonWindingOrder::CounterClockWise)
+        {
+            GL_CALL(glFrontFace(GL_CCW));
+        }
+        else if (winding_order == dev::PolygonWindingOrder::ClockWise)
+        {
+            GL_CALL(glFrontFace(GL_CW));
+        }
+        else BUG("Bug on polygon winding order.");
+
+        mRasterState.winding_order = winding_order;
+    }
+    void SetState(dev::Culling culling) const noexcept
+    {
+        if (mRasterState.culling == culling)
+            return;
+
+        if (culling == dev::Culling::None)
+        {
+            GL_CALL(glDisable(GL_CULL_FACE));
+        }
+        else if (culling == dev::Culling::Front)
+        {
+            GL_CALL(glEnable(GL_CULL_FACE));
+            GL_CALL(glCullFace(GL_FRONT));
+        }
+        else if (culling == dev::Culling::Back)
+        {
+            GL_CALL(glEnable(GL_CULL_FACE));
+            GL_CALL(glCullFace(GL_BACK));
+        }
+        else if (culling == dev::Culling::FrontAndBack)
+        {
+            GL_CALL(glEnable(GL_CULL_FACE));
+            GL_CALL(glCullFace(GL_FRONT_AND_BACK));
+        }
+        else BUG("Bug on cull face state.");
+
+        mRasterState.culling = culling;
+
+    }
+    void SetState(dev::DepthTest depth_test) const noexcept
+    {
+        if (mColorDepthStencilState.depth_test == depth_test)
+            return;
+
+        if (depth_test == dev::DepthTest::Disabled)
+        {
+            GL_CALL(glDisable(GL_DEPTH_TEST));
+        }
+        else if (depth_test == dev::DepthTest::LessOrEQual)
+        {
+            GL_CALL(glEnable(GL_DEPTH_TEST));
+            GL_CALL(glDepthFunc(GL_LEQUAL));
+        }
+        else BUG("Bug on depth test state.");
+
+        mColorDepthStencilState.depth_test = depth_test;
     }
 
 public:
@@ -676,9 +777,23 @@ public:
         // set some initial state
         GL_CALL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
         GL_CALL(glDisable(GL_DEPTH_TEST));
+        GL_CALL(glDisable(GL_BLEND));
+        GL_CALL(glDisable(GL_STENCIL_TEST));
+        GL_CALL(glDisable(GL_SCISSOR_TEST));
         GL_CALL(glEnable(GL_CULL_FACE));
         GL_CALL(glCullFace(GL_BACK));
         GL_CALL(glFrontFace(GL_CCW));
+        GL_CALL(glLineWidth(1.0));
+        GL_CALL(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)); // bWriteColor
+
+        mRasterState.culling  = dev::Culling::Back;
+        mRasterState.blending = dev::BlendOp::None;
+        mRasterState.winding_order = dev::PolygonWindingOrder::CounterClockWise;
+        mRasterState.line_width = 1.0;
+
+        mColorDepthStencilState.depth_test = dev::DepthTest::Disabled;
+        mColorDepthStencilState.stencil_func = dev::StencilFunc::Disabled;
+        mColorDepthStencilState.bWriteColor = true;
 
         have_printed_info = true;
 
@@ -1774,42 +1889,16 @@ public:
 
     void SetRasterState(const dev::RasterState& state) const override
     {
-        GL_CALL(glLineWidth(state.line_width));
+        if (mRasterState.line_width != state.line_width)
+        {
+            GL_CALL(glLineWidth(state.line_width));
 
-        // polygon winding order
-        if (state.winding_order == dev::PolygonWindingOrder::CounterClockWise) {
-            GL_CALL(glFrontFace(GL_CCW));
-        } else if (state.winding_order == dev::PolygonWindingOrder::ClockWise) {
-            GL_CALL(glFrontFace(GL_CW));
-        } else BUG("Bug on polygon winding order.");
+            mRasterState.line_width = state.line_width;
+        }
 
-        // blending
-        if (state.blending == dev::BlendOp::None) {
-            GL_CALL(glDisable(GL_BLEND));
-        } else if (state.blending == dev::BlendOp::Transparent && state.premulalpha) {
-            GL_CALL(glEnable(GL_BLEND));
-            GL_CALL(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
-        } else if (state.blending == dev::BlendOp::Transparent) {
-            GL_CALL(glEnable(GL_BLEND));
-            GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-        } else if (state.blending == dev::BlendOp::Additive) {
-            GL_CALL(glEnable(GL_BLEND));
-            GL_CALL(glBlendFunc(GL_ONE, GL_ONE));
-        } else BUG("Bug on blend state.");
-
-        // culling
-        if (state.culling == dev::Culling::None) {
-            GL_CALL(glDisable(GL_CULL_FACE));
-        } else if (state.culling == dev::Culling::Front) {
-            GL_CALL(glEnable(GL_CULL_FACE));
-            GL_CALL(glCullFace(GL_FRONT));
-        } else if (state.culling == dev::Culling::Back) {
-            GL_CALL(glEnable(GL_CULL_FACE));
-            GL_CALL(glCullFace(GL_BACK));
-        } else if (state.culling == dev::Culling::FrontAndBack) {
-            GL_CALL(glEnable(GL_CULL_FACE));
-            GL_CALL(glCullFace(GL_FRONT_AND_BACK));
-        } else BUG("Bug on cull face state.");
+        SetState(state.winding_order);
+        SetState(state.blending, state.premulalpha);
+        SetState(state.culling);
     }
 
     void BindProgramBuffer(const dev::GraphicsProgram& program, const dev::GraphicsBuffer& buffer,
@@ -1836,99 +1925,118 @@ public:
         {
             ASSERT(std::holds_alternative<dev::DepthTest>(value));
             const auto depth_test = std::get<dev::DepthTest>(value);
-            if (depth_test == dev::DepthTest::Disabled) {
-                GL_CALL(glDisable(GL_DEPTH_TEST));
-            } else if (depth_test == dev::DepthTest::LessOrEQual) {
-                GL_CALL(glDepthFunc(GL_LEQUAL));
-                GL_CALL(glEnable(GL_DEPTH_TEST));
-            } else BUG("Missing depth test.");
+            SetState(depth_test);
         }
         else if (state == dev::StateName::Culling)
         {
             ASSERT(std::holds_alternative<dev::Culling>(value));
             const auto culling = std::get<dev::Culling>(value);
-            if (culling == dev::Culling::None) {
-                GL_CALL(glDisable(GL_CULL_FACE));
-            } else if (culling == dev::Culling::Front) {
-                GL_CALL(glEnable(GL_CULL_FACE));
-                GL_CALL(glCullFace(GL_FRONT));
-            } else if (culling == dev::Culling::Back) {
-                GL_CALL(glEnable(GL_CULL_FACE));
-                GL_CALL(glCullFace(GL_BACK));
-            } else if (culling == dev::Culling::FrontAndBack) {
-                GL_CALL(glEnable(GL_CULL_FACE));
-                GL_CALL(glCullFace(GL_FRONT_AND_BACK));
-            } else BUG("Bug on cull face state.");
-
-        } else if (state == dev::StateName::Blending) {
-
+            SetState(culling);
+        }
+        else if (state == dev::StateName::Blending)
+        {
             ASSERT(std::holds_alternative<dev::BlendOp>(value));
             const auto blending = std::get<dev::BlendOp>(value);
-            if (blending == dev::BlendOp::None) {
-                GL_CALL(glDisable(GL_BLEND));
-            } else if (blending == dev::BlendOp::Transparent) {
-                GL_CALL(glEnable(GL_BLEND));
-                GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-            } else if (blending == dev::BlendOp::Additive) {
-                GL_CALL(glEnable(GL_BLEND));
-                GL_CALL(glBlendFunc(GL_ONE, GL_ONE));
-            } else BUG("Bug on blend state.");
-
-        } else if (state == dev::StateName::WindingOrder) {
-
+            SetState(blending, false);
+        }
+        else if (state == dev::StateName::WindingOrder)
+        {
             ASSERT(std::holds_alternative<dev::PolygonWindingOrder>(value));
             const auto winding_order = std::get<dev::PolygonWindingOrder>(value);
-
-            if (winding_order == dev::PolygonWindingOrder::CounterClockWise) {
-                GL_CALL(glFrontFace(GL_CCW));
-            } else if (winding_order == dev::PolygonWindingOrder::ClockWise) {
-                GL_CALL(glFrontFace(GL_CW));
-            } else BUG("Bug on polygon winding order.");
+            SetState(winding_order);
         }
     }
 
     void SetViewportState(const dev::ViewportState& state) const override
     {
-        GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
-                           state.viewport.GetWidth(), state.viewport.GetHeight()));
-        // scissor
-        if (state.scissor.IsEmpty()) {
-            GL_CALL(glDisable(GL_SCISSOR_TEST));
-        } else {
-            GL_CALL(glEnable(GL_SCISSOR_TEST));
-            GL_CALL(glScissor(state.scissor.GetX(), state.scissor.GetY(),
-                              state.scissor.GetWidth(), state.scissor.GetHeight()));
+        if (mViewportState.viewport != state.viewport)
+        {
+            GL_CALL(glViewport(state.viewport.GetX(), state.viewport.GetY(),
+                               state.viewport.GetWidth(), state.viewport.GetHeight()));
+
+            mViewportState.viewport = state.viewport;
+        }
+
+        if (mViewportState.scissor != state.scissor)
+        {
+            if (state.scissor.IsEmpty())
+            {
+                GL_CALL(glDisable(GL_SCISSOR_TEST));
+            }
+            else
+            {
+                GL_CALL(glEnable(GL_SCISSOR_TEST));
+                GL_CALL(glScissor(state.scissor.GetX(), state.scissor.GetY(),
+                                  state.scissor.GetWidth(), state.scissor.GetHeight()));
+            }
+
+            mViewportState.scissor = state.scissor;
         }
     }
 
     void SetColorDepthStencilState(const dev::ColorDepthStencilState& state) const override
     {
         // depth testing
-        if (state.depth_test == dev::DepthTest::Disabled) {
-            GL_CALL(glDisable(GL_DEPTH_TEST));
-        } else if (state.depth_test == dev::DepthTest::LessOrEQual) {
-            GL_CALL(glEnable(GL_DEPTH_TEST));
-            GL_CALL(glDepthFunc(GL_LEQUAL));
-        } else BUG("Bug on depth test state.");
+        SetState(state.depth_test);
 
-        // stencil test and stencil func
-        if (state.stencil_func == dev::StencilFunc::Disabled) {
-            GL_CALL(glDisable(GL_STENCIL_TEST));
-        } else {
-            const auto stencil_func = GetEnum(state.stencil_func);
-            const auto stencil_fail = GetEnum(state.stencil_fail);
-            const auto stencil_dpass = GetEnum(state.stencil_dpass);
-            const auto stencil_dfail = GetEnum(state.stencil_dfail);
-            GL_CALL(glEnable(GL_STENCIL_TEST));
-            GL_CALL(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
-            GL_CALL(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
+        if (mColorDepthStencilState.stencil_func != state.stencil_func)
+        {
+            if (state.stencil_func == dev::StencilFunc::Disabled)
+            {
+                GL_CALL(glDisable(GL_STENCIL_TEST));
+            }
+            else
+            {
+                GL_CALL(glEnable(GL_STENCIL_TEST));
+            }
+
+            mColorDepthStencilState.stencil_func = state.stencil_func;
         }
 
-        // color mask
-        if (state.bWriteColor) {
-            GL_CALL(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
-        } else {
-            GL_CALL(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
+        if (mColorDepthStencilState.stencil_func != dev::StencilFunc::Disabled)
+        {
+            if (mColorDepthStencilState.stencil_func != state.stencil_func ||
+                mColorDepthStencilState.stencil_ref != state.stencil_ref ||
+                mColorDepthStencilState.stencil_mask != state.stencil_mask)
+            {
+                const auto stencil_func = GetEnum(state.stencil_func);
+
+                GL_CALL(glStencilFunc(stencil_func, state.stencil_ref, state.stencil_mask));
+
+                mColorDepthStencilState.stencil_func = state.stencil_func;
+                mColorDepthStencilState.stencil_ref = state.stencil_ref;
+                mColorDepthStencilState.stencil_mask = state.stencil_mask;
+            }
+
+            if (mColorDepthStencilState.stencil_fail != state.stencil_fail ||
+                mColorDepthStencilState.stencil_dfail != state.stencil_dfail ||
+                mColorDepthStencilState.stencil_dpass != state.stencil_dpass)
+            {
+                const auto stencil_fail = GetEnum(state.stencil_fail);
+                const auto stencil_dpass = GetEnum(state.stencil_dpass);
+                const auto stencil_dfail = GetEnum(state.stencil_dfail);
+
+                GL_CALL(glStencilOp(stencil_fail, stencil_dfail, stencil_dpass));
+
+                mColorDepthStencilState.stencil_fail = state.stencil_fail;
+                mColorDepthStencilState.stencil_dfail = state.stencil_dfail;
+                mColorDepthStencilState.stencil_dpass = state.stencil_dpass;
+            }
+        }
+
+        if (mColorDepthStencilState.bWriteColor != state.bWriteColor)
+        {
+            // color mask
+            if (state.bWriteColor)
+            {
+                GL_CALL(glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
+            }
+            else
+            {
+                GL_CALL(glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
+            }
+
+            mColorDepthStencilState.bWriteColor = state.bWriteColor;
         }
     }
 
