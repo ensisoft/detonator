@@ -71,28 +71,28 @@
 
 namespace
 {
-static const unsigned char DetonatorLOGO[] = {
+const unsigned char DetonatorLOGO[] = {
 #include "engine/engine-logo.h"
 };
 // we'll do this dynamically in loading screen.
-static unsigned LogoWidth  = 0;
-static unsigned LogoHeight = 0;
+unsigned LogoWidth  = 0;
+unsigned LogoHeight = 0;
 
 // Default game engine implementation. Implements the main App interface
 // which is the interface that enables the game host to communicate
 // with the application/game implementation in order to update/tick/etc.
 // the game and also to handle input from keyboard and mouse.
-class GameStudioEngine final : public engine::Engine,
-                               public wdk::WindowListener
+class DetonatorEngine final : public engine::Engine,
+                              public engine::EventListener
 {
 public:
-    GameStudioEngine() : mDebugPrints(10)
+    DetonatorEngine() : mDebugPrints(10)
     {}
 
-    virtual bool GetNextRequest(Request* out) override
+    bool GetNextRequest(Request* out) override
     { return mRequests.GetNext(out); }
 
-    virtual void Init(const InitParams& init, const EngineConfig& conf) override
+    void Init(const InitParams& init, const EngineConfig& conf) override
     {
         DEBUG("Engine initializing.");
         audio::Format audio_format;
@@ -126,7 +126,7 @@ public:
         mRuntime->SetSurfaceSize(init.surface_width, init.surface_height);
         mUIEngine.SetClassLibrary(mClasslib);
         mUIEngine.SetLoader(mEngineDataLoader);
-        mUIEngine.SetSurfaceSize(init.surface_width, init.surface_height);
+        mUIEngine.SetSurfaceSize(float(init.surface_width), float(init.surface_height));
         mUIEngine.SetEditingMode(init.editing_mode);
         mRenderer.SetClassLibrary(mClasslib);
         mRenderer.SetEditingMode(init.editing_mode);
@@ -138,7 +138,7 @@ public:
         mPhysics.SetGravity(conf.physics.gravity);
         mPhysics.SetNumPositionIterations(conf.physics.num_position_iterations);
         mPhysics.SetNumVelocityIterations(conf.physics.num_velocity_iterations);
-        mPhysics.SetTimestep(1.0f / conf.updates_per_second);
+        mPhysics.SetTimestep(1.0f / float(conf.updates_per_second));
 
         mFlags.set(Flags::EditingMode,     init.editing_mode);
         mFlags.set(Flags::Running,         true);
@@ -195,7 +195,7 @@ public:
         std::string font;
         std::unique_ptr<gfx::Material> logo;
     };
-    virtual std::unique_ptr<Engine::LoadingScreen> CreateLoadingScreen(const LoadingScreenSettings& settings) override
+    std::unique_ptr<Engine::LoadingScreen> CreateLoadingScreen(const LoadingScreenSettings& settings) override
     {
         auto state = std::make_unique<LoadingScreen>();
 
@@ -218,14 +218,14 @@ public:
         return state;
     }
 
-    virtual void PreloadClass(const Engine::ContentClass& klass, size_t index, size_t last, Engine::LoadingScreen* screen) override
+    void PreloadClass(const Engine::ContentClass& klass, size_t index, size_t last, Engine::LoadingScreen* screen) override
     {
         gfx::Painter dummy;
         dummy.SetEditingMode(mFlags.test(Flags::EditingMode));
         dummy.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
         dummy.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
         dummy.SetPixelRatio(glm::vec2{1.0f, 1.0});
-        dummy.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, mSurfaceWidth, mSurfaceHeight));
+        dummy.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, float(mSurfaceWidth), float(mSurfaceHeight)));
         dummy.SetScissor(0, 0, 1, 1);
         dummy.SetDevice(mDevice);
 
@@ -316,8 +316,8 @@ public:
 
 
         auto* my_screen = static_cast<LoadingScreen*>(screen);
-        const float surf_width = mSurfaceWidth;
-        const float surf_height = mSurfaceHeight;
+        const auto surf_width  = float(mSurfaceWidth);
+        const auto surf_height = float(mSurfaceHeight);
 
         mDevice->BeginFrame();
         mDevice->ClearColor(gfx::Color::Black);
@@ -340,9 +340,9 @@ public:
             const float device_viewport_height = height * scale;
 
             gfx::IRect device_viewport;
-            device_viewport.Move((surf_width - device_viewport_width) * 0.5,
-                                 (surf_height - device_viewport_height) * 0.5);
-            device_viewport.Resize(device_viewport_width, device_viewport_height);
+            device_viewport.Move((surf_width - device_viewport_width) * 0.5f,
+                                 (surf_height - device_viewport_height) * 0.5f);
+            device_viewport.Resize(int(device_viewport_width), int(device_viewport_height));
 
             gfx::Painter painter(mDevice);
             painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
@@ -364,11 +364,11 @@ public:
             painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
             painter.SetPixelRatio(glm::vec2(1.0f, 1.0f));
             painter.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
-            painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, mSurfaceWidth, mSurfaceHeight));
+            painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, float(mSurfaceWidth), float(mSurfaceHeight)));
             painter.SetEditingMode(mFlags.test(Flags::EditingMode));
 
             painter.ClearColor(gfx::Color::Black);
-            const auto& window = gfx::FRect(0.0f, 0.0f, mSurfaceWidth, mSurfaceHeight);
+            const auto& window = gfx::FRect(0.0f, 0.0f, float(mSurfaceWidth), float(mSurfaceHeight));
 
             const auto have_logo = LogoWidth && LogoHeight;
             const auto& logo_rect = CenterRectOnRect(window, gfx::FRect(0.0f, 0.0f,
@@ -384,7 +384,7 @@ public:
             text_rect.Translate(logo_rect.GetPosition());
             text_rect.Translate(0.0f, logo_rect.GetHeight());
 
-            const int done = ((float)index / (float)last) * 100;
+            const int done = int((float(index) / float(last)) * 100.0f);
 
             gfx::FillRect(painter, text_rect, gfx::Color::Black);
             gfx::DrawTextRect(painter,  base::FormatString("Loading ... %1%\n%2", done, klass.name),
@@ -399,7 +399,7 @@ public:
         mDevice->EndFrame(true);
     }
 
-    virtual void NotifyClassUpdate(const ContentClass& klass) override
+    void NotifyClassUpdate(const ContentClass& klass) override
     {
         DEBUG("Content class was updated. [type=%1, name='%2', id='%2]", klass.type, klass.name, klass.id);
 
@@ -409,24 +409,24 @@ public:
         k.id   = klass.id;
         mRuntime->OnContentClassUpdate(k);
     }
-    virtual void SetRendererConfig(const RendererConfig& config) override
+    void SetRendererConfig(const RendererConfig& config) override
     {
         mRendererConfig = config;
     }
 
-    virtual bool Load() override
+    bool Load() override
     {
         DEBUG("Loading game state.");
         mRuntime->LoadGame();
         return true;
     }
 
-    virtual void Start() override
+    void Start() override
     {
         DEBUG("Starting game play.");
         mRuntime->StartGame();
     }
-    virtual void SetDebugOptions(const DebugOptions& debug) override
+    void SetDebugOptions(const DebugOptions& debug) override
     {
         mDebug = debug;
 
@@ -443,24 +443,24 @@ public:
             }
         }
     }
-    virtual void DebugPrintString(const std::string& message) override
+    void DebugPrintString(const std::string& message) override
     {
         DebugPrint print;
         print.message = message;
         mDebugPrints.push_back(std::move(print));
     }
-    virtual void SetTracer(base::Trace* tracer, base::TraceWriter* writer) override
+    void SetTracer(base::Trace* tracer, base::TraceWriter* writer) override
     {
         if (mAudio)
             mAudio->SetAudioThreadTraceWriter(writer);
     }
-    virtual void SetTracingOn(bool on_off) override
+    void SetTracingOn(bool on_off) override
     {
         if (mAudio)
             mAudio->EnableAudioThreadTrace(on_off);
     }
 
-    virtual void SetEnvironment(const Environment& env) override
+    void SetEnvironment(const Environment& env) override
     {
         mClasslib         = env.classlib;
         mEngineDataLoader = env.engine_loader;
@@ -476,7 +476,7 @@ public:
         DEBUG("User home: '%1'.", env.user_home);
     }
 
-    virtual void Draw(float dt) override
+    void Draw(float dt) override
     {
         mDevice->BeginFrame();
         mDevice->ClearColor(mClearColor);
@@ -517,7 +517,7 @@ public:
 
             class CreateNextFrameTask : public base::ThreadTask {
             public:
-                explicit CreateNextFrameTask(GameStudioEngine* engine)
+                explicit CreateNextFrameTask(DetonatorEngine* engine)
                   : mEngine(engine)
                 {}
             protected:
@@ -527,7 +527,7 @@ public:
                 }
 
             private:
-                GameStudioEngine* mEngine = nullptr;
+                DetonatorEngine* mEngine = nullptr;
             };
 
             // create task to create the next frame in the renderer
@@ -573,7 +573,7 @@ public:
         TRACE_CALL("HandleGameActions", PerformGameActions(dt));
     }
 
-    virtual void BeginMainLoop() override
+    void BeginMainLoop() override
     {
         mRuntime->SetFrameNumber(mFrameCounter);
 
@@ -586,12 +586,12 @@ public:
         }
     }
 
-    virtual void Step() override
+    void Step() override
     {
         mStepForward = true;
     }
 
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         // Game play update. NOT the place for any kind of
         // real time/wall time subsystem (such as audio) service
@@ -609,7 +609,7 @@ public:
 
         class UpdateTask : public base::ThreadTask {
         public:
-            explicit UpdateTask(GameStudioEngine* engine, double total_time, float time_step) noexcept
+            explicit UpdateTask(DetonatorEngine* engine, double total_time, float time_step) noexcept
               : mGameTimeTotal(total_time)
               , mGameTimeStep(time_step)
               , mEngine(engine)
@@ -623,7 +623,7 @@ public:
         private:
             const double mGameTimeTotal = 0.0;
             const double mGameTimeStep  = 0.0;
-            GameStudioEngine* mEngine = nullptr;
+            DetonatorEngine* mEngine = nullptr;
         };
 #endif
 
@@ -656,22 +656,22 @@ public:
 #endif
 
     }
-    virtual void EndMainLoop() override
+    void EndMainLoop() override
     {
         mFrameCounter++;
     }
 
-    virtual void Stop() override
+    void Stop() override
     {
         mRuntime->StopGame();
     }
 
-    virtual void Save() override
+    void Save() override
     {
         mRuntime->SaveGame();
     }
 
-    virtual void Shutdown() override
+    void Shutdown() override
     {
         DEBUG("Engine shutdown");
         mAudio.reset();
@@ -681,12 +681,16 @@ public:
 
         audio::ClearCaches();
     }
-    virtual bool IsRunning() const override
-    { return mFlags.test(Flags::Running); }
-    virtual wdk::WindowListener* GetWindowListener() override
-    { return this; }
+    bool IsRunning() const override
+    {
+        return mFlags.test(Flags::Running);
+    }
+    wdk::WindowListener* GetWindowListener() override
+    {
+        return this;
+    }
 
-    virtual void SetHostStats(const HostStats& stats) override
+    void SetHostStats(const HostStats& stats) override
     {
         if (mDebug.debug_show_fps)
         {
@@ -710,7 +714,7 @@ public:
             }
         }
     }
-    virtual bool GetStats(Stats* stats) const override
+    bool GetStats(Stats* stats) const override
     {
         gfx::Device::ResourceStats rs;
         mDevice->GetResourceStats(&rs);
@@ -724,7 +728,7 @@ public:
         stats->streaming_vbo_mem_use   = rs.streaming_vbo_mem_use;
         return true;
     }
-    virtual void TakeScreenshot(const std::string& filename) const override
+    void TakeScreenshot(const std::string& filename) const override
     {
         const auto& rgba = mDevice->ReadColorBuffer(mSurfaceWidth, mSurfaceHeight);
         // pre-multiply alpha, STB image write with semi transparent pixels
@@ -742,7 +746,7 @@ public:
         gfx::WritePNG(rgb, filename);
         INFO("Wrote screenshot '%1'", filename);
     }
-    virtual void ReloadResources(unsigned bits) override
+    void ReloadResources(unsigned bits) override
     {
         // okay a bit weird this function is about "reload"
         // but we're deleting here.. so for now we just delete
@@ -761,7 +765,7 @@ public:
         }
     }
 
-    virtual void OnRenderingSurfaceResized(unsigned width, unsigned height) override
+    void OnRenderingSurfaceResized(unsigned width, unsigned height) override
     {
         // ignore accidental superfluous notifications.
         if (width == mSurfaceWidth && height == mSurfaceHeight)
@@ -771,24 +775,24 @@ public:
         mSurfaceWidth = width;
         mSurfaceHeight = height;
     }
-    virtual void OnEnterFullScreen() override
+    void OnEnterFullScreen() override
     {
         DEBUG("Enter full screen mode.");
         mFlags.set(Flags::Fullscreen, true);
     }
-    virtual void OnLeaveFullScreen() override
+    void OnLeaveFullScreen() override
     {
         DEBUG("Leave full screen mode.");
         mFlags.set(Flags::Fullscreen, false);
     }
 
     // WindowListener
-    virtual void OnWantClose(const wdk::WindowEventWantClose&) override
+    void OnWantClose(const wdk::WindowEventWantClose&) override
     {
         // todo: handle ending play, saving game etc.
         mFlags.set(Flags::Running, false);
     }
-    virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) override
+    void OnKeyDown(const wdk::WindowEventKeyDown& key) override
     {
         if (mFlags.test(Flags::BlockKeyboard))
             return;
@@ -800,7 +804,7 @@ public:
 
         mRuntime->OnKeyDown(key);
     }
-    virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) override
+    void OnKeyUp(const wdk::WindowEventKeyUp& key) override
     {       
         if (mFlags.test(Flags::BlockKeyboard))
             return;
@@ -812,20 +816,20 @@ public:
 
         mRuntime->OnKeyUp(key);
     }
-    virtual void OnChar(const wdk::WindowEventChar& text) override
+    void OnChar(const wdk::WindowEventChar& text) override
     {
         if (mFlags.test(Flags::BlockKeyboard))
             return;
 
         mRuntime->OnChar(text);
     }
-    virtual void OnMouseMove(const wdk::WindowEventMouseMove& mouse) override
+    void OnMouseMove(const wdk::WindowEventMouseMove& mouse) override
     {
         if (mFlags.test(Flags::BlockMouse))
             return;
 
-        mCursorPos.x = mouse.window_x;
-        mCursorPos.y = mouse.window_y;
+        mCursorPos.x = float(mouse.window_x);
+        mCursorPos.y = float(mouse.window_y);
 
         std::vector<engine::UIEngine::WidgetAction> actions;
         mUIEngine.OnMouseMove(mouse, &actions);
@@ -835,7 +839,7 @@ public:
         const auto& mickey = MapGameMouseEvent(mouse);
         SendGameMouseEvent(mickey, &engine::GameRuntime::OnMouseMove);
     }
-    virtual void OnMousePress(const wdk::WindowEventMousePress& mouse) override
+    void OnMousePress(const wdk::WindowEventMousePress& mouse) override
     {
         if (mFlags.test(Flags::BlockMouse))
             return;
@@ -848,7 +852,7 @@ public:
         const auto& mickey = MapGameMouseEvent(mouse);
         SendGameMouseEvent(mickey, &engine::GameRuntime::OnMousePress);
     }
-    virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) override
+    void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse) override
     {
         if (mFlags.test(Flags::BlockMouse))
             return;
@@ -871,8 +875,8 @@ private:
         // aspect ratio as the logical viewport.
         const float width       = view.GetWidth();
         const float height      = view.GetHeight();
-        const float surf_width  = (float)mSurfaceWidth;
-        const float surf_height = (float)mSurfaceHeight;
+        const auto surf_width  = (float)mSurfaceWidth;
+        const auto surf_height = (float)mSurfaceHeight;
         const float scale = std::min(surf_width / width, surf_height / height);
         const float device_viewport_width = width * scale;
         const float device_viewport_height = height * scale;
@@ -1164,7 +1168,7 @@ private:
             {
                 TRACE_CALL("Renderer::Update", mRenderer.Update(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
                 TRACE_CALL("Renderer::CreateFrame", mRenderer.CreateFrame(*mScene, mTilemap.get()));
-                if (mFlags.test(GameStudioEngine::Flags::EditingMode))
+                if (mFlags.test(DetonatorEngine::Flags::EditingMode))
                 {
                     ConfigureRendererForScene();
                 }
@@ -1608,6 +1612,6 @@ ENGINE_DLL_EXPORT engine::Engine* Gamestudio_CreateEngine()
 #else
     DEBUG("DETONATOR 2D Engine in DEBUG build. *pof*");
 #endif
-    return new GameStudioEngine;
+    return new DetonatorEngine;
 }
 } // extern C
