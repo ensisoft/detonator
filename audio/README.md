@@ -18,13 +18,13 @@ The audio library is divided into following core components that take part in pl
   - Supports running a native audio thread for audio playback. (Compile time configuration).
   - Maintains a list of current audio streams either playing, paused or pending on some action.
 * Source
-  - A low level source object for filling audio buffers with PCM data.
+  - A low level source object for filling device audio buffers with PCM data.
   - Typical implementations either generate the data or use a decoder to decode an audio file.
     - An AudioGraph source runs an audio graph consisting of audio elements in order to generate PCM data. 
 * Stream
   - Device specific audio playback stream with some stream state and a Source object.
   - Exists only inside the device and is not accessible from outside the device during playback.
-  - Combines playback state with the actual audio data source.
+  - Combines playback state with the actual audio data source and device specific buffering.
 * Element 
   - Basic building block for building audio graphs. 
     - Non-source elements receive audio data in a PCM buffer in their input port(s) and 
