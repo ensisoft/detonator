@@ -58,7 +58,7 @@ Currently supported PCM formats:
 * 32bit integer (Pulseaudio/Waveout/SDL)
 * 32bit floating point (All backends)
 * Various sample rates from 8k to 96k (depending on the underlying audio device support)
-* Recommended format is 41k Hz 32bit float
+* Recommended format is 44.1 kHz 32bit float
 
 Audio Graphs 🤔
 -------------
