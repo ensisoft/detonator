@@ -932,6 +932,7 @@ install(TARGETS GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 add_library(GameEngine SHARED
     engine/loader.cpp
     engine/engine.cpp
+    engine/engine-logo.cpp
     engine/lua_game_runtime.cpp
     engine/lua_util.cpp
     engine/lua_base.cpp

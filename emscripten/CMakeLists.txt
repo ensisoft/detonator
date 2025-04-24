@@ -306,6 +306,7 @@ add_executable(GameEngine
     ../engine/audio.cpp
     ../engine/camera.cpp
     ../engine/engine.cpp
+    ../engine/engine-logo.cpp
     ../engine/graphics.cpp
     ../engine/loader.cpp
     ../engine/lua_base.cpp

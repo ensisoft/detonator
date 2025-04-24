@@ -69,11 +69,11 @@
 #include "uikit/painter.h"
 #include "uikit/state.h"
 
+const unsigned char* GetEngineLogoData();
+size_t GetEngineLogoDataSize();
+
 namespace
 {
-const unsigned char DetonatorLOGO[] = {
-#include "engine/engine-logo.h"
-};
 // we'll do this dynamically in loading screen.
 unsigned LogoWidth  = 0;
 unsigned LogoHeight = 0;
@@ -236,7 +236,7 @@ public:
     {
         auto state = std::make_unique<LoadingScreen>();
 
-        gfx::Image png((const void*)DetonatorLOGO, sizeof(DetonatorLOGO));
+        gfx::Image png((const void*)GetEngineLogoData(), GetEngineLogoDataSize());
         if (png.IsValid())
         {
             auto texture_source = std::make_unique<gfx::TextureBitmapBufferSource>();
