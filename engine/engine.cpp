@@ -78,6 +78,43 @@ const unsigned char DetonatorLOGO[] = {
 unsigned LogoWidth  = 0;
 unsigned LogoHeight = 0;
 
+// smooth the frame deltas using a simple moving average
+// based on the historical (previous) frame stamp values.
+// the problem is that the frame delta has small jitter
+// which causes micro stutter when animating.
+// https://medium.com/@alen.ladavac/the-elusive-frame-timing-168f899aec92
+class FrameTimer
+{
+public:
+    FrameTimer() : mDeltas(10)
+    {}
+
+    void Step(float dt)
+    {
+        if (mDeltas.full())
+        {
+            const auto old = mDeltas.front();
+            mDeltas.push_back(dt);
+            mSum -= old;
+            mSum += dt;
+        }
+        else
+        {
+            mDeltas.push_back(dt);
+            mSum += dt;
+        }
+        mDelta = mSum / float(mDeltas.size());
+    }
+    float GetDelta() const noexcept
+    {
+        return mDelta;
+    }
+private:
+    boost::circular_buffer<float> mDeltas;
+    double mSum = 0.0;
+    float mDelta = 0.0f;
+};
+
 // Default game engine implementation. Implements the main App interface
 // which is the interface that enables the game host to communicate
 // with the application/game implementation in order to update/tick/etc.
@@ -476,8 +513,10 @@ public:
         DEBUG("User home: '%1'.", env.user_home);
     }
 
-    void Draw(float dt) override
+    void Draw() override
     {
+        const auto dt = mFrameTimer.GetDelta();
+
         mDevice->BeginFrame();
         mDevice->ClearColor(mClearColor);
         mDevice->ClearDepth(1.0f);
@@ -597,6 +636,10 @@ public:
         // real time/wall time subsystem (such as audio) service
         if (mDebug.debug_pause && !mStepForward)
             return;
+
+        mFrameTimer.Step(dt);
+
+        dt = mFrameTimer.GetDelta();
 
         // there's plenty of information about different ways to write a basic
         // game rendering loop. here are some suggested references:
@@ -1590,6 +1633,8 @@ private:
     double mGameTimeTotal = 0.0f;
     double mRenderTimeTotal = 0.0;
     double mRenderTimeStamp = 0.0;
+
+    FrameTimer mFrameTimer;
 
     std::vector<base::TaskHandle> mUpdateTasks;
 
