@@ -364,7 +364,7 @@ namespace engine
         virtual void EndMainLoop() {};
 
         // Draw the next frame.
-        virtual void Draw(float dt) {}
+        virtual void Draw() {}
 
         // Update the application.
         // dt is the current game time step to take. The time step to take

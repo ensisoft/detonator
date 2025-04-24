@@ -513,7 +513,7 @@ public:
         return EM_TRUE;
     }
 
-    EM_BOOL OnAnimationFrame()
+    EM_BOOL OnAnimationFrame(double time)
     {
         if (mLoadingScreen)
         {
@@ -681,19 +681,23 @@ public:
         }
         TRACE_LEAVE(EngineRequest);
 
+        if (mTimeStamp == 0.0)
+            mTimeStamp = time;
+
         // this is the real wall time elapsed rendering the previous
         // for each iteration of the loop we measure the time
         // spent producing a frame. the time is then used to take
         // some number of simulation steps in order for the simulations
         // to catch up for the *next* frame.
-        const auto time_step = ElapsedSeconds<TimeId::GameTime>();
+        const auto time_step = (time - mTimeStamp) / 1000.0; //ElapsedSeconds<TimeId::GameTime>();
         const auto wall_time = CurrentRuntime();
+        mTimeStamp = time;
 
         // ask the application to take its simulation steps.
         TRACE_CALL("Engine::Update", mEngine->Update(time_step));
 
         // ask the application to draw the current frame.
-        TRACE_CALL("Engine::Draw", mEngine->Draw(time_step));
+        TRACE_CALL("Engine::Draw", mEngine->Draw());
 
         TRACE_CALL("Engine::EndMainLoop", mEngine->EndMainLoop());
         TRACE_LEAVE(Frame);
@@ -1323,6 +1327,8 @@ private:
     // adding all the deltas together.
     glm::vec2 mMousePos = {0.0f, 0.0f};
 
+    double mTimeStamp = 0.0;
+
     double mSeconds = 0;
     unsigned mCounter = 0;
     unsigned mFrames  = 0;
@@ -1418,7 +1424,7 @@ EM_BOOL OnAnimationFrame(double time, void* user_data)
     if (!init_done)
         return EM_TRUE;
 
-    const auto ret = app->OnAnimationFrame();
+    const auto ret = app->OnAnimationFrame(time);
     // EM_TRUE means that another frame is wanted, so the app
     // is still running.
     if (ret == EM_TRUE)

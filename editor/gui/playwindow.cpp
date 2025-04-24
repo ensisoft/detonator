@@ -799,7 +799,7 @@ void PlayWindow::RunGameLoopOnce()
         TRACE_CALL("Engine::Update", mEngine->Update(time_step));
 
         // ask the application to draw the current frame.
-        TRACE_CALL("Engine::Draw", mEngine->Draw(time_step));
+        TRACE_CALL("Engine::Draw", mEngine->Draw());
 
         // indicate end of iteration.
         TRACE_CALL("Engine::EndMainLoop", mEngine->EndMainLoop());

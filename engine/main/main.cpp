@@ -1070,7 +1070,7 @@ int main(int argc, char* argv[])
             TRACE_CALL("Engine::Update", engine->Update(time_step));
 
             // ask the application to draw the current frame.
-            TRACE_CALL("Engine::Draw", engine->Draw(time_step));
+            TRACE_CALL("Engine::Draw", engine->Draw());
 
             // indicate end of iteration.
             TRACE_CALL("Engine::EndMainLoop", engine->EndMainLoop());
