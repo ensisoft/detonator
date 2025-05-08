@@ -3713,6 +3713,8 @@ MainWidget* MainWindow::MakeWidget(app::Resource::Type type, const app::Resource
     if (resource)
     {
         widget->setWindowTitle(resource->GetName());
+        if (!resource->HasUserProperties())
+            widget->InitializeSettings(mUISettings);
     }
     else
     {
