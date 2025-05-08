@@ -135,6 +135,8 @@ namespace app
         virtual void LoadProperties(const QJsonObject& json) = 0;
         // Load the additional properties from the json object.
         virtual void LoadUserProperties(const QJsonObject& json) = 0;
+        // Check whether the resource has any user properties or not.
+        virtual bool HasUserProperties() const = 0;
         // Delete a property by the given key/name.
         virtual void DeleteProperty(const PropertyKey& key) = 0;
         // Delete a user property by the given key/name.
@@ -632,6 +634,8 @@ namespace app
         }
         void LoadUserProperties(const QJsonObject& object) override
         { mUserProps = object[GetId()].toObject().toVariantMap(); }
+        bool HasUserProperties() const
+        { return !mUserProps.empty(); }
         void DeleteProperty(const PropertyKey& key) override
         { mProps.remove(key); }
         void DeleteUserProperty(const PropertyKey& key) override
