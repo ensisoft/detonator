@@ -19,16 +19,16 @@ uniform vec2 kTileRenderSize;
 out vec2 vTileData;
 
 void VertexShaderMain() {
-  // transform tile row,col index into a tile position in units in the x,y plane,
-  vec3 tile = aTilePosition * kTileWorldSize + kTilePointOffset;
+    // transform tile row,col index into a tile position in units in the x,y plane,
+    vec3 tile = aTilePosition * kTileWorldSize + kTilePointOffset;
 
-  vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xyz, 1.0);
+    vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xyz, 1.0);
 
-  vs_out.clip_position = kTileTransform * vertex;
-  vs_out.clip_position.z = 0.0;
-  vs_out.point_size = kTileRenderSize.x;
+    vs_out.clip_position = kTileTransform * vertex;
+    vs_out.clip_position.z = 0.0;
+    vs_out.point_size = kTileRenderSize.x;
 
-  vTileData = aTileData;
+    vTileData = aTileData;
 }
 
 )CPP_RAW_STRING"
