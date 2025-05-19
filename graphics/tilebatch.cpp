@@ -62,7 +62,8 @@ void TileBatch::ApplyDynamicState(const Environment& env, ProgramState& program,
     // for projecting the tile into the render surface coordinates.
     program.SetUniform("kTilePointOffset", tile_point_offset);
     program.SetUniform("kTileRenderSize", tile_render_size);
-    program.SetUniform("kTileTransform", *env.proj_matrix * *env.view_matrix);
+    program.SetUniform("kTileViewTransform", *env.view_matrix);
+    program.SetUniform("kProjectionMatrix", *env.proj_matrix);
     program.SetUniform("kTileCoordinateSpaceTransform", *env.model_matrix);
 }
 
