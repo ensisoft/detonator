@@ -985,7 +985,9 @@ void MainWindow::RunGameLoopOnce()
     if (!mWorkspace)
         return;
 
-    const auto elapsed_since = ElapsedSeconds();
+    mFrameTimer.AddSample(ElapsedSeconds());
+
+    const auto elapsed_since = mFrameTimer.GetAverage(); //ElapsedSeconds();
     const auto& settings = mWorkspace->GetProjectSettings();
     const auto time_step = 1.0 / settings.updates_per_second;
 
