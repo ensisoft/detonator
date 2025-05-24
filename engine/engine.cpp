@@ -65,6 +65,7 @@
 #include "engine/library/library.h"
 #include "engine/ui.h"
 #include "engine/state.h"
+#include "engine/frametimer.h"
 #include "uikit/window.h"
 #include "uikit/painter.h"
 #include "uikit/state.h"
@@ -77,43 +78,6 @@ namespace
 // we'll do this dynamically in loading screen.
 unsigned LogoWidth  = 0;
 unsigned LogoHeight = 0;
-
-// smooth the frame deltas using a simple moving average
-// based on the historical (previous) frame stamp values.
-// the problem is that the frame delta has small jitter
-// which causes micro stutter when animating.
-// https://medium.com/@alen.ladavac/the-elusive-frame-timing-168f899aec92
-class FrameTimer
-{
-public:
-    FrameTimer() : mDeltas(10)
-    {}
-
-    void Step(float dt)
-    {
-        if (mDeltas.full())
-        {
-            const auto old = mDeltas.front();
-            mDeltas.push_back(dt);
-            mSum -= old;
-            mSum += dt;
-        }
-        else
-        {
-            mDeltas.push_back(dt);
-            mSum += dt;
-        }
-        mDelta = mSum / float(mDeltas.size());
-    }
-    float GetDelta() const noexcept
-    {
-        return mDelta;
-    }
-private:
-    boost::circular_buffer<float> mDeltas;
-    double mSum = 0.0;
-    float mDelta = 0.0f;
-};
 
 // Default game engine implementation. Implements the main App interface
 // which is the interface that enables the game host to communicate
@@ -515,7 +479,7 @@ public:
 
     void Draw() override
     {
-        const auto dt = mFrameTimer.GetDelta();
+        const auto dt = mFrameTimer.GetAverage();
 
         mDevice->BeginFrame();
         mDevice->ClearColor(mClearColor);
@@ -637,9 +601,9 @@ public:
         if (mDebug.debug_pause && !mStepForward)
             return;
 
-        mFrameTimer.Step(dt);
+        mFrameTimer.AddSample(dt);
 
-        dt = mFrameTimer.GetDelta();
+        dt = mFrameTimer.GetAverage();
 
         // there's plenty of information about different ways to write a basic
         // game rendering loop. here are some suggested references:
@@ -1634,7 +1598,7 @@ private:
     double mRenderTimeTotal = 0.0;
     double mRenderTimeStamp = 0.0;
 
-    FrameTimer mFrameTimer;
+    engine::FrameTimer mFrameTimer;
 
     std::vector<base::TaskHandle> mUpdateTasks;
 

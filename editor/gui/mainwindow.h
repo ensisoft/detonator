@@ -32,6 +32,7 @@
 #include <stack>
 
 #include "base/threadpool.h"
+#include "engine/frametimer.h"
 #include "editor/app/workspace.h"
 #include "editor/app/process.h"
 #include "editor/app/eventlog.h"
@@ -282,6 +283,9 @@ namespace gui
         double mTimeTotal = 0.0;
         // The time accumulator for keeping track of partial updates.
         double mTimeAccum = 0.0;
+
+        engine::FrameTimer mFrameTimer;
+
         // List of recently opened workspaces.
         QStringList mRecentWorkspaces;
         // the child process for running the game
