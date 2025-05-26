@@ -38,10 +38,12 @@
 #include "ALACBitUtilities.h"
 #include "EndianPortable.h"
 
+#ifdef USE_MY_SHITTY_BOOL
 typedef enum
 {	false = 0,
 	true = 1
 } bool ;
+#endif
 
 // constants/data
 const uint32_t kMaxBitDepth = 32 ;			// max allowed bit depth is 32

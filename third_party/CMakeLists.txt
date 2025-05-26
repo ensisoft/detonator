@@ -12,9 +12,9 @@ if (MSVC)
 
     # conversion from double to float
     add_compile_options(/wd4244)
-    # trunaction from double to float
+    # truncation from double to float
     add_compile_options(/wd4305)
-    # conversino from size_t to long
+    # conversion from size_t to long
     add_compile_options(/wd4267)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif()
@@ -27,6 +27,13 @@ if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
     message(STATUS "third_party/CMakelist Emscripten build.")
     message(STATUS " -03")
     add_compile_options(-O3)
+
+    # the sndfile sources define their own boolean type as an unnamed
+    # enum with true and false. However starting with GCC 15 this causes
+    # a compile error (probably because we're compiling as C++?)
+    # However with Emscripten clang we need this custom bool.
+    add_compile_definitions(USE_MY_SHITTY_BOOL)
+
     # -msse flag is needed to enable SSEx extensions
     # -msimd128 is needed because of -msse flag
     # disabled for now since this seems to be broken somehow

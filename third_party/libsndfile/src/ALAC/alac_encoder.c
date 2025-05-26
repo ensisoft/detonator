@@ -44,11 +44,13 @@
 #include "ALACAudioTypes.h"
 #include "EndianPortable.h"
 
+#ifdef USE_MY_SHITTY_BOOL
 typedef enum
 {
 	false = 0,
 	true = 1
 } bool ;
+#endif
 
 static void	GetConfig (ALAC_ENCODER *p, ALACSpecificConfig * config) ;
 
