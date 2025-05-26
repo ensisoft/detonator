@@ -18,6 +18,9 @@ Build Instructions 👨🏼‍💻
 > [!TIP]
 > You'll need to have Qt5 in order to build the Editor.
 
+> [!IMPORTANT]
+> CMake 4x is not supported but you MUST have CMake 3.x
+> A known working CMake version is 3.31.6
 
 ### Build Steps:
 1. First build the engine and editor for your target platform.

@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include <cstring> // for memcpy
+#include <cstdint>
 
 #include <memory> // for unique_ptr
 #include <string>
