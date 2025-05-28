@@ -132,6 +132,7 @@ std::size_t EntityPlacement::GetHash() const
     hash = base::hash_combine(hash, mFlagValBits);
     hash = base::hash_combine(hash, mFlagSetBits);
     hash = base::hash_combine(hash, mRenderLayer);
+    hash = base::hash_combine(hash, mMapLayer);
     hash = base::hash_combine(hash, mParentRenderTreeNodeId);
     hash = base::hash_combine(hash, mIdleAnimationId);
     hash = base::hash_combine(hash, mLifetime);
@@ -172,6 +173,7 @@ void EntityPlacement::IntoJson(data::Writer& data) const
     data.Write("flag_val_bits",           mFlagValBits);
     data.Write("flag_set_bits",           mFlagSetBits);
     data.Write("render_layer",            mRenderLayer);
+    data.Write("map_layer",               mMapLayer);
     data.Write("parent_render_tree_node", mParentRenderTreeNodeId);
     data.Write("idle_animation_id",       mIdleAnimationId);
     data.Write("lifetime",                mLifetime);
@@ -201,6 +203,7 @@ bool EntityPlacement::FromJson(const data::Reader& data)
     ok &= data.Read("idle_animation_id",       &mIdleAnimationId);
     ok &= data.Read("lifetime",                &mLifetime);
     ok &= data.Read("tag",                     &mTagString);
+    ok &= data.Read("map_layer",               &mMapLayer);
 
     if (data.HasValue("layer") && !data.HasValue("render_layer"))
         ok &= data.Read("layer", &mRenderLayer);
