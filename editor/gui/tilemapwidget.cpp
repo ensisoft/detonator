@@ -1194,6 +1194,8 @@ bool TilemapWidget::CanTakeAction(Actions action, const Clipboard* clipboard) co
         case Actions::CanReloadShaders:
         case Actions::CanReloadTextures:
             return true;
+        case Actions::CanScreenshot:
+            return true;
     }
     return false;
 }

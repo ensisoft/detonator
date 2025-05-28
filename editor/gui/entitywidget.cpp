@@ -1523,6 +1523,8 @@ bool EntityWidget::CanTakeAction(Actions action, const Clipboard* clipboard) con
         case Actions::CanReloadShaders:
         case Actions::CanReloadTextures:
             return true;
+        case Actions::CanScreenshot:
+            return true;
     }
     return false;
 }
