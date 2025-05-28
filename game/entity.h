@@ -363,7 +363,7 @@ namespace game
         { return !mScriptFile.empty(); }
         bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        int GetLayer() const noexcept /* stub*/
+        int32_t GetRenderLayer() const noexcept /* stub*/
         { return 0; }
 
         RenderTree& GetRenderTree() noexcept
@@ -486,8 +486,8 @@ namespace game
         bool enable_logging = true;
         // flag to control spawning on the background.
         bool async_spawn = false;
-        // The scene layer for the entity.
-        int layer = 0;
+        // The scene render layer for the entity.
+        std::int32_t render_layer = 0;
         // delay before spawning/placing the entity into the scene.
         float delay = 0.0f;
 
@@ -725,8 +725,8 @@ namespace game
         { mParentNodeId = id; }
         void SetIdleTrackId(const std::string& id)
         { mIdleTrackId = id; }
-        void SetLayer(int layer) noexcept
-        { mLayer = layer; }
+        void SetRenderLayer(int32_t layer) noexcept
+        { mRenderLayer = layer; }
         void SetLifetime(double lifetime) noexcept
         { mLifetime = lifetime; }
         void SetScene(Scene* scene) noexcept
@@ -792,8 +792,8 @@ namespace game
         { return mJoints.size(); }
         std::string GetDebugName() const
         { return mClass->GetName() + "/" + mInstanceName; }
-        int GetLayer() const noexcept
-        { return mLayer; }
+        auto GetRenderLayer() const noexcept
+        { return mRenderLayer; }
         bool TestFlag(ControlFlags flag) const noexcept
         { return mControlFlags.test(flag); }
         bool TestFlag(Flags flag) const noexcept
@@ -853,7 +853,7 @@ namespace game
         // Entity's max lifetime.
         double mLifetime = 0.0;
         // the render layer index.
-        int mLayer = 0;
+        int32_t mRenderLayer = 0;
         // entity bit flags
         base::bitflag<Flags> mFlags;
         // id of the idle animation track.

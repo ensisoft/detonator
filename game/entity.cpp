@@ -937,7 +937,7 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
 Entity::Entity(const EntityArgs& args) : Entity(args.klass)
 {
     mInstanceName = args.name;
-    mLayer        = args.layer;
+    mRenderLayer  = args.render_layer;
     if (!args.id.empty())
         mInstanceId = args.id;
 

@@ -27,7 +27,7 @@ function DropPowerup(brick)
 
     local powerup = powerup_node:GetEntity()
     powerup:SetVisible(true)
-    powerup:SetLayer(2)
+    powerup:SetRenderLayer(2)
 
     local powerup_body = powerup_node:GetRigidBody()
     local spatial_node = powerup_node:GetSpatialNode()

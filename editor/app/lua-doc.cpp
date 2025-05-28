@@ -1592,8 +1592,8 @@ void InitLuaDoc()
     DOC_METHOD_0("string", "GetTag", "Get the entity tag string.");
     DOC_METHOD_0("unsigned", "GetNumNodes", "Get the number of entity nodes in this entity.");
     DOC_METHOD_0("float", "GetTime", "Get the entity's current accumulated (life) time.");
-    DOC_METHOD_0("int" , "GetLayer", "Get the entity's render layer in the scene rendering.");
-    DOC_METHOD_1("void", "SetLayer", "Set the entity's render layer in the scene rendering.", "int", "layer");
+    DOC_METHOD_0("int" , "GetRenderLayer", "Get the entity's render layer in the scene rendering.");
+    DOC_METHOD_1("void", "SetRenderLayer", "Set the entity's render layer in the scene rendering.", "int", "layer");
     DOC_METHOD_1("void", "SetTag", "Set entity tag string.", "string", "tag");
     DOC_METHOD_0("bool", "IsVisible", "Checks whether the entity is currently visible or not.");
     DOC_METHOD_0("bool", "IsAnimating", "Checks whether the entity is currently playing an animation or not.");

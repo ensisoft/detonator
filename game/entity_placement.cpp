@@ -131,7 +131,7 @@ std::size_t EntityPlacement::GetHash() const
     hash = base::hash_combine(hash, mRotation);
     hash = base::hash_combine(hash, mFlagValBits);
     hash = base::hash_combine(hash, mFlagSetBits);
-    hash = base::hash_combine(hash, mLayer);
+    hash = base::hash_combine(hash, mRenderLayer);
     hash = base::hash_combine(hash, mParentRenderTreeNodeId);
     hash = base::hash_combine(hash, mIdleAnimationId);
     hash = base::hash_combine(hash, mLifetime);
@@ -171,7 +171,7 @@ void EntityPlacement::IntoJson(data::Writer& data) const
     data.Write("rotation",                mRotation);
     data.Write("flag_val_bits",           mFlagValBits);
     data.Write("flag_set_bits",           mFlagSetBits);
-    data.Write("layer",                   mLayer);
+    data.Write("render_layer",            mRenderLayer);
     data.Write("parent_render_tree_node", mParentRenderTreeNodeId);
     data.Write("idle_animation_id",       mIdleAnimationId);
     data.Write("lifetime",                mLifetime);
@@ -197,11 +197,14 @@ bool EntityPlacement::FromJson(const data::Reader& data)
     ok &= data.Read("rotation",                &mRotation);
     ok &= data.Read("flag_val_bits",           &mFlagValBits);
     ok &= data.Read("flag_set_bits",           &mFlagSetBits);
-    ok &= data.Read("layer",                   &mLayer);
     ok &= data.Read("parent_render_tree_node", &mParentRenderTreeNodeId);
     ok &= data.Read("idle_animation_id",       &mIdleAnimationId);
     ok &= data.Read("lifetime",                &mLifetime);
     ok &= data.Read("tag",                     &mTagString);
+
+    if (data.HasValue("layer") && !data.HasValue("render_layer"))
+        ok &= data.Read("layer", &mRenderLayer);
+    else ok &= data.Read("render_layer", &mRenderLayer);
 
     for (unsigned i=0; i<data.GetNumChunks("values"); ++i)
     {

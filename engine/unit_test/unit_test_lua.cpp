@@ -1081,7 +1081,7 @@ void unit_test_scene_interface()
     {
         game::EntityPlacement scene_node;
         scene_node.SetName("test_entity_1");
-        scene_node.SetLayer(4);
+        scene_node.SetRenderLayer(4);
         scene_node.SetEntity(entity);
         scene_node.SetTranslation(glm::vec2(30.0f, 40.0f));
         scene.LinkChild(nullptr, scene.PlaceEntity(scene_node));
@@ -1254,7 +1254,7 @@ function test(scene)
    test_str(entity:GetName(), 'test_entity_1')
    test_str(entity:GetClassName(), 'test_entity')
    test_int(entity:GetNumNodes(), 1)
-   test_int(entity:GetLayer(), 4)
+   test_int(entity:GetRenderLayer(), 4)
    test_bool(entity:IsAnimating(), false)
    test_bool(entity:HasExpired(), false)
    if entity:FindNodeByClassId('sjsjsjs') ~= nil then
