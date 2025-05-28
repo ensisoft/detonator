@@ -158,6 +158,14 @@ namespace data
             return true;
         }
 
+        bool Read(const char* name, unsigned short* value) const
+        {
+            unsigned int tmp = 0;
+            const auto ret = Read(name, &tmp);
+            *value = tmp;
+            return ret;
+        }
+
     private:
         template<size_t index, typename... T>
         bool ReadVariantAlternative(const char* key, std::variant<T...>* out) const

@@ -324,10 +324,12 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
             for (auto& packet: entity_packets)
             {
                 packet.render_layer = placement->GetRenderLayer();
+                packet.map_layer    = placement->GetMapLayer();
             }
             for (auto& light : entity_lights)
             {
                 light.render_layer = placement->GetRenderLayer();
+                light.map_layer    = placement->GetMapLayer();
             }
 
             // Compute tile coordinates for each draw packet created by the entity.
@@ -1482,6 +1484,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             packet.transform    = transform;
             packet.sort_point   = sort_point;
             packet.render_layer = entity.GetRenderLayer();
+            packet.map_layer    = entity.GetMapLayer();
             packet.pass         = item->GetRenderPass();
             packet.projection   = item->GetRenderProjection();
             packet.packet_index = item->GetLayer();
@@ -1580,6 +1583,7 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             packet.sort_point   = sort_point;
             packet.packet_index = text->GetLayer();
             packet.render_layer = entity.GetRenderLayer();
+            packet.map_layer    = entity.GetMapLayer();
             packet.coordinate_space = text->GetCoordinateSpace();
             if (!hook || hook->InspectPacket(&entity_node, packet))
                 packets.push_back(std::move(packet));
@@ -1635,6 +1639,7 @@ void Renderer::CreateLights(const EntityType& entity,
     light.light        = light_node.light;
     light.transform    = transform;
     light.render_layer = entity.GetRenderLayer();
+    light.map_layer    = entity.GetMapLayer();
     light.packet_index = node_light->GetLayer();
     light.sort_point   = sort_point;
     lights.push_back(light);
@@ -1877,7 +1882,6 @@ void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
         ASSERT(map_row < map_height && map_col < map_width);
         packet.map_row   = map_row;
         packet.map_col   = map_col;
-        packet.map_layer = 0;//std::max(0, packet.render_layer);
         //DEBUG("map pos = %1", map_plane_pos);
         //DEBUG("map row = %1, col = %2", map_row, map_col);
     }

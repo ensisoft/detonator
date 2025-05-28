@@ -938,6 +938,7 @@ Entity::Entity(const EntityArgs& args) : Entity(args.klass)
 {
     mInstanceName = args.name;
     mRenderLayer  = args.render_layer;
+    mMapLayer     = args.map_layer;
     if (!args.id.empty())
         mInstanceId = args.id;
 

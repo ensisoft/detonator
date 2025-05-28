@@ -118,6 +118,12 @@ namespace data
                 return;
             Write(name, value.value());
         }
+
+        inline void Write(const char* name, unsigned short value)
+        {
+            Write(name, (unsigned int)value);
+        }
+
     private:
     };
 

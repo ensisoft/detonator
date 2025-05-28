@@ -365,6 +365,8 @@ namespace game
         { return mFlags.test(flag); }
         int32_t GetRenderLayer() const noexcept /* stub*/
         { return 0; }
+        uint16_t GetMapLayer() const noexcept /* stub */
+        { return 0; }
 
         RenderTree& GetRenderTree() noexcept
         { return mRenderTree; }
@@ -488,6 +490,8 @@ namespace game
         bool async_spawn = false;
         // The scene render layer for the entity.
         std::int32_t render_layer = 0;
+        // entity map layer when using a tilemap
+        std::uint16_t map_layer = 0;
         // delay before spawning/placing the entity into the scene.
         float delay = 0.0f;
 
@@ -727,6 +731,8 @@ namespace game
         { mIdleTrackId = id; }
         void SetRenderLayer(int32_t layer) noexcept
         { mRenderLayer = layer; }
+        void SetMapLayer(uint16_t layer) noexcept
+        { mMapLayer = layer; }
         void SetLifetime(double lifetime) noexcept
         { mLifetime = lifetime; }
         void SetScene(Scene* scene) noexcept
@@ -794,6 +800,8 @@ namespace game
         { return mClass->GetName() + "/" + mInstanceName; }
         auto GetRenderLayer() const noexcept
         { return mRenderLayer; }
+        auto GetMapLayer() const noexcept
+        { return mMapLayer; }
         bool TestFlag(ControlFlags flag) const noexcept
         { return mControlFlags.test(flag); }
         bool TestFlag(Flags flag) const noexcept
@@ -854,6 +862,8 @@ namespace game
         double mLifetime = 0.0;
         // the render layer index.
         int32_t mRenderLayer = 0;
+        // the tilemap layer when using a map based world
+        uint16_t mMapLayer = 0;
         // entity bit flags
         base::bitflag<Flags> mFlags;
         // id of the idle animation track.

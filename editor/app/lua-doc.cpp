@@ -1594,6 +1594,8 @@ void InitLuaDoc()
     DOC_METHOD_0("float", "GetTime", "Get the entity's current accumulated (life) time.");
     DOC_METHOD_0("int" , "GetRenderLayer", "Get the entity's render layer in the scene rendering.");
     DOC_METHOD_1("void", "SetRenderLayer", "Set the entity's render layer in the scene rendering.", "int", "layer");
+    DOC_METHOD_0("unsigned", "GetMapLayer", "Get the entity tilemap layer index.");
+    DOC_METHOD_1("void", "SetMapLayer", "Set the entity tilemap layer index.", "unsigned", "layer");
     DOC_METHOD_1("void", "SetTag", "Set entity tag string.", "string", "tag");
     DOC_METHOD_0("bool", "IsVisible", "Checks whether the entity is currently visible or not.");
     DOC_METHOD_0("bool", "IsAnimating", "Checks whether the entity is currently playing an animation or not.");
@@ -1721,8 +1723,10 @@ void InitLuaDoc()
                                       "Default is 0.0 (i.e no rotation).");
     DOC_OBJECT_PROPERTY("bool", "logging", "Whether to enable life time related engine logs for this entity.<br>"
                                    "Default is true.");
-    DOC_OBJECT_PROPERTY("int", "layer", "The scene layer index for the entity.<br>"
-                                        "Default is 0.");
+    DOC_OBJECT_PROPERTY("int", "render_layer", "The scene render layer index for the entity.<br>"
+                                               "Default is 0.");
+    DOC_OBJECT_PROPERTY("unsigned", "map_layer", "Tilemap layer index for the entity.<br>"
+                                                 "Default is 0.");
 
     DOC_TABLE("game.SpatialQueryResultSet");
     DOC_METHOD_0("bool", "IsEmpty", "Check whether the result set is an empty set or not.");
@@ -1877,21 +1881,23 @@ void InitLuaDoc()
                                                "If async is true the entity is spawned in the background and there's no guarantee when it will be placed in to the scene."
                                                "On async spawn no entity object will be returned to the caller from this call."
                                                "The args table is a Lua table for packing all the spawn arguments with the following keys.<br><br>"
-                                               " &nbsp;&nbsp; id,      string,   Entity instance ID. MUST BE UNIQUE. On empty string a value is generated automatically. Default = '' <br>"
-                                               " &nbsp;&nbsp; name,    string,   Entity instance name. Default = ''<br>"
-                                               " &nbsp;&nbsp; sx,      float,    Root node scale factor for X axis. Default = 1.0<br>"
-                                               " &nbsp;&nbsp; sy,      float,    Root node scale factor for Y axis. Default = 1.0<br>"
-                                               " &nbsp;&nbsp; x,       float,    Root node translation on the X axis. Default = 0.0<br>"
-                                               " &nbsp;&nbsp; y,       float,    Root node translation on the Y axis. Default = 0.0<br>"
-                                               " &nbsp;&nbsp; r,       float,    Root node rotation in radians around the Z axis. Default = 0.0<br>"
-                                               " &nbsp;&nbsp; pos,     glm.vec2, Root node translation vector. (Alternative for x, y). Default = glm.vec2(0.0, 0.0)<br>"
-                                               " &nbsp;&nbsp; scale,   glm.vec2, Root node scaling vector (Alternative for sx, sy). Default = glm.vec2(1.0, 1.0)<br>"
-                                               " &nbsp;&nbsp; logging, bool,     Flag to enable/disable entity logging. Default = false<br>"
-                                               " &nbsp;&nbsp; link,    bool,     Flag to control linking to scene root in scene graph. Default = true<br>"
-                                               " &nbsp;&nbsp; async,   bool,     Flag to control async spawning. Default = false<br>"
-                                               " &nbsp;&nbsp; layer,   int,      Scene layer index. Default = 0<br>"
-                                               " &nbsp;&nbsp; delay,   float,    Time delay before the entity is placed into the scene. Default = 0.0<br>"
-                                               " &nbsp;&nbsp; vars,    table,    Key-value table of entity script variables to set. Supports int, float, bool, string and vector types.",
+                                               " &nbsp;&nbsp; id,            string,   Entity instance ID. MUST BE UNIQUE. On empty string a value is generated automatically. Default = '' <br>"
+                                               " &nbsp;&nbsp; name,          string,   Entity instance name. Default = ''<br>"
+                                               " &nbsp;&nbsp; sx,            float,    Root node scale factor for X axis. Default = 1.0<br>"
+                                               " &nbsp;&nbsp; sy,            float,    Root node scale factor for Y axis. Default = 1.0<br>"
+                                               " &nbsp;&nbsp; x,             float,    Root node translation on the X axis. Default = 0.0<br>"
+                                               " &nbsp;&nbsp; y,             float,    Root node translation on the Y axis. Default = 0.0<br>"
+                                               " &nbsp;&nbsp; r,             float,    Root node rotation in radians around the Z axis. Default = 0.0<br>"
+                                               " &nbsp;&nbsp; pos,           glm.vec2, Root node translation vector. (Alternative for x, y). Default = glm.vec2(0.0, 0.0)<br>"
+                                               " &nbsp;&nbsp; scale,         glm.vec2, Root node scaling vector (Alternative for sx, sy). Default = glm.vec2(1.0, 1.0)<br>"
+                                               " &nbsp;&nbsp; logging,       bool,     Flag to enable/disable entity logging. Default = false<br>"
+                                               " &nbsp;&nbsp; link,          bool,     Flag to control linking to scene root in scene graph. Default = true<br>"
+                                               " &nbsp;&nbsp; async,         bool,     Flag to control async spawning. Default = false<br>"
+                                               " &nbsp;&nbsp; render_layer,  int,      Scene render layer index. Default = 0<br>"
+                                               " &nbsp;&nbsp; map_layer,     unsigned, Tilemap layer index. Default = 0<br>"
+                                               " &nbsp;&nbsp; delay,         float,    Time delay before the entity is placed into the scene. Default = 0.0<br>"
+                                               " &nbsp;&nbsp; vars,          table,    Key-value table of entity script variables to set. Supports int, float, bool, string and vector types.",
+
                  "string", "klass_name", "table", "args");
 
     DOC_METHOD_1("glm.mat4", "FindEntityTransform", "Find the transform for transforming the entity into the world/scene coordinate space.",

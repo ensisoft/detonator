@@ -72,6 +72,8 @@ namespace game
         { mName = name; }
         void SetRenderLayer(int32_t layer) noexcept
         { mRenderLayer = layer; }
+        void SetMapLayer(uint16_t layer) noexcept
+        { mMapLayer = layer; }
         void SetTag(const std::string& tag)
         { mTagString = tag; }
         void SetIdleAnimationId(const std::string& id)
@@ -114,6 +116,8 @@ namespace game
         { return mFlagValBits.test(flag); }
         auto GetRenderLayer() const noexcept
         { return mRenderLayer; }
+        auto GetMapLayer() const noexcept
+        { return mMapLayer; }
         double GetLifetime() const noexcept
         { return mLifetime.value_or(0.0); }
         bool HasSpecifiedParentNode() const noexcept
@@ -184,6 +188,8 @@ namespace game
         base::bitflag<Flags> mFlagSetBits;
         // scene render layer index.
         int32_t mRenderLayer = 0;
+        // layer in the map when using a tilemap world
+        uint16_t mMapLayer = 0;
         // the track id of the idle animation if any.
         // this setting will override the entity class idle
         // track designation if set.

@@ -1805,6 +1805,14 @@ void SceneWidget::on_nodeRenderLayer_valueChanged(int layer)
     }
 }
 
+void SceneWidget::on_nodeMapLayer_valueChanged(int layer)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetMapLayer(layer);
+    }
+}
+
 void SceneWidget::on_nodeLink_currentIndexChanged(const QString&)
 {
     if (auto* node = GetCurrentNode())
@@ -2455,6 +2463,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.nodeRotation, 0.0f);
     SetValue(mUI.nodeEntity, -1);
     SetValue(mUI.nodeRenderLayer, 0);
+    SetValue(mUI.nodeMapLayer, 0);
     ClearList(mUI.nodeLink);
     SetValue(mUI.nodeLink, -1);
 
@@ -2472,6 +2481,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
         SetValue(mUI.nodeName, node->GetName());
         SetValue(mUI.nodeEntity, ListItemId(node->GetEntityId()));
         SetValue(mUI.nodeRenderLayer, node->GetRenderLayer());
+        SetValue(mUI.nodeMapLayer, node->GetMapLayer());
         SetValue(mUI.nodeIsVisible, node->TestFlag(game::EntityPlacement::Flags::VisibleInGame));
         SetValue(mUI.nodeTranslateX, translate.x);
         SetValue(mUI.nodeTranslateY, translate.y);
