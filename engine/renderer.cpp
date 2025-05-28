@@ -323,11 +323,11 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
             // (but only a stub function) and the real layer information is in the placement.
             for (auto& packet: entity_packets)
             {
-                packet.render_layer = placement->GetLayer();
+                packet.render_layer = placement->GetRenderLayer();
             }
             for (auto& light : entity_lights)
             {
-                light.render_layer = placement->GetLayer();
+                light.render_layer = placement->GetRenderLayer();
             }
 
             // Compute tile coordinates for each draw packet created by the entity.
@@ -1481,7 +1481,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             packet.drawable     = paint_node.drawable;
             packet.transform    = transform;
             packet.sort_point   = sort_point;
-            packet.render_layer = entity.GetLayer();
+            packet.render_layer = entity.GetRenderLayer();
             packet.pass         = item->GetRenderPass();
             packet.projection   = item->GetRenderProjection();
             packet.packet_index = item->GetLayer();
@@ -1579,7 +1579,7 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             packet.transform    = transform;
             packet.sort_point   = sort_point;
             packet.packet_index = text->GetLayer();
-            packet.render_layer = entity.GetLayer();
+            packet.render_layer = entity.GetRenderLayer();
             packet.coordinate_space = text->GetCoordinateSpace();
             if (!hook || hook->InspectPacket(&entity_node, packet))
                 packets.push_back(std::move(packet));
@@ -1634,7 +1634,7 @@ void Renderer::CreateLights(const EntityType& entity,
     Light light;
     light.light        = light_node.light;
     light.transform    = transform;
-    light.render_layer = entity.GetLayer();
+    light.render_layer = entity.GetRenderLayer();
     light.packet_index = node_light->GetLayer();
     light.sort_point   = sort_point;
     lights.push_back(light);

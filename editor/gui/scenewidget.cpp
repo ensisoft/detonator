@@ -1489,8 +1489,8 @@ void SceneWidget::on_actionNodeMoveUpLayer_triggered()
 {
     if (auto* node = GetCurrentNode())
     {
-        const int layer = node->GetLayer();
-        node->SetLayer(layer + 1);
+        const int layer = node->GetRenderLayer();
+        node->SetRenderLayer(layer + 1);
     }
     DisplayCurrentNodeProperties();
 }
@@ -1498,8 +1498,8 @@ void SceneWidget::on_actionNodeMoveDownLayer_triggered()
 {
     if (auto* node = GetCurrentNode())
     {
-        const int layer = node->GetLayer();
-        node->SetLayer(layer - 1);
+        const int layer = node->GetRenderLayer();
+        node->SetRenderLayer(layer - 1);
     }
     DisplayCurrentNodeProperties();
 }
@@ -1797,11 +1797,11 @@ void SceneWidget::on_nodeEntity_currentIndexChanged(const QString& name)
     }
 }
 
-void SceneWidget::on_nodeLayer_valueChanged(int layer)
+void SceneWidget::on_nodeRenderLayer_valueChanged(int layer)
 {
     if (auto* node = GetCurrentNode())
     {
-        node->SetLayer(layer);
+        node->SetRenderLayer(layer);
     }
 }
 
@@ -2454,7 +2454,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.nodeScaleY, 1.0f);
     SetValue(mUI.nodeRotation, 0.0f);
     SetValue(mUI.nodeEntity, -1);
-    SetValue(mUI.nodeLayer, 0);
+    SetValue(mUI.nodeRenderLayer, 0);
     ClearList(mUI.nodeLink);
     SetValue(mUI.nodeLink, -1);
 
@@ -2471,7 +2471,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
         SetValue(mUI.nodeID, node->GetId());
         SetValue(mUI.nodeName, node->GetName());
         SetValue(mUI.nodeEntity, ListItemId(node->GetEntityId()));
-        SetValue(mUI.nodeLayer, node->GetLayer());
+        SetValue(mUI.nodeRenderLayer, node->GetRenderLayer());
         SetValue(mUI.nodeIsVisible, node->TestFlag(game::EntityPlacement::Flags::VisibleInGame));
         SetValue(mUI.nodeTranslateX, translate.x);
         SetValue(mUI.nodeTranslateY, translate.y);
@@ -2930,15 +2930,15 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     // // select the top most node.
     auto* hit = hit_nodes[0];
     auto  pos = hit_positions[0];
-    int layer = hit->GetLayer();
+    int layer = hit->GetRenderLayer();
     for (size_t i=1; i<hit_nodes.size(); ++i)
     {
         if (hit_nodes[i]->TestFlag(game::EntityPlacement::Flags::VisibleInEditor) &&
-            hit_nodes[i]->GetLayer() >= layer)
+            hit_nodes[i]->GetRenderLayer() >= layer)
         {
             hit = hit_nodes[i];
             pos = hit_positions[i];
-            layer = hit->GetLayer();
+            layer = hit->GetRenderLayer();
         }
     }
     if (!hit->TestFlag(game::EntityPlacement::Flags::VisibleInEditor))

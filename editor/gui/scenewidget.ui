@@ -318,8 +318,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>280</width>
-               <height>754</height>
+               <width>284</width>
+               <height>746</height>
               </rect>
              </property>
              <property name="maximumSize">
@@ -1576,7 +1576,7 @@
               </widget>
              </item>
              <item row="4" column="1">
-              <widget class="QSpinBox" name="nodeLayer">
+              <widget class="QSpinBox" name="nodeRenderLayer">
                <property name="minimum">
                 <number>-100</number>
                </property>
@@ -1644,7 +1644,7 @@
              <item row="4" column="0">
               <widget class="QLabel" name="label_2">
                <property name="text">
-                <string>Layer</string>
+                <string>Render layer</string>
                </property>
               </widget>
              </item>
@@ -2288,7 +2288,7 @@
   <tabstop>btnEditEntity</tabstop>
   <tabstop>btnEntityParams</tabstop>
   <tabstop>nodeLink</tabstop>
-  <tabstop>nodeLayer</tabstop>
+  <tabstop>nodeRenderLayer</tabstop>
   <tabstop>nodeIsVisible</tabstop>
   <tabstop>nodeTranslateX</tabstop>
   <tabstop>nodeTranslateY</tabstop>

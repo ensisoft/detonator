@@ -1290,14 +1290,14 @@ void unit_test_entity_args()
     args.name          = "instance-name";
     args.id            = "instance-id";
     args.rotation      = 2.0f;
-    args.layer         = 100;
+    args.render_layer  = 100;
     args.vars["int"]   = 123;
     args.vars["float"] = 50.0f;
     auto instance = game::CreateEntityInstance(args);
 
     TEST_REQUIRE(instance->GetName()  == "instance-name");
     TEST_REQUIRE(instance->GetId()    == "instance-id");
-    TEST_REQUIRE(instance->GetLayer() == 100);
+    TEST_REQUIRE(instance->GetRenderLayer() == 100);
     TEST_REQUIRE(instance->GetNumNodes() == 1);
     TEST_REQUIRE(instance->FindScriptVarByName("int")->GetValue<int>() == 123);
     TEST_REQUIRE(instance->FindScriptVarByName("float")->GetValue<float>() == 50.0f);

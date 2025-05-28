@@ -1127,8 +1127,8 @@ void BindGameLib(sol::state& L)
     entity["GetClass"]             = &Entity::GetClass;
     entity["GetNumNodes"]          = &Entity::GetNumNodes;
     entity["GetTime"]              = &Entity::GetTime;
-    entity["GetLayer"]             = &Entity::GetLayer;
-    entity["SetLayer"]             = &Entity::SetLayer;
+    entity["GetRenderLayer"]       = &Entity::GetRenderLayer;
+    entity["SetRenderLayer"]       = &Entity::SetRenderLayer;
     entity["IsDying"]              = &Entity::IsDying;
     entity["IsVisible"]            = &Entity::IsVisible;
     entity["IsAnimating"]          = &Entity::IsAnimating;
@@ -1257,9 +1257,10 @@ void BindGameLib(sol::state& L)
     entity_args["position"] = sol::property(&EntityArgs::position);
     entity_args["rotation"] = sol::property(&EntityArgs::rotation);
     entity_args["logging"]  = sol::property(&EntityArgs::enable_logging);
-    entity_args["layer"]    = sol::property(&EntityArgs::layer);
+    entity_args["layer"]    = sol::property(&EntityArgs::render_layer); // the old name is kept for compatibility
     entity_args["async"]    = sol::property(&EntityArgs::async_spawn);
     entity_args["delay"]    = sol::property(&EntityArgs::delay);
+    entity_args["render_layer"] = sol::property(&EntityArgs::render_layer);
 
     using DynamicSpatialQueryResultSet = ResultSet<EntityNode*>;
     auto query_result_set = table.new_usertype<DynamicSpatialQueryResultSet>("SpatialQueryResultSet");
@@ -1591,7 +1592,7 @@ void BindGameLib(sol::state& L)
 
             args.id             = args_table.get_or("id", std::string(""));
             args.name           = args_table.get_or("name", std::string(""));
-            args.layer          = args_table.get_or("layer", 0);
+            args.render_layer   = args_table.get_or("layer", 0);
             args.scale.x        = args_table.get_or("sx", 1.0f);
             args.scale.y        = args_table.get_or("sy", 1.0f);
             args.position.x     = args_table.get_or("x", 0.0f);
@@ -1600,6 +1601,12 @@ void BindGameLib(sol::state& L)
             args.enable_logging = args_table.get_or("logging", false);
             args.async_spawn    = args_table.get_or("async", false);
             args.delay          = args_table.get_or("delay", 0.0f);
+
+            // renamed for more specific name. leaving the "layer" above for
+            // compatibilitys sake.
+            const int32_t* render_layer = nullptr;
+            if (const auto* ptr = args_table.get_or("render_layer", render_layer))
+                args.render_layer = *ptr;
 
             const bool link_to_root = args_table.get_or("link", true);
             const glm::vec2* pos = nullptr;

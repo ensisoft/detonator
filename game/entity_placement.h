@@ -70,8 +70,8 @@ namespace game
         { mEntityId = id; }
         void SetName(const std::string& name)
         { mName = name; }
-        void SetLayer(int layer) noexcept
-        { mLayer = layer; }
+        void SetRenderLayer(int32_t layer) noexcept
+        { mRenderLayer = layer; }
         void SetTag(const std::string& tag)
         { mTagString = tag; }
         void SetIdleAnimationId(const std::string& id)
@@ -112,8 +112,8 @@ namespace game
         { return mTagString ? &mTagString.value() : nullptr; }
         bool TestFlag(Flags flag) const noexcept
         { return mFlagValBits.test(flag); }
-        int GetLayer() const noexcept
-        { return mLayer; }
+        auto GetRenderLayer() const noexcept
+        { return mRenderLayer; }
         double GetLifetime() const noexcept
         { return mLifetime.value_or(0.0); }
         bool HasSpecifiedParentNode() const noexcept
@@ -182,8 +182,8 @@ namespace game
         // is needed to indicate whether a bit is set or not
         base::bitflag<Flags> mFlagValBits;
         base::bitflag<Flags> mFlagSetBits;
-        // the relative render order (layer index)
-        int mLayer = 0;
+        // scene render layer index.
+        int32_t mRenderLayer = 0;
         // the track id of the idle animation if any.
         // this setting will override the entity class idle
         // track designation if set.
