@@ -718,6 +718,8 @@ add_executable(Detonator
     editor/gui/uiwidget.h
     editor/gui/uiwidget.ui
     editor/gui/uiwidget.cpp
+    editor/gui/tileselection.h
+    editor/gui/tileselection.cpp
     editor/gui/tilemapwidget.h
     editor/gui/tilemapwidget.ui
     editor/gui/tilemapwidget.cpp
@@ -1079,6 +1081,7 @@ add_executable(unit_test_gui
         editor/gui/collapsible_widget.h
         editor/gui/collapsible_widget.ui
         editor/gui/collapsible_widget.cpp
+        editor/gui/tileselection.cpp
         third_party/base64/base64.cpp)
 target_compile_definitions(unit_test_gui PRIVATE "QTCOLORWIDGETS_LIBRARY")
 target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
