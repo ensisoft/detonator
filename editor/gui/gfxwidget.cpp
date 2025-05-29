@@ -832,6 +832,20 @@ void GfxWidget::StartPaintTimer()
     mTimer.start();
 }
 
+bool GfxWidget::HasInputFocus() const
+{
+    return this->hasFocus() || this->hasInputFocus();
+}
+
+void GfxWidget::SetFocus()
+{
+    // fucking around with Qt again...
+    QTimer::singleShot(10, this, [this]() {
+        this->activateWindow();
+        this->setFocus();
+    });
+}
+
 void GfxWidget::TranslateZoomInOut(QWheelEvent* wheel)
 {
     const auto mods = wheel->modifiers();
