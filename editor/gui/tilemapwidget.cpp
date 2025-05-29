@@ -1755,6 +1755,8 @@ void TilemapWidget::SelectSelectedTileMaterial()
     if (!klass || !layer || !layer->HasRenderComponent())
         return;
 
+    const auto did_have_focus = mUI.widget->HasInputFocus();
+
     DlgMaterial dlg(this, mState.workspace, "");
     dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
 
@@ -1772,7 +1774,12 @@ void TilemapWidget::SelectSelectedTileMaterial()
     }
 
     if (dlg.exec() == QDialog::Rejected)
+    {
+        if (did_have_focus)
+            mUI.widget->SetFocus();
         return;
+    }
+
     const auto& material = app::ToUtf8(dlg.GetSelectedMaterialId());
     const auto tile_index = dlg.GetTileIndex();
 
@@ -1789,6 +1796,8 @@ void TilemapWidget::SelectSelectedTileMaterial()
                                   "Reusing a material index *will* overwrite that material.", klass->GetName()));
         msg.setStandardButtons(QMessageBox::Ok);
         msg.exec();
+        if (did_have_focus)
+            mUI.widget->SetFocus();
         return;
     }
     klass->SetPaletteMaterialId(material, palette_index);
@@ -1805,6 +1814,9 @@ void TilemapWidget::SelectSelectedTileMaterial()
     ClearUnusedPaletteEntries();
     UpdateLayerPalette();
     DisplaySelection();
+
+    if (did_have_focus)
+        mUI.widget->SetFocus();
 }
 
 void TilemapWidget::DeleteSelectedTileMaterial()

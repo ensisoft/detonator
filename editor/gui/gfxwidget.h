@@ -289,6 +289,10 @@ namespace gui
         // Tries to run at 60 fps
         void StartPaintTimer();
 
+        bool HasInputFocus() const;
+
+        void SetFocus();
+
     public slots:
         void dispose();
         void reloadShaders();
