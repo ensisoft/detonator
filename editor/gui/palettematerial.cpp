@@ -25,6 +25,7 @@ namespace gui
 PaletteMaterial::PaletteMaterial(const app::Workspace* workspace, QWidget* parent)
    : QWidget(parent)
    , mWorkspace(workspace)
+   , mParent(parent)
 {
     mUI.setupUi(this);
     SetEnabled(mUI.btnSetMaterialParams, false);
@@ -38,7 +39,12 @@ void PaletteMaterial::UpdateMaterialList(const ResourceList& list)
 
 void PaletteMaterial::on_btnSelectMaterial_clicked()
 {
-    DlgMaterial dlg(this, mWorkspace);
+    // using *this* as the parent to DlgMaterial sometimes fucks up the
+    // rendering and the tilemap widget goes blank.
+    // This seems similar to previous bug in the UI widget that was
+    // fixed in commit  a7c167ca991f9c0a688212f4c926fc32d9cea77a
+    DlgMaterial dlg(mParent, mWorkspace);
+
     dlg.SetPreviewScale(mPreviewScale);
     dlg.SetMaterialId(GetValue(mUI.cmbMaterial));
     dlg.SetTileIndex(GetValue(mUI.tileIndex));

@@ -98,7 +98,10 @@ namespace gui
         Ui::PaletteMaterial mUI;
     private:
         const app::Workspace* mWorkspace = nullptr;
+        QWidget* mParent = nullptr;
         std::size_t mIndex = 0;
         Size2Df mPreviewScale = {1.0f, 1.0f};
+    private:
+
     };
 } // namespace
