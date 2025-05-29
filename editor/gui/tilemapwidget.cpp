@@ -1757,6 +1757,20 @@ void TilemapWidget::SelectSelectedTileMaterial()
 
     DlgMaterial dlg(this, mState.workspace, "");
     dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
+
+    if (selection.width == 1 && selection.height == 1)
+    {
+        uint8_t current_palette_index = 0;
+        const auto tile_row = selection.start_row;
+        const auto tile_col = selection.start_col;
+        ASSERT(layer->GetTilePaletteIndex(&current_palette_index, tile_row, tile_col));
+        if (current_palette_index != klass->GetMaxPaletteIndex())
+        {
+            dlg.SetMaterialId(klass->GetPaletteMaterialId(current_palette_index));
+            dlg.SetTileIndex(klass->GetPaletteMaterialTileIndex(current_palette_index));
+        }
+    }
+
     if (dlg.exec() == QDialog::Rejected)
         return;
     const auto& material = app::ToUtf8(dlg.GetSelectedMaterialId());
