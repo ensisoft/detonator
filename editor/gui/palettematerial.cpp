@@ -46,7 +46,7 @@ void PaletteMaterial::on_btnSelectMaterial_clicked()
     DlgMaterial dlg(mParent, mWorkspace);
 
     dlg.SetPreviewScale(mPreviewScale);
-    dlg.SetMaterialId(GetValue(mUI.cmbMaterial));
+    dlg.SetMaterialId(GetItemId(mUI.cmbMaterial));
     dlg.SetTileIndex(GetValue(mUI.tileIndex));
 
     if (dlg.exec() == QDialog::Rejected)
