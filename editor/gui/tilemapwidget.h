@@ -31,6 +31,7 @@
 #include "editor/gui/tool.h"
 #include "editor/gui/dlgtiletool.h"
 #include "editor/gui/settings.h"
+#include "editor/gui/tileselection.h"
 
 namespace gui
 {
@@ -177,20 +178,11 @@ namespace gui
 
         QString mCurrentToolId;
 
-        // tile selection. dimensions in tiles.
-        struct TileSelection {
-            unsigned start_row = 0;
-            unsigned start_col = 0;
-            unsigned width  = 0;
-            unsigned height = 0;
-            game::TilemapLayerClass::Resolution resolution;
-        };
-
         struct State {
             app::Workspace* workspace = nullptr;
             std::shared_ptr<game::TilemapClass> klass;
             std::unique_ptr<game::Tilemap> map;
-            std::optional<TileSelection> selection;
+            TileSelection selection;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
             engine::Renderer renderer;

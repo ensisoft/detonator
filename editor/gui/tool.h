@@ -236,6 +236,8 @@ namespace gui
         // or false if the tool is no longer valid.
         virtual bool Validate() const { return true; }
 
+        virtual std::string GetName() const { return {}; }
+
         // Dummy migration shims. Plan is to get rid of the transform param
         // but it can't be done until every caller has been refactored!
         inline void MouseMove(const MouseEvent& mickey)
