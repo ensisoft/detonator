@@ -118,6 +118,8 @@ namespace gfx
         // material objects that aren't based on any material clas!
         virtual const MaterialClass* GetClass() const  { return nullptr; }
 
+        virtual std::unique_ptr<Material> Clone() const { return nullptr; };
+
         template<typename T>
         inline bool GetValue(const std::string& key, T* out) const noexcept
         {

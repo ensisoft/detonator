@@ -263,6 +263,13 @@ void MaterialInstance::InitFlags() noexcept
     SetFlag(Flags::EnableBloom, mClass->TestFlag(MaterialClass::Flags::EnableBloom));
 }
 
+std::unique_ptr<Material> MaterialInstance::Clone() const
+{
+    auto dolly = std::make_unique<MaterialInstance>(*this);
+    dolly->mFirstRender = false;
+    dolly->mError = false;
+    return dolly;
+}
 
 MaterialInstance CreateMaterialFromColor(const Color4f& top_left,
                                          const Color4f& top_right,
