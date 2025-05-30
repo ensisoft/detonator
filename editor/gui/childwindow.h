@@ -48,6 +48,7 @@ namespace gui
         ChildWindow(MainWidget* widget, Clipboard* clipboard);
        ~ChildWindow();
 
+#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
         void SetWindow(FramelessWindow* window)
         {
             mWindow = window;
@@ -56,6 +57,7 @@ namespace gui
         {
             return mWindow;
         }
+#endif
 
         QString GetId() const
         {
@@ -131,7 +133,9 @@ namespace gui
         Ui::ChildWindow mUI;
     private:
         QString mWidgetId;
+#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
         FramelessWindow* mWindow = nullptr;
+#endif
         MainWidget* mWidget = nullptr;
         Clipboard* mClipboard = nullptr;
         bool mClosed = false;

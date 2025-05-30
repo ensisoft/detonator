@@ -113,11 +113,13 @@ void copyright()
     const auto boost_minor    = BOOST_VERSION / 100 % 1000;
     const auto boost_revision = BOOST_VERSION % 100;
 
+#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
     INFO("https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle");
     INFO("Frameless window");
     INFO("Copyright (c) 2018 Juergen Skrotzky");
     INFO("https://github.com/Jorgen-VikingGod");
     INFO("JorgenVikingGod@gmail.com");
+#endif
 
     INFO("https://github.com/antonypro/QGoodWindow");
     INFO("Qt DarkStyle");
@@ -475,20 +477,24 @@ void EditorMain(QApplication& app)
     threadpool.AddMainThread();
     base::SetGlobalThreadPool(&threadpool);
 
+#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
     FramelessWindow framelessWindow;
     framelessWindow.enableShadow(false);
     framelessWindow.init();
+#endif
 
     // Create the application main window into which we add
     // main widgets.
     gui::MainWindow window(app, &threadpool);
 
     window.LoadSettings();
-    window.LoadLastState(&framelessWindow);
+    window.LoadLastState(nullptr);
     window.showWindow();
 
+#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
     framelessWindow.setContent(&window);
     framelessWindow.show();
+#endif
 
     bool load_last_workspace = true;
     // check if we have a flag to disable workspace loading.

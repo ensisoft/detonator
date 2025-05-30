@@ -899,7 +899,9 @@ void MainWindow::CloseWorkspace()
     {
         child->Shutdown();
         child->close();
+#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
         delete child->GetWindow();
+#endif
 
     }
     mChildWindows.clear();
@@ -2533,7 +2535,11 @@ void MainWindow::RefreshUI()
     for (size_t i=0; i<mChildWindows.size(); )
     {
         ChildWindow* child = mChildWindows[i];
-        FramelessWindow* window = child->GetWindow();
+#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
+        auto* window = child->GetWindow();
+#else
+        auto* window = child;
+#endif
 
         if (child->ShouldPopIn() || child->IsClosed())
         {
@@ -3655,41 +3661,57 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
         child->SetSharedWorkspaceMenu(mUI.menuWorkspace);
 
         // Create a new frameless window to hold the child window.
+#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
         auto* window = new FramelessWindow();
         window->enableShadow(false);
         window->init();
         window->setContent(child);
+#endif
 
         QByteArray geometry;
         if (mWorkspace->GetUserProperty("_child_window_geometry_" + widget->GetId(), &geometry))
         {
+#if defined(DETONATOR_EDITOR_FRAMESS_WINDOW)
             window->restoreGeometry(geometry);
+#else
+            child->restoreGeometry(geometry);
+#endif
         }
         else
         {
             // resize and relocate on the desktop, by default the window seems
             // to be at a position that requires it to be immediately used and
             // resize by the user. ugh
-            const auto width = std::max((int) (mFramelessWindow->width() * 0.8), window->width());
-            const auto height = std::max((int) (mFramelessWindow->height() * 0.8), window->height());
-            const auto xpos = mFramelessWindow->x() + (mFramelessWindow->width() - width) / 2;
-            const auto ypos = mFramelessWindow->y() + (mFramelessWindow->height() - height) / 2;
-            window->resize(width, height);
-            window->move(xpos, ypos);
+#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
+            auto* parent_window = mFramlessWindow;
+            auto* child_window  = window;
+#else
+            auto* parent_window = this;
+            auto* child_window  = child;
+#endif
+            const auto width = std::max((int) (parent_window->width() * 0.8), child_window->width());
+            const auto height = std::max((int) (parent_window->height() * 0.8), child_window->height());
+            const auto xpos = parent_window->x() + (parent_window->width() - width) / 2;
+            const auto ypos = parent_window->y() + (parent_window->height() - height) / 2;
+            child_window->resize(width, height);
+            child_window->move(xpos, ypos);
+
         }
         // showing the widget *after* resize/move might produce incorrect
         // results since apparently the window's dimensions are not fully
         // know until it has been show (presumably some layout is done)
         // however doing the show first and then move/resize is visually
         // not very pleasing.
-        //child->show();
+#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
         window->show();
         // we're just going to store the frameless window object pointer
         // in the child window, since we really use the child window.
         // the frameless window now owns the child in the Qt object
         // hierarchy though so we must be careful.
         child->SetWindow(window);
-
+#else
+        child->show();
+#endif
         mChildWindows.push_back(child);
         return child;
     }
