@@ -68,6 +68,8 @@ namespace gfx
         const MaterialClass* GetClass() const override
         { return mClass.get(); }
 
+        std::unique_ptr<Material> Clone() const override;
+
         // Shortcut operator for accessing the class object instance.
         const MaterialClass* operator->() const
         { return mClass.get(); }
