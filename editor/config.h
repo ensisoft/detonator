@@ -34,3 +34,7 @@
 // that are also built into a QDesigner plugin. The plugin build
 // requires export/import crap, whereas the editor build doesn't.
 #define DESIGNER_PLUGIN_EXPORT
+
+// define this macro to enable "frameless" window, i.e. custom window
+// frame. This looks nice but has some serious performance problems.
+//#define DETONATOR_EDITOR_FRAMELESS_WINDOW
