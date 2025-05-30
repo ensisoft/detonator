@@ -159,13 +159,24 @@ public:
       , mDrawGrid(draw_grid)
     {}
 
-    void BeginDraw(const RenderSettings&, const GPUResources& gpu) override
+    void BeginDraw(const RenderSettings& settings, const GPUResources& gpu) override
     {
         if (!mDrawGrid)
             return;
 
-        auto* device = gpu.device;
+        DrawGrid(settings, gpu);
+    }
 
+    void DrawGrid(const RenderSettings&, const GPUResources& gpu) const
+    {
+        auto scene_painter = CreateScenePainter(gpu);
+        auto tile_painter = CreateTilePainter(gpu);
+        DrawCoordinateGrid(scene_painter, tile_painter, mGridDensity, mZoom, mCameraScale.x, mCameraScale.y, mSurfaceWidth, mSurfaceHeight, mCameraView);
+    }
+
+    gfx::Painter CreateTilePainter(const GPUResources& gpu) const
+    {
+        auto* device = gpu.device;
         const auto pixel_ratio = mCameraScale * mZoom;
         const auto surface_width  = (float)mSurfaceWidth;
         const auto surface_height = (float)mSurfaceHeight;
@@ -184,6 +195,17 @@ public:
         tile_painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
         tile_painter.SetEditingMode(true);
         tile_painter.SetFramebuffer(gpu.framebuffer);
+        return tile_painter;
+    }
+    gfx::Painter CreateScenePainter(const GPUResources& gpu) const
+    {
+        auto* device = gpu.device;
+
+        const auto pixel_ratio = mCameraScale * mZoom;
+        const auto surface_width  = (float)mSurfaceWidth;
+        const auto surface_height = (float)mSurfaceHeight;
+
+
 
         gfx::Painter scene_painter(device);
         scene_painter.SetViewMatrix(engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
@@ -196,10 +218,13 @@ public:
         scene_painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
         scene_painter.SetEditingMode(true);
         scene_painter.SetFramebuffer(gpu.framebuffer);
-
-        DrawCoordinateGrid(scene_painter, tile_painter, mGridDensity, mZoom, mCameraScale.x, mCameraScale.y, mSurfaceWidth, mSurfaceHeight, mCameraView);
-
+        return scene_painter;
     }
+    bool DrawGrid() const
+    {
+        return mDrawGrid;
+    }
+
 private:
     const glm::vec2 mCameraPosition;
     const glm::vec2 mCameraScale;
