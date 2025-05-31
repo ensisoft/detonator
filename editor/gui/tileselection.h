@@ -25,21 +25,14 @@ namespace gui
 {
 
     // tile selection. dimensions in tiles.
-    struct TileSelection {
-        unsigned start_row = 0;
-        unsigned start_col = 0;
-        unsigned width  = 0;
-        unsigned height = 0;
-        game::TilemapLayerClass::Resolution resolution =
-                game::TilemapLayerClass::Resolution::Original;
-
+    class TileSelection
+    {
+    public:
         struct Tile {
             unsigned x = 0;
             unsigned y = 0;
         };
 
-
-    public:
         explicit TileSelection(const base::URect& rect);
         TileSelection(unsigned col, unsigned row, unsigned width, unsigned height);
         TileSelection() = default;
@@ -60,20 +53,20 @@ namespace gui
         // for holes in the selection, i.e when the selection is
         // disjoint.
         auto GetWidth() const noexcept
-        { return width; }
+        { return mWidth; }
         auto GetHeight() const noexcept
-        { return height; }
+        { return mHeight; }
         auto GetRow() const noexcept
-        { return start_row; }
+        { return mStartRow; }
         auto GetCol() const noexcept
-        { return start_col; }
+        { return mStartCol; }
 
         void SetResolution(game::TilemapLayerClass::Resolution res)
         { resolution = res; }
         auto GetResolution() const noexcept
         { return resolution; }
         auto ToRect() const noexcept
-        { return base::URect(start_col, start_row, width, height); }
+        { return base::URect(mStartCol, mStartRow, mWidth, mHeight); }
         auto GetTileCount() const noexcept
         { return mTiles.size(); }
         const auto& GetTile(size_t index) const noexcept
@@ -82,6 +75,12 @@ namespace gui
         static TileSelection Combine(const TileSelection& one, const TileSelection& two);
     private:
         std::vector<Tile> mTiles;
+        unsigned mStartRow = 0;
+        unsigned mStartCol = 0;
+        unsigned mWidth  = 0;
+        unsigned mHeight = 0;
+        game::TilemapLayerClass::Resolution resolution =
+                game::TilemapLayerClass::Resolution::Original;
     };
 
 } // namespace

@@ -905,7 +905,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
         if (!mState.selection.HasSelection())
             return;
         if (const auto* layer = GetCurrentLayer()) {
-            if (layer->GetResolution() == mState.selection.resolution)
+            if (layer->GetResolution() == mState.selection.GetResolution())
                 return;
         }
         mState.selection.Clear();
@@ -2078,7 +2078,7 @@ void TilemapWidget::LayerSelectionChanged(const QItemSelection&, const QItemSele
     }
     else
     {
-        if (mState.selection.resolution != current->GetResolution())
+        if (mState.selection.GetResolution() != current->GetResolution())
             mState.selection.Clear();
     }
 
@@ -2240,17 +2240,15 @@ void TilemapWidget::DisplaySelection()
     SetEnabled(mUI.tileValue, false);
     SetEnabled(mUI.tilePaletteIndex, false);
 
-    if (!mState.selection.HasSelection())
+    const auto& selection = mState.selection;
+    if (!selection.HasSelection())
         return;
 
     const auto* layer = GetCurrentLayerInstance();
     if (!layer)
         return;
 
-    const auto& selection = mState.selection;
-    const auto selection_size = selection.width * selection.height;
-    if (selection_size == 0)
-        return;
+    const auto& tile = selection.GetTile(0);
 
     SetEnabled(mUI.selection, true);
 
@@ -2259,7 +2257,7 @@ void TilemapWidget::DisplaySelection()
         SetEnabled(mUI.tilePaletteIndex, true);
 
         uint8_t palette_index = 0;
-        ASSERT(layer->GetTilePaletteIndex(&palette_index, selection.start_row, selection.start_col));
+        ASSERT(layer->GetTilePaletteIndex(&palette_index, tile.y, tile.x));
         SetValue(mUI.tilePaletteIndex, palette_index);
     }
     if (layer->HasDataComponent())
@@ -2267,7 +2265,7 @@ void TilemapWidget::DisplaySelection()
         SetEnabled(mUI.tileValue, true);
 
         int32_t tile_value = 0;
-        ASSERT(layer->GetTileValue(&tile_value, selection.start_row, selection.start_col));
+        ASSERT(layer->GetTileValue(&tile_value, tile.y, tile.x));
         SetValue(mUI.tileValue, tile_value);
     }
 }
@@ -3250,7 +3248,7 @@ bool TilemapWidget::SelectLayerOnKey(unsigned int index)
         SelectRow(mUI.layers, index);
 
         const auto* layer = GetCurrentLayer();
-        if (mState.selection.HasSelection() && mState.selection.resolution != layer->GetResolution())
+        if (mState.selection.GetResolution() != layer->GetResolution())
             mState.selection.Clear();
 
         DisplayLayerProperties();
