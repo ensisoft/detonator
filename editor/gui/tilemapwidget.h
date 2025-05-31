@@ -115,7 +115,7 @@ namespace gui
         void SelectSelectedTileMaterial();
 
         void StartToolAction();
-        void LayerSelectionChanged(const QItemSelection, const QItemSelection);
+        void LayerSelectionChanged(const QItemSelection&, const QItemSelection&);
         void PaletteMaterialChanged(const PaletteMaterial* material);
     private:
         void StartTool(const QString& id);
@@ -132,7 +132,7 @@ namespace gui
         void MouseRelease(QMouseEvent* mickey);
         void MouseDoubleClick(QMouseEvent* mickey);
         void MouseWheel(QWheelEvent* wheel);
-        void MouseZoom(std::function<void(void)> zoom_function);
+        void MouseZoom(const std::function<void(void)>& zoom_function);
         bool KeyPress(QKeyEvent* key);
         game::TilemapLayerClass* GetCurrentLayer();
         game::TilemapLayer* GetCurrentLayerInstance();
@@ -151,14 +151,15 @@ namespace gui
         using Tool = TileTool;
         Tool* GetCurrentTool(size_t* index = nullptr);
         bool ValidateToolAgainstLayer(const Tool& tool, const game::TilemapLayer& layer);
-        void ToolIntoJson(const Tool& tool, QJsonObject& json) const;
-        bool ToolFromJson(Tool& tool, const QJsonObject& json) const;
 
         struct Tile {
             unsigned col = 0;
             unsigned row = 0;
         };
         std::optional<Tile> FindTileUnderMouse()const;
+
+        static void ToolIntoJson(const Tool& tool, QJsonObject& json);
+        static bool ToolFromJson(Tool& tool, const QJsonObject& json);
 
     private:
         Ui::Tilemap mUI;
