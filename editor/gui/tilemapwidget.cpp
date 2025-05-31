@@ -39,6 +39,7 @@
 #include "editor/app/workspace.h"
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
+#include "editor/gui/main.h"
 #include "editor/gui/tool.h"
 #include "editor/gui/nerd.h"
 #include "editor/gui/tilemapwidget.h"
@@ -331,44 +332,38 @@ private:
 class TilemapWidget::TileMoveTool : public MouseTool
 {
 public:
-    TileMoveTool(State& state, game::TilemapLayer& layer, int tile_selection_pos_x, int tile_selection_pos_y)
+    TileMoveTool(State& state, game::TilemapLayer& layer)
       : mState(state)
       , mLayer(layer)
-      , mSelectionOffsetX(tile_selection_pos_x)
-      , mSelectionOffsetY(tile_selection_pos_y)
     {
         ASSERT(mState.selection.HasSelection());
         const auto& selection = mState.selection;
-        mSelectionWidth = selection.width;
-        mSelectionHeight = selection.height;
-        mTiles.resize(mSelectionWidth * mSelectionHeight);
+        mTiles.resize(selection.GetTileCount());
 
-        for (unsigned row=0; row<mSelectionHeight; ++row)
+        // for each selected tile create a corresponding visual tile
+        // for visualizing the tile that is getting moved to the user.
+        for (unsigned i=0; i<selection.GetTileCount(); ++i)
         {
-            for (unsigned col=0; col<mSelectionWidth; ++col)
-            {
-                const auto tile_index = row * mSelectionWidth + col;
-                const auto tile_row = selection.start_row + row;
-                const auto tile_col = selection.start_col + col;
+            const auto& tile = selection.GetTile(i);
 
-                std::uint8_t palette_index = 0;
-                ASSERT(mLayer.GetTilePaletteIndex(&palette_index, tile_row, tile_col));
-                if (palette_index == mLayer.GetMaxPaletteIndex())
-                    continue;
-                const auto& materialId = mLayer->GetPaletteMaterialId(palette_index);
-                const auto& materialCls = mState.workspace->GetMaterialClassById(materialId);
-                mTiles[tile_index].material = gfx::CreateMaterialInstance(materialCls);
-                mTiles[tile_index].tile_index = mLayer->GetPaletteMaterialTileIndex(palette_index);
-                mTiles[tile_index].palette_index = palette_index;
+            std::uint8_t palette_index = 0;
+            ASSERT(mLayer.GetTilePaletteIndex(&palette_index, tile.y, tile.x));
+            if (palette_index == mLayer.GetMaxPaletteIndex())
+                continue;
 
-                const auto nothing = mLayer.GetMaxPaletteIndex();
-                mLayer.SetTilePaletteIndex(nothing, tile_row, tile_col);
-            }
+            const auto& materialId = mLayer->GetPaletteMaterialId(palette_index);
+            const auto& materialCls = mState.workspace->GetMaterialClassById(materialId);
+            mTiles[i].material = gfx::CreateMaterialInstance(materialCls);
+            mTiles[i].material->SetUniform("kBaseColor", gfx::Color::HotPink);
+            mTiles[i].tile_index    = mLayer->GetPaletteMaterialTileIndex(palette_index);
+            mTiles[i].palette_index = palette_index;
         }
-
     }
     void Render(gfx::Painter& scene_painter, gfx::Painter& tile_painter) const override
     {
+        if (!mSelectionMoved)
+            return;
+
         // This matrix will project a coordinate in isometric tile world space into
         // 2D screen space/surface coordinate.
         const auto& tile_projection_transform_matrix = engine::GetProjectionTransformMatrix(tile_painter.GetProjMatrix(),
@@ -389,46 +384,41 @@ public:
                                                                perspective);
         gfx::FRect tool_bounds;
 
-        for (unsigned row=0; row<mSelectionHeight; ++row)
+        const auto& selection = mState.selection;
+        ASSERT(mTiles.size() == selection.GetTileCount());
+
+        for (unsigned i=0; i<selection.GetTileCount(); ++i)
         {
-            for (unsigned col=0; col<mSelectionWidth; ++col)
-            {
-                const auto tile_row = mTileRow + row - mSelectionOffsetY;
-                const auto tile_col = mTileCol + col - mSelectionOffsetX;
-                if (tile_row < 0 || tile_row >= mLayer.GetHeight()||
-                    tile_col < 0 || tile_col >= mLayer.GetWidth())
-                    continue;
+            const auto& selected_tile = selection.GetTile(i);
+            const auto& visual_tile = mTiles[i];
+            if (!visual_tile.material)
+                continue;
 
-                const auto& tile_data = mTiles[row * mSelectionWidth + col];
-                if (!tile_data.material)
-                    continue;
+            gfx::TileBatch::Tile tile;
+            tile.pos.y  = selected_tile.y;
+            tile.pos.x  = selected_tile.x;
+            tile.pos.z  = mLayer.GetDepth();
+            tile.data.x = visual_tile.tile_index;
 
-                gfx::TileBatch::Tile tile;
-                tile.pos.y = tile_row;
-                tile.pos.x = tile_col;
-                tile.pos.z = mLayer.GetDepth();
-                tile.data.x = tile_data.tile_index;
+            gfx::TileBatch batch;
+            batch.AddTile(tile);
+            batch.SetTileWorldSize(tile_size * cuboid_scale);
+            batch.SetTileRenderWidth(render_size.x * tile_render_width_scale);
+            batch.SetTileRenderHeight(render_size.y * tile_render_height_scale);
+            batch.SetTileShape(gfx::TileBatch::TileShape::Automatic);
+            if (perspective == game::Tilemap::Perspective::AxisAligned)
+                batch.SetProjection(gfx::TileBatch::Projection::AxisAligned);
+            else if (perspective == game::Tilemap::Perspective::Dimetric)
+                batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
+            else BUG("missing tile projection.");
 
-                gfx::TileBatch batch;
-                batch.AddTile(tile);
-                batch.SetTileWorldSize(tile_size * cuboid_scale);
-                batch.SetTileRenderWidth(render_size.x * tile_render_width_scale);
-                batch.SetTileRenderHeight(render_size.y * tile_render_height_scale);
-                batch.SetTileShape(gfx::TileBatch::TileShape::Automatic);
-                if (perspective == game::Tilemap::Perspective::AxisAligned)
-                    batch.SetProjection(gfx::TileBatch::Projection::AxisAligned);
-                else if (perspective == game::Tilemap::Perspective::Dimetric)
-                    batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
-                else BUG("missing tile projection.");
+            // draw the tile batch
+            scene_painter.Draw(batch, tile_projection_transform_matrix, *visual_tile.material);
 
-                // draw the tile batch
-                scene_painter.Draw(batch, tile_projection_transform_matrix, *tile_data.material);
-
-                gfx::FRect rect;
-                rect.Resize(tile_width_units, tile_height_units);
-                rect.Translate(tile.pos.x * tile_width_units, tile.pos.y * tile_height_units);
-                tool_bounds = Union(tool_bounds, rect);
-            }
+            gfx::FRect rect;
+            rect.Resize(tile_width_units, tile_height_units);
+            rect.Translate(tile.pos.x * tile_width_units, tile.pos.y * tile_height_units);
+            tool_bounds = Union(tool_bounds, rect);
         }
 
         // draw a rect around the tool on the tile plane
@@ -447,62 +437,60 @@ public:
         const auto tile_height = mState.klass->GetTileHeight() * tile_scale;
 
         const glm::vec2 world_pos = mickey.MapToPlane();
-        mTileCol  = world_pos.x / tile_width;
-        mTileRow  = world_pos.y / tile_height;
-        mMouseMoved++;
+        const auto tile_col = int(world_pos.x / tile_width);
+        const auto tile_row = int(world_pos.y / tile_height);
+
+        const int tile_dx = tile_col - mTileCol;
+        const int tile_dy = tile_row - mTileRow;
+        if (Editor::DebugEditor())
+            VERBOSE("Tile move tool dx=%1, dy=%2 row=%3, col=%4", tile_dx, tile_dy, tile_row, tile_col);
+
+        if (tile_dx || tile_dy)
+        {
+            if (!mSelectionMoved)
+            {
+                const auto nothing = mLayer.GetMaxPaletteIndex();
+                for (unsigned i=0; i<mState.selection.GetTileCount(); ++i)
+                {
+                    const auto& tile = mState.selection.GetTile(i);
+                    mLayer.SetTilePaletteIndex(nothing, tile.y, tile.x);
+                }
+            }
+            mSelectionMoved = true;
+
+            mState.selection.ShiftSelection(tile_dx, tile_dy, mLayer.GetWidth(), mLayer.GetHeight());
+        }
+
+        mTileCol = tile_col;
+        mTileRow = tile_row;
     }
     void MousePress(const MouseEvent& mickey, gfx::Transform&) override
     {
+        const auto tile_scale  = mLayer.GetTileSizeScaler();
+        const auto tile_width  = mState.klass->GetTileWidth() * tile_scale;
+        const auto tile_height = mState.klass->GetTileHeight() * tile_scale;
 
+        const glm::vec2 world_pos = mickey.MapToPlane();
+        mTileCol  = world_pos.x / tile_width;
+        mTileRow  = world_pos.y / tile_height;
+
+        if (Editor::DebugEditor())
+            VERBOSE("Tile move tool start at row=%1, col=%2", mTileRow, mTileCol);
     }
     bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
     {
-        if (mMouseMoved < 2)
-            return true;
+        const auto& selection = mState.selection;
+        ASSERT(mTiles.size() == selection.GetTileCount());
 
-        unsigned selection_min_row = std::numeric_limits<unsigned>::max();
-        unsigned selection_max_row = 0;
-        unsigned selection_min_col = std::numeric_limits<unsigned>::max();
-        unsigned selection_max_col = 0;
-
-        for (unsigned row=0; row<mSelectionHeight; ++row)
+        for (unsigned i=0; i<selection.GetTileCount(); ++i)
         {
-            for (unsigned col=0; col<mSelectionWidth; ++col)
-            {
-                const auto tile_row = mTileRow + row - mSelectionOffsetY;
-                const auto tile_col = mTileCol + col - mSelectionOffsetX;
-                if (tile_row < 0 || tile_row >= mLayer.GetHeight()||
-                    tile_col < 0 || tile_col >= mLayer.GetWidth())
-                    continue;
+            const auto& selected_tile = selection.GetTile(i);
+            const auto& visual_tile = mTiles[i];
+            if (!visual_tile.material)
+                continue;
 
-                selection_min_row = std::min(selection_min_row, tile_row);
-                selection_max_row = std::max(selection_max_row, tile_row);
-                selection_min_col = std::min(selection_min_col, tile_col);
-                selection_max_col = std::max(selection_max_col, tile_col);
-
-                const auto& tile_data = mTiles[row * mSelectionWidth + col];
-                if (!tile_data.material)
-                    continue;
-
-                mLayer.SetTilePaletteIndex(tile_data.palette_index, tile_row, tile_col);
-            }
+            mLayer.SetTilePaletteIndex(visual_tile.palette_index, selected_tile.y, selected_tile.x);
         }
-        mState.selection.Clear();
-
-        if (selection_min_row == std::numeric_limits<unsigned>::max() ||
-            selection_min_col == std::numeric_limits<unsigned >::max())
-            return true;
-
-        const auto selection_width = selection_max_col - selection_min_col + 1;
-        const auto selection_height = selection_max_row - selection_min_row + 1;
-
-        TileSelection selection;
-        selection.start_row = selection_min_row;
-        selection.start_col = selection_min_col;
-        selection.width  = selection_width;
-        selection.height = selection_height;
-        selection.resolution = mLayer->GetResolution();
-        mState.selection = selection;
         return true;
     }
     std::string GetName() const override
@@ -515,10 +503,6 @@ private:
         std::uint8_t palette_index = 0;
         std::uint32_t tile_index   = 0;
     };
-    unsigned mSelectionWidth = 0;
-    unsigned mSelectionHeight = 0;
-    int mSelectionOffsetX = 0;
-    int mSelectionOffsetY = 0;
     std::vector<Tile> mTiles;
 
     TilemapWidget::State& mState;
@@ -526,8 +510,7 @@ private:
 
     int mTileRow = 0;
     int mTileCol = 0;
-
-    unsigned mMouseMoved = 0;
+    bool mSelectionMoved = false;
 };
 
 class TilemapWidget::TileSelectTool : public MouseTool
@@ -1778,16 +1761,12 @@ void TilemapWidget::on_tilePaletteIndex_valueChanged(int)
         return;
 
     const auto& selection = mState.selection;
-    const int8_t palette_index = GetValue(mUI.tilePaletteIndex);
+    const auto palette_index = (int8_t)GetValue(mUI.tilePaletteIndex);
 
-    for (unsigned row=0; row<selection.height; ++row)
+    for (unsigned i=0; i<selection.GetTileCount(); ++i)
     {
-        for (unsigned col=0; col<selection.width; ++col)
-        {
-            const auto tile_row = selection.start_row + row;
-            const auto tile_col = selection.start_col + col;
-            ASSERT(layer->SetTilePaletteIndex(palette_index, tile_row, tile_col));
-        }
+        const auto& tile = selection.GetTile(i);
+        ASSERT(layer->SetTilePaletteIndex(palette_index, tile.y, tile.x));
     }
 
     ClearUnusedPaletteEntries();
@@ -1811,12 +1790,26 @@ void TilemapWidget::SelectSelectedTileMaterial()
     DlgMaterial dlg(this, mState.workspace, "");
     dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
 
-    if (selection.width == 1 && selection.height == 1)
+    // indicate the current tile material when possible.
     {
         uint8_t current_palette_index = 0;
-        const auto tile_row = selection.start_row;
-        const auto tile_col = selection.start_col;
-        ASSERT(layer->GetTilePaletteIndex(&current_palette_index, tile_row, tile_col));
+
+        for (size_t i = 1; i < selection.GetTileCount(); ++i)
+        {
+            const auto& tile_one = selection.GetTile(0);
+            const auto& tile_two = selection.GetTile(i);
+
+            uint8_t palette_index_one = 0;
+            uint8_t palette_index_two = 0;
+            ASSERT(layer->GetTilePaletteIndex(&palette_index_one, tile_one.y, tile_one.x));
+            ASSERT(layer->GetTilePaletteIndex(&palette_index_two, tile_two.y, tile_two.x));
+            if (palette_index_one != palette_index_two)
+            {
+                current_palette_index = klass->GetMaxPaletteIndex();
+                break;
+            } else current_palette_index = palette_index_one;
+        }
+
         if (current_palette_index != klass->GetMaxPaletteIndex())
         {
             dlg.SetMaterialId(klass->GetPaletteMaterialId(current_palette_index));
@@ -1853,15 +1846,13 @@ void TilemapWidget::SelectSelectedTileMaterial()
     }
     klass->SetPaletteMaterialId(material, palette_index);
     klass->SetPaletteMaterialTileIndex(tile_index, palette_index);
-    for (unsigned row=0; row<selection.height; ++row)
+
+    for (unsigned i=0; i<selection.GetTileCount(); ++i)
     {
-        for (unsigned col=0; col<selection.width; ++col)
-        {
-            const auto tile_row = selection.start_row + row;
-            const auto tile_col = selection.start_col + col;
-            ASSERT(layer->SetTilePaletteIndex(palette_index, tile_row, tile_col));
-        }
+        const auto& tile = selection.GetTile(i);
+        ASSERT(layer->SetTilePaletteIndex(palette_index, tile.y, tile.x));
     }
+
     ClearUnusedPaletteEntries();
     UpdateLayerPalette();
     DisplaySelection();
@@ -1883,15 +1874,13 @@ void TilemapWidget::DeleteSelectedTileMaterial()
         return;
 
     const auto nothing_index = layer->GetMaxPaletteIndex();
-    for (unsigned row=0; row<selection.height; ++row)
+
+    for (unsigned i=0; i<selection.GetTileCount(); ++i)
     {
-        for (unsigned col=0; col<selection.width; ++col)
-        {
-            const auto tile_row = selection.start_row + row;
-            const auto tile_col = selection.start_col + col;
-            ASSERT(layer->SetTilePaletteIndex(nothing_index, tile_row, tile_col));
-        }
+        const auto& tile = selection.GetTile(i);
+        ASSERT(layer->SetTilePaletteIndex(nothing_index, tile.y, tile.x));
     }
+
     ClearUnusedPaletteEntries();
     UpdateLayerPalette();
     DisplaySelection();
@@ -1908,16 +1897,12 @@ void TilemapWidget::on_tileValue_valueChanged(int)
         return;
 
     const auto& selection = mState.selection;
-    const int32_t tile_value = GetValue(mUI.tileValue);
+    const auto tile_value = (int32_t)GetValue(mUI.tileValue);
 
-    for (unsigned row=0; row<selection.height; ++row)
+    for (unsigned i=0; i<selection.GetTileCount(); ++i)
     {
-        for (unsigned col=0; col<selection.width; ++col)
-        {
-            const auto tile_row = selection.start_row + row;
-            const auto tile_col = selection.start_col + col;
-            ASSERT(layer->SetTileValue(tile_value, tile_row, tile_col));
-        }
+        const auto& tile = selection.GetTile(i);
+        ASSERT(layer->SetTileValue(tile_value, tile.y, tile.x));
     }
 }
 
@@ -2249,10 +2234,9 @@ void TilemapWidget::DisplayLayerProperties()
 
 void TilemapWidget::DisplaySelection()
 {
-    SetEnabled(mUI.selection, false);
-
     SetValue(mUI.tileValue, 0);
     SetValue(mUI.tilePaletteIndex, 0);
+    SetEnabled(mUI.selection, false);
     SetEnabled(mUI.tileValue, false);
     SetEnabled(mUI.tilePaletteIndex, false);
 
@@ -2745,25 +2729,25 @@ void TilemapWidget::MousePress(QMouseEvent* event)
 {
     const MouseEvent mickey(event, mUI, mState, mState.klass->GetPerspective());
 
+    const auto& mods = event->modifiers();
+    const auto shift = mods & Qt::ShiftModifier;
+
     if (!mCurrentTool && mickey->button() == Qt::LeftButton)
     {
         if (auto* layer = GetCurrentLayerInstance())
         {
-            if (mState.selection.HasSelection() && layer->HasRenderComponent())
+            const auto& layer_resolution = layer->GetClass().GetResolution();
+
+            if (mState.selection.HasSelection() &&
+                mState.selection.GetResolution() == layer_resolution && layer->HasRenderComponent() && !shift)
             {
                 const auto& selection = mState.selection;
-                // todo: support move with disjoint selection.
-                if (!selection.DisjointSelection())
+
+                if (const auto& tile = FindTileUnderMouse())
                 {
-                    if (const auto& tile = FindTileUnderMouse())
+                    if (selection.IsSelected(tile->col, tile->row))
                     {
-                        if (selection.IsSelected(tile->col, tile->row))
-                        {
-                            const int x = tile->col - selection.start_col;
-                            const int y = tile->row - selection.start_row;
-                            mCurrentTool.reset(new TileMoveTool(mState, *layer, x, y));
-                            mCurrentTool->MouseMove(mickey);
-                        }
+                        mCurrentTool.reset(new TileMoveTool(mState, *layer));
                     }
                 }
             }
@@ -2891,28 +2875,8 @@ void TilemapWidget::MouseZoom(const std::function<void()>& zoom_function)
 
 bool TilemapWidget::KeyPress(QKeyEvent* key)
 {
-    auto move_selection = [this](int dx, int dy) {
-        if (!mState.selection.HasSelection())
-            return;
-        const auto* layer = GetCurrentLayer();
-        const auto num_cols = layer->MapDimension(mState.klass->GetMapWidth());
-        const auto num_rows = layer->MapDimension(mState.klass->GetMapHeight());
-
-        auto& selection = mState.selection;
-
-        const int start_col = selection.start_col;
-        const int start_row = selection.start_row;
-        const int width     = selection.width;
-        const int height    = selection.height;
-        if (start_col + dx >= 0 && start_col + width + dx <= num_cols)
-            selection.start_col = (unsigned)(start_col + dx);
-        if (start_row + dy >= 0 && start_row + height + dy <= num_rows)
-            selection.start_row = (unsigned)(start_row + dy);
-
-        ASSERT(selection.start_col + selection.width <= num_cols);
-        ASSERT(selection.start_row + selection.height <= num_rows);
-        DisplaySelection();
-    };
+    int selection_dx = 0;
+    int selection_dy = 0;
 
     if (key->key() == Qt::Key_Escape)
     {
@@ -2920,7 +2884,15 @@ bool TilemapWidget::KeyPress(QKeyEvent* key)
         return true;
     }
     else if (key->key() == Qt::Key_Delete || key->key() == Qt::Key_Backspace)
+    {
         DeleteSelectedTileMaterial();
+        return true;
+    }
+    else if (key->key() == Qt::Key_Space)
+    {
+        SelectSelectedTileMaterial();
+        return true;
+    }
     else if (key->key() == Qt::Key_1)
         return SelectLayerOnKey(0);
     else if (key->key() == Qt::Key_2)
@@ -2940,16 +2912,22 @@ bool TilemapWidget::KeyPress(QKeyEvent* key)
     else if (key->key() == Qt::Key_9)
         return SelectLayerOnKey(8);
     else if (key->key() == Qt::Key_Up)
-        move_selection(0, -1);
+        selection_dy = -1;
     else if (key->key() == Qt::Key_Down)
-        move_selection(0, 1);
+        selection_dy = 1;
     else if (key->key() == Qt::Key_Left)
-        move_selection(-1, 0);
+        selection_dx = -1;
     else if (key->key() == Qt::Key_Right)
-        move_selection(1, 0);
-    else if (key->key() == Qt::Key_Space)
-        SelectSelectedTileMaterial();
-    return false;
+        selection_dx = 1;
+    else return false;
+
+    const auto* layer = GetCurrentLayer();
+    const auto num_cols = layer->MapDimension(mState.klass->GetMapWidth());
+    const auto num_rows = layer->MapDimension(mState.klass->GetMapHeight());
+    if (mState.selection.ShiftSelection(selection_dx, selection_dy, num_cols, num_rows))
+        DisplaySelection();
+
+    return true;
 }
 
 game::TilemapLayerClass* TilemapWidget::GetCurrentLayer()
