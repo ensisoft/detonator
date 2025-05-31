@@ -71,36 +71,36 @@ namespace gui
 class TilemapWidget::LayerData : public game::TilemapData
 {
 public:
-    virtual void Write(const void* ptr, size_t bytes, size_t offset) override
+    void Write(const void* ptr, size_t bytes, size_t offset) override
     {
         ASSERT(offset + bytes <= mBytes.size());
 
         std::memcpy(&mBytes[offset], ptr, bytes);
     }
-    virtual void Read(void* ptr, size_t bytes, size_t offset) const override
+    void Read(void* ptr, size_t bytes, size_t offset) const override
     {
         ASSERT(offset + bytes <= mBytes.size());
 
         std::memcpy(ptr, &mBytes[offset],bytes);
     }
-    virtual size_t AppendChunk(size_t bytes) override
+    size_t AppendChunk(size_t bytes) override
     {
         const auto offset = mBytes.size();
         mBytes.resize(offset + bytes);
         //DEBUG("Allocated new map layer data chunk. [offset=%1, bytes=%2]", offset, Bytes {bytes});
         return offset;
     }
-    virtual size_t GetByteCount() const override
+    size_t GetByteCount() const override
     {
         return mBytes.size();
     }
-    virtual void Resize(size_t bytes) override
+    void Resize(size_t bytes) override
     {
         mBytes.resize(bytes);
         //DEBUG("Resized map layer buffer to new size. [bytes=%1]", Bytes {bytes});
     }
 
-    virtual void ClearChunk(const void* value, size_t value_size, size_t offset, size_t num_values) override
+    void ClearChunk(const void* value, size_t value_size, size_t offset, size_t num_values) override
     {
         ASSERT(offset + value_size * num_values <= mBytes.size());
 
@@ -255,10 +255,10 @@ private:
 class TilemapWidget::LayerModel : public QAbstractTableModel
 {
 public:
-    LayerModel(TilemapWidget::State& state)
+    explicit LayerModel(TilemapWidget::State& state) noexcept
       : mState(state)
     {}
-    virtual QVariant data(const QModelIndex& index, int role) const override
+    QVariant data(const QModelIndex& index, int role) const override
     {
         const auto col = index.column();
         const auto row = index.row();
@@ -279,9 +279,9 @@ public:
                 else return QIcon("icons:crossed_eye.png");
             }
         }
-        return QVariant();
+        return {};
     }
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
     {
         if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         {
@@ -289,13 +289,13 @@ public:
             else if (section == 1) return "Name";
             else BUG("Missing layer table column index.");
         }
-        return QVariant();
+        return {};
     }
-    virtual int rowCount(const QModelIndex&) const override
+    int rowCount(const QModelIndex&) const override
     {
         return static_cast<int>(mState.klass->GetNumLayers());
     }
-    virtual int columnCount(const QModelIndex&) const override
+    int columnCount(const QModelIndex&) const override
     {
         return 2;
     }
@@ -303,12 +303,14 @@ public:
     {
         const auto count = static_cast<int>(mState.klass->GetNumLayers());
         QAbstractTableModel::beginInsertRows(QModelIndex(), count, count);
-        mState.klass->AddLayer(layer);
+        mState.klass->AddLayer(std::move(layer));
         QAbstractTableModel::endInsertRows();
     }
     void DeleteLayer(size_t index)
     {
-        QAbstractTableModel::beginRemoveRows(QModelIndex(), index, index);
+        const auto row = static_cast<int>(index);
+
+        QAbstractTableModel::beginRemoveRows(QModelIndex(), row, row);
         mState.klass->DeleteLayer(index);
         QAbstractTableModel::endInsertRows();
     }
@@ -633,15 +635,15 @@ private:
     const game::TilemapLayer& mLayer;
     TilemapWidget::State& mState;
 private:
-    glm::vec2 mWorldStartPos;
-    glm::vec2 mWorldPos;
+    glm::vec2 mWorldStartPos = {0.0f, 0.0f};
+    glm::vec2 mWorldPos = {0.0f, 0.0f};
 };
 
 class TilemapWidget::TileBrushTool : public MouseTool
 {
 public:
     TileBrushTool(std::shared_ptr<const TileTool> tool, State& state, game::TilemapLayer& layer)
-      : mTool(tool)
+      : mTool(std::move(tool))
       , mState(state)
       , mLayer(layer)
     {}
@@ -1953,7 +1955,7 @@ void TilemapWidget::on_layers_customContextMenuRequested(const QPoint& point)
 
 void TilemapWidget::StartToolAction()
 {
-    QAction* action = qobject_cast<QAction*>(sender());
+    auto* action = qobject_cast<QAction*>(sender());
 
     StartTool(action->data().toString());
 
@@ -2080,7 +2082,7 @@ void TilemapWidget::OnUpdateResource(const app::Resource* resource)
 
 }
 
-void TilemapWidget::LayerSelectionChanged(const QItemSelection, const QItemSelection)
+void TilemapWidget::LayerSelectionChanged(const QItemSelection&, const QItemSelection&)
 {
     const auto* current = GetCurrentLayer();
     if (!current)
@@ -2860,7 +2862,7 @@ void TilemapWidget::MouseWheel(QWheelEvent* wheel)
 
 }
 
-void TilemapWidget::MouseZoom(std::function<void()> zoom_function)
+void TilemapWidget::MouseZoom(const std::function<void()>& zoom_function)
 {
     // where's the mouse in the widget
     const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
@@ -3029,7 +3031,7 @@ void TilemapWidget::UpdateToolToolbar()
     for (unsigned i=0; i<mTools.size(); ++i)
     {
         const auto& tool = mTools[i];
-        QAction* action = new QAction(this);
+        auto* action = new QAction(this);
         action->setText(tool->name);
         action->setData(tool->id);
         action->setCheckable(true);
@@ -3128,7 +3130,8 @@ bool TilemapWidget::ValidateToolAgainstLayer(const Tool& tool, const game::Tilem
     return true;
 }
 
-void TilemapWidget::ToolIntoJson(const Tool& tool, QJsonObject& json) const
+// static
+void TilemapWidget::ToolIntoJson(const Tool& tool, QJsonObject& json)
 {
     app::JsonWrite(json, "tool",           tool.tool);
     app::JsonWrite(json, "shape",          tool.shape);
@@ -3154,7 +3157,8 @@ void TilemapWidget::ToolIntoJson(const Tool& tool, QJsonObject& json) const
     json["tiles"] = tiles;
 }
 
-bool TilemapWidget::ToolFromJson(Tool& tool, const QJsonObject& json) const
+// static
+bool TilemapWidget::ToolFromJson(Tool& tool, const QJsonObject& json)
 {
     app::JsonReadSafe(json, "tool",           &tool.tool);
     app::JsonReadSafe(json, "shape",          &tool.shape);
@@ -3191,7 +3195,13 @@ bool TilemapWidget::ToolFromJson(Tool& tool, const QJsonObject& json) const
         app::JsonReadSafe(json, "apply_value",    &tile.apply_value);
         for (size_t i=0; i<tool.width*tool.height; ++i)
         {
-            tool.tiles.push_back(std::move(tile));
+            TileTool::Tile copy;
+            copy.material = tile.material;
+            copy.tile_index = tile.tile_index;
+            copy.palette_index = tile.palette_index;
+            copy.apply_material = tile.apply_material;
+            copy.apply_value = tile.apply_value;
+            tool.tiles.push_back(std::move(copy));
         }
     }
     return true;
