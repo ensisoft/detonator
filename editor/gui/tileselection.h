@@ -54,6 +54,8 @@ namespace gui
 
         void Deselect(const Tile& tile);
 
+        bool ShiftSelection(int dx, int dy, unsigned map_width, unsigned map_height);
+
         // get selection width in tiles. this does not account
         // for holes in the selection, i.e when the selection is
         // disjoint.

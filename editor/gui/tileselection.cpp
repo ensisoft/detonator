@@ -108,6 +108,36 @@ void TileSelection::Deselect(const Tile& tile)
     }
 }
 
+bool TileSelection::ShiftSelection(int dx, int dy, unsigned map_width, unsigned map_height)
+{
+    const auto start_col = static_cast<int64_t>(this->start_col);
+    const auto start_row = static_cast<int64_t>(this->start_row);
+    const auto width     = static_cast<int64_t>(this->width);
+    const auto height    = static_cast<int64_t>(this->height);
+
+    if (start_col + dx < 0 || start_col + width + dx > map_width)
+        dx = 0;
+
+    if (start_row + dy < 0 || start_row + height + dy > map_height)
+        dy = 0;
+
+    if (dx == 0 && dy == 0)
+        return false;
+
+    this->start_row = start_row + dy;
+    this->start_col = start_col + dx;
+
+    for (auto& tile : mTiles)
+    {
+        tile.x += dx;
+        tile.y += dy;
+    }
+
+    ASSERT(this->start_col + this->width <= map_width);
+    ASSERT(this->start_row + this->height <= map_height);
+    return true;
+}
+
 // static
 TileSelection TileSelection::Combine(const TileSelection& one, const TileSelection& two)
 {
