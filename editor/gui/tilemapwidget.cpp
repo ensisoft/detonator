@@ -548,7 +548,7 @@ public:
         model.Scale(movement.x, movement.y);
         model.MoveTo(mWorldStartPos.x, mWorldStartPos.y);
         tile_painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), model,
-                    gfx::CreateMaterialFromColor(gfx::Color::Green));
+                    gfx::CreateMaterialFromColor(gfx::Color::HotPink), 2.0f);
 
     }
     void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
@@ -619,6 +619,13 @@ public:
         const unsigned selection_tile_height = (unsigned)(std::ceil(selection.GetHeight() / tile_height));
         return base::URect(selection_tile_xpos, selection_tile_ypos,
                            selection_tile_width, selection_tile_height);
+    }
+
+    TileSelection GetSelection() const
+    {
+        TileSelection selection(GetTileRect());
+        selection.SetResolution(mLayer->GetResolution());
+        return selection;
     }
 
 private:
@@ -2322,12 +2329,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     scene_painter.SetViewport(0, 0, width, height);
     scene_painter.SetSurfaceSize(width, height);
 
-    // draw the background grid in tilespace and project with the map perspective
-    if (GetValue(mUI.chkShowGrid))
-    {
-        DrawCoordinateGrid(scene_painter, tile_painter, grid, zoom, xs, ys, width, height, map_view);
-    }
-
     // render the actual tilemap
     {
         auto* device = painter.GetDevice();
@@ -2346,18 +2347,62 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                 grid,
                 GetValue(mUI.chkShowGrid));
 
-        class DrawHook : public engine::LowLevelRendererHook
+        class DrawHook : public engine::LowLevelRendererHook, public engine::PacketFilter
         {
         public:
-            DrawHook(const State& state, const game::TilemapLayer* layer, const gfx::Painter& painter, LowLevelRenderHook* hook)
+            DrawHook(const State& state, const game::TilemapLayer* layer, const gfx::Painter& painter, LowLevelRenderHook* hook, MouseTool* tool)
               : mState(state)
               , mLayer(layer)
               , mWindowPainter(painter)
               , mLowLevelRenderHook(hook)
+              , mCurrentTool(tool)
             {}
             void BeginDraw(const RenderSettings& settings, const GPUResources& gpu) override
             {
-                mLowLevelRenderHook->BeginDraw(settings, gpu);
+                if (mLowLevelRenderHook->DrawGrid())
+                    mLowLevelRenderHook->DrawGrid(settings, gpu);
+
+                if (!mLayer)
+                    return;
+
+                // visualize the selected tiles in the grid level
+                const auto tile_width  = mState.klass->GetTileWidth();
+                const auto tile_height = mState.klass->GetTileHeight();
+                const auto tile_depth  = mState.klass->GetTileDepth();
+                const auto tile_scaler = mLayer->GetTileSizeScaler();
+                const auto layer_tile_width  = tile_width * tile_scaler;
+                const auto layer_tile_height = tile_height * tile_scaler;
+
+                auto tile_painter = mLowLevelRenderHook->CreateTilePainter(gpu);
+
+                // visualize the currently selected tiles
+                const auto& selection = mState.selection;
+                for (unsigned i=0; i<selection.GetTileCount(); ++i)
+                {
+                    const auto& tile = selection.GetTile(i);
+                    gfx::Transform model;
+                    model.Scale(layer_tile_width, layer_tile_height);
+                    model.MoveTo(layer_tile_width * tile.x, layer_tile_height * tile.y);
+                    tile_painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Solid), model,
+                                      gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray, 0.4f)));
+                }
+
+                // visualize the tiles currently being selected
+                if (const auto* select_tool = dynamic_cast<const TileSelectTool*>(mCurrentTool))
+                {
+                    const auto& selection = select_tool->GetSelection();
+                    if (selection.IsEmpty())
+                        return;
+                    for (unsigned i=0; i<selection.GetTileCount(); ++i)
+                    {
+                        const auto& tile = selection.GetTile(i);
+                        gfx::Transform model;
+                        model.Scale(layer_tile_width, layer_tile_height);
+                        model.MoveTo(layer_tile_width * tile.x, layer_tile_height * tile.y);
+                        tile_painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Solid), model,
+                                          gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray, 0.4f)));
+                    }
+                }
             }
 
             void EndDrawPacket(const RenderSettings& settings, const GPUResources& gpu, const engine::DrawPacket& packet, gfx::Painter& painter) override
@@ -2411,16 +2456,76 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                             tiles.SetProjection(gfx::TileBatch::Projection::Dimetric);
                         else BUG("unknown projection");
 
-                        DrawEdges(painter, mWindowPainter, tiles, *packet.material, packet.transform, mState.klass->GetId());
+                        //DrawEdges(painter, mWindowPainter, tiles, *packet.material, packet.transform, mState.klass->GetId());
                     }
                 }
+            }
+            bool InspectPacket(engine::DrawPacket& packet) override
+            {
+                if (!mLayer)
+                    return true;
+
+                const auto& selection = mState.selection;
+
+                const auto& packet_layer = mState.map->GetLayer(packet.map_layer);
+                if (packet_layer->GetResolution() != selection.GetResolution())
+                    return true;
+
+                const auto* tile_batch = dynamic_cast<const gfx::TileBatch*>(packet.drawable.get());
+                const auto layer_index = mState.map->FindLayerIndex(mLayer);
+
+
+                TileSelection temp;
+
+                if (const auto* select_tool = dynamic_cast<const TileSelectTool*>(mCurrentTool))
+                {
+                    temp = select_tool->GetSelection();
+                    ASSERT(temp.GetResolution() == selection.GetResolution());
+                    ASSERT(temp.GetResolution() == packet_layer->GetResolution());
+                }
+
+                for (size_t i=0; i<tile_batch->GetNumTiles(); ++i)
+                {
+                    const auto& tile = tile_batch->GetTile(i);
+
+                    const auto selected_tile= selection.IsSelected(tile.pos.x, tile.pos.y) ||
+                                             temp.IsSelected(tile.pos.x, tile.pos.y);
+                    if (!selected_tile)
+                        continue;
+
+                    if (packet.domain == engine::DrawPacket::Domain::Scene)
+                    {
+                        auto material = packet.material->Clone();
+
+                        // the idea here is to visually indicate not only the tile that is
+                        // the current layer but also the tile that is not in the current layer.
+                        // we could use different colors here but visually using a single
+                        // color seems more appealing. Going to leave that layer check here
+                        // for posterity however.
+                        if (int(tile.pos.z) == mLayer->GetDepth())
+                        {
+                            if (packet.map_layer == layer_index)
+                                material->SetUniform("kBaseColor", gfx::Color::HotPink);
+                            else material->SetUniform("kBaseColor", gfx::Color::HotPink);
+                        }
+                        else
+                        {
+                            material->SetUniform("kBaseColor", gfx::Color::LightGray);
+                        }
+
+                        packet.material = std::move(material);
+                    }
+                }
+
+                return true;
             }
         private:
             const State& mState;
             const game::TilemapLayer* mLayer = nullptr;
             const gfx::Painter& mWindowPainter;
-            LowLevelRenderHook* mLowLevelRenderHook = nullptr;
-        } hook(mState, GetCurrentLayerInstance(), painter, &low_level_render_hook);
+            const LowLevelRenderHook* mLowLevelRenderHook = nullptr;
+            const MouseTool* mCurrentTool = nullptr;
+        } hook(mState, GetCurrentLayerInstance(), painter, &low_level_render_hook, mCurrentTool.get());
 
         engine::Renderer::Camera camera;
         camera.clear_color     = mUI.widget->GetCurrentClearColor();
@@ -2437,6 +2542,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         mState.renderer.SetSurface(surface);
 
         mState.renderer.SetLowLevelRendererHook(&hook);
+        mState.renderer.SetPacketFilter(&hook);
         mState.renderer.SetEditingMode(true);
         mState.renderer.SetName("TilemapWidgetRenderer/" + mState.klass->GetId());
         mState.renderer.SetClassLibrary(mState.workspace);
@@ -2477,53 +2583,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                               gfx::CreateMaterialFromColor(gfx::Color::DarkYellow));
         }
 
-        // draw the selection if any
-        bool draw_selection = mState.selection.HasSelection();
-        if (draw_selection)
-        {
-            if (mCurrentTool)
-            {
-                if (mCurrentTool->GetName() != "TileSelectTool")
-                    draw_selection = false;
-                else {
-                    const auto mods = QGuiApplication::keyboardModifiers();
-                    if ((mods & Qt::ShiftModifier)== 0)
-                        draw_selection = false;
-                }
-            }
-        }
-
-        if (draw_selection)
-        {
-            const auto& selection = mState.selection;
-            if (selection.DisjointSelection())
-            {
-                for (unsigned i=0; i<selection.GetTileCount(); ++i)
-                {
-                    const auto& tile = selection.GetTile(i);
-                    gfx::Transform model;
-                    model.Scale(layer_tile_width, layer_tile_height);
-                    model.MoveTo(layer_tile_width * tile.x, layer_tile_height * tile.y);
-                    tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model,
-                                      gfx::CreateMaterialFromColor(gfx::Color::Green));
-                }
-            }
-            else
-            {
-                const auto selection_width_tiles = selection.GetWidth();
-                const auto selection_height_tiles = selection.GetHeight();
-                const auto selection_start_row = selection.GetRow();
-                const auto selection_start_col = selection.GetCol();
-
-                gfx::Transform model;
-                model.Scale(layer_tile_width * selection_width_tiles,
-                            layer_tile_height * selection_height_tiles);
-                model.MoveTo(layer_tile_width * selection_start_col,
-                             layer_tile_height * selection_start_row);
-                tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model,
-                                  gfx::CreateMaterialFromColor(gfx::Color::Green));
-            }
-        }
 
         // visualize the tile under the mouse pointer.
         if (const auto& tile = FindTileUnderMouse(); tile.has_value() && !mCurrentTool)
