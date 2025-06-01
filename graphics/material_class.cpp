@@ -760,6 +760,13 @@ bool MaterialClass::FromJson(const data::Reader& data)
             mTextureMaps.push_back(std::move(map));
         } else ok = false;
     }
+
+    if (mActiveTextureMap.empty())
+    {
+        if (!mTextureMaps.empty())
+            mActiveTextureMap = mTextureMaps[0]->GetId();
+    }
+
     return ok;
 }
 
