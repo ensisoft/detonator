@@ -452,6 +452,48 @@ void test_tilemap_class()
     }
 }
 
+void test_tilemap_func()
+{
+    TEST_CASE(test::Type::Feature)
+
+    game::TilemapClass klass;
+    klass.SetName("foobar");
+    klass.SetTileWidth(5.0f);
+    klass.SetTileHeight(10.0f);
+    klass.SetTileDepth(10.0f);
+    klass.SetMapWidth(10);
+    klass.SetMapHeight(15);
+
+    game::TilemapLayerClass layer0;
+    layer0.SetResolution(game::TilemapLayerClass::Resolution::Original);
+    klass.AddLayer(layer0);
+
+    game::Tilemap map(klass);
+
+    {
+        TEST_REQUIRE(map.TestPlaneCoordinate(glm::vec2{-1.0f, 0.0f}, 0) == false);
+        TEST_REQUIRE(map.TestPlaneCoordinate(glm::vec2{0.0f, -1.0f}, 0) == false);
+        TEST_REQUIRE(map.TestPlaneCoordinate(glm::vec2{51.0f, 0.0f}, 0) == false);
+        TEST_REQUIRE(map.TestPlaneCoordinate(glm::vec2{0.0f, 151.0f}, 0) == false);
+
+        game::RowCol ret;
+        ret = map.MapFromPlane(glm::vec2{0.0, 0.0f}, 0);
+        TEST_REQUIRE(ret.col == 0 && ret.row == 0);
+
+        ret = map.MapFromPlane(glm::vec2{6.0, 0.0f}, 0);
+        TEST_REQUIRE(ret.col == 1 && ret.row == 0);
+
+        ret = map.MapFromPlane(glm::vec2{6.0, 11.0f}, 0);
+        TEST_REQUIRE(ret.col == 1 && ret.row == 1);
+
+        ret = map.MapFromPlane(glm::vec2{50.0f, 150.0f}, 0);
+        TEST_REQUIRE(ret.col == 9 && ret.row == 14);
+
+    }
+
+}
+
+
 void test_mixed_resolution_tile_access()
 {
     TEST_CASE(test::Type::Feature)
@@ -1002,6 +1044,7 @@ int test_main(int argc, char* argv[])
     test_details();
     test_tilemap_layer();
     test_tilemap_class();
+    test_tilemap_func();
 
     test_mixed_resolution_tile_access();
 
