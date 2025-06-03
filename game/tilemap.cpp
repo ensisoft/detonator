@@ -1332,6 +1332,59 @@ std::size_t Tilemap::FindLayerIndex(const TilemapLayer* layer) const noexcept
     return mLayers.size();
 }
 
+RowCol Tilemap::MapFromPlane(const glm::vec2& xy, const TilemapLayer& layer) const noexcept
+{
+    const auto layer_tile_scaler = layer.GetTileSizeScaler();
+    const auto layer_width_tiles = layer.GetWidth();
+    const auto layer_height_tiles = layer.GetHeight();
+
+    const auto layer_tile_width = GetTileWidth() * layer_tile_scaler;
+    const auto layer_tile_height = GetTileHeight() * layer_tile_scaler;
+
+    const auto layer_width_units = layer_tile_width * layer_width_tiles;
+    const auto layer_height_units = layer_tile_height * layer_height_tiles;
+
+    const auto pos = glm::vec2{math::clamp(0.0f, layer_width_units, xy.x),
+                               math::clamp(0.0f, layer_height_units, xy.y)};
+
+    RowCol ret;
+    ret.col = math::clamp(0u, layer_width_tiles-1, unsigned(pos.x / layer_tile_width));
+    ret.row = math::clamp(0u, layer_height_tiles-1, unsigned(pos.y / layer_tile_height));
+    return ret;
+}
+
+RowCol Tilemap::MapFromPlane(const glm::vec2& xy, size_t layer_index) const noexcept
+{
+    ASSERT(layer_index < mLayers.size());
+    return MapFromPlane(xy, *mLayers[layer_index]);
+}
+
+bool Tilemap::TestPlaneCoordinate(const glm::vec2& xy, const TilemapLayer& layer) const noexcept
+{
+    if (xy.x < 0.0f || xy.y < 0.0f)
+        return false;
+
+    const auto layer_tile_scaler = layer.GetTileSizeScaler();
+    const auto layer_width_tiles = layer.GetWidth();
+    const auto layer_height_tiles = layer.GetHeight();
+
+    const auto layer_tile_width = GetTileWidth() * layer_tile_scaler;
+    const auto layer_tile_height = GetTileHeight() * layer_tile_scaler;
+
+    const auto layer_width_units = layer_tile_width * layer_width_tiles;
+    const auto layer_height_units = layer_tile_height * layer_height_tiles;
+
+    if (xy.x > layer_width_units || xy.y > layer_height_units)
+        return false;
+
+    return true;
+}
+
+bool Tilemap::TestPlaneCoordinate(const glm::vec2& xy, size_t layer_index) const noexcept
+{
+    ASSERT(layer_index < mLayers.size());
+    return TestPlaneCoordinate(xy, *mLayers[layer_index]);
+}
 
 std::unique_ptr<TilemapLayer> CreateTilemapLayer(const std::shared_ptr<const TilemapLayerClass>& klass,
                                                  unsigned map_width, unsigned map_height)

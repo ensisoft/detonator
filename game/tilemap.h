@@ -300,6 +300,11 @@ namespace game
 
     } // namespace
 
+    struct RowCol {
+        unsigned row = 0;
+        unsigned col = 0;
+    };
+
     // Description of a tilemap layer.
     // Each layer defines the logical function of the layer
     // i.e. render or data and the data type (if any).
@@ -622,26 +627,26 @@ namespace game
             {
                 mFlags = mClass->GetFlags();
             }
-            virtual std::string GetClassId() const override
+            std::string GetClassId() const override
             { return mClass->GetId(); }
-            virtual std::string GetClassName() const override
+            std::string GetClassName() const override
             { return mClass->GetName(); }
-            virtual std::string GetPaletteMaterialId(size_t index) const override
+            std::string GetPaletteMaterialId(size_t index) const override
             {
                 if (const auto* material = base::SafeFind(mPalette, index))
                     return *material;
                 return mClass->GetPaletteMaterialId(index);
             }
-            virtual base::bitflag<Flags> GetFlags() const override
+            base::bitflag<Flags> GetFlags() const override
             { return mFlags; }
-            virtual Type GetType() const override
+            Type GetType() const override
             { return mClass->GetType(); }
-            virtual bool TestFlag(Flags flag) const override
+            bool TestFlag(Flags flag) const override
             { return mFlags.test(flag); }
-            virtual bool IsLoaded() const override
+            bool IsLoaded() const override
             { return mData != nullptr; }
 
-            virtual void Load(const std::shared_ptr<TilemapData>& data) override
+            void Load(const std::shared_ptr<TilemapData>& data) override
             {
                 const auto cache = mClass->GetCache();
                 mData = data;
@@ -653,7 +658,7 @@ namespace game
                                    mClass->MapDimension(mMapWidth),
                                    mClass->MapDimension(mMapHeight));
             }
-            virtual void FlushCache() override
+            void FlushCache() override
             {
                 if (mDirtyCache)
                     mLoader->SaveCache(*mData, mClass->GetDefaultTileValue<Tile>(), mTileCache, mCacheIndex,
@@ -661,38 +666,39 @@ namespace game
                                        mClass->MapDimension(mMapHeight));
                 mDirtyCache = false;
             }
-            virtual void Save() override
+            void Save() override
             {
                 mLoader->SaveState(*mData);
             }
 
-            virtual void SetPaletteMaterialId(const std::string& material, size_t index) override
+            void SetPaletteMaterialId(const std::string& material, size_t index) override
             { mPalette[index] = material; }
-            virtual void SetMapDimensions(unsigned width, unsigned height) override
+            void SetMapDimensions(unsigned width, unsigned height) override
             { mMapWidth = width; mMapHeight = height; }
-            virtual unsigned GetWidth() const override
+            unsigned GetWidth() const override
             { return mClass->MapDimension(mMapWidth); }
-            virtual unsigned GetHeight() const override
+            unsigned GetHeight() const override
             { return mClass->MapDimension(mMapHeight); }
-            virtual int GetDepth() const override
+            int GetDepth() const override
             { return mClass->GetDepth(); }
-            virtual int GetRenderLayer() const override
+            int GetRenderLayer() const override
             { return mClass->GetRenderLayer(); }
-            virtual float GetTileSizeScaler() const override
+            float GetTileSizeScaler() const override
             { return mClass->GetTileSizeScaler(); }
-            virtual bool SetTilePaletteIndex(uint8_t index, unsigned row, unsigned col) override
+            bool SetTilePaletteIndex(uint8_t index, unsigned row, unsigned col) override
             { return detail::SetTilePaletteIndex(get_tile(row, col, true), index);}
-            virtual bool GetTilePaletteIndex(uint8_t* index, unsigned row, unsigned col) const override
+            bool GetTilePaletteIndex(uint8_t* index, unsigned row, unsigned col) const override
             { return detail::GetTilePaletteIndex(get_tile(row, col, false), index); }
-            virtual bool SetTileValue(int32_t value, unsigned row, unsigned col) override
+            bool SetTileValue(int32_t value, unsigned row, unsigned col) override
             { return detail::SetTileValue(get_tile(row, col, true), value); }
-            virtual bool GetTileValue(int32_t* value, unsigned row, unsigned col) const override
+            bool GetTileValue(int32_t* value, unsigned row, unsigned col) const override
             { return detail::GetTileValue(get_tile(row, col, false), value); }
-            virtual void SetFlags(base::bitflag<Flags> flags) override
+            void SetFlags(base::bitflag<Flags> flags) override
             { mFlags = flags; }
-            virtual const TilemapLayerClass& GetClass() const override
+
+            const TilemapLayerClass& GetClass() const override
             { return *mClass; }
-            virtual size_t GetByteCount() const override
+            size_t GetByteCount() const override
             { return mLoader->GetByteCount(); }
             void SetTile(const Tile& tile, unsigned row, unsigned col)
             { get_tile(row, col, true) = tile; }
@@ -926,6 +932,17 @@ namespace game
             std::swap(mLayers[src], mLayers[dst]);
         }
         std::size_t FindLayerIndex(const TilemapLayer* layer) const noexcept;
+
+        // Map a coordinate on the tile plane to rows and columns.
+        // The result will be clamped to the map bounds.
+        RowCol MapFromPlane(const glm::vec2& xy, const TilemapLayer& layer) const noexcept;
+        RowCol MapFromPlane(const glm::vec2& xy, size_t layer_index) const noexcept;
+
+        // Test whether a plane xy coordinate is within the tile coordinates
+        // or not. Returns true if the coordinate can be converted into
+        // a tile (row, col) coordinates without clamping .
+        bool TestPlaneCoordinate(const glm::vec2& xy, const TilemapLayer& layer) const noexcept;
+        bool TestPlaneCoordinate(const glm::vec2& xy, size_t layer_index) const noexcept;
 
         inline std::size_t GetNumLayers() const noexcept
         { return mLayers.size(); }
