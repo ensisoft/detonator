@@ -2114,6 +2114,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         draw_hook.SetIsPlaying(mPlayState == PlayState::Playing);
         draw_hook.SetDrawVectors(true);
         draw_hook.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::GameView::AxisAligned));
+        draw_hook.SetTilemap(mTilemap.get());
 
         const auto camera_position = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
         const auto camera_scale    = glm::vec2{xs, ys};
@@ -2144,6 +2145,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         mState.renderer.SetSurface(surface);
 
         mState.renderer.SetLowLevelRendererHook(&low_level_render_hook);
+        mState.renderer.SetPacketFilter(&draw_hook);
 
         const auto shading = (game::SceneClass::RenderingArgs::ShadingMode)GetValue(mUI.cmbShading);
         if (shading == game::SceneClass::RenderingArgs::ShadingMode::BasicLight)
@@ -2910,6 +2912,7 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     mState.renderer.SetSurface(surface);
 
     mState.renderer.SetLowLevelRendererHook(nullptr);
+    mState.renderer.SetPacketFilter(nullptr);
 
     DrawHook hook(hit_nodes);
     mState.renderer.CreateFrame(*mState.scene, nullptr, &hook);
