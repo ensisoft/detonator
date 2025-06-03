@@ -45,6 +45,7 @@
 #include "game/scene.h"
 #include "game/types.h"
 #include "game/tilemap.h"
+#include "game/tilemap_layer_base.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
 #include "game/entity_node_tilemap_node.h"

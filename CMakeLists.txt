@@ -295,6 +295,8 @@ add_library(EngineLib
     game/scene_class.cpp
     game/scene.cpp
     game/tilemap.cpp
+    game/tilemap_layer_class.cpp
+    game/tilemap_layer.cpp
     engine/audio.cpp
     engine/camera.cpp
     engine/renderer.cpp
@@ -1147,7 +1149,9 @@ add_library(GameLibTesting
     game/material_animator.cpp
     game/scene_class.cpp
     game/scene.cpp
-    game/tilemap.cpp)
+    game/tilemap.cpp
+    game/tilemap_layer.cpp
+    game/tilemap_layer_class.cpp)
 add_library(EngineLibTesting
     engine/ui.cpp
     engine/audio.cpp

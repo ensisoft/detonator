@@ -132,6 +132,8 @@ add_executable(UnitTest
     ../game/scene.cpp
     ../game/scriptvar.cpp
     ../game/tilemap.cpp
+    ../game/tilemap_layer.cpp
+    ../game/tilemap_layer_class.cpp
     ../uikit/animation.cpp
     ../uikit/widget.cpp
     ../uikit/window.cpp
@@ -302,6 +304,8 @@ add_executable(GameEngine
     ../game/scene.cpp
     ../game/scriptvar.cpp
     ../game/tilemap.cpp
+    ../game/tilemap_layer.cpp
+    ../game/tilemap_layer_class.cpp
     ../game/transform_animator.cpp
     ../engine/audio.cpp
     ../engine/camera.cpp
