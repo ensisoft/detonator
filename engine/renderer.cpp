@@ -1411,6 +1411,10 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
     if (const auto* map = entity_node.GetMapNode())
         sort_point = map->GetSortPoint();
 
+    transform.Push(entity_node.GetModelTransform());
+       sort_point = transform * glm::vec4{sort_point, 0.0f, 1.0};
+     transform.Pop();
+
     const auto* item = entity_node.GetDrawable();
     if (item && paint_node.drawable && paint_node.material)
     {
@@ -1581,7 +1585,7 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             packet.drawable     = paint_node.drawable;
             packet.material     = paint_node.material;
             packet.transform    = transform;
-            packet.sort_point   = sort_point;
+            packet.sort_point   = transform * glm::vec4{sort_point, 0.0f, 1.0};
             packet.packet_index = text->GetLayer();
             packet.render_layer = entity.GetRenderLayer();
             packet.map_layer    = entity.GetMapLayer();
@@ -1642,7 +1646,7 @@ void Renderer::CreateLights(const EntityType& entity,
     light.render_layer = entity.GetRenderLayer();
     light.map_layer    = entity.GetMapLayer();
     light.packet_index = node_light->GetLayer();
-    light.sort_point   = sort_point;
+    light.sort_point   = transform * glm::vec4{sort_point, 0.0f, 1.0};
     lights.push_back(light);
 }
 
@@ -1872,7 +1876,7 @@ void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
 
         // take a model space coordinate and transform by the packet's model transform
         // into world space in the scene.
-        const auto scene_world_pos =  packet.transform * glm::vec4{packet.sort_point, 0.0f, 1.0f}; 
+        const auto scene_world_pos = glm::vec4{packet.sort_point, 0.0, 1.0};
         //DEBUG("Scene pos = %1", scene_world_pos);
         // map the scene world pos to a tilemap plane position.
         const auto map_plane_pos = MapFromScenePlaneToTilePlane(scene_world_pos, map_view);
