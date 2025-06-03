@@ -24,12 +24,16 @@
 #  include <QtMath>
 #include "warnpop.h"
 
+#include <unordered_set>
+
+#include "base/utility.h"
 #include "engine/camera.h"
 #include "engine/renderer.h"
 #include "game/treeop.h"
 #include "game/enum.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
+#include "game/tilemap.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
@@ -242,7 +246,8 @@ private:
 // indicate the selected node when editing a scene/animation.
 class DrawHook : public engine::EntityClassDrawHook,
                  public engine::EntityInstanceDrawHook,
-                 public engine::SceneClassDrawHook
+                 public engine::SceneClassDrawHook,
+                 public engine::PacketFilter
 {
 public:
     DrawHook() = default;
@@ -265,29 +270,32 @@ public:
     void SetViewMatrix(const glm::mat4& view)
     { mView = view; }
 
+    void SetTilemap(const game::Tilemap* map)
+    { mMap = map; }
+
     // EntityNode
-    virtual bool InspectPacket(const game::EntityNode* node, engine::DrawPacket& packet) override
+    bool InspectPacket(const game::EntityNode* node, engine::DrawPacket& packet) override
     {
         return GenericFilterEntityPacket(node, packet);
     }
-    virtual void AppendPackets(const game::EntityNode* node, gfx::Transform& trans,
+    void AppendPackets(const game::EntityNode* node, gfx::Transform& trans,
                                std::vector<engine::DrawPacket>& packets) override
     {
         GenericAppendEntityPackets(node, trans, packets);
     }
     // EntityNodeClass
-    virtual bool InspectPacket(const game::EntityNodeClass* node, engine::DrawPacket& packet) override
+    bool InspectPacket(const game::EntityNodeClass* node, engine::DrawPacket& packet) override
     {
         return GenericFilterEntityPacket(node, packet);
     }
-    virtual void AppendPackets(const game::EntityNodeClass* node, gfx::Transform& model,
+    void AppendPackets(const game::EntityNodeClass* node, gfx::Transform& model,
                                std::vector<engine::DrawPacket>& packets) override
     {
         GenericAppendEntityPackets(node, model, packets);
     }
 
     // SceneClassDrawHook
-    virtual bool FilterEntity(const game::EntityPlacement& placement) override
+    bool FilterEntity(const game::EntityPlacement& placement) override
     {
         if (!placement.TestFlag(game::EntityPlacement::Flags::VisibleInEditor))
             return false;
@@ -295,14 +303,54 @@ public:
             return false;
         return true;
     }
-    virtual void BeginDrawEntity(const game::EntityPlacement& placement) override
+    void BeginDrawEntity(const game::EntityPlacement& placement) override
     {
     }
-    virtual void EndDrawEntity(const game::EntityPlacement& placement) override
+    void EndDrawEntity(const game::EntityPlacement& placement) override
     {
+    }
+    bool InspectPacket(const game::EntityPlacement& placement, engine::DrawPacket& packet) override
+    {
+        if (!mMap || &placement != mSelectedSceneNode)
+            return true;
+
+        if (packet.map_layer >= mMap->GetNumLayers())
+            return true;
+        const auto& layer = mMap->GetLayer(packet.map_layer);
+
+        const auto& entity_class = placement.GetEntityClass();
+        if (!entity_class)
+            return true;
+
+        if (base::Contains(mTileHighlightEntities, entity_class->GetId()))
+            return true;
+
+        mTileHighlightEntities.insert(entity_class->GetId());
+
+        for (size_t i=0; i<entity_class->GetNumNodes(); ++i)
+        {
+            const auto& node_class = entity_class->GetNode(i);
+            if (const auto* tilemap_node = node_class.GetMapNode())
+            {
+                const auto& world_pos = glm::vec4 { packet.sort_point, 0.0f, 1.0f};
+                const auto& plane_pos = engine::MapFromScenePlaneToTilePlane(world_pos, mMap->GetPerspective());
+                if (!mMap->TestPlaneCoordinate(plane_pos, layer))
+                    continue;
+                const auto& tile_pos = mMap->MapFromPlane(plane_pos, layer);
+                TileHighlight th;
+                th.row = tile_pos.row;
+                th.col = tile_pos.col;
+                th.layer = packet.map_layer;
+                mTileHighlights.push_back(th);
+                break;
+            }
+        }
+
+        return true;
     }
 
-    virtual void AppendPackets(const game::EntityPlacement& placement, gfx::Transform& model,
+
+    void AppendPackets(const game::EntityPlacement& placement, gfx::Transform& model,
                                std::vector<engine::DrawPacket>& packets)
     {
         if (placement.IsBroken())
@@ -327,6 +375,28 @@ public:
         }
 
         model.Pop();
+    }
+
+    // Packet filter
+    bool InspectPacket(engine::DrawPacket& packet) override
+    {
+        if (!mMap)
+            return true;
+
+        if (packet.source != engine::DrawPacket::Source::Map)
+            return true;
+
+        for (const auto& highlight : mTileHighlights)
+        {
+            if ((highlight.col == packet.map_col) && (highlight.row == packet.map_row) &&
+                    (packet.map_layer < highlight.layer))
+            {
+                auto material = packet.material->Clone();
+                material->SetUniform("kBaseColor", gfx::Color::HotPink);
+                packet.material = std::move(material);
+            }
+        }
+        return true;
     }
 
 private:
@@ -415,9 +485,18 @@ private:
     const game::EntityNodeClass* mSelectedEntityClassNode = nullptr;
     const game::EntityPlacement* mSelectedSceneNode       = nullptr;
     const game::FRect mViewRect;
+    const game::Tilemap* mMap = nullptr;
     bool mPlaying        = false;
     bool mDrawVectors    = false;
     glm::mat4 mView = glm::mat4(1.0f);
+
+    struct TileHighlight {
+        unsigned row = 0;
+        unsigned col = 0;
+        unsigned layer = 0;
+    };
+    std::vector<TileHighlight> mTileHighlights;
+    std::unordered_set<std::string> mTileHighlightEntities;
 };
 
 } // namespace

@@ -269,7 +269,8 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
         constexpr auto obey_klass_flags   = false;
         constexpr auto draw_render_layers = true;
         constexpr auto draw_data_layers   = false;
-        constexpr auto use_tile_batching = true;
+        // disable batching because of single tile highlights
+        constexpr auto use_tile_batching = false;
         PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching);
         GenerateMapDrawPackets(*map, batches, packets);
     }
