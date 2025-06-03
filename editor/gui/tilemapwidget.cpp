@@ -3272,24 +3272,14 @@ std::optional<TilemapWidget::Tile> TilemapWidget::FindTileUnderMouse() const
         return std::nullopt;
 
     const auto map_view = mState.klass->GetPerspective();
-    const auto map_width_tiles = mState.klass->GetMapWidth();
-    const auto map_height_tiles = mState.klass->GetMapHeight();
-    const auto tile_width  = mState.klass->GetTileWidth();
-    const auto tile_height = mState.klass->GetTileHeight();
-    const auto tile_scaler = layer->GetTileSizeScaler();
-    const auto layer_tile_width  = tile_width * tile_scaler;
-    const auto layer_tile_height = tile_height * tile_scaler;
-    const auto layer_width_tiles  = layer->GetWidth();
-    const auto layer_height_tiles = layer->GetHeight();
-
     const glm::vec2 tile_coord = MapWindowCoordinateToWorld(mUI, mState, mickey, map_view);
-    const unsigned tile_col = tile_coord.x / layer_tile_width;
-    const unsigned tile_row = tile_coord.y / layer_tile_height;
 
-    if (tile_col >= layer_width_tiles || tile_row >= layer_height_tiles)
+    if (!mState.map->TestPlaneCoordinate(tile_coord, *layer))
         return std::nullopt;
 
-    return TilemapWidget::Tile {tile_col, tile_row};
+    const auto& ret = mState.map->MapFromPlane(tile_coord, *layer);
+
+    return TilemapWidget::Tile { ret.col, ret.row };
 }
 
 } // namespace
