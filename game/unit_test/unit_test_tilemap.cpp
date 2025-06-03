@@ -23,6 +23,7 @@
 #include "base/test_minimal.h"
 #include "base/test_help.h"
 #include "game/tilemap.h"
+#include "game/tilemap_layer_base.h"
 #include "game/loader.h"
 #include "data/json.h"
 
@@ -476,7 +477,7 @@ void test_tilemap_func()
         TEST_REQUIRE(map.TestPlaneCoordinate(glm::vec2{51.0f, 0.0f}, 0) == false);
         TEST_REQUIRE(map.TestPlaneCoordinate(glm::vec2{0.0f, 151.0f}, 0) == false);
 
-        game::RowCol ret;
+        game::TileRowCol ret;
         ret = map.MapFromPlane(glm::vec2{0.0, 0.0f}, 0);
         TEST_REQUIRE(ret.col == 0 && ret.row == 0);
 
