@@ -919,6 +919,7 @@ void unit_test_axis_aligned_map()
     layer0->SetPaletteMaterialId("green", 1);
     layer0->SetPaletteMaterialId("blue", 2);
     layer0->SetPaletteMaterialId("pink", 3);
+    layer0->SetLayer(0);
     map->AddLayer(layer0);
 
     auto layer1 = std::make_shared<game::TilemapLayerClass>();
@@ -931,6 +932,7 @@ void unit_test_axis_aligned_map()
     layer1->SetPaletteMaterialId("green", 1);
     layer1->SetPaletteMaterialId("blue", 2);
     layer1->SetPaletteMaterialId("pink", 3);
+    layer1->SetLayer(1);
     map->AddLayer(layer1);
 
     auto data0 = std::make_shared<TestMapData>();

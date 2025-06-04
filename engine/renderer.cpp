@@ -1740,7 +1740,7 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
                 batches.emplace_back();
                 auto& batch = batches.back();
                 batch.material     = GetTileMaterial(map, layer_index, palette_index);
-                batch.layer_index  = layer_index;
+                batch.layer_index  = layer.GetLayer();
                 batch.depth        = layer.GetDepth();
                 batch.render_layer = map.GetRenderLayer();
                 batch.row          = row;
@@ -1821,9 +1821,9 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
             batch.tiles.push_back(tile);
             batch.material     = gfx::CreateMaterialInstance(gfx::CreateMaterialClassFromColor(color));
             batch.depth        = layer.GetDepth();
+            batch.layer_index  = layer.GetLayer();
             batch.row          = row;
             batch.col          = col;
-            batch.layer_index  = layer_index;
             batch.render_layer = map.GetRenderLayer();
             batch.type         = TileBatch::Type::Data;
             batch.tile_size    = layer_tile_size;

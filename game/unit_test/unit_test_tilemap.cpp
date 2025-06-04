@@ -315,6 +315,7 @@ void test_tilemap_layer()
     klass.SetPaletteMaterialId("some_material", 0);
     klass.SetPaletteMaterialId("other_material", 1);
     klass.SetDepth(-2);
+    klass.SetLayer(3);
 
     {
         data::JsonObject json;
@@ -336,6 +337,7 @@ void test_tilemap_layer()
         TEST_REQUIRE(ret.GetPaletteMaterialId(0) == "some_material");
         TEST_REQUIRE(ret.GetPaletteMaterialId(1) == "other_material");
         TEST_REQUIRE(ret.GetDepth() == -2);
+        TEST_REQUIRE(ret.GetLayer() == 3);
     }
 
     // copy
