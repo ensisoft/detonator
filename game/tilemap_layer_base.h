@@ -133,8 +133,6 @@ namespace game
             { return mClass->MapDimension(mMapHeight); }
             int GetDepth() const override
             { return mClass->GetDepth(); }
-            int GetRenderLayer() const override
-            { return mClass->GetRenderLayer(); }
             float GetTileSizeScaler() const override
             { return mClass->GetTileSizeScaler(); }
             bool SetTilePaletteIndex(uint8_t index, unsigned row, unsigned col) override

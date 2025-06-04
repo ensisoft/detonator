@@ -1720,29 +1720,29 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
 
     for (unsigned row=tile_row; row<max_row; ++row)
     {
-        auto last_material_index = LayerTraits::MaxPaletteIndex;
+        auto last_palette_index = LayerTraits::MaxPaletteIndex;
 
         for (unsigned col=tile_col; col<max_col; ++col)
         {
             // the tiles index value is an index into the tile map
             // sprite palette.
-            const auto material_index = ptr->GetTile(row, col).index;
+            const auto palette_index = ptr->GetTile(row, col).index;
             // special index max means "no value". this is needed in order
             // to be able to have "holes" in some layer and let the layer
             // below show through. could have used zero but that would
             // make the palette indexing more inconvenient.
-            if (material_index == LayerTraits::MaxPaletteIndex)
+            if (palette_index == LayerTraits::MaxPaletteIndex)
                 continue;
 
             // if the material changes start a new tile batch.
-            if (last_material_index != material_index)
+            if (last_palette_index != palette_index)
             {
                 batches.emplace_back();
                 auto& batch = batches.back();
-                batch.material     = GetTileMaterial(map, layer_index, material_index);
+                batch.material     = GetTileMaterial(map, layer_index, palette_index);
                 batch.layer_index  = layer_index;
                 batch.depth        = layer.GetDepth();
-                batch.render_layer = layer.GetRenderLayer();
+                batch.render_layer = map.GetRenderLayer();
                 batch.row          = row;
                 batch.col          = col;
                 batch.tile_size    = layer_tile_size;
@@ -1755,12 +1755,12 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
             tile.pos.x  = col;
             tile.pos.y  = row;
             tile.pos.z  = layer.GetDepth();
-            tile.data.x = GetTileMaterialTileIndex(map, layer_index, material_index);
+            tile.data.x = GetTileMaterialTileIndex(map, layer_index, palette_index);
 
             batch.tiles.push_back(tile);
 
             // keep track of the last material used.
-            last_material_index  = use_batching ? material_index : LayerTraits::MaxPaletteIndex;
+            last_palette_index = use_batching ? palette_index : LayerTraits::MaxPaletteIndex;
         }
     }
 }
@@ -1824,7 +1824,7 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
             batch.row          = row;
             batch.col          = col;
             batch.layer_index  = layer_index;
-            batch.render_layer = layer.GetRenderLayer();
+            batch.render_layer = map.GetRenderLayer();
             batch.type         = TileBatch::Type::Data;
             batch.tile_size    = layer_tile_size;
             batches.push_back(std::move(batch));

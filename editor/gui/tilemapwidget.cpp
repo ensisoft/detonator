@@ -1701,8 +1701,6 @@ void TilemapWidget::on_widgetColor_colorChanged(QColor color)
     mUI.widget->SetClearColor(ToGfx(color));
 }
 
-
-
 void TilemapWidget::on_layers_doubleClicked(const QModelIndex& index)
 {
     const auto row = index.row();
@@ -1734,7 +1732,7 @@ void TilemapWidget::on_layerDepth_valueChanged(int)
 
 void TilemapWidget::on_renderLayer_valueChanged(int)
 {
-    ModifyCurrentLayer();
+    SetMapProperties();
 }
 
 void TilemapWidget::on_chkLayerVisible_stateChanged(int)
@@ -2122,6 +2120,7 @@ void TilemapWidget::SetMapProperties()
     mState.klass->SetPerspective(GetValue(mUI.cmbPerspective));
     mState.klass->SetTileRenderWidthScale(GetValue(mUI.tileScaleX));
     mState.klass->SetTileRenderHeightScale(GetValue(mUI.tileScaleY));
+    mState.klass->SetRenderLayer(GetValue(mUI.renderLayer));
 }
 
 void TilemapWidget::SetLayerProperties()
@@ -2152,6 +2151,7 @@ void TilemapWidget::DisplayMapProperties()
     SetValue(mUI.mapHeight,      mState.klass->GetMapHeight());
     SetValue(mUI.tileScaleX,     mState.klass->GetTileRenderWidthScale());
     SetValue(mUI.tileScaleY,     mState.klass->GetTileRenderHeightScale());
+    SetValue(mUI.renderLayer,    mState.klass->GetRenderLayer());
     SetValue(mUI.mapSize,        Bytes{total});
 }
 
@@ -2166,7 +2166,6 @@ void TilemapWidget::DisplayLayerProperties()
     SetValue(mUI.cmbLayerResolution, -1);
     SetValue(mUI.cmbLayerCache,      -1);
     SetValue(mUI.layerDepth,          0);
-    SetValue(mUI.renderLayer,         0);
     SetValue(mUI.chkLayerVisible,   false);
     SetValue(mUI.chkLayerEnabled,   false);
     SetValue(mUI.chkLayerReadOnly,  false);
@@ -2194,7 +2193,6 @@ void TilemapWidget::DisplayLayerProperties()
         SetValue(mUI.cmbLayerCache,      layer->GetCache());
         SetValue(mUI.cmbLayerResolution, layer->GetResolution());
         SetValue(mUI.layerDepth,         layer->GetDepth() * -1);
-        SetValue(mUI.renderLayer,        layer->GetRenderLayer());
         SetValue(mUI.chkLayerVisible,    layer->IsVisible());
         SetValue(mUI.chkLayerEnabled,    layer->IsEnabled());
         SetValue(mUI.chkLayerReadOnly,   layer->IsReadOnly());
@@ -3065,7 +3063,6 @@ void TilemapWidget::ModifyCurrentLayer()
         layer->SetEnabled(GetValue(mUI.chkLayerEnabled));
         layer->SetReadOnly(GetValue(mUI.chkLayerReadOnly));
         layer->SetDepth(GetValue(mUI.layerDepth)*-1);
-        layer->SetRenderLayer(GetValue(mUI.renderLayer));
 
         auto* instance = GetCurrentLayerInstance();
         instance->SetFlags(layer->GetFlags());

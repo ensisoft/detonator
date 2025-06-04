@@ -401,6 +401,7 @@ void test_tilemap_class()
     klass.SetMapHeight(240);
     klass.SetTileRenderScale({2.0f, 3.0f});
     klass.SetScriptFile("foobar.lua");
+    klass.SetRenderLayer(-4);
 
     game::TilemapLayerClass layer0;
     layer0.SetName("layer0");
@@ -426,6 +427,7 @@ void test_tilemap_class()
         TEST_REQUIRE(ret.GetTileHeight() == 8.0f);
         TEST_REQUIRE(ret.GetTileDepth() == 10.0f);
         TEST_REQUIRE(ret.GetTileRenderScale() == glm::vec2(2.0f, 3.0f));
+        TEST_REQUIRE(ret.GetRenderLayer() == -4);
     }
 
     {
