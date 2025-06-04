@@ -103,6 +103,7 @@ namespace gui
         void on_layerName_textChanged();
         void on_cmbLayerCache_currentIndexChanged(int);
         void on_layerDepth_valueChanged(int);
+        void on_layerIndex_valueChanged(int);
         void on_renderLayer_valueChanged(int);
         void on_chkLayerVisible_stateChanged(int);
         void on_chkLayerEnabled_stateChanged(int);

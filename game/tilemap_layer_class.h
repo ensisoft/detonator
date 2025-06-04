@@ -117,6 +117,8 @@ namespace game
         { return mStorage; }
         inline int GetDepth() const noexcept
         { return mDepth; }
+        inline unsigned GetLayer() const noexcept
+        { return mLayer; }
         inline void SetId(std::string id) noexcept
         { mId = std::move(id); }
         inline void SetName(std::string name) noexcept
@@ -147,6 +149,8 @@ namespace game
         { mFlags = flags; }
         inline void SetDepth(int depth) noexcept
         { mDepth = depth; }
+        inline void SetLayer(unsigned layer) noexcept
+        { mLayer = layer; }
         inline size_t GetCacheSize() const noexcept
         { return GetCacheSize(mCache); }
         inline void SetPaletteMaterialId(std::string material, std::size_t palette_index)
@@ -257,6 +261,7 @@ namespace game
         Resolution mResolution = Resolution::Original;
         DefaultValue  mDefault;
         int mDepth = 0;
+        unsigned mLayer = 0;
     };
 
 } // namespace
