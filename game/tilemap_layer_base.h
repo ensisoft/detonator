@@ -77,17 +77,10 @@ namespace game
             { return mClass->GetName(); }
 
             std::string GetPaletteMaterialId(size_t palette_index) const override
-            {
-                if (const auto* entry = base::SafeFind(mPalette, palette_index))
-                    return entry->materialId;
-                return mClass->GetPaletteMaterialId(palette_index);
-            }
+            { return mClass->GetPaletteMaterialId(palette_index); }
+
             std::uint8_t GetPaletteFlags(size_t palette_index) const override
-            {
-                if (const auto* entry = base::SafeFind(mPalette, palette_index))
-                    return entry->flags;
-                return mClass->GetPaletteFlags(palette_index);
-            }
+            { return mClass->GetPaletteFlags(palette_index); }
 
             base::bitflag<Flags> GetFlags() const override
             { return mFlags; }
@@ -123,8 +116,6 @@ namespace game
                 mLoader->SaveState(*mData);
             }
 
-            void SetPaletteMaterialId(const std::string& material, size_t palette_index) override
-            { mPalette[palette_index].materialId = material; }
             void SetMapDimensions(unsigned width, unsigned height) override
             { mMapWidth = width; mMapHeight = height; }
             unsigned GetWidth() const override
@@ -149,13 +140,7 @@ namespace game
             { mFlags = flags; }
 
             bool TestPaletteFlag(PaletteFlags flag, size_t palette_index) const override
-            {
-                if (const auto* entry = base::SafeFind(mPalette, palette_index))
-                {
-                    return entry->flags & static_cast<uint8_t>(flag);
-                }
-                return mClass->TestPaletteFlag(flag, palette_index);
-            }
+            { return mClass->TestPaletteFlag(flag, palette_index); }
 
             const TilemapLayerClass& GetClass() const override
             { return *mClass; }
@@ -198,16 +183,9 @@ namespace game
                 return mTileCache[tile_offset & (cache_size -1)];
             }
         protected:
-            struct PaletteEntry {
-                std::string materialId;
-                std::uint8_t tile_index = 0;
-                std::uint8_t flags = 0;
-            };
-
             std::shared_ptr<const TilemapLayerClass> mClass;
             std::unique_ptr<TileLoader> mLoader;
             std::shared_ptr<TilemapData> mData;
-            std::unordered_map<size_t, PaletteEntry> mPalette;
             std::vector<Tile> mTileCache;
             std::size_t mCacheIndex = 0;
             base::bitflag<Flags> mFlags;
