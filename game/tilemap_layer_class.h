@@ -42,6 +42,9 @@ namespace game
     public:
         using Type = detail::TilemapLayerType;
 
+        enum class PaletteFlags : int8_t {
+        };
+
         enum class Flags {
             VisibleInEditor,
             Visible,
@@ -159,6 +162,10 @@ namespace game
         inline void ClearMaterialId(std::size_t index) noexcept
         { mPalette.erase(index); }
 
+        void SetPaletteFlag(PaletteFlags flag, bool on_off, std::size_t palette_index);
+
+        bool TestPaletteFlag(PaletteFlags flag, size_t palette_index) const;
+
         void SetType(Type type) noexcept;
 
         Type GetType() const noexcept;
@@ -166,6 +173,7 @@ namespace game
         std::size_t GetHash() const noexcept;
         std::string GetPaletteMaterialId(std::size_t index) const;
         std::uint8_t GetPaletteMaterialTileIndex(std::size_t index) const;
+        std::uint8_t GetPaletteFlags(std::size_t index) const;
         std::size_t FindMaterialIndexInPalette(const std::string& materialId) const;
         std::size_t FindMaterialIndexInPalette(const std::string& materialId, std::uint8_t tile_index) const;
         std::size_t FindNextAvailablePaletteIndex() const;
@@ -245,6 +253,7 @@ namespace game
         struct PaletteEntry {
             std::string materialId;
             std::uint8_t tile_index = 0;
+            std::uint8_t flags = 0;
         };
         std::unordered_map<std::size_t, PaletteEntry> mPalette;
         Storage mStorage = Storage::Dense;

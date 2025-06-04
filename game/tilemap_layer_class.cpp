@@ -554,6 +554,7 @@ std::size_t TilemapLayerClass::GetHash() const noexcept
         const auto* entry = base::SafeFind(mPalette, key);
         hash = base::hash_combine(hash, entry->materialId);
         hash = base::hash_combine(hash, entry->tile_index);
+        hash = base::hash_combine(hash, entry->flags);
     }
     return hash;
 }
@@ -569,6 +570,14 @@ std::uint8_t TilemapLayerClass::GetPaletteMaterialTileIndex(std::size_t index) c
 {
     if (const auto* entry = base::SafeFind(mPalette, index))
         return entry->tile_index;
+
+    return 0;
+}
+
+std::uint8_t TilemapLayerClass::GetPaletteFlags(std::size_t index) const
+{
+    if (const auto* entry = base::SafeFind(mPalette, index))
+        return entry->flags;
 
     return 0;
 }
@@ -634,6 +643,22 @@ int32_t TilemapLayerClass::GetDefaultTileDataValue() const
     return value;
 }
 
+void TilemapLayerClass::SetPaletteFlag(PaletteFlags flag, bool on_off, size_t palette_index)
+{
+    auto& entry = mPalette[palette_index];
+    if (on_off)
+        entry.flags |= static_cast<int8_t>(flag);
+    else entry.flags &= ~static_cast<uint8_t>(flag);
+}
+
+bool TilemapLayerClass::TestPaletteFlag(PaletteFlags flag, size_t palette_index) const
+{
+    if (const auto* entry = base::SafeFind(mPalette, palette_index))
+    {
+        return entry->flags & static_cast<uint8_t>(flag);
+    }
+    return false;
+}
 
 void TilemapLayerClass::SetType(Type type) noexcept
 {
@@ -748,6 +773,7 @@ void TilemapLayerClass::IntoJson(data::Writer& data) const
         chunk->Write("index", (unsigned)key);
         chunk->Write("value", entry->materialId);
         chunk->Write("tile_index", (unsigned)entry->tile_index);
+        chunk->Write("flags", (unsigned)entry->flags);
         data.AppendChunk("palette", std::move(chunk));
     }
 
@@ -783,13 +809,17 @@ bool TilemapLayerClass::FromJson(const data::Reader& data)
         std::string material;
         unsigned tile_index;
         unsigned key = 0;
+        unsigned flags = 0;
         const auto& chunk = data.GetReadChunk("palette", i);
         ok &= chunk->Read("index", &key);
         ok &= chunk->Read("value", &material);
+        ok &= chunk->Read("flags", &flags);
         ok &= chunk->Read("tile_index", &tile_index);
+
         PaletteEntry entry;
         entry.materialId = std::move(material);
         entry.tile_index = tile_index;
+        entry.flags      = flags;
         mPalette[key] = std::move(entry);
     }
 

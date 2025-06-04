@@ -31,6 +31,7 @@ namespace game
     class TilemapLayer
     {
     public:
+        using PaletteFlags = TilemapLayerClass::PaletteFlags;
         using Flags = TilemapLayerClass::Flags;
         using Type  = TilemapLayerClass::Type;
         using Class = TilemapLayerClass;
@@ -38,7 +39,8 @@ namespace game
         virtual ~TilemapLayer() = default;
         virtual std::string GetClassId() const = 0;
         virtual std::string GetClassName() const = 0;
-        virtual std::string GetPaletteMaterialId(size_t index) const = 0;
+        virtual std::string GetPaletteMaterialId(size_t palette_index) const = 0;
+        virtual std::uint8_t GetPaletteFlags(size_t palette_index) const = 0;
         virtual base::bitflag<Flags> GetFlags() const = 0;
         virtual Type GetType() const = 0;
         virtual bool TestFlag(Flags flag) const = 0;
@@ -65,6 +67,8 @@ namespace game
         virtual bool GetTileValue(int32_t* value, unsigned row, unsigned col) const = 0;
 
         virtual void SetFlags(base::bitflag<Flags> flags) = 0;
+
+        virtual bool TestPaletteFlag(PaletteFlags flags, size_t palette_index) const = 0;
 
         virtual const Class& GetClass() const = 0;
 
