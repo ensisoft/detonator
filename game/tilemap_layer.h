@@ -56,7 +56,6 @@ namespace game
         virtual int GetDepth() const = 0;
         virtual unsigned GetLayer() const = 0;
 
-        virtual void SetPaletteMaterialId(const std::string& material, size_t index) = 0;
         virtual void SetMapDimensions(unsigned width, unsigned  height) = 0;
 
         virtual float GetTileSizeScaler() const = 0;
