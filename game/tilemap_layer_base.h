@@ -61,10 +61,10 @@ namespace game
             using TileLoader = TilemapLayerLoader<Tile>;
             static constexpr auto LayerType = detail::TilemapLayerTraits<Tile>::LayerType;
 
-            TilemapLayerBase(const std::shared_ptr<const TilemapLayerClass>& klass,
+            TilemapLayerBase(std::shared_ptr<const TilemapLayerClass> klass,
                              std::unique_ptr<TileLoader> loader,
                              unsigned map_width, unsigned map_height)
-              : mClass(klass)
+              : mClass(std::move(klass))
               , mLoader(std::move(loader))
               , mMapWidth(map_width)
               , mMapHeight(map_height)
@@ -75,12 +75,20 @@ namespace game
             { return mClass->GetId(); }
             std::string GetClassName() const override
             { return mClass->GetName(); }
-            std::string GetPaletteMaterialId(size_t index) const override
+
+            std::string GetPaletteMaterialId(size_t palette_index) const override
             {
-                if (const auto* material = base::SafeFind(mPalette, index))
-                    return *material;
-                return mClass->GetPaletteMaterialId(index);
+                if (const auto* entry = base::SafeFind(mPalette, palette_index))
+                    return entry->materialId;
+                return mClass->GetPaletteMaterialId(palette_index);
             }
+            std::uint8_t GetPaletteFlags(size_t palette_index) const override
+            {
+                if (const auto* entry = base::SafeFind(mPalette, palette_index))
+                    return entry->flags;
+                return mClass->GetPaletteFlags(palette_index);
+            }
+
             base::bitflag<Flags> GetFlags() const override
             { return mFlags; }
             Type GetType() const override
@@ -115,8 +123,8 @@ namespace game
                 mLoader->SaveState(*mData);
             }
 
-            void SetPaletteMaterialId(const std::string& material, size_t index) override
-            { mPalette[index] = material; }
+            void SetPaletteMaterialId(const std::string& material, size_t palette_index) override
+            { mPalette[palette_index].materialId = material; }
             void SetMapDimensions(unsigned width, unsigned height) override
             { mMapWidth = width; mMapHeight = height; }
             unsigned GetWidth() const override
@@ -139,6 +147,15 @@ namespace game
             { return detail::GetTileValue(get_tile(row, col, false), value); }
             void SetFlags(base::bitflag<Flags> flags) override
             { mFlags = flags; }
+
+            bool TestPaletteFlag(PaletteFlags flag, size_t palette_index) const override
+            {
+                if (const auto* entry = base::SafeFind(mPalette, palette_index))
+                {
+                    return entry->flags & static_cast<uint8_t>(flag);
+                }
+                return mClass->TestPaletteFlag(flag, palette_index);
+            }
 
             const TilemapLayerClass& GetClass() const override
             { return *mClass; }
@@ -181,10 +198,16 @@ namespace game
                 return mTileCache[tile_offset & (cache_size -1)];
             }
         protected:
+            struct PaletteEntry {
+                std::string materialId;
+                std::uint8_t tile_index = 0;
+                std::uint8_t flags = 0;
+            };
+
             std::shared_ptr<const TilemapLayerClass> mClass;
             std::unique_ptr<TileLoader> mLoader;
             std::shared_ptr<TilemapData> mData;
-            std::unordered_map<size_t, std::string> mPalette;
+            std::unordered_map<size_t, PaletteEntry> mPalette;
             std::vector<Tile> mTileCache;
             std::size_t mCacheIndex = 0;
             base::bitflag<Flags> mFlags;
