@@ -77,6 +77,8 @@ namespace game
         { mTileRenderScale.x = scale; }
         inline void SetTileRenderHeightScale(float scale) noexcept
         { mTileRenderScale.y = scale; }
+        inline void SetRenderLayer(int layer) noexcept
+        { mRenderLayer = layer; }
 
         inline std::size_t GetNumLayers() const noexcept
         { return mLayers.size(); }
@@ -106,6 +108,8 @@ namespace game
         { return mTileRenderScale.x; }
         inline float GetTileRenderHeightScale() const noexcept
         { return mTileRenderScale.y; }
+        inline int GetRenderLayer() const noexcept
+        { return mRenderLayer; }
 
         void AddLayer(const TilemapLayerClass& layer);
         void AddLayer(TilemapLayerClass&& layer);
@@ -144,6 +148,7 @@ namespace game
         std::string mScriptFile;
         unsigned mWidth = 0;
         unsigned mHeight = 0;
+        int mRenderLayer = 0;
         glm::vec3 mTileWorldSize = {0.0f, 0.0f, 0.0f};
         glm::vec2 mTileRenderScale = {1.0f, 1.0f};
         Perspective mPerspective = Perspective::AxisAligned;
@@ -197,6 +202,8 @@ namespace game
         { return mClass->GetName(); }
         inline std::string GetClassId() const noexcept
         { return mClass->GetId(); }
+        inline int GetRenderLayer() const noexcept
+        { return mClass->GetRenderLayer(); }
         inline unsigned GetMapWidth() const noexcept
         { return mClass->GetMapWidth(); }
         inline unsigned GetMapHeight() const noexcept

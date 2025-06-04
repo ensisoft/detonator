@@ -543,7 +543,6 @@ std::size_t TilemapLayerClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mResolution);
     hash = base::hash_combine(hash, mDefault);
     hash = base::hash_combine(hash, mDepth);
-    hash = base::hash_combine(hash, mRenderLayer);
 
     std::set<size_t> keys;
     for (const auto& [key, val] : mPalette)
@@ -759,7 +758,6 @@ void TilemapLayerClass::IntoJson(data::Writer& data) const
     data.Write("cache",        mCache);
     data.Write("rez",          mResolution);
     data.Write("depth",        mDepth);
-    data.Write("layer",        mRenderLayer);
 
     std::set<size_t> keys;
     for (const auto [key, val] : mPalette)
@@ -802,7 +800,6 @@ bool TilemapLayerClass::FromJson(const data::Reader& data)
     ok &= data.Read("cache",        &mCache);
     ok &= data.Read("rez",          &mResolution);
     ok &= data.Read("depth",        &mDepth);
-    ok &= data.Read("layer",        &mRenderLayer);
 
     for (unsigned i=0; i<data.GetNumChunks("palette"); ++i)
     {
