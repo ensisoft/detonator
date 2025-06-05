@@ -101,6 +101,8 @@ namespace engine
         // map layer.
         std::uint16_t map_layer = 0;
 
+        std::uint8_t map_sort_key = 0;
+
         float line_width = 1.0f;
     };
 

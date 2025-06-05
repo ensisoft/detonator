@@ -206,11 +206,12 @@ namespace engine
             enum class Type {
                 Render, Data
             };
-
             Type type = Type::Render;
             std::vector<gfx::TileBatch::Tile> tiles;
             std::shared_ptr<const gfx::Material> material;
             // the index of the layer in the map
+            std::uint8_t padding_;
+            std::uint8_t sort_key = 0;
             std::uint16_t layer_index = 0;
             std::int16_t render_layer = 0;
             std::int16_t depth  = 0;
@@ -299,9 +300,6 @@ namespace engine
         std::shared_ptr<const gfx::Material> GetTileMaterial(const game::Tilemap& map,
                                                              std::uint16_t layer_index,
                                                              std::uint16_t material_index);
-        std::uint8_t GetTileMaterialTileIndex(const game::Tilemap& map,
-                                              std::uint16_t layer_index,
-                                              std::uint16_t palette_material_index) const;
 
     private:
         const ClassLibrary* mClassLib = nullptr;

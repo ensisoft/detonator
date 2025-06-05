@@ -18,7 +18,15 @@
 
 #include "config.h"
 
+#include <cstdint>
+
 namespace game {
+
+    enum class TileOcclusion : uint8_t {
+        // warning, do not reorganize this enum
+        // the order of the fields is used directly in sorting.
+        Top, Left, None, Bottom, Right
+    };
 
     enum class BasicLightType {
         Ambient, Directional, Spot, Point

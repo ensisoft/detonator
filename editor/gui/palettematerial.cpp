@@ -16,9 +16,11 @@
 
 #include "config.h"
 
+#include "game/enum.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/palettematerial.h"
 #include "editor/gui/dlgmaterial.h"
+#include "editor/gui/utility.h"
 
 namespace gui
 {
@@ -28,6 +30,8 @@ PaletteMaterial::PaletteMaterial(const app::Workspace* workspace, QWidget* paren
    , mParent(parent)
 {
     mUI.setupUi(this);
+    PopulateFromEnum<game::TileOcclusion>(mUI.cmbOcclusion);
+
     SetEnabled(mUI.btnSetMaterialParams, false);
     SetEnabled(mUI.btnResetMaterial, false);
 }
@@ -64,6 +68,7 @@ void PaletteMaterial::on_btnResetMaterial_clicked()
 {
     SetValue(mUI.cmbMaterial, -1);
     SetValue(mUI.tileIndex, 0);
+    SetValue(mUI.cmbOcclusion, game::TileOcclusion::None);
     SetEnabled(mUI.btnResetMaterial, false);
     emit ValueChanged(this);
 }
@@ -75,6 +80,11 @@ void PaletteMaterial::on_cmbMaterial_currentIndexChanged(int)
 }
 
 void PaletteMaterial::on_tileIndex_valueChanged(int)
+{
+    emit ValueChanged(this);
+}
+
+void PaletteMaterial::on_cmbOcclusion_currentIndexChanged(int)
 {
     emit ValueChanged(this);
 }
