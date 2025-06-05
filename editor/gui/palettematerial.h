@@ -54,21 +54,10 @@ namespace gui
         {
             mIndex = index;
         }
-        void ResetMaterial()
-        {
-            SetValue(mUI.cmbMaterial, -1);
-            SetEnabled(mUI.btnResetMaterial, false);
-        }
-        void SetMaterial(const app::AnyString& id)
-        {
-            SetValue(mUI.cmbMaterial, ListItemId(id))
-                ? SetEnabled(mUI.btnResetMaterial, true)
-                : SetEnabled(mUI.btnResetMaterial, false);
-        }
-        void SetTileIndex(unsigned tile_index)
-        {
-            SetValue(mUI.tileIndex, tile_index);
-        }
+        void ResetMaterial();
+        void SetMaterial(const app::AnyString& id);
+        void SetTileIndex(unsigned tile_index);
+
         void SetOcclusion(game::TileOcclusion sort)
         {
             SetValue(mUI.cmbOcclusion, sort);
@@ -94,6 +83,9 @@ namespace gui
         }
 
         void UpdateMaterialList(const ResourceList& list);
+    private:
+        void UpdatePreview(const app::AnyString& id);
+
     signals:
         void ValueChanged(const PaletteMaterial* material);
 

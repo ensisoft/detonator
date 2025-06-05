@@ -60,6 +60,7 @@ namespace game {
     std::string TranslateEnum(BasicLightClass::LightType light);
     std::string TranslateEnum(RenderPass pass);
     std::string TranslateEnum(CoordinateSpace space);
+    std::string TranslateEnum(TileOcclusion occlusion);
 } // namespace
 
 namespace math {

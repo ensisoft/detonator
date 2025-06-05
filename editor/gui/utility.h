@@ -225,6 +225,12 @@ inline void SetWindowTitle(QDialog* dialog, const app::AnyString& title)
 
 inline void SetImage(QLabel* label, const QPixmap& pixmap)
 {
+    if (pixmap.isNull())
+    {
+        label->setPixmap(pixmap);
+        return;
+    }
+
     const auto lbl_width = label->width();
     const auto lbl_height = label->height();
     const auto pix_width = pixmap.width();
