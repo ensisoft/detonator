@@ -16,11 +16,15 @@
 
 #include "config.h"
 
+#include <QPixmap>
+
 #include "game/enum.h"
+#include "graphics/material_class.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/palettematerial.h"
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/translation.h"
 
 namespace gui
 {
@@ -36,9 +40,64 @@ PaletteMaterial::PaletteMaterial(const app::Workspace* workspace, QWidget* paren
     SetEnabled(mUI.btnResetMaterial, false);
 }
 
+ void PaletteMaterial::ResetMaterial()
+ {
+     SetValue(mUI.cmbMaterial, -1);
+     SetValue(mUI.cmbOcclusion, game::TileOcclusion::None);
+     SetEnabled(mUI.btnResetMaterial, false);
+     SetImage(mUI.preview, QPixmap());
+ }
+
+void PaletteMaterial::SetMaterial(const app::AnyString& id)
+{
+    if (SetValue(mUI.cmbMaterial, ListItemId(id)))
+    {
+        SetEnabled(mUI.btnResetMaterial, true);
+        UpdatePreview(id);
+    }
+    else
+    {
+        SetEnabled(mUI.btnResetMaterial, false);
+        SetImage(mUI.preview, QPixmap());
+    }
+}
+void PaletteMaterial::SetTileIndex(unsigned tile_index)
+{
+    SetValue(mUI.tileIndex, tile_index);
+
+    // todo: preview update
+}
+
 void PaletteMaterial::UpdateMaterialList(const ResourceList& list)
 {
     SetList(mUI.cmbMaterial, list);
+}
+
+void PaletteMaterial::UpdatePreview(const app::AnyString& id)
+{
+    SetImage(mUI.preview, QPixmap());
+
+    const auto& klass = mWorkspace->FindMaterialClassById(id);
+    if (!klass)
+        return;
+
+    const auto map_count = klass->GetNumTextureMaps();
+    if (map_count == 0)
+        return;
+
+    const auto* texture = klass->GetTextureMap(0);
+    if (!texture->GetNumTextures())
+        return;
+
+    // todo: texture rect computation
+    // todo: tilemap tile computation inside texture rect
+
+    const auto* texture_source = texture->GetTextureSource(0);
+    const auto& texture_data = texture_source->GetData();
+    if (texture_data)
+    {
+        SetImage(mUI.preview, *texture_data);
+    }
 }
 
 void PaletteMaterial::on_btnSelectMaterial_clicked()
@@ -58,6 +117,8 @@ void PaletteMaterial::on_btnSelectMaterial_clicked()
     SetValue(mUI.cmbMaterial, ListItemId(dlg.GetSelectedMaterialId()));
     SetValue(mUI.tileIndex, dlg.GetTileIndex());
     SetEnabled(mUI.btnResetMaterial, true);
+    UpdatePreview(dlg.GetSelectedMaterialId());
+
     emit ValueChanged(this);
 }
 void PaletteMaterial::on_btnSetMaterialParams_clicked()
@@ -70,12 +131,15 @@ void PaletteMaterial::on_btnResetMaterial_clicked()
     SetValue(mUI.tileIndex, 0);
     SetValue(mUI.cmbOcclusion, game::TileOcclusion::None);
     SetEnabled(mUI.btnResetMaterial, false);
+    SetImage(mUI.preview, QPixmap());
     emit ValueChanged(this);
 }
 
 void PaletteMaterial::on_cmbMaterial_currentIndexChanged(int)
 {
     SetEnabled(mUI.btnResetMaterial, true);
+    UpdatePreview(GetItemId(mUI.cmbMaterial));
+
     emit ValueChanged(this);
 }
 

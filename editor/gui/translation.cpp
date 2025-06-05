@@ -304,6 +304,23 @@ std::string TranslateEnum(CoordinateSpace space)
     return "???";
 }
 
+std::string TranslateEnum(TileOcclusion occlusion)
+{
+    using O = TileOcclusion;
+    if (occlusion == O::Top)
+        return "Occlude Top";
+    else if (occlusion == O::Left)
+        return "Occlude Left";
+    else if (occlusion == O::None)
+        return "Occlude Nothing";
+    else if (occlusion == O::Bottom)
+        return "Occlude Bottom";
+    else if (occlusion == O::Right)
+        return "Occlude Right";
+    else BUG("Missing translation");
+    return "???";
+}
+
 } // namespace
 
 namespace math
