@@ -520,15 +520,6 @@ void Renderer::CreateFrame(const game::Tilemap& map, bool draw_render_layer, boo
     OffsetPacketLayers(packets, lights);
     SortTilePackets(packets);
 
-    // this rendering path doesn't use the runtime rendering path (DrawScenePackets)
-    // therefore we must do our own sorting here to get the packets sorted
-    // according to render layers as well.
-    std::stable_sort(packets.begin(), packets.end(), [](const auto& lhs, const auto& rhs) {
-        if (lhs.render_layer < rhs.render_layer)
-            return true;
-        return false;
-    });
-
     // put the data packets (indicated by editor) first
     std::stable_partition(packets.begin(), packets.end(), [](const auto& packet) {
         return packet.domain == DrawPacket::Domain::Editor;
@@ -631,6 +622,7 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             packet.transform    = from_map_to_scene;
             packet.map_row      = batch.row;
             packet.map_col      = batch.col;
+            packet.map_sort_key = batch.sort_key;
             packet.map_layer    = batch.layer_index;
             packet.render_layer = batch.render_layer;
             packet.packet_index = 0;
@@ -654,6 +646,7 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             packet.transform    = glm::mat4(1.0f);
             packet.map_row      = batch.row;
             packet.map_col      = batch.col;
+            packet.map_sort_key = batch.sort_key;
             packet.map_layer    = batch.layer_index;
             packet.render_layer = batch.render_layer;
             packet.packet_index = 0;
@@ -1717,6 +1710,7 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
     const auto layer_tile_size = glm::vec3 { layer_tile_width_units * cuboid_scale_factors.x,
                                              layer_tile_height_units * cuboid_scale_factors.y,
                                              layer_tile_depth_units * cuboid_scale_factors.z };
+    const auto& klass = layer.GetClass();
 
     for (unsigned row=tile_row; row<max_row; ++row)
     {
@@ -1740,8 +1734,9 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
                 batches.emplace_back();
                 auto& batch = batches.back();
                 batch.material     = GetTileMaterial(map, layer_index, palette_index);
-                batch.layer_index  = layer.GetLayer();
-                batch.depth        = layer.GetDepth();
+                batch.sort_key     = static_cast<uint8_t>(klass.GetPaletteOcclusion(palette_index));
+                batch.layer_index  = klass.GetLayer();
+                batch.depth        = klass.GetDepth();
                 batch.render_layer = map.GetRenderLayer();
                 batch.row          = row;
                 batch.col          = col;
@@ -1754,9 +1749,8 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
             gfx::TileBatch::Tile tile;
             tile.pos.x  = col;
             tile.pos.y  = row;
-            tile.pos.z  = layer.GetDepth();
-            tile.data.x = GetTileMaterialTileIndex(map, layer_index, palette_index);
-
+            tile.pos.z  = klass.GetDepth();
+            tile.data.x = klass.GetPaletteMaterialTileIndex(palette_index);
             batch.tiles.push_back(tile);
 
             // keep track of the last material used.
@@ -1840,21 +1834,31 @@ void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
     // as the relative ordering is correct the renderer
     // will then put the packets in render layers properly.
 
-    // row 0, col 0, layer 0
-    // row 0, col 0, layer 1
-    // row 0, col 1, layer 1
+    // layer 0, row 0, col 0, sk = 0
+    // layer 0, row 0, col 0, sk = 1
+    // layer 0, row 0, col 1, sk = 0
+    // layer 0, row 0, col 1, sk = 1
     // ...
-    // row 1, col 0, layer 0,
-    // row 2, col 0, layer 1
+    // layer 0, row 1, col 1, sk = 0
+    // layer 0, row 1, col 1, sk = 1
+    
     std::sort(packets.begin(), packets.end(), [](const auto& lhs, const auto& rhs) {
-        if (lhs.map_row < rhs.map_row)
+        if (lhs.map_layer < rhs.map_layer)
             return true;
-        else if (lhs.map_row == rhs.map_row)
+        else if (lhs.map_layer == rhs.map_layer)
         {
-            if (lhs.map_col < rhs.map_col)
+            if (lhs.map_row < rhs.map_row)
                 return true;
-            else if (lhs.map_col == rhs.map_col)
-                return lhs.map_layer < rhs.map_layer;
+            else if (lhs.map_row == rhs.map_row)
+            {
+                if (lhs.map_col < rhs.map_col)
+                    return true;
+                else if (lhs.map_col == rhs.map_col)
+                {
+                    if (lhs.map_sort_key < rhs.map_sort_key)
+                        return true;
+                }
+            }
         }
         return false;
     });
@@ -1931,15 +1935,6 @@ std::shared_ptr<const gfx::Material> Renderer::GetTileMaterial(const game::Tilem
         layer_material_node.material = gfx::CreateMaterialInstance(klass);
     }
     return layer_material_node.material;
-}
-
-std::uint8_t Renderer::GetTileMaterialTileIndex(const game::Tilemap& map,
-                                                std::uint16_t layer_index,
-                                                std::uint16_t palette_material_index) const
-{
-    const auto& layer = map.GetLayer(layer_index);
-    const auto& klass = layer.GetClass();
-    return klass.GetPaletteMaterialTileIndex(palette_material_index);
 }
 
 } // namespace

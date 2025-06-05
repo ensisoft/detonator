@@ -25,6 +25,7 @@
 
 #include <string>
 
+#include "game/enum.h"
 #include "editor/app/types.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/types.h"
@@ -68,6 +69,10 @@ namespace gui
         {
             SetValue(mUI.tileIndex, tile_index);
         }
+        void SetOcclusion(game::TileOcclusion sort)
+        {
+            SetValue(mUI.cmbOcclusion, sort);
+        }
 
         app::AnyString GetMaterialId() const
         {
@@ -77,6 +82,10 @@ namespace gui
         std::size_t GetPaletteIndex() const
         {
             return mIndex;
+        }
+        game::TileOcclusion GetOcclusion() const
+        {
+            return GetValue(mUI.cmbOcclusion);
         }
 
         unsigned GetTileIndex() const
@@ -94,6 +103,7 @@ namespace gui
         void on_btnResetMaterial_clicked();
         void on_cmbMaterial_currentIndexChanged(int);
         void on_tileIndex_valueChanged(int);
+        void on_cmbOcclusion_currentIndexChanged(int);
     private:
         Ui::PaletteMaterial mUI;
     private:

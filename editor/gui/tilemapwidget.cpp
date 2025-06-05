@@ -2096,8 +2096,10 @@ void TilemapWidget::PaletteMaterialChanged(const PaletteMaterial* material)
 {
     if (auto* layer = GetCurrentLayer())
     {
-        layer->SetPaletteMaterialId(material->GetMaterialId(), material->GetPaletteIndex());
-        layer->SetPaletteMaterialTileIndex(material->GetTileIndex(), material->GetPaletteIndex());
+        const auto palette_index = material->GetPaletteIndex();
+        layer->SetPaletteMaterialId(material->GetMaterialId(), palette_index);
+        layer->SetPaletteOcclusion(material->GetOcclusion(), palette_index);
+        layer->SetPaletteMaterialTileIndex(material->GetTileIndex(), palette_index);
     }
 }
 
@@ -2224,6 +2226,7 @@ void TilemapWidget::DisplayLayerProperties()
                 widget->setEnabled(true);
                 widget->SetMaterial(layer->GetPaletteMaterialId(i));
                 widget->SetTileIndex(layer->GetPaletteMaterialTileIndex(i));
+                widget->SetOcclusion(layer->GetPaletteOcclusion(i));
             }
             SetEnabled(mUI.layerPalette, true);
 
@@ -2286,6 +2289,7 @@ void TilemapWidget::UpdateLayerPalette()
                 auto* widget = mPaletteMaterialWidgets[i];
                 widget->SetMaterial(layer->GetPaletteMaterialId(i));
                 widget->SetTileIndex(layer->GetPaletteMaterialTileIndex(i));
+                widget->SetOcclusion(layer->GetPaletteOcclusion(i));
             }
         }
     }

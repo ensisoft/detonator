@@ -82,6 +82,9 @@ namespace game
             std::uint8_t GetPaletteFlags(size_t palette_index) const override
             { return mClass->GetPaletteFlags(palette_index); }
 
+            TileOcclusion GetPaletteOcclusion(size_t palette_index) const override
+            { return mClass->GetPaletteOcclusion(palette_index); }
+
             base::bitflag<Flags> GetFlags() const override
             { return mFlags; }
             Type GetType() const override

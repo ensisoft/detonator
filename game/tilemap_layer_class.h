@@ -27,6 +27,7 @@
 #include "base/bitflag.h"
 #include "data/fwd.h"
 #include "game/types.h"
+#include "game/enum.h"
 #include "game/tilemap_types.h"
 
 namespace game
@@ -40,6 +41,7 @@ namespace game
     class TilemapLayerClass
     {
     public:
+        using TileOcclusion = game::TileOcclusion;
         using Type = detail::TilemapLayerType;
 
         enum class PaletteFlags : int8_t {
@@ -163,6 +165,7 @@ namespace game
         { mPalette.erase(index); }
 
         void SetPaletteFlag(PaletteFlags flag, bool on_off, std::size_t palette_index);
+        void SetPaletteOcclusion(TileOcclusion occlusion, std::size_t palette_index);
 
         bool TestPaletteFlag(PaletteFlags flag, size_t palette_index) const;
 
@@ -177,6 +180,8 @@ namespace game
         std::size_t FindMaterialIndexInPalette(const std::string& materialId) const;
         std::size_t FindMaterialIndexInPalette(const std::string& materialId, std::uint8_t tile_index) const;
         std::size_t FindNextAvailablePaletteIndex() const;
+
+        TileOcclusion GetPaletteOcclusion(size_t palette_index) const;
 
         template<typename T>
         const T& GetDefaultTileValue() const
@@ -254,6 +259,7 @@ namespace game
             std::string materialId;
             std::uint8_t tile_index = 0;
             std::uint8_t flags = 0;
+            TileOcclusion occlusion = TileOcclusion::None;
         };
         std::unordered_map<std::size_t, PaletteEntry> mPalette;
         Storage mStorage = Storage::Dense;

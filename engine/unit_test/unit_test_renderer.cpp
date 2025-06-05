@@ -1035,18 +1035,7 @@ void unit_test_axis_aligned_map()
     // verify the render order.
     {
         // current rendering order should be
-        // row < col < height < layer
-
-        // but right now we assume the layer takes care of the height,
-        // so we end up with
-        //
-        // row=0, col=0, layer=0
-        // row=0, col=0, layer=1,
-        // row=0, col=1, layer=0,
-        // row=0; col=1, layer=1,
-        // ...
-        // row=n, col=m; layer=0,
-        // row=n, col=m, layer=1
+        // layer < row < col < sort_key
 
         const auto& batches = hook.batches;
         TEST_REQUIRE(batches.size() == 2 * 2 * 2);
@@ -1055,12 +1044,12 @@ void unit_test_axis_aligned_map()
             uint16_t row, col, layer;
         } expected[] = {
             {0, 0, 0},
-            {0, 0, 1},
             {0, 1, 0},
-            {0, 1, 1},
             {1, 0, 0},
-            {1, 0, 1},
             {1, 1, 0},
+            {0, 0, 1},
+            {0, 1, 1},
+            {1, 0, 1},
             {1, 1, 1}
         };
         for (size_t i=0; i<batches.size(); ++i)
