@@ -263,6 +263,7 @@ namespace gui
         void on_btnResetTextRasterHeight_clicked();
         void on_mnVCenter_valueChanged(double);
         void on_mnHCenter_valueChanged(double);
+        void on_nodeMapLayer_valueChanged(int);
         void on_tfIntegrator_currentIndexChanged(int);
         void on_tfVelocityX_valueChanged(double);
         void on_tfVelocityY_valueChanged(double);

@@ -326,12 +326,10 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
             for (auto& packet: entity_packets)
             {
                 packet.render_layer = placement->GetRenderLayer();
-                packet.map_layer    = placement->GetMapLayer();
             }
             for (auto& light : entity_lights)
             {
                 light.render_layer = placement->GetRenderLayer();
-                light.map_layer    = placement->GetMapLayer();
             }
 
             // Compute tile coordinates for each draw packet created by the entity.
@@ -1401,12 +1399,16 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
     transform.RotateAroundZ(paint_node.world_rotation);
     transform.Translate(paint_node.world_pos);
 
-    glm::vec2 sort_point = {0.5f, 1.0f};
+    glm::vec2 map_sort_point = {0.5f, 1.0f};
+    std::uint16_t map_layer = 0;
     if (const auto* map = entity_node.GetMapNode())
-        sort_point = map->GetSortPoint();
+    {
+        map_sort_point = map->GetSortPoint();
+        map_layer = map->GetMapLayer();
+    }
 
     transform.Push(entity_node.GetModelTransform());
-       sort_point = transform * glm::vec4{sort_point, 0.0f, 1.0};
+       map_sort_point = transform * glm::vec4{map_sort_point, 0.0f, 1.0};
      transform.Pop();
 
     const auto* item = entity_node.GetDrawable();
@@ -1481,9 +1483,9 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             packet.material     = paint_node.material;
             packet.drawable     = paint_node.drawable;
             packet.transform    = transform;
-            packet.sort_point   = sort_point;
+            packet.sort_point   = map_sort_point;
+            packet.map_layer    = map_layer;
             packet.render_layer = entity.GetRenderLayer();
-            packet.map_layer    = entity.GetMapLayer();
             packet.pass         = item->GetRenderPass();
             packet.projection   = item->GetRenderProjection();
             packet.packet_index = item->GetLayer();
@@ -1549,9 +1551,13 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
     transform.RotateAroundZ(paint_node.world_rotation);
     transform.Translate(paint_node.world_pos);
 
-    glm::vec2 sort_point = {0.5f, 1.0f};
+    glm::vec2 map_sort_point = {0.5f, 1.0f};
+    std::uint16_t map_layer = 0;
     if (const auto* map = entity_node.GetMapNode())
-        sort_point = map->GetSortPoint();
+    {
+        map_sort_point = map->GetSortPoint();
+        map_layer = map->GetMapLayer();
+    }
 
     const auto* text = entity_node.GetTextItem();
     if (text && paint_node.drawable && paint_node.material)
@@ -1579,10 +1585,10 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             packet.drawable     = paint_node.drawable;
             packet.material     = paint_node.material;
             packet.transform    = transform;
-            packet.sort_point   = transform * glm::vec4{sort_point, 0.0f, 1.0};
+            packet.sort_point   = transform * glm::vec4{map_sort_point, 0.0f, 1.0};
+            packet.map_layer    = map_layer;
             packet.packet_index = text->GetLayer();
             packet.render_layer = entity.GetRenderLayer();
-            packet.map_layer    = entity.GetMapLayer();
             packet.coordinate_space = text->GetCoordinateSpace();
             if (!hook || hook->InspectPacket(&entity_node, packet))
                 packets.push_back(std::move(packet));
@@ -1622,9 +1628,13 @@ void Renderer::CreateLights(const EntityType& entity,
     transform.Push();
          transform.Translate(node_light->GetTranslation());
 
-    glm::vec2 sort_point = {0.5f, 1.0f};
+    glm::vec2 map_sort_point = {0.5f, 1.0f};
+    std::uint16_t map_layer = 0;
     if (const auto* map = entity_node.GetMapNode())
-        sort_point = map->GetSortPoint();
+    {
+        map_sort_point = map->GetSortPoint();
+        map_layer = map->GetMapLayer();
+    }
 
     // hack around here to make the light direction in 3D match
     // what the user expects to see based on the 2D view
@@ -1638,9 +1648,9 @@ void Renderer::CreateLights(const EntityType& entity,
     light.light        = light_node.light;
     light.transform    = transform;
     light.render_layer = entity.GetRenderLayer();
-    light.map_layer    = entity.GetMapLayer();
+    light.map_layer    = map_layer;
     light.packet_index = node_light->GetLayer();
-    light.sort_point   = transform * glm::vec4{sort_point, 0.0f, 1.0};
+    light.sort_point   = transform * glm::vec4{map_sort_point, 0.0f, 1.0};
     lights.push_back(light);
 }
 

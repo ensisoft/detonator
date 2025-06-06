@@ -27,17 +27,20 @@ size_t MapNodeClass::GetHash() const noexcept
 {
     size_t hash = 0;
     hash = base::hash_combine(0, mMapSortPoint);
+    hash = base::hash_combine(0, mMapLayer);
     return hash;
 }
 
 void MapNodeClass::IntoJson(data::Writer& data) const
 {
     data.Write("map_sort_point", mMapSortPoint);
+    data.Write("map_layer", mMapLayer);
 }
 bool MapNodeClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("map_sort_point", &mMapSortPoint);
+    ok &= data.Read("map_layer", &mMapLayer);
     return ok;
 }
 

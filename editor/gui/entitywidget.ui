@@ -299,8 +299,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>417</width>
-               <height>1013</height>
+               <width>421</width>
+               <height>1003</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -1479,8 +1479,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>428</width>
-          <height>1250</height>
+          <width>431</width>
+          <height>1016</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -2689,7 +2689,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="collapsed" stdset="0">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text" stdset="0">
                  <string>Text Item</string>
@@ -4038,7 +4038,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="text" stdset="0">
-                 <string>Tilemap Placement Node</string>
+                 <string>Tilemap Placement</string>
                 </property>
                 <property name="frameShape" stdset="0">
                  <enum>QFrame::NoFrame</enum>
@@ -4069,7 +4069,7 @@
                     <item row="3" column="0" colspan="2">
                      <widget class="QPushButton" name="btnDelTilemapNode">
                       <property name="text">
-                       <string>Remove Tilemap Placement Node</string>
+                       <string>Remove Tilemap Placement</string>
                       </property>
                       <property name="icon">
                        <iconset resource="../resource/resource.qrc">
@@ -4148,6 +4148,20 @@
                        </widget>
                       </item>
                      </layout>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_80">
+                      <property name="text">
+                       <string>Map layer</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QSpinBox" name="nodeMapLayer">
+                      <property name="maximum">
+                       <number>255</number>
+                      </property>
+                     </widget>
                     </item>
                    </layout>
                   </item>
@@ -5082,7 +5096,7 @@
      <normaloff>:/16x16_ico_png/tilemap.png</normaloff>:/16x16_ico_png/tilemap.png</iconset>
    </property>
    <property name="text">
-    <string>Tilemap Placement Node</string>
+    <string>Tilemap Placement</string>
    </property>
   </action>
   <action name="actionAddSpatialNode">
@@ -5447,6 +5461,7 @@
   <tabstop>btnDelLight</tabstop>
   <tabstop>mnHCenter</tabstop>
   <tabstop>mnVCenter</tabstop>
+  <tabstop>nodeMapLayer</tabstop>
   <tabstop>btnDelTilemapNode</tabstop>
   <tabstop>spatialNode</tabstop>
   <tabstop>spnShape</tabstop>

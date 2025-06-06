@@ -75,7 +75,6 @@ void unit_test_node()
     node.SetEntityId("entity");
     node.SetTag("tag tag");
     node.SetRenderLayer(1);
-    node.SetMapLayer(2);
 
     // to/from json
     {
@@ -91,7 +90,6 @@ void unit_test_node()
         TEST_REQUIRE(ret.GetRotation()     == real::float32(1.5f));
         TEST_REQUIRE(ret.GetEntityId()     == "entity");
         TEST_REQUIRE(ret.GetRenderLayer()  == 1);
-        TEST_REQUIRE(ret.GetMapLayer()     == 2);
         TEST_REQUIRE(ret.GetHash() == node.GetHash());
     }
 

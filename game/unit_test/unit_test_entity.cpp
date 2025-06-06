@@ -133,7 +133,7 @@ void unit_test_entity_node()
 
     game::MapNodeClass map;
     map.SetMapSortPoint(glm::vec2{2.0f, 3.0f});
-
+    map.SetMapLayer(123);
 
     game::BasicLightClass light;
     light.Enable(true);
@@ -213,6 +213,7 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetFixture()->GetPolygonShapeId() == "123232ddd");
     TEST_REQUIRE(node.GetFixture()->GetRigidBodyNodeId() == "81288");
     TEST_REQUIRE(node.GetMapNode()->GetSortPoint() == glm::vec2(2.0f, 3.0f));
+    TEST_REQUIRE(node.GetMapNode()->GetMapLayer() == 123);
     TEST_REQUIRE(node.GetTransformer()->GetAngularAcceleration() == 1.0f);
     TEST_REQUIRE(node.GetTransformer()->GetAngularVelocity() == 5.0f);
     TEST_REQUIRE(node.GetTransformer()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
@@ -1291,7 +1292,6 @@ void unit_test_entity_args()
     args.id            = "instance-id";
     args.rotation      = 2.0f;
     args.render_layer  = 100;
-    args.map_layer     = 130;
     args.vars["int"]   = 123;
     args.vars["float"] = 50.0f;
     auto instance = game::CreateEntityInstance(args);
@@ -1299,7 +1299,6 @@ void unit_test_entity_args()
     TEST_REQUIRE(instance->GetName()  == "instance-name");
     TEST_REQUIRE(instance->GetId()    == "instance-id");
     TEST_REQUIRE(instance->GetRenderLayer() == 100);
-    TEST_REQUIRE(instance->GetMapLayer() == 130);
     TEST_REQUIRE(instance->GetNumNodes() == 1);
     TEST_REQUIRE(instance->FindScriptVarByName("int")->GetValue<int>() == 123);
     TEST_REQUIRE(instance->FindScriptVarByName("float")->GetValue<float>() == 50.0f);
