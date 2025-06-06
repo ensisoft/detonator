@@ -1129,8 +1129,6 @@ void BindGameLib(sol::state& L)
     entity["GetTime"]              = &Entity::GetTime;
     entity["GetRenderLayer"]       = &Entity::GetRenderLayer;
     entity["SetRenderLayer"]       = &Entity::SetRenderLayer;
-    entity["GetMapLayer"]          = &Entity::GetMapLayer;
-    entity["SetMapLayer"]          = &Entity::SetMapLayer;
     entity["IsDying"]              = &Entity::IsDying;
     entity["IsVisible"]            = &Entity::IsVisible;
     entity["IsAnimating"]          = &Entity::IsAnimating;
@@ -1262,7 +1260,6 @@ void BindGameLib(sol::state& L)
     entity_args["layer"]    = sol::property(&EntityArgs::render_layer); // the old name is kept for compatibility
     entity_args["async"]    = sol::property(&EntityArgs::async_spawn);
     entity_args["delay"]    = sol::property(&EntityArgs::delay);
-    entity_args["map_layer"] = sol::property(&EntityArgs::map_layer);
     entity_args["render_layer"] = sol::property(&EntityArgs::render_layer);
 
     using DynamicSpatialQueryResultSet = ResultSet<EntityNode*>;
@@ -1596,7 +1593,6 @@ void BindGameLib(sol::state& L)
             args.id             = args_table.get_or("id", std::string(""));
             args.name           = args_table.get_or("name", std::string(""));
             args.render_layer   = args_table.get_or("layer", 0);
-            args.map_layer      = args_table.get_or("map_layer", 0);
             args.scale.x        = args_table.get_or("sx", 1.0f);
             args.scale.y        = args_table.get_or("sy", 1.0f);
             args.position.x     = args_table.get_or("x", 0.0f);

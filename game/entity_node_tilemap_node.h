@@ -23,6 +23,7 @@
 #include "warnpop.h"
 
 #include <memory>
+#include <cstdint>
 
 #include "data/fwd.h"
 
@@ -33,8 +34,12 @@ namespace game
     public:
         inline void SetMapSortPoint(glm::vec2 point) noexcept
         { mMapSortPoint = point; }
-        inline glm::vec2 GetSortPoint() const noexcept
+        inline auto GetSortPoint() const noexcept
         { return mMapSortPoint; }
+        inline void SetMapLayer(uint16_t layer) noexcept
+        { mMapLayer = layer; }
+        inline auto GetMapLayer() const noexcept
+        { return mMapLayer; }
 
         std::size_t GetHash() const noexcept;
 
@@ -43,16 +48,20 @@ namespace game
         bool FromJson(const data::Reader& data);
     private:
         glm::vec2 mMapSortPoint = {0.5f, 1.0f};
+        // layer in the map when using a tilemap world
+        uint16_t mMapLayer = 0;
     };
 
     class MapNode
     {
     public:
         explicit MapNode(std::shared_ptr<const MapNodeClass> klass) noexcept
-           : mClass(klass)
+           : mClass(std::move(klass))
         {}
-        inline glm::vec2 GetSortPoint() const noexcept
+        inline auto GetSortPoint() const noexcept
         { return mClass->GetSortPoint(); }
+        inline auto GetMapLayer() const noexcept
+        { return mClass->GetMapLayer(); }
         inline const MapNodeClass& GetClass() const noexcept
         { return *mClass; }
         inline const MapNodeClass* operator ->() const noexcept

@@ -1594,8 +1594,6 @@ void InitLuaDoc()
     DOC_METHOD_0("float", "GetTime", "Get the entity's current accumulated (life) time.");
     DOC_METHOD_0("int" , "GetRenderLayer", "Get the entity's render layer in the scene rendering.");
     DOC_METHOD_1("void", "SetRenderLayer", "Set the entity's render layer in the scene rendering.", "int", "layer");
-    DOC_METHOD_0("unsigned", "GetMapLayer", "Get the entity tilemap layer index.");
-    DOC_METHOD_1("void", "SetMapLayer", "Set the entity tilemap layer index.", "unsigned", "layer");
     DOC_METHOD_1("void", "SetTag", "Set entity tag string.", "string", "tag");
     DOC_METHOD_0("bool", "IsVisible", "Checks whether the entity is currently visible or not.");
     DOC_METHOD_0("bool", "IsAnimating", "Checks whether the entity is currently playing an animation or not.");
@@ -1725,8 +1723,6 @@ void InitLuaDoc()
                                    "Default is true.");
     DOC_OBJECT_PROPERTY("int", "render_layer", "The scene render layer index for the entity.<br>"
                                                "Default is 0.");
-    DOC_OBJECT_PROPERTY("unsigned", "map_layer", "Tilemap layer index for the entity.<br>"
-                                                 "Default is 0.");
 
     DOC_TABLE("game.SpatialQueryResultSet");
     DOC_METHOD_0("bool", "IsEmpty", "Check whether the result set is an empty set or not.");
@@ -1894,7 +1890,6 @@ void InitLuaDoc()
                                                " &nbsp;&nbsp; link,          bool,     Flag to control linking to scene root in scene graph. Default = true<br>"
                                                " &nbsp;&nbsp; async,         bool,     Flag to control async spawning. Default = false<br>"
                                                " &nbsp;&nbsp; render_layer,  int,      Scene render layer index. Default = 0<br>"
-                                               " &nbsp;&nbsp; map_layer,     unsigned, Tilemap layer index. Default = 0<br>"
                                                " &nbsp;&nbsp; delay,         float,    Time delay before the entity is placed into the scene. Default = 0.0<br>"
                                                " &nbsp;&nbsp; vars,          table,    Key-value table of entity script variables to set. Supports int, float, bool, string and vector types.",
 

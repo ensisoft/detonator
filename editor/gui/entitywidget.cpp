@@ -3264,6 +3264,11 @@ void EntityWidget::on_mnHCenter_valueChanged(double)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_nodeMapLayer_valueChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_tfIntegrator_currentIndexChanged(int)
 {
     UpdateCurrentNodeProperties();
@@ -4577,6 +4582,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.fxIsSensor, false);
     SetValue(mUI.mnHCenter, 0.5f);
     SetValue(mUI.mnVCenter, 1.0f);
+    SetValue(mUI.nodeMapLayer, 0);
 
     SetValue(mUI.tfIntegrator, game::NodeTransformerClass::Integrator::Euler);
     SetValue(mUI.tfVelocityX, 0.0f);
@@ -4768,6 +4774,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             const auto& center = map->GetSortPoint();
             SetValue(mUI.mnVCenter, center.y);
             SetValue(mUI.mnHCenter, center.x);
+            SetValue(mUI.nodeMapLayer, map->GetMapLayer());
         }
         if (const auto* trans = node->GetTransformer())
         {
@@ -4982,6 +4989,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         center.x = GetValue(mUI.mnHCenter);
         center.y = GetValue(mUI.mnVCenter);
         map->SetMapSortPoint(center);
+        map->SetMapLayer(GetValue(mUI.nodeMapLayer));
     }
 
     if (auto* trans = node->GetTransformer())

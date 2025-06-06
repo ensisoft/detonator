@@ -129,7 +129,6 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         // placement node.
         entity->SetParentNodeClassId(placement.GetParentRenderTreeNodeId());
         entity->SetRenderLayer(placement.GetRenderLayer());
-        entity->SetMapLayer(placement.GetMapLayer());
         entity->SetScene(this);
 
         // optionally set instance settings, if these are not set then
