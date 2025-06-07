@@ -51,6 +51,8 @@ namespace engine
             Scene, Editor
         };
         enum class Source {
+            // warning do not change the order of these.
+            // the value is used directly when sorting tilemap tiles.
             Map, Scene
         };
 
