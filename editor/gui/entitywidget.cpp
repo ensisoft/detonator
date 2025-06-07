@@ -113,9 +113,9 @@ std::string GenerateEntityNodeName(const game::EntityClass& entity, const std::s
 class EntityWidget::JointModel : public QAbstractTableModel
 {
 public:
-    JointModel(EntityWidget::State& state) : mState(state)
+    explicit JointModel(EntityWidget::State& state) : mState(state)
     {}
-    virtual QVariant data(const QModelIndex& index, int role) const override
+    QVariant data(const QModelIndex& index, int role) const override
     {
         const auto& joint = mState.entity->GetJoint(index.row());
         const auto* src   = mState.entity->FindNodeById(joint.src_node_id);
@@ -130,9 +130,9 @@ public:
                 default: BUG("Unknown script variable data index.");
             }
         }
-        return QVariant();
+        return {};
     }
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
     {
         if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         {
@@ -144,14 +144,16 @@ public:
                 default: BUG("Unknown script variable data index.");
             }
         }
-        return QVariant();
+        return {};
     }
-    virtual int rowCount(const QModelIndex&) const override
+    int rowCount(const QModelIndex&) const override
     {
         return static_cast<int>(mState.entity->GetNumJoints());
     }
-    virtual int columnCount(const QModelIndex&) const override
-    { return 4; }
+    int columnCount(const QModelIndex&) const override
+    {
+        return 4;
+    }
 
     void AddJoint(game::EntityClass::PhysicsJoint&& joint)
     {
@@ -191,7 +193,7 @@ class EntityWidget::ScriptVarModel : public QAbstractTableModel
 public:
     ScriptVarModel(EntityWidget::State& state) : mState(state)
     {}
-    virtual QVariant data(const QModelIndex& index, int role) const override
+    QVariant data(const QModelIndex& index, int role) const override
     {
         const auto& var = mState.entity->GetScriptVar(index.row());
         if (role == Qt::DisplayRole)
@@ -203,9 +205,9 @@ public:
                 default: BUG("Unknown script variable data index.");
             }
         }
-        return QVariant();
+        return {};
     }
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
     {
         if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         {
@@ -216,13 +218,13 @@ public:
                 default: BUG("Unknown script variable data index.");
             }
         }
-        return QVariant();
+        return {};
     }
-    virtual int rowCount(const QModelIndex&) const override
+    int rowCount(const QModelIndex&) const override
     {
         return static_cast<int>(mState.entity->GetNumScriptVars());
     }
-    virtual int columnCount(const QModelIndex&) const override
+    int columnCount(const QModelIndex&) const override
     {
         //return 3;
         return 2;
@@ -368,7 +370,7 @@ private:
                 break;
         }
         BUG("Unknown ScriptVar type.");
-        return QVariant();
+        return {};
     }
 private:
     EntityWidget::State& mState;
@@ -381,7 +383,7 @@ public:
        : mState(state)
        , mCurrent(mouse_pos)
     {}
-    virtual void Render(gfx::Painter& painter, gfx::Painter& entity) const override
+    void Render(gfx::Painter& painter, gfx::Painter& entity) const override
     {
         if (mCurrentNode)
         {
@@ -409,7 +411,7 @@ public:
         }
     }
 
-    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
+    void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
         mCurrent = mickey.MapToPlane();
 
@@ -432,7 +434,7 @@ public:
             }
         }
     }
-    virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
+    void MousePress(const MouseEvent& mickey, gfx::Transform&) override
     {
         std::vector<game::EntityNodeClass*> hit_nodes;
         std::vector<glm::vec2> hit_boxes;
@@ -473,7 +475,7 @@ public:
         DEBUG("Joint tool node selection. [node='%1', pos='%2']", node->GetName(), hit_pos);
     }
 
-    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
+    bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
     {
          if (mNodeA && mNodeB)
              return true;
@@ -584,7 +586,7 @@ private:
 class EntityWidget::PlaceRigidBodyTool : public MouseTool
 {
 public:
-    PlaceRigidBodyTool(EntityWidget::State& state) : mState(state)
+    explicit PlaceRigidBodyTool(EntityWidget::State& state) : mState(state)
     {
     }
 
@@ -696,7 +698,7 @@ private:
 class EntityWidget::PlaceTextTool : public MouseTool
 {
 public:
-    PlaceTextTool(EntityWidget::State& state) : mState(state)
+    explicit PlaceTextTool(EntityWidget::State& state) : mState(state)
     {
         gfx::TextBuffer::Text text_and_style;
         text_and_style.text       = "text";
@@ -844,7 +846,7 @@ public:
         mCurrent = mouse_pos;
     }
 
-    virtual void Render(gfx::Painter&, gfx::Painter& entity) const override
+    void Render(gfx::Painter&, gfx::Painter& entity) const override
     {
         if (!mEngaged)
         {
@@ -874,12 +876,12 @@ public:
         entity.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), model,
                     gfx::CreateMaterialFromColor(gfx::Color::Green));
     }
-    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
+    void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
         mCurrent = mickey.MapToPlane();
         mAlwaysSquare = mickey->modifiers() & Qt::ControlModifier;
     }
-    virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
+    void MousePress(const MouseEvent& mickey, gfx::Transform&) override
     {
         const auto button = mickey->button();
         if (button == Qt::LeftButton)
@@ -889,7 +891,7 @@ public:
             mEngaged = true;
         }
     }
-    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
+    bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto button = mickey->button();
         if (button != Qt::LeftButton)
@@ -1002,9 +1004,9 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.entity->SetName("My Entity");
     mOriginalHash = ComputeHash();
 
-    mRenderTree.reset(new TreeModel(*mState.entity));
-    mScriptVarModel.reset(new ScriptVarModel(mState));
-    mJointModel.reset(new JointModel(mState));
+    mRenderTree = std::make_unique<TreeModel>(*mState.entity);
+    mJointModel = std::make_unique<JointModel>(mState);
+    mScriptVarModel = std::make_unique<ScriptVarModel>(mState);
 
     mUI.setupUi(this);
     mUI.scriptVarList->setModel(mScriptVarModel.get());
@@ -1240,7 +1242,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     mScriptVarModel->Reset();
     mJointModel->Reset();
 
-    mRenderTree.reset(new TreeModel(*mState.entity));
+    mRenderTree = std::make_unique<TreeModel>(*mState.entity);
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
 }
@@ -1495,7 +1497,7 @@ bool EntityWidget::LoadState(const Settings& settings)
 
     mScriptVarModel->Reset();
     mJointModel->Reset();
-    mRenderTree.reset(new TreeModel(*mState.entity));
+    mRenderTree = std::make_unique<TreeModel>(*mState.entity);
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
     return true;
@@ -3890,7 +3892,8 @@ void EntityWidget::PlaceNewParticleSystem()
     QString material = resource.GetProperty("material",  QString("_checkerboard"));
     if (!mState.workspace->IsValidMaterial(material))
         material = "_checkerboard";
-    mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable, MapMouseCursorToWorld()));
+
+    mCurrentTool = std::make_unique<PlaceShapeTool>(mState, material, drawable, MapMouseCursorToWorld());
 }
 void EntityWidget::PlaceNewCustomShape()
 {
@@ -3903,7 +3906,8 @@ void EntityWidget::PlaceNewCustomShape()
     QString material = resource.GetProperty("material",  QString("_checkerboard"));
     if (!mState.workspace->IsValidMaterial(material))
         material = "_checkerboard";
-    mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable, MapMouseCursorToWorld()));
+
+    mCurrentTool = std::make_unique<PlaceShapeTool>(mState, material, drawable, MapMouseCursorToWorld());
 }
 
 void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
@@ -4114,7 +4118,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     PrintMousePos(mUI, mState, painter,view, engine::Projection::Orthographic);
 }
 
-void EntityWidget::MouseZoom(std::function<void(void)> zoom_function)
+void EntityWidget::MouseZoom(const std::function<void(void)>& zoom_function)
 {
     // where's the mouse in the widget
     const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
