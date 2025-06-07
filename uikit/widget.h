@@ -931,6 +931,7 @@ namespace uik
             static constexpr auto WantsMouseEvents = true;
             static constexpr auto WantsKeyEvents   = true;
             static constexpr auto WantsPoll = true;
+            static constexpr auto InitialWidth = 160;
         };
         template<>
         struct WidgetModelTraits<GroupBoxModel> : public WidgetTraits

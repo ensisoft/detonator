@@ -131,8 +131,10 @@ namespace gui
         void on_btnEditWidgetStyle_clicked();
         void on_btnEditWidgetStyleString_clicked();
         void on_btnResetWidgetStyle_clicked();
+        void on_widgetStyleString_textChanged();
         void on_btnEditWidgetAnimationString_clicked();
         void on_btnResetWidgetAnimationString_clicked();
+        void on_widgetAnimationString_textChanged();
         void on_cmbScrollAreaVerticalScrollbarMode_currentIndexChanged(int);
         void on_cmbScrollAreaHorizontalScrollbarMode_currentIndexChanged(int);
         void on_shapeDrawable_currentIndexChanged(int);

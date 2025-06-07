@@ -26,13 +26,31 @@
 #  include <QIcon>
 #  include <QPixmap>
 #  include <QStyleFactory>
+#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
+#include "base/json.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/gui/utility.h"
 
 namespace gui {
+
+
+void SetValue(QPlainTextEdit* edit, const app::AnyString& value, const app::AnyString& format)
+{
+    QSignalBlocker s(edit);
+    if (format == "JSON")
+    {
+        const auto& [ok, json, error] = base::JsonParse(value);
+        if (ok)
+        {
+            edit->setPlainText(app::FromUtf8(json.dump(2)));
+        }
+        return;
+    }
+    edit->setPlainText(value);
+}
 
 
 QPixmap ToGrayscale(QPixmap p)
