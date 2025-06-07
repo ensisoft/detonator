@@ -705,6 +705,17 @@ inline void SelectLastItem(QListWidget* list)
     list->item(count-1)->setSelected(true);
 }
 
+inline void SelectFirstItem(QListWidget* list)
+{
+    QSignalBlocker s(list);
+    const auto count = list->count();
+    if (count == 0)
+        return;
+    for (int i=0; i<count; ++i)
+        list->item(i)->setSelected(false);
+    list->item(0)->setSelected(true);
+}
+
 inline void SetCurrentRow(QListWidget* list, int row)
 {
     QSignalBlocker s(list);

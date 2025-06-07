@@ -21,9 +21,11 @@
 
 #include "graphics/drawing.h"
 #include "graphics/material_instance.h"
+#include "graphics/texture_file_source.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/spritewidget.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/drawing.h"
 
 namespace {
     constexpr auto ScrollStepSize = 10.0f;
@@ -59,15 +61,46 @@ void SpriteWidget::on_horizontalScrollBar_valueChanged(int)
 
 void SpriteWidget::PaintScene(gfx::Painter& painter, double dt)
 {
-    if (!mMaterial)
-        return;
+    auto material = mMaterial;
+    bool demo_mode = false;
 
-    const auto& type = mMaterial->GetType();
+    if (!material || material->GetType() != gfx::MaterialClass::Type::Sprite)
+    {
+        static std::shared_ptr<gfx::SpriteClass> demo_material;
+        if (!demo_material)
+        {
+            gfx::TextureMap map;
+            map.SetType(gfx::TextureMap::Type::Sprite);
+            map.SetName("Sample");
+            map.SetSpriteFrameRate(10.0f);
+
+            map.SetNumTextures(8);
+            map.SetTextureSource(0, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-1.png"));
+            map.SetTextureSource(1, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-2.png"));
+            map.SetTextureSource(2, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-3.png"));
+            map.SetTextureSource(3, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-4.png"));
+            map.SetTextureSource(4, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-5.png"));
+            map.SetTextureSource(5, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-6.png"));
+            map.SetTextureSource(6, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-7.png"));
+            map.SetTextureSource(7, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-8.png"));
+
+            demo_material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Sprite);
+            demo_material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            demo_material->SetBaseColor(gfx::Color4f(gfx::Color::LightGray, 0.46f));
+            demo_material->SetNumTextureMaps(1);
+            demo_material->SetActiveTextureMap(map.GetId());
+            demo_material->SetTextureMap(0, std::move(map));
+        }
+        material = demo_material;
+        demo_mode = true;
+    }
+
+    const auto& type = material->GetType();
     if (type != gfx::MaterialClass::Type::Sprite)
         return;
 
-    const auto& active_texture_map = mMaterial->GetActiveTextureMap();
-    const auto* texture_map = mMaterial->FindTextureMapById(active_texture_map);
+    const auto& active_texture_map = material->GetActiveTextureMap();
+    const auto* texture_map = material->FindTextureMapById(active_texture_map);
     if (texture_map == nullptr || texture_map->GetType() != gfx::TextureMap::Type::Sprite)
         return;
 
@@ -147,10 +180,10 @@ void SpriteWidget::PaintScene(gfx::Painter& painter, double dt)
         const auto& texture_rect = texture_map->GetTextureRect(0);
 
         gfx::MaterialClass temp(gfx::MaterialClass::Type::Texture);
-        temp.SetSurfaceType(mMaterial->GetSurfaceType());
-        temp.SetTextureMinFilter(mMaterial->GetTextureMinFilter());
-        temp.SetTextureMagFilter(mMaterial->GetTextureMagFilter());
-        temp.SetBaseColor(mMaterial->GetBaseColor());
+        temp.SetSurfaceType(material->GetSurfaceType());
+        temp.SetTextureMinFilter(material->GetTextureMinFilter());
+        temp.SetTextureMagFilter(material->GetTextureMagFilter());
+        temp.SetBaseColor(material->GetBaseColor());
         temp.AddTexture(texture_src->Copy());
 
         for (unsigned row=0; row<sprite_sheet->rows; ++row)
@@ -185,10 +218,10 @@ void SpriteWidget::PaintScene(gfx::Painter& painter, double dt)
             const auto& texture_rect = texture_map->GetTextureRect(texture_index);
 
             gfx::MaterialClass temp(gfx::MaterialClass::Type::Texture);
-            temp.SetSurfaceType(mMaterial->GetSurfaceType());
-            temp.SetBaseColor(mMaterial->GetBaseColor());
-            temp.SetTextureMinFilter(mMaterial->GetTextureMinFilter());
-            temp.SetTextureMagFilter(mMaterial->GetTextureMagFilter());
+            temp.SetSurfaceType(material->GetSurfaceType());
+            temp.SetBaseColor(material->GetBaseColor());
+            temp.SetTextureMinFilter(material->GetTextureMinFilter());
+            temp.SetTextureMagFilter(material->GetTextureMagFilter());
             temp.AddTexture(texture_src->Copy());
             temp.SetTextureRect(texture_rect);
 
@@ -226,6 +259,12 @@ void SpriteWidget::PaintScene(gfx::Painter& painter, double dt)
             gfx::DebugDrawLine(painter, a, b, gfx::Color::Silver, 2.0f);
         }
     }
+
+    if (demo_mode)
+    {
+        ShowInstruction("Sprite frames + timeline", Rect2Df(0.0f, 0.0f, widget_width, widget_height), painter);
+    }
+
 
     const auto cycle_render_width = 10.0f + duration_width + 10.0f;
 
