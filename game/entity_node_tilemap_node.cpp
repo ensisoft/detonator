@@ -26,8 +26,8 @@ namespace game
 size_t MapNodeClass::GetHash() const noexcept
 {
     size_t hash = 0;
-    hash = base::hash_combine(0, mMapSortPoint);
-    hash = base::hash_combine(0, mMapLayer);
+    hash = base::hash_combine(hash, mMapSortPoint);
+    hash = base::hash_combine(hash, mMapLayer);
     return hash;
 }
 
