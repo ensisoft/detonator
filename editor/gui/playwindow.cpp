@@ -519,6 +519,13 @@ public:
     void SetEntityPreview(const std::shared_ptr<const game::EntityClass>& klass)
     { mEntityPreview = klass; }
 
+    auto GetUIPreview() const
+    { return mUIPreview; }
+    auto GetEntityPreview() const
+    { return mEntityPreview; }
+    auto GetScenePreview() const
+    { return mScenePreview; }
+
 private:
     const app::Workspace& mWorkspace;
     std::shared_ptr<const game::SceneClass> mEntityPreviewScene;
@@ -1358,6 +1365,40 @@ void PlayWindow::InitPreview(const QString& script)
         params.surface_height   = mSurface->height();
         InitializeEngine(params);
 
+        {
+            engine::Engine::LoadingScreenSettings loading_screen_settings;
+            loading_screen_settings.font_uri = app::ToUtf8(settings.loading_font);
+
+            auto screen = mEngine->CreateLoadingScreen(loading_screen_settings);
+
+            if (auto ui = mClassLibrary->GetUIPreview())
+            {
+                engine::Engine::ContentClass klass;
+                klass.type = engine::ClassLibrary::ClassType::UI;
+                klass.name = ui->GetName();
+                klass.id   = ui->GetId();
+                mEngine->PreloadClass(klass, 0, 1, screen.get());
+            }
+
+            if (auto entity = mClassLibrary->GetEntityPreview())
+            {
+                engine::Engine::ContentClass klass;
+                klass.type = engine::ClassLibrary::ClassType::Entity;
+                klass.name = entity->GetName();
+                klass.id   = entity->GetId();
+                mEngine->PreloadClass(klass, 0, 1, screen.get());
+            }
+
+            if (auto scene = mClassLibrary->GetScenePreview())
+            {
+                engine::Engine::ContentClass klass;
+                klass.type = engine::ClassLibrary::ClassType::Scene;
+                klass.name = scene->GetName();
+                klass.id   = scene->GetId();
+                mEngine->PreloadClass(klass, 0, 1, screen.get());
+            }
+        }
+
         if (!mEngine->Load())
         {
             Barf("Engine failed to load. Please see the log for more details.");
@@ -1365,9 +1406,12 @@ void PlayWindow::InitPreview(const QString& script)
         }
 
         mEngine->Start();
-        mTimer.Start();
-        mFrameTimer.start();
-        mInitDone = true;
+
+        QTimer::singleShot(100, this, [this]() {
+            mTimer.Start();
+            mFrameTimer.start();
+            mInitDone = true;
+        });
 
         SetEnabled(mUI.toolBar,         true);
         SetEnabled(mUI.menuApplication, true);
