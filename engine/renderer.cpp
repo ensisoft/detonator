@@ -161,7 +161,8 @@ void Renderer::UpdateRendererState(const game::Tilemap& map)
 
 void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
 {
-    std::vector<DrawPacket> packets;
+    std::vector<DrawPacket> scene_draw_packets;
+    std::vector<DrawPacket> map_draw_packets;
     std::vector<Light> lights;
 
     if (map)
@@ -173,10 +174,10 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
         constexpr auto draw_data_layers   = false;
         constexpr auto use_tile_batching  = true;
         TRACE_CALL("PrepareMapTileBatches", PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching));
-        TRACE_CALL("GenerateMapDrawPackets", GenerateMapDrawPackets(*map, batches, packets));
+        TRACE_CALL("GenerateMapDrawPackets", GenerateMapDrawPackets(*map, batches, map_draw_packets));
     }
 
-    const auto scene_packet_start_index = packets.size();
+    const auto map_packet_count = map_draw_packets.size();
 
     {
         TRACE_SCOPE("CreateScenePackets");
@@ -184,19 +185,24 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
         for (size_t i=0; i<scene.GetNumEntities(); ++i)
         {
             const auto& entity = scene.GetEntity(i);
+            const auto entity_render_layer = entity.GetRenderLayer();
+            const auto entity_belongs_to_tilemap = map && map->GetRenderLayer() == entity_render_layer;
+
+            auto* packet_list = entity_belongs_to_tilemap ? &map_draw_packets : &scene_draw_packets;
+
             for (size_t j=0; j<entity.GetNumNodes(); ++j)
             {
                 const auto& node = entity.GetNode(j);
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
                 {
-                    CreateDrawableDrawPackets<Entity, EntityNode>(entity, node, *paint, packets, nullptr);
+                    CreateDrawableDrawPackets<Entity, EntityNode>(entity, node, *paint, *packet_list, nullptr);
                     paint->visited = true;
                 }
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
                 {
-                    CreateTextDrawPackets<Entity, EntityNode>(entity, node, *paint, packets, nullptr);
+                    CreateTextDrawPackets<Entity, EntityNode>(entity, node, *paint, *packet_list, nullptr);
                     paint->visited = true;
                 }
 
@@ -216,15 +222,17 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
         // In other words, whenever a draw packet is generated from a scene's paint
         // node, map that node to a position on the map tile grid for combining it
         // with the map's tile rendering.
-        TRACE_CALL("ComputeTileCoordinates", ComputeTileCoordinates(*map, scene_packet_start_index, packets));
-        TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets, lights));
+        TRACE_CALL("ComputeTileCoordinates", ComputeTileCoordinates(*map, map_packet_count, map_draw_packets));
+
         // Sort all packets based on the map based sorting criteria
-        TRACE_CALL("SortTilePackets", SortTilePackets(packets));
+        TRACE_CALL("SortTilePackets", SortTilePackets(map_draw_packets));
     }
-    else
-    {
-        TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets, lights));
-    }
+
+    std::vector<DrawPacket> packets;
+    base::AppendVector(packets, map_draw_packets);
+    base::AppendVector(packets, scene_draw_packets);
+
+    TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets, lights));
 
     // this is the outcome that the draw function will then actually draw
     std::swap(mRenderBuffer, packets);
@@ -233,34 +241,11 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
 
 void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* map, SceneClassDrawHook* scene_hook)
 {
-    // When we're combining the map with a scene everything that is to be drawn
-    // has to live in the same space and understand "depth" the same way.
-    // Current implementation already uses scene layering so we're going to do
-    // the same here and leverage the scene layer index value instead of using
-    // floating points. Other option could be compute a floating distance from
-    // camera and then sort the draw packets based on distance. It'd just mean
-    // that scene layering would not work the same way regarding stencil masking
-    // and how entities that map to the same scene layer interact when rendered.
-    // I.e. each scene layer has the same render passes, mask cover/expose, color.
-    // Layer Indexing is essentially the same thing but uses distinct buckets
-    // instead of a continuous range.
-    //
-    // To compute the render layer index there could be two options (as far as I
-    // can think of right now...)
-    //
-    // a) Use the relative height of objects in the clip space.
-    // Project both entities and tiles from their own coordinate spaces into clip
-    // space and use the clip space height value to to separate objects into different
-    // render layer buckets.
-    //
-    //
-    // b) Use the tilemap row index and render from back to front. Since rows grow towards
-    // the "screen surface" and bigger row indices are closer to the viewer the row index
-    // should map directly to a layer index. Then each entity needs to be mapped from
-    // entity world into tilemap and xy tile position computed.
+    std::vector<DrawPacket> scene_draw_packets;
+    std::vector<DrawPacket> map_draw_packets;
 
-    std::vector<DrawPacket> packets;
-    std::vector<Light> lights;
+    //std::vector<Light> map_lights;
+    std::vector<Light> scene_lights;
 
     if (map)
     {
@@ -272,7 +257,7 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
         // disable batching because of single tile highlights
         constexpr auto use_tile_batching = false;
         PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching);
-        GenerateMapDrawPackets(*map, batches, packets);
+        GenerateMapDrawPackets(*map, batches, map_draw_packets);
     }
 
     const auto& nodes = scene.CollectNodes();
@@ -281,9 +266,9 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
     {
         // When we're drawing SceneClass object the placement is a EntityPlacement*
         // When we're drawing a Scene object the placement is n Entity* object
-        auto placement = node.placement;
+        const auto& placement = node.placement;
         // When we're drawing SceneClass object entity is shared_ptr<const EntityClass>
-        auto entity = node.entity;
+        const auto& entity = node.entity;
 
         // draw when there's no scene hook or when the scene hook returns
         // true for the filtering operation.
@@ -293,6 +278,14 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
 
         if (scene_hook)
             scene_hook->BeginDrawEntity(*placement);
+
+        const auto entity_render_layer = placement->GetRenderLayer();
+        const bool entity_belongs_to_tilemap = map && map->GetRenderLayer() == entity_render_layer;
+
+        // choose a packet list for the entity. if the entity has been assigned to the same
+        // rendering layer that has a tilemap then the rendering will require sorting the
+        // entity packets into the tilemap packets
+        auto* packet_list = entity_belongs_to_tilemap ? &map_draw_packets : &scene_draw_packets;
 
         if (placement->TestFlag(game::EntityPlacement::Flags::VisibleInGame))
         {
@@ -325,31 +318,38 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
             // (but only a stub function) and the real layer information is in the placement.
             for (auto& packet: entity_packets)
             {
-                packet.render_layer = placement->GetRenderLayer();
+                packet.render_layer = entity_render_layer;
             }
             for (auto& light : entity_lights)
             {
-                light.render_layer = placement->GetRenderLayer();
+                light.render_layer = entity_render_layer;
             }
 
-            // Compute tile coordinates for each draw packet created by the entity.
-            if (map)
+            // Compute tile coordinates for each draw packet created by the entity
+            // if the entity is in the same render layer as the map.
+            // We must do the tilemap coordinate computation here so that the scene
+            // hook (if any) can use the tile col/row information when doing
+            // for example tile highlighting
+            if (entity_belongs_to_tilemap)
             {
                 ComputeTileCoordinates(*map, 0, entity_packets);
             }
 
+            // If there's a scene hook let the scene hook inspect each and every
+            // entity draw packet in order to perform things such as visualizations
+            // of selected object(s) in the Editor.
             if (scene_hook)
             {
                 for (auto& packet : entity_packets)
                 {
                     if (scene_hook->InspectPacket(*placement, packet))
-                        packets.push_back(packet);
+                        packet_list->push_back(packet);
                 }
-
             }
-            else base::AppendVector(packets, entity_packets);
+            else base::AppendVector(*packet_list, entity_packets);
 
-            base::AppendVector(lights, entity_lights);
+            // todo: solve lights for map
+            base::AppendVector(scene_lights, entity_lights);
 
         } // visible placement
 
@@ -358,24 +358,28 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
             // this is the model, aka model_to_world transform
             gfx::Transform transform(node.node_to_scene);
 
-            scene_hook->AppendPackets(*placement, transform, packets);
+            scene_hook->AppendPackets(*placement, transform, *packet_list);
             scene_hook->EndDrawEntity(*placement);
         }
     }
 
-    if (map)
-    {
-        OffsetPacketLayers(packets, lights);
-        SortTilePackets(packets);
-    }
-    else
-    {
-        OffsetPacketLayers(packets, lights);
-    }
+    // If we have any tilemap packets they must be sorted to the tile
+    // specific rendering order in order to solve tile occlusion.
+    SortTilePackets(map_draw_packets);
+
+    std::vector<DrawPacket> packets;
+    base::AppendVector(packets, map_draw_packets);
+    base::AppendVector(packets, scene_draw_packets);
+
+    // All rendering layers must be shifted so that there are no
+    // negative values. and all layer offsets are positive. The
+    // low level renderer uses a bucket sort for the render layers
+    // and that cannot tolerate negative indices
+    OffsetPacketLayers(packets, scene_lights);
 
     // this is the outcome that the draw function will then actually draw
     std::swap(mRenderBuffer, packets);
-    std::swap(mLightBuffer, lights);
+    std::swap(mLightBuffer, scene_lights);
 }
 
 void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook* hook)

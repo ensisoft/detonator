@@ -311,11 +311,16 @@ public:
     }
     bool InspectPacket(const game::EntityPlacement& placement, engine::DrawPacket& packet) override
     {
-        if (!mMap || &placement != mSelectedSceneNode)
+        if (!mMap)
+            return true;
+        else if (&placement != mSelectedSceneNode)
+            return true;
+        else if (placement.GetRenderLayer() != mMap->GetRenderLayer())
             return true;
 
         if (packet.map_layer >= mMap->GetNumLayers())
             return true;
+
         const auto& layer = mMap->GetLayer(packet.map_layer);
 
         const auto& entity_class = placement.GetEntityClass();
