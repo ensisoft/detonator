@@ -935,6 +935,8 @@ inline void SetValue(QPlainTextEdit* edit, const app::AnyString& value)
     edit->setPlainText(value);
 }
 
+void SetValue(QPlainTextEdit* edit, const app::AnyString& value, const app::AnyString& format);
+
 inline void SetValue(QDoubleSpinBox* spin, base::FDegrees value)
 {
     QSignalBlocker s(spin);

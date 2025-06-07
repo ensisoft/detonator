@@ -644,6 +644,9 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
         mHamburger->popup(mUI.btnHamburger->mapToGlobal(point));
     });
 
+    // changing the UI to use a plain text edit so the
+    // animation string can be edited in place.
+    SetVisible(mUI.btnEditWidgetAnimationString, false);
 }
 
 UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : UIWidget(workspace)
@@ -756,8 +759,8 @@ void UIWidget::InitializeContent()
     QTimer::singleShot(0, this, [this]() {
         QList<int> sizes;
         sizes << mUI.leftLayout->sizeHint().width();
-        sizes << mUI.center->sizeHint().width();
-        sizes << mUI.rightSplitter->sizeHint().width();
+        sizes << mUI.center->sizeHint().width() - 100;
+        sizes << mUI.rightSplitter->sizeHint().width() + 100;
         mUI.mainSplitter->setSizes(sizes);
     });
 }
@@ -1805,9 +1808,39 @@ void UIWidget::on_btnResetWidgetStyle_clicked()
     }
 }
 
+void UIWidget::on_widgetStyleString_textChanged()
+{
+    // todo: this needs improvement in live parsing of the style string.
+#if 0
+    if (auto* widget = GetCurrentWidget())
+    {
+        const auto& new_style_string = GetValue(mUI.widgetStyleString);
+
+        engine::UIStyle temp;
+        if (!temp.ParseStyleString(widget->GetId(), new_style_string))
+        {
+            ERROR("Widget style string contains errors and cannot be used.[widget='%1']", widget->GetName());
+            return;
+        }
+
+        mState.style->DeleteMaterials(widget->GetId());
+        mState.style->DeleteProperties(widget->GetId());
+        mState.painter->DeleteMaterialInstances(widget->GetId());
+
+        if (!mState.style->ParseStyleString(widget->GetId(), new_style_string))
+        {
+            ERROR("Widget style string contains errors and cannot be used.[widget='%1']", widget->GetName());
+            return;
+        }
+        widget->SetStyleString(new_style_string);
+        widget->QueryStyle(*mState.painter);
+    }
+#endif
+}
+
 void UIWidget::on_btnEditWidgetAnimationString_clicked()
 {
-    if (auto* widget= GetCurrentWidget())
+    if (auto* widget = GetCurrentWidget())
     {
         std::string old_animation_string = widget->GetAnimationString();
 
@@ -1817,7 +1850,7 @@ void UIWidget::on_btnEditWidgetAnimationString_clicked()
         if (dlg.execFU() == QDialog::Rejected)
             return;
 
-        const std::string new_animation_string = dlg.GetText("JSON");
+        const std::string new_animation_string = dlg.GetText("TEXT");
 
         widget->SetAnimationString(new_animation_string);
         SetValue(mUI.widgetAnimationString, new_animation_string);
@@ -1832,6 +1865,15 @@ void UIWidget::on_btnResetWidgetAnimationString_clicked()
         DisplayCurrentWidgetProperties();
     }
 }
+
+void UIWidget::on_widgetAnimationString_textChanged()
+{
+    if (auto* widget = GetCurrentWidget())
+    {
+        widget->SetAnimationString(GetValue(mUI.widgetAnimationString));
+    }
+}
+
 void UIWidget::on_cmbScrollAreaVerticalScrollbarMode_currentIndexChanged(int)
 {
     UpdateCurrentWidgetProperties();
@@ -2878,7 +2920,7 @@ void UIWidget::DisplayCurrentWidgetProperties()
         SetValue(mUI.widgetId , widget->GetId());
         SetValue(mUI.widgetType, app::toString(widget->GetType()));
         SetValue(mUI.widgetName , widget->GetName());
-        SetValue(mUI.widgetStyleString, widget->GetStyleString());
+        SetValue(mUI.widgetStyleString, widget->GetStyleString(), "JSON");
         SetValue(mUI.widgetAnimationString, widget->GetAnimationString());
         SetValue(mUI.widgetWidth , size.GetWidth());
         SetValue(mUI.widgetHeight , size.GetHeight());
