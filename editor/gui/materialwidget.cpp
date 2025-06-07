@@ -170,7 +170,6 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mModelRotationTotal.y = glm::radians(15.0f);
 
     mUI.sprite->SetMaterial(mMaterial);
-    mUI.sprite->RenderTimeBar(true);
 }
 
 MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
@@ -231,8 +230,9 @@ void MaterialWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.zoom, settings.zoom);
 
+    // open this by default for better user discovery
     QTimer::singleShot(10, this, [this]() {
-        mUI.spriteSplitter->setSizes({100, 0});
+        mUI.spriteSplitter->setSizes({50, 150});
     });
 }
 
@@ -490,6 +490,9 @@ void MaterialWidget::on_actionPlay_triggered()
     SetEnabled(mUI.actionPause, true);
     SetEnabled(mUI.actionStop, true);
     SetEnabled(mUI.kTime, false);
+
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
+        mUI.sprite->RenderTimeBar(true);
 }
 
 void MaterialWidget::on_actionPause_triggered()
@@ -508,6 +511,8 @@ void MaterialWidget::on_actionStop_triggered()
     SetEnabled(mUI.actionStop, false);
     SetEnabled(mUI.kTime, true);
     mTime = 0.0f;
+
+    mUI.sprite->RenderTimeBar(false);
 }
 
 void MaterialWidget::on_actionSave_triggered()
@@ -1147,6 +1152,12 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
 
     ClearCustomUniforms();
     ShowMaterialProperties();
+
+    if (mMaterial->GetNumTextureMaps() == 1)
+    {
+        SelectFirstItem(mUI.textures);
+    }
+
     ShowTextureMapProperties();
     ShowTextureProperties();
 }
