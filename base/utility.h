@@ -351,14 +351,30 @@ class ElapsedTimer
 public:
     // Start measuring the passing of time.
     inline void Start()
-    { mStartTime = base::GetTime(); }
+    {
+        mStartTime = base::GetTime();
+        mStarted = true;
+    }
     // Return the time in seconds since Start.
     inline double SinceStart()
-    { return base::GetTime() - mStartTime; }
+    {
+        if (!mStarted)
+            return 0.0;
+        return base::GetTime() - mStartTime;
+    }
     // Return the time in seconds since last Delta.
     inline double Delta()
     {
+        if (!mStarted)
+            return 0.0;
+
         const auto now = base::GetTime();
+        if (mDeltaTime == 0.0)
+        {
+            mDeltaTime =  now;
+            return 0.0;
+        }
+
         const auto dt  = now - mDeltaTime;
         mDeltaTime = now;
         return dt;
