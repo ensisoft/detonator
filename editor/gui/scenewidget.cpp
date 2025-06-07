@@ -74,10 +74,10 @@ namespace gui
 class DlgFindEntity::TableModel : public QAbstractTableModel
 {
 public:
-    TableModel(const game::SceneClass& klass)
+    explicit TableModel(const game::SceneClass& klass)
       : mScene(klass)
     {}
-    virtual QVariant data(const QModelIndex& index, int role) const override
+    QVariant data(const QModelIndex& index, int role) const override
     {
         const auto& placement = mScene.GetPlacement(index.row());
         const auto& entity = placement.GetEntityClass();
@@ -92,7 +92,7 @@ public:
         }
         return QVariant();
     }
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
     {
         if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         {
@@ -101,11 +101,11 @@ public:
         }
         return QVariant();
     }
-    virtual int rowCount(const QModelIndex&) const override
+    int rowCount(const QModelIndex&) const override
     {
         return static_cast<int>(mScene.GetNumNodes());
     }
-    virtual int columnCount(const QModelIndex&) const override
+    int columnCount(const QModelIndex&) const override
     {
         return 2;
     }
@@ -116,7 +116,7 @@ private:
 class DlgFindEntity::TableProxy : public QSortFilterProxyModel
 {
 public:
-    TableProxy(const game::SceneClass& klass)
+    explicit TableProxy(const game::SceneClass& klass)
       : mScene(klass)
     {}
 
@@ -215,9 +215,9 @@ bool DlgFindEntity::eventFilter(QObject* destination, QEvent* event)
 class SceneWidget::ScriptVarModel : public QAbstractTableModel
 {
 public:
-    ScriptVarModel(SceneWidget::State& state) : mState(state)
+    explicit ScriptVarModel(SceneWidget::State& state) : mState(state)
     {}
-    virtual QVariant data(const QModelIndex& index, int role) const override
+    QVariant data(const QModelIndex& index, int role) const override
     {
         const auto& var = mState.scene->GetScriptVar(index.row());
         if (role == Qt::DisplayRole)
@@ -229,9 +229,9 @@ public:
                 default: BUG("Unknown script variable data index.");
             }
         }
-        return QVariant();
+        return {};
     }
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
     {
         if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         {
@@ -242,13 +242,13 @@ public:
                 default: BUG("Unknown script variable data index.");
             }
         }
-        return QVariant();
+        return {};
     }
-    virtual int rowCount(const QModelIndex&) const override
+    int rowCount(const QModelIndex&) const override
     {
         return static_cast<int>(mState.scene->GetNumScriptVars());
     }
-    virtual int columnCount(const QModelIndex&) const override
+    int columnCount(const QModelIndex&) const override
     {
         return 2;
         //return 3;
@@ -402,7 +402,7 @@ class SceneWidget::PlaceEntityTool : public MouseTool
 public:
     PlaceEntityTool(SceneWidget::State& state, std::shared_ptr<const game::EntityClass> klass, bool snap, unsigned grid)
       : mState(state)
-      , mClass(klass)
+      , mClass(std::move(klass))
       , mSnapToGrid(snap)
       , mGridSize(grid)
     {
@@ -432,14 +432,13 @@ public:
         }
         StartNextPlacement();
     }
-    ~PlaceEntityTool()
+    ~PlaceEntityTool() override
     {
         ASSERT(mCurrentPlacement);
         mState.scene->DeletePlacement(mCurrentPlacement);
     }
 
-
-    virtual void Render(gfx::Painter& painter, gfx::Painter& scene_painter) const override
+    void Render(gfx::Painter& painter, gfx::Painter& scene_painter) const override
     {
         const auto& rect = mClass->GetBoundingRect();
         const auto width = rect.GetWidth();
@@ -457,14 +456,14 @@ public:
                                                          mWorldPos.y + bottom + 10.0f, 0.0f));
         ShowMessage(mClass->GetName(), gfx::FRect(pos.x, pos.y, 200.0f, 20.0f), painter);
     }
-    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
+    void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
         mWorldPos = mickey.MapToPlane();
     }
-    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
+    void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
     }
-    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
+    bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto button = mickey->button();
         if (button != Qt::LeftButton)
@@ -479,8 +478,8 @@ public:
 
         if (snap)
         {
-            mWorldPos.x = std::round(mWorldPos.x / mGridSize) * mGridSize;
-            mWorldPos.y = std::round(mWorldPos.y / mGridSize) * mGridSize;
+            mWorldPos.x = std::round(mWorldPos.x / (float)mGridSize) * (float)mGridSize;
+            mWorldPos.y = std::round(mWorldPos.y / (float)mGridSize) * (float)mGridSize;
         }
         mCurrentPlacement->SetScale(1.0f, 1.0f);
         mCurrentPlacement->SetName(CreateName());
@@ -550,7 +549,7 @@ private:
     SceneWidget::State& mState;
     // the current entity position in scene coordinates of the placement
     // based on the mouse position at the time.
-    glm::vec2 mWorldPos;
+    glm::vec2 mWorldPos = {0.0f, 0.0f};
     // entity class for the item we're going to add to scene.
     std::shared_ptr<const game::EntityClass> mClass;
     // true if we want the x,y coords to be aligned on grid size units.
@@ -571,8 +570,8 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
 
     mState.scene = std::make_shared<game::SceneClass>();
 
-    mRenderTree.reset(new TreeModel(*mState.scene));
-    mScriptVarModel.reset(new ScriptVarModel(mState));
+    mRenderTree = std::make_unique<TreeModel>(*mState.scene);
+    mScriptVarModel = std::make_unique<ScriptVarModel>(mState);
 
     mUI.setupUi(this);
     mUI.scriptVarList->setModel(mScriptVarModel.get());
@@ -700,7 +699,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     DisplaySceneProperties();
     DisplayCurrentCameraLocation();
 
-    mRenderTree.reset(new TreeModel(*mState.scene));
+    mRenderTree = std::make_unique<TreeModel>(*mState.scene);
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
 }
@@ -828,7 +827,7 @@ bool SceneWidget::LoadState(const Settings& settings)
     DisplayCurrentCameraLocation();
 
     mScriptVarModel->Reset();
-    mRenderTree.reset(new TreeModel(*mState.scene));
+    mRenderTree = std::make_unique<TreeModel>(*mState.scene);
     mUI.tree->SetModel(mRenderTree.get());
     mUI.tree->Rebuild();
     return true;
@@ -1627,7 +1626,7 @@ void SceneWidget::on_btnAddScript_clicked()
     mState.workspace->SaveResource(resource);
     mState.scene->SetScriptFileId(script.GetId());
 
-    ScriptWidget* widget = new ScriptWidget(mState.workspace, resource);
+    auto* widget = new ScriptWidget(mState.workspace, resource);
     emit OpenNewWidget(widget);
 
     SetValue(mUI.cmbScripts, ListItemId(script.GetId()));
@@ -2669,7 +2668,7 @@ void SceneWidget::RebuildMenus()
         return;
     }
 
-    QAction* action = mEntities->addAction("Any Entity");
+    auto* action = mEntities->addAction("Any Entity");
     action->setIcon(QIcon("icons:entity.png"));
     action->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_A));
     connect(action, &QAction::triggered, this, &SceneWidget::PlaceAnyEntity);
@@ -2677,7 +2676,7 @@ void SceneWidget::RebuildMenus()
 
     for (const auto& resource : entities)
     {
-        QAction* action = mEntities->addAction(resource.name);
+        auto* action = mEntities->addAction(resource.name);
         action->setData(resource.id);
         connect(action, &QAction::triggered, this, &SceneWidget::PlaceNewEntity);
     }
@@ -2830,7 +2829,7 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     class DrawHook : public engine::SceneClassDrawHook
     {
     public:
-        DrawHook(const std::vector<game::EntityPlacement*>& hits) : mHits(hits)
+        explicit DrawHook(const std::vector<game::EntityPlacement*>& hits) : mHits(hits)
         {
             for (unsigned i=0; i<hits.size(); ++i)
             {
@@ -2838,10 +2837,10 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
                 const unsigned r = (rgb >> 16) & 0xff;
                 const unsigned g = (rgb >> 8)  & 0xff;
                 const unsigned b = (rgb >> 0)  & 0xff;
-                mColors.push_back(gfx::Color4f(r, g, b, 0xff));
+                mColors.emplace_back(gfx::Color4f(r, g, b, 0xff));
             }
         }
-        virtual bool FilterEntity(const game::EntityPlacement& placement) override
+        bool FilterEntity(const game::EntityPlacement& placement) override
         {
             // filter out nodes that are currently not visible.
             // probably don't want to select any of those.
@@ -2854,7 +2853,7 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
                 if (n == &placement) return true;
             return false;
         }
-        virtual void BeginDrawEntity(const game::EntityPlacement& placement) override
+        void BeginDrawEntity(const game::EntityPlacement& placement) override
         {
             for (size_t i=0; i<mHits.size(); ++i)
             {
@@ -2865,7 +2864,7 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
                 }
             }
         }
-        virtual bool InspectPacket(const game::EntityPlacement& placement, engine::DrawPacket& draw) override
+        bool InspectPacket(const game::EntityPlacement& placement, engine::DrawPacket& draw) override
         {
             ASSERT(mColorIndex < mColors.size());
             draw.material = gfx::CreateMaterialInstance(gfx::CreateMaterialClassFromColor(mColors[mColorIndex]));
