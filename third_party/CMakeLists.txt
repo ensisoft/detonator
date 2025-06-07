@@ -17,6 +17,8 @@ if (MSVC)
     # conversion from size_t to long
     add_compile_options(/wd4267)
     add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+
+    add_compile_definitions(USE_MY_SHITTY_BOOL)
 endif()
 
 if (UNIX)
