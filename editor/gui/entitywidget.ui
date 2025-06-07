@@ -4053,6 +4053,24 @@
                  <layout class="QVBoxLayout" name="verticalLayout_10">
                   <item>
                    <layout class="QGridLayout" name="gridLayout_12">
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_80">
+                      <property name="text">
+                       <string>Map layer</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="0" colspan="2">
+                     <widget class="QPushButton" name="btnDelTilemapNode">
+                      <property name="text">
+                       <string>Remove Tilemap Placement</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../resource/resource.qrc">
+                        <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                      </property>
+                     </widget>
+                    </item>
                     <item row="0" column="0">
                      <widget class="QLabel" name="label_61">
                       <property name="sizePolicy">
@@ -4066,14 +4084,10 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="3" column="0" colspan="2">
-                     <widget class="QPushButton" name="btnDelTilemapNode">
+                    <item row="2" column="0">
+                     <widget class="QLabel" name="label_81">
                       <property name="text">
-                       <string>Remove Tilemap Placement</string>
-                      </property>
-                      <property name="icon">
-                       <iconset resource="../resource/resource.qrc">
-                        <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                       <string>Occlusion</string>
                       </property>
                      </widget>
                     </item>
@@ -4149,19 +4163,15 @@
                       </item>
                      </layout>
                     </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="label_80">
-                      <property name="text">
-                       <string>Map layer</string>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="1" column="1">
                      <widget class="QSpinBox" name="nodeMapLayer">
                       <property name="maximum">
                        <number>255</number>
                       </property>
                      </widget>
+                    </item>
+                    <item row="2" column="1">
+                     <widget class="QComboBox" name="nodeTileOcclusion"/>
                     </item>
                    </layout>
                   </item>
@@ -5462,6 +5472,7 @@
   <tabstop>mnHCenter</tabstop>
   <tabstop>mnVCenter</tabstop>
   <tabstop>nodeMapLayer</tabstop>
+  <tabstop>nodeTileOcclusion</tabstop>
   <tabstop>btnDelTilemapNode</tabstop>
   <tabstop>spatialNode</tabstop>
   <tabstop>spnShape</tabstop>

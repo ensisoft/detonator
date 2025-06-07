@@ -26,12 +26,17 @@
 #include <cstdint>
 
 #include "data/fwd.h"
+#include "game/enum.h"
 
 namespace game
 {
     class MapNodeClass
     {
     public:
+        using TileOcclusion = game::TileOcclusion;
+
+        inline void SetTileOcclusion(TileOcclusion occlusion) noexcept
+        { mTileOcclusion = occlusion; }
         inline void SetMapSortPoint(glm::vec2 point) noexcept
         { mMapSortPoint = point; }
         inline auto GetSortPoint() const noexcept
@@ -40,6 +45,8 @@ namespace game
         { mMapLayer = layer; }
         inline auto GetMapLayer() const noexcept
         { return mMapLayer; }
+        inline auto GetTileOcclusion() const noexcept
+        { return mTileOcclusion; }
 
         std::size_t GetHash() const noexcept;
 
@@ -50,14 +57,20 @@ namespace game
         glm::vec2 mMapSortPoint = {0.5f, 1.0f};
         // layer in the map when using a tilemap world
         uint16_t mMapLayer = 0;
+
+        TileOcclusion mTileOcclusion = TileOcclusion::None;
     };
 
     class MapNode
     {
     public:
+        using TileOcclusion = MapNodeClass::TileOcclusion;
+
         explicit MapNode(std::shared_ptr<const MapNodeClass> klass) noexcept
            : mClass(std::move(klass))
         {}
+        inline auto GetTileOcclusion() const noexcept
+        { return mClass->GetTileOcclusion(); }
         inline auto GetSortPoint() const noexcept
         { return mClass->GetSortPoint(); }
         inline auto GetMapLayer() const noexcept

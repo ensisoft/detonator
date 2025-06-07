@@ -1403,12 +1403,14 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
     transform.RotateAroundZ(paint_node.world_rotation);
     transform.Translate(paint_node.world_pos);
 
-    glm::vec2 map_sort_point = {0.5f, 1.0f};
-    std::uint16_t map_layer = 0;
+    auto map_sort_point  = glm::vec2 {0.5f, 1.0f};
+    auto map_layer       = uint16_t(0);
+    auto map_sort_key    = static_cast<uint8_t>(game::TileOcclusion::None);
     if (const auto* map = entity_node.GetMapNode())
     {
         map_sort_point = map->GetSortPoint();
-        map_layer = map->GetMapLayer();
+        map_layer      = map->GetMapLayer();
+        map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
     }
 
     transform.Push(entity_node.GetModelTransform());
@@ -1489,6 +1491,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             packet.transform    = transform;
             packet.sort_point   = map_sort_point;
             packet.map_layer    = map_layer;
+            packet.map_sort_key = map_sort_key;
             packet.render_layer = entity.GetRenderLayer();
             packet.pass         = item->GetRenderPass();
             packet.projection   = item->GetRenderProjection();
@@ -1555,12 +1558,14 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
     transform.RotateAroundZ(paint_node.world_rotation);
     transform.Translate(paint_node.world_pos);
 
-    glm::vec2 map_sort_point = {0.5f, 1.0f};
-    std::uint16_t map_layer = 0;
+    auto map_sort_point = glm::vec2 {0.5f, 1.0f};
+    auto map_layer      = uint16_t(0);
+    auto map_sort_key   = static_cast<uint8_t>(game::TileOcclusion::None);
     if (const auto* map = entity_node.GetMapNode())
     {
         map_sort_point = map->GetSortPoint();
-        map_layer = map->GetMapLayer();
+        map_layer      = map->GetMapLayer();
+        map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
     }
 
     const auto* text = entity_node.GetTextItem();
@@ -1591,6 +1596,7 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             packet.transform    = transform;
             packet.sort_point   = transform * glm::vec4{map_sort_point, 0.0f, 1.0};
             packet.map_layer    = map_layer;
+            packet.map_sort_key = map_sort_key;
             packet.packet_index = text->GetLayer();
             packet.render_layer = entity.GetRenderLayer();
             packet.coordinate_space = text->GetCoordinateSpace();
@@ -1632,12 +1638,14 @@ void Renderer::CreateLights(const EntityType& entity,
     transform.Push();
          transform.Translate(node_light->GetTranslation());
 
-    glm::vec2 map_sort_point = {0.5f, 1.0f};
-    std::uint16_t map_layer = 0;
+    auto map_sort_point = glm::vec2 {0.5f, 1.0f};
+    auto map_layer      = std::uint16_t(0);
+    auto map_sort_key   = static_cast<uint8_t>(game::TileOcclusion::None);
     if (const auto* map = entity_node.GetMapNode())
     {
         map_sort_point = map->GetSortPoint();
-        map_layer = map->GetMapLayer();
+        map_layer      = map->GetMapLayer();
+        map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
     }
 
     // hack around here to make the light direction in 3D match
@@ -1653,6 +1661,7 @@ void Renderer::CreateLights(const EntityType& entity,
     light.transform    = transform;
     light.render_layer = entity.GetRenderLayer();
     light.map_layer    = map_layer;
+    // todo: light_sort key??
     light.packet_index = node_light->GetLayer();
     light.sort_point   = transform * glm::vec4{map_sort_point, 0.0f, 1.0};
     lights.push_back(light);
