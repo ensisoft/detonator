@@ -1880,6 +1880,11 @@ void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
                 {
                     if (lhs.map_sort_key < rhs.map_sort_key)
                         return true;
+                    else if (lhs.map_sort_key == rhs.map_sort_key)
+                    {
+                        if (static_cast<int>(lhs.source) < static_cast<int>(rhs.source))
+                            return true;
+                    }
                 }
             }
         }
