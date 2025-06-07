@@ -28,19 +28,22 @@ size_t MapNodeClass::GetHash() const noexcept
     size_t hash = 0;
     hash = base::hash_combine(hash, mMapSortPoint);
     hash = base::hash_combine(hash, mMapLayer);
+    hash = base::hash_combine(hash, mTileOcclusion);
     return hash;
 }
 
 void MapNodeClass::IntoJson(data::Writer& data) const
 {
     data.Write("map_sort_point", mMapSortPoint);
-    data.Write("map_layer", mMapLayer);
+    data.Write("map_layer",      mMapLayer);
+    data.Write("tile_occlusion", mTileOcclusion);
 }
 bool MapNodeClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("map_sort_point", &mMapSortPoint);
-    ok &= data.Read("map_layer", &mMapLayer);
+    ok &= data.Read("map_layer",      &mMapLayer);
+    ok &= data.Read("tile_occlusion", &mTileOcclusion);
     return ok;
 }
 

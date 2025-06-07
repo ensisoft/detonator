@@ -134,6 +134,7 @@ void unit_test_entity_node()
     game::MapNodeClass map;
     map.SetMapSortPoint(glm::vec2{2.0f, 3.0f});
     map.SetMapLayer(123);
+    map.SetTileOcclusion(game::TileOcclusion::Left);
 
     game::BasicLightClass light;
     light.Enable(true);
@@ -214,6 +215,7 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetFixture()->GetRigidBodyNodeId() == "81288");
     TEST_REQUIRE(node.GetMapNode()->GetSortPoint() == glm::vec2(2.0f, 3.0f));
     TEST_REQUIRE(node.GetMapNode()->GetMapLayer() == 123);
+    TEST_REQUIRE(node.GetMapNode()->GetTileOcclusion() == game::TileOcclusion::Left);
     TEST_REQUIRE(node.GetTransformer()->GetAngularAcceleration() == 1.0f);
     TEST_REQUIRE(node.GetTransformer()->GetAngularVelocity() == 5.0f);
     TEST_REQUIRE(node.GetTransformer()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
