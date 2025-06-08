@@ -2205,12 +2205,6 @@ void TilemapWidget::DisplayLayerProperties()
     SetEnabled(mUI.layerProperties,     false);
     SetEnabled(mUI.layerPalette,        false);
 
-    for (auto* widget : mPaletteMaterialWidgets)
-    {
-        widget->ResetMaterial();
-        widget->setEnabled(false);
-    }
-
     if (const auto* layer = GetCurrentLayer())
     {
         const auto* inst = GetCurrentLayerInstance();
@@ -2259,6 +2253,14 @@ void TilemapWidget::DisplayLayerProperties()
         SetEnabled(mUI.btnDeleteLayer,  true);
         SetEnabled(mUI.layerProperties, true);
         SetEnabled(mUI.layerPalette,    true);
+    }
+    else
+    {
+        for (auto* widget : mPaletteMaterialWidgets)
+        {
+            widget->ResetMaterial();
+            widget->setEnabled(false);
+        }
     }
 }
 
