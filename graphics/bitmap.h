@@ -84,6 +84,23 @@ namespace gfx
         virtual std::unique_ptr<IBitmap> Clone() const = 0;
         // Get unique hash value based on the contents of the bitmap.
         virtual std::size_t GetHash() const = 0;
+
+        virtual std::unique_ptr<IBitmap> CopyRect(const URect& src) const = 0;
+
+        // convenience functions
+        inline URect GetRect() const
+        {
+            const auto width = GetWidth();
+            const auto height = GetHeight();
+            return {0u, 0u, width, height};
+        }
+        inline USize GetSize() const
+        {
+            const auto width = GetWidth();
+            const auto height = GetHeight();
+            return {width, height};
+        }
+
     protected:
         // No public dynamic copying or assignment
         IBitmap() = default;
@@ -433,10 +450,11 @@ namespace gfx
             return ret;
         }
 
-        URect GetRect() const
-        { return URect(0u, 0u, mWidth, mHeight); }
-        USize GetSize() const
-        { return USize(mWidth, mHeight); }
+        std::unique_ptr<IBitmap> CopyRect(const URect& src) const override
+        {
+            auto other = Copy(src);
+            return std::make_unique<Bitmap>(std::move(other));
+        }
     private:
         std::vector<Pixel> mPixels;
         unsigned mWidth  = 0;
