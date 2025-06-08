@@ -88,6 +88,7 @@ bool PaletteMaterial::HasSelectedMaterial() const
 void PaletteMaterial::UpdateMaterialList(const ResourceList& list)
 {
     SetList(mUI.cmbMaterial, list);
+    UpdatePreview(GetItemId(mUI.cmbMaterial));
 }
 
 void PaletteMaterial::UpdateMaterialPreview(const app::AnyString& id)
@@ -115,13 +116,23 @@ void PaletteMaterial::UpdatePreview(const app::AnyString& id)
     if (!texture->GetNumTextures())
         return;
 
-    // todo: texture rect computation
     // todo: tilemap tile computation inside texture rect
 
     const auto* texture_source = texture->GetTextureSource(0);
-    const auto& texture_data = texture_source->GetData();
-    if (texture_data)
+    const auto& texture_source_rect = texture->GetTextureRect(0);
+    const auto& texture_source_data = texture_source->GetData();
+    if (!texture_source_data)
+        return;
+
+    const auto texture_rect = base::MapToGlobalExpand(texture_source_data->GetRect(),
+                                              texture_source_rect);
+    if (texture_rect == texture_source_data->GetRect())
     {
+        SetImage(mUI.preview, *texture_source_data);
+    }
+    else
+    {
+        const auto& texture_data = texture_source_data->CopyRect(texture_rect);
         SetImage(mUI.preview, *texture_data);
     }
 }
