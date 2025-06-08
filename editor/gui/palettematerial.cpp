@@ -50,6 +50,10 @@ PaletteMaterial::PaletteMaterial(const app::Workspace* workspace, QWidget* paren
 
 void PaletteMaterial::SetMaterial(const app::AnyString& id)
 {
+    const QString& current = GetItemId(mUI.cmbMaterial);
+    if (current == id)
+        return;
+
     if (SetValue(mUI.cmbMaterial, ListItemId(id)))
     {
         SetEnabled(mUI.btnResetMaterial, true);
@@ -63,6 +67,10 @@ void PaletteMaterial::SetMaterial(const app::AnyString& id)
 }
 void PaletteMaterial::SetTileIndex(unsigned tile_index)
 {
+    const  unsigned current = GetValue(mUI.tileIndex);
+    if (current == tile_index)
+        return;
+
     SetValue(mUI.tileIndex, tile_index);
 
     // todo: preview update
