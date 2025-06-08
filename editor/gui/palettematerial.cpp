@@ -68,6 +68,15 @@ void PaletteMaterial::SetTileIndex(unsigned tile_index)
     // todo: preview update
 }
 
+bool PaletteMaterial::HasSelectedMaterial() const
+{
+    const auto current = mUI.cmbMaterial->currentIndex();
+    if (current == -1)
+        return false;
+
+    return true;
+}
+
 void PaletteMaterial::UpdateMaterialList(const ResourceList& list)
 {
     SetList(mUI.cmbMaterial, list);

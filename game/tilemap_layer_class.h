@@ -161,7 +161,7 @@ namespace game
         { mPalette[palette_index].tile_index = tile_index; }
         inline void ClearPalette() noexcept
         { mPalette.clear(); }
-        inline void ClearMaterialId(std::size_t index) noexcept
+        inline void ClearPaletteIndex(std::size_t index) noexcept
         { mPalette.erase(index); }
 
         void SetPaletteFlag(PaletteFlags flag, bool on_off, std::size_t palette_index);

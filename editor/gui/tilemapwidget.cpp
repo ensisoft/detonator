@@ -2094,12 +2094,34 @@ void TilemapWidget::LayerSelectionChanged(const QItemSelection&, const QItemSele
 
 void TilemapWidget::PaletteMaterialChanged(const PaletteMaterial* material)
 {
-    if (auto* layer = GetCurrentLayer())
+    if (auto* layer = GetCurrentLayerInstance())
     {
+        auto* klass = GetCurrentLayer();
+
         const auto palette_index = material->GetPaletteIndex();
-        layer->SetPaletteMaterialId(material->GetMaterialId(), palette_index);
-        layer->SetPaletteOcclusion(material->GetOcclusion(), palette_index);
-        layer->SetPaletteMaterialTileIndex(material->GetTileIndex(), palette_index);
+        if (material->HasSelectedMaterial())
+        {
+            klass->SetPaletteMaterialId(material->GetMaterialId(), palette_index);
+            klass->SetPaletteOcclusion(material->GetOcclusion(), palette_index);
+            klass->SetPaletteMaterialTileIndex(material->GetTileIndex(), palette_index);
+        }
+        else
+        {
+            const auto nothing_index = layer->GetMaxPaletteIndex();
+
+            for (unsigned row=0; row<layer->GetHeight(); ++row)
+            {
+                for (unsigned col=0; col<layer->GetWidth(); ++col)
+                {
+                    uint8_t tile_palette_index = 0;
+                    ASSERT(layer->GetTilePaletteIndex(&tile_palette_index, row, col));
+                    if (tile_palette_index == palette_index)
+                        layer->SetTilePaletteIndex(nothing_index, row, col);
+                }
+            }
+            klass->ClearPaletteIndex(palette_index);
+            DisplaySelection();
+        }
     }
 }
 
@@ -3246,7 +3268,7 @@ void TilemapWidget::ClearUnusedPaletteEntries()
     }
     for (auto i: indices)
     {
-        klass->ClearMaterialId(i);
+        klass->ClearPaletteIndex(i);
     }
 }
 
