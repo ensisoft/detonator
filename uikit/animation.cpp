@@ -477,7 +477,7 @@ bool Animation::TriggerOnAction(const WidgetAction& action)
         const auto has_focus = std::get<bool>(action.value);
         const auto trigger_gain_focus = mTrigger == Animation::Trigger::GainFocus && has_focus;
         const auto trigger_lost_focus = mTrigger == Animation::Trigger::LostFocus && !has_focus;
-        if (!(trigger_gain_focus || trigger_gain_focus))
+        if (!(trigger_gain_focus || trigger_lost_focus))
             return false;
     }
     else if (action.type == WidgetActionType::ButtonPress &&
