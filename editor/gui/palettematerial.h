@@ -83,6 +83,7 @@ namespace gui
         {
             return GetValue(mUI.tileIndex);
         }
+        void UpdateMaterialPreview(const app::AnyString& id);
 
         void UpdateMaterialList(const ResourceList& list);
     private:
