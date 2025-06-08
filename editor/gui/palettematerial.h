@@ -58,6 +58,8 @@ namespace gui
         void SetMaterial(const app::AnyString& id);
         void SetTileIndex(unsigned tile_index);
 
+        bool HasSelectedMaterial() const;
+
         void SetOcclusion(game::TileOcclusion sort)
         {
             SetValue(mUI.cmbOcclusion, sort);
