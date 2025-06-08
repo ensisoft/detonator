@@ -2053,7 +2053,16 @@ void TilemapWidget::OnUpdateResource(const app::Resource* resource)
             widget->UpdateMaterialList(materials);
 
         mState.renderer.ClearPaintState();
+
+        if (const auto* layer = GetCurrentLayer())
+        {
+            for (auto* widget : mPaletteMaterialWidgets)
+            {
+                widget->UpdateMaterialPreview(resource->GetId());
+            }
+        }
     }
+
     if (mCurrentTool)
     {
         if (!mCurrentTool->Validate())

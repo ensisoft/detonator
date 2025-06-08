@@ -90,6 +90,15 @@ void PaletteMaterial::UpdateMaterialList(const ResourceList& list)
     SetList(mUI.cmbMaterial, list);
 }
 
+void PaletteMaterial::UpdateMaterialPreview(const app::AnyString& id)
+{
+    const QString& current = GetItemId(mUI.cmbMaterial);
+    if (current == id)
+    {
+        UpdatePreview(id);
+    }
+}
+
 void PaletteMaterial::UpdatePreview(const app::AnyString& id)
 {
     SetImage(mUI.preview, QPixmap());
