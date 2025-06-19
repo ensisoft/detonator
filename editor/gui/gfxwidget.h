@@ -109,6 +109,8 @@ namespace gui
         void SetClearColor(const gfx::Color4f& color)
         { mClearColor = color; }
 
+        void SetCursorColor(const gfx::Color4f& color, CursorShape shape);
+
         void ResetClearColor()
         { mClearColor.reset(); }
 
@@ -186,6 +188,8 @@ namespace gui
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
         std::unique_ptr<gfx::Painter> mCustomGraphicsPainter;
         std::optional<gfx::Color4f> mClearColor;
+        std::optional<gfx::Color4f> mCrossHairCursorColor;
+        std::optional<gfx::Color4f> mArrowCursorColor;
     private:
         QElapsedTimer mClock;
         bool mVsync       = false;
@@ -244,11 +248,10 @@ namespace gui
         { return mWindow->getDeviceResourceStats(); }
 
         void SetClearColor(const QColor& color);
+        void SetClearColor(const gfx::Color4f& color);
 
-        void SetClearColor(const gfx::Color4f& color)
-        {
-            mWindow->SetClearColor(color);
-        }
+        void SetCursorColor(const  QColor& color, CursorShape  shape);
+        void SetCursorColor(const gfx::Color4f& color, CursorShape shape);
 
         void ResetClearColor()
         {
