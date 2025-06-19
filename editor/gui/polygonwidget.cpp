@@ -43,6 +43,8 @@
 
 namespace {
 
+constexpr auto Margin = 20; // pixels
+
 std::vector<gfx::Vertex2D> MakeVerts(const std::vector<QPoint>& points,
                                                      float width, float height)
 {
@@ -93,6 +95,9 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
         this, std::placeholders::_1);
     mUI.widget->onKeyPress = std::bind(&ShapeWidget::OnKeyPressEvent,
         this, std::placeholders::_1);
+
+    mUI.widget->SetCursorColor(gfx::Color::HotPink, GfxWidget::CursorShape::CrossHair);
+    mUI.widget->SetCursorColor(gfx::Color::HotPink, GfxWidget::CursorShape::ArrowCursor);
 
     auto* menu = new QMenu(this);
     menu->addAction(mUI.actionCustomizeShader);
@@ -528,11 +533,11 @@ void ShapeWidget::OnRemoveResource(const app::Resource* resource)
 
 void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 {
-    const auto widget_width  = mUI.widget->width();
-    const auto widget_height = mUI.widget->height();
+    const auto widget_width  = mUI.widget->width() - Margin * 2;
+    const auto widget_height = mUI.widget->height() - Margin * 2;
     const auto size = std::min(widget_width, widget_height);
-    const auto xoffset = (widget_width - size) / 2;
-    const auto yoffset = (widget_height - size) / 2;
+    const auto xoffset = Margin + (widget_width - size) / 2;
+    const auto yoffset = Margin + (widget_height - size) / 2;
     const auto width = size;
     const auto height = size;
     painter.SetViewport(xoffset, yoffset, size, size);
@@ -654,11 +659,11 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 {
-    const auto widget_width  = mUI.widget->width();
-    const auto widget_height = mUI.widget->height();
+    const auto widget_width  = mUI.widget->width() - Margin * 2;
+    const auto widget_height = mUI.widget->height() - Margin * 2;
     const auto size = std::min(widget_width, widget_height);
-    const auto xoffset = (widget_width - size) / 2;
-    const auto yoffset = (widget_height - size) / 2;
+    const auto xoffset = Margin + (widget_width - size) / 2;
+    const auto yoffset = Margin + (widget_height - size) / 2;
     const auto width = size;
     const auto height = size;
 
@@ -687,11 +692,11 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
     if (!mActive)
         return;
 
-    const auto widget_width  = mUI.widget->width();
-    const auto widget_height = mUI.widget->height();
+    const auto widget_width  = mUI.widget->width() - Margin * 2;
+    const auto widget_height = mUI.widget->height() - Margin * 2;
     const auto size = std::min(widget_width, widget_height);
-    const auto xoffset = (widget_width - size) / 2;
-    const auto yoffset = (widget_height - size) / 2;
+    const auto xoffset = Margin + (widget_width - size) / 2;
+    const auto yoffset = Margin + (widget_height - size) / 2;
     const auto width  = size;
     const auto height = size;
 
@@ -716,11 +721,11 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
 
 void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
 {
-    const auto widget_width  = mUI.widget->width();
-    const auto widget_height = mUI.widget->height();
+    const auto widget_width  = mUI.widget->width() - 2 * Margin;
+    const auto widget_height = mUI.widget->height() - 2 * Margin;
     const auto size = std::min(widget_width, widget_height);
-    const auto xoffset = (widget_width - size) / 2;
-    const auto yoffset = (widget_height - size) / 2;
+    const auto xoffset = Margin + (widget_width - size) / 2;
+    const auto yoffset = Margin + (widget_height - size) / 2;
     const auto width  = size;
     const auto height = size;
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
@@ -771,11 +776,11 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     // find the vertex closes to the click point
     // use polygon winding order to figure out whether
     // the new vertex should come before or after the closest vertex
-    const auto widget_width  = mUI.widget->width();
-    const auto widget_height = mUI.widget->height();
+    const auto widget_width  = mUI.widget->width() - Margin * 2;
+    const auto widget_height = mUI.widget->height() - Margin * 2;
     const auto size = std::min(widget_width, widget_height);
-    const auto xoffset = (widget_width - size) / 2;
-    const auto yoffset = (widget_height - size) / 2;
+    const auto xoffset = Margin + (widget_width - size) / 2;
+    const auto yoffset = Margin + (widget_height - size) / 2;
     const auto width  = size;
     const auto height = size;
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
@@ -854,8 +859,8 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
 
 bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
 {
-    const auto widget_width  = mUI.widget->width();
-    const auto widget_height = mUI.widget->height();
+    const auto widget_width  = mUI.widget->width() - Margin * 2;
+    const auto widget_height = mUI.widget->height() - Margin * 2;
     const auto size = std::min(widget_width, widget_height);
     const auto width  = size;
     const auto height = size;
