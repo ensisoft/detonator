@@ -1078,6 +1078,7 @@ add_executable(unit_test_gui
         data/json.cpp
         editor/app/utility.cpp
         editor/app/eventlog.cpp
+        editor/gui/gfxwidget.cpp
         editor/gui/settings.cpp
         editor/gui/unit_test/unit_test.cpp
         editor/gui/collapsible_widget.h

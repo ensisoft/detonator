@@ -153,6 +153,15 @@ bool GfxWindow::haveVSYNC() const
     return should_have_vsync;
 }
 
+void GfxWindow::SetCursorColor(const gfx::Color4f& color, CursorShape shape)
+{
+    if (shape == CursorShape::ArrowCursor)
+        mArrowCursorColor = color;
+    else if (shape == CursorShape::CrossHair)
+        mCrossHairCursorColor = color;
+    else BUG("Bug on cursor shape color setting.");
+}
+
 void GfxWindow::dispose()
 {
     if (!mContext)
@@ -320,19 +329,18 @@ void GfxWindow::paintGL()
     if (WindowMouseCursor == MouseCursor::Custom)
     {
         static std::shared_ptr<gfx::ColorClass> arrow_cursor_material;
+        static std::shared_ptr<gfx::TextureMap2DClass> crosshair_cursor_material;
         if (!arrow_cursor_material)
         {
             arrow_cursor_material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color);
-            arrow_cursor_material->SetBaseColor(gfx::Color::Silver);
         }
-        static std::shared_ptr<gfx::TextureMap2DClass> crosshair_cursor_material;
         if (!crosshair_cursor_material)
         {
             crosshair_cursor_material = std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromImage(res::CrosshairCursor));
             crosshair_cursor_material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-            crosshair_cursor_material->SetBaseColor(gfx::Color::HotPink);
         }
-
+        arrow_cursor_material->SetBaseColor(mArrowCursorColor.value_or(gfx::Color::Silver));
+        crosshair_cursor_material->SetBaseColor(mCrossHairCursorColor.value_or(gfx::Color::HotPink));
 
         const auto& mickey = mapFromGlobal(QCursor::pos());
         const auto width = this->width();
@@ -794,6 +802,20 @@ void GfxWidget::focusOutEvent(QFocusEvent* focus)
 void GfxWidget::SetClearColor(const QColor& color)
 {
     mWindow->SetClearColor(ToGfx(color));
+}
+
+void GfxWidget::SetClearColor(const gfx::Color4f& color)
+{
+    mWindow->SetClearColor(color);
+}
+
+void GfxWidget::SetCursorColor(const  QColor& color, CursorShape  shape)
+{
+    mWindow->SetCursorColor(ToGfx(color), shape);
+}
+void GfxWidget::SetCursorColor(const gfx::Color4f& color, CursorShape shape)
+{
+    mWindow->SetCursorColor(color, shape);
 }
 
 void GfxWidget::ShowColorDialog()
