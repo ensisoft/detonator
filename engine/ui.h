@@ -285,7 +285,11 @@ namespace engine
     class UIProperty
     {
     public:
-        using ValueType = std::variant<gfx::Color4f, std::string,
+        // WARNING: the order in which the types appear in the variant
+        // is important since a color value encoded as string can
+        // parse as a Color4f and thus the property changes the type from
+        // to a Color4f.
+        using ValueType = std::variant<std::string, gfx::Color4f,
                 int, unsigned, float, double, bool>;
 
         UIProperty() = default;
