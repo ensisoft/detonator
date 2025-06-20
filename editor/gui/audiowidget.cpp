@@ -128,7 +128,7 @@ public:
         setFlag(QGraphicsItem::ItemIsMovable, false);
         setFlag(QGraphicsItem::ItemIsSelectable, false);
     }
-    AudioLink(const audio::GraphClass::Link& link)
+    explicit AudioLink(const audio::GraphClass::Link& link)
       : mId(link.id)
     {
         mSrcElem = link.src_element;
@@ -172,7 +172,7 @@ public:
     {
         return true;
     }
-    virtual QRectF boundingRect() const override
+    QRectF boundingRect() const override
     {
         const auto& src = mapFromScene(mSrc);
         const auto& dst = mapFromScene(mDst);
@@ -180,9 +180,9 @@ public:
         const auto left   = std::min(src.x(), dst.x());
         const auto right  = std::max(src.x(), dst.x());
         const auto bottom = std::max(src.y(), dst.y());
-        return QRectF(left, top, right-left, bottom-top);
+        return {left, top, right-left, bottom-top};
     }
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override
     {
         const auto& src = mapFromScene(mSrc);
         const auto& dst = mapFromScene(mDst);
@@ -272,7 +272,7 @@ private:
 class AudioElement : public QGraphicsItem
 {
 public:
-    AudioElement(const audio::GraphClass::Element& elem)
+    explicit AudioElement(const audio::GraphClass::Element& elem)
       : mId(elem.id)
       , mType(elem.type)
       , mName(elem.name)
@@ -319,7 +319,7 @@ public:
         ComputePorts();
     }
 
-    AudioElement(const ElementDesc& desc)
+    explicit AudioElement(const ElementDesc& desc)
       : mId(base::RandomString(10))
       , mType(desc.type)
       , mIPorts(desc.input_ports)
@@ -539,7 +539,7 @@ public:
         return false;
     }
 
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override
     {
         const auto& palette = option->palette;
         painter->setRenderHint(QPainter::Antialiasing);
@@ -599,7 +599,7 @@ public:
         painter->drawText(0, mHeight + 25, mMessage);
     }
 
-    virtual QVariant itemChange(GraphicsItemChange change, const QVariant& value) override
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override
     {
         // this is the wrong place to do things, try to fix this API mess
         // and dispatch the call to the right place, i.e the scene.
@@ -695,7 +695,7 @@ public:
         }
     }
 protected:
-    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* mickey) override
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* mickey) override
     {
         if (CanAddInputPort())
             AddInputPort();
@@ -1117,7 +1117,7 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
     mUI.afDuration->SetEditable(false);
-    GetSelectedElementProperties();
+    ShowSelectedElementProperties();
     mGraphHash = GetHash();
 
     const auto& map = GetElementMap();
@@ -1173,7 +1173,7 @@ AudioWidget::AudioWidget(app::Workspace* workspace, const app::Resource& resourc
     SetValue(mUI.outElem, ListItemId(klass->GetGraphOutputElementId()));
     on_outElem_currentIndexChanged(0);
     SetValue(mUI.outPort, ListItemId(klass->GetGraphOutputElementPort()));
-    GetSelectedElementProperties();
+    ShowSelectedElementProperties();
 
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
@@ -1200,12 +1200,14 @@ void AudioWidget::InitializeContent()
     auto* element = new AudioElement(FindElementDescription("FileSource"));
     element->SetName("Kalimba");
     element->setPos(0.0f, 0.0f);
+    element->setSelected(true);
     if (auto* val = element->GetArgValue<std::string>("file"))
         *val = "app://audio/music/Kalimba_short.mp3";
 
     mScene->addItem(element);
     mItems.push_back(element);
     UpdateElementList();
+    ShowSelectedElementProperties();
 
     SetValue(mUI.outElem, ListItemId(element->GetId()));
     on_outElem_currentIndexChanged(0);
@@ -1223,7 +1225,7 @@ void AudioWidget::InitializeSettings(const UISettings& settings)
         QList<int> sizes;
         sizes << mUI.leftLayout->sizeHint().width();
         sizes << mUI.center->sizeHint().width();
-        sizes << mUI.rightSplitter->sizeHint().width() + 40;
+        sizes << mUI.rightSplitter->sizeHint().width() + 150;
         mUI.mainSplitter->setSizes(sizes);
     });
 }
@@ -1272,7 +1274,7 @@ void AudioWidget::AddActions(QToolBar& bar)
 void AudioWidget::AddActions(QMenu& menu)
 {
     auto* place_menu = new QMenu(&menu);
-    place_menu->setTitle("Place");
+    place_menu->setTitle("Create New");
     place_menu->addAction(mElements->menuAction());
 
     menu.addAction(mUI.actionPlay);
@@ -1349,7 +1351,7 @@ bool AudioWidget::LoadState(const Settings& settings)
         SetValue(mUI.outPort, ListItemId(graph_out_port));
     }
 
-    GetSelectedElementProperties();
+    ShowSelectedElementProperties();
     return true;
 }
 
@@ -1486,7 +1488,7 @@ void AudioWidget::on_btnSelectFile_clicked()
     const auto& uri = mWorkspace->MapFileToWorkspace(info.absoluteFilePath());
     SetValue(mUI.fileSource, uri);
     SetSelectedElementProperties();
-    GetSelectedElementProperties();
+    ShowSelectedElementProperties();
 }
 
 void AudioWidget::on_btnEditFile_clicked()
@@ -1679,7 +1681,7 @@ void AudioWidget::on_actionDelete_triggered()
     mScene->DeleteItems(selected);
 
     UpdateElementList();
-    GetSelectedElementProperties();
+    ShowSelectedElementProperties();
 }
 
 void AudioWidget::on_actionUnlink_triggered()
@@ -1755,7 +1757,7 @@ void AudioWidget::on_view_customContextMenuRequested(QPoint pos)
     mUI.actionAddOutputPort->setEnabled(!selected.isEmpty() && item != nullptr && item->CanAddOutputPort());
     mUI.actionRemoveOutputPort->setEnabled(!selected.isEmpty() && item != nullptr && item->CanRemoveOutputPort());
 
-    QMenu place_menu("Place");
+    QMenu place_menu("New Element");
 
     const auto& map = GetElementMap();
     for (const auto& pair : map)
@@ -1770,10 +1772,10 @@ void AudioWidget::on_view_customContextMenuRequested(QPoint pos)
     QMenu menu(this);
     menu.addMenu(&place_menu);
     menu.addSeparator();
-    QMenu input_port_menu("Input Ports");
+    QMenu input_port_menu("Change Input Ports");
     input_port_menu.addAction(mUI.actionAddInputPort);
     input_port_menu.addAction(mUI.actionRemoveInputPort);
-    QMenu output_port_menu("Output Ports");
+    QMenu output_port_menu("Change Output Ports");
     output_port_menu.addAction(mUI.actionAddOutputPort);
     output_port_menu.addAction(mUI.actionRemoveOutputPort);
     menu.addMenu(&input_port_menu);
@@ -1805,7 +1807,7 @@ void AudioWidget::on_elements_itemSelectionChanged()
     }
     mUI.view->update();
 
-    GetSelectedElementProperties();
+    ShowSelectedElementProperties();
 }
 
 void AudioWidget::on_elements_customContextMenuRequested(QPoint)
@@ -1934,7 +1936,7 @@ void AudioWidget::on_fileCaching_stateChanged(int)
 
 void AudioWidget::SceneSelectionChanged()
 {
-    GetSelectedElementProperties();
+    ShowSelectedElementProperties();
 
     UpdateElementList();
 }
@@ -1971,11 +1973,18 @@ void AudioWidget::AddElementAction()
         const auto& scene_pos = mUI.view->mapToScene(mouse_pos);
         element->setPos(scene_pos);
     }
+    auto selected = mScene->selectedItems();
+    for (auto item : selected)
+        item->setSelected(false);
+
     element->SetName(name);
+    element->setSelected(true);
+
     // scene takes ownership of the graphics item
     mScene->addItem(element);
     mItems.push_back(element);
     UpdateElementList();
+    ShowSelectedElementProperties();
 }
 
 void AudioWidget::RefreshTimer()
@@ -2027,63 +2036,76 @@ size_t AudioWidget::GetHash() const
     return klass.GetHash();
 }
 
-void AudioWidget::GetSelectedElementProperties()
+void AudioWidget::ShowSelectedElementProperties()
 {
-    SetValue(mUI.elemName, QString(""));
-    SetValue(mUI.elemID,   QString(""));
-    SetValue(mUI.sampleType, audio::SampleType::Float32);
-    SetValue(mUI.channels, audio::Channels::Stereo);
+    SetValue(mUI.elemName,     QString(""));
+    SetValue(mUI.elemID,       QString(""));
+    SetValue(mUI.sampleType,   audio::SampleType::Float32);
+    SetValue(mUI.channels,     audio::Channels::Stereo);
     SetValue(mUI.sampleRate,   QString("44100"));
-    SetValue(mUI.ioStrategy, audio::FileSource::IOStrategy::Default);
-    SetValue(mUI.fileSource, QString(""));
+    SetValue(mUI.ioStrategy,   audio::FileSource::IOStrategy::Default);
+    SetValue(mUI.fileSource,   QString(""));
     SetValue(mUI.gainValue,    1.0f);
-    SetValue(mUI.frequency, 0);
-    SetValue(mUI.duration, 0);
-    SetValue(mUI.delay, 0);
-    SetValue(mUI.startTime, 0);
+    SetValue(mUI.frequency,    0);
+    SetValue(mUI.duration,     0);
+    SetValue(mUI.delay,        0);
+    SetValue(mUI.startTime,    0);
     SetValue(mUI.afChannels,   QString(""));
     SetValue(mUI.afSampleRate, QString(""));
     SetValue(mUI.afFrames,     QString(""));
     SetValue(mUI.afSize,       QString(""));
     SetValue(mUI.afDuration,   0);
-    SetValue(mUI.loopCount, 1);
-    SetValue(mUI.pcmCaching, false);
-    SetValue(mUI.fileCaching, false);
+    SetValue(mUI.loopCount,    1);
+    SetValue(mUI.pcmCaching,   false);
+    SetValue(mUI.fileCaching,  false);
 
-    SetEnabled(mUI.sampleType, false);
-    SetEnabled(mUI.sampleRate, false);
-    SetEnabled(mUI.ioStrategy, false);
-    SetEnabled(mUI.channels, false);
-    SetEnabled(mUI.fileSource, false);
+    SetEnabled(mUI.sampleType,    false);
+    SetEnabled(mUI.sampleRate,    false);
+    SetEnabled(mUI.ioStrategy,    false);
+    SetEnabled(mUI.channels,      false);
+    SetEnabled(mUI.fileSource,    false);
     SetEnabled(mUI.btnSelectFile, false);
-    SetEnabled(mUI.gainValue,  false);
-    SetEnabled(mUI.frequency, false);
-    SetEnabled(mUI.duration, false);
-    SetEnabled(mUI.delay, false);
-    SetEnabled(mUI.startTime, false);
-    SetEnabled(mUI.effect, false);
-    SetEnabled(mUI.audioFile, false);
-    SetEnabled(mUI.actionDelete, false);
-    SetEnabled(mUI.loopCount, false);
-    SetEnabled(mUI.pcmCaching, false);
-    SetEnabled(mUI.fileCaching, false);
+    SetEnabled(mUI.gainValue,     false);
+    SetEnabled(mUI.frequency,     false);
+    SetEnabled(mUI.duration,      false);
+    SetEnabled(mUI.delay,         false);
+    SetEnabled(mUI.startTime,     false);
+    SetEnabled(mUI.effect,        false);
+    SetEnabled(mUI.audioFile,     false);
+    SetEnabled(mUI.actionDelete,  false);
+    SetEnabled(mUI.loopCount,     false);
+    SetEnabled(mUI.pcmCaching,    false);
+    SetEnabled(mUI.fileCaching,   false);
 
-    /*
-    SetVisible(mUI.sampleType, false);
-    SetVisible(mUI.sampleRate, false);
-    SetVisible(mUI.channels, false);
-    SetVisible(mUI.fileSource, false);
+    SetVisible(mUI.sampleType,    false);
+    SetVisible(mUI.sampleRate,    false);
+    SetVisible(mUI.channels,      false);
+    SetVisible(mUI.ioStrategy,    false);
+    SetVisible(mUI.fileSource,    false);
     SetVisible(mUI.btnSelectFile, false);
-    SetVisible(mUI.gainValue,  false);
-    SetVisible(mUI.frequency, false);
-    SetVisible(mUI.audioFile, false);
+    SetVisible(mUI.gainValue,     false);
+    SetVisible(mUI.frequency,     false);
+    SetVisible(mUI.duration,      false);
+    SetVisible(mUI.delay,         false);
+    SetVisible(mUI.startTime,     false);
+    SetVisible(mUI.audioFile,     false);
+    SetVisible(mUI.effect,        false);
+    SetVisible(mUI.loopCount,     false);
+    SetVisible(mUI.pcmCaching,    false);
+    SetVisible(mUI.fileCaching,   false);
+
     SetVisible(mUI.lblSampleType, false);
     SetVisible(mUI.lblSampleRate, false);
+    SetVisible(mUI.lblChannels,   false);
+    SetVisible(mUI.lblIoStrategy, false);
     SetVisible(mUI.lblFileSource, false);
-    SetVisible(mUI.lblGain, false);
-    SetVisible(mUI.lblChannels, false);
-    SetVisible(mUI.lblFrequency, false);
-    */
+    SetVisible(mUI.lblGain,       false);
+    SetVisible(mUI.lblFrequency,  false);
+    SetVisible(mUI.lblDuration,   false);
+    SetVisible(mUI.lblDelay,      false);
+    SetVisible(mUI.lblStartTime,  false);
+    SetVisible(mUI.lblEffect,     false);
+    SetVisible(mUI.lblLoops,      false);
 
     auto items = mScene->selectedItems();
     if (items.isEmpty()) return;
@@ -2098,13 +2120,14 @@ void AudioWidget::GetSelectedElementProperties()
     {
         SetEnabled(mUI.sampleType, true);
         SetEnabled(mUI.sampleRate, true);
-        SetEnabled(mUI.channels, true);
+        SetEnabled(mUI.channels,   true);
         SetVisible(mUI.sampleType, true);
         SetVisible(mUI.sampleRate, true);
-        SetVisible(mUI.channels, true);
+        SetVisible(mUI.channels,   true);
         SetVisible(mUI.lblSampleType, true);
         SetVisible(mUI.lblSampleRate, true);
-        SetVisible(mUI.lblChannels, true);
+        SetVisible(mUI.lblChannels,   true);
+
         SetValue(mUI.sampleType, val->sample_type);
         SetValue(mUI.sampleRate, val->sample_rate);
         SetValue(mUI.channels, static_cast<audio::Channels>(val->channel_count));
@@ -2139,6 +2162,7 @@ void AudioWidget::GetSelectedElementProperties()
     {
         SetEnabled(mUI.ioStrategy, true);
         SetVisible(mUI.ioStrategy, true);
+        SetVisible(mUI.lblIoStrategy, true);
         SetValue(mUI.ioStrategy, *val);
     }
 
@@ -2146,6 +2170,7 @@ void AudioWidget::GetSelectedElementProperties()
     {
         SetEnabled(mUI.loopCount, true);
         SetVisible(mUI.loopCount, true);
+        SetVisible(mUI.lblLoops,  true);
         SetValue(mUI.loopCount, *val);
     }
     if (const auto* val = item->GetArgValue<bool>("pcm_caching"))
@@ -2179,21 +2204,29 @@ void AudioWidget::GetSelectedElementProperties()
     if (const auto* val = item->GetArgValue<unsigned>("duration"))
     {
         SetEnabled(mUI.duration, true);
+        SetVisible(mUI.duration, true);
+        SetVisible(mUI.lblDuration, true);
         SetValue(mUI.duration, *val);
     }
     if (const auto* val = item->GetArgValue<unsigned>("delay"))
     {
         SetEnabled(mUI.delay, true);
+        SetVisible(mUI.delay, true);
+        SetVisible(mUI.lblDelay, true);
         SetValue(mUI.delay, *val);
     }
     if (const auto* val = item->GetArgValue<unsigned>("time"))
     {
         SetEnabled(mUI.startTime, true);
+        SetVisible(mUI.startTime, true);
+        SetVisible(mUI.lblStartTime, true);
         SetValue(mUI.startTime, *val);
     }
     if (const auto* val = item->GetArgValue<audio::Effect::Kind>("effect"))
     {
         SetEnabled(mUI.effect, true);
+        SetVisible(mUI.effect, true);
+        SetVisible(mUI.lblEffect, true);
         SetValue(mUI.effect, *val);
     }
 
