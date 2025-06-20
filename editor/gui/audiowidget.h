@@ -85,28 +85,28 @@ namespace gui
         Q_OBJECT
 
     public:
-        AudioWidget(app::Workspace* workspace);
+        explicit AudioWidget(app::Workspace* workspace);
         AudioWidget(app::Workspace* workspace, const app::Resource& resource);
-       ~AudioWidget();
+       ~AudioWidget() override;
 
-        virtual void InitializeContent() override;
-        virtual void InitializeSettings(const UISettings& settings) override;
-        virtual QString GetId() const override;
-        virtual bool IsAccelerated() const override;
-        virtual bool CanTakeAction(Actions action, const Clipboard*) const override;
-        virtual void AddActions(QToolBar& bar) override;
-        virtual void AddActions(QMenu& menu) override;
-        virtual void Refresh() override;
-        virtual void Save() override;
-        virtual bool SaveState(Settings& settings) const override;
-        virtual bool LoadState(const Settings& settings) override;
-        virtual void Cut(Clipboard& clipboard) override;
-        virtual void Copy(Clipboard& clipboard) const override;
-        virtual void Paste(const Clipboard& clipboard) override;
-        virtual bool HasUnsavedChanges() const override;
-        virtual bool GetStats(Stats* stats) const override;
+        void InitializeContent() override;
+        void InitializeSettings(const UISettings& settings) override;
+        QString GetId() const override;
+        bool IsAccelerated() const override;
+        bool CanTakeAction(Actions action, const Clipboard*) const override;
+        void AddActions(QToolBar& bar) override;
+        void AddActions(QMenu& menu) override;
+        void Refresh() override;
+        void Save() override;
+        bool SaveState(Settings& settings) const override;
+        bool LoadState(const Settings& settings) override;
+        void Cut(Clipboard& clipboard) override;
+        void Copy(Clipboard& clipboard) const override;
+        void Paste(const Clipboard& clipboard) override;
+        bool HasUnsavedChanges() const override;
+        bool GetStats(Stats* stats) const override;
     private:
-        void GetSelectedElementProperties();
+        void ShowSelectedElementProperties();
         void SetSelectedElementProperties();
         void UpdateElementList();
         void OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event);
