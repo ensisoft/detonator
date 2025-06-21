@@ -71,7 +71,7 @@ glm::mat4 MakePerspectiveProjection(FRadians fov, float aspect, float znear, flo
 gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instancing);
 gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instancing);
 gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_instancing);
-
+gfx::ShaderSource MakePerceptual3DVertexShader(const gfx::Device& device, bool use_instancing);
 
 } // namespace
 

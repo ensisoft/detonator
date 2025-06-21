@@ -123,6 +123,25 @@ namespace gfx
         Vec2 aTexCoord;
     };
 
+    // Vertex for rendering 2D shapes, such as quads, where the content
+    // of the 2D shape rendered (basically the texture) is partially
+    // mapped into a 3D world.
+    // The intended use case is "isometric tile rendering" where each tile
+    // is rendered as a 2D billboard that is aligned to face the camera
+    // but the contents of each tile ae perceptually 3D. In order to compute
+    // effects such as lights better we cannot rely on the 2D objects geometry
+    // but rather the lights must be computed in the "perceptual 3D space".
+    struct Perceptual3DVertex {
+        Vec2 aPosition;
+        Vec2 aTexCoord;
+        // coordinate in the "tile 3D space". i.e. relative to
+        // the tile plane. We use this information to compute lights
+        // in perceptual 3D space.
+        Vec3 aPerceptualPosition;
+        // Normal of the vertex in the tile 3D space.
+        Vec3 aPerceptualNormal;
+    };
+
     // Vertex for #D drawing in the XYZ space.
     struct Vertex3D {
         // Coordinate / position of the vertex in the model space.
@@ -168,6 +187,18 @@ namespace gfx
 
     template<typename Vertex>
     const VertexLayout& GetVertexLayout();
+
+    template<> inline
+    const VertexLayout& GetVertexLayout<Perceptual3DVertex>()
+    {
+        static const VertexLayout layout(sizeof(Perceptual3DVertex), {
+            {"aPosition",           0, 2, 0, offsetof(Perceptual3DVertex, aPosition)},
+            {"aTexCoord",           0, 2, 0, offsetof(Perceptual3DVertex, aTexCoord)},
+            {"aPerceptualPosition", 0, 3, 0, offsetof(Perceptual3DVertex, aPerceptualPosition)},
+            {"aPerceptualNormal",   0, 3, 0, offsetof(Perceptual3DVertex, aPerceptualNormal)}
+        });
+        return layout;
+    }
 
     template<> inline
     const VertexLayout& GetVertexLayout<Vertex2D>()

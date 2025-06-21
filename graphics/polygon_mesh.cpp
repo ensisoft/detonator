@@ -199,6 +199,8 @@ ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& d
         src = MakeSimple3DVertexShader(device, env.instanced_draw);
     else if (mesh == MeshType::Model3D)
         src = MakeModel3DVertexShader(device, env.instanced_draw); // todo:
+    else if (mesh == MeshType::Perceptual3D)
+        src = MakePerceptual3DVertexShader(device, env.instanced_draw);
     else BUG("No such vertex shader");
 
     if (!mShaderSrc.empty())
@@ -532,6 +534,14 @@ void PolygonMeshInstance::ApplyDynamicState(const Environment& env, ProgramState
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
     program.SetUniform("kTime", (float)mTime);
     program.SetUniform("kRandom",(float)mRandom);
+
+    if (GetMeshType() == MeshType::Perceptual3D)
+    {
+        ASSERT(mPerceptualGeometry.has_value());
+        const auto& geometry = mPerceptualGeometry.value();
+        program.SetUniform("kWorldPosition",geometry.position);
+        program.SetUniform("kWorldSize", geometry.size);
+    }
 }
 
 ShaderSource PolygonMeshInstance::GetShader(const Environment& env, const Device& device) const
