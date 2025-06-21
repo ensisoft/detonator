@@ -541,8 +541,8 @@ void unit_test_polygon_builder_json()
     v0.aTexCoord.y = -0.5f;
     verts.push_back(v0);
 
-    gfx::tool::PolygonBuilder builder;
-    gfx::tool::PolygonBuilder::DrawCommand cmd;
+    gfx::tool::PolygonBuilder2D builder;
+    gfx::tool::PolygonBuilder2D::DrawCommand cmd;
     cmd.type = gfx::Geometry::DrawType::TriangleFan;
     cmd.offset = 1243;
     cmd.count = 555;
@@ -554,10 +554,10 @@ void unit_test_polygon_builder_json()
         data::JsonObject json;
         builder.IntoJson(json);
 
-        gfx::tool::PolygonBuilder copy;
+        gfx::tool::PolygonBuilder2D copy;
         TEST_REQUIRE(copy.FromJson(json));
-        TEST_REQUIRE(copy.GetNumVertices() == 1);
-        TEST_REQUIRE(copy.GetNumDrawCommands() == 1);
+        TEST_REQUIRE(copy.GetVertexCount() == 1);
+        TEST_REQUIRE(copy.GetCommandCount() == 1);
         TEST_REQUIRE(copy.GetVertex(0) == v0);
         TEST_REQUIRE(copy.GetDrawCommand(0).type   == gfx::Geometry::DrawType::TriangleFan);
         TEST_REQUIRE(copy.GetDrawCommand(0).offset == 1243);
@@ -582,7 +582,7 @@ void unit_test_polygon_builder_build()
 
     // test finding the right draw command.
     {
-        gfx::tool::PolygonBuilder poly;
+        gfx::tool::PolygonBuilder2D poly;
         poly.AddVertices(verts);
 
         gfx::Geometry::DrawCommand cmd;
@@ -616,7 +616,7 @@ void unit_test_polygon_builder_build()
 
     // test erase/insert with only one draw cmd
     {
-        gfx::tool::PolygonBuilder poly;
+        gfx::tool::PolygonBuilder2D poly;
         poly.AddVertices(verts);
 
         gfx::Geometry::DrawCommand cmd;
@@ -646,7 +646,7 @@ void unit_test_polygon_builder_build()
 
     // test erase/insert first draw command first index
     {
-        gfx::tool::PolygonBuilder poly;
+        gfx::tool::PolygonBuilder2D poly;
         poly.AddVertices(verts);
 
         gfx::Geometry::DrawCommand cmd;
@@ -657,8 +657,8 @@ void unit_test_polygon_builder_build()
         cmd.offset = 3;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);
-        TEST_REQUIRE(poly.GetNumDrawCommands() == 2);
-        TEST_REQUIRE(poly.GetNumVertices() == 6);
+        TEST_REQUIRE(poly.GetCommandCount() == 2);
+        TEST_REQUIRE(poly.GetVertexCount() == 6);
 
         poly.EraseVertex(0);
         TEST_REQUIRE(poly.GetVertex(0).aPosition.x == real::float32(1.0f));
@@ -686,7 +686,7 @@ void unit_test_polygon_builder_build()
 
     // test erase/insert first draw command last index
     {
-        gfx::tool::PolygonBuilder poly;
+        gfx::tool::PolygonBuilder2D poly;
         poly.AddVertices(verts);
 
         gfx::Geometry::DrawCommand cmd;
@@ -697,8 +697,8 @@ void unit_test_polygon_builder_build()
         cmd.offset = 3;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);
-        TEST_REQUIRE(poly.GetNumDrawCommands() == 2);
-        TEST_REQUIRE(poly.GetNumVertices() == 6);
+        TEST_REQUIRE(poly.GetCommandCount() == 2);
+        TEST_REQUIRE(poly.GetVertexCount() == 6);
 
         poly.EraseVertex(2);
         TEST_REQUIRE(poly.GetVertex(0).aPosition.x == real::float32(0.0f));
@@ -726,7 +726,7 @@ void unit_test_polygon_builder_build()
 
     // test erase/insert from/into second draw command.
     {
-        gfx::tool::PolygonBuilder poly;
+        gfx::tool::PolygonBuilder2D poly;
         poly.AddVertices(verts);
 
         gfx::Geometry::DrawCommand cmd;
@@ -737,8 +737,8 @@ void unit_test_polygon_builder_build()
         cmd.offset = 3;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);
-        TEST_REQUIRE(poly.GetNumDrawCommands() == 2);
-        TEST_REQUIRE(poly.GetNumVertices() == 6);
+        TEST_REQUIRE(poly.GetCommandCount() == 2);
+        TEST_REQUIRE(poly.GetVertexCount() == 6);
 
         poly.EraseVertex(4);
         TEST_REQUIRE(poly.GetDrawCommand(0).offset == 0);

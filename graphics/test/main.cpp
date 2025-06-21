@@ -326,7 +326,7 @@ class PacmanPolygon
 public:
     static void Build(gfx::PolygonMeshClass* polygon, float time)
     {
-        gfx::tool::PolygonBuilder builder;
+        gfx::tool::PolygonBuilder2D builder;
         builder.SetStatic(false);
         AddPacman(builder, 0.4f, -0.5f, 0.3f, time);
         AddCircleShape(builder, 0.60f, -0.5f, 0.05f);
@@ -336,7 +336,7 @@ public:
         builder.BuildPoly(*polygon);
     }
 private:
-    static void AddPacman(gfx::tool::PolygonBuilder& poly, float x, float y, float r, float time)
+    static void AddPacman(gfx::tool::PolygonBuilder2D& poly, float x, float y, float r, float time)
     {
         gfx::Vertex2D center = {
                 {x, y}, {x, -y}
@@ -359,12 +359,12 @@ private:
         }
         gfx::Geometry::DrawCommand cmd;
         cmd.type   = gfx::Geometry::DrawType::TriangleFan;
-        cmd.offset = poly.GetNumVertices();
+        cmd.offset = poly.GetVertexCount();
         cmd.count  = verts.size();
         poly.AddVertices(std::move(verts));
         poly.AddDrawCommand(cmd);
     }
-    static void AddCircleShape(gfx::tool::PolygonBuilder& poly, float x, float y, float r)
+    static void AddCircleShape(gfx::tool::PolygonBuilder2D& poly, float x, float y, float r)
     {
         gfx::Vertex2D center = {
                 {x, y}, {x, -y}
@@ -386,7 +386,7 @@ private:
         }
         gfx::Geometry::DrawCommand cmd;
         cmd.type   = gfx::Geometry::DrawType::TriangleFan;
-        cmd.offset = poly.GetNumVertices();
+        cmd.offset = poly.GetVertexCount();
         cmd.count  = verts.size();
         poly.AddVertices(std::move(verts));
         poly.AddDrawCommand(cmd);
