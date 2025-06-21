@@ -200,4 +200,27 @@ gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_in
     return source;
 }
 
+gfx::ShaderSource MakePerceptual3DVertexShader(const gfx::Device& device, bool use_instancing)
+{
+    static const char* shader = {
+#include "shaders/vertex_perceptual_3d_shader.glsl"
+    };
+
+    ShaderSource source;
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
+    source.SetType(ShaderSource::Type::Vertex);
+    if (use_instancing)
+    {
+        source.AddPreprocessorDefinition("INSTANCED_DRAW");
+    }
+    source.LoadRawSource(vertex_base);
+    source.LoadRawSource(shader);
+    source.AddShaderName("Perceptual 3D Shader");
+    source.AddShaderSourceUri("shaders/vertex_base.glsl");
+    source.AddShaderSourceUri("shaders/vertex_perceptual_3d_shader.glsl");
+    source.AddDebugInfo("Instanced", use_instancing ? "YES" : "NO");
+    return source;
+
+}
+
 } // namespace

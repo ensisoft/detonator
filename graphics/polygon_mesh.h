@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <glm/vec3.hpp>
 #include "warnpop.h"
 
 #include <string>
@@ -43,7 +44,8 @@ namespace gfx
         enum class MeshType {
             Simple2D,
             Simple3D,
-            Model3D
+            Model3D,
+            Perceptual3D
         };
 
         explicit PolygonMeshClass(std::string id = base::RandomString(10),
@@ -171,6 +173,16 @@ namespace gfx
     public:
         using MeshType = PolygonMeshClass::MeshType;
 
+        // Data to support geometric (polygonal) tile rendering.
+        // This is only used / required when the mesh type is
+        // Perceptual3DTile
+        struct Perceptual3DGeometry{
+            // Mesh position in the perceptual 3D space.
+            glm::vec3 position;
+            // Mesh size (scaling coefficients) in the perceptual 3D space.
+            glm::vec3 size;
+        };
+
         explicit PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass,
                                      std::string sub_mesh_key = "") noexcept;
         explicit PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key = "");
@@ -185,6 +197,8 @@ namespace gfx
         { mTime = time; }
         inline void SetRandomValue(float value) noexcept
         { mRandom = value; }
+        inline void SetPerceptualGeometry(const Perceptual3DGeometry& geometry) noexcept
+        { mPerceptualGeometry = geometry; }
 
         void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
@@ -210,6 +224,7 @@ namespace gfx
         { return mClass.get(); }
     private:
         std::shared_ptr<const PolygonMeshClass> mClass;
+        std::optional<Perceptual3DGeometry> mPerceptualGeometry;
         std::string mSubMeshKey;
         double mTime = 0.0;
         float mRandom = 0.0f;
