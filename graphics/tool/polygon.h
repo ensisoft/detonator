@@ -16,7 +16,10 @@
 
 #pragma once
 
+#include <cstring> // for memcpy
+
 #include "graphics/geometry.h"
+#include "graphics/vertex.h"
 
 // the stuff here is *NOT NEEDED* at runtime. The builder could
 // be placed somwhere else for example under the editor itself but
@@ -28,28 +31,21 @@ namespace gfx {
 
 namespace tool {
 
-    class PolygonBuilder
+    class IPolygonBuilder
     {
     public:
-        // Define how the geometry is to be rasterized.
         using DrawCommand = gfx::Geometry::DrawCommand;
 
-        using Vertex = gfx::Vertex2D;
-
-        void Clear() noexcept;
-        void ClearDrawCommands() noexcept;
-        void ClearVertices() noexcept;
-
-        // Add the array of vertices to the existing vertex buffer.
-        void AddVertices(const std::vector<Vertex>& vertices);
-        void AddVertices(std::vector<Vertex>&& vertices);
-        void AddVertices(const Vertex* vertices, size_t num_vertices);
-
-        // Update the vertex at the given index.
-        void UpdateVertex(const Vertex& vert, size_t index);
+        virtual ~IPolygonBuilder() = default;
+        virtual void ClearAll() noexcept = 0;
+        virtual void ClearDrawCommands() noexcept = 0;
+        virtual void ClearVertices() noexcept = 0;
 
         // Erase the vertex at the given index.
-        void EraseVertex(size_t index);
+        virtual void EraseVertex(size_t index) = 0;
+
+        // Update the vertex at the given index.
+        virtual void UpdateVertex(const void* vertex, size_t index) = 0;
 
         // Insert a vertex into the vertex array where the index is
         // an index within the given draw command. Index can be in
@@ -60,45 +56,107 @@ namespace tool {
         // new vertex will grow its count by 1 and all draw commands
         // that come after the will have their starting offsets
         // incremented by 1.
-        void InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index);
+        virtual void InsertVertex(const void* vertex, size_t cmd_index, size_t index) = 0;
 
-        void AddDrawCommand(const DrawCommand& cmd);
+        virtual void AddDrawCommand(const DrawCommand& cmd) = 0;
 
-        void UpdateDrawCommand(const DrawCommand& cmd, size_t index) noexcept;
+        virtual void UpdateDrawCommand(const DrawCommand& cmd, size_t index) noexcept = 0;
+
         // Find the draw command that contains the vertex at the given index.
         // Returns index to the draw command.
-        size_t FindDrawCommand(size_t vertex_index) const noexcept;
+        virtual size_t FindDrawCommand(size_t vertex_index) const noexcept = 0;
 
         // Compute a hash value based on the content only, i.e. the
         // vertices and the draw commands.
         // The hash value is used to realize changes done to a polygon
         // with dynamic content and then to re-upload the data to the GPU.
-        size_t GetContentHash() const noexcept;
+        virtual size_t GetContentHash() const noexcept = 0;
 
-        inline size_t GetNumVertices() const noexcept
+        virtual size_t GetVertexCount() const noexcept = 0;
+
+        virtual size_t GetCommandCount() const noexcept = 0;
+
+        virtual const DrawCommand& GetDrawCommand(size_t index ) const = 0;
+
+        virtual void GetVertex(void* vertex, size_t index) const noexcept = 0;
+
+        virtual bool IsStatic() const noexcept = 0;
+        virtual void SetStatic(bool on_off) noexcept = 0;
+
+        virtual void IntoJson(data::Writer& writer) const = 0;
+        virtual bool FromJson(const data::Reader& reader) = 0;
+
+        virtual void BuildPoly(PolygonMeshClass& polygon) const = 0;
+        virtual void InitFrom(const PolygonMeshClass& polygon) = 0;
+    };
+
+    template<typename Vertex>
+    class PolygonBuilder : public IPolygonBuilder
+    {
+    public:
+        // Define how the geometry is to be rasterized.
+        using DrawCommand = gfx::Geometry::DrawCommand;
+
+        void ClearAll() noexcept override;
+        void ClearDrawCommands() noexcept override;
+        void ClearVertices() noexcept override;
+
+        // Add the array of vertices to the existing vertex buffer.
+        void AddVertices(const std::vector<Vertex>& vertices);
+        void AddVertices(std::vector<Vertex>&& vertices);
+        void AddVertices(const Vertex* vertices, size_t num_vertices);
+
+        void UpdateVertex(const Vertex& vert, size_t index);
+        void UpdateVertex(const void* vertex, size_t index) override;
+
+        void EraseVertex(size_t index) override;
+
+        void InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index);
+        void InsertVertex(const void* vertex, size_t cmd_index, size_t index) override;
+
+        void AddDrawCommand(const DrawCommand& cmd) override;
+
+        void UpdateDrawCommand(const DrawCommand& cmd, size_t index) noexcept override;
+
+        size_t FindDrawCommand(size_t vertex_index) const noexcept override;
+
+        size_t GetContentHash() const noexcept override;
+
+        size_t GetVertexCount() const noexcept override
         { return mVertices.size(); }
-        inline size_t GetNumDrawCommands() const noexcept
+        size_t GetCommandCount() const noexcept override
         { return mDrawCommands.size(); }
-        inline const DrawCommand& GetDrawCommand(size_t index) const noexcept
+        const DrawCommand& GetDrawCommand(size_t index) const noexcept override
         { return mDrawCommands[index]; }
+
+        void GetVertex(void* vertex, size_t index) const noexcept override
+        {
+            const auto& vert = mVertices[index];
+            std::memcpy(vertex, &vert, sizeof(vert));
+        }
+
         inline const Vertex& GetVertex(size_t index) const noexcept
         { return mVertices[index]; }
-        inline bool IsStatic() const noexcept
+
+        bool IsStatic() const noexcept override
         { return mStatic; }
-        inline void SetStatic(bool on_off) noexcept
+        void SetStatic(bool on_off) noexcept override
         { mStatic = on_off; }
 
-        void IntoJson(data::Writer& writer) const;
-        bool FromJson(const data::Reader& reader);
+        void IntoJson(data::Writer& writer) const override;
+        bool FromJson(const data::Reader& reader) override;
 
-        void BuildPoly(PolygonMeshClass& polygon) const;
-        void InitFrom(const PolygonMeshClass& polygon);
+        void BuildPoly(PolygonMeshClass& polygon) const override;
+        void InitFrom(const PolygonMeshClass& polygon) override;
 
     private:
         std::vector<Vertex> mVertices;
         std::vector<DrawCommand> mDrawCommands;
         bool mStatic = true;
     };
+
+    using PolygonBuilder2D = PolygonBuilder<Vertex2D>;
+    using PolygonBuilderPerceptual3D = PolygonBuilder<Perceptual3DVertex>;
 
 } // namespace
 } // namespace

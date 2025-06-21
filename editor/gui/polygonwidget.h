@@ -101,7 +101,7 @@ namespace gui
         // the current polygon we're editing.
         gfx::PolygonMeshClass mPolygon;
         // the builder tool for editing the shape
-        gfx::tool::PolygonBuilder mBuilder;
+        gfx::tool::PolygonBuilder2D mBuilder;
         // the current material for the blueprint (the background image)
         std::unique_ptr<gfx::Material> mBlueprint;
         // the list of points for adding the next draw command.

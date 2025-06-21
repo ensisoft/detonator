@@ -28,44 +28,65 @@
 namespace gfx {
 namespace tool {
 
-void PolygonBuilder::Clear() noexcept
+template<typename Vertex>
+void PolygonBuilder<Vertex>::ClearAll() noexcept
 {
     mVertices.clear();
     mDrawCommands.clear();
 }
-void PolygonBuilder::ClearDrawCommands() noexcept
+
+template<typename Vertex>
+void PolygonBuilder<Vertex>::ClearDrawCommands() noexcept
 {
     mDrawCommands.clear();
 }
-void PolygonBuilder::ClearVertices() noexcept
+
+template<typename Vertex>
+void PolygonBuilder<Vertex>::ClearVertices() noexcept
 {
     mVertices.clear();
 }
-void PolygonBuilder::AddVertices(const std::vector<Vertex>& vertices)
+
+template<typename Vertex>
+void PolygonBuilder<Vertex>::AddVertices(const std::vector<Vertex>& vertices)
 {
     std::copy(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
 }
-void PolygonBuilder::AddVertices(std::vector<Vertex>&& vertices)
+
+template<typename Vertex>
+void PolygonBuilder<Vertex>::AddVertices(std::vector<Vertex>&& vertices)
 {
     std::move(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
 }
-void PolygonBuilder::AddVertices(const Vertex* vertices, size_t num_vertices)
+
+template<typename Vertex>
+void PolygonBuilder<Vertex>::AddVertices(const Vertex* vertices, size_t num_vertices)
 {
     for (size_t i=0; i<num_vertices; ++i)
         mVertices.push_back(vertices[i]);
 }
-void PolygonBuilder::AddDrawCommand(const DrawCommand& cmd)
+
+template<typename Vertex>
+void PolygonBuilder<Vertex>::AddDrawCommand(const DrawCommand& cmd)
 {
     mDrawCommands.push_back(cmd);
 }
 
-void PolygonBuilder::UpdateVertex(const Vertex& vert, size_t index)
+template<typename Vertex>
+void PolygonBuilder<Vertex>::UpdateVertex(const Vertex& vert, size_t index)
 {
     ASSERT(index < mVertices.size());
     mVertices[index] = vert;
 }
 
-void PolygonBuilder::EraseVertex(size_t index)
+template<typename Vertex>
+void PolygonBuilder<Vertex>::UpdateVertex(const void* vertex, size_t index)
+{
+    UpdateVertex(*static_cast<const Vertex*>(vertex), index);
+}
+
+template<typename Vertex>
+void PolygonBuilder<Vertex>::EraseVertex(size_t index)
 {
     ASSERT(index < mVertices.size());
     auto it = mVertices.begin();
@@ -90,7 +111,8 @@ void PolygonBuilder::EraseVertex(size_t index)
     }
 }
 
-void PolygonBuilder::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index)
+template<typename Vertex>
+void PolygonBuilder<Vertex>::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index)
 {
     ASSERT(cmd_index < mDrawCommands.size());
     ASSERT(index <= mDrawCommands[cmd_index].count);
@@ -113,13 +135,21 @@ void PolygonBuilder::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t
     }
 }
 
-void PolygonBuilder::UpdateDrawCommand(const DrawCommand& cmd, size_t index) noexcept
+template<typename Vertex>
+void PolygonBuilder<Vertex>::InsertVertex(const void* vertex, size_t cmd_index, size_t index)
+{
+    InsertVertex(*static_cast<const Vertex*>(vertex), cmd_index, index);
+}
+
+template<typename Vertex>
+void PolygonBuilder<Vertex>::UpdateDrawCommand(const DrawCommand& cmd, size_t index) noexcept
 {
     ASSERT(index < mDrawCommands.size());
     mDrawCommands[index] = cmd;
 }
 
-size_t PolygonBuilder::FindDrawCommand(size_t vertex_index) const noexcept
+template<typename Vertex>
+size_t PolygonBuilder<Vertex>::FindDrawCommand(size_t vertex_index) const noexcept
 {
     for (size_t i=0; i<mDrawCommands.size(); ++i)
     {
@@ -134,7 +164,8 @@ size_t PolygonBuilder::FindDrawCommand(size_t vertex_index) const noexcept
     BUG("no draw command found.");
 }
 
-size_t PolygonBuilder::GetContentHash() const noexcept
+template<typename Vertex>
+size_t PolygonBuilder<Vertex>::GetContentHash() const noexcept
 {
     size_t hash = 0;
     for (const auto& vertex : mVertices)
@@ -149,7 +180,8 @@ size_t PolygonBuilder::GetContentHash() const noexcept
 }
 
 
-void PolygonBuilder::IntoJson(data::Writer& writer) const
+template<typename Vertex>
+void PolygonBuilder<Vertex>::IntoJson(data::Writer& writer) const
 {
     const VertexStream  vertex_stream(gfx::GetVertexLayout<Vertex>(), mVertices);
     const CommandStream command_stream(mDrawCommands);
@@ -160,7 +192,8 @@ void PolygonBuilder::IntoJson(data::Writer& writer) const
     writer.Write("static", mStatic);
 }
 
-bool PolygonBuilder::FromJson(const data::Reader& reader)
+template<typename Vertex>
+bool PolygonBuilder<Vertex>::FromJson(const data::Reader& reader)
 {
     bool ok = true;
 
@@ -172,14 +205,15 @@ bool PolygonBuilder::FromJson(const data::Reader& reader)
     ok &= command_buffer.FromJson(reader);
     ok &= reader.Read("static", &mStatic);
 
-    mVertices = vertex_buffer.CopyBuffer<Vertex2D>();
+    mVertices = vertex_buffer.CopyBuffer<Vertex>();
     return ok;
 }
 
-void PolygonBuilder::BuildPoly(PolygonMeshClass& polygon) const
+template<typename Vertex>
+void PolygonBuilder<Vertex>::BuildPoly(PolygonMeshClass& polygon) const
 {
     const auto count = mVertices.size();
-    const auto bytes = count * sizeof(Vertex2D);
+    const auto bytes = count * sizeof(Vertex);
 
     std::vector<uint8_t> buffer;
     buffer.resize(bytes);
@@ -189,23 +223,24 @@ void PolygonBuilder::BuildPoly(PolygonMeshClass& polygon) const
 
     polygon.SetVertexBuffer(std::move(buffer));
     polygon.SetContentHash(GetContentHash());
-    polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    polygon.SetVertexLayout(gfx::GetVertexLayout<Vertex>());
     polygon.SetCommandBuffer(mDrawCommands);
     polygon.SetStatic(mStatic);
 }
 
-void PolygonBuilder::InitFrom(const PolygonMeshClass& polygon)
+template<typename Vertex>
+void PolygonBuilder<Vertex>::InitFrom(const PolygonMeshClass& polygon)
 {
     mDrawCommands.clear();
     mVertices.clear();
 
     if (polygon.HasInlineData())
     {
-        ASSERT(*polygon.GetVertexLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
+        ASSERT(*polygon.GetVertexLayout() == gfx::GetVertexLayout<Vertex>());
 
         const void* ptr = polygon.GetVertexBufferPtr();
         const auto bytes = polygon.GetVertexBufferSize();
-        const auto count = bytes / sizeof(Vertex2D);
+        const auto count = bytes / sizeof(Vertex);
 
         mVertices.resize(count);
         if (count)
@@ -218,6 +253,10 @@ void PolygonBuilder::InitFrom(const PolygonMeshClass& polygon)
     }
     mStatic = polygon.IsStatic();
 }
+
+template class PolygonBuilder<Vertex2D>;
+template class PolygonBuilder<Perceptual3DVertex>;
+
 
 } // namespace
 } // namespace

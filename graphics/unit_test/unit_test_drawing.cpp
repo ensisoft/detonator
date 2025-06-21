@@ -1480,7 +1480,7 @@ void unit_test_polygon_inline_data()
 {
     TEST_CASE(test::Type::Feature)
 
-    gfx::tool::PolygonBuilder builder;
+    gfx::tool::PolygonBuilder2D builder;
     gfx::PolygonMeshClass poly;
     TEST_REQUIRE(poly.GetContentHash() == 0);
 

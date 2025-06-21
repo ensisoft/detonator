@@ -602,7 +602,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // visualize the vertices.
     view.Resize(6, 6);
-    for (size_t i=0; i<mBuilder.GetNumVertices(); ++i)
+    for (size_t i=0; i<mBuilder.GetVertexCount(); ++i)
     {
         const auto& vert = mBuilder.GetVertex(i);
         const auto x = width * vert.aPosition.x;
@@ -646,7 +646,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     cmd.offset = 0;
     cmd.count  = points.size();
 
-    gfx::tool::PolygonBuilder builder;
+    gfx::tool::PolygonBuilder2D builder;
     builder.AddVertices(MakeVerts(points, width, height));
     builder.AddDrawCommand(cmd);
 
@@ -669,7 +669,7 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 
     const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
 
-    for (size_t i=0; i<mBuilder.GetNumVertices(); ++i)
+    for (size_t i=0; i<mBuilder.GetVertexCount(); ++i)
     {
         const auto& vert = mBuilder.GetVertex(i);
         const auto x = width * vert.aPosition.x;
@@ -785,7 +785,7 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     const auto height = size;
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
 
-    const auto num_vertices = mBuilder.GetNumVertices();
+    const auto num_vertices = mBuilder.GetVertexCount();
 
     QPoint point = pos;
     if (GetValue(mUI.chkSnap))
@@ -870,7 +870,7 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
         gfx::Geometry::DrawCommand cmd;
         cmd.type   = gfx::Geometry::DrawType::TriangleFan;
         cmd.count  = mPoints.size();
-        cmd.offset = mBuilder.GetNumVertices();
+        cmd.offset = mBuilder.GetVertexCount();
         mBuilder.AddVertices(MakeVerts(mPoints, width, height));
         mBuilder.AddDrawCommand(cmd);
         mPoints.clear();
@@ -882,9 +882,9 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
     else if (key->key() == Qt::Key_Delete ||
              key->key() == Qt::Key_D)
     {
-        if (mVertexIndex < mBuilder.GetNumVertices())
+        if (mVertexIndex < mBuilder.GetVertexCount())
             mBuilder.EraseVertex(mVertexIndex);
-        if (mBuilder.GetNumVertices() == 0)
+        if (mBuilder.GetVertexCount() == 0)
             mUI.actionClear->setEnabled(false);
     }
     else if (key->key() == Qt::Key_E)
