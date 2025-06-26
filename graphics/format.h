@@ -21,10 +21,13 @@
 #include <cstdio>
 #include <string>
 
-#include "graphics/format.h"
+#include "graphics/vertex.h"
 
 namespace gfx
 {
     // provide formatting here for gfx types.
+    std::string ToString(const Vec2& vec2);
+    std::string ToString(const Vec3& vec3);
+    std::string ToString(const Vec4& vec4);
 
 } // namespace

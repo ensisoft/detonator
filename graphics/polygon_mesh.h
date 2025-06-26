@@ -127,6 +127,8 @@ namespace gfx
 
         const DrawCmd* GetSubMeshDrawCmd(const std::string& key) const noexcept;
 
+        void ClearContent();
+
         Type GetType() const override
         { return Type::Polygon; }
         std::string GetId() const override

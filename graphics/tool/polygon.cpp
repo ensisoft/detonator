@@ -212,14 +212,16 @@ bool PolygonBuilder<Vertex>::FromJson(const data::Reader& reader)
 template<typename Vertex>
 void PolygonBuilder<Vertex>::BuildPoly(PolygonMeshClass& polygon) const
 {
+    polygon.ClearContent();
+
     const auto count = mVertices.size();
     const auto bytes = count * sizeof(Vertex);
+    if (count == 0)
+        return;
 
     std::vector<uint8_t> buffer;
     buffer.resize(bytes);
-
-    if (bytes)
-        std::memcpy(buffer.data(), mVertices.data(), bytes);
+    std::memcpy(buffer.data(), mVertices.data(), bytes);
 
     polygon.SetVertexBuffer(std::move(buffer));
     polygon.SetContentHash(GetContentHash());

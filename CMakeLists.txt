@@ -505,6 +505,7 @@ add_executable(Detonator
     audio/graph.cpp
     audio/proxy.cpp
     graphics/tool/polygon.cpp
+    graphics/format.cpp
     editor/app/import.h
     editor/app/import.cpp
     editor/app/event.h
@@ -808,6 +809,7 @@ install(FILES "${CMAKE_CURRENT_LIST_DIR}/tools/http-server.py" DESTINATION "${CM
 # game host application which provides a host process to load the game
 # libraries for playback.
 add_executable(EditorGameHost
+    graphics/format.cpp
     editor/app/format.cpp
     editor/app/utility.cpp
     editor/app/eventlog.h

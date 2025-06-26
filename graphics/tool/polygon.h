@@ -137,6 +137,8 @@ namespace tool {
 
         inline const Vertex& GetVertex(size_t index) const noexcept
         { return mVertices[index]; }
+        Vertex& GetVertex(size_t index) noexcept
+        { return mVertices[index]; }
 
         bool IsStatic() const noexcept override
         { return mStatic; }
