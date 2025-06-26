@@ -40,31 +40,32 @@ namespace gui
         Q_OBJECT
 
     public:
-        ShapeWidget(app::Workspace* workspace);
+        explicit ShapeWidget(app::Workspace* workspace);
         ShapeWidget(app::Workspace* workspace, const app::Resource& resource);
-       ~ShapeWidget();
+       ~ShapeWidget() override;
 
-        virtual QString GetId() const override;
-        virtual void InitializeSettings(const UISettings& settings) override;
-        virtual void SetViewerMode() override;
-        virtual void AddActions(QToolBar& bar) override;
-        virtual void AddActions(QMenu& menu) override;
-        virtual bool SaveState(Settings& settings) const override;
-        virtual bool LoadState(const Settings& settings) override;
-        virtual bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
-        virtual void ReloadShaders() override;
-        virtual void ReloadTextures() override;
-        virtual void Shutdown() override;
-        virtual void Render() override;
-        virtual void Update(double secs) override;
-        virtual void Save() override;
-        virtual bool HasUnsavedChanges() const override;
-        virtual bool GetStats(Stats* stats) const override;
-        virtual void OnAddResource(const app::Resource* resource) override;
-        virtual void OnRemoveResource(const app::Resource* resource) override;
+        QString GetId() const override;
+        void InitializeSettings(const UISettings& settings) override;
+        void InitializeContent() override;
+        void SetViewerMode() override;
+        void AddActions(QToolBar& bar) override;
+        void AddActions(QMenu& menu) override;
+        bool SaveState(Settings& settings) const override;
+        bool LoadState(const Settings& settings) override;
+        bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
+        void ReloadShaders() override;
+        void ReloadTextures() override;
+        void Shutdown() override;
+        void Render() override;
+        void Update(double secs) override;
+        void Save() override;
+        bool HasUnsavedChanges() const override;
+        bool GetStats(Stats* stats) const override;
+        void OnAddResource(const app::Resource* resource) override;
+        void OnRemoveResource(const app::Resource* resource) override;
 
     private slots:
-        void on_widgetColor_colorChanged(QColor color);
+        void on_widgetColor_colorChanged(const QColor& color);
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();
@@ -89,6 +90,9 @@ namespace gui
     private:
         Ui::ShapeWidget mUI;
     private:
+        class VertexDataTable;
+        class Vertex2DTable;
+
         enum class GridDensity {
             Grid10x10 = 10,
             Grid20x20 = 20,
@@ -106,6 +110,9 @@ namespace gui
         std::unique_ptr<gfx::Material> mBlueprint;
         // the list of points for adding the next draw command.
         std::vector<QPoint> mPoints;
+
+        std::unique_ptr<VertexDataTable> mTable;
+
         // the most current (latest) point is where the mouse
         // currently is.
         QPoint mCurrentPoint;

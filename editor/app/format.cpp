@@ -18,6 +18,7 @@
 
 #include "base/assert.h"
 #include "base/color4f.h"
+#include "graphics/format.h"
 #include "editor/app/format.h"
 
 namespace app
@@ -86,6 +87,23 @@ QString toString(const base::Color4f& color)
 {
     return QString::fromStdString(base::ToString(color));
 }
+
+#ifdef DETONATOR_EDITOR_BUILD
+QString toString(const gfx::Vec2& vec)
+{
+    return QString::fromStdString(gfx::ToString(vec));
+}
+
+QString toString(const gfx::Vec3& vec)
+{
+    return QString::fromStdString(gfx::ToString(vec));
+}
+
+QString toString(const gfx::Vec4& vec)
+{
+    return QString::fromStdString(gfx::ToString(vec));
+}
+#endif
 
 QString toString(const Bytes& bytes)
 {

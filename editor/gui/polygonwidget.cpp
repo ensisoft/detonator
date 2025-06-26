@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2025 Sami Väisänen
+// Copyright (C) 2020-2025 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,10 +19,14 @@
 #include "warnpush.h"
 #  include <QMessageBox>
 #  include <QVector2D>
+#  include <QAbstractTableModel>
 #  include <base64/base64.h>
 #include "warnpop.h"
 
+#include <cmath>
+
 #include "base/math.h"
+#include "base/utility.h"
 #include "data/json.h"
 #include "graphics/material.h"
 #include "graphics/material_class.h"
@@ -35,6 +39,7 @@
 #include "graphics/polygon_mesh.h"
 #include "graphics/guidegrid.h"
 #include "editor/app/eventlog.h"
+#include "editor/app/format.h"
 #include "editor/gui/polygonwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
@@ -78,6 +83,138 @@ float PointDist(const QPoint& a, const QPoint& b)
 namespace gui
 {
 
+class ShapeWidget::VertexDataTable : public QAbstractTableModel
+{
+public:
+    virtual void UpdateVertex(const gfx::Vertex2D& vertex, size_t vertex_index) = 0;
+    virtual void InsertVertex(const gfx::Vertex2D& vertex, size_t vertex_index, size_t cmd_index) = 0;
+    virtual void AddVertices(std::vector<gfx::Vertex2D> vertices) = 0;
+    virtual void EraseVertex(size_t vertex_index) = 0;
+    virtual void Reset() = 0;
+};
+
+class ShapeWidget::Vertex2DTable : public VertexDataTable {
+public:
+    explicit Vertex2DTable(gfx::tool::PolygonBuilder2D& builder) : mBuilder(builder)
+    {}
+    Qt::ItemFlags flags(const QModelIndex& index) const override
+    {
+        return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
+    }
+
+    bool setData(const QModelIndex& index, const QVariant& variant, int role) override
+    {
+        const auto row = static_cast<size_t>(index.row());
+        const auto col = static_cast<size_t>(index.column());
+
+        bool success = false;
+        const float value = variant.toFloat(&success);
+        if (!success)
+            return false;
+
+        auto& vertex = mBuilder.GetVertex(row);
+        if (col == 0)
+            vertex.aPosition.x = value;
+        else if (col == 1)
+            vertex.aPosition.y = value;
+        else if (col == 2)
+            vertex.aTexCoord.x = value;
+        else if (col == 3)
+            vertex.aTexCoord.y = value;
+
+        emit dataChanged(this->index(row, 0), this->index(row, 4));
+        return true;
+    }
+
+    QVariant data(const QModelIndex& index, int role) const override
+    {
+        const auto row = static_cast<size_t>(index.row());
+        const auto col = static_cast<size_t>(index.column());
+        if (role == Qt::DisplayRole)
+        {
+            const auto& vertex = mBuilder.GetVertex(row);
+            if (col == 0)
+                return QString::number(vertex.aPosition.x, 'f', 2);
+            else if (col == 1)
+                return QString::number(vertex.aPosition.y, 'f', 2);
+            else if (col == 2)
+                return QString::number(vertex.aTexCoord.x, 'f', 2);
+            else if (col == 3)
+                return QString::number(vertex.aTexCoord.y, 'f', 2);
+
+        }
+        return {};
+    }
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    {
+        if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+        {
+            if (section == 0)
+                return "aPosition X";
+            else if (section == 1)
+                return "aPosition Y";
+            else if (section == 2)
+                return "aTexCoord X";
+            else if (section == 3)
+                return "aTexCoord Y";
+        }
+        return {};
+    }
+    int rowCount(const QModelIndex&) const override
+    {
+        return static_cast<int>(mBuilder.GetVertexCount());
+    }
+    int columnCount(const QModelIndex&) const override
+    {
+        return 4;
+    }
+
+    void UpdateVertex(const gfx::Vertex2D& vertex, size_t vertex_index) override
+    {
+        const auto row = static_cast<int>(vertex_index);
+
+        mBuilder.UpdateVertex(vertex, vertex_index);
+
+        emit dataChanged(this->index(row, 0), this->index(row, 4));
+    }
+    void InsertVertex(const gfx::Vertex2D& vertex, size_t vertex_index, size_t cmd_index) override
+    {
+        const auto first_index = static_cast<int>(vertex_index);
+        const auto last_index = static_cast<int>(vertex_index);
+
+        beginInsertRows(QModelIndex(),
+            static_cast<int>(first_index), static_cast<int>(last_index));
+        mBuilder.InsertVertex(vertex, cmd_index, vertex_index);
+        endInsertRows();
+    }
+
+    void AddVertices(std::vector<gfx::Vertex2D> vertices) override
+    {
+        const auto first_index = mBuilder.GetVertexCount();
+        const auto last_index = first_index + vertices.size() - 1;
+
+        beginInsertRows(QModelIndex(),
+            static_cast<int>(first_index), static_cast<int>(last_index));
+        mBuilder.AddVertices(std::move(vertices));
+        endInsertRows();
+    }
+    void EraseVertex(size_t index) override
+    {
+        beginRemoveRows(QModelIndex(), static_cast<int>(index), static_cast<int>(index));
+        mBuilder.EraseVertex(index);
+        endRemoveRows();
+    }
+
+    void Reset() override
+    {
+        beginResetModel();
+        endResetModel();
+    }
+private:
+    gfx::tool::PolygonBuilder2D& mBuilder;
+};
+
+
 ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
 {
     DEBUG("Create PolygonWidget");
@@ -104,8 +241,6 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
     menu->addAction(mUI.actionShowShader);
     mUI.btnAddShader->setMenu(menu);
 
-    mOriginalHash = mPolygon.GetHash();
-
     SetList(mUI.blueprints, workspace->ListUserDefinedMaterials());
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
@@ -118,6 +253,24 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
 
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid20x20);
+
+    mPolygon.SetName(GetValue(mUI.name));
+    mPolygon.SetStatic(GetValue(mUI.staticInstance));
+    mOriginalHash = mPolygon.GetHash();
+
+    mTable = std::make_unique<Vertex2DTable>(mBuilder);
+    mUI.tableView->setModel(mTable.get());
+
+    // Adwaita theme bugs out and doesn't show the data without this
+    // little hack here.
+    mTable->Reset();
+
+    QObject::connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+                     [this](const QItemSelection&, const QItemSelection&) {
+        const auto row = GetSelectedRow(mUI.tableView);
+        mVertexIndex = row;
+    });
+
 }
 
 ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resource) : ShapeWidget(workspace)
@@ -130,11 +283,12 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
 
     QString material;
     GetProperty(resource, "material", &material);
-    GetUserProperty(resource, "alpha",        mUI.alpha);
     GetUserProperty(resource, "grid",         mUI.cmbGrid);
     GetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
     GetUserProperty(resource, "show_grid",    mUI.chkShowGrid);
     GetUserProperty(resource, "widget",       mUI.widget);
+    GetUserProperty(resource, "splitter",     mUI.splitter);
+    GetUserProperty(resource, "kRandom",      mUI.kRandom);
 
     SetValue(mUI.name, resource.GetName());
     SetValue(mUI.ID, mPolygon.GetId());
@@ -176,15 +330,24 @@ void ShapeWidget::InitializeSettings(const UISettings& settings)
     SetValue(mUI.chkShowGrid, settings.show_grid);
 }
 
+void ShapeWidget::InitializeContent()
+{
+    QTimer::singleShot(10, this, [this]() {
+        QList<int> sizes {98, 100};
+        //mUI.splitter->setSizes(sizes);
+    });
+}
+
 void ShapeWidget::SetViewerMode()
 {
     SetVisible(mUI.baseProperties, false);
     SetVisible(mUI.lblHelp,        false);
     SetVisible(mUI.blueprints,     false);
-    SetVisible(mUI.alpha,          false);
     SetVisible(mUI.chkSnap,        false);
     SetVisible(mUI.chkSnap,        false);
     SetVisible(mUI.btnResetBlueprint, false);
+    SetVisible(mUI.lblRandom, false);
+    SetVisible(mUI.kRandom, false);
 }
 
 void ShapeWidget::AddActions(QToolBar& bar)
@@ -225,11 +388,12 @@ bool ShapeWidget::SaveState(Settings& settings) const
     settings.SetValue("Polygon", "material", (QString)GetItemId(mUI.blueprints));
     settings.SetValue("Polygon", "hash", mOriginalHash);
     settings.SaveWidget("Polygon", mUI.name);
-    settings.SaveWidget("Polygon", mUI.alpha);
     settings.SaveWidget("Polygon", mUI.chkShowGrid);
     settings.SaveWidget("Polygon", mUI.chkSnap);
     settings.SaveWidget("Polygon", mUI.cmbGrid);
     settings.SaveWidget("Polygon", mUI.widget);
+    settings.SaveWidget("Polygon", mUI.splitter);
+    settings.SaveWidget("Polygon", mUI.kRandom);
     return true;
 }
 bool ShapeWidget::LoadState(const Settings& settings)
@@ -240,11 +404,12 @@ bool ShapeWidget::LoadState(const Settings& settings)
     settings.GetValue("Polygon", "material", &material);
     settings.GetValue("Polygon", "hash", &mOriginalHash);
     settings.LoadWidget("Polygon", mUI.name);
-    settings.LoadWidget("Polygon", mUI.alpha);
     settings.LoadWidget("Polygon", mUI.chkShowGrid);
     settings.LoadWidget("Polygon", mUI.chkSnap);
     settings.LoadWidget("Polygon", mUI.cmbGrid);
     settings.LoadWidget("Polygon", mUI.widget);
+    settings.LoadWidget("Polygon", mUI.splitter);
+    settings.LoadWidget("Polygon", mUI.kRandom);
 
     if (!mPolygon.FromJson(json))
         WARN("Failed to restore polygon shape state.");
@@ -319,7 +484,14 @@ void ShapeWidget::Save()
 
 bool ShapeWidget::HasUnsavedChanges() const
 {
-    if (mOriginalHash == mPolygon.GetHash())
+    auto clone = mPolygon.Copy();
+    auto* poly = dynamic_cast<gfx::PolygonMeshClass*>(clone.get());
+    mBuilder.BuildPoly(*poly);
+
+    poly->SetStatic(GetValue(mUI.staticInstance));
+    poly->SetName(GetValue(mUI.name));
+
+    if (mOriginalHash == poly->GetHash())
         return false;
     return true;
 }
@@ -340,7 +512,7 @@ bool ShapeWidget::GetStats(Stats* stats) const
     return true;
 }
 
-void ShapeWidget::on_widgetColor_colorChanged(QColor color)
+void ShapeWidget::on_widgetColor_colorChanged(const QColor& color)
 {
     mUI.widget->SetClearColor(ToGfx(color));
 }
@@ -387,11 +559,12 @@ void ShapeWidget::on_actionSave_triggered()
 
     app::CustomShapeResource resource(mPolygon, GetValue(mUI.name));
     SetProperty(resource, "material", (QString)GetItemId(mUI.blueprints));
-    SetUserProperty(resource, "alpha",        mUI.alpha);
     SetUserProperty(resource, "grid",         mUI.cmbGrid);
     SetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
     SetUserProperty(resource, "show_grid",    mUI.chkShowGrid);
     SetUserProperty(resource, "widget",       mUI.widget);
+    SetUserProperty(resource, "splitter",     mUI.splitter);
+    SetUserProperty(resource, "kRandom",      mUI.kRandom);
 
     mWorkspace->SaveResource(resource);
     mOriginalHash = mPolygon.GetHash();
@@ -538,84 +711,103 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto size = std::min(widget_width, widget_height);
     const auto xoffset = Margin + (widget_width - size) / 2;
     const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width = size;
-    const auto height = size;
+    const auto width = float(size);
+    const auto height = float(size);
     painter.SetViewport(xoffset, yoffset, size, size);
     painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width , height));
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    gfx::Transform view;
-    // fiddle with the view transform in order to avoid having
-    // some content (fragments) get clipped against the viewport.
-    view.Resize(width-2, height-2);
-    view.MoveTo(1, 1);
-
     // if we have some blueprint then use it on the background.
     if (mBlueprint)
     {
+        gfx::Transform view;
+        view.Resize(width, height);
         painter.Draw(gfx::Rectangle(), view, *mBlueprint);
     }
 
     if (GetValue(mUI.chkShowGrid))
     {
-        const GridDensity grid = GetValue(mUI.cmbGrid);
-        const unsigned num_cell_lines = static_cast<unsigned>(grid) - 1;
+        const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+        const auto num_cell_lines = static_cast<unsigned>(grid) - 1;
+
+        gfx::Transform view;
+        view.Resize(width, height);
         painter.Draw(gfx::Grid(num_cell_lines, num_cell_lines), view,
                      gfx::CreateMaterialFromColor(gfx::Color::LightGray));
     }
     else
     {
+        gfx::Transform view;
+        view.Resize(width, height);
         painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), view,
                      gfx::CreateMaterialFromColor(gfx::Color::LightGray));
     }
 
-    // draw the polygon we're working on
-    const auto alpha = GetValue(mUI.alpha);
+    const auto alpha = 0.87f;
     static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
     color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
     color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
-    // hack hack if we have the main window preview window displaying this
-    // same custom shape then we have a competition of hash values used
-    // to compare the polygon data content against the content in the GPU
-    // buffer. And the competition is between the class object stored in
-    // the workspace that has the same Class ID but different content hash
-    // and *this* polygon class instance here that is a copy but maps to
-    // the same class ID but with different hash (because it has different
-    // content when it's being edited).
-    // so hack around this problem by adding a suffix here.
-    gfx::PolygonMeshClass poly(mPolygon.GetId() + "_1");
-    poly.SetShaderSrc(mPolygon.GetShaderSrc());
-    poly.SetName(mPolygon.GetName());
-    mBuilder.BuildPoly(poly);
+    // draw the polygon we're working on
+    {
+        // hack hack if we have the main window preview window displaying this
+        // same custom shape then we have a competition of hash values used
+        // to compare the polygon data content against the content in the GPU
+        // buffer. And the competition is between the class object stored in
+        // the workspace that has the same Class ID but different content hash
+        // and *this* polygon class instance here that is a copy but maps to
+        // the same class ID but with different hash (because it has different
+        // content when it's being edited).
+        // so hack around this problem by adding a suffix here.
+        gfx::PolygonMeshClass poly(mPolygon.GetId() + "_1");
+        poly.SetShaderSrc(mPolygon.GetShaderSrc());
+        poly.SetName(mPolygon.GetName());
+        mBuilder.BuildPoly(poly);
 
-    // set to true since we're constructing this polygon on every frame
-    // without this we'll eat all the static vertex/index buffers. argh!
-    poly.SetDynamic(true);
+        // set to true since we're constructing this polygon on every frame
+        // without this we'll eat all the static vertex/index buffers. argh!
+        poly.SetDynamic(true);
 
-    gfx::PolygonMeshInstance mesh(poly);
-    mesh.SetTime(mTime);
-    mesh.SetRandomValue(0.123423); // random!
+        gfx::PolygonMeshInstance mesh(poly);
+        mesh.SetTime(mTime);
+        mesh.SetRandomValue(GetValue(mUI.kRandom));
 
-    painter.Draw(mesh, view, gfx::MaterialInstance(color));
+        gfx::Transform view;
+        view.Resize(width, height);
+        painter.Draw(mesh, view, gfx::MaterialInstance(color));
+    }
 
     // visualize the vertices.
-    view.Resize(6, 6);
-    for (size_t i=0; i<mBuilder.GetVertexCount(); ++i)
     {
-        const auto& vert = mBuilder.GetVertex(i);
-        const auto x = width * vert.aPosition.x;
-        const auto y = height * -vert.aPosition.y;
-        view.MoveTo(x+1, y+1);
-        view.Translate(-3, -3);
-        if (mVertexIndex == i)
+        gfx::Transform view;
+        view.Resize(15, 15);
+
+        for (size_t i = 0; i < mBuilder.GetVertexCount(); ++i)
         {
-            painter.Draw(gfx::Circle(), view, gfx::CreateMaterialFromColor(gfx::Color::Green));
-        }
-        else
-        {
-            painter.Draw(gfx::Circle(), view, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+            const auto& vert = mBuilder.GetVertex(i);
+            const auto x = width * vert.aPosition.x;
+            const auto y = height * -vert.aPosition.y;
+            view.MoveTo(x, y);
+            view.Translate(-7.5, -7.5);
+            if (mVertexIndex == i)
+            {
+                painter.Draw(gfx::Circle(), view, gfx::CreateMaterialFromColor(gfx::Color::Green));
+                if (!mDragging)
+                {
+                    const auto time = fmod(base::GetTime(), 1.5) / 1.5;
+                    const auto size = 15.0f + time * 50.0f;
+                    gfx::Transform model;
+                    model.Resize(size, size);
+                    model.MoveTo(x, y);
+                    model.Translate(-size*0.5f, -size*0.5f);
+                    painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+                }
+            }
+            else
+            {
+                painter.Draw(gfx::Circle(), view, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+            }
         }
     }
 
@@ -625,36 +817,37 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
     }
 
-    if (!mActive)
-        return;
-
-    if (!mPoints.empty())
+    // visualize the current triangle
+    if (mActive)
     {
-        const QPoint& a = mPoints.back();
-        const QPoint& b = mCurrentPoint;
-        gfx::DebugDrawLine(painter, ToGfx(a), ToGfx(b), gfx::Color::HotPink, 2.0f);
+        if (!mPoints.empty())
+        {
+            const QPoint& a = mPoints.back();
+            const QPoint& b = mCurrentPoint;
+            gfx::DebugDrawLine(painter, ToGfx(a), ToGfx(b), gfx::Color::HotPink, 2.0f);
+        }
+
+        std::vector<QPoint> points = mPoints;
+        points.push_back(mCurrentPoint);
+
+        gfx::Transform  view;
+        view.Resize(width, height);
+
+        gfx::Geometry::DrawCommand cmd;
+        cmd.type = gfx::Geometry::DrawType::TriangleFan;
+        cmd.offset = 0;
+        cmd.count = points.size();
+
+        gfx::tool::PolygonBuilder2D builder;
+        builder.AddVertices(MakeVerts(points, width, height));
+        builder.AddDrawCommand(cmd);
+
+        gfx::PolygonMeshClass current(mPolygon.GetId() + "_2");
+        builder.BuildPoly(current);
+        current.SetStatic(false);
+
+        painter.Draw(gfx::PolygonMeshInstance(current), view, gfx::MaterialInstance(color));
     }
-
-    std::vector<QPoint> points = mPoints;
-    points.push_back(mCurrentPoint);
-
-    view.Resize(width-2, height-2);
-    view.MoveTo(1, 1);
-
-    gfx::Geometry::DrawCommand cmd;
-    cmd.type   = gfx::Geometry::DrawType::TriangleFan;
-    cmd.offset = 0;
-    cmd.count  = points.size();
-
-    gfx::tool::PolygonBuilder2D builder;
-    builder.AddVertices(MakeVerts(points, width, height));
-    builder.AddDrawCommand(cmd);
-
-    gfx::PolygonMeshClass current(mPolygon.GetId() + "_2");
-    builder.BuildPoly(current);
-    current.SetStatic(false);
-
-    painter.Draw(gfx::PolygonMeshInstance(current), view, gfx::MaterialInstance(color));
 }
 
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)
@@ -664,8 +857,8 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
     const auto size = std::min(widget_width, widget_height);
     const auto xoffset = Margin + (widget_width - size) / 2;
     const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width = size;
-    const auto height = size;
+    const auto width  = float(size);
+    const auto height = float(size);
 
     const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
 
@@ -676,10 +869,11 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
         const auto y = height * -vert.aPosition.y;
         const auto r = QPoint(x, y) - point;
         const auto l = std::sqrt(r.x() * r.x() + r.y() * r.y());
-        if (l <= 5)
+        if (l <= 10)
         {
             mDragging = true;
             mVertexIndex = i;
+            SelectRow(mUI.tableView, mVertexIndex);
             break;
         }
     }
@@ -697,21 +891,27 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
     const auto size = std::min(widget_width, widget_height);
     const auto xoffset = Margin + (widget_width - size) / 2;
     const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width  = size;
-    const auto height = size;
+    const auto width  = float(size);
+    const auto height = float(size);
 
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
 
-    if (GetValue(mUI.chkSnap))
+    const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
+
+    bool snap = GetValue(mUI.chkSnap);
+    if (ctrl)
+        snap = !snap;
+
+    if (snap)
     {
         const GridDensity grid = GetValue(mUI.cmbGrid);
-        const float num_cells = static_cast<float>(grid);
+        const auto num_cells = static_cast<float>(grid);
 
         const auto cell_width = width / num_cells;
         const auto cell_height = height / num_cells;
         const auto x = std::round(pos.x() / cell_width) * cell_width;
         const auto y = std::round(pos.y() / cell_height) * cell_height;
-        mPoints.push_back(QPoint(x, y));
+        mPoints.emplace_back(QPoint(x, y));
     }
     else
     {
@@ -726,17 +926,23 @@ void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
     const auto size = std::min(widget_width, widget_height);
     const auto xoffset = Margin + (widget_width - size) / 2;
     const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width  = size;
-    const auto height = size;
+    const auto width  = float(size);
+    const auto height = float(size);
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
+
+    const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
 
     if (mDragging)
     {
+        bool snap = GetValue(mUI.chkSnap);
+        if (ctrl)
+            snap = !snap;
+
         auto vertex = mBuilder.GetVertex(mVertexIndex);
-        if (GetValue(mUI.chkSnap))
+        if (snap)
         {
             const GridDensity grid = GetValue(mUI.cmbGrid);
-            const float num_cells = static_cast<float>(grid);
+            const auto num_cells = static_cast<float>(grid);
 
             const auto cell_width = width / num_cells;
             const auto cell_height = height / num_cells;
@@ -755,15 +961,15 @@ void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
         }
         else
         {
-            const float dx = (mCurrentPoint.x() - pos.x());
-            const float dy = (mCurrentPoint.y() - pos.y());
+            const auto dx = float(mCurrentPoint.x() - pos.x());
+            const auto dy = float(mCurrentPoint.y() - pos.y());
             vertex.aPosition.x -= (dx / width);
             vertex.aPosition.y += (dy / height);
             mCurrentPoint = pos;
         }
-        vertex.aTexCoord.x  = vertex.aPosition.x;
-        vertex.aTexCoord.y  = -vertex.aPosition.y;
-        mBuilder.UpdateVertex(vertex, mVertexIndex);
+        vertex.aTexCoord.x =  vertex.aPosition.x;
+        vertex.aTexCoord.y = -vertex.aPosition.y;
+        mTable->UpdateVertex(vertex, mVertexIndex);
     }
     else
     {
@@ -781,17 +987,22 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     const auto size = std::min(widget_width, widget_height);
     const auto xoffset = Margin + (widget_width - size) / 2;
     const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width  = size;
-    const auto height = size;
+    const auto width  = float(size);
+    const auto height = float(size);
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
+    const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
 
     const auto num_vertices = mBuilder.GetVertexCount();
 
     QPoint point = pos;
-    if (GetValue(mUI.chkSnap))
+    bool snap = GetValue(mUI.chkSnap);
+    if (ctrl)
+        snap = !snap;
+
+    if (snap)
     {
         const GridDensity grid = GetValue(mUI.cmbGrid);
-        const float num_cells = static_cast<float>(grid);
+        const auto num_cells = static_cast<float>(grid);
 
         const auto cell_width = width / num_cells;
         const auto cell_height = height / num_cells;
@@ -853,8 +1064,8 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     const auto closest = mBuilder.GetVertex(vertex_index);
     const auto winding = math::FindTriangleWindingOrder(first.aPosition, closest.aPosition, vertex.aPosition);
     if (winding == math::TriangleWindingOrder::CounterClockwise)
-         mBuilder.InsertVertex(vertex, cmd_index, cmd_vertex_index + 1);
-    else mBuilder.InsertVertex(vertex, cmd_index, cmd_vertex_index);
+        mTable->InsertVertex(vertex, cmd_vertex_index + 1, cmd_index);
+    else mTable->InsertVertex(vertex, cmd_vertex_index, cmd_index);
 }
 
 bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
@@ -871,7 +1082,7 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
         cmd.type   = gfx::Geometry::DrawType::TriangleFan;
         cmd.count  = mPoints.size();
         cmd.offset = mBuilder.GetVertexCount();
-        mBuilder.AddVertices(MakeVerts(mPoints, width, height));
+        mTable->AddVertices(MakeVerts(mPoints, width, height));
         mBuilder.AddDrawCommand(cmd);
         mPoints.clear();
 
@@ -883,7 +1094,12 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
              key->key() == Qt::Key_D)
     {
         if (mVertexIndex < mBuilder.GetVertexCount())
-            mBuilder.EraseVertex(mVertexIndex);
+        {
+            mTable->EraseVertex(mVertexIndex);
+            mVertexIndex = 0xffffff;
+            ClearSelection(mUI.tableView);
+        }
+
         if (mBuilder.GetVertexCount() == 0)
             mUI.actionClear->setEnabled(false);
     }

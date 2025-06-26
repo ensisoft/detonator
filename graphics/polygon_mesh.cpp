@@ -224,6 +224,15 @@ const PolygonMeshClass::DrawCmd* PolygonMeshClass::GetSubMeshDrawCmd(const std::
     return base::SafeFind(mSubMeshes, key);
 }
 
+void PolygonMeshClass::ClearContent()
+{
+    mData.reset();
+    mMesh = MeshType::Simple2D;
+    mSubMeshes.clear();
+    mContentUri.clear();
+    mContentHash = 0;
+}
+
 std::size_t PolygonMeshClass::GetHash() const
 {
     size_t hash = 0;

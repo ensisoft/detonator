@@ -37,6 +37,7 @@
 
 #include "audio/format.h"
 #include "base/format.h"
+#include "graphics/vertex.h"
 
 namespace app
 {
@@ -45,6 +46,12 @@ namespace app
     QString toString(QProcess::ProcessError error);
     QString toString(const audio::Format& format);
     QString toString(const base::Color4f& color);
+
+#ifdef DETONATOR_EDITOR_BUILD
+    QString toString(const gfx::Vec2& vec);
+    QString toString(const gfx::Vec3& vec);
+    QString toString(const gfx::Vec4& vec);
+#endif
 
     inline QString toString(const std::string& s)
     { return QString::fromUtf8(s.c_str());  }
