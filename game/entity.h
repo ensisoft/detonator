@@ -351,7 +351,7 @@ namespace game
         { mTag = tag; }
         void SetIdleTrackId(const std::string& id)
         { mIdleTrackId = id; }
-        void SetSriptFileId(const std::string& file)
+        void SetScriptFileId(const std::string& file)
         { mScriptFile = file; }
         void ResetIdleTrack() noexcept
         { mIdleTrackId.clear(); }

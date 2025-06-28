@@ -1334,7 +1334,7 @@ end
 
     auto entity = std::make_shared<game::EntityClass>();
     entity->SetName("entity");
-    entity->SetSriptFileId("entity_begin_end_play_test");
+    entity->SetScriptFileId("entity_begin_end_play_test");
 
     game::SceneClass scene_class;
     {
@@ -1423,13 +1423,13 @@ end
 )");
     auto foo = std::make_shared<game::EntityClass>();
     foo->SetName("foo");
-    foo->SetSriptFileId("entity_tick_update_test");
+    foo->SetScriptFileId("entity_tick_update_test");
     foo->SetFlag(game::EntityClass::Flags::TickEntity, true);
     foo->SetFlag(game::EntityClass::Flags::UpdateEntity, false);
 
     auto bar = std::make_shared<game::EntityClass>();
     bar->SetName("bar");
-    bar->SetSriptFileId("entity_tick_update_test");
+    bar->SetScriptFileId("entity_tick_update_test");
     bar->SetFlag(game::EntityClass::Flags::TickEntity, false);
     bar->SetFlag(game::EntityClass::Flags::UpdateEntity, true);
 
@@ -1715,12 +1715,12 @@ end
 )");
     auto foo = std::make_shared<game::EntityClass>();
     foo->SetName("foo");
-    foo->SetSriptFileId("entity_env_foo_test");
+    foo->SetScriptFileId("entity_env_foo_test");
     foo->SetFlag(game::EntityClass::Flags::TickEntity, true);
 
     auto bar = std::make_shared<game::EntityClass>();
     bar->SetName("bar");
-    bar->SetSriptFileId("entity_env_bar_test");
+    bar->SetScriptFileId("entity_env_bar_test");
     bar->SetFlag(game::EntityClass::Flags::TickEntity, true);
 
     game::SceneClass scene_class;
@@ -1824,14 +1824,14 @@ end
 
     auto foo = std::make_shared<game::EntityClass>();
     foo->SetName("foo");
-    foo->SetSriptFileId("entity_env_foo_test");
+    foo->SetScriptFileId("entity_env_foo_test");
     foo->SetFlag(game::EntityClass::Flags::TickEntity, true);
     foo->AddScriptVar(private_var);
     foo->AddScriptVar(public_var);
 
     auto bar = std::make_shared<game::EntityClass>();
     bar->SetName("bar");
-    bar->SetSriptFileId("entity_env_bar_test");
+    bar->SetScriptFileId("entity_env_bar_test");
     bar->SetFlag(game::EntityClass::Flags::TickEntity, true);
 
     game::SceneClass scene_class;
@@ -1903,12 +1903,12 @@ end
 
     auto foo = std::make_shared<game::EntityClass>();
     foo->SetName("foo");
-    foo->SetSriptFileId("entity_env_foo_test");
+    foo->SetScriptFileId("entity_env_foo_test");
     foo->SetFlag(game::EntityClass::Flags::TickEntity, true);
 
     auto bar = std::make_shared<game::EntityClass>();
     bar->SetName("bar");
-    bar->SetSriptFileId("entity_env_bar_test");
+    bar->SetScriptFileId("entity_env_bar_test");
     bar->SetFlag(game::EntityClass::Flags::TickEntity, true);
 
     game::SceneClass scene_class;
@@ -1974,12 +1974,12 @@ end
 )");
     auto foo = std::make_shared<game::EntityClass>();
     foo->SetName("foo");
-    foo->SetSriptFileId("entity_shared_global_test_foo");
+    foo->SetScriptFileId("entity_shared_global_test_foo");
     foo->SetFlag(game::EntityClass::Flags::TickEntity, true);
 
     auto bar = std::make_shared<game::EntityClass>();
     bar->SetName("bar");
-    bar->SetSriptFileId("entity_shared_global_test_bar");
+    bar->SetScriptFileId("entity_shared_global_test_bar");
     bar->SetFlag(game::EntityClass::Flags::TickEntity, true);
 
     game::SceneClass scene_class;
@@ -2164,7 +2164,7 @@ end
 
     auto bullet_class = std::make_shared<game::EntityClass>();
     bullet_class->SetName("Bullet");
-    bullet_class->SetSriptFileId("bullet");
+    bullet_class->SetScriptFileId("bullet");
     bullet_class->SetFlag(game::EntityClass::Flags::UpdateEntity, true);
     bullet_class->AddScriptVar(velocity);
     bullet_class->AddNode(std::move(body));

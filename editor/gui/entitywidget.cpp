@@ -2448,7 +2448,7 @@ void EntityWidget::on_btnAddScript_clicked()
     script.SetFileURI(uri);
     app::ScriptResource resource(script, GetValue(mUI.entityName));
     mState.workspace->SaveResource(resource);
-    mState.entity->SetSriptFileId(script.GetId());
+    mState.entity->SetScriptFileId(script.GetId());
 
     auto* widget = new ScriptWidget(mState.workspace, resource);
     emit OpenNewWidget(widget);
@@ -2804,7 +2804,7 @@ void EntityWidget::on_scriptFile_currentIndexChanged(int index)
         SetEnabled(mUI.btnResetScript, false);
         return;
     }
-    mState.entity->SetSriptFileId(GetItemId(mUI.scriptFile));
+    mState.entity->SetScriptFileId(GetItemId(mUI.scriptFile));
     SetEnabled(mUI.btnEditScript, true);
 }
 
