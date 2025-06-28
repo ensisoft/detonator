@@ -178,8 +178,8 @@ Install these packages:
   For example:
 ```
   $ cd detonator/audio/test/
-  $ valgrind --tool=cachegrind ./audio_test --graph
-  $ kcaghegrind cachegrind.out.XXXXX
+  $ valgrind --tool=callgrind ./audio_test --graph
+  $ kcachegrind callgrind.out.XXXXX
 ```
 </details>
 
