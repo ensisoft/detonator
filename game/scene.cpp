@@ -86,9 +86,6 @@ private:
 namespace game
 {
 
-
-
-
 Scene::Scene(std::shared_ptr<const SceneClass> klass)
   : mClass(std::move(klass))
 {
@@ -180,7 +177,7 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         }
 
         entity_placement_map[&placement] = entity.get();
-        mIdMap[entity->GetId()] = entity.get();
+
         mNameMap[entity->GetName()] = entity.get();
         mEntities.push_back(std::move(entity));
     }
@@ -233,10 +230,12 @@ Entity& Scene::GetEntity(size_t index)
 }
 Entity* Scene::FindEntityByInstanceId(const std::string& id)
 {
-    auto it = mIdMap.find(id);
-    if (it == mIdMap.end())
-        return nullptr;
-    return it->second;
+    for (auto& entity : mEntities)
+    {
+        if (entity->GetId() == id)
+            return entity.get();
+    }
+    return nullptr;
 }
 Entity* Scene::FindEntityByInstanceName(const std::string& name)
 {
@@ -297,10 +296,12 @@ const Entity& Scene::GetEntity(size_t index) const
 }
 const Entity* Scene::FindEntityByInstanceId(const std::string& id) const
 {
-    auto it = mIdMap.find(id);
-    if (it == mIdMap.end())
-        return nullptr;
-    return it->second;
+    for (const auto& entity : mEntities)
+    {
+        if (entity->GetId() == id)
+            return entity.get();
+    }
+    return nullptr;
 }
 const Entity* Scene::FindEntityByInstanceName(const std::string& name) const
 {
@@ -382,8 +383,6 @@ Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
         instance->PlayIdle();
     }
 
-    ASSERT(mIdMap.find(instance->GetId()) == mIdMap.end());
-
     SpawnRecord spawn;
     spawn.spawn_time = mCurrentTime + args.delay;
     spawn.instance   = std::move(instance);
@@ -433,9 +432,6 @@ void Scene::BeginLoop()
         entity->SetFlag(Entity::ControlFlags::Spawned, true);
         entity->SetScene(this);
 
-        ASSERT(!base::Contains(mIdMap, entity->GetId()));
-
-        mIdMap[entity->GetId()]     = entity.get();
         mNameMap[entity->GetName()] = entity.get();
         mRenderTree.LinkChild(nullptr, entity.get());
         mEntities.push_back(std::move(entity));
@@ -468,8 +464,8 @@ void Scene::EndLoop()
 
         if (entity->TestFlag(Entity::ControlFlags::EnableLogging))
             DEBUG("Entity '%1/%2' was deleted.", entity->GetClassName(), entity->GetName());
+
         mRenderTree.DeleteNode(entity.get());
-        mIdMap.erase(entity->GetId());
         mNameMap.erase(entity->GetName());
 
         if (mSpatialIndex)
