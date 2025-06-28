@@ -1620,7 +1620,7 @@ void unit_test_list_deps()
 
         game::EntityClass entity;
         entity.SetName("entity");
-        entity.SetSriptFileId(script_resource.GetIdUtf8());
+        entity.SetScriptFileId(script_resource.GetIdUtf8());
 
         {
             const auto* material = workspace.FindResourceByName("mat1", app::Resource::Type::Material);

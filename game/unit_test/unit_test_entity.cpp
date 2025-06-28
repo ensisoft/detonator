@@ -376,7 +376,7 @@ void unit_test_entity_class()
     entity.SetLifetime(5.0f);
     entity.SetFlag(game::EntityClass::Flags::UpdateEntity, false);
     entity.SetFlag(game::EntityClass::Flags::WantsMouseEvents, true);
-    entity.SetSriptFileId("script_123.lua");
+    entity.SetScriptFileId("script_123.lua");
     entity.SetTag("foo bar");
     {
         game::EntityNodeClass node;
@@ -1374,7 +1374,7 @@ void measure_entity_allocation_time()
     entity->SetLifetime(5.0f);
     entity->SetFlag(game::EntityClass::Flags::UpdateEntity, false);
     entity->SetFlag(game::EntityClass::Flags::WantsMouseEvents, true);
-    entity->SetSriptFileId("script_123.lua");
+    entity->SetScriptFileId("script_123.lua");
     entity->SetTag("foo bar");
     {
         game::EntityNodeClass node;
@@ -1419,7 +1419,7 @@ void measure_entity_update_time()
     entity->SetLifetime(5.0f);
     entity->SetFlag(game::EntityClass::Flags::UpdateEntity, false);
     entity->SetFlag(game::EntityClass::Flags::WantsMouseEvents, true);
-    entity->SetSriptFileId("script_123.lua");
+    entity->SetScriptFileId("script_123.lua");
     entity->SetTag("foo bar");
     {
         game::EntityNodeClass node;
