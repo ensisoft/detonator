@@ -323,8 +323,6 @@ namespace game
         std::shared_ptr<const SceneClass> mClass;
         // Entities currently in the scene.
         std::vector<std::unique_ptr<Entity>> mEntities;
-        // lookup table for mapping entity ids to entities.
-        std::unordered_map<std::string, Entity*> mIdMap;
         // lookup table for mapping entity names to entities.
         // the names are *human-readable* and set by the designer
         // so it's possible that there could be name collisions.

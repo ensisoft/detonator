@@ -464,9 +464,14 @@ namespace game
     struct EntityArgs {
         // the class object that defines the type of the entity.
         std::shared_ptr<const EntityClass> klass;
-        // the entity instance id that is to be used.
+        // A known entity ID. Used with entities that are spawned
+        // in the scene based on scene's entity placement done during
+        // the scene design.
         std::string id;
-        // the entity instance name that is to be used.
+        // the entity instance name that is to be used. This is
+        // designed to let the game programmer use human readable
+        // names for interesting entities such as "Player" and then
+        // easily lookup/find those entities during game play.
         std::string name;
         // the transformation parents are relative to the parent
         // of the entity.
