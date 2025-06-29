@@ -1105,6 +1105,12 @@ bool LuaRuntime::GetNextAction(Action* out)
     return true;
 }
 
+bool LuaRuntime::GetCamera(Camera* cam) const
+{
+    *cam = mCamera;
+    return true;
+}
+
 void LuaRuntime::TransferDebugQueue(std::vector<DebugDrawCmd>* out)
 {
     std::swap(mDebugDrawQueue, *out);
