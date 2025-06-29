@@ -29,7 +29,7 @@
 #include "audio/elements/graph.h"
 #include "audio/elements/graph_class.h"
 #include "audio/loader.h"
-#include "audio/graph.h"
+#include "audio/audio_graph_source.h"
 
 class TestBuffer : public audio::Buffer
 {
@@ -768,8 +768,8 @@ void unit_test_oversized_buffer()
 
     audio::Loader loader;
 
-    auto source = std::make_unique<audio::AudioGraph>("graph", std::move(graph));
-    audio::AudioGraph::PrepareParams p;
+    auto source = std::make_unique<audio::AudioGraphSource>("graph", std::move(graph));
+    audio::AudioGraphSource::PrepareParams p;
     TEST_REQUIRE(source->Prepare(loader, p));
 
     audio::Format format;

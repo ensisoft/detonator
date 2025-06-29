@@ -27,10 +27,10 @@
 #include <map>
 
 #include "audio/element.h"
-#include "audio/graph.h"
 #include "audio/format.h"
 #include "audio/player.h"
 #include "audio/device.h"
+#include "audio/audio_graph_source.h"
 #include "audio/elements/graph_class.h"
 #include "audio/elements/graph.h"
 #include "data/json.h"
@@ -1535,8 +1535,8 @@ void AudioWidget::on_actionPlay_triggered()
         mScene->ApplyState(klass);
 
         audio::Graph graph(std::move(klass));
-        auto source = std::make_unique<audio::AudioGraph>(GetValue(mUI.graphName), std::move(graph));
-        audio::AudioGraph::PrepareParams params;
+        auto source = std::make_unique<audio::AudioGraphSource>(GetValue(mUI.graphName), std::move(graph));
+        audio::AudioGraphSource::PrepareParams params;
         params.enable_pcm_caching = false;
 
         if (!source->Prepare(*mWorkspace, params))

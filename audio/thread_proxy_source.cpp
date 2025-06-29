@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2025 Sami Väisänen
+// Copyright (C) 2020-2025 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,30 +17,45 @@
 #include "config.h"
 
 #include <algorithm>
+#include <atomic>
 
-#include "audio/source.h"
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/trace.h"
+#include "audio/thread_proxy_source.h"
 
 namespace audio
 {
-SourceThreadProxy::SourceThreadProxy(std::unique_ptr<Source> source)
+
+ThreadProxySource::ThreadProxySource(std::unique_ptr<Source> source) noexcept
   : mSource(std::move(source))
 {}
-SourceThreadProxy::~SourceThreadProxy()
+
+ThreadProxySource::~ThreadProxySource()
 {
     Shutdown();
 }
-unsigned SourceThreadProxy::GetRateHz() const noexcept
-{ return mSource->GetRateHz(); }
-unsigned SourceThreadProxy::GetNumChannels() const noexcept
-{ return mSource->GetNumChannels(); }
-Source::Format SourceThreadProxy::GetFormat() const noexcept
-{ return mSource->GetFormat(); }
-std::string SourceThreadProxy::GetName() const noexcept
-{ return mSource->GetName(); }
-void SourceThreadProxy::Prepare(unsigned int buffer_size)
+unsigned ThreadProxySource::GetRateHz() const noexcept
+{
+    return mSource->GetRateHz();
+}
+
+unsigned ThreadProxySource::GetNumChannels() const noexcept
+{
+    return mSource->GetNumChannels();
+}
+
+Source::Format ThreadProxySource::GetFormat() const noexcept
+{
+    return mSource->GetFormat();
+}
+
+std::string ThreadProxySource::GetName() const noexcept
+{
+    return mSource->GetName();
+}
+
+void ThreadProxySource::Prepare(unsigned int buffer_size)
 {
     ASSERT(!mThread);
     ASSERT(!mBuffers.size());
@@ -62,9 +77,9 @@ void SourceThreadProxy::Prepare(unsigned int buffer_size)
     DEBUG("Preparing audio source thread buffers. [num=%1, size=%2 b]",
           mEmptyQueue.size(),buffer_size);
 
-    mThread.reset(new std::thread(&SourceThreadProxy::ThreadLoop, this));
+    mThread.reset(new std::thread(&ThreadProxySource::ThreadLoop, this));
 }
-unsigned SourceThreadProxy::FillBuffer(void* device_buff, unsigned device_buff_size)
+unsigned ThreadProxySource::FillBuffer(void* device_buff, unsigned device_buff_size)
 {
     // After the call to prepare the audio source was moved to the audio
     // device it's now possible that the the first call to FillBuffer
@@ -99,12 +114,12 @@ unsigned SourceThreadProxy::FillBuffer(void* device_buff, unsigned device_buff_s
     return 0;
 }
 
-bool SourceThreadProxy::HasMore(std::uint64_t num_bytes_read) const noexcept
+bool ThreadProxySource::HasMore(std::uint64_t num_bytes_read) const noexcept
 {
     return !mSourceDone;
 }
 
-void SourceThreadProxy::Shutdown() noexcept
+void ThreadProxySource::Shutdown() noexcept
 {
     if (mThread)
     {
@@ -124,12 +139,12 @@ void SourceThreadProxy::Shutdown() noexcept
         mSource.reset();
     }
 }
-void SourceThreadProxy::RecvCommand(std::unique_ptr<Command> cmd) noexcept
+void ThreadProxySource::RecvCommand(std::unique_ptr<Command> cmd) noexcept
 {
     std::unique_lock<decltype(mMutex)> lock(mMutex);
     mCommands.push(std::move(cmd));
 }
-std::unique_ptr<Event> SourceThreadProxy::GetEvent() noexcept
+std::unique_ptr<Event> ThreadProxySource::GetEvent() noexcept
 {
     if (!mMutex.try_lock())
         return nullptr;
@@ -143,13 +158,13 @@ std::unique_ptr<Event> SourceThreadProxy::GetEvent() noexcept
     return ret;
 }
 
-unsigned SourceThreadProxy::WaitBuffer(void* device_buff, unsigned int device_buff_size)
+unsigned ThreadProxySource::WaitBuffer(void* device_buff, unsigned int device_buff_size)
 {
     return FillBuffer(device_buff, device_buff_size, true);
 }
 
 
-unsigned SourceThreadProxy::FillBuffer(void* device_buff, unsigned device_buff_size, bool wait_buffer)
+unsigned ThreadProxySource::FillBuffer(void* device_buff, unsigned device_buff_size, bool wait_buffer)
 {
     unsigned bytes_copied = 0;
 
@@ -190,7 +205,7 @@ unsigned SourceThreadProxy::FillBuffer(void* device_buff, unsigned device_buff_s
     return bytes_copied;
 }
 
-unsigned SourceThreadProxy::CopyBuffer(VectorBuffer* source, void* device_buff, unsigned int device_buff_size)
+unsigned ThreadProxySource::CopyBuffer(VectorBuffer* source, void* device_buff, unsigned int device_buff_size)
 {
     auto* buffer_ptr = (char*)source->GetPtr();
 
@@ -224,7 +239,7 @@ unsigned SourceThreadProxy::CopyBuffer(VectorBuffer* source, void* device_buff, 
     return bytes_to_copy;
 }
 
-void SourceThreadProxy::ThreadLoop()
+void ThreadProxySource::ThreadLoop()
 {
     static std::atomic<size_t> ThreadId = 0;
 
@@ -256,17 +271,17 @@ void SourceThreadProxy::ThreadLoop()
             }
 
             TRACE_START();
-            TRACE_ENTER(MainLoop);
+            TRACE_ENTER(AudioSourceThreadMainLoop);
 
             VectorBuffer* buffer = nullptr;
-            TRACE_BLOCK("GetBuffer",
+            TRACE_BLOCK("GetAudioBuffer",
                 while (!buffer)
                 {
                     std::unique_lock<decltype(mMutex)> lock(mMutex);
 
                     if (mShutdown)
                     {
-                        TRACE_LEAVE(MainLoop);
+                        TRACE_LEAVE(AudioSourceThreadMainLoop);
                         return;
                     }
 
@@ -297,7 +312,7 @@ void SourceThreadProxy::ThreadLoop()
             const auto buffer_avail = buffer_size - buffer_used;
             auto* ptr = (char*)buffer->GetPtr() + buffer_used;
 
-            TRACE_BLOCK("FillBuffer",
+            TRACE_BLOCK("FillAudioBuffer",
                 const auto ret = mSource->FillBuffer(ptr, buffer_avail);
                 ASSERT(ret <= buffer_avail);
                 ASSERT(ret + buffer_used <= buffer_size);
@@ -328,7 +343,7 @@ void SourceThreadProxy::ThreadLoop()
                     break;
                 }
             }
-            TRACE_LEAVE(MainLoop);
+            TRACE_LEAVE(AudioSourceThreadMainLoop);
 
             // take a mutex on the trace writer to make sure that it will
             // not be deleted from underneath us while we're dumping
@@ -353,10 +368,10 @@ void SourceThreadProxy::ThreadLoop()
 } // ThreadLoop
 
 // static
-base::TraceWriter* SourceThreadProxy::TraceWriter;
+base::TraceWriter* ThreadProxySource::TraceWriter;
 // static
-std::mutex SourceThreadProxy::TraceWriterMutex;
+std::mutex ThreadProxySource::TraceWriterMutex;
 // static
-bool SourceThreadProxy::EnableTrace = false;
+bool ThreadProxySource::EnableTrace = false;
 
 } // nameespace

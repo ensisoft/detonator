@@ -31,6 +31,8 @@
 #include "audio/player.h"
 #include "audio/device.h"
 #include "audio/algo.h"
+#include "audio/sine_source.h"
+#include "audio/thread_proxy_source.h"
 
 class TestSource : public audio::Source
 {
@@ -43,30 +45,30 @@ public:
       , mFailBuffer(fail_buffer)
     { }
 
-    virtual unsigned GetRateHz() const noexcept override
+    unsigned GetRateHz() const noexcept override
     { return mSampleRate; }
-    virtual unsigned int GetNumChannels() const noexcept override
+    unsigned int GetNumChannels() const noexcept override
     { return mNumChannels;}
-    virtual Format GetFormat() const noexcept override
+    Format GetFormat() const noexcept override
     { return Format::Float32; }
-    virtual std::string GetName() const noexcept override
+    std::string GetName() const noexcept override
     { return "test"; }
-    virtual unsigned  FillBuffer(void* buff, unsigned max_bytes) override
+    unsigned  FillBuffer(void* buff, unsigned max_bytes) override
     {
         DEBUG("FillBuffer %1", mFillCount);
         if (++mFillCount == mFailBuffer)
             throw std::runtime_error("something failed");
         return max_bytes;
     }
-    virtual bool HasMore(std::uint64_t num_bytes_read) const noexcept override
+    bool HasMore(std::uint64_t num_bytes_read) const noexcept override
     {
         const auto ret = mFillCount < mBuffers;
         DEBUG("HasNextBuffer: %1", ret);
         return ret;
     }
-    virtual void Shutdown() noexcept override
+    void Shutdown() noexcept override
     {}
-    virtual void RecvCommand(std::unique_ptr<audio::Command>) noexcept override
+    void RecvCommand(std::unique_ptr<audio::Command>) noexcept override
     {}
 private:
     const unsigned mSampleRate = 0;
@@ -176,7 +178,7 @@ void unit_test_pause_resume()
     audio::Player player(audio::Device::Create("audio_unit_test"));
 
     {
-        const auto id = player.Play(std::make_unique<audio::SineGenerator>(300));
+        const auto id = player.Play(std::make_unique<audio::SineTestSource>(300));
         std::this_thread::sleep_for(std::chrono::seconds(1));
         for (unsigned i=0; i<10; ++i)
         {
@@ -197,7 +199,7 @@ void unit_test_cancel()
 
     for (unsigned i=0; i<100; ++i)
     {
-        const auto id = player.Play(std::make_unique<audio::SineGenerator>(300, 200));
+        const auto id = player.Play(std::make_unique<audio::SineTestSource>(300, 200));
         std::this_thread::sleep_for(std::chrono::milliseconds(math::rand<423234>(0, 100)));
         player.Cancel(id);
     }
@@ -210,7 +212,7 @@ void unit_test_shutdown_with_active_streams()
     for (unsigned i=0; i<100; ++i)
     {
         audio::Player player(audio::Device::Create("audio_unit_test"));
-        const auto id = player.Play(std::make_unique<audio::SineGenerator>(300, 200));
+        const auto id = player.Play(std::make_unique<audio::SineTestSource>(300, 200));
         std::this_thread::sleep_for(std::chrono::milliseconds(math::rand<22323>(0, 100)));
     }
 }
@@ -226,7 +228,7 @@ void unit_test_thread_proxy()
         const auto size = audio::Source::BuffSize(test->GetFormat(),
                                                   test->GetNumChannels(),
                                                   test->GetRateHz(), 20);
-        auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(test));
+        auto proxy = std::make_unique<audio::ThreadProxySource>(std::move(test));
 
         TEST_REQUIRE(proxy->GetFormat() == audio::Source::Format::Float32);
         TEST_REQUIRE(proxy->GetRateHz() == 44100);
@@ -256,7 +258,7 @@ void unit_test_thread_proxy()
         const auto size = audio::Source::BuffSize(test->GetFormat(),
                                                   test->GetNumChannels(),
                                                   test->GetRateHz(), 20);
-        auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(test));
+        auto proxy = std::make_unique<audio::ThreadProxySource>(std::move(test));
 
         TEST_REQUIRE(proxy->GetFormat() == audio::Source::Format::Float32);
         TEST_REQUIRE(proxy->GetRateHz() == 44100);
@@ -287,7 +289,7 @@ void unit_test_thread_proxy()
         const auto size = audio::Source::BuffSize(test->GetFormat(),
                                                   test->GetNumChannels(),
                                                   test->GetRateHz(), 20);
-        auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(test));
+        auto proxy = std::make_unique<audio::ThreadProxySource>(std::move(test));
 
         TEST_REQUIRE(proxy->GetFormat() == audio::Source::Format::Float32);
         TEST_REQUIRE(proxy->GetRateHz() == 44100);

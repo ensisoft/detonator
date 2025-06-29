@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2025 Sami Väisänen
+// Copyright (C) 2020-2025 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,32 +21,33 @@
 #include "base/hash.h"
 #include "base/trace.h"
 
-#include "audio/graph.h"
 #include "audio/element.h"
+#include "audio/command.h"
+#include "audio/audio_graph_source.h"
 
 namespace audio
 {
-struct AudioGraph::GraphCmd {
+struct AudioGraphSource::GraphCmd {
     std::unique_ptr<Element::Command> cmd;
     std::string dest;
 };
 
-AudioGraph::AudioGraph(const std::string& name)
+AudioGraphSource::AudioGraphSource(const std::string& name)
   : mName(name)
   , mGraph(name)
 {}
 
-AudioGraph::AudioGraph(std::string name, Graph&& graph)
+AudioGraphSource::AudioGraphSource(std::string name, Graph&& graph)
   : mName(std::move(name))
   , mGraph(std::move(graph))
 {}
 
-AudioGraph::AudioGraph(AudioGraph&& other) noexcept
+AudioGraphSource::AudioGraphSource(AudioGraphSource&& other) noexcept
   : mName(std::move(other.mName))
   , mGraph(std::move(other.mGraph))
 {}
 
-bool AudioGraph::Prepare(const Loader& loader, const PrepareParams& params)
+bool AudioGraphSource::Prepare(const Loader& loader, const PrepareParams& params)
 {
     if (!mGraph.Prepare(loader, params))
         return false;
@@ -55,13 +56,13 @@ bool AudioGraph::Prepare(const Loader& loader, const PrepareParams& params)
     return true;
 }
 
-unsigned AudioGraph::GetRateHz() const noexcept
+unsigned AudioGraphSource::GetRateHz() const noexcept
 { return mFormat.sample_rate; }
 
-unsigned AudioGraph::GetNumChannels() const noexcept
+unsigned AudioGraphSource::GetNumChannels() const noexcept
 { return mFormat.channel_count; }
 
-Source::Format AudioGraph::GetFormat() const noexcept
+Source::Format AudioGraphSource::GetFormat() const noexcept
 {
     if (mFormat.sample_type == SampleType::Int16)
         return Source::Format::Int16;
@@ -72,10 +73,10 @@ Source::Format AudioGraph::GetFormat() const noexcept
     else BUG("Incorrect audio format.");
     return Source::Format::Float32;
 }
-std::string AudioGraph::GetName() const noexcept
+std::string AudioGraphSource::GetName() const noexcept
 { return mName; }
 
-unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
+unsigned AudioGraphSource::FillBuffer(void* buff, unsigned max_bytes)
 {
     // todo: figure out a way to get rid of this copying whenever possible.
 
@@ -171,17 +172,17 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
     WARN("Audio graph has no output audio buffer available. [graph=%1]", mName);
     return 0;
 }
-bool AudioGraph::HasMore(std::uint64_t num_bytes_read) const noexcept
+bool AudioGraphSource::HasMore(std::uint64_t num_bytes_read) const noexcept
 {
     return mPendingBuffer || !mGraph.IsSourceDone();
 }
 
-void AudioGraph::Shutdown() noexcept
+void AudioGraphSource::Shutdown() noexcept
 {
     mGraph.Shutdown();
 }
 
-void AudioGraph::RecvCommand(std::unique_ptr<Command> cmd) noexcept
+void AudioGraphSource::RecvCommand(std::unique_ptr<Command> cmd) noexcept
 {
     if (auto* ptr = cmd->GetIf<GraphCmd>())
     {
@@ -191,7 +192,7 @@ void AudioGraph::RecvCommand(std::unique_ptr<Command> cmd) noexcept
     else BUG("Unexpected command.");
 }
 
-std::unique_ptr<Event> AudioGraph::GetEvent() noexcept
+std::unique_ptr<Event> AudioGraphSource::GetEvent() noexcept
 {
     if (mEvents.empty()) return nullptr;
     auto ret = std::move(mEvents.front());
@@ -200,7 +201,7 @@ std::unique_ptr<Event> AudioGraph::GetEvent() noexcept
 }
 
 // static
-std::unique_ptr<Command> AudioGraph::MakeCommandPtr(const std::string& destination, std::unique_ptr<Element::Command>&& cmd)
+std::unique_ptr<Command> AudioGraphSource::MakeCommandPtr(const std::string& destination, std::unique_ptr<Element::Command>&& cmd)
 {
     GraphCmd foo;
     foo.dest = destination;

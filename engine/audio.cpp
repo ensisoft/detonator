@@ -21,7 +21,6 @@
 #include "base/trace.h"
 #include "audio/device.h"
 #include "audio/format.h"
-#include "audio/graph.h"
 #include "audio/player.h"
 #include "audio/buffer.h"
 #include "engine/audio.h"
@@ -31,6 +30,8 @@
 #include "audio/elements/mixer.h"
 #include "audio/elements/graph_class.h"
 #include "audio/elements/graph.h"
+#include "audio/thread_proxy_source.h"
+#include "audio/audio_graph_source.h"
 #include "engine/loader.h"
 #include "engine/data.h"
 
@@ -69,7 +70,7 @@ void AudioEngine::Start()
     ASSERT(mEffectGraphId == 0);
     ASSERT(mMusicGraphId  == 0);
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
-    audio::AudioGraph::PrepareParams p;
+    audio::AudioGraphSource::PrepareParams p;
     p.enable_pcm_caching = false;
 
     auto device = audio::Device::Create(mName.c_str(), &mFormat);
@@ -110,7 +111,7 @@ void AudioEngine::Start()
         DEBUG("Audio music graph is ready. [id=%1]", mMusicGraphId);
     }
 #else
-    auto audio_graph = std::make_unique<audio::AudioGraph>(mName.c_str());
+    auto audio_graph = std::make_unique<audio::AudioGraphSource>(mName.c_str());
     auto main_mixer = (*audio_graph)->AddElement(audio::Mixer("mixer"));
     auto effect_mixer = (*audio_graph)->AddElement(audio::MixerSource("effect_mixer", mFormat));
     auto effect_gain = (*audio_graph)->AddElement(audio::Gain("effect_gain", 2.0f));
@@ -127,7 +128,7 @@ void AudioEngine::Start()
     ASSERT((*audio_graph)->LinkGraph("mixer", "out"));
     ASSERT(audio_graph->Prepare(*mLoader, p));
 
-    auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(audio_graph));
+    auto proxy = std::make_unique<audio::ThreadProxySource>(std::move(audio_graph));
     mAudioGraphId = mPlayer->Play(std::move(proxy));
     DEBUG("Audio graph is ready. [id=%1]", mAudioGraphId);
 
@@ -185,7 +186,7 @@ bool AudioEngine::PrepareMusicGraph(const GraphHandle& graph)
     audio::MixerSource::AddSourceCmd cmd;
     cmd.src    = std::move(instance);
     cmd.paused = true;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraphSource::MakeCommand("music_mixer", std::move(cmd)));
 #endif
     return true;
 }
@@ -207,7 +208,7 @@ void AudioEngine::ResumeMusic(const std::string& track, unsigned when)
     cmd.name      = track;
     cmd.paused    = false;
     cmd.millisecs = when;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraphSource::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 
@@ -218,7 +219,7 @@ void AudioEngine::PauseMusic(const std::string& track, unsigned when)
     cmd.name      = track;
     cmd.paused    = true;
     cmd.millisecs = when;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraphSource::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 
@@ -228,7 +229,7 @@ void AudioEngine::KillMusic(const std::string& track, unsigned when)
     audio::MixerSource::DeleteSourceCmd cmd;
     cmd.name      = track;
     cmd.millisecs = when;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraphSource::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 void AudioEngine::KillAllMusic(unsigned int when)
@@ -236,7 +237,7 @@ void AudioEngine::KillAllMusic(unsigned int when)
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::MixerSource::DeleteAllSrcCmd cmd;
     cmd.millisecs = when;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraphSource::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 
@@ -245,7 +246,7 @@ void AudioEngine::CancelMusicCmds(const std::string& track)
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::MixerSource::CancelSourceCmdCmd cmd;
     cmd.name = track;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraphSource::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 
@@ -261,7 +262,7 @@ void AudioEngine::SetMusicEffect(const std::string& track, unsigned duration, Ef
     audio::MixerSource::SetEffectCmd cmd;
     cmd.src    = track;
     cmd.effect = std::move(mixer_effect);
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraphSource::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 
@@ -270,7 +271,7 @@ void AudioEngine::SetMusicGain(float gain)
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::Gain::SetGainCmd cmd;
     cmd.gain = gain;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_gain", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraphSource::MakeCommand("music_gain", std::move(cmd)));
 #endif
 }
 
@@ -298,13 +299,13 @@ bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
     audio::MixerSource::AddSourceCmd add_cmd;
     add_cmd.src    = std::move(graph);
     add_cmd.paused = true;
-    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_mixer", std::move(add_cmd)));
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraphSource::MakeCommand("effect_mixer", std::move(add_cmd)));
 
     audio::MixerSource::PauseSourceCmd play_cmd;
     play_cmd.name      = name;
     play_cmd.paused    = false;
     play_cmd.millisecs = when;
-    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_mixer", std::move(play_cmd)));
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraphSource::MakeCommand("effect_mixer", std::move(play_cmd)));
 #endif
     return true;
 }
@@ -314,7 +315,7 @@ void AudioEngine::SetSoundEffectGain(float gain)
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::Gain::SetGainCmd cmd;
     cmd.gain = gain;
-    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_gain", std::move(cmd)));
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraphSource::MakeCommand("effect_gain", std::move(cmd)));
 #endif
 }
 void AudioEngine::KillAllSoundEffects(unsigned when)
@@ -322,7 +323,7 @@ void AudioEngine::KillAllSoundEffects(unsigned when)
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::MixerSource::DeleteAllSrcCmd cmd;
     cmd.millisecs = when;
-    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_mixer", std::move(cmd)));
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraphSource::MakeCommand("effect_mixer", std::move(cmd)));
 #endif
 }
 
@@ -332,7 +333,7 @@ void AudioEngine::KillSoundEffect(const std::string& track, unsigned when)
     audio::MixerSource::DeleteSourceCmd cmd;
     cmd.name = track;
     cmd.millisecs = when;
-    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_mixer", std::move(cmd)));
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraphSource::MakeCommand("effect_mixer", std::move(cmd)));
 #endif
 }
 
@@ -399,7 +400,7 @@ void AudioEngine::SetAudioThreadTraceWriter(base::TraceWriter* writer)
   #if defined(AUDIO_USE_PLAYER_THREAD)
        // todo: enable tracing in the audio player thread
   #else
-      audio::SourceThreadProxy::SetThreadTraceWriter(writer);
+      audio::ThreadProxySource::SetThreadTraceWriter(writer);
   #endif
 #endif
 }
@@ -410,7 +411,7 @@ void AudioEngine::EnableAudioThreadTrace(bool on_off)
   #if defined(AUDIO_USE_PLAYER_THREAD)
       // todo
   #else
-      audio::SourceThreadProxy::EnableThreadTrace(on_off);
+      audio::ThreadProxySource::EnableThreadTrace(on_off);
   #endif
 #endif
 }

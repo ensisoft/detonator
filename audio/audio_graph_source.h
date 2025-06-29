@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2025 Sami Väisänen
+// Copyright (C) 2020-2025 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,15 +34,15 @@ namespace audio
 {
     // Source implementation for an audio graph. Evaluates the
     // graph and its elements in order to produce PCM audio data.
-    class AudioGraph : public Source
+    class AudioGraphSource : public Source
     {
     public:
         using PrepareParams = Graph::PrepareParams;
 
-        explicit AudioGraph(AudioGraph&& other) noexcept;
-        explicit AudioGraph(const std::string& name);
-        AudioGraph(std::string name, Graph&& graph);
-        AudioGraph(const AudioGraph&) = delete;
+        explicit AudioGraphSource(AudioGraphSource&& other) noexcept;
+        explicit AudioGraphSource(const std::string& name);
+        AudioGraphSource(std::string name, Graph&& graph);
+        AudioGraphSource(const AudioGraphSource&) = delete;
 
         // Prepare the graph for playback. Prepare should be called
         // after all the elements have been added and linked to the graph
@@ -74,7 +74,7 @@ namespace audio
         const Graph& GetGraph() const
         { return mGraph; }
 
-        AudioGraph& operator=(const AudioGraph&) = delete;
+        AudioGraphSource& operator=(const AudioGraphSource&) = delete;
 
         static
         std::unique_ptr<audio::Command> MakeCommandPtr(const std::string& destination,

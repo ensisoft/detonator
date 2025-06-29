@@ -34,7 +34,7 @@
 #include "base/trace.h"
 #include "data/writer.h"
 #include "data/io.h"
-#include "audio/graph.h"
+#include "audio/audio_graph_source.h"
 #include "game/entity.h"
 #include "game/scene.h"
 #include "graphics/material.h"

@@ -23,34 +23,34 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/utility.h"
-#include "audio/source.h"
 #include "audio/sndfile.h"
 #include "audio/mpg123.h"
 #include "audio/loader.h"
+#include "audio/audio_file_source.h"
 
 namespace audio
 {
 
-AudioFile::AudioFile(const std::string& filename, const std::string& name, Format format)
+AudioFileSource::AudioFileSource(const std::string& filename, const std::string& name, Format format)
     : mFilename(filename)
     , mName(name)
     , mFormat(format)
 {}
-AudioFile::~AudioFile() = default;
+AudioFileSource::~AudioFileSource() = default;
 
-unsigned AudioFile::GetRateHz() const noexcept
+unsigned AudioFileSource::GetRateHz() const noexcept
 { return mDecoder->GetSampleRate(); }
 
-unsigned AudioFile::GetNumChannels() const noexcept
+unsigned AudioFileSource::GetNumChannels() const noexcept
 { return mDecoder->GetNumChannels(); }
 
-Source::Format AudioFile::GetFormat() const noexcept
+Source::Format AudioFileSource::GetFormat() const noexcept
 { return mFormat; }
 
-std::string AudioFile::GetName() const noexcept
+std::string AudioFileSource::GetName() const noexcept
 { return mName; }
 
-unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes) 
+unsigned AudioFileSource::FillBuffer(void* buff, unsigned max_bytes)
 {
     const auto num_channels = mDecoder->GetNumChannels();
     const auto frame_size = num_channels * ByteSize(mFormat);
@@ -86,7 +86,7 @@ unsigned AudioFile::FillBuffer(void* buff, unsigned max_bytes)
     return ret * frame_size;
 }
 
-bool AudioFile::HasMore(std::uint64_t num_bytes_read) const noexcept
+bool AudioFileSource::HasMore(std::uint64_t num_bytes_read) const noexcept
 {
     if (mFrames < mDecoder->GetNumFrames())
         return true;
@@ -97,12 +97,12 @@ bool AudioFile::HasMore(std::uint64_t num_bytes_read) const noexcept
     return false;
 }
 
-void AudioFile::Shutdown() noexcept
+void AudioFileSource::Shutdown() noexcept
 {
     mDecoder.reset();
 }
 
-bool AudioFile::Open()
+bool AudioFileSource::Open()
 {
     auto stream = audio::OpenFileStream(mFilename);
     if (!stream)
