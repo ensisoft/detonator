@@ -196,7 +196,9 @@ add_library(AudioLib
     audio/sokol.cpp
     audio/waveout.cpp
     audio/openal.cpp
-    audio/source.cpp
+    audio/audio_graph_source.cpp
+    audio/audio_file_source.cpp
+    audio/thread_proxy_source.cpp
     audio/player.cpp
     audio/element.cpp
     audio/elements/delay.cpp
@@ -216,9 +218,7 @@ add_library(AudioLib
     audio/elements/stereo_maker.cpp
     audio/elements/stereo_splitter.cpp
     audio/elements/stream_source.cpp
-    audio/elements/zero_source.cpp
-    audio/graph.cpp
-    audio/proxy.cpp)
+    audio/elements/zero_source.cpp)
 add_library(DataLib
     data/json.cpp
     data/io.cpp)
@@ -481,7 +481,9 @@ add_executable(Detonator
     audio/sokol.cpp
     audio/waveout.cpp
     audio/openal.cpp
-    audio/source.cpp
+    audio/audio_graph_source.cpp
+    audio/audio_file_source.cpp
+    audio/thread_proxy_source.cpp
     audio/player.cpp
     audio/element.cpp
     audio/elements/delay.cpp
@@ -502,8 +504,6 @@ add_executable(Detonator
     audio/elements/stereo_splitter.cpp
     audio/elements/stream_source.cpp
     audio/elements/zero_source.cpp
-    audio/graph.cpp
-    audio/proxy.cpp
     graphics/tool/polygon.cpp
     graphics/format.cpp
     editor/app/import.h
@@ -869,7 +869,9 @@ add_executable(audio_test
     audio/openal.cpp
     audio/sdl.cpp
     audio/sokol.cpp
-    audio/source.cpp
+    audio/audio_graph_source.cpp
+    audio/audio_file_source.cpp
+    audio/thread_proxy_source.cpp
     audio/player.cpp
     audio/element.cpp
     audio/elements/delay.cpp
@@ -890,8 +892,6 @@ add_executable(audio_test
     audio/elements/stereo_splitter.cpp
     audio/elements/stream_source.cpp
     audio/elements/zero_source.cpp
-    audio/graph.cpp
-    audio/proxy.cpp
     audio/test/main.cpp
 )
 target_include_directories(audio_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
@@ -1247,7 +1247,7 @@ add_executable(unit_test_audio
         audio/sdl.cpp
         audio/sokol.cpp
         audio/player.cpp
-        audio/proxy.cpp)
+        audio/thread_proxy_source.cpp)
 target_include_directories(unit_test_audio PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
 target_link_libraries(unit_test_audio BaseLib)
 if (UNIX)
@@ -1264,6 +1264,7 @@ add_executable(unit_test_audio_graph
         audio/mpg123.cpp
         audio/sndfile.cpp
         audio/element.cpp
+        audio/audio_graph_source.cpp
         audio/elements/delay.cpp
         audio/elements/effect.cpp
         audio/elements/file_source.cpp
@@ -1282,8 +1283,7 @@ add_executable(unit_test_audio_graph
         audio/elements/stereo_splitter.cpp
         audio/elements/stream_source.cpp
         audio/elements/zero_source.cpp
-        audio/format.cpp
-        audio/graph.cpp)
+        audio/format.cpp)
 target_include_directories(unit_test_audio_graph PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
 target_link_libraries(unit_test_audio_graph DataLib BaseLib samplerate sndfile ${CONAN_LIBS})
 

@@ -30,7 +30,7 @@
 #include "engine/library/library.h"
 #include "base/logging.h"
 #include "base/format.h"
-#include "audio/graph.h"
+#include "audio/audio_graph_source.h"
 #include "audio/elements/graph.h"
 #include "audio/elements/graph_class.h"
 #include "audio/loader.h"

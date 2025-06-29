@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2025 Sami Väisänen
+// Copyright (C) 2020-2025 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,23 +18,10 @@
 
 #include "config.h"
 
-#include <atomic>
 #include <string>
 #include <vector>
 #include <memory>
-#include <optional>
-#include <thread>
-#include <queue>
-#include <condition_variable>
 
-#include <cmath>
-
-#if defined(AUDIO_ENABLE_TEST_SOUND)
-#  include "base/math.h"
-#endif
-
-#include "base/assert.h"
-#include "base/trace.h"
 #include "audio/command.h"
 #include "audio/buffer.h"
 #include "audio/format.h"
@@ -114,165 +101,5 @@ namespace audio
         }
     private:
     };
-
-    class SourceThreadProxy : public Source
-    {
-    public:
-        SourceThreadProxy(std::unique_ptr<Source> source);
-       ~SourceThreadProxy();
-        virtual unsigned GetRateHz() const noexcept override;
-        virtual unsigned GetNumChannels() const noexcept override;
-        virtual Format GetFormat() const noexcept override;
-        virtual std::string GetName() const noexcept override;
-        virtual void Prepare(unsigned buffer_size) override;
-        virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override;
-        virtual bool HasMore(std::uint64_t num_bytes_read) const noexcept override;
-        virtual void Shutdown() noexcept override;
-        virtual void RecvCommand(std::unique_ptr<Command> cmd) noexcept override;
-        virtual std::unique_ptr<Event> GetEvent() noexcept override;
-
-        unsigned WaitBuffer(void* device_buff, unsigned device_buff_size);
-
-        static void SetThreadTraceWriter(base::TraceWriter* writer)
-        {
-            std::lock_guard<std::mutex> lock(TraceWriterMutex);
-            TraceWriter = writer;
-        }
-        static void EnableThreadTrace(bool enable)
-        {
-            std::lock_guard<std::mutex> lock(TraceWriterMutex);
-            EnableTrace = enable;
-        }
-
-    private:
-        unsigned FillBuffer(void* device_buff, unsigned device_buff_size, bool wait_buffer);
-        unsigned CopyBuffer(VectorBuffer* source, void* device_buff, unsigned device_buff_size);
-        void ThreadLoop();
-    private:
-        mutable std::mutex mMutex;
-        std::unique_ptr<Source> mSource;
-        std::unique_ptr<std::thread> mThread;
-        std::queue<std::unique_ptr<Event>> mEvents;
-        std::queue<std::unique_ptr<Command>> mCommands;
-        std::condition_variable mCondition;
-        std::queue<VectorBuffer*> mEmptyQueue;
-        std::queue<VectorBuffer*> mFillQueue;
-        std::vector<VectorBuffer> mBuffers;
-        std::exception_ptr mException;
-        bool mShutdown = false;
-        bool mSourceDone = false;
-        bool mFirstBuffer = true;
-
-        static std::mutex TraceWriterMutex;
-        static base::TraceWriter* TraceWriter;
-        static bool EnableTrace;
-    };
-
-    // AudioFile implements reading audio samples from an
-    // encoded audio file on the file system.
-    // Supported formats, WAV, OGG, FLAC and MP3. This is the
-    // super simple way to play an audio clip directly without
-    // using a more complicated audio graph.
-    class AudioFile : public Source
-    {
-    public: 
-        // Construct audio file audio sample by reading the contents
-        // of the given file. You must call Open before (and check for
-        // success) before passing the object to the audio device!
-        AudioFile(const std::string& filename, const std::string& name, Format format = Format::Float32);
-       ~AudioFile();
-        // Get the sample rate in Hz.
-        virtual unsigned GetRateHz() const noexcept override;
-        // Get the number of channels in the sample
-        virtual unsigned GetNumChannels() const noexcept override;
-        // Get the PCM byte format of the sample.
-        virtual Format GetFormat() const noexcept override;
-        // Get the human-readable name of the sample if any.
-        virtual std::string GetName() const noexcept override;
-        // Fill the buffer with PCM data.
-        virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override;
-        // Returns true if there's more audio data available
-        // or false if the source has been depleted.
-        virtual bool HasMore(std::uint64_t num_bytes_read) const noexcept override;
-        // Shutdown.
-        virtual void Shutdown() noexcept override;
-        // Try to open the audio file for reading. Returns true if
-        // successful otherwise false and error is logged.
-        bool Open();
-
-        // Set the number of loops (the number of times) the file is
-        // to be played. pass 0 for "infinite" looping.
-        void SetLoopCount(unsigned count)
-        { mLoopCount = count; }
-    private:
-        const std::string mFilename;
-        const std::string mName;
-        const Format mFormat = Format::Float32;
-        std::unique_ptr<Decoder> mDecoder;
-        std::size_t mFrames = 0;
-        unsigned mLoopCount = 1;
-        unsigned mPlayCount = 0;
-    };
-
-#ifdef AUDIO_ENABLE_TEST_SOUND
-    class SineGenerator : public Source
-    {
-    public:
-        SineGenerator(unsigned frequency, Format format = Format::Float32)
-          : mFrequency(frequency)
-          , mFormat(format)
-        {}
-        SineGenerator(unsigned frequency, unsigned millisecs, Format format = Format::Float32)
-          : mFrequency(frequency)
-          , mFormat(format)
-          , mLimitDuration(true)
-          , mDuration(millisecs)
-        {}
-        virtual unsigned GetRateHz() const noexcept override
-        { return 44100; }
-        virtual unsigned GetNumChannels() const noexcept override
-        { return 1; }
-        virtual Format GetFormat() const noexcept override
-        { return mFormat; }
-        virtual std::string GetName() const noexcept override
-        { return "Sine"; }
-        virtual unsigned FillBuffer(void* buff, unsigned max_bytes) override
-        {
-            const auto num_channels = 1;
-            const auto frame_size = num_channels * ByteSize(mFormat);
-            const auto frames = max_bytes / frame_size;
-            const auto radial_velocity = math::Pi * 2.0 * mFrequency;
-            const auto sample_increment = 1.0/44100.0 * radial_velocity;
-
-            for (unsigned i=0; i<frames; ++i)
-            {
-                // http://blog.bjornroche.com/2009/12/int-float-int-its-jungle-out-there.html
-                const float sample = std::sin(mSampleCounter++ * sample_increment);
-                if (mFormat == Format::Float32)
-                    ((float*)buff)[i] = sample;
-                else if (mFormat == Format::Int32)
-                    ((int*)buff)[i] = 0x7fffffff * sample;
-                else if (mFormat == Format::Int16)
-                    ((short*)buff)[i] = 0x7fff * sample;
-            }
-            return frames * frame_size;
-        }
-        virtual bool HasMore(std::uint64_t) const noexcept override
-        {
-            if (!mLimitDuration) return true;
-            const auto seconds = mSampleCounter / 44100.0f;
-            const auto millis  = seconds * 1000.0f;
-            return millis < mDuration;
-        }
-        virtual void Shutdown() noexcept override
-        { /* intentionally empty */ }
-    private:
-        const unsigned mFrequency = 0;
-        const Format mFormat      = Format::Float32;
-        const bool mLimitDuration = false;
-        const unsigned mDuration  = 0;
-        unsigned mSampleCounter   = 0;
-    };
-#endif
 
 } // namespace

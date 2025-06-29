@@ -37,7 +37,10 @@ namespace audio
     class GraphClass;
     class Graph;
 #ifdef AUDIO_ENABLE_TEST_SOUND
-    class SineSource;
+    class SineTestSource;
 #endif
+    class AudioFileSource;
+    class AudioGraphSource;
+    class ThreadProxySource;
 
 } // namespace

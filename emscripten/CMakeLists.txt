@@ -68,14 +68,14 @@ add_executable(UnitTest
     ../audio/elements/stream_source.cpp
     ../audio/elements/zero_source.cpp
     ../audio/format.cpp
-    ../audio/graph.cpp
     ../audio/loader.cpp
     ../audio/mpg123.cpp
     ../audio/openal.cpp
     ../audio/player.cpp
-    ../audio/proxy.cpp
     ../audio/sndfile.cpp
-    ../audio/source.cpp
+    ../audio/audio_file_source.cpp
+    ../audio/audio_graph_source.cpp
+    ../audio/thread_proxy_source.cpp
     ../base/assert.cpp
     ../base/format.cpp
     ../base/json.cpp
@@ -194,8 +194,8 @@ add_executable(UnitTestThread
         ../audio/format.cpp
         ../audio/mpg123.cpp
         ../audio/sndfile.cpp
-        ../audio/source.cpp
-        ../audio/proxy.cpp
+        ../audio/audio_file_source.cpp
+        ../audio/thread_proxy_source.cpp
         ../audio/openal.cpp)
 
 target_compile_definitions(UnitTestThread PRIVATE DETONATOR_UNIT_TEST_THREAD_WASM_BUILD)
@@ -261,16 +261,16 @@ add_executable(GameEngine
     ../audio/elements/stream_source.cpp
     ../audio/elements/zero_source.cpp
     ../audio/format.cpp
-    ../audio/graph.cpp
     ../audio/loader.cpp
     ../audio/mpg123.cpp
     ../audio/openal.cpp
     ../audio/player.cpp
-    ../audio/proxy.cpp
     ../audio/sdl.cpp
     ../audio/sndfile.cpp
     ../audio/sokol.cpp
-    ../audio/source.cpp
+    ../audio/audio_file_source.cpp
+    ../audio/audio_graph_source.cpp
+    ../audio/thread_proxy_source.cpp
     ../base/assert.cpp
     ../base/format.cpp
     ../base/json.cpp

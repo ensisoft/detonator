@@ -26,10 +26,8 @@
 #include "base/logging.h"
 #include "audio/device.h"
 #include "audio/player.h"
-#include "audio/source.h"
 #include "audio/element.h"
 #include "audio/loader.h"
-#include "audio/graph.h"
 #include "audio/elements/mixer_source.h"
 #include "audio/elements/file_source.h"
 #include "audio/elements/sine_source.h"
@@ -37,6 +35,10 @@
 #include "audio/elements/null.h"
 #include "audio/elements/mixer.h"
 #include "audio/elements/gain.h"
+#include "audio/audio_file_source.h"
+#include "audio/audio_graph_source.h"
+#include "audio/sine_source.h"
+#include "audio/thread_proxy_source.h"
 
 // audio test application
 
@@ -128,7 +130,7 @@ int main(int argc, char* argv[])
     if (test_sine)
     {
         INFO("Playing procedural sine audio for 10 seconds.");
-        auto source = std::make_unique<audio::SineGenerator>(500, format);
+        auto source = std::make_unique<audio::SineTestSource>(500, format);
         const auto id = player.Play(std::move(source));
         DEBUG("New sine wave stream. [id=%1]", id);
 #if defined(AUDIO_USE_PLAYER_THREAD)
@@ -147,7 +149,7 @@ int main(int argc, char* argv[])
     {
         audio::Loader loader;
 
-        auto graph = std::make_unique<audio::AudioGraph>("graph");
+        auto graph = std::make_unique<audio::AudioGraphSource>("graph");
         audio::Format sine_format;
         sine_format.sample_type = audio::SampleType::Float32;
         sine_format.channel_count = 1;
@@ -166,7 +168,7 @@ int main(int argc, char* argv[])
         ASSERT((*graph)->LinkElements("mixer", "out", "gain", "in"));
         ASSERT((*graph)->LinkGraph("gain", "out"));
 
-        audio::AudioGraph::PrepareParams params;
+        audio::AudioGraphSource::PrepareParams params;
         params.enable_pcm_caching = false;
         ASSERT(graph->Prepare(loader, params));
 
@@ -183,7 +185,7 @@ int main(int argc, char* argv[])
             // audio source in it's own thread
             // see the audio/test/config.h for the build flag to
             // enable/disable audio player thread
-            source = std::make_unique<audio::SourceThreadProxy>(std::move(graph));
+            source = std::make_unique<audio::ThreadProxySource>(std::move(graph));
         }
         else
         {
@@ -312,7 +314,7 @@ int main(int argc, char* argv[])
 
         std::unique_ptr<audio::Source> source;
 
-        auto file_source = std::make_unique<audio::AudioFile>(file, "test", format);
+        auto file_source = std::make_unique<audio::AudioFileSource>(file, "test", format);
         if (!file_source->Open())
         {
             ERROR("Failed to open audio file. [file='%1']", file);
@@ -327,7 +329,7 @@ int main(int argc, char* argv[])
             // audio source in it's own thread
             // see the audio/test/config.h for the build flag to
             // enable/disable audio player thread
-            source = std::make_unique<audio::SourceThreadProxy>(std::move(file_source));
+            source = std::make_unique<audio::ThreadProxySource>(std::move(file_source));
         }
         else
         {

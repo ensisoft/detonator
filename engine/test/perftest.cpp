@@ -28,7 +28,7 @@
 #include "base/trace.h"
 #include "audio/format.h"
 #include "audio/loader.h"
-#include "audio/graph.h"
+#include "audio/audio_graph_source.h"
 #include "audio/elements/graph.h"
 #include "audio/elements/graph_class.h"
 #include "device/device.h"
@@ -147,12 +147,12 @@ public:
         std::vector<char> buffer;
         buffer.resize(1024);
 
-        audio::AudioGraph::PrepareParams p;
+        audio::AudioGraphSource::PrepareParams p;
         p.enable_pcm_caching = true;
 
         for (unsigned i = 0; i < 100; ++i)
         {
-            audio::AudioGraph graph("graph", audio::Graph("graph", laser));
+            audio::AudioGraphSource graph("graph", audio::Graph("graph", laser));
             graph.Prepare(*engine.audio_loader, p);
             std::uint64_t bytes = 0;
             while (graph.HasMore(bytes))
