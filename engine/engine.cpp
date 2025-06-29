@@ -873,10 +873,17 @@ public:
         SendGameMouseEvent(mickey, &engine::GameRuntime::OnMouseRelease);
     }
 private:
+    engine::GameRuntime::Camera GetCamera() const
+    {
+        engine::GameRuntime::Camera camera;
+        mRuntime->GetCamera(&camera);
+        return camera;
+    }
+
     engine::IRect GetViewport() const
     {
         // get the game's logical viewport into the game world.
-        const auto& view = mRuntime->GetCamera().viewport;
+        const auto& view = GetCamera().viewport;
         // map the logical viewport to some area in the rendering surface
         // so that the rendering area (the device viewport) has the same
         // aspect ratio as the logical viewport.
@@ -903,7 +910,7 @@ private:
     template<typename WdkMouseEvent>
     engine::MouseEvent MapGameMouseEvent(const WdkMouseEvent& mickey) const
     {
-        const auto& camera = mRuntime->GetCamera();
+        const auto& camera = GetCamera();
         const auto& device_viewport  = GetViewport();
 
         engine::MouseEvent event;
@@ -1190,7 +1197,7 @@ private:
         // configure renderer
         const auto surf_width  = (float)mSurfaceWidth;
         const auto surf_height = (float)mSurfaceHeight;
-        const auto& game_camera = mRuntime->GetCamera();
+        const auto& game_camera = GetCamera();
         // get the game's logical viewport into the game world.
         const auto& game_view = game_camera.viewport;
         // map the logical viewport to some area in the rendering surface
@@ -1312,7 +1319,7 @@ private:
 
         const auto surf_width  = (float)mSurfaceWidth;
         const auto surf_height = (float)mSurfaceHeight;
-        const auto& game_camera = mRuntime->GetCamera();
+        const auto& game_camera = GetCamera();
         // get the game's logical viewport into the game world.
         const auto& game_view = game_camera.viewport;
         // map the logical viewport to some area in the rendering surface
@@ -1414,7 +1421,7 @@ private:
             return;
         }
 
-        const auto& camera = mRuntime->GetCamera();
+        const auto& camera = GetCamera();
         const auto device_viewport  = GetViewport();
         const auto surface_width  = (float)mSurfaceWidth;
         const auto surface_height = (float)mSurfaceHeight;

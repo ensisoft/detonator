@@ -30,11 +30,16 @@
 #include "base/types.h"
 #include "wdk/keys.h"
 #include "wdk/bitflag.h"
+#include "wdk/events.h"
 
 #include "game/fwd.h"
 
 namespace engine
 {
+    using KeyDownEvent = wdk::WindowEventKeyDown;
+    using KeyUpEvent = wdk::WindowEventKeyUp;
+    using CharEvent = wdk::WindowEventChar;
+
     struct MouseEvent {
         // mouse cursor position in window coordinates.
         glm::vec2 window_coord;

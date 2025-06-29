@@ -68,53 +68,53 @@ namespace engine
         // Set the default transient key-value store that can be
         // used by the game to store non-persistent data for the
         // duration of the game play.
-        virtual void SetStateStore(KeyValueStore* store) = 0;
+        virtual void SetStateStore(KeyValueStore* store) {}
         // Set physics engine instance.
-        virtual void SetPhysicsEngine(PhysicsEngine* engine) = 0;
+        virtual void SetPhysicsEngine(PhysicsEngine* engine) {}
         // Set audio engine instance.
-        virtual void SetAudioEngine(AudioEngine* engine) = 0;
+        virtual void SetAudioEngine(AudioEngine* engine) {}
         // Set the game data loader.
-        virtual void SetDataLoader(const Loader* loader) = 0;
+        virtual void SetDataLoader(const Loader* loader) {}
         // Set the class loader.
-        virtual void SetClassLibrary(const ClassLibrary* classlib) = 0;
+        virtual void SetClassLibrary(const ClassLibrary* classlib) {}
         // Set the current UI instance (if any). Will be nullptr when there's no
         // current UI open.
-        virtual void SetCurrentUI(uik::Window* window) = 0;
+        virtual void SetCurrentUI(uik::Window* window) {}
         // Initialize the runtime, load the appropriate runtime resources
         // for the game execution to begin.
-        virtual void Init() = 0;
+        virtual void Init() {}
         // Load the game data. This is called once by the engine after the
         // main application has started. In the implementation you should
         // load whatever initial game state that is needed. It's possible to
         // fail (indicated by returning false) or by throwing an exception.
         // Failure will make the host application exit early since the
         // game obviously cannot be run.
-        virtual bool LoadGame() = 0;
+        virtual bool LoadGame() { return false; }
         // Start the actual game after all required initial content has been
         // loaded. At this point all the engine subsystems are available
         // including rendering, physics and audio.
         // The game should enter whatever initial state such as opening
         // main screen/menu.
-        virtual void StartGame() = 0;
+        virtual void StartGame() {}
         // BeginPlay is called as a response to PlayAction. When the
         // action is processed the engine creates an instance of the scene
         // and then calls BeginPlay. The Engine will maintain the ownership
         // of the scene for the duration of the game play.
-        virtual void BeginPlay(game::Scene* scene, game::Tilemap* map) = 0;
+        virtual void BeginPlay(game::Scene* scene, game::Tilemap* map) {}
         // Begin one iteration of the game update loop. In the update the loop
         // the sequence of calls are:
         // BeginLoop, Update, Tick, PostUpdate, EndLoop
         // BeginLoop is where the runtime should realize things such as new
         // entities that have been spawned and invoke their "begin play"
         // functionality.
-        virtual void BeginLoop() = 0;
+        virtual void BeginLoop() {}
         // Tick is called intermittently in order to perform some low frequency
         // game activity. The actual frequency is specified in the game config.json.
         // game_time is the current total accumulated game time measured
         // in seconds and updated in dt steps with each step being equal to
         // 1.0/ticks_per_second seconds.
         // On every call game_time already includes the time step dt.
-        virtual void Tick(double game_time, double dt) = 0;
+        virtual void Tick(double game_time, double dt) {}
         // Update is the main game update callback. It is called (normally)
         // at much higher frequency (for example @ 60 Hz) than Tick. The actual
         // frequency is specified in the game configuration in config.json.
@@ -122,15 +122,15 @@ namespace engine
         // in seconds and updated in dt steps with each step being equal to
         // 1.0/updates_per_second seconds.
         // On every call game_time already includes the time step dt.
-        virtual void Update(double game_time,  double dt) = 0;
+        virtual void Update(double game_time,  double dt) {}
 
-        virtual void PostUpdate(double game_time) = 0;
+        virtual void PostUpdate(double game_time) {}
         // End one iteration of the game update loop. EndLoop is where
         // the runtime should realize the results of teh update operations
         // that have happened during the updates in the game state.
         // This is the place to for example realize the entities that
         // have been killed and call their "end play" functionality.
-        virtual void EndLoop() = 0;
+        virtual void EndLoop() {}
 
         // todo:
         virtual void PausePlay()
@@ -138,11 +138,11 @@ namespace engine
         virtual void ResumePlay()
         {}
         // Called after StopAction has taken place.
-        virtual void EndPlay(game::Scene* scene, game::Tilemap* map) = 0;
+        virtual void EndPlay(game::Scene* scene, game::Tilemap* map) {}
         // todo:
-        virtual void SaveGame() = 0;
+        virtual void SaveGame() {}
         // todo:
-        virtual void StopGame() = 0;
+        virtual void StopGame() {}
         // Get the next action from the game's action queue. The game engine
         // will process all the game actions once per game update loop iteration.
         // If there was no next action returns false, otherwise true is returned
@@ -168,7 +168,8 @@ namespace engine
             glm::vec2 scale    = {1.0f, 1.0f};
         };
 
-        virtual Camera GetCamera() const = 0;
+        virtual bool GetCamera(Camera* camera) const
+        { return false; }
 
         struct ContentClass {
             ClassLibrary::ClassType type;
@@ -204,9 +205,9 @@ namespace engine
         // todo:
         virtual void OnSceneEvent(const std::vector<game::Scene::Event>& events) {}
         // action/input handlers for some interesting windowing events.
-        virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) {}
-        virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) {}
-        virtual void OnChar(const wdk::WindowEventChar& text) {}
+        virtual void OnKeyDown(const KeyDownEvent& key) {}
+        virtual void OnKeyUp(const KeyUpEvent& key) {}
+        virtual void OnChar(const CharEvent& text) {}
         virtual void OnMouseMove(const MouseEvent& mouse) {}
         virtual void OnMousePress(const MouseEvent& mouse) {}
         virtual void OnMouseRelease(const MouseEvent& mouse) {}

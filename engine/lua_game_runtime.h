@@ -47,48 +47,47 @@ namespace engine
                    const std::string& game_name);
        ~LuaRuntime() override;
 
-        virtual void SetFrameNumber(unsigned frame) override;
-        virtual void SetSurfaceSize(unsigned width, unsigned height) override;
-        virtual void SetEditingMode(bool editing) override;
-        virtual void SetPreviewMode(bool preview) override;
-        virtual void SetClassLibrary(const ClassLibrary* classlib) override;
-        virtual void SetPhysicsEngine(PhysicsEngine* engine) override;
-        virtual void SetAudioEngine(AudioEngine* engine) override;
-        virtual void SetDataLoader(const Loader* loader) override;
-        virtual void SetStateStore(KeyValueStore* store) override;
-        virtual void SetCurrentUI(uik::Window* window) override;
-        virtual void Init() override;
-        virtual bool LoadGame() override;
-        virtual void StartGame() override;
-        virtual void SaveGame() override;
-        virtual void StopGame() override;
-        virtual void BeginPlay(game::Scene* scene, game::Tilemap* map) override;
-        virtual void EndPlay(game::Scene* scene, game::Tilemap* map) override;
-        virtual void Tick(double game_time, double dt) override;
-        virtual void Update(double game_time, double dt) override;
-        virtual void PostUpdate(double game_time) override;
-        virtual void BeginLoop() override;
-        virtual void EndLoop() override;
-        virtual bool GetNextAction(Action* out) override;
-        virtual void TransferDebugQueue(std::vector<DebugDrawCmd>* out) override;
-        virtual void OnContactEvent(const std::vector<ContactEvent>& contacts) override;
-        virtual void OnGameEvent(const GameEvent& event) override;
-        virtual void OnAudioEvent(const AudioEvent& event) override;
-        virtual void OnSceneEvent(const std::vector<game::Scene::Event>& events) override;
-        virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) override;
-        virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) override;
-        virtual void OnChar(const wdk::WindowEventChar& text) override;
-        virtual void OnMouseMove(const MouseEvent& mouse) override;
-        virtual void OnMousePress(const MouseEvent& mouse) override;
-        virtual void OnMouseRelease(const MouseEvent& mouse) override;
-        virtual void UpdateUI(uik::Window* ui, double game_time, double dt) override;
-        virtual void OnUIOpen(uik::Window* ui) override;
-        virtual void OnUIClose(uik::Window* ui, int result) override;
-        virtual void OnUIAction(uik::Window* ui, const WidgetActionList& actions) override;
-        virtual void OnContentClassUpdate(const ContentClass& klass) override;
+        void SetFrameNumber(unsigned frame) override;
+        void SetSurfaceSize(unsigned width, unsigned height) override;
+        void SetEditingMode(bool editing) override;
+        void SetPreviewMode(bool preview) override;
+        void SetClassLibrary(const ClassLibrary* classlib) override;
+        void SetPhysicsEngine(PhysicsEngine* engine) override;
+        void SetAudioEngine(AudioEngine* engine) override;
+        void SetDataLoader(const Loader* loader) override;
+        void SetStateStore(KeyValueStore* store) override;
+        void SetCurrentUI(uik::Window* window) override;
+        void Init() override;
+        bool LoadGame() override;
+        void StartGame() override;
+        void SaveGame() override;
+        void StopGame() override;
+        void BeginPlay(game::Scene* scene, game::Tilemap* map) override;
+        void EndPlay(game::Scene* scene, game::Tilemap* map) override;
+        void Tick(double game_time, double dt) override;
+        void Update(double game_time, double dt) override;
+        void PostUpdate(double game_time) override;
+        void BeginLoop() override;
+        void EndLoop() override;
+        bool GetNextAction(Action* out) override;
+        bool GetCamera(Camera* cam) const override;
+        void TransferDebugQueue(std::vector<DebugDrawCmd>* out) override;
 
-        virtual Camera GetCamera() const override
-        { return mCamera; }
+        void OnContactEvent(const std::vector<ContactEvent>& contacts) override;
+        void OnGameEvent(const GameEvent& event) override;
+        void OnAudioEvent(const AudioEvent& event) override;
+        void OnSceneEvent(const std::vector<game::Scene::Event>& events) override;
+        void OnKeyDown(const wdk::WindowEventKeyDown& key) override;
+        void OnKeyUp(const wdk::WindowEventKeyUp& key) override;
+        void OnChar(const wdk::WindowEventChar& text) override;
+        void OnMouseMove(const MouseEvent& mouse) override;
+        void OnMousePress(const MouseEvent& mouse) override;
+        void OnMouseRelease(const MouseEvent& mouse) override;
+        void UpdateUI(uik::Window* ui, double game_time, double dt) override;
+        void OnUIOpen(uik::Window* ui) override;
+        void OnUIClose(uik::Window* ui, int result) override;
+        void OnUIAction(uik::Window* ui, const WidgetActionList& actions) override;
+        void OnContentClassUpdate(const ContentClass& klass) override;
 
         bool HasAction() const
         { return !mActionQueue.empty(); }
