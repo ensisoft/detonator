@@ -782,8 +782,23 @@ public:
         mThreadPool.reset();
 
         mContext.reset();
+        DEBUG("Shutdown complete. Have a good day!");
         return EM_FALSE;
     }
+    EM_BOOL OnAnimationFrameExceptionSafe(double time)
+    {
+        try
+        {
+            return OnAnimationFrame(time);
+        }
+        catch (const std::exception& exception)
+        {
+            ERROR("The engine has thrown an exception.");
+            ERROR("%1", exception.what());
+        }
+        return EM_FALSE;
+    }
+
     void PostResize(const wdk::WindowEventResize* ptr)
     {
         // filter out superfluous event notifications when the render target
@@ -1424,7 +1439,7 @@ EM_BOOL OnAnimationFrame(double time, void* user_data)
     if (!init_done)
         return EM_TRUE;
 
-    const auto ret = app->OnAnimationFrame(time);
+    const auto ret = app->OnAnimationFrameExceptionSafe(time);
     // EM_TRUE means that another frame is wanted, so the app
     // is still running.
     if (ret == EM_TRUE)
