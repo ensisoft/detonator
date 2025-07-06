@@ -46,7 +46,8 @@ Player::Player(std::unique_ptr<Device> device)
 #endif
 {
 #if defined(AUDIO_USE_PLAYER_THREAD)
-    run_thread_.test_and_set(std::memory_order_acquire);
+    std::lock_guard<std::mutex> lock(thread_mutex_);
+    run_thread_ = true;
     thread_.reset(new std::thread(std::bind(&Player::AudioThreadLoop, this, device.get())));
     device.release();
 #else
@@ -59,7 +60,10 @@ Player::~Player()
 {
 #if defined(AUDIO_USE_PLAYER_THREAD)
     // signal the audio thread to exit
-    run_thread_.clear(std::memory_order_release);
+    {
+        std::lock_guard<std::mutex> lock(thread_mutex_);
+        run_thread_ = false;
+    }
     thread_->join();
 #else
     for (auto& p : track_list_)
@@ -196,7 +200,9 @@ void Player::AudioThreadLoop(Device* device)
 
         std::list<Track> track_list;
 
-        while (run_thread_.test_and_set(std::memory_order_acquire))
+        bool run_thread = true;
+
+        while (run_thread)
         {
             RunAudioUpdateOnce(*device, track_list);
             // this wait is here to avoid "overheating the cpu" so to speak.
@@ -205,6 +211,11 @@ void Player::AudioThreadLoop(Device* device)
             // b) creates possibility for a buffer underruns in the audio playback stream.
             // todo: probably need something more sophisticated ?
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
+
+            {
+                std::lock_guard<std::mutex> lock(thread_mutex_);
+                run_thread = run_thread_;
+            }
         }
 
         // cancel pending audio streams
