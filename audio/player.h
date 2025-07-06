@@ -154,7 +154,8 @@ namespace audio
         // lock free queue or a std::queue + std::mutex.
 #if defined(AUDIO_USE_PLAYER_THREAD)
         // audio thread stop flag
-        std::atomic_flag run_thread_ = ATOMIC_FLAG_INIT;
+        std::mutex thread_mutex_;
+        bool run_thread_ = true;
         std::unique_ptr<std::thread> thread_;
   #if defined(AUDIO_LOCK_FREE_QUEUE)
         // queue of actions for tracks (pause/resume)
