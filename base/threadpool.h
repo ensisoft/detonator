@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <chrono>
 #include <optional>
+#include <typeinfo>
 
 #include "base/platform.h"
 #include "base/logging.h"
@@ -42,7 +43,7 @@ namespace base
         };
 
         enum class Flags {
-            Error, Tracing
+            Error, Tracing, Logging
         };
 
         explicit ThreadTask() noexcept
@@ -95,28 +96,13 @@ namespace base
         {
             if (mDescription.has_value())
                 return mDescription.value().name;
-            return "";
+            return typeid(*this).name();
         }
         inline std::string GetErrorString() const noexcept
         { return mErrorString; }
 
-        void Execute()
-        {
-            try
-            {
-                DoTask();
-            }
-            catch (const std::exception&)
-            {
-               mException = std::current_exception();
-            }
-            mDone.store(true, std::memory_order_release);
-        }
-
-        void RethrowException() const
-        {
-            std::rethrow_exception(mException);
-        }
+        void Execute();
+        void RethrowException() const;
 
         virtual void GetValue(const char* key, void* ptr)
         {}
