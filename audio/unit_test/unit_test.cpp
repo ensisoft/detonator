@@ -18,6 +18,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <thread>
+#include <filesystem>
 
 #ifndef ENABLE_AUDIO_TEST_SOURCE
 #  define ENABLE_AUDIO_TEST_SOURCE
@@ -31,7 +33,9 @@
 #include "audio/player.h"
 #include "audio/device.h"
 #include "audio/algo.h"
+#include "audio/sndfile.h"
 #include "audio/sine_source.h"
+#include "audio/loader.h"
 #include "audio/thread_proxy_source.h"
 
 class TestSource : public audio::Source
@@ -94,6 +98,13 @@ bool LoopUntilEvent(audio::Player& player, Condition cond)
         }
     }
     return false;
+}
+
+std::string GetTestFile(const std::string& name)
+{
+    auto p = std::filesystem::path(__FILE__).parent_path();
+    p /= name;
+    return p.string();
 }
 
 void unit_test_success()
@@ -314,6 +325,35 @@ void unit_test_thread_proxy()
     }
 }
 
+// sndfile is not thread safe.
+// https://github.com/libsndfile/libsndfile/issues/279
+void unit_test_sndfile_thread_safety()
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto stream = audio::OpenFileStream(GetTestFile("sounds/bombexplosion.ogg"));
+    TEST_REQUIRE(stream);
+
+    for (int i=0; i<100; ++i)
+    {
+        std::thread thread0([&stream]() {
+            audio::SndFileDecoder dec;
+
+            TEST_REQUIRE(dec.Open(stream));
+
+        });
+        std::thread thread1([stream]() {
+            audio::SndFileDecoder dec;
+
+            TEST_REQUIRE(dec.Open(stream));
+        });
+
+        thread0.join();
+        thread1.join();
+    }
+
+}
+
 void perf_test_buffer_mixing()
 {
     TEST_CASE(test::Type::Performance)
@@ -363,6 +403,7 @@ void run_tests()
     unit_test_cancel();
     unit_test_shutdown_with_active_streams();
     unit_test_thread_proxy();
+    unit_test_sndfile_thread_safety();
 
     perf_test_buffer_mixing();
 #endif

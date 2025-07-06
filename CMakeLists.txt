@@ -1240,6 +1240,8 @@ add_test(NAME unit_test_uikit COMMAND unit_test_uikit)
 # audio tests
 add_executable(unit_test_audio
         audio/unit_test/unit_test.cpp
+        audio/sndfile.cpp
+        audio/loader.cpp
         audio/format.cpp
         audio/pulseaudio.cpp
         audio/openal.cpp
@@ -1250,6 +1252,7 @@ add_executable(unit_test_audio
         audio/thread_proxy_source.cpp)
 target_include_directories(unit_test_audio PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
 target_link_libraries(unit_test_audio BaseLib)
+target_link_libraries(unit_test_audio sndfile)
 if (UNIX)
     target_link_libraries(unit_test_audio pulse)
     target_link_libraries(unit_test_audio pthread)

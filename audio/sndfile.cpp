@@ -18,6 +18,7 @@
 
 #include <stdexcept>
 #include <cstring>
+#include <mutex>
 
 #include <sndfile.h>
 
@@ -25,6 +26,15 @@
 #include "base/logging.h"
 #include "audio/sndfile.h"
 #include "audio/loader.h"
+
+namespace {
+
+// sndfile is not thread safe when it comes to opening new streams.
+// https://github.com/libsndfile/libsndfile/issues/279
+
+// use a dog-shit global mutex to serialize the calls.
+std::mutex global_sndfile_open_lock;
+} //
 
 namespace audio
 {
@@ -52,6 +62,12 @@ void SndFileDecoder::Reset()
 
 bool SndFileDecoder::Open(std::shared_ptr<const SourceStream> source)
 {
+    // use this lock to serialize calls into sf_open.
+    // internally sndfile calls psf_open_file which is not
+    // thread safe when it comes to error reporting. This
+    // will cause valgrind (helgrind) to report thread errors.
+    std::lock_guard<std::mutex> lock(global_sndfile_open_lock);
+
     ASSERT(mSource == nullptr);
     ASSERT(mFile   == nullptr);
     struct Trampoline {
