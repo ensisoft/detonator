@@ -3,7 +3,7 @@
 
 #include "base/platform.h"
 
-#define AUDIO_LOCK_FREE_QUEUE
+//#define AUDIO_LOCK_FREE_QUEUE
 #define AUDIO_ENABLE_TEST_SOUND
 #define AUDIO_USE_PLAYER_THREAD
 #if defined(LINUX_OS)
