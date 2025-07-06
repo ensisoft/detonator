@@ -45,7 +45,7 @@
 #  define AUDIO_USE_WAVEOUT
 #endif
 
-#define AUDIO_LOCK_FREE_QUEUE
+//#define AUDIO_LOCK_FREE_QUEUE
 
 #if defined(DETONATOR_EDITOR_BUILD)
   #define AUDIO_USE_PLAYER_THREAD
