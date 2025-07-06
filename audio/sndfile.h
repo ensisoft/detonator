@@ -36,18 +36,20 @@ namespace audio
     {
     public:
         SndFileDecoder() = default;
-        SndFileDecoder(std::shared_ptr<const SourceStream> io);
-       ~SndFileDecoder();
-        virtual unsigned GetSampleRate() const override
+        explicit SndFileDecoder(std::shared_ptr<const SourceStream> io);
+       ~SndFileDecoder() override;
+
+        unsigned GetSampleRate() const override
         { return mSampleRate; }
-        virtual unsigned GetNumChannels() const override
+        unsigned GetNumChannels() const override
         { return mChannels; }
-        virtual unsigned GetNumFrames() const override
+        unsigned GetNumFrames() const override
         { return mFrames; }
-        virtual size_t ReadFrames(float* ptr, size_t frames) override;
-        virtual size_t ReadFrames(short* ptr, size_t frames) override;
-        virtual size_t ReadFrames(int* ptr, size_t frames) override;
-        virtual void Reset() override;
+
+        size_t ReadFrames(float* ptr, size_t frames) override;
+        size_t ReadFrames(short* ptr, size_t frames) override;
+        size_t ReadFrames(int* ptr, size_t frames) override;
+        void Reset() override;
 
         // Try to open the decoder based on the given IO device.
         // Returns true if successful. Errors are logged.
