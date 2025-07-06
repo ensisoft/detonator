@@ -442,7 +442,7 @@ void ParticleEngineClass::Update(const Environment& env, InstanceStatePtr ptr, f
             if (num_particles_now < num_particles_always)
             {
                 const auto num_particles_needed = num_particles_always - num_particles_now;
-                InitParticles(env, ptr, num_particles_needed);
+                ParticleEngineClass::InitParticles(env, *mParams, ptr->particles, num_particles_needed);
             }
         }
     }
