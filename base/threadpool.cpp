@@ -26,6 +26,7 @@
 #include "base/logging.h"
 #include "base/threadpool.h"
 #include "base/trace.h"
+#include "base/utility.h"
 
 namespace {
     base::ThreadPool* global_thread_pool;
@@ -33,6 +34,26 @@ namespace {
 
 namespace base
 {
+
+void ThreadTask::Execute()
+{
+    try
+    {
+        DoTask();
+    }
+    catch (const std::exception& exception)
+    {
+        ERROR("Exception in task! [task='%1', what='%2]",  typeid(*this).name(), exception.what());
+        mException = std::current_exception();
+    }
+    mDone.store(true, std::memory_order_release);
+}
+
+void ThreadTask::RethrowException() const
+{
+    std::rethrow_exception(mException);
+}
+
 struct ThreadPool::State {
     std::atomic<size_t> num_tasks = 0;
 };
@@ -159,6 +180,11 @@ private:
 
             if (task)
             {
+                if (task->TestFlag(ThreadTask::Flags::Logging))
+                {
+                    DEBUG("Executing thread task. [task='%1']", task->GetTaskName());
+                }
+
                 if (task->TestFlag(ThreadTask::Flags::Tracing))
                 {
                     TRACE_CALL("Task::Execute", task->Execute());
@@ -167,6 +193,12 @@ private:
                 {
                     task->Execute();
                 }
+
+                if (task->TestFlag(ThreadTask::Flags::Logging))
+                {
+                    DEBUG("Thread task complete. [task='%1']", task->GetTaskName());
+                }
+
                 mState->num_tasks--;
             }
 
@@ -263,6 +295,9 @@ void TaskHandle::Wait(WaitStrategy strategy) noexcept
         }
     }
 
+    base::ElapsedTimer t;
+    t.Start();
+
     while (!IsComplete())
     {
         // holy hell batman, let's not cause a stall here by blocking the
@@ -273,6 +308,11 @@ void TaskHandle::Wait(WaitStrategy strategy) noexcept
         if (strategy == WaitStrategy::Sleep)
         {
             std::this_thread::sleep_for(std::chrono::microseconds(1));
+        }
+        if (t.SinceStart() > 2.0)
+        {
+            DEBUG("Stuck waiting on task %1 to complete. ", mTask->GetTaskName());
+            t.Start();
         }
     }
 }
