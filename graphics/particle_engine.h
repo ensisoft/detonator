@@ -265,6 +265,7 @@ namespace gfx
             // engine tasks (init/update) on the background on their
             // own buffers while the rendering state is in the
             // original 'particles' buffers.
+            mutable std::mutex buffer_mutex;
             ParticleBuffer task_buffer[2];
             std::atomic<size_t> task_count = 0;
         };
