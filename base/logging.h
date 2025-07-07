@@ -350,11 +350,43 @@ namespace base
     // Set the logger object for all threads to use. Each thread can override
     // this setting by setting a thread specific log. If a thread specific
     // logger is set that will the precedence over global logger.
-    // In the precense of threads the logger object should be thread safe.
+    // In the presence of threads the logger object should be thread safe.
     Logger* SetGlobalLog(Logger* log);
 
     // Get access to the global logger object (if any).
-    Logger* GetGlobalLog();
+    class GlobalLogger {
+    public:
+        GlobalLogger(Logger* logger, std::mutex* global_mutex) noexcept
+          : mLogger(logger)
+          , mMutex(global_mutex)
+        {}
+        ~GlobalLogger()
+        {
+            mMutex->unlock();
+        }
+        GlobalLogger(const GlobalLogger&) = delete;
+
+        Logger* operator->()
+        {
+            return mLogger;
+        }
+        operator bool() const
+        {
+            return mLogger != nullptr;
+        }
+
+        bool operator==(const Logger* other) const
+        {
+            return mLogger == other;
+        }
+
+        GlobalLogger& operator=(const GlobalLogger&) = delete;
+    private:
+        Logger* mLogger = nullptr;
+        std::mutex* mMutex = nullptr;
+    };
+
+    GlobalLogger GetGlobalLog();
 
     // Get the calling thread's current logger object (if any)
     Logger* GetThreadLog();
@@ -403,9 +435,12 @@ namespace base
 // C style interface for doing dymamic address / function resolution.
 // currently only for suppressing name mangling
 extern "C" {
-    base::Logger* base_GetGlobalLog();
     base::Logger* base_GetThreadLog();
+    base::Logger* base_AcquireGlobalLog();
+    void          base_ReleaseGlobalLog(base::Logger* logger);
 
-    typedef base::Logger* (*base_GetGlobalLog_FuncPtr)();
+    typedef base::Logger* (*base_AcquireGlobalLog_FuncPtr)();
+    typedef void (*base_ReleaseGlobalLog_FuncPtr)(base::Logger*);
+
     typedef base::Logger* (*base_GetThreadLog_FuncPtr)();
 } //

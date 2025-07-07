@@ -178,7 +178,8 @@ BlurpFailure(const char* expression, const char* file, const char* function, int
 #if defined(POSIX_OS)
     static void* myself = dlopen(NULL, RTLD_NOW);
     static auto* get_thread_log = (base_GetThreadLog_FuncPtr)dlsym(myself, "base_GetThreadLog");
-    static auto* get_global_log = (base_GetGlobalLog_FuncPtr)dlsym(myself, "base_GetGlobalLog");
+    static auto* acquire_global_log = (base_AcquireGlobalLog_FuncPtr)dlsym(myself, "base_AcquireGlobalLog");
+    static auto* release_global_log = (base_ReleaseGlobalLog_FuncPtr)dlsym(myself, "base_ReleaseGlobalLog");
 
     if (get_thread_log)
     {
@@ -186,10 +187,13 @@ BlurpFailure(const char* expression, const char* file, const char* function, int
             logger->Flush();
     }
 
-    if (get_global_log)
+    if (acquire_global_log)
     {
-        if (auto* logger = get_global_log())
+        if (auto* logger = acquire_global_log())
+        {
             logger->Flush();
+            release_global_log(logger);
+        }
     }
 
 #endif

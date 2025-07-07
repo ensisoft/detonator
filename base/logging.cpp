@@ -34,6 +34,8 @@
 #include <atomic>
 #include <chrono>
 #include <cstdio>
+#include <mutex>
+
 #include "base/assert.h"
 #include "base/logging.h"
 
@@ -42,15 +44,16 @@ namespace {
 thread_local base::Logger* threadLogger;
 
 // global logger
-static base::Logger* globalLogger;
+base::Logger* globalLogger;
+std::mutex globalLoggerMutex;
 
-// atomic flag to globally specify which log events
+// flags to globally specify which log events
 // are enabled or not.
-static std::atomic<bool> isGlobalVerboseLogEnabled(false);
-static std::atomic<bool> isGlobalDebugLogEnabled(false);
-static std::atomic<bool> isGlobalWarnLogEnabled(true);
-static std::atomic<bool> isGlobalInfoLogEnabled(true);
-static std::atomic<bool> isGlobalErrorLogEnabled(true);
+bool isGlobalVerboseLogEnabled = false;
+bool isGlobalDebugLogEnabled   = false;
+bool isGlobalWarnLogEnabled    = true;
+bool isGlobalInfoLogEnabled    = true;
+bool isGlobalErrorLogEnabled   = true;
 
 } // namespace
 
@@ -325,14 +328,18 @@ void EmscriptenLogger::Flush()
 
 Logger* SetGlobalLog(Logger* log)
 {
+    std::lock_guard<std::mutex> lock(globalLoggerMutex);
+
     auto ret = globalLogger;
     globalLogger = log;
     return ret;
 }
 
-Logger* GetGlobalLog()
+GlobalLogger GetGlobalLog()
 {
-    return globalLogger;
+    globalLoggerMutex.lock();
+
+    return { globalLogger, &globalLoggerMutex };
 }
 
 Logger* GetThreadLog()
@@ -357,18 +364,22 @@ void FlushThreadLog()
 
 void FlushGlobalLog()
 {
-    if (!globalLogger)
-        return;
-    globalLogger->Flush();
+    auto logger = GetGlobalLog();
+    if (logger)
+        logger->Flush();
 }
 
 bool IsDebugLogEnabled()
 {
+    std::lock_guard<std::mutex> lock(globalLoggerMutex);
+
     return isGlobalDebugLogEnabled;
 }
 
 bool IsLogEventEnabled(LogEvent type)
 {
+    std::lock_guard<std::mutex> lock(globalLoggerMutex);
+
     if (type == LogEvent::Verbose)
         return isGlobalVerboseLogEnabled;
     else if (type == LogEvent::Debug)
@@ -385,6 +396,8 @@ bool IsLogEventEnabled(LogEvent type)
 
 void EnableLogEvent(LogEvent type, bool on_off)
 {
+    std::lock_guard<std::mutex> lock(globalLoggerMutex);
+
     if (type == LogEvent::Verbose)
         isGlobalVerboseLogEnabled = on_off;
     else if (type == LogEvent::Debug)
@@ -400,6 +413,8 @@ void EnableLogEvent(LogEvent type, bool on_off)
 
 void EnableDebugLog(bool on_off)
 {
+    std::lock_guard<std::mutex> lock(globalLoggerMutex);
+
     isGlobalDebugLogEnabled = on_off;
 }
 
@@ -436,7 +451,7 @@ void WriteLogMessage(LogEvent type, const char* file, int line, const std::strin
     char formatted_log_message[512] = {0};
 
     auto* thread_log = GetThreadLog();
-    auto* global_log = GetGlobalLog();
+    auto global_log = GetGlobalLog();
     if ((thread_log && thread_log->TestWriteMask(Logger::WriteType::WriteFormatted)) ||
         (global_log && global_log->TestWriteMask(Logger::WriteType::WriteFormatted)))
     {
@@ -466,10 +481,24 @@ void WriteLogMessage(LogEvent type, const char* file, int line, const std::strin
 } // base
 
 extern "C" {
-base::Logger* base_GetGlobalLog()
+base::Logger* base_AcquireGlobalLog()
 {
-    return base::GetGlobalLog();
+    globalLoggerMutex.lock();
+
+    if (globalLogger == nullptr)
+        globalLoggerMutex.unlock();
+
+    return globalLogger;
 }
+void base_ReleaseGlobalLog(base::Logger* logger)
+{
+    if (logger)
+    {
+        globalLoggerMutex.unlock();
+    }
+}
+
+
 base::Logger* base_GetThreadLog()
 {
     return base::GetThreadLog();
