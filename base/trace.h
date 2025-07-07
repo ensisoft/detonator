@@ -253,8 +253,15 @@ namespace base
         WrappedWriter mWriter;
     };
 
+    enum class TraceFlags {
+        DebugLogging
+    };
+
     Trace* GetThreadTrace();
     void SetThreadTrace(Trace* trace);
+    void SetThreadTraceFlag(TraceFlags flag, bool on_off);
+    bool TestThreadTraceFlag(TraceFlags flag);
+
     void TraceStart();
     void TraceWrite(TraceWriter& writer);
     void TraceMarker(std::string str);

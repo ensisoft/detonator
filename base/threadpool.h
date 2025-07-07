@@ -43,12 +43,14 @@ namespace base
         };
 
         enum class Flags {
-            Error, Tracing, Logging
+            Error, Tracing, TraceLogging
         };
 
         explicit ThreadTask() noexcept
           : mTaskId(GetNextTaskId())
-        {}
+        {
+            mFlags.set(Flags::Tracing, true);
+        }
         virtual ~ThreadTask() = default;
 
         // Get the ID of the task
@@ -63,6 +65,9 @@ namespace base
 
         inline bool Failed() const noexcept
         { return TestFlag(Flags::Error); }
+
+        inline void SetFlag(Flags flag, bool on_off) noexcept
+        { mFlags.set(flag, on_off); }
 
         bool HasException() const noexcept
         { return !!mException; }

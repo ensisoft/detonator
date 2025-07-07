@@ -20,13 +20,15 @@
 #include <chrono>
 
 #include "base/assert.h"
+#include "base/bitflag.h"
 #include "base/trace.h"
 #include "base/logging.h"
 #include "base/memory.h"
 
 namespace {
-static thread_local base::Trace* thread_tracer = nullptr;
-static thread_local bool enable_tracing = false;
+thread_local base::Trace* thread_tracer = nullptr;
+thread_local base::bitflag<base::TraceFlags> flags;
+thread_local bool enable_tracing = false;
 } // namespace
 
 namespace base
@@ -45,6 +47,17 @@ unsigned TraceLog::BeginScope(const char* name)
             mMaxStackSizeExceededWarning = true;
         }
         return mTraceIndex;
+    }
+
+    if (flags.test(TraceFlags::DebugLogging))
+    {
+        std::string str;
+        str.resize(mStackDepth * 2);
+        for (unsigned i=0; i<str.size(); ++i)
+            str[i] = ' ';
+        str += name;
+        str += " {";
+        DEBUG(str);
     }
 
     ASSERT(mTraceIndex < mCallTrace.size());
@@ -68,7 +81,25 @@ void TraceLog::EndScope(unsigned int index)
     if (index == mTraceIndex)
         return;
 
-    mCallTrace[index].finish_time = GetTime();
+    auto& trace_entry = mCallTrace[index];
+    trace_entry.finish_time = GetTime();
+
+    if (flags.test(TraceFlags::DebugLogging))
+    {
+        const auto time = trace_entry.finish_time - trace_entry.start_time;
+
+        std::string str;
+        str.resize(trace_entry.level * 2);
+        for (unsigned i=0; i<str.size(); ++i)
+            str[i] = ' ';
+
+        str += "} ";
+        str += trace_entry.name;
+        str += ", ";
+        str += std::to_string(time) + " us";
+        DEBUG(str);
+    }
+
     mStackDepth--;
 }
 
@@ -81,6 +112,17 @@ void SetThreadTrace(Trace* trace)
 {
     thread_tracer = trace;
 }
+
+void SetThreadTraceFlag(TraceFlags flag, bool on_off)
+{
+    flags.set(flag, on_off);
+}
+
+bool TestThreadTraceFlag(TraceFlags flag)
+{
+    return flags.test(flag);
+}
+
 void TraceStart()
 {
     if (thread_tracer && enable_tracing)
