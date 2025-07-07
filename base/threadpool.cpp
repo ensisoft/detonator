@@ -180,24 +180,16 @@ private:
 
             if (task)
             {
-                if (task->TestFlag(ThreadTask::Flags::Logging))
-                {
-                    DEBUG("Executing thread task. [task='%1']", task->GetTaskName());
-                }
+                const auto enable_trace_logging = TestThreadTraceFlag(TraceFlags::DebugLogging);
+                const auto enable_trace = IsTracingEnabled();
 
-                if (task->TestFlag(ThreadTask::Flags::Tracing))
-                {
-                    TRACE_CALL("Task::Execute", task->Execute());
-                }
-                else
-                {
-                    task->Execute();
-                }
+                SetThreadTraceFlag(TraceFlags::DebugLogging, task->TestFlag(ThreadTask::Flags::TraceLogging));
+                EnableTracing(task->TestFlag(ThreadTask::Flags::Tracing));
 
-                if (task->TestFlag(ThreadTask::Flags::Logging))
-                {
-                    DEBUG("Thread task complete. [task='%1']", task->GetTaskName());
-                }
+                TRACE_CALL("Task::Execute", task->Execute());
+
+                SetThreadTraceFlag(TraceFlags::DebugLogging, enable_trace_logging);
+                EnableTracing(enable_trace);
 
                 mState->num_tasks--;
             }
@@ -260,14 +252,16 @@ public:
 
             if (!task->IsComplete())
             {
-                if (task->TestFlag(ThreadTask::Flags::Tracing))
-                {
-                    TRACE_CALL("Task::Execute", task->Execute());
-                }
-                else
-                {
-                    task->Execute();
-                }
+                const auto enable_trace_logging = TestThreadTraceFlag(TraceFlags::DebugLogging);
+                const auto enable_trace = IsTracingEnabled();
+
+                SetThreadTraceFlag(TraceFlags::DebugLogging, task->TestFlag(ThreadTask::Flags::TraceLogging));
+                EnableTracing(task->TestFlag(ThreadTask::Flags::Tracing));
+
+                TRACE_CALL("Task::Execute", task->Execute());
+
+                SetThreadTraceFlag(TraceFlags::DebugLogging, enable_trace_logging);
+                EnableTracing(enable_trace);
             }
 
             state_->num_tasks--;
