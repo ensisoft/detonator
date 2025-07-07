@@ -388,7 +388,7 @@ void ViewerMain(const std::string& style, const std::string& ipc_socket, QApplic
         auto msg = app::ToUtf8(event.message);
         // currently, the app::Event information doesn't have file/line
         // information.
-        auto* logger = base::GetGlobalLog();
+        auto logger = base::GetGlobalLog();
         if (logger->TestWriteMask(base::Logger::WriteType::WriteRaw)) {
             logger->Write(type, __FILE__, __LINE__, msg.c_str(), 0.0); // todo: time value (the forwarding
                                                                        // logger doesn't use it now either
