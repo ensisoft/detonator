@@ -65,18 +65,6 @@ Renderer::Renderer(const ClassLibrary* classlib)
     mEffects.set(Effects::Bloom, false);
 }
 
-void Renderer::BeginFrame()
-{
-    if (mEditingMode)
-    {
-        for (auto& node: mPaintNodes)
-            node.second.visited = false;
-
-        for (auto& light : mLightNodes)
-            light.second.visited = false;
-    }
-}
-
 void Renderer::CreateRendererState(const game::Scene& scene, const game::Tilemap* map)
 {
     mPaintNodes.clear();
@@ -123,40 +111,39 @@ void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap
     }
 }
 
-void Renderer::UpdateRendererState(const game::SceneClass& scene, const game::Tilemap* map)
+void Renderer::Update(const Scene& scene, const game::Tilemap* map, double time, float dt)
 {
-    const auto& nodes = scene.CollectNodes();
-
-    for (const auto& node : nodes)
+    for (size_t i=0; i<scene.GetNumEntities(); ++i)
     {
-        const auto* placement = node.placement;
-        // When we're drawing SceneClass object entity is shared_ptr<const EntityClass>
-        // the entity class reference could be nullptr if for example the class was deleted.
-        const auto& entity = node.entity;
-        if (entity == nullptr)
-            continue;
-
-        gfx::Transform transform(node.node_to_scene);
-        CreatePaintNodes<game::EntityClass, game::EntityNodeClass>(*entity, transform, placement->GetId());
+        const auto& entity = scene.GetEntity(i);
+        Update(entity, time, dt);
     }
 }
 
-void Renderer::UpdateRendererState(const game::EntityClass& entity)
+void Renderer::Update(const Entity& entity, double time, float dt)
 {
-    gfx::Transform transform;
-    CreatePaintNodes<EntityClass, EntityNodeClass>(entity, transform, "");
-}
+    for (size_t i=0; i < entity.GetNumNodes(); ++i)
+    {
+        const auto& node = entity.GetNode(i);
 
-void Renderer::UpdateRendererState(const game::Entity& entity)
-{
-    gfx::Transform transform;
-    CreatePaintNodes<Entity, EntityNode>(entity, transform, "");
-}
+        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+        {
+            UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, time, dt);
+            paint->visited = true;
+        }
 
-void Renderer::UpdateRendererState(const game::Tilemap& map)
-{
-    // this API exists for the sake of completeness but currently
-    // there's nothing here that needs to be done.
+        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+        {
+            UpdateTextResources<Entity, EntityNode>(entity, node, *paint, time, dt);
+            paint->visited = true;
+        }
+
+        if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
+        {
+            UpdateLightResources<Entity, EntityNode>(entity, node, *light, time, dt);
+            light->visited = true;
+        }
+    }
 }
 
 void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
@@ -237,6 +224,148 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
     // this is the outcome that the draw function will then actually draw
     std::swap(mRenderBuffer, packets);
     std::swap(mLightBuffer, lights);
+}
+
+void Renderer::DrawFrame(gfx::Device& device) const
+{
+    // only take this shortcut when running for realz otherwise
+    // (in the editor) we end up skipping doing low level render
+    // hook operations such as drawing the guide grid
+    if (mRenderBuffer.empty() && !mEditingMode)
+        return;
+
+    // surface (renderer) has not been configured yet.
+    const auto width = mSurface.size.GetWidth();
+    const auto height = mSurface.size.GetHeight();
+    if (width == 0 || height == 0)
+        return;
+
+    bool enable_bloom = false;
+    bool enable_lights = false;
+    if (mStyle == RenderingStyle::FlatColor ||
+        mStyle == RenderingStyle::BasicShading)
+    {
+        if (IsEnabled(Effects::Bloom))
+            enable_bloom = true;
+    }
+    if (mStyle == RenderingStyle::BasicShading)
+        enable_lights = true;
+
+    LowLevelRenderer low_level_renderer(&mRendererName, device);
+    low_level_renderer.SetCamera(mCamera);
+    low_level_renderer.SetEditingMode(mEditingMode);
+    low_level_renderer.SetSurface(mSurface);
+    low_level_renderer.SetBloom(mBloom);
+    low_level_renderer.EnableBloom(enable_bloom);
+    low_level_renderer.EnableLights(enable_lights);
+#if !defined(DETONATOR_ENGINE_BUILD)
+    low_level_renderer.SetRenderHook(mLowLevelRendererHook);
+    low_level_renderer.SetPacketFilter(mPacketFilter);
+#endif
+
+    TRACE_CALL("DrawPackets", low_level_renderer.DrawPackets(mRenderBuffer, mLightBuffer));
+    TRACE_CALL("BlitImage", low_level_renderer.BlitImage());
+}
+
+
+#if !defined(DETONATOR_ENGINE_BUILD)
+void Renderer::UpdateRendererState(const game::SceneClass& scene, const game::Tilemap* map)
+{
+    const auto& nodes = scene.CollectNodes();
+
+    for (const auto& node : nodes)
+    {
+        const auto* placement = node.placement;
+        // When we're drawing SceneClass object entity is shared_ptr<const EntityClass>
+        // the entity class reference could be nullptr if for example the class was deleted.
+        const auto& entity = node.entity;
+        if (entity == nullptr)
+            continue;
+
+        gfx::Transform transform(node.node_to_scene);
+        CreatePaintNodes<game::EntityClass, game::EntityNodeClass>(*entity, transform, placement->GetId());
+    }
+}
+
+void Renderer::UpdateRendererState(const game::EntityClass& entity)
+{
+    gfx::Transform transform;
+    CreatePaintNodes<EntityClass, EntityNodeClass>(entity, transform, "");
+}
+
+void Renderer::UpdateRendererState(const game::Entity& entity)
+{
+    gfx::Transform transform;
+    CreatePaintNodes<Entity, EntityNode>(entity, transform, "");
+}
+
+void Renderer::UpdateRendererState(const game::Tilemap& map)
+{
+    // this API exists for the sake of completeness but currently
+    // there's nothing here that needs to be done.
+}
+
+void Renderer::Update(const EntityClass& entity, double time, float dt)
+{
+    for (size_t i=0; i < entity.GetNumNodes(); ++i)
+    {
+        const auto& node = entity.GetNode(i);
+
+        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+        {
+            UpdateDrawableResources<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
+            paint->visited = true;
+        }
+
+        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+        {
+            UpdateTextResources<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
+            paint->visited = true;
+        }
+
+        if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
+        {
+            UpdateLightResources<EntityClass, EntityNodeClass>(entity, node, *light, time, dt);
+            light->visited = true;
+        }
+    }
+}
+
+void Renderer::Update(const SceneClass& scene, const game::Tilemap* map, double time, float dt)
+{
+    for (size_t i=0; i<scene.GetNumNodes(); ++i)
+    {
+        const auto& placement = scene.GetPlacement(i);
+        const auto& entity = placement.GetEntityClass();
+        if (!entity)
+            continue;
+
+        for (size_t j=0; j<entity->GetNumNodes(); ++j)
+        {
+            const auto& node = entity->GetNode(j);
+            if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + placement.GetId() + "/" + node.GetId()))
+            {
+                UpdateDrawableResources<EntityClass, EntityNodeClass>(*entity, node, *paint, time, dt);
+                paint->visited = true;
+            }
+            if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + placement.GetId() + "/" + node.GetId()))
+            {
+                UpdateTextResources<EntityClass, EntityNodeClass>(*entity, node, *paint, time, dt);
+                paint->visited = true;
+            }
+            if (auto* light = base::SafeFind(mLightNodes, "basic/" + placement.GetId() + "/" + node.GetId()))
+            {
+                UpdateLightResources<EntityClass, EntityNodeClass>(*entity, node, *light, time, dt);
+                light->visited = true;
+            }
+        }
+    }
+}
+
+void Renderer::Update(const game::Tilemap& map, double time, float dt)
+{
+    // this API exists for the sake of completeness but currently
+    // there's nothing here that needs to be done.
 }
 
 void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* map, SceneClassDrawHook* scene_hook)
@@ -530,43 +659,49 @@ void Renderer::CreateFrame(const game::Tilemap& map, bool draw_render_layer, boo
     std::swap(mRenderBuffer, packets);
 }
 
-void Renderer::DrawFrame(gfx::Device& device) const
+void Renderer::BeginFrame()
 {
-    // only take this shortcut when running for realz otherwise
-    // (in the editor) we end up skipping doing low level render
-    // hook operations such as drawing the guide grid
-    if (mRenderBuffer.empty() && !mEditingMode)
-        return;
-
-    // surface (renderer) has not been configured yet.
-    const auto width = mSurface.size.GetWidth();
-    const auto height = mSurface.size.GetHeight();
-    if (width == 0 || height == 0)
-        return;
-
-    bool enable_bloom = false;
-    bool enable_lights = false;
-    if (mStyle == RenderingStyle::FlatColor ||
-        mStyle == RenderingStyle::BasicShading)
+    if (mEditingMode)
     {
-        if (IsEnabled(Effects::Bloom))
-            enable_bloom = true;
-    }
-    if (mStyle == RenderingStyle::BasicShading)
-        enable_lights = true;
+        for (auto& node: mPaintNodes)
+            node.second.visited = false;
 
-    LowLevelRenderer low_level_renderer(&mRendererName, device);
-    low_level_renderer.SetCamera(mCamera);
-    low_level_renderer.SetEditingMode(mEditingMode);
-    low_level_renderer.SetSurface(mSurface);
-    low_level_renderer.SetRenderHook(mLowLevelRendererHook);
-    low_level_renderer.SetPacketFilter(mPacketFilter);
-    low_level_renderer.SetBloom(mBloom);
-    low_level_renderer.EnableBloom(enable_bloom);
-    low_level_renderer.EnableLights(enable_lights);
-    TRACE_CALL("DrawPackets", low_level_renderer.DrawPackets(mRenderBuffer, mLightBuffer));
-    TRACE_CALL("BlitImage", low_level_renderer.BlitImage());
+        for (auto& light : mLightNodes)
+            light.second.visited = false;
+    }
 }
+
+void Renderer::EndFrame()
+{
+    if (mEditingMode)
+    {
+        for (auto it = mPaintNodes.begin(); it != mPaintNodes.end();)
+        {
+            const auto& paint_node = it->second;
+            if (paint_node.visited)
+                ++it;
+            else it = mPaintNodes.erase(it);
+        }
+
+        for (auto it = mLightNodes.begin(); it != mLightNodes.end(); )
+        {
+            const auto& light_node = it->second;
+            if (light_node.visited)
+                ++it;
+            else it = mLightNodes.erase(it);
+        }
+    }
+}
+
+void Renderer::ClearPaintState()
+{
+    mPaintNodes.clear();
+    mLightNodes.clear();
+    mTilemapPalette.clear();
+}
+
+#endif // DETONATOR_ENGINE_BUILD
+
 
 void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
                                       const std::vector<TileBatch>& batches,
@@ -580,9 +715,9 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
     const auto& scene_world_to_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale,
                                                             mCamera.rotation);
 
-    // this matrix will transform coordinates from scene's coordinate space
-    // into map coordinate space. but keep in mind that the scene world coordinate
-    // is a coordinate in a 3D space not on the tile plane.
+    // this matrix will transform coordinates from map's coordinate space to
+    // scene coordinate space. (the scene world coordinate is a coordinate
+    // in the 3D rendering space)
     const auto& from_map_to_scene = GetProjectionTransformMatrix(map_view_to_clip,
                                                                  map_world_to_view,
                                                                  scene_view_to_clip,
@@ -780,132 +915,6 @@ void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
             else BUG("Unknown data layer type.");
         }
     }
-}
-
-void Renderer::Update(const EntityClass& entity, double time, float dt)
-{
-    for (size_t i=0; i < entity.GetNumNodes(); ++i)
-    {
-        const auto& node = entity.GetNode(i);
-
-        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
-        {
-            UpdateDrawableResources<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
-            paint->visited = true;
-        }
-
-        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
-        {
-            UpdateTextResources<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
-            paint->visited = true;
-        }
-
-        if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
-        {
-            UpdateLightResources<EntityClass, EntityNodeClass>(entity, node, *light, time, dt);
-            light->visited = true;
-        }
-    }
-}
-
-void Renderer::Update(const Entity& entity, double time, float dt)
-{
-    for (size_t i=0; i < entity.GetNumNodes(); ++i)
-    {
-        const auto& node = entity.GetNode(i);
-
-        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
-        {
-            UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, time, dt);
-            paint->visited = true;
-        }
-
-        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
-        {
-            UpdateTextResources<Entity, EntityNode>(entity, node, *paint, time, dt);
-            paint->visited = true;
-        }
-
-        if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
-        {
-            UpdateLightResources<Entity, EntityNode>(entity, node, *light, time, dt);
-            light->visited = true;
-        }
-    }
-}
-
-void Renderer::Update(const SceneClass& scene, const game::Tilemap* map, double time, float dt)
-{
-    for (size_t i=0; i<scene.GetNumNodes(); ++i)
-    {
-        const auto& placement = scene.GetPlacement(i);
-        const auto& entity = placement.GetEntityClass();
-        if (!entity)
-            continue;
-
-        for (size_t j=0; j<entity->GetNumNodes(); ++j)
-        {
-            const auto& node = entity->GetNode(j);
-            if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + placement.GetId() + "/" + node.GetId()))
-            {
-                UpdateDrawableResources<EntityClass, EntityNodeClass>(*entity, node, *paint, time, dt);
-                paint->visited = true;
-            }
-            if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + placement.GetId() + "/" + node.GetId()))
-            {
-                UpdateTextResources<EntityClass, EntityNodeClass>(*entity, node, *paint, time, dt);
-                paint->visited = true;
-            }
-            if (auto* light = base::SafeFind(mLightNodes, "basic/" + placement.GetId() + "/" + node.GetId()))
-            {
-                UpdateLightResources<EntityClass, EntityNodeClass>(*entity, node, *light, time, dt);
-                light->visited = true;
-            }
-        }
-    }
-}
-void Renderer::Update(const Scene& scene, const game::Tilemap* map, double time, float dt)
-{
-    for (size_t i=0; i<scene.GetNumEntities(); ++i)
-    {
-        const auto& entity = scene.GetEntity(i);
-        Update(entity, time, dt);
-    }
-}
-
-void Renderer::Update(const game::Tilemap& map, double time, float dt)
-{
-    // this API exists for the sake of completeness but currently
-    // there's nothing here that needs to be done.
-}
-
-void Renderer::EndFrame()
-{
-    if (mEditingMode)
-    {
-        for (auto it = mPaintNodes.begin(); it != mPaintNodes.end();)
-        {
-            const auto& paint_node = it->second;
-            if (paint_node.visited)
-                ++it;
-            else it = mPaintNodes.erase(it);
-        }
-
-        for (auto it = mLightNodes.begin(); it != mLightNodes.end(); )
-        {
-            const auto& light_node = it->second;
-            if (light_node.visited)
-                ++it;
-            else it = mLightNodes.erase(it);
-        }
-    }
-}
-
-void Renderer::ClearPaintState()
-{
-    mPaintNodes.clear();
-    mLightNodes.clear();
-    mTilemapPalette.clear();
 }
 
 template<typename EntityType, typename EntityNodeType>
