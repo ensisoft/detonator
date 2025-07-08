@@ -138,17 +138,20 @@ namespace engine
         { mCamera = camera; }
         inline void SetSurface(const Surface& surface) noexcept
         { mSurface = surface; }
-        inline void SetPacketFilter(PacketFilter* filter) noexcept
-        { mPacketFilter = filter; }
-        inline void SetLowLevelRendererHook(LowLevelRendererHook* hook) noexcept
-        { mLowLevelRendererHook = hook; }
         inline void SetStyle(RenderingStyle style) noexcept
         { mStyle = style; }
         inline void SetTileSizeFudge(float fudge) noexcept
         { mTileSizeFudge = fudge; }
 
-        void BeginFrame();
+#if !defined(DETONATOR_ENGINE_BUILD)
+        inline void SetPacketFilter(PacketFilter* filter) noexcept
+        { mPacketFilter = filter; }
+        inline void SetLowLevelRendererHook(LowLevelRendererHook* hook) noexcept
+        { mLowLevelRendererHook = hook; }
 
+        inline auto GetNumPaintNodes() const noexcept
+        { return mPaintNodes.size(); }
+#endif
         // This the current *real* rendering API used by the engine.
 
         // Create the internal renderer data structures for visually representing
@@ -158,18 +161,30 @@ namespace engine
         // Update the internal renderer data structures by applying changes to the
         // scene in the renderers data structures.
         void UpdateRendererState(const game::Scene& scene, const game::Tilemap* map);
+
+        // Update the current frame rendering state, animate materials etc.
+        // note that when doing multi-threaded render/update this
+        // method cannot run in parallel with DrawFrame.
+        void Update(const game::Scene& scene, const game::Tilemap* map, double time, float dt);
+        void Update(const game::Entity& entity, double time, float dt);
+
+        // Create the draw commands for the next frame that to be drawn
+        // by the call to DrawFrame. This method cannot run in parallel
+        // with with DrawFrame.
+        void CreateFrame(const game::Scene& scene, const game::Tilemap* map);
+
+        // Draw the current frame rendering state, i.e. the currently
+        // enqueued and created draw commands.
+        void DrawFrame(gfx::Device& painter) const;
+
+#if !defined(DETONATOR_ENGINE_BUILD)
         void UpdateRendererState(const game::SceneClass& scene, const game::Tilemap* map);
         void UpdateRendererState(const game::EntityClass& entity);
         void UpdateRendererState(const game::Entity& entity);
         void UpdateRendererState(const game::Tilemap& map);
 
-        // Update the current frame rendering state, animate materials etc.
-        // note that when doing multi-threaded render/update this
-        // method cannot run in parallel with DrawFrame.
         void Update(const game::EntityClass& entity, double time, float dt);
-        void Update(const game::Entity& entity, double time, float dt);
         void Update(const game::SceneClass& scene, const game::Tilemap* map, double time, float dt);
-        void Update(const game::Scene& scene, const game::Tilemap* map, double time, float dt);
         void Update(const game::Tilemap& map, double time, float dt);
 
         void Update(const game::Scene& scene, double time, float dt)
@@ -181,26 +196,16 @@ namespace engine
             Update(scene, nullptr, time, dt);
         }
 
-        // Create the draw commands for the next frame that to be drawn
-        // by the call to DrawFrame. This method cannot run in parallel
-        // with with DrawFrame.
-        void CreateFrame(const game::Scene& scene, const game::Tilemap* map);
         void CreateFrame(const game::SceneClass& scene, const game::Tilemap* map, SceneClassDrawHook* hook = nullptr);
         void CreateFrame(const game::EntityClass& entity, EntityClassDrawHook* hook = nullptr);
         void CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* hook = nullptr);
         void CreateFrame(const game::Tilemap& map, bool draw_render_layer, bool draw_data_layer,
                          TileBatchDrawHook* hook = nullptr);
 
-        // Draw the current frame rendering state, i.e. the currently
-        // enqueued and created draw commands.
-        void DrawFrame(gfx::Device& painter) const;
-
+        void BeginFrame();
         void EndFrame();
-
         void ClearPaintState();
-
-        size_t GetNumPaintNodes() const
-        { return mPaintNodes.size(); }
+#endif
     private:
         struct TileBatch {
             enum class Type {
@@ -296,11 +301,9 @@ namespace engine
                                     std::size_t packet_start_index,
                                     std::vector<DrawPacket>& packets) const;
 
-
         std::shared_ptr<const gfx::Material> GetTileMaterial(const game::Tilemap& map,
                                                              std::uint16_t layer_index,
                                                              std::uint16_t material_index);
-
     private:
         const ClassLibrary* mClassLib = nullptr;
 
@@ -323,15 +326,14 @@ namespace engine
             float world_rotation = 0.0f;
         };
 
-        std::unordered_map<std::string, PaintNode> mPaintNodes;
-        std::unordered_map<std::string, LightNode> mLightNodes;
-
         struct TilemapLayerPaletteEntry {
             std::string material_id;
             std::shared_ptr<gfx::Material> material;
         };
-
         using TilemapLayerPalette = std::vector<TilemapLayerPaletteEntry>;
+
+        std::unordered_map<std::string, PaintNode> mPaintNodes;
+        std::unordered_map<std::string, LightNode> mLightNodes;
         std::vector<TilemapLayerPalette> mTilemapPalette;
 
         std::string mRendererName;
@@ -348,8 +350,10 @@ namespace engine
         // appear between them.
         float mTileSizeFudge = 0.5f;
 
+#if !defined(DETONATOR_ENGINE_BUILD)
         PacketFilter* mPacketFilter = nullptr;
         LowLevelRendererHook* mLowLevelRendererHook = nullptr;
+#endif
 
         mutable std::vector<DrawPacket> mRenderBuffer;
         mutable std::vector<Light> mLightBuffer;
