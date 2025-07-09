@@ -79,6 +79,36 @@ namespace
 unsigned LogoWidth  = 0;
 unsigned LogoHeight = 0;
 
+struct UpdateState {
+    double game_time  = 0.0;
+    double game_step  = 0.0;
+    double tick_accum = 0.0f;
+    double tick_step  = 0.0f;
+    engine::GameRuntime::Camera camera;
+};
+
+struct RenderState {
+    double game_time = 0.0;
+    double render_time_stamp = 0.0;
+    double render_time_total = 0.0;
+    unsigned surface_width  = 0.0f;
+    unsigned surface_height = 0.0f;
+    engine::GameRuntime::Camera camera;
+    base::Color4f clear_color;
+    bool enable_bloom = false;
+    std::optional<engine::Engine::RendererConfig> render_config;
+};
+
+struct EngineRuntime {
+    game::Scene* scene     = nullptr;
+    game::Tilemap* tilemap = nullptr;
+
+    engine::PhysicsEngine* physics = nullptr;
+    engine::GameRuntime* gamert = nullptr;
+    engine::Renderer* renderer = nullptr;
+    engine::UIEngine* ui = nullptr;
+};
+
 // Default game engine implementation. Implements the main App interface
 // which is the interface that enables the game host to communicate
 // with the application/game implementation in order to update/tick/etc.
@@ -90,12 +120,23 @@ public:
     DetonatorEngine() : mDebugPrints(10)
     {}
 
+    ~DetonatorEngine() override
+    {
+        DEBUG("Engine deleted");
+    }
+
     bool GetNextRequest(Request* out) override
-    { return mRequests.GetNext(out); }
+    {
+        return mRequests.GetNext(out);
+    }
 
     void Init(const InitParams& init, const EngineConfig& conf) override
     {
         DEBUG("Engine initializing.");
+        // LOCK ORDER MUST BE CONSISTENT. See Draw method.
+        std::unique_lock<std::mutex> runtime_lock(mRuntimeLock);
+        std::unique_lock<std::mutex> engine_lock(mEngineLock);
+
         audio::Format audio_format;
         audio_format.channel_count = static_cast<unsigned>(conf.audio.channels); // todo: use enum
         audio_format.sample_rate   = conf.audio.sample_rate;
@@ -123,16 +164,16 @@ public:
         mRuntime->SetEditingMode(init.editing_mode);
         mRuntime->SetPreviewMode(init.preview_mode);
         mRuntime->Init();
-
         mRuntime->SetSurfaceSize(init.surface_width, init.surface_height);
+
         mUIEngine.SetClassLibrary(mClasslib);
         mUIEngine.SetLoader(mEngineDataLoader);
         mUIEngine.SetSurfaceSize(float(init.surface_width), float(init.surface_height));
         mUIEngine.SetEditingMode(init.editing_mode);
+
         mRenderer.SetClassLibrary(mClasslib);
         mRenderer.SetEditingMode(init.editing_mode);
         mRenderer.SetName("Engine");
-        mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, true);
 
         mPhysics.SetClassLibrary(mClasslib);
         mPhysics.SetScale(conf.physics.scale);
@@ -404,6 +445,8 @@ public:
     {
         DEBUG("Content class was updated. [type=%1, name='%2', id='%2]", klass.type, klass.name, klass.id);
 
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
+
         engine::GameRuntime::ContentClass k;
         k.type = klass.type;
         k.name = klass.name;
@@ -412,12 +455,16 @@ public:
     }
     void SetRendererConfig(const RendererConfig& config) override
     {
+        std::lock_guard<std::mutex> lock(mEngineLock);
         mRendererConfig = config;
     }
 
     bool Load() override
     {
         DEBUG("Loading game state.");
+        ASSERT(mUpdateTasks.empty());
+
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
         mRuntime->LoadGame();
         return true;
     }
@@ -425,27 +472,39 @@ public:
     void Start() override
     {
         DEBUG("Starting game play.");
+        ASSERT(mUpdateTasks.empty());
+
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
         mRuntime->StartGame();
     }
     void SetDebugOptions(const DebugOptions& debug) override
     {
-        mDebug = debug;
+        {
+            std::unique_lock<std::mutex> lock(mEngineLock);
+
+            mDebug = debug;
+
+            if (mDebug.debug_show_fps || mDebug.debug_show_msg)
+            {
+                if (mDebug.debug_font.empty())
+                {
+                    WARN("Debug font is empty (no font selected).");
+                    WARN("Debug prints will not be available.");
+                    WARN("You can set the debug font in the project settings.");
+                }
+            }
+        }
 
         if (mAudio)
-            mAudio->SetDebugPause(debug.debug_pause);
-
-        if (mDebug.debug_show_fps || mDebug.debug_show_msg)
         {
-            if (mDebug.debug_font.empty())
-            {
-                WARN("Debug font is empty (no font selected).");
-                WARN("Debug prints will not be available.");
-                WARN("You can set the debug font in the project settings.");
-            }
+            std::lock_guard<std::mutex> lock(mRuntimeLock);
+            mAudio->SetDebugPause(debug.debug_pause);
         }
     }
     void DebugPrintString(const std::string& message) override
     {
+        std::unique_lock<std::mutex> lock(mEngineLock);
+
         DebugPrint print;
         print.message = message;
         mDebugPrints.push_back(std::move(print));
@@ -453,16 +512,24 @@ public:
     void SetTracer(base::Trace* tracer, base::TraceWriter* writer) override
     {
         if (mAudio)
+        {
+            std::lock_guard<std::mutex> lock(mRuntimeLock);
             mAudio->SetAudioThreadTraceWriter(writer);
+        }
     }
     void SetTracingOn(bool on_off) override
     {
         if (mAudio)
+        {
+            std::lock_guard<std::mutex> lock(mRuntimeLock);
             mAudio->EnableAudioThreadTrace(on_off);
+        }
     }
 
     void SetEnvironment(const Environment& env) override
     {
+        std::lock_guard<std::mutex> lock(mEngineLock);
+
         mClasslib         = env.classlib;
         mEngineDataLoader = env.engine_loader;
         mAudioLoader      = env.audio_loader;
@@ -487,106 +554,75 @@ public:
 
         // Do the main drawing here based on previously generated
         // draw packets that are stored in the renderer.
-        // this state is rebuilt in the the call to renderer's
-        // CreateRenderPackets, which is an operation that cannot
-        // run at the same time when we're drawing.
+        // This method can run in parallel with the calls to update
+        // the renderer state. The thread safety is built into the
+        // renderer class itself.
         TRACE_CALL("Renderer::DrawFrame", mRenderer.DrawFrame(*mDevice));
 
+        // Wait the completion of update tasks that we might have
+        // kicked off in the update step. The update accesses
+        // the same data so we can't run parallel.
+        const bool done_updates = WaitTasks();
+
+        // take the locks to make Valgrind happy.
+        // LOCK ORDER MUST BE CONSISTENT. See Init.
+        std::lock_guard<std::mutex> runtime_lock(mRuntimeLock);
+        std::lock_guard<std::mutex> engine_lock(mEngineLock);
+
+
 #if defined(ENGINE_USE_UPDATE_THREAD)
-        base::TaskHandle next_frame_task;
-
-        // if we had updates running in parallel then complete (wait)
-        // the tasks here. This is unfortunately needed in order to
-        // make sure that the update thread is no longer touching
-        // the UI system or the scene.
-        if (!mUpdateTasks.empty())
-        {
-            // Wait each update task
-            for (auto& handle: mUpdateTasks)
-            {
-                TRACE_CALL("WaitSceneUpdate", handle.Wait(base::TaskHandle::WaitStrategy::BusyLoop));
-            }
-
-            // make sure that we first wait everything and only then throw
-            // if anything failed.
-            for (auto& handle : mUpdateTasks)
-            {
-                const auto* task = handle.GetTask();
-                if (task->HasException())
-                    task->RethrowException();
-            }
-
-            mUpdateTasks.clear();
-
-            class CreateNextFrameTask : public base::ThreadTask {
-            public:
-                explicit CreateNextFrameTask(DetonatorEngine* engine)
-                  : mEngine(engine)
-                {}
-            protected:
-                void DoTask() override
-                {
-                    mEngine->CreateNextFrame();
-                }
-
-            private:
-                DetonatorEngine* mEngine = nullptr;
-            };
-
-            // create task to create the next frame in the renderer
-            // we can do this in parallel while this thread can proceed
-            // to draw game UI, debug objects etc.
-            auto* thread_pool = base::GetGlobalThreadPool();
-            auto thread_task = std::make_unique<CreateNextFrameTask>(this);
-            next_frame_task = thread_pool->SubmitTask(std::move(thread_task), base::ThreadPool::UpdateThreadID);
-
-            // update the debug draws only after updating the game
-            // if this is done per each frame they will not be seen
-            // by the user if the rendering is running very fast.
-            std::vector<engine::DebugDrawCmd> debug_draws;
-            mRuntime->TransferDebugQueue(&debug_draws);
-            std::swap(mDebugDraws, debug_draws);
-        }
-#else
-        CreateNextFrame();
+        if (done_updates)
 #endif
-        // Continue drawing more stuff while the renderer update
-        // task runs in parallel.
+        {
+            RenderState state;
+            state.camera            = mCamera;
+            state.game_time         = mGameTimeTotal;
+            state.render_time_stamp = mRenderTimeStamp;
+            state.render_time_total = mRenderTimeTotal;
+            state.surface_width     = mSurfaceWidth;
+            state.surface_height    = mSurfaceHeight;
+            state.clear_color       = mClearColor;
+            state.enable_bloom      = mFlags.test(DetonatorEngine::Flags::EnableBloom);
+            state.render_config     = mRendererConfig;
+
+            EngineRuntime runtime;
+            runtime.scene    = mScene.get();
+            runtime.tilemap  = mTilemap.get();
+            runtime.gamert   = mRuntime.get();
+            runtime.physics  = &mPhysics;
+            runtime.renderer = &mRenderer;
+            runtime.ui       = &mUIEngine;
+            TRACE_CALL("CreateNextFrame", CreateNextFrame(state, runtime));
+
+            mRenderTimeStamp = state.render_time_stamp;
+            mRenderTimeTotal = state.render_time_total;
+
+        } // wait tasks
+
         TRACE_CALL("Engine::DrawGameUI",        DrawGameUI());
         TRACE_CALL("Engine::DrawDebugObjects",  DrawDebugObjects());
         TRACE_CALL("Engine::DrawDebugMessages", DrawDebugMessages());
         TRACE_CALL("Engine::DrawMousePointer",  DrawMousePointer(dt));
-
         TRACE_CALL("Device::EndFrame", mDevice->EndFrame(true));
-        // Note that we *don't* call CleanGarbage here since currently there should
-        // be nothing that is creating needless GPU resources.
-
-#if defined(ENGINE_USE_UPDATE_THREAD)
-        // complete the update/render loop, wait this task here
-        // so that the update/rendering stay in sync.
-        if (next_frame_task)
-        {
-            TRACE_CALL("WaitCreateFrame", next_frame_task.Wait(base::TaskHandle::WaitStrategy::BusyLoop));
-        }
-#endif
-
-        if (mDebug.debug_pause && !mStepForward)
-            return;
-
-        TRACE_CALL("HandleGameActions", PerformGameActions(dt));
     }
 
     void BeginMainLoop() override
     {
-        mRuntime->SetFrameNumber(mFrameCounter);
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
 
-        // service the audio system once.
-        std::vector<engine::AudioEvent> audio_events;
-        TRACE_CALL("Audio::Update", mAudio->Update(&audio_events));
-        for (const auto& event : audio_events)
-        {
-            mRuntime->OnAudioEvent(event);
-        }
+        mRuntime->SetFrameNumber(++mFrameCounter);
+
+        // service the audio system once. We have to do this
+        // in the main thread (same as drawing) because of
+        // the limitations of the web build.
+        TRACE_BLOCK("AudioEngineUpdate",
+            std::vector<engine::AudioEvent> audio_events;
+            mAudio->Update(&audio_events);
+            for (const auto& event : audio_events)
+            {
+                mRuntime->OnAudioEvent(event);
+            }
+        );
     }
 
     void Step() override
@@ -616,23 +652,72 @@ public:
 
         class UpdateTask : public base::ThreadTask {
         public:
-            explicit UpdateTask(DetonatorEngine* engine, double total_time, float time_step) noexcept
-              : mGameTimeTotal(total_time)
-              , mGameTimeStep(time_step)
-              , mEngine(engine)
+            explicit UpdateTask(DetonatorEngine* engine) noexcept
+              : mEngine(engine)
             {}
         protected:
             void DoTask() override
             {
-                TRACE_CALL("UpdateGame", mEngine->UpdateGame(mGameTimeTotal, mGameTimeStep));
-                TRACE_CALL("UpdateGameUI", mEngine->UpdateGameUI(mGameTimeTotal, mGameTimeStep));
+                UpdateState state;
+                {
+                    std::lock_guard<std::mutex> lock(mEngine->mEngineLock);
+                    state.tick_accum = mEngine->mTickAccum;
+                    state.tick_step  = mEngine->mGameTickStep;
+                    state.game_time  = mEngine->mGameTimeTotal;
+                    state.game_step  = mEngine->mGameTimeStep;
+                }
+
+                {
+                    std::lock_guard<std::mutex> lock(mEngine->mRuntimeLock);
+                    EngineRuntime runtime;
+                    runtime.scene    = mEngine->mScene.get();
+                    runtime.tilemap  = mEngine->mTilemap.get();
+                    runtime.gamert   = mEngine->mRuntime.get();
+                    runtime.physics  = &mEngine->mPhysics;
+                    runtime.renderer = &mEngine->mRenderer;
+                    runtime.ui       = &mEngine->mUIEngine;
+                    TRACE_CALL("UpdateGame", mEngine->UpdateGame(state, runtime));
+                }
+
+                {
+                    std::lock_guard<std::mutex> lock(mEngine->mEngineLock);
+                    mEngine->mTickAccum     = state.tick_accum;
+                    mEngine->mGameTickStep  = state.tick_step;
+                    mEngine->mGameTimeTotal = state.game_time;
+                    mEngine->mGameTimeStep  = state.game_step;
+                    mEngine->mCamera        = state.camera;
+                }
             }
         private:
-            const double mGameTimeTotal = 0.0;
-            const double mGameTimeStep  = 0.0;
+            DetonatorEngine* mEngine = nullptr;
+        };
+
+        class UpdateDebugDrawTask : public base::ThreadTask {
+        public:
+            explicit UpdateDebugDrawTask(DetonatorEngine* engine) noexcept
+              : mEngine(engine)
+            {}
+        protected:
+            void DoTask() override
+            {
+                // update the debug draws only after updating the game
+                // if this is done per each frame they will not be seen
+                // by the user if the rendering is running very fast.
+                std::vector<engine::DebugDrawCmd> debug_draws;
+                {
+                    std::lock_guard<std::mutex> lock(mEngine->mRuntimeLock);
+                    mEngine->mRuntime->TransferDebugQueue(&debug_draws);
+                }
+                {
+                    std::lock_guard<std::mutex> lock(mEngine->mEngineLock);
+                    std::swap(mEngine->mDebugDraws, debug_draws);
+                }
+            }
+        private:
             DetonatorEngine* mEngine = nullptr;
         };
 #endif
+        bool did_update = false;
 
         // do simulation/animation update steps.
         while (mTimeAccum >= mGameTimeStep)
@@ -641,46 +726,136 @@ public:
             // is advancing one time step from current mGameTimeTotal.
             // this is consistent with the tick time accumulation below.
 #if defined(ENGINE_USE_UPDATE_THREAD)
-            auto task = std::make_unique<UpdateTask>(this, mGameTimeTotal, mGameTimeStep);
+            auto task = std::make_unique<UpdateTask>(this);
+            task->SetTaskName("UpdateTask");
             mUpdateTasks.push_back(thread_pool->SubmitTask(std::move(task), base::ThreadPool::UpdateThreadID));
 #else
-            TRACE_CALL("UpdateGame", UpdateGame(mGameTimeTotal, mGameTimeStep));
-            TRACE_CALL("UpdateGameUI", UpdateGameUI(mGameTimeTotal, mGameTimeStep));
+            UpdateState state;
+            state.tick_accum = mTickAccum;
+            state.tick_step  = mGameTickStep;
+            state.game_time  = mGameTimeTotal;
+            state.game_step  = mGameTimeStep;
+
+            EngineRuntime runtime;
+            runtime.scene    = mScene.get();
+            runtime.tilemap  = mTilemap.get();
+            runtime.gamert   = mRuntime.get();
+            runtime.physics  = &mPhysics;
+            runtime.renderer = &mRenderer;
+            runtime.ui       = &mUIEngine;
+            TRACE_CALL("UpdateGame", UpdateGame(state, runtime));
+
+            mTickAccum     = state.tick_accum;
+            mGameTickStep  = state.tick_step;
+            mGameTimeTotal = state.game_time;
+            mGameTimeStep  = state.game_step;
+            mCamera        = state.camera;
+
 #endif
             mGameTimeTotal += mGameTimeStep;
             mTimeAccum -= mGameTimeStep;
 
             // if we're paused for debugging stop after one step forward.
             mStepForward = false;
+
+            did_update = true;
         }
-#if !defined(ENGINE_USE_UPDATE_THREAD)
-        // update the debug draws only after updating the game
-        // if this is done per each frame they will not be seen
-        // by the user if the rendering is running very fast.
-        std::vector<engine::DebugDrawCmd> debug_draws;
-        mRuntime->TransferDebugQueue(&debug_draws);
-        std::swap(mDebugDraws, debug_draws);
+
+        if (did_update)
+        {
+#if defined(ENGINE_USE_UPDATE_THREAD)
+            auto task = std::make_unique<UpdateDebugDrawTask>(this);
+            task->SetTaskName("UpdateDebugDraws");
+            mUpdateTasks.push_back(thread_pool->SubmitTask(std::move(task), base::ThreadPool::UpdateThreadID));
+#else
+            // update the debug draws only after updating the game
+            // if this is done per each frame they will not be seen
+            // by the user if the rendering is running very fast.
+            std::vector<engine::DebugDrawCmd> debug_draws;
+            mRuntime->TransferDebugQueue(&debug_draws);
+            std::swap(mDebugDraws, debug_draws);
 #endif
+        }
 
     }
     void EndMainLoop() override
     {
-        mFrameCounter++;
+        const auto dt = mFrameTimer.GetAverage();
+
+        // take the locks to make Valgrind happy.
+        // LOCK ORDER MUST BE CONSISTENT. See Init method.
+        std::lock_guard<std::mutex> runtime_lock(mRuntimeLock);
+        std::lock_guard<std::mutex> engine_lock(mEngineLock);
+
+        // Note that we *don't* call CleanGarbage here since currently there should
+        // be nothing that is creating needless GPU resources.
+        if (mDebug.debug_pause && !mStepForward)
+            return;
+
+        // todo: the action processing probably needs to be split
+        // into game-actions and non-game actions. For example the
+        // game might insert an additional delay in order to transition
+        // from one game state to another but likely want to transition
+        // to full screen mode in real time. (non game action)
+        mActionDelay = math::clamp(0.0f, mActionDelay, mActionDelay - dt);
+        if (mActionDelay > 0.0f)
+            return;
+
+        engine::Action action;
+        while (mRuntime->GetNextAction(&action))
+        {
+            std::visit([this](auto& variant_value) {
+                this->OnAction(variant_value);
+            }, action);
+            // action delay can be changed by the delay action.
+            if (mActionDelay > 0.0f)
+                break;
+        }
     }
 
     void Stop() override
     {
+        DEBUG("Stop game");
+        WaitTasks();
+
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
+
         mRuntime->StopGame();
     }
 
     void Save() override
     {
+        DEBUG("Save game");
+        WaitTasks();
+
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
+        ASSERT(mUpdateTasks.empty());
+
         mRuntime->SaveGame();
     }
 
     void Shutdown() override
     {
-        DEBUG("Engine shutdown");
+        DEBUG("Engine shutting down.");
+        std::unique_lock<std::mutex> runtime_lock(mRuntimeLock);
+        std::unique_lock<std::mutex> engine_lock(mEngineLock);
+
+        ASSERT(mUpdateTasks.empty());
+
+        mPhysics.SetClassLibrary(nullptr);
+
+        mRenderer.SetClassLibrary(nullptr);
+
+        mUIEngine.SetClassLibrary(nullptr);
+        mUIEngine.SetLoader(nullptr);
+
+        mRuntime->SetClassLibrary(nullptr);
+        mRuntime->SetPhysicsEngine(nullptr);
+        mRuntime->SetStateStore(nullptr);
+        mRuntime->SetAudioEngine(nullptr);
+        mRuntime->SetDataLoader(nullptr);
+
+        mAudio->SetClassLibrary(nullptr);
         mAudio.reset();
 
         gfx::SetResourceLoader(nullptr);
@@ -774,6 +949,8 @@ public:
 
     void OnRenderingSurfaceResized(unsigned width, unsigned height) override
     {
+        std::lock_guard<std::mutex> lock(mEngineLock);
+
         // ignore accidental superfluous notifications.
         if (width == mSurfaceWidth && height == mSurfaceHeight)
             return;
@@ -804,11 +981,11 @@ public:
         if (mFlags.test(Flags::BlockKeyboard))
             return;
 
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
+
         std::vector<engine::UIEngine::WidgetAction> actions;
         mUIEngine.OnKeyDown(key, &actions);
-
         mRuntime->OnUIAction(mUIEngine.GetUI(), actions);
-
         mRuntime->OnKeyDown(key);
     }
     void OnKeyUp(const wdk::WindowEventKeyUp& key) override
@@ -816,11 +993,11 @@ public:
         if (mFlags.test(Flags::BlockKeyboard))
             return;
 
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
+
         std::vector<engine::UIEngine::WidgetAction> actions;
         mUIEngine.OnKeyUp(key, &actions);
-
         mRuntime->OnUIAction(mUIEngine.GetUI(), actions);
-
         mRuntime->OnKeyUp(key);
     }
     void OnChar(const wdk::WindowEventChar& text) override
@@ -828,6 +1005,7 @@ public:
         if (mFlags.test(Flags::BlockKeyboard))
             return;
 
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
         mRuntime->OnChar(text);
     }
     void OnMouseMove(const wdk::WindowEventMouseMove& mouse) override
@@ -835,12 +1013,13 @@ public:
         if (mFlags.test(Flags::BlockMouse))
             return;
 
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
+
         mCursorPos.x = float(mouse.window_x);
         mCursorPos.y = float(mouse.window_y);
 
         std::vector<engine::UIEngine::WidgetAction> actions;
         mUIEngine.OnMouseMove(mouse, &actions);
-
         mRuntime->OnUIAction(mUIEngine.GetUI(), actions);
 
         const auto& mickey = MapGameMouseEvent(mouse);
@@ -851,9 +1030,10 @@ public:
         if (mFlags.test(Flags::BlockMouse))
             return;
 
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
+
         std::vector<engine::UIEngine::WidgetAction> actions;
         mUIEngine.OnMousePress(mouse, &actions);
-
         mRuntime->OnUIAction(mUIEngine.GetUI(), actions);
 
         const auto& mickey = MapGameMouseEvent(mouse);
@@ -864,9 +1044,10 @@ public:
         if (mFlags.test(Flags::BlockMouse))
             return;
 
+        std::lock_guard<std::mutex> lock(mRuntimeLock);
+
         std::vector<engine::UIEngine::WidgetAction> actions;
         mUIEngine.OnMouseRelease(mouse, &actions);
-
         mRuntime->OnUIAction(mUIEngine.GetUI(), actions);
 
         const auto& mickey = MapGameMouseEvent(mouse);
@@ -875,22 +1056,22 @@ public:
 private:
     engine::GameRuntime::Camera GetCamera() const
     {
-        engine::GameRuntime::Camera camera;
-        mRuntime->GetCamera(&camera);
-        return camera;
+        return mCamera;
     }
 
-    engine::IRect GetViewport() const
+    engine::IRect GetViewport(const engine::GameRuntime::Camera& camera,
+                              unsigned surface_width, unsigned surface_height) const
+
     {
         // get the game's logical viewport into the game world.
-        const auto& view = GetCamera().viewport;
+        const auto& view = camera.viewport;
         // map the logical viewport to some area in the rendering surface
         // so that the rendering area (the device viewport) has the same
         // aspect ratio as the logical viewport.
         const float width       = view.GetWidth();
         const float height      = view.GetHeight();
-        const auto surf_width  = (float)mSurfaceWidth;
-        const auto surf_height = (float)mSurfaceHeight;
+        const auto surf_width  = (float)surface_width;
+        const auto surf_height = (float)surface_height;
         const float scale = std::min(surf_width / width, surf_height / height);
         const float device_viewport_width = width * scale;
         const float device_viewport_height = height * scale;
@@ -911,7 +1092,7 @@ private:
     engine::MouseEvent MapGameMouseEvent(const WdkMouseEvent& mickey) const
     {
         const auto& camera = GetCamera();
-        const auto& device_viewport  = GetViewport();
+        const auto& device_viewport  = GetViewport(camera, mSurfaceWidth, mSurfaceHeight);
 
         engine::MouseEvent event;
         event.window_coord = glm::vec2(mickey.window_x, mickey.window_y);
@@ -980,8 +1161,6 @@ private:
         mScene->SetMap(mTilemap.get());
 
         TRACE_CALL("Renderer::CreateState", mRenderer.CreateRendererState(*mScene, mTilemap.get()));
-        ConfigureRendererForScene();
-
         TRACE_CALL("Runtime::BeginPlay", mRuntime->BeginPlay(mScene.get(), mTilemap.get()));
     }
     void OnAction(const engine::SuspendAction& action)
@@ -1075,7 +1254,6 @@ private:
         if (action.name == "Bloom")
             mFlags.set(Flags::EnableBloom, action.value);
         else WARN("Unidentified effect name. [effect='%1']", action.name);
-        ConfigureRendererForScene();
     }
     void OnAction(const engine::EnableTracing& action)
     {
@@ -1088,48 +1266,51 @@ private:
         mRequests.EnableDebugDraw(action.enabled);
     }
 
-    void UpdateGame(double game_time, float dt)
+    void UpdateGame(UpdateState& state, EngineRuntime& runtime) const
     {
-        if (mScene)
+        const auto game_time = state.game_time;
+        const auto dt = state.game_step;
+
+        if (runtime.scene)
         {
-            TRACE_CALL("Scene::BeginLoop", mScene->BeginLoop());
-            TRACE_CALL("Runtime:BeginLoop", mRuntime->BeginLoop());
+            TRACE_CALL("Scene::BeginLoop", runtime.scene->BeginLoop());
+            TRACE_CALL("Runtime:BeginLoop", runtime.gamert->BeginLoop());
 
             std::vector<game::Scene::Event> events;
-            TRACE_CALL("Scene::Update", mScene->Update(dt, &events));
-            TRACE_CALL("Runtime:OnSceneEvent", mRuntime->OnSceneEvent(events));
+            TRACE_CALL("Scene::Update", runtime.scene->Update(dt, &events));
+            TRACE_CALL("Runtime:OnSceneEvent", runtime.gamert->OnSceneEvent(events));
 
-            if (mPhysics.HaveWorld())
+            if (runtime.physics->HaveWorld())
             {
                 std::vector<engine::ContactEvent> contacts;
                 // Apply any pending changes such as velocity updates,
                 // rigid body flag state changes, new rigid bodies etc.
                 // changes to the physics world.
-                TRACE_CALL("Physics::UpdateWorld", mPhysics.UpdateWorld(*mScene));
+                TRACE_CALL("Physics::UpdateWorld", runtime.physics->UpdateWorld(*mScene));
                 // Step the simulation forward.
-                TRACE_CALL("Physics::Step", mPhysics.Step(&contacts));
+                TRACE_CALL("Physics::Step", runtime.physics->Step(&contacts));
                 // Update the result of the physics simulation from the
                 // physics world to the scene and its entities.
-                TRACE_CALL("Physics::UpdateScene", mPhysics.UpdateScene(*mScene));
+                TRACE_CALL("Physics::UpdateScene", runtime.physics->UpdateScene(*mScene));
                 // dispatch the contact events (if any).
-                TRACE_CALL("Runtime::OnContactEvents", mRuntime->OnContactEvent(contacts));
+                TRACE_CALL("Runtime::OnContactEvents", runtime.gamert->OnContactEvent(contacts));
             }
         }
 
-        TRACE_CALL("Runtime::Update", mRuntime->Update(game_time, dt));
+        TRACE_CALL("Runtime::Update", runtime.gamert->Update(game_time, dt));
 
         // Tick game
         {
-            mTickAccum += dt;
+            state.tick_accum += dt;
             // current game time from which we step forward
             // in ticks later on.
             auto tick_time = game_time;
 
-            while (mTickAccum >= mGameTickStep)
+            while (state.tick_accum >= state.tick_step)
             {
-                TRACE_CALL("Runtime::Tick", mRuntime->Tick(tick_time, mGameTickStep));
-                mTickAccum -= mGameTickStep;
-                tick_time += mGameTickStep;
+                TRACE_CALL("Runtime::Tick", runtime.gamert->Tick(tick_time, mGameTickStep));
+                state.tick_accum -= state.tick_step;
+                tick_time += state.tick_step;
             }
         }
 
@@ -1147,57 +1328,74 @@ private:
         // been moved already. To resolve this issue the game should move entity A
         // in the Update function and then check for the collisions/overlap/whatever
         // in the PostUpdate with consistent world state.
-        if (mScene)
+        if (runtime.scene)
         {
             // Update renderers data structures from the scene.
             // This involves creating new render nodes for new entities
             // that have been spawned etc. This needs to be done inside
             // the begin/end loop in order to have the correct signalling
             // i.e. entity control flags.
-            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRendererState(*mScene, mTilemap.get()));
+            TRACE_CALL("Renderer::UpdateState", runtime.renderer->UpdateRendererState(*mScene, mTilemap.get()));
 
             // make sure to do this first in order to allow the scene to rebuild
             // the spatial indices etc. before the game's PostUpdate runs.
-            TRACE_CALL("Scene::Rebuild", mScene->Rebuild());
+            TRACE_CALL("Scene::Rebuild", runtime.scene->Rebuild());
             // using the time we've arrived to now after having taken the previous
             // delta step forward in game time.
-            TRACE_CALL("Runtime::PostUpdate", mRuntime->PostUpdate(game_time + dt));
+            TRACE_CALL("Runtime::PostUpdate", runtime.gamert->PostUpdate(game_time + dt));
 
-            TRACE_CALL("Runtime::EndLoop", mRuntime->EndLoop());
-            TRACE_CALL("Scene::EndLoop", mScene->EndLoop());
+            TRACE_CALL("Runtime::EndLoop", runtime.gamert->EndLoop());
+            TRACE_CALL("Scene::EndLoop", runtime.scene->EndLoop());
         }
-    }
 
-    void CreateNextFrame()
-    {
-        const auto now = mGameTimeTotal;
-        if (mRenderTimeStamp == 0.0)
-            mRenderTimeStamp = now;
+        runtime.gamert->GetCamera(&state.camera);
 
-        const auto dt  = now - mRenderTimeStamp;
+        std::vector<engine::UIEngine::WidgetAction> widget_actions;
+        std::vector<engine::UIEngine::WindowAction> window_actions;
+        TRACE_CALL("UI::UpdateWindow", runtime.ui->UpdateWindow(game_time, dt, &widget_actions));
+        TRACE_CALL("UI::UpdateState", runtime.ui->UpdateState(game_time, dt, &window_actions));
 
-        if (mScene)
-        {
-            if (SetRendererState())
+        TRACE_BLOCK("Runtime::UpdateUI",
+            if (auto* ui = runtime.ui->GetUI())
             {
-                TRACE_CALL("Renderer::Update", mRenderer.Update(*mScene, mTilemap.get(), mRenderTimeTotal, dt));
-                TRACE_CALL("Renderer::CreateFrame", mRenderer.CreateFrame(*mScene, mTilemap.get()));
-                if (mFlags.test(DetonatorEngine::Flags::EditingMode))
-                {
-                    ConfigureRendererForScene();
-                }
+                runtime.gamert->OnUIAction(ui, widget_actions);
+                runtime.gamert->UpdateUI(ui, game_time, dt);
             }
-        }
-        mRenderTimeTotal += dt;
-        mRenderTimeStamp = now;
+        );
+
+        TRACE_BLOCK("Runtime::HandleUI",
+            for (const auto& w : window_actions)
+            {
+                if (const auto* ptr = std::get_if<engine::UIEngine::WindowOpen>(&w))
+                    runtime.gamert->OnUIOpen(ptr->window);
+                else if (const auto* ptr = std::get_if<engine::UIEngine::WindowUpdate>(&w))
+                    runtime.gamert->SetCurrentUI(ptr->window);
+                else if(const auto* ptr = std::get_if<engine::UIEngine::WindowClose>(&w))
+                    runtime.gamert->OnUIClose(ptr->window.get(), ptr->result);
+                else BUG("Missing UIEngine window event handling.");
+            }
+        );
     }
 
-    bool SetRendererState()
+    void CreateNextFrame(RenderState& state, EngineRuntime& runtime) const
     {
-        // configure renderer
-        const auto surf_width  = (float)mSurfaceWidth;
-        const auto surf_height = (float)mSurfaceHeight;
-        const auto& game_camera = GetCamera();
+        const auto now = state.game_time;
+        if (state.render_time_stamp == 0.0)
+            state.render_time_stamp = now;
+
+        const auto current_render_delta = now - state.render_time_stamp;
+        const auto current_render_time = state.render_time_total;
+
+        state.render_time_total += current_render_delta;
+        state.render_time_stamp = now;
+
+        if (!runtime.scene)
+            return;
+
+        const auto surf_width   = float(state.surface_width);
+        const auto surf_height  = float(state.surface_height);
+        const auto& game_camera = state.camera;
+
         // get the game's logical viewport into the game world.
         const auto& game_view = game_camera.viewport;
         // map the logical viewport to some area in the rendering surface
@@ -1210,102 +1408,67 @@ private:
 
         // if the game hasn't set the viewport... then don't draw!
         if (game_view_width <= 0.0f || game_view_height <= 0.0f)
-        {
-            WARN("Game viewport is invalid. [width=%1, height=%2]", game_view_width, game_view_height);
-            return false;
-        }
-
-        engine::Renderer::Surface surface;
-        surface.viewport = GetViewport();
-        surface.size     = base::USize(mSurfaceWidth, mSurfaceHeight);
-        mRenderer.SetSurface(surface);
-
-        engine::Renderer::Camera camera;
-        camera.clear_color = mClearColor;
-        camera.viewport    = game_view;
-        camera.scale       = game_camera.scale;
-        camera.position    = game_camera.position;
-        camera.rotation    = 0.0f;
-        camera.ppa         = engine::ComputePerspectiveProjection(game_view);
-        mRenderer.SetCamera(camera);
-        return true;
-    }
-
-    void UpdateGameUI(double game_time, float dt)
-    {
-        std::vector<engine::UIEngine::WidgetAction> widget_actions;
-        std::vector<engine::UIEngine::WindowAction> window_actions;
-        TRACE_CALL("UIEngine::UpdateWindow", mUIEngine.UpdateWindow(game_time, dt, &widget_actions));
-        TRACE_CALL("UIEngine::UpdateState", mUIEngine.UpdateState(game_time, dt, &window_actions));
-        if (auto* ui = mUIEngine.GetUI())
-        {
-            TRACE_CALL("Runtime::OnUIAction", mRuntime->OnUIAction(ui, widget_actions));
-            TRACE_CALL("Runtime::UpdateUI", mRuntime->UpdateUI(ui, game_time, dt));
-        }
-
-        for (const auto& w : window_actions)
-        {
-            if (const auto* ptr = std::get_if<engine::UIEngine::WindowOpen>(&w))
-                mRuntime->OnUIOpen(ptr->window);
-            else if (const auto* ptr = std::get_if<engine::UIEngine::WindowUpdate>(&w))
-                mRuntime->SetCurrentUI(ptr->window);
-            else if(const auto* ptr = std::get_if<engine::UIEngine::WindowClose>(&w))
-                mRuntime->OnUIClose(ptr->window.get(), ptr->result);
-            else BUG("Missing UIEngine window event handling.");
-        }
-    }
-
-    void PerformGameActions(float dt)
-    {
-        // todo: the action processing probably needs to be split
-        // into game-actions and non-game actions. For example the
-        // game might insert an additional delay in order to transition
-        // from one game state to another but likely want to transition
-        // to full screen mode in real time. (non game action)
-        mActionDelay = math::clamp(0.0f, mActionDelay, mActionDelay - dt);
-        if (mActionDelay > 0.0f)
             return;
 
-        engine::Action action;
-        while (mRuntime->GetNextAction(&action))
-        {
-            std::visit([this](auto& variant_value) {
-                this->OnAction(variant_value);
-            }, action);
-            // action delay can be changed by the delay action.
-            if (mActionDelay > 0.0f)
-                break;
-        }
-    }
+        engine::Renderer::FrameSettings settings;
+        settings.surface.viewport   = GetViewport(state.camera, state.surface_width, state.surface_height);
+        settings.surface.size       = base::USize(state.surface_width, state.surface_height);
+        settings.camera.clear_color = state.clear_color;
+        settings.camera.viewport    = game_view;
+        settings.camera.scale       = game_camera.scale;
+        settings.camera.position    = game_camera.position;
+        settings.camera.rotation    = 0.0f;
+        settings.camera.ppa         = engine::ComputePerspectiveProjection(game_view);
 
-    void ConfigureRendererForScene()
-    {
-        if (auto* bloom = mScene->GetBloom(); bloom && mFlags.test(Flags::EnableBloom))
+        if (auto* bloom = runtime.scene->GetBloom(); bloom && state.enable_bloom)
         {
-            engine::Renderer::BloomParams bloom_params;
-            bloom_params.threshold = bloom->threshold;
-            bloom_params.red       = bloom->red;
-            bloom_params.green     = bloom->green;
-            bloom_params.blue      = bloom->blue;
-            mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, true);
-            mRenderer.SetBloom(bloom_params);
+            settings.bloom.threshold = bloom->threshold;
+            settings.bloom.red       = bloom->red;
+            settings.bloom.green     = bloom->green;
+            settings.bloom.blue      = bloom->blue;
+            settings.effects.set(engine::Renderer::Effects::Bloom, true);
         }
-        else
-        {
-            mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, false);
-        }
-        const auto shading = (*mScene)->GetShadingMode();
+
+        const auto shading = (*runtime.scene)->GetShadingMode();
         if (shading == game::SceneClass::RenderingArgs::ShadingMode::Flat)
-            mRenderer.SetStyle(engine::Renderer::RenderingStyle::FlatColor);
+            settings.style = engine::Renderer::RenderingStyle::FlatColor;
         else if (shading == game::SceneClass::RenderingArgs::ShadingMode::BasicLight)
-            mRenderer.SetStyle(engine::Renderer::RenderingStyle::BasicShading);
+            settings.style = engine::Renderer::RenderingStyle::BasicShading;
         else BUG("Bug on renderer shading mode.");
 
-        if (mRendererConfig.has_value())
+        if (state.render_config.has_value())
         {
-            const auto& value = mRendererConfig.value();
-            mRenderer.SetStyle(value.style);
+            const auto& value = state.render_config.value();
+            settings.style = value.style;
         }
+
+        TRACE_CALL("Renderer::Update", runtime.renderer->Update(*runtime.scene, runtime.tilemap,
+            current_render_time, current_render_delta));
+
+        TRACE_CALL("Renderer::CreateFrame", runtime.renderer->CreateFrame(*runtime.scene, runtime.tilemap, settings));
+    }
+
+    bool WaitTasks()
+    {
+        if (mUpdateTasks.empty())
+            return false;
+        // if we had updates running in parallel then complete (wait)
+        // the tasks here. This is unfortunately needed in order to
+        // make sure that the update thread is no longer touching
+        // the UI system or the scene.
+        // Wait each update task
+        for (auto& handle: mUpdateTasks)
+        {
+            TRACE_CALL("WaitSceneUpdate", handle.Wait(base::TaskHandle::WaitStrategy::BusyLoop));
+            const auto* task = handle.GetTask();
+            if (task->HasException())
+            {
+                ERROR("Task has encountered an exception. [task='%1']", task->GetTaskName());
+                // should we rethrow this?
+            }
+        }
+        mUpdateTasks.clear();
+        return true;
     }
 
     void DrawMousePointer(float dt)
@@ -1409,7 +1572,9 @@ private:
         if (mDebug.debug_draw)
         {
             // visualize the game's logical viewport in the window.
-            gfx::DrawRectOutline(painter, gfx::FRect(GetViewport()), gfx::Color::Green, 1.0f);
+            const auto& camera = GetCamera();
+            const auto& viewport = GetViewport(camera, mSurfaceWidth, mSurfaceHeight);
+            gfx::DrawRectOutline(painter, gfx::FRect(viewport), gfx::Color::Green, 1.0f);
         }
     }
 
@@ -1422,7 +1587,7 @@ private:
         }
 
         const auto& camera = GetCamera();
-        const auto device_viewport  = GetViewport();
+        const auto device_viewport  = GetViewport(camera, mSurfaceWidth, mSurfaceHeight);
         const auto surface_width  = (float)mSurfaceWidth;
         const auto surface_height = (float)mSurfaceHeight;
 
@@ -1463,6 +1628,9 @@ private:
             }
         );
 
+        if (!mScene)
+            return;
+
         // this debug drawing is provided for the game developer to help them
         // see where the spatial nodes are, not for the engine developer to
         // debug the engine code. So this means that we assume that the engine
@@ -1471,36 +1639,32 @@ private:
         // entity/node iteration instead of iterating over the items in the
         // spatial index. (Which is a function that doesn't event exist yet).
         TRACE_BLOCK("DebugDrawScene",
-            if (mScene)
+            for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
             {
-                for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
+                const auto& entity = mScene->GetEntity(i);
+                for (size_t j = 0; j < entity.GetNumNodes(); ++j)
                 {
-                    const auto& entity = mScene->GetEntity(i);
-                    for (size_t j = 0; j < entity.GetNumNodes(); ++j)
+                    const auto& node = entity.GetNode(j);
+                    if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::SpatialIndex))
                     {
-                        const auto& node = entity.GetNode(j);
-                        if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::SpatialIndex))
-                        {
-                            if (!node.HasSpatialNode())
-                                continue;
+                        if (!node.HasSpatialNode())
+                            continue;
 
-                            const auto& aabb = mScene->FindEntityNodeBoundingRect(&entity, &node);
-                            gfx::DebugDrawRect(painter, aabb, gfx::Color::Gray, 1.0f);
-                        }
+                        const auto& aabb = mScene->FindEntityNodeBoundingRect(&entity, &node);
+                        gfx::DebugDrawRect(painter, aabb, gfx::Color::Gray, 1.0f);
                     }
-                    if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::BoundingRect))
-                    {
-                        const auto rect = mScene->FindEntityBoundingRect(&entity);
-                        gfx::DrawRectOutline(painter, rect, gfx::Color::Yellow, 1.0f);
-                    }
-                    if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::BoundingBox))
-                    {
-                        // todo: need to implement the minimum bounding box computation first
-                    }
+                }
+                if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::BoundingRect))
+                {
+                    const auto rect = mScene->FindEntityBoundingRect(&entity);
+                    gfx::DrawRectOutline(painter, rect, gfx::Color::Yellow, 1.0f);
+                }
+                if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::BoundingBox))
+                {
+                    // todo: need to implement the minimum bounding box computation first
                 }
             }
         );
-
     }
 private:
     enum class Flags {
@@ -1527,28 +1691,13 @@ private:
         // master flag to control bloom PP in the renderer, controlled by the game.
         EnableBloom
     };
-    // current engine flags to control execution etc.
-    base::bitflag<Flags> mFlags;
-    unsigned mFrameCounter = 0;
-    // current FBO 0 surface sizes
-    unsigned mSurfaceWidth  = 0;
-    unsigned mSurfaceHeight = 0;
-    // current mouse cursor details
-    EngineConfig::MouseCursorUnits mCursorUnits = EngineConfig::MouseCursorUnits::Pixels;
-    glm::vec2 mCursorPos;
-    glm::vec2 mCursorHotspot;
-    glm::vec2 mCursorSize;
-    std::unique_ptr<gfx::Material> mMouseMaterial;
-    std::unique_ptr<gfx::Drawable> mMouseDrawable;
-    gfx::Color4f mClearColor = {0.2f, 0.3f, 0.4f, 1.0f};
-    // game dir where the executable is.
-    std::string mDirectory;
-    // home directory for the game generated data.
-    std::string mGameHome;
-    // queue of outgoing requests regarding the environment
-    // such as the window size/position etc that the game host
-    // may/may not support.
-    engine::AppRequestQueue mRequests;
+    // list of current debug print messages that
+    // get printed to the display.
+    struct DebugPrint {
+        std::string message;
+        short lifetime = 3;
+    };
+
     // Interface for accessing the game classes and resources
     // such as animations, materials etc.
     engine::ClassLibrary* mClasslib = nullptr;
@@ -1559,6 +1708,8 @@ private:
     audio::Loader* mAudioLoader = nullptr;
     // Game data loader.
     game::Loader* mGameLoader = nullptr;
+
+    std::mutex mRuntimeLock;
     // The graphics device.
     std::shared_ptr<gfx::Device> mDevice;
     // The rendering subsystem.
@@ -1575,16 +1726,38 @@ private:
     std::unique_ptr<game::Scene> mScene;
     // Current tilemap or nullptr if no map.
     std::unique_ptr<game::Tilemap> mTilemap;
+
+    std::mutex mEngineLock;
+
+    // current engine flags to control execution etc.
+    base::bitflag<Flags> mFlags;
+    unsigned mFrameCounter = 0;
+    // current FBO 0 surface sizes
+    unsigned mSurfaceWidth  = 0;
+    unsigned mSurfaceHeight = 0;
+    // current mouse cursor details
+    EngineConfig::MouseCursorUnits mCursorUnits = EngineConfig::MouseCursorUnits::Pixels;
+    glm::vec2 mCursorPos     = {0.0f, 0.0f};
+    glm::vec2 mCursorHotspot = {0.0f, 0.0f};
+    glm::vec2 mCursorSize    = {1.0f, 1.0f};
+    std::unique_ptr<gfx::Material> mMouseMaterial;
+    std::unique_ptr<gfx::Drawable> mMouseDrawable;
+    gfx::Color4f mClearColor = {0.2f, 0.3f, 0.4f, 1.0f};
+    // game dir where the executable is.
+    std::string mDirectory;
+    // home directory for the game generated data.
+    std::string mGameHome;
+    // queue of outgoing requests regarding the environment
+    // such as the window size/position etc that the game host
+    // may/may not support.
+    engine::AppRequestQueue mRequests;
+
+    engine::GameRuntime::Camera mCamera;
     // current debug options.
     engine::Engine::DebugOptions mDebug;
     // last statistics about the rendering rate etc.
     engine::Engine::HostStats mLastStats;
-    // list of current debug print messages that
-    // get printed to the display.
-    struct DebugPrint {
-        std::string message;
-        short lifetime = 3;
-    };
+
     boost::circular_buffer<DebugPrint> mDebugPrints;
     std::vector<engine::DebugDrawCmd> mDebugDraws;
     // Time to consume until game actions are processed.
