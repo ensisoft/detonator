@@ -120,35 +120,51 @@ namespace engine
         using Camera = LowLevelRenderer::Camera;
         using Surface = LowLevelRenderer::Surface;
 
+        struct FrameSettings {
+            base::bitflag<Effects> effects;
+            BloomParams bloom;
+            Camera camera;
+            Surface surface;
+            RenderingStyle style = RenderingStyle::FlatColor;
+            // render units (= scene units?)
+            // add a little fudge to the renderable tile size in order to try to
+            // close any possible gap between the tiles. if the tiles are exactly
+            // the size they're supposed to be it's possible that some gaps
+            // appear between them.
+            float tile_size_fudge = 0.5f;
+        };
+
         explicit Renderer(const ClassLibrary* classlib = nullptr);
 
-        inline void SetBloom(const BloomParams& bloom) noexcept
-        { mBloom = bloom; }
         inline void SetClassLibrary(const ClassLibrary* classlib) noexcept
         { mClassLib = classlib; }
         inline void SetEditingMode(bool on_off) noexcept
         { mEditingMode = on_off; }
         inline void SetName(std::string name) noexcept
         { mRendererName = std::move(name); }
-        inline void EnableEffect(Effects effect, bool enabled) noexcept
-        { mEffects.set(effect, enabled); }
-        inline bool IsEnabled(Effects effect) const noexcept
-        { return mEffects.test(effect); }
-        inline void SetCamera(const Camera& camera) noexcept
-        { mCamera = camera; }
-        inline void SetSurface(const Surface& surface) noexcept
-        { mSurface = surface; }
-        inline void SetStyle(RenderingStyle style) noexcept
-        { mStyle = style; }
-        inline void SetTileSizeFudge(float fudge) noexcept
-        { mTileSizeFudge = fudge; }
 
 #if !defined(DETONATOR_ENGINE_BUILD)
+        // these are not thread safe and are only available in the
+        // editor and tests. The engine uses threads so we cannot
+        // use these directly.
+        inline void SetBloom(const BloomParams& bloom) noexcept
+        { mFrameSettings.bloom = bloom; }
+        inline void EnableEffect(Effects effect, bool enabled) noexcept
+        { mFrameSettings.effects.set(effect, enabled); }
+        inline bool IsEnabled(Effects effect) const noexcept
+        { return mFrameSettings.effects.test(effect); }
+        inline void SetCamera(const Camera& camera) noexcept
+        { mFrameSettings.camera = camera; }
+        inline void SetSurface(const Surface& surface) noexcept
+        { mFrameSettings.surface = surface; }
+        inline void SetStyle(RenderingStyle style) noexcept
+        { mFrameSettings.style = style; }
+        inline void SetTileSizeFudge(float fudge) noexcept
+        { mFrameSettings.tile_size_fudge = fudge; }
         inline void SetPacketFilter(PacketFilter* filter) noexcept
         { mPacketFilter = filter; }
         inline void SetLowLevelRendererHook(LowLevelRendererHook* hook) noexcept
         { mLowLevelRendererHook = hook; }
-
         inline auto GetNumPaintNodes() const noexcept
         { return mPaintNodes.size(); }
 #endif
@@ -171,7 +187,7 @@ namespace engine
         // Create the draw commands for the next frame that to be drawn
         // by the call to DrawFrame. This method cannot run in parallel
         // with with DrawFrame.
-        void CreateFrame(const game::Scene& scene, const game::Tilemap* map);
+        void CreateFrame(const game::Scene& scene, const game::Tilemap* map, const FrameSettings& settings);
 
         // Draw the current frame rendering state, i.e. the currently
         // enqueued and created draw commands.
@@ -201,6 +217,11 @@ namespace engine
         void CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* hook = nullptr);
         void CreateFrame(const game::Tilemap& map, bool draw_render_layer, bool draw_data_layer,
                          TileBatchDrawHook* hook = nullptr);
+
+        void CreateFrame(const game::Scene& scene, const game::Tilemap* map)
+        {
+            CreateFrame(scene, map, mFrameSettings);
+        }
 
         void BeginFrame();
         void EndFrame();
@@ -253,6 +274,7 @@ namespace engine
         void CreateDrawableDrawPackets(const EntityType& entity,
                                        const EntityNodeType& entity_node,
                                        const PaintNode& paint_node,
+                                       const FrameSettings& settings,
                                        std::vector<DrawPacket>& packets,
                                        EntityDrawHook<EntityNodeType>* hook) const;
         template<typename EntityType, typename EntityNodeType>
@@ -271,10 +293,12 @@ namespace engine
         void OffsetPacketLayers(std::vector<DrawPacket>& packets, std::vector<Light>& lights) const;
 
         void GenerateMapDrawPackets(const game::Tilemap& map,
+                                    const FrameSettings& settings,
                                     const std::vector<TileBatch>& batches,
                                     std::vector<DrawPacket>& packets) const;
 
         void PrepareMapTileBatches(const game::Tilemap& map,
+                                   const FrameSettings& settings,
                                    std::vector<TileBatch>& batches,
                                    bool draw_render_layer,
                                    bool draw_data_layer,
@@ -306,6 +330,8 @@ namespace engine
                                                              std::uint16_t material_index);
     private:
         const ClassLibrary* mClassLib = nullptr;
+        std::string mRendererName;
+        bool mEditingMode = false;
 
         struct PaintNode {
             bool visited = false;
@@ -332,32 +358,19 @@ namespace engine
         };
         using TilemapLayerPalette = std::vector<TilemapLayerPaletteEntry>;
 
+        std::mutex mRendererLock;
         std::unordered_map<std::string, PaintNode> mPaintNodes;
         std::unordered_map<std::string, LightNode> mLightNodes;
         std::vector<TilemapLayerPalette> mTilemapPalette;
-
-        std::string mRendererName;
-        base::bitflag<Effects> mEffects;
-        bool mEditingMode = false;
-        BloomParams mBloom;
-        Camera mCamera;
-        Surface mSurface;
-        RenderingStyle mStyle = RenderingStyle::FlatColor;
-        // render units (= scene units?)
-        // add a little fudge to the renderable tile size in order to try to
-        // close any possible gap between the tiles. if the tiles are exactly
-        // the size they're supposed to be it's possible that some gaps
-        // appear between them.
-        float mTileSizeFudge = 0.5f;
 
 #if !defined(DETONATOR_ENGINE_BUILD)
         PacketFilter* mPacketFilter = nullptr;
         LowLevelRendererHook* mLowLevelRendererHook = nullptr;
 #endif
-
+        mutable std::mutex mFrameLock;
         mutable std::vector<DrawPacket> mRenderBuffer;
         mutable std::vector<Light> mLightBuffer;
-
+        mutable FrameSettings mFrameSettings;
     };
 
 } // namespace

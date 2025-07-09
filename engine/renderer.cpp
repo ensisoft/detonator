@@ -62,11 +62,12 @@ namespace engine
 Renderer::Renderer(const ClassLibrary* classlib)
   : mClassLib(classlib)
 {
-    mEffects.set(Effects::Bloom, false);
 }
 
 void Renderer::CreateRendererState(const game::Scene& scene, const game::Tilemap* map)
 {
+    std::lock_guard<std::mutex> lock(mRendererLock);
+
     mPaintNodes.clear();
 
     const auto& nodes = scene.CollectNodes();
@@ -84,6 +85,8 @@ void Renderer::CreateRendererState(const game::Scene& scene, const game::Tilemap
 
 void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap* map)
 {
+    std::lock_guard<std::mutex> lock(mRendererLock);
+
     const auto& nodes = scene.CollectNodes();
 
     for (const auto& node : nodes)
@@ -99,7 +102,6 @@ void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap
                 const auto& node = entity->GetNode(i);
                 mPaintNodes.erase("drawable/" + node.GetId());
                 mPaintNodes.erase("text-item/" + node.GetId());
-
                 mLightNodes.erase("basic/" + node.GetId());
             }
         }
@@ -112,7 +114,16 @@ void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap
 }
 
 void Renderer::Update(const Scene& scene, const game::Tilemap* map, double time, float dt)
-{
+{    
+    
+    // can't update the renderer state (paint nodes, lights etc)
+    // concurrently.
+    std::lock_guard<std::mutex> renderer_lock(mRendererLock);
+
+    // can't update the materials/drawables concurrently
+    // with frame rendering.
+    std::lock_guard<std::mutex> frame_lock(mFrameLock);
+
     for (size_t i=0; i<scene.GetNumEntities(); ++i)
     {
         const auto& entity = scene.GetEntity(i);
@@ -122,6 +133,9 @@ void Renderer::Update(const Scene& scene, const game::Tilemap* map, double time,
 
 void Renderer::Update(const Entity& entity, double time, float dt)
 {
+    // should hold frame lock here, but we're holding it now in
+    // Scene update which calls this method
+
     for (size_t i=0; i < entity.GetNumNodes(); ++i)
     {
         const auto& node = entity.GetNode(i);
@@ -146,8 +160,10 @@ void Renderer::Update(const Entity& entity, double time, float dt)
     }
 }
 
-void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
+void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, const FrameSettings& settings)
 {
+    std::lock_guard<std::mutex> renderer_lock(mRendererLock);
+
     std::vector<DrawPacket> scene_draw_packets;
     std::vector<DrawPacket> map_draw_packets;
     std::vector<Light> lights;
@@ -160,8 +176,8 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
         constexpr auto draw_render_layers = true;
         constexpr auto draw_data_layers   = false;
         constexpr auto use_tile_batching  = true;
-        TRACE_CALL("PrepareMapTileBatches", PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching));
-        TRACE_CALL("GenerateMapDrawPackets", GenerateMapDrawPackets(*map, batches, map_draw_packets));
+        TRACE_CALL("PrepareMapTileBatches", PrepareMapTileBatches(*map, settings, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching));
+        TRACE_CALL("GenerateMapDrawPackets", GenerateMapDrawPackets(*map, settings, batches, map_draw_packets));
     }
 
     const auto map_packet_count = map_draw_packets.size();
@@ -183,7 +199,7 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
                 {
-                    CreateDrawableDrawPackets<Entity, EntityNode>(entity, node, *paint, *packet_list, nullptr);
+                    CreateDrawableDrawPackets<Entity, EntityNode>(entity, node, *paint, settings, *packet_list, nullptr);
                     paint->visited = true;
                 }
 
@@ -222,12 +238,16 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map)
     TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets, lights));
 
     // this is the outcome that the draw function will then actually draw
+    std::lock_guard<std::mutex> lock(mFrameLock);
     std::swap(mRenderBuffer, packets);
     std::swap(mLightBuffer, lights);
+    mFrameSettings = settings;
 }
 
 void Renderer::DrawFrame(gfx::Device& device) const
 {
+    std::lock_guard<std::mutex> lock(mFrameLock);
+
     // only take this shortcut when running for realz otherwise
     // (in the editor) we end up skipping doing low level render
     // hook operations such as drawing the guide grid
@@ -235,27 +255,27 @@ void Renderer::DrawFrame(gfx::Device& device) const
         return;
 
     // surface (renderer) has not been configured yet.
-    const auto width = mSurface.size.GetWidth();
-    const auto height = mSurface.size.GetHeight();
+    const auto width  = mFrameSettings.surface.size.GetWidth();
+    const auto height = mFrameSettings.surface.size.GetHeight();
     if (width == 0 || height == 0)
         return;
 
-    bool enable_bloom = false;
+    bool enable_bloom  = false;
     bool enable_lights = false;
-    if (mStyle == RenderingStyle::FlatColor ||
-        mStyle == RenderingStyle::BasicShading)
+    if (mFrameSettings.style == RenderingStyle::FlatColor ||
+        mFrameSettings.style == RenderingStyle::BasicShading)
     {
-        if (IsEnabled(Effects::Bloom))
+        if (mFrameSettings.effects.test(Effects::Bloom))
             enable_bloom = true;
     }
-    if (mStyle == RenderingStyle::BasicShading)
+    if (mFrameSettings.style == RenderingStyle::BasicShading)
         enable_lights = true;
 
     LowLevelRenderer low_level_renderer(&mRendererName, device);
-    low_level_renderer.SetCamera(mCamera);
+    low_level_renderer.SetCamera(mFrameSettings.camera);
     low_level_renderer.SetEditingMode(mEditingMode);
-    low_level_renderer.SetSurface(mSurface);
-    low_level_renderer.SetBloom(mBloom);
+    low_level_renderer.SetSurface(mFrameSettings.surface);
+    low_level_renderer.SetBloom(mFrameSettings.bloom);
     low_level_renderer.EnableBloom(enable_bloom);
     low_level_renderer.EnableLights(enable_lights);
 #if !defined(DETONATOR_ENGINE_BUILD)
@@ -385,8 +405,8 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
         constexpr auto draw_data_layers   = false;
         // disable batching because of single tile highlights
         constexpr auto use_tile_batching = false;
-        PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching);
-        GenerateMapDrawPackets(*map, batches, map_draw_packets);
+        PrepareMapTileBatches(*map, mFrameSettings, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching);
+        GenerateMapDrawPackets(*map, mFrameSettings, batches, map_draw_packets);
     }
 
     const auto& nodes = scene.CollectNodes();
@@ -427,7 +447,7 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + placement->GetId() + "/" + node.GetId()))
                 {
-                    CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(*entity, node, *paint, entity_packets, nullptr);
+                    CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(*entity, node, *paint, mFrameSettings, entity_packets, nullptr);
                     paint->visited = true;
                 }
 
@@ -525,7 +545,7 @@ void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook*
         {
             if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
             {
-                CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, packets, hook);
+                CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, mFrameSettings, packets, hook);
                 paint->visited = true;
                 did_paint = true;
             }
@@ -575,7 +595,7 @@ void Renderer::CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* h
         bool did_paint = false;
         if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
         {
-            CreateDrawableDrawPackets<game::Entity, game::EntityNode>(entity, node, *paint, packets, hook);
+            CreateDrawableDrawPackets<game::Entity, game::EntityNode>(entity, node, *paint, mFrameSettings, packets, hook);
             paint->visited = true;
             did_paint = true;
         }
@@ -641,10 +661,10 @@ void Renderer::CreateFrame(const game::Tilemap& map, bool draw_render_layer, boo
     constexpr auto use_tile_batching = false;
 
     std::vector<TileBatch> batches;
-    PrepareMapTileBatches(map, batches, draw_render_layer, draw_data_layer, obey_klass_flags, use_tile_batching);
+    PrepareMapTileBatches(map, mFrameSettings, batches, draw_render_layer, draw_data_layer, obey_klass_flags, use_tile_batching);
 
     std::vector<DrawPacket> packets;
-    GenerateMapDrawPackets(map, batches,packets);
+    GenerateMapDrawPackets(map, mFrameSettings, batches,packets);
 
     std::vector<Light> lights;
 
@@ -704,16 +724,19 @@ void Renderer::ClearPaintState()
 
 
 void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
+                                      const FrameSettings& settings,
                                       const std::vector<TileBatch>& batches,
                                       std::vector<DrawPacket>& packets) const
 {
+    const auto& camera = settings.camera;
+
     const auto map_view = map.GetPerspective();
-    const auto& map_view_to_clip    = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-    const auto& map_world_to_view   = CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale,
-                                                            mCamera.rotation);
-    const auto& scene_view_to_clip  = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-    const auto& scene_world_to_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale,
-                                                            mCamera.rotation);
+    const auto& map_view_to_clip    = CreateProjectionMatrix(Projection::Orthographic, camera.viewport);
+    const auto& map_world_to_view   = CreateModelViewMatrix(map_view, camera.position, camera.scale,
+                                                            camera.rotation);
+    const auto& scene_view_to_clip  = CreateProjectionMatrix(Projection::Orthographic, camera.viewport);
+    const auto& scene_world_to_view = CreateModelViewMatrix(GameView::AxisAligned, camera.position, camera.scale,
+                                                            camera.rotation);
 
     // this matrix will transform coordinates from map's coordinate space to
     // scene coordinate space. (the scene world coordinate is a coordinate
@@ -735,8 +758,8 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             const auto tile_render_size = ComputeTileRenderSize(from_map_to_scene, batch.tile_size, map_view);
             const auto tile_render_width_scale = map->GetTileRenderWidthScale();
             const auto tile_render_height_scale = map->GetTileRenderHeightScale();
-            const auto tile_width_render_units = tile_render_size.x * tile_render_width_scale + mTileSizeFudge;
-            const auto tile_height_render_units = tile_render_size.y * tile_render_height_scale + mTileSizeFudge;
+            const auto tile_width_render_units = tile_render_size.x * tile_render_width_scale + settings.tile_size_fudge;
+            const auto tile_height_render_units = tile_render_size.y * tile_render_height_scale + settings.tile_size_fudge;
 
             auto tiles = std::make_unique<gfx::TileBatch>(std::move(batch.tiles));
             tiles->SetTileWorldSize(batch.tile_size);
@@ -793,6 +816,7 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
 }
 
 void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
+                                     const FrameSettings& settings,
                                      std::vector<TileBatch>& batches,
                                      bool draw_render_layer,
                                      bool draw_data_layer,
@@ -800,17 +824,20 @@ void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
                                      bool use_batching)
 
 {
+    const auto& surface = settings.surface;
+    const auto& camera  = settings.camera;
+
     // The logical game world is mapped inside the device viewport
     // through projection and clip transformations. thus it should
     // be possible to map the viewport back to the world plane already
     // with MapFromWindowToWorldPlane.
-    const auto device_viewport_width   = mSurface.viewport.GetWidth();
-    const auto device_viewport_height  = mSurface.viewport.GetHeight();
+    const auto device_viewport_width   = surface.viewport.GetWidth();
+    const auto device_viewport_height  = surface.viewport.GetHeight();
     const auto window_size = glm::vec2{device_viewport_width, device_viewport_height};
 
     const auto map_view = map.GetPerspective();
-    const auto& view_to_clip = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-    const auto& world_to_view = CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale, mCamera.rotation);
+    const auto& view_to_clip = CreateProjectionMatrix(Projection::Orthographic, camera.viewport);
+    const auto& world_to_view = CreateModelViewMatrix(map_view, camera.position, camera.scale, camera.rotation);
 
     // map the corners of the viewport onto the map plane.
     const auto corners = MapFromWindowToWorldPlane(view_to_clip, world_to_view, window_size,
@@ -851,8 +878,8 @@ void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
 
         const unsigned layer_width_tiles  = layer.GetWidth();
         const unsigned layer_height_tiles = layer.GetHeight();
-        const float layer_width_units  = layer_width_tiles  * layer_tile_width_units;
-        const float layer_height_units = layer_height_tiles * layer_tile_height_units;
+        const auto layer_width_units  = float(layer_width_tiles)  * layer_tile_width_units;
+        const auto layer_height_units = float(layer_height_tiles) * layer_tile_height_units;
 
         const auto layer_min = glm::vec2{0.0f,  0.0f};
         const auto layer_max = glm::vec2{layer_width_units, layer_height_units};
@@ -1400,6 +1427,7 @@ template<typename EntityType, typename EntityNodeType>
 void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
                                          const EntityNodeType& entity_node,
                                          const PaintNode& paint_node,
+                                         const FrameSettings& settings,
                                          std::vector<DrawPacket>& packets,
                                          EntityDrawHook<EntityNodeType>* hook) const
 {
@@ -1510,7 +1538,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
 
             if (mEditingMode)
             {
-                if (mStyle == RenderingStyle::Wireframe &&
+                if (settings.style == RenderingStyle::Wireframe &&
                         packet.drawable->GetDrawPrimitive() == gfx::Drawable::DrawPrimitive::Triangles)
                 {
                     static auto wireframe_color = std::make_shared<gfx::MaterialInstance>(
@@ -1603,7 +1631,7 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             packet.drawable     = paint_node.drawable;
             packet.material     = paint_node.material;
             packet.transform    = transform;
-            packet.sort_point   = transform * glm::vec4{map_sort_point, 0.0f, 1.0};
+            packet.sort_point   = transform * glm::vec4{map_sort_point, 0.0f, 1.0f};
             packet.map_layer    = map_layer;
             packet.map_sort_key = map_sort_key;
             packet.packet_index = text->GetLayer();
@@ -1642,7 +1670,7 @@ void Renderer::CreateLights(const EntityType& entity,
 
     gfx::Transform transform;
     transform.Scale(light_node.world_scale);
-    transform.RotateAroundZ(light_node.world_rotation * -1.0);
+    transform.RotateAroundZ(light_node.world_rotation * -1.0f);
     transform.Translate(light_node.world_pos);
     transform.Push();
          transform.Translate(node_light->GetTranslation());
@@ -1839,9 +1867,9 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
             const gfx::Color4f color(r, g, b, a);
 
             gfx::TileBatch::Tile tile;
-            tile.pos.x = col;
-            tile.pos.y = row;
-            tile.pos.z = layer.GetDepth();
+            tile.pos.x = float(col);
+            tile.pos.y = float(row);
+            tile.pos.z = float(layer.GetDepth());
 
             TileBatch batch;
             batch.tiles.push_back(tile);
