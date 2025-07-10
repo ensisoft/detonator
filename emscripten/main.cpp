@@ -734,7 +734,19 @@ public:
         // dump trace if needed.
         if (mTraceLogger)
         {
+            // write the main thread trace.
             mTraceLogger->Write(*mTraceWriter);
+
+            // write the background thread traces, by transferring the data out of the
+            // buffer and then writing it out.
+            std::vector<struct base::TraceEvent> events;
+            std::vector<struct base::TraceEntry> traces;
+            mTraceBuffer->TransferData(&traces, &events);
+
+            for (const auto& event : events)
+                mTraceWriter->Write(event);
+            for (const auto& trace : traces)
+                mTraceWriter->Write(trace);
         }
 
         ++mFrames;
@@ -830,24 +842,32 @@ public:
 
         if (mTraceEnabledCounter && !mTraceWriter)
         {
-            using TraceWriter = base::LockedTraceWriter<base::ChromiumTraceJsonWriter>;
-
-            mTraceWriter.reset(new TraceWriter((base::ChromiumTraceJsonWriter("/trace.json"))));
+            // write the traces in Chromium JSON format.
+            // use https://ui.perfetto.dev to view the data.
+            mTraceWriter.reset(new base::ChromiumTraceJsonWriter("/trace.json"));
+            // capture the main thread (this calling thread) data
+            // into this trace log object.
             mTraceLogger.reset(new base::TraceLog(1000, base::TraceLog::MainThread));
+
+            // Use buffer for background thread traces. The threads
+            // will dump their local trace logs into the writer
+            // which is this buffer and which will save the data
+            // in a vector which will then periodically dump in
+            // to the JSON file in this main thread.
+            mTraceBuffer.reset(new base::BufferTraceWriter);
+
             base::SetThreadTrace(mTraceLogger.get());
             base::EnableTracing(true);
             // even though we don't have a engine library separately we
             // have to make these calls here in order to propagate the state
             // changes through the engine to the audio thread(s) etc.
-            mEngine->SetTracer(mTraceLogger.get(), mTraceWriter.get());
+            mEngine->SetTracer(mTraceLogger.get(), mTraceBuffer.get());
             mEngine->SetTracingOn(true);
-            mThreadPool->SetThreadTraceWriter(mTraceWriter.get());
+            mThreadPool->SetThreadTraceWriter(mTraceBuffer.get());
             mThreadPool->EnableThreadTrace(true);
         }
         else if (!mTraceEnabledCounter && mTraceWriter)
         {
-            mTraceWriter.reset();
-            mTraceLogger.reset();
             base::SetThreadTrace(nullptr);
             base::EnableTracing(false);
             // even though we don't have a engine library separately we
@@ -857,6 +877,10 @@ public:
             mEngine->SetTracingOn(false);
             mThreadPool->SetThreadTraceWriter(nullptr);
             mThreadPool->EnableThreadTrace(false);
+
+            mTraceWriter.reset();
+            mTraceLogger.reset();
+            mTraceBuffer.reset();
         }
     }
 
@@ -1303,7 +1327,11 @@ private:
     std::unique_ptr<engine::FileResourceLoader>  mResourceLoader;
     std::unique_ptr<base::ThreadPool> mThreadPool;
     std::unique_ptr<base::TraceLog> mTraceLogger;
-    std::unique_ptr<base::TraceWriter> mTraceWriter;
+    // we give this trace buffer to the background threads for writing
+    // trace data into and then use the main thread to transfer
+    // the data out and into the real trace log.
+    std::unique_ptr<base::BufferTraceWriter> mTraceBuffer;
+    std::unique_ptr<base::ChromiumTraceJsonWriter> mTraceWriter;
     std::vector<bool> mEnableTracing;
     unsigned mTraceEnabledCounter = 0;
 
