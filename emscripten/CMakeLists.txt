@@ -380,6 +380,7 @@ add_executable(GameEngine
     )
 
 target_compile_definitions(GameEngine PRIVATE DETONATOR_GAME_ENGINE_WASM_BUILD)
+target_compile_definitions(GameEngine PRIVATE DETONATOR_ENGINE_BUILD)
 
 target_link_libraries(GameEngine cmake_git_version_tracking)
 
