@@ -1295,6 +1295,7 @@ add_test(NAME unit_test_audio_graph COMMAND unit_test_audio_graph)
 
 # base tests
 add_executable(unit_test_thread  base/unit_test/unit_test_thread.cpp
+        base/format.cpp
         base/assert.cpp
         base/logging.cpp
         base/trace.cpp
