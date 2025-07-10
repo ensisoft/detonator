@@ -107,14 +107,14 @@ namespace base
             mCallTrace.resize(capacity);
             mThreadId   = threadId;
         }
-        virtual void Start() override
+        void Start() override
         {
             mTraceIndex = 0;
             mStackDepth = 0;
             mDynamicStrings.clear();
             mTraceEvents.clear();
         }
-        virtual void Write(TraceWriter& writer) const override
+        void Write(TraceWriter& writer) const override
         {
             for (size_t i=0; i<mTraceIndex; ++i)
                 writer.Write(mCallTrace[i]);
@@ -122,10 +122,10 @@ namespace base
             for (const auto& event : mTraceEvents)
                 writer.Write(event);
         }
-        virtual unsigned BeginScope(const char* name) override;
-        virtual void EndScope(unsigned index) override;
+        unsigned BeginScope(const char* name) override;
+        void EndScope(unsigned index) override;
 
-        virtual void Marker(std::string str, unsigned index) override
+        void Marker(std::string str, unsigned index) override
         {
             ASSERT(index <= mTraceIndex);
             if (index == mCallTrace.size())
@@ -133,14 +133,14 @@ namespace base
             mCallTrace[index].markers.push_back(std::move(str));
         }
 
-        virtual void Comment(std::string str, unsigned index) override
+        void Comment(std::string str, unsigned index) override
         {
             ASSERT(index <= mTraceIndex);
             if (index == mCallTrace.size())
                 return;
             mCallTrace[index].comment = std::move(str);
         }
-        virtual void Event(std::string name) override
+        void Event(std::string name) override
         {
             struct TraceEvent event;
             event.name = std::move(name);
@@ -149,13 +149,13 @@ namespace base
             mTraceEvents.push_back(std::move(event));
         }
 
-        virtual unsigned GetCurrentTraceIndex() const override
+        unsigned GetCurrentTraceIndex() const override
         {
             ASSERT(mTraceIndex > 0 && mTraceIndex < mCallTrace.size());
             return mTraceIndex - 1;
         }
 
-        virtual const char* StoreString(std::string str) override
+        const char* StoreString(std::string str) override
         {
             mDynamicStrings.push_front(std::move(str));
             return mDynamicStrings.front().c_str();
@@ -189,17 +189,17 @@ namespace base
     class TextFileTraceWriter : public TraceWriter
     {
     public:
-        TextFileTraceWriter(const std::string& file);
-        TextFileTraceWriter(TextFileTraceWriter&& other)
+        explicit TextFileTraceWriter(const std::string& file);
+        TextFileTraceWriter(TextFileTraceWriter&& other) noexcept
           : mFile(other.mFile)
         {
             other.mFile = nullptr;
         }
-       ~TextFileTraceWriter() noexcept;
+       ~TextFileTraceWriter() override;
         TextFileTraceWriter() = delete;
-        virtual void Write(const TraceEntry& entry) override;
-        virtual void Write(const struct TraceEvent& event) override;
-        virtual void Flush() override;
+        void Write(const TraceEntry& entry) override;
+        void Write(const struct TraceEvent& event) override;
+        void Flush() override;
         TextFileTraceWriter& operator=(const TextFileTraceWriter&) = delete;
     private:
         FILE* mFile = nullptr;
@@ -208,22 +208,52 @@ namespace base
     class ChromiumTraceJsonWriter : public TraceWriter
     {
     public:
-        ChromiumTraceJsonWriter(const std::string& file);
-        ChromiumTraceJsonWriter(ChromiumTraceJsonWriter&& other)
+        explicit ChromiumTraceJsonWriter(const std::string& file);
+        ChromiumTraceJsonWriter(ChromiumTraceJsonWriter&& other) noexcept
           : mFile(other.mFile)
         {
             other.mFile = nullptr;
         }
         ChromiumTraceJsonWriter(const ChromiumTraceJsonWriter&) = delete;
-       ~ChromiumTraceJsonWriter() noexcept;
-        ChromiumTraceJsonWriter();
-        virtual void Write(const TraceEntry& entry) override;
-        virtual void Write(const struct TraceEvent& event) override;
-        virtual void Flush() override;
+       ~ChromiumTraceJsonWriter() override;
+        ChromiumTraceJsonWriter() = delete;
+
+        void Write(const TraceEntry& entry) override;
+        void Write(const struct TraceEvent& event) override;
+        void Flush() override;
         ChromiumTraceJsonWriter& operator=(const ChromiumTraceJsonWriter&) = delete;
     private:
         FILE* mFile = nullptr;
         bool mCommaNeeded = false;
+    };
+
+    class BufferTraceWriter : public TraceWriter
+    {
+    public:
+        void Write(const TraceEntry& entry) override
+        {
+            std::unique_lock<std::mutex> lock(mLock);
+            mTraces.push_back(entry);
+        }
+        void Write(const struct TraceEvent& event) override
+        {
+            std::unique_lock<std::mutex> lock(mLock);
+            mEvents.push_back(event);
+        }
+        void Flush() override
+        {}
+
+        void TransferData(std::vector<TraceEntry>* traces, std::vector<TraceEvent>* events)
+        {
+            std::unique_lock<std::mutex> lock(mLock);
+            std::swap(*traces, mTraces);
+            std::swap(*events, mEvents);
+        }
+
+    private:
+        std::mutex mLock;
+        std::vector<TraceEntry> mTraces;
+        std::vector<TraceEvent> mEvents;
     };
 
     template<typename WrappedWriter>
@@ -233,17 +263,17 @@ namespace base
         explicit LockedTraceWriter(WrappedWriter&& writer) noexcept
            : mWriter(std::move(writer))
         {}
-        virtual void Write(const TraceEntry& entry) override
+        void Write(const TraceEntry& entry) override
         {
             std::lock_guard<std::mutex> lock(mMutex);
             mWriter.Write(entry);
         }
-        virtual void Write(const struct TraceEvent& event) override
+        void Write(const struct TraceEvent& event) override
         {
             std::lock_guard<std::mutex> lock(mMutex);
             mWriter.Write(event);
         }
-        virtual void Flush() override
+        void Flush() override
         {
             std::lock_guard<std::mutex> lock(mMutex);
             mWriter.Flush();
