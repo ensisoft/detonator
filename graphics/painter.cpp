@@ -24,6 +24,7 @@
 
 #include "base/format.h"
 #include "base/logging.h"
+#include "base/trace.h"
 #include "graphics/drawcmd.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
@@ -101,7 +102,7 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program, const Col
 
         auto geometry = draw.geometry_gpu_ptr;
         if (geometry == nullptr)
-            geometry = GetGpuGeometry(*draw.drawable, drawable_env);
+            TRACE_CALL("GetGpuGeometry", geometry = GetGpuGeometry(*draw.drawable, drawable_env));
 
         if (!geometry)
             continue;
@@ -119,37 +120,43 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program, const Col
         material_env.draw_primitive = draw.drawable->GetDrawPrimitive();
         material_env.draw_category  = draw.drawable->GetDrawCategory();
         material_env.renderpass     = program.GetRenderPass();
-        ProgramPtr gpu_program = GetProgram(program, *draw.drawable, *draw.material, drawable_env, material_env);
+        ProgramPtr gpu_program;
+
+        TRACE_CALL("GetGpuProgram", gpu_program = GetProgram(program, *draw.drawable, *draw.material, drawable_env, material_env));
         if (gpu_program == nullptr)
             continue;
 
         ProgramState gpu_program_state;
-
-        Material::RasterState material_raster_state;
-        if (!draw.material->ApplyDynamicState(material_env, *mDevice, gpu_program_state, material_raster_state))
-            continue;
-
-        Drawable::RasterState drawable_raster_state;
-        drawable_raster_state.culling    = draw.state.culling;
-        drawable_raster_state.line_width = draw.state.line_width;
-        if (!draw.drawable->ApplyDynamicState(drawable_env, gpu_program_state, drawable_raster_state))
-            continue;
-
         Device::RasterState device_state;
-        device_state.blending      = material_raster_state.blending;
-        device_state.premulalpha   = material_raster_state.premultiplied_alpha;
-        device_state.line_width    = drawable_raster_state.line_width;
-        device_state.culling       = drawable_raster_state.culling;
-        device_state.winding_order = draw.state.winding;
 
-        // apply shader program state dynamically once on the GPU program object
-        // if the GPU program object changes.
-        if (!base::Contains(used_programs, gpu_program->GetId()))
-        {
-            program.ApplyDynamicState(*mDevice, gpu_program_state);
-        }
+        bool state_ok = true;
 
-        program.ApplyDynamicState(*mDevice, gpu_program_state, device_state, draw.user);
+        TRACE_BLOCK("ApplyState",
+            Material::RasterState material_raster_state;
+            state_ok &= draw.material->ApplyDynamicState(material_env, *mDevice, gpu_program_state, material_raster_state);
+
+            Drawable::RasterState drawable_raster_state;
+            drawable_raster_state.culling    = draw.state.culling;
+            drawable_raster_state.line_width = draw.state.line_width;
+            state_ok &= draw.drawable->ApplyDynamicState(drawable_env, gpu_program_state, drawable_raster_state);
+
+            device_state.blending      = material_raster_state.blending;
+            device_state.premulalpha   = material_raster_state.premultiplied_alpha;
+            device_state.line_width    = drawable_raster_state.line_width;
+            device_state.culling       = drawable_raster_state.culling;
+            device_state.winding_order = draw.state.winding;
+
+            // apply shader program state dynamically once on the GPU program object
+            // if the GPU program object changes.
+            if (!base::Contains(used_programs, gpu_program->GetId()))
+            {
+                program.ApplyDynamicState(*mDevice, gpu_program_state);
+            }
+
+            program.ApplyDynamicState(*mDevice, gpu_program_state, device_state, draw.user);
+        );
+        if (!state_ok)
+            continue;
 
         // The drawable provides the draw command which identifies the
         // sequence of more primitive draw commands set on the geometry
@@ -159,13 +166,13 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program, const Col
         // modify the depth testing state since this is per draw right now.
         mDevice->ModifyState(draw.state.depth_test, Device::StateName::DepthTest);
 
-        mDevice->Draw(*gpu_program,
+        TRACE_CALL("DeviceDraw", mDevice->Draw(*gpu_program,
                       gpu_program_state,
                       GeometryDrawCommand(*geometry,
-                                          cmd_params.draw_cmd_start,
-                                          cmd_params.draw_cmd_count,
-                                          instanced_draw),
-                      device_state, mFrameBuffer);
+                          cmd_params.draw_cmd_start,
+                          cmd_params.draw_cmd_count,
+                          instanced_draw),
+                      device_state, mFrameBuffer));
 
         // we supposedly rendered something, mark this as success.
         success = true;
