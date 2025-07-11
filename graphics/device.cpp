@@ -410,9 +410,13 @@ void GraphicsDevice::Draw(const gfx::Program& program,
                           const gfx::ProgramState& program_state,
                           const gfx::GeometryDrawCommand& geometry, const Device::RasterState& state, gfx::Framebuffer* fbo)
 {
-    dev::Framebuffer framebuffer = SetupFBO(fbo);
-    if (!framebuffer.IsValid())
-        return;
+
+    dev::Framebuffer framebuffer;
+    TRACE_BLOCK("SetupFBO",
+        framebuffer = SetupFBO(fbo);
+        if (!framebuffer.IsValid())
+            return;
+    );
 
     const auto* myprog = static_cast<const gfx::DeviceProgram*>(&program);
     const auto* mygeom = static_cast<const gfx::DeviceGeometry*>(geometry.GetGeometry());
@@ -437,61 +441,62 @@ void GraphicsDevice::Draw(const gfx::Program& program,
     // set program texture bindings
     const auto num_textures = program_state.GetSamplerCount();
 
-    TRACE_ENTER(BindTextures);
-    for (size_t i=0; i<num_textures; ++i)
-    {
-        const auto& sampler = program_state.GetSamplerSetting(i);
-
-        const auto* texture = static_cast<const gfx::DeviceTexture*>(sampler.texture);
-        // if the program sampler/texture setting is using a discontinuous set of
-        // texture units we might end up with "holes" in the program texture state
-        // and then the texture object is actually a nullptr.
-        if (texture == nullptr)
-            continue;
-
-        texture->SetFrameStamp(mFrameNumber);
-
-        auto texture_min_filter = texture->GetMinFilter();
-        auto texture_mag_filter = texture->GetMagFilter();
-        if (texture_min_filter == dev::TextureMinFilter::Default)
-            texture_min_filter = static_cast<dev::TextureMinFilter>(mDefaultMinTextureFilter);
-        if (texture_mag_filter == dev::TextureMagFilter::Default)
-            texture_mag_filter = static_cast<dev::TextureMagFilter>(mDefaultMagTextureFilter);
-
-        const auto texture_wrap_x = texture->GetWrapX();
-        const auto texture_wrap_y = texture->GetWrapY();
-        const auto texture_name = texture->GetName();
-        const auto texture_unit = i;
-
-        dev::GraphicsDevice::BindWarnings warnings;
-
-        mDevice->BindTexture2D(texture->GetTexture(), myprog->GetProgram(), sampler.name,
-                               texture_unit, texture_wrap_x, texture_wrap_y,
-                               texture_min_filter, texture_mag_filter, &warnings);
-
-        if (!texture->IsTransient() && texture->WarnOnce())
+    TRACE_BLOCK("BindTextures",
+        for (size_t i=0; i<num_textures; ++i)
         {
-            if (warnings.force_min_linear)
-                WARN("Forcing GL_LINEAR on texture without mip maps. [texture='%1']", texture_name);
-            if (warnings.force_clamp_x)
-                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
-            if (warnings.force_clamp_y)
-                WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
+            const auto& sampler = program_state.GetSamplerSetting(i);
+
+            const auto* texture = static_cast<const gfx::DeviceTexture*>(sampler.texture);
+            // if the program sampler/texture setting is using a discontinuous set of
+            // texture units we might end up with "holes" in the program texture state
+            // and then the texture object is actually a nullptr.
+            if (texture == nullptr)
+                continue;
+
+            texture->SetFrameStamp(mFrameNumber);
+
+            auto texture_min_filter = texture->GetMinFilter();
+            auto texture_mag_filter = texture->GetMagFilter();
+            if (texture_min_filter == dev::TextureMinFilter::Default)
+                texture_min_filter = static_cast<dev::TextureMinFilter>(mDefaultMinTextureFilter);
+            if (texture_mag_filter == dev::TextureMagFilter::Default)
+                texture_mag_filter = static_cast<dev::TextureMagFilter>(mDefaultMagTextureFilter);
+
+            const auto texture_wrap_x = texture->GetWrapX();
+            const auto texture_wrap_y = texture->GetWrapY();
+            const auto texture_name = texture->GetName();
+            const auto texture_unit = i;
+
+            dev::GraphicsDevice::BindWarnings warnings;
+
+            mDevice->BindTexture2D(texture->GetTexture(), myprog->GetProgram(), sampler.name,
+                                   texture_unit, texture_wrap_x, texture_wrap_y,
+                                   texture_min_filter, texture_mag_filter, &warnings);
+
+            if (!texture->IsTransient() && texture->WarnOnce())
+            {
+                if (warnings.force_min_linear)
+                    WARN("Forcing GL_LINEAR on texture without mip maps. [texture='%1']", texture_name);
+                if (warnings.force_clamp_x)
+                    WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
+                if (warnings.force_clamp_y)
+                    WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
+            }
         }
-    }
-    TRACE_LEAVE(BindTextures);
+    );
 
     // start drawing geometry.
 
     constexpr auto DrawMax = std::numeric_limits<uint32_t>::max();
 
+    TRACE_BLOCK("BindBuffers",
+        mDevice->BindFramebuffer(framebuffer);
+        mDevice->BindVertexBuffer(mygeom->GetVertexBuffer(),
+                                  myprog->GetProgram(),
+                                  mygeom->GetVertexLayout());
+    );
+
     TRACE_ENTER(DrawCommands);
-
-    mDevice->BindFramebuffer(framebuffer);
-    mDevice->BindVertexBuffer(mygeom->GetVertexBuffer(),
-                              myprog->GetProgram(),
-                              mygeom->GetVertexLayout());
-
     if (mygeom->UsesIndexBuffer())
     {
         mDevice->BindIndexBuffer(mygeom->GetIndexBuffer());
