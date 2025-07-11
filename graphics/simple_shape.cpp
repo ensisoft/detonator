@@ -1274,12 +1274,13 @@ bool SimpleShapeClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-void SimpleShapeInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
+bool SimpleShapeInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
+    return true;
 }
 ShaderSource SimpleShapeInstance::GetShader(const Environment& env, const Device& device) const
 {
@@ -1360,12 +1361,13 @@ Drawable::Usage SimpleShapeInstance::GetGeometryUsage() const
     return Usage::Static;
 }
 
-void SimpleShape::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
+bool SimpleShape::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
+    return true;
 }
 ShaderSource SimpleShape::GetShader(const Environment& env, const Device& device) const
 {

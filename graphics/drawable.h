@@ -184,7 +184,7 @@ namespace gfx
 
         virtual ~Drawable() = default;
         // Apply the drawable's state (if any) on the program and set the rasterizer state.
-        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const = 0;
+        virtual bool ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const = 0;
         // Get the device specific shader source applicable for this drawable, its state
         // and the given environment in which it should execute.
         // Should return an empty string on any error.

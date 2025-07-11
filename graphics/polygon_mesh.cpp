@@ -535,7 +535,7 @@ PolygonMeshInstance::PolygonMeshInstance(const PolygonMeshClass& klass, std::str
     , mRandom(math::rand<0x12e4584>(0.0f, 1.0f))
 {}
 
-void PolygonMeshInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
+bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
@@ -551,6 +551,7 @@ void PolygonMeshInstance::ApplyDynamicState(const Environment& env, ProgramState
         program.SetUniform("kWorldPosition",geometry.position);
         program.SetUniform("kWorldSize", geometry.size);
     }
+    return true;
 }
 
 ShaderSource PolygonMeshInstance::GetShader(const Environment& env, const Device& device) const
