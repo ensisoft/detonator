@@ -23,10 +23,11 @@
 namespace gfx
 {
 
-void LineBatch2D::ApplyDynamicState(const Environment &environment, ProgramState &program, RasterState &state) const
+bool LineBatch2D::ApplyDynamicState(const Environment &environment, ProgramState &program, RasterState &state) const
 {
     program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
+    return true;
 }
 
 ShaderSource LineBatch2D::GetShader(const Environment& environment, const Device& device) const
@@ -72,10 +73,11 @@ bool LineBatch2D::Construct(const Environment& environment, Geometry::CreateArgs
     return true;
 }
 
-void LineBatch3D::ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const
+bool LineBatch3D::ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const
 {
     program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
+    return true;
 }
 
 ShaderSource LineBatch3D::GetShader(const Environment& environment, const Device& device) const

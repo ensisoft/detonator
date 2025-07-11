@@ -309,7 +309,7 @@ namespace gfx
           : mClass(std::make_shared<Class>(std::move(klass)))
           , mStyle(style)
         {}
-        void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
@@ -351,7 +351,7 @@ namespace gfx
           , mArgs(args)
           , mStyle(style)
         {}
-        void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;

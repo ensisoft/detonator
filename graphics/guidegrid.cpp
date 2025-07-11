@@ -24,12 +24,13 @@
 namespace gfx
 {
 
-void Grid::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
+bool Grid::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
+    return true;
 }
 
 std::string Grid::GetShaderId(const Environment&) const

@@ -132,7 +132,8 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program, const Col
         Drawable::RasterState drawable_raster_state;
         drawable_raster_state.culling    = draw.state.culling;
         drawable_raster_state.line_width = draw.state.line_width;
-        draw.drawable->ApplyDynamicState(drawable_env, gpu_program_state, drawable_raster_state);
+        if (!draw.drawable->ApplyDynamicState(drawable_env, gpu_program_state, drawable_raster_state))
+            continue;
 
         Device::RasterState device_state;
         device_state.blending      = material_raster_state.blending;

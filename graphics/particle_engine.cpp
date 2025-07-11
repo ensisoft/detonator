@@ -305,7 +305,7 @@ bool ParticleEngineClass::Construct(const Environment& env, const InstanceState&
     return true;
 }
 
-void ParticleEngineClass::ApplyDynamicState(const Environment& env, ProgramState& program) const
+bool ParticleEngineClass::ApplyDynamicState(const Environment& env, ProgramState& program) const
 {
     if (mParams->coordinate_space == CoordinateSpace::Global)
     {
@@ -324,6 +324,7 @@ void ParticleEngineClass::ApplyDynamicState(const Environment& env, ProgramState
         program.SetUniform("kProjectionMatrix", kProjectionMatrix);
         program.SetUniform("kModelViewMatrix", kModelViewMatrix);
     }
+    return true;
 }
 
 // Update the particle simulation.
@@ -1148,13 +1149,12 @@ bool ParticleEngineClass::UpdateParticle(const Environment& env, const Params& p
     return true;
 }
 
-void ParticleEngineInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
+bool ParticleEngineInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     // state.line_width = 1.0; // don't change the line width
     state.culling    = Culling::None;
-    mClass->ApplyDynamicState(env, program);
+    return mClass->ApplyDynamicState(env, program);
 }
-
 
 ShaderSource ParticleEngineInstance::GetShader(const Environment& env, const Device& device) const
 {

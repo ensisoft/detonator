@@ -23,7 +23,7 @@
 namespace gfx
 {
 
-void TileBatch::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& raster) const
+bool TileBatch::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& raster) const
 {
     const auto pixel_scale = std::min(env.pixel_ratio.x, env.pixel_ratio.y);
 
@@ -65,6 +65,7 @@ void TileBatch::ApplyDynamicState(const Environment& env, ProgramState& program,
     program.SetUniform("kTileViewTransform", *env.view_matrix);
     program.SetUniform("kProjectionMatrix", *env.proj_matrix);
     program.SetUniform("kTileCoordinateSpaceTransform", *env.model_matrix);
+    return true;
 }
 
 ShaderSource TileBatch::GetShader(const Environment& env, const Device& device) const
