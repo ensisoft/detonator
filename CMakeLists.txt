@@ -964,7 +964,7 @@ if (UNIX)
 endif()
 
 # test engine
-add_library(TestEngine SHARED engine/test/main.cpp engine/library/library.cpp)
+add_library(TestEngine SHARED engine/test/engine.cpp engine/library/library.cpp)
 target_include_directories(TestEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
 target_link_libraries(TestEngine PRIVATE GameLib EngineLib GfxLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(TestEngine PRIVATE ${CONAN_LIBS})
