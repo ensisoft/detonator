@@ -58,3 +58,9 @@
 #define BASE_TYPES_SUPPORT_GLM
 
 #define GFX_ENABLE_DEVICE_TRACING
+
+// need these for the correct operation of SOL
+// regarding different C++ numeric types and their
+// overloading and type resolution.
+#define SOL_ALL_SAFETIES_ON 1
+#define SOL_SAFE_NUMERICS 1
