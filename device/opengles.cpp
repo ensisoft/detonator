@@ -161,22 +161,31 @@ typedef void (GL_APIENTRY *GLDEBUGPROC)(GLenum source, GLenum type, GLuint id,GL
 typedef void (GL_APIENTRY *PFNGLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC proc, const void* user);
 
 #if !defined(GRAPHICS_CHECK_OPENGL)
-#  pragma message "OpenGL calls are NOT checked!"
-#  define GL_CALL(x) mGL.x
-#else
-#define GL_CALL(x)                                      \
-do {                                                    \
-    mGL.x;                                              \
-    const auto err = mGL.glGetError();                  \
-    if (err != GL_NO_ERROR) {                           \
-        std::printf("GL Error %s @ %s,%d\n",            \
-            GLEnumToStr(err), __FILE__, __LINE__);      \
-        std::fflush(stdout);                            \
-        std::abort();                                   \
-    }                                                   \
-} while(0)
+  #ifdef __MSVC__
+    #pragma message("OpenGL calls are NOT checked!")
+  #else
+    #pragma message "OpenGL calls are NOT checked!"
+  #endif
 
-#pragma message "OpenGL calls are checked!"
+  #define GL_CALL(x) mGL.x
+#else
+  #define GL_CALL(x)                                      \
+  do {                                                    \
+      mGL.x;                                              \
+      const auto err = mGL.glGetError();                  \
+      if (err != GL_NO_ERROR) {                           \
+          std::printf("GL Error %s @ %s,%d\n",            \
+              GLEnumToStr(err), __FILE__, __LINE__);      \
+          std::fflush(stdout);                            \
+          std::abort();                                   \
+      }                                                   \
+  } while(0)
+
+  #ifdef __MSVC__
+    #pragma message("OpenGL calls are checked!")
+  #else
+    #pragma message "OpenGL calls are checked!"
+  #endif
 #endif
 
 namespace

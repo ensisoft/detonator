@@ -58,9 +58,13 @@
 // SOL_ALL_SAFETIES_ON will take care of that
 
 #ifndef SOL_SAFE_NUMERICS
-#  error we need SOL safety flags for correct function
+  #error we need SOL safety flags for correct function
 #else
-#  pragma message "SOL SAFETIES ARE ON  !"
+  #ifdef __MSVC__
+    #pragma message("SOL SAFETIES ARE ON!")
+  #else
+    #pragma message "SOL SAFETIES ARE ON !"
+  #endif
 #endif
 
 using namespace engine::lua;
