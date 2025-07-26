@@ -270,40 +270,53 @@ add_library(GfxLib
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp)
-add_library(EngineLib
+add_library(GameLib
     game/animation.cpp
     game/animator.cpp
-    game/transform_animator.cpp
-    game/kinematic_animator.cpp
-    game/property_animator.cpp
-    game/material_animator.cpp
     game/entity.cpp
     game/entity_node.cpp
+    game/entity_node_drawable_item.cpp
+    game/entity_node_fixture.cpp
+    game/entity_node_light.cpp
+    game/entity_node_rigid_body.cpp
+    game/entity_node_rigid_body_joint.cpp
+    game/entity_node_spatial_node.cpp
+    game/entity_node_text_item.cpp
+    game/entity_node_tilemap_node.cpp
+    game/entity_node_transformer.cpp
     game/entity_placement.cpp
     game/entity_state.cpp
     game/entity_state_controller.cpp
-    game/entity_node_transformer.cpp
-    game/entity_node_rigid_body.cpp
-    game/entity_node_rigid_body_joint.cpp
-    game/entity_node_drawable_item.cpp
-    game/entity_node_text_item.cpp
-    game/entity_node_spatial_node.cpp
-    game/entity_node_fixture.cpp
-    game/entity_node_tilemap_node.cpp
-    game/entity_node_light.cpp
-    game/scriptvar.cpp
-    game/scene_class.cpp
+    game/kinematic_animator.cpp
+    game/material_animator.cpp
+    game/property_animator.cpp
     game/scene.cpp
+    game/scene_class.cpp
+    game/scriptvar.cpp
     game/tilemap.cpp
-    game/tilemap_layer_class.cpp
     game/tilemap_layer.cpp
+    game/tilemap_layer_class.cpp
+    game/transform_animator.cpp)
+add_library(EngineLib
     engine/audio.cpp
     engine/camera.cpp
-    engine/renderer.cpp
-    engine/physics.cpp
+    engine/engine-logo.cpp
+    engine/engine.cpp
     engine/graphics.cpp
-    engine/ui.cpp
-    engine/state.cpp)
+    engine/loader.cpp
+    engine/lua_base.cpp
+    engine/lua_data.cpp
+    engine/lua_game.cpp
+    engine/lua_game_runtime.cpp
+    engine/lua_gfx.cpp
+    engine/lua_glm.cpp
+    engine/lua_uik.cpp
+    engine/lua_util.cpp
+    engine/lua_wdk.cpp
+    engine/physics.cpp
+    engine/renderer.cpp
+    engine/state.cpp
+    engine/ui.cpp)
 add_library(UiLib
     uikit/animation.cpp
     uikit/layout.cpp
@@ -366,12 +379,14 @@ endif()
 target_include_directories(AudioLib  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(BaseLib   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(DataLib   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
+target_include_directories(GameLib   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(GfxLib    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(EngineLib PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(UiLib     PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 if (UNIX)
     target_compile_options(AudioLib  PRIVATE -fPIC)
     target_compile_options(DataLib   PRIVATE -fPIC)
+    target_compile_options(GameLib   PRIVATE -fPIC)
     target_compile_options(BaseLib   PRIVATE -fPIC)
     target_compile_options(GfxLib    PRIVATE -fPIC)
     target_compile_options(EngineLib PRIVATE -fPIC)
@@ -383,7 +398,7 @@ if (UNIX)
     target_link_libraries(AudioLib INTERFACE sndfile)
 endif()
 if (MSVC)
-   target_compile_options(EngineLib  INTERFACE /bigobj)
+   target_compile_options(EngineLib  PRIVATE /bigobj)
 
    target_link_libraries(AudioLib INTERFACE samplerate)
    target_link_libraries(AudioLib INTERFACE sndfile)
@@ -394,6 +409,7 @@ target_link_libraries(EngineLib INTERFACE box2d)
 target_link_libraries(AudioLib      PUBLIC ${CONAN_LIBS})
 target_link_libraries(DataLib       PUBLIC ${CONAN_LIBS})
 target_link_libraries(BaseLib       PUBLIC ${CONAN_LIBS})
+target_link_libraries(GameLib       PUBLIC ${CONAN_LIBS})
 target_link_libraries(GfxLib        PUBLIC ${CONAN_LIBS})
 target_link_libraries(GfxLibTesting PUBLIC ${CONAN_LIBS})
 target_link_libraries(EngineLib     PUBLIC ${CONAN_LIBS})
@@ -784,7 +800,7 @@ target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_pa
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
 target_link_libraries(Detonator Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network Qt5::Svg Qt5::Xml)
-target_link_libraries(Detonator EngineLib UiLib GfxLib DataLib BaseLib)
+target_link_libraries(Detonator EngineLib GameLib UiLib GfxLib DataLib BaseLib)
 target_link_libraries(Detonator Lua)
 target_link_libraries(Detonator QtColorWidgets)
 target_link_libraries(Detonator QuaZip)
@@ -851,7 +867,7 @@ target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/thi
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/EditorGameHost_autogen/include")
 target_link_libraries(EditorGameHost Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(EditorGameHost EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
+target_link_libraries(EditorGameHost GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
 target_link_libraries(EditorGameHost QuaZip)
 target_link_libraries(EditorGameHost ${CONAN_LIBS})
 target_link_libraries(EditorGameHost cmake_git_version_tracking)
@@ -935,23 +951,9 @@ endif()
 install(TARGETS GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # generic game engine library.
-add_library(GameEngine SHARED
-    engine/loader.cpp
-    engine/engine.cpp
-    engine/engine-logo.cpp
-    engine/lua_game_runtime.cpp
-    engine/lua_util.cpp
-    engine/lua_base.cpp
-    engine/lua_data.cpp
-    engine/lua_glm.cpp
-    engine/lua_wdk.cpp
-    engine/lua_uik.cpp
-    engine/lua_gfx.cpp
-    engine/lua_game.cpp
-    engine/library/library.cpp
-)
+add_library(GameEngine SHARED engine/engine.cpp engine/library/library.cpp)
 target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
-target_link_libraries(GameEngine PRIVATE EngineLib GfxLib AudioLib UiLib DataLib BaseLib)
+target_link_libraries(GameEngine PRIVATE GameLib EngineLib GfxLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(GameEngine PRIVATE ${CONAN_LIBS})
 target_link_libraries(GameEngine PRIVATE wdk_system)
 target_link_libraries(GameEngine PRIVATE Lua)
@@ -962,13 +964,9 @@ if (UNIX)
 endif()
 
 # test engine
-add_library(TestEngine SHARED
-    engine/loader.cpp
-    engine/test/main.cpp
-    engine/library/library.cpp
-)
+add_library(TestEngine SHARED engine/test/main.cpp engine/library/library.cpp)
 target_include_directories(TestEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
-target_link_libraries(TestEngine PRIVATE EngineLib GfxLib AudioLib UiLib DataLib BaseLib)
+target_link_libraries(TestEngine PRIVATE GameLib EngineLib GfxLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(TestEngine PRIVATE ${CONAN_LIBS})
 install(TARGETS TestEngine GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/engine/test/dist")
 
@@ -980,7 +978,7 @@ endif()
 # engine perf test app
 add_executable(perf-test engine/test/perftest.cpp)
 target_include_directories(perf-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
-target_link_libraries(perf-test PRIVATE EngineLib GfxLibTesting AudioLib UiLib DataLib BaseLib)
+target_link_libraries(perf-test PRIVATE EngineLib GameLib GfxLibTesting AudioLib UiLib DataLib BaseLib)
 target_link_libraries(perf-test PRIVATE ${CONAN_LIBS})
 target_link_libraries(perf-test PRIVATE wdk_system wdk_desktop_gl)
 target_link_libraries(perf-test PRIVATE Lua)
@@ -996,7 +994,7 @@ target_include_directories(glm-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_par
 
 # 3D/2D isometric projection test app.
 add_executable(3d tools/test/3d/main.cpp)
-target_link_libraries(3d PRIVATE  wdk_system wdk_desktop_gl EngineLib GfxLib UiLib DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(3d PRIVATE  wdk_system wdk_desktop_gl GameLib EngineLib GfxLib UiLib DataLib BaseLib ${CONAN_LIBS})
 target_include_directories(3d PRIVATE "${CMAKE_CURRENT_LIST_DIR}/tools/test/3d")
 target_include_directories(3d PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
 install(TARGETS 3d DESTINATION "${CMAKE_CURRENT_LIST_DIR}/tools/test/3d/dist")
@@ -1112,18 +1110,18 @@ target_link_libraries(unit_test_lua_tool Qt5::Widgets Qt5::Core tree-sitter)
 
 # FIX RANDOM RUNTIME GLIB VOMIT STATIC ASSERTION FAILURE BY RANDOMLY CHANGING THE
 # ORDER OF THE LIBRARIES HERE!
-target_link_libraries(unit_test_gui EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_gui GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_gui QtColorWidgets Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 
 # FIX RANDOM RUNTIME GLIB VOMIT STATIC ASSERTION FAILURE BY RANDOMLY CHANGING THE
 # ORDER OF THE LIBRARIES HERE!
-target_link_libraries(unit_test_ipc EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_ipc GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(unit_test_ipc QuaZip)
 
 target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets UiLib DataLib BaseLib)
 
-target_link_libraries(unit_test_workspace EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
+target_link_libraries(unit_test_workspace GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
 target_link_libraries(unit_test_workspace QuaZip)
 target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})
 target_link_libraries(unit_test_event_log Qt5::Core DataLib BaseLib)
