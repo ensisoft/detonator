@@ -732,7 +732,8 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         const auto num_cell_lines = static_cast<unsigned>(grid) - 1;
 
         gfx::Transform view;
-        view.Resize(width, height);
+        view.Resize(width-2.0f, height-2.0f);
+        view.Translate(1.0f, 1.0f);
         painter.Draw(gfx::Grid(num_cell_lines, num_cell_lines), view,
                      gfx::CreateMaterialFromColor(gfx::Color::LightGray));
     }
