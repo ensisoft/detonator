@@ -109,14 +109,12 @@ std::string MaterialClass::GetShaderName(const State& state) const noexcept
     return base::FormatString("%1 Shader", mType);
 }
 
-std::string MaterialClass::GetShaderId(const State& state) const noexcept
+size_t MaterialClass::GetShaderHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mType);
     hash = base::hash_combine(hash, mShaderSrc);
     hash = base::hash_combine(hash, mShaderUri);
-    hash = base::hash_combine(hash, state.draw_primitive);
-    hash = base::hash_combine(hash, state.draw_category);
 
     if (mType == Type::Color)
     {
@@ -198,6 +196,22 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
 
     } else BUG("Unknown material type.");
 
+    return hash;
+}
+
+std::string MaterialClass::GetShaderId(const State& state) const noexcept
+{
+    size_t hash = 0;
+    if (mCache.has_value())
+    {
+        hash = mCache.value().shader_hash;
+    }
+    else
+    {
+        hash = GetShaderHash();
+    }
+    hash = base::hash_combine(hash, state.draw_primitive);
+    hash = base::hash_combine(hash, state.draw_category);
     return base::FormatString("%1+%2", mType, hash);
 }
 
@@ -603,7 +617,7 @@ bool MaterialClass::ReadLegacyValue(const char* name, const char* uniform, const
     return true;
 }
 
-bool MaterialClass::FromJson(const data::Reader& data)
+bool MaterialClass::FromJson(const data::Reader& data, unsigned flags)
 {
     bool ok = true;
     ok &= data.Read("type",               &mType);
@@ -765,6 +779,14 @@ bool MaterialClass::FromJson(const data::Reader& data)
     {
         if (!mTextureMaps.empty())
             mActiveTextureMap = mTextureMaps[0]->GetId();
+    }
+
+    const auto enable_cache = flags & LoadingFlags::EnableCaching;
+    if (enable_cache)
+    {
+        ValueCache values;
+        values.shader_hash = GetShaderHash();
+        mCache = values;
     }
 
     return ok;
@@ -1116,7 +1138,7 @@ std::string MaterialClass::GetColorUniformName(ColorIndex index)
 }
 
 // static
-std::unique_ptr<MaterialClass> MaterialClass::ClassFromJson(const data::Reader& data)
+std::unique_ptr<MaterialClass> MaterialClass::ClassFromJson(const data::Reader& data, unsigned flags)
 {
     Type type;
     if (!data.Read("type", &type))

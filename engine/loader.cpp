@@ -901,6 +901,8 @@ bool LoadMaterials(const data::Reader& data, const char* type,
                  std::unordered_map<std::string, std::shared_ptr<gfx::MaterialClass>>& out,
                  std::unordered_map<std::string, std::string>* namemap)
 {
+    const unsigned loading_flags = gfx::MaterialClass::LoadingFlags::EnableCaching;
+
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
         const auto& chunk = data.GetReadChunk(type, i);
@@ -908,7 +910,8 @@ bool LoadMaterials(const data::Reader& data, const char* type,
         std::string name;
         chunk->Read("resource_id", &id);
         chunk->Read("resource_name", &name);
-        auto ret = gfx::MaterialClass::ClassFromJson(*chunk);
+
+        auto ret = gfx::MaterialClass::ClassFromJson(*chunk, loading_flags);
         if (!ret)
         {
             ERROR("Failed to load game class. [type='%1', name='%2'].", type, name);

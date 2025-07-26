@@ -28,6 +28,7 @@
 #include <variant>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 
 #include "base/utility.h"
 #include "graphics/color4f.h"
@@ -203,7 +204,7 @@ namespace gfx
         { mType = type; }
 
         inline void SetActiveTextureMap(std::string id) noexcept
-        { mActiveTextureMap = id; }
+        { mActiveTextureMap = std::move(id); }
         // Set the human-readable material class name.
         inline void SetName(std::string name) noexcept
         { mName = std::move(name); }
@@ -490,7 +491,7 @@ namespace gfx
         // Serialize the class into JSON.
         void IntoJson(data::Writer& data) const;
         // Load the class from JSON. Returns true on success.
-        bool FromJson(const data::Reader& data);
+        bool FromJson(const data::Reader& data, unsigned flags = 0);
         // Create an exact bitwise copy of this material class.
         std::unique_ptr<MaterialClass> Copy() const;
         // Create a similar clone of this material class but with unique id.
@@ -531,8 +532,12 @@ namespace gfx
         void SetTextureSource(size_t map, size_t texture, std::unique_ptr<TextureSource> source) noexcept;
         void SetTextureSource(std::unique_ptr<TextureSource> source) noexcept;
 
+        enum LoadingFlags {
+            EnableCaching = 0x1
+        };
+
         static std::string GetColorUniformName(ColorIndex index);
-        static std::unique_ptr<MaterialClass> ClassFromJson(const data::Reader& data);
+        static std::unique_ptr<MaterialClass> ClassFromJson(const data::Reader& data, unsigned flags = 0u);
 
         MaterialClass& operator=(const MaterialClass& other);
     private:
@@ -547,6 +552,7 @@ namespace gfx
     private:
         TextureMap* SelectTextureMap(const State& state) const noexcept;
         ShaderSource GetShaderSource(const State& state, const Device& device) const;
+        size_t GetShaderHash() const;
 
         bool ApplySpriteDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
         bool ApplyCustomDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
@@ -570,6 +576,11 @@ namespace gfx
         base::bitflag<Flags> mFlags;
         std::unordered_map<std::string, Uniform> mUniforms;
         std::vector<std::unique_ptr<TextureMap>> mTextureMaps;
+    private:
+        struct ValueCache {
+            size_t shader_hash = 0;
+        };
+        std::optional<ValueCache> mCache;
     };
 
     using ColorClass = MaterialClass;
