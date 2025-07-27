@@ -37,6 +37,11 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../third_party "whatever")
 add_link_options(-sMALLOC=mimalloc)
 add_link_options(-sSTACK_SIZE=5MB)
 
+# enable colored diagnostics
+add_compile_options(-fcolor-diagnostics)
+add_compile_options(-fansi-escape-codes)
+add_compile_options(-fdiagnostics-color=always)
+
 add_executable(UnitTest
     ../base/test_minimal.cpp
     ../base/unit_test/unit_test_math.cpp
