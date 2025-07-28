@@ -26,6 +26,21 @@ find_package(MPG123 REQUIRED)
 find_package(Boost REQUIRED)
 find_package(assimp REQUIRED)
 
+# set variables that are useful when building game specific
+# engine libraries. See blast demo for an example of how to
+# build a native, game specific, game engine.
+set(ENGINE_SRC "${CMAKE_CURRENT_LIST_DIR}/engine")
+set(ENGINE_LIBS GameLib EngineLib GfxLib AudioLib UiLib DataLib BaseLib Lua ${CONAN_LIBS} wdk_system)
+set(ENGINE_INC
+    "${CMAKE_CURRENT_LIST_DIR}"
+    "${CMAKE_CURRENT_LIST_DIR}/wdk"
+    "${CMAKE_CURRENT_LIST_DIR}/third_party"
+    "${CMAKE_CURRENT_LIST_DIR}/third_party/glm"
+    "${CMAKE_CURRENT_LIST_DIR}/third_party/box2d/include")
+set(ENGINE_DEF)
+set(ENGINE_COMPILE_OPTIONS)
+set(ENGINE_LINK_OPTIONS)
+
 # conan2 doesn't provide CONAN_LIBS anymore, so we'll setup our own array var
 # for the same purpose
 set(CONAN_LIBS)
@@ -60,6 +75,11 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party)
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/libsndfile)
 # current version 2.4.1
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party/box2d)
+
+# build game specific native engines. see blast demo for an example
+# In a nutshell: the game specific engine needs a custom CMakeLists.txt
+# which is invoked by this CMakeLists.
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/editor/dist/demos/blast/cpp)
 
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/wdk")
 include_directories(BEFORE "${CMAKE_CURRENT_LIST_DIR}/third_party")
