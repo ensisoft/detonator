@@ -18,7 +18,7 @@
 
 #include "config/config.h"
 
-#define SOL_ALL_SAFETIES_ON 1
-#define SOL_SAFE_NUMERICS 1
+// add here defines that pertain to the  ameMain executable
+// or to the default GameEngine library
 
 
