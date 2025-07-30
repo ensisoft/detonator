@@ -44,9 +44,8 @@ extern "C" const char* git_Branch();
 extern "C" bool git_AnyUncommittedChanges();
 
 namespace {
-    bool VerifyWasmBuildVersion(QString* sha)
+    bool VerifyWasmBuildVersion(const QString& wasm_version_file, QString* sha)
     {
-        const auto& wasm_version_file = app::GetAppInstFilePath("html5/GameEngine.version.txt");
         const auto& wasm_version_data = app::ReadTextFile(wasm_version_file);
         if (wasm_version_data.isEmpty())
             return false;
@@ -134,10 +133,12 @@ DlgPackage::DlgPackage(QWidget* parent, gui::AppSettings& settings, app::Workspa
     SetValue(mUI.btnHtml5, copy_html5);
     SetVisible(mUI.warning, false);
 
+    const auto& project_settings = mWorkspace.GetProjectSettings();
+    const auto wasm_version_file = mWorkspace.MapFileToFilesystem(project_settings.GetWasmEngineVersionFile());
 
     QString warning;
     QString wasm_sha;
-    if (!VerifyWasmBuildVersion(&wasm_sha))
+    if (!VerifyWasmBuildVersion(wasm_version_file, &wasm_sha))
     {
         warning += "Failed to verify HTML5/WASM build version. Rebuild with Emscripten.\n";
     }

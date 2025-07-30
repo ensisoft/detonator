@@ -749,6 +749,59 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
+        <widget class="QGroupBox" name="groupBox_21">
+         <property name="title">
+          <string>Engine</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_23">
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
+          <property name="rightMargin">
+           <number>10</number>
+          </property>
+          <property name="bottomMargin">
+           <number>10</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_43">
+            <property name="text">
+             <string>Engine library</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_16">
+            <item>
+             <widget class="QLineEdit" name="wasmEngine">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnSelectWasmEngine">
+              <property name="text">
+               <string>Browse ...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="groupBox_8">
          <property name="title">
           <string>WebGL canvas</string>
@@ -981,8 +1034,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>810</width>
-            <height>824</height>
+            <width>791</width>
+            <height>685</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -1343,21 +1396,18 @@
               <item row="2" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_4">
                 <item>
-                 <widget class="color_widgets::ColorSelector" name="clearColor">
+                 <widget class="color_widgets::ColorSelector" name="clearColor" native="true">
                   <property name="focusPolicy">
                    <enum>Qt::StrongFocus</enum>
                   </property>
-                  <property name="color">
+                  <property name="color" stdset="0">
                    <color>
                     <red>255</red>
                     <green>255</green>
                     <blue>255</blue>
                    </color>
                   </property>
-                  <property name="display_mode" stdset="0">
-                   <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                  </property>
-                  <property name="background">
+                  <property name="background" stdset="0">
                    <brush brushstyle="Dense3Pattern">
                     <color alpha="255">
                      <red>128</red>
@@ -2128,6 +2178,8 @@
   <tabstop>chkCursor</tabstop>
   <tabstop>chkGrabMouse</tabstop>
   <tabstop>chkSaveGeom</tabstop>
+  <tabstop>wasmEngine</tabstop>
+  <tabstop>btnSelectWasmEngine</tabstop>
   <tabstop>cmbCanvasPresentationMode</tabstop>
   <tabstop>cmbCanvasFSStrategy</tabstop>
   <tabstop>canvasWidth</tabstop>

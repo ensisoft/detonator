@@ -28,6 +28,7 @@ void IntoJson(QJsonObject& project, const ProjectSettings& settings)
     JsonWrite(project, "application_version"     ,  settings.game_version);
     JsonWrite(project, "application_library_win" ,  settings.game_engine_library_win);
     JsonWrite(project, "application_library_lin" ,  settings.game_engine_library_lin);
+    JsonWrite(project, "application_library_wasm",  settings.game_engine_library_wasm);
     JsonWrite(project, "loading_screen_font"     ,  settings.loading_font);
     JsonWrite(project, "debug_font"              ,  settings.debug_font);
     JsonWrite(project, "debug_show_fps"          ,  settings.debug_show_fps);
@@ -101,6 +102,7 @@ void FromJson(const QJsonObject& project, ProjectSettings& settings)
     JsonReadSafe(project, "application_version"       , &settings.game_version);
     JsonReadSafe(project, "application_library_win"   , &settings.game_engine_library_win);
     JsonReadSafe(project, "application_library_lin"   , &settings.game_engine_library_lin);
+    JsonReadSafe(project, "application_library_wasm"  , &settings.game_engine_library_wasm);
     JsonReadSafe(project, "loading_screen_font"       , &settings.loading_font);
     JsonReadSafe(project, "debug_font"                , &settings.debug_font);
     JsonReadSafe(project, "debug_show_fps"            , &settings.debug_show_fps);

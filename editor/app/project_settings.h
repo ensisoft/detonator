@@ -55,6 +55,7 @@ namespace app
         // entry point and game::App implementation.
         QString game_engine_library_lin = "app://libGameEngine.so";
         QString game_engine_library_win = "app://GameEngine.dll";
+        QString game_engine_library_wasm = "app://html5/GameEngine.wasm";
         QString GetApplicationLibrary() const
         {
         #if defined(POSIX_OS)
@@ -71,6 +72,14 @@ namespace app
             game_engine_library_win = library;
         #endif
         }
+
+        QString GetWasmEngineVersionFile() const
+        {
+            QString ret = game_engine_library_wasm;
+            ret.replace(".wasm", ".version.txt");
+            return ret;
+        }
+
         // Loading screen font
         QString loading_font = "app://fonts/ethnocentric rg.otf";
 
