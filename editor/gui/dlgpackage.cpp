@@ -46,7 +46,7 @@ extern "C" bool git_AnyUncommittedChanges();
 namespace {
     bool VerifyWasmBuildVersion(QString* sha)
     {
-        const auto& wasm_version_file = app::GetAppInstFilePath("html5/GameEngineVersion.txt");
+        const auto& wasm_version_file = app::GetAppInstFilePath("html5/GameEngine.version.txt");
         const auto& wasm_version_data = app::ReadTextFile(wasm_version_file);
         if (wasm_version_data.isEmpty())
             return false;

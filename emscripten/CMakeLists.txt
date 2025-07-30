@@ -443,14 +443,11 @@ target_link_options(GameEngine PRIVATE -sPTHREAD_POOL_SIZE=4)
 # emscripten cache (when emscripten is installed from github)
 # seems to be under /home/user/emsdk/upstream/emscripten/cache
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.js"   DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist/html5")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.wasm" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist/html5")
-
-# uncomment this in order to enable threading
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.js"        DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist/html5")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.wasm"      DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist/html5")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.worker.js" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist/html5")
-
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/_deps/cmake_git_version_tracking-build/git.c"
         DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/../editor/dist/html5"
-        RENAME "GameEngineVersion.txt")
+        RENAME "GameEngine.version.txt")
 
 
