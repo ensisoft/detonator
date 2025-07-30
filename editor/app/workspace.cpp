@@ -620,7 +620,7 @@ Workspace::Workspace(const QString& dir)
     {
         resource->SetIsPrimitive(true);
     }
-    mSettings.application_identifier = app::RandomString();
+    mSettings.game_identifier = app::RandomString();
 }
 
 Workspace::~Workspace()
@@ -2578,9 +2578,9 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
             base::JsonWrite(json["window"], "set_fullscreen", true);
 
         base::JsonWrite(json["application"], "library", ToUtf8(engine_name));
-        base::JsonWrite(json["application"], "identifier", ToUtf8(mSettings.application_identifier));
-        base::JsonWrite(json["application"], "title",    ToUtf8(mSettings.application_name));
-        base::JsonWrite(json["application"], "version",  ToUtf8(mSettings.application_version));
+        base::JsonWrite(json["application"], "identifier", ToUtf8(mSettings.game_identifier));
+        base::JsonWrite(json["application"], "title",    ToUtf8(mSettings.game_name));
+        base::JsonWrite(json["application"], "version",  ToUtf8(mSettings.game_version));
         base::JsonWrite(json["application"], "content", ToUtf8(options.package_name));
         base::JsonWrite(json["application"], "game_script", ToUtf8(mSettings.game_script));
         base::JsonWrite(json["desktop"], "audio_io_strategy", mSettings.desktop_audio_io_strategy);
@@ -2779,7 +2779,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         // when trying to launch the native game.
 
         QString src_exec = "GameMain";
-        QString dst_exec = mSettings.application_name;
+        QString dst_exec = mSettings.game_name;
         if (dst_exec.isEmpty())
             dst_exec = "GameMain";
 #if defined(WINDOWS_OS)

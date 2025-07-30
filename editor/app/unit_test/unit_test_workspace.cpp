@@ -270,10 +270,10 @@ void unit_test_save_load()
         // set project settings.
         app::Workspace::ProjectSettings settings;
         settings.multisample_sample_count = 16;
-        settings.application_name = "foobar";
-        settings.application_version = "1.1.1";
-        settings.application_library_win = "library.dll";
-        settings.application_library_lin = "liblibrary.so";
+        settings.game_name = "foobar";
+        settings.game_version = "1.1.1";
+        settings.game_engine_library_win = "library.dll";
+        settings.game_engine_library_lin = "liblibrary.so";
         settings.default_min_filter = gfx::Device::MinFilter::Mipmap;
         settings.default_mag_filter = gfx::Device::MagFilter::Linear;
         settings.window_mode = app::Workspace::ProjectSettings::WindowMode::Fullscreen;
@@ -320,10 +320,10 @@ void unit_test_save_load()
             TEST_REQUIRE(res.HasTag("#bar"));
         }
         TEST_REQUIRE(workspace.GetProjectSettings().multisample_sample_count == 16);
-        TEST_REQUIRE(workspace.GetProjectSettings().application_name == "foobar");
-        TEST_REQUIRE(workspace.GetProjectSettings().application_version == "1.1.1");
-        TEST_REQUIRE(workspace.GetProjectSettings().application_library_win == "library.dll");
-        TEST_REQUIRE(workspace.GetProjectSettings().application_library_lin == "liblibrary.so");
+        TEST_REQUIRE(workspace.GetProjectSettings().game_name == "foobar");
+        TEST_REQUIRE(workspace.GetProjectSettings().game_version == "1.1.1");
+        TEST_REQUIRE(workspace.GetProjectSettings().game_engine_library_win == "library.dll");
+        TEST_REQUIRE(workspace.GetProjectSettings().game_engine_library_lin == "liblibrary.so");
         TEST_REQUIRE(workspace.GetProjectSettings().default_min_filter == gfx::Device::MinFilter::Mipmap);
         TEST_REQUIRE(workspace.GetProjectSettings().default_mag_filter == gfx::Device::MagFilter::Linear);
         TEST_REQUIRE(
@@ -393,10 +393,10 @@ R"(
     // set project settings.
     app::Workspace::ProjectSettings settings;
     settings.multisample_sample_count = 16;
-    settings.application_name = "foobar";
-    settings.application_version = "1.1.1";
-    settings.application_library_lin = "libgame.so";
-    settings.application_library_win = "game.dll";
+    settings.game_name = "foobar";
+    settings.game_version = "1.1.1";
+    settings.game_engine_library_lin = "libgame.so";
+    settings.game_engine_library_win = "game.dll";
     settings.default_min_filter = gfx::Device::MinFilter::Mipmap;
     settings.default_mag_filter = gfx::Device::MagFilter::Linear;
     settings.window_mode = app::Workspace::ProjectSettings::WindowMode::Fullscreen;

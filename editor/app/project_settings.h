@@ -46,29 +46,29 @@ namespace app
         // sample count when using multi-sampled render targets.
         unsigned multisample_sample_count = 4;
         // Unique identifier for the project.
-        QString application_identifier;
+        QString game_identifier;
         // user defined name of the application.
-        QString application_name;
+        QString game_name;
         // User defined version of the application.
-        QString application_version;
+        QString game_version;
         // The library (.so or .dll) that contains the application
         // entry point and game::App implementation.
-        QString application_library_lin = "app://libGameEngine.so";
-        QString application_library_win = "app://GameEngine.dll";
+        QString game_engine_library_lin = "app://libGameEngine.so";
+        QString game_engine_library_win = "app://GameEngine.dll";
         QString GetApplicationLibrary() const
         {
         #if defined(POSIX_OS)
-            return application_library_lin;
+            return game_engine_library_lin;
         #else
-            return application_library_win;
+            return game_engine_library_win;
         #endif
         }
         void SetApplicationLibrary(QString library)
         {
         #if defined(POSIX_OS)
-            application_library_lin = library;
+            game_engine_library_lin = library;
         #else
-            application_library_win = library;
+            game_engine_library_win = library;
         #endif
         }
         // Loading screen font

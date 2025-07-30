@@ -23,11 +23,11 @@ namespace app
 void IntoJson(QJsonObject& project, const ProjectSettings& settings)
 {
     JsonWrite(project, "multisample_sample_count",  settings.multisample_sample_count);
-    JsonWrite(project, "application_identifier"  ,  settings.application_identifier);
-    JsonWrite(project, "application_name"        ,  settings.application_name);
-    JsonWrite(project, "application_version"     ,  settings.application_version);
-    JsonWrite(project, "application_library_win" ,  settings.application_library_win);
-    JsonWrite(project, "application_library_lin" ,  settings.application_library_lin);
+    JsonWrite(project, "application_identifier"  ,  settings.game_identifier);
+    JsonWrite(project, "application_name"        ,  settings.game_name);
+    JsonWrite(project, "application_version"     ,  settings.game_version);
+    JsonWrite(project, "application_library_win" ,  settings.game_engine_library_win);
+    JsonWrite(project, "application_library_lin" ,  settings.game_engine_library_lin);
     JsonWrite(project, "loading_screen_font"     ,  settings.loading_font);
     JsonWrite(project, "debug_font"              ,  settings.debug_font);
     JsonWrite(project, "debug_show_fps"          ,  settings.debug_show_fps);
@@ -96,11 +96,11 @@ void IntoJson(QJsonObject& project, const ProjectSettings& settings)
 void FromJson(const QJsonObject& project, ProjectSettings& settings)
 {
     JsonReadSafe(project, "multisample_sample_count"  , &settings.multisample_sample_count);
-    JsonReadSafe(project, "application_identifier"    , &settings.application_identifier);
-    JsonReadSafe(project, "application_name"          , &settings.application_name);
-    JsonReadSafe(project, "application_version"       , &settings.application_version);
-    JsonReadSafe(project, "application_library_win"   , &settings.application_library_win);
-    JsonReadSafe(project, "application_library_lin"   , &settings.application_library_lin);
+    JsonReadSafe(project, "application_identifier"    , &settings.game_identifier);
+    JsonReadSafe(project, "application_name"          , &settings.game_name);
+    JsonReadSafe(project, "application_version"       , &settings.game_version);
+    JsonReadSafe(project, "application_library_win"   , &settings.game_engine_library_win);
+    JsonReadSafe(project, "application_library_lin"   , &settings.game_engine_library_lin);
     JsonReadSafe(project, "loading_screen_font"       , &settings.loading_font);
     JsonReadSafe(project, "debug_font"                , &settings.debug_font);
     JsonReadSafe(project, "debug_show_fps"            , &settings.debug_show_fps);
