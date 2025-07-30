@@ -2718,24 +2718,30 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
             bool mandatory;
         };
 
-        const HTML5_Engine_File files[] = {
-            {"GameEngine.js", true},
-            {"GameEngine.wasm", true},
-            // the JS Web worker glue code. this file is only produced by Emscripten
-            // if the threaded WASM build is being used.
-            {"GameEngine.worker.js", false},
-            // this is just a helper file for convenience
-            {"http-server.py", false},
-            // this is needed for the trace file save
-            {"FileSaver.js", false},
-            // This is just for version information. The file is
-            // produced by the Emscripten build using CMake-git-version-tracking
-            {"GameEngine.version.txt", false}
-        };
+        QString engine_wasm_file = mSettings.game_engine_library_wasm;
+
+        QString engine_js_file = mSettings.game_engine_library_wasm;
+        engine_js_file.replace(".wasm", ".js");
+
+        QString engine_worker_js_file = mSettings.game_engine_library_wasm;
+        engine_worker_js_file.replace(".wasm", ".worker.js");
+
+        QString engine_version_txt_file = mSettings.game_engine_library_wasm;
+        engine_version_txt_file.replace(".wasm", ".version.txt");
+
+        std::vector<HTML5_Engine_File> files;
+        files.push_back({ engine_wasm_file, true });
+        files.push_back({ engine_js_file, true });
+        files.push_back({ engine_worker_js_file, true });
+        files.push_back({engine_version_txt_file, false});
+        files.push_back({ "app://html5/http-server.py", false});
+        files.push_back({ "app://html5/FileSaver.js", false});
+
         for (const auto& file : files)
         {
-            const auto& src = app::GetAppInstFilePath("html5/" + file.name);
-            const auto& dst = app::JoinPath(options.directory, file.name);
+            const auto& src = MapFileToFilesystem(file.name);
+            const auto& nfo = QFileInfo(src);
+            const auto& dst = app::JoinPath(options.directory, nfo.fileName());
             auto[success, error] = app::CopyFile(src, dst);
             if (!success)
             {
@@ -2755,19 +2761,20 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
     }
     if (options.write_html5_game_file)
     {
-        const QString files[] = {
-           "html5/game.html"
-        };
-        for (int i=0; i<1; ++i)
+        QString engine_js_file = mSettings.game_engine_library_wasm;
+        engine_js_file.replace(".wasm", ".js");
+        const auto& nfo = QFileInfo(MapFileToFilesystem(engine_js_file));
+
+        const auto& src = MapFileToFilesystem("app://html5/game.html");
+        const auto& dst = app::JoinPath(options.directory, "game.html");
+        auto data = app::ReadTextFile(src);
+        data.replace("GameEngine.js", nfo.fileName());
+
+        QString error;
+        if (!app::WriteTextFile(dst, data, nullptr, &error))
         {
-            const auto& src = app::GetAppInstFilePath(files[i]);
-            const auto& dst = app::JoinPath(options.directory, files[i]);
-            auto[success, error] = app::CopyFile(src, dst);
-            if (!success)
-            {
-                ERROR("Failed to copy game html file. [src='1%', dst='%2', error='%3']", src, dst, error);
-                ++errors;
-            }
+            ERROR("Failed to copy game html file. [src='1%', dst='%2', error='%3']", src, dst, error);
+            ++errors;
         }
     }
 

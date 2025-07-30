@@ -106,6 +106,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.audioSampleRate, mSettings.audio_sample_rate);
     SetUIValue(mUI.audioBufferSize, mSettings.audio_buffer_size);
     SetUIValue(mUI.audioCaching, mSettings.enable_audio_pcm_caching);
+    SetUIValue(mUI.wasmEngine, mSettings.game_engine_library_wasm);
     SetUIValue(mUI.cmbCanvasPresentationMode, mSettings.canvas_mode);
     SetUIValue(mUI.cmbCanvasFSStrategy, mSettings.canvas_fs_strategy);
     SetUIValue(mUI.cmbPowerPref, mSettings.webgl_power_preference);
@@ -176,6 +177,7 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.audioSampleRate, &mSettings.audio_sample_rate);
     GetUIValue(mUI.audioBufferSize, &mSettings.audio_buffer_size);
     GetUIValue(mUI.audioCaching, &mSettings.enable_audio_pcm_caching);
+    GetUIValue(mUI.wasmEngine, &mSettings.game_engine_library_wasm);
     GetUIValue(mUI.cmbCanvasPresentationMode, &mSettings.canvas_mode);
     GetUIValue(mUI.cmbCanvasFSStrategy, &mSettings.canvas_fs_strategy);
     GetUIValue(mUI.cmbPowerPref, &mSettings.webgl_power_preference);
@@ -222,6 +224,16 @@ void DlgProject::on_btnSelectEngine_clicked()
         return;
     const auto& file = mWorkspace.MapFileToWorkspace(list[0]);
     SetValue(mUI.edtAppLibrary, file);
+}
+
+void DlgProject::on_btnSelectWasmEngine_clicked()
+{
+    const auto& selection = QFileDialog::getOpenFileName(this,
+        tr("Select Engine Library"), "", tr("Wasm files (*.wasm)"));
+    if (selection.isEmpty())
+        return;
+    const auto& file = mWorkspace.MapFileToWorkspace(selection);
+    SetValue(mUI.wasmEngine, file);
 }
 
 void DlgProject::on_btnResetClearColor_clicked()
