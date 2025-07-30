@@ -132,7 +132,7 @@ void DlgComplete::on_btnPlayNative_clicked()
 
     const auto& settings = mWorkspace.GetProjectSettings();
 
-    QString game_name = settings.application_name;
+    QString game_name = settings.game_name;
     if (game_name.isEmpty())
         game_name = "GameMain";
 #if defined(WINDOWS_OS)

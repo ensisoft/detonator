@@ -571,8 +571,8 @@ PlayWindow::PlayWindow(app::Workspace& workspace, bool is_separate_process) : mW
     game_default_res->setData(-1);
     connect(game_default_res, &QAction::triggered, this, &PlayWindow::SelectResolution);
 
-    SetWindowTitle(this, settings.application_name);
-    mLogger->SetLogTag(settings.application_name);
+    SetWindowTitle(this, settings.game_name);
+    mLogger->SetLogTag(settings.game_name);
 
     mHostWorkingDir = QDir::currentPath();
     mGameWorkingDir = settings.working_folder;
@@ -1214,9 +1214,9 @@ void PlayWindow::InitGame(bool clean_game_home)
         QString editor_home = app::JoinPath(user_home, ".GameStudio");
         game_home.replace("${workspace}", mWorkspace.GetDir());
         game_home.replace("${user-home}", user_home);
-        game_home.replace("${game-id}", settings.application_identifier);
-        game_home.replace("${game-ver}", settings.application_version);
-        game_home.replace("${game-home}", app::JoinPath(editor_home, settings.application_identifier));
+        game_home.replace("${game-id}", settings.game_identifier);
+        game_home.replace("${game-ver}", settings.game_version);
+        game_home.replace("${game-home}", app::JoinPath(editor_home, settings.game_identifier));
         DEBUG("User home is '%1'", user_home);
         DEBUG("Game home is '%1'", game_home);
 
@@ -1257,7 +1257,7 @@ void PlayWindow::InitGame(bool clean_game_home)
         params.editing_mode     = true; // allow changes to "static" content take place.
         params.preview_mode     = false;
         params.game_script      = app::ToUtf8(settings.game_script);
-        params.application_name = app::ToUtf8(settings.application_name);
+        params.application_name = app::ToUtf8(settings.game_name);
         params.context          = mWindowContext.get();
         params.surface_width    = mSurface->width();
         params.surface_height   = mSurface->height();
@@ -1359,7 +1359,7 @@ void PlayWindow::InitPreview(const QString& script)
         params.editing_mode     = true; // allow changes to "static" content take place.
         params.preview_mode     = true; // yes, we're doing preview now!
         params.game_script      = app::ToUtf8(script);
-        params.application_name = app::ToUtf8(settings.application_name);
+        params.application_name = app::ToUtf8(settings.game_name);
         params.context          = mWindowContext.get();
         params.surface_width    = mSurface->width();
         params.surface_height   = mSurface->height();

@@ -424,7 +424,7 @@ namespace app
         void SetProjectSettings(const ProjectSettings& settings)
         { mSettings = settings; }
         void SetProjectId(const QString& id)
-        { mSettings.application_identifier = id; }
+        { mSettings.game_identifier = id; }
 
         struct ExportOptions {
             QString zip_file;

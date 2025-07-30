@@ -58,7 +58,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetList(mUI.mouseDrawable, workspace.ListCursors());
     SetList(mUI.mouseMaterial, workspace.ListAllMaterials());
     SetUIValue(mUI.cmbLoadingFont, mSettings.loading_font);
-    SetUIValue(mUI.edtAppIdentifier, mSettings.application_identifier);
+    SetUIValue(mUI.edtAppIdentifier, mSettings.game_identifier);
     SetUIValue(mUI.cmbMSAA, mSettings.multisample_sample_count);
     SetUIValue(mUI.cmbMinFilter, mSettings.default_min_filter);
     SetUIValue(mUI.cmbMagFilter, mSettings.default_mag_filter);
@@ -73,9 +73,9 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.chkCursor, mSettings.window_cursor);
     SetUIValue(mUI.chkGrabMouse, mSettings.grab_mouse);
     SetUIValue(mUI.chkSaveGeom, mSettings.save_window_geometry);
-    SetUIValue(mUI.edtAppName, mSettings.application_name);
+    SetUIValue(mUI.edtAppName, mSettings.game_name);
     SetUIValue(mUI.edtGameScript, mSettings.game_script);
-    SetUIValue(mUI.edtAppVersion, mSettings.application_version);
+    SetUIValue(mUI.edtAppVersion, mSettings.game_version);
     SetUIValue(mUI.edtAppLibrary, library);
     SetUIValue(mUI.ticksPerSecond, mSettings.ticks_per_second);
     SetUIValue(mUI.updatesPerSecond, mSettings.updates_per_second);
@@ -146,8 +146,8 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.chkCursor, &mSettings.window_cursor);
     GetUIValue(mUI.chkGrabMouse, &mSettings.grab_mouse);
     GetUIValue(mUI.chkSaveGeom, &mSettings.save_window_geometry);
-    GetUIValue(mUI.edtAppName, &mSettings.application_name);
-    GetUIValue(mUI.edtAppVersion, &mSettings.application_version);
+    GetUIValue(mUI.edtAppName, &mSettings.game_name);
+    GetUIValue(mUI.edtAppVersion, &mSettings.game_version);
     GetUIValue(mUI.edtGameScript, &mSettings.game_script);
     GetUIValue(mUI.ticksPerSecond, &mSettings.ticks_per_second);
     GetUIValue(mUI.updatesPerSecond, &mSettings.updates_per_second);
