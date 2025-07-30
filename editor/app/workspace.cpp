@@ -2730,7 +2730,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
             {"FileSaver.js", false},
             // This is just for version information. The file is
             // produced by the Emscripten build using CMake-git-version-tracking
-            {"GameEngineVersion.txt", false}
+            {"GameEngine.version.txt", false}
         };
         for (const auto& file : files)
         {
