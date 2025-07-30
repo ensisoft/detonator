@@ -2756,7 +2756,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
     if (options.write_html5_game_file)
     {
         const QString files[] = {
-           "game.html"
+           "html5/game.html"
         };
         for (int i=0; i<1; ++i)
         {
