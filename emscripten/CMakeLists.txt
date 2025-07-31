@@ -144,6 +144,7 @@ add_executable(UnitTest
     ../uikit/widget.cpp
     ../uikit/window.cpp
         )
+target_include_directories(UnitTest PRIVATE "${CMAKE_CURRENT_LIST_DIR}/test")
 target_compile_definitions(UnitTest PRIVATE UNIT_TEST_BUNDLE)
 target_compile_definitions(UnitTest PRIVATE DETONATOR_UNIT_TEST_WASM_BUILD)
 target_compile_options(UnitTest PRIVATE -O3)
@@ -204,8 +205,8 @@ add_executable(UnitTestThread
         ../audio/thread_proxy_source.cpp
         ../audio/openal.cpp)
 
+target_include_directories(UnitTestThread PRIVATE "${CMAKE_CURRENT_LIST_DIR}/test")
 target_compile_definitions(UnitTestThread PRIVATE DETONATOR_UNIT_TEST_THREAD_WASM_BUILD)
-
 target_compile_definitions(UnitTestThread PRIVATE UNIT_TEST_BUNDLE)
 target_compile_definitions(UnitTestThread PRIVATE AUDIO_ENABLE_TEST_SOUND)
 target_compile_options(UnitTestThread PRIVATE -pthread)
@@ -385,8 +386,8 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../third_party/stb/stb_image_write.c
   ${CMAKE_CURRENT_LIST_DIR}/../third_party/stb/stb_image.c)
 
-# engine include directories. currently empty on purpose
-set(ENGINE_INC)
+# engine include directories.
+set(ENGINE_INC "${CMAKE_CURRENT_LIST_DIR}/../config/")
 
 set(ENGINE_DEF
     DETONATOR_GAME_ENGINE_WASM_BUILD
@@ -455,6 +456,7 @@ list(APPEND ENGINE_LINK_OPTIONS -sPTHREAD_POOL_SIZE=4)
 add_executable(GameEngine ${ENGINE_SRC}
         ${CMAKE_CURRENT_LIST_DIR}/../engine/game_dummy.cpp)
 
+target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../config/")
 target_compile_definitions(GameEngine PRIVATE ${ENGINE_DEF})
 target_compile_options(GameEngine PRIVATE ${ENGINE_COMPILE_OPTIONS})
 target_link_options(GameEngine PRIVATE ${ENGINE_LINK_OPTIONS})

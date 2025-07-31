@@ -259,7 +259,7 @@ namespace engine
         std::tuple<bool, glm::vec2> FindJointConnectionPoint(const game::EntityNode& node, const game::RigidBodyJoint& joint) const;
 
 
-#if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
+#if defined(ENGINE_ENABLE_PHYSICS_DEBUG)
         // Visualize the physics world object's by drawing OOBs around them.
         void DebugDrawObjects(gfx::Painter& painter) const;
 #endif

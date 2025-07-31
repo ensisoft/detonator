@@ -798,7 +798,7 @@ std::tuple<bool, glm::vec2> PhysicsEngine::FindJointConnectionPoint(const game::
 }
 
 
-#if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
+#if defined(ENGINE_ENABLE_PHYSICS_DEBUG)
 void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
 {
     static gfx::MaterialInstance mat(gfx::CreateMaterialClassFromColor(gfx::Color4f(gfx::Color::HotPink, 0.6)));
@@ -945,7 +945,7 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
         model.Pop();
     }
 }
-#endif // GAMESTUDIO_ENABLE_PHYSICS_DEBUG
+#endif // ENGINE_ENABLE_PHYSICS_DEBUG
 
 void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::Entity& entity)
 {
