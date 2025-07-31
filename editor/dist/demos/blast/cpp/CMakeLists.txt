@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
     # build WASM game engine
-    add_executable(BlastEngine ${ENGINE_SRC} blast.cpp)
+    add_executable(BlastEngine ${ENGINE_SRC} blast.cpp enemy.cpp)
 
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/BlastEngine.js"        DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/BlastEngine.wasm"      DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
@@ -17,7 +17,8 @@ else()
     add_library(BlastEngine SHARED
             ${ENGINE_SRC}/engine.cpp
             ${ENGINE_SRC}/library/library.cpp
-            blast.cpp)
+            blast.cpp
+            enemy.cpp)
     # hide symbols on linux
     if (UNIX)
         target_link_options(BlastEngine PRIVATE "-Wl,--version-script=${ENGINE_SRC}/library/library.txt")
