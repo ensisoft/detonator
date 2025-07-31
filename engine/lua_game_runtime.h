@@ -29,7 +29,7 @@
 
 #include "game/types.h"
 #include "game/animation.h"
-#include "engine/game.h"
+#include "engine/runtime.h"
 #include "engine/action.h"
 
 namespace engine

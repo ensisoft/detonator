@@ -54,6 +54,8 @@ namespace game {
     class BasicLight;
     class BasicLightClass;
 
+    struct EntityArgs;
+
 } // namespace
 
 namespace base {

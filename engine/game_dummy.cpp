@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2025 Sami Väisänen
+// Copyright (C) 2020-20215 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,11 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+// this file provides a dummy implementation for the cpp game runtime.
+// Only used to make the build management easier.
 
-#include "config/config.h"
+#include "engine/game.h"
 
-// add here defines that pertain to the  ameMain executable
-// or to the default GameEngine library
+namespace engine
+{
 
+void GetEntityScripts(std::vector<EntityScriptRegistration>* out)
+{
+    // dummy implementation to satisfy the linker when building
+    // the default game engine.
+}
 
+} // namespace

@@ -41,7 +41,6 @@
 #include "game/tilemap.h"
 #include "engine/lua.h"
 #include "engine/lua_game_runtime.h"
-#include "engine/game.h"
 #include "engine/audio.h"
 #include "engine/classlib.h"
 #include "engine/physics.h"
