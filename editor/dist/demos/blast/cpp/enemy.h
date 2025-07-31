@@ -16,30 +16,13 @@
 
 #include "config.h"
 
-#include "engine/game.h"
-#include "enemy.h"
+#include "engine/entity_script.h"
 
-namespace engine
+namespace blast
 {
-
-void GetEntityScripts(std::vector<EntityScriptRegistration>* out)
-{
-    // todo: currently adding native scripts is a manual process
-    // and has to be done by hand. The editor doesn't know how to
-    // add c++ code to the game engine build.
+    class EnemyShip : public engine::EntityScript
     {
-        EntityScriptRegistration reg;
-        reg.classId = "pNT0bA0bpw";
-        reg.script  = std::make_unique<blast::EnemyShip>();
-        out->push_back(std::move(reg));
-    }
-
-    {
-        EntityScriptRegistration reg;
-        reg.classId = "XSYiC5gMBy";
-        reg.script  = std::make_unique<blast::EnemyShip>();
-        out->push_back(std::move(reg));
-    }
-}
-
+    public:
+        void Update(game::Entity& entity, double game_time, double dt) override;
+    };
 } // namespace

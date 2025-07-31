@@ -153,45 +153,7 @@ end
 
 -- Called on every iteration of game loop.
 function Update(ship, game_time, dt)
-    -- move ship forward
-    local ship_body = ship:GetNode(0)
-    local ship_pos = ship_body:GetTranslation()
-    local ship_rot = ship_body:GetRotation()
-
-    if ship:IsDying() then
-        if ship_pos.y > 500.0 then
-            return
-        end
-
-        SpawnExplosion(ship_pos, 'Enemy/Explosion/' .. ship.type)
-        SpawnScore(ship_pos, ship.score)
-        BroadcastDeath(ship)
-    end
-
-    -- update x,y position
-    ship_pos.x = ship_pos.x + dt * ship.velocity.x
-    ship_pos.y = ship_pos.y + dt * ship.velocity.y
-
-    local velocity = ship.velocity
-    -- change direction at the boundaries
-    if ship_pos.x >= 550 then
-        velocity.x = velocity.x * -1.0
-        ship_pos.x = 550
-    elseif ship_pos.x <= -550 then
-        velocity.x = velocity.x * -1.0
-        ship_pos.x = -550
-    end
-    ship.velocity = velocity
-    ship_body:SetTranslation(ship_pos)
-
-    ship_rot = ship_rot + ship.rotation * dt
-
-    ship_body:SetRotation(ship_rot)
-
-    -- if it reached the edge of space then kill it.
-    if ship_pos.y > 500 then
-        ship:Die()
-    end
+    -- native code implements
 end
 
 function OnKeyDown(ship, symbol, modifier_bits)

@@ -720,6 +720,20 @@ namespace game
         const ScriptVar* FindScriptVarByName(const std::string& name) const;
         const ScriptVar* FindScriptVarById(const std::string& id) const;
 
+        template<typename T>
+        T GetVar(const std::string& name) const
+        {
+            if (const auto* ptr = FindScriptVarByName(name))
+                return ptr->GetValue<T>();
+            return T {};
+        }
+        template<typename T>
+        void SetVar(const std::string& name, const T& val)
+        {
+            if (const auto* ptr = FindScriptVarByName(name))
+                ptr->SetValue(val);
+        }
+
         void SetTag(const std::string& tag)
         { mInstanceTag = tag; }
         void SetFlag(ControlFlags flag, bool on_off) noexcept

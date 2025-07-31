@@ -802,7 +802,6 @@
         "__tag_list": [
         ],
         "__version": 3,
-        "checked_for_packing": true,
         "comment_2LJhfhUCPC": "",
         "comment_37wPuCDipF": "",
         "comment_6IMWYKiN1b": "",
@@ -1044,8 +1043,9 @@
     },
     "project": {
         "application_identifier": "dD8e2yH4h45Y",
-        "application_library_lin": "app://libGameEngine.so",
-        "application_library_win": "app://GameEngine.dll",
+        "application_library_lin": "ws://cpp/bin/libBlastEngine.so",
+        "application_library_wasm": "ws://cpp/bin/BlastEngine.wasm",
+        "application_library_win": "ws://cpp/bin/BlastEngine.dll",
         "application_name": "Blast!",
         "application_version": "",
         "audio_buffer_size": 40,
@@ -1310,7 +1310,6 @@
         "__tag_list": [
         ],
         "__version": 6,
-        "checked_for_packing": true,
         "is-valid": true
     },
     "wEBG4Nwt8g": {
