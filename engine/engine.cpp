@@ -19,8 +19,6 @@
 // this translation unit implements the engine library interface.
 #define ENGINE_DLL_IMPLEMENTATION
 
-#define ENGINE_USE_UPDATE_THREAD
-
 #include "warnpush.h"
 #  include <neargye/magic_enum.hpp>
 #  include <boost/circular_buffer.hpp>

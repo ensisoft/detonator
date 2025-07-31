@@ -964,7 +964,7 @@ install(TARGETS graphics_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/graphics/te
 # config.json and create the window/context for the application as
 # per the configuration. The game logic will be loaded from a .so or .dll
 add_executable(GameMain engine/main/main.cpp)
-target_include_directories(GameMain PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
+target_include_directories(GameMain PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_link_libraries(GameMain DataLib BaseLib wdk_system wdk_desktop_gl)
 target_link_libraries(GameMain cmake_git_version_tracking)
 if (UNIX)
@@ -974,7 +974,7 @@ install(TARGETS GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # generic game engine library.
 add_library(GameEngine SHARED engine/engine.cpp engine/game_dummy.cpp engine/library/library.cpp)
-target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
+target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_link_libraries(GameEngine PRIVATE GameLib EngineLib GfxLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(GameEngine PRIVATE ${CONAN_LIBS})
 target_link_libraries(GameEngine PRIVATE wdk_system)

@@ -48,7 +48,7 @@ AudioEngine::AudioEngine(const std::string& name)
 
 AudioEngine::~AudioEngine()
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     if (mPlayer)
     {
         if (mAudioGraphId)
@@ -69,7 +69,7 @@ void AudioEngine::Start()
     ASSERT(!mPlayer);
     ASSERT(mEffectGraphId == 0);
     ASSERT(mMusicGraphId  == 0);
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     audio::AudioGraphSource::PrepareParams p;
     p.enable_pcm_caching = false;
 
@@ -142,7 +142,7 @@ void AudioEngine::Start()
 
 void AudioEngine::SetDebugPause(bool on_off)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     if (on_off)
     {
         if (mAudioGraphId)
@@ -173,7 +173,7 @@ void AudioEngine::SetDebugPause(bool on_off)
 bool AudioEngine::PrepareMusicGraph(const GraphHandle& graph)
 {
     ASSERT(graph);
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     auto instance = std::make_unique<audio::Graph>(graph);
     audio::Graph::PrepareParams p;
     p.enable_pcm_caching = mEnableCaching;
@@ -193,7 +193,7 @@ bool AudioEngine::PrepareMusicGraph(const GraphHandle& graph)
 
 bool AudioEngine::PlayMusic(const GraphHandle& graph, unsigned when)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     if (!PrepareMusicGraph(graph))
         return false;
     ResumeMusic(graph->GetName(), when);
@@ -203,7 +203,7 @@ bool AudioEngine::PlayMusic(const GraphHandle& graph, unsigned when)
 
 void AudioEngine::ResumeMusic(const std::string& track, unsigned when)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     audio::MixerSource::PauseSourceCmd cmd;
     cmd.name      = track;
     cmd.paused    = false;
@@ -214,7 +214,7 @@ void AudioEngine::ResumeMusic(const std::string& track, unsigned when)
 
 void AudioEngine::PauseMusic(const std::string& track, unsigned when)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     audio::MixerSource::PauseSourceCmd cmd;
     cmd.name      = track;
     cmd.paused    = true;
@@ -225,7 +225,7 @@ void AudioEngine::PauseMusic(const std::string& track, unsigned when)
 
 void AudioEngine::KillMusic(const std::string& track, unsigned when)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     audio::MixerSource::DeleteSourceCmd cmd;
     cmd.name      = track;
     cmd.millisecs = when;
@@ -234,7 +234,7 @@ void AudioEngine::KillMusic(const std::string& track, unsigned when)
 }
 void AudioEngine::KillAllMusic(unsigned int when)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     audio::MixerSource::DeleteAllSrcCmd cmd;
     cmd.millisecs = when;
     mPlayer->SendCommand(mMusicGraphId, audio::AudioGraphSource::MakeCommand("music_mixer", std::move(cmd)));
@@ -243,7 +243,7 @@ void AudioEngine::KillAllMusic(unsigned int when)
 
 void AudioEngine::CancelMusicCmds(const std::string& track)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     audio::MixerSource::CancelSourceCmdCmd cmd;
     cmd.name = track;
     mPlayer->SendCommand(mMusicGraphId, audio::AudioGraphSource::MakeCommand("music_mixer", std::move(cmd)));
@@ -252,7 +252,7 @@ void AudioEngine::CancelMusicCmds(const std::string& track)
 
 void AudioEngine::SetMusicEffect(const std::string& track, unsigned duration, Effect effect)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     std::unique_ptr<audio::MixerSource::Effect> mixer_effect;
     if (effect == Effect::FadeIn)
         mixer_effect = std::make_unique<audio::MixerSource::FadeIn>(duration);
@@ -268,7 +268,7 @@ void AudioEngine::SetMusicEffect(const std::string& track, unsigned duration, Ef
 
 void AudioEngine::SetMusicGain(float gain)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     audio::Gain::SetGainCmd cmd;
     cmd.gain = gain;
     mPlayer->SendCommand(mMusicGraphId, audio::AudioGraphSource::MakeCommand("music_gain", std::move(cmd)));
@@ -279,7 +279,7 @@ bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
 {
     TRACE_SCOPE("AudioEngine::PlaySoundEffect");
 
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     if (!mEnableEffects)
         return true;
 
@@ -312,7 +312,7 @@ bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
 
 void AudioEngine::SetSoundEffectGain(float gain)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     audio::Gain::SetGainCmd cmd;
     cmd.gain = gain;
     mPlayer->SendCommand(mEffectGraphId, audio::AudioGraphSource::MakeCommand("effect_gain", std::move(cmd)));
@@ -320,7 +320,7 @@ void AudioEngine::SetSoundEffectGain(float gain)
 }
 void AudioEngine::KillAllSoundEffects(unsigned when)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     audio::MixerSource::DeleteAllSrcCmd cmd;
     cmd.millisecs = when;
     mPlayer->SendCommand(mEffectGraphId, audio::AudioGraphSource::MakeCommand("effect_mixer", std::move(cmd)));
@@ -329,7 +329,7 @@ void AudioEngine::KillAllSoundEffects(unsigned when)
 
 void AudioEngine::KillSoundEffect(const std::string& track, unsigned when)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
     audio::MixerSource::DeleteSourceCmd cmd;
     cmd.name = track;
     cmd.millisecs = when;
@@ -339,7 +339,7 @@ void AudioEngine::KillSoundEffect(const std::string& track, unsigned when)
 
 void AudioEngine::Update(AudioEventQueue* events)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
 
 #if !defined(AUDIO_USE_PLAYER_THREAD)
     mPlayer->ProcessOnce();
@@ -396,7 +396,7 @@ void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEvent& event, Au
 
 void AudioEngine::SetAudioThreadTraceWriter(base::TraceWriter* writer)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
   #if defined(AUDIO_USE_PLAYER_THREAD)
        // todo: enable tracing in the audio player thread
   #else
@@ -407,7 +407,7 @@ void AudioEngine::SetAudioThreadTraceWriter(base::TraceWriter* writer)
 
 void AudioEngine::EnableAudioThreadTrace(bool on_off)
 {
-#if defined(GAMESTUDIO_ENABLE_AUDIO)
+#if defined(ENGINE_ENABLE_AUDIO)
   #if defined(AUDIO_USE_PLAYER_THREAD)
       // todo
   #else

@@ -92,6 +92,7 @@
 #endif
 
 #if defined(__EMSCRIPTEN__)
+#  define WASM
 #  define WEBASSEMBLY
 #  define WEBGL
 #  define COMPILER_NAME "emscripten"
