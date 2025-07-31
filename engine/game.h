@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2025 Sami Väisänen
+// Copyright (C) 2020-20215 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,204 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
-
 #include "config.h"
 
 #include <memory>
-#include <variant>
 #include <string>
+#include <vector>
 
-#include "wdk/events.h"
-#include "game/types.h"
-#include "game/fwd.h"
-#include "game/scene.h"
-#include "engine/classlib.h"
-#include "engine/action.h"
-#include "engine/types.h"
-#include "uikit/window.h"
-#include "uikit/types.h"
+// this header is the interface header between the engine
+// and the native (cpp based) game logic, i.e. entity, scene
+// scripts etc.
 
 namespace engine
 {
-    class Loader;
-    class PhysicsEngine;
-    class AudioEngine;
-    class KeyValueStore;
-    struct ContactEvent;
-    struct AudioEvent;
-    struct MouseEvent;
-    struct GameEvent;
+    class EntityScript;
 
-    // This is the main interface for the game engine to interface
-    // with the actual game logic. I.e. implementations of this
-    // interface implement game logic execution by for example calling
-    // into user provided Lua scripts.
-    class GameRuntime
-    {
-    public:
-        using Action = engine::Action;
-        using DebugDrawCmd = engine::DebugDrawCmd;
-
-        virtual ~GameRuntime() = default;
-        // Set current frame counter value. This can loop over.
-        virtual void SetFrameNumber(unsigned frame) {}
-        // Set rendering surface size.
-        virtual void SetSurfaceSize(unsigned width, unsigned height) {}
-
-        // Set flag to indicate that the current game launch is an
-        // editor launch, i.e. edit/design time.
-        virtual void SetEditingMode(bool editing) {}
-        // Set a flag to indicate that the current game launch is a
-        // preview launch, i.e. edit/design time preview of some resource.
-        virtual void SetPreviewMode(bool preview) {}
-        // Set the default transient key-value store that can be
-        // used by the game to store non-persistent data for the
-        // duration of the game play.
-        virtual void SetStateStore(KeyValueStore* store) {}
-        // Set physics engine instance.
-        virtual void SetPhysicsEngine(PhysicsEngine* engine) {}
-        // Set audio engine instance.
-        virtual void SetAudioEngine(AudioEngine* engine) {}
-        // Set the game data loader.
-        virtual void SetDataLoader(const Loader* loader) {}
-        // Set the class loader.
-        virtual void SetClassLibrary(const ClassLibrary* classlib) {}
-        // Set the current UI instance (if any). Will be nullptr when there's no
-        // current UI open.
-        virtual void SetCurrentUI(uik::Window* window) {}
-        // Initialize the runtime, load the appropriate runtime resources
-        // for the game execution to begin.
-        virtual void Init() {}
-        // Load the game data. This is called once by the engine after the
-        // main application has started. In the implementation you should
-        // load whatever initial game state that is needed. It's possible to
-        // fail (indicated by returning false) or by throwing an exception.
-        // Failure will make the host application exit early since the
-        // game obviously cannot be run.
-        virtual bool LoadGame() { return false; }
-        // Start the actual game after all required initial content has been
-        // loaded. At this point all the engine subsystems are available
-        // including rendering, physics and audio.
-        // The game should enter whatever initial state such as opening
-        // main screen/menu.
-        virtual void StartGame() {}
-        // BeginPlay is called as a response to PlayAction. When the
-        // action is processed the engine creates an instance of the scene
-        // and then calls BeginPlay. The Engine will maintain the ownership
-        // of the scene for the duration of the game play.
-        virtual void BeginPlay(game::Scene* scene, game::Tilemap* map) {}
-        // Begin one iteration of the game update loop. In the update the loop
-        // the sequence of calls are:
-        // BeginLoop, Update, Tick, PostUpdate, EndLoop
-        // BeginLoop is where the runtime should realize things such as new
-        // entities that have been spawned and invoke their "begin play"
-        // functionality.
-        virtual void BeginLoop() {}
-        // Tick is called intermittently in order to perform some low frequency
-        // game activity. The actual frequency is specified in the game config.json.
-        // game_time is the current total accumulated game time measured
-        // in seconds and updated in dt steps with each step being equal to
-        // 1.0/ticks_per_second seconds.
-        // On every call game_time already includes the time step dt.
-        virtual void Tick(double game_time, double dt) {}
-        // Update is the main game update callback. It is called (normally)
-        // at much higher frequency (for example @ 60 Hz) than Tick. The actual
-        // frequency is specified in the game configuration in config.json.
-        // game_time is the current total accumulated game time measured
-        // in seconds and updated in dt steps with each step being equal to
-        // 1.0/updates_per_second seconds.
-        // On every call game_time already includes the time step dt.
-        virtual void Update(double game_time,  double dt) {}
-
-        virtual void PostUpdate(double game_time) {}
-        // End one iteration of the game update loop. EndLoop is where
-        // the runtime should realize the results of teh update operations
-        // that have happened during the updates in the game state.
-        // This is the place to for example realize the entities that
-        // have been killed and call their "end play" functionality.
-        virtual void EndLoop() {}
-
-        // todo:
-        virtual void PausePlay()
-        {}
-        virtual void ResumePlay()
-        {}
-        // Called after StopAction has taken place.
-        virtual void EndPlay(game::Scene* scene, game::Tilemap* map) {}
-        // todo:
-        virtual void SaveGame() {}
-        // todo:
-        virtual void StopGame() {}
-        // Get the next action from the game's action queue. The game engine
-        // will process all the game actions once per game update loop iteration.
-        // If there was no next action returns false, otherwise true is returned
-        // and the action should be copied into out.
-        virtual bool GetNextAction(Action* out)
-        { return false; }
-
-        // Transfer the contents of the current debug draw queue
-        // into the given out queue
-        virtual void TransferDebugQueue(std::vector<DebugDrawCmd>* out) {}
-
-        struct Camera {
-            // Get the game's logical viewport into the game world.
-            // The viewport is defined in the same units as the game itself
-            // and has no direct relation to pixels or to the graphics device
-            // viewport. Instead, it's completely game related and is managed by
-            // the game. The engine will then use the viewport information to
-            // render the contents within the game's viewport into some area
-            // in some rendering surface such as a window. If your game returns
-            // an empty viewport (width and height are 0) *nothing* will be shown.
-            FRect viewport;
-            glm::vec2 position = {0.0f, 0.0f};
-            glm::vec2 scale    = {1.0f, 1.0f};
-        };
-
-        virtual bool GetCamera(Camera* camera) const
-        { return false; }
-
-        struct ContentClass {
-            ClassLibrary::ClassType type;
-            std::string name;
-            std::string id;
-        };
-
-        virtual void OnContentClassUpdate(const ContentClass& klass) {}
-
-        // Event listeners.
-
-
-        // Called when a new UI has been opened onto the UI stack.
-        virtual void OnUIOpen(uik::Window* ui) {}
-        // Called when the UI is about to close. After the call
-        // returns the UI is deleted and removed from the window stack.
-        virtual void OnUIClose(uik::Window* ui, int result) {}
-        // Called when a some UI action happens as a result of user input.
-        using WidgetActionList = std::vector<uik::Window::WidgetAction>;
-        virtual void OnUIAction(uik::Window* ui, const WidgetActionList& actions) {}
-        // Update the game UI
-        virtual void UpdateUI(uik::Window* ui, double game_time, double dt) {}
-        // Act on a contact event when 2 physics bodies have come into
-        // contact or have come out of contact.
-        // Called when the physics engine reports collision between bodies.
-        virtual void OnContactEvent(const std::vector<ContactEvent>& contacts) {}
-        // Act on audio playback event.
-        // Called when the audio engine reports and audio event such as the
-        // audio track playback having finished.
-        virtual void OnAudioEvent(const AudioEvent& event) {}
-        // Act on a game event posted through PostEvent
-        virtual void OnGameEvent(const GameEvent& event) {}
-        // todo:
-        virtual void OnSceneEvent(const std::vector<game::Scene::Event>& events) {}
-        // action/input handlers for some interesting windowing events.
-        virtual void OnKeyDown(const KeyDownEvent& key) {}
-        virtual void OnKeyUp(const KeyUpEvent& key) {}
-        virtual void OnChar(const CharEvent& text) {}
-        virtual void OnMouseMove(const MouseEvent& mouse) {}
-        virtual void OnMousePress(const MouseEvent& mouse) {}
-        virtual void OnMouseRelease(const MouseEvent& mouse) {}
-    private:
+    struct EntityScriptRegistration {
+        std::string classId;
+        std::unique_ptr<EntityScript> script;
     };
+    // when implementing game logic in a custom game specific
+    // engine this function needs to be implemented by the game.
+    void GetEntityScripts(std::vector<EntityScriptRegistration>* out);
 
-} // namespace
+} // engine

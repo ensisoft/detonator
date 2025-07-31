@@ -59,8 +59,8 @@
 #include "engine/renderer.h"
 #include "engine/event.h"
 #include "engine/physics.h"
-#include "engine/game.h"
 #include "engine/lua_game_runtime.h"
+#include "engine/cpp_game_runtime.h"
 #include "engine/format.h"
 #include "engine/library/library.h"
 #include "engine/ui.h"
@@ -104,7 +104,8 @@ struct EngineRuntime {
     game::Tilemap* tilemap = nullptr;
 
     engine::PhysicsEngine* physics = nullptr;
-    engine::GameRuntime* gamert = nullptr;
+    engine::GameRuntime* lua_rt = nullptr;
+    engine::GameRuntime* cpp_rt = nullptr;
     engine::Renderer* renderer = nullptr;
     engine::UIEngine* ui = nullptr;
 };
@@ -155,16 +156,31 @@ public:
         mDevice->SetDefaultTextureFilter(conf.default_min_filter);
         mDevice->SetDefaultTextureFilter(conf.default_mag_filter);
 
-        mRuntime = std::make_unique<engine::LuaRuntime>("lua", init.game_script, mGameHome, init.application_name);
-        mRuntime->SetClassLibrary(mClasslib);
-        mRuntime->SetPhysicsEngine(&mPhysics);
-        mRuntime->SetStateStore(&mStateStore);
-        mRuntime->SetAudioEngine(mAudio.get());
-        mRuntime->SetDataLoader(mEngineDataLoader);
-        mRuntime->SetEditingMode(init.editing_mode);
-        mRuntime->SetPreviewMode(init.preview_mode);
-        mRuntime->Init();
-        mRuntime->SetSurfaceSize(init.surface_width, init.surface_height);
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime = std::make_unique<engine::LuaRuntime>("lua", init.game_script, mGameHome, init.application_name);
+        mLuaRuntime->SetClassLibrary(mClasslib);
+        mLuaRuntime->SetPhysicsEngine(&mPhysics);
+        mLuaRuntime->SetStateStore(&mStateStore);
+        mLuaRuntime->SetAudioEngine(mAudio.get());
+        mLuaRuntime->SetDataLoader(mEngineDataLoader);
+        mLuaRuntime->SetEditingMode(init.editing_mode);
+        mLuaRuntime->SetPreviewMode(init.preview_mode);
+        mLuaRuntime->Init();
+        mLuaRuntime->SetSurfaceSize(init.surface_width, init.surface_height);
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime = std::make_unique<engine::CppRuntime>();
+        mCppRuntime->SetClassLibrary(mClasslib);
+        mCppRuntime->SetPhysicsEngine(&mPhysics);
+        mCppRuntime->SetStateStore(&mStateStore);
+        mCppRuntime->SetAudioEngine(mAudio.get());
+        mCppRuntime->SetDataLoader(mEngineDataLoader);
+        mCppRuntime->SetEditingMode(init.editing_mode);
+        mCppRuntime->SetPreviewMode(init.preview_mode);
+        mCppRuntime->Init();
+        mCppRuntime->SetSurfaceSize(init.surface_width, init.surface_height);
+#endif
 
         mUIEngine.SetClassLibrary(mClasslib);
         mUIEngine.SetLoader(mEngineDataLoader);
@@ -451,7 +467,13 @@ public:
         k.type = klass.type;
         k.name = klass.name;
         k.id   = klass.id;
-        mRuntime->OnContentClassUpdate(k);
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->OnContentClassUpdate(k);
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->OnContentClassUpdate(k);
+#endif
     }
     void SetRendererConfig(const RendererConfig& config) override
     {
@@ -465,7 +487,12 @@ public:
         ASSERT(mUpdateTasks.empty());
 
         std::lock_guard<std::mutex> lock(mRuntimeLock);
-        mRuntime->LoadGame();
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->LoadGame();
+#endif
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->LoadGame();
+#endif
         return true;
     }
 
@@ -475,7 +502,13 @@ public:
         ASSERT(mUpdateTasks.empty());
 
         std::lock_guard<std::mutex> lock(mRuntimeLock);
-        mRuntime->StartGame();
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->StartGame();
+#endif
+        
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->StartGame();
+#endif
     }
     void SetDebugOptions(const DebugOptions& debug) override
     {
@@ -588,7 +621,12 @@ public:
             EngineRuntime runtime;
             runtime.scene    = mScene.get();
             runtime.tilemap  = mTilemap.get();
-            runtime.gamert   = mRuntime.get();
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+            runtime.lua_rt = mLuaRuntime.get();
+#endif
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+            runtime.cpp_rt = mCppRuntime.get();
+#endif
             runtime.physics  = &mPhysics;
             runtime.renderer = &mRenderer;
             runtime.ui       = &mUIEngine;
@@ -610,7 +648,18 @@ public:
     {
         std::lock_guard<std::mutex> lock(mRuntimeLock);
 
-        mRuntime->SetFrameNumber(++mFrameCounter);
+        ++mFrameCounter;
+
+        engine::GameRuntime* cpp_runtime = nullptr;
+        engine::GameRuntime* lua_runtime = nullptr;
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        lua_runtime = mLuaRuntime.get();
+        lua_runtime->SetFrameNumber(mFrameCounter);
+#endif
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        cpp_runtime = mCppRuntime.get();
+        cpp_runtime->SetFrameNumber(mFrameCounter);
+#endif
 
         // service the audio system once. We have to do this
         // in the main thread (same as drawing) because of
@@ -620,7 +669,10 @@ public:
             mAudio->Update(&audio_events);
             for (const auto& event : audio_events)
             {
-                mRuntime->OnAudioEvent(event);
+                if (lua_runtime)
+                    lua_runtime->OnAudioEvent(event);
+                if (cpp_runtime)
+                    cpp_runtime->OnAudioEvent(event);
             }
         );
     }
@@ -672,7 +724,12 @@ public:
                     EngineRuntime runtime;
                     runtime.scene    = mEngine->mScene.get();
                     runtime.tilemap  = mEngine->mTilemap.get();
-                    runtime.gamert   = mEngine->mRuntime.get();
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+                    runtime.lua_rt   = mEngine->mLuaRuntime.get();
+#endif
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+                    runtime.cpp_rt   = mEngine->mCppRuntime.get();
+#endif
                     runtime.physics  = &mEngine->mPhysics;
                     runtime.renderer = &mEngine->mRenderer;
                     runtime.ui       = &mEngine->mUIEngine;
@@ -706,8 +763,19 @@ public:
                 std::vector<engine::DebugDrawCmd> debug_draws;
                 {
                     std::lock_guard<std::mutex> lock(mEngine->mRuntimeLock);
-                    mEngine->mRuntime->TransferDebugQueue(&debug_draws);
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+                    std::vector<engine::DebugDrawCmd> lua_debug_draws;
+                    mEngine->mLuaRuntime->TransferDebugQueue(&lua_debug_draws);
+                    base::AppendVector(debug_draws, lua_debug_draws);
+#endif
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+                    std::vector<engine::DebugDrawCmd> cpp_debug_draws;
+                    mEngine->mCppRuntime->TransferDebugQueue(&cpp_debug_draws);
+                    base::AppendVector(debug_draws, cpp_debug_draws);
+#endif
+
                 }
+
                 {
                     std::lock_guard<std::mutex> lock(mEngine->mEngineLock);
                     std::swap(mEngine->mDebugDraws, debug_draws);
@@ -739,7 +807,12 @@ public:
             EngineRuntime runtime;
             runtime.scene    = mScene.get();
             runtime.tilemap  = mTilemap.get();
-            runtime.gamert   = mRuntime.get();
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+            runtime.glua_rt  = mLuaRuntime.get();
+#endif
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+            runtime.cpp_rt   = mCppRuntime.get();
+#endif
             runtime.physics  = &mPhysics;
             runtime.renderer = &mRenderer;
             runtime.ui       = &mUIEngine;
@@ -772,7 +845,17 @@ public:
             // if this is done per each frame they will not be seen
             // by the user if the rendering is running very fast.
             std::vector<engine::DebugDrawCmd> debug_draws;
-            mRuntime->TransferDebugQueue(&debug_draws);
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+            std::vector<engine::DebugDrawCmd> lua_debug_draws;
+            mLuaRuntime->TransferDebugQueue(&lua_debug_draws);
+            base::AppendVector(debug_draws, lua_debug_draws);
+#endif
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+            std::vector<engine::DebugDrawCmd> cpp_debug_draws;
+            mCppRuntime->TransferDebugQueue(&cpp_debug_draws);
+            base::AppendVector(debug_draws, cpp_debug_draws);
+#endif
+
             std::swap(mDebugDraws, debug_draws);
 #endif
         }
@@ -801,13 +884,22 @@ public:
         if (mActionDelay > 0.0f)
             return;
 
+        engine::GameRuntime* lua_runtime = nullptr;
+        engine::GameRuntime* cpp_runtime = nullptr;
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        lua_runtime = mLuaRuntime.get();
+#endif
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        cpp_runtime = mCppRuntime.get();
+#endif
         engine::Action action;
-        while (mRuntime->GetNextAction(&action))
+        while ((lua_runtime && lua_runtime->GetNextAction(&action)) ||
+               (cpp_runtime && cpp_runtime->GetNextAction(&action)))
         {
             std::visit([this](auto& variant_value) {
                 this->OnAction(variant_value);
             }, action);
-            // action delay can be changed by the delay action.
+
             if (mActionDelay > 0.0f)
                 break;
         }
@@ -820,7 +912,13 @@ public:
 
         std::lock_guard<std::mutex> lock(mRuntimeLock);
 
-        mRuntime->StopGame();
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->StopGame();
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->StopGame();
+#endif
     }
 
     void Save() override
@@ -831,7 +929,13 @@ public:
         std::lock_guard<std::mutex> lock(mRuntimeLock);
         ASSERT(mUpdateTasks.empty());
 
-        mRuntime->SaveGame();
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->SaveGame();
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->SaveGame();
+#endif
     }
 
     void Shutdown() override
@@ -849,11 +953,21 @@ public:
         mUIEngine.SetClassLibrary(nullptr);
         mUIEngine.SetLoader(nullptr);
 
-        mRuntime->SetClassLibrary(nullptr);
-        mRuntime->SetPhysicsEngine(nullptr);
-        mRuntime->SetStateStore(nullptr);
-        mRuntime->SetAudioEngine(nullptr);
-        mRuntime->SetDataLoader(nullptr);
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->SetClassLibrary(nullptr);
+        mLuaRuntime->SetPhysicsEngine(nullptr);
+        mLuaRuntime->SetStateStore(nullptr);
+        mLuaRuntime->SetAudioEngine(nullptr);
+        mLuaRuntime->SetDataLoader(nullptr);
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->SetClassLibrary(nullptr);
+        mCppRuntime->SetPhysicsEngine(nullptr);
+        mCppRuntime->SetStateStore(nullptr);
+        mCppRuntime->SetAudioEngine(nullptr);
+        mCppRuntime->SetDataLoader(nullptr);
+#endif
 
         mAudio->SetClassLibrary(nullptr);
         mAudio.reset();
@@ -985,8 +1099,16 @@ public:
 
         std::vector<engine::UIEngine::WidgetAction> actions;
         mUIEngine.OnKeyDown(key, &actions);
-        mRuntime->OnUIAction(mUIEngine.GetUI(), actions);
-        mRuntime->OnKeyDown(key);
+
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+        mLuaRuntime->OnKeyDown(key);
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+        mCppRuntime->OnKeyDown(key);
+#endif
     }
     void OnKeyUp(const wdk::WindowEventKeyUp& key) override
     {       
@@ -997,8 +1119,16 @@ public:
 
         std::vector<engine::UIEngine::WidgetAction> actions;
         mUIEngine.OnKeyUp(key, &actions);
-        mRuntime->OnUIAction(mUIEngine.GetUI(), actions);
-        mRuntime->OnKeyUp(key);
+
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+        mLuaRuntime->OnKeyUp(key);
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+        mCppRuntime->OnKeyUp(key);
+#endif
     }
     void OnChar(const wdk::WindowEventChar& text) override
     {
@@ -1006,7 +1136,14 @@ public:
             return;
 
         std::lock_guard<std::mutex> lock(mRuntimeLock);
-        mRuntime->OnChar(text);
+
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->OnChar(text);
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->OnChar(text);
+#endif
     }
     void OnMouseMove(const wdk::WindowEventMouseMove& mouse) override
     {
@@ -1020,7 +1157,14 @@ public:
 
         std::vector<engine::UIEngine::WidgetAction> actions;
         mUIEngine.OnMouseMove(mouse, &actions);
-        mRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+#endif
 
         const auto& mickey = MapGameMouseEvent(mouse);
         SendGameMouseEvent(mickey, &engine::GameRuntime::OnMouseMove);
@@ -1034,7 +1178,13 @@ public:
 
         std::vector<engine::UIEngine::WidgetAction> actions;
         mUIEngine.OnMousePress(mouse, &actions);
-        mRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+#endif
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+#endif
 
         const auto& mickey = MapGameMouseEvent(mouse);
         SendGameMouseEvent(mickey, &engine::GameRuntime::OnMousePress);
@@ -1048,7 +1198,13 @@ public:
 
         std::vector<engine::UIEngine::WidgetAction> actions;
         mUIEngine.OnMouseRelease(mouse, &actions);
-        mRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+#endif
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->OnUIAction(mUIEngine.GetUI(), actions);
+#endif
 
         const auto& mickey = MapGameMouseEvent(mouse);
         SendGameMouseEvent(mickey, &engine::GameRuntime::OnMouseRelease);
@@ -1084,8 +1240,15 @@ private:
     using GameMouseFunc = void (engine::GameRuntime::*)(const engine::MouseEvent&);
     void SendGameMouseEvent(const engine::MouseEvent& mickey, GameMouseFunc which)
     {
-        auto* game = mRuntime.get();
-        (game->*which)(mickey);
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        auto* lua_rt = mLuaRuntime.get();
+        (lua_rt->*which)(mickey);
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        auto* cpp_rt = mCppRuntime.get();
+        (cpp_rt->*which)(mickey);
+#endif
     }
 
     template<typename WdkMouseEvent>
@@ -1161,7 +1324,14 @@ private:
         mScene->SetMap(mTilemap.get());
 
         TRACE_CALL("Renderer::CreateState", mRenderer.CreateRendererState(*mScene, mTilemap.get()));
-        TRACE_CALL("Runtime::BeginPlay", mRuntime->BeginPlay(mScene.get(), mTilemap.get()));
+
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        TRACE_CALL("LuaRuntime::BeginPlay", mLuaRuntime->BeginPlay(mScene.get(), mTilemap.get()));
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        TRACE_CALL("CppRuntime::BeginPlay", mCppRuntime->BeginPlay(mScene.get(), mTilemap.get()));
+#endif
     }
     void OnAction(const engine::SuspendAction& action)
     {
@@ -1175,7 +1345,14 @@ private:
     {
         if (!mScene)
             return;
-        mRuntime->EndPlay(mScene.get(), mTilemap.get());
+
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->EndPlay(mScene.get(), mTilemap.get());
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->EndPlay(mScene.get(), mTilemap.get());
+#endif
         mScene.reset();
         mTilemap.reset();
         mPhysics.DeleteAll();
@@ -1236,7 +1413,13 @@ private:
     }
     void OnAction(const engine::PostEventAction& action)
     {
-        mRuntime->OnGameEvent(action.event);
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+        mLuaRuntime->OnGameEvent(action.event);
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+        mCppRuntime->OnGameEvent(action.event);
+#endif
     }
     void OnAction(const engine::ShowDeveloperUIAction& action)
     {
@@ -1274,11 +1457,19 @@ private:
         if (runtime.scene)
         {
             TRACE_CALL("Scene::BeginLoop", runtime.scene->BeginLoop());
-            TRACE_CALL("Runtime:BeginLoop", runtime.gamert->BeginLoop());
+
+            if (runtime.lua_rt)
+                TRACE_CALL("LuaRuntime::BeginLoop", runtime.lua_rt->BeginLoop());
+            if (runtime.cpp_rt)
+                TRACE_CALL("CppRuntime::BeginLoop", runtime.cpp_rt->BeginLoop());
 
             std::vector<game::Scene::Event> events;
             TRACE_CALL("Scene::Update", runtime.scene->Update(dt, &events));
-            TRACE_CALL("Runtime:OnSceneEvent", runtime.gamert->OnSceneEvent(events));
+
+            if (runtime.lua_rt)
+                TRACE_CALL("LuaRuntime::OnSceneEvent", runtime.lua_rt->OnSceneEvent(events));
+            if (runtime.cpp_rt)
+                TRACE_CALL("CppRuntime::OnSceneEvent", runtime.cpp_rt->OnSceneEvent(events));
 
             if (runtime.physics->HaveWorld())
             {
@@ -1293,11 +1484,17 @@ private:
                 // physics world to the scene and its entities.
                 TRACE_CALL("Physics::UpdateScene", runtime.physics->UpdateScene(*mScene));
                 // dispatch the contact events (if any).
-                TRACE_CALL("Runtime::OnContactEvents", runtime.gamert->OnContactEvent(contacts));
+                if (runtime.lua_rt)
+                    TRACE_CALL("LuaRuntime::OnContactEvents", runtime.lua_rt->OnContactEvent(contacts));
+                if (runtime.cpp_rt)
+                    TRACE_CALL("CppRuntime::OnContactEvents", runtime.cpp_rt->OnContactEvent(contacts));
             }
         }
 
-        TRACE_CALL("Runtime::Update", runtime.gamert->Update(game_time, dt));
+        if (runtime.lua_rt)
+            TRACE_CALL("LuaRuntime::Update", runtime.lua_rt->Update(game_time, dt));
+        if (runtime.cpp_rt)
+            TRACE_CALL("CppRuntime:Update", runtime.cpp_rt->Update(game_time, dt));
 
         // Tick game
         {
@@ -1308,7 +1505,10 @@ private:
 
             while (state.tick_accum >= state.tick_step)
             {
-                TRACE_CALL("Runtime::Tick", runtime.gamert->Tick(tick_time, mGameTickStep));
+                if (runtime.lua_rt)
+                    TRACE_CALL("LuaRuntime::Tick", runtime.lua_rt->Tick(tick_time, mGameTickStep));
+                if (runtime.cpp_rt)
+                    TRACE_CALL("CppRuntime:Tick", runtime.cpp_rt->Tick(tick_time, mGameTickStep));
                 state.tick_accum -= state.tick_step;
                 tick_time += state.tick_step;
             }
@@ -1342,37 +1542,83 @@ private:
             TRACE_CALL("Scene::Rebuild", runtime.scene->Rebuild());
             // using the time we've arrived to now after having taken the previous
             // delta step forward in game time.
-            TRACE_CALL("Runtime::PostUpdate", runtime.gamert->PostUpdate(game_time + dt));
+            if (runtime.lua_rt)
+                TRACE_CALL("LuaRuntime::PostUpdate", runtime.lua_rt->PostUpdate(game_time + dt));
+            if (runtime.cpp_rt)
+                TRACE_CALL("CppRuntime::PostUpdate", runtime.cpp_rt->PostUpdate(game_time + dt));
 
-            TRACE_CALL("Runtime::EndLoop", runtime.gamert->EndLoop());
+            if (runtime.lua_rt)
+                TRACE_CALL("LuaRuntime::EndLoop", runtime.lua_rt->EndLoop());
+            if (runtime.cpp_rt)
+                TRACE_CALL("CppRuntime::EndLoop", runtime.cpp_rt->EndLoop());
+
             TRACE_CALL("Scene::EndLoop", runtime.scene->EndLoop());
         }
 
-        runtime.gamert->GetCamera(&state.camera);
+        // this looks like a competition, but basically it's up to the game
+        // to make the right thing in terms of controlling the camera
+        // properly.
+        if (runtime.lua_rt)
+            runtime.lua_rt->GetCamera(&state.camera);
+        if (runtime.cpp_rt)
+            runtime.cpp_rt->GetCamera(&state.camera);
 
         std::vector<engine::UIEngine::WidgetAction> widget_actions;
         std::vector<engine::UIEngine::WindowAction> window_actions;
         TRACE_CALL("UI::UpdateWindow", runtime.ui->UpdateWindow(game_time, dt, &widget_actions));
         TRACE_CALL("UI::UpdateState", runtime.ui->UpdateState(game_time, dt, &window_actions));
 
-        TRACE_BLOCK("Runtime::UpdateUI",
+        TRACE_BLOCK("LuaRuntime::UpdateUI",
             if (auto* ui = runtime.ui->GetUI())
             {
-                runtime.gamert->OnUIAction(ui, widget_actions);
-                runtime.gamert->UpdateUI(ui, game_time, dt);
+                if (runtime.lua_rt)
+                {
+                    runtime.lua_rt->OnUIAction(ui, widget_actions);
+                    runtime.lua_rt->UpdateUI(ui, game_time, dt);
+                }
             }
         );
 
-        TRACE_BLOCK("Runtime::HandleUI",
-            for (const auto& w : window_actions)
+        TRACE_BLOCK("CppRuntime::UpdateUI",
+            if (auto* ui = runtime.ui->GetUI())
             {
-                if (const auto* ptr = std::get_if<engine::UIEngine::WindowOpen>(&w))
-                    runtime.gamert->OnUIOpen(ptr->window);
-                else if (const auto* ptr = std::get_if<engine::UIEngine::WindowUpdate>(&w))
-                    runtime.gamert->SetCurrentUI(ptr->window);
-                else if(const auto* ptr = std::get_if<engine::UIEngine::WindowClose>(&w))
-                    runtime.gamert->OnUIClose(ptr->window.get(), ptr->result);
-                else BUG("Missing UIEngine window event handling.");
+                if (runtime.cpp_rt)
+                {
+                    runtime.cpp_rt->OnUIAction(ui, widget_actions);
+                    runtime.cpp_rt->UpdateUI(ui, game_time, dt);
+                }
+            }
+        );
+
+        TRACE_BLOCK("LuaRuntime::HandleUI",
+            if (runtime.lua_rt)
+            {
+                for (const auto& w : window_actions)
+                {
+                    if (const auto* ptr = std::get_if<engine::UIEngine::WindowOpen>(&w))
+                        runtime.lua_rt->OnUIOpen(ptr->window);
+                    else if (const auto* ptr = std::get_if<engine::UIEngine::WindowUpdate>(&w))
+                        runtime.lua_rt->SetCurrentUI(ptr->window);
+                    else if(const auto* ptr = std::get_if<engine::UIEngine::WindowClose>(&w))
+                        runtime.lua_rt->OnUIClose(ptr->window.get(), ptr->result);
+                    else BUG("Missing UIEngine window event handling.");
+                }
+            }
+        );
+
+        TRACE_BLOCK("CppRuntime::HandleUI",
+            if (runtime.cpp_rt)
+            {
+                for (const auto& w : window_actions)
+                {
+                    if (const auto* ptr = std::get_if<engine::UIEngine::WindowOpen>(&w))
+                        runtime.cpp_rt->OnUIOpen(ptr->window);
+                    else if (const auto* ptr = std::get_if<engine::UIEngine::WindowUpdate>(&w))
+                        runtime.cpp_rt->SetCurrentUI(ptr->window);
+                    else if(const auto* ptr = std::get_if<engine::UIEngine::WindowClose>(&w))
+                        runtime.cpp_rt->OnUIClose(ptr->window.get(), ptr->result);
+                    else BUG("Missing UIEngine window event handling.");
+                }
             }
         );
     }
@@ -1720,8 +1966,14 @@ private:
     engine::UIEngine mUIEngine;
     // The audio engine.
     std::unique_ptr<engine::AudioEngine> mAudio;
-    // The game runtime that runs the actual game logic.
-    std::unique_ptr<engine::GameRuntime> mRuntime;
+
+#if defined(ENGINE_ENABLE_LUA_SCRIPTING)
+    std::unique_ptr<engine::LuaRuntime> mLuaRuntime;
+#endif
+
+#if defined(ENGINE_ENABLE_CPP_SCRIPTING)
+    std::unique_ptr<engine::CppRuntime> mCppRuntime;
+#endif
     // Current game scene or nullptr if no scene.
     std::unique_ptr<game::Scene> mScene;
     // Current tilemap or nullptr if no map.

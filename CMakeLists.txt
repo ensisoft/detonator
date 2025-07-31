@@ -320,6 +320,8 @@ add_library(GameLib
 add_library(EngineLib
     engine/audio.cpp
     engine/camera.cpp
+    engine/context.cpp
+    engine/cpp_game_runtime.cpp
     engine/engine-logo.cpp
     engine/engine.cpp
     engine/graphics.cpp
@@ -971,7 +973,7 @@ endif()
 install(TARGETS GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # generic game engine library.
-add_library(GameEngine SHARED engine/engine.cpp engine/library/library.cpp)
+add_library(GameEngine SHARED engine/engine.cpp engine/game_dummy.cpp engine/library/library.cpp)
 target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
 target_link_libraries(GameEngine PRIVATE GameLib EngineLib GfxLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(GameEngine PRIVATE ${CONAN_LIBS})
@@ -1178,6 +1180,7 @@ add_library(EngineLibTesting
     engine/audio.cpp
     engine/physics.cpp
     engine/renderer.cpp
+    engine/context.cpp
     engine/camera.cpp
     engine/graphics.cpp
     engine/lua_game_runtime.cpp

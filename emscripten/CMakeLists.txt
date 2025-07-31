@@ -102,6 +102,7 @@ add_executable(UnitTest
     ../graphics/material_instance.cpp
     ../engine/audio.cpp
     ../engine/camera.cpp
+    ../engine/context.cpp
     ../engine/lua_base.cpp
     ../engine/lua_data.cpp
     ../engine/lua_game.cpp
@@ -313,6 +314,8 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../game/transform_animator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../engine/audio.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../engine/camera.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../engine/context.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../engine/cpp_game_runtime.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../engine/engine.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../engine/engine-logo.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../engine/graphics.cpp
@@ -449,7 +452,8 @@ list(APPEND ENGINE_LINK_OPTIONS -sTEXTDECODER=0)
 list(APPEND ENGINE_LINK_OPTIONS -sPTHREAD_POOL_SIZE=4)
 
 #### BUILD DEFAULT GAME ENGINE
-add_executable(GameEngine ${ENGINE_SRC})
+add_executable(GameEngine ${ENGINE_SRC}
+        ${CMAKE_CURRENT_LIST_DIR}/../engine/game_dummy.cpp)
 
 target_compile_definitions(GameEngine PRIVATE ${ENGINE_DEF})
 target_compile_options(GameEngine PRIVATE ${ENGINE_COMPILE_OPTIONS})
