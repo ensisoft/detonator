@@ -91,6 +91,8 @@ end
     });
 
     // general application settings.
+    SetUIValue(mUI.edtCodeEditorExecutable,     settings.code_editor_executable);
+    SetUIValue(mUI.edtCodeEditorArguments,      settings.code_editor_arguments);
     SetUIValue(mUI.edtImageEditorExecutable,    settings.image_editor_executable);
     SetUIValue(mUI.edtImageEditorArguments,     settings.image_editor_arguments);
     SetUIValue(mUI.edtShaderEditorExecutable,   settings.shader_editor_executable);
@@ -162,6 +164,8 @@ void DlgSettings::UpdateSampleCode()
 void DlgSettings::on_btnAccept_clicked()
 {
     // general settings
+    GetUIValue(mUI.edtCodeEditorExecutable,     &mSettings.code_editor_executable);
+    GetUIValue(mUI.edtCodeEditorArguments,      &mSettings.code_editor_arguments);
     GetUIValue(mUI.edtImageEditorExecutable,    &mSettings.image_editor_executable);
     GetUIValue(mUI.edtImageEditorArguments,     &mSettings.image_editor_arguments);
     GetUIValue(mUI.edtShaderEditorExecutable,   &mSettings.shader_editor_executable);
@@ -214,6 +218,24 @@ void DlgSettings::on_btnAccept_clicked()
 void DlgSettings::on_btnCancel_clicked()
 {
     reject();
+}
+
+void DlgSettings::on_btnSelectCodeEditor_clicked()
+{
+    QString filter;
+
+#if defined(WINDOWS_OS)
+    filter = "Executables (*.exe)";
+#endif
+
+    const QString& executable = QFileDialog::getOpenFileName(this,
+        tr("Select Application"), QString(), filter);
+    if (executable.isEmpty())
+        return;
+
+    const QFileInfo info(executable);
+    mUI.edtCodeEditorExecutable->setText(QDir::toNativeSeparators(executable));
+    mUI.edtCodeEditorExecutable->setCursorPosition(0);
 }
 
 void DlgSettings::on_btnSelectImageEditor_clicked()

@@ -1157,6 +1157,8 @@ void Workspace::ScanCppSources()
         else
         {
             CppSource s;
+            s.SetFileURI("ws://cpp/" + file);
+
             auto resource = std::make_unique<CppSourceResource>(s, file);
             resource->SetProperty("__file_name__", file);
             resource->SetProperty("__tick__", (unsigned)mTickCount);

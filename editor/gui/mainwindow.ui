@@ -1719,7 +1719,7 @@
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QVBoxLayout" name="verticalLayout_8">
      <item>
-      <widget class="gui::GfxWidget" name="preview" native="true"/>
+      <widget class="gui::GfxWidget" name="preview"/>
      </item>
     </layout>
    </widget>
@@ -2367,7 +2367,7 @@
      <normaloff>:/16x16_ico_png/rename.png</normaloff>:/16x16_ico_png/rename.png</iconset>
    </property>
    <property name="text">
-    <string>Rename ...</string>
+    <string>Rename...</string>
    </property>
    <property name="toolTip">
     <string>Rename selected resource(s)</string>
@@ -2699,6 +2699,18 @@
    </property>
    <property name="text">
     <string>Pop Out</string>
+   </property>
+  </action>
+  <action name="actionEditResourceExternally">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/cpp.png</normaloff>:/16x16_ico_png/cpp.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open in External Editor</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit the resource in an external editor</string>
    </property>
   </action>
  </widget>

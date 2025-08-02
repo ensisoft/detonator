@@ -148,6 +148,7 @@ namespace gui
         void on_actionEditResource_triggered();
         void on_actionEditResourceNewWindow_triggered();
         void on_actionEditResourceNewTab_triggered();
+        void on_actionEditResourceExternally_triggered();
         void on_actionDeleteResource_triggered();
         void on_actionRenameResource_triggered();
         void on_actionDuplicateResource_triggered();
@@ -202,6 +203,7 @@ namespace gui
         void OpenExternalShader(const QString& file);
         void OpenExternalScript(const QString& file);
         void OpenExternalAudio(const QString& file);
+        void OpenExternalSourceFile(const QString& file);
         void OpenNewWidget(gui::MainWidget* widget);
         bool FocusWidget(const QString& id);
         void ActOnWidget(const QString& action);
