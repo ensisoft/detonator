@@ -16,17 +16,18 @@
 
 #include "config.h"
 
+#include "base/warnpush.h"
+#  include <locale>
+#include "base/warnpop.h"
+
 #include <cstdio>
-#include <locale>
 #include <codecvt>
 #include <cctype>
+
 #include "base/types.h"
 #include "base/format.h"
 
-#if defined(__MSVC__)
-#  pragma warning(push)
-#  pragma warning(disable: 4996) // deprecated use of wstring_convert
-#endif
+#include "base/warnpush.h"
 
 namespace base {
 namespace detail {
@@ -327,6 +328,4 @@ Color4f ColorFromHex(const std::string& str, const Color4f& backup)
 
 } // namespace
 
-#if defined(__MSVC__)
-#  pragma warning(pop) // deprecated use of wstring_convert
-#endif
+#include "base/warnpop.h"
