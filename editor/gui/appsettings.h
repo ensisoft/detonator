@@ -75,6 +75,10 @@ namespace gui
         // managers.
         QString style_name = "DETONATOR";
 
+        // C++ code editor and arguments
+        QString code_editor_executable;
+        QString code_editor_arguments = "${file}";
+
         // Whether to save widgets with unsaved changes automatically
         // on play or whether to ask
         bool save_automatically_on_play = false;
