@@ -195,7 +195,7 @@ namespace base
         {
             other.mFile = nullptr;
         }
-       ~TextFileTraceWriter() override;
+       ~TextFileTraceWriter() noexcept override;
         TextFileTraceWriter() = delete;
         void Write(const TraceEntry& entry) override;
         void Write(const struct TraceEvent& event) override;
@@ -215,7 +215,7 @@ namespace base
             other.mFile = nullptr;
         }
         ChromiumTraceJsonWriter(const ChromiumTraceJsonWriter&) = delete;
-       ~ChromiumTraceJsonWriter() override;
+       ~ChromiumTraceJsonWriter() noexcept override;
         ChromiumTraceJsonWriter() = delete;
 
         void Write(const TraceEntry& entry) override;
