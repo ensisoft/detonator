@@ -92,11 +92,12 @@
 #endif
 
 #if defined(__EMSCRIPTEN__)
+#  define __CLANG__
 #  define WASM
 #  define WEBASSEMBLY
 #  define WEBGL
-#  define COMPILER_NAME "emscripten"
-#  define COMPILER_VERSION "xxxx"
+#  define COMPILER_NAME "emcc"
+#  define COMPILER_VERSION __clang_version__
 // emscripten tries to be posix compatible to some extent
 #  define POSIX_OS
 #endif
