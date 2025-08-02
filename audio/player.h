@@ -75,21 +75,21 @@ namespace audio
         };
 
         // Source event during audio playback.
-        struct SourceEvent {
+        struct SourceEventEvent {
             // the id of the track/source that generated the event.
             std::size_t id = 0;
             // the actual event object. see the source implementations
             // for possible events.
-            std::unique_ptr<Event> event;
+            std::unique_ptr<audio::Event> event;
         };
 
         using Event = std::variant<SourceCompleteEvent,
-                SourceEvent, SourceProgressEvent>;
+                SourceEventEvent, SourceProgressEvent>;
 
         // Create a new audio player using the given audio device.
-        Player(std::unique_ptr<Device> device);
+        explicit Player(std::unique_ptr<Device> device);
         // dtor.
-       ~Player();
+       ~Player() noexcept;
 
         // Play the audio samples sourced from the source object.
         // Returns an identifier for the audio stream that can then be used

@@ -135,7 +135,7 @@ namespace engine
         void EnableAudioThreadTrace(bool on_off);
     private:
         void OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event, AudioEventQueue* events);
-        void OnAudioPlayerEvent(const audio::Player::SourceEvent& event, AudioEventQueue* events);
+        void OnAudioPlayerEvent(const audio::Player::SourceEventEvent& event, AudioEventQueue* events);
     private:
         class AudioBuffer;
         const audio::Loader* mLoader = nullptr;
