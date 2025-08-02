@@ -312,6 +312,16 @@ void DlgVCS::BeginScan()
 
         // should we ignore this file?
         bool ignore_this_file = false;
+        bool native_source_file = false;
+
+        if (vcs_file.endsWith(".cpp") ||
+            vcs_file.endsWith(".h") ||
+            vcs_file.contains("CMakeLists.txt"))
+        {
+            native_source_file = true;
+            AppendLog(app::toString("File requires manual action. '%1'", vcs_file));
+        }
+
         for (const auto& ignore : ignore_list) {
             if (vcs_file.contains(ignore, Qt::CaseInsensitive))
             {
@@ -327,14 +337,26 @@ void DlgVCS::BeginScan()
 
         vcs_set.insert(vcs_file);
 
-        // if the file is no longer in the set of resource files we're
-        // adding an action for deleting it.
-        if (!base::Contains(uri_set, vcs_file))
+        // we don't have good integration with native game specific
+        // engine source files yet (.cpp, .h files) so for now just
+        // record the file in the table of files but don't perform
+        // any action on them.
+        if (native_source_file)
         {
             TableModel::FileResource file;
-            file.sync = TableModel::SyncAction::Delete;
+            file.sync   = TableModel::SyncAction::None;
             file.status = TableModel::FileStatus::Found;
-            file.file = vcs_file;
+            file.file   = vcs_file;
+            mModel->AddItem(std::move(file));
+        }
+        else if (!base::Contains(uri_set, vcs_file))
+        {
+            // if the file is no longer in the set of resource files we're
+            // adding an action for deleting it.
+            TableModel::FileResource file;
+            file.sync   = TableModel::SyncAction::Delete;
+            file.status = TableModel::FileStatus::Found;
+            file.file   = vcs_file;
             mModel->AddItem(std::move(file));
         }
     }
