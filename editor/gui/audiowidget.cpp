@@ -1298,7 +1298,7 @@ void AudioWidget::Refresh()
     {
         if (const auto* ptr = std::get_if<audio::Player::SourceCompleteEvent>(&event))
             OnAudioPlayerEvent(*ptr);
-        else if (const auto* ptr = std::get_if<audio::Player::SourceEvent>(&event))
+        else if (const auto* ptr = std::get_if<audio::Player::SourceEventEvent>(&event))
             OnAudioPlayerEvent(*ptr);
         else if (const auto* ptr = std::get_if<audio::Player::SourceProgressEvent>(&event))
             OnAudioPlayerEvent(*ptr);
@@ -2335,7 +2335,7 @@ void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceProgressEvent& e
         mPlayTime = event.time / 1000.0;
 }
 
-void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceEvent& event)
+void AudioWidget::OnAudioPlayerEvent(const audio::Player::SourceEventEvent& event)
 {
 
 }

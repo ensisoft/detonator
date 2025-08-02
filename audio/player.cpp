@@ -56,7 +56,7 @@ Player::Player(std::unique_ptr<Device> device)
 #endif
 }
 
-Player::~Player()
+Player::~Player() noexcept
 {
 #if defined(AUDIO_USE_PLAYER_THREAD)
     // signal the audio thread to exit
@@ -312,7 +312,7 @@ void Player::RunAudioUpdateOnce(Device& device, std::list<Track>& track_list)
         // propagate events from the stream/source if any.
         while (auto event = track.stream->GetEvent())
         {
-            SourceEvent ev;
+            SourceEventEvent ev;
             ev.id    = track.id;
             ev.event = std::move(event);
             std::lock_guard<std::mutex> lock(event_mutex_);

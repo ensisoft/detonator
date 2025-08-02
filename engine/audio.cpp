@@ -351,7 +351,7 @@ void AudioEngine::Update(AudioEventQueue* events)
     {
         if (const auto* ptr = std::get_if<audio::Player::SourceCompleteEvent>(&event))
             OnAudioPlayerEvent(*ptr, events);
-        else if (const auto* ptr = std::get_if<audio::Player::SourceEvent>(&event))
+        else if (const auto* ptr = std::get_if<audio::Player::SourceEventEvent>(&event))
             OnAudioPlayerEvent(*ptr, events);
         else BUG("Unexpected audio player event.");
     }
@@ -364,7 +364,7 @@ void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& e
 
     // intentionally empty for now.
 }
-void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEvent& event, AudioEventQueue* events)
+void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEventEvent& event, AudioEventQueue* events)
 {
     if (event.id == mAudioGraphId)
         DEBUG("Audio engine music+effect graph source event.");

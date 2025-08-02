@@ -111,7 +111,7 @@ namespace gui
         void UpdateElementList();
         void OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event);
         void OnAudioPlayerEvent(const audio::Player::SourceProgressEvent& event);
-        void OnAudioPlayerEvent(const audio::Player::SourceEvent& event);
+        void OnAudioPlayerEvent(const audio::Player::SourceEventEvent& event);
         virtual void keyPressEvent(QKeyEvent* key) override;
     private slots:
         void on_btnSelectFile_clicked();
