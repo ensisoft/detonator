@@ -259,6 +259,7 @@ MainWindow::~MainWindow()
 void MainWindow::LoadSettings()
 {
 #if defined(POSIX_OS)
+    mSettings.code_editor_executable   = "/usr/bin/code";
     mSettings.image_editor_executable  = "/usr/bin/gimp";
     mSettings.shader_editor_executable = "/usr/bin/gedit";
     mSettings.script_editor_executable = "/usr/bin/gedit";
@@ -267,6 +268,7 @@ void MainWindow::LoadSettings()
     mSettings.vcs_executable           = "/usr/bin/git";
     // no emsdk selected, user has to do that :(
 #elif defined(WINDOWS_OS)
+    mSettings.code_editor_executable   = "vscode.exe";
     mSettings.image_editor_executable  = "mspaint.exe";
     mSettings.shader_editor_executable = "notepad.exe";
     mSettings.script_editor_executable = "notepad.exe";
@@ -274,7 +276,7 @@ void MainWindow::LoadSettings()
     // use python from emssdk ? use python packaged with gamestudio ?
     // emsdk must be selected in any case.
     mSettings.python_executable = app::GetAppInstFilePath("python/python.exe");
-    mSettings.vcs_executable           = "C:\\Program Files\\Git\\cmd\\git.exe";
+    mSettings.vcs_executable    = "C:\\Program Files\\Git\\cmd\\git.exe";
 
 #endif
     mSettings.vcs_cmd_commit_file = "add -f ${file}";
@@ -289,6 +291,8 @@ void MainWindow::LoadSettings()
         WARN("Failed to load application settings.");
         return;
     }
+    settings.GetValue("Settings", "code_editor_executable",     &mSettings.code_editor_executable);
+    settings.GetValue("Settings", "code_editor_arguments",      &mSettings.code_editor_arguments);
     settings.GetValue("Settings", "image_editor_executable",    &mSettings.image_editor_executable);
     settings.GetValue("Settings", "image_editor_arguments",     &mSettings.image_editor_arguments);
     settings.GetValue("Settings", "shader_editor_executable",   &mSettings.shader_editor_executable);
@@ -1684,6 +1688,31 @@ void MainWindow::on_actionEditResourceNewTab_triggered()
     EditResources(open_new_window);
 }
 
+void MainWindow::on_actionEditResourceExternally_triggered()
+{
+    const auto& selected = GetSelection(mUI.workspace);
+    for (int i=0; i<selected.size(); ++i)
+    {
+        const auto& resource = mWorkspace->GetResource(selected[i].row());
+        if (resource.IsCppSource())
+        {
+
+            const app::CppSource* source = nullptr;
+            resource.GetContent(&source);
+            const auto& file = mWorkspace->MapFileToFilesystem(source->GetFileURI());
+
+            OpenExternalSourceFile(file);
+        }
+        else if (resource.IsScript())
+        {
+            const app::Script* script = nullptr;
+            resource.GetContent(&script);
+            const auto& file = mWorkspace->MapFileToFilesystem(script->GetFileURI());
+
+            OpenExternalScript(file);
+        }
+    }
+}
 
 void MainWindow::on_actionDeleteResource_triggered()
 {
@@ -2193,6 +2222,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     mUI.actionEditResource->setEnabled(!indices.isEmpty());
     mUI.actionEditResourceNewWindow->setEnabled(!indices.isEmpty());
     mUI.actionEditResourceNewTab->setEnabled(!indices.isEmpty());
+    mUI.actionEditResourceExternally->setEnabled(!indices.isEmpty());
     mUI.actionExportJSON->setEnabled(!indices.isEmpty());
     mUI.actionImportJSON->setEnabled(mWorkspace != nullptr);
     mUI.actionExportZIP->setEnabled(!indices.isEmpty());
@@ -2233,6 +2263,9 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
             SetEnabled(mUI.actionEditResourceNewTab, false);
             SetEnabled(mUI.actionEditResourceNewWindow, false);
         }
+
+        if (!(resource.IsCppSource() || resource.IsScript()))
+            SetEnabled(mUI.actionEditResourceExternally, false);
     }
 
     QMenu show;
@@ -2299,6 +2332,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
     menu.addAction(mUI.actionEditResourceNewTab);
+    menu.addAction(mUI.actionEditResourceExternally);
     menu.addSeparator();
     menu.addAction(mUI.actionRenameResource);
     menu.addAction(mUI.actionEditTags);
@@ -2355,6 +2389,18 @@ void MainWindow::on_actionSelectResourceForEditing_triggered()
         msg.exec();
         return;
     }
+    else if (resource->IsCppSource())
+    {
+        const app::CppSource* source = nullptr;
+        resource->GetContent(&source);
+
+        const auto& file = mWorkspace->MapFileToFilesystem(source->GetFileURI());
+
+        OpenExternalSourceFile(file);
+        return;
+    }
+
+
     if (!FocusWidget(resource->GetId()))
     {
         const auto new_window = dlg.GetOpenMode() == "Window";
@@ -2745,14 +2791,14 @@ void MainWindow::OpenExternalScript(const QString& file)
         QMessageBox msg;
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msg.setIcon(QMessageBox::Question);
-        msg.setText("You haven't configured any external application for script files.\n"
+        msg.setText("You haven't configured any external code editor for script files.\n"
                     "Would you like to set one now?");
         if (msg.exec() == QMessageBox::No)
             return;
         on_actionSettings_triggered();
         if (mSettings.script_editor_executable.isEmpty())
         {
-            ERROR("No shader editor has been configured.");
+            ERROR("No Lua code editor has been configured.");
             return;
         }
     }
@@ -2785,6 +2831,33 @@ void MainWindow::OpenExternalAudio(const QString& file)
     args.executable_args   = mSettings.audio_editor_arguments;
     args.executable_binary = mSettings.audio_editor_executable;
     args.file_arg = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
+    app::LaunchExternalApplication(args);
+}
+
+void MainWindow::OpenExternalSourceFile(const QString& file)
+{
+    if (mSettings.code_editor_executable.isEmpty())
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setText(tr("You haven't configured any external code editor for editing C++ files.\n"
+                       "Would you like to set one now?"));
+        msg.setIcon(QMessageBox::Icon::Question);
+        if (msg.exec() == QMessageBox::No)
+            return;
+
+        on_actionSettings_triggered();
+    }
+    if (mSettings.code_editor_executable.isEmpty())
+    {
+        ERROR("No C++ code editor has been configured. ");
+        return;
+    }
+
+    app::ExternalApplicationArgs args;
+    args.executable_args = mSettings.code_editor_arguments;
+    args.executable_binary = mSettings.code_editor_executable;
+    args.file_arg = QDir::toNativeSeparators(file);
     app::LaunchExternalApplication(args);
 }
 
@@ -3567,6 +3640,8 @@ void MainWindow::BuildRecentWorkspacesMenu()
 void MainWindow::SaveSettings()
 {
     Settings settings("Ensisoft", "Gamestudio Editor");
+    settings.SetValue("Settings", "code_editor_executable",     mSettings.code_editor_executable);
+    settings.SetValue("Settings", "code_editor_arguments",      mSettings.code_editor_arguments);
     settings.SetValue("Settings", "image_editor_executable",    mSettings.image_editor_executable);
     settings.SetValue("Settings", "image_editor_arguments",     mSettings.image_editor_arguments);
     settings.SetValue("Settings", "shader_editor_executable",   mSettings.shader_editor_executable);
@@ -3878,6 +3953,11 @@ void MainWindow::EditResources(bool open_new_window)
         }
         else if (resource.IsCppSource())
         {
+            const app::CppSource* source = nullptr;
+            resource.GetContent(&source);
+            const auto& file = mWorkspace->MapFileToFilesystem(source->GetFileURI());
+
+            OpenExternalSourceFile(file);
             continue;
         }
 
