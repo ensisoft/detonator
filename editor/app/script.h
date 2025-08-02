@@ -37,7 +37,8 @@ namespace app
                 Unspecified,
                 External,
                 TilemapData,
-                ScriptData
+                ScriptData,
+                CppSource
             };
 
             FileResource()
@@ -96,7 +97,9 @@ namespace app
             TypeTag mTypeTag = TypeTag::Unspecified;
         };
     } // detail
-    using Script = detail::FileResource<0>;
-    using DataFile = detail::FileResource<1>;
+
+    using Script    = detail::FileResource<0>;
+    using DataFile  = detail::FileResource<1>;
+    using CppSource = detail::FileResource<2>;
 
 } // namespace
