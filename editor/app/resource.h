@@ -95,7 +95,9 @@ namespace app
             // it's a UI / window description
             UI,
             // It's a tilemap
-            Tilemap
+            Tilemap,
+            // Native C++ source/header file.
+            CppSource
         };
         virtual ~Resource() = default;
         // Get the identifier of the class object type.
@@ -194,6 +196,16 @@ namespace app
         { return GetType() == Type::Tilemap; }
         inline bool IsDrawable() const
         { return GetType() == Type::Drawable; }
+        inline bool IsCppSource() const
+        { return GetType() == Type::CppSource; }
+
+        inline bool IsTransient() const
+        {
+            const auto type = GetType();
+            if (type == Type::CppSource)
+                return true;
+            return false;
+        }
 
         inline bool IsAnyDrawableType() const
         {
@@ -336,6 +348,8 @@ namespace app
                     return QIcon("icons:ui.png");
                 case Resource::Type::Tilemap:
                     return QIcon("icons:tilemap.png");
+                case Resource::Type::CppSource:
+                    return QIcon("icons:cpp.png");
                 default: break;
             }
             return QIcon();
@@ -402,6 +416,10 @@ namespace app
         template<>
         struct ResourceTypeTraits<uik::Window> {
             static constexpr auto Type = app::Resource::Type::UI;
+        };
+        template<>
+        struct ResourceTypeTraits<CppSource> {
+            static constexpr auto Type = app::Resource::Type::CppSource;
         };
 
         template<typename ResourceType> inline
@@ -766,9 +784,10 @@ namespace app
     using SceneResource          = GameResource<game::SceneClass>;
     using TilemapResource        = GameResource<game::TilemapClass>;
     using AudioResource          = GameResource<audio::GraphClass>;
+    using UIResource             = GameResource<uik::Window>;
     using ScriptResource         = GameResource<Script>;
     using DataResource           = GameResource<DataFile>;
-    using UIResource             = GameResource<uik::Window>;
+    using CppSourceResource      = GameResource<CppSource>;
 
     template<typename DerivedType>
     using DrawableResource = GameResource<gfx::DrawableClass, DerivedType>;

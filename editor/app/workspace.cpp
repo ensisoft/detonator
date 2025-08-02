@@ -1123,6 +1123,87 @@ AnyString Workspace::MapFileToFilesystem(const AnyString& uri) const
     return MapUriToFile(uri, mWorkspaceDir);
 }
 
+void Workspace::ScanCppSources()
+{
+    QStringList filters;
+    filters << "*.cpp";
+    filters << "*.h";
+
+    QDir dir;
+    dir.setPath(JoinPath(mWorkspaceDir, "cpp"));
+    dir.setNameFilters(filters);
+    const auto& files = dir.entryList();
+
+    for (const auto& file: files)
+    {
+        VERBOSE("Found engine source file. '%1'", file);
+        Resource* resource = nullptr;
+        for (size_t i=0; i<mUserResourceCount; ++i)
+        {
+            auto* res = mResources[i].get();
+            if (!res->IsCppSource())
+                continue;
+            QString name;
+            res->GetProperty("__file_name__", &name);
+            if (name != file)
+                continue;
+            resource = res;
+            break;
+        }
+        if (resource)
+        {
+            resource->SetProperty("__tick__", (unsigned)mTickCount);
+        }
+        else
+        {
+            CppSource s;
+            auto resource = std::make_unique<CppSourceResource>(s, file);
+            resource->SetProperty("__file_name__", file);
+            resource->SetProperty("__tick__", (unsigned)mTickCount);
+
+            beginInsertRows(QModelIndex(), mUserResourceCount, mUserResourceCount);
+            // insert at the end of the visible range which is from [0, mUserResourceCount)
+            mResources.insert(mResources.begin() + mUserResourceCount, std::move(resource));
+            // careful! endInsertRows will trigger the view proxy to re-fetch the contents.
+            // make sure to update this property before endInsertRows otherwise
+            // we'll hit ASSERT incorrectly in GetUserDefinedMaterial
+            mUserResourceCount++;
+
+            endInsertRows();
+        }
+    }
+
+    std::vector<size_t> graveyard;
+    for (size_t i=0; i<mUserResourceCount; ++i)
+    {
+        const auto* res = mResources[i].get();
+        if (!res->IsCppSource())
+            continue;
+
+        unsigned tick = 0;
+        res->GetProperty("__tick__", &tick);
+        if (tick == mTickCount)
+            continue;
+
+        graveyard.push_back(i);
+    }
+    std::reverse(graveyard.begin(), graveyard.end());
+
+    for (auto dead_index : graveyard)
+    {
+        const auto row = static_cast<int>(dead_index);
+        beginRemoveRows(QModelIndex(), row, row);
+
+        auto it = std::begin(mResources);
+        std::advance(it, dead_index);
+
+        mResources.erase(it);
+        mUserResourceCount--;
+
+        endRemoveRows();
+    }
+}
+
 bool Workspace::LoadContent(const QString& filename, ResourceMigrationLog* log, WorkspaceAsyncWorkObserver* observer)
 {
     data::JsonFile file;
@@ -1220,6 +1301,9 @@ bool Workspace::SaveContent(const QString& filename) const
     data::JsonObject root;
     for (const auto& resource : mResources)
     {
+        if (resource->IsTransient())
+            continue;
+
         // skip persisting primitive resources since they're always
         // created as part of the workspace creation and their resource
         // IDs are fixed.
@@ -1263,7 +1347,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     // resource object.
     for (const auto& resource : mResources)
     {
-        if (resource->IsPrimitive())
+        if (resource->IsPrimitive() || resource->IsTransient())
             continue;
         resource->SaveProperties(json);
     }
@@ -1288,7 +1372,7 @@ void Workspace::SaveUserSettings(const QString& filename) const
     json["user"] = QJsonObject::fromVariantMap(mUserProperties);
     for (const auto& resource : mResources)
     {
-        if (resource->IsPrimitive())
+        if (resource->IsPrimitive() || resource->IsTransient())
             continue;
         resource->SaveUserProperties(json);
     }
@@ -2051,6 +2135,8 @@ void Workspace::DuplicateResources(const ModelIndexList& list, QModelIndexList* 
     {
         const auto row_index = indices[i];
         const auto& src_resource = GetResource(row_index);
+        if (src_resource.IsTransient())
+            continue;
 
         auto cpy_resource = src_resource.Clone();
         cpy_resource->SetName(QString("Copy of %1").arg(src_resource.GetName()));
@@ -2274,7 +2360,12 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
 
 void Workspace::Tick()
 {
+    if ((mTickCount % 10) == 0)
+    {
+        ScanCppSources();
+    }
 
+    ++mTickCount;
 }
 
 bool Workspace::ExportResourceArchive(const std::vector<const Resource*>& resources, const ExportOptions& options)
