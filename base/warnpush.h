@@ -44,6 +44,7 @@
 #  pragma clang diagnostic ignored "-Wc++11-long-long"
 #  pragma clang diagnostic ignored "-Winconsistent-missing-override"
 #  pragma clang diagnostic ignored "-Wunused-local-typedefs"
+#  pragma clang diagnostic ignored "-Wunknown-warning-option"
 #elif defined(__MSVC__)
 #  pragma warning(push)
 #  pragma warning(disable: 4091) // msvs14 DbgHelp.h
