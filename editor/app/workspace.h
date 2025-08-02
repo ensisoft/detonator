@@ -527,6 +527,7 @@ namespace app
         void ResourceRemoved(const Resource* resource);
 
     private:
+        void ScanCppSources();
         bool LoadContent(const QString& file, ResourceMigrationLog* log, WorkspaceAsyncWorkObserver* observer);
         bool LoadProperties(const QString& file, WorkspaceAsyncWorkObserver* observer);
         void LoadUserSettings(const QString& file);
@@ -560,6 +561,7 @@ namespace app
         // the user defined resources come first and then the primitive
         // resources follow.
         std::size_t mUserResourceCount = 0;
+        std::size_t mTickCount = 0;
     private:
         const QString mWorkspaceDir;
         // workspace specific properties

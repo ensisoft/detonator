@@ -1729,6 +1729,8 @@ void MainWindow::on_actionRenameResource_triggered()
     for (int i=0; i<selected.size(); ++i)
     {
         auto& resource = mWorkspace->GetResource(selected[i].row());
+        if (resource.IsCppSource())
+            continue;
 
         bool accepted = false;
         const auto& name = QInputDialog::getText(this,
@@ -2197,6 +2199,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     mUI.actionImportZIP->setEnabled(mWorkspace != nullptr);
     mUI.actionRenameResource->setEnabled(!indices.empty());
     mUI.actionEditTags->setEnabled(!indices.empty());
+    mUI.actionDependencies->setEnabled(!indices.empty());
 
     for (int i=0; i<indices.size(); ++i)
     {
@@ -2216,6 +2219,19 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
             // this doesn't currently do what is expected, since the script file
             // is *not* copied.
             SetEnabled(mUI.actionDuplicateResource, false);
+        }
+        else if (resource.IsCppSource())
+        {
+            SetEnabled(mUI.actionRenameResource, false);
+            SetEnabled(mUI.actionEditTags, false);
+            SetEnabled(mUI.actionExportJSON, false);
+            SetEnabled(mUI.actionExportZIP, false);
+            SetEnabled(mUI.actionDeleteResource, false);
+            SetEnabled(mUI.actionDependencies, false);
+            SetEnabled(mUI.actionDuplicateResource, false);
+            SetEnabled(mUI.actionEditResource, false);
+            SetEnabled(mUI.actionEditResourceNewTab, false);
+            SetEnabled(mUI.actionEditResourceNewWindow, false);
         }
     }
 
@@ -3855,9 +3871,13 @@ void MainWindow::EditResources(bool open_new_window)
     {
         const auto& resource = mWorkspace->GetResource(indices[i].row());
         // we don't know how to open these.
-        if (resource.GetType() == app::Resource::Type::DataFile)
+        if (resource.IsDataFile())
         {
             WARN("Can't edit '%1' since it's not a %2 resource.", resource.GetName(), APP_TITLE);
+            continue;
+        }
+        else if (resource.IsCppSource())
+        {
             continue;
         }
 
