@@ -131,11 +131,18 @@ bool FUDialog::HandleEvent(QEvent* event)
         if (Editor::DebugEditor())
             VERBOSE("FU Dialog close event.");
 
-        // yes sir, we accept your request to close this FU window
-        close->accept();
+        if (OnCloseEvent())
+        {
+            // yes sir, we accept your request to close this FU window
+            close->accept();
 
-        // but we reject any changes made
-        reject();
+            // but we reject any changes made
+            reject();
+        }
+        else
+        {
+            close->ignore();
+        }
         return true;
     }
     else if (event->type() == QEvent::KeyPress)
@@ -149,8 +156,11 @@ bool FUDialog::HandleEvent(QEvent* event)
         // calls "accept" equals *REJECTING* the dialog (and any changes)
         if (key->key() == Qt::Key_Escape)
         {
-            reject();
-            return true;
+            if (OnCloseEvent())
+            {
+                reject();
+                return true;
+            }
         }
         return false;
     }
@@ -239,6 +249,11 @@ void FUDialog::CloseFU(int result)
 
     mWindow->removeEventFilter(mWindowEventFilter);
     mWindow->close();
+}
+
+bool FUDialog::OnCloseEvent()
+{
+    return true;
 }
 
 } // namespace
