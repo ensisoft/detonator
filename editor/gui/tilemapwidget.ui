@@ -1137,6 +1137,9 @@
               <property name="leftMargin">
                <number>0</number>
               </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
               <property name="rightMargin">
                <number>0</number>
               </property>
@@ -1163,7 +1166,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>349</width>
-                   <height>458</height>
+                   <height>464</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
