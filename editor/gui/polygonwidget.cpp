@@ -812,12 +812,6 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         }
     }
 
-    if (painter.GetErrorCount())
-    {
-        ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
-        ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
-    }
-
     // visualize the current triangle
     if (mActive)
     {
@@ -848,6 +842,25 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         current.SetStatic(false);
 
         painter.Draw(gfx::PolygonMeshInstance(current), view, gfx::MaterialInstance(color));
+    }
+
+    if (painter.GetErrorCount())
+    {
+        const auto width = float(mUI.widget->width());
+        const auto height = float(mUI.widget->height());
+
+        painter.SetViewport(0.0, 0.0, width, height);
+        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width, height));
+        ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
+        ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
+
+        if (mShaderEditor)
+            mShaderEditor->ShowError("Shader compile error");
+    }
+    else
+    {
+        if (mShaderEditor)
+            mShaderEditor->ClearError();
     }
 }
 

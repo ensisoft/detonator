@@ -274,6 +274,9 @@ DlgTextEdit::DlgTextEdit(QWidget* parent)
     SetEnabled(mUI->btnCancel, false);
     SetVisible(mUI->btnCancel, false);
 
+    SetVisible(mUI->errorIcon, false);
+    SetVisible(mUI->errorMessage, false);
+
     SetupFU(this);
 }
 
@@ -385,6 +388,26 @@ void DlgTextEdit::EnableSaveApply()
         SetEnabled(mUI->btnApply, true);
         SetEnabled(mUI->btnAccept, true);
     });
+}
+
+void DlgTextEdit::ShowError(const QString& message)
+{
+    if (message.isEmpty())
+    {
+        SetVisible(mUI->errorIcon, false);
+        SetVisible(mUI->errorMessage, false);
+    }
+    else
+    {
+        SetVisible(mUI->errorIcon, true);
+        SetVisible(mUI->errorMessage, true);
+        SetValue(mUI->errorMessage, message);
+    }
+}
+
+void DlgTextEdit::ClearError()
+{
+    ShowError("");
 }
 
 void DlgTextEdit::on_btnAccept_clicked()
