@@ -51,6 +51,8 @@ namespace gui
 
         void SetReadOnly(bool readonly);
         void EnableSaveApply();
+        void ShowError(const QString& message);
+        void ClearError();
 
         std::function<void()> applyFunction;
 
