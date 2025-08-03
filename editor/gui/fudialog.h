@@ -63,6 +63,8 @@ namespace gui
         int InvokeFU(bool block);
         void CloseFU(int result);
 
+        virtual bool OnCloseEvent();
+
     private:
         QWidget* mParent = nullptr;
         QMainWindow* mWindow = nullptr;
