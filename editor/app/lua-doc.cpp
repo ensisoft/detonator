@@ -1120,7 +1120,7 @@ void InitLuaDoc()
     DOC_META_METHOD_0("...", "newindex", "Lua new index meta method.");
     DOC_OBJECT_PROPERTY("string", "name", "The name of the command.");
 
-    DOC_TABLE2("game.NodeTransformer", "Simple node motion and animation.");
+    DOC_TABLE2("game.LinearMover", "Simple node motion and animation.");
     DOC_METHOD_0("bool", "IsEnabled", "Check whether the transformer is enabled.");
     DOC_METHOD_0("glm.vec2", "GetLinearVelocity", "Get the current linear velocity (u/s) of motion.");
     DOC_METHOD_0("glm.vec2", "GetLinearAcceleration", "Get the current linear acceleration (u/s²) of motion.");
@@ -1446,7 +1446,7 @@ void InitLuaDoc()
     DOC_METHOD_0("game.TextItem", "GetTextItem", "Get the node's text item if any. Returns nil if node has no text item.");
     DOC_METHOD_0("game.Drawable", "GetDrawable", "Get the node's drawable item if any. Returns nil if node has no drawable item.");
     DOC_METHOD_0("game.SpatialNode", "GetSpatialNode", "Get the node's spatial node if any. Returns nil if node has no spatial node.");
-    DOC_METHOD_0("game.NodeTransformer", "GetTransformer", "Get the node's transformer if any. Returns nil if node has no transformer.");
+    DOC_METHOD_0("game.LinearMover", "GetTransformer", "Get the node's transformer if any. Returns nil if node has no transformer.");
     DOC_METHOD_0("game.Entity", "GetEntity", "Get the entity that owns this entity node.");
     DOC_METHOD_1("void", "SetScale", "Set the node's scaling factor that applies to this node and its children.", "glm.vec2", "scale");
     DOC_METHOD_2("void", "SetScale", "Set the node's scaling factor that applies to this node and its children.", "float", "sx", "float", "sy");

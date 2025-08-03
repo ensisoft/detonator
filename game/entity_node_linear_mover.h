@@ -31,7 +31,7 @@
 
 namespace game
 {
-    class NodeTransformerClass
+    class LinearMoverClass
     {
     public:
         enum class Integrator {
@@ -40,7 +40,7 @@ namespace game
         enum class Flags {
             Enabled
         };
-        NodeTransformerClass()
+        LinearMoverClass()
         {
             mFlags.set(Flags::Enabled, true);
         }
@@ -88,13 +88,13 @@ namespace game
         float mAngularAcceleration = 0.0f;
     };
 
-    class NodeTransformer
+    class LinearMover
     {
     public:
-        using Integrator = NodeTransformerClass::Integrator;
-        using Flags = NodeTransformerClass::Flags;
+        using Integrator = LinearMoverClass::Integrator;
+        using Flags = LinearMoverClass::Flags;
 
-        explicit NodeTransformer(std::shared_ptr<const NodeTransformerClass> klass)
+        explicit LinearMover(std::shared_ptr<const LinearMoverClass> klass)
             : mClass(std::move(klass))
             , mFlags(mClass->GetFlags())
             , mLinearVelocity(mClass->GetLinearVelocity())
@@ -129,12 +129,12 @@ namespace game
         inline void Enable(bool on_off) noexcept
         { SetFlag(Flags::Enabled, on_off); }
 
-        inline const NodeTransformerClass& GetClass() const noexcept
+        inline const LinearMoverClass& GetClass() const noexcept
         { return *mClass; }
-        inline const NodeTransformerClass* operator->() const noexcept
+        inline const LinearMoverClass* operator->() const noexcept
         { return mClass.get(); }
     private:
-        std::shared_ptr<const NodeTransformerClass> mClass;
+        std::shared_ptr<const LinearMoverClass> mClass;
         base::bitflag<Flags> mFlags;
         glm::vec2 mLinearVelocity     = {0.0f, 0.0f};
         glm::vec2 mLinearAcceleration = {0.0f, 0.0f};

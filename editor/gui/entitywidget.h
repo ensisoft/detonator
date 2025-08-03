@@ -292,7 +292,7 @@ namespace gui
         void on_btnDelFixture_clicked();
         void on_btnDelTilemapNode_clicked();
         void on_btnDelSpatialNode_clicked();
-        void on_btnDelTransformer_clicked();
+        void on_btnDelLinearMover_clicked();
         void on_btnDelLight_clicked();
         void on_actionAddLight_triggered();
         void on_actionAddDrawable_triggered();
@@ -301,7 +301,7 @@ namespace gui
         void on_actionAddFixture_triggered();
         void on_actionAddTilemapNode_triggered();
         void on_actionAddSpatialNode_triggered();
-        void on_actionAddTransformer_triggered();
+        void on_actionAddLinearMover_triggered();
         void on_actionEditEntityScript_triggered();
         void on_actionEditControllerScript_triggered();
 
@@ -325,7 +325,7 @@ namespace gui
         void ToggleSpatialNode(bool on);
         void ToggleFixture(bool on);
         void ToggleTilemapNode(bool on);
-        void ToggleTransformer(bool on);
+        void ToggleLinearMover(bool on);
         void ScrollEntityNodeArea();
 
     private:

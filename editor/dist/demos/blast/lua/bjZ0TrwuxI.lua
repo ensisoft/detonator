@@ -9,8 +9,8 @@ end
 -- Called when the game play begins for a scene.
 function BeginPlay(asteroid, scene, map)
     local node = asteroid:GetNode(0)
-    local transformer = node:GetTransformer()
-    transformer:SetLinearVelocity(0.0, asteroid.speed)
+    local mover = node:GetLinearMover()
+    mover:SetLinearVelocity(0.0, asteroid.speed)
 end
 
 -- Called on every low frequency game tick.

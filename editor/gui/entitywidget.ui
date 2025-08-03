@@ -4281,7 +4281,7 @@
                </widget>
               </item>
               <item>
-               <widget class="gui::CollapsibleWidget" name="transformer">
+               <widget class="gui::CollapsibleWidget" name="linearMover">
                 <property name="icon" stdset="0">
                  <iconset resource="../resource/resource.qrc">
                   <normaloff>:/16x16_ico_png/vector.png</normaloff>:/16x16_ico_png/vector.png</iconset>
@@ -4293,7 +4293,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="text" stdset="0">
-                 <string>Node Integrator</string>
+                 <string>Linear Mover</string>
                 </property>
                 <property name="frameShape" stdset="0">
                  <enum>QFrame::NoFrame</enum>
@@ -4536,7 +4536,7 @@
                    </layout>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="btnDelTransformer">
+                   <widget class="QPushButton" name="btnDelLinearMover">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -4544,7 +4544,7 @@
                      </sizepolicy>
                     </property>
                     <property name="text">
-                     <string>Remove Node Integrator</string>
+                     <string>Remove Linear Mover</string>
                     </property>
                     <property name="icon">
                      <iconset resource="../resource/resource.qrc">
@@ -5118,16 +5118,16 @@
     <string>Spatial Query Node</string>
    </property>
   </action>
-  <action name="actionAddTransformer">
+  <action name="actionAddLinearMover">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/16x16_ico_png/vector.png</normaloff>:/16x16_ico_png/vector.png</iconset>
    </property>
    <property name="text">
-    <string>Node Integrator</string>
+    <string>Linear Mover</string>
    </property>
    <property name="toolTip">
-    <string>Node integrator</string>
+    <string>Add linear mover node attachment</string>
    </property>
   </action>
   <action name="actionEditEntityScript">
@@ -5478,7 +5478,7 @@
   <tabstop>spnShape</tabstop>
   <tabstop>spnEnabled</tabstop>
   <tabstop>btnDelSpatialNode</tabstop>
-  <tabstop>transformer</tabstop>
+  <tabstop>linearMover</tabstop>
   <tabstop>tfIntegrator</tabstop>
   <tabstop>tfVelocityX</tabstop>
   <tabstop>tfVelocityY</tabstop>
@@ -5487,7 +5487,7 @@
   <tabstop>tfVelocityA</tabstop>
   <tabstop>tfAccelA</tabstop>
   <tabstop>tfEnabled</tabstop>
-  <tabstop>btnDelTransformer</tabstop>
+  <tabstop>btnDelLinearMover</tabstop>
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>

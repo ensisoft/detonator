@@ -61,7 +61,7 @@ function SetState(hero, state)
     local hero_node = hero:GetNode(0)
     local hero_skin = hero_node:GetDrawable()
     local hero_weapon_node = hero:GetNode(1)
-    local transformer = hero_node:GetTransformer()
+    local mover = hero_node:GetLinearMover()
     hero_skin:SetUniform('kState', States[state])
     hero_state = state
 
@@ -70,18 +70,18 @@ function SetState(hero, state)
 
         if state == 'run' then
             if hero_direction == 'right' then
-                transformer:SetLinearVelocity(300.0, 0.0)
+                mover:SetLinearVelocity(300.0, 0.0)
             elseif hero_direction == 'left' then
-                transformer:SetLinearVelocity(-300.0, 0.0)
+                mover:SetLinearVelocity(-300.0, 0.0)
             end
         elseif state == 'stand' then
-            transformer:SetLinearVelocity(0.0, 0.0)
+            mover:SetLinearVelocity(0.0, 0.0)
         end
 
     elseif state == 'kneel' then
         hero_weapon_node:SetTranslation(0.0, 30.0)
 
-        transformer:SetLinearVelocity(0.0, 0.0)
+        mover:SetLinearVelocity(0.0, 0.0)
     end
 end
 

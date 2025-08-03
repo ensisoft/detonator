@@ -7,9 +7,9 @@ require('common')
 -- Called when the game play begins for a scene.
 function BeginPlay(bullet, scene, map)
     local node = bullet:GetNode(0)
-    local transformer = node:GetTransformer()
-    if transformer ~= nil then
-        transformer:SetLinearVelocity(0.0, bullet.velocity)
+    local mover = node:GetLinearMover()
+    if mover ~= nil then
+        mover:SetLinearVelocity(0.0, bullet.velocity)
     end
 end
 

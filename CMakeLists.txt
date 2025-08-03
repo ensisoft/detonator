@@ -303,7 +303,7 @@ add_library(GameLib
     game/entity_node_spatial_node.cpp
     game/entity_node_text_item.cpp
     game/entity_node_tilemap_node.cpp
-    game/entity_node_transformer.cpp
+        game/entity_node_linear_mover.cpp
     game/entity_placement.cpp
     game/entity_state.cpp
     game/entity_state_controller.cpp
@@ -1154,7 +1154,7 @@ add_library(GameLibTesting
     game/entity_placement.cpp
     game/entity_state.cpp
     game/entity_state_controller.cpp
-    game/entity_node_transformer.cpp
+        game/entity_node_linear_mover.cpp
     game/entity_node_rigid_body.cpp
     game/entity_node_rigid_body_joint.cpp
     game/entity_node_drawable_item.cpp

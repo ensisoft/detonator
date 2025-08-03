@@ -126,7 +126,7 @@ add_executable(UnitTest
     ../game/entity_state.cpp
     ../game/entity_state_controller.cpp
     ../game/entity_node_rigid_body_joint.cpp
-    ../game/entity_node_transformer.cpp
+    ../game/entity_node_linear_mover.cpp
     ../game/entity_node_rigid_body.cpp
     ../game/entity_node_drawable_item.cpp
     ../game/entity_node_text_item.cpp
@@ -300,7 +300,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_spatial_node.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_text_item.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_tilemap_node.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_transformer.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_linear_mover.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_state.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_state_controller.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/kinematic_animator.cpp

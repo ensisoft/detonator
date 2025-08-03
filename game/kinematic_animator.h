@@ -36,7 +36,7 @@ namespace game
     public:
         enum class Target {
             RigidBody,
-            Transformer
+            LinearMover
         };
         // The interpolation method.
         using Interpolation = math::Interpolation;

@@ -145,22 +145,22 @@ std::string TranslateEnum(PropertyAnimatorClass::PropertyName name)
         return "Text String";
     else if (name == P::TextItem_Color)
         return "Text Color";
-    else if (name == P::Transformer_LinearVelocity)
-        return "Transformer Velocity";
-    else if (name == P::Transformer_LinearVelocityX)
-        return "Transformer Velocity on X Axis";
-    else if (name == P::Transformer_LinearVelocityY)
-        return "Transformer Velocity on Y Axis";
-    else if (name == P::Transformer_LinearAcceleration)
-        return "Transformer Acceleration";
-    else if (name == P::Transformer_LinearAccelerationX)
-        return "Transformer Acceleration on X Axis";
-    else if (name == P::Transformer_LinearAccelerationY)
-        return "Transformer Acceleration on Y Axis";
-    else if (name == P::Transformer_AngularVelocity)
-        return "Transformer Angular Velocity";
-    else if (name == P::Transformer_AngularAcceleration)
-        return "Transformer Angular Acceleration";
+    else if (name == P::LinearMover_LinearVelocity)
+        return "Linear Mover Velocity";
+    else if (name == P::LinearMover_LinearVelocityX)
+        return "Linear Mover Velocity on X Axis";
+    else if (name == P::LinearMover_LinearVelocityY)
+        return "Linear Mover Velocity on Y Axis";
+    else if (name == P::LinearMover_LinearAcceleration)
+        return "Linear Mover Acceleration";
+    else if (name == P::LinearMover_LinearAccelerationX)
+        return "Linear Mover Acceleration on X Axis";
+    else if (name == P::LinearMover_LinearAccelerationY)
+        return "Linear Mover Acceleration on Y Axis";
+    else if (name == P::LinearMover_AngularVelocity)
+        return "Linear Mover Angular Velocity";
+    else if (name == P::LinearMover_AngularAcceleration)
+        return "Linear Mover Angular Acceleration";
     else if (name == P::RigidBodyJoint_MotorTorque)
         return "Rigid Body Joint Motor Torque";
     else if (name == P::RigidBodyJoint_MotorSpeed)
@@ -233,8 +233,8 @@ std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name)
         return "Enable Bloom for Text";
     else if (name == P::SpatialNode_Enabled)
         return "Enable Spatial Node";
-    else if (name == P::Transformer_Enabled)
-        return "Enable Transformer";
+    else if (name == P::LinearMover_Enabled)
+        return "Enable Linear Mover";
     else if (name == P::RigidBodyJoint_EnableLimits)
         return "Enable Joint Limits";
     else if (name == P::RigidBodyJoint_EnableMotor)
@@ -249,8 +249,8 @@ std::string TranslateEnum(KinematicAnimatorClass::Target target)
 {
     if (target == KinematicAnimatorClass::Target::RigidBody)
         return "Rigid Body";
-    else if (target == KinematicAnimatorClass::Target::Transformer)
-        return "Node Transformer";
+    else if (target == KinematicAnimatorClass::Target::LinearMover)
+        return "Linear Mover";
     else BUG("Missing translation");
     return "???";
 }

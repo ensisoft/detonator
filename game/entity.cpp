@@ -36,7 +36,7 @@
 #include "game/transform.h"
 #include "game/animator.h"
 #include "game/property_animator.h"
-#include "game/entity_node_transformer.h"
+#include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
@@ -1212,27 +1212,27 @@ void Entity::Update(float dt, std::vector<Event>* events)
 
     for (auto& node : mNodes)
     {
-        auto* transformer = node.GetTransformer();
-        if (!transformer || !transformer->IsEnabled())
+        auto* linear_mover = node.GetLinearMover();
+        if (!linear_mover || !linear_mover->IsEnabled())
             continue;
 
-        const auto integrator = transformer->GetIntegrator();
-        if (integrator == NodeTransformerClass::Integrator::Euler)
+        const auto integrator = linear_mover->GetIntegrator();
+        if (integrator == LinearMoverClass::Integrator::Euler)
         {
             {
-                float acceleration = transformer->GetAngularAcceleration();
-                float velocity = transformer->GetAngularVelocity();
+                float acceleration = linear_mover->GetAngularAcceleration();
+                float velocity = linear_mover->GetAngularVelocity();
                 velocity += acceleration * dt;
                 node.Rotate(velocity * dt);
-                transformer->SetAngularVelocity(velocity);
+                linear_mover->SetAngularVelocity(velocity);
             }
 
             {
-                auto acceleration = transformer->GetLinearAcceleration();
-                auto velocity = transformer->GetLinearVelocity();
+                auto acceleration = linear_mover->GetLinearAcceleration();
+                auto velocity = linear_mover->GetLinearVelocity();
                 velocity += acceleration * dt;
                 node.Translate(velocity * dt);
-                transformer->SetLinearVelocity(velocity);
+                linear_mover->SetLinearVelocity(velocity);
             }
         }
     }
