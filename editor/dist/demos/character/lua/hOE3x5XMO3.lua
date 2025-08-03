@@ -6,7 +6,7 @@
 -- Called once when the game play begins for the entity in the scene.
 function BeginPlay(entity, scene, map)
     local body_node = entity:GetNode(0)
-    local transformer = body_node:GetTransformer()
+    local mover = body_node:GetLinearMover()
 
     local velocity = entity.velocity
     local direction = glm.normalize(velocity)
@@ -23,7 +23,7 @@ function BeginPlay(entity, scene, map)
         body_node:SetRotation(math.acos(cosine))
     end
 
-    transformer:SetLinearVelocity(velocity)
+    mover:SetLinearVelocity(velocity)
 end
 
 -- Called once when the game play ends for the entity in the scene.

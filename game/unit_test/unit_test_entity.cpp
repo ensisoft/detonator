@@ -31,7 +31,7 @@
 #include "data/json.h"
 #include "game/entity.h"
 #include "game/entity_node_rigid_body_joint.h"
-#include "game/entity_node_transformer.h"
+#include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
@@ -143,11 +143,11 @@ void unit_test_entity_node()
     light.SetDiffuseColor(game::Color::Green);
     light.SetSpecularColor(game::Color::Blue);
 
-    game::NodeTransformerClass transformer;
-    transformer.SetAngularAcceleration(1.0f);
-    transformer.SetAngularVelocity(5.0f);
-    transformer.SetLinearAcceleration(glm::vec2{1.0f, 2.0f});
-    transformer.SetLinearVelocity(glm::vec2{-1.0f, 2.0f});
+    game::LinearMoverClass mover;
+    mover.SetAngularAcceleration(1.0f);
+    mover.SetAngularVelocity(5.0f);
+    mover.SetLinearAcceleration(glm::vec2{1.0f, 2.0f});
+    mover.SetLinearVelocity(glm::vec2{-1.0f, 2.0f});
 
     game::EntityNodeClass node;
     node.SetName("root");
@@ -162,7 +162,7 @@ void unit_test_entity_node()
     node.SetSpatialNode(spatial);
     node.SetFixture(fix);
     node.SetMapNode(map);
-    node.SetTransformer(transformer);
+    node.SetLinearMover(mover);
     node.SetBasicLight(light);
 
     TEST_REQUIRE(node.HasDrawable());
@@ -171,7 +171,7 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.HasSpatialNode());
     TEST_REQUIRE(node.HasFixture());
     TEST_REQUIRE(node.HasMapNode());
-    TEST_REQUIRE(node.HasTransformer());
+    TEST_REQUIRE(node.HasLinearMover());
     TEST_REQUIRE(node.HasBasicLight());
     TEST_REQUIRE(node.GetName()         == "root");
     TEST_REQUIRE(node.GetSize()         == glm::vec2(100.0f, 100.0f));
@@ -216,10 +216,10 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetMapNode()->GetSortPoint() == glm::vec2(2.0f, 3.0f));
     TEST_REQUIRE(node.GetMapNode()->GetMapLayer() == 123);
     TEST_REQUIRE(node.GetMapNode()->GetTileOcclusion() == game::TileOcclusion::Left);
-    TEST_REQUIRE(node.GetTransformer()->GetAngularAcceleration() == 1.0f);
-    TEST_REQUIRE(node.GetTransformer()->GetAngularVelocity() == 5.0f);
-    TEST_REQUIRE(node.GetTransformer()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
-    TEST_REQUIRE(node.GetTransformer()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
+    TEST_REQUIRE(node.GetLinearMover()->GetAngularAcceleration() == 1.0f);
+    TEST_REQUIRE(node.GetLinearMover()->GetAngularVelocity() == 5.0f);
+    TEST_REQUIRE(node.GetLinearMover()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
+    TEST_REQUIRE(node.GetLinearMover()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
     TEST_REQUIRE(node.GetBasicLight()->GetQuadraticAttenuation() == 1.0f);
     TEST_REQUIRE(node.GetBasicLight()->GetAmbientColor() == game::Color::Red);
     TEST_REQUIRE(node.GetBasicLight()->GetDiffuseColor() == game::Color::Green);
@@ -273,10 +273,10 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.GetFixture()->GetPolygonShapeId() == "123232ddd");
         TEST_REQUIRE(ret.GetFixture()->GetRigidBodyNodeId() == "81288");
         TEST_REQUIRE(ret.GetMapNode()->GetSortPoint() == glm::vec2(2.0f, 3.0f));
-        TEST_REQUIRE(ret.GetTransformer()->GetAngularAcceleration() == 1.0f);
-        TEST_REQUIRE(ret.GetTransformer()->GetAngularVelocity() == 5.0f);
-        TEST_REQUIRE(ret.GetTransformer()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
-        TEST_REQUIRE(ret.GetTransformer()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(ret.GetLinearMover()->GetAngularAcceleration() == 1.0f);
+        TEST_REQUIRE(ret.GetLinearMover()->GetAngularVelocity() == 5.0f);
+        TEST_REQUIRE(ret.GetLinearMover()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
+        TEST_REQUIRE(ret.GetLinearMover()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
         TEST_REQUIRE(ret.GetBasicLight()->GetQuadraticAttenuation() == 1.0f);
         TEST_REQUIRE(ret.GetBasicLight()->GetAmbientColor() == game::Color::Red);
         TEST_REQUIRE(ret.GetBasicLight()->GetDiffuseColor() == game::Color::Green);

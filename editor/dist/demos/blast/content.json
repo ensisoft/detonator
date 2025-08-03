@@ -577,22 +577,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Bullet",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 63.611576080322266,
-            "y": 68.26495361328125
-          },
-          "tag": "",
-          "transformer": {
+          "linear_mover": {
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
@@ -607,7 +592,22 @@
               "x": 0.0,
               "y": 0.0
             }
-          }
+          },
+          "name": "Bullet",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 63.611576080322266,
+            "y": 68.26495361328125
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
@@ -5034,22 +5034,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Bullet",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": -1.5707963705062866,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 95.67528533935547,
-            "y": 54.342041015625
-          },
-          "tag": "",
-          "transformer": {
+          "linear_mover": {
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
@@ -5064,7 +5049,22 @@
               "x": 0.0,
               "y": 0.0
             }
-          }
+          },
+          "name": "Bullet",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": -1.5707963705062866,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 95.67528533935547,
+            "y": 54.342041015625
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
@@ -5258,22 +5258,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Node 0",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 3.1415927410125732,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 33.33318328857422,
-            "y": 102.18312072753906
-          },
-          "tag": "",
-          "transformer": {
+          "linear_mover": {
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
@@ -5288,7 +5273,22 @@
               "x": 0.0,
               "y": 0.0
             }
-          }
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 3.1415927410125732,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 33.33318328857422,
+            "y": 102.18312072753906
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
@@ -6413,22 +6413,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Body",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 88.0,
-            "y": 88.0
-          },
-          "tag": "",
-          "transformer": {
+          "linear_mover": {
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
@@ -6443,7 +6428,22 @@
               "x": 0.0,
               "y": 0.0
             }
-          }
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 88.0,
+            "y": 88.0
+          },
+          "tag": ""
         },
         {
           "class": "kp7A9ShK5w",

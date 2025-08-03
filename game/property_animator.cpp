@@ -25,7 +25,7 @@
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_text_item.h"
 #include "game/entity_node_spatial_node.h"
-#include "game/entity_node_transformer.h"
+#include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body_joint.h"
 #include "game/entity_node_light.h"
 #include "game/property_animator.h"
@@ -89,7 +89,7 @@ void BooleanPropertyAnimator::Start(EntityNode& node)
     const auto* text = node.GetTextItem();
     const auto* spatial = node.GetSpatialNode();
     const auto* light = node.GetBasicLight();
-    const auto* transformer= node.GetTransformer();
+    const auto* mover = node.GetLinearMover();
 
     using FlagName = BooleanPropertyAnimatorClass::PropertyName;
     const auto flag = mClass->GetFlagName();
@@ -132,8 +132,8 @@ void BooleanPropertyAnimator::Start(EntityNode& node)
         mStartState = text->TestFlag(TextItem::Flags::PP_EnableBloom);
     else if (flag == FlagName::SpatialNode_Enabled)
         mStartState = spatial->TestFlag(SpatialNode::Flags::Enabled);
-    else if (flag == FlagName::Transformer_Enabled)
-        mStartState = transformer->TestFlag(NodeTransformer::Flags::Enabled);
+    else if (flag == FlagName::LinearMover_Enabled)
+        mStartState = mover->TestFlag(LinearMover::Flags::Enabled);
     else if (flag == FlagName::RigidBodyJoint_EnableLimits)
     {
         const auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
@@ -194,7 +194,7 @@ void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
     auto* text = node.GetTextItem();
     auto* light = node.GetBasicLight();
     auto* spatial = node.GetSpatialNode();
-    auto* transformer = node.GetTransformer();
+    auto* mover = node.GetLinearMover();
 
     using FlagName = BooleanPropertyAnimatorClass::PropertyName;
     const auto flag = mClass->GetFlagName();
@@ -237,8 +237,8 @@ void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
         text->SetFlag(TextItem::Flags::PP_EnableBloom, next_value);
     else if (flag == FlagName::SpatialNode_Enabled)
         spatial->SetFlag(SpatialNode::Flags::Enabled, next_value);
-    else if (flag == FlagName::Transformer_Enabled)
-        transformer->SetFlag(NodeTransformer::Flags::Enabled, next_value);
+    else if (flag == FlagName::LinearMover_Enabled)
+        mover->SetFlag(LinearMover::Flags::Enabled, next_value);
     else if (flag == FlagName::RigidBodyJoint_EnableMotor)
     {
         auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
@@ -264,7 +264,7 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     auto* text = node.GetTextItem();
     auto* light = node.GetBasicLight();
     auto* spatial = node.GetSpatialNode();
-    auto* transformer = node.GetTransformer();
+    auto* mover = node.GetLinearMover();
 
     using FlagName = BooleanPropertyAnimatorClass::PropertyName;
     const auto flag = mClass->GetFlagName();
@@ -320,11 +320,11 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
         }
         return spatial != nullptr;
     }
-    else if (flag == FlagName::Transformer_Enabled)
+    else if (flag == FlagName::LinearMover_Enabled)
     {
-        if (!transformer && verbose)
+        if (!mover && verbose)
         {
-            WARN("Property animator can't apply a node transformer flag on a node without a transformer. [animator='%1', node='%2', flag=%3]",
+            WARN("Property animator can't apply a node linear mover flag on a node without a linear mover. [animator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
     }
@@ -420,7 +420,7 @@ void PropertyAnimator::Start(EntityNode& node)
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
     const auto* light = node.GetBasicLight();
-    const auto* transformer = node.GetTransformer();
+    const auto* mover = node.GetLinearMover();
 
     const RigidBodyJoint* joint = nullptr;
     if (param == PropertyName::RigidBodyJoint_MotorTorque ||
@@ -460,22 +460,22 @@ void PropertyAnimator::Start(EntityNode& node)
         mStartValue = text->GetText();
     else if (param == PropertyName::TextItem_Color)
         mStartValue = text->GetTextColor();
-    else if (param == PropertyName::Transformer_LinearVelocity)
-        mStartValue = transformer->GetLinearVelocity();
-    else if (param == PropertyName::Transformer_LinearVelocityX)
-        mStartValue = transformer->GetLinearVelocity().x;
-    else if (param == PropertyName::Transformer_LinearVelocityY)
-        mStartValue = transformer->GetLinearVelocity().y;
-    else if (param == PropertyName::Transformer_LinearAcceleration)
-        mStartValue = transformer->GetLinearAcceleration();
-    else if (param == PropertyName::Transformer_LinearAccelerationX)
-        mStartValue = transformer->GetLinearAcceleration().x;
-    else if (param == PropertyName::Transformer_LinearAccelerationY)
-        mStartValue = transformer->GetLinearAcceleration().y;
-    else if (param == PropertyName::Transformer_AngularVelocity)
-        mStartValue = transformer->GetAngularVelocity();
-    else if (param == PropertyName::Transformer_AngularAcceleration)
-        mStartValue = transformer->GetAngularAcceleration();
+    else if (param == PropertyName::LinearMover_LinearVelocity)
+        mStartValue = mover->GetLinearVelocity();
+    else if (param == PropertyName::LinearMover_LinearVelocityX)
+        mStartValue = mover->GetLinearVelocity().x;
+    else if (param == PropertyName::LinearMover_LinearVelocityY)
+        mStartValue = mover->GetLinearVelocity().y;
+    else if (param == PropertyName::LinearMover_LinearAcceleration)
+        mStartValue = mover->GetLinearAcceleration();
+    else if (param == PropertyName::LinearMover_LinearAccelerationX)
+        mStartValue = mover->GetLinearAcceleration().x;
+    else if (param == PropertyName::LinearMover_LinearAccelerationY)
+        mStartValue = mover->GetLinearAcceleration().y;
+    else if (param == PropertyName::LinearMover_AngularVelocity)
+        mStartValue = mover->GetAngularVelocity();
+    else if (param == PropertyName::LinearMover_AngularAcceleration)
+        mStartValue = mover->GetAngularAcceleration();
     else if (param == PropertyName::RigidBodyJoint_MotorTorque)
         mStartValue = joint->GetCurrentJointValue<float>(RigidBodyJointSetting::MotorTorque);
     else if (param == PropertyName::RigidBodyJoint_MotorSpeed)
@@ -526,7 +526,7 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
     auto* body = node.GetRigidBody();
     auto* text = node.GetTextItem();
     auto* light = node.GetBasicLight();
-    auto* transformer = node.GetTransformer();
+    auto* mover = node.GetLinearMover();
 
     if (param == PropertyName::Drawable_TimeScale)
     {
@@ -615,45 +615,45 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
             body->AdjustLinearVelocity(Interpolate<glm::vec2>(t, interpolate));
         }
     }
-    else if (param == PropertyName::Transformer_LinearVelocity)
+    else if (param == PropertyName::LinearMover_LinearVelocity)
     {
-        transformer->SetLinearVelocity(Interpolate<glm::vec2>(t, interpolate));
+        mover->SetLinearVelocity(Interpolate<glm::vec2>(t, interpolate));
     }
-    else if (param == PropertyName::Transformer_LinearVelocityX)
+    else if (param == PropertyName::LinearMover_LinearVelocityX)
     {
-        auto velocity = transformer->GetLinearVelocity();
+        auto velocity = mover->GetLinearVelocity();
         velocity.x = Interpolate<float>(t, interpolate);
-        transformer->SetLinearVelocity(velocity);
+        mover->SetLinearVelocity(velocity);
     }
-    else if (param == PropertyName::Transformer_LinearVelocityY)
+    else if (param == PropertyName::LinearMover_LinearVelocityY)
     {
-        auto velocity = transformer->GetLinearVelocity();
+        auto velocity = mover->GetLinearVelocity();
         velocity.y = Interpolate<float>(t, interpolate);
-        transformer->SetLinearVelocity(velocity);
+        mover->SetLinearVelocity(velocity);
     }
-    else if (param == PropertyName::Transformer_LinearAcceleration)
+    else if (param == PropertyName::LinearMover_LinearAcceleration)
     {
-        transformer->SetLinearAcceleration(Interpolate<glm::vec2>(t, interpolate));
+        mover->SetLinearAcceleration(Interpolate<glm::vec2>(t, interpolate));
     }
-    else if (param == PropertyName::Transformer_LinearAccelerationX)
+    else if (param == PropertyName::LinearMover_LinearAccelerationX)
     {
-        auto accel = transformer->GetLinearAcceleration();
+        auto accel = mover->GetLinearAcceleration();
         accel.x = Interpolate<float>(t, interpolate);
-        transformer->SetLinearAcceleration(accel);
+        mover->SetLinearAcceleration(accel);
     }
-    else if (param == PropertyName::Transformer_LinearAccelerationY)
+    else if (param == PropertyName::LinearMover_LinearAccelerationY)
     {
-        auto accel = transformer->GetLinearAcceleration();
+        auto accel = mover->GetLinearAcceleration();
         accel.y = Interpolate<float>(t, interpolate);
-        transformer->SetLinearAcceleration(accel);
+        mover->SetLinearAcceleration(accel);
     }
-    else if (param == PropertyName::Transformer_AngularVelocity)
+    else if (param == PropertyName::LinearMover_AngularVelocity)
     {
-        transformer->SetAngularVelocity(Interpolate<float>(t, interpolate));
+        mover->SetAngularVelocity(Interpolate<float>(t, interpolate));
     }
-    else if (param == PropertyName::Transformer_AngularAcceleration)
+    else if (param == PropertyName::LinearMover_AngularAcceleration)
     {
-        transformer->SetAngularAcceleration(Interpolate<float>(t, interpolate));
+        mover->SetAngularAcceleration(Interpolate<float>(t, interpolate));
     }
     else if (param == PropertyName::TextItem_Color)
     {
@@ -725,7 +725,7 @@ bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
     const auto* light = node.GetBasicLight();
-    const auto* transformer = node.GetTransformer();
+    const auto* mover = node.GetLinearMover();
 
     if (param == PropertyName::Drawable_TimeScale ||
         param == PropertyName::Drawable_RotationX ||
@@ -777,21 +777,21 @@ bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
         }
         return text != nullptr;
     }
-    else if (param == PropertyName::Transformer_LinearVelocity ||
-             param == PropertyName::Transformer_LinearVelocityX ||
-             param == PropertyName::Transformer_LinearVelocityY ||
-             param == PropertyName::Transformer_LinearAcceleration  ||
-             param == PropertyName::Transformer_LinearAccelerationX ||
-             param == PropertyName::Transformer_LinearAccelerationY ||
-             param == PropertyName::Transformer_AngularVelocity ||
-             param == PropertyName::Transformer_AngularAcceleration)
+    else if (param == PropertyName::LinearMover_LinearVelocity ||
+             param == PropertyName::LinearMover_LinearVelocityX ||
+             param == PropertyName::LinearMover_LinearVelocityY ||
+             param == PropertyName::LinearMover_LinearAcceleration  ||
+             param == PropertyName::LinearMover_LinearAccelerationX ||
+             param == PropertyName::LinearMover_LinearAccelerationY ||
+             param == PropertyName::LinearMover_AngularVelocity ||
+             param == PropertyName::LinearMover_AngularAcceleration)
     {
-        if (!transformer && verbose)
+        if (!mover && verbose)
         {
-            WARN("Property animator can't set a transformer value on a node without a transformer. [animator='%1', node='%2', value=%3]",
+            WARN("Property animator can't set a linear mover value on a node without a linear mover. [animator='%1', node='%2', value=%3]",
                  mClass->GetName(), node.GetName(), param);
         }
-        return transformer != nullptr;
+        return mover != nullptr;
     }
     else if (param == PropertyName::RigidBodyJoint_MotorTorque ||
              param == PropertyName::RigidBodyJoint_MotorSpeed ||

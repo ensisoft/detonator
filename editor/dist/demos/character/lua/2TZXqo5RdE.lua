@@ -45,21 +45,21 @@ function Walk(sob, direction)
 
     local sob_body_node = sob:GetNode(0)
     local sob_body_draw = sob_body_node:GetDrawable()
-    local sob_body_transformer = sob_body_node:GetTransformer()
+    local sob_body_mover = sob_body_node:GetLinearMover()
 
     if direction == 'left' then
         sob_body_draw:SetFlag('UpdateMaterial', true)
         sob_body_draw:AdjustMaterialTime(0.0)
         sob_body_draw:SetTimeScale(1.0)
-        sob_body_transformer:SetLinearVelocity(-120.0, 0.0)
+        sob_body_mover:SetLinearVelocity(-120.0, 0.0)
     elseif direction == 'right' then
         sob_body_draw:SetFlag('UpdateMaterial', true)
         sob_body_draw:AdjustMaterialTime(0.0)
         sob_body_draw:SetTimeScale(-1.0)
-        sob_body_transformer:SetLinearVelocity(120.0, 0.0)
+        sob_body_mover:SetLinearVelocity(120.0, 0.0)
     end
 
-    sob_body_transformer:Enable(true)
+    sob_body_mover:Enable(true)
 
     sob_state = 'walk'
     sob_direction = direction
@@ -83,10 +83,10 @@ function Stop(sob, game_time)
 
     local sob_body_node = sob:GetNode(0)
     local sob_body_draw = sob_body_node:GetDrawable()
-    local sob_body_transformer = sob_body_node:GetTransformer()
+    local sob_body_mover = sob_body_node:GetLinearMover()
     sob_body_draw:SetFlag('UpdateMaterial', false)
     sob_body_draw:AdjustMaterialTime(0.0)
-    sob_body_transformer:Enable(false)
+    sob_body_mover:Enable(false)
 
     sob_stop_time = game_time
     sob_state = 'stand'

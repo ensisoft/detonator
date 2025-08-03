@@ -40,7 +40,7 @@
 #include "game/material_animator.h"
 #include "game/property_animator.h"
 #include "game/entity.h"
-#include "game/entity_node_transformer.h"
+#include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_rigid_body_joint.h"
 #include "game/entity_node_drawable_item.h"
@@ -849,28 +849,28 @@ void BindGameLib(sol::state& L)
     spn["IsEnabled"] = &SpatialNode::IsEnabled;
     spn["Enable"]    = &SpatialNode::Enable;
 
-    auto transformer = table.new_usertype<NodeTransformer>("NodeTransformer");
-    transformer["Enable"]                 = &NodeTransformer::Enable;
-    transformer["IsEnabled"]              = &NodeTransformer::IsEnabled;
-    transformer["GetLinearVelocity"]      = &NodeTransformer::GetLinearVelocity;
-    transformer["GetLinearAcceleration"]  = &NodeTransformer::GetLinearAcceleration;
-    transformer["GetAngularVelocity"]     = &NodeTransformer::GetAngularVelocity;
-    transformer["GetAngularAcceleration"] = &NodeTransformer::GetAngularAcceleration;
-    transformer["GetIntegrator"]          = [](const NodeTransformer& transformer) { return base::ToString(transformer.GetIntegrator()); };
-    transformer["SetAngularVelocity"]     = &NodeTransformer::SetAngularVelocity;
-    transformer["SetAngularAcceleration"] = &NodeTransformer::SetAngularAcceleration;
-    transformer["SetLinearVelocity"]      = sol::overload(
-        [](NodeTransformer& transformer, glm::vec2 vector) {
+    auto linear_mover = table.new_usertype<LinearMover>("LinearMover");
+    linear_mover["Enable"]                 = &LinearMover::Enable;
+    linear_mover["IsEnabled"]              = &LinearMover::IsEnabled;
+    linear_mover["GetLinearVelocity"]      = &LinearMover::GetLinearVelocity;
+    linear_mover["GetLinearAcceleration"]  = &LinearMover::GetLinearAcceleration;
+    linear_mover["GetAngularVelocity"]     = &LinearMover::GetAngularVelocity;
+    linear_mover["GetAngularAcceleration"] = &LinearMover::GetAngularAcceleration;
+    linear_mover["GetIntegrator"]          = [](const LinearMover& transformer) { return base::ToString(transformer.GetIntegrator()); };
+    linear_mover["SetAngularVelocity"]     = &LinearMover::SetAngularVelocity;
+    linear_mover["SetAngularAcceleration"] = &LinearMover::SetAngularAcceleration;
+    linear_mover["SetLinearVelocity"]      = sol::overload(
+        [](LinearMover& transformer, glm::vec2 vector) {
             transformer.SetLinearVelocity(vector);
         },
-        [](NodeTransformer& transformer, float x, float y) {
+        [](LinearMover& transformer, float x, float y) {
             transformer.SetLinearVelocity(glm::vec2{x, y});
         });
-    transformer["SetLinearAcceleration"] = sol::overload(
-        [](NodeTransformer& transformer, glm::vec2 vector) {
+    linear_mover["SetLinearAcceleration"] = sol::overload(
+        [](LinearMover& transformer, glm::vec2 vector) {
             transformer.SetLinearAcceleration(vector);
         },
-        [](NodeTransformer& transformer, float x, float y) {
+        [](LinearMover& transformer, float x, float y) {
             transformer.SetLinearAcceleration(glm::vec2{x, y});
         });
 
@@ -895,7 +895,7 @@ void BindGameLib(sol::state& L)
     entity_node["GetRigidBody"]   = GetMutable(&EntityNode::GetRigidBody);
     entity_node["GetTextItem"]    = GetMutable(&EntityNode::GetTextItem);
     entity_node["GetSpatialNode"] = GetMutable(&EntityNode::GetSpatialNode);
-    entity_node["GetTransformer"] = GetMutable(&EntityNode::GetTransformer);
+    entity_node["GetLinearMover"] = GetMutable(&EntityNode::GetLinearMover);
     entity_node["GetEntity"]      = GetMutable(&EntityNode::GetEntity);
     entity_node["SetName"]        = &EntityNode::SetName;
     entity_node["SetRotation"]    = &EntityNode::SetRotation;

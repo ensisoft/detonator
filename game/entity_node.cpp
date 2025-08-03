@@ -22,7 +22,7 @@
 #include "data/reader.h"
 #include "game/transform.h"
 #include "game/entity_node.h"
-#include "game/entity_node_transformer.h"
+#include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
@@ -68,8 +68,8 @@ EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
         mFixture = std::make_shared<FixtureClass>(*other.mFixture);
     if (other.mMapNode)
         mMapNode = std::make_shared<MapNodeClass>(*other.mMapNode);
-    if (other.mTransformer)
-        mTransformer = std::make_shared<NodeTransformerClass>(*other.mTransformer);
+    if (other.mLinearMover)
+        mLinearMover = std::make_shared<LinearMoverClass>(*other.mLinearMover);
     if (other.mBasicLight)
         mBasicLight = std::make_shared<BasicLightClass>(*other.mBasicLight);
 }
@@ -90,8 +90,8 @@ EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
     mSpatialNode = std::move(other.mSpatialNode);
     mFixture     = std::move(other.mFixture);
     mMapNode     = std::move(other.mMapNode);
-    mTransformer = std::move(other.mTransformer);
-    mBasicLight   = std::move(other.mBasicLight);
+    mLinearMover = std::move(other.mLinearMover);
+    mBasicLight  = std::move(other.mBasicLight);
 }
 
 std::size_t EntityNodeClass::GetHash() const
@@ -117,8 +117,8 @@ std::size_t EntityNodeClass::GetHash() const
         hash = base::hash_combine(hash, mFixture->GetHash());
     if (mMapNode)
         hash = base::hash_combine(hash, mMapNode->GetHash());
-    if (mTransformer)
-        hash = base::hash_combine(hash, mTransformer->GetHash());
+    if (mLinearMover)
+        hash = base::hash_combine(hash, mLinearMover->GetHash());
     if (mBasicLight)
         hash = base::hash_combine(hash, mBasicLight->GetHash());
     return hash;
@@ -153,9 +153,9 @@ void EntityNodeClass::SetMapNode(const MapNodeClass& map)
 {
     mMapNode = std::make_shared<MapNodeClass>(map);
 }
-void EntityNodeClass::SetTransformer(const NodeTransformerClass& transformer)
+void EntityNodeClass::SetLinearMover(const LinearMoverClass& mover)
 {
-    mTransformer = std::make_shared<NodeTransformerClass>(transformer);
+    mLinearMover = std::make_shared<LinearMoverClass>(mover);
 }
 
 void EntityNodeClass::SetBasicLight(const BasicLightClass& light)
@@ -193,9 +193,9 @@ void EntityNodeClass::CreateMapNode()
     mMapNode = std::make_shared<MapNodeClass>();
 }
 
-void EntityNodeClass::CreateTransformer()
+void EntityNodeClass::CreateLinearMover()
 {
-    mTransformer = std::make_shared<NodeTransformerClass>();
+    mLinearMover = std::make_shared<LinearMoverClass>();
 }
 
 void EntityNodeClass::CreateBasicLight()
@@ -276,11 +276,11 @@ void EntityNodeClass::IntoJson(data::Writer& data) const
         mMapNode->IntoJson(*chunk);
         data.Write("map_node", std::move(chunk));
     }
-    if (mTransformer)
+    if (mLinearMover)
     {
         auto chunk = data.NewWriteChunk();
-        mTransformer->IntoJson(*chunk);
-        data.Write("transformer", std::move(chunk));
+        mLinearMover->IntoJson(*chunk);
+        data.Write("linear_mover", std::move(chunk));
     }
     if (mBasicLight)
     {
@@ -322,7 +322,7 @@ bool EntityNodeClass::FromJson(const data::Reader& data)
     ok &= ComponentClassFromJson(mName, "spatial_node",  data, mSpatialNode);
     ok &= ComponentClassFromJson(mName, "fixture",       data, mFixture);
     ok &= ComponentClassFromJson(mName, "map_node",      data, mMapNode);
-    ok &= ComponentClassFromJson(mName, "transformer",   data, mTransformer);
+    ok &= ComponentClassFromJson(mName, "linear_mover",  data, mLinearMover);
     ok &= ComponentClassFromJson(mName, "basic_light",   data, mBasicLight);
     return ok;
 }
@@ -352,7 +352,7 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
     mSpatialNode = std::move(tmp.mSpatialNode);
     mFixture     = std::move(tmp.mFixture);
     mMapNode     = std::move(tmp.mMapNode);
-    mTransformer = std::move(tmp.mTransformer);
+    mLinearMover = std::move(tmp.mLinearMover);
     mBitFlags    = std::move(tmp.mBitFlags);
     mBasicLight  = std::move(tmp.mBasicLight);
     return *this;
@@ -387,8 +387,8 @@ EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass, EntityNodeA
         mFixture = std::make_unique<Fixture>(mClass->GetSharedFixture());
     if (mClass->HasMapNode())
         mMapNode = std::make_unique<MapNode>(mClass->GetSharedMapNode());
-    if (mClass->HasTransformer())
-        mTransformer = std::make_unique<NodeTransformer>(mClass->GetSharedTransformer());
+    if (mClass->HasLinearMover())
+        mLinearMover = std::make_unique<LinearMover>(mClass->GetSharedLinearMover());
     if (mClass->HasBasicLight())
         mBasicLight = std::make_unique<BasicLight>(mClass->GetSharedBasicLight());
 }
@@ -404,7 +404,7 @@ EntityNode::EntityNode(EntityNode&& other)
    , mSpatialNode   (std::move(other.mSpatialNode))
    , mFixture       (std::move(other.mFixture))
    , mMapNode       (std::move(other.mMapNode))
-   , mTransformer   (std::move(other.mTransformer))
+   , mLinearMover   (std::move(other.mLinearMover))
    , mBasicLight    (std::move(other.mBasicLight))
 {
     other.mTransform = nullptr;
@@ -455,9 +455,9 @@ SpatialNode* EntityNode::GetSpatialNode()
     return mSpatialNode.get();
 }
 
-NodeTransformer* EntityNode::GetTransformer()
+LinearMover* EntityNode::GetLinearMover()
 {
-    return mTransformer.get();
+    return mLinearMover.get();
 }
 
 BasicLight* EntityNode::GetBasicLight()
@@ -483,9 +483,9 @@ const Fixture* EntityNode::GetFixture() const
 const MapNode* EntityNode::GetMapNode() const
 { return mMapNode.get(); }
 
-const NodeTransformer* EntityNode::GetTransformer() const
+const LinearMover* EntityNode::GetLinearMover() const
 {
-    return mTransformer.get();
+    return mLinearMover.get();
 }
 
 const BasicLight* EntityNode::GetBasicLight() const

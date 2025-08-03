@@ -21,7 +21,7 @@
 #include "data/reader.h"
 #include "game/kinematic_animator.h"
 #include "game/entity_node.h"
-#include "game/entity_node_transformer.h"
+#include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body.h"
 
 namespace game
@@ -98,18 +98,18 @@ void KinematicAnimator::Start(EntityNode& node)
             WARN("Kinematic animator can't apply on a node without rigid body. [animator='%1']", mClass->GetName());
         }
     }
-    else if (target == KinematicAnimatorClass::Target::Transformer)
+    else if (target == KinematicAnimatorClass::Target::LinearMover)
     {
-        if (const auto* transformer = node.GetTransformer())
+        if (const auto* mover = node.GetLinearMover())
         {
-            mStartLinearVelocity      = transformer->GetLinearVelocity();
-            mStartLinearAcceleration  = transformer->GetLinearAcceleration();
-            mStartAngularVelocity     = transformer->GetAngularVelocity();
-            mStartAngularAcceleration = transformer->GetAngularAcceleration();
+            mStartLinearVelocity      = mover->GetLinearVelocity();
+            mStartLinearAcceleration  = mover->GetLinearAcceleration();
+            mStartAngularVelocity     = mover->GetAngularVelocity();
+            mStartAngularAcceleration = mover->GetAngularAcceleration();
         }
         else
         {
-            WARN("Kinematic animator can't apply on a node without a transformer. [animator='%1']", mClass->GetName());
+            WARN("Kinematic animator can't apply on a node without a linear mover. [animator='%1']", mClass->GetName());
         }
     } else BUG("Missing kinematic animator target.");
 }
@@ -141,9 +141,9 @@ void KinematicAnimator::Apply(EntityNode& node, float t)
                 body->AdjustAngularVelocity(angular_velocity);
         }
     }
-    else if (target == KinematicAnimatorClass::Target::Transformer)
+    else if (target == KinematicAnimatorClass::Target::LinearMover)
     {
-        if (auto* transformer = node.GetTransformer())
+        if (auto* mover = node.GetLinearMover())
         {
             const auto method = mClass->GetInterpolation();
             const auto linear_velocity = math::interpolate(mStartLinearVelocity,
@@ -155,10 +155,10 @@ void KinematicAnimator::Apply(EntityNode& node, float t)
             const auto angular_acceleration = math::interpolate(mStartAngularAcceleration,
                                                                 mClass->GetEndAngularAcceleration(), t, method);
 
-            transformer->SetLinearVelocity(linear_velocity);
-            transformer->SetLinearAcceleration(linear_acceleration);
-            transformer->SetAngularVelocity(angular_velocity);
-            transformer->SetAngularAcceleration(angular_acceleration);
+            mover->SetLinearVelocity(linear_velocity);
+            mover->SetLinearAcceleration(linear_acceleration);
+            mover->SetAngularVelocity(angular_velocity);
+            mover->SetAngularAcceleration(angular_acceleration);
         }
     } else BUG("Missing kinematic animator target.");
 }
@@ -174,14 +174,14 @@ void KinematicAnimator::Finish(EntityNode& node)
             body->AdjustAngularVelocity(mClass->GetEndAngularVelocity());
         }
     }
-    else if (target == KinematicAnimatorClass::Target::Transformer)
+    else if (target == KinematicAnimatorClass::Target::LinearMover)
     {
-        if (auto* transformer = node.GetTransformer())
+        if (auto* mover = node.GetLinearMover())
         {
-            transformer->SetLinearVelocity(mClass->GetEndLinearVelocity());
-            transformer->SetLinearAcceleration(mClass->GetEndLinearAcceleration());
-            transformer->SetAngularVelocity(mClass->GetEndAngularVelocity());
-            transformer->SetAngularAcceleration(mClass->GetEndAngularAcceleration());
+            mover->SetLinearVelocity(mClass->GetEndLinearVelocity());
+            mover->SetLinearAcceleration(mClass->GetEndLinearAcceleration());
+            mover->SetAngularVelocity(mClass->GetEndAngularVelocity());
+            mover->SetAngularAcceleration(mClass->GetEndAngularAcceleration());
         }
     }
     else BUG("Missing kinematic animator target.");

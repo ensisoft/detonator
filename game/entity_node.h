@@ -33,8 +33,8 @@
 
 namespace game
 {
-    class NodeTransformerClass;
-    class NodeTransformer;
+    class LinearMoverClass;
+    class LinearMover;
     class RigidBodyClass;
     class RigidBody;
     class DrawableItemClass;
@@ -140,7 +140,7 @@ namespace game
         // Attach a tilemap node to this node class.
         void SetMapNode(const MapNodeClass& map);
         // Attach a transformer to this node class
-        void SetTransformer(const NodeTransformerClass& transformer);
+        void SetLinearMover(const LinearMoverClass& transformer);
 
         void SetBasicLight(const BasicLightClass& light);
 
@@ -157,7 +157,7 @@ namespace game
         // Create and attach a map node with default settings.
         void CreateMapNode();
         // Create and attach a transformer with default settings.
-        void CreateTransformer();
+        void CreateLinearMover();
 
         void CreateBasicLight();
 
@@ -173,8 +173,8 @@ namespace game
         { mFixture.reset(); }
         void RemoveMapNode() noexcept
         { mMapNode.reset(); }
-        void RemoveTransformer() noexcept
-        { mTransformer.reset(); }
+        void RemoveLinearMover() noexcept
+        { mLinearMover.reset(); }
         void RemoveBasicLight() noexcept
         { mBasicLight.reset(); }
 
@@ -196,8 +196,8 @@ namespace game
         // Get the map node class if any.
         auto GetSharedMapNode() const noexcept
         { return mMapNode; }
-        auto GetSharedTransformer() const noexcept
-        { return mTransformer; }
+        auto GetSharedLinearMover() const noexcept
+        { return mLinearMover; }
         auto GetSharedBasicLight() const noexcept
         { return mBasicLight; }
 
@@ -216,8 +216,8 @@ namespace game
         { return !!mFixture; }
         bool HasMapNode() const noexcept
         { return !!mMapNode; }
-        bool HasTransformer() const noexcept
-        { return !!mTransformer; }
+        bool HasLinearMover() const noexcept
+        { return !!mLinearMover; }
         bool HasBasicLight() const noexcept
         { return !!mBasicLight; }
 
@@ -243,8 +243,8 @@ namespace game
         { return mFixture.get(); }
         MapNodeClass* GetMapNode() noexcept
         { return mMapNode.get(); }
-        NodeTransformerClass* GetTransformer() noexcept
-        { return mTransformer.get(); }
+        LinearMoverClass* GetLinearMover() noexcept
+        { return mLinearMover.get(); }
         BasicLightClass* GetBasicLight() noexcept
         { return mBasicLight.get(); }
 
@@ -269,8 +269,8 @@ namespace game
         const FixtureClass* GetFixture() const noexcept
         { return mFixture.get(); }
 
-        const NodeTransformerClass* GetTransformer() const noexcept
-        { return mTransformer.get(); }
+        const LinearMoverClass* GetLinearMover() const noexcept
+        { return mLinearMover.get(); }
 
         const MapNodeClass* GetMapNode() const noexcept
         { return mMapNode.get(); }
@@ -325,7 +325,7 @@ namespace game
         // fixture if any.
         std::shared_ptr<FixtureClass> mFixture;
         std::shared_ptr<MapNodeClass> mMapNode;
-        std::shared_ptr<NodeTransformerClass> mTransformer;
+        std::shared_ptr<LinearMoverClass> mLinearMover;
         std::shared_ptr<BasicLightClass> mBasicLight;
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
@@ -521,7 +521,7 @@ namespace game
 
         MapNode* GetMapNode();
 
-        NodeTransformer* GetTransformer();
+        LinearMover* GetLinearMover();
 
         BasicLight* GetBasicLight();
 
@@ -543,7 +543,7 @@ namespace game
 
         const MapNode* GetMapNode() const;
 
-        const NodeTransformer* GetTransformer() const;
+        const LinearMover* GetLinearMover() const;
 
         const BasicLight* GetBasicLight() const;
 
@@ -607,7 +607,7 @@ namespace game
         std::unique_ptr<Fixture> mFixture;
         // map node if any.
         std::unique_ptr<MapNode> mMapNode;
-        std::unique_ptr<NodeTransformer> mTransformer;
+        std::unique_ptr<LinearMover> mLinearMover;
         std::unique_ptr<BasicLight> mBasicLight;
 
     };

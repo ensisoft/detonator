@@ -450,22 +450,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Body",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 50.0,
-            "y": 50.0
-          },
-          "tag": "",
-          "transformer": {
+          "linear_mover": {
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
@@ -480,7 +465,22 @@
               "x": 0.0,
               "y": 0.0
             }
-          }
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 50.0,
+            "y": 50.0
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
@@ -1822,22 +1822,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Body",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 50.0,
-            "y": 50.0
-          },
-          "tag": "",
-          "transformer": {
+          "linear_mover": {
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
@@ -1852,7 +1837,22 @@
               "x": 0.0,
               "y": 0.0
             }
-          }
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 50.0,
+            "y": 50.0
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
@@ -1883,7 +1883,7 @@
                 "id": "tCe7Cgogje",
                 "joint_id": "",
                 "method": "Linear",
-                "name": "Transformer_LinearVelocity",
+                "name": "LinearMover_LinearVelocity",
                 "node": "WLST0ZxIsj",
                 "starttime": 0.0,
                 "value": {
@@ -2195,6 +2195,22 @@
           "flags": {
             "VisibleInEditor": true
           },
+          "linear_mover": {
+            "angular_acceleration": 0.0,
+            "angular_velocity": 0.0,
+            "flags": {
+              "Enabled": true
+            },
+            "integrator": "Euler",
+            "linear_acceleration": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "linear_velocity": {
+              "x": 0.0,
+              "y": 0.0
+            }
+          },
           "name": "Body",
           "position": {
             "x": 0.0,
@@ -2209,23 +2225,7 @@
             "x": 270.0,
             "y": 290.0
           },
-          "tag": "",
-          "transformer": {
-            "angular_acceleration": 0.0,
-            "angular_velocity": 0.0,
-            "flags": {
-              "Enabled": false
-            },
-            "integrator": "Euler",
-            "linear_acceleration": {
-              "x": 0.0,
-              "y": 0.0
-            },
-            "linear_velocity": {
-              "x": 0.0,
-              "y": 0.0
-            }
-          }
+          "tag": ""
         },
         {
           "class": "l3P8GD3RWu",
@@ -3423,22 +3423,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Body",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 50.0,
-            "y": 50.0
-          },
-          "tag": "",
-          "transformer": {
+          "linear_mover": {
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
@@ -3453,7 +3438,22 @@
               "x": 0.0,
               "y": 0.0
             }
-          }
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 50.0,
+            "y": 50.0
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
@@ -4573,22 +4573,7 @@
           "flags": {
             "VisibleInEditor": true
           },
-          "name": "Body",
-          "position": {
-            "x": -0.0,
-            "y": -100.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 200.0,
-            "y": 200.0
-          },
-          "tag": "",
-          "transformer": {
+          "linear_mover": {
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
@@ -4603,7 +4588,22 @@
               "x": 0.0,
               "y": 0.0
             }
-          }
+          },
+          "name": "Body",
+          "position": {
+            "x": -0.0,
+            "y": -100.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 200.0,
+            "y": 200.0
+          },
+          "tag": ""
         },
         {
           "class": "AqvX8Eaq7K",
