@@ -848,7 +848,7 @@ void CustomFragmentShaderMain() {
     mShaderEditor->LoadGeometry(mWorkspace, "shader-editor-geometry");
     mShaderEditor->SetText(mMaterial->GetShaderSrc(), "GLSL");
     mShaderEditor->SetTitle("Shader Source");
-    mShaderEditor->EnableApply(true);
+    mShaderEditor->EnableSaveApply();
     mShaderEditor->showFU();
     mShaderEditor->finished = [this](int ret) {
         if (ret == QDialog::Rejected)
@@ -860,7 +860,7 @@ void CustomFragmentShaderMain() {
         mShaderEditor = nullptr;
         ShowMaterialProperties();
     };
-    mShaderEditor->apply = [this]() {
+    mShaderEditor->applyFunction = [this]() {
         mMaterial->SetShaderSrc(mShaderEditor->GetText());
         on_actionReloadShaders_triggered();
     };

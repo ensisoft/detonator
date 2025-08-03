@@ -270,6 +270,9 @@ DlgTextEdit::DlgTextEdit(QWidget* parent)
     mUI->setupUi(this);
 
     SetEnabled(mUI->btnApply, false);
+    SetVisible(mUI->btnApply, false);
+    SetEnabled(mUI->btnCancel, false);
+    SetVisible(mUI->btnCancel, false);
 
     SetupFU(this);
 }
@@ -360,24 +363,70 @@ void DlgTextEdit::SetReadOnly(bool readonly)
     mUI->text->setReadOnly(readonly);
     mUI->btnCancel->setVisible(!readonly);
 }
-void DlgTextEdit::EnableApply(bool on_off)
+void DlgTextEdit::EnableSaveApply()
 {
-    SetEnabled(mUI->btnApply, on_off);
+    // initial state.
+    SetEnabled(mUI->btnApply, false);
+    SetVisible(mUI->btnApply, true);
+    SetEnabled(mUI->btnAccept, false);
+    SetVisible(mUI->btnAccept, true);
+
+    SetEnabled(mUI->btnCancel, true);
+    SetVisible(mUI->btnCancel, true);
+
+    mUI->btnAccept->setText("Save");
+
+    connect(&mDocument, &QTextDocument::contentsChanged, this, [this]() {
+        SetEnabled(mUI->btnApply, true);
+        SetEnabled(mUI->btnAccept, true);
+    });
+
+    connect(mUI->text, &QPlainTextEdit::modificationChanged, this, [this](bool changed) {
+        SetEnabled(mUI->btnApply, true);
+        SetEnabled(mUI->btnAccept, true);
+    });
 }
 
 void DlgTextEdit::on_btnAccept_clicked()
 {
      accept();
+     mPendingChanges = false;
 }
 void DlgTextEdit::on_btnCancel_clicked()
 {
-     reject();
+    if (CheckForClose())
+        reject();
 }
 
 void DlgTextEdit::on_btnApply_clicked()
 {
-    if (apply)
-        apply();
+    if (applyFunction)
+    {
+        applyFunction();
+        mPendingChanges = true;
+        SetEnabled(mUI->btnApply, false);
+    }
+}
+
+bool DlgTextEdit::OnCloseEvent()
+{
+    return CheckForClose();
+}
+
+bool DlgTextEdit::CheckForClose()
+{
+    if (!mPendingChanges)
+        return true;
+
+    QMessageBox msg(this);
+    msg.setWindowTitle("Pending Changes");
+    msg.setIcon(QMessageBox::Icon::Question);
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msg.setText(tr("Are you sure you want to discard unsaved changes?"));
+    if (msg.exec() == QMessageBox::No)
+        return false;
+
+    return true;
 }
 
 } // namespace
