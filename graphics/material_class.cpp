@@ -1273,7 +1273,9 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 #include "shaders/fragment_color_shader.glsl"
         };
 
+        src.LoadRawSource(base_shader);
         src.LoadRawSource(source);
+        src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_color_shader.glsl");
     }
     else if (mType == Type::Gradient)
