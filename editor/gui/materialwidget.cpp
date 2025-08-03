@@ -3203,6 +3203,17 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     {
         ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
         ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
+        if  (mShaderEditor)
+        {
+            mShaderEditor->ShowError("Shader compile error");
+        }
+    }
+    else
+    {
+        if (mShaderEditor)
+        {
+            mShaderEditor->ClearError();
+        }
     }
 
     if (type == gfx::MaterialClass::Type::Sprite && mState == PlayState::Playing)
