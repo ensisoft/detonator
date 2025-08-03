@@ -203,6 +203,7 @@
     "project": {
         "application_identifier": "nzHsJhRp8RDr",
         "application_library_lin": "app://libGameEngine.so",
+        "application_library_wasm": "app://html5/GameEngine.wasm",
         "application_library_win": "app://GameEngine.dll",
         "application_name": "",
         "application_version": "",
