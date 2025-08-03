@@ -57,11 +57,13 @@
     "LPH6tgo9eN": {
         "__tag_list": [
         ],
+        "__version": 6,
         "is-valid": true
     },
     "LnRkG51o2z": {
         "__tag_list": [
         ],
+        "__version": 6,
         "is-valid": true
     },
     "SfDYJTRhGz": {
@@ -91,6 +93,7 @@
     "id5BsoCSrO": {
         "__tag_list": [
         ],
+        "__version": 1,
         "is-valid": true
     },
     "iiKBwhkDbI": {
@@ -143,6 +146,7 @@
     "project": {
         "application_identifier": "DLdjym3PLCqb",
         "application_library_lin": "app://libGameEngine.so",
+        "application_library_wasm": "app://html5/GameEngine.wasm",
         "application_library_win": "app://GameEngine.dll",
         "application_name": "Derpo Bird",
         "application_version": "",

@@ -1370,8 +1370,6 @@
     "f85ZCt9KqW": {
         "__tag_list": [
         ],
-        "__version": 6,
-        "checked_for_packing": true,
         "is-valid": true
     },
     "fW04Lutwft": {
@@ -1542,6 +1540,7 @@
     "project": {
         "application_identifier": "FpdPRbNGTfO5",
         "application_library_lin": "app://libGameEngine.so",
+        "application_library_wasm": "app://html5/GameEngine.wasm",
         "application_library_win": "app://GameEngine.dll",
         "application_name": "",
         "application_version": "",
