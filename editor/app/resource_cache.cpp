@@ -22,6 +22,8 @@
 #  include <QJsonDocument>
 #include "warnpop.h"
 
+#include <map>
+
 #include "base/assert.h"
 #include "base/utility.h"
 #include "data/json.h"
@@ -102,15 +104,34 @@ public:
     {
         const auto filename = app::JoinPath(mWorkspaceDirectory, "content.json");
 
-        data::JsonObject root;
+        // unordered map can cause large random diffs in the content.json
+        // file simply because the keys were sorted differently and the data
+        // was then written out in different order WITHOUT any real changes
+        // in the actual content. This causes confusion and makes it extra
+        // difficult to git diff any changes (for example during migration)
+        // done to the content.json file.
+        //
+        // Make sure the data writing order is consistent by using a map
+        // that guarantees always the same relative order.
+        std::map<std::string, const Resource*> table;
         for (const auto& pair : mState->resources)
         {
-            const auto& resource = pair.second;
+            table[pair.first] = pair.second.get();
+        }
+
+        data::JsonObject root;
+        for (const auto& pair : table)
+        {
+            const auto* resource = pair.second;
             // skip persisting primitive resources since they're always
             // created as part of the workspace creation and their resource
             // IDs are fixed.
             if (resource->IsPrimitive())
                 continue;
+            // skip persisting any transient resources.
+            if (resource->IsTransient())
+                continue;
+
             // serialize the user defined resource.
             resource->Serialize(root);
         }
@@ -146,14 +167,23 @@ public:
         json["workspace"] = QJsonObject::fromVariantMap(mWorkspaceProperties);
         json["project"]   = project;
 
+        std::map<std::string, const Resource*> table;
+        for (const auto& pair : mState->resources)
+        {
+            table[pair.first] = pair.second.get();
+        }
+
         // serialize the properties stored in each and every
         // resource object.
-        for (const auto& pair : mState->resources)
+        for (const auto& pair : table)
         {
             const auto& resource = pair.second;
 
             if (resource->IsPrimitive())
                 continue;
+            if (resource->IsTransient())
+                continue;
+
             resource->SaveProperties(json);
         }
         // set the root object to the json document then serialize
@@ -182,6 +212,9 @@ public:
 
             if (resource->IsPrimitive())
                 continue;
+            if (resource->IsTransient())
+                continue;
+
             resource->SaveUserProperties(json);
         }
 

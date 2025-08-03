@@ -45,6 +45,7 @@
 #include <memory>
 #include <unordered_map>
 #include <set>
+#include <map>
 #include <stack>
 #include <functional>
 
@@ -1300,9 +1301,21 @@ bool Workspace::LoadContent(const QString& filename, ResourceMigrationLog* log, 
 
 bool Workspace::SaveContent(const QString& filename) const
 {
-    data::JsonObject root;
+    // Make sure to order the data in the same way in both cases
+    // when using a resource cache and when not using a resource cache.
+    // see resource_cache SaveContent for more details.
+
+    std::map<std::string, const Resource*> table;
     for (const auto& resource : mResources)
     {
+        table[resource->GetIdUtf8()] = resource.get();
+    }
+
+    data::JsonObject root;
+    for (const auto& pair : table)
+    {
+        const auto* resource = pair.second;
+
         if (resource->IsTransient())
             continue;
 
@@ -1311,6 +1324,7 @@ bool Workspace::SaveContent(const QString& filename) const
         // IDs are fixed.
         if (resource->IsPrimitive())
             continue;
+
         // serialize the user defined resource.
         resource->Serialize(root);
     }
@@ -1345,12 +1359,25 @@ bool Workspace::SaveProperties(const QString& filename) const
     json["workspace"] = QJsonObject::fromVariantMap(mProperties);
     json["project"]   = project;
 
-    // serialize the properties stored in each and every
-    // resource object.
+    // Make sure to order the data in the same way in both cases
+    // when using a resource cache and when not using a resource cache.
+    // see resource_cache SaveContent for more details.
+
+    std::map<std::string, const Resource*> table;
     for (const auto& resource : mResources)
     {
+        table[resource->GetIdUtf8()] = resource.get();
+    }
+
+    // serialize the properties stored in each and every
+    // resource object.
+    for (const auto& pair : table)
+    {
+        const auto* resource = pair.second;
+
         if (resource->IsPrimitive() || resource->IsTransient())
             continue;
+
         resource->SaveProperties(json);
     }
     // set the root object to the json document then serialize
