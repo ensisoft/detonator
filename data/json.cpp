@@ -190,6 +190,19 @@ bool JsonObject::Read(const char* name, unsigned index, std::string* out) const
     return read_array(name, index, out);
 }
 
+bool JsonObject::Read(const char* name, unsigned index, glm::vec2* out) const
+{
+    if (!mJson->contains(name))
+        return false;
+
+    const auto& obj = (*mJson)[name];
+    if (!obj.is_array())
+        return false;
+    if (index > obj.size())
+        return false;
+    return base::JsonReadSafe(obj[index], out);
+}
+
 bool JsonObject::HasValue(const char* name) const
 {
     return mJson->contains(name);
@@ -356,6 +369,21 @@ void JsonObject::Write(const char* name, const char* const * array, size_t size)
 void JsonObject::Write(const char* name, const std::string* array, size_t size)
 {
     write_array<std::string>(name, array, size);
+}
+
+void JsonObject::Write(const char* name, const glm::vec2* array, size_t size)
+{
+    nlohmann::json json_array;
+
+    for (size_t i=0; i<size; ++i)
+    {
+        const auto& val = array[i];
+        nlohmann::json j;
+        j["x"] = val.x;
+        j["y"] = val.y;
+        json_array.push_back(std::move(j));
+    }
+    (*mJson)[name] = std::move(json_array);
 }
 
 void JsonObject::AppendChunk(const char* name, const Writer& chunk)
