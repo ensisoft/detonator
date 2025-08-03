@@ -17,8 +17,11 @@
 #include "config.h"
 
 #include <sstream>
+#include <unordered_set>
+#include <cstdio>
 
 #include "base/assert.h"
+#include "base/utility.h"
 #include "base/logging.h"
 #include "graphics/device_shader.h"
 
@@ -60,8 +63,25 @@ void DeviceShader::CompileSource(const std::string& source, bool debug)
     auto shader = mDevice->CompileShader(source, type, &mCompileInfo);
     if (!shader.IsValid())
     {
-        ERROR("Shader object compile error. [name='%1', info='%2']", mName, mCompileInfo);
-        DumpSource(source);
+        const auto& info_lines = base::SplitString(mCompileInfo, '\n');
+
+        std::unordered_set<unsigned> error_lines;
+
+        ERROR("Shader object compile error. [name='%1']", mName);
+        for (const auto& info_line : info_lines)
+        {
+            if (info_line.empty() || info_line == "\n" || info_line == "\r\n")
+                continue;
+
+            ERROR("%1", info_line);
+
+            int tmp, line_number;
+            // likely not universal format but specific to NVIDIA driver
+            if (std::sscanf(info_line.c_str(), "%d(%d)", &tmp, &line_number) == 2)
+                error_lines.insert(line_number);
+        }
+
+        DumpSource(source, &error_lines);
         return;
     }
     else
@@ -80,16 +100,20 @@ void DeviceShader::DumpSource() const
     DumpSource(mSource);
 }
 
-void DeviceShader::DumpSource(const std::string& source) const
+void DeviceShader::DumpSource(const std::string& source,
+                              const std::unordered_set<unsigned>* error_lines) const
 {
     DEBUG("Shader source: [name='%1']", mName);
     std::stringstream ss(source);
     std::string line;
-    std::size_t counter = 1;
+    unsigned line_number = 1;
     while (std::getline(ss, line))
     {
-        DEBUG("L:%1 %2", counter, line);
-        ++counter;
+        if (error_lines && base::Contains(*error_lines, line_number))
+            ERROR("L:%1 %2", line_number, line);
+        else DEBUG("L:%1 %2", line_number, line);
+
+        ++line_number;
     }
 }
 void DeviceShader::ClearSource() const

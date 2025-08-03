@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include <string>
+#include <unordered_set>
 
 #include "device/graphics.h"
 #include "graphics/shader.h"
@@ -36,7 +37,8 @@ namespace gfx {
 
         void CompileSource(const std::string& source, bool debug);
         void DumpSource() const;
-        void DumpSource(const std::string& source) const;
+        void DumpSource(const std::string& source,
+                        const std::unordered_set<unsigned>* error_lines = nullptr) const;
         void ClearSource() const;
 
         bool IsValid() const override
