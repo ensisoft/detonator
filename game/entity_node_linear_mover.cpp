@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "game/entity_node_transformer.h"
+#include "game/entity_node_linear_mover.h"
 
 #include "base/hash.h"
 #include "data/writer.h"
@@ -23,7 +23,7 @@
 namespace game
 {
 
- size_t NodeTransformerClass::GetHash() const noexcept
+ size_t LinearMoverClass::GetHash() const noexcept
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mFlags);
@@ -35,7 +35,7 @@ namespace game
     return hash;
 }
 
-void NodeTransformerClass::IntoJson(data::Writer& data) const
+void LinearMoverClass::IntoJson(data::Writer& data) const
 {
     data.Write("flags",                mFlags);
     data.Write("integrator",           mIntegrator);
@@ -45,7 +45,7 @@ void NodeTransformerClass::IntoJson(data::Writer& data) const
     data.Write("angular_acceleration", mAngularAcceleration);
 }
 
-bool NodeTransformerClass::FromJson(const data::Reader& data)
+bool LinearMoverClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("flags",                &mFlags);

@@ -1003,7 +1003,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
 
     actuator_list.push_back( {game::AnimatorClass::Type::TransformAnimator,       "Transform Animator" });
     actuator_list.push_back( {game::AnimatorClass::Type::KinematicAnimator,       "Kinematic Animator on Rigid Body" });
-    actuator_list.push_back( {game::AnimatorClass::Type::KinematicAnimator,       "Kinematic Animator on Node Transformer" });
+    actuator_list.push_back( {game::AnimatorClass::Type::KinematicAnimator,       "Kinematic Animator on Linear Mover" });
     actuator_list.push_back( {game::AnimatorClass::Type::MaterialAnimator,        "Material Animator" });
     actuator_list.push_back( {game::AnimatorClass::Type::PropertyAnimator,        "Property Animator" });
     actuator_list.push_back( {game::AnimatorClass::Type::BooleanPropertyAnimator, "Property Animator (Boolean))" });
@@ -1017,8 +1017,8 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
         action->setEnabled(false);
         if (act.name.contains("Rigid Body"))
             action->setProperty("kinematic_target", static_cast<int>(game::KinematicAnimatorClass::Target::RigidBody));
-        else if (act.name.contains("Node Transformer"))
-            action->setProperty("kinematic_target", static_cast<int>(game::KinematicAnimatorClass::Target::Transformer));
+        else if (act.name.contains("Linear Mover"))
+            action->setProperty("kinematic_target", static_cast<int>(game::KinematicAnimatorClass::Target::LinearMover));
 
         connect(action, &QAction::triggered, this, &AnimationTrackWidget::AddActuatorAction);
         if (timeline)
@@ -1380,42 +1380,42 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
             mUI.setvalEndValue->SetType(Uniform::Type::Vec2, " m/s");
             setter->SetEndValue(mUI.setvalEndValue->GetAsVec2());
         }
-        else if (name == Name::Transformer_LinearVelocity)
+        else if (name == Name::LinearMover_LinearVelocity)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Vec2, " u/s");
             setter->SetEndValue(mUI.setvalEndValue->GetAsVec2());
         }
-        else if (name == Name::Transformer_LinearVelocityX)
+        else if (name == Name::LinearMover_LinearVelocityX)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float, " u/s");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::Transformer_LinearVelocityY)
+        else if (name == Name::LinearMover_LinearVelocityY)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float, " u/s");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::Transformer_LinearAcceleration)
+        else if (name == Name::LinearMover_LinearAcceleration)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Vec2, " u/s²");
             setter->SetEndValue(mUI.setvalEndValue->GetAsVec2());
         }
-        else if (name == Name::Transformer_LinearAccelerationX)
+        else if (name == Name::LinearMover_LinearAccelerationX)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float, " u/s²");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::Transformer_LinearAccelerationY)
+        else if (name == Name::LinearMover_LinearAccelerationY)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float, " u/s²");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::Transformer_AngularVelocity)
+        else if (name == Name::LinearMover_AngularVelocity)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float, " rad/s");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::Transformer_AngularAcceleration)
+        else if (name == Name::LinearMover_AngularAcceleration)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float, " rad/s²");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
@@ -1723,21 +1723,21 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " m/s");
         else if (name == Name::RigidBody_AngularVelocity)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " m/s");
-        else if (name == Name::Transformer_LinearVelocity)
+        else if (name == Name::LinearMover_LinearVelocity)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>(), " u/s");
-        else if (name == Name::Transformer_LinearVelocityX)
+        else if (name == Name::LinearMover_LinearVelocityX)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " u/s");
-        else if (name == Name::Transformer_LinearVelocityY)
+        else if (name == Name::LinearMover_LinearVelocityY)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " u/s");
-        else if (name == Name::Transformer_LinearAcceleration)
+        else if (name == Name::LinearMover_LinearAcceleration)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>(), " u/s²");
-        else if (name == Name::Transformer_LinearAccelerationX)
+        else if (name == Name::LinearMover_LinearAccelerationX)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " u/s²");
-        else if (name == Name::Transformer_LinearAccelerationY)
+        else if (name == Name::LinearMover_LinearAccelerationY)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " u/s²");
-        else if (name == Name::Transformer_AngularVelocity)
+        else if (name == Name::LinearMover_AngularVelocity)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " rad/s");
-        else if (name == Name::Transformer_AngularAcceleration)
+        else if (name == Name::LinearMover_AngularAcceleration)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " rad/s²");
         else if (name == Name::TextItem_Color)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<base::Color4f>());
@@ -2440,7 +2440,7 @@ void AnimationTrackWidget::UpdateKinematicUnits()
         SetEnabled(mUI.kinematicEndAccelY, false);
         SetEnabled(mUI.kinematicEndAccelZ, false);
     }
-    else if (target == game::KinematicAnimatorClass::Target::Transformer)
+    else if (target == game::KinematicAnimatorClass::Target::LinearMover)
     {
         SetSuffix(mUI.kinematicEndVeloX, " u/s");
         SetSuffix(mUI.kinematicEndVeloY, " u/s");

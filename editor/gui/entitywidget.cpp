@@ -64,7 +64,7 @@
 #include "base/format.h"
 #include "base/math.h"
 #include "data/json.h"
-#include "game/entity_node_transformer.h"
+#include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
@@ -1109,7 +1109,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::TextItemClass::CoordinateSpace>(mUI.tiCoordinateSpace);
     PopulateFromEnum<game::SpatialNodeClass::Shape>(mUI.spnShape);
     PopulateFromEnum<game::FixtureClass::CollisionShape>(mUI.fxShape);
-    PopulateFromEnum<game::NodeTransformerClass::Integrator>(mUI.tfIntegrator);
+    PopulateFromEnum<game::LinearMoverClass::Integrator>(mUI.tfIntegrator);
     PopulateFromEnum<game::BasicLightClass::LightType>(mUI.ltType);
     PopulateFromEnum<game::TileOcclusion>(mUI.nodeTileOcclusion);
     PopulateFontNames(mUI.tiFontName);
@@ -1145,7 +1145,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
             mAttachments->addAction(mUI.actionAddLight);
             mAttachments->addAction(mUI.actionAddTilemapNode);
             mAttachments->addAction(mUI.actionAddSpatialNode);
-            mAttachments->addAction(mUI.actionAddTransformer);
+            mAttachments->addAction(mUI.actionAddLinearMover);
         }
         mAttachments->popup(mUI.btnAddNodeItem->mapToGlobal(point));
     });
@@ -3546,9 +3546,9 @@ void EntityWidget::on_btnDelSpatialNode_clicked()
     ToggleSpatialNode(false);
 }
 
-void EntityWidget::on_btnDelTransformer_clicked()
+void EntityWidget::on_btnDelLinearMover_clicked()
 {
-    ToggleTransformer(false);
+    ToggleLinearMover(false);
 }
 
 void EntityWidget::on_btnDelLight_clicked()
@@ -3585,9 +3585,9 @@ void EntityWidget::on_actionAddSpatialNode_triggered()
 {
     ToggleSpatialNode(true);
 }
-void EntityWidget::on_actionAddTransformer_triggered()
+void EntityWidget::on_actionAddLinearMover_triggered()
 {
-    ToggleTransformer(true);
+    ToggleLinearMover(true);
 }
 
 void EntityWidget::on_actionEditEntityScript_triggered()
@@ -3726,26 +3726,26 @@ void EntityWidget::ToggleTilemapNode(bool on)
     }
 }
 
-void EntityWidget::ToggleTransformer(bool on)
+void EntityWidget::ToggleLinearMover(bool on)
 {
     if (auto* node = GetCurrentNode())
     {
-        if (on && !node->HasTransformer())
+        if (on && !node->HasLinearMover())
         {
-            game::NodeTransformerClass trans;
-            node->SetTransformer(trans);
+            game::LinearMoverClass mover;
+            node->SetLinearMover(mover);
 
             ScrollEntityNodeArea();
 
-            DEBUG("Added transformer to node '%1'", node->GetName());
+            DEBUG("Added linear mover to node '%1'", node->GetName());
         }
-        else if (!on && node->HasTransformer())
+        else if (!on && node->HasLinearMover())
         {
-            node->RemoveTransformer();
+            node->RemoveLinearMover();
         }
         DisplayCurrentNodeProperties();
 
-        mUI.transformer->Collapse(!on);
+        mUI.linearMover->Collapse(!on);
     }
 }
 
@@ -4595,7 +4595,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.nodeMapLayer, 0);
     SetValue(mUI.nodeTileOcclusion, game::TileOcclusion::None);
 
-    SetValue(mUI.tfIntegrator, game::NodeTransformerClass::Integrator::Euler);
+    SetValue(mUI.tfIntegrator, game::LinearMoverClass::Integrator::Euler);
     SetValue(mUI.tfVelocityX, 0.0f);
     SetValue(mUI.tfVelocityY, 0.0f);
     SetValue(mUI.tfVelocityA, 0.0f);
@@ -4614,7 +4614,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetEnabled(mUI.actionAddFixture,     true);
     SetEnabled(mUI.actionAddTilemapNode, true);
     SetEnabled(mUI.actionAddSpatialNode, true);
-    SetEnabled(mUI.actionAddTransformer, true);
+    SetEnabled(mUI.actionAddLinearMover, true);
     SetEnabled(mUI.actionAddLight,       true);
 
     SetVisible(mUI.drawable,    false);
@@ -4623,7 +4623,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetVisible(mUI.fixture,     false);
     SetVisible(mUI.tilemapNode, false);
     SetVisible(mUI.spatialNode, false);
-    SetVisible(mUI.transformer, false);
+    SetVisible(mUI.linearMover, false);
     SetVisible(mUI.basicLight,  false);
 
     if (const auto* node = GetCurrentNode())
@@ -4788,21 +4788,21 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.nodeMapLayer, map->GetMapLayer());
             SetValue(mUI.nodeTileOcclusion, map->GetTileOcclusion());
         }
-        if (const auto* trans = node->GetTransformer())
+        if (const auto* mover = node->GetLinearMover())
         {
-            SetEnabled(mUI.actionAddTransformer, false);
-            SetVisible(mUI.transformer, true);
+            SetEnabled(mUI.actionAddLinearMover, false);
+            SetVisible(mUI.linearMover, true);
 
-            const auto& accel = trans->GetLinearAcceleration();
-            const auto& velo  = trans->GetLinearVelocity();
-            SetValue(mUI.tfIntegrator, trans->GetIntegrator());
+            const auto& accel = mover->GetLinearAcceleration();
+            const auto& velo  = mover->GetLinearVelocity();
+            SetValue(mUI.tfIntegrator, mover->GetIntegrator());
             SetValue(mUI.tfVelocityX, velo.x);
             SetValue(mUI.tfVelocityY, velo.y);
-            SetValue(mUI.tfVelocityA, trans->GetAngularVelocity());
+            SetValue(mUI.tfVelocityA, mover->GetAngularVelocity());
             SetValue(mUI.tfAccelX, accel.x);
             SetValue(mUI.tfAccelY, accel.y);
-            SetValue(mUI.tfAccelA, trans->GetAngularAcceleration());
-            SetValue(mUI.tfEnabled, trans->IsEnabled());
+            SetValue(mUI.tfAccelA, mover->GetAngularAcceleration());
+            SetValue(mUI.tfEnabled, mover->IsEnabled());
         }
 
         if (const auto* light = node->GetBasicLight())
@@ -5005,7 +5005,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         map->SetTileOcclusion(GetValue(mUI.nodeTileOcclusion));
     }
 
-    if (auto* trans = node->GetTransformer())
+    if (auto* mover = node->GetLinearMover())
     {
         glm::vec2 velocity;
         glm::vec2 acceleration;
@@ -5013,12 +5013,12 @@ void EntityWidget::UpdateCurrentNodeProperties()
         velocity.y = GetValue(mUI.tfVelocityY);
         acceleration.x = GetValue(mUI.tfAccelX);
         acceleration.y = GetValue(mUI.tfAccelY);
-        trans->SetIntegrator(GetValue(mUI.tfIntegrator));
-        trans->SetLinearAcceleration(acceleration);
-        trans->SetLinearVelocity(velocity);
-        trans->SetAngularVelocity(GetValue(mUI.tfVelocityA));
-        trans->SetAngularAcceleration(GetValue(mUI.tfAccelA));
-        trans->SetFlag(game::NodeTransformerClass::Flags::Enabled, GetValue(mUI.tfEnabled));
+        mover->SetIntegrator(GetValue(mUI.tfIntegrator));
+        mover->SetLinearAcceleration(acceleration);
+        mover->SetLinearVelocity(velocity);
+        mover->SetAngularVelocity(GetValue(mUI.tfVelocityA));
+        mover->SetAngularAcceleration(GetValue(mUI.tfAccelA));
+        mover->SetFlag(game::LinearMoverClass::Flags::Enabled, GetValue(mUI.tfEnabled));
     }
 
     if (auto* light = node->GetBasicLight())
