@@ -229,5 +229,11 @@ int test_main(int argc, char* argv[])
         };
         unit_test_array(values, 5);
     }
+    {
+        const glm::vec2 array[] = {
+            {1.0f, 2.0f}, {-1.0f, -2.0f}, {0.0f, 0.0f}
+        };
+        unit_test_array(array, 3);
+    }
     return 0;
 }

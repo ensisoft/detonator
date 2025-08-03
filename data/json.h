@@ -42,98 +42,101 @@ namespace data
        ~JsonObject() override;
 
         // reader interface impl
-        virtual std::unique_ptr<Reader> GetReadChunk(const char* name) const override;
-        virtual std::unique_ptr<Reader> GetReadChunk(const char* name, unsigned index) const override;
-        virtual std::unique_ptr<Chunk> GetChunk(const char* name) const override;
-        virtual std::unique_ptr<Chunk> GetChunk(const char* name, unsigned index) const override;
-        virtual bool Read(const char* name, double* out) const override;
-        virtual bool Read(const char* name, float* out) const override;
-        virtual bool Read(const char* name, int* out) const override;
-        virtual bool Read(const char* name, unsigned* out) const override;
-        virtual bool Read(const char* name, bool* out) const override;
-        virtual bool Read(const char* name, std::string* out) const override;
+        std::unique_ptr<Reader> GetReadChunk(const char* name) const override;
+        std::unique_ptr<Reader> GetReadChunk(const char* name, unsigned index) const override;
+        std::unique_ptr<Chunk> GetChunk(const char* name) const override;
+        std::unique_ptr<Chunk> GetChunk(const char* name, unsigned index) const override;
+        bool Read(const char* name, double* out) const override;
+        bool Read(const char* name, float* out) const override;
+        bool Read(const char* name, int* out) const override;
+        bool Read(const char* name, unsigned* out) const override;
+        bool Read(const char* name, bool* out) const override;
+        bool Read(const char* name, std::string* out) const override;
         // array read for primitive items.
-        virtual bool Read(const char* name, unsigned index, double* out) const override;
-        virtual bool Read(const char* name, unsigned index, float* out) const override;
-        virtual bool Read(const char* name, unsigned index, int* out) const override;
-        virtual bool Read(const char* name, unsigned index, unsigned* out) const override;
-        virtual bool Read(const char* name, unsigned index, bool* out) const override;
-        virtual bool Read(const char* name, unsigned index, std::string* out) const override;
-        virtual bool Read(const char* name, glm::vec2* out) const override;
-        virtual bool Read(const char* name, glm::vec3* out) const override;
-        virtual bool Read(const char* name, glm::vec4* out) const override;
-        virtual bool Read(const char* name, base::FDegrees* degrees) const override;
-        virtual bool Read(const char* name, base::FRadians* radians) const override;
-        virtual bool Read(const char* name, base::FRect* rect) const override;
-        virtual bool Read(const char* name, base::FPoint* point) const override;
-        virtual bool Read(const char* name, base::FSize* point) const override;
-        virtual bool Read(const char* name, base::Color4f* color) const override;
-        virtual bool Read(const char* name, base::Rotator* rotator) const override;
-        virtual bool HasValue(const char* name) const override;
-        virtual bool HasChunk(const char* name) const override;
-        virtual bool HasArray(const char* name) const override;
-        virtual bool IsEmpty() const override;
-        virtual unsigned GetNumItems(const char* array) const override;
-        virtual unsigned GetNumChunks(const char* name) const override;
+        bool Read(const char* name, unsigned index, double* out) const override;
+        bool Read(const char* name, unsigned index, float* out) const override;
+        bool Read(const char* name, unsigned index, int* out) const override;
+        bool Read(const char* name, unsigned index, unsigned* out) const override;
+        bool Read(const char* name, unsigned index, bool* out) const override;
+        bool Read(const char* name, unsigned index, std::string* out) const override;
+        bool Read(const char* name, unsigned index, glm::vec2* out) const override;
+
+        bool Read(const char* name, glm::vec2* out) const override;
+        bool Read(const char* name, glm::vec3* out) const override;
+        bool Read(const char* name, glm::vec4* out) const override;
+        bool Read(const char* name, base::FDegrees* degrees) const override;
+        bool Read(const char* name, base::FRadians* radians) const override;
+        bool Read(const char* name, base::FRect* rect) const override;
+        bool Read(const char* name, base::FPoint* point) const override;
+        bool Read(const char* name, base::FSize* point) const override;
+        bool Read(const char* name, base::Color4f* color) const override;
+        bool Read(const char* name, base::Rotator* rotator) const override;
+        bool HasValue(const char* name) const override;
+        bool HasChunk(const char* name) const override;
+        bool HasArray(const char* name) const override;
+        bool IsEmpty() const override;
+        unsigned GetNumItems(const char* array) const override;
+        unsigned GetNumChunks(const char* name) const override;
 
         // writer interface impl.
-        virtual std::unique_ptr<Chunk> NewChunk() const override;
-        virtual std::unique_ptr<Writer> NewWriteChunk() const override;
-        virtual void Write(const char* name, int value) override;
-        virtual void Write(const char* name, unsigned value) override;
-        virtual void Write(const char* name, double value) override;
-        virtual void Write(const char* name, float value) override;
-        virtual void Write(const char* name, bool value) override;
-        virtual void Write(const char* name, const char* value) override;
-        virtual void Write(const char* name, const std::string& value) override;
-        virtual void Write(const char* name, const glm::vec2& value) override;
-        virtual void Write(const char* name, const glm::vec3& value) override;
-        virtual void Write(const char* name, const glm::vec4& value) override;
-        virtual void Write(const char* name, const base::FDegrees& degrees) override;
-        virtual void Write(const char* name, const base::FRadians& radians) override;
-        virtual void Write(const char* name, const base::FRect& value) override;
-        virtual void Write(const char* name, const base::FPoint& value) override;
-        virtual void Write(const char* name, const base::FSize& value) override;
-        virtual void Write(const char* name, const base::Color4f& value) override;
-        virtual void Write(const char* name, const base::Rotator& value) override;
-        virtual void Write(const char* name, const Writer& chunk) override;
-        virtual void Write(const char* name, const Chunk& chunk) override;
-        virtual void Write(const char* name, std::unique_ptr<Writer> chunk) override;
-        virtual void Write(const char* name, std::unique_ptr<Chunk> chunk) override;
-        virtual void Write(const char* name, const int* array, size_t size) override;
-        virtual void Write(const char* name, const unsigned* array, size_t size) override;
-        virtual void Write(const char* name, const double* array, size_t size) override;
-        virtual void Write(const char* name, const float* array, size_t size) override;
-        virtual void Write(const char* name, const bool* array, size_t size) override;
-        virtual void Write(const char* name, const char* const * array, size_t size) override;
-        virtual void Write(const char* name, const std::string* array, size_t size) override;
-        virtual void AppendChunk(const char* name, const Writer& chunk) override;
-        virtual void AppendChunk(const char* name, const Chunk& chunk) override;
-        virtual void AppendChunk(const char* name, std::unique_ptr<Writer> chunk) override;
-        virtual void AppendChunk(const char* name, std::unique_ptr<Chunk> chunk) override;
+        std::unique_ptr<Chunk> NewChunk() const override;
+        std::unique_ptr<Writer> NewWriteChunk() const override;
+        void Write(const char* name, int value) override;
+        void Write(const char* name, unsigned value) override;
+        void Write(const char* name, double value) override;
+        void Write(const char* name, float value) override;
+        void Write(const char* name, bool value) override;
+        void Write(const char* name, const char* value) override;
+        void Write(const char* name, const std::string& value) override;
+        void Write(const char* name, const glm::vec2& value) override;
+        void Write(const char* name, const glm::vec3& value) override;
+        void Write(const char* name, const glm::vec4& value) override;
+        void Write(const char* name, const base::FDegrees& degrees) override;
+        void Write(const char* name, const base::FRadians& radians) override;
+        void Write(const char* name, const base::FRect& value) override;
+        void Write(const char* name, const base::FPoint& value) override;
+        void Write(const char* name, const base::FSize& value) override;
+        void Write(const char* name, const base::Color4f& value) override;
+        void Write(const char* name, const base::Rotator& value) override;
+        void Write(const char* name, const Writer& chunk) override;
+        void Write(const char* name, const Chunk& chunk) override;
+        void Write(const char* name, std::unique_ptr<Writer> chunk) override;
+        void Write(const char* name, std::unique_ptr<Chunk> chunk) override;
+        void Write(const char* name, const int* array, size_t size) override;
+        void Write(const char* name, const unsigned* array, size_t size) override;
+        void Write(const char* name, const double* array, size_t size) override;
+        void Write(const char* name, const float* array, size_t size) override;
+        void Write(const char* name, const bool* array, size_t size) override;
+        void Write(const char* name, const char* const * array, size_t size) override;
+        void Write(const char* name, const std::string* array, size_t size) override;
+        void Write(const char* name, const glm::vec2* array, size_t size) override;
+        void AppendChunk(const char* name, const Writer& chunk) override;
+        void AppendChunk(const char* name, const Chunk& chunk) override;
+        void AppendChunk(const char* name, std::unique_ptr<Writer> chunk) override;
+        void AppendChunk(const char* name, std::unique_ptr<Chunk> chunk) override;
 
         // bring the template helpers into scope when using this type.
         using Writer::Write;
         using Reader::Read;
 
         // From Chunk API
-        virtual Writer* GetWriter() noexcept override
+        Writer* GetWriter() noexcept override
         { return this; }
-        virtual const Reader* GetReader() const noexcept override
-        { return this; }
-
-        virtual Chunk* GetChunkFromWriter() noexcept override
-        { return this; }
-        virtual Chunk* GetChunkFromReader() noexcept override
-        { return this; }
-        virtual const Chunk* GetChunkFromWriter() const noexcept override
-        { return this; }
-        virtual const Chunk* GetChunkFromReader() const noexcept override
+        const Reader* GetReader() const noexcept override
         { return this; }
 
-        virtual void OverwriteChunk(const char* name, std::unique_ptr<Chunk> chunk) override;
-        virtual void OverwriteChunk(const char* name, std::unique_ptr<Chunk> chunk, unsigned index) override;
-        virtual bool Dump(IODevice& device) const override;
+        Chunk* GetChunkFromWriter() noexcept override
+        { return this; }
+        Chunk* GetChunkFromReader() noexcept override
+        { return this; }
+        const Chunk* GetChunkFromWriter() const noexcept override
+        { return this; }
+        const Chunk* GetChunkFromReader() const noexcept override
+        { return this; }
+
+        void OverwriteChunk(const char* name, std::unique_ptr<Chunk> chunk) override;
+        void OverwriteChunk(const char* name, std::unique_ptr<Chunk> chunk, unsigned index) override;
+        bool Dump(IODevice& device) const override;
 
         JsonObject& operator=(const JsonObject&) = delete;
 
