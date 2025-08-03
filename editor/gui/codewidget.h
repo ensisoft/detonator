@@ -93,8 +93,8 @@ namespace gui
             unsigned font_size  = 10;
         };
 
-        TextEditor(QWidget *parent = nullptr);
-       ~TextEditor();
+        explicit TextEditor(QWidget *parent = nullptr);
+       ~TextEditor() override;
 
         bool CanCopy() const
         { return mCanCopy; }
@@ -136,8 +136,8 @@ namespace gui
         void SetCursorPositionFromHashIgnoreWS(size_t cursor_hash);
 
     protected:
-        virtual void resizeEvent(QResizeEvent *event) override;
-        virtual void keyPressEvent(QKeyEvent* key) override;
+        void resizeEvent(QResizeEvent *event) override;
+        void keyPressEvent(QKeyEvent* key) override;
 
     private slots:
         void UpdateLineNumberAreaWidth(int newBlockCount);

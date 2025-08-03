@@ -626,7 +626,7 @@ void CustomVertexTransform(inout VertexData vs) {
     mShaderEditor->LoadGeometry(mWorkspace, "polygon-shader-editor-geometry");
     mShaderEditor->SetText(mPolygon.GetShaderSrc(), "GLSL");
     mShaderEditor->SetTitle("Shader Source");
-    mShaderEditor->EnableApply(true);
+    mShaderEditor->EnableSaveApply();
     mShaderEditor->showFU();
     mShaderEditor->finished = [this](int ret) {
         if (ret == QDialog::Rejected)
@@ -642,7 +642,7 @@ void CustomVertexTransform(inout VertexData vs) {
 
         mUI.widget->GetPainter()->ClearErrors();
     };
-    mShaderEditor->apply = [this]() {
+    mShaderEditor->applyFunction = [this]() {
         mPolygon.SetShaderSrc(mShaderEditor->GetText());
 
         mUI.widget->GetPainter()->ClearErrors();

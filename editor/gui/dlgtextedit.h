@@ -50,18 +50,22 @@ namespace gui
         app::AnyString GetText(const std::string& format) const;
 
         void SetReadOnly(bool readonly);
-        void EnableApply(bool on_off);
+        void EnableSaveApply();
 
-        std::function<void()> apply;
+        std::function<void()> applyFunction;
 
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnApply_clicked();
     private:
+        bool OnCloseEvent()  override;
+        bool CheckForClose();
+    private:
         Ui::DlgTextEdit* mUI = nullptr;
     private:
         QTextDocument mDocument;
         QSyntaxHighlighter* mSyntaxHighlight = nullptr;
+        bool mPendingChanges = false;
     };
 } // namespace
