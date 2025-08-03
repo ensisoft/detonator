@@ -58,6 +58,7 @@ namespace data
         virtual bool Read(const char* name, unsigned index, unsigned* out) const = 0;
         virtual bool Read(const char* name, unsigned index, bool* out) const = 0;
         virtual bool Read(const char* name, unsigned index, std::string* out) const = 0;
+        virtual bool Read(const char* name, unsigned index, glm::vec2* out) const = 0;
 
         virtual bool Read(const char* name, std::string* out) const = 0;
         virtual bool Read(const char* name, glm::vec2* out) const = 0;
