@@ -430,6 +430,8 @@ void MainWindow::LoadLastState(FramelessWindow* window)
     mWorkspaceProxy.SetModel(nullptr);
     mWorkspaceProxy.setSourceModel(nullptr);
     BuildRecentWorkspacesMenu();
+
+    SetEnabled(mUI.statusBarFrame, false);
 }
 
 void MainWindow::LoadLastWorkspace()
@@ -695,7 +697,7 @@ bool MainWindow::LoadWorkspace(const QString& workspace_dir)
     }
 
     SetVisible(mUI.preview, true);
-
+    SetEnabled(mUI.statusBarFrame, true);
     return success;
 }
 
@@ -973,6 +975,7 @@ void MainWindow::CloseWorkspace()
     mFocusStack = FocusStack();
 
     SetVisible(mUI.preview, false);
+    SetEnabled(mUI.statusBarFrame, false);
 }
 
 void MainWindow::showWindow()
