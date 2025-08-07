@@ -247,8 +247,6 @@ MainWindow::MainWindow(QApplication& app, base::ThreadPool* threadpool)
     // hack but we need to set the mainwindow object
     // as the receiver of these events
     ActionEvent::GetReceiver() = this;
-
-    SetVisible(mUI.preview, false);
 }
 
 MainWindow::~MainWindow()
@@ -431,6 +429,10 @@ void MainWindow::LoadLastState(FramelessWindow* window)
     mWorkspaceProxy.setSourceModel(nullptr);
     BuildRecentWorkspacesMenu();
 
+    mDockState = QMainWindow::saveState();
+    SetVisible(mUI.workspaceDock, false);
+    SetVisible(mUI.eventlogDock,  false);
+    SetVisible(mUI.previewDock,   false);
     SetEnabled(mUI.statusBarFrame, false);
 }
 
@@ -637,7 +639,8 @@ bool MainWindow::LoadWorkspace(const QString& workspace_dir)
 
                 window->resize(width, height);
                 window->setWindowTitle(title);
-            } else
+            }
+            else
             {
                 ShowWidget(widget, false);
             }
@@ -696,7 +699,7 @@ bool MainWindow::LoadWorkspace(const QString& workspace_dir)
         dlg.exec();
     }
 
-    SetVisible(mUI.preview, true);
+    QMainWindow::restoreState(mDockState);
     SetEnabled(mUI.statusBarFrame, true);
     return success;
 }
@@ -974,7 +977,10 @@ void MainWindow::CloseWorkspace()
 
     mFocusStack = FocusStack();
 
-    SetVisible(mUI.preview, false);
+    mDockState = QMainWindow::saveState();
+    SetVisible(mUI.workspaceDock, false);
+    SetVisible(mUI.eventlogDock,  false);
+    SetVisible(mUI.previewDock,   false);
     SetEnabled(mUI.statusBarFrame, false);
 }
 
@@ -3701,6 +3707,11 @@ void MainWindow::SaveSettings()
 
 bool MainWindow::SaveState()
 {
+    // when we close the workspace the docs are hidden.
+    // the original visibility state is stored in mDockState.
+    // So make sure to save the *correct* state
+    QMainWindow::restoreState(mDockState);
+
     const auto& file  = app::GetAppHomeFilePath("state.json");
     Settings settings(file);
     settings.SetValue("MainWindow", "log_bits", mEventLog.GetShowBits());
