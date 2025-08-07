@@ -937,7 +937,7 @@ void LuaRuntime::Update(double game_time, double dt)
             const auto& klass   = mClassLib->FindEntityClassById(klassId);
             if (klass->TestFlag(game::EntityClass::Flags::UpdateNodes))
             {
-                auto* allocator = &klass->GetAllocator();
+                auto* allocator = klass->GetAllocator();
 
                 // have to hold the allocator lock here to make sure
                 // that the allocator's world view stays consistent

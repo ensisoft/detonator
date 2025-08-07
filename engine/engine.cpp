@@ -300,6 +300,8 @@ public:
             if (!entity)
                 return;
 
+            entity->InitClassGameRuntime();
+
             for (size_t i=0; i<entity->GetNumNodes(); ++i)
             {
                 const auto& node = entity->GetNode(i);
@@ -1460,6 +1462,9 @@ private:
                 TRACE_CALL("LuaRuntime::BeginLoop", runtime.lua_rt->BeginLoop());
             if (runtime.cpp_rt)
                 TRACE_CALL("CppRuntime::BeginLoop", runtime.cpp_rt->BeginLoop());
+
+            // do a component wise runtime update.
+            game::EntityClass::UpdateRuntimes(game_time, dt);
 
             std::vector<game::Scene::Event> events;
             TRACE_CALL("Scene::Update", runtime.scene->Update(dt, &events));

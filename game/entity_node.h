@@ -344,7 +344,7 @@ namespace game
         float rotation = 0.0f;
 
         EntityNodeTransform() = default;
-        EntityNodeTransform(const EntityNodeClass& klass)
+        explicit EntityNodeTransform(const EntityNodeClass& klass)
           : translation(klass.GetTranslation())
           , scale(klass.GetScale())
           , size(klass.GetSize())
@@ -395,6 +395,8 @@ namespace game
         { return this->translation.y; }
     };
 
+    class EntityNode;
+
     class EntityNodeData {
     public:
         EntityNodeData(std::string id, std::string name) noexcept
@@ -409,6 +411,8 @@ namespace game
         { return mInstanceId; }
         inline Entity* GetEntity() noexcept
         { return mEntity; }
+        inline EntityNode* GetNode() noexcept
+        { return mNode; }
     private:
         friend class EntityNode;
         // the instance id.
@@ -417,6 +421,7 @@ namespace game
         std::string mInstanceName;
         // The entity that owns this node.
         Entity* mEntity = nullptr;
+        EntityNode* mNode = nullptr;
     };
 
     using EntityNodeAllocator = base::Allocator<EntityNodeTransform, EntityNodeData>;
@@ -587,10 +592,12 @@ namespace game
 
         EntityNode& operator=(const EntityNode&) = delete;
     private:
+        static constexpr auto InvalidAllocatorIndex = 0xFFFFFFFF;
+
         // the class object.
         std::shared_ptr<const EntityNodeClass> mClass;
         // Index of the data in the allocator.
-        std::size_t mAllocatorIndex = 0;
+        unsigned mAllocatorIndex = InvalidAllocatorIndex;
         // transformation object
         EntityNodeTransform* mTransform = nullptr;
         // data object
