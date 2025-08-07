@@ -106,6 +106,7 @@ namespace game
         explicit EntityClass(std::string id);
         EntityClass();
         EntityClass(const EntityClass& other);
+       ~EntityClass();
 
         // Add a new node to the entity.
         // Returns a pointer to the node that was added to the entity.
@@ -363,6 +364,8 @@ namespace game
         { return !mScriptFile.empty(); }
         bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
+        bool HaveRuntime() const noexcept
+        { return mInitRuntime; }
         int32_t GetRenderLayer() const noexcept /* stub*/
         { return 0; }
 
@@ -410,8 +413,9 @@ namespace game
         std::shared_ptr<const EntityStateControllerClass> GetSharedEntityControllerClass(size_t index) const noexcept
         { return mAnimators[index]; }
 
-        EntityNodeAllocator& GetAllocator() const
-        { return mAllocator; }
+        EntityNodeAllocator* GetAllocator() const;
+
+        void InitClassGameRuntime() const;
 
         // Serialize the entity into JSON.
         void IntoJson(data::Writer& data) const;
@@ -421,6 +425,8 @@ namespace game
         EntityClass Clone() const;
 
         EntityClass& operator=(const EntityClass& other);
+
+        static void UpdateRuntimes(double game_time, double dt);
     private:
         // The class/resource id of this class.
         std::string mClassId;
@@ -454,7 +460,7 @@ namespace game
         // deleted if LimitLifetime flag is set.
         float mLifetime = 0.0f;
     private:
-        mutable EntityNodeAllocator mAllocator;
+        mutable bool mInitRuntime = false;
     };
 
     // Collection of arguments for creating a new entity

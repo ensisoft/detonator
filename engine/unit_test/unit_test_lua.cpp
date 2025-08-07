@@ -2169,6 +2169,7 @@ end
     bullet_class->AddScriptVar(velocity);
     bullet_class->AddNode(std::move(body));
     bullet_class->LinkChild(nullptr, bullet_class->FindNodeByName("body"));
+    bullet_class->InitClassGameRuntime();
 
     auto scene_class = std::make_shared<game::SceneClass>();
     scene_class->SetName("scene");
@@ -2428,7 +2429,7 @@ end
         )");
 
         {
-            auto* allocator = &bullet_class->GetAllocator();
+            auto* allocator = bullet_class->GetAllocator();
             auto ret = test::TimedTest(1000, [allocator, &lua, bullet_class]() {
                 lua["UpdateNodes1"](allocator, 0.0, 0.0f);
             });
@@ -2439,7 +2440,7 @@ end
 
             std::vector<game::EntityNodeTransform*> test;
 
-            auto* allocator = &bullet_class->GetAllocator();
+            auto* allocator = bullet_class->GetAllocator();
             auto ret = test::TimedTest(1000, [&allocator, &lua, &test]() {
                 test.clear();
                 test.reserve(allocator->GetHighIndex());
@@ -2455,7 +2456,7 @@ end
         }
 
         {
-            auto* allocator = &bullet_class->GetAllocator();
+            auto* allocator = bullet_class->GetAllocator();
             auto ret = test::TimedTest(1000, [allocator, &lua, bullet_class]() {
                 lua["UpdateNodes3"](allocator, 0.0, 0.0f);
             });
@@ -2463,7 +2464,7 @@ end
         }
 
         {
-            auto* allocator = &bullet_class->GetAllocator();
+            auto* allocator = bullet_class->GetAllocator();
             auto ret = test::TimedTest(1000, [allocator, &lua, bullet_class]() {
                 /*
                 game::EntityNodeTransformSequence sequence(allocator);

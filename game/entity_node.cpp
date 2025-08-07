@@ -368,11 +368,13 @@ EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass, EntityNodeA
         mAllocatorIndex = allocator->GetNextIndex();
         mTransform = allocator->CreateObject<EntityNodeTransform>(mAllocatorIndex, *mClass);
         mNodeData  = allocator->CreateObject<EntityNodeData>(mAllocatorIndex, FastId(10), mClass->GetName());
+        mNodeData->mNode = this;
     }
     else
     {
         mTransform = new EntityNodeTransform(*mClass);
         mNodeData  = new EntityNodeData(FastId(10), mClass->GetName());
+        mNodeData->mNode = this;
     }
 
     if (mClass->HasDrawable())
@@ -409,6 +411,7 @@ EntityNode::EntityNode(EntityNode&& other)
 {
     other.mTransform = nullptr;
     other.mNodeData  = nullptr;
+    mNodeData->mNode = this;
 }
 
 EntityNode::EntityNode(const EntityNodeClass& klass, EntityNodeAllocator* allocator)
@@ -417,19 +420,31 @@ EntityNode::EntityNode(const EntityNodeClass& klass, EntityNodeAllocator* alloca
 
 EntityNode::~EntityNode()
 {
-    delete mTransform;
-    delete mNodeData;
+    if (mAllocatorIndex != InvalidAllocatorIndex)
+    {
+        // assert that Release was called
+        ASSERT(mTransform == nullptr);
+        ASSERT(mNodeData == nullptr);
+    }
+    else
+    {
+        delete mTransform;
+        delete mNodeData;
+    }
 }
 
 void EntityNode::Release(EntityNodeAllocator* allocator)
 {
     if (mTransform)
     {
+        ASSERT(mAllocatorIndex != InvalidAllocatorIndex);
+
         std::lock_guard<std::mutex> lock(allocator->GetMutex());
 
         allocator->DestroyObject(mAllocatorIndex, mTransform);
         allocator->DestroyObject(mAllocatorIndex, mNodeData);
         allocator->FreeIndex(mAllocatorIndex);
+
         mTransform = nullptr;
         mNodeData  = nullptr;
     }

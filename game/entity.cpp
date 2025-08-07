@@ -23,6 +23,7 @@
 #include <atomic>
 #include <algorithm>
 #include <set>
+#include <unordered_map>
 
 #include "base/logging.h"
 #include "base/assert.h"
@@ -43,6 +44,14 @@
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_tilemap_node.h"
+
+namespace {
+    struct ClassRuntime {
+        bool needs_update = false;
+        game::EntityNodeAllocator allocator;
+    };
+    std::unordered_map<std::string, std::unique_ptr<ClassRuntime>> runtimes;
+}
 
 namespace game
 {
@@ -112,6 +121,14 @@ EntityClass::EntityClass(const EntityClass& other)
     mRenderTree.FromTree(other.GetRenderTree(), [&map](const EntityNodeClass* node) {
         return map[node];
     });
+}
+
+EntityClass::~EntityClass()
+{
+    if (mInitRuntime)
+    {
+        runtimes.erase(mClassId);
+    }
 }
 
 EntityNodeClass* EntityClass::AddNode(const EntityNodeClass& node)
@@ -605,6 +622,28 @@ std::size_t EntityClass::GetHash() const
     return hash;
 }
 
+EntityNodeAllocator* EntityClass::GetAllocator() const
+{
+    if (auto* runtime = base::SafeFind(runtimes, mClassId))
+        return &runtime->allocator;
+
+    return nullptr;
+}
+
+void EntityClass::InitClassGameRuntime() const
+{
+    auto rt = std::make_unique<ClassRuntime>();
+
+    for (const auto& node : mNodes)
+    {
+        if (node->HasLinearMover())
+            rt->needs_update = true;
+    }
+    runtimes.insert( { mClassId, std::move(rt) });
+    mInitRuntime = true;
+    DEBUG("Initialized class runtime. [class='%1']", mName);
+}
+
 void EntityClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",          mClassId);
@@ -856,6 +895,35 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
     return *this;
 }
 
+// static
+void EntityClass::UpdateRuntimes(double game_time, double dt)
+{
+    for (auto& pair : runtimes)
+    {
+        auto* runtime = pair.second.get();
+        if (!runtime->needs_update)
+            continue;
+
+        auto& allocator = runtime->allocator;
+
+        std::unique_lock<std::mutex> allocator_lock(allocator.GetMutex());
+
+        for (size_t i=0; i<allocator.GetHighIndex(); ++i)
+        {
+            auto* transform = allocator.GetObject<EntityNodeTransform>(i);
+            auto* data = allocator.GetObject<EntityNodeData>(i);
+            if (!transform || !data)
+                continue;
+
+            auto* node = data->GetNode();
+            if (auto* mover = node->GetLinearMover())
+            {
+                mover->TransformObject(static_cast<float>(dt), *transform);
+            }
+        }
+    }
+}
+
 Entity::Entity(std::shared_ptr<const EntityClass> klass)
   : mClass(std::move(klass))
   , mInstanceId(FastId(10))
@@ -871,7 +939,7 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
     // taken to elements in the vector will remain valid.
     mNodes.reserve(mClass->GetNumNodes());
 
-    auto& allocator = mClass->GetAllocator();
+    auto* allocator = mClass->GetAllocator();
 
     // build render tree, first create instances of all node classes
     // then build the render tree based on the node instances
@@ -879,7 +947,7 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
         for (size_t i = 0; i < mClass->GetNumNodes(); ++i)
         {
             auto node_klass = mClass->GetSharedEntityNodeClass(i);
-            EntityNode node(node_klass, &allocator);
+            EntityNode node(node_klass, allocator);
             node.SetEntity(this);
             mNodes.push_back(std::move(node));
             map[node_klass.get()] = &mNodes.back();
@@ -1014,11 +1082,12 @@ Entity::Entity(const EntityClass& klass)
 
 Entity::~Entity()
 {
-    auto& allocator = mClass->GetAllocator();
-
-    for (auto& node: mNodes)
+    if (auto* allocator = mClass->GetAllocator())
     {
-        node.Release(&allocator);
+        for (auto& node: mNodes)
+        {
+            node.Release(allocator);
+        }
     }
 }
 
@@ -1209,30 +1278,16 @@ void Entity::Update(float dt, std::vector<Event>* events)
     }
     mEvents.clear();
 
-
-    for (auto& node : mNodes)
+    // this path only exists here for the development/design time when
+    // we don't have an actual entity class runtime service enabled.
+    // in this case we'll do the mover based transformations here.
+    if (!mClass->HaveRuntime())
     {
-        auto* linear_mover = node.GetLinearMover();
-        if (!linear_mover || !linear_mover->IsEnabled())
-            continue;
-
-        const auto integrator = linear_mover->GetIntegrator();
-        if (integrator == LinearMoverClass::Integrator::Euler)
+        for (auto& node: mNodes)
         {
+            if (auto* mover = node.GetLinearMover())
             {
-                float acceleration = linear_mover->GetAngularAcceleration();
-                float velocity = linear_mover->GetAngularVelocity();
-                velocity += acceleration * dt;
-                node.Rotate(velocity * dt);
-                linear_mover->SetAngularVelocity(velocity);
-            }
-
-            {
-                auto acceleration = linear_mover->GetLinearAcceleration();
-                auto velocity = linear_mover->GetLinearVelocity();
-                velocity += acceleration * dt;
-                node.Translate(velocity * dt);
-                linear_mover->SetLinearVelocity(velocity);
+                mover->TransformObject(static_cast<float>(dt), node);
             }
         }
     }

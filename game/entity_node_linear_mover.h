@@ -129,6 +129,21 @@ namespace game
         inline void Enable(bool on_off) noexcept
         { SetFlag(Flags::Enabled, on_off); }
 
+        template<typename Target>
+        inline void TransformObject(float dt, Target& target) noexcept
+        {
+            if (!IsEnabled())
+                return;
+            if (GetIntegrator() == Integrator::Euler)
+            {
+                mAngularVelocity += (mAngularAcceleration * dt);
+                target.Rotate(mAngularVelocity * dt);
+
+                mLinearVelocity += (mLinearAcceleration * dt);
+                target.Translate(mLinearVelocity * dt);
+            }
+        }
+
         inline const LinearMoverClass& GetClass() const noexcept
         { return *mClass; }
         inline const LinearMoverClass* operator->() const noexcept
