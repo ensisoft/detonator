@@ -784,7 +784,10 @@
         <item>
          <widget class="QGroupBox" name="grpWelcome">
           <property name="title">
-           <string>Welcome to DETONATOR 2D</string>
+           <string/>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>

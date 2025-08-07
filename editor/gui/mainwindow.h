@@ -332,6 +332,8 @@ namespace gui
         Preview mPreview;
 
         FramelessWindow* mFramelessWindow = nullptr;
+
+        QByteArray mDockState;
     };
 
 } // namespace
