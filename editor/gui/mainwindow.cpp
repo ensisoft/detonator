@@ -4266,10 +4266,24 @@ void MainWindow::DrawResourcePreview(gfx::Painter& painter, double dt)
         mPreview.drawable->Update(env, dt);
         painter.Draw(*mPreview.drawable, transform, *mPreview.material);
     }
+    else if (!selected.isEmpty())
+    {
+        const auto& resource = mWorkspace->GetResource(selected[0]);
+        if (resource.IsMaterial() || resource.IsEntity() || resource.IsScene())
+        {
+            ShowInstruction(app::toString("Save\n'%1'\nto generate\npreview image.", resource.GetName()),
+                    gfx::FRect(0.0f, 0.0f, width, height), painter, 16);
+        }
+        else
+        {
+            ShowInstruction("No preview available.",
+                            gfx::FRect(0.0f, 0.0f, width, height), painter, 16);
+        }
+    }
     else
     {
-        ShowInstruction("No preview available",
-                        gfx::FRect(0.0f, 0.0f, width, height), painter);
+        ShowInstruction("No preview available.\nNothing selected.",
+                        gfx::FRect(0.0f, 0.0f, width, height), painter, 16);
     }
 }
 
