@@ -24,7 +24,7 @@
 #  endif
 #include "warnpop.h"
 
-#include <algorithm> // for min, max
+#include <algorithm> // for min, max, swap
 #include <tuple>
 #include <cmath>
 
@@ -987,5 +987,212 @@ namespace base
 
     template<typename Unit>
     using FAngle = Angle<float, Unit>;
+
+
+    template<typename T>
+    class Vector2D
+    {
+    public:
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        using Vec2Type = typename detail::GLMTraits<T>::Vec2Type;
+#endif
+        Vector2D(T x, T y) noexcept
+          : x(x), y(y)
+        {}
+        explicit Vector2D(T value) noexcept
+          : x(value), y(value)
+        {}
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        Vector2D(const Vec2Type& vec) noexcept
+          : x(vec.x), y(vec.y)
+        {}
+#endif
+        inline bool IsZero() const noexcept
+        {
+            if (x == T() && y == T())
+                return true;
+            return false;
+        }
+
+        inline Vector2D& SwizzleXY() noexcept
+        {
+            std::swap(x, y);
+            return *this;
+        }
+
+        inline T Length() const noexcept
+        {
+            return std::sqrt(x*x + y*y);
+        }
+        inline T LengthSquared() const noexcept
+        {
+            return x*x + y*y;
+        }
+
+        inline Vector2D& Normalize() noexcept
+        {
+            const auto len = Length();
+            x /= len;
+            y /= len;
+            return *this;
+        }
+
+        //  operators
+        inline Vector2D& operator+=(const Vector2D& other) noexcept
+        {
+            x += other.x;
+            y += other.y;
+            return *this;
+        }
+        inline Vector2D& operator-=(const Vector2D& other) noexcept
+        {
+            x -= other.x;
+            y -= other.y;
+            return *this;
+        }
+        inline Vector2D& operator*=(const Vector2D& other) noexcept
+        {
+            x *= other.x;
+            y *= other.y;
+            return *this;
+        }
+        inline Vector2D& operator/=(const Vector2D& other) noexcept
+        {
+            x /= other.x;
+            y /= other.y;
+            return *this;
+        }
+
+        inline Vector2D& operator*= (T scalar) noexcept
+        {
+            x *= scalar;
+            y *= scalar;
+            return *this;
+        }
+        inline Vector2D& operator/= (T scalar) noexcept
+        {
+            x /= scalar;
+            y /= scalar;
+            return *this;
+        }
+        inline Vector2D operator- () noexcept
+        {
+            return { x * -1, y * -1 };
+        }
+        inline Vector2D operator+ () const noexcept
+        {
+            return *this;
+        }
+        inline T& operator[](size_t index) noexcept
+        {
+            if (index == 0) return x;
+            if (index == 1) return y;
+            BUG("Vector index out of bounds.");
+        }
+        inline T operator[](size_t index) const noexcept
+        {
+            if (index == 0) return x;
+            if (index == 1) return y;
+            BUG("Vector index out of bounds.");
+        }
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        inline operator glm::vec2() const noexcept
+        {
+            return { x, y };
+        }
+#endif
+
+    public:
+        T x = T();
+        T y = T();
+    };
+
+
+    template<typename T>
+    inline Vector2D<T> operator * (const Vector2D<T>& vector, T scalar) noexcept
+    {
+        return { vector.x * scalar, vector.y * scalar };
+    }
+    template<typename T>
+    inline Vector2D<T> operator * (T scalar, const Vector2D<T>& vector) noexcept
+    {
+        return { vector.x * scalar, vector.y * scalar };
+    }
+    template<typename T>
+    inline Vector2D<T> operator / (const Vector2D<T>& vector, T scalar) noexcept
+    {
+        return { vector.x / scalar, vector.y / scalar };
+    }
+
+    template<typename T>
+    inline Vector2D<T> operator + (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    {
+        return { lhs.x + rhs.x, lhs.y + rhs.y };
+    }
+    template<typename T>
+    inline Vector2D<T> operator - (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    {
+        return { lhs.x - rhs.x, lhs.y - rhs.y };
+    }
+    template<typename T>
+    inline Vector2D<T> operator * (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    {
+        return { lhs.x * rhs.x, lhs.y * rhs.y };
+    }
+    template<typename T>
+    inline Vector2D<T> operator / (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    {
+        return { lhs.x / rhs.x, lhs.y / rhs.y };
+    }
+
+    template<typename T>
+    inline bool operator == (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    {
+        return (lhs.x == rhs.x) && (lhs.y == rhs.y);
+    }
+    template<typename T>
+    inline bool operator != (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    {
+        return (lhs.x != rhs.x) || (lhs.y != rhs.y);
+    }
+
+    template<typename T>
+    inline T Dot(const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    {
+        return (lhs.x * rhs.x) + (lhs.y * rhs.y);
+    }
+
+    template<typename  T>
+    inline T Distance(const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    {
+        return Vector2D(lhs - rhs).Length();
+    }
+    template<typename T>
+    inline T SquareDistance(const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    {
+        return Vector2D(lhs - rhs).SquareDistance();
+    }
+
+    template<typename T>
+    inline Vector2D<T> SwizzleXY(const Vector2D<T>& vector) noexcept
+    {
+        return { vector.y, vector. x };
+    }
+
+    template<typename T>
+    inline Vector2D<T> Normalize(const Vector2D<T>& vector) noexcept
+    {
+        Vector2D ret(vector);
+        ret.Normalize();
+        return ret;
+    }
+    template<typename T>
+    inline Vector2D<T> Perpendicular(const Vector2D<T>& vector) noexcept
+    {
+        return { -vector.x, vector.x };
+    }
+
+
+    using FVector2D = Vector2D<float>;
 
 } // namespace

@@ -96,6 +96,7 @@ bool JsonReadSafe(const nlohmann::json& json, const char* name, FPoint* point);
 bool JsonReadSafe(const nlohmann::json& json, const char* name, FSize* point);
 bool JsonReadSafe(const nlohmann::json& json, const char* name, Color4f* color);
 bool JsonReadSafe(const nlohmann::json& json, const char* name, Rotator* rotator);
+bool JsonReadSafe(const nlohmann::json& json, const char* name, FVector2D* vector);
 
 void JsonWrite(nlohmann::json& object, const char* name, int value);
 void JsonWrite(nlohmann::json& object, const char* name, unsigned value);
@@ -114,6 +115,7 @@ void JsonWrite(nlohmann::json& json, const char* name, const FPoint& point);
 void JsonWrite(nlohmann::json& json, const char* name, const FSize& point);
 void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color);
 void JsonWrite(nlohmann::json& json, const char* name, const Rotator& rotator);
+void JsonWrite(nlohmann::json& json, const char* name, const FVector2D& vector);
 
 
 template<typename... Types>

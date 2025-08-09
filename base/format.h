@@ -89,6 +89,11 @@ namespace base
 
         std::string ToString(const base::FDegrees& angle);
         std::string ToString(const base::FRadians& angle);
+        std::string ToString(const FRect& rect);
+        std::string ToString(const FSize& size);
+        std::string ToString(const FPoint& point);
+        std::string ToString(const Color4f& color);
+        std::string ToString(const FVector2D& vector);
 
 #if defined(BASE_FORMAT_SUPPORT_GLM)
         std::string ToString(const glm::mat4& m);
@@ -100,10 +105,6 @@ namespace base
         // Rotator is inside here because we can't have Rotator without glm
         std::string ToString(const Rotator& rotator);
 #endif // BASE_FORMAT_SUPPORT_GLM
-        std::string ToString(const FRect& rect);
-        std::string ToString(const FSize& size);
-        std::string ToString(const FPoint& point);
-        std::string ToString(const Color4f& color);
 
 #if defined(BASE_FORMAT_SUPPORT_MAGIC_ENUM)
         template<typename Enum> inline

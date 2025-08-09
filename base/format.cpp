@@ -148,6 +148,14 @@ std::string ToString(const Color4f& color)
     return buff;
 }
 
+std::string ToString(const FVector2D& vector)
+{
+    char buff[1024];
+    std::memset(buff, 0, sizeof(buff));
+    std::snprintf(buff, sizeof(buff),"[%.2f %.2f]", vector.x, vector.y);
+    return buff;
+}
+
 std::string ToString(const std::wstring& s)
 {
     //setup converter
