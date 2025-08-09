@@ -1192,7 +1192,93 @@ namespace base
         return { -vector.x, vector.x };
     }
 
-
     using FVector2D = Vector2D<float>;
+
+    // This is a convenience class to help provide implicit / automatic
+    // conversion from various "float 2 like" types. This is intended
+    // for simplifying APIs where it's desirable to make the API callable
+    // with many "float 2 like" types without having to overload the API
+    // for specific types.
+    // In other words instead of this:
+    //
+    //  glm::vec2 MyFunction(const glm::vec2)
+    //  glm::vec2 MyFunction(const FPoint& point);
+    //  glm::vec2 MyFunction(float x, float);
+    //
+    //  All can be replaced simply by:
+    //  Float2 MyFunction(const Float2&);
+    //
+    // This also solves the question as to what the return value should be
+    // since the Float2 return value can then be automatically converted
+    // to the type the caller expects.
+    class Float2
+    {
+    public:
+        float x = 0.0f;
+        float y = 0.0f;
+
+        Float2() = default;
+
+        inline Float2(float x, float y) noexcept
+          : x(x), y(y)
+        {}
+
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        inline Float2(const glm::vec2& vec) noexcept
+          : x(vec.x), y(vec.y)
+        {}
+        inline Float2(const glm::vec3& vec) noexcept
+          : x(vec.x), y(vec.y)
+        {}
+        inline Float2(const glm::vec4& vec) noexcept
+          : x(vec.x), y(vec.y)
+        {}
+#endif
+        inline Float2(const FPoint& point) noexcept
+          : x(point.GetX()), y(point.GetY())
+        {}
+        inline Float2(const FVector2D& vector) noexcept
+          : x(vector.x), y(vector.y)
+        {}
+        inline Float2(const FSize& size) noexcept
+          : x(size.GetWidth()), y(size.GetHeight())
+        {}
+
+        inline operator FPoint () const noexcept
+        {
+            return {x, y};
+        }
+        inline operator FVector2D () const noexcept
+        {
+            return {x, y};
+        }
+        inline operator FSize () const noexcept
+        {
+            return {x, y};
+        }
+
+        inline FSize ToSize() const noexcept
+        {
+            return {x, y};
+        }
+        inline FPoint ToPoint() const noexcept
+        {
+            return {x, y};
+        }
+        inline FVector2D ToVector2D() const noexcept
+        {
+            return {x, y};
+        }
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        inline operator glm::vec2 () const noexcept
+        {
+            return {x, y};
+        }
+        glm::vec2 ToVec2() const noexcept
+        {
+            return {x, y};
+        }
+#endif
+    };
 
 } // namespace

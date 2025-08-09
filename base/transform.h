@@ -63,8 +63,8 @@ namespace base
         { MoveTo(pos.x, pos.y); }
         inline void MoveTo(const glm::vec3& pos) noexcept
         { MoveTo(pos.x, pos.y, pos.z); }
-        inline void MoveTo(const FPoint& point) noexcept
-        { MoveTo(point.GetX(), point.GetY()); }
+        inline void MoveTo(const Float2& point) noexcept
+        { MoveTo(point.x, point.y); }
         inline void MoveTo(const FRect& rect) noexcept
         { MoveTo(rect.GetX(), rect.GetY()); }
 
@@ -74,8 +74,8 @@ namespace base
         { Accumulate(glm::translate(glm::mat4(1.0f), {x, y, 0.0f})); }
         inline void Translate(float x, float y, float z) noexcept
         { Accumulate(glm::translate(glm::mat4(1.0f), {x, y, z})); }
-        inline void Translate(const FPoint& point) noexcept
-        { Translate(point.GetX(), point.GetY()); }
+        inline void Translate(const Float2& offset) noexcept
+        { Translate(offset.x, offset.y); }
         inline void Translate(const FRect& rect) noexcept
         { Translate(rect.GetX(), rect.GetY()); }
         inline void Translate(const glm::vec2& offset) noexcept
@@ -108,8 +108,8 @@ namespace base
             mTransform.back()[3] = t;
         }
 
-        inline void Resize(const FSize& size) noexcept
-        { Resize(size.GetWidth(), size.GetHeight()); }
+        inline void Resize(const Float2& size) noexcept
+        { Resize(size.x, size.y); }
         inline void Resize(const FRect& rect) noexcept
         { Resize(rect.GetWidth(), rect.GetHeight()); }
         inline void Resize(const glm::vec2& size) noexcept
@@ -127,8 +127,8 @@ namespace base
         { Scale(scale.x, scale.y); }
         inline void Scale(const glm::vec3& scale) noexcept
         { Scale(scale.x, scale.y, scale.z); }
-        inline void Scale(const FSize& size) noexcept
-        { Scale(size.GetWidth(), size.GetHeight()); }
+        inline void Scale(const Float2& size) noexcept
+        { Scale(size.x, size.y); }
 
         // Accumulate rotation to the current transformation
         inline void RotateAroundX(float radians) noexcept
