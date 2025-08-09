@@ -36,20 +36,22 @@
 namespace game
 {
     // type aliases for base types
-    using FBox = base::FBox;
-    using FRect = base::FRect;
-    using IRect = base::IRect;
-    using URect = base::URect;
-    using USize = base::USize;
-    using IPoint = base::IPoint;
-    using FPoint = base::FPoint;
-    using FSize  = base::FSize;
-    using ISize  = base::ISize;
-    using Color4f = base::Color4f;
-    using Rotator = base::Rotator;
-    using FRadians = base::FRadians;
-    using FDegrees = base::FDegrees;
-    using Color = base::Color;
+    using FBox      = base::FBox;
+    using FRect     = base::FRect;
+    using IRect     = base::IRect;
+    using URect     = base::URect;
+    using USize     = base::USize;
+    using IPoint    = base::IPoint;
+    using FPoint    = base::FPoint;
+    using FSize     = base::FSize;
+    using ISize     = base::ISize;
+    using Color4f   = base::Color4f;
+    using Rotator   = base::Rotator;
+    using FRadians  = base::FRadians;
+    using FDegrees  = base::FDegrees;
+    using Color     = base::Color;
+    using FVector2D = base::FVector2D;
+    using Float2    = base::Float2;
 
     using LightParam = std::variant<float,
             glm::vec2, glm::vec3, glm::vec4,

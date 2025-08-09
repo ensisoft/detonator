@@ -2187,8 +2187,8 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         const auto& entity_klass = node.GetEntityClass();
         if (entity_klass)
             continue;
-        const auto& pos = mState.scene->MapCoordsFromNodeBox(0.0f, 0.0f, &node);
-        ShowError(base::FormatString("%1 Missing entity reference!", node.GetName()), gfx::FPoint(pos.x, pos.y), scene_painter);
+        const auto& pos = mState.scene->MapCoordsFromNodeBox({0.0f, 0.0f}, &node);
+        ShowError(base::FormatString("%1 Missing entity reference!", node.GetName()), pos, scene_painter);
     }
 
     if (mState.scene->GetNumNodes() == 0)
@@ -2801,7 +2801,7 @@ void SceneWidget::FindNode(const game::EntityPlacement* node)
 
     const auto proj = engine::CreateProjectionMatrix(engine::Projection::Orthographic, viewport);
 
-    const auto& node_world_pos = mState.scene->MapCoordsFromNodeBox(0.0f, 0.0f, node);
+    const auto& node_world_pos = mState.scene->MapCoordsFromNodeBox({0.0f, 0.0f}, node).ToVec2();
     const auto& node_view_pos  = view * glm::vec4(node_world_pos, 0.0f, 1.0f);
     const auto& node_clip_pos  = proj * node_view_pos;
 

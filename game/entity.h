@@ -274,29 +274,16 @@ namespace game
         // size box only. The hit nodes are stored in the hits vector and the
         // positions with the nodes' hitboxes are (optionally) stored in the
         // hitbox_positions vector.
-        void CoarseHitTest(float x, float y, std::vector<EntityNodeClass*>* hits,
+        void CoarseHitTest(const Float2& point, std::vector<EntityNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr);
-        void CoarseHitTest(float x, float y, std::vector<const EntityNodeClass*>* hits,
+        void CoarseHitTest(const Float2& point, std::vector<const EntityNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
-
-        inline void CoarseHitTest(const glm::vec2& pos, std::vector<EntityNodeClass*>* hits,
-                           std::vector<glm::vec2>* hitbox_positions = nullptr)
-        {
-            return CoarseHitTest(pos.x, pos.y, hits, hitbox_positions);
-        }
-        inline void CoarseHitTest(const glm::vec2& pos, std::vector<const EntityNodeClass*>* hits,
-                                  std::vector<glm::vec2>* hitbox_positions = nullptr) const
-        {
-            return CoarseHitTest(pos.x, pos.y, hits, hitbox_positions);
-        }
 
         // Map coordinates in node's OOB space into entity coordinate space. The origin of
         // the OOB space is relative to the "TopLeft" corner of the OOB of the node.
-        glm::vec2 MapCoordsFromNodeBox(float x, float y, const EntityNodeClass* node) const;
-        glm::vec2 MapCoordsFromNodeBox(const glm::vec2& pos, const EntityNodeClass* node) const;
+        Float2 MapCoordsFromNodeBox(const Float2& coordinates, const EntityNodeClass* node) const;
         // Map coordinates in entity coordinate space into node's OOB coordinate space.
-        glm::vec2 MapCoordsToNodeBox(float x, float y, const EntityNodeClass* node) const;
-        glm::vec2 MapCoordsToNodeBox(const glm::vec2& pos, const EntityNodeClass* node) const;
+        Float2 MapCoordsToNodeBox(const Float2& coordinates, const EntityNodeClass* node) const;
 
         // Compute the axis aligned bounding box (AABB) for the whole entity.
         FRect GetBoundingRect() const;
@@ -585,22 +572,16 @@ namespace game
         // size box only. The hit nodes are stored in the hits vector and the
         // positions with the nodes' hitboxes are (optionally) stored in the
         // hitbox_positions vector.
-        void CoarseHitTest(float x, float y, std::vector<EntityNode*>* hits,
+        void CoarseHitTest(const Float2& point, std::vector<EntityNode*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr);
-        void CoarseHitTest(const glm::vec2& pos, std::vector<EntityNode*>* hits,
-                           std::vector<glm::vec2>* hitbox_positions = nullptr);
-        void CoarseHitTest(float x, float y, std::vector<const EntityNode*>* hits,
-                           std::vector<glm::vec2>* hitbox_positions = nullptr) const;
-        void CoarseHitTest(const glm::vec2& pos, std::vector<const EntityNode*>* hits,
+        void CoarseHitTest(const Float2& point, std::vector<const EntityNode*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
         // Map coordinates in node's OOB space into entity coordinate space. The origin of
         // the OOB space is relative to the "TopLeft" corner of the OOB of the node.
-        glm::vec2 MapCoordsFromNodeBox(float x, float y, const EntityNode* node) const;
-        glm::vec2 MapCoordsFromNodeBox(const glm::vec2& pos, const EntityNode* node) const;
+        Float2 MapCoordsFromNodeBox(const Float2& pos, const EntityNode* node) const;
         // Map coordinates in entity coordinate space into node's OOB coordinate space.
-        glm::vec2 MapCoordsToNodeBox(float x, float y, const EntityNode* node) const;
-        glm::vec2 MapCoordsToNodeBox(const glm::vec2& pos, const EntityNode* node) const;
+        Float2 MapCoordsToNodeBox(const Float2& pos, const EntityNode* node) const;
 
         // Compute the axis aligned bounding box (AABB) for the whole entity.
         FRect GetBoundingRect() const;

@@ -273,7 +273,7 @@ std::vector<SceneClass::SceneNode> SceneClass::CollectNodes()
     return ret;
 }
 
-void SceneClass::CoarseHitTest(float x, float y, std::vector<EntityPlacement*>* hits,
+void SceneClass::CoarseHitTest(const Float2& point, std::vector<EntityPlacement*>* hits,
                    std::vector<glm::vec2>* hitbox_positions)
 {
     const auto& entity_nodes = CollectNodes();
@@ -288,10 +288,10 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<EntityPlacement*>* 
         // coordinate space, then delegate the hit test to the
         // entity to see if we hit any of the entity nodes.
         auto scene_to_node = glm::inverse(entity_node.node_to_scene);
-        auto node_hit_pos  = scene_to_node * glm::vec4(x, y, 1.0f, 1.0f);
+        auto node_hit_pos  = scene_to_node * glm::vec4(point.x, point.y, 1.0f, 1.0f);
         // perform entity hit test.
         std::vector<const EntityNodeClass*> nodes;
-        entity_node.entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
+        entity_node.entity->CoarseHitTest(node_hit_pos, &nodes);
         if (nodes.empty())
             continue;
 
@@ -301,13 +301,8 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<EntityPlacement*>* 
             hitbox_positions->push_back(glm::vec2(node_hit_pos.x, node_hit_pos.y));
     }
 }
-void SceneClass::CoarseHitTest(const glm::vec2& pos, std::vector<EntityPlacement*>* hits,
-                               std::vector<glm::vec2>* hitbox_positions)
-{
-    CoarseHitTest(pos.x, pos.y, hits, hitbox_positions);
-}
 
-void SceneClass::CoarseHitTest(float x, float y, std::vector<const EntityPlacement*>* hits,
+void SceneClass::CoarseHitTest(const Float2& point, std::vector<const EntityPlacement*>* hits,
                        std::vector<glm::vec2>* hitbox_positions) const
 {
     const auto& entity_nodes = CollectNodes();
@@ -322,10 +317,10 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<const EntityPlaceme
         // coordinate space, then delegate the hit test to the
         // entity to see if we hit any of the entity nodes.
         auto scene_to_node = glm::inverse(entity_node.node_to_scene);
-        auto node_hit_pos  = scene_to_node * glm::vec4(x, y, 1.0f, 1.0f);
+        auto node_hit_pos  = scene_to_node * glm::vec4(point.x, point.y, 1.0f, 1.0f);
         // perform entity hit test.
         std::vector<const EntityNodeClass*> nodes;
-        entity_node.entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
+        entity_node.entity->CoarseHitTest(node_hit_pos, &nodes);
         if (nodes.empty())
             continue;
 
@@ -336,48 +331,34 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<const EntityPlaceme
     }
 }
 
-void SceneClass::CoarseHitTest(const glm::vec2& pos, std::vector<const EntityPlacement*>* hits,
-                               std::vector<glm::vec2>* hitbox_positions) const
-{
-    CoarseHitTest(pos.x, pos.y, hits, hitbox_positions);
-}
-
-glm::vec2 SceneClass::MapCoordsFromNodeBox(float x, float y, const EntityPlacement* node) const
+Float2 SceneClass::MapCoordsFromNodeBox(const Float2& coordinates, const EntityPlacement* node) const
 {
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
     {
         if (entity_node.placement == node)
         {
-            const auto ret = entity_node.node_to_scene * glm::vec4(x, y, 1.0f, 1.0f);
+            const auto ret = entity_node.node_to_scene * glm::vec4(coordinates.x, coordinates.y, 1.0f, 1.0f);
             return glm::vec2(ret.x, ret.y);
         }
     }
     // todo: should we return something else maybe ?
-    return glm::vec2(0.0f, 0.0f);
-}
-glm::vec2 SceneClass::MapCoordsFromNodeBox(const glm::vec2& pos, const EntityPlacement* node) const
-{
-    return MapCoordsFromNodeBox(pos.x, pos.y, node);
+    return {0.0f, 0.0f};
 }
 
-glm::vec2 SceneClass::MapCoordsToNodeBox(float x, float y, const EntityPlacement* node) const
+Float2 SceneClass::MapCoordsToNodeBox(const Float2& coordinates, const EntityPlacement* node) const
 {
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
     {
         if (entity_node.placement == node)
         {
-            const auto ret = glm::inverse(entity_node.node_to_scene) * glm::vec4(x, y, 1.0f, 1.0f);
+            const auto ret = glm::inverse(entity_node.node_to_scene) * glm::vec4(coordinates.x, coordinates.y, 1.0f, 1.0f);
             return glm::vec2(ret.x, ret.y);
         }
     }
     // todo: should we return something else maybe ?
-    return glm::vec2(0.0f, 0.0f);
-}
-glm::vec2 SceneClass::MapCoordsToNodeBox(const glm::vec2& pos, const EntityPlacement* node) const
-{
-    return MapCoordsToNodeBox(pos.x, pos.y, node);
+    return {0.0f, 0.0f};
 }
 
 glm::mat4 SceneClass::FindEntityTransform(const EntityPlacement* placement) const

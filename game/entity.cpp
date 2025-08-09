@@ -460,31 +460,24 @@ EntityNodeClass* EntityClass::DuplicateNode(const EntityNodeClass* node)
 
 }
 
-void EntityClass::CoarseHitTest(float x, float y, std::vector<EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions)
+void EntityClass::CoarseHitTest(const Float2& point, std::vector<EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions)
 {
-    game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+    game::CoarseHitTest(mRenderTree, point.x, point.y, hits, hitbox_positions);
 }
 
-void EntityClass::CoarseHitTest(float x, float y, std::vector<const EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions) const
+void EntityClass::CoarseHitTest(const Float2& point, std::vector<const EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions) const
 {
-    game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
+    game::CoarseHitTest(mRenderTree, point.x, point.y, hits, hitbox_positions);
 }
 
-glm::vec2 EntityClass::MapCoordsFromNodeBox(float x, float y, const EntityNodeClass* node) const
+Float2 EntityClass::MapCoordsFromNodeBox(const Float2& coordinates, const EntityNodeClass* node) const
 {
-    return game::MapCoordsFromNodeBox(mRenderTree, x, y, node);
+    return game::MapCoordsFromNodeBox(mRenderTree, coordinates.x, coordinates.y, node);
 }
-glm::vec2 EntityClass::MapCoordsFromNodeBox(const glm::vec2& pos, const EntityNodeClass* node) const
+
+Float2 EntityClass::MapCoordsToNodeBox(const Float2& coordinates, const EntityNodeClass* node) const
 {
-    return game::MapCoordsFromNodeBox(mRenderTree, pos.x, pos.y, node);
-}
-glm::vec2 EntityClass::MapCoordsToNodeBox(float x, float y, const EntityNodeClass* node) const
-{
-    return game::MapCoordsToNodeBox(mRenderTree, x, y, node);
-}
-glm::vec2 EntityClass::MapCoordsToNodeBox(const glm::vec2& pos, const EntityNodeClass* node) const
-{
-    return game::MapCoordsToNodeBox(mRenderTree, pos.x, pos.y, node);
+    return game::MapCoordsToNodeBox(mRenderTree, coordinates.x, coordinates.y, node);
 }
 
 FRect EntityClass::FindNodeBoundingRect(const EntityNodeClass* node) const
@@ -1159,40 +1152,22 @@ const EntityNode* Entity::FindNodeByInstanceName(const std::string& name) const
     return nullptr;
 }
 
-void Entity::CoarseHitTest(float x, float y, std::vector<EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions)
-{
-    game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
-}
-
-void Entity::CoarseHitTest(const glm::vec2& pos, std::vector<EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions)
+void Entity::CoarseHitTest(const Float2& pos, std::vector<EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions)
 {
     game::CoarseHitTest(mRenderTree, pos.x, pos.y, hits, hitbox_positions);
 }
 
-void Entity::CoarseHitTest(float x, float y, std::vector<const EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions) const
-{
-    game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
-}
-void Entity::CoarseHitTest(const glm::vec2& pos, std::vector<const EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions) const
+void Entity::CoarseHitTest(const Float2& pos, std::vector<const EntityNode*>* hits, std::vector<glm::vec2>* hitbox_positions) const
 {
     game::CoarseHitTest(mRenderTree, pos.x, pos.y, hits, hitbox_positions);
 }
 
-glm::vec2 Entity::MapCoordsFromNodeBox(float x, float y, const EntityNode* node) const
-{
-    return game::MapCoordsFromNodeBox(mRenderTree, x, y, node);
-}
-glm::vec2 Entity::MapCoordsFromNodeBox(const glm::vec2& pos, const EntityNode* node) const
+Float2 Entity::MapCoordsFromNodeBox(const Float2& pos, const EntityNode* node) const
 {
     return game::MapCoordsFromNodeBox(mRenderTree, pos.x, pos.y, node);
 }
 
-glm::vec2 Entity::MapCoordsToNodeBox(float x, float y, const EntityNode* node) const
-{
-    return game::MapCoordsToNodeBox(mRenderTree, x, y, node);
-}
-
-glm::vec2 Entity::MapCoordsToNodeBox(const glm::vec2& pos, const EntityNode* node) const
+Float2 Entity::MapCoordsToNodeBox(const Float2& pos, const EntityNode* node) const
 {
     return game::MapCoordsToNodeBox(mRenderTree, pos.x, pos.y, node);
 }

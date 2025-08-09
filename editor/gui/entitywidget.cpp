@@ -4059,7 +4059,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             if (const auto* node = mState.entity->FindNodeById(id))
             {
                 const auto& size = node->GetSize();
-                const auto& pos = mState.entity->MapCoordsFromNodeBox(0.0f, size.y, node);
+                const auto& pos = mState.entity->MapCoordsFromNodeBox({0.0f, size.y}, node);
                 ShowMessage(comment, gfx::FPoint(pos.x + 10, pos.y + 10), entity_painter);
             }
         }

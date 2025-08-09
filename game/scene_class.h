@@ -193,22 +193,16 @@ namespace game
         // size box only. The hit nodes are stored in the hits vector and the
         // positions with the nodes' hitboxes are (optionally) stored in the
         // hitbox_positions vector.
-        void CoarseHitTest(float x, float y, std::vector<EntityPlacement*>* hits,
+        void CoarseHitTest(const Float2& point, std::vector<EntityPlacement*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr);
-        void CoarseHitTest(const glm::vec2& pos, std::vector<EntityPlacement*>* hits,
-                           std::vector<glm::vec2>* hitbox_positions = nullptr);
-        void CoarseHitTest(float x, float y, std::vector<const EntityPlacement*>* hits,
-                           std::vector<glm::vec2>* hitbox_positions = nullptr) const;
-        void CoarseHitTest(const glm::vec2& pos, std::vector<const EntityPlacement*>* hits,
+        void CoarseHitTest(const Float2& point, std::vector<const EntityPlacement*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
         // Map coordinates in node's OOB space into entity coordinate space. The origin of
         // the OOB space is relative to the "TopLeft" corner of the OOB of the node.
-        glm::vec2 MapCoordsFromNodeBox(float x, float y, const EntityPlacement* node) const;
-        glm::vec2 MapCoordsFromNodeBox(const glm::vec2& pos, const EntityPlacement* node) const;
+        Float2 MapCoordsFromNodeBox(const Float2& coordinates, const EntityPlacement* node) const;
         // Map coordinates in scene coordinate space into node's OOB coordinate space.
-        glm::vec2 MapCoordsToNodeBox(float x, float y, const EntityPlacement* node) const;
-        glm::vec2 MapCoordsToNodeBox(const glm::vec2& pos, const EntityPlacement* node) const;
+        Float2 MapCoordsToNodeBox(const Float2& coordinates, const EntityPlacement* node) const;
 
         glm::mat4 FindEntityTransform(const EntityPlacement* placement) const;
 

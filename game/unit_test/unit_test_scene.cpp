@@ -362,16 +362,16 @@ void unit_test_scene_class()
     {
         std::vector<game::EntityPlacement*> hits;
         std::vector<glm::vec2> hitpos;
-        klass.CoarseHitTest(50.0f, 50.0f, &hits, &hitpos);
+        klass.CoarseHitTest({50.0f, 50.0f}, &hits, &hitpos);
         TEST_REQUIRE(hits.empty());
 
-        klass.CoarseHitTest(0.0f, 0.0f, &hits, &hitpos);
+        klass.CoarseHitTest({0.0f, 0.0f}, &hits, &hitpos);
         TEST_REQUIRE(!hits.empty());
         TEST_REQUIRE(hits[0]->GetName() == "root");
 
         hits.clear();
         hitpos.clear();
-        klass.CoarseHitTest(100.0f, 100.0f, &hits, &hitpos);
+        klass.CoarseHitTest({100.0f, 100.0f}, &hits, &hitpos);
         TEST_REQUIRE(!hits.empty());
         TEST_REQUIRE(hits[0]->GetName() == "child_1");
     }
@@ -379,12 +379,12 @@ void unit_test_scene_class()
     // test coordinate mapping
     {
         const auto* node = klass.FindPlacementByName("child_1");
-        auto vec = klass.MapCoordsFromNodeBox(0.0f, 0.0f, node);
+        auto vec = klass.MapCoordsFromNodeBox({0.0f, 0.0f}, node);
         TEST_REQUIRE(math::equals(100.0f, vec.x));
         TEST_REQUIRE(math::equals(100.0f, vec.y));
 
         // inverse operation to MapCoordsFromNodeBox
-        vec = klass.MapCoordsToNodeBox(100.0f, 100.0f, node);
+        vec = klass.MapCoordsToNodeBox({100.0f, 100.0f}, node);
         TEST_REQUIRE(math::equals(0.0f, vec.x));
         TEST_REQUIRE(math::equals(0.0f, vec.y));
     }

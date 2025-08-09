@@ -1191,17 +1191,17 @@ void BindGameLib(sol::state& L)
     entity["HitTest"] = sol::overload(
         [](Entity& entity, float x, float y) {
             std::vector<EntityNode*> hits;
-            entity.CoarseHitTest(x, y, &hits);
+            entity.CoarseHitTest({x, y}, &hits);
             return EntityNodeList(std::move(hits));
         },
-        [](Entity& entity, glm::vec2 pos) {
+        [](Entity& entity, const glm::vec2& pos) {
             std::vector<EntityNode*> hits;
             entity.CoarseHitTest(pos, &hits);
             return EntityNodeList(std::move(hits));
         },
-        [](Entity& entity, FPoint point) {
+        [](Entity& entity, const FPoint& point) {
             std::vector<EntityNode*> hits;
-            entity.CoarseHitTest(point.GetX(), point.GetY(), &hits);
+            entity.CoarseHitTest(point, &hits);
             return EntityNodeList(std::move(hits));
         });
     entity["FindNode"] = GetMutable(&Entity::FindNodeByClassName);
