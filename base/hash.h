@@ -110,6 +110,14 @@ S hash_combine(S seed, const Point<T>& point)
 }
 
 template<typename S, typename T> inline
+S hash_combine(S seed, const Vector2D<T>& vector)
+{
+    seed = hash_combine(seed, vector.x);
+    seed = hash_combine(seed, vector.y);
+    return seed;
+}
+
+template<typename S, typename T> inline
 S hash_combine(S seed, const Rect<T>& rect)
 {
     seed = hash_combine(seed, rect.GetX());

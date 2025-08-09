@@ -293,6 +293,23 @@ bool JsonReadSafe(const nlohmann::json& json, const char* name, Rotator* rotator
     return false;
 }
 
+bool JsonReadSafe(const nlohmann::json& json, const char* name, FVector2D* out)
+{
+    if (!json.contains(name) || !json[name].is_object())
+        return false;
+    const auto& vector = json[name];
+    if (!vector.contains("x") || !vector["x"].is_number_float())
+        return false;
+    if (!vector.contains("y") || !vector["y"].is_number_float())
+        return false;
+    // if it contains more than x and y then it's not a vec2
+    if (vector.contains("z"))
+        return false;
+    out->x = vector["x"];
+    out->y = vector["y"];
+    return true;
+}
+
 bool JsonReadSafe(const nlohmann::json& value, double* out)
 {
     if (!value.is_number_float())
@@ -499,6 +516,14 @@ void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color)
 void JsonWrite(nlohmann::json& json, const char* name, const Rotator& rotator)
 {
     JsonWrite(json, name, rotator.ToVector());
+}
+
+void JsonWrite(nlohmann::json& json, const char* name, const FVector2D& vec)
+{
+    nlohmann::json object;
+    JsonWrite(object, "x", vec.x);
+    JsonWrite(object, "y", vec.y);
+    json[name] = std::move(object);
 }
 
 void JsonWrite(nlohmann::json& json, const char* name, const nlohmann::json& js)
