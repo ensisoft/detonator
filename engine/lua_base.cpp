@@ -229,12 +229,11 @@ void BindBase(sol::state& L)
     point["SetX"] = &base::FPoint::SetX;
     point["SetY"] = &base::FPoint::SetY;
     point["Copy"] = [](const base::FPoint& point) { return base::FPoint(point); };
-    point["Distance"] = &base::Distance;
-    point["SquareDistance"] = &base::Distance;
-
-    point.set_function(sol::meta_function::addition, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs + rhs; });
+    point["Distance"]       = &base::Distance;
+    point["SquareDistance"] = &base::SquareDistance;
+    point.set_function(sol::meta_function::addition,    [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs + rhs; });
     point.set_function(sol::meta_function::subtraction, [](const base::FPoint& lhs, const base::FPoint& rhs) { return lhs - rhs; });
-    point.set_function(sol::meta_function::to_string, [](const base::FPoint& point) { return base::ToString(point); });
+    point.set_function(sol::meta_function::to_string,   [](const base::FPoint& point) { return base::ToString(point); });
 
     // build color name table
     for (const auto& color : magic_enum::enum_values<base::Color>())
