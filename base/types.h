@@ -32,10 +32,48 @@
 
 namespace base
 {
+    namespace detail {
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        template<typename T>
+        struct GLMTraits {};
+
+        template<>
+        struct GLMTraits<float> {
+            using Vec2Type = glm::vec2;
+            using Vec3Type = glm::vec3;
+            using Vec4Type = glm::vec4;
+        };
+        template<>
+        struct GLMTraits<double> {
+            using Vec2Type = glm::dvec2;
+            using Vec3Type = glm::dvec3;
+            using Vec4Type = glm::dvec4;
+        };
+
+        template<>
+        struct GLMTraits<int> {
+            using Vec2Type = glm::ivec2;
+            using Vec3Type = glm::ivec3;
+            using Vec4Type = glm::ivec4;
+        };
+        template<>
+        struct GLMTraits<unsigned> {
+            using Vec2Type = glm::uvec2;
+            using Vec3Type = glm::uvec3;
+            using Vec4Type = glm::uvec4;
+        };
+#endif
+    } // namespace
+
+
     template<typename T>
     class Size
     {
     public:
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        using Vec2Type = typename detail::GLMTraits<T>::Vec2Type;
+#endif
+
         Size() = default;
         Size(T width, T height) noexcept
           : mWidth(width)
@@ -43,7 +81,7 @@ namespace base
         {}
 
 #if defined(BASE_TYPES_SUPPORT_GLM)
-        Size(const glm::vec2& vector) noexcept
+        Size(const Vec2Type& vector) noexcept
            : mWidth(vector.x)
            , mHeight(vector.y)
         {}
@@ -66,6 +104,12 @@ namespace base
                 return false;
             return true;
         }
+
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        inline Vec2Type ToVector() const noexcept
+        { return {mWidth, mHeight }; }
+#endif
+
     private:
         T mWidth  = T();
         T mHeight = T();
@@ -122,6 +166,10 @@ namespace base
     class Point
     {
     public:
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        using Vec2Type = typename detail::GLMTraits<T>::Vec2Type;
+#endif
+
         Point() = default;
         Point(T x, T y) noexcept
           : mX(x)
@@ -129,7 +177,7 @@ namespace base
         {}
 
 #if defined(BASE_TYPES_SUPPORT_GLM)
-        Point(const glm::vec2& vector) noexcept
+        Point(const Vec2Type& vector) noexcept
           : mX(vector.x)
           , mY(vector.y)
         {}
@@ -157,6 +205,11 @@ namespace base
         { return {mX + dx, mY + dy}; }
         inline Point TranslateCopy(const Point& p) noexcept
         { return {mX + p.mX, mY + p.mY }; }
+
+#if defined(BASE_TYPES_SUPPORT_GLM)
+       inline Vec2Type ToVector() const noexcept
+       { return {mX, mY}; }
+#endif
 
         Point& operator+=(const Point& other) noexcept
         {
@@ -553,6 +606,10 @@ namespace base
     class Circle
     {
     public:
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        using Vec2Type = typename detail::GLMTraits<T>::Vec2Type;
+#endif
+
         Circle() = default;
         Circle(float x, float y, float radius) noexcept
           : mX(x)
@@ -566,7 +623,7 @@ namespace base
         {}
 
 #if defined(BASE_TYPES_SUPPORT_GLM)
-        Circle(const glm::vec2& pos, float radius) noexcept
+        Circle(const Vec2Type& pos, float radius) noexcept
           : mX(pos.x)
           , mY(pos.y)
           , mRadius(radius)
@@ -634,6 +691,10 @@ namespace base
     class Line
     {
     public:
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        using Vec2Type = typename detail::GLMTraits<T>::Vec2Type;
+#endif
+
         Line() = default;
         Line(float x1, float y1, float x2, float y2)
           : mPointA(x1, y1)
@@ -645,7 +706,7 @@ namespace base
         {}
 
 #if defined(BASE_TYPES_SUPPORT_GLM)
-        Line(const glm::vec2& a, const glm::vec2& b)
+        Line(const Vec2Type& a, const Vec2Type& b)
           : mPointA(a)
           , mPointB(b)
         {}
