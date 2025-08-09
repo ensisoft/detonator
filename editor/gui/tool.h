@@ -384,7 +384,7 @@ namespace gui
             if (tree.HasParent(mNode) && tree.GetParent(mNode))
             {
                 const auto* parent = tree.GetParent(mNode);
-                const auto& mouse_pos_in_node = mModel.MapCoordsToNodeBox(mouse_pos, parent);
+                const auto& mouse_pos_in_node = mModel.MapCoordsToNodeBox(mouse_pos, parent).ToVec2();
                 const auto& mouse_delta = mouse_pos_in_node - mPreviousMousePos;
 
                 glm::vec2 position = mNode->GetTranslation();
@@ -529,7 +529,7 @@ namespace gui
         virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& mouse_pos = mickey.MapMouse(trans);
-            const auto& mouse_pos_in_node = mModel.MapCoordsToNodeBox(mouse_pos, mNode);
+            const auto& mouse_pos_in_node = mModel.MapCoordsToNodeBox(mouse_pos, mNode).ToVec2();
             const auto& mouse_delta = (mouse_pos_in_node - mPreviousMousePos);
             const bool maintain_aspect_ratio = mickey->modifiers() & Qt::ShiftModifier;
 
@@ -601,12 +601,12 @@ namespace gui
         {
             if constexpr (std::is_same_v<TreeNode, game::EntityPlacement>)
             {
-                mNodeCenterInWorld = mModel.MapCoordsFromNodeBox(0.0f, 0.0f, mNode);
+                mNodeCenterInWorld = mModel.MapCoordsFromNodeBox({0.0f, 0.0f}, mNode);
             }
             else
             {
-                const auto &node_size = mNode->GetSize();
-                mNodeCenterInWorld = mModel.MapCoordsFromNodeBox(node_size.x * 0.5f, node_size.y * 0.5, mNode);
+                const auto& node_size = mNode->GetSize();
+                mNodeCenterInWorld = mModel.MapCoordsFromNodeBox(node_size * 0.5f, mNode);
             }
         }
         virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override

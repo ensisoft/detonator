@@ -141,6 +141,10 @@ namespace gui
           : mX(point.GetX())
           , mY(point.GetY())
         {}
+        Point2Df(const base::Float2& point) noexcept
+          : mX(point.x)
+          , mY(point.y)
+        {}
         operator QPointF () const noexcept
         { return {mX, mY}; }
         operator glm::vec2 () const noexcept
@@ -149,6 +153,8 @@ namespace gui
         { return {mX, mY}; }
         operator Tuple () const noexcept
         { return {mX, mY}; }
+        operator base::Float2 () const noexcept
+        { return {mX, mY }; }
 
         inline float x() const noexcept
         { return mX; }
