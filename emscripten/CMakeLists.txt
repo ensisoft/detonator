@@ -121,6 +121,7 @@ add_executable(UnitTest
     ../game/property_animator.cpp
     ../game/animation.cpp
     ../game/entity.cpp
+    ../game/entity_class.cpp
     ../game/entity_node.cpp
     ../game/entity_placement.cpp
     ../game/entity_state.cpp
@@ -290,6 +291,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../game/animation.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/animator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/entity_class.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_placement.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_drawable_item.cpp

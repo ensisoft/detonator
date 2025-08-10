@@ -29,6 +29,7 @@
 #include "data/json.h"
 #include "game/scene.h"
 #include "game/entity.h"
+#include "game/entity_class.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "engine/lua.h"

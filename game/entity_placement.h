@@ -28,13 +28,14 @@
 #include <optional>
 #include <memory>
 
-#include "base/hash.h"
 #include "base/bitflag.h"
-#include "game/entity.h"
+#include "game/enum.h"
 #include "game/scriptvar.h"
 
 namespace game
 {
+    class EntityClass;
+
     // EntityPlacement holds the information for placing an entity
     // into the scene when the actual scene instance is created.
     // In other words the EntityPlacement objects in the SceneClass
@@ -42,7 +43,7 @@ namespace game
     class EntityPlacement
     {
     public:
-        using Flags = Entity::Flags;
+        using Flags = EntityFlags;
 
         struct ScriptVarValue {
             std::string id;

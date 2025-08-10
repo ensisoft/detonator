@@ -36,6 +36,7 @@
 #include "data/io.h"
 #include "audio/audio_graph_source.h"
 #include "game/entity.h"
+#include "game/entity_class.h"
 #include "game/scene.h"
 #include "graphics/material.h"
 #include "game/tilemap.h"

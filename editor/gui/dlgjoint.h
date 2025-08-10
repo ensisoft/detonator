@@ -25,7 +25,7 @@
 
 #include <memory>
 
-#include "game/entity.h"
+#include "game/fwd.h"
 
 namespace gui
 {
@@ -34,8 +34,8 @@ namespace gui
         Q_OBJECT
 
     public:
-        DlgJoint(QWidget* parent, const game::EntityClass& klass, game::EntityClass::PhysicsJoint& joint);
-       ~DlgJoint();
+        DlgJoint(QWidget* parent, const game::EntityClass& klass, game::RigidBodyJointClass& joint);
+       ~DlgJoint() override;
 
     private slots:
         void on_btnSwap_clicked();
@@ -61,6 +61,6 @@ namespace gui
         Ui::DlgJoint mUI;
     private:
         const game::EntityClass& mEntity;
-        game::EntityClass::PhysicsJoint& mJoint;
+        game::RigidBodyJointClass& mJoint;
     };
 } // namespace

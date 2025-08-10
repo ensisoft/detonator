@@ -30,6 +30,7 @@
 #include "base/memory.h"
 #include "data/json.h"
 #include "game/entity.h"
+#include "game/entity_class.h"
 #include "game/entity_node_rigid_body_joint.h"
 #include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body.h"

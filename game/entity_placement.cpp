@@ -16,9 +16,12 @@
 
 #include "config.h"
 
+#include "base/utility.h"
+#include "base/hash.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "game/transform.h"
+#include "game/entity_class.h"
 #include "game/entity_placement.h"
 
 namespace game
@@ -40,7 +43,7 @@ void EntityPlacement::SetFlag(Flags flag, bool on_off) noexcept
 void EntityPlacement::SetEntity(std::shared_ptr<const EntityClass> klass)
 {
     mEntityId = klass->GetId();
-    mEntity   = klass;
+    mEntity   = std::move(klass);
 }
 void EntityPlacement::ResetEntity() noexcept
 {

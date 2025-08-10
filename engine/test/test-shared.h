@@ -24,6 +24,7 @@
 #include "graphics/color4f.h"
 #include "graphics/simple_shape.h"
 #include "game/entity.h"
+#include "game/entity_class.h"
 #include "game/scene.h"
 #include "game/transform_animator.h"
 #include "game/entity_node_rigid_body.h"
