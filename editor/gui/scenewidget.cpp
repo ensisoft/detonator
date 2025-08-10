@@ -1965,6 +1965,7 @@ void SceneWidget::PlaceNewEntity()
     const auto* action = qobject_cast<QAction*>(sender());
     const auto klassid = action->data().toString();
     auto entity = mState.workspace->GetEntityClassById(klassid);
+    ASSERT(entity);
 
     const auto snap = (bool)GetValue(mUI.actionSnapGrid);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);

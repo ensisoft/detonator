@@ -37,6 +37,8 @@ namespace game
     public:
         // The type of the animator class.
         enum class Type {
+            // Animate along a spline
+            SplineAnimator,
             // TransformAnimator animators modify the transform state of the node
             // i.e. the translation, scale and rotation variables directly.
             TransformAnimator,
@@ -95,6 +97,8 @@ namespace game
         // Load the class object state from JSON. Returns true when
         // successful otherwise false and the object is not valid state.
         virtual bool FromJson(const data::Reader& data) = 0;
+        // Init class runtime services if any.
+        virtual bool InitClassRuntime() const { return true; }
     private:
     };
 

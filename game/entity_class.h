@@ -251,12 +251,18 @@ namespace game
         void CoarseHitTest(const Float2& point, std::vector<const EntityNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
-        // Map coordinates in node's OOB space into entity coordinate space. The origin of
-        // the OOB space is relative to the "TopLeft" corner of the OOB of the node.
+        // Map coordinates in node's OOB space into entity coordinate space.
+        // The origin of the OOB space is relative to the "TopLeft" corner of the OOB of the node.
         Float2 MapCoordsFromNodeBox(const Float2& coordinates, const EntityNodeClass* node) const;
+
+        // Map coordinates in node coordinate space into entity coordinate space.
+        // The origin of the coordinate space is in the middle of the node.
+        Float2 MapCoordsFromNode(const Float2& coordinates, const EntityNodeClass* node) const;
 
         // Map coordinates in entity coordinate space into node's OOB coordinate space.
         Float2 MapCoordsToNodeBox(const Float2& coordinates, const EntityNodeClass* node) const;
+
+        Float2 MapCoordsToNode(const Float2& coordinates, const EntityNodeClass* node) const;
 
         // Compute the axis aligned bounding box (AABB) for the whole entity.
         FRect GetBoundingRect() const;

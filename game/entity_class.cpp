@@ -30,6 +30,7 @@
 #include "game/entity_node.h"
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_linear_mover.h"
+#include "game/entity_node_spline_mover.h"
 #include "game/property_animator.h"
 
 namespace {
@@ -473,10 +474,21 @@ Float2 EntityClass::MapCoordsFromNodeBox(const Float2& coordinates, const Entity
     return game::MapCoordsFromNodeBox(mRenderTree, coordinates.x, coordinates.y, node);
 }
 
+Float2 EntityClass::MapCoordsFromNode(const Float2& coordinates, const EntityNodeClass* node) const
+{
+    return game::MapCoordsFromNode(mRenderTree, coordinates.x, coordinates.y, node);
+}
+
 Float2 EntityClass::MapCoordsToNodeBox(const Float2& coordinates, const EntityNodeClass* node) const
 {
     return game::MapCoordsToNodeBox(mRenderTree, coordinates.x, coordinates.y, node);
 }
+
+Float2 EntityClass::MapCoordsToNode(const Float2& coordinates, const EntityNodeClass* node) const
+{
+    return game::MapCoordsToNode(mRenderTree, coordinates.x, coordinates.y, node);
+}
+
 
 FRect EntityClass::FindNodeBoundingRect(const EntityNodeClass* node) const
 {
@@ -625,11 +637,33 @@ void EntityClass::InitClassGameRuntime() const
 {
     auto rt = std::make_unique<ClassRuntime>();
 
+    bool ok = true;
+
     for (const auto& node : mNodes)
     {
-        if (node->HasLinearMover())
+        if (node->HasLinearMover() || node->HasSplineMover())
             rt->needs_update = true;
+
+        if (auto* mover = node->GetSplineMover())
+        {
+            ok &= mover->InitClassRuntime();
+        }
+
+        for (const auto& animation : mAnimations)
+        {
+            for (size_t i=0; i<animation->GetNumAnimators(); ++i)
+            {
+                const auto& animator = animation->GetAnimatorClass(i);
+                ok &= animator.InitClassRuntime();
+            }
+        }
     }
+
+    if (!ok)
+    {
+        WARN("Entity class runtime failed to initialize completely. [name='%1']", mName);
+    }
+
     runtimes.insert( { mClassId, std::move(rt) });
     mInitRuntime = true;
     DEBUG("Initialized class runtime. [class='%1']", mName);
@@ -909,6 +943,10 @@ void EntityClass::UpdateRuntimes(double game_time, double dt)
 
             auto* node = data->GetNode();
             if (auto* mover = node->GetLinearMover())
+            {
+                mover->TransformObject(static_cast<float>(dt), *transform);
+            }
+            if (auto* mover = node->GetSplineMover())
             {
                 mover->TransformObject(static_cast<float>(dt), *transform);
             }

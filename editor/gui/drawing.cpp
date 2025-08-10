@@ -29,6 +29,7 @@
 #include "base/logging.h"
 #include "engine/camera.h"
 #include "game/types.h"
+#include "game/entity_node_spline_mover.h"
 #include "editor/app/resource-uri.h"
 #include "editor/app/utility.h"
 #include "editor/gui/drawing.h"
@@ -63,6 +64,59 @@ std::string TranslateEnum(GridDensity density)
         return "Grid 100x100";
     else BUG("Missing translation");
     return "???";
+}
+
+void DrawSplineControlPoint(gfx::Painter& painter, const glm::vec2& pos, bool active)
+{
+    gfx::Transform model;
+    model.Resize(15, 15);
+    model.MoveTo(pos);
+    model.Translate(-7.5, -7.5);
+    if (active)
+    {
+        painter.Draw(gfx::Rectangle(), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+
+        const auto time = fmod(base::GetTime(), 1.5) / 1.5;
+        const auto size = 15.0f + time * 50.0f;
+        const auto alpha = 1.0f - time;
+        gfx::Transform circle;
+        circle.Resize(size, size);
+        circle.MoveTo(pos);
+        circle.Translate(-size*0.5f, -size*0.5f);
+        painter.Draw(gfx::Rectangle(gfx::Circle::Style::Outline), circle,
+                     gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::Green, alpha)));
+    }
+    else
+    {
+        painter.Draw(gfx::Rectangle(), model, gfx::CreateMaterialFromColor(gfx::Color::DarkYellow));
+    }
+}
+
+void DrawSpline(gfx::Painter& painter,
+                const game::SplineMoverClass* spline,
+                const game::EntityNodeClass* coordinate_reference_node, const game::EntityClass& entity)
+{
+    // todo: use the derivative to segment the line drawing better.
+
+    auto catmull_rom = spline->MakeCatmullRom();
+    if (!catmull_rom || !catmull_rom->is_valid())
+        return;
+
+    const auto segments = 100;
+    for (int i=0; i<segments; ++i)
+    {
+        const auto segment_length = 1.0f / segments;
+        const auto t = (float)i;
+        const auto point_t0 = (t + 0.0f) * segment_length;
+        const auto point_t1 = (t + 1.0f) * segment_length;
+
+        const auto spline_local_point0 = spline->Evaluate(*catmull_rom, point_t0).GetPosition();
+        const auto spline_local_point1 = spline->Evaluate(*catmull_rom, point_t1).GetPosition();
+
+        const auto& spline_world_point0 = entity.MapCoordsFromNode(spline_local_point0, coordinate_reference_node);
+        const auto& spline_world_point1 = entity.MapCoordsFromNode(spline_local_point1, coordinate_reference_node);
+        DrawLine(painter, spline_world_point0, spline_world_point1);
+    }
 }
 
 void DrawLine(gfx::Painter& painter, const glm::vec2& src, const glm::vec2& dst)

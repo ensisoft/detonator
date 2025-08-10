@@ -285,6 +285,11 @@ namespace gui
         void on_ltSpotHalfAngle_valueChanged(double);
         void on_ltLayer_valueChanged(int);
         void on_ltEnabled_stateChanged(int);
+        void on_splineCoordSpace_currentIndexChanged(int);
+        void on_splineCurveType_currentIndexChanged(int);
+        void on_splineRotation_currentIndexChanged(int);
+        void on_splineSpeed_valueChanged(double value);
+        void on_splineAcceleration_valueChanged(double value);
 
         void on_btnDelDrawable_clicked();
         void on_btnDelTextItem_clicked();
@@ -293,6 +298,7 @@ namespace gui
         void on_btnDelTilemapNode_clicked();
         void on_btnDelSpatialNode_clicked();
         void on_btnDelLinearMover_clicked();
+        void on_btnDelSplineMover_clicked();
         void on_btnDelLight_clicked();
         void on_actionAddLight_triggered();
         void on_actionAddDrawable_triggered();
@@ -302,6 +308,7 @@ namespace gui
         void on_actionAddTilemapNode_triggered();
         void on_actionAddSpatialNode_triggered();
         void on_actionAddLinearMover_triggered();
+        void on_actionAddSplineMover_triggered();
         void on_actionEditEntityScript_triggered();
         void on_actionEditControllerScript_triggered();
 
@@ -326,6 +333,7 @@ namespace gui
         void ToggleFixture(bool on);
         void ToggleTilemapNode(bool on);
         void ToggleLinearMover(bool on);
+        void ToggleSplineMover(bool on);
         void ScrollEntityNodeArea();
 
     private:
@@ -370,6 +378,7 @@ namespace gui
 
         UIAnimator mAnimator;
     private:
+        class SplineTool;
         class JointTool;
         class PlaceRigidBodyTool;
         class PlaceTextTool;
@@ -377,10 +386,12 @@ namespace gui
         class PlaceShapeTool;
         class ScriptVarModel;
         class JointModel;
+        class SplineModel;
         enum class PlayState {
             Playing, Paused, Stopped
         };
         struct State {
+            SplineModel* spline_model = nullptr;
             // shared with the animation track widget.
             std::shared_ptr<game::EntityClass> entity;
             engine::Renderer renderer;
@@ -398,6 +409,7 @@ namespace gui
         std::unique_ptr<MouseTool> mCurrentTool;
         std::unique_ptr<ScriptVarModel> mScriptVarModel;
         std::unique_ptr<JointModel> mJointModel;
+        std::unique_ptr<SplineModel> mSplineModel;
         PlayState mPlayState = PlayState::Stopped;
         double mCurrentTime = 0.0;
         double mEntityTime   = 0.0;

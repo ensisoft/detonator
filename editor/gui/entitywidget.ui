@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2072</width>
-    <height>1522</height>
+    <width>1969</width>
+    <height>1172</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -300,7 +300,7 @@
                <x>0</x>
                <y>0</y>
                <width>421</width>
-               <height>1003</height>
+               <height>653</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -1480,7 +1480,7 @@
           <x>0</x>
           <y>0</y>
           <width>431</width>
-          <height>1016</height>
+          <height>781</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -2086,7 +2086,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="text" stdset="0">
-                 <string>Drawable</string>
+                 <string>Model &amp; Material</string>
                 </property>
                 <property name="frameShape" stdset="0">
                  <enum>QFrame::NoFrame</enum>
@@ -4559,6 +4559,172 @@
              </layout>
             </item>
             <item>
+             <widget class="gui::CollapsibleWidget" name="splineMover">
+              <property name="icon" stdset="0">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/vector.png</normaloff>:/16x16_ico_png/vector.png</iconset>
+              </property>
+              <property name="iconVisible" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="collapsed" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="text" stdset="0">
+               <string>Spline Mover</string>
+              </property>
+              <property name="frameShape" stdset="0">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <widget class="QWidget" name="page_13">
+               <layout class="QVBoxLayout" name="verticalLayout_15">
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_20">
+                  <item>
+                   <widget class="QTableView" name="splinePointView">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>200</height>
+                     </size>
+                    </property>
+                    <property name="editTriggers">
+                     <set>QAbstractItemView::DoubleClicked</set>
+                    </property>
+                    <property name="selectionMode">
+                     <enum>QAbstractItemView::SingleSelection</enum>
+                    </property>
+                    <property name="selectionBehavior">
+                     <enum>QAbstractItemView::SelectRows</enum>
+                    </property>
+                    <attribute name="horizontalHeaderStretchLastSection">
+                     <bool>false</bool>
+                    </attribute>
+                    <attribute name="verticalHeaderVisible">
+                     <bool>false</bool>
+                    </attribute>
+                    <attribute name="verticalHeaderDefaultSectionSize">
+                     <number>27</number>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item>
+                   <layout class="QGridLayout" name="gridLayout_14">
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_82">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text">
+                       <string>Path coordinates</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QLabel" name="label_84">
+                      <property name="text">
+                       <string>Speed</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="1">
+                     <widget class="QDoubleSpinBox" name="splineSpeed">
+                      <property name="suffix">
+                       <string> u/s</string>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="1">
+                     <widget class="QDoubleSpinBox" name="splineAcceleration">
+                      <property name="suffix">
+                       <string>  u/s²</string>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QComboBox" name="splineCoordSpace">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QComboBox" name="splineCurveType"/>
+                    </item>
+                    <item row="4" column="0">
+                     <widget class="QLabel" name="label_85">
+                      <property name="text">
+                       <string>Acceleration</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_83">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text">
+                       <string>Path curve type</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QLabel" name="label_86">
+                      <property name="text">
+                       <string>Rotation</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="1">
+                     <widget class="QComboBox" name="splineRotation"/>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btnDelSplineMover">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>Remove Spline Mover</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../resource/resource.qrc">
+                    <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item>
              <spacer name="verticalSpacer_2">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -5279,6 +5445,18 @@
     <string>Place new static rigid body</string>
    </property>
   </action>
+  <action name="actionAddSplineMover">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/vector.png</normaloff>:/16x16_ico_png/vector.png</iconset>
+   </property>
+   <property name="text">
+    <string>Spline Mover</string>
+   </property>
+   <property name="toolTip">
+    <string>Add spline mover node attachment</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -5488,6 +5666,14 @@
   <tabstop>tfAccelA</tabstop>
   <tabstop>tfEnabled</tabstop>
   <tabstop>btnDelLinearMover</tabstop>
+  <tabstop>splineMover</tabstop>
+  <tabstop>splinePointView</tabstop>
+  <tabstop>splineCoordSpace</tabstop>
+  <tabstop>splineCurveType</tabstop>
+  <tabstop>splineRotation</tabstop>
+  <tabstop>splineSpeed</tabstop>
+  <tabstop>splineAcceleration</tabstop>
+  <tabstop>btnDelSplineMover</tabstop>
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>

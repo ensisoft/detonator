@@ -23,65 +23,63 @@
 #include "base/math.h"
 #include "game/animator.h"
 
-namespace game
+namespace game::detail
 {
-    namespace detail {
-        template<typename T>
-        class AnimatorClassBase : public AnimatorClass
+    template<typename T>
+    class AnimatorClassBase : public AnimatorClass
+    {
+    public:
+        void SetNodeId(const std::string& id) override
+        { mNodeId = id; }
+        void SetName(const std::string& name) override
+        { mName = name; }
+        std::string GetName() const override
+        { return mName; }
+        std::string GetId() const override
+        { return mId; }
+        std::string GetNodeId() const override
+        { return mNodeId; }
+        float GetStartTime() const override
+        { return mStartTime; }
+        float GetDuration() const override
+        { return mDuration; }
+        void SetFlag(Flags flag, bool on_off) override
+        { mFlags.set(flag, on_off); }
+        bool TestFlag(Flags flag) const override
+        { return mFlags.test(flag); }
+        void SetStartTime(float start) override
+        { mStartTime = math::clamp(0.0f, 1.0f, start); }
+        void SetDuration(float duration) override
+        { mDuration = math::clamp(0.0f, 1.0f, duration); }
+        std::unique_ptr<AnimatorClass> Copy() const override
+        { return std::make_unique<T>(*static_cast<const T*>(this)); }
+        std::unique_ptr<AnimatorClass> Clone() const override
         {
-        public:
-            virtual void SetNodeId(const std::string& id) override
-            { mNodeId = id; }
-            virtual void SetName(const std::string& name) override
-            { mName = name; }
-            virtual std::string GetName() const override
-            { return mName; }
-            virtual std::string GetId() const override
-            { return mId; }
-            virtual std::string GetNodeId() const override
-            { return mNodeId; }
-            virtual float GetStartTime() const override
-            { return mStartTime; }
-            virtual float GetDuration() const override
-            { return mDuration; }
-            virtual void SetFlag(Flags flag, bool on_off) override
-            { mFlags.set(flag, on_off); }
-            virtual bool TestFlag(Flags flag) const override
-            { return mFlags.test(flag); }
-            virtual void SetStartTime(float start) override
-            { mStartTime = math::clamp(0.0f, 1.0f, start); }
-            virtual void SetDuration(float duration) override
-            { mDuration = math::clamp(0.0f, 1.0f, duration); }
-            virtual std::unique_ptr<AnimatorClass> Copy() const override
-            { return std::make_unique<T>(*static_cast<const T*>(this)); }
-            virtual std::unique_ptr<AnimatorClass> Clone() const override
-            {
-                auto ret = std::make_unique<T>(*static_cast<const T*>(this));
-                ret->mId = base::RandomString(10);
-                return ret;
-            }
-        protected:
-            AnimatorClassBase()
-            {
-                mId = base::RandomString(10);
-                mFlags.set(Flags::StaticInstance, true);
-            }
-            ~AnimatorClassBase() = default;
-        protected:
-            // ID of the class.
-            std::string mId;
-            // Human-readable name of the class
-            std::string mName;
-            // id of the node that the action will be applied onto
-            std::string mNodeId;
-            // Normalized start time.
-            float mStartTime = 0.0f;
-            // Normalized duration.
-            float mDuration = 1.0f;
-            // bitflags set on the class.
-            base::bitflag<Flags> mFlags;
-        private:
-        };
-    } // namespace detail
+            auto ret = std::make_unique<T>(*static_cast<const T*>(this));
+            ret->mId = base::RandomString(10);
+            return ret;
+        }
+    protected:
+        AnimatorClassBase()
+        {
+            mId = base::RandomString(10);
+            mFlags.set(Flags::StaticInstance, true);
+        }
+        ~AnimatorClassBase() override = default;
+    protected:
+        // ID of the class.
+        std::string mId;
+        // Human-readable name of the class
+        std::string mName;
+        // id of the node that the action will be applied onto
+        std::string mNodeId;
+        // Normalized start time.
+        float mStartTime = 0.0f;
+        // Normalized duration.
+        float mDuration = 1.0f;
+        // bitflags set on the class.
+        base::bitflag<Flags> mFlags;
+    private:
+    };
 
 } // game

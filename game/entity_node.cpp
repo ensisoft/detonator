@@ -22,6 +22,7 @@
 #include "data/reader.h"
 #include "game/transform.h"
 #include "game/entity_node.h"
+#include "game/entity_node_spline_mover.h"
 #include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
@@ -70,6 +71,8 @@ EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
         mMapNode = std::make_shared<MapNodeClass>(*other.mMapNode);
     if (other.mLinearMover)
         mLinearMover = std::make_shared<LinearMoverClass>(*other.mLinearMover);
+    if (other.mSplineMover)
+        mSplineMover = std::make_shared<SplineMoverClass>(*other.mSplineMover);
     if (other.mBasicLight)
         mBasicLight = std::make_shared<BasicLightClass>(*other.mBasicLight);
 }
@@ -91,6 +94,7 @@ EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
     mFixture     = std::move(other.mFixture);
     mMapNode     = std::move(other.mMapNode);
     mLinearMover = std::move(other.mLinearMover);
+    mSplineMover = std::move(other.mSplineMover);
     mBasicLight  = std::move(other.mBasicLight);
 }
 
@@ -119,6 +123,8 @@ std::size_t EntityNodeClass::GetHash() const
         hash = base::hash_combine(hash, mMapNode->GetHash());
     if (mLinearMover)
         hash = base::hash_combine(hash, mLinearMover->GetHash());
+    if (mSplineMover)
+        hash = base::hash_combine(hash, mSplineMover->GetHash());
     if (mBasicLight)
         hash = base::hash_combine(hash, mBasicLight->GetHash());
     return hash;
@@ -156,6 +162,11 @@ void EntityNodeClass::SetMapNode(const MapNodeClass& map)
 void EntityNodeClass::SetLinearMover(const LinearMoverClass& mover)
 {
     mLinearMover = std::make_shared<LinearMoverClass>(mover);
+}
+
+void EntityNodeClass::SetSplineMover(const SplineMoverClass& mover)
+{
+    mSplineMover = std::make_shared<SplineMoverClass>(mover);
 }
 
 void EntityNodeClass::SetBasicLight(const BasicLightClass& light)
@@ -196,6 +207,11 @@ void EntityNodeClass::CreateMapNode()
 void EntityNodeClass::CreateLinearMover()
 {
     mLinearMover = std::make_shared<LinearMoverClass>();
+}
+
+void EntityNodeClass::CreateSplineMover()
+{
+    mSplineMover = std::make_shared<SplineMoverClass>();
 }
 
 void EntityNodeClass::CreateBasicLight()
@@ -282,6 +298,13 @@ void EntityNodeClass::IntoJson(data::Writer& data) const
         mLinearMover->IntoJson(*chunk);
         data.Write("linear_mover", std::move(chunk));
     }
+    if (mSplineMover)
+    {
+        auto chunk = data.NewWriteChunk();
+        mSplineMover->IntoJson(*chunk);
+        data.Write("spline_mover", std::move(chunk));
+    }
+
     if (mBasicLight)
     {
         auto chunk = data.NewWriteChunk();
@@ -323,6 +346,7 @@ bool EntityNodeClass::FromJson(const data::Reader& data)
     ok &= ComponentClassFromJson(mName, "fixture",       data, mFixture);
     ok &= ComponentClassFromJson(mName, "map_node",      data, mMapNode);
     ok &= ComponentClassFromJson(mName, "linear_mover",  data, mLinearMover);
+    ok &= ComponentClassFromJson(mName, "spline_mover",  data, mSplineMover);
     ok &= ComponentClassFromJson(mName, "basic_light",   data, mBasicLight);
     return ok;
 }
@@ -353,6 +377,7 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
     mFixture     = std::move(tmp.mFixture);
     mMapNode     = std::move(tmp.mMapNode);
     mLinearMover = std::move(tmp.mLinearMover);
+    mSplineMover = std::move(tmp.mSplineMover);
     mBitFlags    = std::move(tmp.mBitFlags);
     mBasicLight  = std::move(tmp.mBasicLight);
     return *this;
@@ -391,6 +416,8 @@ EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass, EntityNodeA
         mMapNode = std::make_unique<MapNode>(mClass->GetSharedMapNode());
     if (mClass->HasLinearMover())
         mLinearMover = std::make_unique<LinearMover>(mClass->GetSharedLinearMover());
+    if (mClass->HasSplineMover())
+        mSplineMover = std::make_unique<SplineMover>(mClass->GetSharedSplineMover());
     if (mClass->HasBasicLight())
         mBasicLight = std::make_unique<BasicLight>(mClass->GetSharedBasicLight());
 }
@@ -407,6 +434,7 @@ EntityNode::EntityNode(EntityNode&& other)
    , mFixture       (std::move(other.mFixture))
    , mMapNode       (std::move(other.mMapNode))
    , mLinearMover   (std::move(other.mLinearMover))
+   , mSplineMover   (std::move(other.mSplineMover))
    , mBasicLight    (std::move(other.mBasicLight))
 {
     other.mTransform = nullptr;
@@ -475,6 +503,11 @@ LinearMover* EntityNode::GetLinearMover()
     return mLinearMover.get();
 }
 
+SplineMover* EntityNode::GetSplineMover()
+{
+    return mSplineMover.get();
+}
+
 BasicLight* EntityNode::GetBasicLight()
 {
     return mBasicLight.get();
@@ -501,6 +534,11 @@ const MapNode* EntityNode::GetMapNode() const
 const LinearMover* EntityNode::GetLinearMover() const
 {
     return mLinearMover.get();
+}
+
+const SplineMover* EntityNode::GetSplineMover() const
+{
+    return mSplineMover.get();
 }
 
 const BasicLight* EntityNode::GetBasicLight() const

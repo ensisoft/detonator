@@ -32,6 +32,7 @@
 #include "game/entity.h"
 #include "game/entity_class.h"
 #include "game/entity_node_rigid_body_joint.h"
+#include "game/entity_node_spline_mover.h"
 #include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
@@ -150,6 +151,19 @@ void unit_test_entity_node()
     mover.SetLinearAcceleration(glm::vec2{1.0f, 2.0f});
     mover.SetLinearVelocity(glm::vec2{-1.0f, 2.0f});
 
+    game::SplineMoverClass spline;
+    {
+        glm::vec2 point = {-200.0f, 0.0f};
+        for(unsigned i=0; i<=4; ++i)
+        {
+            game::SplinePoint p;
+            p.SetPosition(point);
+
+            spline.AppendPoint(p);
+            point += glm::vec2{100.0f, 0.0f};
+        }
+    }
+
     game::EntityNodeClass node;
     node.SetName("root");
     node.SetTag("#tag");
@@ -164,6 +178,7 @@ void unit_test_entity_node()
     node.SetFixture(fix);
     node.SetMapNode(map);
     node.SetLinearMover(mover);
+    node.SetSplineMover(spline);
     node.SetBasicLight(light);
 
     TEST_REQUIRE(node.HasDrawable());
@@ -173,6 +188,7 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.HasFixture());
     TEST_REQUIRE(node.HasMapNode());
     TEST_REQUIRE(node.HasLinearMover());
+    TEST_REQUIRE(node.HasSplineMover());
     TEST_REQUIRE(node.HasBasicLight());
     TEST_REQUIRE(node.GetName()         == "root");
     TEST_REQUIRE(node.GetSize()         == glm::vec2(100.0f, 100.0f));
@@ -221,6 +237,9 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetLinearMover()->GetAngularVelocity() == 5.0f);
     TEST_REQUIRE(node.GetLinearMover()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
     TEST_REQUIRE(node.GetLinearMover()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
+    TEST_REQUIRE(node.GetSplineMover()->GetPointCount() == 5);
+    TEST_REQUIRE(node.GetSplineMover()->GetPoint(0).GetPosition().ToVec2() == glm::vec2(-200.0f, 0.0f));
+    TEST_REQUIRE(node.GetSplineMover()->GetPoint(4).GetPosition().ToVec2() == glm::vec2( 200.0f, 0.0f));
     TEST_REQUIRE(node.GetBasicLight()->GetQuadraticAttenuation() == 1.0f);
     TEST_REQUIRE(node.GetBasicLight()->GetAmbientColor() == game::Color::Red);
     TEST_REQUIRE(node.GetBasicLight()->GetDiffuseColor() == game::Color::Green);
@@ -238,6 +257,8 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.HasSpatialNode());
         TEST_REQUIRE(ret.HasMapNode());
         TEST_REQUIRE(ret.HasBasicLight());
+        TEST_REQUIRE(ret.HasLinearMover());
+        TEST_REQUIRE(ret.HasSplineMover());
         TEST_REQUIRE(ret.GetName()         == "root");
         TEST_REQUIRE(ret.GetSize()         == glm::vec2(100.0f, 100.0f));
         TEST_REQUIRE(ret.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -278,6 +299,9 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.GetLinearMover()->GetAngularVelocity() == 5.0f);
         TEST_REQUIRE(ret.GetLinearMover()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
         TEST_REQUIRE(ret.GetLinearMover()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(ret.GetSplineMover()->GetPointCount() == 5);
+        TEST_REQUIRE(ret.GetSplineMover()->GetPoint(0).GetPosition().ToVec2() == glm::vec2(-200.0f, 0.0f));
+        TEST_REQUIRE(ret.GetSplineMover()->GetPoint(4).GetPosition().ToVec2() == glm::vec2( 200.0f, 0.0f));
         TEST_REQUIRE(ret.GetBasicLight()->GetQuadraticAttenuation() == 1.0f);
         TEST_REQUIRE(ret.GetBasicLight()->GetAmbientColor() == game::Color::Red);
         TEST_REQUIRE(ret.GetBasicLight()->GetDiffuseColor() == game::Color::Green);
@@ -324,6 +348,9 @@ void unit_test_entity_node()
         TEST_REQUIRE(clone.GetBasicLight()->GetAmbientColor() == game::Color::Red);
         TEST_REQUIRE(clone.GetBasicLight()->GetDiffuseColor() == game::Color::Green);
         TEST_REQUIRE(clone.GetBasicLight()->GetSpecularColor() == game::Color::Blue);
+        TEST_REQUIRE(clone.GetSplineMover()->GetPointCount() == 5);
+        TEST_REQUIRE(clone.GetSplineMover()->GetPoint(0).GetPosition().ToVec2() == glm::vec2(-200.0f, 0.0f));
+        TEST_REQUIRE(clone.GetSplineMover()->GetPoint(4).GetPosition().ToVec2() == glm::vec2( 200.0f, 0.0f));
     }
 
     // test instance state.
@@ -341,6 +368,8 @@ void unit_test_entity_node()
         TEST_REQUIRE(instance.HasDrawable());
         TEST_REQUIRE(instance.HasSpatialNode());
         TEST_REQUIRE(instance.HasBasicLight());
+        TEST_REQUIRE(instance.GetLinearMover());
+        TEST_REQUIRE(instance.GetSplineMover());
         TEST_REQUIRE(instance.GetDrawable()->GetLineWidth()   == real::float32(5.0f));
         TEST_REQUIRE(instance.GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::MaskCover);
         TEST_REQUIRE(instance.GetRigidBody()->GetPolygonShapeId() == "shape");
@@ -1311,6 +1340,35 @@ void unit_test_entity_args()
 
 }
 
+void unit_test_entity_node_spline_mover()
+{
+    TEST_CASE(test::Type::Feature)
+
+    game::SplineMoverClass spline;
+    {
+        glm::vec2 point = {0.0f, 0.0f};
+        for(unsigned i=0; i<=4; ++i)
+        {
+            game::SplinePoint p;
+            p.SetPosition(point);
+
+            spline.AppendPoint(p);
+            point += glm::vec2{100.0f, 0.0f};
+        }
+    }
+
+    game::EntityNodeClass node_class;
+    node_class.SetSplineMover(spline);
+
+    game::EntityNode node(node_class);
+    TEST_REQUIRE(node.HasSplineMover());
+
+    auto* mover = node.GetSplineMover();
+    mover->TransformObject(0.0f, node);
+    mover->TransformObject(0.5f, node);
+    mover->TransformObject(1.0f, node);
+}
+
 struct PerfTestDrawableTag{};
 
 namespace mem {
@@ -1466,6 +1524,7 @@ int test_main(int argc, char* argv[])
     unit_test_entity_transformation_precision();
     unit_test_entity_animation_state();
     unit_test_entity_args();
+    unit_test_entity_node_spline_mover();
 
     measure_item_allocation_time();
     measure_entity_allocation_time();
