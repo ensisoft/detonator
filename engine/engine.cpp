@@ -443,13 +443,31 @@ public:
             text_rect.Translate(logo_rect.GetPosition());
             text_rect.Translate(0.0f, logo_rect.GetHeight());
 
-            const int done = int((float(index) / float(last)) * 100.0f);
+            const float done = float(index) / float(last);
 
             gfx::FillRect(painter, text_rect, gfx::Color::Black);
-            gfx::DrawTextRect(painter,  base::FormatString("Loading ... %1%\n%2", done, klass.name),
+            gfx::DrawTextRect(painter,  base::FormatString("Loading ... %1%\n%2", int(done * 100.0f), klass.name),
                               my_screen->font, 22, text_rect,
                               gfx::Color::Silver,
                               gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignHCenter);
+
+            gfx::FRect loader_rect_outline;
+            loader_rect_outline.Resize(logo_rect.GetWidth(), 20.0f);
+            loader_rect_outline.Translate(logo_rect.GetPosition());
+            loader_rect_outline.Translate(0.0f, logo_rect.GetHeight());
+            loader_rect_outline.Translate(0.0f, text_rect.GetHeight());
+            loader_rect_outline.Translate(0.0f, 10.0f);
+            gfx::DrawRectOutline(painter, loader_rect_outline, gfx::Color::Silver);
+
+            gfx::FRect loader_rect_fill;
+            loader_rect_fill.Resize((logo_rect.GetWidth()-4.0f) * done, 20.0f-4.0f);
+            loader_rect_fill.Translate(logo_rect.GetPosition());
+            loader_rect_fill.Translate(0.0f, logo_rect.GetHeight());
+            loader_rect_fill.Translate(0.0f, text_rect.GetHeight());
+            loader_rect_fill.Translate(0.0f, 10.0f);
+            loader_rect_fill.Translate(2.0f, 2.0f);
+            gfx::FillRect(painter, loader_rect_fill, gfx::Color::Silver);
+
         }
 
         // this is for debugging so we can see what happens...
