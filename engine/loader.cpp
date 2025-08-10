@@ -94,42 +94,42 @@ bool LoadFileBufferFromDisk(const std::string& filename, std::vector<char>* buff
 class TilemapDataBuffer : public game::TilemapData
 {
 public:
-    TilemapDataBuffer(const std::string& filename, bool read_only, std::vector<char>&& data)
-      : mFileName(filename)
+    TilemapDataBuffer(std::string filename, bool read_only, std::vector<char>&& data) noexcept
+      : mFileName(std::move(filename))
       , mReadonly(read_only)
       , mFileData(std::move(data))
     {}
 
-    virtual void Write(const void* ptr, size_t bytes, size_t offset) override
+    void Write(const void* ptr, size_t bytes, size_t offset) override
     {
         ASSERT(offset + bytes <= mFileData.size());
         ASSERT(mReadonly == false);
         std::memcpy(&mFileData[offset], ptr, bytes);
     }
-    virtual void Read(void* ptr, size_t bytes, size_t offset) const override
+    void Read(void* ptr, size_t bytes, size_t offset) const override
     {
         ASSERT(offset + bytes <= mFileData.size());
         std::memcpy(ptr, &mFileData[offset], bytes);
     }
 
-    virtual size_t AppendChunk(size_t bytes) override
+    size_t AppendChunk(size_t bytes) override
     {
         ASSERT(mReadonly == false);
         const auto offset = mFileData.size();
         mFileData.resize(offset + bytes);
         return offset;
     }
-    virtual size_t GetByteCount() const override
+    size_t GetByteCount() const override
     {
         return mFileData.size();
     }
-    virtual void Resize(size_t bytes) override
+    void Resize(size_t bytes) override
     {
         ASSERT(mReadonly == false);
         mFileData.resize(bytes);
     }
 
-    virtual void ClearChunk(const void* value, size_t value_size, size_t offset, size_t num_values) override
+    void ClearChunk(const void* value, size_t value_size, size_t offset, size_t num_values) override
     {
         ASSERT(mReadonly == false);
         ASSERT(offset + value_size * num_values <= mFileData.size());
@@ -150,19 +150,19 @@ template<typename Interface>
 class FileBuffer : public Interface
 {
 public:
-    FileBuffer(const std::string& filename, std::vector<char>&& data)
-        : mFileName(filename)
+    FileBuffer(std::string filename, std::vector<char>&& data) noexcept
+        : mFileName(std::move(filename))
         , mFileData(std::move(data))
     {}
-    virtual const void* GetData() const override
+    const void* GetData() const override
     {
         if (mFileData.empty())
             return nullptr;
         return &mFileData[0];
     }
-    virtual std::size_t GetByteSize() const override
+    std::size_t GetByteSize() const override
     { return mFileData.size(); }
-    virtual std::string GetSourceName() const override
+    std::string GetSourceName() const override
     { return mFileName; }
 private:
     const std::string mFileName;
@@ -176,26 +176,26 @@ using GraphicsFileBuffer = FileBuffer<gfx::Resource>;
 class AudioFileMap : public audio::SourceStream
 {
 public:
-    AudioFileMap(const std::string& filename)
-      : mFileName(filename)
+    explicit AudioFileMap(std::string filename) noexcept
+      : mFileName(std::move(filename))
     {}
-    ~AudioFileMap()
+    ~AudioFileMap() override
     {
         if (mBase)
             ASSERT(::munmap(mBase, mSize) == 0);
         if (mFile)
             ASSERT(::close(mFile) == 0);
     }
-    virtual void Read(void* ptr, uint64_t offset, uint64_t bytes) const override
+    void Read(void* ptr, uint64_t offset, uint64_t bytes) const override
     {
         ASSERT(offset + bytes <= mSize);
         bytes = std::min(mSize - offset, bytes);
         const auto* base = static_cast<const char*>(mBase);
         std::memcpy(ptr, &base[offset], bytes);
     }
-    virtual std::uint64_t GetSize() const override
+    std::uint64_t GetSize() const override
     { return mSize; }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return mFileName; }
 
     bool Map()
@@ -207,14 +207,14 @@ public:
             ERROR("Failed to open file. [file='%1', error='%2']", mFileName, strerror(errno));
             return false;
         }
-        struct stat64 stat;
+        struct stat64 stat = {};
         if (fstat64(mFile, &stat))
         {
             ERROR("Failed to fstat64 file. [file='%1', error='%2']", mFileName, strerror(errno));
             return false;
         }
         mSize = stat.st_size;
-        mBase = ::mmap(0, mSize, PROT_READ, MAP_SHARED, mFile, off_t(0));
+        mBase = ::mmap(nullptr, mSize, PROT_READ, MAP_SHARED, mFile, off_t(0));
         if (mBase == MAP_FAILED)
         {
             ERROR("Failed to mmap file. [file='%1', error='%2']", mFileName, strerror(errno));
@@ -341,18 +341,18 @@ private:
 class AudioBuffer : public audio::SourceStream
 {
 public:
-    AudioBuffer(const std::string& filename, std::vector<char>&& data)
-      : mFileName(filename)
+    AudioBuffer(std::string filename, std::vector<char>&& data) noexcept
+      : mFileName(std::move(filename))
       , mFileData(std::move(data))
     {}
-    virtual void Read(void* ptr, uint64_t offset, uint64_t bytes) const override
+    void Read(void* ptr, uint64_t offset, uint64_t bytes) const override
     {
         ASSERT(offset + bytes <= mFileData.size());
         std::memcpy(ptr, &mFileData[offset], bytes);
     }
-    virtual std::uint64_t GetSize() const override
+    std::uint64_t GetSize() const override
     { return mFileData.size(); }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return mFileName; }
 private:
     const std::string mFileName;
@@ -362,7 +362,8 @@ private:
 class AudioStream : public audio::SourceStream
 {
 public:
-    AudioStream(const std::string& filename) : mFileName(filename)
+    explicit AudioStream(std::string filename) noexcept
+      : mFileName(std::move(filename))
     {}
     bool Open()
     {
@@ -378,15 +379,15 @@ public:
         DEBUG("Opened audio file stream. [file='%1' bytes=%2]", mFileName, mSize);
         return true;
     }
-    virtual void Read(void* ptr, uint64_t offset, uint64_t bytes) const override
+    void Read(void* ptr, uint64_t offset, uint64_t bytes) const override
     {
         auto* stream = const_cast<std::ifstream*>(&mStream);
         stream->seekg(offset, std::ios::beg);
         stream->read((char*)ptr, bytes);
     }
-    virtual std::uint64_t GetSize() const override
+    std::uint64_t GetSize() const override
     { return mSize; }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return mFileName; }
 private:
     const std::string mFileName;
@@ -398,7 +399,7 @@ class FileResourceLoaderImpl : public FileResourceLoader
 {
 public:
     // gfx::resource loader impl
-    virtual gfx::ResourceHandle LoadResource(const gfx::Loader::ResourceDesc& desc) override
+    gfx::ResourceHandle LoadResource(const gfx::Loader::ResourceDesc& desc) override
     {
         std::lock_guard<std::mutex> lock(mLoaderLock);
 
@@ -418,7 +419,7 @@ public:
         return buff;
     }
     // GameDataLoader impl
-    virtual EngineDataHandle LoadEngineDataUri(const std::string& uri) const override
+    EngineDataHandle LoadEngineDataUri(const std::string& uri) const override
     {
         std::lock_guard<std::mutex> lock(mLoaderLock);
 
@@ -435,7 +436,7 @@ public:
         mGameDataBufferCache[filename] = buff;
         return buff;
     }
-    virtual EngineDataHandle LoadEngineDataFile(const std::string& filename) const override
+    EngineDataHandle LoadEngineDataFile(const std::string& filename) const override
     {
         std::lock_guard<std::mutex> lock(mLoaderLock);
 
@@ -457,7 +458,7 @@ public:
         mGameDataBufferCache[file] = buff;
         return buff;
     }
-    virtual EngineDataHandle LoadEngineDataId(const std::string& id) const override
+    EngineDataHandle LoadEngineDataId(const std::string& id) const override
     {
         std::lock_guard<std::mutex> lock(mLoaderLock);
 
@@ -481,7 +482,7 @@ public:
     }
 
     // audio::Loader impl
-    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
+    audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
         AudioIOStrategy strategy, bool enable_file_caching) const override
     {
         std::lock_guard<std::mutex> lock(mLoaderLock);
@@ -580,7 +581,7 @@ public:
     }
 
     // game::Loader impl
-    virtual game::TilemapDataHandle LoadTilemapData(const game::Loader::TilemapDataDesc& desc) const override
+    game::TilemapDataHandle LoadTilemapData(const game::Loader::TilemapDataDesc& desc) const override
     {
         std::lock_guard<std::mutex> lock(mLoaderLock);
 
@@ -594,7 +595,7 @@ public:
     }
 
     // FileResourceLoader impl
-    virtual bool LoadResourceLoadingInfo(const data::Reader& data) override
+    bool LoadResourceLoadingInfo(const data::Reader& data) override
     {
         for (unsigned i=0; i<data.GetNumChunks("scripts"); ++i)
         {
@@ -617,13 +618,13 @@ public:
         return true;
     }
 
-    virtual void SetDefaultAudioIOStrategy(DefaultAudioIOStrategy strategy) override
+    void SetDefaultAudioIOStrategy(DefaultAudioIOStrategy strategy) override
     { mDefaultAudioIO = strategy; }
-    virtual void SetApplicationPath(const std::string& path) override
+    void SetApplicationPath(const std::string& path) override
     { mApplicationPath = path; }
-    virtual void SetContentPath(const std::string& path) override
+    void SetContentPath(const std::string& path) override
     { mContentPath = path; }
-    virtual void PreloadFiles() override
+    void PreloadFiles() override
     {
         std::lock_guard<std::mutex> lock(mLoaderLock);
 
@@ -632,9 +633,8 @@ public:
           "audio", "fonts", "lua", "textures", "ui/style", "ui/keymap", "shaders/es2"
         };
         size_t bytes_loaded = 0;
-        for (size_t i=0; i<base::ArraySize(dirs); ++i)
+        for (const auto& dir : dirs)
         {
-            const auto& dir = dirs[i];
             const auto& path = base::JoinPath(mContentPath, dir);
             if (!base::FileExists(path))
                 continue;
@@ -736,21 +736,21 @@ public:
     ContentLoaderImpl();
 
     // ClassLibrary implementation.
-    virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const  override;
-    virtual ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override;
-    virtual ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
-    virtual ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
-    virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override;
-    virtual ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
-    virtual ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
-    virtual ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
-    virtual ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
-    virtual ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
-    virtual ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
-    virtual ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override;
+    ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const  override;
+    ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override;
+    ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
+    ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
+    ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override;
+    ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
+    ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
+    ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
+    ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
+    ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
+    ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
+    ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override;
     // ContentLoader impl
-    virtual std::vector<JsonFileClassLoader::Class> ListClasses() const override;
-    virtual bool LoadClasses(const data::Reader& data) override;
+    std::vector<JsonFileClassLoader::Class> ListClasses() const override;
+    bool LoadClasses(const data::Reader& data) override;
 private:
     // These are the material types that have been loaded
     // from the resource file.
@@ -817,9 +817,9 @@ ClassHandle<const audio::GraphClass> ContentLoaderImpl::FindAudioGraphClassById(
 }
 ClassHandle<const audio::GraphClass> ContentLoaderImpl::FindAudioGraphClassByName(const std::string& name) const
 {
-    for (auto it=mAudioGraphs.begin(); it != mAudioGraphs.end(); ++it)
+    for (const auto& it : mAudioGraphs)
     {
-        auto& graph = it->second;
+        auto& graph = it.second;
         if (graph->GetName() == name)
             return graph;
     }
@@ -828,9 +828,9 @@ ClassHandle<const audio::GraphClass> ContentLoaderImpl::FindAudioGraphClassByNam
 
 ClassHandle<const uik::Window> ContentLoaderImpl::FindUIByName(const std::string& name) const
 {
-    for (auto it=mWindows.begin(); it != mWindows.end(); ++it)
+    for (const auto& it : mWindows)
     {
-        auto& win = it->second;
+        auto& win = it.second;
         if (win->GetName() == name)
             return win;
     }
@@ -931,7 +931,7 @@ std::vector<JsonFileClassLoader::Class> ContentLoaderImpl::ListClasses() const
 {
     std::vector<Class> ret;
 
-    for (auto pair : mMaterials)
+    for (const auto& pair : mMaterials)
     {
         Class klass;
         klass.type = ClassLibrary::ClassType::Material;
@@ -940,7 +940,7 @@ std::vector<JsonFileClassLoader::Class> ContentLoaderImpl::ListClasses() const
         ret.push_back(std::move(klass));
     }
 
-    for (auto pair : mDrawables)
+    for (const auto& pair : mDrawables)
     {
         Class klass;
         klass.type = ClassLibrary::ClassType::Drawable;
@@ -949,7 +949,7 @@ std::vector<JsonFileClassLoader::Class> ContentLoaderImpl::ListClasses() const
         ret.push_back(std::move(klass));
     }
 
-    for (auto pair : mEntities)
+    for (const auto& pair : mEntities)
     {
         Class klass;
         klass.type = ClassLibrary::ClassType::Entity;
@@ -958,7 +958,7 @@ std::vector<JsonFileClassLoader::Class> ContentLoaderImpl::ListClasses() const
         ret.push_back(std::move(klass));
     }
 
-    for (auto pair : mScenes)
+    for (const auto& pair : mScenes)
     {
         Class klass;
         klass.type = ClassLibrary::ClassType::Scene;
@@ -967,7 +967,7 @@ std::vector<JsonFileClassLoader::Class> ContentLoaderImpl::ListClasses() const
         ret.push_back(std::move(klass));
     }
 
-    for (auto pair : mAudioGraphs)
+    for (const auto& pair : mAudioGraphs)
     {
         Class klass;
         klass.type = ClassLibrary::ClassType::AudioGraph;
@@ -976,7 +976,7 @@ std::vector<JsonFileClassLoader::Class> ContentLoaderImpl::ListClasses() const
         ret.push_back(std::move(klass));
     }
 
-    for (auto pair : mMaps)
+    for (const auto& pair : mMaps)
     {
         Class klass;
         klass.type = ClassLibrary::ClassType::Tilemap;
@@ -985,7 +985,7 @@ std::vector<JsonFileClassLoader::Class> ContentLoaderImpl::ListClasses() const
         ret.push_back(std::move(klass));
     }
 
-    for (auto pair : mWindows)
+    for (const auto& pair : mWindows)
     {
         Class klass;
         klass.type = ClassLibrary::ClassType::UI;
