@@ -20,7 +20,9 @@
 
 #include "base/logging.h"
 #include "game/entity.h"
+#include "game/entity_class.h"
 #include "game/scene.h"
+#include "game/scene_class.h"
 #include "engine/classlib.h"
 #include "engine/entity_script.h"
 #include "engine/game.h"

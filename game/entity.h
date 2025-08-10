@@ -33,11 +33,8 @@
 #include <variant>
 #include <queue>
 
-#include "base/allocator.h"
 #include "base/bitflag.h"
 #include "base/utility.h"
-#include "base/math.h"
-#include "base/hash.h"
 #include "data/fwd.h"
 #include "game/tree.h"
 #include "game/types.h"
@@ -52,403 +49,7 @@
 namespace game
 {
     class Scene;
-
-    class EntityClass
-    {
-    public:
-        using RenderTree      = game::RenderTree<EntityNodeClass>;
-        using RenderTreeNode  = EntityNodeClass;
-        using RenderTreeValue = EntityNodeClass;
-
-        using PhysicsJoint = RigidBodyJointClass;
-        using PhysicsJointType = RigidBodyJointClass::JointType;
-        using PhysicsJointParams = RigidBodyJointClass::JointParams;
-        using RevoluteJointParams = RigidBodyJointClass::RevoluteJointParams;
-        using DistanceJointParams = RigidBodyJointClass::DistanceJointParams;
-        using WeldJointParams = RigidBodyJointClass::WeldJointParams;
-        using MotorJointParams = RigidBodyJointClass::MotorJointParams;
-        using PrismaticJointParams = RigidBodyJointClass::PrismaticJointParams;
-        using PulleyJointParams = RigidBodyJointClass::PulleyJointParams;
-
-        enum class Flags {
-            // Only pertains to editor (todo: maybe this flag should be removed)
-            VisibleInEditor,
-            // node is visible in the game or not.
-            // Even if this is true the node will still need to have some
-            // renderable items attached to it such as a shape or
-            // animation item.
-            VisibleInGame,
-            // Limit the lifetime to some maximum amount
-            // after which the entity is killed.
-            LimitLifetime,
-            // Whether to automatically kill entity when it reaches
-            // its end of lifetime.
-            KillAtLifetime,
-            // Whether to automatically kill entity when it reaches (goes past)
-            // the border of the scene
-            KillAtBoundary,
-            // Invoke the tick function on the entity
-            TickEntity,
-            // Invoke the update function on the entity
-            UpdateEntity,
-            // Invoke the node update function on the entity
-            UpdateNodes,
-            // Invoke the post update function on the entity.
-            PostUpdate,
-            // Whether to pass keyboard events to the entity or not
-            WantsKeyEvents,
-            // Whether to pass mouse events to the entity or not.
-            WantsMouseEvents,
-        };
-
-        // for testing purposes make it easier to create an entity class
-        // with a known ID.
-        explicit EntityClass(std::string id);
-        EntityClass();
-        EntityClass(const EntityClass& other);
-       ~EntityClass();
-
-        // Add a new node to the entity.
-        // Returns a pointer to the node that was added to the entity.
-        // The returned EntityNodeClass object pointer is only guaranteed
-        // to be valid until the next call to PlaceEntity/Delete. It is not
-        // safe for the caller to hold on to it long term. Instead, the
-        // assumed use of the pointer is to simplify for example calling
-        // LinkChild for linking the node to the entity's render tree.
-        EntityNodeClass* AddNode(const EntityNodeClass& node);
-        EntityNodeClass* AddNode(EntityNodeClass&& node);
-        EntityNodeClass* AddNode(std::unique_ptr<EntityNodeClass> node);
-
-        void MoveNode(size_t src_index, size_t dst_index);
-
-        // PhysicsJoint lifetimes.
-        // For any API function returning a PhysicsJoint* (or const PhysicsJoint*) it's
-        // safe to assume that the returned object pointer is valid only
-        // until the next call to modify the list of joints. I.e. any call to
-        // AddJoint or DeleteJoint can invalidate any previously returned PhysicsJoint*
-        // pointer. The caller should not hold on to these pointers long term.
-
-        // Add a new joint definition linking 2 entity nodes with rigid bodies
-        // together using a physics joint. The joints must refer to valid nodes
-        // that already exist (i.e. the src and dst node class IDst must be valid).
-        PhysicsJoint* AddJoint(const PhysicsJoint& joint);
-        PhysicsJoint* AddJoint(PhysicsJoint&& joint);
-        // Respecify the details of a joint at the given index.
-        void SetJoint(size_t index, const PhysicsJoint& joint);
-        void SetJoint(size_t index, PhysicsJoint&& joint);
-        // Get the joint at the given index. The index must be valid.
-        PhysicsJoint& GetJoint(size_t index);
-        // Find a joint by the given joint ID. Returns nullptr if no
-        // such joint could be found.
-        PhysicsJoint* FindJointById(const std::string& id);
-        // Find a joint by a node id, i.e. when the joint specifies a
-        // connection between either src or dst node having the given
-        // node ID. In case of multiple joints connecting between the
-        // same nodes the returned node is the first one found.
-        PhysicsJoint* FindJointByNodeId(const std::string& id);
-        // Get the joint at the given index. The index must be valid.
-        const PhysicsJoint& GetJoint(size_t index) const;
-        // Find a joint by the given joint ID. Returns nullptr if no
-        // such joint could be found.
-        const PhysicsJoint* FindJointById(const std::string& id) const;
-        // Find a joint by a node id, i.e. when the joint specifies a
-        // connection between either src or dst node having the given
-        // node ID. In case of multiple joints connecting between the
-        // same nodes the returned node is the first one found.
-        const PhysicsJoint* FindJointByNodeId(const std::string& id) const;
-        // Delete a joint by the given ID.
-        void DeleteJointById(const std::string& id);
-        // Delete a joint by the given index. The index must be valid.
-        void DeleteJoint(std::size_t index);
-        // todo:
-        void DeleteInvalidJoints();
-        // todo:
-        void FindInvalidJoints(std::vector<PhysicsJoint*>* invalid);
-        // todo:
-        void DeleteInvalidFixtures();
-
-        // Get the node by index. The index must be valid.
-        EntityNodeClass& GetNode(size_t index);
-        // Find entity node by name. Returns nullptr if
-        // no such node could be found.
-        EntityNodeClass* FindNodeByName(const std::string& name);
-        // Find entity node by id. Returns nullptr if
-        // no such node could be found.
-        EntityNodeClass* FindNodeById(const std::string& id);
-        // Get the entity node by index. The index must be valid.
-        const EntityNodeClass& GetNode(size_t index) const;
-        // Find entity node by name. Returns nullptr if
-        // no such node could be found.
-        const EntityNodeClass* FindNodeByName(const std::string& name) const;
-        // Find entity node by id. Returns nullptr if
-        // no such node could be found.
-        const EntityNodeClass* FindNodeById(const std::string& id) const;
-
-        // Add a new animation class object. Returns a pointer to the animation
-        // that was added to the entity class.
-        AnimationClass* AddAnimation(AnimationClass&& track);
-        // Add a new animation class object. Returns a pointer to the animation
-        // that was added to the entity class.
-        AnimationClass* AddAnimation(const AnimationClass& track);
-        // Add a new animation class object. Returns a pointer to the animation
-        // that was added to the entity class.
-        AnimationClass* AddAnimation(std::unique_ptr<AnimationClass> track);
-        // Delete an animation by the given index. The index must be valid.
-        void DeleteAnimation(size_t index);
-        // Delete an animation by the given name.
-        // Returns true if a track was deleted, otherwise false.
-        bool DeleteAnimationByName(const std::string& name);
-        // Delete an animation by the given id.
-        // Returns true if a track was deleted, otherwise false.
-        bool DeleteAnimationById(const std::string& id);
-        // Get the animation class object by index. The index must be valid.
-        AnimationClass& GetAnimation(size_t index);
-        // Find an animation class object by name.
-        // Returns nullptr if no such animation could be found.
-        // Returns the first animation object with a matching name.
-        AnimationClass* FindAnimationByName(const std::string& name);
-        // Get the animation class object by index. The index must be valid.
-        const AnimationClass& GetAnimation(size_t index) const;
-        // Find an animation class object by name.
-        // Returns nullptr if no such animation could be found.
-        // Returns the first animation object with a matching name.
-        const AnimationClass* FindAnimationByName(const std::string& name) const;
-
-        // Add a new animator class object. Returns a pointer to the animator
-        // that was added to the entity class.
-        EntityStateControllerClass* AddController(EntityStateControllerClass&& animator);
-        EntityStateControllerClass* AddController(const EntityStateControllerClass& animator);
-        EntityStateControllerClass* AddController(const std::shared_ptr<EntityStateControllerClass>& animator);
-
-        void DeleteController(size_t index);
-        bool DeleteControllerByName(const std::string& name);
-        bool DeleteControllerById(const std::string& id);
-
-        EntityStateControllerClass& GetController(size_t index);
-        EntityStateControllerClass* FindControllerByName(const std::string& name);
-        EntityStateControllerClass* FindControllerById(const std::string& id);
-
-        const EntityStateControllerClass& GetController(size_t index) const;
-        const EntityStateControllerClass* FindControllerByName(const std::string& name) const;
-        const EntityStateControllerClass* FindControllerById(const std::string& id) const;
-
-        // Link the given child node with the parent.
-        // The parent may be a nullptr in which case the child
-        // is added to the root of the entity. The child node needs
-        // to be a valid node and needs to point to node that is not
-        // yet any part of the render tree and is a node that belongs
-        // to this entity.
-        void LinkChild(EntityNodeClass* parent, EntityNodeClass* child);
-
-        // Break a child node away from its parent. The child node needs
-        // to be a valid node and needs to point to a node that is added
-        // to the render tree and belongs to this entity class object.
-        // The child (and all of its children) that has been broken still
-        // exists in the entity but is removed from the render tree.
-        // You can then either DeletePlacement to completely delete it or
-        // LinkChild to insert it into another part of the render tree.
-        void BreakChild(EntityNodeClass* child, bool keep_world_transform = true);
-
-        // Re-parent a child node from its current parent to another parent.
-        // Both the child node and the parent node to be a valid nodes and
-        // need to point to nodes that are part of the render tree and belong
-        // to this entity class object. This will move the whole hierarchy of
-        // nodes starting from child under the new parent.
-        // If keep_world_transform is true the child will be transformed such
-        // that it's current world transformation remains the same. I.e  it's
-        // position and rotation in the world don't change.
-        void ReparentChild(EntityNodeClass* parent, EntityNodeClass* child, bool keep_world_transform = true);
-
-        // Delete a node from the entity. The given node and all of its
-        // children will be removed from the entity render tree and then deleted.
-        void DeleteNode(EntityNodeClass* node);
-
-        // Duplicate an entire node hierarchy starting at the given node
-        // and add the resulting hierarchy to node's parent.
-        // Returns the root node of the new node hierarchy.
-        EntityNodeClass* DuplicateNode(const EntityNodeClass* node);
-
-        // Perform coarse hit test to see if the given x,y point
-        // intersects with any node's box in the entity.
-        // The testing is coarse in the sense that it's done against the node's
-        // size box only. The hit nodes are stored in the hits vector and the
-        // positions with the nodes' hitboxes are (optionally) stored in the
-        // hitbox_positions vector.
-        void CoarseHitTest(const Float2& point, std::vector<EntityNodeClass*>* hits,
-                           std::vector<glm::vec2>* hitbox_positions = nullptr);
-        void CoarseHitTest(const Float2& point, std::vector<const EntityNodeClass*>* hits,
-                           std::vector<glm::vec2>* hitbox_positions = nullptr) const;
-
-        // Map coordinates in node's OOB space into entity coordinate space. The origin of
-        // the OOB space is relative to the "TopLeft" corner of the OOB of the node.
-        Float2 MapCoordsFromNodeBox(const Float2& coordinates, const EntityNodeClass* node) const;
-        // Map coordinates in entity coordinate space into node's OOB coordinate space.
-        Float2 MapCoordsToNodeBox(const Float2& coordinates, const EntityNodeClass* node) const;
-
-        // Compute the axis aligned bounding box (AABB) for the whole entity.
-        FRect GetBoundingRect() const;
-        // Compute the axis aligned bounding box (AABB) for the given entity node.
-        FRect FindNodeBoundingRect(const EntityNodeClass* node) const;
-        // Compute the oriented bounding box (OOB) for the given entity node.
-        FBox FindNodeBoundingBox(const EntityNodeClass* node) const;
-
-        size_t FindNodeIndex(const EntityNodeClass* node) const;
-
-        // todo:
-        glm::mat4 FindNodeTransform(const EntityNodeClass* node) const;
-        glm::mat4 FindNodeModelTransform(const EntityNodeClass* node) const;
-
-        // Add a new scripting variable to the list of variables.
-        // No checks are made to whether a variable by that name
-        // already exists.
-        void AddScriptVar(const ScriptVar& var);
-        void AddScriptVar(ScriptVar&& var);
-        // Delete the scripting variable at the given index.
-        // The index must be a valid index.
-        void DeleteScriptVar(size_t index);
-        // Set the properties (copy over) the scripting variable at the given index.
-        // The index must be a valid index.
-        void SetScriptVar(size_t index, const ScriptVar& var);
-        void SetScriptVar(size_t index, ScriptVar&& var);
-        // Get the scripting variable at the given index.
-        // The index must be a valid index.
-        ScriptVar& GetScriptVar(size_t index);
-        // Find a scripting variable with the given name. If no such variable
-        // exists then nullptr is returned.
-        ScriptVar* FindScriptVarByName(const std::string& name);
-        // Find a scripting variable with the given id. If no such variable
-        // exists then nullptr is returned.
-        ScriptVar* FindScriptVarById(const std::string& id);
-        // Get the scripting variable at the given index.
-        // The index must be a valid index.
-        const ScriptVar& GetScriptVar(size_t index) const;
-        // Find a scripting variable with the given name. If no such variable
-        // exists then nullptr is returned.
-        const ScriptVar* FindScriptVarByName(const std::string& name) const;
-        // Find a scripting variable with the given id. If no such variable
-        // exists then nullptr is returned.
-        const ScriptVar* FindScriptVarById(const std::string& id) const;
-
-        void SetLifetime(float value) noexcept
-        { mLifetime = value;}
-        void SetFlag(Flags flag, bool on_off) noexcept
-        { mFlags.set(flag, on_off); }
-        void SetName(const std::string& name)
-        { mName = name; }
-        void SetTag(const std::string& tag)
-        { mTag = tag; }
-        void SetIdleTrackId(const std::string& id)
-        { mIdleTrackId = id; }
-        void SetScriptFileId(const std::string& file)
-        { mScriptFile = file; }
-        void ResetIdleTrack() noexcept
-        { mIdleTrackId.clear(); }
-        void ResetScriptFile() noexcept
-        { mScriptFile.clear(); }
-        bool HasIdleTrack() const noexcept
-        { return !mIdleTrackId.empty(); }
-        bool HasScriptFile() const noexcept
-        { return !mScriptFile.empty(); }
-        bool TestFlag(Flags flag) const noexcept
-        { return mFlags.test(flag); }
-        bool HaveRuntime() const noexcept
-        { return mInitRuntime; }
-        int32_t GetRenderLayer() const noexcept /* stub*/
-        { return 0; }
-
-        RenderTree& GetRenderTree() noexcept
-        { return mRenderTree; }
-        const RenderTree& GetRenderTree() const noexcept
-        { return mRenderTree; }
-
-        std::size_t GetHash() const;
-        std::size_t GetNumNodes() const noexcept
-        { return mNodes.size(); }
-        std::size_t GetNumAnimators() const noexcept
-        { return mAnimators.size(); }
-        std::size_t GetNumAnimations() const noexcept
-        { return mAnimations.size(); }
-        std::size_t GetNumScriptVars() const noexcept
-        { return mScriptVars.size(); }
-        std::size_t GetNumJoints() const noexcept
-        { return mJoints.size(); }
-        const std::string& GetId() const noexcept
-        { return mClassId; }
-        const std::string& GetIdleTrackId() const noexcept
-        { return mIdleTrackId; }
-        const std::string& GetName() const noexcept
-        { return mName; }
-        const std::string& GetClassName() const noexcept
-        { return mName; }
-        const std::string& GetTag() const noexcept
-        { return mTag; }
-        const std::string& GetScriptFileId() const noexcept
-        { return mScriptFile; }
-        float GetLifetime() const noexcept
-        { return mLifetime; }
-        const base::bitflag<Flags>& GetFlags() const noexcept
-        { return mFlags; }
-
-        std::shared_ptr<const EntityNodeClass> GetSharedEntityNodeClass(size_t index) const noexcept
-        { return mNodes[index]; }
-        std::shared_ptr<const AnimationClass> GetSharedAnimationClass(size_t index) const noexcept
-        { return mAnimations[index]; }
-        std::shared_ptr<const ScriptVar> GetSharedScriptVar(size_t index) const noexcept
-        { return mScriptVars[index]; }
-        std::shared_ptr<const PhysicsJoint> GetSharedJoint(size_t index) const noexcept
-        { return mJoints[index]; }
-        std::shared_ptr<const EntityStateControllerClass> GetSharedEntityControllerClass(size_t index) const noexcept
-        { return mAnimators[index]; }
-
-        EntityNodeAllocator* GetAllocator() const;
-
-        void InitClassGameRuntime() const;
-
-        // Serialize the entity into JSON.
-        void IntoJson(data::Writer& data) const;
-
-        bool FromJson(const data::Reader& data);
-
-        EntityClass Clone() const;
-
-        EntityClass& operator=(const EntityClass& other);
-
-        static void UpdateRuntimes(double game_time, double dt);
-    private:
-        // The class/resource id of this class.
-        std::string mClassId;
-        // the human-readable name of the class.
-        std::string mName;
-        // Arbitrary tag string.
-        std::string mTag;
-        // the track ID of the idle track that gets played when nothing
-        // else is going on. can be empty in which case no animation plays.
-        std::string mIdleTrackId;
-        // the list of animation tracks that are pre-defined with this
-        // type of animation.
-        std::vector<std::shared_ptr<AnimationClass>> mAnimations;
-        // the list of nodes that belong to this entity.
-        std::vector<std::shared_ptr<EntityNodeClass>> mNodes;
-        // the list of joints that belong to this entity.
-        std::vector<std::shared_ptr<PhysicsJoint>> mJoints;
-        // the list of animators
-        std::vector<std::shared_ptr<EntityStateControllerClass>> mAnimators;
-        // The render tree for hierarchical traversal and
-        // transformation of the entity and its nodes.
-        RenderTree mRenderTree;
-        // Scripting variables. read-only variables are
-        // shareable with each entity instance.
-        std::vector<std::shared_ptr<ScriptVar>> mScriptVars;
-        // the name of the associated script if any.
-        std::string mScriptFile;
-        // entity class flags.
-        base::bitflag<Flags> mFlags;
-        // maximum lifetime after which the entity is
-        // deleted if LimitLifetime flag is set.
-        float mLifetime = 0.0f;
-    private:
-        mutable bool mInitRuntime = false;
-    };
+    class EntityClass;
 
     // Collection of arguments for creating a new entity
     // with some initial state. The immutable arguments must
@@ -523,7 +124,7 @@ namespace game
             // from the scene.
             WantsToDie
         };
-        using Flags = EntityClass::Flags;
+        using Flags = EntityFlags;
         using RenderTree      = game::RenderTree<EntityNode>;
         using RenderTreeNode  = EntityNode;
         using RenderTreeValue = EntityNode;
@@ -686,9 +287,9 @@ namespace game
 
         bool HasLights() const;
 
-        using PhysicsJointClass = EntityClass::PhysicsJoint;
-        using PhysicsJointType  = EntityClass::PhysicsJointType;
-        using PhysicsJointParams = EntityClass::PhysicsJointParams;
+        using PhysicsJointClass  = RigidBodyJointClass;
+        using PhysicsJointType   = RigidBodyJointClass::JointType;
+        using PhysicsJointParams = RigidBodyJointClass::JointParams;
         using PhysicsJoint = RigidBodyJoint;
 
         PhysicsJoint* FindJointById(const std::string& id);
@@ -767,6 +368,18 @@ namespace game
                 ret.push_back(anim.get());
             return ret;
         }
+
+        const std::string& GetClassId() const noexcept;
+        const std::string& GetClassName() const noexcept;
+        const std::string& GetScriptFileId() const noexcept;
+
+        const EntityClass& GetClass() const noexcept;
+        const EntityClass* operator->() const noexcept;
+
+        std::string GetDebugName() const;
+
+        bool HasIdleTrack() const noexcept;
+
         // Get the current scene.
         const Scene* GetScene() const noexcept
         { return mScene; }
@@ -780,24 +393,18 @@ namespace game
         { return mIdleTrackId; }
         const std::string& GetParentNodeClassId() const noexcept
         { return mParentNodeId; }
-        const std::string& GetClassId() const noexcept
-        { return mClass->GetId(); }
         const std::string& GetId() const noexcept
         { return mInstanceId; }
-        const std::string& GetClassName() const noexcept
-        { return mClass->GetName(); }
+
         const std::string& GetName() const noexcept
         { return mInstanceName; }
         const std::string& GetTag() const noexcept
         { return mInstanceTag; }
-        const std::string& GetScriptFileId() const noexcept
-        { return mClass->GetScriptFileId(); }
+
         std::size_t GetNumNodes() const noexcept
         { return mNodes.size(); }
         std::size_t GetNumJoints() const noexcept
         { return mJoints.size(); }
-        std::string GetDebugName() const
-        { return mClass->GetName() + "/" + mInstanceName; }
         auto GetRenderLayer() const noexcept
         { return mRenderLayer; }
         bool TestFlag(ControlFlags flag) const noexcept
@@ -806,8 +413,7 @@ namespace game
         { return mFlags.test(flag); }
         bool IsVisible() const noexcept
         { return TestFlag(Flags::VisibleInGame); }
-        bool HasIdleTrack() const noexcept
-        { return !mIdleTrackId.empty() || mClass->HasIdleTrack(); }
+
         bool HasStateController() const noexcept
         { return mAnimator.has_value(); }
         const EntityStateController* GetStateController() const
@@ -818,10 +424,7 @@ namespace game
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const noexcept
         { return mRenderTree; }
-        const EntityClass& GetClass() const noexcept
-        { return *mClass.get(); }
-        const EntityClass* operator->() const noexcept
-        { return mClass.get(); }
+
         Entity& operator=(const Entity&) = delete;
     private:
         // the class object.

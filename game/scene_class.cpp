@@ -25,6 +25,7 @@
 #include "data/writer.h"
 #include "game/treeop.h"
 #include "game/scene_class.h"
+#include "game/entity_class.h"
 
 namespace game
 {

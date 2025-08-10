@@ -29,13 +29,14 @@
 #include "graphics/polygon_mesh.h"
 #include "graphics/material_class.h"
 #include "graphics/material_instance.h"
-#include "engine/physics.h"
-#include "engine/loader.h"
 #include "game/types.h"
 #include "game/scene.h"
+#include "game/entity.h"
 #include "game/transform.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_fixture.h"
+#include "engine/physics.h"
+#include "engine/loader.h"
 
 using namespace game;
 
@@ -1374,9 +1375,9 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
 
         const auto type = joint.GetType();
 
-        if (type == Entity::PhysicsJointType::Distance)
+        if (type == RigidBodyJoint::JointType::Distance)
         {
-            const auto& params = std::get<EntityClass::DistanceJointParams>(joint.GetParams());
+            const auto& params = std::get<RigidBodyJointClass::DistanceJointParams>(joint.GetParams());
 
             // distance between the anchor points is the same as the distance
             // between the anchor points in the physics world.
@@ -1413,9 +1414,9 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
                   def.minLength, def.maxLength, params.stiffness, params.damping);
 
         }
-        else if (type == Entity::PhysicsJointType::Revolute)
+        else if (type == RigidBodyJoint::JointType::Revolute)
         {
-            const auto& params = std::get<EntityClass::RevoluteJointParams>(joint.GetParams());
+            const auto& params = std::get<RigidBodyJointClass::RevoluteJointParams>(joint.GetParams());
             // the revolute joint is a hinge like joint with one single point of rotation
             // around which the bodies rotate.
             b2RevoluteJointDef def = {};
@@ -1441,9 +1442,9 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
                   params.upper_angle_limit.ToDegrees(),
                   params.motor_speed, params.motor_torque);
         }
-        else if (type == Entity::PhysicsJointType::Weld)
+        else if (type == RigidBodyJoint::JointType::Weld)
         {
-            const auto& params = std::get<EntityClass::WeldJointParams>(joint.GetParams());
+            const auto& params = std::get<RigidBodyJointClass::WeldJointParams>(joint.GetParams());
             b2WeldJointDef def = {};
             def.Initialize(src_physics_node->world_body, dst_physics_node->world_body, ToBox2D(src_world_anchor));
             def.collideConnected = joint->CollideConnected();
@@ -1459,12 +1460,12 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
 
             DEBUG("Weld joint info: [damping=%1, stiffness=%2]", params.damping, params.stiffness);
         }
-        else if (type == Entity::PhysicsJointType::Prismatic)
+        else if (type == RigidBodyJoint::JointType::Prismatic)
         {
             Transform transform(entity_to_world);
             transform.Push(entity.FindNodeTransform(src_node));
 
-            const auto& params = std::get<EntityClass::PrismaticJointParams>(joint.GetParams());
+            const auto& params = std::get<RigidBodyJointClass::PrismaticJointParams>(joint.GetParams());
             const auto& local_direction_vector = RotateVectorAroundZ(glm::vec2(1.0f, 0.0f), params.direction_angle.ToRadians());
             const auto& world_direction_vector = TransformVector(transform, local_direction_vector);
 
@@ -1494,9 +1495,9 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
                   def.lowerTranslation, def.upperTranslation,
                   params.motor_speed, params.motor_torque);
         }
-        else if (type == Entity::PhysicsJointType ::Motor)
+        else if (type == RigidBodyJoint::JointType ::Motor)
         {
-            const auto& params = std::get<EntityClass::MotorJointParams>(joint.GetParams());
+            const auto& params = std::get<RigidBodyJointClass::MotorJointParams>(joint.GetParams());
 
             b2MotorJointDef def = {};
             def.Initialize(src_physics_node->world_body, dst_physics_node->world_body);
@@ -1514,9 +1515,9 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
 
             DEBUG("Motor joint info: [max_force=%1, max_torque=%2]", def.maxForce, def.maxTorque);
         }
-        else if (type == Entity::PhysicsJointType::Pulley)
+        else if (type == RigidBodyJoint::JointType::Pulley)
         {
-            const auto& params = std::get<EntityClass::PulleyJointParams>(joint.GetParams());
+            const auto& params = std::get<RigidBodyJointClass::PulleyJointParams>(joint.GetParams());
             const auto* world_anchor_node_a = entity.FindNodeByClassId(params.anchor_nodes[0]);
             const auto* world_anchor_node_b = entity.FindNodeByClassId(params.anchor_nodes[1]);
             if (!world_anchor_node_a || !world_anchor_node_b)
@@ -1555,9 +1556,7 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             mWorld->CreateJoint(&def);
 
             DEBUG("Pulley joint info: [ratio=%1]", def.ratio);
-
         }
-
         else BUG("Unhandled physics joint type.");
 
         DEBUG("Created new physics joint. [entity='%1', type=%2, joint='%3', node='%4', node='%5']",

@@ -16,12 +16,13 @@
 
 #include "config.h"
 
+#include "game/entity_node_rigid_body_joint.h"
 #include "editor/gui/dlgjoint.h"
 #include "editor/gui/utility.h"
 
 namespace gui
 {
-DlgJoint::DlgJoint(QWidget* parent, const game::EntityClass& klass, game::EntityClass::PhysicsJoint& joint)
+DlgJoint::DlgJoint(QWidget* parent, const game::EntityClass& klass, game::RigidBodyJointClass& joint)
   : QDialog(parent)
   , mEntity(klass)
   , mJoint(joint)
@@ -56,10 +57,8 @@ DlgJoint::DlgJoint(QWidget* parent, const game::EntityClass& klass, game::Entity
     Show();
 
 }
-DlgJoint::~DlgJoint()
-{
+DlgJoint::~DlgJoint() = default;
 
-}
 
 void DlgJoint::Show()
 {
@@ -118,7 +117,7 @@ void DlgJoint::Show()
     SetValue(mUI.chkCollideConnected, mJoint.CollideConnected());
     SetValue(mUI.chkStaticSettings, mJoint.IsStatic());
 
-    if (mJoint.type == game::EntityClass::PhysicsJointType::Distance)
+    if (mJoint.type == game::RigidBodyJointClass::JointType::Distance)
     {
         SetVisible(mUI.lblNodeAPosition,    true);
         SetVisible(mUI.lblNodeBPosition,    true);
@@ -139,7 +138,7 @@ void DlgJoint::Show()
         SetVisible(mUI.btnResetDstAnchor,   true);
         SetVisible(mUI.btnResetSrcAnchor,   true);
 
-        const auto& params = std::get<game::EntityClass::DistanceJointParams>(mJoint.params);
+        const auto& params = std::get<game::RigidBodyJointClass::DistanceJointParams>(mJoint.params);
 
         SetValue(mUI.stiffness, params.stiffness);
         SetValue(mUI.damping, params.damping);
@@ -149,7 +148,7 @@ void DlgJoint::Show()
         SetSuffix(mUI.stiffness, " N/m"); // Newtons per meter
         SetSuffix(mUI.damping, " N⋅s/m"); // Newton seconds per meter
     }
-    else if (mJoint.type == game::EntityClass::PhysicsJointType::Revolute)
+    else if (mJoint.type == game::RigidBodyJointClass::JointType::Revolute)
     {
         SetVisible(mUI.lblNodeAPosition,    true);
         SetVisible(mUI.srcX,                true);
@@ -169,7 +168,7 @@ void DlgJoint::Show()
         SetVisible(mUI.motorRotation,       true);
         SetRange(mUI.motorSpeed, 0.0f, 100.0f);
 
-        const auto& params = std::get<game::EntityClass::RevoluteJointParams>(mJoint.params);
+        const auto& params = std::get<game::RigidBodyJointClass::RevoluteJointParams>(mJoint.params);
         SetValue(mUI.lowerAngle, params.lower_angle_limit);
         SetValue(mUI.upperAngle, params.upper_angle_limit);
         SetValue(mUI.motorSpeed, std::fabs(params.motor_speed));
@@ -183,7 +182,7 @@ void DlgJoint::Show()
         else SetValue(mUI.motorRotation, "Clockwise");
 
     }
-    else if (mJoint.type == game::EntityClass::PhysicsJointType::Weld)
+    else if (mJoint.type == game::RigidBodyJointClass::JointType::Weld)
     {
         SetVisible(mUI.lblNodeAPosition,    true);
         SetVisible(mUI.srcX,                true);
@@ -194,14 +193,14 @@ void DlgJoint::Show()
         SetVisible(mUI.stiffness,           true);
         SetVisible(mUI.damping,             true);
 
-        const auto& params = std::get<game::EntityClass::WeldJointParams>(mJoint.params);
+        const auto& params = std::get<game::RigidBodyJointClass::WeldJointParams>(mJoint.params);
         SetValue(mUI.damping, params.damping);
         SetValue(mUI.stiffness, params.stiffness);
 
         SetSuffix(mUI.stiffness, " N⋅m");
         SetSuffix(mUI.damping, " N⋅m/s");
     }
-    else if (mJoint.type == game::EntityClass::PhysicsJointType::Prismatic)
+    else if (mJoint.type == game::RigidBodyJointClass::JointType::Prismatic)
     {
         SetVisible(mUI.lblNodeAPosition,         true);
         SetVisible(mUI.srcX,                     true);
@@ -222,7 +221,7 @@ void DlgJoint::Show()
         SetVisible(mUI.dirAngle,                 true);
         SetRange(mUI.motorSpeed, -100.0f, 100.0f);
 
-        const auto& params = std::get<game::EntityClass::PrismaticJointParams>(mJoint.params);
+        const auto& params = std::get<game::RigidBodyJointClass::PrismaticJointParams>(mJoint.params);
         SetValue(mUI.chkEnableLimit, params.enable_limit);
         SetValue(mUI.chkEnableMotor, params.enable_motor);
         SetValue(mUI.motorSpeed,     params.motor_speed);
@@ -231,7 +230,7 @@ void DlgJoint::Show()
         SetValue(mUI.upperTranslationLimit, params.upper_limit);
         SetValue(mUI.dirAngle, params.direction_angle);
     }
-    else if (mJoint.type == game::EntityClass::PhysicsJointType::Motor)
+    else if (mJoint.type == game::RigidBodyJointClass::JointType::Motor)
     {
         SetVisible(mUI.jointAnchors,             false);
         SetVisible(mUI.lblMotorForce,            true);
@@ -239,11 +238,11 @@ void DlgJoint::Show()
         SetVisible(mUI.motorForce,               true);
         SetVisible(mUI.motorTorque,              true);
 
-        const auto& params = std::get<game::EntityClass::MotorJointParams>(mJoint.params);
+        const auto& params = std::get<game::RigidBodyJointClass::MotorJointParams>(mJoint.params);
         SetValue(mUI.motorForce, params.max_force);
         SetValue(mUI.motorTorque, params.max_torque);
     }
-    else if (mJoint.type == game::EntityClass::PhysicsJointType::Pulley)
+    else if (mJoint.type == game::RigidBodyJointClass::JointType::Pulley)
     {
         SetVisible(mUI.pulleyGroundAnchorA,      true);
         SetVisible(mUI.pulleyGroundAnchorB,      true);
@@ -256,7 +255,7 @@ void DlgJoint::Show()
         SetVisible(mUI.dstX,                     true);
         SetVisible(mUI.dstY,                     true);
 
-        const auto& params = std::get<game::EntityClass::PulleyJointParams>(mJoint.params);
+        const auto& params = std::get<game::RigidBodyJointClass::PulleyJointParams>(mJoint.params);
         SetValue(mUI.pulleyGroundAnchorA, ListItemId(params.anchor_nodes[0]));
         SetValue(mUI.pulleyGroundAnchorB, ListItemId(params.anchor_nodes[1]));
     }
@@ -290,12 +289,12 @@ bool DlgJoint::Apply()
     mJoint.dst_node_anchor_point.y = GetValue(mUI.dstY);
     mJoint.src_node_anchor_point.x = GetValue(mUI.srcX);
     mJoint.src_node_anchor_point.y = GetValue(mUI.srcY);
-    mJoint.SetFlag(game::EntityClass::PhysicsJoint::Flags::CollideConnected, GetValue(mUI.chkCollideConnected));
-    mJoint.SetFlag(game::EntityClass::PhysicsJoint::Flags::StaticSettings, GetValue(mUI.chkStaticSettings));
+    mJoint.SetFlag(game::RigidBodyJointClass::Flags::CollideConnected, GetValue(mUI.chkCollideConnected));
+    mJoint.SetFlag(game::RigidBodyJointClass::Flags::StaticSettings, GetValue(mUI.chkStaticSettings));
 
-    if (mJoint.type == game::EntityClass::PhysicsJointType::Distance)
+    if (mJoint.type == game::RigidBodyJointClass::JointType::Distance)
     {
-        game::EntityClass::DistanceJointParams params;
+        game::RigidBodyJointClass::DistanceJointParams params;
         params.stiffness = GetValue(mUI.stiffness);
         params.damping   = GetValue(mUI.damping);
         const float min_dist = GetValue(mUI.minDist);
@@ -306,11 +305,11 @@ bool DlgJoint::Apply()
             params.max_distance = max_dist;
         mJoint.params = params;
     }
-    else if (mJoint.type == game::EntityClass::PhysicsJointType::Revolute)
+    else if (mJoint.type == game::RigidBodyJointClass::JointType::Revolute)
     {
         const auto& motor_direction = mUI.motorRotation->currentText();
 
-        game::EntityClass::RevoluteJointParams params;
+        game::RigidBodyJointClass::RevoluteJointParams params;
         params.upper_angle_limit = GetValue(mUI.upperAngle);
         params.lower_angle_limit = GetValue(mUI.lowerAngle);
         params.motor_torque = GetValue(mUI.motorTorque);
@@ -321,16 +320,16 @@ bool DlgJoint::Apply()
             params.motor_speed *= -1.0f;
         mJoint.params = params;
     }
-    else if (mJoint.type == game::EntityClass::PhysicsJointType::Weld)
+    else if (mJoint.type == game::RigidBodyJointClass::JointType::Weld)
     {
-        game::EntityClass::WeldJointParams params;
+        game::RigidBodyJointClass::WeldJointParams params;
         params.damping = GetValue(mUI.damping);
         params.stiffness = GetValue(mUI.stiffness);
         mJoint.params = params;
     }
-    else if (mJoint.type == game::EntityClass::PhysicsJointType::Prismatic)
+    else if (mJoint.type == game::RigidBodyJointClass::JointType::Prismatic)
     {
-        game::EntityClass::PrismaticJointParams params;
+        game::RigidBodyJointClass::PrismaticJointParams params;
         params.upper_limit = GetValue(mUI.upperTranslationLimit);
         params.lower_limit = GetValue(mUI.lowerTranslationLimit);
         params.motor_torque = GetValue(mUI.motorTorque);
@@ -340,21 +339,21 @@ bool DlgJoint::Apply()
         params.direction_angle = GetValue(mUI.dirAngle);
         mJoint.params = params;
     }
-    else if (mJoint.type == game::EntityClass::PhysicsJointType::Motor)
+    else if (mJoint.type == game::RigidBodyJointClass::JointType::Motor)
     {
-        game::EntityClass::MotorJointParams params;
+        game::RigidBodyJointClass::MotorJointParams params;
         params.max_torque = GetValue(mUI.motorTorque);
         params.max_force = GetValue(mUI.motorForce);
         mJoint.params = params;
     }
-    else if (mJoint.type == game::EntityClass::PhysicsJointType::Pulley)
+    else if (mJoint.type == game::RigidBodyJointClass::JointType::Pulley)
     {
         if (!MustHaveInput(mUI.pulleyGroundAnchorA))
             return false;
         if (!MustHaveInput(mUI.pulleyGroundAnchorB))
             return false;
 
-        game::EntityClass::PulleyJointParams params;
+        game::RigidBodyJointClass::PulleyJointParams params;
         params.anchor_nodes[0] = GetItemId(mUI.pulleyGroundAnchorA);
         params.anchor_nodes[1] = GetItemId(mUI.pulleyGroundAnchorB);
         params.ratio = 1.0f;
@@ -436,36 +435,36 @@ void DlgJoint::on_btnResetMaxDistance_clicked()
 
 void DlgJoint::on_cmbType_currentIndexChanged(int)
 {
-    const game::EntityClass::PhysicsJointType type = GetValue(mUI.cmbType);
+    const game::RigidBodyJointClass::JointType type = GetValue(mUI.cmbType);
     if (type == game::EntityClass::PhysicsJointType::Distance)
     {
         mJoint.type = type;
-        mJoint.params = game::EntityClass::DistanceJointParams {};
+        mJoint.params = game::RigidBodyJointClass::DistanceJointParams {};
     }
-    else if (type == game::EntityClass::PhysicsJointType::Revolute)
+    else if (type == game::RigidBodyJointClass::JointType::Revolute)
     {
         mJoint.type = type;
-        mJoint.params = game::EntityClass::RevoluteJointParams {};
+        mJoint.params = game::RigidBodyJointClass::RevoluteJointParams {};
     }
-    else if (type == game::EntityClass::PhysicsJointType::Weld)
+    else if (type == game::RigidBodyJointClass::JointType::Weld)
     {
         mJoint.type = type;
-        mJoint.params = game::EntityClass::WeldJointParams {};
+        mJoint.params = game::RigidBodyJointClass::WeldJointParams {};
     }
-    else if (type == game::EntityClass::PhysicsJointType::Prismatic)
+    else if (type == game::RigidBodyJointClass::JointType::Prismatic)
     {
         mJoint.type = type;
-        mJoint.params = game::EntityClass::PrismaticJointParams {};
+        mJoint.params = game::RigidBodyJointClass::PrismaticJointParams {};
     }
-    else if (type == game::EntityClass::PhysicsJointType::Motor)
+    else if (type == game::RigidBodyJointClass::JointType::Motor)
     {
         mJoint.type = type;
-        mJoint.params = game::EntityClass::MotorJointParams {};
+        mJoint.params = game::RigidBodyJointClass::MotorJointParams {};
     }
-    else if (type == game::EntityClass::PhysicsJointType::Pulley)
+    else if (type == game::RigidBodyJointClass::JointType::Pulley)
     {
         mJoint.type = type;
-        mJoint.params = game::EntityClass::PulleyJointParams {};
+        mJoint.params = game::RigidBodyJointClass::PulleyJointParams {};
     }
 
     Show();

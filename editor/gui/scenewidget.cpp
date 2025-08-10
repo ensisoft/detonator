@@ -40,6 +40,7 @@
 #include "data/json.h"
 #include "base/transform.h"
 #include "game/treeop.h"
+#include "game/entity_class.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/material_class.h"

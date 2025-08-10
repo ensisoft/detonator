@@ -294,6 +294,7 @@ add_library(GameLib
     game/animation.cpp
     game/animator.cpp
     game/entity.cpp
+    game/entity_class.cpp
     game/entity_node.cpp
     game/entity_node_drawable_item.cpp
     game/entity_node_fixture.cpp
@@ -1150,6 +1151,7 @@ target_link_libraries(unit_test_event_log Qt5::Core DataLib BaseLib)
 
 add_library(GameLibTesting
     game/entity.cpp
+    game/entity_class.cpp
     game/entity_node.cpp
     game/entity_placement.cpp
     game/entity_state.cpp

@@ -33,6 +33,7 @@
 #include "graphics/particle_engine.h"
 #include "graphics/texture_bitmap_buffer_source.h"
 #include "game/entity.h"
+#include "game/entity_class.h"
 #include "game/scene.h"
 #include "game/util.h"
 #include "game/loader.h"

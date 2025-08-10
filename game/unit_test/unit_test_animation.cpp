@@ -33,6 +33,7 @@
 #include "game/material_animator.h"
 #include "game/property_animator.h"
 #include "game/entity.h"
+#include "game/entity_class.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"

@@ -103,4 +103,35 @@ namespace game {
         Camera
     };
 
+    enum class EntityFlags {
+        // Only pertains to editor (todo: maybe this flag should be removed)
+        VisibleInEditor,
+        // node is visible in the game or not.
+        // Even if this is true the node will still need to have some
+        // renderable items attached to it such as a shape or
+        // animation item.
+        VisibleInGame,
+        // Limit the lifetime to some maximum amount
+        // after which the entity is killed.
+        LimitLifetime,
+        // Whether to automatically kill entity when it reaches
+        // its end of lifetime.
+        KillAtLifetime,
+        // Whether to automatically kill entity when it reaches (goes past)
+        // the border of the scene
+        KillAtBoundary,
+        // Invoke the tick function on the entity
+        TickEntity,
+        // Invoke the update function on the entity
+        UpdateEntity,
+        // Invoke the node update function on the entity
+        UpdateNodes,
+        // Invoke the post update function on the entity.
+        PostUpdate,
+        // Whether to pass keyboard events to the entity or not
+        WantsKeyEvents,
+        // Whether to pass mouse events to the entity or not.
+        WantsMouseEvents,
+    };
+
 } // namespace

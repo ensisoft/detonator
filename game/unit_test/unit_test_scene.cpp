@@ -29,6 +29,7 @@
 #include "data/json.h"
 #include "game/scene.h"
 #include "game/entity.h"
+#include "game/entity_class.h"
 
 // build easily comparable representation of the render tree
 // by concatenating node names into a string in the order
