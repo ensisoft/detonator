@@ -377,6 +377,22 @@ glm::vec2 MapCoordsFromNodeBox(const RenderTree<Node>& tree, float x, float y, c
 }
 
 template<typename Node>
+glm::vec2 MapCoordsFromNode(const RenderTree<Node>& tree, float x, float y, const Node* node)
+{
+    const auto& mat = FindNodeTransform(tree, node);
+    const auto& ret = mat * glm::vec4(x, y, 1.0f, 1.0f);
+    return glm::vec2(ret.x, ret.y);
+}
+
+template<typename Node>
+glm::vec2 MapCoordsToNode(const RenderTree<Node>& tree, float x, float y, const Node* node)
+{
+    const auto& mat = glm::inverse(FindNodeTransform(tree, node));
+    const auto& ret = mat * glm::vec4(x, y, 1.0f, 1.0f);
+    return glm::vec2(ret.x, ret.y);
+}
+
+template<typename Node>
 glm::vec2 MapCoordsToNodeBox(const RenderTree<Node>& tree, float x, float y, const Node* node)
 {
     const auto& mat = glm::inverse(FindUnscaledNodeModelTransform(tree, node));

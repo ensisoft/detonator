@@ -33,6 +33,8 @@
 
 namespace game
 {
+    class SplineMoverClass;
+    class SplineMover;
     class LinearMoverClass;
     class LinearMover;
     class RigidBodyClass;
@@ -140,7 +142,9 @@ namespace game
         // Attach a tilemap node to this node class.
         void SetMapNode(const MapNodeClass& map);
         // Attach a transformer to this node class
-        void SetLinearMover(const LinearMoverClass& transformer);
+        void SetLinearMover(const LinearMoverClass& mover);
+
+        void SetSplineMover(const SplineMoverClass& mover);
 
         void SetBasicLight(const BasicLightClass& light);
 
@@ -159,6 +163,8 @@ namespace game
         // Create and attach a transformer with default settings.
         void CreateLinearMover();
 
+        void CreateSplineMover();
+
         void CreateBasicLight();
 
         void RemoveDrawable() noexcept
@@ -175,6 +181,8 @@ namespace game
         { mMapNode.reset(); }
         void RemoveLinearMover() noexcept
         { mLinearMover.reset(); }
+        void RemoveSplineMover() noexcept
+        { mSplineMover.reset(); }
         void RemoveBasicLight() noexcept
         { mBasicLight.reset(); }
 
@@ -198,6 +206,8 @@ namespace game
         { return mMapNode; }
         auto GetSharedLinearMover() const noexcept
         { return mLinearMover; }
+        auto GetSharedSplineMover() const noexcept
+        { return mSplineMover; }
         auto GetSharedBasicLight() const noexcept
         { return mBasicLight; }
 
@@ -218,6 +228,8 @@ namespace game
         { return !!mMapNode; }
         bool HasLinearMover() const noexcept
         { return !!mLinearMover; }
+        bool HasSplineMover() const noexcept
+        { return !!mSplineMover; }
         bool HasBasicLight() const noexcept
         { return !!mBasicLight; }
 
@@ -245,6 +257,8 @@ namespace game
         { return mMapNode.get(); }
         LinearMoverClass* GetLinearMover() noexcept
         { return mLinearMover.get(); }
+        SplineMoverClass* GetSplineMover() noexcept
+        { return mSplineMover.get(); }
         BasicLightClass* GetBasicLight() noexcept
         { return mBasicLight.get(); }
 
@@ -271,6 +285,8 @@ namespace game
 
         const LinearMoverClass* GetLinearMover() const noexcept
         { return mLinearMover.get(); }
+        const SplineMoverClass* GetSplineMover() const noexcept
+        { return mSplineMover.get(); }
 
         const MapNodeClass* GetMapNode() const noexcept
         { return mMapNode.get(); }
@@ -326,6 +342,7 @@ namespace game
         std::shared_ptr<FixtureClass> mFixture;
         std::shared_ptr<MapNodeClass> mMapNode;
         std::shared_ptr<LinearMoverClass> mLinearMover;
+        std::shared_ptr<SplineMoverClass> mSplineMover;
         std::shared_ptr<BasicLightClass> mBasicLight;
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
@@ -375,6 +392,16 @@ namespace game
         { this->size += vec; }
         inline void Grow(float dx, float dy) noexcept
         { this->size += glm::vec2(dx, dy); }
+
+        inline glm::vec2 GetXVector() const noexcept
+        { return math::RotateVectorAroundZ(glm::vec2{1.0f, 0.0f}, this->rotation); }
+        inline glm::vec2 GetYVector() const noexcept
+        { return math::RotateVectorAroundZ(glm::vec2{0.0f, 1.0f}, this->rotation); }
+
+        inline glm::vec2 GetForwardVector() const noexcept
+        { return math::RotateVectorAroundZ(glm::vec2{1.0f, 0.0f}, this->rotation); }
+        inline glm::vec2 GetUpVector() const noexcept
+        { return math::RotateVectorAroundZ(glm::vec2{0.0f -1.0f}, this->rotation); }
 
         inline glm::vec2 GetTranslation() const noexcept
         { return this->translation; }
@@ -478,6 +505,17 @@ namespace game
         { return mTransform->scale; }
         inline glm::vec2 GetSize() const noexcept
         { return mTransform->size; }
+
+        inline glm::vec2 GetXVector() const noexcept
+        { return mTransform->GetXVector(); }
+        inline glm::vec2 GetYVector() const noexcept
+        { return mTransform->GetYVector(); }
+
+        inline glm::vec2 GetForwardVector() const noexcept
+        { return mTransform->GetForwardVector(); }
+        inline glm::vec2 GetUpVector() const noexcept
+        { return mTransform->GetUpVector(); }
+
         inline float GetRotation() const noexcept
         { return mTransform->rotation; }
 
@@ -528,6 +566,8 @@ namespace game
 
         LinearMover* GetLinearMover();
 
+        SplineMover* GetSplineMover();
+
         BasicLight* GetBasicLight();
 
         // Get the node's drawable item if any. If now drawable
@@ -550,6 +590,8 @@ namespace game
 
         const LinearMover* GetLinearMover() const;
 
+        const SplineMover* GetSplineMover() const;
+
         const BasicLight* GetBasicLight() const;
 
         bool HasRigidBody() const noexcept
@@ -566,6 +608,10 @@ namespace game
         { return !!mMapNode; }
         bool HasBasicLight() const noexcept
         { return !!mBasicLight; }
+        bool HasLinearMover() const noexcept
+        { return !!mLinearMover; }
+        bool HasSplineMover() const noexcept
+        { return !!mSplineMover; }
 
         // shortcut for class getters.
         const std::string& GetClassId() const noexcept
@@ -615,6 +661,7 @@ namespace game
         // map node if any.
         std::unique_ptr<MapNode> mMapNode;
         std::unique_ptr<LinearMover> mLinearMover;
+        std::unique_ptr<SplineMover> mSplineMover;
         std::unique_ptr<BasicLight> mBasicLight;
 
     };

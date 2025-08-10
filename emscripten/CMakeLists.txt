@@ -128,6 +128,7 @@ add_executable(UnitTest
     ../game/entity_state_controller.cpp
     ../game/entity_node_rigid_body_joint.cpp
     ../game/entity_node_linear_mover.cpp
+    ../game/entity_node_spline_mover.cpp
     ../game/entity_node_rigid_body.cpp
     ../game/entity_node_drawable_item.cpp
     ../game/entity_node_text_item.cpp
@@ -138,6 +139,7 @@ add_executable(UnitTest
     ../game/scene_class.cpp
     ../game/scene.cpp
     ../game/scriptvar.cpp
+    ../game/spline.cpp
     ../game/tilemap.cpp
     ../game/tilemap_layer.cpp
     ../game/tilemap_layer_class.cpp
@@ -303,6 +305,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_text_item.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_tilemap_node.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_linear_mover.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_spline_mover.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_state.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_state_controller.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/kinematic_animator.cpp
@@ -311,6 +314,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../game/scene_class.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/scene.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/scriptvar.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/spline.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/tilemap.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/tilemap_layer.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/tilemap_layer_class.cpp

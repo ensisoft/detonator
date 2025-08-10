@@ -415,6 +415,7 @@ namespace math
     {
         return glm::eulerAngleZ(angle) * glm::vec4(vec.x, vec.y, 0.0f, 0.0f);
     }
+
     // transform a direction vector (such as a normal) safely even if the
     // transformation matrix contains a non-uniform scale.
     inline glm::vec3 TransformNormalVector(const glm::mat4& matrix, const glm::vec3& vector) noexcept

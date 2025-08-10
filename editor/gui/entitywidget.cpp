@@ -43,6 +43,7 @@
 #include "game/treeop.h"
 #include "game/entity_class.h"
 #include "game/entity_node_linear_mover.h"
+#include "game/entity_node_spline_mover.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
@@ -109,6 +110,124 @@ std::string GenerateEntityNodeName(const game::EntityClass& entity, const std::s
     }
     return name;
 }
+
+class EntityWidget::SplineModel : public QAbstractTableModel
+{
+public:
+    Qt::ItemFlags flags(const QModelIndex& index) const override
+    {
+        return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
+    }
+
+    bool setData(const QModelIndex& index, const QVariant& variant, int role) override
+    {
+        const auto row = static_cast<size_t>(index.row());
+        const auto col = static_cast<size_t>(index.column());
+
+        bool success = false;
+        const float value = variant.toFloat(&success);
+        if (!success)
+            return false;
+
+        auto point = mSpline->GetPoint(row);
+        auto position = point.GetPosition();
+        if (col == 0)
+            position.x = value;
+        else if (col == 1)
+            position.y = value;
+
+        point.SetPosition(position);
+
+        mSpline->SetPoint(point, row);
+
+        emit dataChanged(this->index(row, 0), this->index(row, 4));
+        return true;
+    }
+
+    QVariant data(const QModelIndex& index, int role) const override
+    {
+        const auto row = static_cast<size_t>(index.row());
+        const auto col = static_cast<size_t>(index.column());
+        if (role == Qt::DisplayRole)
+        {
+            const auto& point = mSpline->GetPoint(row).GetPosition();
+            if (col == 0)
+                return QString::number(point.x, 'f', 2);
+            else if (col == 1)
+                return QString::number(point.y, 'f', 2);
+        }
+        return {};
+    }
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override
+    {
+        if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+        {
+            if (section == 0)
+                return "x";
+            else if (section == 1)
+                return "y";
+        }
+        return {};
+    }
+    int rowCount(const QModelIndex&) const override
+    {
+        if (mSpline)
+            return static_cast<int>(mSpline->GetPointCount());
+
+        return 0;
+    }
+    int columnCount(const QModelIndex&) const override
+    {
+        return 2;
+    }
+
+    void UpdatePoint(const game::SplinePoint& point, size_t index)
+    {
+        const auto row = static_cast<int>(index);
+
+        mSpline->SetPoint(point, index);
+
+        emit dataChanged(this->index(row, 0), this->index(row, 4));
+    }
+
+    void AppendPoint(const game::SplinePoint& point)
+    {
+        const auto first_index = mSpline->GetPointCount();
+        const auto last_index = first_index + 1 - 1;
+
+        beginInsertRows(QModelIndex(), static_cast<int>(first_index), static_cast<int>(last_index));
+        mSpline->AppendPoint(point);
+        endInsertRows();
+    }
+    void PrependPoint(const game::SplinePoint& point)
+    {
+        const auto first_index = 0;
+        const auto last_index = 0;
+
+        beginInsertRows(QModelIndex(), static_cast<int>(first_index), static_cast<int>(last_index));
+        mSpline->PrependPoint(point);
+        endInsertRows();
+    }
+
+    void ErasePoint(size_t index)
+    {
+        beginRemoveRows(QModelIndex(), static_cast<int>(index), static_cast<int>(index));
+        mSpline->ErasePoint(index);
+        endRemoveRows();
+    }
+
+    void Reset(game::SplineMoverClass* spline = nullptr)
+    {
+        if (spline == mSpline)
+            return;
+
+        beginResetModel();
+        mSpline = spline;
+        endResetModel();
+    }
+private:
+    game::SplineMoverClass* mSpline = nullptr;
+};
 
 
 class EntityWidget::JointModel : public QAbstractTableModel
@@ -375,6 +494,123 @@ private:
     }
 private:
     EntityWidget::State& mState;
+};
+
+class EntityWidget::SplineTool : public MouseTool
+{
+public:
+    explicit SplineTool(gui::EntityWidget::State& state, game::EntityNodeClass* node,
+                        game::SplineMoverClass* spline, size_t point_index)
+      : mState(state)
+      , mNode(node)
+      , mSpline(spline)
+      , mIndex(point_index)
+    {}
+    void Render(gfx::Painter& window_painter, gfx::Painter& entity_painter) const override
+    {
+        if (mPlacePoint)
+        {
+            const auto* parent = mState.entity->FindNodeParent(mNode);
+            const auto& mode = mSpline->GetPathCoordinateSpace();
+
+            const game::EntityNodeClass* coordinate_reference_node = nullptr;
+            if (mode == game::SplineMoverClass::PathCoordinateSpace::Absolute)
+                coordinate_reference_node = parent;
+            else if (mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+                coordinate_reference_node = mNode;
+            else BUG("Bug on spline path mode.");
+
+            const auto& spline_local_point = mSpline->GetPathRelativePoint(mIndex).GetPosition();
+            const auto& spline_world_point = mState.entity->MapCoordsFromNode(spline_local_point, coordinate_reference_node);
+            const auto& mouse_world_point  = mState.entity->MapCoordsFromNode(mMousePosLocal, coordinate_reference_node);
+            DrawLine(entity_painter, spline_world_point, mouse_world_point);
+        }
+    }
+    void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
+    {
+        const auto parent_node = mState.entity->FindNodeParent(mNode);
+        const auto spline_path_mode = mSpline->GetPathCoordinateSpace();
+        if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative && mIndex == 0)
+            return;
+
+        const game::EntityNodeClass* coordinate_reference_node = nullptr;
+        if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Absolute)
+            coordinate_reference_node = parent_node;
+        else if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+            coordinate_reference_node = mNode;
+        else BUG("Bug on spline path mode.");
+
+        const auto mouse_pos_world = mickey.MapToPlane();
+        mMousePosLocal = mState.entity->MapCoordsToNode(mouse_pos_world, coordinate_reference_node).ToVec2();
+        glm::vec2 offset = {0.0f, 0.0f};
+
+        if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+        {
+            offset = mSpline->GetPoint(0).GetPosition().ToVec2();
+        }
+
+        if (mickey.TestModKey(Qt::KeyboardModifier::ShiftModifier))
+        {
+            const auto last_index = mSpline->GetPointCount() - 1;
+            if ((mIndex == 0 && spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Absolute) ||
+                    (mIndex == last_index))
+                mPlacePoint = true;
+        }
+
+        if (!mPlacePoint)
+        {
+            auto p = mSpline->GetPoint(mIndex);
+            p.SetPosition(mMousePosLocal + offset);
+            mState.spline_model->UpdatePoint(p, mIndex);
+        }
+    }
+    void MousePress(const MouseEvent& mickey, gfx::Transform&) override
+    {
+    }
+    bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
+    {
+        if (mPlacePoint)
+        {
+            const auto parent_node = mState.entity->FindNodeParent(mNode);
+            const auto path_mode  = mSpline->GetPathCoordinateSpace();
+            const auto last_index = mSpline->GetPointCount() - 1;
+
+            const game::EntityNodeClass* coordinate_reference_node = nullptr;
+            if (path_mode == game::SplineMoverClass::PathCoordinateSpace::Absolute)
+                coordinate_reference_node = parent_node;
+            else if (path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+                coordinate_reference_node = mNode;
+            else BUG("Bug on spline path mode.");
+
+            glm::vec2 offset;
+            if (path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+            {
+                offset = mSpline->GetPoint(0).GetPosition().ToVec2();
+            }
+
+
+            if (mIndex == 0)
+            {
+                game::SplinePoint point;
+                point.SetPosition(mMousePosLocal + offset);
+                mState.spline_model->PrependPoint(point);
+            }
+            else if (mIndex == last_index)
+            {
+                game::SplinePoint point;
+                point.SetPosition(mMousePosLocal + offset);
+                mState.spline_model->AppendPoint(point);
+            }
+        }
+        return true;
+    }
+private:
+    EntityWidget::State& mState;
+    game::EntityNodeClass* mNode = nullptr;
+    game::SplineMoverClass* mSpline = nullptr;
+    std::size_t mIndex = 0;
+    glm::vec2 mMousePosLocal = {0.0f, 0.0f};
+    bool mPlacePoint = false;
 };
 
 class EntityWidget::JointTool : public MouseTool
@@ -1007,11 +1243,13 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
 
     mRenderTree = std::make_unique<TreeModel>(*mState.entity);
     mJointModel = std::make_unique<JointModel>(mState);
+    mSplineModel = std::make_unique<SplineModel>();
     mScriptVarModel = std::make_unique<ScriptVarModel>(mState);
 
     mUI.setupUi(this);
     mUI.scriptVarList->setModel(mScriptVarModel.get());
     mUI.jointList->setModel(mJointModel.get());
+    mUI.splinePointView->setModel(mSplineModel.get());
     QHeaderView* verticalHeader = mUI.scriptVarList->verticalHeader();
     verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
     verticalHeader->setDefaultSectionSize(16);
@@ -1090,6 +1328,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.renderer.SetClassLibrary(workspace);
     mState.renderer.SetEditingMode(true);
     mState.view = &mUI;
+    mState.spline_model = mSplineModel.get();
 
     // connect tree widget signals
     connect(mUI.tree, &TreeWidget::currentRowChanged, this, &EntityWidget::TreeCurrentNodeChangedEvent);
@@ -1113,6 +1352,9 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::LinearMoverClass::Integrator>(mUI.tfIntegrator);
     PopulateFromEnum<game::BasicLightClass::LightType>(mUI.ltType);
     PopulateFromEnum<game::TileOcclusion>(mUI.nodeTileOcclusion);
+    PopulateFromEnum<game::SplineMoverClass::PathCoordinateSpace>(mUI.splineCoordSpace);
+    PopulateFromEnum<game::SplineMoverClass::PathCurveType>(mUI.splineCurveType);
+    PopulateFromEnum<game::SplineMoverClass::RotationMode>(mUI.splineRotation);
     PopulateFontNames(mUI.tiFontName);
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
@@ -1147,6 +1389,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
             mAttachments->addAction(mUI.actionAddTilemapNode);
             mAttachments->addAction(mUI.actionAddSpatialNode);
             mAttachments->addAction(mUI.actionAddLinearMover);
+            mAttachments->addAction(mUI.actionAddSplineMover);
         }
         mAttachments->popup(mUI.btnAddNodeItem->mapToGlobal(point));
     });
@@ -1838,9 +2081,16 @@ bool EntityWidget::OnEscape()
         mCurrentTool.reset();
         UncheckPlacementActions();
     }
-    else if (mUI.tree->GetSelectedItem())
+    else if (const auto* node = GetCurrentNode())
     {
-        mUI.tree->ClearSelection();
+        if (const auto* spline = node->GetSplineMover())
+        {
+            const auto row = GetSelectedRow(mUI.splinePointView);
+            if (row != -1)
+                ClearSelection(mUI.splinePointView);
+            else mUI.tree->ClearSelection();
+        }
+        else mUI.tree->ClearSelection();
     }
     else
     {
@@ -3367,6 +3617,29 @@ void EntityWidget::on_ltEnabled_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_splineCoordSpace_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_splineCurveType_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_splineRotation_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_splineSpeed_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_splineAcceleration_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
 
 void EntityWidget::on_btnDelDrawable_clicked()
 {
@@ -3552,6 +3825,11 @@ void EntityWidget::on_btnDelLinearMover_clicked()
     ToggleLinearMover(false);
 }
 
+void EntityWidget::on_btnDelSplineMover_clicked()
+{
+    ToggleSplineMover(false);
+}
+
 void EntityWidget::on_btnDelLight_clicked()
 {
     ToggleLight(false);
@@ -3589,6 +3867,11 @@ void EntityWidget::on_actionAddSpatialNode_triggered()
 void EntityWidget::on_actionAddLinearMover_triggered()
 {
     ToggleLinearMover(true);
+}
+
+void EntityWidget::on_actionAddSplineMover_triggered()
+{
+    ToggleSplineMover(true);
 }
 
 void EntityWidget::on_actionEditEntityScript_triggered()
@@ -3747,6 +4030,42 @@ void EntityWidget::ToggleLinearMover(bool on)
         DisplayCurrentNodeProperties();
 
         mUI.linearMover->Collapse(!on);
+    }
+}
+
+void EntityWidget::ToggleSplineMover(bool on)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (on && !node->HasSplineMover())
+        {
+            game::SplineMoverClass mover;
+            mover.SetPathCoordinateSpace(game::SplineMoverClass::PathCoordinateSpace::Absolute);
+            mover.SetSpeed(100.0f);
+
+            glm::vec2 point = {-200.0f, 0.0f};
+            for(unsigned i=0; i<=4; ++i)
+            {
+                game::SplinePoint p;
+                p.SetPosition(point);
+
+                mover.AppendPoint(p);
+                point += glm::vec2{100.0f, 0.0f};
+            }
+
+            node->SetSplineMover(mover);
+
+            ScrollEntityNodeArea();
+
+            DEBUG("Added spline mover to node '%1'", node->GetName());
+        }
+        else if (!on && node->HasSplineMover())
+        {
+            node->RemoveSplineMover();
+        }
+        DisplayCurrentNodeProperties();
+
+        mUI.splineMover->Collapse(!on);
     }
 }
 
@@ -4050,6 +4369,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             DrawDot(entity_painter, anchor_node_b_world);
         }
     }
+
     // Draw comments, drawn in entity space
     if (GetValue(mUI.chkShowComments))
     {
@@ -4081,6 +4401,29 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
                 model.Resize(10.0f, 10.0f);
                 model.Translate(-5.0f, -5.0f);
                 entity_painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+            }
+        }
+        if (const auto* spline = node->GetSplineMover())
+        {
+            const auto* parent = mState.entity->FindNodeParent(node);
+            const auto& mode = spline->GetPathCoordinateSpace();
+
+            const game::EntityNodeClass* coordinate_reference_node = nullptr;
+            if (mode == game::SplineMoverClass::PathCoordinateSpace::Absolute)
+                coordinate_reference_node = parent;
+            else if (mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+                coordinate_reference_node = node;
+            else BUG("Bug on spline path mode.");
+
+            DrawSpline(entity_painter, spline, coordinate_reference_node, *mState.entity);
+
+            for (int i=0; i<spline->GetPointCount(); ++i)
+            {
+                const auto selected_row = GetSelectedRow(mUI.splinePointView);
+                const auto& spline_local_point = spline->GetPathRelativePoint(i).GetPosition();
+                const auto& spline_world_point = mState.entity->MapCoordsFromNode(spline_local_point, coordinate_reference_node);
+
+                DrawSplineControlPoint(entity_painter, spline_world_point, selected_row == i);
             }
         }
     }
@@ -4173,7 +4516,6 @@ void EntityWidget::MouseMove(QMouseEvent* event)
 }
 void EntityWidget::MousePress(QMouseEvent* event)
 {
-
     const MouseEvent mickey(event, mUI, mState);
 
     if (!mCurrentTool && !mViewerMode && (mickey->button() == Qt::LeftButton))
@@ -4185,20 +4527,51 @@ void EntityWidget::MousePress(QMouseEvent* event)
 
         if (auto* current = GetCurrentNode())
         {
-            const auto node_box_size = current->GetSize();
-            const auto& node_to_world = mState.entity->FindNodeTransform(current);
-            gfx::FRect box;
-            box.Resize(node_box_size.x, node_box_size.y);
-            box.Translate(-node_box_size.x*0.5f, -node_box_size.y*0.5f);
+            if (auto* spline = current->GetSplineMover())
+            {
+                const auto* parent_node = mState.entity->FindNodeParent(current);
+                const auto spline_path_mode = spline->GetPathCoordinateSpace();
+                const game::EntityNodeClass* coordinate_reference_node = nullptr;
 
-            const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, click_point);
-            if (hotspot == ToolHotspot::Resize)
-                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, current, snap, grid_size));
-            else if (hotspot == ToolHotspot::Rotate)
-                mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, current));
-            else if (hotspot == ToolHotspot::Remove)
-                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, current, snap, grid_size));
-            else mUI.tree->ClearSelection();
+                if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Absolute)
+                    coordinate_reference_node = parent_node;
+                else if (spline_path_mode == game::SplineMoverClass::PathCoordinateSpace::Relative)
+                    coordinate_reference_node = current;
+                else BUG("Bug on spline path mode.");
+
+                for (size_t i=0; i<spline->GetPointCount(); ++i)
+                {
+                    const auto& spline_local_point = spline->GetPathRelativePoint(i).GetPosition();
+                    const auto& spline_world_point = mState.entity->MapCoordsFromNode(spline_local_point, coordinate_reference_node);
+                    gfx::FRect box;
+                    box.Resize(20.0f, 20.0f);
+                    box.Move(spline_world_point);
+                    box.Translate(-10.0f, -10.0f);
+                    if (box.TestPoint(mickey.MapToPlane()))
+                    {
+                        mCurrentTool = std::make_unique<SplineTool>(mState, current, spline, i);
+                        SelectRow(mUI.splinePointView, i);
+                        break;
+                    }
+                }
+            }
+            if (!mCurrentTool)
+            {
+                const auto node_box_size = current->GetSize();
+                const auto& node_to_world = mState.entity->FindNodeTransform(current);
+                gfx::FRect box;
+                box.Resize(node_box_size.x, node_box_size.y);
+                box.Translate(-node_box_size.x * 0.5f, -node_box_size.y * 0.5f);
+
+                const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, click_point);
+                if (hotspot == ToolHotspot::Resize)
+                    mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, current, snap, grid_size));
+                else if (hotspot == ToolHotspot::Rotate)
+                    mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, current));
+                else if (hotspot == ToolHotspot::Remove)
+                    mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, current, snap, grid_size));
+                else mUI.tree->ClearSelection();
+            }
         }
 
         if (!GetCurrentNode())
@@ -4352,17 +4725,30 @@ void EntityWidget::MouseWheel(QWheelEvent* wheel)
     }
 }
 
-bool EntityWidget::KeyPress(QKeyEvent* key)
+bool EntityWidget::KeyPress(QKeyEvent* event)
 {
     // handle key press events coming from the gfx widget
-    if (mCurrentTool && mCurrentTool->KeyPress(key))
+    if (mCurrentTool && mCurrentTool->KeyPress(event))
         return true;
+
+    const auto key = event->key();
 
     if (auto* node = GetCurrentNode())
     {
-        if (auto* text = node->GetTextItem())
+        auto* spline = node->GetSplineMover();
+        const int spline_point_index = spline ? GetSelectedRow(mUI.splinePointView) : -1;
+
+        if (spline && spline_point_index != -1 && key == Qt::Key_Delete)
         {
-            if (key->key() == Qt::Key_Delete)
+            const auto spline_point_count = spline->GetPointCount();
+            if (spline_point_count > 4)
+                mSplineModel->ErasePoint(spline_point_index);
+            else NOTE("Spline needs a minimum of 4 control points.");
+            return true;
+        }
+        else if (auto* text = node->GetTextItem())
+        {
+            if (key == Qt::Key_Delete)
             {
                 std::string str = text->GetText();
                 if (!str.empty())
@@ -4373,7 +4759,7 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
                 }
 
             }
-            else if (key->key() == Qt::Key_Backspace)
+            else if (key  == Qt::Key_Backspace)
             {
                 std::string str = text->GetText();
                 if (!str.empty())
@@ -4383,10 +4769,10 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
                     return true;
                 }
             }
-            else if (std::isprint(key->key()))
+            else if (std::isprint(key))
             {
                 std::string str = text->GetText();
-                str += app::ToUtf8(key->text());
+                str += app::ToUtf8(event->text());
                 text->SetText(std::move(str));
                 return true;
             }
@@ -4395,7 +4781,7 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
         {
             const auto& id = draw->GetMaterialId();
             const auto& mat = mState.workspace->FindMaterialClassById(id);
-            if (mat && mat->GetType() == gfx::MaterialClass::Type::Tilemap && key->key() == Qt::Key_T)
+            if (mat && mat->GetType() == gfx::MaterialClass::Type::Tilemap && key == Qt::Key_T)
             {
                 DlgTileChooser dlg(this, mat);
                 if (const auto* ptr = draw->GetMaterialParamValue<float>("kTileIndex"))
@@ -4416,7 +4802,7 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
         }
     }
 
-    switch (key->key())
+    switch (key)
     {
         case Qt::Key_Delete:
             on_actionNodeDelete_triggered();
@@ -4450,7 +4836,7 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
             break;
         case Qt::Key_Space:
             if (auto* node = GetCurrentNode()) {
-                if (key->modifiers() & Qt::Key_Shift)
+                if (event->modifiers() & Qt::Key_Shift)
                 {
                     if (auto* drawable = node->GetDrawable())
                         on_btnSelectMaterial_clicked();
@@ -4595,6 +4981,11 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.mnVCenter, 1.0f);
     SetValue(mUI.nodeMapLayer, 0);
     SetValue(mUI.nodeTileOcclusion, game::TileOcclusion::None);
+    SetValue(mUI.splineCoordSpace, game::SplineMoverClass::PathCoordinateSpace::Absolute);
+    SetValue(mUI.splineCurveType, game::SplineMoverClass::PathCurveType::CatmullRom);
+    SetValue(mUI.splineRotation, game::SplineMoverClass::RotationMode::ApplySplineRotation);
+    SetValue(mUI.splineSpeed, 0.0f);
+    SetValue(mUI.splineAcceleration, 0.0f);
 
     SetValue(mUI.tfIntegrator, game::LinearMoverClass::Integrator::Euler);
     SetValue(mUI.tfVelocityX, 0.0f);
@@ -4616,6 +5007,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetEnabled(mUI.actionAddTilemapNode, true);
     SetEnabled(mUI.actionAddSpatialNode, true);
     SetEnabled(mUI.actionAddLinearMover, true);
+    SetEnabled(mUI.actionAddSplineMover, true);
     SetEnabled(mUI.actionAddLight,       true);
 
     SetVisible(mUI.drawable,    false);
@@ -4625,9 +5017,10 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetVisible(mUI.tilemapNode, false);
     SetVisible(mUI.spatialNode, false);
     SetVisible(mUI.linearMover, false);
+    SetVisible(mUI.splineMover, false);
     SetVisible(mUI.basicLight,  false);
 
-    if (const auto* node = GetCurrentNode())
+    if (auto* node = GetCurrentNode())
     {
         SetEnabled(mUI.nodeProperties, true);
         SetEnabled(mUI.nodeTransform,  true);
@@ -4805,6 +5198,17 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.tfAccelA, mover->GetAngularAcceleration());
             SetValue(mUI.tfEnabled, mover->IsEnabled());
         }
+        if (auto* mover = node->GetSplineMover())
+        {
+            SetEnabled(mUI.actionAddSplineMover, false);
+            SetVisible(mUI.splineMover, true);
+            SetValue(mUI.splineCoordSpace, mover->GetPathCoordinateSpace());
+            SetValue(mUI.splineCurveType, mover->GetPathCurveType());
+            SetValue(mUI.splineRotation, mover->GetRotationMode());
+            SetValue(mUI.splineSpeed, mover->GetSpeed());
+            SetValue(mUI.splineAcceleration, mover->GetAcceleration());
+            mSplineModel->Reset(mover);
+        }
 
         if (const auto* light = node->GetBasicLight())
         {
@@ -4824,6 +5228,10 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.ltLayer, light->GetLayer());
             SetValue(mUI.ltEnabled, light->IsEnabled());
         }
+    }
+    else
+    {
+        mSplineModel->Reset(nullptr);
     }
 }
 
@@ -5020,6 +5428,15 @@ void EntityWidget::UpdateCurrentNodeProperties()
         mover->SetAngularVelocity(GetValue(mUI.tfVelocityA));
         mover->SetAngularAcceleration(GetValue(mUI.tfAccelA));
         mover->SetFlag(game::LinearMoverClass::Flags::Enabled, GetValue(mUI.tfEnabled));
+    }
+
+    if (auto* mover = node->GetSplineMover())
+    {
+        mover->SetPathCoordinateSpace(GetValue(mUI.splineCoordSpace));
+        mover->SetPathCurveType(GetValue(mUI.splineCurveType));
+        mover->SetRotationMode(GetValue(mUI.splineRotation));
+        mover->SetSpeed(GetValue(mUI.splineSpeed));
+        mover->SetAcceleration(GetValue(mUI.splineAcceleration));
     }
 
     if (auto* light = node->GetBasicLight())

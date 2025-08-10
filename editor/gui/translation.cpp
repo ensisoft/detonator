@@ -321,6 +321,39 @@ std::string TranslateEnum(TileOcclusion occlusion)
     return "???";
 }
 
+std::string TranslateEnum(SplineMoverClass::PathCoordinateSpace mode)
+{
+    using P = SplineMoverClass::PathCoordinateSpace;
+    if (mode == P::Absolute)
+        return "Absolute Path Coordinates";
+    else if (mode == P::Relative)
+        return "Relative Path Coordinates";
+    else BUG("Missing translation");
+    return "???";
+}
+
+std::string TranslateEnum(SplineMoverClass::PathCurveType type)
+{
+    using T = SplineMoverClass::PathCurveType;
+    if (type == T::Linear)
+        return "Linear";
+    else if (type == T::CatmullRom)
+        return "Catmull-Rom";
+    else BUG("Missing translation");
+    return "???";
+}
+
+std::string TranslateEnum(SplineMoverClass::RotationMode mode)
+{
+    using M = SplineMoverClass::RotationMode;
+    if (mode == M::ApplySplineRotation)
+        return "Rotate Along Spline";
+    else if (mode == M::IgnoreSplineRotation)
+        return "Ignore Rotation from Spline";
+    else BUG("Missing translation");
+    return "???";
+}
+
 } // namespace
 
 namespace math

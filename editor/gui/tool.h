@@ -196,6 +196,11 @@ namespace gui
 
         const QMouseEvent* operator->() const
         { return mMickey; }
+
+        const bool TestModKey(Qt::KeyboardModifier mod) const noexcept
+        {
+            return mMickey->modifiers() & mod;
+        }
     private:
         const QMouseEvent* mMickey = nullptr;
         const glm::vec2 mWindowSize  = {0.0f, 0.0f};

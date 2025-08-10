@@ -33,6 +33,7 @@
 #include "game/enum.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
+#include "game/spline.h"
 #include "game/tilemap.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
@@ -46,6 +47,10 @@ class QWidget;
 namespace gui
 {
 
+void DrawSplineControlPoint(gfx::Painter& painter, const glm::vec2& pos, bool active);
+void DrawSpline(gfx::Painter& painter,
+                const game::SplineMoverClass* spline,
+                const game::EntityNodeClass* coordinate_reference_node, const game::EntityClass& entity);
 void DrawLine(gfx::Painter& painter, const glm::vec2& src, const glm::vec2& dst);
 void DrawDot(gfx::Painter& painter, const glm::vec2& pos);
 void DrawDir(gfx::Painter& painter, const glm::vec2& pos, const glm::vec2& dir);

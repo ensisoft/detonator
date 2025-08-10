@@ -39,13 +39,13 @@
 #include "game/animator.h"
 #include "game/property_animator.h"
 #include "game/entity_node_linear_mover.h"
+#include "game/entity_node_spline_mover.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_tilemap_node.h"
-
 
 namespace game
 {
@@ -428,6 +428,10 @@ void Entity::Update(float dt, std::vector<Event>* events)
         for (auto& node: mNodes)
         {
             if (auto* mover = node.GetLinearMover())
+            {
+                mover->TransformObject(static_cast<float>(dt), node);
+            }
+            if (auto* mover = node.GetSplineMover())
             {
                 mover->TransformObject(static_cast<float>(dt), node);
             }

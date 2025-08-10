@@ -304,7 +304,8 @@ add_library(GameLib
     game/entity_node_spatial_node.cpp
     game/entity_node_text_item.cpp
     game/entity_node_tilemap_node.cpp
-        game/entity_node_linear_mover.cpp
+    game/entity_node_linear_mover.cpp
+    game/entity_node_spline_mover.cpp
     game/entity_placement.cpp
     game/entity_state.cpp
     game/entity_state_controller.cpp
@@ -314,6 +315,7 @@ add_library(GameLib
     game/scene.cpp
     game/scene_class.cpp
     game/scriptvar.cpp
+    game/spline.cpp
     game/tilemap.cpp
     game/tilemap_layer.cpp
     game/tilemap_layer_class.cpp
@@ -1156,7 +1158,8 @@ add_library(GameLibTesting
     game/entity_placement.cpp
     game/entity_state.cpp
     game/entity_state_controller.cpp
-        game/entity_node_linear_mover.cpp
+    game/entity_node_linear_mover.cpp
+    game/entity_node_spline_mover.cpp
     game/entity_node_rigid_body.cpp
     game/entity_node_rigid_body_joint.cpp
     game/entity_node_drawable_item.cpp
@@ -1166,6 +1169,7 @@ add_library(GameLibTesting
     game/entity_node_tilemap_node.cpp
     game/entity_node_light.cpp
     game/scriptvar.cpp
+    game/spline.cpp
     game/animation.cpp
     game/animator.cpp
     game/transform_animator.cpp
