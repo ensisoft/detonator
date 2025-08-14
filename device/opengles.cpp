@@ -698,12 +698,13 @@ public:
         // a little hack to provide the INFO level graphics device
         // information only once.
         static bool have_printed_info = false;
+        const auto* driver_version = (const char*)mGL.glGetString(GL_VERSION);
+        const auto* driver_vendor = (const char*)mGL.glGetString(GL_VENDOR);
+        const auto* driver_renderer = (const char*)mGL.glGetString(GL_RENDERER);
+
         if (have_printed_info)
         {
-            DEBUG("GL %1 Vendor: %2, %3",
-                  mGL.glGetString(GL_VERSION),
-                  mGL.glGetString(GL_VENDOR),
-                  mGL.glGetString(GL_RENDERER));
+            DEBUG("GL %1 Vendor: %2, %3", driver_version, driver_vendor, driver_renderer);
             DEBUG("Stencil bits: %1", stencil_bits);
             DEBUG("Red bits: %1", red_bits);
             DEBUG("Blue bits: %1", blue_bits);
@@ -715,12 +716,10 @@ public:
             DEBUG("Maximum render buffer size %1x%2", max_rbo_size, max_rbo_size);
             DEBUG("FBO MSAA samples: %1", max_samples);
             DEBUG("UBO offset alignment: %1", uniform_buffer_offset_alignment);
-        } else
+        }
+        else
         {
-            INFO("GL %1 Vendor: %2, %3",
-                 mGL.glGetString(GL_VERSION),
-                 mGL.glGetString(GL_VENDOR),
-                 mGL.glGetString(GL_RENDERER));
+            INFO("GL %1 Vendor: %2, %3", driver_version, driver_vendor, driver_renderer);
             INFO("Stencil bits: %1", stencil_bits);
             INFO("Red bits: %1", red_bits);
             INFO("Blue bits: %1", blue_bits);
@@ -768,13 +767,24 @@ public:
             if (have_printed_info)
             {
                 DEBUG("Maximum color attachments: %1", max_color_attachments);
-            } else
+            }
+            else
             {
                 INFO("Maximum color attachments: %1", max_color_attachments);
             }
-        } else if (version == dev::Context::Version::OpenGL_ES2 ||
+        }
+        else if (version == dev::Context::Version::OpenGL_ES2 ||
                    version == dev::Context::Version::WebGL_1)
         {
+            if (std::strstr(driver_vendor, "Intel"))
+            {
+                if (mExtensions.EXT_sRGB)
+                {
+                    mExtensions.EXT_sRGB = false;
+                    WARN("Disabling sRGB(A) texture support on Intel Integrated with ES2.");
+                    WARN("The feature is disabled because of driver bugs.");
+                }
+            }
         }
         // we use this for uploading textures and generating mips
         // so we don't need to play stupid games with the "actual"
