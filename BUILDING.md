@@ -12,15 +12,29 @@ Build Instructions 👨🏼‍💻
 ## Getting Started 👈
 
 > [!TIP]
-> The build process assumes some familiarity with building C++ based projects using
-> toolchains and tools such as GCC, MSVS, Emscripten💩 and CMake.
+> If you're new to software development I suggest you immediately give up 
+> and look for a better, saner, less frustrating career. If you're still
+> foolish and stubborn enough to actually try to work with modern software, 
+> tools, technologies and stacks then proceed but remember to keep the blood
+> pressure pills nearby. This TRASH is always producing useless busy work
+> that has NO meaning or value, only pain and frustration.
+> Don't say I did not warn you!
 
 > [!TIP]
-> You'll need to have Qt5 in order to build the Editor.
+> The build process assumes some familiarity with building C++ based projects using
+> toolchains and tools such as GCC, MSVS, Emscripten💩 and CMake. Combined these
+> tools are total utter garbage and if you ever get stuff to build 6 months later
+> something has changed and it's broken again.
+
+> [!WARNING]
+> You'll need to Qt5 in order to build the Editor. Qt company uses dark patterns 
+> to try to trick you to purchase the paid version. Be careful!
 
 > [!IMPORTANT]
 > CMake 4x is not supported but you MUST have CMake 3.x
-> A known working CMake version is 3.31.6
+> A known working CMake version is 3.31.6. These fools always break this.
+> A common characteristics of a solid good quality tool is that it *just works*. 
+> CMake isn't it. 
 
 ### Build Steps:
 1. First build the engine and editor for your target platform.
@@ -30,8 +44,7 @@ Build Instructions 👨🏼‍💻
 
 ## Step 1) Building the Editor & Engine for Desktop Windows 🪟
 
-> [!IMPORTANT]
-> These build instructions are for MSVS 2019 Community Edition 64bit build.
+<strong>These build instructions are for 'MSVS 2022 Community Edition'</strong>
 
 <details><summary>How to install dependencies</summary>
 
@@ -39,29 +52,64 @@ Build Instructions 👨🏼‍💻
   https://git-scm.com/download/win
 
 
-- Install Microsoft Visual Studio 2019 Community<br>
+- Install Microsoft Visual Studio 2022 Community<br>
   https://www.visualstudio.com/downloads/
-
+ 
 
 - Install prebuilt Qt 5.15.2<br>
-  If the link doesn't work you'll need to create an account with the Qt company<br>
-  and download the installer for the LGPL version (they like to hide this) from their site.<br>
-  http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
+  The Qt Company no longer offers an offline installer but rather force you to 
+  use their shitty Online installer that requires an account with them.
+  https://www.qt.io/download-qt-installer-oss
 
 
 - Install Conan package manager (VERSION 2)<br>
-  https://docs.conan.io/en/latest/installation.html
+  https://github.com/conan-io/conan/releases/tag/2.19.1
+  
+ On first start you will likely need to generate a new conan profile:
+```
+  $ where conan 
+  $ c:\Users\samiv\AppData\LocalData\Conan\conan.exe
+  $ conan --version
+  $ Conan version 2.19.1
+  $ conan profile detect
+```  
 
+Open the profile file in `c:\Users\username\.conan2\profile\default` and make sure that
+`compiler.cppstd` is set to `17`.
+
+  ```
+  [settings]
+  arch=x86_64
+  build_type=Release
+  compiler=msvc
+  compiler.cppstd=17
+  compiler.runtime=dynamic
+  compiler.version=194
+  os=Windows
+  ```
 
 - Install CMake build tool<br>
-  https://cmake.org/install/
+  These fools have broken something and CMake 4x doesn't work so make sure to use CMake 3x instead. 
+- Below is a direct link which I expect will be invalid by the time you read this.<br>
+  https://github.com/Kitware/CMake/releases/download/v3.31.8/cmake-3.31.8-windows-x86_64.msi
+
+  
+- Install Python 3.13.x 💩💩<br>
+  Make sure that you check "Add Python to PATH" option when installing.<br>
+  https://www.python.org/ftp/python/3.13.5/python-3.13.5-amd64.exe
+
+  ```
+  $ where python
+  $ C:\Users\username\AppData\Local\Programs\Python\Python313\Python.exe
+  $ python --version
+  $ Python 3.13.5
+  ```
 
 </details>
 
-
 <details><summary>How to build the project in RELEASE</summary>
 
-- Open `Developer Command Prompt for VS 2019`
+- Open `x64 Native Tools Command Prompt for VS 2022`
 
 ```
   $ git clone https://github.com/ensisoft/detonator
@@ -70,20 +118,36 @@ Build Instructions 👨🏼‍💻
   $ mkdir build
   $ cd build
   $ conan install .. --output-folder=conan --build missing
-  $ cmake -G "Visual Studio 16 2019" .. -DCMAKE_BUILD_TYPE=Release  -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
+  $ cmake -G "Visual Studio 17 2022" .. -DCMAKE_BUILD_TYPE=Release  -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
   $ cmake --build   . --config Release
   $ cmake --install . --config Release
 ```
+
+If the build completed successfully and this is the first build then Qt libraries
+must be copied manually from `c:\Qt\5.15.2\msvc2019_64\`to `editor\dist`.
+* bin\libGLESv2.dll
+* bin\libEGL.dll
+* bin\Qt5Core.dll
+* bin\Qt5Gui.dll
+* bin\Qt5Network.dll
+* bin\Qt5OpenGL.dll
+* bin\Qt5Widgets.dll
+* bin\Qt5WinExtras.dll
+* bin\Qt5Xml.dll
+* bin\Qt5Svg.dll
+* plugins\platforms (whole folder)
+* plugins\imageformats (whole folder)
+* plugins\styles (whole folder, optional)
 
 </details>
 
 <details><summary>How to build the project in DEBUG [OPTIONAL]</summary>
 
+> [!NOTE]
 > Note that on MSVS the library interfaces change between debug/release build configs. (e.g. iterator debug levels).
 > This means that in order to link to 3rd party libraries the debug versions of those libraries must be used.
 
-
-- Open `Developer Command Prompt for VS 2019`
+- Open `x64 Native Tools Command Prompt for VS 2022`
 
 ```
   $ git clone https://github.com/ensisoft/detonator
@@ -92,10 +156,26 @@ Build Instructions 👨🏼‍💻
   $ mkdir build_d
   $ cd build_d
   $ conan install .. --output-folder=conan --build missing -s build_type=Debug
-  $ cmake -G "Visual Studio 16 2019" .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
+  $ cmake -G "Visual Studio 17 2022" .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
   $ cmake --build   . --config Debug
   $ cmake --install . --config Debug
 ```
+If the build completed successfully and this is the first build then Qt libraries
+must be copied manually from `c:\Qt\5.15.2\msvc2019_64\`to `editor\dist`.
+* bin\libGLESv2d.dll
+* bin\libEGLd.dll
+* bin\Qt5Core.dll
+* bin\Qt5Guid.dll
+* bin\Qt5Networkd.dll
+* bin\Qt5OpenGLd.dll
+* bin\Qt5Widgetsd.dll
+* bin\Qt5WinExtrasd.dll
+* bin\Qt5Xmld.dll
+* bin\Qt5Svgd.dll
+* plugins\platforms (whole folder)
+* plugins\imageformats (whole folder)
+* plugins\styles (whole folder, optional)
+
 
 </details>
 

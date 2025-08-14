@@ -80,6 +80,7 @@ If you want to remove the app simply:
 
 If you want to:
 
+* Write native (C++) game code
 * Use the latest development version
 * Use Detonator on LINUX
 * Hack on the engine or the editor
