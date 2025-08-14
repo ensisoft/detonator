@@ -410,7 +410,7 @@ public:
         mEntityIds = mState.workspace->ListUserDefinedEntityIds();
         for (mCurrentEntityIdIndex=0; mCurrentEntityIdIndex<mEntityIds.size(); ++mCurrentEntityIdIndex)
         {
-            if (mEntityIds[mCurrentEntityIdIndex] == app::FromUtf8(klass->GetId()))
+            if (mEntityIds[mCurrentEntityIdIndex] == app::FromUtf8(mClass->GetId()))
                 break;
         }
         StartNextPlacement();
