@@ -2417,8 +2417,6 @@ public:
         {
             gfx::MaterialClass material(gfx::MaterialClass::Type::Color);
             material.SetShaderSrc(R"(
-varying vec2 vTexCoord;
-
 float sRGB_decode(float value)
 {
     return value <= 0.04045
@@ -2435,12 +2433,13 @@ vec4 sRGB_decode(vec4 color)
    return ret;
 }
 
-void FragmentShaderMain()
+void CustomFragmentShaderMain()
 {
     float color;
 
-    float x = vTexCoord.x;
-    float y = vTexCoord.y;
+    vec2 coords = GetTextureCoords();
+    float x = coords.x;
+    float y = coords.y;
     if (x < 0.5)
     {
       if (y < 0.5)
