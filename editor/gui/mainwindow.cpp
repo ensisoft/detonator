@@ -835,18 +835,22 @@ void MainWindow::CloseWorkspace()
         return;
     }
 
-    // todo: show a dialog here.
-    if (mThreadPool->HasPendingTasks())
+    // move the resource cache to this local variable. make sure that
+    // nothing will queue more work (accidentally) when calling Qt
+    // processEvents into the resource cache while we're closing.
+    auto resource_cache = std::move(mResourceCache);
+    
+    if (mThreadPool->HasPendingTasks() || resource_cache && resource_cache->HasPendingWork())
     {
         DlgProgress dlg(this);
-        dlg.setWindowTitle("Closing workspace...");
-        dlg.setWindowModality(Qt::WindowModal);
-        dlg.EnqueueUpdate("Closing workspace...", 0, 0);
-        dlg.show();
+            dlg.setWindowTitle("Closing workspace...");
+            dlg.setWindowModality(Qt::WindowModal);
+            dlg.EnqueueUpdate("Closing workspace...", 0, 0);
+            dlg.show();
 
-        while (mResourceCache && mResourceCache->HasPendingWork())
+        while (resource_cache && resource_cache->HasPendingWork())
         {
-            if (const auto& handle = mResourceCache->GetFirstTask())
+            if (const auto& handle = resource_cache->GetFirstTask())
             {
                 SetValue(mUI.worker, handle.GetTaskDescription());
                 for (auto* child: mChildWindows)
@@ -854,7 +858,7 @@ void MainWindow::CloseWorkspace()
             }
 
             mThreadPool->ExecuteMainThread();
-            mResourceCache->TickPendingWork();
+            resource_cache->TickPendingWork();
 
             QApplication::processEvents();
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -874,7 +878,7 @@ void MainWindow::CloseWorkspace()
         }
     }
 
-    mResourceCache.reset();
+    resource_cache.reset();
 
     // note that here we don't care about saving any state.
     // this is only for closing everything, closing the tabs
