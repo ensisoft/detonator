@@ -1442,6 +1442,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "scripting_group", mUI.scripting);
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
+    GetUserProperty(resource, "node_property_group", mUI.nodePropertiesGroup);
+    GetUserProperty(resource, "node_transform_group", mUI.nodeTransformGroup);
     GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
     GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
@@ -1526,7 +1528,7 @@ void EntityWidget::InitializeSettings(const UISettings& settings)
         QList<int> sizes;
         sizes << mUI.leftLayout->sizeHint().width();
         sizes << mUI.center->sizeHint().width();
-        sizes << mUI.rightSplitter->sizeHint().width();
+        sizes << mUI.rightSplitter->sizeHint().width() + 150;
         mUI.mainSplitter->setSizes(sizes);
     });
 }
@@ -1542,17 +1544,16 @@ void EntityWidget::SetViewerMode()
     SetVisible(mUI.renderTree,      false);
     SetVisible(mUI.nodeProperties,  false);
     SetVisible(mUI.nodeTransform,   false);
-    SetVisible(mUI.nodeItems,       false);
     SetVisible(mUI.cmbGrid,         false);
     SetVisible(mUI.btnHamburger,    false);
     SetVisible(mUI.help,            false);
     SetVisible(mUI.renderTree,      false);
     SetVisible(mUI.nodeProperties,  false);
     SetVisible(mUI.nodeTransform,   false);
-    SetVisible(mUI.nodeItems,       false);
     SetVisible(mUI.nodeScrollArea,  false);
     SetVisible(mUI.cmbStyle,        false);
     SetVisible(mButtonBar,          false);
+    SetVisible(mUI.nodeScrollAreaWidgetContents, false),
 
     SetValue(mUI.chkShowGrid,       false);
     SetValue(mUI.chkShowOrigin,     false);
@@ -1663,6 +1664,8 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Entity", mUI.joints);
     settings.SaveWidget("Entity", mUI.mainSplitter);
     settings.SaveWidget("Entity", mUI.rightSplitter);
+    settings.SaveWidget("Entity", mUI.nodePropertiesGroup);
+    settings.SaveWidget("Entity", mUI.nodeTransformGroup);
     return true;
 }
 bool EntityWidget::LoadState(const Settings& settings)
@@ -1691,6 +1694,8 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Entity", mUI.joints);
     settings.LoadWidget("Entity", mUI.mainSplitter);
     settings.LoadWidget("Entity", mUI.rightSplitter);
+    settings.LoadWidget("Entity", mUI.nodePropertiesGroup);
+    settings.LoadWidget("Entity", mUI.nodeTransformGroup);
 
     game::EntityClass klass;
     if (!klass.FromJson(json))
@@ -2227,6 +2232,8 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "scripting_group", mUI.scripting);
     SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
+    SetUserProperty(resource, "node_property_group", mUI.nodePropertiesGroup);
+    SetUserProperty(resource, "node_transform_group", mUI.nodeTransformGroup);
 
     // save the track properties.
     for (const auto& [id, props] : mTrackProperties)
@@ -4995,10 +5002,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tfAccelY, 0.0f);
     SetValue(mUI.tfAccelA, 0.0f);
     SetValue(mUI.tfEnabled, false);
-    SetEnabled(mUI.nodeProperties, false);
-    SetEnabled(mUI.nodeTransform,  false);
-    SetEnabled(mUI.nodeItems,      false);
-    SetEnabled(mUI.btnAddNodeItem, false);
+    SetEnabled(mUI.nodeScrollAreaWidgetContents, false);
 
     SetEnabled(mUI.actionAddDrawable,    true);
     SetEnabled(mUI.actionAddTextItem,    true);
@@ -5024,7 +5028,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     {
         SetEnabled(mUI.nodeProperties, true);
         SetEnabled(mUI.nodeTransform,  true);
-        SetEnabled(mUI.nodeItems,      true);
+        SetEnabled(mUI.nodeScrollAreaWidgetContents, true);
         SetEnabled(mUI.btnAddNodeItem, true);
 
         const auto& translate = node->GetTranslation();
