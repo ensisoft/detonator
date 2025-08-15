@@ -1355,6 +1355,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::SplineMoverClass::PathCoordinateSpace>(mUI.splineCoordSpace);
     PopulateFromEnum<game::SplineMoverClass::PathCurveType>(mUI.splineCurveType);
     PopulateFromEnum<game::SplineMoverClass::RotationMode>(mUI.splineRotation);
+    PopulateFromEnum<game::SplineMoverClass::IterationMode>(mUI.splineLooping);
     PopulateFontNames(mUI.tiFontName);
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
@@ -3639,6 +3640,11 @@ void EntityWidget::on_splineRotation_currentIndexChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_splineLooping_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_splineSpeed_valueChanged(double value)
 {
     UpdateCurrentNodeProperties();
@@ -4991,6 +4997,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.splineCoordSpace, game::SplineMoverClass::PathCoordinateSpace::Absolute);
     SetValue(mUI.splineCurveType, game::SplineMoverClass::PathCurveType::CatmullRom);
     SetValue(mUI.splineRotation, game::SplineMoverClass::RotationMode::ApplySplineRotation);
+    SetValue(mUI.splineLooping, game::SplineMoverClass::IterationMode::Once);
     SetValue(mUI.splineSpeed, 0.0f);
     SetValue(mUI.splineAcceleration, 0.0f);
 
@@ -5209,6 +5216,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.splineCoordSpace, mover->GetPathCoordinateSpace());
             SetValue(mUI.splineCurveType, mover->GetPathCurveType());
             SetValue(mUI.splineRotation, mover->GetRotationMode());
+            SetValue(mUI.splineLooping, mover->GetIterationMode());
             SetValue(mUI.splineSpeed, mover->GetSpeed());
             SetValue(mUI.splineAcceleration, mover->GetAcceleration());
             mSplineModel->Reset(mover);
@@ -5439,6 +5447,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         mover->SetPathCoordinateSpace(GetValue(mUI.splineCoordSpace));
         mover->SetPathCurveType(GetValue(mUI.splineCurveType));
         mover->SetRotationMode(GetValue(mUI.splineRotation));
+        mover->SetIterationMode(GetValue(mUI.splineLooping));
         mover->SetSpeed(GetValue(mUI.splineSpeed));
         mover->SetAcceleration(GetValue(mUI.splineAcceleration));
     }

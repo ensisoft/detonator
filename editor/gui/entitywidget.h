@@ -288,6 +288,7 @@ namespace gui
         void on_splineCoordSpace_currentIndexChanged(int);
         void on_splineCurveType_currentIndexChanged(int);
         void on_splineRotation_currentIndexChanged(int);
+        void on_splineLooping_currentIndexChanged(int);
         void on_splineSpeed_valueChanged(double value);
         void on_splineAcceleration_valueChanged(double value);
 
