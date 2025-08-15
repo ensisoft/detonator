@@ -354,6 +354,19 @@ std::string TranslateEnum(SplineMoverClass::RotationMode mode)
     return "???";
 }
 
+std::string TranslateEnum(SplineMoverClass::IterationMode mode)
+{
+    using I = SplineMoverClass::IterationMode;
+    if (mode == I::Once)
+        return "Once";
+    else if (mode == I::PingPong)
+        return "Ping Pong";
+    else if (mode == I::Loop)
+        return "Loop";
+    else BUG("Missing translation");
+    return "???";
+}
+
 } // namespace
 
 namespace math

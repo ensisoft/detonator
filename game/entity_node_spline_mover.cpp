@@ -74,6 +74,7 @@ size_t SplineMoverClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mSpeed);
     hash = base::hash_combine(hash, mAcceleration);
     hash = base::hash_combine(hash, mRotationMode);
+    hash = base::hash_combine(hash, mIterationMode);
     return hash;
 }
 
@@ -83,6 +84,7 @@ void SplineMoverClass::IntoJson(data::Writer& data) const
     data.Write("path-coordinate-space", mPathCoordinateSpace);
     data.Write("path-curve-type"      , mPathCurveType);
     data.Write("rotation-mode"        , mRotationMode);
+    data.Write("iteration-mode"       , mIterationMode);
     data.Write("acceleration"         , mAcceleration);
     data.Write("speed"                , mSpeed);
 }
@@ -94,6 +96,7 @@ bool SplineMoverClass::FromJson(const data::Reader& data)
     ok &= data.Read("path-coordinate-space", &mPathCoordinateSpace);
     ok &= data.Read("path-curve-type"      , &mPathCurveType);
     ok &= data.Read("rotation-mode"        , &mRotationMode);
+    ok &= data.Read("iteration-mode"       , &mIterationMode);
     ok &= data.Read("acceleration"         , &mAcceleration);
     ok &= data.Read("speed"                , &mSpeed);
     return ok;

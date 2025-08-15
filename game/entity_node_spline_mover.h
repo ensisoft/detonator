@@ -55,9 +55,23 @@ namespace game
             IgnoreSplineRotation
         };
 
+        enum class IterationMode {
+            // Run the spline once from beginning to the end
+            Once,
+            // Run the spline from beginning to the end and then
+            // back indefinitely
+            PingPong,
+            // Run the spline from beginning to the end and then
+            // return to the beginning for the next iteration
+            Loop
+        };
+
         using CatmullRomFunction = Spline::CatmullRomFunction;
 
         ~SplineMoverClass();
+
+        inline auto GetIterationMode() const noexcept
+        { return mIterationMode; }
 
         inline auto GetRotationMode() const noexcept
         { return mRotationMode; }
@@ -125,6 +139,9 @@ namespace game
         inline void SetRotationMode(RotationMode rotation) noexcept
         { mRotationMode = rotation; }
 
+        inline void SetIterationMode(IterationMode mode) noexcept
+        { mIterationMode = mode; }
+
         std::shared_ptr<const CatmullRomFunction> GetCatmullRom() const;
         std::shared_ptr<const CatmullRomFunction> MakeCatmullRom() const;
 
@@ -150,6 +167,7 @@ namespace game
         PathCoordinateSpace mPathCoordinateSpace = PathCoordinateSpace::Absolute;
         PathCurveType mPathCurveType = PathCurveType::CatmullRom;
         RotationMode mRotationMode = RotationMode::ApplySplineRotation;
+        IterationMode mIterationMode = IterationMode::Once;
         Spline mSpline;
         float mSpeed = 0.0f;
         float mAcceleration = 0.0f;
@@ -158,6 +176,7 @@ namespace game
     class SplineMover
     {
     public:
+        using IterationMode       = SplineMoverClass::IterationMode;
         using RotationMode        = SplineMoverClass::RotationMode;
         using PathCoordinateSpace = SplineMoverClass::PathCoordinateSpace;
         using CatmullRomFunction  = SplineMoverClass::CatmullRomFunction;
@@ -170,11 +189,39 @@ namespace game
             if (!mCatmullRom || mPathComplete)
                 return;
 
+            const auto iteration_mode = mClass->GetIterationMode();
+
             // integrate, euler
             mSpeed += (mAcceleration * dt);
-            mDisplacement += (dt * mSpeed);
+            mDisplacement += (dt * mSpeed * mDirection);
 
-            mDisplacement = math::clamp(0.0f, mPathLength, mDisplacement);
+            if (iteration_mode == IterationMode::Once)
+            {
+                mDisplacement = math::clamp(0.0f, mPathLength, mDisplacement);
+            }
+            else if (iteration_mode == IterationMode::PingPong)
+            {
+                if (mDisplacement > mPathLength)
+                {
+                    const auto diff = mDisplacement - mPathLength;
+                    mDisplacement = mPathLength - diff;
+                    mDirection = -1.0f;
+                }
+                else if (mDisplacement < 0.0f)
+                {
+                    mDisplacement = std::abs(mDisplacement);
+                    mDirection = 1.0f;
+                }
+            }
+            else if (iteration_mode == IterationMode::Loop)
+            {
+                if (mDisplacement > mPathLength)
+                {
+                    const auto diff = mDisplacement - mPathLength;
+                    mDisplacement = diff;
+                    mDirection = 1.0;
+                }
+            } else BUG("Bug on iteration mode");
 
             // normalize displacement.
             const float t = mDisplacement / mPathLength;
@@ -232,6 +279,7 @@ namespace game
         std::shared_ptr<const SplineMoverClass> mClass;
         std::shared_ptr<const CatmullRomFunction> mCatmullRom;
         Float2 mStartPos;
+        float mDirection    = 1.0f;
         float mSpeed        = 0.0f;
         float mAcceleration = 0.0f;
         float mDisplacement = 0.0f;
