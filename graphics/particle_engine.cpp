@@ -605,8 +605,14 @@ void ParticleEngineClass::Emit(const Environment& env, InstanceStatePtr ptr, int
 {
     if (count < 0)
         return;
+    if (mParams->mode != SpawnPolicy::Command)
+    {
+        WARN("Ignoring emit particle command since spawn policy is not set to emit on command. [name='%1', mode='%2']",
+            mName, mParams->mode);
+        return;
+    }
 
-    InitParticles(env, ptr, size_t(count));
+    InitParticles(env, std::move(ptr), static_cast<size_t>(count));
 }
 
 // ParticleEngine implementation. Restart the simulation
@@ -1200,7 +1206,7 @@ void ParticleEngineInstance::Restart(const Environment& env)
 
 void ParticleEngineInstance::Execute(const Environment& env, const Command& cmd)
 {
-    if (cmd.name == "EmitParticles")
+    if (cmd.name == "EmitParticles" && mClass->GetParams().mode == ParticleEngineClass::SpawnPolicy::Command)
     {
         if (const auto* count = base::SafeFind(cmd.args, std::string("count")))
         {
