@@ -1998,6 +1998,10 @@ public:
         // depth testing
         SetState(state.depth_test);
 
+        const auto current_stencil_func = mColorDepthStencilState.stencil_func;
+        const auto current_stencil_ref  = mColorDepthStencilState.stencil_ref;
+        const auto current_stencil_mask = mColorDepthStencilState.stencil_mask;
+
         if (mColorDepthStencilState.stencil_func != state.stencil_func)
         {
             if (state.stencil_func == dev::StencilFunc::Disabled)
@@ -2014,9 +2018,9 @@ public:
 
         if (mColorDepthStencilState.stencil_func != dev::StencilFunc::Disabled)
         {
-            if (mColorDepthStencilState.stencil_func != state.stencil_func ||
-                mColorDepthStencilState.stencil_ref != state.stencil_ref ||
-                mColorDepthStencilState.stencil_mask != state.stencil_mask)
+            if (current_stencil_func != state.stencil_func ||
+                current_stencil_ref != state.stencil_ref ||
+                current_stencil_mask != state.stencil_mask)
             {
                 const auto stencil_func = GetEnum(state.stencil_func);
 
