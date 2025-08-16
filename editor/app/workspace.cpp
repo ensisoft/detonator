@@ -1924,7 +1924,7 @@ Resource& Workspace::GetUserDefinedResource(size_t index)
     return *mResources[index];
 }
 
-Resource* Workspace::FindResourceById(const QString &id)
+Resource* Workspace::FindResourceById(const AnyString& id)
 {
     for (auto& res : mResources)
     {
@@ -1974,7 +1974,7 @@ const Resource& Workspace::GetResourceByName(const QString& name, Resource::Type
     BUG("No such resource");
 }
 
-const Resource* Workspace::FindResourceById(const QString &id) const
+const Resource* Workspace::FindResourceById(const AnyString &id) const
 {
     for (const auto& res : mResources)
     {

@@ -1946,7 +1946,7 @@ void ParticleEditorWidget::OnUpdateResource(const app::Resource* resource)
         {
             mMaterialClass = resource->GetContent<gfx::MaterialClass>()->Copy();
             mMaterial.reset();
-            DEBUG("Particle editor material was changed!");
+            DEBUG("Particle editor material was changed! [name='%1']", GetValue(mUI.name));
             ShowParams();
         }
         else if (mMaterial && mMaterial->GetClassId() == resource->GetIdUtf8())

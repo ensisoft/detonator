@@ -277,14 +277,14 @@ namespace app
         // Get a resource identified by id. The resource must exist.
         Resource& GetResourceById(const QString& id);
         // Find resource by id. Returns nullptr if it doesn't exist.
-        Resource* FindResourceById(const QString& id);
+        Resource* FindResourceById(const AnyString& id);
         // Find resource by name and type. Returns nullptr if not found.
         Resource* FindResourceByName(const QString& name, Resource::Type type);
         // Get a resource identified by name and type.
         // The resource must exist.
         const Resource& GetResourceByName(const QString& name, Resource::Type type) const;
         // Find resource by id. Returns nullptr if it doesn't exist.
-        const Resource* FindResourceById(const QString& id) const;
+        const Resource* FindResourceById(const AnyString& id) const;
         // Find resource by name and type. Returns nullptr if not found.
         const Resource* FindResourceByName(const QString& name, Resource::Type type) const;
         // Get resource at a specific index in the list of all resources.

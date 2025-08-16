@@ -56,27 +56,27 @@ namespace gui
     public:
         MaterialWidget(app::Workspace* workspace);
         MaterialWidget(app::Workspace* workspace, const app::Resource& resource);
-       ~MaterialWidget();
+       ~MaterialWidget() override;;
 
-        virtual QString GetId() const override;
-        virtual QImage TakeScreenshot() const override;
-        virtual void InitializeSettings(const UISettings& settings) override;
-        virtual void SetViewerMode() override;
-        virtual void AddActions(QToolBar& bar) override;
-        virtual void AddActions(QMenu& menu) override;
-        virtual bool SaveState(Settings& settings) const override;
-        virtual bool LoadState(const Settings& settings) override;
-        virtual bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
-        virtual void ZoomIn() override;
-        virtual void ZoomOut() override;
-        virtual void ReloadShaders() override;
-        virtual void ReloadTextures() override;
-        virtual void Shutdown() override;
-        virtual void Update(double dt) override;
-        virtual void Render() override;
-        virtual void Save() override;
-        virtual bool HasUnsavedChanges() const override;
-        virtual bool GetStats(Stats* stats) const override;
+        QString GetId() const override;
+        QImage TakeScreenshot() const override;
+        void InitializeSettings(const UISettings& settings) override;
+        void SetViewerMode() override;
+        void AddActions(QToolBar& bar) override;
+        void AddActions(QMenu& menu) override;
+        bool SaveState(Settings& settings) const override;
+        bool LoadState(const Settings& settings) override;
+        bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
+        void ZoomIn() override;
+        void ZoomOut() override;
+        void ReloadShaders() override;
+        void ReloadTextures() override;
+        void Shutdown() override;
+        void Update(double dt) override;
+        void Render() override;
+        void Save() override;
+        bool HasUnsavedChanges() const override;
+        bool GetStats(Stats* stats) const override;
     private slots:
         void on_widgetColor_colorChanged(QColor color);
         void on_actionPlay_triggered();
