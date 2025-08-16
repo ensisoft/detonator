@@ -196,7 +196,11 @@ namespace gfx
             float max_time = std::numeric_limits<float>::max();
             // the minimum time the simulation will be alive even if
             // there are no particles.
-            float min_time = 0;
+            float min_time = 0.0f;
+            // The time to "dry run" the simulation before rendering it.
+            // Useful for getting the simulation into some "Primed" state
+            // before visually showing them to the user.
+            float warmup_time = 0.0f;
             // the number of particles this engine shall create
             // the behaviour of this parameter depends on the spawn mode.
             float num_particles = 100;
@@ -419,7 +423,5 @@ namespace gfx
         // particle engine state
         std::shared_ptr<ParticleEngineClass::InstanceState> mState;
     };
-
-
 
 } // namespace

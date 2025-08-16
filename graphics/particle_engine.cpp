@@ -483,6 +483,7 @@ void ParticleEngineClass::IntoJson(data::Writer& data) const
     data.Write("delay",                        mParams->delay);
     data.Write("min_time",                     mParams->min_time);
     data.Write("max_time",                     mParams->max_time);
+    data.Write("warmup_time",                  mParams->warmup_time);
     data.Write("num_particles",                mParams->num_particles);
     data.Write("min_lifetime",                 mParams->min_lifetime);
     data.Write("max_lifetime",                 mParams->max_lifetime);
@@ -552,6 +553,8 @@ bool ParticleEngineClass::FromJson(const data::Reader& data)
 
     if (data.HasValue("flags"))
         ok &= data.Read("flags", &params.flags);
+    if (data.HasValue("warmup_time"))
+        ok &= data.Read("warmup_time", &params.warmup_time);
 
     SetParams(params);
     return ok;
@@ -690,7 +693,7 @@ void ParticleEngineClass::UpdateParticles(const Environment& env, InstanceStateP
           , mTimeStep(dt)
         {}
     protected:
-        virtual void DoTask() override
+        void DoTask() override
         {
             const auto& env = mEnvironment.ToEnv();
             const auto& params = *mEngineParams;
@@ -1202,6 +1205,21 @@ bool ParticleEngineInstance::IsAlive() const
 void ParticleEngineInstance::Restart(const Environment& env)
 {
     mClass->Restart(env, mState);
+
+    // consume the initial warmup time (if any) by doing successive
+    // updates which then simulate the particle system to a certain
+    // approximate initial state. This is useful to help get the
+    // particles to a visually more desirable certain state that only
+    // appears after some time has passed.
+
+    float warmup_time = mClass->GetParams().warmup_time;
+
+    while (warmup_time > 0.0f)
+    {
+        const auto dt = 1.0f / 60.0f;
+        mClass->Update(env, mState, dt);
+        warmup_time -= dt;
+    }
 }
 
 void ParticleEngineInstance::Execute(const Environment& env, const Command& cmd)
