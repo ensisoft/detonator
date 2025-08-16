@@ -28,7 +28,7 @@
 #include <unordered_map>
 
 #include "game/types.h"
-#include "game/animation.h"
+#include "game/timeline_animation.h"
 #include "engine/runtime.h"
 #include "engine/action.h"
 

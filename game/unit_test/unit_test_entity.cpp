@@ -41,8 +41,8 @@
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_tilemap_node.h"
 #include "game/entity_node_light.h"
-#include "game/transform_animator.h"
-#include "game/property_animator.h"
+#include "game/timeline_transform_animator.h"
+#include "game/timeline_property_animator.h"
 
 // build easily comparable representation of the render tree
 // by concatenating node names into a string in the order

@@ -30,8 +30,8 @@
 
 #include "base/assert.h"
 #include "data/chunk.h"
-#include "game/animator.h"
-#include "game/animation.h"
+#include "game/timeline_animator.h"
+#include "game/timeline_animation.h"
 #include "game/entity_state_controller.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"

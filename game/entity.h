@@ -39,12 +39,12 @@
 #include "game/tree.h"
 #include "game/types.h"
 #include "game/enum.h"
-#include "game/animation.h"
 #include "game/color.h"
 #include "game/scriptvar.h"
 #include "game/entity_node.h"
 #include "game/entity_node_rigid_body_joint.h"
 #include "game/entity_state_controller.h"
+#include "game/timeline_animation.h"
 
 namespace game
 {

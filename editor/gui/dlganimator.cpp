@@ -26,7 +26,7 @@
 
 #include <cmath>
 
-#include "game/animation.h"
+#include "game/timeline_animation.h"
 #include "game/entity.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"

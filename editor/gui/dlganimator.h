@@ -27,7 +27,7 @@
 #include <memory>
 
 #include "game/entity.h"
-#include "game/animation.h"
+#include "game/entity_state_controller.h"
 
 namespace gui
 {

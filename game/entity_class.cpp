@@ -23,7 +23,8 @@
 #include "data/writer.h"
 #include "game/util.h"
 #include "game/treeop.h"
-#include "game/animation.h"
+#include "game/timeline_animation.h"
+#include "game/timeline_property_animator.h"
 #include "game/scriptvar.h"
 #include "game/entity_class.h"
 #include "game/entity_state_controller.h"
@@ -31,7 +32,6 @@
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_linear_mover.h"
 #include "game/entity_node_spline_mover.h"
-#include "game/property_animator.h"
 
 namespace {
     struct ClassRuntime {
