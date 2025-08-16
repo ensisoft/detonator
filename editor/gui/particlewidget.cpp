@@ -910,6 +910,7 @@ void ParticleEditorWidget::SetParams()
     params.direction_sector_size            = qDegreesToRadians((float)mUI.dirSizeAngle->value());
     params.min_lifetime                     = GetValue(mUI.minLifetime);
     params.max_lifetime                     = GetValue(mUI.maxLifetime);
+    params.warmup_time                      = GetValue(mUI.warmupTime);
 
     params.min_time = GetValue(mUI.minTime);
     params.max_time = GetValue(mUI.maxTime);
@@ -959,6 +960,7 @@ void ParticleEditorWidget::ShowParams()
     SetValue(mUI.gravityY,            params.gravity.y);
     SetValue(mUI.minLifetime,         params.min_lifetime);
     SetValue(mUI.maxLifetime,         params.max_lifetime);
+    SetValue(mUI.warmupTime,          params.warmup_time);
     SetValue(mUI.minPointsize,        params.min_point_size);
     SetValue(mUI.maxPointsize,        params.max_point_size);
     SetValue(mUI.minAlpha,            params.min_alpha);
@@ -1424,6 +1426,10 @@ void ParticleEditorWidget::on_minTime_valueChanged(double)
 void ParticleEditorWidget::on_maxTime_valueChanged(double)
 {
     SetParams();
+}
+void ParticleEditorWidget::on_warmupTime_valueChanged(double)
+{
+    SetParams();;
 }
 
 void ParticleEditorWidget::on_delay_valueChanged(double)

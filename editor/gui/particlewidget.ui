@@ -306,6 +306,16 @@
           <item row="2" column="1">
            <widget class="QComboBox" name="primitive"/>
           </item>
+          <item row="13" column="0">
+           <widget class="QLabel" name="label_42">
+            <property name="text">
+             <string>Warmup time</string>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="1">
+           <widget class="QDoubleSpinBox" name="warmupTime"/>
+          </item>
          </layout>
         </widget>
        </item>
@@ -334,8 +344,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>327</width>
-            <height>867</height>
+            <width>331</width>
+            <height>830</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1271,7 +1281,7 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
-          <widget class="gui::GfxWidget" name="widget" native="true">
+          <widget class="gui::GfxWidget" name="widget">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>

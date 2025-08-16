@@ -107,6 +107,7 @@ namespace gui
         void on_gravityY_valueChanged(double);
         void on_minTime_valueChanged(double);
         void on_maxTime_valueChanged(double);
+        void on_warmupTime_valueChanged(double);
         void on_delay_valueChanged(double);
         void on_btnResetMinTime_clicked();
         void on_btnResetMaxTime_clicked();
