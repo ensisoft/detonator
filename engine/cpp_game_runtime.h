@@ -22,7 +22,7 @@
 
 #include "game/fwd.h"
 #include "game/types.h"
-#include "game/animation.h"
+#include "game/timeline_animation.h"
 #include "engine/runtime.h"
 #include "engine/action.h"
 #include "engine/entity_script.h"

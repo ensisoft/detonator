@@ -19,7 +19,7 @@
 #include "base/hash.h"
 #include "data/writer.h"
 #include "data/reader.h"
-#include "game/kinematic_animator.h"
+#include "game/timeline_kinematic_animator.h"
 #include "game/entity_node.h"
 #include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body.h"

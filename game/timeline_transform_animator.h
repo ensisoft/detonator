@@ -22,7 +22,7 @@
 #  include <glm/vec2.hpp>
 #include "warnpop.h"
 
-#include "game/animator_base.h"
+#include "game/timeline_animator_base.h"
 
 #include "base/snafu.h"
 

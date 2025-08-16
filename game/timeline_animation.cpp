@@ -21,13 +21,13 @@
 #include "base/utility.h"
 #include "data/writer.h"
 #include "data/reader.h"
-#include "game/animation.h"
-#include "game/animator.h"
-#include "game/transform_animator.h"
-#include "game/kinematic_animator.h"
-#include "game/material_animator.h"
-#include "game/property_animator.h"
 #include "game/entity.h"
+#include "game/timeline_animation.h"
+#include "game/timeline_animator.h"
+#include "game/timeline_transform_animator.h"
+#include "game/timeline_kinematic_animator.h"
+#include "game/timeline_material_animator.h"
+#include "game/timeline_property_animator.h"
 
 namespace game
 {

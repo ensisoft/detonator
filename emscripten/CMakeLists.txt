@@ -114,12 +114,12 @@ add_executable(UnitTest
     ../engine/lua_wdk.cpp
     ../engine/physics.cpp
     ../engine/state.cpp
-    ../game/animator.cpp
-    ../game/transform_animator.cpp
-    ../game/kinematic_animator.cpp
-    ../game/material_animator.cpp
-    ../game/property_animator.cpp
-    ../game/animation.cpp
+    ../game/timeline_animator.cpp
+    ../game/timeline_transform_animator.cpp
+    ../game/timeline_kinematic_animator.cpp
+    ../game/timeline_material_animator.cpp
+    ../game/timeline_property_animator.cpp
+    ../game/timeline_animation.cpp
     ../game/entity.cpp
     ../game/entity_class.cpp
     ../game/entity_node.cpp
@@ -291,8 +291,8 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../base/utility.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../data/json.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../data/io.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/../game/animation.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/../game/animator.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/timeline_animation.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/timeline_animator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_class.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node.cpp
@@ -309,9 +309,9 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_spline_mover.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_state.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_state_controller.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/../game/kinematic_animator.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/../game/material_animator.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/../game/property_animator.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/timeline_kinematic_animator.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/timeline_material_animator.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/timeline_property_animator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/scene_class.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/scene.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/scriptvar.cpp
@@ -319,7 +319,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../game/tilemap.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/tilemap_layer.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/tilemap_layer_class.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/../game/transform_animator.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/timeline_transform_animator.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../engine/audio.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../engine/camera.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../engine/context.cpp

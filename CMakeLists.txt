@@ -291,8 +291,8 @@ add_library(GfxLib
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp)
 add_library(GameLib
-    game/animation.cpp
-    game/animator.cpp
+    game/timeline_animation.cpp
+    game/timeline_animator.cpp
     game/entity.cpp
     game/entity_class.cpp
     game/entity_node.cpp
@@ -309,9 +309,9 @@ add_library(GameLib
     game/entity_placement.cpp
     game/entity_state.cpp
     game/entity_state_controller.cpp
-    game/kinematic_animator.cpp
-    game/material_animator.cpp
-    game/property_animator.cpp
+    game/timeline_kinematic_animator.cpp
+    game/timeline_material_animator.cpp
+    game/timeline_property_animator.cpp
     game/scene.cpp
     game/scene_class.cpp
     game/scriptvar.cpp
@@ -319,7 +319,7 @@ add_library(GameLib
     game/tilemap.cpp
     game/tilemap_layer.cpp
     game/tilemap_layer_class.cpp
-    game/transform_animator.cpp)
+    game/timeline_transform_animator.cpp)
 add_library(EngineLib
     engine/audio.cpp
     engine/camera.cpp
@@ -1170,12 +1170,12 @@ add_library(GameLibTesting
     game/entity_node_light.cpp
     game/scriptvar.cpp
     game/spline.cpp
-    game/animation.cpp
-    game/animator.cpp
-    game/transform_animator.cpp
-    game/kinematic_animator.cpp
-    game/property_animator.cpp
-    game/material_animator.cpp
+    game/timeline_animation.cpp
+    game/timeline_animator.cpp
+    game/timeline_transform_animator.cpp
+    game/timeline_kinematic_animator.cpp
+    game/timeline_property_animator.cpp
+    game/timeline_material_animator.cpp
     game/scene_class.cpp
     game/scene.cpp
     game/tilemap.cpp
