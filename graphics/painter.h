@@ -195,7 +195,19 @@ namespace gfx
 
         using InstancedDraw = Drawable::InstancedDraw;
 
+        // State aggregate for the device state for depth testing
+        // stencil testing etc.
+        struct DrawCommandState {
+            DepthTest depth_test = DepthTest::LessOrEQual;
+            Culling culling = Culling::Back;
+            WindigOrder winding = WindigOrder::CounterClockWise;
+            BlendOp blending = BlendOp::None;
+            float line_width = 1.0f;
+            bool premulalpha = false;
+        };
+
         struct DrawCommand {
+            using State = DrawCommandState;
             // Optional projection matrix that will override the painter's projection matrix.
             const glm::mat4* projection = nullptr;
             // Optional view matrix that will override the painter's view matrix.
@@ -211,16 +223,8 @@ namespace gfx
             // ShaderProgram::FilterDraw for doing low level shape/draw filtering.
             // Using dodgy/Unsafe void* here for performance reasons. vs. std::any
             void* user = nullptr;
-            // State aggregate for the device state for depth testing
-            // stencil testing etc.
-            struct State {
-                DepthTest depth_test = DepthTest::LessOrEQual;
-                Culling culling = Culling::Back;
-                WindigOrder winding = WindigOrder::CounterClockWise;
-                BlendOp blending = BlendOp::None;
-                float line_width = 1.0f;
-                bool premulalpha = false;
-            } state;
+
+            State state;
 
             std::optional<InstancedDraw> instanced_draw;
 
@@ -236,6 +240,23 @@ namespace gfx
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
         bool Draw(const DrawList& list, const ShaderProgram& program, const ColorDepthStencilState& cds) const;
+
+        bool Draw(const gfx::Drawable& drawable,
+                  const gfx::Material& material,
+                  const glm::mat4& model,
+                  const gfx::ShaderProgram& program,
+                  const ColorDepthStencilState& cds,
+                  const DrawCommandState& state) const
+        {
+            DrawCommand cmd;
+            cmd.model = &model;
+            cmd.drawable = &drawable;
+            cmd.material = &material;
+            cmd.state = state;
+            DrawList list;
+            list.push_back(cmd);
+            return Draw(list, program, cds);
+        }
 
         // legacy draw functions.
 

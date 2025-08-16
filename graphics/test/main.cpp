@@ -712,55 +712,112 @@ private:
     std::unique_ptr<gfx::Material> mTileSet64x64Padding2x2;
 };
 
-class StencilTest : public GraphicsTest
+class StencilCoverTest : public GraphicsTest
 {
 public:
     void Render(gfx::Painter& painter) override
     {
-        // draw a gradient in the background
-        {
-            gfx::GradientClass material(gfx::MaterialClass::Type::Gradient);
-            material.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::GradientColor0);
-            material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::GradientColor2);
-            material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::GradientColor3);
-            material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::GradientColor1);
-            material.SetGradientGamma(2.2f);
-            gfx::Transform transform;
-            transform.Resize(1024, 768);
-            painter.Draw(gfx::Rectangle(), transform, gfx::MaterialInstance(material));
-        }
+        // use the stencil to cover (block) areas from getting changed
+        // by the color buffer write.
 
-        {
-            gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
-            material.SetTexture(gfx::LoadTextureFromFile("textures/Checkerboard.png"));
-            gfx::Transform mask;
-            mask.Resize(400, 400);
-            mask.Translate(200 + std::cos(mTime) * 200, 200 + std::sin(mTime) * 200);
+        // Clear stencil buffer to 1 (write color everywhere)
+        painter.ClearStencil(gfx::StencilClearValue(1));
 
-            // Clear stencil to all 1s and then write to 0 when fragment is written.
-            gfx::MaterialInstance material_instance(material);
+        // write the mask shape to the stencil buffer by writing
+        // zeroes to the stencil buffer to the fragments that are NOT to be modified
+        gfx::Painter::ColorDepthStencilState mask_cover_state;
+        mask_cover_state.bWriteColor   = false;
+        mask_cover_state.stencil_ref   = 0;
+        mask_cover_state.stencil_mask  = 0xff;
+        mask_cover_state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+        mask_cover_state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+        mask_cover_state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
 
-            const gfx::StencilMaskPass stencil(1, 0, painter);
-            stencil.Draw(gfx::Circle(), mask, material_instance);
+        // Set the state so that we modify fragments only when the stencil value is 1.
+        gfx::Painter::ColorDepthStencilState mask_draw_color_state;
+        mask_draw_color_state.bWriteColor   = true;
+        mask_draw_color_state.stencil_ref   = 1;
+        mask_draw_color_state.stencil_mask  = 0xff;
+        mask_draw_color_state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
+        mask_draw_color_state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
+        mask_draw_color_state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
 
-            // write fragments only where stencil has value 1
-            const gfx::StencilTestColorWritePass cover(1, painter);
+        gfx::Transform mask_transform;
+        mask_transform.Resize(200.0f, 200.0f);
+        mask_transform.MoveTo(300.0f, 300.0f);
 
-            gfx::Transform shape;
-            shape.Resize(1024, 768);
-            cover.Draw(gfx::Rectangle(), shape, material_instance);
-        }
-    }
-    void Update(float dts) override
-    {
-        const float velocity = 1.23;
-        mTime += dts * velocity;
+        gfx::Transform shape_transform;
+        shape_transform.Resize(200.0f, 200.0f);
+        shape_transform.MoveTo(300.0f, 300.0f);
+
+        gfx::Painter::DrawCommandState cmd_state;
+
+        gfx::StencilShaderProgram stencil_program;
+        gfx::GenericShaderProgram color_program;
+
+        painter.Draw(gfx::Circle(),gfx::CreateMaterialFromColor(gfx::Color::White), mask_transform,
+            stencil_program, mask_cover_state, cmd_state);
+
+        painter.Draw(gfx::Rectangle(), gfx::CreateMaterialFromColor(gfx::Color::HotPink), shape_transform,
+             color_program, mask_draw_color_state, cmd_state);
     }
     std::string GetName() const override
-    { return "StencilTest"; }
+    { return "StencilCoverTest"; }
 private:
-    float mTime = 0.0f;
+};
 
+class StencilExposeTest : public GraphicsTest
+{
+public:
+    void Render(gfx::Painter& painter) override
+    {
+        // use the stencil to cover (block) areas from getting changed
+        // by the color buffer write.
+
+        // Clear stencil buffer to 0. (Write color nowhere)
+        painter.ClearStencil(gfx::StencilClearValue(0));
+
+        // write the mask shape to the stencil buffer by writing
+        // ones to the stencil buffer to the fragments that are to be *modified*
+        gfx::Painter::ColorDepthStencilState mask_expose_state;
+        mask_expose_state.bWriteColor   = false;
+        mask_expose_state.stencil_ref   = 1;
+        mask_expose_state.stencil_mask  = 0xff;
+        mask_expose_state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+        mask_expose_state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+        mask_expose_state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+
+        // Set the state so that we modify fragments only when the stencil value is 1.
+        gfx::Painter::ColorDepthStencilState mask_draw_color_state;
+        mask_draw_color_state.bWriteColor   = true;
+        mask_draw_color_state.stencil_ref   = 1;
+        mask_draw_color_state.stencil_mask  = 0xff;
+        mask_draw_color_state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
+        mask_draw_color_state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
+        mask_draw_color_state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
+
+        gfx::Transform mask_transform;
+        mask_transform.Resize(200.0f, 200.0f);
+        mask_transform.MoveTo(300.0f, 300.0f);
+
+        gfx::Transform shape_transform;
+        shape_transform.Resize(200.0f, 200.0f);
+        shape_transform.MoveTo(300.0f, 300.0f);
+
+        gfx::Painter::DrawCommandState cmd_state;
+
+        gfx::StencilShaderProgram stencil_program;
+        gfx::GenericShaderProgram color_program;
+
+        painter.Draw(gfx::Circle(),gfx::CreateMaterialFromColor(gfx::Color::White), mask_transform,
+            stencil_program, mask_expose_state, cmd_state);
+
+        painter.Draw(gfx::Rectangle(), gfx::CreateMaterialFromColor(gfx::Color::HotPink), shape_transform,
+             color_program, mask_draw_color_state, cmd_state);
+    }
+    std::string GetName() const override
+    { return "StencilExposeTest"; }
+private:
 };
 
 class TextureBlurTest : public GraphicsTest
@@ -4090,7 +4147,8 @@ int main(int argc, char* argv[])
     tests.emplace_back(new GradientTest);
     tests.emplace_back(new SpriteTest);
     tests.emplace_back(new SpriteSheetTest);
-    tests.emplace_back(new StencilTest);
+    tests.emplace_back(new StencilCoverTest);
+    tests.emplace_back(new StencilExposeTest);
     tests.emplace_back(new PolygonTest);
     tests.emplace_back(new TileBatchTest);
     tests.emplace_back(new TileOverdrawTest);
