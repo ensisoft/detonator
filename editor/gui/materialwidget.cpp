@@ -532,6 +532,20 @@ void MaterialWidget::on_actionSave_triggered()
     SetUserProperty(resource, "model_rotation", mModelRotationTotal);
     SetUserProperty(resource, "light_position", mLightPositionTotal);
 
+    if (const auto* previous_material = mWorkspace->FindResourceById(mMaterial->GetId()))
+    {
+        // if the material class already exists and is marked as assigned
+        // (controlled by) a particle engine we use that same particle
+        // engine association here.
+        QString particle_engine_id;
+        if (previous_material->GetProperty("particle-engine-class-id", &particle_engine_id))
+        {
+            const auto* particle_engine = mWorkspace->FindResourceById(particle_engine_id);
+            if (particle_engine && particle_engine->IsParticleEngine())
+                SetProperty(resource, "particle-engine-class-id", particle_engine_id);
+        }
+    }
+
     // WARNING WARNING WARNING WARNING unsafe code!
     // We have a stupid ass recursion happening when we call
     // SaveResource since that will invoke callbacks which
@@ -1711,18 +1725,24 @@ void MaterialWidget::ResourceUpdated(const app::Resource* resource)
     if (resource->GetIdUtf8() != mMaterial->GetId())
         return;
 
-    // if we saved it, we already wrote the new hash value, so skip
-    if (mOriginalHash == mMaterial->GetHash())
+    const gfx::MaterialClass* klass = nullptr;
+    resource->GetContent(&klass);
+
+    // if we saved it, we already updated our hash value and in this case
+    // the resource that was updated carries the same hash value and we
+    // don't need to do anything.
+    if (mOriginalHash == klass->GetHash())
         return;
 
-    mMaterial = resource->GetContent<gfx::MaterialClass>()->Copy();
+    DEBUG("Material update detected in material editor. Saved by particle editor? [name='%1']", GetValue(mUI.materialName));
+
+    mMaterial = klass->Copy();
+    mOriginalHash = klass->GetHash();
     mMaterialInst.reset();
 
     ShowMaterialProperties();
     ShowTextureMapProperties();
     ShowTextureProperties();
-
-    mOriginalHash = mMaterial->GetHash();
 }
 
 void MaterialWidget::CreateCustomShaderStub()
