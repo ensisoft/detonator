@@ -37,8 +37,6 @@ namespace game
     public:
         // The type of the animator class.
         enum class Type {
-            // Animate along a spline
-            SplineAnimator,
             // TransformAnimator animators modify the transform state of the node
             // i.e. the translation, scale and rotation variables directly.
             TransformAnimator,
