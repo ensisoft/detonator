@@ -63,6 +63,8 @@ namespace game
         virtual std::string GetId() const = 0;
         // Get the ID of the node affected by this animator.
         virtual std::string GetNodeId() const = 0;
+        // Get the ID of the assigned timeline.
+        virtual std::string GetTimelineId() const = 0;
         // Get the o of the object state.
         virtual std::size_t GetHash() const = 0;
         // Create an exact copy of this class object.
@@ -90,6 +92,8 @@ namespace game
         virtual void SetNodeId(const std::string& id) = 0;
         // Set the human-readable name of the animator class.
         virtual void SetName(const std::string& name) = 0;
+        // Set the assigned timeline ID.
+        virtual void SetTimelineId(const std::string& id) = 0;
         // Serialize the class object into JSON.
         virtual void IntoJson(data::Writer& data) const = 0;
         // Load the class object state from JSON. Returns true when

@@ -29,6 +29,8 @@ namespace game::detail
     class AnimatorClassBase : public AnimatorClass
     {
     public:
+        void SetTimelineId(const std::string& id) override
+        { mTimelineId = id; }
         void SetNodeId(const std::string& id) override
         { mNodeId = id; }
         void SetName(const std::string& name) override
@@ -37,6 +39,8 @@ namespace game::detail
         { return mName; }
         std::string GetId() const override
         { return mId; }
+        std::string GetTimelineId() const override
+        { return mTimelineId; }
         std::string GetNodeId() const override
         { return mNodeId; }
         float GetStartTime() const override
@@ -73,6 +77,8 @@ namespace game::detail
         std::string mName;
         // id of the node that the action will be applied onto
         std::string mNodeId;
+        // ID of the timeline this animator belongs to.
+        std::string mTimelineId;
         // Normalized start time.
         float mStartTime = 0.0f;
         // Normalized duration.

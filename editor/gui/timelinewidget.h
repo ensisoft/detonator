@@ -32,6 +32,8 @@
 #include <memory>
 #include <limits>
 
+#include "app/types.h"
+
 namespace gui
 {
     class TimelineWidget : public QAbstractScrollArea
@@ -45,9 +47,9 @@ namespace gui
             // color of the visualized item.
             QColor  color;
             // application defined item id.
-            QString id;
+            app::AnyString id;
             // text (name) of the item.
-            QString text;
+            app::AnyString text;
             // icon (if any) of the item.
             QIcon   icon;
             // application defined data value.
@@ -139,7 +141,7 @@ namespace gui
         { return mHoveredTimeline; }
         float MapToSeconds(const QPoint& pos) const;
 
-        const TimelineItem* SelectItem(const QString& id);
+        const TimelineItem* SelectItem(const app::AnyString& itemId);
     signals:
         void TimeDragged(float seconds);
         void SelectedItemChanged(const TimelineItem* selected);

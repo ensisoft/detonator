@@ -39,6 +39,7 @@ namespace game
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mNodeId);
+    hash = base::hash_combine(hash, mTimelineId);
     hash = base::hash_combine(hash, mFlagName);
     hash = base::hash_combine(hash, mStartTime);
     hash = base::hash_combine(hash, mDuration);
@@ -54,6 +55,7 @@ void BooleanPropertyAnimatorClass::IntoJson(data::Writer& data) const
     data.Write("id",        mId);
     data.Write("name",      mName);
     data.Write("node",      mNodeId);
+    data.Write("timeline",  mTimelineId);
     data.Write("flag",      mFlagName);
     data.Write("starttime", mStartTime);
     data.Write("duration",  mDuration);
@@ -69,6 +71,7 @@ bool BooleanPropertyAnimatorClass::FromJson(const data::Reader& data)
     ok &= data.Read("id",        &mId);
     ok &= data.Read("name",      &mName);
     ok &= data.Read("node",      &mNodeId);
+    ok &= data.Read("timeline",  &mTimelineId);
     ok &= data.Read("flag",      &mFlagName);
     ok &= data.Read("starttime", &mStartTime);
     ok &= data.Read("duration",  &mDuration);
@@ -370,6 +373,7 @@ size_t PropertyAnimatorClass::GetHash() const
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mNodeId);
+    hash = base::hash_combine(hash, mTimelineId);
     hash = base::hash_combine(hash, mInterpolation);
     hash = base::hash_combine(hash, mParamName);
     hash = base::hash_combine(hash, mStartTime);
@@ -385,6 +389,7 @@ void PropertyAnimatorClass::IntoJson(data::Writer& data) const
     data.Write("id",        mId);
     data.Write("cname",     mName);
     data.Write("node",      mNodeId);
+    data.Write("timeline",  mTimelineId);
     data.Write("method",    mInterpolation);
     data.Write("name",      mParamName);
     data.Write("starttime", mStartTime);
@@ -400,6 +405,7 @@ bool PropertyAnimatorClass::FromJson(const data::Reader& data)
     ok &= data.Read("id",        &mId);
     ok &= data.Read("cname",     &mName);
     ok &= data.Read("node",      &mNodeId);
+    ok &= data.Read("timeline",  &mTimelineId);
     ok &= data.Read("method",    &mInterpolation);
     ok &= data.Read("name",      &mParamName);
     ok &= data.Read("starttime", &mStartTime);

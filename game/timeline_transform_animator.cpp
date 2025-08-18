@@ -31,6 +31,7 @@ void TransformAnimatorClass::IntoJson(data::Writer& data) const
     data.Write("id",        mId);
     data.Write("name",      mName);
     data.Write("node",      mNodeId);
+    data.Write("timeline",  mTimelineId);
     data.Write("method",    mInterpolation);
     data.Write("starttime", mStartTime);
     data.Write("duration",  mDuration);
@@ -47,6 +48,7 @@ bool TransformAnimatorClass::FromJson(const data::Reader& data)
     ok &= data.Read("id",        &mId);
     ok &= data.Read("name",      &mName);
     ok &= data.Read("node",      &mNodeId);
+    ok &= data.Read("timeline",  &mTimelineId);
     ok &= data.Read("starttime", &mStartTime);
     ok &= data.Read("duration",  &mDuration);
     ok &= data.Read("position",  &mEndPosition);
@@ -64,6 +66,7 @@ std::size_t TransformAnimatorClass::GetHash() const
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mNodeId);
+    hash = base::hash_combine(hash, mTimelineId);
     hash = base::hash_combine(hash, mInterpolation);
     hash = base::hash_combine(hash, mStartTime);
     hash = base::hash_combine(hash, mDuration);

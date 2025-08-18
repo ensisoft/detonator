@@ -435,7 +435,7 @@ namespace app
             return props;
         }
 
-        QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game::EntityClass& dupe, const QVariantMap& props);
+        QVariantMap DuplicateResourceProperties(const game::EntityClass& src, game::EntityClass& dupe, const QVariantMap& props);
 
         template<typename ResourceType> inline
         QStringList ListResourceDependencies(const ResourceType& res, const QVariantMap& props)
