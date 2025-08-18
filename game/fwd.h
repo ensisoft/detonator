@@ -22,6 +22,8 @@ namespace game {
     class AnimationClass;
     class Animation;
     class AnimatorClass;
+    class AnimationTriggerClass;
+    class AnimationTrigger;
     class EntityStateControllerClass;
     class EntityStateController;
     class TilemapClass;
@@ -44,7 +46,6 @@ namespace game {
     class BooleanPropertyAnimator;
     class PropertyAnimator;
     class KinematicAnimator;
-    class MaterialAnimator;
 
     class RigidBodyClass;
     class RigidBody;

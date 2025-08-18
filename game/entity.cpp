@@ -37,6 +37,7 @@
 #include "game/entity_class.h"
 #include "game/transform.h"
 #include "game/timeline_animator.h"
+#include "game/timeline_animation_trigger.h"
 #include "game/timeline_property_animator.h"
 #include "game/entity_node_linear_mover.h"
 #include "game/entity_node_spline_mover.h"

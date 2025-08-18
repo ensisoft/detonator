@@ -312,6 +312,7 @@ add_library(GameLib
     game/timeline_kinematic_animator.cpp
     game/timeline_material_animator.cpp
     game/timeline_property_animator.cpp
+    game/timeline_animation_trigger.cpp
     game/scene.cpp
     game/scene_class.cpp
     game/scriptvar.cpp
@@ -1176,6 +1177,7 @@ add_library(GameLibTesting
     game/timeline_kinematic_animator.cpp
     game/timeline_property_animator.cpp
     game/timeline_material_animator.cpp
+    game/timeline_animation_trigger.cpp
     game/scene_class.cpp
     game/scene.cpp
     game/tilemap.cpp

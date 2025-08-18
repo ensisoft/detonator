@@ -35,6 +35,8 @@ namespace game
 {
     class Animator;
     class AnimatorClass;
+    class AnimationTriggerClass;
+    class AnimationTrigger;
     class EntityNode;
 
     // AnimationClass defines a new type of animation that includes the
@@ -89,36 +91,67 @@ namespace game
             std::shared_ptr<AnimatorClass> foo(new Animator(animator));
             mAnimators.push_back(std::move(foo));
         }
+
+        template<typename Trigger>
+        void AddTrigger(const Trigger& trigger)
+        {
+            std::shared_ptr<AnimationTriggerClass> foo(new Trigger(trigger));
+            mTriggers.push_back(std::move(foo));
+        }
+
         // Add a new animator that applies state update/action on some animation node.
         void AddAnimator(std::shared_ptr<AnimatorClass> animator)
         { mAnimators.push_back(std::move(animator)); }
 
+        void AddTrigger(std::shared_ptr<AnimationTriggerClass> trigger)
+        { mTriggers.push_back(std::move(trigger)); }
+
         // Delete the animator at the given index.
         void DeleteAnimator(std::size_t index) noexcept;
+
+        void DeleteTrigger(std::size_t index) noexcept;
         // Delete the animator by the given ID. Returns true if animator was deleted
         // or false to indicate that nothing was done.
         bool DeleteAnimatorById(const std::string& id) noexcept;
+        bool DeleteTriggerById(const std::string& id) noexcept;
+
         // Find an animator by the given ID. Returns nullptr if no such animator exists.
         AnimatorClass* FindAnimatorById(const std::string& id) noexcept;
         // Find an animator by the given ID. Returns nullptr if no such animator exists.
         const AnimatorClass* FindAnimatorById(const std::string& id) const noexcept;
-        // Clear (and delete) all animator previously added to the animation.
+        // Clear (and delete) all animators and triggers previously added to the animation.
         inline void Clear() noexcept
-        { mAnimators.clear(); }
+        {
+            mAnimators.clear();
+            mTriggers.clear();
+        }
         // Get the number of animators currently added to this animation track.
         inline std::size_t GetNumAnimators() const noexcept
         { return mAnimators.size(); }
+        inline std::size_t GetNumTriggers() const noexcept
+        { return mTriggers.size(); }
         // Get the animator class object at the given index.
         inline AnimatorClass& GetAnimatorClass(std::size_t index) noexcept
         { return *mAnimators[index]; }
         // Get the animator class object at the given index.
         inline const AnimatorClass& GetAnimatorClass(std::size_t index) const noexcept
         { return *mAnimators[index]; }
+
+        inline AnimationTriggerClass& GetTriggerClass(std::size_t index) noexcept
+        { return *mTriggers[index]; }
+
+        inline const AnimationTriggerClass& GetTriggerClass(std::size_t index) const noexcept
+        { return *mTriggers[index]; }
+
+        AnimationTriggerClass* FindTriggerById(const std::string& id);
+        const AnimationTriggerClass* FindTriggerById(const std::string& id) const;
+
         // Create an instance of some animator class type at the given index.
         // For example if the type of animator class at index N is
         // TransformAnimatorClass then the returned object will be an
         // instance of TransformAnimator.
         std::unique_ptr<Animator> CreateAnimatorInstance(std::size_t index) const;
+        std::unique_ptr<AnimationTrigger> CreateTriggerInstance(std::size_t index) const;
         // Get the hash value based on the static data.
         std::size_t GetHash() const noexcept;
         // Serialize the animation into JSON.
@@ -135,6 +168,7 @@ namespace game
         std::string mId;
         // The list of animators that apply transforms
         std::vector<std::shared_ptr<AnimatorClass>> mAnimators;
+        std::vector<std::shared_ptr<AnimationTriggerClass>> mTriggers;
         // Human-readable name of the animation.
         std::string mName;
         // One time delay before starting the playback.
@@ -162,6 +196,8 @@ namespace game
         Animation(const Animation& other);
         // Move ctor.
         Animation(Animation&& other) noexcept;
+
+       ~Animation();
 
         // Update the animation track state.
         void Update(float dt) noexcept;
@@ -224,8 +260,11 @@ namespace game
         struct AnimatorState {
             std::string node;
             std::unique_ptr<Animator> animator;
+            std::unique_ptr<AnimationTrigger> trigger;
             mutable bool started = false;
             mutable bool ended   = false;
+            mutable bool triggered = false;
+            mutable bool valid = false;
         };
         std::vector<AnimatorState> mTracks;
         // One time delay before starting the animation.
