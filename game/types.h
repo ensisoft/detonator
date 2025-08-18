@@ -58,6 +58,8 @@ namespace game
             Color4f>;
     using LightParamMap = std::unordered_map<std::string, LightParam>;
 
+    using AnimationTriggerParam = std::variant<float, int, std::string>;
+    using AnimationTriggerParamMap = std::unordered_map<std::string, AnimationTriggerParam>;
 
 } // namespace
 

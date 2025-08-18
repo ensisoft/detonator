@@ -35,6 +35,7 @@
 #include "data/json.h"
 #include "game/timeline_animation.h"
 #include "game/timeline_animator.h"
+#include "game/timeline_animation_trigger.h"
 #include "game/timeline_transform_animator.h"
 #include "game/timeline_kinematic_animator.h"
 #include "game/timeline_material_animator.h"

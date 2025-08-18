@@ -24,6 +24,7 @@
 #include "game/entity.h"
 #include "game/timeline_animation.h"
 #include "game/timeline_animator.h"
+#include "game/timeline_animation_trigger.h"
 #include "game/timeline_transform_animator.h"
 #include "game/timeline_kinematic_animator.h"
 #include "game/timeline_material_animator.h"
@@ -39,9 +40,13 @@ AnimationClass::AnimationClass()
 
 AnimationClass::AnimationClass(const AnimationClass& other)
 {
-    for (const auto& a : other.mAnimators)
+    for (const auto& animator : other.mAnimators)
     {
-        mAnimators.push_back(a->Copy());
+        mAnimators.push_back(animator->Copy());
+    }
+    for (const auto& trigger : other.mTriggers)
+    {
+        mTriggers.push_back(trigger->Copy());
     }
     mId       = other.mId;
     mName     = other.mName;
@@ -53,6 +58,7 @@ AnimationClass::AnimationClass(AnimationClass&& other) noexcept
 {
     mId        = std::move(other.mId);
     mAnimators = std::move(other.mAnimators);
+    mTriggers  = std::move(other.mTriggers);
     mName      = std::move(other.mName);
     mDuration  = other.mDuration;
     mLooping   = other.mLooping;
@@ -67,6 +73,14 @@ void AnimationClass::DeleteAnimator(std::size_t index) noexcept
     mAnimators.erase(it);
 }
 
+void AnimationClass::DeleteTrigger(std::size_t index) noexcept
+{
+    ASSERT(index < mTriggers.size());
+    auto it = mTriggers.begin();
+    std::advance(it, index);
+    mTriggers.erase(it);
+}
+
 bool AnimationClass::DeleteAnimatorById(const std::string& id) noexcept
 {
     for (auto it = mAnimators.begin(); it != mAnimators.end(); ++it)
@@ -78,6 +92,19 @@ bool AnimationClass::DeleteAnimatorById(const std::string& id) noexcept
     }
     return false;
 }
+
+bool AnimationClass::DeleteTriggerById(const std::string& id) noexcept
+{
+    for (auto it = mTriggers.begin(); it != mTriggers.end(); ++it)
+    {
+        if ((*it)->GetId() == id) {
+            mTriggers.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
 AnimatorClass* AnimationClass::FindAnimatorById(const std::string& id) noexcept
 {
     for (auto& animator : mAnimators) {
@@ -94,6 +121,26 @@ const AnimatorClass* AnimationClass::FindAnimatorById(const std::string& id) con
     }
     return nullptr;
 }
+
+AnimationTriggerClass* AnimationClass::FindTriggerById(const std::string& id)
+{
+    for (auto& trigger : mTriggers)
+    {
+        if (trigger->GetId() == id)
+            return trigger.get();
+    }
+    return nullptr;
+}
+
+ const AnimationTriggerClass* AnimationClass::FindTriggerById(const std::string& id) const
+ {
+     for (auto& trigger : mTriggers)
+     {
+         if (trigger->GetId() == id)
+             return trigger.get();
+     }
+     return nullptr;
+ }
 
 std::unique_ptr<Animator> AnimationClass::CreateAnimatorInstance(std::size_t index) const
 {
@@ -112,6 +159,11 @@ std::unique_ptr<Animator> AnimationClass::CreateAnimatorInstance(std::size_t ind
     return {};
 }
 
+std::unique_ptr<AnimationTrigger> AnimationClass::CreateTriggerInstance(std::size_t index) const
+{
+    return std::make_unique<AnimationTrigger>(mTriggers[index]);
+}
+
 std::size_t AnimationClass::GetHash() const noexcept
 {
     std::size_t hash = 0;
@@ -122,6 +174,10 @@ std::size_t AnimationClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mDelay);
     for (const auto& animator : mAnimators)
         hash = base::hash_combine(hash, animator->GetHash());
+
+    for (const auto& trigger : mTriggers)
+        hash = base::hash_combine(hash, trigger->GetHash());
+
     return hash;
 }
 
@@ -140,6 +196,13 @@ void AnimationClass::IntoJson(data::Writer& data) const
         meta->Write("type", animator->GetType());
         meta->Write("animator", std::move(act));
         data.AppendChunk("animators", std::move(meta));
+    }
+
+    for (const auto& trigger : mTriggers)
+    {
+        auto chunk = data.NewWriteChunk();
+        trigger->IntoJson(*chunk);
+        data.AppendChunk("triggers", std::move(chunk));
     }
 }
 
@@ -185,6 +248,14 @@ bool AnimationClass::FromJson(const data::Reader& data)
 
         ok = false;
     }
+
+    for (unsigned i=0; i<data.GetNumChunks("triggers"); ++i)
+    {
+        const auto& chunk = data.GetReadChunk("triggers", i);
+        auto trigger = std::make_unique<AnimationTriggerClass>();
+        ok &= trigger->FromJson(*chunk);
+        mTriggers.push_back(std::move(trigger));
+    }
     return ok;
 }
 
@@ -197,6 +268,8 @@ AnimationClass AnimationClass::Clone() const
     ret.mDelay    = mDelay;
     for (const auto& klass : mAnimators)
         ret.mAnimators.push_back(klass->Clone());
+    for (const auto& trigger : mTriggers)
+        ret.mTriggers.push_back(trigger->Clone());
     return ret;
 }
 
@@ -207,6 +280,7 @@ AnimationClass& AnimationClass::operator=(const AnimationClass& other)
     AnimationClass copy(other);
     std::swap(mId, copy.mId);
     std::swap(mAnimators, copy.mAnimators);
+    std::swap(mTriggers, copy.mTriggers);
     std::swap(mName, copy.mName);
     std::swap(mDuration, copy.mDuration);
     std::swap(mLooping, copy.mLooping);
@@ -219,13 +293,22 @@ Animation::Animation(const std::shared_ptr<const AnimationClass>& klass)
 {
     for (size_t i=0; i< mClass->GetNumAnimators(); ++i)
     {
-        AnimatorState track;
-        track.animator = mClass->CreateAnimatorInstance(i);
-        track.node     = track.animator->GetNodeId();
-        track.ended    = false;
-        track.started  = false;
-        mTracks.push_back(std::move(track));
+        AnimatorState state;
+        state.animator = mClass->CreateAnimatorInstance(i);
+        state.node     = state.animator->GetNodeId();
+        state.ended    = false;
+        state.started  = false;
+        mTracks.push_back(std::move(state));
     }
+    for (size_t i=0; i<mClass->GetNumTriggers(); ++i)
+    {
+        AnimatorState state;
+        state.trigger   = mClass->CreateTriggerInstance(i);
+        state.node      = state.trigger->GetNodeId();
+        state.triggered = false;
+        mTracks.push_back(std::move(state));
+    }
+
     mDelay = klass->GetDelay();
     // start at negative delay time, then the actual animation playback
     // starts after the current time reaches 0 and all delay has been "consumed".
@@ -237,15 +320,20 @@ Animation::Animation(const AnimationClass& klass)
 
 Animation::Animation(const Animation& other) : mClass(other.mClass)
 {
-    for (size_t i=0; i<other.mTracks.size(); ++i)
+    for (const auto& other_state : other.mTracks)
     {
         AnimatorState track;
-        track.node     = other.mTracks[i].node;
-        track.animator = other.mTracks[i].animator->Copy();
-        track.ended    = other.mTracks[i].ended;
-        track.started  = other.mTracks[i].started;
+        track.node     = other_state.node;
+        track.ended    = other_state.ended;
+        track.started  = other_state.started;
+        if (other_state.animator)
+            track.animator = other_state.animator->Copy();
+        if (other_state.trigger)
+            track.trigger = other_state.trigger->Copy();
+
         mTracks.push_back(std::move(track));
     }
+
     mCurrentTime = other.mCurrentTime;
     mDelay       = other.mDelay;
 }
@@ -257,6 +345,8 @@ Animation::Animation(Animation&& other) noexcept
     mDelay       = other.mDelay;
     mTracks      = std::move(other.mTracks);
 }
+
+Animation::~Animation() = default;
 
 void Animation::Update(float dt) noexcept
 {
@@ -271,7 +361,7 @@ void Animation::Apply(EntityNode& node) const
     if (mCurrentTime < 0)
         return;
     const auto duration = mClass->GetDuration();
-    const auto pos = mCurrentTime / duration;
+    const auto animation_time = mCurrentTime / duration;
 
     // todo: keep the tracks in some smarter data structure or perhaps
     // in a sorted vector and then binary search.
@@ -280,27 +370,44 @@ void Animation::Apply(EntityNode& node) const
         if (track.node != node.GetClassId())
             continue;
 
-        const auto start = track.animator->GetStartTime();
-        const auto len   = track.animator->GetDuration();
-        const auto end   = math::clamp(0.0f, 1.0f, start + len);
-        if (pos < start)
-            continue;
-        else if (pos >= end)
+        auto* trigger = track.trigger.get();
+        auto* animator = track.animator.get();
+        if (trigger)
         {
-            if (!track.ended)
+            if (!track.triggered)
             {
-                track.animator->Finish(node);
-                track.ended = true;
+                const auto& trigger_time_point = trigger->GetTime();
+                if (animation_time >= trigger_time_point)
+                {
+                    trigger->Trigger(node);
+                    track.triggered = true;
+                }
             }
-            continue;
         }
-        if (!track.started)
+        else if (animator)
         {
-            track.animator->Start(node);
-            track.started = true;
+            const auto start_time_point  = track.animator->GetStartTime();
+            const auto animator_duration = track.animator->GetDuration();
+            const auto end_time_point    =  math::clamp(0.0f, 1.0f, start_time_point + animator_duration);
+            if (animation_time < start_time_point)
+                continue;
+            else if (animation_time >= end_time_point)
+            {
+                if (!track.ended)
+                {
+                    track.animator->Finish(node);
+                    track.ended = true;
+                }
+                continue;
+            }
+            if (!track.started)
+            {
+                track.animator->Start(node);
+                track.started = true;
+            }
+            const auto t = math::clamp(0.0f, 1.0f, (animation_time - start_time_point) / animator_duration);
+            track.animator->Apply(node, t);
         }
-        const auto t = math::clamp(0.0f, 1.0f, (pos - start) / len);
-        track.animator->Apply(node, t);
     }
 }
 
@@ -308,10 +415,18 @@ void Animation::Restart() noexcept
 {
     for (auto& track : mTracks)
     {
-        ASSERT(track.started);
-        ASSERT(track.ended);
-        track.started = false;
-        track.ended   = false;
+        if (track.animator)
+        {
+            ASSERT(track.started);
+            ASSERT(track.ended);
+        }
+        if (track.trigger)
+        {
+            ASSERT(track.triggered);
+        }
+        track.started   = false;
+        track.ended     = false;
+        track.triggered = false;
     }
     mCurrentTime = -mDelay;
 }
@@ -320,7 +435,9 @@ bool Animation::IsComplete() const noexcept
 {
     for (const auto& track : mTracks)
     {
-        if (!track.ended)
+        if (track.animator && !track.ended)
+            return false;
+        if (track.trigger && !track.triggered)
             return false;
     }
     if (mCurrentTime >= mClass->GetDuration())

@@ -63,7 +63,7 @@ namespace game
         virtual std::string GetId() const = 0;
         // Get the ID of the node affected by this animator.
         virtual std::string GetNodeId() const = 0;
-        // Get the hash of the object state.
+        // Get the o of the object state.
         virtual std::size_t GetHash() const = 0;
         // Create an exact copy of this class object.
         virtual std::unique_ptr<AnimatorClass> Copy() const = 0;

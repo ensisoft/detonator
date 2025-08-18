@@ -120,6 +120,7 @@ add_executable(UnitTest
     ../game/timeline_material_animator.cpp
     ../game/timeline_property_animator.cpp
     ../game/timeline_animation.cpp
+    ../game/timeline_animation_trigger.cpp
     ../game/entity.cpp
     ../game/entity_class.cpp
     ../game/entity_node.cpp
@@ -293,6 +294,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../data/io.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/timeline_animation.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/timeline_animator.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/timeline_animation_trigger.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_class.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node.cpp

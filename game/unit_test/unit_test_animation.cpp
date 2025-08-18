@@ -28,6 +28,7 @@
 #include "data/json.h"
 #include "game/timeline_animation.h"
 #include "game/timeline_animator.h"
+#include "game/timeline_animation_trigger.h"
 #include "game/timeline_transform_animator.h"
 #include "game/timeline_kinematic_animator.h"
 #include "game/timeline_material_animator.h"
@@ -728,32 +729,39 @@ void unit_test_animation_track()
     // create node instance
     game::EntityNode node(klass);
 
-    game::AnimationClass track;
-    track.SetName("test");
-    track.SetLooping(true);
-    track.SetDuration(10.0f);
-    TEST_REQUIRE(track.GetName() == "test");
-    TEST_REQUIRE(track.IsLooping());
-    TEST_REQUIRE(track.GetDuration() == real::float32(10.0f));
-    TEST_REQUIRE(track.GetNumAnimators() == 0);
+    game::AnimationTriggerClass trigger(game::AnimationTriggerClass::Type::EmitParticlesTrigger);
+    trigger.SetName("my-trigger");
+    trigger.SetTime(1.0f);
+    trigger.SetNodeId(klass.GetId());
+    trigger.SetParameter("count", 123);
 
-    game::TransformAnimatorClass act;
-    act.SetNodeId(node.GetClassId());
-    act.SetStartTime(0.1f);
-    act.SetDuration(0.5f);
-    act.SetInterpolation(game::TransformAnimatorClass::Interpolation::Cosine);
-    act.SetEndPosition(glm::vec2(100.0f, 50.0f));
-    act.SetEndSize(glm::vec2(5.0f, 6.0f));
-    act.SetEndScale(glm::vec2(3.0f, 8.0f));
-    act.SetEndRotation(1.5f);
+    game::TransformAnimatorClass animator;
+    animator.SetNodeId(node.GetClassId());
+    animator.SetStartTime(0.1f);
+    animator.SetDuration(0.5f);
+    animator.SetInterpolation(game::TransformAnimatorClass::Interpolation::Cosine);
+    animator.SetEndPosition(glm::vec2(100.0f, 50.0f));
+    animator.SetEndSize(glm::vec2(5.0f, 6.0f));
+    animator.SetEndScale(glm::vec2(3.0f, 8.0f));
+    animator.SetEndRotation(1.5f);
 
-    track.AddAnimator(act);
-    TEST_REQUIRE(track.GetNumAnimators() == 1);
+    game::AnimationClass animation;
+    animation.SetName("test");
+    animation.SetLooping(true);
+    animation.SetDuration(10.0f);
+    animation.AddAnimator(animator);
+    animation.AddTrigger(trigger);
+
+    TEST_REQUIRE(animation.GetName() == "test");
+    TEST_REQUIRE(animation.IsLooping());
+    TEST_REQUIRE(animation.GetDuration() == real::float32(10.0f));
+    TEST_REQUIRE(animation.GetNumAnimators() == 1);
+    TEST_REQUIRE(animation.GetNumTriggers() == 1);
 
     // serialize
     {
         data::JsonObject json;
-        track.IntoJson(json);
+        animation.IntoJson(json);
 
         game::AnimationClass ret;
         TEST_REQUIRE(ret.FromJson(json));
@@ -761,34 +769,39 @@ void unit_test_animation_track()
         TEST_REQUIRE(ret.IsLooping()       == true);
         TEST_REQUIRE(ret.GetName()         == "test");
         TEST_REQUIRE(ret.GetDuration()     == real::float32(10.0f));
-        TEST_REQUIRE(ret.GetId()           == track.GetId());
-        TEST_REQUIRE(ret.GetHash()         == track.GetHash());
+        TEST_REQUIRE(ret.GetId()           == animation.GetId());
+        TEST_REQUIRE(ret.GetHash()         == animation.GetHash());
+        TEST_REQUIRE(ret.GetNumTriggers() == 1);
+        TEST_REQUIRE(ret.GetTriggerClass(0).GetNodeId() == klass.GetId());
+        TEST_REQUIRE(ret.GetTriggerClass(0).GetTime() == 1.0f);
+        TEST_REQUIRE(*ret.GetTriggerClass(0).GetParameter<int>("count") == 123);
+        TEST_REQUIRE(ret.GetTriggerClass(0).GetName() == "my-trigger");
     }
 
     // copy assignment and copy ctor
     {
-        auto copy(track);
+        auto copy(animation);
         TEST_REQUIRE(copy.GetNumAnimators() == 1);
         TEST_REQUIRE(copy.IsLooping()       == true);
         TEST_REQUIRE(copy.GetName()         == "test");
         TEST_REQUIRE(copy.GetDuration()     == real::float32(10.0f));
-        TEST_REQUIRE(copy.GetId()           == track.GetId());
-        TEST_REQUIRE(copy.GetHash()         == track.GetHash());
-        copy = track;
-        TEST_REQUIRE(copy.GetId()           == track.GetId());
-        TEST_REQUIRE(copy.GetHash()         == track.GetHash());
+        TEST_REQUIRE(copy.GetId()           == animation.GetId());
+        TEST_REQUIRE(copy.GetHash()         == animation.GetHash());
+        copy = animation;
+        TEST_REQUIRE(copy.GetId()           == animation.GetId());
+        TEST_REQUIRE(copy.GetHash()         == animation.GetHash());
     }
 
     // clone
     {
-        auto clone = track.Clone();
-        TEST_REQUIRE(clone.GetId() != track.GetId());
-        TEST_REQUIRE(clone.GetHash() != track.GetHash());
+        auto clone = animation.Clone();
+        TEST_REQUIRE(clone.GetId() != animation.GetId());
+        TEST_REQUIRE(clone.GetHash() != animation.GetHash());
     }
 
     // instance
     {
-        game::Animation instance(track);
+        game::Animation instance(animation);
         TEST_REQUIRE(!instance.IsComplete());
 
         instance.Update(5.0f);
@@ -971,6 +984,45 @@ void unit_test_animation_state()
 
 }
 
+void unit_test_animation_trigger()
+{
+    TEST_CASE(test::Type::Feature)
+
+    game::EntityNodeClass node;
+    node.CreateDrawable();
+
+    game::AnimationTriggerClass trigger(game::AnimationTriggerClass::Type::EmitParticlesTrigger);
+    trigger.SetName("my-trigger");
+    trigger.SetTime(0.1f); // normalized time
+    trigger.SetNodeId(node.GetId());
+    trigger.SetParameter("count", 123);
+
+    game::EntityNode node_instance(node);
+    auto* drawable = node_instance.GetDrawable();
+
+    game::AnimationClass animation;
+    animation.SetName("test");
+    animation.SetLooping(true);
+    animation.SetDuration(10.0f);
+    animation.AddTrigger(trigger);
+
+    game::Animation instance(animation);
+    TEST_REQUIRE(!instance.IsComplete());
+
+    instance.Update(0.5f);
+    instance.Apply(node_instance);
+    TEST_REQUIRE(drawable->GetNumCommands() == 0);
+
+    instance.Update(0.5f);
+    instance.Apply(node_instance);
+    TEST_REQUIRE(drawable->GetNumCommands() == 1);
+
+    drawable->ClearCommands();
+    instance.Update(0.5f);
+    instance.Apply(node_instance);
+    TEST_REQUIRE(drawable->GetNumCommands() == 0);
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -982,6 +1034,7 @@ int test_main(int argc, char* argv[])
     unit_test_animation_track();
     unit_test_animation_complete();
     unit_test_animation_state();
+    unit_test_animation_trigger();
     return 0;
 }
 ) // TEST_MAIN

@@ -451,7 +451,7 @@ namespace game
         { return mCommands.size(); }
 
         const DrawableItemClass& GetClass() const noexcept
-        { return *mClass.get(); }
+        { return *mClass; }
         const DrawableItemClass* operator->() const noexcept
         { return mClass.get(); }
     private:
