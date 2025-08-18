@@ -187,8 +187,8 @@ namespace gui
         // The workspace object.
         app::Workspace* mWorkspace = nullptr;
         struct Timeline {
-            std::string selfId;
-            std::string nodeId;
+            app::AnyString timeline_id;
+            app::AnyString target_node_id;
         };
         // Current state that is accessed and modified by this widget
         // object's event handlers (slots) and also by the current tool.
@@ -199,7 +199,6 @@ namespace gui
             std::shared_ptr<game::AnimationClass> track;
             base::bitflag<game::AnimatorClass::Type> show_flags = {~0u};
             std::vector<Timeline> timelines;
-            std::unordered_map<std::string, std::string> actuator_to_timeline;
         } mState;
         // Time accumulator for animation playback only.
         double mAnimationTime = 0.0f;

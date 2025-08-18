@@ -31,6 +31,7 @@ void MaterialAnimatorClass::IntoJson(data::Writer& data) const
     data.Write("id",       mId);
     data.Write("cname",    mName);
     data.Write("node",     mNodeId);
+    data.Write("timeline", mTimelineId);
     data.Write("method",   mInterpolation);
     data.Write("start",    mStartTime);
     data.Write("duration", mDuration);
@@ -50,6 +51,7 @@ bool MaterialAnimatorClass::FromJson(const data::Reader& data)
     ok &= data.Read("id",       &mId);
     ok &= data.Read("cname",    &mName);
     ok &= data.Read("node",     &mNodeId);
+    ok &= data.Read("timeline", &mTimelineId);
     ok &= data.Read("method",   &mInterpolation);
     ok &= data.Read("start",    &mStartTime);
     ok &= data.Read("duration", &mDuration);
@@ -71,6 +73,7 @@ std::size_t MaterialAnimatorClass::GetHash() const
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mNodeId);
+    hash = base::hash_combine(hash, mTimelineId);
     hash = base::hash_combine(hash, mInterpolation);
     hash = base::hash_combine(hash, mStartTime);
     hash = base::hash_combine(hash, mDuration);

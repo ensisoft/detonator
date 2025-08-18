@@ -115,14 +115,14 @@ float TimelineWidget::MapToSeconds(const QPoint& pos) const
     return seconds;
 }
 
-const TimelineWidget::TimelineItem* TimelineWidget::SelectItem(const QString& id)
+const TimelineWidget::TimelineItem* TimelineWidget::SelectItem(const app::AnyString& itemId)
 {
     for (auto& timeline : mTimelines)
     {
         for (size_t i=0; i<timeline.GetNumItems(); ++i)
         {
             auto& item = timeline.GetItem(i);
-            if (item.id == id)
+            if (item.id == itemId)
             {
                 mSelectedItem = &item;
                 return mSelectedItem;

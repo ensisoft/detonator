@@ -375,7 +375,7 @@ namespace {
 
 namespace app {
 namespace detail {
-QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game::EntityClass& dupe, const QVariantMap& props)
+QVariantMap DuplicateResourceProperties(const game::EntityClass& src, game::EntityClass& dupe, const QVariantMap& props)
 {
     ASSERT(src.GetNumNodes() == dupe.GetNumNodes());
     ASSERT(src.GetNumAnimations() == dupe.GetNumAnimations());
@@ -442,7 +442,7 @@ QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game
         }
     }
 
-    std::unordered_map<std::string, std::string> node_id_map;
+    std::unordered_map<AnyString, AnyString> node_id_map;
     for (size_t i=0; i<src.GetNumNodes(); ++i)
     {
         const auto& src_node = src.GetNode(i);
@@ -469,7 +469,7 @@ QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game
     for (size_t i=0; i<src.GetNumAnimations(); ++i)
     {
         const auto& src_track = src.GetAnimation(i);
-        const auto& dst_track = dupe.GetAnimation(i);
+        auto& dst_track = dupe.GetAnimation(i);
         const auto& src_id    = FromUtf8(src_track.GetId());
         const auto& dst_id    = FromUtf8(dst_track.GetId());
         const auto& variant   = ret.value("track_" + src_id);
@@ -478,39 +478,37 @@ QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game
 
         ASSERT(src_track.GetNumAnimators() == dst_track.GetNumAnimators());
 
-        std::unordered_map<std::string, std::string> actuator_id_map;
-        for (size_t i=0; i< src_track.GetNumAnimators(); ++i)
-        {
-            const auto& src_actuator = src_track.GetAnimatorClass(i);
-            const auto& dst_actuator = dst_track.GetAnimatorClass(i);
-            actuator_id_map[src_actuator.GetId()] = dst_actuator.GetId();
-        }
-
-        std::unordered_map<std::string, std::string> timeline_id_map;
+        std::unordered_map<AnyString, AnyString> timeline_id_map;
 
         QVariantMap new_properties;
         QVariantMap old_properties = variant.toMap();
         const auto num_timelines = old_properties["num_timelines"].toUInt();
         for (unsigned i=0; i<num_timelines; ++i)
         {
-            const auto& src_line_id = app::ToUtf8(old_properties[QString("timeline_%1_self_id").arg(i)].toString());
-            const auto& src_node_id = app::ToUtf8(old_properties[QString("timeline_%1_node_id").arg(i)].toString());
-            const auto& dst_line_id = base::RandomString(10);
-            const auto& dst_node_id = node_id_map[src_node_id];
-            new_properties[QString("timeline_%1_self_id").arg(i)] = app::FromUtf8(dst_line_id);
-            new_properties[QString("timeline_%1_node_id").arg(i)] = app::FromUtf8(dst_node_id);
-            timeline_id_map[src_line_id] = dst_line_id;
+            const auto& src_timeline_id    = old_properties[QString("timeline_%1_self_id").arg(i)].toString();
+            const auto& src_target_node_id = old_properties[QString("timeline_%1_node_id").arg(i)].toString();
+            const auto& dst_timeline_id    = AnyString(base::RandomString(10));
+            const auto& dst_target_node_id = node_id_map[src_target_node_id];
+            new_properties[QString("timeline_%1_self_id").arg(i)] = dst_timeline_id;
+            new_properties[QString("timeline_%1_node_id").arg(i)] = dst_target_node_id;
+            timeline_id_map[src_timeline_id] = dst_timeline_id;
         }
         for (size_t i=0; i< src_track.GetNumAnimators(); ++i)
         {
-            const auto& src_actuator = src_track.GetAnimatorClass(i);
-            const auto& dst_actuator = dst_track.GetAnimatorClass(i);
-            const auto& src_id = src_actuator.GetId();
-            const auto& dst_id = dst_actuator.GetId();
+            const auto& src_animator = src_track.GetAnimatorClass(i);
+            auto& dst_animator = dst_track.GetAnimatorClass(i);
+            const auto& src_id = AnyString(src_animator.GetId());
+            const auto& dst_id = AnyString(dst_animator.GetId());
 
-            const auto& src_timeline = old_properties[FromUtf8(src_id)].toString();
-            const auto& dst_timeline = timeline_id_map[ToUtf8(src_timeline)];
-            new_properties[FromUtf8(dst_id)] = FromUtf8(dst_timeline);
+            if (old_properties.contains(src_id))
+            {
+                const auto& src_timeline = old_properties[src_id].toString();
+                const auto& dst_timeline = timeline_id_map[src_timeline];
+                new_properties[dst_id] = dst_timeline;
+            }
+            const auto& src_timeline_id = src_animator.GetTimelineId();
+            if (!src_timeline_id.empty())
+                dst_animator.SetTimelineId(timeline_id_map[src_timeline_id]);
         }
 
         ret["track_" + dst_id] = new_properties;

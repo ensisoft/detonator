@@ -68,9 +68,9 @@ namespace gui
 class AnimationTrackWidget::TimelineModel : public TimelineWidget::TimelineModel
 {
 public:
-    TimelineModel(AnimationTrackWidget::State& state) : mState(state)
+    explicit TimelineModel(AnimationTrackWidget::State& state) : mState(state)
     {}
-    virtual void Fetch(std::vector<TimelineWidget::Timeline>* list) override
+    void Fetch(std::vector<TimelineWidget::Timeline>* list) override
     {
         const auto& track = *mState.track;
         const auto& anim  = *mState.entity;
@@ -80,10 +80,10 @@ public:
         // setup all timelines with empty item vectors.
         for (const auto& item : mState.timelines)
         {
-            const auto* node = mState.entity->FindNodeById(item.nodeId);
+            const auto* node = mState.entity->FindNodeById(item.target_node_id);
             const auto& name = node->GetName();
             // map timeline objects to widget timeline indices
-            id_to_index_map[item.selfId] = list->size();
+            id_to_index_map[item.timeline_id] = list->size();
             TimelineWidget::Timeline line;
             line.SetName(app::FromUtf8(name));
             list->push_back(line);
@@ -92,40 +92,39 @@ public:
         // for visual representation of each actuator.
         for (size_t i=0; i< track.GetNumAnimators(); ++i)
         {
-            const auto& actuator = track.GetAnimatorClass(i);
-            const auto type  = actuator.GetType();
-            if (!mState.show_flags.test(type))
+            const auto& animator = track.GetAnimatorClass(i);
+            const auto animator_type  = animator.GetType();
+            const auto& animator_name = animator.GetName();
+            if (!mState.show_flags.test(animator_type))
                 continue;
 
-            const auto& nodeId = actuator.GetNodeId();
-            const auto& lineId = mState.actuator_to_timeline[actuator.GetId()];
-            const auto* node = mState.entity->FindNodeById(nodeId);
-            const auto& node_name = app::FromUtf8(node->GetName());
-            const auto& actuator_name = app::FromUtf8(actuator.GetName());
-            const auto index = id_to_index_map[lineId];
-            const auto num   = (*list)[index].GetNumItems();
+            const auto& target_node_id = animator.GetNodeId();
+            const auto& timeline_id    = animator.GetTimelineId();
+            const auto timeline_index = id_to_index_map[timeline_id];
+            const auto* target_node = mState.entity->FindNodeById(target_node_id);
+            const auto& target_name = target_node->GetName();
 
             // pastel color palette.
             // https://colorhunt.co/palette/226038
 
             TimelineWidget::TimelineItem item;
-            item.text      = app::toString("%1 (%2)", node_name, actuator_name);
-            item.id        = app::FromUtf8(actuator.GetId());
-            item.starttime = actuator.GetStartTime();
-            item.duration  = actuator.GetDuration();
-            if (type == game::AnimatorClass::Type::BooleanPropertyAnimator)
+            item.text      = app::toString("%1 (%2)", target_name, animator_name);
+            item.id        = animator.GetId();
+            item.starttime = animator.GetStartTime();
+            item.duration  = animator.GetDuration();
+            if (animator_type == game::AnimatorClass::Type::BooleanPropertyAnimator)
                 item.color = QColor(0xa3, 0xdd, 0xcb, 150);
-            else if (type == game::AnimatorClass::Type::TransformAnimator)
+            else if (animator_type == game::AnimatorClass::Type::TransformAnimator)
                 item.color = QColor(0xe8, 0xe9, 0xa1, 150);
-            else if (type == game::AnimatorClass::Type::KinematicAnimator)
+            else if (animator_type == game::AnimatorClass::Type::KinematicAnimator)
                 item.color = QColor(0xe6, 0xb5, 0x66, 150);
-            else if (type == game::AnimatorClass::Type::PropertyAnimator)
+            else if (animator_type == game::AnimatorClass::Type::PropertyAnimator)
                 item.color = QColor(0xe5, 0x70, 0x7e, 150);
-            else if (type == game::AnimatorClass::Type::MaterialAnimator)
+            else if (animator_type == game::AnimatorClass::Type::MaterialAnimator)
                 item.color = QColor(0xe7, 0x80, 0x7e, 150);
             else BUG("Unhandled type for item colorization.");
 
-            (*list)[index].AddItem(item);
+            (*list)[timeline_index].AddItem(item);
         }
         for (auto& timeline : (*list))
         {
@@ -247,16 +246,26 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
     const int num_timelines = properties["num_timelines"].toInt();
     for (int i = 0; i < num_timelines; ++i)
     {
-        Timeline tl;
-        tl.selfId = app::ToUtf8(properties[QString("timeline_%1_self_id").arg(i)].toString());
-        tl.nodeId = app::ToUtf8(properties[QString("timeline_%1_node_id").arg(i)].toString());
-        mState.timelines.push_back(std::move(tl));
+        Timeline timeline;
+        timeline.timeline_id    = properties[QString("timeline_%1_self_id").arg(i)].toString();
+        timeline.target_node_id = properties[QString("timeline_%1_node_id").arg(i)].toString();
+        mState.timelines.push_back(std::move(timeline));
     }
+
+    // we used to store the animator => timeline mapping in properties
+    // but it got messy so the decision was made to simplify by adding
+    // the timeline ID to the animator class itself. This code is here
+    // just to migrate any existing property based mapping to the new
+    // way of storing the mapping.
     for (size_t i = 0; i < mState.track->GetNumAnimators(); ++i)
     {
-        const auto& actuator = mState.track->GetAnimatorClass(i);
-        const auto& timeline = properties[app::FromUtf8(actuator.GetId())].toString();
-        mState.actuator_to_timeline[actuator.GetId()] = app::ToUtf8(timeline);
+        auto& animator = mState.track->GetAnimatorClass(i);
+        const auto& property_key = app::AnyString(animator.GetId());
+        if (properties.contains(property_key))
+        {
+            const auto& property_val = app::AnyString(properties[property_key].toString());
+            animator.SetTimelineId(property_val);
+        }
     }
 
     if (properties.contains("main_splitter"))
@@ -331,15 +340,11 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     settings.SetValue("TrackWidget", "camera_offset_y", mState.camera_offset_y);
     settings.SetValue("TrackWidget", "num_timelines", (unsigned)mState.timelines.size());
 
-    for (int i=0; i<(unsigned)mState.timelines.size(); ++i)
+    for (unsigned i=0; i<(unsigned)mState.timelines.size(); ++i)
     {
         const auto& timeline = mState.timelines[i];
-        settings.SetValue("TrackWidget", QString("timeline_%1_self_id").arg(i), timeline.selfId);
-        settings.SetValue("TrackWidget", QString("timeline_%1_node_id").arg(i), timeline.nodeId);
-    }
-    for (const auto& p : mState.actuator_to_timeline)
-    {
-        settings.SetValue("TrackWidget", app::FromUtf8(p.first), p.second);
+        settings.SetValue("TrackWidget", QString("timeline_%1_self_id").arg(i), timeline.timeline_id);
+        settings.SetValue("TrackWidget", QString("timeline_%1_node_id").arg(i), timeline.target_node_id);
     }
 
     settings.SaveWidget("TrackWidget", mUI.scaleX);
@@ -376,10 +381,15 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
 
     for (unsigned i=0; i<num_timelines; ++i)
     {
-        Timeline tl;
-        settings.GetValue("TrackWidget", QString("timeline_%1_self_id").arg(i), &tl.selfId);
-        settings.GetValue("TrackWidget", QString("timeline_%1_node_id").arg(i), &tl.nodeId);
-        mState.timelines.push_back(std::move(tl));
+        QString timeline_id;
+        QString target_node_id;
+        settings.GetValue("TrackWidget", QString("timeline_%1_self_id").arg(i), &timeline_id);
+        settings.GetValue("TrackWidget", QString("timeline_%1_node_id").arg(i), &target_node_id);
+
+        Timeline timeline;
+        timeline.timeline_id = timeline_id;
+        timeline.target_node_id = target_node_id;
+        mState.timelines.push_back(std::move(timeline));
     }
     mState.show_flags.set_from_value(show_bits);
 
@@ -428,10 +438,11 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
 
     for (size_t i=0; i< mState.track->GetNumAnimators(); ++i)
     {
-        const auto& actuator = mState.track->GetAnimatorClass(i);
-        std::string trackId;
-        settings.GetValue("TrackWidget", app::FromUtf8(actuator.GetId()), &trackId);
-        mState.actuator_to_timeline[actuator.GetId()] = trackId;
+        auto& animator = mState.track->GetAnimatorClass(i);
+
+        std::string timeline_id;
+        if (settings.GetValue("TrackWidget", app::FromUtf8(animator.GetId()), &timeline_id))
+            animator.SetTimelineId(timeline_id);
     }
     mUI.timeline->SetDuration(mState.track->GetDuration());
     mUI.timeline->Rebuild();
@@ -758,17 +769,13 @@ void AnimationTrackWidget::on_actionSave_triggered()
     properties["main_splitter"]     = QString::fromLatin1(mUI.mainSplitter->saveState().toBase64());
     properties["center_splitter"]   = QString::fromLatin1(mUI.centerSplitter->saveState().toBase64());
     properties["timeline_splitter"] = QString::fromLatin1(mUI.timelineSplitter->saveState().toBase64());
-    properties["use_physics"]   = (bool)GetValue(mUI.actionUsePhysics);
-    properties["num_timelines"] = (int)mState.timelines.size();
+    properties["use_physics"]       = (bool)GetValue(mUI.actionUsePhysics);
+    properties["num_timelines"]     = (int)mState.timelines.size();
     for (int i=0; i<(int)mState.timelines.size(); ++i)
     {
         const auto& timeline = mState.timelines[i];
-        properties[QString("timeline_%1_self_id").arg(i)] = app::FromUtf8(timeline.selfId);
-        properties[QString("timeline_%1_node_id").arg(i)] = app::FromUtf8(timeline.nodeId);
-    }
-    for (const auto& p : mState.actuator_to_timeline)
-    {
-        properties[app::FromUtf8(p.first)] = app::FromUtf8(p.second);
+        properties[QString("timeline_%1_self_id").arg(i)] = timeline.timeline_id;
+        properties[QString("timeline_%1_node_id").arg(i)] = timeline.target_node_id;
     }
 
     parent->SaveAnimation(*mState.track, properties);
@@ -816,25 +823,25 @@ void AnimationTrackWidget::on_actionDeleteTimeline_triggered()
 {
     if (!mUI.timeline->GetCurrentTimeline())
         return;
-    const auto index = mUI.timeline->GetCurrentTimelineIndex();
-    ASSERT(index < mState.timelines.size());
-    auto tl = mState.timelines[index];
+    const auto timeline_index = mUI.timeline->GetCurrentTimelineIndex();
+    ASSERT(timeline_index < mState.timelines.size());
+    const auto& timeline = mState.timelines[timeline_index];
 
-    size_t count = 0;
+    size_t timeline_item_count = 0;
     for (size_t i=0; i< mState.track->GetNumAnimators(); ++i)
     {
-        const auto& actuator = mState.track->GetAnimatorClass(i);
-        const auto& timeline = mState.actuator_to_timeline[actuator.GetId()];
-        if (timeline == tl.selfId)
-            ++count;
+        const auto& animator = mState.track->GetAnimatorClass(i);
+        const auto& animator_timeline_id = animator.GetTimelineId();
+        if (animator_timeline_id == timeline.timeline_id)
+            ++timeline_item_count;
     }
 
-    if (count > 0)
+    if (timeline_item_count > 0)
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Question);
         msg.setWindowTitle("Delete Timeline ?");
-        msg.setText("Timeline contains multiple actuators. Are you sure you want to delete?");
+        msg.setText("Timeline contains multiple items. Are you sure you want to delete?");
         msg.setStandardButtons(QMessageBox::StandardButton::Yes |
                                QMessageBox::StandardButton::No);
         if (msg.exec() == QMessageBox::StandardButton::No)
@@ -843,15 +850,15 @@ void AnimationTrackWidget::on_actionDeleteTimeline_triggered()
 
     for (size_t i=0; i< mState.track->GetNumAnimators();)
     {
-        const auto& actuator = mState.track->GetAnimatorClass(i);
-        const auto& timeline = mState.actuator_to_timeline[actuator.GetId()];
-        if (timeline == tl.selfId) {
+        const auto& animator = mState.track->GetAnimatorClass(i);
+        const auto& animator_timeline_id = animator.GetTimelineId();
+        if (animator_timeline_id == timeline.timeline_id) {
             mState.track->DeleteAnimator(i);
         } else {
             ++i;
         }
     }
-    mState.timelines.erase(mState.timelines.begin() + index);
+    mState.timelines.erase(mState.timelines.begin() + timeline_index);
     mUI.timeline->Rebuild();
     SetActuatorUIDefaults();
     SetActuatorUIEnabled(false);
@@ -1630,11 +1637,11 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
 
     SetActuatorUIEnabled(true);
 
-    const auto* actuator = mState.track->FindAnimatorById(app::ToUtf8(item->id));
+    const auto* selected_animator = mState.track->FindAnimatorById(item->id);
     const auto duration = mState.track->GetDuration();
-    const auto start = actuator->GetStartTime() * duration;
-    const auto end = actuator->GetDuration() * duration + start;
-    const auto node = mEntity->FindNodeByClassId(actuator->GetNodeId());
+    const auto start = selected_animator->GetStartTime() * duration;
+    const auto end = selected_animator->GetDuration() * duration + start;
+    const auto node = mEntity->FindNodeByClassId(selected_animator->GetNodeId());
 
     // figure out the hi/lo (left right) limits for the spinbox start
     // and time values for this actuator.
@@ -1642,40 +1649,37 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
     float hi_bound = 1.0f;
     for (size_t i = 0; i < mState.track->GetNumAnimators(); ++i)
     {
-        const auto& other = mState.track->GetAnimatorClass(i);
-        if (other.GetId() == actuator->GetId())
+        const auto& other_animator = mState.track->GetAnimatorClass(i);
+        if (other_animator.GetId() == selected_animator->GetId())
             continue;
-        else if (other.GetNodeId() != actuator->GetNodeId())
+        else if (other_animator.GetNodeId() != selected_animator->GetNodeId())
             continue;
 
-        // if the actuators are not on the same timeline then discard
+        // if the animators are not on the same timeline then discard
         // from this check
-        ASSERT(base::Contains(mState.actuator_to_timeline, actuator->GetId()));
-        ASSERT(base::Contains(mState.actuator_to_timeline, other.GetId()));
-        if (mState.actuator_to_timeline[actuator->GetId()] !=
-            mState.actuator_to_timeline[other.GetId()])
+        if (other_animator.GetTimelineId() != selected_animator->GetTimelineId())
             continue;
 
-        const auto start = other.GetStartTime();
-        const auto end = other.GetStartTime() + other.GetDuration();
-        if (start >= actuator->GetStartTime())
+        const auto start = other_animator.GetStartTime();
+        const auto end = other_animator.GetStartTime() + other_animator.GetDuration();
+        if (start >= selected_animator->GetStartTime())
             hi_bound = std::min(hi_bound, start);
-        if (end <= actuator->GetStartTime())
+        if (end <= selected_animator->GetStartTime())
             lo_bound = std::max(lo_bound, end);
     }
     const auto& len = QString::number(end - start, 'f', 2);
-    SetValue(mUI.actuatorName, actuator->GetName());
-    SetValue(mUI.actuatorID, actuator->GetId());
+    SetValue(mUI.actuatorName, selected_animator->GetName());
+    SetValue(mUI.actuatorID, selected_animator->GetId());
     SetValue(mUI.actuatorNode, node->GetName());
-    SetValue(mUI.actuatorType, app::toString(actuator->GetType()));
-    SetValue(mUI.actuatorIsStatic, actuator->TestFlag(game::AnimatorClass::Flags::StaticInstance));
+    SetValue(mUI.actuatorType, app::toString(selected_animator->GetType()));
+    SetValue(mUI.actuatorIsStatic, selected_animator->TestFlag(game::AnimatorClass::Flags::StaticInstance));
     SetMinMax(mUI.actuatorStartTime, lo_bound * duration, hi_bound * duration);
     SetMinMax(mUI.actuatorEndTime, lo_bound * duration, hi_bound * duration);
     SetValue(mUI.actuatorStartTime, start);
     SetValue(mUI.actuatorEndTime, end);
     SetValue(mUI.actuatorGroup, app::toString("Animator - %1, %2s", item->text, len));
 
-    if (const auto* ptr = dynamic_cast<const game::TransformAnimatorClass*>(actuator))
+    if (const auto* ptr = dynamic_cast<const game::TransformAnimatorClass*>(selected_animator))
     {
         const auto& pos = ptr->GetEndPosition();
         const auto& size = ptr->GetEndSize();
@@ -1697,7 +1701,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         node->SetScale(scale);
         node->SetRotation(rotation);
     }
-    else if (const auto* ptr = dynamic_cast<const game::PropertyAnimatorClass*>(actuator))
+    else if (const auto* ptr = dynamic_cast<const game::PropertyAnimatorClass*>(selected_animator))
     {
         const auto name = ptr->GetPropertyName();
         using Name = game::PropertyAnimatorClass::PropertyName;
@@ -1784,7 +1788,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
 
         mUI.curve->SetFunction(ptr->GetInterpolation());
     }
-    else if (const auto* ptr = dynamic_cast<const game::KinematicAnimatorClass*>(actuator))
+    else if (const auto* ptr = dynamic_cast<const game::KinematicAnimatorClass*>(selected_animator))
     {
         const auto& linear_velocity = ptr->GetEndLinearVelocity();
         const auto& linear_acceleration = ptr->GetEndLinearAcceleration();
@@ -1802,7 +1806,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
 
         mUI.actuatorProperties->setCurrentWidget(mUI.kinematicActuator);
     }
-    else if (const auto* ptr = dynamic_cast<const game::BooleanPropertyAnimatorClass*>(actuator))
+    else if (const auto* ptr = dynamic_cast<const game::BooleanPropertyAnimatorClass*>(selected_animator))
     {
         SetValue(mUI.itemFlags, ptr->GetFlagName());
         SetValue(mUI.flagAction, ptr->GetFlagAction());
@@ -1814,7 +1818,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
 
         mUI.curve->ClearFunction();
     }
-    else if (const auto* ptr = dynamic_cast<const game::MaterialAnimatorClass*>(actuator))
+    else if (const auto* ptr = dynamic_cast<const game::MaterialAnimatorClass*>(selected_animator))
     {
         SetValue(mUI.materialInterpolation, ptr->GetInterpolation());
         mUI.actuatorProperties->setCurrentWidget(mUI.materialActuator);
@@ -1887,23 +1891,24 @@ void AnimationTrackWidget::AddActuatorAction()
 
 void AnimationTrackWidget::AddNodeTimelineAction()
 {
-    QAction* action = qobject_cast<QAction*>(sender());
+    const auto* action = qobject_cast<QAction*>(sender());
+    const auto& nodeId = action->data().toString();
 
-    const QString& nodeId = action->data().toString();
-    size_t index = 0;
+    size_t insert_index = 0;
     if (!mUI.timeline->GetCurrentTimeline())
     {
         if (!mState.timelines.empty())
-            index = mState.timelines.size();
+            insert_index = mState.timelines.size();
     }
     else
     {
-        index = mUI.timeline->GetCurrentTimelineIndex();
+        insert_index = mUI.timeline->GetCurrentTimelineIndex();
     }
-    Timeline tl;
-    tl.selfId = base::RandomString(10);
-    tl.nodeId = app::ToUtf8(nodeId);
-    mState.timelines.insert(mState.timelines.begin() + index, tl);
+
+    Timeline timeline;
+    timeline.timeline_id    = base::RandomString(10);
+    timeline.target_node_id = nodeId;
+    mState.timelines.insert(mState.timelines.begin() + insert_index, timeline);
     mUI.timeline->Rebuild();
 }
 
@@ -2150,7 +2155,7 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
         return;
 
     const auto& timeline = mState.timelines[timeline_index];
-    const auto* node     = mState.entity->FindNodeById(timeline.nodeId);
+    const auto* node     = mState.entity->FindNodeById(timeline.target_node_id);
     const auto duration  = mState.track->GetDuration();
     const auto position  = seconds / duration;
 
@@ -2158,22 +2163,23 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
     float hi_bound = 1.0f;
     for (size_t i=0; i< mState.track->GetNumAnimators(); ++i)
     {
-        const auto& klass = mState.track->GetAnimatorClass(i);
-        if (mState.actuator_to_timeline[klass.GetId()] != timeline.selfId)
+        const auto& animator = mState.track->GetAnimatorClass(i);
+        if (animator.GetTimelineId() != timeline.timeline_id)
             continue;
-        const auto start = klass.GetStartTime();
-        const auto end   = klass.GetStartTime() + klass.GetDuration();
+
+        const auto start = animator.GetStartTime();
+        const auto end   = animator.GetStartTime() + animator.GetDuration();
+
         if (start >= position)
             hi_bound = std::min(hi_bound, start);
         if (end <= position)
             lo_bound = std::max(lo_bound, end);
     }
+
     const auto& name = base::FormatString("Animator_%1", mState.track->GetNumAnimators());
     const auto node_duration   = hi_bound - lo_bound;
     const auto node_start_time = lo_bound;
     const float node_end_time  = node_start_time + duration;
-
-    QString actuator;
 
     if (type == game::AnimatorClass::Type::TransformAnimator)
     {
@@ -2191,7 +2197,8 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
 
         game::TransformAnimatorClass klass;
         klass.SetName(name);
-        klass.SetNodeId(node->GetId());
+        klass.SetNodeId(timeline.target_node_id);
+        klass.SetTimelineId(timeline.timeline_id);
         klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
@@ -2200,17 +2207,20 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
         klass.SetEndScale(scale);
         klass.SetInterpolation(GetValue(mUI.transformInterpolation));
         klass.SetEndRotation(qDegreesToRadians((float) GetValue(mUI.transformEndRotation)));
-        actuator = app::FromUtf8(klass.GetId());
-        mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
         mState.track->AddAnimator(klass);
+
+        mUI.timeline->Rebuild();
+        SelectedItemChanged(mUI.timeline->SelectItem(klass.GetId()));
     }
     else if (type == game::AnimatorClass::Type::PropertyAnimator)
     {
         using ValName = game::PropertyAnimatorClass::PropertyName;
         const auto value = (ValName)GetValue(mUI.setvalName);
+
         game::PropertyAnimatorClass klass;
         klass.SetName(name);
-        klass.SetNodeId(node->GetId());
+        klass.SetNodeId(timeline.target_node_id);
+        klass.SetTimelineId(timeline.timeline_id);
         klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
@@ -2276,15 +2286,17 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
         else BUG("Unhandled value actuator value type.");
 
-        actuator = app::FromUtf8(klass.GetId());
-        mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
         mState.track->AddAnimator(klass);
+
+        mUI.timeline->Rebuild();
+        SelectedItemChanged(mUI.timeline->SelectItem(klass.GetId()));
     }
     else if (type == game::AnimatorClass::Type::KinematicAnimator)
     {
         game::KinematicAnimatorClass klass;
         klass.SetName(name);
-        klass.SetNodeId(node->GetId());
+        klass.SetNodeId(timeline.target_node_id);
+        klass.SetTimelineId(timeline.timeline_id);
         klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
@@ -2293,40 +2305,44 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
         velocity.x = GetValue(mUI.kinematicEndVeloX);
         velocity.y = GetValue(mUI.kinematicEndVeloY);
         klass.SetEndLinearVelocity(velocity);
-        actuator = app::FromUtf8(klass.GetId());
-        mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
+
         mState.track->AddAnimator(klass);
+
+        mUI.timeline->Rebuild();
+        SelectedItemChanged(mUI.timeline->SelectItem(klass.GetId()));
     }
     else if (type == game::AnimatorClass::Type::BooleanPropertyAnimator)
     {
         game::BooleanPropertyAnimatorClass klass;
         klass.SetName(name);
-        klass.SetNodeId(node->GetId());
+        klass.SetNodeId(timeline.target_node_id);
+        klass.SetTimelineId(timeline.timeline_id);
         klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
         klass.SetFlagName(GetValue(mUI.itemFlags));
         klass.SetFlagAction(GetValue(mUI.flagAction));
         klass.SetJointId(GetItemId(mUI.flagJoint));
-        actuator = app::FromUtf8(klass.GetId());
-        mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
+
         mState.track->AddAnimator(klass);
+
+        mUI.timeline->Rebuild();
+        SelectedItemChanged(mUI.timeline->SelectItem(klass.GetId()));
     }
     else if (type ==game::AnimatorClass::Type::MaterialAnimator)
     {
         game::MaterialAnimatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(node->GetId());
+        klass.SetTimelineId(timeline.timeline_id);
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
-        actuator = app::FromUtf8(klass.GetId());
-        mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
+
         mState.track->AddAnimator(klass);
+
+        mUI.timeline->Rebuild();
+        SelectedItemChanged(mUI.timeline->SelectItem(klass.GetId()));
     }
-
-    mUI.timeline->Rebuild();
-    SelectedItemChanged(mUI.timeline->SelectItem(actuator));
-
     DEBUG("New %1 actuator on entity node '%2' from %3s to %4s", type, node->GetName(),
           node_start_time * duration, node_end_time * duration);
 }
@@ -2339,14 +2355,14 @@ void AnimationTrackWidget::CreateTimelines()
         const auto& id = mState.entity->GetNode(i).GetId();
         auto it = std::find_if(mState.timelines.begin(),
                                mState.timelines.end(), [&id](const auto& timeline) {
-            return timeline.nodeId == id;
+            return timeline.target_node_id == id;
         });
         if (it != mState.timelines.end())
             continue;
 
         Timeline timeline;
-        timeline.selfId = base::RandomString(10);
-        timeline.nodeId = id;
+        timeline.timeline_id = base::RandomString(10);
+        timeline.target_node_id = id;
         mState.timelines.push_back(std::move(timeline));
     }
 }
@@ -2386,14 +2402,13 @@ void AnimationTrackWidget::RemoveDeletedItems()
     for (const auto& id : dead_animators)
     {
         mState.track->DeleteAnimatorById(id);
-        mState.actuator_to_timeline.erase(id);
     }
 
     // remove orphaned timelines.
     for (auto it = mState.timelines.begin();  it != mState.timelines.end();)
     {
         const auto& timeline = *it;
-        if (mState.entity->FindNodeById(timeline.nodeId))
+        if (mState.entity->FindNodeById(timeline.target_node_id))
         {
             ++it;
             continue;
