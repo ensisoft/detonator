@@ -44,6 +44,16 @@ namespace gui
         // One item that appears on the visualization of the timeline
         struct TimelineItem
         {
+            enum class Type {
+                // A span (block) of time. Start and duration are used to define
+                // the span.
+                Span,
+                // A point (such as an event) in time. Startime is used to define
+                // the point in time.
+                Point
+            };
+            Type type = Type::Span;
+
             // color of the visualized item.
             QColor  color;
             // application defined item id.
@@ -51,28 +61,28 @@ namespace gui
             // text (name) of the item.
             app::AnyString text;
             // icon (if any) of the item.
-            QIcon   icon;
+            QPixmap icon;
             // application defined data value.
             std::any user;
             // normalized (with respect to the timeline widget's time duration)
             // start time of the item on its timeline.
-            float   starttime = 0.0f;
+            float starttime = 0.0f;
             // normalized (with respect to the timeline widget's time duration)
             // duration of the time.
-            float   duration  = 0.0f;
+            float duration  = 0.0f;
         };
 
         class Timeline
         {
         public:
-            Timeline(const QString& name) : mName(name)
+            explicit Timeline(QString name) : mName(std::move(name))
             {}
             Timeline() = default;
             void AddItem(const TimelineItem& item)
             {
                 mItems.push_back(item);
             }
-            void SetName(const QString& name)
+            void SetName(const app::AnyString& name)
             { mName = name; }
             size_t GetNumItems() const
             { return mItems.size(); }
@@ -95,7 +105,7 @@ namespace gui
         private:
         };
 
-        TimelineWidget(QWidget* parent);
+        explicit TimelineWidget(QWidget* parent);
 
         // Rebuild the widget's data representation.
         // This will ask the model to provide a new list of data
@@ -149,16 +159,16 @@ namespace gui
         void DeleteSelectedItem(const TimelineItem* selected);
 
     private:
-        virtual void paintEvent(QPaintEvent* event) override;
-        virtual void mouseMoveEvent(QMouseEvent* mickey) override;
-        virtual void mousePressEvent(QMouseEvent* mickey) override;
-        virtual void mouseReleaseEvent(QMouseEvent* mickey) override;
-        virtual void wheelEvent(QWheelEvent* wheel) override;
-        virtual void scrollContentsBy(int dx, int dy) override;
-        virtual void enterEvent(QEvent*) override;
-        virtual void leaveEvent(QEvent*) override;
-        virtual void resizeEvent(QResizeEvent* event) override;
-        virtual void keyPressEvent(QKeyEvent* event) override;
+        void paintEvent(QPaintEvent* event) override;
+        void mouseMoveEvent(QMouseEvent* mickey) override;
+        void mousePressEvent(QMouseEvent* mickey) override;
+        void mouseReleaseEvent(QMouseEvent* mickey) override;
+        void wheelEvent(QWheelEvent* wheel) override;
+        void scrollContentsBy(int dx, int dy) override;
+        void enterEvent(QEvent*) override;
+        void leaveEvent(QEvent*) override;
+        void resizeEvent(QResizeEvent* event) override;
+        void keyPressEvent(QKeyEvent* event) override;
     private:
         void ComputeVerticalScrollbars();
         void ComputeHorizontalScrollbars();
