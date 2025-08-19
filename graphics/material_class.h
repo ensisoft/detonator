@@ -265,6 +265,9 @@ namespace gfx
         inline bool HasCustomShader() const noexcept
         { return !mShaderSrc.empty() || !mShaderUri.empty(); }
 
+        inline bool IsSprite() const noexcept
+        { return GetType() == Type::Sprite; }
+
         // Material uniform API for setting/getting "Known" uniforms.
         inline void SetParticleRotation(ParticleRotation rotation) noexcept
         { SetUniform("kParticleRotation", static_cast<int>(rotation)); }

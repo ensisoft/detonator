@@ -690,7 +690,7 @@
         </sizepolicy>
        </property>
        <property name="title">
-        <string>Animator</string>
+        <string>Item properties (nothing selected)</string>
        </property>
        <property name="flat">
         <bool>true</bool>
@@ -726,7 +726,7 @@
             <item row="5" column="0">
              <widget class="QLabel" name="label_13">
               <property name="text">
-               <string>Animator type</string>
+               <string>Item type</string>
               </property>
              </widget>
             </item>
@@ -740,7 +740,7 @@
             <item row="4" column="0">
              <widget class="QLabel" name="label_33">
               <property name="text">
-               <string>Animator ID</string>
+               <string>Item ID</string>
               </property>
              </widget>
             </item>
@@ -754,7 +754,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="label_32">
               <property name="text">
-               <string>Animator name</string>
+               <string>Item name</string>
               </property>
              </widget>
             </item>
@@ -784,7 +784,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Entity node</string>
+               <string>Target node</string>
               </property>
              </widget>
             </item>
@@ -878,7 +878,7 @@
              <enum>QFrame::Plain</enum>
             </property>
             <property name="currentIndex">
-             <number>1</number>
+             <number>3</number>
             </property>
             <widget class="QWidget" name="transformActuator">
              <layout class="QGridLayout" name="gridLayout_5">
@@ -1153,6 +1153,7 @@
               </item>
              </layout>
             </widget>
+            <widget class="QWidget" name="blankPage"/>
             <widget class="QWidget" name="setvalActuator">
              <layout class="QGridLayout" name="gridLayout_3">
               <property name="leftMargin">
@@ -1224,6 +1225,47 @@
                  <string>Joint</string>
                 </property>
                </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="emitParticlesTrigger">
+             <layout class="QGridLayout" name="gridLayout_4">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_22">
+                <property name="text">
+                 <string>Particle count</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QSpinBox" name="emitCount">
+                <property name="specialValueText">
+                 <string>Particle engine default</string>
+                </property>
+                <property name="minimum">
+                 <number>0</number>
+                </property>
+                <property name="maximum">
+                 <number>1024</number>
+                </property>
+                <property name="value">
+                 <number>0</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="runSpriteCycleTrigger">
+             <layout class="QGridLayout" name="gridLayout_9">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_35">
+                <property name="text">
+                 <string>Sprite cycle</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="spriteCycles"/>
               </item>
              </layout>
             </widget>
@@ -1299,7 +1341,7 @@
               <item row="1" column="0">
                <widget class="QLabel" name="label_18">
                 <property name="text">
-                 <string>Target</string>
+                 <string>Target attachment</string>
                 </property>
                </widget>
               </item>
@@ -1690,31 +1732,31 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="actionDeleteActuator">
+  <action name="actionDeleteItem">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
    </property>
    <property name="text">
-    <string>Delete Animator</string>
+    <string>Delete Item</string>
    </property>
    <property name="toolTip">
-    <string>Delete selected animator</string>
+    <string>Delete selected item</string>
    </property>
    <property name="shortcut">
     <string>Del</string>
    </property>
   </action>
-  <action name="actionDeleteActuators">
+  <action name="actionDeleteItems">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
    </property>
    <property name="text">
-    <string>Delete All Animators</string>
+    <string>Delete All Items</string>
    </property>
    <property name="toolTip">
-    <string>Delete all animators from all timelines</string>
+    <string>Delete all animation items</string>
    </property>
   </action>
   <action name="actionReset">
@@ -1723,10 +1765,10 @@
      <normaloff>:/32x32_ico_png/reset.png</normaloff>:/32x32_ico_png/reset.png</iconset>
    </property>
    <property name="text">
-    <string>Reset</string>
+    <string>Reset Animation</string>
    </property>
    <property name="toolTip">
-    <string>Reset the animation track</string>
+    <string>Reset the animation visualization state to initial state</string>
    </property>
    <property name="shortcut">
     <string>Esc</string>
@@ -1744,10 +1786,10 @@
      <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
    </property>
    <property name="text">
-    <string>Physics</string>
+    <string>Use Physics</string>
    </property>
    <property name="toolTip">
-    <string>Toggle physics simulation on/off</string>
+    <string>Toggle physics simulation on and off</string>
    </property>
   </action>
   <action name="actionDeleteTimeline">
