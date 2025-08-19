@@ -54,32 +54,32 @@ namespace gui
 
     public:
         // constructors.
-        AnimationTrackWidget(app::Workspace* workspace);
+        explicit AnimationTrackWidget(app::Workspace* workspace);
         AnimationTrackWidget(app::Workspace* workspace, const std::shared_ptr<game::EntityClass>& entity);
         AnimationTrackWidget(app::Workspace* workspace,
                 const std::shared_ptr<game::EntityClass>& entity,
                 const game::AnimationClass& track,
                 const QVariantMap& properties);
-       ~AnimationTrackWidget();
+       ~AnimationTrackWidget() override;
 
         // MainWidget implementation.
-        virtual QString GetId() const override;
-        virtual void AddActions(QToolBar& bar) override;
-        virtual void AddActions(QMenu& menu) override;
-        virtual bool SaveState(Settings& settings) const override;
-        virtual bool LoadState(const Settings& settings) override;
-        virtual bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
-        virtual void ZoomIn() override;
-        virtual void ZoomOut() override;
-        virtual void ReloadShaders() override;
-        virtual void ReloadTextures() override;
-        virtual void Shutdown() override;
-        virtual void Render() override;
-        virtual void Update(double secs) override;
-        virtual void Save() override;
-        virtual bool HasUnsavedChanges() const override;
-        virtual bool GetStats(Stats* stats) const override;
-        virtual bool ShouldClose() const override;
+        QString GetId() const override;
+        void AddActions(QToolBar& bar) override;
+        void AddActions(QMenu& menu) override;
+        bool SaveState(Settings& settings) const override;
+        bool LoadState(const Settings& settings) override;
+        bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
+        void ZoomIn() override;
+        void ZoomOut() override;
+        void ReloadShaders() override;
+        void ReloadTextures() override;
+        void Shutdown() override;
+        void Render() override;
+        void Update(double secs) override;
+        void Save() override;
+        bool HasUnsavedChanges() const override;
+        bool GetStats(Stats* stats) const override;
+        bool ShouldClose() const override;
 
         void SetZoom(float zoom);
         void SetShowGrid(bool on_off);
@@ -90,14 +90,14 @@ namespace gui
         void SetRenderingStyle(engine::RenderingStyle style);
         void RealizeEntityChange(std::shared_ptr<const game::EntityClass> klass);
     private slots:
-        void on_widgetColor_colorChanged(QColor color);
+        void on_widgetColor_colorChanged(const QColor& color);
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionSave_triggered();
         void on_actionReset_triggered();
-        void on_actionDeleteActuator_triggered();
-        void on_actionDeleteActuators_triggered();
+        void on_actionDeleteItem_triggered();
+        void on_actionDeleteItems_triggered();
         void on_actionDeleteTimeline_triggered();
         void on_btnTransformPlus90_clicked();
         void on_btnTransformMinus90_clicked();
@@ -143,11 +143,18 @@ namespace gui
         void on_flagJoint_currentIndexChanged(int);
         void on_materialInterpolation_currentIndexChanged(int);
         void on_btnMaterialParameters_clicked();
+
+        void on_emitCount_valueChanged(int);
+        void on_spriteCycles_currentIndexChanged(int);
+
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
         void DeleteSelectedItem(const TimelineWidget::TimelineItem* item);
+        void TimelineAnimatorChanged(const TimelineWidget::TimelineItem* item);
+        void TimelineTriggerChanged(const TimelineWidget::TimelineItem* item);
         void ToggleShowResource();
-        void AddActuatorAction();
+        void AddAnimatorAction();
+        void AddTriggerAction();
         void AddNodeTimelineAction();
     private:
         void PaintScene(gfx::Painter& painter, double secs);
@@ -158,18 +165,19 @@ namespace gui
         bool KeyPress(QKeyEvent* key);
         void UpdateTransformActuatorUI();
         void UpdateTrackUI();
+        void SetSelectedTriggerProperties();
         void SetSelectedActuatorProperties();
         void SetActuatorUIEnabled(bool enabled);
         void SetActuatorUIDefaults();
-        void AddActuatorFromTimeline(game::AnimatorClass::Type type, float start_time);
+        void AddAnimatorFromTimeline(game::AnimatorClass::Type type, float start_time, unsigned timeline_index);
         void DisplayCurrentCameraLocation();
         void CreateTimelines();
-        void RemoveDeletedItems();
+        void RemoveInvalidAnimationItems();
         void ReturnToDefault();
         void UpdateKinematicUnits();
         game::EntityNode* GetCurrentEntityNode();
-        game::AnimatorClass* GetCurrentActuator();
-        gui::TimelineWidget::TimelineItem* GetCurrentTimelineItem();
+        game::AnimatorClass* GetCurrentAnimator();
+        game::AnimationTriggerClass* GetCurrentTrigger();
     private:
         Ui::AnimationTrack mUI;
         UIAnimator mAnimator;

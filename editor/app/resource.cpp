@@ -32,6 +32,7 @@
 #include "data/chunk.h"
 #include "game/timeline_animator.h"
 #include "game/timeline_animation.h"
+#include "game/timeline_animation_trigger.h"
 #include "game/entity_state_controller.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
@@ -509,6 +510,13 @@ QVariantMap DuplicateResourceProperties(const game::EntityClass& src, game::Enti
             const auto& src_timeline_id = src_animator.GetTimelineId();
             if (!src_timeline_id.empty())
                 dst_animator.SetTimelineId(timeline_id_map[src_timeline_id]);
+        }
+        for (size_t i=0; i<src_track.GetNumTriggers(); ++i)
+        {
+            const auto& src_trigger = src_track.GetTriggerClass(i);
+            auto& dst_trigger = dst_track.GetTriggerClass(i);
+            const auto& src_trigger_timeline_id = src_trigger.GetTimelineId();
+            dst_trigger.SetTimelineId(timeline_id_map[src_trigger_timeline_id]);
         }
 
         ret["track_" + dst_id] = new_properties;
