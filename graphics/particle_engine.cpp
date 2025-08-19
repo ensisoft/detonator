@@ -1224,17 +1224,27 @@ void ParticleEngineInstance::Restart(const Environment& env)
 
 void ParticleEngineInstance::Execute(const Environment& env, const Command& cmd)
 {
-    if (cmd.name == "EmitParticles" && mClass->GetParams().mode == ParticleEngineClass::SpawnPolicy::Command)
+    const auto& params = mClass->GetParams();
+    const auto default_emit_count = static_cast<int>(params.num_particles);
+    if (cmd.name == "EmitParticles" && params.mode == ParticleEngineClass::SpawnPolicy::Command)
     {
         if (const auto* count = base::SafeFind(cmd.args, std::string("count")))
         {
             if (const auto* val = std::get_if<int>(count))
-                mClass->Emit(env, mState, *val);
+            {
+                if (*val > 0)
+                    mClass->Emit(env, mState, *val);
+                else mClass->Emit(env, mState, default_emit_count);
+            }
+            else
+            {
+                WARN("Particle engine 'EmitParticles' command argument 'count' has wrong type. Expected 'int'.");
+                mClass->Emit(env, mState, default_emit_count);
+            }
         }
         else
         {
-            const auto& params = mClass->GetParams();
-            mClass->Emit(env, mState, (int)params.num_particles);
+            mClass->Emit(env, mState, default_emit_count);
         }
     }
     else WARN("No such particle engine command. [cmd='%1']", cmd.name);
