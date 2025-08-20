@@ -149,7 +149,7 @@ namespace gui
         }
         size_t GetCurrentTimelineIndex() const
         { return mHoveredTimeline; }
-        float MapToSeconds(const QPoint& pos) const;
+        float MapToSeconds(QPoint pos) const;
 
         const TimelineItem* SelectItem(const app::AnyString& itemId);
     signals:
@@ -172,6 +172,14 @@ namespace gui
     private:
         void ComputeVerticalScrollbars();
         void ComputeHorizontalScrollbars();
+        float GetPixelsPerSecond() const;
+        QPoint MapFromView(QPoint click_pos) const;
+
+        enum class HotSpot {
+            LeftMargin, RightMargin, Ruler, Content
+        };
+        HotSpot TestHotSpot(const QPoint& click_pos) const;
+
     private:
         // the provider of the timeline data.
         TimelineModel* mModel = nullptr;
@@ -183,7 +191,7 @@ namespace gui
         std::size_t mSelectedTimeline = 0;
         // Index of the currently hovered timeline.
         std::size_t mHoveredTimeline = std::numeric_limits<size_t>::max();
-        unsigned mNumVisibleTimelines = 0;
+
         float mDuration    = 10.0f; // length of timeline in seconds.
         float mZoomFactor  = 1.0f;
         float mCurrentTime = 0.0f;

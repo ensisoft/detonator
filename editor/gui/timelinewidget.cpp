@@ -119,19 +119,23 @@ void TimelineWidget::Repaint()
     viewport()->repaint();
 }
 
-float TimelineWidget::MapToSeconds(const QPoint& pos) const
+float TimelineWidget::MapToSeconds(QPoint pos) const
 {
-    const unsigned window_width  = viewport()->width();
-    const unsigned window_height = viewport()->height();
-    // only interested in the x position which should be
-    // within the widget's width.
-    const float x = pos.x() - mXOffset - HorizontalMargin;
+    // only the horizontal position matters here.
+    pos.setY(RulerHeight + 20);
 
-    const int timeline_width = window_width - 2 * HorizontalMargin; // leave 5px gap at both ends
-    const float num_seconds_on_timeline = timeline_width / float(PixelsToSecond);
-    const auto pixels_per_one_second = (num_seconds_on_timeline > mDuration
-                                        ? timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
-    const float seconds = x / pixels_per_one_second;
+    const auto hotspot = TestHotSpot(pos);
+    if (hotspot == HotSpot::LeftMargin)
+        return 0.0f;
+    else if (hotspot == HotSpot::RightMargin)
+        return 1.0f;
+
+    pos = MapFromView(pos);
+
+    const auto point = static_cast<float>(pos.x());
+    const auto pixels_per_one_second = GetPixelsPerSecond();
+    const auto seconds = point / pixels_per_one_second;
+
     return seconds;
 }
 
@@ -157,16 +161,15 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
     //const QPalette& palette = this->palette();
     const auto& palette = QApplication::palette();
 
-    const unsigned window_width  = viewport()->width();
-    const unsigned window_height = viewport()->height();
+    const auto viewport_width  = viewport()->width();
+    const auto viewport_height = viewport()->height();
 
-    const int timeline_start = mXOffset + HorizontalMargin;
-    const int timeline_width = window_width - 2 * HorizontalMargin; // leave 5px gap at both ends
-    const float num_seconds_on_timeline = timeline_width / float(PixelsToSecond);
-    const auto pixels_per_one_second = (num_seconds_on_timeline > mDuration
-        ? timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
-    const auto num_second_ticks = (timeline_width + std::abs(mXOffset)) / pixels_per_one_second;
-    const auto max_num_visible_timelines = (window_height - RulerHeight) / (TimelineHeight + VerticalMargin);
+    const auto timeline_row_height   = TimelineHeight + 2 * VerticalMargin;
+    const auto pixels_per_one_second = GetPixelsPerSecond();
+    const auto content_width_pixels  = std::abs(mXOffset) + viewport_width - 2 * HorizontalMargin;
+    const auto content_width_seconds = content_width_pixels / pixels_per_one_second;
+    const auto timeline_count        = mTimelines.size();
+    const auto ruler_tick_count     = std::min(mDuration, content_width_seconds);
 
     auto color_group = QPalette::ColorGroup::Active;
     if (mFreezeItems)
@@ -174,111 +177,64 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
     else if (!hasFocus())
         color_group = QPalette::ColorGroup::Inactive;
 
+    QPen selection_pen;
+    selection_pen.setWidth(2.0f);
+    selection_pen.setColor(QColor(0x0, 0xff, 0x00, 0xff));
+
     QPainter p(viewport());
     p.setRenderHint(QPainter::Antialiasing);
     p.fillRect(viewport()->rect(), palette.color(color_group, QPalette::Base));
 
-    QPen selection_pen;
-    selection_pen.setWidth(2.0f);
-    //selection_pen.setColor(palette.color(color_group, QPalette::Highlight));
-    selection_pen.setColor(QColor(0x0, 0xff, 0x00, 0xff));
+    // paint order
+    // draw timeline visualization
+    // draw time spans
+    // draw time points
+    // draw ruler + time bullet
 
-    // draw the timeline meter at the top row.
+    for (size_t timeline_index=0; timeline_index<timeline_count; ++timeline_index)
     {
-        QFont small;
-        small.setPixelSize(8);
-        QFontMetrics fm(small);
+        const auto& timeline = mTimelines[timeline_index];
 
-        QPen line;
-        line.setColor(palette.color(color_group, QPalette::Text));
-
-        const auto line_length = mDuration * pixels_per_one_second;
-        p.setPen(line);
-        p.drawLine(timeline_start, 20, timeline_start + line_length, 20);
-        p.setFont(small);
-
-        for (unsigned i=0; i<=num_second_ticks; ++i)
-        {
-            const auto x = timeline_start + i * pixels_per_one_second;
-            const auto y = 20;
-            p.drawLine(x, y, x, y+10);
-
-            const auto& legend = QString("%1s").arg(i);
-            const auto len = fm.horizontalAdvance(legend);
-            p.drawText(x-len*0.5, 15, legend);
-
-            const auto num_fractions = 10;
-            const auto pixels_per_frac_second = pixels_per_one_second / num_fractions;
-            if (pixels_per_one_second == 0)
-                continue;
-
-            for (int i=0; i<num_fractions; ++i)
-            {
-                const auto x0 = x + i * pixels_per_frac_second;
-                const auto y0 = y;
-                p.drawLine(x0, y0, x0, y0+5);
-            }
-        }
-    }
-
-    QFont font;
-    p.setFont(font);
-
-    // visualize the timelines and their items
-    for (size_t i=0; i<max_num_visible_timelines; ++i)
-    {
-        const auto index = i + mYOffset;
-        if (index >= mTimelines.size())
-            break;
-        const auto& timeline = mTimelines[index];
-        const auto x = timeline_start;
-        const auto y = RulerHeight + i * TimelineHeight + i * VerticalMargin;
-        const auto l = mDuration * pixels_per_one_second;
-        const QRect timeline_box(x, y, l, TimelineHeight);
+        QRect timeline_box(0, timeline_index * timeline_row_height, content_width_pixels, TimelineHeight);
+        timeline_box.translate(0, VerticalMargin);
+        timeline_box.translate(mXOffset, mYOffset);
+        timeline_box.translate(HorizontalMargin, RulerHeight);
 
         // indicate the timeline the mouse is hovered on unless there's
         // an item we're hovering on.
-        if (index == mHoveredTimeline && !mHoveredItem)
-        {
-            QPen pen;
-            pen.setColor(palette.color(color_group, QPalette::Text));
-            p.setPen(pen);
-            p.fillRect(timeline_box, palette.color(color_group, QPalette::AlternateBase));
-            p.drawText(timeline_box, Qt::AlignVCenter | Qt::AlignHCenter, timeline.GetName());
-        }
-        else
-        {
-            QPen pen;
-            pen.setColor(palette.color(color_group, QPalette::Text));
-            p.setPen(pen);
-            p.fillRect(timeline_box, palette.color(color_group, QPalette::Base));
-            p.drawText(timeline_box, Qt::AlignVCenter | Qt::AlignHCenter, timeline.GetName());
-        }
+        QColor color;
+        if (timeline_index == mHoveredTimeline && !mHoveredItem)
+            color = palette.color(color_group, QPalette::AlternateBase);
+        else color = palette.color(color_group, QPalette::Base);
 
-        // draw timeline spans
-        for (size_t i=0; i<timeline.GetNumItems(); ++i)
+        p.fillRect(timeline_box, color);
+    }
+
+    // draw spans
+    for (size_t timeline_index=0; timeline_index<timeline_count; ++timeline_index)
+    {
+        const auto& timeline = mTimelines[timeline_index];
+        for (size_t item_index=0; item_index<timeline.GetNumItems(); ++item_index)
         {
-            const auto& item = timeline.GetItem(i);
+            const auto& item = timeline.GetItem(item_index);
             if (item.type != TimelineItem::Type::Span)
                 continue;
 
-            const auto x0 = x + item.starttime * pixels_per_one_second * mDuration;
-            const auto y0 = y;
-            QRect span_box(x0, y0, item.duration * pixels_per_one_second * mDuration, TimelineHeight);
+            QRect span_box(item.starttime * pixels_per_one_second * mDuration,
+                timeline_index * timeline_row_height,
+                item.duration * pixels_per_one_second * mDuration, TimelineHeight);
+            span_box.translate(0, VerticalMargin);
+            span_box.translate(mXOffset, mYOffset);
+            span_box.translate(HorizontalMargin, RulerHeight);
 
-            QColor box_color;
+            QColor box_color = item.color;
             if (mFreezeItems)
-            {
                 box_color = Qt::lightGray;
-            }
-            else
-            {
-                box_color = item.color;
-                if (mHoveredItem == &item && mSelectedItem != &item)
-                    box_color.setAlpha(255);
-            }
-            if (mDragging && &item == mSelectedItem)
-                span_box = span_box.adjusted(-2, -2, 2, 2);
+            else if (mHoveredItem == &item && mSelectedItem != &item)
+                box_color.setAlpha(255);
+
+            if (mSelectedItem == &item && mDragging)
+                span_box = span_box.adjusted(-2, -2, 4, 4);
 
             QPainterPath path;
             path.addRoundedRect(span_box, 5, 5);
@@ -289,78 +245,114 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
                 p.setPen(selection_pen);
                 p.drawPath(path);
             }
-
-            if (mSelectedItem == &item)
-            {
-                QPen pen;
-                pen.setColor(palette.color(color_group, QPalette::HighlightedText));
-                p.setPen(pen);
-                p.drawText(timeline_box, Qt::AlignVCenter | Qt::AlignHCenter, item.text);
-            }
         }
     }
 
-    for (size_t i=0; i<max_num_visible_timelines; ++i)
+    // draw timeline labels.
+    for (size_t timeline_index=0; timeline_index < timeline_count; ++timeline_index)
     {
-        const auto index = i + mYOffset;
-        if (index >= mTimelines.size())
-            break;
-        const auto &timeline = mTimelines[index];
-        const auto x = timeline_start;
-        const auto y = RulerHeight + i * TimelineHeight + i * VerticalMargin;
-        const auto l = mDuration * pixels_per_one_second;
-        const QRect timeline_box(x, y, l, TimelineHeight);
+        QRect timeline_box(HorizontalMargin, timeline_index * timeline_row_height + mYOffset + RulerHeight,
+                viewport_width, timeline_row_height);
 
-        // draw points
-        for (size_t i = 0; i < timeline.GetNumItems(); ++i)
+        QPen pen;
+        pen.setColor(palette.color(color_group, QPalette::HighlightedText));
+        p.setPen(pen);
+        p.drawText(timeline_box, Qt::AlignVCenter | Qt::AlignHCenter,
+            mTimelines[timeline_index].GetName());
+    }
+
+
+    // draw points
+    for (size_t timeline_index=0; timeline_index<timeline_count; ++timeline_index)
+    {
+        const auto& timeline = mTimelines[timeline_index];
+        for (size_t item_index=0; item_index<timeline.GetNumItems(); ++item_index)
         {
-            const auto &item = timeline.GetItem(i);
+            const auto& item = timeline.GetItem(item_index);
             if (item.type != TimelineItem::Type::Point)
                 continue;
 
-            const auto x0 = x + item.starttime * pixels_per_one_second * mDuration - PointIconSize / 2;
-            const auto y0 = y + (TimelineHeight / 2) - PointIconSize / 2;
+            QRect point_box(item.starttime * pixels_per_one_second * mDuration,
+                timeline_index * timeline_row_height,
+                PointIconSize, PointIconSize);
+            point_box.translate(0, timeline_row_height * 0.5);
+            point_box.translate(mXOffset, mYOffset);
+            point_box.translate(HorizontalMargin, RulerHeight);
+            point_box.translate(-PointIconSize*0.5, -PointIconSize*0.5);
 
-            QRect icon_box(x0, y0, PointIconSize, PointIconSize);
-            if (mDragging && mSelectedItem == &item)
-                icon_box = icon_box.adjusted(-2, -2, 2, 2);
-            else if (mSelectedItem == &item)
-            {
-                QRect border_box = icon_box.adjusted(-2, -2, 2, 2);
-                p.setPen(selection_pen);
-                p.drawRect(border_box);
-            }
-            p.fillRect(icon_box, item.color);
-            if (mFreezeItems)
-                p.drawPixmap(icon_box, ToGrayscale(item.icon));
-            else p.drawPixmap(icon_box, item.icon);
+            if (mSelectedItem == &item && mDragging)
+                point_box = point_box.adjusted(-2, -2, 4, 4);
+
+            p.fillRect(point_box, item.color);
+            p.drawPixmap(point_box, mFreezeItems ? ToGrayscale(item.icon) : item.icon);
 
             if (mSelectedItem == &item)
             {
-                QPen pen;
-                pen.setColor(palette.color(color_group, QPalette::HighlightedText));
-                p.setPen(pen);
-                p.drawText(timeline_box, Qt::AlignVCenter | Qt::AlignHCenter, item.text);
+                p.setPen(selection_pen);
+                p.drawRect(point_box);
             }
         }
     }
 
-    if (mAlignmentBar)
+    QPen ruler_line_pen;
+    ruler_line_pen.setColor(palette.color(color_group, QPalette::Text));
+
+    QFont ruler_font;
+    ruler_font.setPixelSize(8);
+    QFontMetrics ruler_font_metrics(ruler_font);
+
+    // draw the timeline ruler on top, if we have a yoffset
+    // we must mask out the stuff underneath.
+    if (std::abs(mYOffset))
     {
-        const auto xpos = timeline_start + mAlignmentBarTime * pixels_per_one_second * mDuration;
-        QPen pen;
-        pen.setColor(palette.color(QPalette::Text));
-        p.setPen(pen);
-        p.drawLine(xpos, 0, xpos, viewport()->height());
+        p.fillRect(QRect(0, 0, viewport_width, RulerHeight),
+            palette.color(color_group, QPalette::Base));
+    }
+    p.setFont(ruler_font);
+    p.setPen(ruler_line_pen);
+    p.drawLine(0 + mXOffset + HorizontalMargin, 20, content_width_pixels, 20);
+    for (size_t tick=0; tick<=ruler_tick_count; ++tick)
+    {
+        const auto x = tick * pixels_per_one_second + mXOffset + HorizontalMargin;
+        const auto y = 20;
+        p.drawLine(x, y, x, y+10);
+
+        const auto& legend = QString("%1s").arg(tick);
+        const auto len = ruler_font_metrics.horizontalAdvance(legend);
+        p.drawText(x-len*0.5, 15, legend);
+
+        const auto tick_fraction_count = 10u;
+        const auto pixels_per_frac_second = pixels_per_one_second / tick_fraction_count;
+        if (pixels_per_one_second == 0)
+            continue;
+        if (tick == ruler_tick_count)
+            continue;
+
+        for (unsigned fraction_tick=0; fraction_tick<tick_fraction_count; ++fraction_tick)
+        {
+            const auto x0 = x + fraction_tick * pixels_per_frac_second;
+            const auto y0 = y;
+            p.drawLine(x0, y0, x0, y0+5);
+        }
     }
 
     // visualize the current time
     QPixmap bullet("icons:bullet.png");
-    p.drawPixmap(timeline_start + mCurrentTime * pixels_per_one_second - 8, 25, bullet);
+    constexpr auto BulletSize = 16; // px
+    p.drawPixmap(mCurrentTime * pixels_per_one_second + mXOffset + HorizontalMargin - BulletSize/2, 25, bullet);
+
+    if (mAlignmentBar)
+    {
+        const auto bar_position = mAlignmentBarTime * pixels_per_one_second * mDuration + mXOffset + HorizontalMargin;
+        QPen pen;
+        pen.setColor(palette.color(QPalette::Text));
+        p.setPen(pen);
+        p.drawLine(bar_position, 0, bar_position, viewport()->height());
+    }
+
 
     if (hasFocus())
     {
-        p.resetTransform();
         QPen pen;
         pen.setWidth(1.0);
         pen.setColor(palette.color(color_group, QPalette::Highlight));
@@ -376,18 +368,13 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
 
 void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
 {
-    const auto& pos = mickey->pos();
-    const unsigned window_width  = viewport()->width();
-    const int timeline_start = mXOffset + HorizontalMargin;
-    const int timeline_width = window_width - 2 * HorizontalMargin; // leave 5px gap at both ends
-    const float num_seconds_on_timeline = timeline_width / float(PixelsToSecond);
-    const auto pixels_per_one_second = (num_seconds_on_timeline > mDuration
-                                        ? timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
-
     mAlignmentBar = false;
 
     if (mDragging)
     {
+        const auto& pos = mickey->pos();
+        const auto pixels_per_one_second = GetPixelsPerSecond();
+
         // convert drag coordinates to normalized positions.
         const auto& drag_offset = pos - mDragPoint;
         const auto drag_seconds = drag_offset.x() / (float)pixels_per_one_second;
@@ -523,25 +510,27 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
     mHoveredTimeline = mTimelines.size();
     setCursor(Qt::ArrowCursor);
 
-    const auto mouse_y = pos.y(); // - mYOffset;
-    const auto mouse_x = pos.x() - mXOffset;
-    if (mouse_y <= RulerHeight)
-        return;
-    const auto height = TimelineHeight + VerticalMargin;
-    const auto index  = (mouse_y - RulerHeight) / height + mYOffset;
-    if (index >= mTimelines.size())
+    const auto& hover_pos = MapFromView(mickey->pos());
+    const auto pixels_per_one_second = GetPixelsPerSecond();
+
+    const auto mouse_x = hover_pos.x();
+    const auto mouse_y = hover_pos.y();
+
+    const auto timeline_row_height = TimelineHeight + 2 * VerticalMargin;
+    const auto timeline_row_index  = mouse_y / timeline_row_height;
+    if (timeline_row_index >= mTimelines.size())
         return;
 
     unsigned selected_item_left = 0;
     unsigned selected_item_right = 0;
 
-    auto& timeline = mTimelines[index];
+    auto& timeline = mTimelines[timeline_row_index];
     for (size_t i=0; i<timeline.GetNumItems(); ++i)
     {
         auto& item = timeline.GetItem(i);
         if (item.type == TimelineItem::Type::Span)
         {
-            const auto span_left = timeline_start + item.starttime * pixels_per_one_second * mDuration;
+            const auto span_left = item.starttime * pixels_per_one_second * mDuration;
             const auto span_right = span_left + item.duration * pixels_per_one_second * mDuration;
             if (mouse_x >= span_left && mouse_x <= span_right)
             {
@@ -553,7 +542,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
         }
         else if (item.type == TimelineItem::Type::Point)
         {
-            const auto point = timeline_start + item.starttime * pixels_per_one_second * mDuration;
+            const auto point = item.starttime * pixels_per_one_second * mDuration;
             const auto point_left = point - PointIconSize / 2;
             const auto point_right = point + PointIconSize / 2;
             if (mouse_x >= point_left && mouse_x <= point_right)
@@ -577,7 +566,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
     {
         setCursor(Qt::DragMoveCursor);
     }
-    mHoveredTimeline = index;
+    mHoveredTimeline = timeline_row_index;
 }
 void TimelineWidget::mousePressEvent(QMouseEvent* mickey)
 {
@@ -587,30 +576,32 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mickey)
     if (mickey->button() != Qt::LeftButton)
         return;
 
+    const auto hotspot = TestHotSpot(mickey->pos());
+    if (hotspot != HotSpot::Content)
+    {
+        if (hotspot == HotSpot::Ruler)
+            VERBOSE("Timeline ruler click detected. Not implemented.");
+        return;
+    }
+
     // schedule an update
     viewport()->update();
 
     mSelectedItem = nullptr;
     emit SelectedItemChanged(nullptr);
 
-    const auto& pos = mickey->pos();
-    const unsigned window_width  = viewport()->width();
-    const int timeline_start = mXOffset + HorizontalMargin;
-    const int timeline_width = window_width - 2 * HorizontalMargin; // leave 5px gap at both ends
-    const float num_seconds_on_timeline = timeline_width / float(PixelsToSecond);
-    const auto pixels_per_one_second = (num_seconds_on_timeline > mDuration
-                                        ? timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
-    const auto mouse_y = pos.y(); // - mYOffset;
-    const auto mouse_x = pos.x() - mXOffset;
+    const auto& click_pos  = MapFromView(mickey->pos());
+    const auto pixels_per_one_second = GetPixelsPerSecond();
 
-    if (mouse_y <= RulerHeight)
-        return;
-    const auto height = TimelineHeight + VerticalMargin;
-    const auto index  = (mouse_y - RulerHeight) / height + mYOffset;
-    if (index >= mTimelines.size())
+    const auto mouse_y = click_pos.y();
+    const auto mouse_x = click_pos.x();
+
+    const auto timeline_row_height = TimelineHeight + 2 * VerticalMargin;
+    const auto timeline_row_index  = mouse_y / timeline_row_height;
+    if (timeline_row_index >= mTimelines.size())
         return;
 
-    auto &timeline = mTimelines[index];
+    auto &timeline = mTimelines[timeline_row_index];
 
     // hit test points first
     for (size_t i=0; i<timeline.GetNumItems(); ++i)
@@ -619,13 +610,13 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mickey)
         if (item.type != TimelineItem::Type::Point)
             continue;
 
-        const auto point = timeline_start + item.starttime * pixels_per_one_second * mDuration;
+        const auto point = item.starttime * pixels_per_one_second * mDuration;
         const auto point_left  = point - PointIconSize / 2;
         const auto point_right = point + PointIconSize / 2;
         if (mouse_x >= point_left && mouse_x <= point_right)
         {
             mSelectedItem      = &item;
-            mSelectedTimeline  = index;
+            mSelectedTimeline  = timeline_row_index;
             mDragging          = true;
             mDragStart = mickey->pos();
             mDragPoint = mickey->pos();
@@ -640,12 +631,12 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mickey)
         if (item.type != TimelineItem::Type::Span)
             continue;
 
-        const auto span_left = timeline_start + item.starttime * pixels_per_one_second * mDuration;
+        const auto span_left = item.starttime * pixels_per_one_second * mDuration;
         const auto span_right = span_left + item.duration * pixels_per_one_second * mDuration;
         if (mouse_x >= span_left && mouse_x <= span_right)
         {
             mSelectedItem     = &item;
-            mSelectedTimeline = index;
+            mSelectedTimeline = timeline_row_index;
             mDragging         = true;
             mDragStart = mickey->pos();
             mDragPoint = mickey->pos();
@@ -688,31 +679,40 @@ void TimelineWidget::wheelEvent(QWheelEvent* wheel)
                 mZoomFactor += 0.1;
             else if (num_wheel_steps < 0 && mZoomFactor > 0.1)
                 mZoomFactor -= 0.1;
+
+            ComputeHorizontalScrollbars();
         }
         else if (verticalScrollBar()->isVisible())
         {
-            unsigned max = verticalScrollBar()->maximum();
+            const int scroll_rows_count = verticalScrollBar()->maximum();
+            const int scroll_row_index  = verticalScrollBar()->value();
+            const int timeline_row_height = TimelineHeight + 2 * VerticalMargin;
+
+            int scroll_value = scroll_row_index;
+
             // scrolling upwards
-            if (num_wheel_steps > 0 )
-                mYOffset = mYOffset > 0 ? mYOffset - 1 : 0;
+            if (num_wheel_steps > 0)
+                scroll_value = math::clamp(0, scroll_rows_count, scroll_row_index - 1);
             else if (num_wheel_steps < 0)
-                mYOffset = mYOffset < max ? mYOffset + 1 : mYOffset;
+                scroll_value = math::clamp(0, scroll_rows_count, scroll_row_index + 1);
+
             QSignalBlocker s(verticalScrollBar());
-            verticalScrollBar()->setValue(mYOffset);
+            verticalScrollBar()->setValue(scroll_value);
+            mYOffset = (scroll_value * timeline_row_height) * -1;
         }
     }
     viewport()->update();
-
-    if (mods & Qt::ControlModifier)
-        ComputeHorizontalScrollbars();
 }
 
 void TimelineWidget::scrollContentsBy(int dx, int dy)
 {
-    dy *= -1;
+    // vertical scroll is in timeline rows and horizontal scroll
+    // is in pixels.
+
+    const auto timeline_row_height = TimelineHeight + 2 * VerticalMargin;
 
     mXOffset += dx;
-    mYOffset += dy;
+    mYOffset += (dy * timeline_row_height);
     //DEBUG("Scroll event dx=%1 dy=%2 xoffset=%3 yoffset=%4", dx, dy, mXOffset, mYOffset);
     viewport()->update();
 }
@@ -734,17 +734,7 @@ void TimelineWidget::leaveEvent(QEvent*)
 void TimelineWidget::resizeEvent(QResizeEvent* event)
 {
     ComputeHorizontalScrollbars();
-
-    const unsigned window_height = viewport()->height();
-    const auto max_num_visible_timelines = (window_height - RulerHeight) / (TimelineHeight + VerticalMargin);
-    // filter bullshit events, such as when a QMenu is opened on top
-    // of the widget and resizeEvent is invoked.
-    if (max_num_visible_timelines == mNumVisibleTimelines)
-        return;
-
     ComputeVerticalScrollbars();
-
-    mNumVisibleTimelines = max_num_visible_timelines;
 }
 
 void TimelineWidget::keyPressEvent(QKeyEvent* event)
@@ -760,51 +750,101 @@ void TimelineWidget::keyPressEvent(QKeyEvent* event)
 
 void TimelineWidget::ComputeVerticalScrollbars()
 {
-    const unsigned window_width = viewport()->width();
-    const unsigned window_height = viewport()->height();
-    const auto max_num_visible_timelines = (window_height - RulerHeight) / (TimelineHeight + VerticalMargin);
+    const unsigned viewport_height = viewport()->height();
+    const unsigned visible_area_height = viewport_height - RulerHeight;
+    const unsigned timeline_row_height = TimelineHeight + 2 * VerticalMargin;
+    const unsigned visible_rows = visible_area_height / timeline_row_height;
+
+    const unsigned current_rows = mTimelines.size();
+    const unsigned scroll_rows  = visible_rows >= current_rows ? 0 : current_rows - visible_rows;
+
+    QSignalBlocker s(verticalScrollBar());
 
     // compute vertical scroll
-    if (mTimelines.size() > max_num_visible_timelines)
+    if (scroll_rows)
     {
-        const auto num_scroll_steps = mTimelines.size() - max_num_visible_timelines;
-        QSignalBlocker s(verticalScrollBar());
-        verticalScrollBar()->setMaximum(num_scroll_steps);
-        verticalScrollBar()->setRange(0 , num_scroll_steps);
+        if (verticalScrollBar()->maximum() == scroll_rows)
+            return;
+
+        verticalScrollBar()->setSingleStep(1);
+        verticalScrollBar()->setValue(0);
+        verticalScrollBar()->setMinimum(0);
+        verticalScrollBar()->setMaximum(scroll_rows);
         verticalScrollBar()->setVisible(true);
         setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-        verticalScrollBar()->setValue(0);
         mYOffset = 0;
     }
     else
     {
         verticalScrollBar()->setVisible(false);
+        mXOffset = 0;
     }
 }
 
 void TimelineWidget::ComputeHorizontalScrollbars()
 {
-    const unsigned window_width = viewport()->width();
-    // compute horizontal scroll
-    const int available_timeline_width = window_width - 2 * HorizontalMargin; // leave 5px gap at both ends
-    const float available_num_seconds_on_timeline = available_timeline_width / float(PixelsToSecond);
-    const auto pixels_per_one_second = (available_num_seconds_on_timeline > mDuration
-        ? available_timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
+    const unsigned viewport_width = viewport()->width() - 2 * HorizontalMargin;
+    const auto pixels_per_second = GetPixelsPerSecond();
+    const auto content_width = mDuration * pixels_per_second;
 
-    const unsigned total_width  = mDuration * pixels_per_one_second + 2 * HorizontalMargin;
+    QSignalBlocker s(horizontalScrollBar());
 
-    if (total_width > window_width)
+    if (content_width > viewport_width)
     {
-        const auto horizontal_excess = total_width - window_width;
-        horizontalScrollBar()->setRange(0, horizontal_excess);
+        const auto horizontal_excess = content_width - viewport_width + 10;
+        if (horizontalScrollBar()->maximum() == horizontal_excess)
+            return;
+
+        horizontalScrollBar()->setValue(0);
+        horizontalScrollBar()->setMinimum(0);
+        horizontalScrollBar()->setMaximum(horizontal_excess);
         horizontalScrollBar()->setPageStep(horizontal_excess);
         horizontalScrollBar()->setVisible(true);
         setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        mXOffset = 0;
     }
     else
     {
         horizontalScrollBar()->setVisible(false);
+        mXOffset = 0;
     }
 }
+
+float TimelineWidget::GetPixelsPerSecond() const
+{
+    // create a mapping from time in seconds to pixels based on the
+    // current viewport size and zoom factor.
+    const auto viewport_width  = viewport()->width();
+    const auto viewport_height = viewport()->height();
+
+    const int timeline_width = viewport_width - 2 * HorizontalMargin; // leave 5px gap at both ends
+    const float num_seconds_on_timeline = timeline_width / float(PixelsToSecond);
+    const auto pixels_per_one_second = (num_seconds_on_timeline > mDuration
+                                    ? timeline_width / mDuration : PixelsToSecond) * mZoomFactor;
+    return pixels_per_one_second;
+}
+
+QPoint TimelineWidget::MapFromView(QPoint click_pos) const
+{
+    click_pos -= QPoint(HorizontalMargin, RulerHeight);
+    click_pos -= QPoint(mXOffset, mYOffset);
+    return click_pos;
+}
+
+TimelineWidget::HotSpot TimelineWidget::TestHotSpot(const QPoint& click_pos) const
+{
+    if (click_pos.y() <= RulerHeight)
+        return HotSpot::Ruler;
+
+    const auto viewport_width  = viewport()->width();
+    const auto viewport_height = viewport()->height();
+    if (click_pos.x() <= HorizontalMargin)
+        return HotSpot::LeftMargin;
+    if (click_pos.y() >= viewport_width - HorizontalMargin)
+        return HotSpot::RightMargin;
+
+    return HotSpot::Content;
+}
+
 
 } // namespace
