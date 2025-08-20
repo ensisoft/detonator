@@ -413,6 +413,19 @@
       "tag": ""
     },
     {
+      "animators": [
+        {
+          "flags": {
+            "ReceiveKeyboardInput": false,
+            "ReceiveMouseInput": false
+          },
+          "id": "k7KPZyTqkO",
+          "initial_state": "",
+          "name": "My EntityStateController",
+          "script_id": "",
+          "transition_mode": "Continuous"
+        }
+      ],
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": true,
@@ -453,7 +466,7 @@
             },
             "friction": 0.30000001192092896,
             "linear_damping": 0.5,
-            "polygon": "e1zlPY8HTm",
+            "polygon": "",
             "restitution": 0.5,
             "shape": "Circle",
             "simulation": "Dynamic"
@@ -525,61 +538,6 @@
           "tag": ""
         },
         {
-          "class": "2qZDXrpOrX",
-          "drawable_item": {
-            "coordinate_space": "Scene",
-            "depth": 1.0,
-            "drawable": "e1zlPY8HTm",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": false
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "sUAHqYkAPp",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "x": 0.0,
-              "y": -0.0,
-              "z": 0.0
-            },
-            "timescale": 1.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Hurt",
-          "position": {
-            "x": 0.6000000238418579,
-            "y": 0.6000000238418579
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 100.0,
-            "y": 100.0
-          },
-          "tag": ""
-        },
-        {
           "class": "mmd8qzxl3w",
           "flags": {
             "VisibleInEditor": true
@@ -637,11 +595,6 @@
               },
               {
                 "node": {
-                  "id": "2qZDXrpOrX"
-                }
-              },
-              {
-                "node": {
                   "id": "mmd8qzxl3w"
                 }
               }
@@ -663,78 +616,87 @@
           "animators": [
             {
               "animator": {
-                "action": "Off",
-                "duration": 0.10009009391069412,
-                "flag": "Drawable_VisibleInGame",
+                "action": "On",
+                "duration": 0.05300482362508774,
+                "flag": "TextItem_VisibleInGame",
                 "flags": {
-                  "StaticInstance": true
+                  "StaticInstance": false
                 },
-                "id": "KG5fOHpMYa",
+                "id": "QqBTIhztHa",
                 "joint_id": "",
-                "name": "",
-                "node": "mqxbWFGIg9",
+                "name": "Animator_0",
+                "node": "mmd8qzxl3w",
                 "starttime": 0.0,
-                "time": 1.0
+                "time": 1.0,
+                "timeline": "HA7wwZJaxm"
               },
               "type": "BooleanPropertyAnimator"
             },
             {
               "animator": {
-                "action": "On",
-                "duration": 0.10414785146713257,
-                "flag": "Drawable_VisibleInGame",
+                "cname": "Animator_1",
+                "duration": 0.7838747501373291,
                 "flags": {
-                  "StaticInstance": true
+                  "StaticInstance": false
                 },
-                "id": "sTMBX1vz6w",
+                "id": "wJj4p1S2R3",
                 "joint_id": "",
-                "name": "",
-                "node": "mqxbWFGIg9",
-                "starttime": 0.8958521485328674,
-                "time": 1.0
+                "method": "StepStart",
+                "name": "TextItem_Text",
+                "node": "mmd8qzxl3w",
+                "starttime": 0.07838736474514008,
+                "timeline": "HA7wwZJaxm",
+                "value": "Oh no!"
               },
-              "type": "BooleanPropertyAnimator"
-            },
-            {
-              "animator": {
-                "action": "On",
-                "duration": 0.09963932633399963,
-                "flag": "Drawable_VisibleInGame",
-                "flags": {
-                  "StaticInstance": true
-                },
-                "id": "QeuPJrbmpq",
-                "joint_id": "",
-                "name": "",
-                "node": "2qZDXrpOrX",
-                "starttime": 0.0,
-                "time": 1.0
-              },
-              "type": "BooleanPropertyAnimator"
+              "type": "PropertyAnimator"
             },
             {
               "animator": {
                 "action": "Off",
-                "duration": 0.10414791107177734,
-                "flag": "Drawable_VisibleInGame",
+                "duration": 0.04852557182312012,
+                "flag": "TextItem_VisibleInGame",
                 "flags": {
-                  "StaticInstance": true
+                  "StaticInstance": false
                 },
-                "id": "OHFoxLJrUF",
+                "id": "WrYmUspEZ4",
                 "joint_id": "",
-                "name": "",
-                "node": "2qZDXrpOrX",
-                "starttime": 0.8958520889282227,
-                "time": 1.0
+                "name": "Animator_2",
+                "node": "mmd8qzxl3w",
+                "starttime": 0.9223584532737732,
+                "time": 1.0,
+                "timeline": "HA7wwZJaxm"
               },
               "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
-          "duration": 1.0,
+          "duration": 2.0,
           "id": "0YxK4CGXbf",
           "looping": false,
-          "name": "Hurt"
+          "name": "Hurt",
+          "triggers": [
+            {
+              "trigger-flags": {
+                "Enabled": true
+              },
+              "trigger-id": "oM6byYXwQ7",
+              "trigger-name": "Trigger_0",
+              "trigger-parameters": [
+                {
+                  "trigger-param-name": "sprite-cycle-delay",
+                  "trigger-param-value": 0.0
+                },
+                {
+                  "trigger-param-name": "sprite-cycle-id",
+                  "trigger-param-value": "QAg2falHLd"
+                }
+              ],
+              "trigger-target-node-id": "mqxbWFGIg9",
+              "trigger-time": 0.0257558710873127,
+              "trigger-timeline-id": "AzUofLOAMl",
+              "trigger-type": "RunSpriteCycle"
+            }
+          ]
         }
       ]
     }
@@ -806,443 +768,17 @@
       ]
     },
     {
-      "active_texture_map": "Kq4gzA1263",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "9CxQaKSgMC",
-      "name": "Biird",
-      "resource_id": "9CxQaKSgMC",
-      "resource_name": "Biird",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 10.0,
-          "id": "Kq4gzA1263",
-          "looping": true,
-          "name": "Sprite",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-1.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "yIXRxHdW8n",
-              "name": "frame-1",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-2.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "BY7W3TUXq4",
-              "name": "frame-2",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-3.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "7KkbXbdMZ0",
-              "name": "frame-3",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-4.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "gRSzA9oT7d",
-              "name": "frame-4",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-5.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "1geANxhSkl",
-              "name": "frame-5",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-6.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "TL2R5PYvIh",
-              "name": "frame-6",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-7.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "eUkuT0e9bI",
-              "name": "frame-7",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-8.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "eACLTygb2j",
-              "name": "frame-8",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Sprite"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Sprite"
-    },
-    {
-      "active_texture_map": "3MAkfADqnS",
-      "flags": {
-        "BlendFrames": true,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "9fLWNBkZvX",
-      "name": "Bird",
-      "resource_id": "9fLWNBkZvX",
-      "resource_name": "Bird",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 10.0,
-          "id": "3MAkfADqnS",
-          "looping": true,
-          "name": "Sprite",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-1.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "BUy37KfGdA",
-              "name": "frame-1",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-2.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "vOpqdHibQw",
-              "name": "frame-2",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-3.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "QNDgaWmXGq",
-              "name": "frame-3",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-4.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "QMdhzbRwO6",
-              "name": "frame-4",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-5.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "p1iN5QO3OK",
-              "name": "frame-5",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-6.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "lLmJUNwNej",
-              "name": "frame-6",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-7.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "X0du5MiXGP",
-              "name": "frame-7",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Flying/frame-8.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "ZAhi9OHkd5",
-              "name": "frame-8",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Sprite"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Sprite"
-    },
-    {
       "active_texture_map": "Fj66N4PDUG",
       "flags": {
-        "BlendFrames": true,
+        "BlendFrames": false,
         "EnableBloom": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
       "id": "Fj66N4PDUG",
-      "name": "FlappyBird Flying",
+      "name": "FlappyBird",
       "resource_id": "Fj66N4PDUG",
-      "resource_name": "FlappyBird Flying",
+      "resource_name": "FlappyBird",
       "resource_ver": 6,
       "shader_src": "",
       "shader_uri": "",
@@ -1253,7 +789,7 @@
           "fps": 10.0,
           "id": "Fj66N4PDUG",
           "looping": true,
-          "name": "FlappyBird Flying",
+          "name": "Flying",
           "rect_name0": "",
           "rect_name1": "",
           "sampler_name0": "",
@@ -1437,6 +973,63 @@
             }
           ],
           "type": "Sprite"
+        },
+        {
+          "fps": 2.0,
+          "id": "QAg2falHLd",
+          "looping": true,
+          "name": "Hurt",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Hurt/frame-1.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "1282Ff3OBz",
+              "name": "frame-1",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Hurt/frame-2.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "QyH8o485w9",
+              "name": "frame-2",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
         }
       ],
       "texture_min_filter": "Default",
@@ -1567,100 +1160,11 @@
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Texture"
-    },
-    {
-      "active_texture_map": "sUAHqYkAPp",
-      "flags": {
-        "BlendFrames": false,
-        "EnableBloom": true,
-        "PremultipliedAlpha": false,
-        "Static": false
-      },
-      "id": "sUAHqYkAPp",
-      "name": "FlappyBird Hurt",
-      "resource_id": "sUAHqYkAPp",
-      "resource_name": "FlappyBird Hurt",
-      "resource_ver": 6,
-      "shader_src": "",
-      "shader_uri": "",
-      "surface": "Transparent",
-      "texture_mag_filter": "Default",
-      "texture_maps": [
-        {
-          "fps": 2.0,
-          "id": "sUAHqYkAPp",
-          "looping": true,
-          "name": "FlappyBird Hurt",
-          "rect_name0": "",
-          "rect_name1": "",
-          "sampler_name0": "",
-          "sampler_name1": "",
-          "textures": [
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Hurt/frame-1.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "QPWkqRqYkY",
-              "name": "frame-1",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            },
-            {
-              "colorspace": "sRGB",
-              "effects": {
-                "Blur": false,
-                "Edges": false
-              },
-              "file": "ws://textures/FlappyBird/Hurt/frame-2.png",
-              "flags": {
-                "AllowPacking": true,
-                "AllowResizing": true,
-                "PremulAlpha": false
-              },
-              "id": "L1mEfJMq1o",
-              "name": "frame-2",
-              "rect": {
-                "h": 1.0,
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0
-              },
-              "type": "Filesystem"
-            }
-          ],
-          "type": "Sprite"
-        }
-      ],
-      "texture_min_filter": "Default",
-      "texture_wrap_x": "Clamp",
-      "texture_wrap_y": "Clamp",
-      "type": "Sprite",
-      "uniforms": [
-        {
-          "name": "kTextureRotation",
-          "value": 0.0
-        }
-      ]
     }
   ],
   "scenes": [
     {
-      "dense_grid_cols": 4,
-      "dense_grid_rows": 4,
-      "dynamic_spatial_index": "DenseGrid",
+      "dynamic_spatial_index": "Disabled",
       "id": "iiKBwhkDbI",
       "name": "My Scene",
       "nodes": [
@@ -1741,7 +1245,7 @@
           "parent_render_tree_node": "",
           "position": {
             "x": 0.0,
-            "y": -0.0
+            "y": 0.0
           },
           "render_layer": -1,
           "rotation": 0.0,
