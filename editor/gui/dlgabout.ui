@@ -3200,22 +3200,22 @@ SOFTWARE.</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_20">
           <item>
-           <widget class="QLabel" name="copyright">
-            <property name="styleSheet">
-             <string notr="true">font: 16pt &quot;Sans Serif&quot;;</string>
-            </property>
-            <property name="text">
-             <string>Copyright</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QLabel" name="title">
             <property name="styleSheet">
              <string notr="true">font: 20pt &quot;Sans Serif&quot;;</string>
             </property>
             <property name="text">
              <string>Title</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="copyright">
+            <property name="styleSheet">
+             <string notr="true">font: 16pt &quot;Sans Serif&quot;;</string>
+            </property>
+            <property name="text">
+             <string>Copyright</string>
             </property>
            </widget>
           </item>

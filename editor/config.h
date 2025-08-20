@@ -26,7 +26,7 @@
 #endif
 // modify the app version before cranking out a release build
 #define APP_VERSION "rel-???"
-#define APP_COPYRIGHT "Copyright (c) 2020-2024\n" \
+#define APP_COPYRIGHT "Copyright (c) 2020-2025\n" \
                       "Sami Väisänen"   \
 
 
