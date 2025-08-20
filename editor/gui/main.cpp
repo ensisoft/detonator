@@ -218,7 +218,7 @@ void copyright()
     INFO("https://github.com/ensisoft/detonator");
     INFO("Compiler: %1 %2", COMPILER_NAME , COMPILER_VERSION);
     INFO("Compiled: " __DATE__ ", " __TIME__);
-    INFO("Copyright (c) Sami Väisänen 2020-2023");
+    INFO("Copyright (c) Sami Väisänen 2020-2025");
     INFO("Built on branch '%1' with commit %2", git_Branch(), git_CommitSHA1());
     INFO(APP_TITLE ", " APP_VERSION);
 }
