@@ -1480,7 +1480,7 @@
           <x>0</x>
           <y>0</y>
           <width>431</width>
-          <height>1132</height>
+          <height>1468</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1539,6 +1539,9 @@
            </property>
            <widget class="QWidget" name="page_14">
             <layout class="QVBoxLayout" name="verticalLayout_25">
+             <property name="topMargin">
+              <number>0</number>
+             </property>
              <item>
               <widget class="QGroupBox" name="nodeProperties">
                <property name="enabled">
@@ -1735,6 +1738,9 @@
            </property>
            <widget class="QWidget" name="page_15">
             <layout class="QVBoxLayout" name="fuckingLayout">
+             <property name="topMargin">
+              <number>0</number>
+             </property>
              <item>
               <widget class="QGroupBox" name="nodeTransform">
                <property name="enabled">
@@ -2158,7 +2164,7 @@
             <bool>true</bool>
            </property>
            <property name="collapsed" stdset="0">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
            <property name="text" stdset="0">
             <string>Drawable</string>
@@ -2171,13 +2177,13 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_5">
                <property name="leftMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="topMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="bottomMargin">
                 <number>4</number>
@@ -2336,7 +2342,7 @@
                <item row="0" column="0">
                 <widget class="QLabel" name="label_10">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
@@ -2534,7 +2540,7 @@
                  <item>
                   <widget class="QComboBox" name="dsDrawable">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -2843,16 +2849,16 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_7">
                <property name="leftMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="topMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="bottomMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <item row="8" column="0">
                 <widget class="QLabel" name="label_12">
@@ -3347,16 +3353,16 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_6">
                <property name="leftMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="topMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="bottomMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <item row="7" column="0">
                 <widget class="QLabel" name="label_33">
@@ -3601,16 +3607,16 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_4">
                <property name="leftMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="topMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="bottomMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_50">
@@ -3890,16 +3896,16 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_11">
                <property name="leftMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="topMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="bottomMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <item row="2" column="0">
                 <widget class="QLabel" name="label_22">
@@ -4343,16 +4349,16 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_13">
                <property name="leftMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="topMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="bottomMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <item row="1" column="0">
                 <widget class="QLabel" name="label_20">
@@ -4444,16 +4450,16 @@
              <item>
               <layout class="QGridLayout" name="gridLayout_8">
                <property name="leftMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="topMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <property name="bottomMargin">
-                <number>4</number>
+                <number>0</number>
                </property>
                <item row="3" column="1">
                 <widget class="QDoubleSpinBox" name="tfVelocityA">
