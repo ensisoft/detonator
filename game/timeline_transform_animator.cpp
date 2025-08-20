@@ -147,7 +147,7 @@ void TransformAnimator::SetEndScale(const glm::vec2& scale)
         WARN("Ignoring transform animator scale set on static animator instance. [name=%1]", mClass->GetName());
         return;
     }
-    mDynamicInstance.value().end_position = scale;
+    mDynamicInstance.value().end_scale = scale;
 }
 void TransformAnimator::SetEndSize(const glm::vec2& size)
 {
@@ -156,7 +156,7 @@ void TransformAnimator::SetEndSize(const glm::vec2& size)
         WARN("Ignoring transform animator size set on static animator instance. [name=%1]", mClass->GetName());
         return;
     }
-    mDynamicInstance.value().end_position = size;
+    mDynamicInstance.value().end_size = size;
 }
 
 void TransformAnimator::SetEndRotation(float angle)
