@@ -25,7 +25,7 @@ end
 -- Called on collision events with other objects.
 function OnBeginContact(flappybird, node, other, other_node)
     if other:GetClassName() == 'Spike' then
-        flappybird:PlayAnimationByName('Hurt')
+        flappybird:PlayAnimation('Hurt')
         Audio:PlaySoundEffect('Boing', 0)
     end
 end
@@ -42,13 +42,13 @@ function OnKeyDown(flappybird, symbol, modifier_bits)
     if symbol == wdk.Keys.Space then
         space_counter = space_counter + 1
 
-        local body = flappybird:GetNode(0)
-        Physics:ApplyImpulseToCenter(body, glm.vec2:new(0.1, -4.0))
+        local bird_body = flappybird:GetNode(0)
+        Physics:ApplyImpulseToCenter(bird_body, glm.vec2:new(0.1, -4.0))
 
         if space_counter == 4 then
-            local text = flappybird:GetNode(3)
-            local txt = text:GetTextItem()
-            txt:SetFlag('VisibleInGame', false)
+            local text_node = flappybird:FindNode('Text')
+            local text_node_text = text_node:GetTextItem()
+            text_node_text:SetFlag('VisibleInGame', false)
         end
     end
 end

@@ -3,21 +3,6 @@
         "__tag_list": [
         ],
         "__version": 6,
-        "checked_for_packing": 1,
-        "is-valid": true
-    },
-    "9CxQaKSgMC": {
-        "__tag_list": [
-        ],
-        "__version": 6,
-        "checked_for_packing": 1,
-        "is-valid": true
-    },
-    "9fLWNBkZvX": {
-        "__tag_list": [
-        ],
-        "__version": 6,
-        "checked_for_packing": 1,
         "is-valid": true
     },
     "Fj66N4PDUG": {
@@ -100,7 +85,6 @@
         "__tag_list": [
         ],
         "__version": 1,
-        "checked_for_packing": 1,
         "is-valid": true
     },
     "lQlseaZOEX": {
@@ -229,34 +213,26 @@
         "comment_0EZszTO4jB": "",
         "is-valid": true
     },
-    "sUAHqYkAPp": {
-        "__tag_list": [
-        ],
-        "__version": 6,
-        "checked_for_packing": 1,
-        "is-valid": true
-    },
     "tqHo3nK0b9": {
         "__tag_list": [
         ],
         "__version": 3,
-        "comment_2qZDXrpOrX": "",
         "comment_mmd8qzxl3w": "",
         "comment_mqxbWFGIg9": "",
         "comment_xYSBrgLxKL": "",
         "is-valid": true,
         "track_0YxK4CGXbf": {
-            "KG5fOHpMYa": "AzUofLOAMl",
-            "OHFoxLJrUF": "xzg62aztGL",
-            "QeuPJrbmpq": "xzg62aztGL",
+            "center_splitter": "AAAA/wAAAAEAAAADAAABLQAAAZwAAADiAf////8BAAAAAQA=",
+            "main_splitter": "AAAA/wAAAAEAAAACAAABrwAAAe0B/////wEAAAACAA==",
             "num_timelines": 3,
-            "sTMBX1vz6w": "AzUofLOAMl",
             "timeline_0_node_id": "xYSBrgLxKL",
             "timeline_0_self_id": "Pr3NOKLFEv",
             "timeline_1_node_id": "mqxbWFGIg9",
             "timeline_1_self_id": "AzUofLOAMl",
-            "timeline_2_node_id": "2qZDXrpOrX",
-            "timeline_2_self_id": "xzg62aztGL"
+            "timeline_2_node_id": "mmd8qzxl3w",
+            "timeline_2_self_id": "HA7wwZJaxm",
+            "timeline_splitter": "AAAA/wAAAAEAAAACAAAA5QAAAQgB/////wEAAAACAA==",
+            "use_physics": false
         }
     },
     "workspace": {
