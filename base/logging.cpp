@@ -84,7 +84,7 @@ OStreamLogger::OStreamLogger(std::ostream& out) : m_out(&out)
 
 void OStreamLogger::Write(LogEvent type, const char* file, int line, const char* msg, double time)
 {
-#if defined(LINUX_OS)
+#if defined(LINUX_OS) || defined(WINDOWS_OS)
     if (mStyle == Style::FancyColor)
     {
         auto& out = *m_out;
@@ -145,9 +145,7 @@ void OStreamLogger::Write(LogEvent type, const char* file, int line, const char*
         {
             //out << "\033[" << 90 << "m";
         }
-        out << msg
-            << "\033[m";
-
+        out << msg << "\033[m";
         out << "\n";
 
         out.copyfmt(old_state);
