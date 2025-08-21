@@ -53,9 +53,9 @@ void CallWaveout(Function func, const Args&... args)
 class Waveout : public Device
 {
 public:
-    Waveout(const char*)
+    explicit Waveout(const char*)
     {}
-    virtual std::shared_ptr<Stream> Prepare(std::unique_ptr<Source> source) override
+    std::shared_ptr<Stream> Prepare(std::unique_ptr<Source> source) override
     {
         const auto name = source->GetName();
         try
@@ -71,7 +71,7 @@ public:
         return nullptr;
 
     }
-    virtual void Poll()
+    void Poll()
     {
         for (auto it = std::begin(streams_); it != std::end(streams_); )
         {
@@ -89,13 +89,13 @@ public:
         }
     }
 
-    virtual void Init()
+    void Init()
     {}
 
-    virtual State GetState() const override
+    State GetState() const override
     { return Device::State::Ready; }
 
-    virtual void SetBufferSize(unsigned milliseconds)
+    void SetBufferSize(unsigned milliseconds)
     { buffer_size_ = milliseconds; }
 private:
     class AlignedAllocator
@@ -167,31 +167,33 @@ private:
             hWave_  = hWave;
             size_   = bytes;
             buffer_ = AlignedAllocator::get().allocate(bytes, alignment);
+
+            ZeroMemory(&header_, sizeof(header_));
+            header_.lpData         = (LPSTR)buffer_;
+            header_.dwBufferLength = size_;
+            header_.dwUser         = (DWORD_PTR)this;
+            CallWaveout(waveOutPrepareHeader, hWave_, &header_, sizeof(header_));
         }
        ~Buffer()
         {
             // todo: should we somehow make sure here not to free the buffer
             // while it's being used in the waveout write??
-            if (prepared_)
-            {
-                const auto ret = waveOutUnprepareHeader(hWave_, &header_, sizeof(header_));
-                ASSERT(ret == MMSYSERR_NOERROR);
-            }
+            const auto ret = waveOutUnprepareHeader(hWave_, &header_, sizeof(header_));
+            ASSERT(ret == MMSYSERR_NOERROR);
             AlignedAllocator::get().free(buffer_);
         }
-        std::size_t fill(Source& source)
+        std::size_t FillBuffer(Source& source)
         {
-            const auto pcm_bytes = source.FillBuffer(buffer_, size_);
-
-            ZeroMemory(&header_, sizeof(header_));
-            header_.lpData         = (LPSTR)buffer_;
-            header_.dwBufferLength = pcm_bytes;
-            header_.dwUser         = (DWORD_PTR)this;
-            CallWaveout(waveOutPrepareHeader, hWave_, &header_, sizeof(header_));
-            prepared_ = true;
-            return pcm_bytes;
+            ZeroMemory(buffer_, size_);
+            return source.FillBuffer(buffer_, size_);
         }
-        void play()
+
+        std::size_t FillZero()
+        {
+            ZeroMemory(buffer_, size_);
+            return size_;
+        }
+        void PlayBuffer()
         {
             CallWaveout(waveOutWrite, hWave_, &header_, sizeof(header_));
         }
@@ -200,7 +202,7 @@ private:
         Buffer& operator=(const Buffer&) = delete;
     private:
         HWAVEOUT hWave_ = NULL;
-        WAVEHDR  header_;
+        WAVEHDR  header_ = {};
         std::size_t size_ = 0;
         void* buffer_ = nullptr;
         bool prepared_ = false;
@@ -266,10 +268,10 @@ private:
             buffers_.resize(5);
             for (size_t i=0; i<buffers_.size(); ++i)
             {
-                buffers_[i]  = std::unique_ptr<Buffer>(new Buffer(handle_, buffer_size, block_size));
+                buffers_[i]  = std::make_unique<Buffer>(handle_, buffer_size, block_size);
             }
         }
-       ~PlaybackStream()
+       ~PlaybackStream() override
         {
             auto ret = waveOutReset(handle_);
             ASSERT(ret == MMSYSERR_NOERROR);
@@ -289,13 +291,13 @@ private:
             ASSERT(source_ == nullptr);
         }
 
-        virtual Stream::State GetState() const override
+        Stream::State GetState() const override
         {
             std::lock_guard<decltype(mutex_)> lock(mutex_);
             return state_;
         }
 
-        virtual std::unique_ptr<Source> GetFinishedSource() override
+        std::unique_ptr<Source> GetFinishedSource() override
         {
             std::unique_ptr<Source> ret;
             std::lock_guard<decltype(mutex_)> lock(mutex_);
@@ -304,14 +306,14 @@ private:
             return ret;
         }
 
-        virtual std::string GetName() const override
+        std::string GetName() const override
         { return source_->GetName(); }
-        virtual std::uint64_t GetStreamTime() const override
+        std::uint64_t GetStreamTime() const override
         { return milliseconds_; }
-        virtual std::uint64_t GetStreamBytes() const override 
+        std::uint64_t GetStreamBytes() const override
         { return num_pcm_bytes_; }
 
-        virtual void Play() override
+        void EnqueueBuffers()
         {
             // enter initial play state. fill all buffers with audio
             // and enqueue them to the device. once a signal is
@@ -326,10 +328,17 @@ private:
                 {
                     if (source_->HasMore(num_pcm_bytes_))
                     {
-                        num_pcm_bytes_ += buffers_[i]->fill(*source_);
-                        buffers_[i]->play();
+                        num_pcm_bytes_ += buffers_[i]->FillBuffer(*source_);
+                        buffers_[i]->PlayBuffer();
+                    }
+                    else
+                    {
+                        buffers_[i]->FillZero();
+                        buffers_[i]->PlayBuffer();
+                        source_complete_ = true;
                     }
                 }
+                device_queue_size_ = buffers_.size();
             }
             catch (const std::exception & e)
             {
@@ -337,20 +346,24 @@ private:
                 state_ = Stream::State::Error;
             }
         }
+        void Play() override
+        {
+            EnqueueBuffers();
+        }
 
-        virtual void Pause() override
+        void Pause() override
         {
             DEBUG("Waveout stream pause. [name='%1']", source_->GetName());
             waveOutPause(handle_);
         }
 
-        virtual void Resume() override
+        void Resume() override
         {
             DEBUG("Waveout stream resume. [name='%1']", source_->GetName());
             waveOutRestart(handle_);
         }
 
-        virtual void Cancel() override
+        void Cancel() override
         {
             DEBUG("Waveout stream cancel. [name='%1']", source_->GetName());
             // anything that needs to be done?
@@ -358,11 +371,11 @@ private:
             source_.reset();
         }
 
-        virtual void SendCommand(std::unique_ptr<Command> cmd) override
+        void SendCommand(std::unique_ptr<Command> cmd) override
         {
             source_->RecvCommand(std::move(cmd));
         }
-        virtual std::unique_ptr<Event> GetEvent() override
+        std::unique_ptr<Event> GetEvent() override
         {
             return source_->GetEvent();
         }
@@ -375,20 +388,28 @@ private:
 
             while (!message_queue_.empty())
             {
-                auto message = message_queue_.front();
+                const auto& message = message_queue_.front();
                 if (message.message == WOM_OPEN)
                 {
                     state_ = Stream::State::Ready;
-                    DEBUG("WOM_OPEN");
+                    //EnqueueBuffers();
+                    DEBUG("Waveout stream state change to ready (WOM_OPEN)");
                 }
                 else if (message.message == WOM_DONE)
                 {
-                    auto* buffer = (Buffer*)message.header.dwUser;
+                    auto* buffer = reinterpret_cast<Buffer*>(message.header.dwUser);
                     empty_buffers.push(buffer);
+                    device_queue_size_--;
                 }
                 message_queue_.pop();
             }
             lock.unlock();
+
+            if (source_complete_ && device_queue_size_ == 0)
+            {
+                state_ = Stream::State::Complete;
+                DEBUG("Waveout stream is complete. [name='%1']", source_->GetName());
+            }
 
             if (state_ == Stream::State::Error || state_ == Stream::State::Complete)
                 return;
@@ -406,20 +427,22 @@ private:
                 {
                     auto* buffer = empty_buffers.front();
                     empty_buffers.pop();
-                    if (!source_->HasMore(num_pcm_bytes_))
+                    if (source_->HasMore(num_pcm_bytes_))
                     {
-                        state_ = Stream::State::Complete;
-                        break;
+                        const auto bytes = buffer->FillBuffer(*source_);
+                        const auto sample_size    = Source::ByteSize(source_->GetFormat());
+                        const auto samples_per_ms = source_->GetRateHz() / 1000u;
+                        const auto bytes_per_ms   = source_->GetNumChannels() * sample_size * samples_per_ms;
+                        const auto milliseconds   = bytes / bytes_per_ms;
+                        num_pcm_bytes_ += bytes;
+                        milliseconds_ += milliseconds;
+                        device_queue_size_++;
+                        buffer->PlayBuffer();
                     }
-
-                    const auto bytes = buffer->fill(*source_);
-                    const auto sample_size    = Source::ByteSize(source_->GetFormat());
-                    const auto samples_per_ms = source_->GetRateHz() / 1000u;
-                    const auto bytes_per_ms   = source_->GetNumChannels() * sample_size * samples_per_ms;
-                    const auto milliseconds   = bytes / bytes_per_ms;
-                    num_pcm_bytes_ += bytes;
-                    milliseconds_ += milliseconds;
-                    buffer->play();
+                    else
+                    {
+                        source_complete_ = true;
+                    }
                 }
             }
             catch (const std::exception & e)
@@ -431,9 +454,7 @@ private:
 
     private:
         static void CALLBACK waveOutProc(HWAVEOUT handle, UINT uMsg,
-            DWORD_PTR dwInstance,
-            DWORD_PTR dwParam1,
-            DWORD_PTR dwParam2)
+            DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
         {
             if (dwInstance == 0)
                 return;
@@ -446,7 +467,7 @@ private:
 
             if (uMsg == WOM_DONE)
             {
-                const WAVEHDR* header = (WAVEHDR*)dwParam1;
+                const auto* header = reinterpret_cast<const WAVEHDR*>(dwParam1);
                 std::memcpy(&message.header, header, sizeof(WAVEHDR));
             }
 
@@ -471,6 +492,8 @@ private:
         mutable std::recursive_mutex mutex_;
         std::queue<WaveOutMessage> message_queue_;
         std::vector<std::unique_ptr<Buffer>> buffers_;
+        std::uint32_t device_queue_size_ = 0;
+        bool source_complete_ = false;
     private:
         State state_ = State::None;
     };
