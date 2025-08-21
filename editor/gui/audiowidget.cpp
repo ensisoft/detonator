@@ -33,6 +33,7 @@
 #include "audio/audio_graph_source.h"
 #include "audio/elements/graph_class.h"
 #include "audio/elements/graph.h"
+#include "audio/thread_proxy_source.h"
 #include "data/json.h"
 
 #include "editor/app/workspace.h"
@@ -1556,11 +1557,11 @@ void AudioWidget::on_actionPlay_triggered()
         const auto& port = (*source)->GetOutputPort(0);
         NOTE("Graph output %1", port.GetFormat());
 
-#if !defined(AUDIO_USE_PLAYER_THREAD)
-        auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(source));
-        mCurrentId = mPlayer->Play(std::move(proxy));
-#else
+#if defined(AUDIO_USE_PLAYER_THREAD)
         mCurrentId = mPlayer->Play(std::move(source));
+#else
+        auto proxy = std::make_unique<audio::ThreadProxySource>(std::move(source));
+        mCurrentId = mPlayer->Play(std::move(proxy));
 #endif
     }
     else
