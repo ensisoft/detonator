@@ -54,9 +54,11 @@ Build Instructions 👨🏼‍💻
 
 - Install Microsoft Visual Studio 2022 Community<br>
   https://www.visualstudio.com/downloads/
- 
+  
+  
+- <strong>OPTIONAL</strong> Install prebuilt Qt 5.15.2  
+  <i>Qt is only needed to build the editor. If you want to just build your game using C++ it's possible to proceed without.</i><br><br>
 
-- Install prebuilt Qt 5.15.2<br>
   The Qt Company no longer offers an offline installer but rather force you to 
   use their shitty Online installer that requires an account with them.
   https://www.qt.io/download-qt-installer-oss
@@ -305,6 +307,31 @@ $ conan profile new default --detect
 
 If Conan complains about "ERROR: invalid setting" (for example when GCC major version changes)
 you can try edit ~/.conan/settings.yaml. Search for the GCC versions and edit there.
+
+</details>
+
+### Step 1.1) Build Custom Game Engines 👈
+<b>This is only relevant to you if you want to write your game in C++. If you're happy to use Lua then the standard game
+engine will suffice and there's no need to do anything.</b>
+
+<i>This process is still WIP and a little bit rough. Some patience and familiarity with C++ and CMakeLists.txt is required.</i>
+
+<details><summary>How to build a custom game engine</summary>
+
+  * You need a CMakeLists.txt file that contains all the right build incantations.
+    * [Click here for an example](editor/dist/demos/blast/cpp/CMakeLists.txt)
+  * Put the CMakeLists.txt file in your `your-game\cpp` folder 
+  * Add your game's CPP source files in your CMakeLists.txt engine sources.
+  * Implement `void GetEntityScripts(std::vector<EntityScriptRegistration>* out)` in your sources somewhere
+    * This function provides the mapping between entity class IDs and your game logic 
+    * [Click here for an example](editor/dist/demos/blast/cpp/blast.cpp)
+  * Add your engine CMakeLists.txt to the top level CMakelists.txt.
+    * `add_subdirectory("/home/user/awesome-game/cpp")`
+  * Build the whole project (follow the normal build instructions for your platform)
+    * This includes the Emscripten and WASM/HTML5 build, which should now also work for your game.
+  
+If everything works out your game engine binary should be built in your `home/user/awesome-game/cpp/bin` folder.<br>
+Finally using the DETONATOR Editor open your game project, go to the settings and change the game engine to YOUR engine.
 
 </details>
 

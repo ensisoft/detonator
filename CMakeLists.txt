@@ -6,16 +6,17 @@ cmake_policy(SET CMP0091 NEW)
 project(DETONATOR2D)
 
 option(USE_MOLD_LINKER "Use mold linker. https://github.com/rui314/mold" OFF)
+option(BUILD_QT_STUFF "Build the editor (and other Qt dependant components" ON)
 
 message(STATUS "
-          ~~ DETONATOR 2D ~~
+            ~~ DETONATOR 2D ~~
 
     \\\\o Brought to you by Ensisoft o//
         http://www.ensisoft.com
-    Copyright (c) 2019-2023 Sami Väisänen
+    Copyright (c) 2019-2025 Sami Väisänen
                 Ensisoft
 
-https://github.com/ensisoft/detonator
+    https://github.com/ensisoft/detonator
 
 ")
 
@@ -173,11 +174,25 @@ find_package(Qt5Svg)
 find_package(Qt5Xml)
 if (NOT Qt5Widgets_FOUND)
     message("
-Qt5 was not found. I will not be able to build the game.
+Qt5 was not found. Editor will not be built. If you want to build the editor too
+you must install Qt5 SDK. Follow the instructions in BUILDING.md. Good luck!
+")
+    set(BUILD_QT_STUFF OFF)
+else()
+    message("
+Qt ${Qt5Widgets_VERSION} was found and build is configured to build components that
+depend on Qt SDK including the amazing DETONATOR editor.
+You can turn these components off with the BUILD_QT_STUFF option.
+")
+endif()
+
+if (BUILD_QT_STUFF)
+    message("You've opted to build the amazing DETONATOR editor. Good Choice!
 ")
 else()
-    message(STATUS "Qt5 version: ${Qt5Widgets_VERSION}")
-    message(STATUS "${Qt5Widgets_INCLUDE_DIRS}")
+    message("Skipping Qt build. No amazing DETONATOR editor for you! Boo.
+But let's get those custom game engines built!
+")
 endif()
 
 set(CMAKE_AUTOMOC ON)
@@ -441,463 +456,571 @@ target_link_libraries(GfxLibTesting PUBLIC ${CONAN_LIBS})
 target_link_libraries(EngineLib     PUBLIC ${CONAN_LIBS})
 target_link_libraries(UiLib         PUBLIC ${CONAN_LIBS})
 
-add_library(QuaZip
-    third_party/quazip/quazip/unzip.c
-    third_party/quazip/quazip/zip.c
-    third_party/quazip/quazip/JlCompress.cpp
-    third_party/quazip/quazip/qioapi.cpp
-    third_party/quazip/quazip/quaadler32.cpp
-    third_party/quazip/quazip/quachecksum32.cpp
-    third_party/quazip/quazip/quacrc32.cpp
-    third_party/quazip/quazip/quagzipfile.cpp
-    third_party/quazip/quazip/quaziodevice.cpp
-    third_party/quazip/quazip/quazip.cpp
-    third_party/quazip/quazip/quazipdir.cpp
-    third_party/quazip/quazip/quazipfile.cpp
-    third_party/quazip/quazip/quazipfileinfo.cpp
-    third_party/quazip/quazip/quazipnewinfo.cpp)
-target_compile_definitions(QuaZip PUBLIC QUAZIP_STATIC)
-target_link_libraries(QuaZip Qt5::Core ZLIB::ZLIB)
+if (BUILD_QT_STUFF)
 
-add_library(QtColorWidgets
-        third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
-        third_party/Qt-Color-Widgets/src/bound_color_selector.cpp
-        third_party/Qt-Color-Widgets/src/color_2d_slider.cpp
-        third_party/Qt-Color-Widgets/src/color_delegate.cpp
-        third_party/Qt-Color-Widgets/src/color_dialog.cpp
-        third_party/Qt-Color-Widgets/src/color_dialog.ui
-        third_party/Qt-Color-Widgets/src/color_line_edit.cpp
-        third_party/Qt-Color-Widgets/src/color_list_widget.cpp
-        third_party/Qt-Color-Widgets/src/color_names.cpp
-        third_party/Qt-Color-Widgets/src/color_palette.cpp
-        third_party/Qt-Color-Widgets/src/color_palette_model.cpp
-        third_party/Qt-Color-Widgets/src/color_palette_widget.cpp
-        third_party/Qt-Color-Widgets/src/color_palette_widget.ui
-        third_party/Qt-Color-Widgets/src/color_preview.cpp
-        third_party/Qt-Color-Widgets/src/color_selector.cpp
-        third_party/Qt-Color-Widgets/src/color_utils.cpp
-        third_party/Qt-Color-Widgets/src/color_wheel.cpp
-        third_party/Qt-Color-Widgets/src/color_widgets.qrc
-        third_party/Qt-Color-Widgets/src/gradient_slider.cpp
-        third_party/Qt-Color-Widgets/src/hue_slider.cpp
-        third_party/Qt-Color-Widgets/src/swatch.cpp
-        third_party/Qt-Color-Widgets/include/abstract_widget_list.hpp
-        third_party/Qt-Color-Widgets/include/bound_color_selector.hpp
-        third_party/Qt-Color-Widgets/include/color_2d_slider.hpp
-        third_party/Qt-Color-Widgets/include/color_delegate.hpp
-        third_party/Qt-Color-Widgets/include/color_dialog.hpp
-        third_party/Qt-Color-Widgets/include/color_line_edit.hpp
-        third_party/Qt-Color-Widgets/include/color_list_widget.hpp
-        third_party/Qt-Color-Widgets/include/color_names.hpp
-        third_party/Qt-Color-Widgets/include/color_palette.hpp
-        third_party/Qt-Color-Widgets/include/color_palette_model.hpp
-        third_party/Qt-Color-Widgets/include/color_palette_widget.hpp
-        third_party/Qt-Color-Widgets/include/color_preview.hpp
-        third_party/Qt-Color-Widgets/include/color_selector.hpp
-        third_party/Qt-Color-Widgets/include/color_wheel.hpp
-        third_party/Qt-Color-Widgets/include/colorwidgets_global.hpp
-        third_party/Qt-Color-Widgets/include/gradient_slider.hpp
-        third_party/Qt-Color-Widgets/include/hue_slider.hpp
-        third_party/Qt-Color-Widgets/include/swatch.hpp)
-target_include_directories(QtColorWidgets PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
-target_compile_definitions(QtColorWidgets PRIVATE "QTCOLORWIDGETS_LIBRARY")
-target_link_libraries(QtColorWidgets Qt5::Widgets Qt5::Core Qt5::CorePrivate)
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # suppress some noise coming from Qt (Qt-Color-Widgets)
-    target_compile_options(QtColorWidgets PRIVATE -Wno-deprecated-declarations)
-endif()
+    add_library(QuaZip
+        third_party/quazip/quazip/unzip.c
+        third_party/quazip/quazip/zip.c
+        third_party/quazip/quazip/JlCompress.cpp
+        third_party/quazip/quazip/qioapi.cpp
+        third_party/quazip/quazip/quaadler32.cpp
+        third_party/quazip/quazip/quachecksum32.cpp
+        third_party/quazip/quazip/quacrc32.cpp
+        third_party/quazip/quazip/quagzipfile.cpp
+        third_party/quazip/quazip/quaziodevice.cpp
+        third_party/quazip/quazip/quazip.cpp
+        third_party/quazip/quazip/quazipdir.cpp
+        third_party/quazip/quazip/quazipfile.cpp
+        third_party/quazip/quazip/quazipfileinfo.cpp
+        third_party/quazip/quazip/quazipnewinfo.cpp)
+    target_compile_definitions(QuaZip PUBLIC QUAZIP_STATIC)
+    target_link_libraries(QuaZip Qt5::Core ZLIB::ZLIB)
 
-add_library(tree-sitter third_party/tree-sitter/src/lib.c
-        third_party/tree-sitter/lua/parser.c
-        third_party/tree-sitter/lua/scanner.c)
-target_include_directories(tree-sitter PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
+    add_library(QtColorWidgets
+            third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
+            third_party/Qt-Color-Widgets/src/bound_color_selector.cpp
+            third_party/Qt-Color-Widgets/src/color_2d_slider.cpp
+            third_party/Qt-Color-Widgets/src/color_delegate.cpp
+            third_party/Qt-Color-Widgets/src/color_dialog.cpp
+            third_party/Qt-Color-Widgets/src/color_dialog.ui
+            third_party/Qt-Color-Widgets/src/color_line_edit.cpp
+            third_party/Qt-Color-Widgets/src/color_list_widget.cpp
+            third_party/Qt-Color-Widgets/src/color_names.cpp
+            third_party/Qt-Color-Widgets/src/color_palette.cpp
+            third_party/Qt-Color-Widgets/src/color_palette_model.cpp
+            third_party/Qt-Color-Widgets/src/color_palette_widget.cpp
+            third_party/Qt-Color-Widgets/src/color_palette_widget.ui
+            third_party/Qt-Color-Widgets/src/color_preview.cpp
+            third_party/Qt-Color-Widgets/src/color_selector.cpp
+            third_party/Qt-Color-Widgets/src/color_utils.cpp
+            third_party/Qt-Color-Widgets/src/color_wheel.cpp
+            third_party/Qt-Color-Widgets/src/color_widgets.qrc
+            third_party/Qt-Color-Widgets/src/gradient_slider.cpp
+            third_party/Qt-Color-Widgets/src/hue_slider.cpp
+            third_party/Qt-Color-Widgets/src/swatch.cpp
+            third_party/Qt-Color-Widgets/include/abstract_widget_list.hpp
+            third_party/Qt-Color-Widgets/include/bound_color_selector.hpp
+            third_party/Qt-Color-Widgets/include/color_2d_slider.hpp
+            third_party/Qt-Color-Widgets/include/color_delegate.hpp
+            third_party/Qt-Color-Widgets/include/color_dialog.hpp
+            third_party/Qt-Color-Widgets/include/color_line_edit.hpp
+            third_party/Qt-Color-Widgets/include/color_list_widget.hpp
+            third_party/Qt-Color-Widgets/include/color_names.hpp
+            third_party/Qt-Color-Widgets/include/color_palette.hpp
+            third_party/Qt-Color-Widgets/include/color_palette_model.hpp
+            third_party/Qt-Color-Widgets/include/color_palette_widget.hpp
+            third_party/Qt-Color-Widgets/include/color_preview.hpp
+            third_party/Qt-Color-Widgets/include/color_selector.hpp
+            third_party/Qt-Color-Widgets/include/color_wheel.hpp
+            third_party/Qt-Color-Widgets/include/colorwidgets_global.hpp
+            third_party/Qt-Color-Widgets/include/gradient_slider.hpp
+            third_party/Qt-Color-Widgets/include/hue_slider.hpp
+            third_party/Qt-Color-Widgets/include/swatch.hpp)
+    target_include_directories(QtColorWidgets PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+    target_compile_definitions(QtColorWidgets PRIVATE "QTCOLORWIDGETS_LIBRARY")
+    target_link_libraries(QtColorWidgets Qt5::Widgets Qt5::Core Qt5::CorePrivate)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        # suppress some noise coming from Qt (Qt-Color-Widgets)
+        target_compile_options(QtColorWidgets PRIVATE -Wno-deprecated-declarations)
+    endif()
 
-# Editor application.
-add_executable(Detonator
-    audio/format.cpp
-    audio/loader.cpp
-    audio/sndfile.cpp
-    audio/mpg123.cpp
-    audio/pulseaudio.cpp
-    audio/sdl.cpp
-    audio/sokol.cpp
-    audio/waveout.cpp
-    audio/openal.cpp
-    audio/audio_graph_source.cpp
-    audio/audio_file_source.cpp
-    audio/thread_proxy_source.cpp
-    audio/player.cpp
-    audio/element.cpp
-    audio/elements/delay.cpp
-    audio/elements/effect.cpp
-    audio/elements/file_source.cpp
-    audio/elements/gain.cpp
-    audio/elements/graph.cpp
-    audio/elements/graph_class.cpp
-    audio/elements/mixer.cpp
-    audio/elements/mixer_source.cpp
-    audio/elements/playlist.cpp
-    audio/elements/queue.cpp
-    audio/elements/resampler.cpp
-    audio/elements/sine_source.cpp
-    audio/elements/splitter.cpp
-    audio/elements/stereo_joiner.cpp
-    audio/elements/stereo_maker.cpp
-    audio/elements/stereo_splitter.cpp
-    audio/elements/stream_source.cpp
-    audio/elements/zero_source.cpp
-    graphics/tool/polygon.cpp
-    graphics/format.cpp
-    editor/app/import.h
-    editor/app/import.cpp
-    editor/app/event.h
-    editor/app/eventlog.h
-    editor/app/eventlog.cpp
-    editor/app/window-eventlog.h
-    editor/app/window-eventlog.cpp
-    editor/app/format.h
-    editor/app/format.cpp
-    editor/app/packing.h
-    editor/app/packing.cpp
-    editor/app/platform.h
-    editor/app/platform.cpp
-    editor/app/utility.h
-    editor/app/utility.cpp
-    editor/app/workspace.h
-    editor/app/workspace.cpp
-    editor/app/project_settings.cpp
-    editor/app/workspace_resource_packer.cpp
-    editor/app/zip_archive.cpp
-    editor/app/zip_archive_exporter.cpp
-    editor/app/zip_archive_importer.cpp
-    editor/app/buffer.h
-    editor/app/buffer.cpp
-    editor/app/packing.cpp
-    editor/app/process.h
-    editor/app/process.cpp
-    editor/app/ipc.cpp
-    editor/app/resource.cpp
-    editor/app/resource_cache.cpp
-    editor/app/lua-tools.cpp
-    editor/app/lua-doc.cpp
-    editor/app/code-tools.cpp
-    editor/gui/audiowidget.h
-    editor/gui/audiowidget.ui
-    editor/gui/audiowidget.cpp
-    editor/gui/animationtrackwidget.h
-    editor/gui/animationtrackwidget.ui
-    editor/gui/animationtrackwidget.cpp
-    editor/gui/childwindow.h
-    editor/gui/childwindow.cpp
-    editor/gui/childwindow.ui
-    editor/gui/fudialog.h
-    editor/gui/fudialog.cpp
-    editor/gui/completer.ui
-    editor/gui/codewidget.h
-    editor/gui/codewidget.cpp
-    editor/gui/drawing.cpp
-    editor/gui/playwindow.h
-    editor/gui/playwindow.cpp
-    editor/gui/playwindow.ui
-    editor/gui/dlganimator.h
-    editor/gui/dlganimator.ui
-    editor/gui/dlganimator.cpp
-    editor/gui/dlgeventlog.h
-    editor/gui/dlgeventlog.ui
-    editor/gui/dlgeventlog.cpp
-    editor/gui/dlgvcs.h
-    editor/gui/dlgvcs.ui
-    editor/gui/dlgvcs.cpp
-    editor/gui/dlgsvg.h
-    editor/gui/dlgsvg.ui
-    editor/gui/dlgsvg.cpp
-    editor/gui/dlgabout.h
-    editor/gui/dlgabout.ui
-    editor/gui/dlgabout.cpp
-    editor/gui/dlgcomplete.h
-    editor/gui/dlgcomplete.ui
-    editor/gui/dlgcomplete.cpp
-    editor/gui/dlgjoint.h
-    editor/gui/dlgjoint.ui
-    editor/gui/dlgjoint.cpp
-    editor/gui/dlgsettings.h
-    editor/gui/dlgsettings.ui
-    editor/gui/dlgsettings.cpp
-    editor/gui/dlgfindentity.ui
-    editor/gui/dlgentity.h
-    editor/gui/dlgentity.ui
-    editor/gui/dlgentity.cpp
-    editor/gui/dlgbitmap.h
-    editor/gui/dlgbitmap.cpp
-    editor/gui/dlgtext.h
-    editor/gui/dlgtext.cpp
-    editor/gui/dlgtext.ui
-    editor/gui/dlgfont.h
-    editor/gui/dlgfont.ui
-    editor/gui/dlgfont.cpp
-    editor/gui/dlgtexturerect.h
-    editor/gui/dlgtexturerect.ui
-    editor/gui/dlgtexturerect.cpp
-    editor/gui/dlgimgview.h
-    editor/gui/dlgimgview.ui
-    editor/gui/dlgimgview.cpp
-    editor/gui/dlgimgpack.ui
-    editor/gui/dlgimgpack.h
-    editor/gui/dlgimgpack.cpp
-    editor/gui/dlgparticle.h
-    editor/gui/dlgparticle.ui
-    editor/gui/dlgparticle.cpp
-    editor/gui/dlgmaterial.h
-    editor/gui/dlgmaterial.ui
-    editor/gui/dlgmaterial.cpp
-    editor/gui/dlgmaterialparams.h
-    editor/gui/dlgmaterialparams.ui
-    editor/gui/dlgmaterialparams.cpp
-    editor/gui/dlgmodelimport.h
-    editor/gui/dlgmodelimport.ui
-    editor/gui/dlgmodelimport.cpp
-    editor/gui/dlgpackage.h
-    editor/gui/dlgpackage.ui
-    editor/gui/dlgpackage.cpp
-    editor/gui/dlgprogress.h
-    editor/gui/dlgprogress.ui
-    editor/gui/dlgprogress.cpp
-    editor/gui/dlgproject.h
-    editor/gui/dlgproject.ui
-    editor/gui/dlgproject.cpp
-    editor/gui/dlgresdeps.h
-    editor/gui/dlgresdeps.ui
-    editor/gui/dlgresdeps.cpp
-    editor/gui/dlgsave.h
-    editor/gui/dlgsave.ui
-    editor/gui/dlgsave.cpp
-    editor/gui/dlgopen.h
-    editor/gui/dlgopen.ui
-    editor/gui/dlgopen.cpp
-    editor/gui/dlgscriptvarname.h
-    editor/gui/dlgscriptvarname.ui
-    editor/gui/dlgscriptvarname.cpp
-    editor/gui/dlgscriptvar.h
-    editor/gui/dlgscriptvar.ui
-    editor/gui/dlgscriptvar.cpp
-    editor/gui/dlgstyleproperties.h
-    editor/gui/dlgstyleproperties.ui
-    editor/gui/dlgstyleproperties.cpp
-    editor/gui/dlgtextedit.h
-    editor/gui/dlgtextedit.ui
-    editor/gui/dlgtextedit.cpp
-    editor/gui/dlgwidgetlist.h
-    editor/gui/dlgwidgetlist.ui
-    editor/gui/dlgwidgetlist.cpp
-    editor/gui/dlggradient.h
-    editor/gui/dlggradient.ui
-    editor/gui/dlgnew.h
-    editor/gui/dlgnew.ui
-    editor/gui/dlgtilemap.h
-    editor/gui/dlgtilemap.ui
-    editor/gui/dlgtilemap.cpp
-    editor/gui/dlgfontmap.h
-    editor/gui/dlgfontmap.ui
-    editor/gui/dlgfontmap.cpp
-    editor/gui/dlgtilelayer.h
-    editor/gui/dlgtilelayer.ui
-    editor/gui/dlgtileimport.h
-    editor/gui/dlgtileimport.ui
-    editor/gui/dlgtileimport.cpp
-    editor/gui/dlgtiletool.h
-    editor/gui/dlgtiletool.ui
-    editor/gui/dlgtiletool.cpp
-    editor/gui/dlgimport.h
-    editor/gui/dlgimport.ui
-    editor/gui/dlgimport.cpp
-    editor/gui/dlgmigrationlog.h
-    editor/gui/dlgmigrationlog.ui
-    editor/gui/dlgmigrationlog.cpp
-    editor/gui/gfxwidget.h
-    editor/gui/gfxwidget.cpp
-    editor/gui/mainwidget.h
-    editor/gui/mainwindow.h
-    editor/gui/mainwindow.cpp
-    editor/gui/mainwindow.ui
-    editor/gui/viewwindow.h
-    editor/gui/viewwindow.ui
-    editor/gui/viewwindow.cpp
-    editor/gui/main.cpp
-    editor/gui/particlewidget.h
-    editor/gui/particlewidget.cpp
-    editor/gui/particlewidget.ui
-    editor/gui/polygonwidget.ui
-    editor/gui/polygonwidget.h
-    editor/gui/polygonwidget.cpp
-    editor/gui/materialwidget.h
-    editor/gui/materialwidget.cpp
-    editor/gui/materialwidget.ui
-    editor/gui/entitywidget.h
-    editor/gui/entitywidget.ui
-    editor/gui/entitywidget.cpp
-    editor/gui/scenewidget.h
-    editor/gui/scenewidget.ui
-    editor/gui/scenewidget.cpp
-    editor/gui/scriptwidget.h
-    editor/gui/scriptwidget.ui
-    editor/gui/scriptwidget.cpp
-    editor/gui/settings.h
-    editor/gui/settings.cpp
-    editor/gui/doubleslider.h
-    editor/gui/doubleslider.ui
-    editor/gui/doubleslider.cpp
-    editor/gui/spinboxwidget.h
-    editor/gui/doublespinbox.ui
-    editor/gui/spinboxwidget.cpp
-    editor/gui/collapsible_widget.h
-    editor/gui/collapsible_widget.ui
-    editor/gui/collapsible_widget.cpp
-    editor/gui/curvewidget.cpp
-    editor/gui/curvewidget.h
-    editor/gui/treewidget.h
-    editor/gui/treewidget.cpp
-    editor/gui/timelinewidget.h
-    editor/gui/timelinewidget.cpp
-    editor/gui/rangewidget.h
-    editor/gui/rangewidget.cpp
-    editor/gui/uiwidget.h
-    editor/gui/uiwidget.ui
-    editor/gui/uiwidget.cpp
-    editor/gui/tileselection.h
-    editor/gui/tileselection.cpp
-    editor/gui/tilemapwidget.h
-    editor/gui/tilemapwidget.ui
-    editor/gui/tilemapwidget.cpp
-    editor/gui/uniform.h
-    editor/gui/uniform.ui
-    editor/gui/uniform.cpp
-    editor/gui/vector3.h
-    editor/gui/vector3.ui
-    editor/gui/vector3.cpp
-    editor/gui/palettematerial.h
-    editor/gui/palettematerial.ui
-    editor/gui/palettematerial.cpp
-    editor/gui/sampler.h
-    editor/gui/sampler.ui
-    editor/gui/widgetstylewidget.h
-    editor/gui/widgetstylewidget.ui
-    editor/gui/widgetstylewidget.cpp
-    editor/gui/timewidget.h
-    editor/gui/timewidget.ui
-    editor/gui/timewidget.cpp
-    editor/gui/utility.cpp
-    editor/gui/svg/svgview.h
-    editor/gui/svg/svgview.cpp
-    editor/gui/imgpack.cpp
-    editor/gui/translation.h
-    editor/gui/translation.cpp
-    editor/gui/spritewidget.h
-    editor/gui/spritewidget.ui
-    editor/gui/spritewidget.cpp
-    editor/resource/resource.qrc
-    editor/welcome.qrc
-    editor/gui/darkstyle/darkstyle.cpp
-    editor/gui/darkstyle/darkstyle.h
-    editor/gui/darkstyle/stylecommon.h
-    editor/gui/darkstyle/stylecommon.cpp
-    editor/gui/darkstyle/darkstyle.qrc
+    add_library(tree-sitter third_party/tree-sitter/src/lib.c
+            third_party/tree-sitter/lua/parser.c
+            third_party/tree-sitter/lua/scanner.c)
+    target_include_directories(tree-sitter PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
 
-    editor/gui/framelesswindow/framelesswindow.h
-    editor/gui/framelesswindow/framelesswindow.ui
-    editor/gui/framelesswindow/framelesswindow.cpp
-    editor/gui/framelesswindow/windowdragger.h
-    editor/gui/framelesswindow/windowdragger.cpp
-    editor/gui/framelesswindow/framelesswindow.qrc
-)
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # suppress some noise coming from Qt (Qt-Color-Widgets)
-    target_compile_options(Detonator PRIVATE -Wno-deprecated-declarations)
-endif()
+    # Editor application.
+    add_executable(Detonator
+        audio/format.cpp
+        audio/loader.cpp
+        audio/sndfile.cpp
+        audio/mpg123.cpp
+        audio/pulseaudio.cpp
+        audio/sdl.cpp
+        audio/sokol.cpp
+        audio/waveout.cpp
+        audio/openal.cpp
+        audio/audio_graph_source.cpp
+        audio/audio_file_source.cpp
+        audio/thread_proxy_source.cpp
+        audio/player.cpp
+        audio/element.cpp
+        audio/elements/delay.cpp
+        audio/elements/effect.cpp
+        audio/elements/file_source.cpp
+        audio/elements/gain.cpp
+        audio/elements/graph.cpp
+        audio/elements/graph_class.cpp
+        audio/elements/mixer.cpp
+        audio/elements/mixer_source.cpp
+        audio/elements/playlist.cpp
+        audio/elements/queue.cpp
+        audio/elements/resampler.cpp
+        audio/elements/sine_source.cpp
+        audio/elements/splitter.cpp
+        audio/elements/stereo_joiner.cpp
+        audio/elements/stereo_maker.cpp
+        audio/elements/stereo_splitter.cpp
+        audio/elements/stream_source.cpp
+        audio/elements/zero_source.cpp
+        graphics/tool/polygon.cpp
+        graphics/format.cpp
+        editor/app/import.h
+        editor/app/import.cpp
+        editor/app/event.h
+        editor/app/eventlog.h
+        editor/app/eventlog.cpp
+        editor/app/window-eventlog.h
+        editor/app/window-eventlog.cpp
+        editor/app/format.h
+        editor/app/format.cpp
+        editor/app/packing.h
+        editor/app/packing.cpp
+        editor/app/platform.h
+        editor/app/platform.cpp
+        editor/app/utility.h
+        editor/app/utility.cpp
+        editor/app/workspace.h
+        editor/app/workspace.cpp
+        editor/app/project_settings.cpp
+        editor/app/workspace_resource_packer.cpp
+        editor/app/zip_archive.cpp
+        editor/app/zip_archive_exporter.cpp
+        editor/app/zip_archive_importer.cpp
+        editor/app/buffer.h
+        editor/app/buffer.cpp
+        editor/app/packing.cpp
+        editor/app/process.h
+        editor/app/process.cpp
+        editor/app/ipc.cpp
+        editor/app/resource.cpp
+        editor/app/resource_cache.cpp
+        editor/app/lua-tools.cpp
+        editor/app/lua-doc.cpp
+        editor/app/code-tools.cpp
+        editor/gui/audiowidget.h
+        editor/gui/audiowidget.ui
+        editor/gui/audiowidget.cpp
+        editor/gui/animationtrackwidget.h
+        editor/gui/animationtrackwidget.ui
+        editor/gui/animationtrackwidget.cpp
+        editor/gui/childwindow.h
+        editor/gui/childwindow.cpp
+        editor/gui/childwindow.ui
+        editor/gui/fudialog.h
+        editor/gui/fudialog.cpp
+        editor/gui/completer.ui
+        editor/gui/codewidget.h
+        editor/gui/codewidget.cpp
+        editor/gui/drawing.cpp
+        editor/gui/playwindow.h
+        editor/gui/playwindow.cpp
+        editor/gui/playwindow.ui
+        editor/gui/dlganimator.h
+        editor/gui/dlganimator.ui
+        editor/gui/dlganimator.cpp
+        editor/gui/dlgeventlog.h
+        editor/gui/dlgeventlog.ui
+        editor/gui/dlgeventlog.cpp
+        editor/gui/dlgvcs.h
+        editor/gui/dlgvcs.ui
+        editor/gui/dlgvcs.cpp
+        editor/gui/dlgsvg.h
+        editor/gui/dlgsvg.ui
+        editor/gui/dlgsvg.cpp
+        editor/gui/dlgabout.h
+        editor/gui/dlgabout.ui
+        editor/gui/dlgabout.cpp
+        editor/gui/dlgcomplete.h
+        editor/gui/dlgcomplete.ui
+        editor/gui/dlgcomplete.cpp
+        editor/gui/dlgjoint.h
+        editor/gui/dlgjoint.ui
+        editor/gui/dlgjoint.cpp
+        editor/gui/dlgsettings.h
+        editor/gui/dlgsettings.ui
+        editor/gui/dlgsettings.cpp
+        editor/gui/dlgfindentity.ui
+        editor/gui/dlgentity.h
+        editor/gui/dlgentity.ui
+        editor/gui/dlgentity.cpp
+        editor/gui/dlgbitmap.h
+        editor/gui/dlgbitmap.cpp
+        editor/gui/dlgtext.h
+        editor/gui/dlgtext.cpp
+        editor/gui/dlgtext.ui
+        editor/gui/dlgfont.h
+        editor/gui/dlgfont.ui
+        editor/gui/dlgfont.cpp
+        editor/gui/dlgtexturerect.h
+        editor/gui/dlgtexturerect.ui
+        editor/gui/dlgtexturerect.cpp
+        editor/gui/dlgimgview.h
+        editor/gui/dlgimgview.ui
+        editor/gui/dlgimgview.cpp
+        editor/gui/dlgimgpack.ui
+        editor/gui/dlgimgpack.h
+        editor/gui/dlgimgpack.cpp
+        editor/gui/dlgparticle.h
+        editor/gui/dlgparticle.ui
+        editor/gui/dlgparticle.cpp
+        editor/gui/dlgmaterial.h
+        editor/gui/dlgmaterial.ui
+        editor/gui/dlgmaterial.cpp
+        editor/gui/dlgmaterialparams.h
+        editor/gui/dlgmaterialparams.ui
+        editor/gui/dlgmaterialparams.cpp
+        editor/gui/dlgmodelimport.h
+        editor/gui/dlgmodelimport.ui
+        editor/gui/dlgmodelimport.cpp
+        editor/gui/dlgpackage.h
+        editor/gui/dlgpackage.ui
+        editor/gui/dlgpackage.cpp
+        editor/gui/dlgprogress.h
+        editor/gui/dlgprogress.ui
+        editor/gui/dlgprogress.cpp
+        editor/gui/dlgproject.h
+        editor/gui/dlgproject.ui
+        editor/gui/dlgproject.cpp
+        editor/gui/dlgresdeps.h
+        editor/gui/dlgresdeps.ui
+        editor/gui/dlgresdeps.cpp
+        editor/gui/dlgsave.h
+        editor/gui/dlgsave.ui
+        editor/gui/dlgsave.cpp
+        editor/gui/dlgopen.h
+        editor/gui/dlgopen.ui
+        editor/gui/dlgopen.cpp
+        editor/gui/dlgscriptvarname.h
+        editor/gui/dlgscriptvarname.ui
+        editor/gui/dlgscriptvarname.cpp
+        editor/gui/dlgscriptvar.h
+        editor/gui/dlgscriptvar.ui
+        editor/gui/dlgscriptvar.cpp
+        editor/gui/dlgstyleproperties.h
+        editor/gui/dlgstyleproperties.ui
+        editor/gui/dlgstyleproperties.cpp
+        editor/gui/dlgtextedit.h
+        editor/gui/dlgtextedit.ui
+        editor/gui/dlgtextedit.cpp
+        editor/gui/dlgwidgetlist.h
+        editor/gui/dlgwidgetlist.ui
+        editor/gui/dlgwidgetlist.cpp
+        editor/gui/dlggradient.h
+        editor/gui/dlggradient.ui
+        editor/gui/dlgnew.h
+        editor/gui/dlgnew.ui
+        editor/gui/dlgtilemap.h
+        editor/gui/dlgtilemap.ui
+        editor/gui/dlgtilemap.cpp
+        editor/gui/dlgfontmap.h
+        editor/gui/dlgfontmap.ui
+        editor/gui/dlgfontmap.cpp
+        editor/gui/dlgtilelayer.h
+        editor/gui/dlgtilelayer.ui
+        editor/gui/dlgtileimport.h
+        editor/gui/dlgtileimport.ui
+        editor/gui/dlgtileimport.cpp
+        editor/gui/dlgtiletool.h
+        editor/gui/dlgtiletool.ui
+        editor/gui/dlgtiletool.cpp
+        editor/gui/dlgimport.h
+        editor/gui/dlgimport.ui
+        editor/gui/dlgimport.cpp
+        editor/gui/dlgmigrationlog.h
+        editor/gui/dlgmigrationlog.ui
+        editor/gui/dlgmigrationlog.cpp
+        editor/gui/gfxwidget.h
+        editor/gui/gfxwidget.cpp
+        editor/gui/mainwidget.h
+        editor/gui/mainwindow.h
+        editor/gui/mainwindow.cpp
+        editor/gui/mainwindow.ui
+        editor/gui/viewwindow.h
+        editor/gui/viewwindow.ui
+        editor/gui/viewwindow.cpp
+        editor/gui/main.cpp
+        editor/gui/particlewidget.h
+        editor/gui/particlewidget.cpp
+        editor/gui/particlewidget.ui
+        editor/gui/polygonwidget.ui
+        editor/gui/polygonwidget.h
+        editor/gui/polygonwidget.cpp
+        editor/gui/materialwidget.h
+        editor/gui/materialwidget.cpp
+        editor/gui/materialwidget.ui
+        editor/gui/entitywidget.h
+        editor/gui/entitywidget.ui
+        editor/gui/entitywidget.cpp
+        editor/gui/scenewidget.h
+        editor/gui/scenewidget.ui
+        editor/gui/scenewidget.cpp
+        editor/gui/scriptwidget.h
+        editor/gui/scriptwidget.ui
+        editor/gui/scriptwidget.cpp
+        editor/gui/settings.h
+        editor/gui/settings.cpp
+        editor/gui/doubleslider.h
+        editor/gui/doubleslider.ui
+        editor/gui/doubleslider.cpp
+        editor/gui/spinboxwidget.h
+        editor/gui/doublespinbox.ui
+        editor/gui/spinboxwidget.cpp
+        editor/gui/collapsible_widget.h
+        editor/gui/collapsible_widget.ui
+        editor/gui/collapsible_widget.cpp
+        editor/gui/curvewidget.cpp
+        editor/gui/curvewidget.h
+        editor/gui/treewidget.h
+        editor/gui/treewidget.cpp
+        editor/gui/timelinewidget.h
+        editor/gui/timelinewidget.cpp
+        editor/gui/rangewidget.h
+        editor/gui/rangewidget.cpp
+        editor/gui/uiwidget.h
+        editor/gui/uiwidget.ui
+        editor/gui/uiwidget.cpp
+        editor/gui/tileselection.h
+        editor/gui/tileselection.cpp
+        editor/gui/tilemapwidget.h
+        editor/gui/tilemapwidget.ui
+        editor/gui/tilemapwidget.cpp
+        editor/gui/uniform.h
+        editor/gui/uniform.ui
+        editor/gui/uniform.cpp
+        editor/gui/vector3.h
+        editor/gui/vector3.ui
+        editor/gui/vector3.cpp
+        editor/gui/palettematerial.h
+        editor/gui/palettematerial.ui
+        editor/gui/palettematerial.cpp
+        editor/gui/sampler.h
+        editor/gui/sampler.ui
+        editor/gui/widgetstylewidget.h
+        editor/gui/widgetstylewidget.ui
+        editor/gui/widgetstylewidget.cpp
+        editor/gui/timewidget.h
+        editor/gui/timewidget.ui
+        editor/gui/timewidget.cpp
+        editor/gui/utility.cpp
+        editor/gui/svg/svgview.h
+        editor/gui/svg/svgview.cpp
+        editor/gui/imgpack.cpp
+        editor/gui/translation.h
+        editor/gui/translation.cpp
+        editor/gui/spritewidget.h
+        editor/gui/spritewidget.ui
+        editor/gui/spritewidget.cpp
+        editor/resource/resource.qrc
+        editor/welcome.qrc
+        editor/gui/darkstyle/darkstyle.cpp
+        editor/gui/darkstyle/darkstyle.h
+        editor/gui/darkstyle/stylecommon.h
+        editor/gui/darkstyle/stylecommon.cpp
+        editor/gui/darkstyle/darkstyle.qrc
 
-target_compile_definitions(Detonator PRIVATE DETONATOR_EDITOR_BUILD)
-target_compile_definitions(Detonator PRIVATE "QTCOLORWIDGETS_LIBRARY")
-target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
-# add this include for the promoted widgets
-target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
-target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui/framelesswindow")
-target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
-target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
-target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
-# support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
-target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
-target_link_libraries(Detonator Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network Qt5::Svg Qt5::Xml)
-target_link_libraries(Detonator EngineLib GameLib UiLib GfxLib DataLib BaseLib)
-target_link_libraries(Detonator Lua)
-target_link_libraries(Detonator QtColorWidgets)
-target_link_libraries(Detonator QuaZip)
-target_link_libraries(Detonator ${CONAN_LIBS})
-target_link_libraries(Detonator cmake_git_version_tracking)
-target_link_libraries(Detonator tree-sitter)
-target_link_libraries(Detonator samplerate)
-target_link_libraries(Detonator sndfile)
-if (UNIX)
-    target_link_libraries(Detonator pulse)
-    target_link_libraries(Detonator pthread)
-endif()
+        editor/gui/framelesswindow/framelesswindow.h
+        editor/gui/framelesswindow/framelesswindow.ui
+        editor/gui/framelesswindow/framelesswindow.cpp
+        editor/gui/framelesswindow/windowdragger.h
+        editor/gui/framelesswindow/windowdragger.cpp
+        editor/gui/framelesswindow/framelesswindow.qrc
+    )
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        # suppress some noise coming from Qt (Qt-Color-Widgets)
+        target_compile_options(Detonator PRIVATE -Wno-deprecated-declarations)
+    endif()
+
+    target_compile_definitions(Detonator PRIVATE DETONATOR_EDITOR_BUILD)
+    target_compile_definitions(Detonator PRIVATE "QTCOLORWIDGETS_LIBRARY")
+    target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
+    # add this include for the promoted widgets
+    target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
+    target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui/framelesswindow")
+    target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+    target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
+    target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
+    # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
+    target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
+    target_link_libraries(Detonator Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network Qt5::Svg Qt5::Xml)
+    target_link_libraries(Detonator EngineLib GameLib UiLib GfxLib DataLib BaseLib)
+    target_link_libraries(Detonator Lua)
+    target_link_libraries(Detonator QtColorWidgets)
+    target_link_libraries(Detonator QuaZip)
+    target_link_libraries(Detonator ${CONAN_LIBS})
+    target_link_libraries(Detonator cmake_git_version_tracking)
+    target_link_libraries(Detonator tree-sitter)
+    target_link_libraries(Detonator samplerate)
+    target_link_libraries(Detonator sndfile)
+    if (UNIX)
+        target_link_libraries(Detonator pulse)
+        target_link_libraries(Detonator pthread)
+    endif()
+    install(TARGETS Detonator DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
+
+    # game host application which provides a host process to load the game
+    # libraries for playback.
+    add_executable(EditorGameHost
+        graphics/format.cpp
+        editor/app/format.cpp
+        editor/app/utility.cpp
+        editor/app/eventlog.h
+        editor/app/eventlog.cpp
+        editor/app/packing.cpp
+        editor/app/workspace.h
+        editor/app/workspace.cpp
+        editor/app/project_settings.cpp
+        editor/app/workspace_resource_packer.cpp
+        editor/app/zip_archive.cpp
+        editor/app/zip_archive_exporter.cpp
+        editor/app/zip_archive_importer.cpp
+        editor/app/resource.cpp
+        editor/app/buffer.cpp
+        editor/app/window-eventlog.cpp
+        editor/app/ipc.h
+        editor/app/ipc.cpp
+        editor/app/process.cpp
+        editor/gui/host.cpp
+        editor/gui/utility.h
+        editor/gui/playwindow.h
+        editor/gui/playwindow.ui
+        editor/gui/playwindow.cpp
+        editor/gui/dlgeventlog.h
+        editor/gui/dlgeventlog.ui
+        editor/gui/dlgeventlog.cpp
+        editor/resource/resource.qrc
+        editor/gui/darkstyle/darkstyle.cpp
+        editor/gui/darkstyle/darkstyle.h
+        editor/gui/darkstyle/stylecommon.h
+        editor/gui/darkstyle/stylecommon.cpp
+        editor/gui/darkstyle/darkstyle.qrc
+    )
+    target_compile_definitions(EditorGameHost PRIVATE DETONATOR_GAMEHOST_BUILD)
+    target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
+    target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
+    target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+    target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
+    # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
+    target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/EditorGameHost_autogen/include")
+    target_link_libraries(EditorGameHost Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
+    target_link_libraries(EditorGameHost GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
+    target_link_libraries(EditorGameHost QuaZip)
+    target_link_libraries(EditorGameHost ${CONAN_LIBS})
+    target_link_libraries(EditorGameHost cmake_git_version_tracking)
+    install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
+
+    # unit tests
+    add_executable(unit_test_ipc
+            editor/app/unit_test/unit_test_ipc.cpp
+            editor/app/eventlog.cpp
+            editor/app/format.cpp
+            editor/app/utility.cpp
+            editor/app/workspace.cpp
+            editor/app/project_settings.cpp
+            editor/app/workspace_resource_packer.cpp
+            editor/app/zip_archive.cpp
+            editor/app/zip_archive_exporter.cpp
+            editor/app/zip_archive_importer.cpp
+            editor/app/resource.cpp
+            editor/app/buffer.cpp
+            editor/app/ipc.cpp
+            editor/app/packing.cpp
+            editor/app/process.cpp)
+    target_include_directories(unit_test_ipc PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
+    target_include_directories(unit_test_ipc PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+    # FIX RANDOM RUNTIME GLIB VOMIT STATIC ASSERTION FAILURE BY RANDOMLY CHANGING THE
+    # ORDER OF THE LIBRARIES HERE!
+    target_link_libraries(unit_test_ipc GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
+    target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
+    target_link_libraries(unit_test_ipc QuaZip)
 
 
-install(TARGETS Detonator DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
+    add_executable(unit_test_lua_tool
+            editor/app/unit_test/unit_test_lua_tool.cpp
+            editor/app/utility.cpp
+            editor/app/lua-tools.cpp
+            base/assert.cpp)
+    target_include_directories(unit_test_lua_tool  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
+    target_include_directories(unit_test_lua_tool  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+    target_link_libraries(unit_test_lua_tool Qt5::Widgets Qt5::Core tree-sitter)
+
+
+    add_executable(unit_test_resource
+            editor/app/unit_test/unit_test_resource.cpp
+            editor/app/utility.cpp
+            base/assert.cpp)
+    target_include_directories(unit_test_resource  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+    target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets UiLib DataLib BaseLib)
+
+
+    add_executable(unit_test_workspace
+            editor/app/unit_test/unit_test_workspace.cpp
+            engine/loader.cpp
+            editor/app/utility.cpp
+            editor/app/format.cpp
+            editor/app/eventlog.cpp
+            editor/app/workspace.cpp
+            editor/app/project_settings.cpp
+            editor/app/workspace_resource_packer.cpp
+            editor/app/zip_archive.cpp
+            editor/app/zip_archive_exporter.cpp
+            editor/app/zip_archive_importer.cpp
+            editor/app/resource.cpp
+            editor/app/resource_cache.cpp
+            editor/app/buffer.cpp
+            editor/app/packing.cpp
+            editor/app/process.cpp)
+    target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
+    target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+    target_link_libraries(unit_test_workspace GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
+    target_link_libraries(unit_test_workspace QuaZip)
+    target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})
+
+    add_executable(unit_test_event_log
+            editor/app/unit_test/unit_test_window-eventlog.cpp
+            editor/app/window-eventlog.cpp)
+    target_include_directories(unit_test_event_log PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+    target_link_libraries(unit_test_event_log Qt5::Core DataLib BaseLib)
+
+    add_executable(unit_test_gui
+            base/assert.cpp
+            base/json.cpp
+            base/utility.cpp
+            data/json.cpp
+            editor/app/utility.cpp
+            editor/app/eventlog.cpp
+            editor/gui/gfxwidget.cpp
+            editor/gui/settings.cpp
+            editor/gui/unit_test/unit_test.cpp
+            editor/gui/collapsible_widget.h
+            editor/gui/collapsible_widget.ui
+            editor/gui/collapsible_widget.cpp
+            editor/gui/tileselection.cpp
+            third_party/base64/base64.cpp)
+    target_compile_definitions(unit_test_gui PRIVATE "QTCOLORWIDGETS_LIBRARY")
+    target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
+    # add this include for the promoted widgets
+    target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
+    target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
+    target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
+    # FIX RANDOM RUNTIME GLIB VOMIT STATIC ASSERTION FAILURE BY RANDOMLY CHANGING THE
+    # ORDER OF THE LIBRARIES HERE!
+    target_link_libraries(unit_test_gui GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
+    target_link_libraries(unit_test_gui QtColorWidgets Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
+
+    add_test(NAME unit_test_ipc       COMMAND unit_test_ipc)
+    add_test(NAME unit_test_lua_tool  COMMAND unit_test_lua_tool)
+    add_test(NAME unit_test_resource  COMMAND unit_test_resource)
+    add_test(NAME unit_test_workspace COMMAND unit_test_workspace)
+    add_test(NAME unit_test_event_log COMMAND unit_test_event_log)
+    add_test(NAME unit_test_gui       COMMAND unit_test_gui)
+
+endif() # BUILD_QT_STUFF
 
 # Copy the Python based http-server for serving the HTML5/WASM game locally
 # with the right access policy headers for enabling some features such
 # as the infamous SharedArrayBuffer
 install(FILES "${CMAKE_CURRENT_LIST_DIR}/tools/http-server.py" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
-
-# game host application which provides a host process to load the game
-# libraries for playback.
-add_executable(EditorGameHost
-    graphics/format.cpp
-    editor/app/format.cpp
-    editor/app/utility.cpp
-    editor/app/eventlog.h
-    editor/app/eventlog.cpp
-    editor/app/packing.cpp
-    editor/app/workspace.h
-    editor/app/workspace.cpp
-    editor/app/project_settings.cpp
-    editor/app/workspace_resource_packer.cpp
-    editor/app/zip_archive.cpp
-    editor/app/zip_archive_exporter.cpp
-    editor/app/zip_archive_importer.cpp
-    editor/app/resource.cpp
-    editor/app/buffer.cpp
-    editor/app/window-eventlog.cpp
-    editor/app/ipc.h
-    editor/app/ipc.cpp
-    editor/app/process.cpp
-    editor/gui/host.cpp
-    editor/gui/utility.h
-    editor/gui/playwindow.h
-    editor/gui/playwindow.ui
-    editor/gui/playwindow.cpp
-    editor/gui/dlgeventlog.h
-    editor/gui/dlgeventlog.ui
-    editor/gui/dlgeventlog.cpp
-    editor/resource/resource.qrc
-    editor/gui/darkstyle/darkstyle.cpp
-    editor/gui/darkstyle/darkstyle.h
-    editor/gui/darkstyle/stylecommon.h
-    editor/gui/darkstyle/stylecommon.cpp
-    editor/gui/darkstyle/darkstyle.qrc
-)
-target_compile_definitions(EditorGameHost PRIVATE DETONATOR_GAMEHOST_BUILD)
-target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
-target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
-target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
-target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
-# support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
-target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/EditorGameHost_autogen/include")
-target_link_libraries(EditorGameHost Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(EditorGameHost GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
-target_link_libraries(EditorGameHost QuaZip)
-target_link_libraries(EditorGameHost ${CONAN_LIBS})
-target_link_libraries(EditorGameHost cmake_git_version_tracking)
-install(TARGETS EditorGameHost DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # audio test application. Simple console application that plays
 # OGG and WAV files in several different formats.
@@ -938,7 +1061,6 @@ add_executable(audio_test
 )
 target_include_directories(audio_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
 target_link_libraries(audio_test BaseLib)
-target_link_libraries(audio_test Qt5::Widgets)
 target_link_libraries(audio_test ${CONAN_LIBS})
 target_link_libraries(audio_test samplerate)
 target_link_libraries(audio_test sndfile)
@@ -1029,11 +1151,10 @@ install(TARGETS 3d DESTINATION "${CMAKE_CURRENT_LIST_DIR}/tools/test/3d/dist")
 enable_testing()
 
 #data unit tests
-add_executable(unit_test_data data/unit_test/unit_test.cpp
-        data/json.cpp)
-add_test(NAME unit_test_data COMMAND unit_test_data)
+add_executable(unit_test_data data/unit_test/unit_test.cpp data/json.cpp)
 target_include_directories(unit_test_data PRIVATE "${CMAKE_CURRENT_LIST_DIR}/data/unit_test")
 target_link_libraries(unit_test_data PRIVATE BaseLib)
+add_test(NAME unit_test_data COMMAND unit_test_data)
 
 #editor unit tests
 add_executable(unit_test_imgpack
@@ -1045,112 +1166,8 @@ add_executable(unit_test_imgpack
         graphics/pixel.cpp
         third_party/stb/stb_image.c
         third_party/stb/stb_image_write.c)
-add_executable(unit_test_ipc
-        editor/app/unit_test/unit_test_ipc.cpp
-        editor/app/eventlog.cpp
-        editor/app/format.cpp
-        editor/app/utility.cpp
-        editor/app/workspace.cpp
-        editor/app/project_settings.cpp
-        editor/app/workspace_resource_packer.cpp
-        editor/app/zip_archive.cpp
-        editor/app/zip_archive_exporter.cpp
-        editor/app/zip_archive_importer.cpp
-        editor/app/resource.cpp
-        editor/app/buffer.cpp
-        editor/app/ipc.cpp
-        editor/app/packing.cpp
-        editor/app/process.cpp)
-target_include_directories(unit_test_ipc PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
-
-add_executable(unit_test_lua_tool
-        editor/app/unit_test/unit_test_lua_tool.cpp
-        editor/app/utility.cpp
-        editor/app/lua-tools.cpp
-        base/assert.cpp)
-target_include_directories(unit_test_lua_tool  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
-
-add_executable(unit_test_resource
-        editor/app/unit_test/unit_test_resource.cpp
-        editor/app/utility.cpp
-        base/assert.cpp)
-add_executable(unit_test_workspace
-        editor/app/unit_test/unit_test_workspace.cpp
-        engine/loader.cpp
-        editor/app/utility.cpp
-        editor/app/format.cpp
-        editor/app/eventlog.cpp
-        editor/app/workspace.cpp
-        editor/app/project_settings.cpp
-        editor/app/workspace_resource_packer.cpp
-        editor/app/zip_archive.cpp
-        editor/app/zip_archive_exporter.cpp
-        editor/app/zip_archive_importer.cpp
-        editor/app/resource.cpp
-        editor/app/resource_cache.cpp
-        editor/app/buffer.cpp
-        editor/app/packing.cpp
-        editor/app/process.cpp)
-target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/quazip/")
-
-add_executable(unit_test_event_log
-        editor/app/unit_test/unit_test_window-eventlog.cpp
-        editor/app/window-eventlog.cpp)
-
-add_executable(unit_test_gui
-        base/assert.cpp
-        base/json.cpp
-        base/utility.cpp
-        data/json.cpp
-        editor/app/utility.cpp
-        editor/app/eventlog.cpp
-        editor/gui/gfxwidget.cpp
-        editor/gui/settings.cpp
-        editor/gui/unit_test/unit_test.cpp
-        editor/gui/collapsible_widget.h
-        editor/gui/collapsible_widget.ui
-        editor/gui/collapsible_widget.cpp
-        editor/gui/tileselection.cpp
-        third_party/base64/base64.cpp)
-target_compile_definitions(unit_test_gui PRIVATE "QTCOLORWIDGETS_LIBRARY")
-target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
-# add this include for the promoted widgets
-target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
-target_include_directories(unit_test_gui PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/Qt-Color-Widgets/include")
-
-add_test(NAME unit_test_lua_tool  COMMAND unit_test_lua_tool)
-add_test(NAME unit_test_gui       COMMAND unit_test_gui)
-add_test(NAME unit_test_imgpack   COMMAND unit_test_imgpack)
-add_test(NAME unit_test_ipc       COMMAND unit_test_ipc)
-add_test(NAME unit_test_resource  COMMAND unit_test_resource)
-add_test(NAME unit_test_workspace COMMAND unit_test_workspace)
-add_test(NAME unit_test_event_log COMMAND unit_test_event_log)
-target_include_directories(unit_test_lua_tool  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
-target_include_directories(unit_test_gui       PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_imgpack   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
-target_include_directories(unit_test_ipc       PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
-target_include_directories(unit_test_resource  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
-target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
-target_include_directories(unit_test_event_log PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
-target_link_libraries(unit_test_lua_tool Qt5::Widgets Qt5::Core tree-sitter)
-
-# FIX RANDOM RUNTIME GLIB VOMIT STATIC ASSERTION FAILURE BY RANDOMLY CHANGING THE
-# ORDER OF THE LIBRARIES HERE!
-target_link_libraries(unit_test_gui GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_gui QtColorWidgets Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-
-# FIX RANDOM RUNTIME GLIB VOMIT STATIC ASSERTION FAILURE BY RANDOMLY CHANGING THE
-# ORDER OF THE LIBRARIES HERE!
-target_link_libraries(unit_test_ipc GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
-target_link_libraries(unit_test_ipc QuaZip)
-
-target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets UiLib DataLib BaseLib)
-
-target_link_libraries(unit_test_workspace GameLib EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
-target_link_libraries(unit_test_workspace QuaZip)
-target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})
-target_link_libraries(unit_test_event_log Qt5::Core DataLib BaseLib)
+add_test(NAME unit_test_imgpack   COMMAND unit_test_imgpack)
 
 add_library(GameLibTesting
     game/entity.cpp
