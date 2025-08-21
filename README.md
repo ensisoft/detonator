@@ -26,6 +26,8 @@ as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time 
   * <i>Main game object and game play APIs are Scene, Entity and EntityNode + Attachments</i>
 * <b>Demo content and examples. </b> 🪜
   * <i>Multiple demo projects ready to run!</i>  
+* <b>Support for scripting and native game development 🍌
+  * <i>Write your game logic in Lua or in C++</i>
 
 <details><summary><strong>Click here for more features...</strong></summary>
 
@@ -38,6 +40,7 @@ as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time 
 * Entity system with animation tracks
 * Audio engine with approx. dozen audio elements
 * Lua based scripting for entities, scenes and UIs
+* Native (C++) game development support
 * Built-in Lua script editor with code formatting, API help and code completion
 * Scene builder
 * In game UI system
