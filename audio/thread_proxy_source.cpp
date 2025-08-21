@@ -340,6 +340,7 @@ void ThreadProxySource::ThreadLoop()
                 mEvents = std::move(events);
                 if (!has_more)
                 {
+                    TRACE_LEAVE(AudioSourceThreadMainLoop);
                     break;
                 }
             }
