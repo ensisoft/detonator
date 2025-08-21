@@ -42,6 +42,7 @@
 #include "game/timeline_property_animator.h"
 #include "game/entity.h"
 #include "game/entity_class.h"
+#include "game/entity_node.h"
 #include "game/entity_node_linear_mover.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_rigid_body_joint.h"
@@ -55,6 +56,8 @@
 #include "game/tilemap.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
+
+#include "base/snafu.h"
 
 // sol overload resolution requires a define
 // SOL_ALL_SAFETIES_ON will take care of that

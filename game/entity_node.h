@@ -31,6 +31,8 @@
 #include "base/bitflag.h"
 #include "data/fwd.h"
 
+#include "base/snafu.h"
+
 namespace game
 {
     class SplineMoverClass;
