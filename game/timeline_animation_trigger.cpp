@@ -172,6 +172,19 @@ bool AnimationTrigger::Validate(const EntityNode& node) const
                 mClass->GetName());
         }
     }
+    else if (type == Type::SpawnEntity)
+    {
+        if (!mClass->HasParameter<std::string>("entity-class-id"))
+        {
+            WARN("Timeline trigger has a missing parameter (string) 'entity-class-id. [trigger='%1']",
+                mClass->GetName());
+        }
+        if (!mClass->HasParameter<int>("entity-render-layer"))
+        {
+            WARN("Timeline trigger has a missing parameter (int) 'entity-render-layer'. [trigger='%1']",
+                mClass->GetName());
+        }
+    }
     else BUG("Unhandled animation trigger type.");
     return true;
 }
@@ -230,6 +243,23 @@ void AnimationTrigger::Trigger(game::EntityNode& node, std::vector<Event>* event
             e.stream = stream;
             e.action = action;
             e.audio_graph_id = std::move(graph_class_id);
+            e.trigger_name = mClass->GetName();
+            events->emplace_back(std::move(e));
+        }
+    }
+    else if (type == Type::SpawnEntity)
+    {
+        int render_layer = 0;
+        std::string entity_class_id;
+        if (!mClass->GetParameter("entity-class-id", &entity_class_id) ||
+            !mClass->GetParameter("entity-render-layer", &render_layer))
+            return;
+        if (events)
+        {
+            AnimationSpawnEntityTriggerEvent e;
+            e.entity_class_id = std::move(entity_class_id);
+            e.render_layer    = render_layer;
+            e.source_node_id = node.GetId();
             e.trigger_name = mClass->GetName();
             events->emplace_back(std::move(e));
         }
