@@ -3670,6 +3670,11 @@ void EntityWidget::on_splineAcceleration_valueChanged(double value)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_splineFlagEnabled_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_btnDelDrawable_clicked()
 {
     ToggleDrawable(false);
@@ -5014,6 +5019,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.splineLooping, game::SplineMoverClass::IterationMode::Once);
     SetValue(mUI.splineSpeed, 0.0f);
     SetValue(mUI.splineAcceleration, 0.0f);
+    SetValue(mUI.splineFlagEnabled, false);
 
     SetValue(mUI.tfIntegrator, game::LinearMoverClass::Integrator::Euler);
     SetValue(mUI.tfVelocityX, 0.0f);
@@ -5233,6 +5239,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.splineLooping, mover->GetIterationMode());
             SetValue(mUI.splineSpeed, mover->GetSpeed());
             SetValue(mUI.splineAcceleration, mover->GetAcceleration());
+            SetValue(mUI.splineFlagEnabled, mover->IsEnabled());
             mSplineModel->Reset(mover);
         }
 
@@ -5464,6 +5471,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         mover->SetIterationMode(GetValue(mUI.splineLooping));
         mover->SetSpeed(GetValue(mUI.splineSpeed));
         mover->SetAcceleration(GetValue(mUI.splineAcceleration));
+        mover->SetFlag(game::SplineMoverClass::Flags::Enabled, GetValue(mUI.splineFlagEnabled));
     }
 
     if (auto* light = node->GetBasicLight())

@@ -23,14 +23,13 @@
 #  include <third_party/boost/catmull_rom.hpp>
 #include "warnpop.h"
 
-#include <vector>
 #include <memory>
-#include <optional>
-#include <algorithm>
+#include <cstdlib>
 
 #include "base/assert.h"
 #include "base/utility.h"
 #include "base/math.h"
+#include "base/bitflag.h"
 #include "data/fwd.h"
 #include "game/spline.h"
 #include "game/types.h"
@@ -66,8 +65,13 @@ namespace game
             Loop
         };
 
+        enum class Flags {
+            Enabled
+        };
+
         using CatmullRomFunction = Spline::CatmullRomFunction;
 
+        SplineMoverClass();
         ~SplineMoverClass();
 
         inline auto GetIterationMode() const noexcept
@@ -142,8 +146,23 @@ namespace game
         inline void SetIterationMode(IterationMode mode) noexcept
         { mIterationMode = mode; }
 
+        inline void SetFlag(Flags flag, bool on_off) noexcept
+        { mFlags.set(flag, on_off); }
+
+        inline void Enable(bool on_off) noexcept
+        { SetFlag(Flags::Enabled, on_off); }
+
+        inline bool TestFlag(Flags flag) const noexcept
+        { return mFlags.test(flag); }
+
+        inline bool IsEnabled() const noexcept
+        { return TestFlag(Flags::Enabled); }
+
         std::shared_ptr<const CatmullRomFunction> GetCatmullRom() const;
         std::shared_ptr<const CatmullRomFunction> MakeCatmullRom() const;
+
+        inline auto GetFlags() const noexcept
+        { return mFlags; }
 
         double GetPathLength() const;
 
@@ -168,6 +187,7 @@ namespace game
         PathCurveType mPathCurveType = PathCurveType::CatmullRom;
         RotationMode mRotationMode = RotationMode::ApplySplineRotation;
         IterationMode mIterationMode = IterationMode::Once;
+        base::bitflag<Flags> mFlags;
         Spline mSpline;
         float mSpeed = 0.0f;
         float mAcceleration = 0.0f;
@@ -176,6 +196,7 @@ namespace game
     class SplineMover
     {
     public:
+        using Flags               = SplineMoverClass::Flags;
         using IterationMode       = SplineMoverClass::IterationMode;
         using RotationMode        = SplineMoverClass::RotationMode;
         using PathCoordinateSpace = SplineMoverClass::PathCoordinateSpace;
@@ -186,7 +207,7 @@ namespace game
         template<typename TargetObject>
         void TransformObject(float dt, TargetObject& object)
         {
-            if (!mCatmullRom || mPathComplete)
+            if (!mCatmullRom || mPathComplete || !IsEnabled())
                 return;
 
             const auto iteration_mode = mClass->GetIterationMode();
@@ -275,9 +296,22 @@ namespace game
         inline auto GetSpeed() const noexcept
         { return mSpeed; }
 
+        inline void SetFlag(Flags flag, bool on_off) noexcept
+        { mFlags.set(flag, on_off); }
+
+        inline void Enable(bool on_off) noexcept
+        { SetFlag(Flags::Enabled, on_off); }
+
+        inline bool TestFlag(Flags flag) const noexcept
+        { return mFlags.test(flag); }
+
+        inline bool IsEnabled() const noexcept
+        { return TestFlag(Flags::Enabled); }
+
     private:
         std::shared_ptr<const SplineMoverClass> mClass;
         std::shared_ptr<const CatmullRomFunction> mCatmullRom;
+        base::bitflag<Flags> mFlags;
         Float2 mStartPos;
         float mDirection    = 1.0f;
         float mSpeed        = 0.0f;

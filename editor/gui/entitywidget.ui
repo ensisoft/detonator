@@ -1480,7 +1480,7 @@
           <x>0</x>
           <y>0</y>
           <width>431</width>
-          <height>1468</height>
+          <height>1132</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -2164,7 +2164,7 @@
             <bool>true</bool>
            </property>
            <property name="collapsed" stdset="0">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text" stdset="0">
             <string>Drawable</string>
@@ -4764,21 +4764,8 @@
                </item>
                <item>
                 <layout class="QGridLayout" name="gridLayout_14">
-                 <item row="2" column="1">
-                  <widget class="QComboBox" name="splineRotation"/>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_82">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Path coordinates</string>
-                   </property>
-                  </widget>
+                 <item row="3" column="1">
+                  <widget class="QComboBox" name="splineLooping"/>
                  </item>
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_83">
@@ -4790,33 +4777,6 @@
                    </property>
                    <property name="text">
                     <string>Path curve type</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="5" column="1">
-                  <widget class="QDoubleSpinBox" name="splineAcceleration">
-                   <property name="suffix">
-                    <string>  u/s²</string>
-                   </property>
-                   <property name="maximum">
-                    <double>1000.000000000000000</double>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="0">
-                  <widget class="QLabel" name="label_84">
-                   <property name="text">
-                    <string>Speed</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <widget class="QDoubleSpinBox" name="splineSpeed">
-                   <property name="suffix">
-                    <string> u/s</string>
-                   </property>
-                   <property name="maximum">
-                    <double>1000.000000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -4837,9 +4797,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="1">
-                  <widget class="QComboBox" name="splineCurveType"/>
-                 </item>
                  <item row="5" column="0">
                   <widget class="QLabel" name="label_85">
                    <property name="text">
@@ -4847,13 +4804,70 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
-                  <widget class="QComboBox" name="splineLooping"/>
-                 </item>
                  <item row="3" column="0">
                   <widget class="QLabel" name="label_87">
                    <property name="text">
                     <string>Looping</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_82">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>Path coordinates</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="label_84">
+                   <property name="text">
+                    <string>Speed</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QDoubleSpinBox" name="splineSpeed">
+                   <property name="suffix">
+                    <string> u/s</string>
+                   </property>
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QComboBox" name="splineCurveType"/>
+                 </item>
+                 <item row="5" column="1">
+                  <widget class="QDoubleSpinBox" name="splineAcceleration">
+                   <property name="suffix">
+                    <string>  u/s²</string>
+                   </property>
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QComboBox" name="splineRotation"/>
+                 </item>
+                 <item row="6" column="1">
+                  <widget class="QCheckBox" name="splineFlagEnabled">
+                   <property name="text">
+                    <string>Enabled</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="0">
+                  <widget class="QLabel" name="label_88">
+                   <property name="text">
+                    <string>Flags</string>
                    </property>
                   </widget>
                  </item>
@@ -5830,6 +5844,7 @@
   <tabstop>splineRotation</tabstop>
   <tabstop>splineLooping</tabstop>
   <tabstop>splineSpeed</tabstop>
+  <tabstop>splineFlagEnabled</tabstop>
   <tabstop>splineAcceleration</tabstop>
   <tabstop>btnDelSplineMover</tabstop>
   <tabstop>widget</tabstop>
