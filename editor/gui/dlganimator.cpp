@@ -779,7 +779,7 @@ void DlgAnimator::on_btnAccept_clicked()
     QVariantMap properties;
     mScene->SaveGraphProperties(properties);
 
-    mEntityWidget->SaveAnimator(mAnimator, properties);
+    mEntityWidget->SaveStateController(mAnimator, properties);
 
     accept();
 }

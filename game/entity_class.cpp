@@ -346,6 +346,12 @@ bool EntityClass::DeleteAnimationById(const std::string& id)
 {
     return EraseById(mAnimations, id);
 }
+
+void EntityClass::DeleteAnimations()
+{
+    mAnimations.clear();
+}
+
 AnimationClass& EntityClass::GetAnimation(size_t i)
 {
     ASSERT(i < mAnimations.size());

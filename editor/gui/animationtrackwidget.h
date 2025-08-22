@@ -96,6 +96,7 @@ namespace gui
         void on_actionStop_triggered();
         void on_actionSave_triggered();
         void on_actionReset_triggered();
+        void on_actionPreview_triggered();
         void on_actionDeleteItem_triggered();
         void on_actionDeleteItems_triggered();
         void on_actionDeleteTimeline_triggered();

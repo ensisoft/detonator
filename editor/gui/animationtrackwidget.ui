@@ -1860,6 +1860,21 @@
     <string>Show grid</string>
    </property>
   </action>
+  <action name="actionPreview">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/joystick.png</normaloff>:/32x32_ico_png/joystick.png</iconset>
+   </property>
+   <property name="text">
+    <string>Test Run</string>
+   </property>
+   <property name="toolTip">
+    <string>Test the entity animation in a simple scene</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

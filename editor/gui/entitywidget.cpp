@@ -2125,6 +2125,35 @@ bool EntityWidget::LaunchScript(const app::AnyString& id)
     return false;
 }
 
+void EntityWidget::PreviewAnimation(const game::AnimationClass& animation)
+{
+    if (mPreview)
+    {
+        mPreview->Shutdown();
+        mPreview->close();
+        mPreview.reset();
+    }
+
+    // make a copy of the entity so that we can mess with the
+    // state without affecting the class we're working on
+    auto preview_entity = std::make_shared<game::EntityClass>(*mState.entity);
+    preview_entity->DeleteAnimations();
+    preview_entity->AddAnimation(animation);
+    preview_entity->SetIdleTrackId(animation.GetId());
+
+    engine::Engine::RendererConfig config;
+    config.style = GetValue(mUI.cmbStyle);
+
+    auto preview = std::make_unique<PlayWindow>(*mState.workspace);
+    preview->LoadState("preview_window", this);
+    preview->ShowWithWAR();
+    preview->LoadPreview(preview_entity);
+    preview->ConfigurePreviewRenderer(config);
+    mPreview = std::move(preview);
+
+    NOTE("Starting animation '%1' preview", animation.GetName());
+}
+
 void EntityWidget::SaveAnimation(const game::AnimationClass& track, const QVariantMap& properties)
 {
     // keep track of the associated track properties 
@@ -2152,7 +2181,7 @@ void EntityWidget::SaveAnimation(const game::AnimationClass& track, const QVaria
     DisplayEntityProperties();
 }
 
-void EntityWidget::SaveAnimator(const game::EntityStateControllerClass& controller, const QVariantMap& properties)
+void EntityWidget::SaveStateController(const game::EntityStateControllerClass& controller, const QVariantMap& properties)
 {
     mAnimatorProperties[controller.GetId()] = properties;
 
@@ -2259,6 +2288,7 @@ void EntityWidget::on_actionPreview_triggered()
         preview->LoadPreview(mState.entity);
         preview->ConfigurePreviewRenderer(config);
         mPreview = std::move(preview);
+        NOTE("Starting entity '%1' preview.", mState.entity->GetName());
     }
 }
 
