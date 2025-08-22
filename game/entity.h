@@ -410,11 +410,11 @@ namespace game
         { return TestFlag(Flags::VisibleInGame); }
 
         bool HasStateController() const noexcept
-        { return mAnimator.has_value(); }
+        { return mStateController.has_value(); }
         const EntityStateController* GetStateController() const
-        { return base::GetOpt(mAnimator); }
+        { return base::GetOpt(mStateController); }
         EntityStateController* GetStateController()
-        { return base::GetOpt(mAnimator); }
+        { return base::GetOpt(mStateController); }
         RenderTree& GetRenderTree() noexcept
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const noexcept
@@ -435,7 +435,7 @@ namespace game
         // entity's render tree that is to be used as the parent
         // of this entity's nodes.
         std::string mParentNodeId;
-        std::optional<game::EntityStateController> mAnimator;
+        std::optional<game::EntityStateController> mStateController;
         // The current animation if any.
         std::vector<std::unique_ptr<Animation>> mCurrentAnimations;
         // the list of nodes that are in the entity.

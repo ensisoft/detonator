@@ -1470,10 +1470,10 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     }
 
     // load animator properties
-    for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
+    if (mState.entity->HasStateController())
     {
-        const auto& anim = mState.entity->GetController(i);
-        const auto& Id = anim.GetId();
+        const auto* controller = mState.entity->GetStateController();
+        const auto& Id = controller->GetId();
         QVariantMap properties;
         GetProperty(resource, "animator_" + Id, &properties);
         mAnimatorProperties[Id] = properties;
@@ -1730,10 +1730,10 @@ bool EntityWidget::LoadState(const Settings& settings)
     }
 
     // load animator properties
-    for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
+    if (mState.entity->HasStateController())
     {
-        const auto& anim = mState.entity->GetController(i);
-        const auto& Id = anim.GetId();
+        const auto* state_controller = mState.entity->GetStateController();
+        const auto& Id = state_controller->GetId();
         QVariantMap properties;
         settings.GetValue("Entity", "animator_" + Id, &properties);
         mAnimatorProperties[Id] = properties;
@@ -2113,10 +2113,10 @@ bool EntityWidget::LaunchScript(const app::AnyString& id)
         on_actionPreview_triggered();
         return true;
     }
-    if (mState.entity->GetNumAnimators() == 0)
+    if (!mState.entity->HasStateController())
         return false;
 
-    const auto& entity_controller_script_id = mState.entity->GetController(0).GetScriptId();
+    const auto& entity_controller_script_id = mState.entity->GetStateController()->GetScriptId();
     if (entity_controller_script_id == id)
     {
         on_actionPreview_triggered();
@@ -2152,27 +2152,13 @@ void EntityWidget::SaveAnimation(const game::AnimationClass& track, const QVaria
     DisplayEntityProperties();
 }
 
-void EntityWidget::SaveAnimator(const game::EntityStateControllerClass& animator, const QVariantMap& properties)
+void EntityWidget::SaveAnimator(const game::EntityStateControllerClass& controller, const QVariantMap& properties)
 {
-    mAnimatorProperties[animator.GetId()] = properties;
+    mAnimatorProperties[controller.GetId()] = properties;
 
-    for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
-    {
-        auto& other = mState.entity->GetController(i);
-        if (other.GetId() != animator.GetId())
-            continue;
-
-        // copy it over.
-        other = animator;
-        INFO("Saved entity controller '%1'", animator.GetName());
-        NOTE("Saved entity controller '%1'", animator.GetName());
-        DisplayEntityProperties();
-        return;
-    }
-    // add a copy
-    mState.entity->AddController(animator);
-    INFO("Saved entity controller '%1'", animator.GetName());
-    NOTE("Saved entity controller '%1'", animator.GetName());
+    mState.entity->SetStateController(controller);
+    INFO("Saved entity state controller '%1'", controller.GetName());
+    NOTE("Saved entity state controller '%1'", controller.GetName());
     DisplayEntityProperties();
 }
 
@@ -2732,14 +2718,14 @@ void EntityWidget::on_btnResetScript_clicked()
 
 void EntityWidget::on_btnEditAnimator_clicked()
 {
-    if (mState.entity->GetNumAnimators() == 0)
+    if (!mState.entity->HasStateController())
         return;
-    const auto& animator = mState.entity->GetController(0);
+    const auto& state_controller = mState.entity->GetStateController();
 
     QVariantMap props;
-    if (const auto* ptr = base::SafeFind(mAnimatorProperties, animator.GetId()))
+    if (const auto* ptr = base::SafeFind(mAnimatorProperties, state_controller->GetId()))
         props = *ptr;
-    DlgAnimator dlg(this, mState.workspace, *mState.entity, animator, props);
+    DlgAnimator dlg(this, mState.workspace, *mState.entity, *state_controller, props);
     dlg.SetEntityWidget(this);
     dlg.exec();
 }
@@ -3893,12 +3879,12 @@ void EntityWidget::on_actionEditEntityScript_triggered()
 }
 void EntityWidget::on_actionEditControllerScript_triggered()
 {
-    if (mState.entity->GetNumAnimators() == 0)
+    if (!mState.entity->HasStateController())
         return;
 
-    const auto& controller = mState.entity->GetController(0);
+    const auto* state_controller = mState.entity->GetStateController();
 
-    const auto& id = controller.GetScriptId();
+    const auto& id = state_controller->GetScriptId();
     if (id.empty())
         return;
 
@@ -4088,12 +4074,11 @@ void EntityWidget::on_animator_toggled(bool on)
     {
         game::EntityStateControllerClass animator;
         animator.SetName("My EntityStateController");
-        mState.entity->AddController(std::move(animator));
+        mState.entity->SetStateController(std::move(animator));
     }
     else
     {
-        ASSERT(mState.entity->GetNumAnimators() == 1);
-        mState.entity->DeleteController(0);
+        mState.entity->DeleteStateController();
     }
 }
 
@@ -4888,7 +4873,6 @@ void EntityWidget::DisplayEntityProperties()
     SetList(mUI.trackList, tracks);
     SetList(mUI.idleTrack, tracks);
 
-    const auto animators = mState.entity->GetNumAnimators();
     const auto vars   = mState.entity->GetNumScriptVars();
     const auto joints = mState.entity->GetNumJoints();
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
@@ -4899,7 +4883,7 @@ void EntityWidget::DisplayEntityProperties()
     SetEnabled(mUI.btnDeleteJoint, joints > 0);
     SetEnabled(mUI.btnEditScript, mState.entity->HasScriptFile());
 
-    SetValue(mUI.animator, animators > 0);
+    SetValue(mUI.animator, mState.entity->HasStateController());
     SetValue(mUI.entityName, mState.entity->GetName());
     SetValue(mUI.entityTag, mState.entity->GetTag());
     SetValue(mUI.entityID, mState.entity->GetId());

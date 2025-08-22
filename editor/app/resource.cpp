@@ -380,16 +380,16 @@ QVariantMap DuplicateResourceProperties(const game::EntityClass& src, game::Enti
 {
     ASSERT(src.GetNumNodes() == dupe.GetNumNodes());
     ASSERT(src.GetNumAnimations() == dupe.GetNumAnimations());
-    ASSERT(src.GetNumAnimators() == dupe.GetNumAnimators());
+    ASSERT(src.HasStateController() == dupe.HasStateController());
 
     QVariantMap ret = props;
 
     // map the properties associated with the resource object, i.e. the variant map
     // from properties using the old IDs to properties using new IDs
-    for (size_t i=0; i<src.GetNumAnimators(); ++i)
+    if (src.HasStateController())
     {
-        const auto& src_animator = src.GetController(i);
-        const auto& dst_animator = dupe.GetController(i);
+        const auto& src_animator = *src.GetStateController();
+        const auto& dst_animator = *dupe.GetStateController();
         // map state and link IDs from the src animator IDs to the
         // duplicate animator IDs
         std::unordered_map<std::string, std::string> mapping;
@@ -546,11 +546,11 @@ QStringList ListResourceDependencies(const game::EntityClass& entity, const QVar
     QStringList ret;
     PushBack(ret, entity.GetScriptFileId());
 
-    for (size_t i=0; i<entity.GetNumAnimators(); ++i)
+    if (entity.HasStateController())
     {
-        const auto& animator = entity.GetController(0);
-        if (animator.HasScriptId())
-            PushBack(ret, animator.GetScriptId());
+        const auto* state_controller = entity.GetStateController();
+        if (state_controller->HasScriptId())
+            PushBack(ret, state_controller->GetScriptId());
     }
 
     for (size_t i=0; i<entity.GetNumNodes(); ++i)

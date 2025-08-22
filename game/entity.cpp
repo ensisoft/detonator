@@ -123,9 +123,9 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
             rigid_body->AddJointConnection(joint_ptr);
     }
 
-    if (mClass->GetNumAnimators())
+    if (mClass->HasStateController())
     {
-        mAnimator = EntityStateController(mClass->GetSharedEntityControllerClass(0));
+        mStateController = EntityStateController(mClass->GetSharedEntityControllerClass());
     }
 }
 
@@ -515,14 +515,14 @@ void Entity::Update(float dt, std::vector<Event>* events)
 
 void Entity::UpdateStateController(float dt, std::vector<EntityStateUpdate>* updates)
 {
-    if (auto* animator = base::GetOpt(mAnimator))
+    if (auto* animator = base::GetOpt(mStateController))
     {
         animator->Update(dt, updates);
     }
 }
 bool Entity::TransitionStateController(const EntityStateTransition* transition, const EntityState* next)
 {
-    if (auto* animator = base::GetOpt(mAnimator))
+    if (auto* animator = base::GetOpt(mStateController))
     {
         return animator->BeginStateTransition(transition, next);
     }
@@ -531,7 +531,7 @@ bool Entity::TransitionStateController(const EntityStateTransition* transition, 
 
 const EntityState* Entity::GetCurrentEntityState() noexcept
 {
-    if (auto* animator = base::GetOpt(mAnimator))
+    if (auto* animator = base::GetOpt(mStateController))
     {
         return animator->GetCurrentState();
     }
@@ -540,7 +540,7 @@ const EntityState* Entity::GetCurrentEntityState() noexcept
 
 const EntityStateTransition* Entity::GetCurrentEntityStateTransition() noexcept
 {
-    if (auto* animator = base::GetOpt(mAnimator))
+    if (auto* animator = base::GetOpt(mStateController))
     {
         return animator->GetTransition();
     }
