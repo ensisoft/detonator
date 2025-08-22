@@ -158,6 +158,7 @@ namespace game
         void DeleteAnimation(size_t index);
         bool DeleteAnimationByName(const std::string& name);
         bool DeleteAnimationById(const std::string& id);
+        void DeleteAnimations();
 
         // Add a new animator class object.
         EntityStateControllerClass* SetStateController(EntityStateControllerClass&& animator);

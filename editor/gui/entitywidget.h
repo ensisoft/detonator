@@ -55,46 +55,48 @@ namespace gui
     {
         Q_OBJECT
     public:
-        EntityWidget(app::Workspace* workspace);
+        explicit EntityWidget(app::Workspace* workspace);
         EntityWidget(app::Workspace* workspace, const app::Resource& resource);
-       ~EntityWidget();
+       ~EntityWidget() override;
 
-        virtual QString GetId() const override;
-        virtual QImage TakeScreenshot() const override;
-        virtual void InitializeSettings(const UISettings& settings) override;
-        virtual void SetViewerMode() override;
-        virtual void AddActions(QToolBar& bar) override;
-        virtual void AddActions(QMenu& menu) override;
-        virtual bool SaveState(Settings& settings) const override;
-        virtual bool LoadState(const Settings& settings) override;
-        virtual bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
-        virtual void Cut(Clipboard& clipboard) override;
-        virtual void Copy(Clipboard& clipboard) const override;
-        virtual void Paste(const Clipboard& clipboard) override;
-        virtual void Save() override;
-        virtual void Undo() override;
-        virtual void ZoomIn() override;
-        virtual void ZoomOut() override;
-        virtual void ReloadShaders() override;
-        virtual void ReloadTextures() override;
-        virtual void Shutdown() override;
-        virtual void Update(double secs) override;
-        virtual void Render() override;
-        virtual void RunGameLoopOnce() override;
-        virtual bool HasUnsavedChanges() const override;
-        virtual void Refresh() override;
-        virtual bool GetStats(Stats* stats) const override;
-        virtual bool OnEscape() override;
-        virtual bool LaunchScript(const app::AnyString& id) override;
-        virtual void OnAddResource(const app::Resource* resource) override;
-        virtual void OnRemoveResource(const app::Resource* resource) override;
-        virtual void OnUpdateResource(const app::Resource* resource) override;
+        QString GetId() const override;
+        QImage TakeScreenshot() const override;
+        void InitializeSettings(const UISettings& settings) override;
+        void SetViewerMode() override;
+        void AddActions(QToolBar& bar) override;
+        void AddActions(QMenu& menu) override;
+        bool SaveState(Settings& settings) const override;
+        bool LoadState(const Settings& settings) override;
+        bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
+        void Cut(Clipboard& clipboard) override;
+        void Copy(Clipboard& clipboard) const override;
+        void Paste(const Clipboard& clipboard) override;
+        void Save() override;
+        void Undo() override;
+        void ZoomIn() override;
+        void ZoomOut() override;
+        void ReloadShaders() override;
+        void ReloadTextures() override;
+        void Shutdown() override;
+        void Update(double secs) override;
+        void Render() override;
+        void RunGameLoopOnce() override;
+        bool HasUnsavedChanges() const override;
+        void Refresh() override;
+        bool GetStats(Stats* stats) const override;
+        bool OnEscape() override;
+        bool LaunchScript(const app::AnyString& id) override;
+        void OnAddResource(const app::Resource* resource) override;
+        void OnRemoveResource(const app::Resource* resource) override;
+        void OnUpdateResource(const app::Resource* resource) override;
 
         std::string GetEntityId() const
         { return mState.entity->GetId(); }
 
+        void PreviewAnimation(const game::AnimationClass& animation);
         void SaveAnimation(const game::AnimationClass& track, const QVariantMap& properties);
-        void SaveAnimator(const game::EntityStateControllerClass& animator, const QVariantMap& properties);
+        void SaveStateController(const game::EntityStateControllerClass& animator, const QVariantMap& properties);
+
     private slots:
         void on_widgetColor_colorChanged(const QColor& color);
         void on_actionPlay_triggered();

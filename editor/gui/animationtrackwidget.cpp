@@ -340,8 +340,9 @@ void AnimationTrackWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionPlay);
     bar.addAction(mUI.actionPause);
-    bar.addSeparator();
     bar.addAction(mUI.actionStop);
+    bar.addSeparator();
+    bar.addAction(mUI.actionPreview);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
@@ -353,8 +354,9 @@ void AnimationTrackWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionPlay);
     menu.addAction(mUI.actionPause);
-    menu.addSeparator();
     menu.addAction(mUI.actionStop);
+    menu.addSeparator();
+    menu.addAction(mUI.actionPreview);
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
@@ -830,6 +832,21 @@ void AnimationTrackWidget::on_actionReset_triggered()
     mUI.timeline->ClearSelection();
     SetActuatorUIDefaults();
     SetActuatorUIEnabled(false);
+}
+
+void AnimationTrackWidget::on_actionPreview_triggered()
+{
+    EntityWidget* parent = nullptr;
+    for (auto* widget : EntityWidgets)
+    {
+        if (widget->GetEntityId() == mState.entity->GetId())
+        {
+            parent = widget;
+            break;
+        }
+    }
+    ASSERT(parent);
+    parent->PreviewAnimation(*mState.track);
 }
 
 void AnimationTrackWidget::on_actionDeleteItem_triggered()
