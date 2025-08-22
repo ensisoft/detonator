@@ -56,6 +56,8 @@ namespace game
             LinearMover_LinearAccelerationY,
             LinearMover_AngularVelocity,
             LinearMover_AngularAcceleration,
+            SplineMover_LinearSpeed,
+            SplineMover_LinearAcceleration,
             RigidBodyJoint_MotorTorque,
             RigidBodyJoint_MotorSpeed,
             RigidBodyJoint_MotorForce,
@@ -157,7 +159,8 @@ namespace game
             LinearMover_Enabled,
             RigidBodyJoint_EnableMotor,
             RigidBodyJoint_EnableLimits,
-            BasicLight_Enabled
+            BasicLight_Enabled,
+            SplineMover_Enabled
         };
 
         enum class PropertyAction {

@@ -26,6 +26,7 @@
 #include "game/entity_node_text_item.h"
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_linear_mover.h"
+#include "game/entity_node_spline_mover.h"
 #include "game/entity_node_rigid_body_joint.h"
 #include "game/entity_node_light.h"
 #include "game/timeline_property_animator.h"
@@ -92,7 +93,8 @@ void BooleanPropertyAnimator::Start(EntityNode& node)
     const auto* text = node.GetTextItem();
     const auto* spatial = node.GetSpatialNode();
     const auto* light = node.GetBasicLight();
-    const auto* mover = node.GetLinearMover();
+    const auto* linear_mover = node.GetLinearMover();
+    const auto* spline_mover = node.GetSplineMover();
 
     using FlagName = BooleanPropertyAnimatorClass::PropertyName;
     const auto flag = mClass->GetFlagName();
@@ -136,7 +138,7 @@ void BooleanPropertyAnimator::Start(EntityNode& node)
     else if (flag == FlagName::SpatialNode_Enabled)
         mStartState = spatial->TestFlag(SpatialNode::Flags::Enabled);
     else if (flag == FlagName::LinearMover_Enabled)
-        mStartState = mover->TestFlag(LinearMover::Flags::Enabled);
+        mStartState = linear_mover->TestFlag(LinearMover::Flags::Enabled);
     else if (flag == FlagName::RigidBodyJoint_EnableLimits)
     {
         const auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
@@ -149,6 +151,8 @@ void BooleanPropertyAnimator::Start(EntityNode& node)
     }
     else if (flag == FlagName::BasicLight_Enabled)
         mStartState = light->IsEnabled();
+     else if (flag == FlagName::SplineMover_Enabled)
+         mStartState = spline_mover->IsEnabled();
     else BUG("Unhandled property.");
 
     if (mTime == 0.0f)
@@ -197,7 +201,8 @@ void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
     auto* text = node.GetTextItem();
     auto* light = node.GetBasicLight();
     auto* spatial = node.GetSpatialNode();
-    auto* mover = node.GetLinearMover();
+    auto* linear_mover = node.GetLinearMover();
+    auto* spline_mover = node.GetSplineMover();
 
     using FlagName = BooleanPropertyAnimatorClass::PropertyName;
     const auto flag = mClass->GetFlagName();
@@ -241,7 +246,7 @@ void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
     else if (flag == FlagName::SpatialNode_Enabled)
         spatial->SetFlag(SpatialNode::Flags::Enabled, next_value);
     else if (flag == FlagName::LinearMover_Enabled)
-        mover->SetFlag(LinearMover::Flags::Enabled, next_value);
+        linear_mover->SetFlag(LinearMover::Flags::Enabled, next_value);
     else if (flag == FlagName::RigidBodyJoint_EnableMotor)
     {
         auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
@@ -254,6 +259,8 @@ void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
     }
     else if (flag == FlagName::BasicLight_Enabled)
         light->SetFlag(BasicLight::Flags::Enabled, next_value);
+     else if (flag == FlagName::SplineMover_Enabled)
+         spline_mover->SetFlag(SplineMover::Flags::Enabled, next_value);
     else BUG("Unhandled property.");
 
     // spams the log
@@ -267,7 +274,8 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     auto* text = node.GetTextItem();
     auto* light = node.GetBasicLight();
     auto* spatial = node.GetSpatialNode();
-    auto* mover = node.GetLinearMover();
+    auto* linear_mover = node.GetLinearMover();
+    auto* spline_mover = node.GetSplineMover();
 
     using FlagName = BooleanPropertyAnimatorClass::PropertyName;
     const auto flag = mClass->GetFlagName();
@@ -325,11 +333,12 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     }
     else if (flag == FlagName::LinearMover_Enabled)
     {
-        if (!mover && verbose)
+        if (!linear_mover && verbose)
         {
             WARN("Property animator can't apply a node linear mover flag on a node without a linear mover. [animator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
+        return linear_mover != nullptr;
     }
     else if (flag == FlagName::RigidBodyJoint_EnableMotor ||
              flag == FlagName ::RigidBodyJoint_EnableLimits)
@@ -362,6 +371,14 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
                  mClass->GetName(), node.GetName(), flag);
         }
         return light != nullptr;
+    }
+    else if (flag == FlagName::SplineMover_Enabled)
+    {
+        if (!spline_mover && verbose)
+        {
+            WARN("Property animator can't apply a spline mover flag on a node without a spline mover. [animator='%1', node='%2', flag=%3]",
+                mClass->GetName(), node.GetName(), flag);
+        }
     }
     else BUG("Unhandled property.");
     return true;
@@ -426,7 +443,8 @@ void PropertyAnimator::Start(EntityNode& node)
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
     const auto* light = node.GetBasicLight();
-    const auto* mover = node.GetLinearMover();
+    const auto* linear_mover = node.GetLinearMover();
+    const auto* spline_mover = node.GetSplineMover();
 
     const RigidBodyJoint* joint = nullptr;
     if (param == PropertyName::RigidBodyJoint_MotorTorque ||
@@ -467,21 +485,21 @@ void PropertyAnimator::Start(EntityNode& node)
     else if (param == PropertyName::TextItem_Color)
         mStartValue = text->GetTextColor();
     else if (param == PropertyName::LinearMover_LinearVelocity)
-        mStartValue = mover->GetLinearVelocity();
+        mStartValue = linear_mover->GetLinearVelocity();
     else if (param == PropertyName::LinearMover_LinearVelocityX)
-        mStartValue = mover->GetLinearVelocity().x;
+        mStartValue = linear_mover->GetLinearVelocity().x;
     else if (param == PropertyName::LinearMover_LinearVelocityY)
-        mStartValue = mover->GetLinearVelocity().y;
+        mStartValue = linear_mover->GetLinearVelocity().y;
     else if (param == PropertyName::LinearMover_LinearAcceleration)
-        mStartValue = mover->GetLinearAcceleration();
+        mStartValue = linear_mover->GetLinearAcceleration();
     else if (param == PropertyName::LinearMover_LinearAccelerationX)
-        mStartValue = mover->GetLinearAcceleration().x;
+        mStartValue = linear_mover->GetLinearAcceleration().x;
     else if (param == PropertyName::LinearMover_LinearAccelerationY)
-        mStartValue = mover->GetLinearAcceleration().y;
+        mStartValue = linear_mover->GetLinearAcceleration().y;
     else if (param == PropertyName::LinearMover_AngularVelocity)
-        mStartValue = mover->GetAngularVelocity();
+        mStartValue = linear_mover->GetAngularVelocity();
     else if (param == PropertyName::LinearMover_AngularAcceleration)
-        mStartValue = mover->GetAngularAcceleration();
+        mStartValue = linear_mover->GetAngularAcceleration();
     else if (param == PropertyName::RigidBodyJoint_MotorTorque)
         mStartValue = joint->GetCurrentJointValue<float>(RigidBodyJointSetting::MotorTorque);
     else if (param == PropertyName::RigidBodyJoint_MotorSpeed)
@@ -510,6 +528,10 @@ void PropertyAnimator::Start(EntityNode& node)
         mStartValue = light->GetLinearAttenuation();
     else if (param == PropertyName::BasicLight_QuadraticAttenuation)
         mStartValue = light->GetQuadraticAttenuation();
+    else if (param == PropertyName::SplineMover_LinearSpeed)
+         mStartValue = spline_mover->GetSpeed();
+    else if (param == PropertyName::SplineMover_LinearAcceleration)
+         mStartValue = spline_mover->GetAcceleration();
     else BUG("Unhandled property.");
 }
 
@@ -532,7 +554,8 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
     auto* body = node.GetRigidBody();
     auto* text = node.GetTextItem();
     auto* light = node.GetBasicLight();
-    auto* mover = node.GetLinearMover();
+    auto* linear_mover = node.GetLinearMover();
+    auto* spline_mover = node.GetSplineMover();
 
     if (param == PropertyName::Drawable_TimeScale)
     {
@@ -623,43 +646,43 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
     }
     else if (param == PropertyName::LinearMover_LinearVelocity)
     {
-        mover->SetLinearVelocity(Interpolate<glm::vec2>(t, interpolate));
+        linear_mover->SetLinearVelocity(Interpolate<glm::vec2>(t, interpolate));
     }
     else if (param == PropertyName::LinearMover_LinearVelocityX)
     {
-        auto velocity = mover->GetLinearVelocity();
+        auto velocity = linear_mover->GetLinearVelocity();
         velocity.x = Interpolate<float>(t, interpolate);
-        mover->SetLinearVelocity(velocity);
+        linear_mover->SetLinearVelocity(velocity);
     }
     else if (param == PropertyName::LinearMover_LinearVelocityY)
     {
-        auto velocity = mover->GetLinearVelocity();
+        auto velocity = linear_mover->GetLinearVelocity();
         velocity.y = Interpolate<float>(t, interpolate);
-        mover->SetLinearVelocity(velocity);
+        linear_mover->SetLinearVelocity(velocity);
     }
     else if (param == PropertyName::LinearMover_LinearAcceleration)
     {
-        mover->SetLinearAcceleration(Interpolate<glm::vec2>(t, interpolate));
+        linear_mover->SetLinearAcceleration(Interpolate<glm::vec2>(t, interpolate));
     }
     else if (param == PropertyName::LinearMover_LinearAccelerationX)
     {
-        auto accel = mover->GetLinearAcceleration();
+        auto accel = linear_mover->GetLinearAcceleration();
         accel.x = Interpolate<float>(t, interpolate);
-        mover->SetLinearAcceleration(accel);
+        linear_mover->SetLinearAcceleration(accel);
     }
     else if (param == PropertyName::LinearMover_LinearAccelerationY)
     {
-        auto accel = mover->GetLinearAcceleration();
+        auto accel = linear_mover->GetLinearAcceleration();
         accel.y = Interpolate<float>(t, interpolate);
-        mover->SetLinearAcceleration(accel);
+        linear_mover->SetLinearAcceleration(accel);
     }
     else if (param == PropertyName::LinearMover_AngularVelocity)
     {
-        mover->SetAngularVelocity(Interpolate<float>(t, interpolate));
+        linear_mover->SetAngularVelocity(Interpolate<float>(t, interpolate));
     }
     else if (param == PropertyName::LinearMover_AngularAcceleration)
     {
-        mover->SetAngularAcceleration(Interpolate<float>(t, interpolate));
+        linear_mover->SetAngularAcceleration(Interpolate<float>(t, interpolate));
     }
     else if (param == PropertyName::TextItem_Color)
     {
@@ -716,6 +739,10 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
         light->SetLinearAttenuation(Interpolate<float>(t, interpolate));
     else if (param == PropertyName::BasicLight_QuadraticAttenuation)
         light->SetQuadraticAttenuation(Interpolate<float>(t, interpolate));
+    else if (param == PropertyName::SplineMover_LinearSpeed)
+         spline_mover->SetSpeed(Interpolate<float>(t, interpolate));
+    else if (param == PropertyName::SplineMover_LinearAcceleration)
+        spline_mover->SetAcceleration(Interpolate<float>(t, interpolate));
     else BUG("Unhandled property.");
 }
 
@@ -731,7 +758,8 @@ bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
     const auto* light = node.GetBasicLight();
-    const auto* mover = node.GetLinearMover();
+    const auto* linear_mover = node.GetLinearMover();
+    const auto* spline_mover = node.GetSplineMover();
 
     if (param == PropertyName::Drawable_TimeScale ||
         param == PropertyName::Drawable_RotationX ||
@@ -792,12 +820,12 @@ bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
              param == PropertyName::LinearMover_AngularVelocity ||
              param == PropertyName::LinearMover_AngularAcceleration)
     {
-        if (!mover && verbose)
+        if (!linear_mover && verbose)
         {
             WARN("Property animator can't set a linear mover value on a node without a linear mover. [animator='%1', node='%2', value=%3]",
                  mClass->GetName(), node.GetName(), param);
         }
-        return mover != nullptr;
+        return linear_mover != nullptr;
     }
     else if (param == PropertyName::RigidBodyJoint_MotorTorque ||
              param == PropertyName::RigidBodyJoint_MotorSpeed ||
@@ -843,6 +871,16 @@ bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
                  mClass->GetName(), node.GetName(), param);
         }
         return light != nullptr;
+    }
+    else if (param == PropertyName::SplineMover_LinearAcceleration ||
+             param == PropertyName::SplineMover_LinearSpeed)
+    {
+        if (!spline_mover && verbose)
+        {
+            WARN("Property animator can't set a spline mover value on a node without a spline mover attachment. [animator='%1', node='%2', value=%3]",
+                mClass->GetName(), node.GetName(), param);
+        }
+        return spline_mover != nullptr;
     }
     else BUG("Unhandled property.");
 
