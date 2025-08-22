@@ -128,6 +128,7 @@ namespace gui
         void on_transformEndRotation_valueChanged(double value);
         void on_setvalEndValue_ValueChanged();
         void on_setvalJoint_currentIndexChanged(int index);
+        void on_actuatorIsStatic_toggled(bool on);
 
         void on_kinematicInterpolation_currentIndexChanged(int index);
         void on_kinematicTarget_currentIndexChanged(int index);
@@ -149,6 +150,9 @@ namespace gui
         void on_spriteCycles_currentIndexChanged(int);
         void on_audioTriggerGraph_currentIndexChanged(int);
         void on_audioTriggerStream_currentIndexChanged(int);
+
+        void on_entityTriggerList_currentIndexChanged(int);
+        void on_entityRenderLayer_valueChanged(int);
 
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
@@ -172,7 +176,7 @@ namespace gui
         void SetSelectedAnimatorProperties();
         void SetActuatorUIEnabled(bool enabled);
         void SetActuatorUIDefaults();
-        void AddAnimatorFromTimeline(game::AnimatorClass::Type type, float start_time, unsigned timeline_index);
+        bool AddAnimatorFromTimeline(game::AnimatorClass::Type type, float start_time, unsigned timeline_index);
         void DisplayCurrentCameraLocation();
         void CreateTimelines();
         void RemoveInvalidAnimationItems();
