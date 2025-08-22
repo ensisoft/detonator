@@ -1851,15 +1851,18 @@ void AudioWidget::on_elements_customContextMenuRequested(QPoint)
 
 void AudioWidget::on_outElem_currentIndexChanged(int)
 {
+    std::vector<ResourceListItem> ports;
+    SetList(mUI.outPort, ports);
+
     const std::string& id = GetItemId(mUI.outElem);
 
     auto it = std::find_if(mItems.begin(), mItems.end(), [&id](const auto* item) {
         return dynamic_cast<const AudioElement*>(item)->GetId() == id;
     });
-    if(it == mItems.end()) return;
+    if(it == mItems.end())
+        return;
 
     const auto* item = dynamic_cast<const AudioElement*>(*it);
-    std::vector<ResourceListItem> ports;
     for (unsigned i=0; i<item->GetNumOutputPorts();++i)
     {
         const auto& port = item->GetOutputPort(i);
@@ -2305,12 +2308,12 @@ void AudioWidget::SetSelectedElementProperties()
 void AudioWidget::UpdateElementList()
 {
     std::vector<ResourceListItem> items;
-    for (auto* item : mItems)
+    for (const auto* item : mItems)
     {
-        auto* element = dynamic_cast<AudioElement*>(item);
+        const auto* element = dynamic_cast<const AudioElement*>(item);
         ResourceListItem li;
-        li.id   = app::FromUtf8(element->GetId());
-        li.name = app::FromUtf8(element->GetName());
+        li.id   = element->GetId();
+        li.name = element->GetName();
         li.selected = element->isSelected();
         items.push_back(li);
     }
