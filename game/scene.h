@@ -203,8 +203,13 @@ namespace game
             Entity* entity = nullptr;
             Entity::PostedEvent event;
         };
+        struct EntityAnimationEvent {
+            Entity* entity = nullptr;
+            Entity::AnimationEvent event;
+        };
+
         using Event = std::variant<EntityTimerEvent,
-                EntityEventPostedEvent>;
+                EntityEventPostedEvent, EntityAnimationEvent>;
 
         void Update(float dt, std::vector<Event>* events = nullptr);
 

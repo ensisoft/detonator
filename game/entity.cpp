@@ -406,17 +406,18 @@ void Entity::Update(float dt, std::vector<Event>* events)
                 TimerEvent event;
                 event.name   = timer.name;
                 event.jitter = timer.when;
-                events->push_back(std::move(event));
+                events->emplace_back(std::move(event));
             }
             it = mTimers.erase(it);
         } else ++it;
     }
 
+    // propagate events queued in this entity to the caller.
     if (events)
     {
         for (auto& event: mEvents)
         {
-            events->push_back(std::move(event));
+            events->emplace_back(std::move(event));
         }
     }
     mEvents.clear();
@@ -459,11 +460,19 @@ void Entity::Update(float dt, std::vector<Event>* events)
     }
 
     // Apply animation state transforms/actions on the entity nodes.
+    std::vector<Animation::Event> animation_events;
     for (auto& node : mNodes)
     {
         for (auto& animation : mCurrentAnimations)
         {
-            animation->Apply(node);
+            animation->Apply(node, &animation_events);
+        }
+    }
+    if (events)
+    {
+        for (auto& event : animation_events)
+        {
+            events->emplace_back(std::move(event));
         }
     }
 

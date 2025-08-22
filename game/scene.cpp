@@ -701,7 +701,9 @@ void Scene::Update(float dt, std::vector<Event>* events)
 {
     mCurrentTime += dt;
 
-    // todo: limit which entities are getting updated.
+    // update entities and propagate their events to the caller
+    // in the list of scene events.
+    // todo: limit which entities are getting updated. ?
     for (auto& entity : mEntities)
     {
         std::vector<Entity::Event> entity_events;
@@ -710,18 +712,25 @@ void Scene::Update(float dt, std::vector<Event>* events)
         {
             if (auto* ptr = std::get_if<Entity::TimerEvent>(&entity_event))
             {
-                EntityTimerEvent timer;
-                timer.entity = entity.get();
-                timer.event  = std::move(*ptr);
-                events->push_back(std::move(timer));
+                EntityTimerEvent timer_event;
+                timer_event.entity = entity.get();
+                timer_event.event  = std::move(*ptr);
+                events->emplace_back(std::move(timer_event));
             }
             else if (auto* ptr = std::get_if<Entity::PostedEvent>(&entity_event))
             {
                 EntityEventPostedEvent posted_event;
                 posted_event.entity  = entity.get();
                 posted_event.event   = std::move(*ptr);
-                events->push_back(std::move(posted_event));
+                events->emplace_back(std::move(posted_event));
             }
+            else if (auto* ptr = std::get_if<Entity::AnimationEvent>(&entity_event))
+            {
+                EntityAnimationEvent animation_event;
+                animation_event.entity = entity.get();
+                animation_event.event  = std::move(*ptr);
+                events->emplace_back(std::move(animation_event));
+            } else BUG("Unhandled entity event type.");
         }
 
         if (entity->HasExpired())
