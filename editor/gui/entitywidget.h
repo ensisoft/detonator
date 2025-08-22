@@ -293,6 +293,7 @@ namespace gui
         void on_splineLooping_currentIndexChanged(int);
         void on_splineSpeed_valueChanged(double value);
         void on_splineAcceleration_valueChanged(double value);
+        void on_splineFlagEnabled_stateChanged(int);
 
         void on_btnDelDrawable_clicked();
         void on_btnDelTextItem_clicked();

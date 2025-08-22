@@ -37,6 +37,11 @@ namespace {
 namespace game
 {
 
+SplineMoverClass::SplineMoverClass()
+{
+    mFlags.set(Flags::Enabled, true);
+}
+
 SplineMoverClass::~SplineMoverClass()
 {
     catmull_rom_cache.erase(this);
@@ -75,6 +80,7 @@ size_t SplineMoverClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mAcceleration);
     hash = base::hash_combine(hash, mRotationMode);
     hash = base::hash_combine(hash, mIterationMode);
+    hash = base::hash_combine(hash, mFlags);
     return hash;
 }
 
@@ -87,6 +93,7 @@ void SplineMoverClass::IntoJson(data::Writer& data) const
     data.Write("iteration-mode"       , mIterationMode);
     data.Write("acceleration"         , mAcceleration);
     data.Write("speed"                , mSpeed);
+    data.Write("flags"                , mFlags);
 }
 
 bool SplineMoverClass::FromJson(const data::Reader& data)
@@ -99,6 +106,7 @@ bool SplineMoverClass::FromJson(const data::Reader& data)
     ok &= data.Read("iteration-mode"       , &mIterationMode);
     ok &= data.Read("acceleration"         , &mAcceleration);
     ok &= data.Read("speed"                , &mSpeed);
+    ok &= data.Read("flags"                , &mFlags);
     return ok;
 }
 
@@ -129,6 +137,7 @@ bool SplineMoverClass::InitClassRuntime() const
 
 SplineMover::SplineMover(std::shared_ptr<const SplineMoverClass> klass)
   : mClass(std::move(klass))
+  , mFlags(mClass->GetFlags())
   , mSpeed(mClass->GetSpeed())
   , mAcceleration(mClass->GetAcceleration())
 {
