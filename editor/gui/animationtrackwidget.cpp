@@ -40,6 +40,7 @@
 #include "game/timeline_property_animator.h"
 #include "graphics/transform.h"
 #include "graphics/painter.h"
+#include "graphics/drawing.h"
 #include "graphics/material_class.h"
 #include "graphics/texture_map.h"
 #include "editor/app/eventlog.h"
@@ -548,6 +549,14 @@ void AnimationTrackWidget::Render()
 }
 void AnimationTrackWidget::Update(double secs)
 {
+    for (auto& event : mEventMessages)
+    {
+        event.time += secs;
+    }
+    base::EraseRemove(mEventMessages, [](const auto& event) {
+        return event.time >= 2.0f;
+    });
+
     mCurrentTime += secs;
 
     mAnimator.Update(mUI, mState);
@@ -564,7 +573,24 @@ void AnimationTrackWidget::Update(double secs)
 
     ASSERT(mPlayState == PlayState::Playing);
 
-    mPlaybackAnimation->Update(secs);
+    std::vector<game::Entity::Event> events;
+    mPlaybackAnimation->Update(static_cast<float>(secs), &events);
+
+    for (const auto& event : events)
+    {
+        const auto* animation_event = std::get_if<game::Entity::AnimationEvent>(&event);
+        if (!animation_event)
+            continue;;
+        const auto* animation_trigger_event = std::get_if<game::AnimationTriggerEvent>(&animation_event->value);
+        if (!animation_trigger_event)
+            continue;;
+        if (const auto* ptr = std::get_if<game::AnimationAudioTriggerEvent>(animation_trigger_event))
+        {
+            EventMessage msg;
+            msg.message = "Audio trigger";
+            mEventMessages.push_back(std::move(msg));
+        }
+    }
 
     if (mPhysics.HaveWorld())
     {
@@ -784,6 +810,8 @@ void AnimationTrackWidget::on_actionStop_triggered()
     mPlaybackAnimation.reset();
 
     mRenderer.ClearPaintState();
+
+    mEventMessages.clear();
 }
 
 void AnimationTrackWidget::on_actionSave_triggered()
@@ -1149,7 +1177,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
         QString name;
     };
     std::vector<Trigger> trigger_type_list;
-    trigger_type_list.push_back( { game::AnimationTriggerClass::Type::EmitParticlesTrigger, "Particle Emission Trigger" });
+    trigger_type_list.push_back( { game::AnimationTriggerClass::Type::EmitParticlesTrigger, "Emit Particles" });
     trigger_type_list.push_back( { game::AnimationTriggerClass::Type::RunSpriteCycle, "Run Sprite Cycle" });
     trigger_type_list.push_back( { game::AnimationTriggerClass::Type::PlayAudio, "Play Sound Effect" });
     trigger_type_list.push_back( { game::AnimationTriggerClass::Type::PlayAudio, "Play Music" });
@@ -2321,9 +2349,23 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
 
-    PrintMousePos(mUI, mState, painter,
-                  engine::GameView::AxisAligned,
-                  engine::Projection::Orthographic);
+    if (mPlayState == PlayState::Playing)
+    {
+        gfx::FRect rect(10.0f, 10.0f, 500.0f, 20.0f);
+        for (const auto& print: mEventMessages)
+        {
+            gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.4f));
+            gfx::DrawTextRect(painter, print.message, "app://fonts/orbitron-medium.otf", 14, rect,
+                              gfx::Color::HotPink, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+            rect.Translate(0.0f, 20.0f);
+        }
+    }
+    else
+    {
+        PrintMousePos(mUI, mState, painter,
+                      engine::GameView::AxisAligned,
+                      engine::Projection::Orthographic);
+    }
 }
 
 void AnimationTrackWidget::MouseZoom(std::function<void(void)> zoom_function)
