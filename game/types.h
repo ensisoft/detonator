@@ -75,7 +75,16 @@ namespace game
         // for debug
         std::string trigger_name;
     };
-    using AnimationTriggerEvent = std::variant<AnimationAudioTriggerEvent>;
+    struct AnimationSpawnEntityTriggerEvent {
+        std::string source_node_id;
+        std::string entity_class_id;
+        int render_layer = 0;
+        // for debug
+        std::string trigger_name;
+    };
+
+    using AnimationTriggerEvent = std::variant<AnimationAudioTriggerEvent,
+        AnimationSpawnEntityTriggerEvent>;
 
     struct AnimationEvent {
         std::variant<AnimationTriggerEvent> value;

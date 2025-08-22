@@ -42,7 +42,8 @@ namespace game
         enum class Type {
             EmitParticlesTrigger,
             RunSpriteCycle,
-            PlayAudio
+            PlayAudio,
+            SpawnEntity
         };
         enum class Flags {
             Enabled
