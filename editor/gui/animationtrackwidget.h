@@ -242,6 +242,12 @@ namespace gui
         engine::Renderer mRenderer;
         // Physics engine for the animation
         engine::PhysicsEngine mPhysics;
+
+        struct EventMessage {
+            float time = 0.0f;
+            std::string message;
+        };
+        std::vector<EventMessage> mEventMessages;
     };
 
     // Functions used to share state between AnimationTrackWidget
