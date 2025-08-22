@@ -1488,6 +1488,8 @@ private:
             std::vector<game::Scene::Event> events;
             TRACE_CALL("Scene::Update", runtime.scene->Update(dt, &events));
 
+            TRACE_CALL("HandleSceneEvents",HandleSceneEvents(events));
+
             if (runtime.lua_rt)
                 TRACE_CALL("LuaRuntime::OnSceneEvent", runtime.lua_rt->OnSceneEvent(events));
             if (runtime.cpp_rt)
@@ -1643,6 +1645,51 @@ private:
                 }
             }
         );
+    }
+
+    bool HandleAnimationAudioTriggerEvent(const game::Scene::Event& event) const
+    {
+        // todo: the nesting of events is a bit complicated here.. maybe flatten
+        // them into a simpler structure?
+
+        const auto* ea_ptr = std::get_if<game::Scene::EntityAnimationEvent>(&event);
+        if (!ea_ptr)
+            return false;
+
+        const auto* at_ptr = std::get_if<game::AnimationTriggerEvent>(&ea_ptr->event.value);
+        if (!at_ptr)
+            return false;
+
+        const auto* ptr = std::get_if<game::AnimationAudioTriggerEvent>(at_ptr);
+        if (!ptr)
+            return false;
+
+        if (ptr->action == game::AnimationAudioTriggerEvent::StreamAction::Play)
+        {
+            const auto& audio_graph = mClasslib->FindAudioGraphClassById(ptr->audio_graph_id);
+            if (!audio_graph)
+            {
+                WARN("Failed to trigger audio on animation event. No such audio graph was found."
+                    "[entity='%1', animation='%2', trigger='%3']", ea_ptr->entity->GetName(),
+                        ea_ptr->event.animation_name, ptr->trigger_name);
+                return true;
+            }
+            if (ptr->stream == game::AnimationAudioTriggerEvent::AudioStream::Effect)
+                mAudio->PlaySoundEffect(audio_graph);
+            else if (ptr->stream == game::AnimationAudioTriggerEvent::AudioStream::Music)
+                mAudio->PlayMusic(audio_graph);
+        } else BUG("Unhandled audio action trigger.");
+
+        return true;
+    }
+
+    void HandleSceneEvents(const std::vector<game::Scene::Event>& events) const
+    {
+        for (const auto& event : events)
+        {
+            if (HandleAnimationAudioTriggerEvent(event))
+                continue;
+        }
     }
 
     void CreateNextFrame(RenderState& state, EngineRuntime& runtime) const
