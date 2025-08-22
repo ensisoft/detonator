@@ -129,6 +129,17 @@ namespace game
         using RenderTreeNode  = EntityNode;
         using RenderTreeValue = EntityNode;
 
+        using EntityStateUpdate     = game::EntityStateController::StateUpdate;
+        using EntityState           = game::EntityState;
+        using EntityStateTransition = game::EntityStateTransition;
+
+        using PostedEventValue = game::EntityPostedEventValue;
+        using PostedEvent      = game::EntityPostedEvent;
+        using TimerEvent       = game::EntityTimerEvent;
+        using AnimationEvent   = game::AnimationEvent;
+
+        using Event = std::variant<TimerEvent, PostedEvent, AnimationEvent>;
+
         // Construct a new entity with the initial state based
         // on the entity class object's state.
         explicit Entity(const EntityArgs& args);
@@ -199,27 +210,11 @@ namespace game
         void Die();
         void DieIn(float seconds);
 
-        using PostedEventValue = std::variant<
-            bool, int, float,
-            std::string,
-            glm::vec2, glm::vec3, glm::vec4>;
-        struct PostedEvent {
-            std::string message;
-            std::string sender;
-            PostedEventValue value;
-        };
-
-        struct TimerEvent {
-            std::string name;
-            float jitter = 0.0f;
-        };
-        using Event = std::variant<TimerEvent, PostedEvent>;
-
+        // Update the entity state, integrate over time. Bubbles up the
+        // various events to the caller as long as events is non-null.
+        // Note that IF class runtime services are available entity nodes
+        // are updated in batch in a call to EntityClass::UpdateRuntimes
         void Update(float dt, std::vector<Event>* events = nullptr);
-
-        using EntityStateUpdate = game::EntityStateController::StateUpdate;
-        using EntityState = game::EntityState;
-        using EntityStateTransition = game::EntityStateTransition;
 
         // update the entity state controller and receive back a bunch of
         // state updates indicating what is happening. All the updates are

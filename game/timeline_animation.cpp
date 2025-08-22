@@ -147,15 +147,16 @@ std::unique_ptr<Animator> AnimationClass::CreateAnimatorInstance(std::size_t ind
     const auto& klass = mAnimators[index];
     if (klass->GetType() == AnimatorClass::Type::TransformAnimator)
         return std::make_unique<TransformAnimator>(std::static_pointer_cast<TransformAnimatorClass>(klass));
-    else if (klass->GetType() == AnimatorClass::Type::PropertyAnimator)
+    if (klass->GetType() == AnimatorClass::Type::PropertyAnimator)
         return std::make_unique<PropertyAnimator>(std::static_pointer_cast<PropertyAnimatorClass>(klass));
-    else if (klass->GetType() == AnimatorClass::Type::KinematicAnimator)
+    if (klass->GetType() == AnimatorClass::Type::KinematicAnimator)
         return std::make_unique<KinematicAnimator>(std::static_pointer_cast<KinematicAnimatorClass>(klass));
-    else if (klass->GetType() == AnimatorClass::Type::BooleanPropertyAnimator)
+    if (klass->GetType() == AnimatorClass::Type::BooleanPropertyAnimator)
         return std::make_unique<BooleanPropertyAnimator>(std::static_pointer_cast<BooleanPropertyAnimatorClass>(klass));
-    else if (klass->GetType() == AnimatorClass::Type::MaterialAnimator)
+    if (klass->GetType() == AnimatorClass::Type::MaterialAnimator)
         return std::make_unique<MaterialAnimator>(std::static_pointer_cast<MaterialAnimatorClass>(klass));
-    else BUG("Unknown animator type");
+
+    BUG("Unknown animator type");
     return {};
 }
 
@@ -293,20 +294,20 @@ Animation::Animation(const std::shared_ptr<const AnimationClass>& klass)
 {
     for (size_t i=0; i< mClass->GetNumAnimators(); ++i)
     {
-        AnimatorState state;
+        ItemState state;
         state.animator = mClass->CreateAnimatorInstance(i);
         state.node     = state.animator->GetNodeId();
         state.ended    = false;
         state.started  = false;
-        mTracks.push_back(std::move(state));
+        mItems.push_back(std::move(state));
     }
     for (size_t i=0; i<mClass->GetNumTriggers(); ++i)
     {
-        AnimatorState state;
+        ItemState state;
         state.trigger   = mClass->CreateTriggerInstance(i);
         state.node      = state.trigger->GetNodeId();
         state.triggered = false;
-        mTracks.push_back(std::move(state));
+        mItems.push_back(std::move(state));
     }
 
     mDelay = klass->GetDelay();
@@ -320,18 +321,18 @@ Animation::Animation(const AnimationClass& klass)
 
 Animation::Animation(const Animation& other) : mClass(other.mClass)
 {
-    for (const auto& other_state : other.mTracks)
+    for (const auto& other_state : other.mItems)
     {
-        AnimatorState track;
-        track.node     = other_state.node;
-        track.ended    = other_state.ended;
-        track.started  = other_state.started;
+        ItemState item;
+        item.node     = other_state.node;
+        item.ended    = other_state.ended;
+        item.started  = other_state.started;
         if (other_state.animator)
-            track.animator = other_state.animator->Copy();
+            item.animator = other_state.animator->Copy();
         if (other_state.trigger)
-            track.trigger = other_state.trigger->Copy();
+            item.trigger = other_state.trigger->Copy();
 
-        mTracks.push_back(std::move(track));
+        mItems.push_back(std::move(item));
     }
 
     mCurrentTime = other.mCurrentTime;
@@ -343,7 +344,7 @@ Animation::Animation(Animation&& other) noexcept
     mClass       = other.mClass;
     mCurrentTime = other.mCurrentTime;
     mDelay       = other.mDelay;
-    mTracks      = std::move(other.mTracks);
+    mItems       = std::move(other.mItems);
 }
 
 Animation::~Animation() = default;
@@ -355,7 +356,7 @@ void Animation::Update(float dt) noexcept
     mCurrentTime = math::clamp(-mDelay, duration, mCurrentTime + dt);
 }
 
-void Animation::Apply(EntityNode& node) const
+void Animation::Apply(EntityNode& node, std::vector<AnimationEvent>* events) const
 {
     // if we're delaying then skip until delay is consumed.
     if (mCurrentTime < 0)
@@ -365,55 +366,63 @@ void Animation::Apply(EntityNode& node) const
 
     // todo: keep the tracks in some smarter data structure or perhaps
     // in a sorted vector and then binary search.
-    for (auto& track : mTracks)
+    for (auto& item : mItems)
     {
-        if (track.node != node.GetClassId())
+        if (item.node != node.GetClassId())
             continue;
 
-        auto* trigger = track.trigger.get();
-        auto* animator = track.animator.get();
+        auto* trigger  = item.trigger.get();
+        auto* animator = item.animator.get();
         if (trigger)
         {
-            if (!track.triggered)
+            if (!item.triggered)
             {
                 const auto& trigger_time_point = trigger->GetTime();
                 if (animation_time >= trigger_time_point)
                 {
-                    trigger->Trigger(node);
-                    track.triggered = true;
+                    std::vector<AnimationTrigger::Event> trigger_events;
+                    trigger->Trigger(node, &trigger_events);
+                    item.triggered = true;
+                    for (auto& trigger_event : trigger_events)
+                    {
+                        AnimationEvent animation_event;
+                        animation_event.value = std::move(trigger_event);
+                        animation_event.animation_name = mClass->GetName();
+                        events->emplace_back(std::move(animation_event));
+                    }
                 }
             }
         }
         else if (animator)
         {
-            const auto start_time_point  = track.animator->GetStartTime();
-            const auto animator_duration = track.animator->GetDuration();
+            const auto start_time_point  = animator->GetStartTime();
+            const auto animator_duration = animator->GetDuration();
             const auto end_time_point    =  math::clamp(0.0f, 1.0f, start_time_point + animator_duration);
             if (animation_time < start_time_point)
                 continue;
-            else if (animation_time >= end_time_point)
+            if (animation_time >= end_time_point)
             {
-                if (!track.ended)
+                if (!item.ended)
                 {
-                    track.animator->Finish(node);
-                    track.ended = true;
+                    animator->Finish(node);
+                    item.ended = true;
                 }
                 continue;
             }
-            if (!track.started)
+            if (!item.started)
             {
-                track.animator->Start(node);
-                track.started = true;
+                animator->Start(node);
+                item.started = true;
             }
             const auto t = math::clamp(0.0f, 1.0f, (animation_time - start_time_point) / animator_duration);
-            track.animator->Apply(node, t);
+            animator->Apply(node, t);
         }
     }
 }
 
 void Animation::Restart() noexcept
 {
-    for (auto& track : mTracks)
+    for (auto& track : mItems)
     {
         if (track.animator)
         {
@@ -433,7 +442,7 @@ void Animation::Restart() noexcept
 
 bool Animation::IsComplete() const noexcept
 {
-    for (const auto& track : mTracks)
+    for (const auto& track : mItems)
     {
         if (track.animator && !track.ended)
             return false;
@@ -447,7 +456,7 @@ bool Animation::IsComplete() const noexcept
 
 Animator* Animation::FindAnimatorById(const std::string& id) noexcept
 {
-    for (auto& item : mTracks)
+    for (auto& item : mItems)
     {
         if (item.animator->GetClassId() == id)
             return item.animator.get();
@@ -456,7 +465,7 @@ Animator* Animation::FindAnimatorById(const std::string& id) noexcept
 }
 Animator* Animation::FindAnimatorByName(const std::string& name) noexcept
 {
-    for (auto& item : mTracks)
+    for (auto& item : mItems)
     {
         if (item.animator->GetClassName() == name)
             return item.animator.get();
@@ -466,7 +475,7 @@ Animator* Animation::FindAnimatorByName(const std::string& name) noexcept
 
 const Animator* Animation::FindAnimatorById(const std::string& id) const noexcept
 {
-    for (auto& item : mTracks)
+    for (auto& item : mItems)
     {
         if (item.animator->GetClassId() == id)
             return item.animator.get();
@@ -475,7 +484,7 @@ const Animator* Animation::FindAnimatorById(const std::string& id) const noexcep
 }
 const Animator* Animation::FindAnimatorByName(const std::string& name) const noexcept
 {
-    for (auto& item : mTracks)
+    for (auto& item : mItems)
     {
         if (item.animator->GetClassName() == name)
             return item.animator.get();

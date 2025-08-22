@@ -733,7 +733,7 @@ void unit_test_animation_track()
     trigger.SetName("my-trigger");
     trigger.SetTime(1.0f);
     trigger.SetNodeId(klass.GetId());
-    trigger.SetParameter("count", 123);
+    trigger.SetParameter("particle-emit-count", 123);
 
     game::TransformAnimatorClass animator;
     animator.SetNodeId(node.GetClassId());
@@ -774,7 +774,7 @@ void unit_test_animation_track()
         TEST_REQUIRE(ret.GetNumTriggers() == 1);
         TEST_REQUIRE(ret.GetTriggerClass(0).GetNodeId() == klass.GetId());
         TEST_REQUIRE(ret.GetTriggerClass(0).GetTime() == 1.0f);
-        TEST_REQUIRE(*ret.GetTriggerClass(0).GetParameter<int>("count") == 123);
+        TEST_REQUIRE(*ret.GetTriggerClass(0).GetParameter<int>("particle-emit-count") == 123);
         TEST_REQUIRE(ret.GetTriggerClass(0).GetName() == "my-trigger");
     }
 
@@ -995,7 +995,7 @@ void unit_test_animation_trigger()
     trigger.SetName("my-trigger");
     trigger.SetTime(0.1f); // normalized time
     trigger.SetNodeId(node.GetId());
-    trigger.SetParameter("count", 123);
+    trigger.SetParameter("particle-emit-count", 123);
 
     game::EntityNode node_instance(node);
     auto* drawable = node_instance.GetDrawable();

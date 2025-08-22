@@ -126,7 +126,7 @@ bool AnimationTrigger::Validate(const EntityNode& node) const
                  mClass->GetName());
             return false;
         }
-        if (!HasParam<int>("count"))
+        if (!mClass->HasParameter<int>("particle-emit-count"))
         {
             WARN("Timeline trigger has a missing parameter (int) 'count'. [trigger='%1']",
                  mClass->GetName());
@@ -141,23 +141,42 @@ bool AnimationTrigger::Validate(const EntityNode& node) const
                 mClass->GetName());
             return false;
         }
-        if (!HasParam<std::string>("sprite-cycle-id"))
+        if (!mClass->HasParameter<std::string>("sprite-cycle-id"))
         {
             WARN("Timeline trigger has a missing parameter (string) 'sprite-cycle-id'. [trigger='%1']",
                 mClass->GetName());
             return false;
         }
-        if (!HasParam<float>("sprite-cycle-delay"))
+        if (!mClass->HasParameter<float>("sprite-cycle-delay"))
         {
             WARN("Timeline trigger has a missing parameter (float) 'sprite-cycle-delay'. [trigger='%1']",
                 mClass->GetName());
             return false;
         }
-    } else BUG("Unhandled animation trigger type.");
+    }
+    else if (type == Type::PlayAudio)
+    {
+        if (!mClass->HasParameter<AnimationTriggerClass::AudioStreamType>("audio-stream"))
+        {
+            WARN("Timeline trigger has a missing parameter (enum) 'audio-stream'. [trigger='%1']",
+                mClass->GetName());
+        }
+        if (!mClass->HasParameter<AnimationTriggerClass::AudioStreamAction>("audio-stream-action"))
+        {
+            WARN("Timeline trigger has a missing parameter (enum) 'audio-stream-action'. [trigger='%1']",
+                mClass->GetName());
+        }
+        if (!mClass->HasParameter<std::string>("audio-graph-id"))
+        {
+            WARN("Timeline trigger has a missing parameter (string) 'audio-graph-id'. [trigger='%1']",
+                mClass->GetName());
+        }
+    }
+    else BUG("Unhandled animation trigger type.");
     return true;
 }
 
-void AnimationTrigger::Trigger(game::EntityNode& node)
+void AnimationTrigger::Trigger(game::EntityNode& node, std::vector<Event>* events)
 {
     if (!mClass->IsEnabled())
         return;
@@ -168,9 +187,14 @@ void AnimationTrigger::Trigger(game::EntityNode& node)
         auto* drawable = node.GetDrawable();
         if (!drawable)
             return;
+
+        int particle_emission_count = 0;
+        if (!mClass->GetParameter("particle-emit-count", &particle_emission_count))
+            return;
+
         DrawableItem::Command cmd;
         cmd.name = "EmitParticles";
-        cmd.args["count"] = GetParam<int>("count");
+        cmd.args["count"] = particle_emission_count;
         drawable->EnqueueCommand(std::move(cmd));
     }
     else if (type == Type::RunSpriteCycle)
@@ -178,40 +202,39 @@ void AnimationTrigger::Trigger(game::EntityNode& node)
         auto* drawable = node.GetDrawable();
         if (!drawable)
             return;
-        if (!HasParam<std::string>("sprite-cycle-id"))
+
+        std::string sprite_cycle_id;
+        float sprite_cycle_delay = 0.0f;
+        if (!mClass->GetParameter("sprite-cycle-id", &sprite_cycle_id) ||
+            !mClass->GetParameter("sprite-cycle-delay", &sprite_cycle_delay))
             return;
+
         DrawableItem::Command cmd;
         cmd.name = "RunSpriteCycle";
-        cmd.args["id"]    = GetParam<std::string>("sprite-cycle-id");
-        cmd.args["delay"] = GetParam<float>("sprite-cycle-delay");
+        cmd.args["id"]    = sprite_cycle_id;
+        cmd.args["delay"] = sprite_cycle_delay;
         drawable->EnqueueCommand(std::move(cmd));
     }
+    else if (type == Type::PlayAudio)
+    {
+        std::string graph_class_id;
+        AnimationTriggerClass::AudioStreamType stream;
+        AnimationTriggerClass::AudioStreamAction action;
+        if (!mClass->GetParameter("audio-stream", &stream) ||
+            !mClass->GetParameter("audio-stream-action", &action) ||
+            !mClass->GetParameter("audio-graph-id", &graph_class_id))
+            return;
+        if (events)
+        {
+            AnimationAudioTriggerEvent e;
+            e.stream = stream;
+            e.action = action;
+            e.audio_graph_id = std::move(graph_class_id);
+            e.trigger_name = mClass->GetName();
+            events->emplace_back(std::move(e));
+        }
+    }
     else BUG("Unhandled animation trigger type.");
-}
-
-template<typename T>
-T AnimationTrigger::GetParam(const std::string& name) const
-{
-    const auto& map = mClass->GetParameters();
-    if (const auto* value = base::SafeFind(map,name))
-    {
-        ASSERT(std::holds_alternative<T>(*value));
-        return std::get<T>(*value);
-    }
-    BUG("No such animation trigger parameter.");
-    return T();
-}
-
-template<typename T>
-bool AnimationTrigger::HasParam(const std::string& name) const
-{
-    const auto& map = mClass->GetParameters();
-    if (const auto* value = base::SafeFind(map, name))
-    {
-        if (std::holds_alternative<T>(*value))
-            return true;
-    }
-    return false;
 }
 
 } // namespace

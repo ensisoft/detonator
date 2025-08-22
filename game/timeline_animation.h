@@ -24,11 +24,11 @@
 
 #include <string>
 #include <memory>
-#include <unordered_map>
+#include <vector>
 
 #include "base/utility.h"
 #include "data/fwd.h"
-
+#include "game/types.h"
 #include "base/snafu.h"
 
 namespace game
@@ -186,6 +186,8 @@ namespace game
     class Animation
     {
     public:
+        using Event = game::AnimationEvent;
+
         // Create a new animation instance based on the given class object.
         explicit Animation(const std::shared_ptr<const AnimationClass>& klass);
         // Create a new animation based on the given class object.
@@ -203,7 +205,7 @@ namespace game
         void Update(float dt) noexcept;
         // Apply animation actions, such as transformations or material changes
         // onto the given entity node.
-        void Apply(EntityNode& node) const;
+        void Apply(EntityNode& node, std::vector<Event>* events = nullptr) const;
         // Prepare the animation track to restart.
         void Restart() noexcept;
         // Returns true if the animation is complete, i.e. all the
@@ -257,7 +259,7 @@ namespace game
         std::shared_ptr<const AnimationClass> mClass;
         // For each node we keep a list of actions that are to be performed
         // at specific times.
-        struct AnimatorState {
+        struct ItemState {
             std::string node;
             std::unique_ptr<Animator> animator;
             std::unique_ptr<AnimationTrigger> trigger;
@@ -266,7 +268,7 @@ namespace game
             mutable bool triggered = false;
             mutable bool valid = false;
         };
-        std::vector<AnimatorState> mTracks;
+        std::vector<ItemState> mItems;
         // One time delay before starting the animation.
         float mDelay = 0.0f;
         // current play back time for this track.

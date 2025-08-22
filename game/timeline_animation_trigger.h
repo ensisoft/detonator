@@ -18,14 +18,20 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <neargye/magic_enum.hpp>
+#include "warnpop.h"
+
 #include <cstddef>
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <type_traits>
 
 #include "base/utility.h"
 #include "base/bitflag.h"
 #include "data/fwd.h"
+#include "game/enum.h"
 #include "game/types.h"
 
 namespace game
@@ -35,11 +41,15 @@ namespace game
     public:
         enum class Type {
             EmitParticlesTrigger,
-            RunSpriteCycle
+            RunSpriteCycle,
+            PlayAudio
         };
         enum class Flags {
             Enabled
         };
+
+        using AudioStreamType   = game::AnimationAudioTriggerEvent::AudioStream;
+        using AudioStreamAction = game::AnimationAudioTriggerEvent::StreamAction;
 
         AnimationTriggerClass() = default;
         explicit AnimationTriggerClass(Type type) noexcept;
@@ -84,6 +94,14 @@ namespace game
         { SetFlag(Flags::Enabled, on_off); }
 
         template<typename T>
+        inline void SetParameter(const std::string& name, T value)
+        {
+            if constexpr (std::is_enum<T>::value)
+                SetParameter(name, std::string(magic_enum::enum_name(value)));
+            else SetParameter(name, AnimationTriggerParam { value });
+        }
+
+        template<typename T>
         inline T* GetParameter(const std::string& name)
         {
             if (auto* ptr = base::SafeFind(mParameters, name))
@@ -102,6 +120,31 @@ namespace game
             return nullptr;
         }
 
+        template<typename T>
+        bool GetParameter(const std::string& name, T* out) const
+        {
+            if constexpr (std::is_enum<T>::value) {
+                if (const auto* str = GetParameter<std::string>(name)) {
+                    const auto& enum_val = magic_enum::enum_cast<T>(*str);
+                    if (enum_val.has_value()) {
+                        *out = enum_val.value();
+                        return true;
+                    }
+                }
+                return false;
+            } else if (const auto* ptr = GetParameter<T>(name)) {
+                *out = *ptr;
+                return true;
+            }
+            return false;
+        }
+
+        template<typename T>
+        bool HasParameter(const std::string& name) const
+        {
+            T temp;
+            return GetParameter(name, &temp);
+        }
 
         std::unique_ptr<AnimationTriggerClass> Copy() const;
         std::unique_ptr<AnimationTriggerClass> Clone() const;
@@ -123,7 +166,8 @@ namespace game
     class AnimationTrigger
     {
     public:
-        using Type = AnimationTriggerClass::Type;
+        using Type  = AnimationTriggerClass::Type;
+        using Event = game::AnimationTriggerEvent;
 
         explicit AnimationTrigger(std::shared_ptr<AnimationTriggerClass> klass)
             : mClass(std::move(klass))
@@ -146,13 +190,7 @@ namespace game
 
         bool Validate(const EntityNode& node) const;
 
-        void Trigger(EntityNode& node);
-    private:
-        template<typename T>
-        T GetParam(const std::string& name) const;
-
-        template<typename T>
-        bool HasParam(const std::string& name) const;
+        void Trigger(EntityNode& node, std::vector<Event>* events = nullptr);
     private:
         std::shared_ptr<const AnimationTriggerClass> mClass;
     };

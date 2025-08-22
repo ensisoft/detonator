@@ -32,6 +32,7 @@
 #include "base/types.h"
 #include "base/color4f.h"
 #include "base/rotator.h"
+#include "game/enum.h"
 
 namespace game
 {
@@ -60,6 +61,44 @@ namespace game
 
     using AnimationTriggerParam = std::variant<float, int, std::string>;
     using AnimationTriggerParamMap = std::unordered_map<std::string, AnimationTriggerParam>;
+
+    struct AnimationAudioTriggerEvent {
+        enum class AudioStream {
+            Effect, Music
+        };
+        enum class StreamAction {
+            Play //, Pause, Kill
+        };
+        AudioStream stream  = AudioStream::Music;
+        StreamAction action = StreamAction::Play;
+        std::string audio_graph_id;
+        // for debug
+        std::string trigger_name;
+    };
+    using AnimationTriggerEvent = std::variant<AnimationAudioTriggerEvent>;
+
+    struct AnimationEvent {
+        std::variant<AnimationTriggerEvent> value;
+        // for debug.
+        std::string animation_name;
+    };
+
+    struct EntityTimerEvent {
+        std::string name;
+        float jitter = 0.0f;
+    };
+
+    using EntityPostedEventValue = std::variant<bool, int, float,
+        std::string,
+        glm::vec2, glm::vec3, glm::vec4>;
+
+    // an event posted in the entity's event queue by the queue
+    // via  call to PostEvent
+    struct EntityPostedEvent {
+        std::string message;
+        std::string sender;
+        EntityPostedEventValue value;
+    };
 
 } // namespace
 
