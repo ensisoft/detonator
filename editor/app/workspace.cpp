@@ -1497,6 +1497,11 @@ Workspace::ResourceList Workspace::ListPrimitiveMaterials() const
     return ListResources(Resource::Type::Material, true, true);
 }
 
+Workspace::ResourceList Workspace::ListAudioGraphs() const
+{
+    return ListResources(Resource::Type::AudioGraph, false, true);
+}
+
 Workspace::ResourceList  Workspace::ListUserDefinedUIs() const
 {
     return ListResources(Resource::Type::UI, false, true);

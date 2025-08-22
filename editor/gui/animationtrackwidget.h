@@ -146,6 +146,8 @@ namespace gui
 
         void on_emitCount_valueChanged(int);
         void on_spriteCycles_currentIndexChanged(int);
+        void on_audioTriggerGraph_currentIndexChanged(int);
+        void on_audioTriggerStream_currentIndexChanged(int);
 
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
         void SelectedItemDragged(const TimelineWidget::TimelineItem* item);
@@ -166,7 +168,7 @@ namespace gui
         void UpdateTransformActuatorUI();
         void UpdateTrackUI();
         void SetSelectedTriggerProperties();
-        void SetSelectedActuatorProperties();
+        void SetSelectedAnimatorProperties();
         void SetActuatorUIEnabled(bool enabled);
         void SetActuatorUIDefaults();
         void AddAnimatorFromTimeline(game::AnimatorClass::Type type, float start_time, unsigned timeline_index);

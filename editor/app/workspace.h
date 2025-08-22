@@ -185,6 +185,8 @@ namespace app
         QString GetSubDir(const QString& dir, bool create = true) const;
 
         using ResourceList = app::ResourceList;
+        ResourceList ListAudioGraphs() const;
+
         ResourceList ListUserDefinedUIs() const;
         // Get a list of user defined tile map resources.
         ResourceList ListUserDefinedMaps() const;

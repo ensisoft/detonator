@@ -156,7 +156,16 @@ public:
                 item.icon = QPixmap("icons64:animation-trigger-particle.png");
             else if (trigger_type == game::AnimationTriggerClass::Type::RunSpriteCycle)
                 item.icon = QPixmap("icons64:animation-trigger-sprite-cycle.png");
-
+            else if (trigger_type == game::AnimationTriggerClass::Type::PlayAudio)
+            {
+                game::AnimationTriggerClass::AudioStreamType stream;
+                ASSERT(trigger.GetParameter("audio-stream", &stream));
+                if (stream == game::AnimationTriggerClass::AudioStreamType::Effect)
+                    item.icon = QPixmap("icons64:animation-trigger-sound-effect.png");
+                else if (stream == game::AnimationTriggerClass::AudioStreamType::Music)
+                    item.icon = QPixmap("icons64:animation-trigger-music.png");
+                else BUG("Unhandled audio trigger stream type.");
+            }
             (*list)[timeline_index].AddItem(item);
         }
     }
@@ -189,6 +198,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     PopulateFromEnum<game::BooleanPropertyAnimatorClass::PropertyName>(mUI.itemFlags, true, true);
     PopulateFromEnum<game::BooleanPropertyAnimatorClass::PropertyAction>(mUI.flagAction, true, true);
     PopulateFromEnum<game::MaterialAnimatorClass::Interpolation >(mUI.materialInterpolation);
+    PopulateFromEnum<game::AnimationTriggerClass::AudioStreamType>(mUI.audioTriggerStream);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.actionUsePhysics, settings.enable_physics);
@@ -971,12 +981,12 @@ void AnimationTrackWidget::on_looping_stateChanged(int)
 
 void AnimationTrackWidget::on_actuatorIsStatic_stateChanged(int)
 {
-    SetSelectedActuatorProperties();
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_actuatorName_textChanged(const QString&)
 {
-    SetSelectedActuatorProperties();
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_actuatorStartTime_valueChanged(double value)
@@ -1013,23 +1023,23 @@ void AnimationTrackWidget::on_actuatorEndTime_valueChanged(double value)
 
 void AnimationTrackWidget::on_transformInterpolation_currentIndexChanged(int index)
 {
-    SetSelectedActuatorProperties();
+    SetSelectedAnimatorProperties();
 }
 void AnimationTrackWidget::on_setvalInterpolation_currentIndexChanged(int index)
 {
-    SetSelectedActuatorProperties();
+    SetSelectedAnimatorProperties();
 }
 void AnimationTrackWidget::on_setvalName_currentIndexChanged(int index)
 {
-    SetSelectedActuatorProperties();
+    SetSelectedAnimatorProperties();
 }
 void AnimationTrackWidget::on_kinematicInterpolation_currentIndexChanged(int index)
 {
-    SetSelectedActuatorProperties();
+    SetSelectedAnimatorProperties();
 }
 void AnimationTrackWidget::on_kinematicTarget_currentIndexChanged(int index)
 {
-    SetSelectedActuatorProperties();
+    SetSelectedAnimatorProperties();
     UpdateKinematicUnits();
 }
 
@@ -1124,6 +1134,8 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     std::vector<Trigger> trigger_type_list;
     trigger_type_list.push_back( { game::AnimationTriggerClass::Type::EmitParticlesTrigger, "Particle Emission Trigger" });
     trigger_type_list.push_back( { game::AnimationTriggerClass::Type::RunSpriteCycle, "Run Sprite Cycle" });
+    trigger_type_list.push_back( { game::AnimationTriggerClass::Type::PlayAudio, "Play Sound Effect" });
+    trigger_type_list.push_back( { game::AnimationTriggerClass::Type::PlayAudio, "Play Music" });
 
     for (const auto& trigger_type : trigger_type_list)
     {
@@ -1161,7 +1173,7 @@ void AnimationTrackWidget::on_transformEndPosX_valueChanged(double value)
         auto pos = node->GetTranslation();
         pos.x = value;
         node->SetTranslation(pos);
-        SetSelectedActuatorProperties();
+        SetSelectedAnimatorProperties();
     }
 }
 
@@ -1172,7 +1184,7 @@ void AnimationTrackWidget::on_transformEndPosY_valueChanged(double value)
         auto pos = node->GetTranslation();
         pos.y = value;
         node->SetTranslation(pos);
-        SetSelectedActuatorProperties();
+        SetSelectedAnimatorProperties();
     }
 }
 void AnimationTrackWidget::on_transformEndSizeX_valueChanged(double value)
@@ -1182,7 +1194,7 @@ void AnimationTrackWidget::on_transformEndSizeX_valueChanged(double value)
         auto size = node->GetSize();
         size.x = value;
         node->SetSize(size);
-        SetSelectedActuatorProperties();
+        SetSelectedAnimatorProperties();
     }
 }
 void AnimationTrackWidget::on_transformEndSizeY_valueChanged(double value)
@@ -1192,7 +1204,7 @@ void AnimationTrackWidget::on_transformEndSizeY_valueChanged(double value)
         auto size = node->GetSize();
         size.y = value;
         node->SetSize(size);
-        SetSelectedActuatorProperties();
+        SetSelectedAnimatorProperties();
     }
 }
 void AnimationTrackWidget::on_transformEndScaleX_valueChanged(double value)
@@ -1202,7 +1214,7 @@ void AnimationTrackWidget::on_transformEndScaleX_valueChanged(double value)
         auto scale = node->GetScale();
         scale.x = value;
         node->SetScale(scale);
-        SetSelectedActuatorProperties();
+        SetSelectedAnimatorProperties();
     }
 }
 
@@ -1213,7 +1225,7 @@ void AnimationTrackWidget::on_transformEndScaleY_valueChanged(double value)
         auto scale = node->GetScale();
         scale.y = value;
         node->SetScale(scale);
-        SetSelectedActuatorProperties();
+        SetSelectedAnimatorProperties();
     }
 }
 
@@ -1222,108 +1234,69 @@ void AnimationTrackWidget::on_transformEndRotation_valueChanged(double value)
     if (auto* node = GetCurrentEntityNode())
     {
         node->SetRotation(qDegreesToRadians(value));
-        SetSelectedActuatorProperties();
+        SetSelectedAnimatorProperties();
     }
 }
 
 void AnimationTrackWidget::on_setvalEndValue_ValueChanged()
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_setvalJoint_currentIndexChanged(int index)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_kinematicEndVeloX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 void AnimationTrackWidget::on_kinematicEndVeloY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 void AnimationTrackWidget::on_kinematicEndVeloZ_valueChanged(double value)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_kinematicEndAccelX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 void AnimationTrackWidget::on_kinematicEndAccelY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 void AnimationTrackWidget::on_kinematicEndAccelZ_valueChanged(double value)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_itemFlags_currentIndexChanged(int)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_flagAction_currentIndexChanged(int)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_flagTime_valueChanged(double)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_flagJoint_currentIndexChanged(int)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_materialInterpolation_currentIndexChanged(int)
 {
-    if (auto* node = GetCurrentEntityNode())
-    {
-        SetSelectedActuatorProperties();
-    }
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_btnMaterialParameters_clicked()
@@ -1342,18 +1315,21 @@ void AnimationTrackWidget::on_btnMaterialParameters_clicked()
 }
 void AnimationTrackWidget::on_emitCount_valueChanged(int)
 {
-    if (auto* trigger = GetCurrentTrigger())
-    {
-        SetSelectedTriggerProperties();
-    }
+    SetSelectedTriggerProperties();
 }
 
 void AnimationTrackWidget::on_spriteCycles_currentIndexChanged(int)
 {
-    if (auto* trigger = GetCurrentTrigger())
-    {
-        SetSelectedTriggerProperties();
-    }
+    SetSelectedTriggerProperties();
+}
+
+void AnimationTrackWidget::on_audioTriggerGraph_currentIndexChanged(int)
+{
+    SetSelectedTriggerProperties();
+}
+void AnimationTrackWidget::on_audioTriggerStream_currentIndexChanged(int)
+{
+    SetSelectedTriggerProperties();
 }
 
 void AnimationTrackWidget::SetActuatorUIEnabled(bool enabled)
@@ -1431,12 +1407,20 @@ void AnimationTrackWidget::SetSelectedTriggerProperties()
 
     trigger->SetName(GetValue(mUI.actuatorName));
     if (trigger->GetType() == game::AnimationTriggerClass::Type::EmitParticlesTrigger)
-        trigger->SetParameter("count", (int)GetValue(mUI.emitCount));
+        trigger->SetParameter("particle-emit-count", (int)GetValue(mUI.emitCount));
     else if (trigger->GetType() == game::AnimationTriggerClass::Type::RunSpriteCycle)
         trigger->SetParameter("sprite-cycle-id", GetItemId(mUI.spriteCycles));
+    else if (trigger->GetType() == game::AnimationTriggerClass::Type::PlayAudio)
+    {
+        const game::AnimationTriggerClass::AudioStreamType stream = GetValue(mUI.audioTriggerStream);
+        const game::AnimationTriggerClass::AudioStreamAction action = game::AnimationTriggerClass::AudioStreamAction::Play;
+        trigger->SetParameter("audio-stream-action", action);
+        trigger->SetParameter("audio-stream", stream);
+        trigger->SetParameter("audio-graph-id", GetItemId(mUI.audioTriggerGraph));
+    } else BUG("Unhandled animation trigger type.");
 }
 
-void AnimationTrackWidget::SetSelectedActuatorProperties()
+void AnimationTrackWidget::SetSelectedAnimatorProperties()
 {
     if (mPlayState != PlayState::Stopped)
         return;
@@ -1730,7 +1714,7 @@ void AnimationTrackWidget::on_btnTransformReset_clicked()
         node->SetRotation(rotation);
 
         // Set the values from the UI to the actual actuator class object.
-        SetSelectedActuatorProperties();
+        SetSelectedAnimatorProperties();
     }
 }
 
@@ -1998,7 +1982,7 @@ void AnimationTrackWidget::TimelineTriggerChanged(const TimelineWidget::Timeline
     if (selected_trigger->GetType() == game::AnimationTriggerClass::Type::EmitParticlesTrigger)
     {
         mUI.actuatorProperties->setCurrentWidget(mUI.emitParticlesTrigger);
-        SetValue(mUI.emitCount, *selected_trigger->GetParameter<int>("count"));
+        SetValue(mUI.emitCount, *selected_trigger->GetParameter<int>("particle-emit-count"));
     }
     else if (selected_trigger->GetType() == game::AnimationTriggerClass::Type::RunSpriteCycle)
     {
@@ -2031,6 +2015,22 @@ void AnimationTrackWidget::TimelineTriggerChanged(const TimelineWidget::Timeline
             SetValue(mUI.spriteCycles, ListItemId { *cycle_id });
         }
     }
+    else if (selected_trigger->GetType() == game::AnimationTriggerClass::Type::PlayAudio)
+    {
+        mUI.actuatorProperties->setCurrentWidget(mUI.playAudioTrigger);
+
+        auto action = game::AnimationTriggerClass::AudioStreamAction::Play;
+        auto stream = game::AnimationTriggerClass::AudioStreamType::Effect;
+        std::string audio_graph_id;
+        selected_trigger->GetParameter("audio-stream-action", &action);
+        selected_trigger->GetParameter("audio-stream", &stream);
+        selected_trigger->GetParameter("audio-graph-id", &audio_graph_id);
+
+        SetList(mUI.audioTriggerGraph, mWorkspace->ListAudioGraphs());
+        SetValue(mUI.audioTriggerGraph, ListItemId { audio_graph_id });
+        SetValue(mUI.audioTriggerStream, stream);
+
+    } else BUG("Unhandled audio trigger type.");
 }
 void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineItem* item)
 {
@@ -2120,6 +2120,8 @@ void AnimationTrackWidget::AddTriggerAction()
     const auto& timeline = mState.timelines[timeline_index];
     const auto* target_node = mState.entity->FindNodeById(timeline.target_node_id);
 
+    const auto& action_text = action->text();
+
     game::AnimationTriggerClass trigger(type);
     trigger.SetName(base::FormatString("Trigger_%1", mState.track->GetNumTriggers()));
     trigger.SetTime(time_point);
@@ -2129,7 +2131,7 @@ void AnimationTrackWidget::AddTriggerAction()
     // add default parameters here.
     if (type == game::AnimationTriggerClass::Type::EmitParticlesTrigger)
     {
-        trigger.SetParameter("count", -1); // default emission.
+        trigger.SetParameter("particle-emit-count", 0); // default emission.
     }
     else if (type == game::AnimationTriggerClass::Type::RunSpriteCycle)
     {
@@ -2163,6 +2165,21 @@ void AnimationTrackWidget::AddTriggerAction()
         }
         trigger.SetParameter("sprite-cycle-delay", 0.0f);
     }
+    else if (type == game::AnimationTriggerClass::Type::PlayAudio)
+    {
+        const auto& list = mWorkspace->ListAudioGraphs();
+        SetList(mUI.audioTriggerGraph, list);
+        if (!list.empty())
+        {
+            trigger.SetParameter("audio-graph-id", list[0].id);
+        }
+        trigger.SetParameter("audio-stream-action", game::AnimationTriggerClass::AudioStreamAction::Play);
+        trigger.SetParameter("audio-stream", game::AnimationTriggerClass::AudioStreamType::Effect);
+
+        if (action_text.contains("Music"))
+            trigger.SetParameter("audio-stream", game::AnimationTriggerClass::AudioStreamType::Music);
+
+    } else BUG("Unhandled animation trigger type.");
 
     mState.track->AddTrigger(trigger);
     mUI.timeline->Rebuild();
@@ -2336,7 +2353,7 @@ void AnimationTrackWidget::MouseMove(QMouseEvent* event)
         // of the current tool.
         DisplayCurrentCameraLocation();
         UpdateTransformActuatorUI();
-        SetSelectedActuatorProperties();
+        SetSelectedAnimatorProperties();
     }
 }
 void AnimationTrackWidget::MousePress(QMouseEvent* event)

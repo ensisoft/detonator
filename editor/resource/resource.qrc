@@ -177,6 +177,8 @@
     <file>64x64_ico_png/animation-trigger.png</file>
     <file>64x64_ico_png/animation-trigger-particle.png</file>
     <file>64x64_ico_png/animation-trigger-sprite-cycle.png</file>
+    <file>64x64_ico_png/animation-trigger-sound-effect.png</file>
+    <file>64x64_ico_png/animation-trigger-music.png</file>
 
     <file>logo/html5.png</file>
     <file>logo/linux.png</file>
