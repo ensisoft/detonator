@@ -566,6 +566,19 @@ QStringList ListResourceDependencies(const game::EntityClass& entity, const QVar
             PushBack(ret, ptr->GetPolygonShapeId());
         }
     }
+
+    for (size_t animation_index=0; animation_index<entity.GetNumAnimations(); ++animation_index)
+    {
+        const auto& animation = entity.GetAnimation(animation_index);
+        for (size_t trigger_index = 0; trigger_index<animation.GetNumTriggers(); ++trigger_index)
+        {
+            const auto& trigger = animation.GetTriggerClass(trigger_index);
+            std::string audio_graph_id;
+            if (trigger.GetParameter("audio-graph-id", &audio_graph_id))
+                PushBack(ret, audio_graph_id);
+        }
+    }
+
     return ret;
 }
 
