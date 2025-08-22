@@ -1671,6 +1671,16 @@ void AnimationTrackWidget::SetSelectedAnimatorProperties()
             mUI.setvalEndValue->SetType(Uniform::Type::Float);
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
+        else if (name == Name::SplineMover_LinearAcceleration)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::SplineMover_LinearSpeed)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
         else BUG("Unhandled value actuator value type.");
 
         setter->SetInterpolation(GetValue(mUI.setvalInterpolation));
@@ -1947,6 +1957,10 @@ void AnimationTrackWidget::TimelineAnimatorChanged(const TimelineWidget::Timelin
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
         else if (name == Name::BasicLight_QuadraticAttenuation)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::SplineMover_LinearAcceleration)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), "u/s²");
+        else if (name == Name::SplineMover_LinearSpeed)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), "u/s");
         else BUG("Unhandled set value actuator value type.");
 
         SetValue(mUI.setvalInterpolation, ptr->GetInterpolation());
@@ -2538,30 +2552,18 @@ void AnimationTrackWidget::AddAnimatorFromTimeline(game::AnimatorClass::Type typ
 
     if (type == game::AnimatorClass::Type::TransformAnimator)
     {
-        const auto& pos     = node->GetTranslation();
-        const auto& size    = node->GetSize();
-        const auto& scale   = node->GetScale();
-        const auto rotation = node->GetRotation();
-        SetValue(mUI.transformEndPosX,   pos.x);
-        SetValue(mUI.transformEndPosY,   pos.y);
-        SetValue(mUI.transformEndSizeX,  size.x);
-        SetValue(mUI.transformEndSizeY,  size.y);
-        SetValue(mUI.transformEndScaleX, scale.x);
-        SetValue(mUI.transformEndScaleY, scale.y);
-        SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
-
         game::TransformAnimatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(timeline.target_node_id);
         klass.SetTimelineId(timeline.timeline_id);
-        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
+        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, true);
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
-        klass.SetEndPosition(pos);
-        klass.SetEndSize(size);
-        klass.SetEndScale(scale);
-        klass.SetInterpolation(GetValue(mUI.transformInterpolation));
-        klass.SetEndRotation(qDegreesToRadians((float) GetValue(mUI.transformEndRotation)));
+        klass.SetEndPosition(node->GetTranslation());
+        klass.SetEndSize(node->GetSize());
+        klass.SetEndScale(node->GetScale());
+        klass.SetEndRotation(node->GetRotation());
+        klass.SetInterpolation(game::TransformAnimatorClass::Interpolation::Linear);
         mState.track->AddAnimator(klass);
 
         mUI.timeline->Rebuild();
@@ -2569,78 +2571,16 @@ void AnimationTrackWidget::AddAnimatorFromTimeline(game::AnimatorClass::Type typ
     }
     else if (type == game::AnimatorClass::Type::PropertyAnimator)
     {
-        using ValName = game::PropertyAnimatorClass::PropertyName;
-        const auto value = (ValName)GetValue(mUI.setvalName);
-
         game::PropertyAnimatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(timeline.target_node_id);
         klass.SetTimelineId(timeline.timeline_id);
-        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
+        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, true);
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
-        klass.SetPropertyName(GetValue(mUI.setvalName));
-        klass.SetInterpolation(GetValue(mUI.setvalInterpolation));
-        klass.SetJointId(GetItemId(mUI.setvalJoint));
-
-        if (value == ValName::Drawable_TimeScale)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::Drawable_RotationX)
-            klass.SetEndValue(qDegreesToRadians(mUI.setvalEndValue->GetAsFloat()));
-        else if (value == ValName::Drawable_RotationY)
-            klass.SetEndValue(qDegreesToRadians(mUI.setvalEndValue->GetAsFloat()));
-        else if (value == ValName::Drawable_RotationZ)
-            klass.SetEndValue(qDegreesToRadians(mUI.setvalEndValue->GetAsFloat()));
-        else if (value == ValName::Drawable_TranslationX)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::Drawable_TranslationY)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::Drawable_TranslationZ)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::Drawable_SizeZ)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::RigidBody_LinearVelocityX)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::RigidBody_LinearVelocityY)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::RigidBody_AngularVelocity)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::RigidBody_LinearVelocity)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsVec2());
-        else if (value == ValName::TextItem_Text)
-            klass.SetEndValue(app::ToUtf8(mUI.setvalEndValue->GetAsString()));
-        else if (value == ValName::TextItem_Color)
-            klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
-        else if (value == ValName::RigidBodyJoint_MotorTorque)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::RigidBodyJoint_MotorSpeed)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::RigidBodyJoint_MotorForce)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::RigidBodyJoint_Stiffness)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::RigidBodyJoint_Damping)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::BasicLight_Direction)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsVec3());
-        else if (value == ValName::BasicLight_Translation)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsVec3());
-        else if (value == ValName::BasicLight_AmbientColor)
-            klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
-        else if (value == ValName::BasicLight_DiffuseColor)
-            klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
-        else if (value == ValName::BasicLight_SpecularColor)
-            klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
-        else if (value == ValName::BasicLight_SpotHalfAngle)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::BasicLight_ConstantAttenuation)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::BasicLight_LinearAttenuation)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::BasicLight_QuadraticAttenuation)
-            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else BUG("Unhandled value actuator value type.");
-
+        klass.SetPropertyName(game::PropertyAnimatorClass::PropertyName::Drawable_TimeScale);
+        klass.SetInterpolation(game::PropertyAnimatorClass::Interpolation::Linear);
+        klass.SetJointId("");
         mState.track->AddAnimator(klass);
 
         mUI.timeline->Rebuild();
@@ -2652,15 +2592,10 @@ void AnimationTrackWidget::AddAnimatorFromTimeline(game::AnimatorClass::Type typ
         klass.SetName(name);
         klass.SetNodeId(timeline.target_node_id);
         klass.SetTimelineId(timeline.timeline_id);
-        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
+        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, true);
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
-        klass.SetEndAngularVelocity(GetValue(mUI.kinematicEndVeloZ));
-        glm::vec2 velocity;
-        velocity.x = GetValue(mUI.kinematicEndVeloX);
-        velocity.y = GetValue(mUI.kinematicEndVeloY);
-        klass.SetEndLinearVelocity(velocity);
-
+        klass.SetEndAngularVelocity(0.0f);
         mState.track->AddAnimator(klass);
 
         mUI.timeline->Rebuild();
@@ -2672,13 +2607,13 @@ void AnimationTrackWidget::AddAnimatorFromTimeline(game::AnimatorClass::Type typ
         klass.SetName(name);
         klass.SetNodeId(timeline.target_node_id);
         klass.SetTimelineId(timeline.timeline_id);
-        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
+        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, true);
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
-        klass.SetFlagName(GetValue(mUI.itemFlags));
-        klass.SetFlagAction(GetValue(mUI.flagAction));
-        klass.SetJointId(GetItemId(mUI.flagJoint));
-
+        klass.SetFlagName(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_VisibleInGame);
+        klass.SetFlagAction(game::BooleanPropertyAnimatorClass::PropertyAction::On);
+        klass.SetJointId("");
+        klass.SetTime((position - lo_bound) / node_duration);
         mState.track->AddAnimator(klass);
 
         mUI.timeline->Rebuild();
@@ -2692,7 +2627,6 @@ void AnimationTrackWidget::AddAnimatorFromTimeline(game::AnimatorClass::Type typ
         klass.SetTimelineId(timeline.timeline_id);
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
-
         mState.track->AddAnimator(klass);
 
         mUI.timeline->Rebuild();
