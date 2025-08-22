@@ -1683,11 +1683,47 @@ private:
         return true;
     }
 
+    bool HandleAnimationSpawnEntityTrigger(const game::Scene::Event& event) const
+    {
+        const auto* ea_ptr = std::get_if<game::Scene::EntityAnimationEvent>(&event);
+        if (!ea_ptr)
+            return false;
+
+        const auto* at_ptr = std::get_if<game::AnimationTriggerEvent>(&ea_ptr->event.value);
+        if (!at_ptr)
+            return false;
+
+        const auto* ptr = std::get_if<game::AnimationSpawnEntityTriggerEvent>(at_ptr);
+        if (!ptr)
+            return false;
+
+        const auto& entity_class = mClasslib->FindEntityClassById(ptr->entity_class_id);
+        if (!entity_class)
+        {
+            WARN("Failed to trigger entity spawn on animation event. No such entity class was found. "
+                "[entity='%1', animation='%2', trigger='%3']", ea_ptr->entity->GetName(),
+                ea_ptr->event.animation_name, ptr->trigger_name);
+            return true;
+        }
+        const auto* entity = ea_ptr->entity;
+        const auto* entity_node = entity->FindNodeByInstanceId(ptr->source_node_id);
+        const auto& spawn_world_pos = mScene->MapPointFromEntityNode(entity, entity_node, {0.0f, 0.0f});
+
+        game::EntityArgs spawn_args;
+        spawn_args.async_spawn = true;
+        spawn_args.klass = entity_class;
+        spawn_args.render_layer = ptr->render_layer;
+        spawn_args.position = spawn_world_pos;
+        mScene->SpawnEntity(spawn_args, true);
+        return true;
+    }
+
     void HandleSceneEvents(const std::vector<game::Scene::Event>& events) const
     {
         for (const auto& event : events)
         {
-            if (HandleAnimationAudioTriggerEvent(event))
+            if (HandleAnimationAudioTriggerEvent(event) ||
+                HandleAnimationSpawnEntityTrigger(event))
                 continue;
         }
     }
