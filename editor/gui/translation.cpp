@@ -146,17 +146,17 @@ std::string TranslateEnum(PropertyAnimatorClass::PropertyName name)
     else if (name == P::TextItem_Color)
         return "Text Color";
     else if (name == P::LinearMover_LinearVelocity)
-        return "Linear Mover Velocity";
+        return "Linear Mover Linear Velocity";
     else if (name == P::LinearMover_LinearVelocityX)
-        return "Linear Mover Velocity on X Axis";
+        return "Linear Mover Linear Velocity on X Axis";
     else if (name == P::LinearMover_LinearVelocityY)
-        return "Linear Mover Velocity on Y Axis";
+        return "Linear Mover Linear Velocity on Y Axis";
     else if (name == P::LinearMover_LinearAcceleration)
-        return "Linear Mover Acceleration";
+        return "Linear Mover Linear Acceleration";
     else if (name == P::LinearMover_LinearAccelerationX)
-        return "Linear Mover Acceleration on X Axis";
+        return "Linear Mover Linear Acceleration on X Axis";
     else if (name == P::LinearMover_LinearAccelerationY)
-        return "Linear Mover Acceleration on Y Axis";
+        return "Linear Mover Linear Acceleration on Y Axis";
     else if (name == P::LinearMover_AngularVelocity)
         return "Linear Mover Angular Velocity";
     else if (name == P::LinearMover_AngularAcceleration)
@@ -189,6 +189,10 @@ std::string TranslateEnum(PropertyAnimatorClass::PropertyName name)
         return "Basic Light Constant Attenuation";
     else if (name == P::BasicLight_QuadraticAttenuation)
         return "Basic Light Quadratic Attenuation";
+    else if (name == P::SplineMover_LinearAcceleration)
+        return "Spline Mover Linear Acceleration";
+    else if (name == P::SplineMover_LinearSpeed)
+        return "Spline Mover Linear Speed";
     else BUG("Missing translation");
     return "???";
 }
@@ -196,19 +200,19 @@ std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name)
 {
     using P = BooleanPropertyAnimatorClass::PropertyName;
     if (name == P::Drawable_VisibleInGame)
-        return "Set Drawable Visibility in Game";
+        return "Set Drawable Visible in Game";
     else if (name == P::Drawable_UpdateMaterial)
-        return "Set Drawable Material Update";
+        return "Enable Drawable Material Update";
     else if (name == P::Drawable_UpdateDrawable)
-        return "Set Drawable Shape Update";
+        return "Enable Drawable Shape Update";
     else if (name == P::Drawable_Restart)
-        return "Set Drawable Restart";
+        return "Enable Drawable Auto-Restart";
     else if (name == P::Drawable_FlipHorizontally)
-        return "Enable Horizontal Flip for Drawable";
+        return "Set Drawable Horizontal Flip";
     else if (name == P::Drawable_FlipVertically)
-        return "Enable Vertical Flip for Drawable";
+        return "Set Drawable Vertical Flip";
     else if (name == P::Drawable_DoubleSided)
-        return "Enable Double-Sided Drawable";
+        return "Set Drawable Double-Sided";
     else if (name == P::Drawable_DepthTest)
         return "Enable Depth Test for Drawable";
     else if (name == P::Drawable_PPEnableBloom)
@@ -222,9 +226,9 @@ std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name)
     else if (name == P::RigidBody_CanSleep)
         return "Enable Rigid Body Sleeping";
     else if (name == P::RigidBody_DiscardRotation)
-        return "Enable Rigid Body Rotation Discard";
+        return "Discard Rigid Body Rotation";
     else if (name == P::TextItem_VisibleInGame)
-        return "Set Text Visibility in Game";
+        return "Set Text Visible in Game";
     else if (name == P::TextItem_Blink)
         return "Enable Text Blinking";
     else if (name == P::TextItem_Underline)
@@ -241,6 +245,8 @@ std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name)
         return "Enable Joint Motor";
     else if (name == P::BasicLight_Enabled)
         return "Enable Basic Light";
+    else if (name == P::SplineMover_Enabled)
+        return "Enable Spline Mover";
     else BUG("Missing translation");
     return "???";
 }
