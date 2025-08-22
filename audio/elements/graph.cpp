@@ -348,6 +348,21 @@ bool Graph::HasElement(Element* element) const
 
 bool Graph::Prepare(const Loader& loader, const PrepareParams& params)
 {
+    bool graph_output_port_set = false;
+    for (const auto& [src_port, dst_port] : mPortMap)
+    {
+        if (dst_port == &mPort)
+        {
+            graph_output_port_set = true;
+            break;
+        }
+    }
+    if (!graph_output_port_set)
+    {
+        ERROR("Failed to determine audio graph output port. No output element selected. [graph='%1']", mName);
+        return false;
+    }
+
     TRACE_SCOPE("Graph::Prepare");
 
     // This is the so called Kahn's algorithm
