@@ -160,21 +160,12 @@ namespace game
         bool DeleteAnimationById(const std::string& id);
 
         // Add a new animator class object.
-        EntityStateControllerClass* AddController(EntityStateControllerClass&& animator);
-        EntityStateControllerClass* AddController(const EntityStateControllerClass& animator);
-        EntityStateControllerClass* AddController(const std::shared_ptr<EntityStateControllerClass>& animator);
-
-        void DeleteController(size_t index);
-        bool DeleteControllerByName(const std::string& name);
-        bool DeleteControllerById(const std::string& id);
-
-        EntityStateControllerClass& GetController(size_t index);
-        EntityStateControllerClass* FindControllerByName(const std::string& name);
-        EntityStateControllerClass* FindControllerById(const std::string& id);
-
-        const EntityStateControllerClass& GetController(size_t index) const;
-        const EntityStateControllerClass* FindControllerByName(const std::string& name) const;
-        const EntityStateControllerClass* FindControllerById(const std::string& id) const;
+        EntityStateControllerClass* SetStateController(EntityStateControllerClass&& animator);
+        EntityStateControllerClass* SetStateController(const EntityStateControllerClass& animator);
+        EntityStateControllerClass* SetStateController(const std::shared_ptr<EntityStateControllerClass>& animator);
+        EntityStateControllerClass* GetStateController();
+        const EntityStateControllerClass* GetStateController() const;
+        void DeleteStateController();
 
         // Scripting variables provide variable properties/data that the game
         // can define and add to the entity class type. For example in a space
@@ -369,8 +360,8 @@ namespace game
         { return mNodes.size(); }
 
         //Get the current state controller count.
-        inline auto GetNumAnimators() const noexcept
-        { return mAnimators.size(); }
+        inline bool HasStateController() const
+        { return !!mStateController; }
 
         // Get the current animation track count.
         inline auto GetNumAnimations() const noexcept
@@ -430,8 +421,8 @@ namespace game
         { return std::shared_ptr<const ScriptVar>(mScriptVars[index]); }
         inline auto GetSharedJoint(size_t index) const noexcept
         { return std::shared_ptr<const PhysicsJoint>(mJoints[index]); }
-        inline auto GetSharedEntityControllerClass(size_t index) const noexcept
-        { return std::shared_ptr<const EntityStateControllerClass>(mAnimators[index]); }
+        inline auto GetSharedEntityControllerClass() const noexcept
+        { return std::shared_ptr<const EntityStateControllerClass>(mStateController); }
 
         // Get the allocator object used to allocate entity node data for entity instances
         // of *this* class type. The allocator only exists when using the class runtime
@@ -487,8 +478,8 @@ namespace game
         std::vector<std::shared_ptr<EntityNodeClass>> mNodes;
         // the list of joints that belong to this entity.
         std::vector<std::shared_ptr<PhysicsJoint>> mJoints;
-        // the list of animators
-        std::vector<std::shared_ptr<EntityStateControllerClass>> mAnimators;
+        // entity state controller if any.
+        std::shared_ptr<EntityStateControllerClass> mStateController;
         // The render tree for hierarchical traversal and
         // transformation of the entity and its nodes.
         RenderTree mRenderTree;

@@ -101,9 +101,9 @@ EntityClass::EntityClass(const EntityClass& other)
     }
 
     // Deepy copy animators
-    for (const auto& animator : other.mAnimators)
+    if (other.mStateController)
     {
-        mAnimators.push_back(std::make_shared<EntityStateControllerClass>(*animator));
+        mStateController = std::make_shared<EntityStateControllerClass>(*other.mStateController);
     }
 
     mRenderTree.FromTree(other.GetRenderTree(), [&map](const EntityNodeClass* node) {
@@ -365,60 +365,35 @@ const AnimationClass* EntityClass::FindAnimationByName(const std::string& name) 
     return FindByName(mAnimations, name);
 }
 
-EntityStateControllerClass* EntityClass::AddController(EntityStateControllerClass&& animator)
+EntityStateControllerClass* EntityClass::SetStateController(EntityStateControllerClass&& animator)
 {
-    mAnimators.push_back(std::make_shared<EntityStateControllerClass>(std::move(animator)));
-    return mAnimators.back().get();
+    mStateController = std::make_shared<EntityStateControllerClass>(std::move(animator));
+    return mStateController.get();
 }
-EntityStateControllerClass* EntityClass::AddController(const EntityStateControllerClass& animator)
+EntityStateControllerClass* EntityClass::SetStateController(const EntityStateControllerClass& animator)
 {
-    mAnimators.push_back(std::make_shared<EntityStateControllerClass>(animator));
-    return mAnimators.back().get();
+    mStateController = std::make_shared<EntityStateControllerClass>(animator);
+    return mStateController.get();
 }
-EntityStateControllerClass* EntityClass::AddController(const std::shared_ptr<EntityStateControllerClass>& animator)
+EntityStateControllerClass* EntityClass::SetStateController(const std::shared_ptr<EntityStateControllerClass>& animator)
 {
-    mAnimators.push_back(animator);
-    return mAnimators.back().get();
-}
-
-void EntityClass::DeleteController(size_t index)
-{
-    base::SafeErase(mAnimators, index);
-}
-bool EntityClass::DeleteControllerByName(const std::string& name)
-{
-    return EraseByName(mAnimators, name);
+    mStateController = animator;
+    return mStateController.get();
 }
 
-bool EntityClass::DeleteControllerById(const std::string& id)
+void EntityClass::DeleteStateController()
 {
-    return EraseById(mAnimators, id);
+    mStateController.reset();
 }
 
-EntityStateControllerClass& EntityClass::GetController(size_t index)
+EntityStateControllerClass* EntityClass::GetStateController()
 {
-    return *base::SafeIndex(mAnimators, index);
-}
-EntityStateControllerClass* EntityClass::FindControllerByName(const std::string& name)
-{
-    return FindByName(mAnimators, name);
-}
-EntityStateControllerClass* EntityClass::FindControllerById(const std::string& id)
-{
-    return FindById(mAnimators, id);
+    return mStateController.get();
 }
 
-const EntityStateControllerClass& EntityClass::GetController(size_t index) const
+const EntityStateControllerClass* EntityClass::GetStateController() const
 {
-    return *base::SafeIndex(mAnimators, index);
-}
-const EntityStateControllerClass* EntityClass::FindControllerByName(const std::string& name) const
-{
-    return FindByName(mAnimators, name);
-}
-const EntityStateControllerClass* EntityClass::FindControllerById(const std::string& id) const
-{
-    return FindById(mAnimators, id);
+    return mStateController.get();
 }
 
 void EntityClass::LinkChild(EntityNodeClass* parent, EntityNodeClass* child)
@@ -617,9 +592,9 @@ std::size_t EntityClass::GetHash() const
         hash = base::hash_combine(hash, joint->GetHash());
     }
 
-    for (const auto& animator : mAnimators)
+    if (mStateController)
     {
-        hash = base::hash_combine(hash, animator->GetHash());
+        hash = base::hash_combine(hash, mStateController->GetHash());
     }
 
     return hash;
@@ -707,11 +682,11 @@ void EntityClass::IntoJson(data::Writer& data) const
         data.AppendChunk("joints", std::move(chunk));
     }
 
-    for (const auto& animator : mAnimators)
+    if (mStateController)
     {
         auto chunk = data.NewWriteChunk();
-        animator->IntoJson(*chunk);
-        data.AppendChunk("animators", std::move(chunk));
+        mStateController->IntoJson(*chunk);
+        data.Write("state-controller", std::move(chunk));
     }
 
     auto chunk = data.NewWriteChunk();
@@ -771,12 +746,17 @@ bool EntityClass::FromJson(const data::Reader& data)
         mJoints.push_back(std::move(joint));
     }
 
-    for (unsigned i=0; i<data.GetNumChunks("animators"); ++i)
+    // migration, animators array becomes a single state-controller
+    if (const auto& chunk = data.GetReadChunk("state-controller"))
     {
-        const auto& chunk = data.GetReadChunk("animators", i);
-        auto animator = std::make_shared<EntityStateControllerClass>();
-        ok &= animator->FromJson(*chunk);
-        mAnimators.push_back(std::move(animator));
+        mStateController = std::make_shared<EntityStateControllerClass>();
+        ok &= mStateController->FromJson(*chunk);
+    }
+    else if (data.GetNumChunks("animators"))
+    {
+        const auto& chunk = data.GetReadChunk("animators", 0);
+        mStateController = std::make_shared<EntityStateControllerClass>();
+        ok &= mStateController->FromJson(*chunk);
     }
 
     const auto& chunk = data.GetReadChunk("render_tree");
@@ -887,10 +867,9 @@ EntityClass EntityClass::Clone() const
         }
     }
 
-    for (const auto& animator : mAnimators)
+    if (mStateController)
     {
-        auto clone = std::make_shared<EntityStateControllerClass>(animator->Clone());
-        ret.mAnimators.push_back(std::move(clone));
+        ret.mStateController = std::make_shared<EntityStateControllerClass>(mStateController->Clone());
     }
 
     ret.mRenderTree.FromTree(mRenderTree, [&map](const EntityNodeClass* node) {
@@ -915,7 +894,7 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
     mScriptFile      = std::move(tmp.mScriptFile);
     mRenderTree      = std::move(tmp.mRenderTree);
     mAnimations      = std::move(tmp.mAnimations);
-    mAnimators       = std::move(tmp.mAnimators);
+    mStateController = std::move(tmp.mStateController);
     mFlags           = tmp.mFlags;
     mLifetime        = tmp.mLifetime;
     return *this;

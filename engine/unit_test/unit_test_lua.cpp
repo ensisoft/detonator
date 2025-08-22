@@ -1604,7 +1604,7 @@ end
 
         klass.SetInitialStateId(idle.GetId());
 
-        foo->AddController(std::move(klass));
+        foo->SetStateController(std::move(klass));
     }
 
     game::SceneClass scene_class;

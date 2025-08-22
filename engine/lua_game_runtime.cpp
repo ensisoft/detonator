@@ -750,16 +750,17 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
     {
         const auto& entity = scene->GetEntity(i);
         const auto& klass  = entity.GetClass();
-        if (klass.GetNumAnimators() == 0)
+        if (!klass.HasStateController())
             continue;
-        const auto& animator = klass.GetController(0);
-        if (!animator.HasScriptId())
-            continue;
-
-        if (animator_env_map.find(animator.GetId()) != animator_env_map.end())
+        const auto* state_controller = klass.GetStateController();
+        if (!state_controller->HasScriptId())
             continue;
 
-        const auto& scriptId = animator.GetScriptId();
+        // seen this controller already?
+        if (base::Contains(animator_env_map, state_controller->GetId()))
+            continue;
+
+        const auto& scriptId = state_controller->GetScriptId();
         auto it = script_env_map.find(scriptId);
         if (it == script_env_map.end())
         {
@@ -793,7 +794,7 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
             it = script_env_map.insert({scriptId, script_env}).first;
             DEBUG("Entity animator script loaded. [class='%1', file='%2']", klass.GetName(), script_file);
         }
-        animator_env_map[animator.GetId()] = it->second;
+        animator_env_map[state_controller->GetId()] = it->second;
     }
 
     std::unique_ptr<sol::environment> scene_env;
@@ -982,10 +983,10 @@ void LuaRuntime::Update(double game_time, double dt)
             continue;
 
         const auto& entity_klass = entity->GetClass();
-        const auto& entity_state_controller_class = entity_klass.GetController(0);
+        const auto& entity_state_controller_class = *entity_klass.GetStateController();
 
         // we must always update the state controller if it exists
-        // regardless whether it as an associated script with it or not.
+        // regardless whether it has an associated script with it or not.
         std::vector<game::Entity::EntityStateUpdate> actions;
         entity->UpdateStateController(dt, &actions);
 
