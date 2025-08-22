@@ -167,6 +167,8 @@ public:
                     item.icon = QPixmap("icons64:animation-trigger-music.png");
                 else BUG("Unhandled audio trigger stream type.");
             }
+            else if (trigger_type == game::AnimationTriggerClass::Type::SpawnEntity)
+                item.icon = QPixmap("icons64:animation-trigger-spawn.png");
             (*list)[timeline_index].AddItem(item);
         }
     }
@@ -588,6 +590,12 @@ void AnimationTrackWidget::Update(double secs)
         {
             EventMessage msg;
             msg.message = "Audio trigger";
+            mEventMessages.push_back(std::move(msg));
+        }
+        else if (const auto* ptr = std::get_if<game::AnimationSpawnEntityTriggerEvent>(animation_trigger_event))
+        {
+            EventMessage msg;
+            msg.message = "Spawn trigger";
             mEventMessages.push_back(std::move(msg));
         }
     }
@@ -1032,6 +1040,7 @@ void AnimationTrackWidget::on_actuatorIsStatic_stateChanged(int)
 void AnimationTrackWidget::on_actuatorName_textChanged(const QString&)
 {
     SetSelectedAnimatorProperties();
+    SetSelectedTriggerProperties();
 }
 
 void AnimationTrackWidget::on_actuatorStartTime_valueChanged(double value)
@@ -1050,7 +1059,7 @@ void AnimationTrackWidget::on_actuatorStartTime_valueChanged(double value)
     {
         const auto duration = mState.track->GetDuration();
         const auto time_point = value / duration;
-        animator->SetStartTime(time_point);
+        trigger->SetTime(time_point);
         mUI.timeline->Rebuild();
     }
 }
@@ -1124,7 +1133,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
 
     QMenu menu(this);
     QMenu animators(this);
-    animators.setEnabled(selected_timeline_item == nullptr);
+    animators.setEnabled(current_timeline != nullptr);
     animators.setTitle("New Animator ...");
     animators.setIcon(QIcon("icons:add.png"));
 
@@ -1181,6 +1190,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     trigger_type_list.push_back( { game::AnimationTriggerClass::Type::RunSpriteCycle, "Run Sprite Cycle" });
     trigger_type_list.push_back( { game::AnimationTriggerClass::Type::PlayAudio, "Play Sound Effect" });
     trigger_type_list.push_back( { game::AnimationTriggerClass::Type::PlayAudio, "Play Music" });
+    trigger_type_list.push_back( { game::AnimationTriggerClass::Type::SpawnEntity, "Spawn Entity" } );
 
     for (const auto& trigger_type : trigger_type_list)
     {
@@ -1293,6 +1303,12 @@ void AnimationTrackWidget::on_setvalJoint_currentIndexChanged(int index)
     SetSelectedAnimatorProperties();
 }
 
+void AnimationTrackWidget::on_actuatorIsStatic_toggled(bool on)
+{
+    SetSelectedAnimatorProperties();
+    SetSelectedTriggerProperties();
+}
+
 void AnimationTrackWidget::on_kinematicEndVeloX_valueChanged(double value)
 {
     SetSelectedAnimatorProperties();
@@ -1377,6 +1393,16 @@ void AnimationTrackWidget::on_audioTriggerStream_currentIndexChanged(int)
     SetSelectedTriggerProperties();
 }
 
+void AnimationTrackWidget::on_entityTriggerList_currentIndexChanged(int)
+{
+    SetSelectedTriggerProperties();
+}
+
+void AnimationTrackWidget::on_entityRenderLayer_valueChanged(int)
+{
+    SetSelectedTriggerProperties();
+}
+
 void AnimationTrackWidget::SetActuatorUIEnabled(bool enabled)
 {
     SetEnabled(mUI.actuatorName,       enabled);
@@ -1429,6 +1455,7 @@ void AnimationTrackWidget::SetActuatorUIDefaults()
     SetValue(mUI.flagJoint, -1);
     SetValue(mUI.emitCount, 0); // indicates default particle emission
     SetValue(mUI.spriteCycles, -1);
+    SetValue(mUI.entityTriggerList, -1);
     mUI.actuatorProperties->setCurrentWidget(mUI.blankPage);
 
     mUI.curve->ClearFunction();
@@ -1462,7 +1489,16 @@ void AnimationTrackWidget::SetSelectedTriggerProperties()
         trigger->SetParameter("audio-stream-action", action);
         trigger->SetParameter("audio-stream", stream);
         trigger->SetParameter("audio-graph-id", GetItemId(mUI.audioTriggerGraph));
-    } else BUG("Unhandled animation trigger type.");
+    }
+    else if (trigger->GetType() == game::AnimationTriggerClass::Type::SpawnEntity)
+    {
+        const int render_layer = GetValue(mUI.entityRenderLayer);
+        trigger->SetParameter("entity-class-id", GetItemId(mUI.entityTriggerList));
+        trigger->SetParameter("entity-render-layer", render_layer);
+    }
+    else BUG("Unhandled animation trigger type.");
+
+    mUI.timeline->Rebuild();
 }
 
 void AnimationTrackWidget::SetSelectedAnimatorProperties()
@@ -1855,8 +1891,8 @@ void AnimationTrackWidget::TimelineAnimatorChanged(const TimelineWidget::Timelin
     SetMinMax(mUI.actuatorEndTime, lo_bound * duration, hi_bound * duration);
     SetValue(mUI.actuatorStartTime, start);
     SetValue(mUI.actuatorEndTime, end);
-    SetValue(mUI.actuatorGroup, app::toString("Animator - %1, %2s", item->text, len));
-    SetEnabled(mUI.actuatorIsStatic, true);
+    SetValue(mUI.actuatorGroup, selected_animator->GetName());
+    SetEnabled(mUI.actuatorIsStatic, false);
     SetEnabled(mUI.actuatorEndTime, true);
 
     if (const auto* ptr = dynamic_cast<const game::TransformAnimatorClass*>(selected_animator))
@@ -1873,6 +1909,8 @@ void AnimationTrackWidget::TimelineAnimatorChanged(const TimelineWidget::Timelin
         SetValue(mUI.transformEndScaleX, scale.x);
         SetValue(mUI.transformEndScaleY, scale.y);
         SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
+        SetValue(mUI.actuatorIsStatic, ptr->TestFlag(game::TransformAnimatorClass::Flags::StaticInstance));
+        SetEnabled(mUI.actuatorIsStatic, true);
         mUI.actuatorProperties->setCurrentWidget(mUI.transformActuator);
         mUI.curve->SetFunction(ptr->GetInterpolation());
 
@@ -2036,7 +2074,7 @@ void AnimationTrackWidget::TimelineTriggerChanged(const TimelineWidget::Timeline
     SetValue(mUI.actuatorStartTime, time_point);
     SetValue(mUI.actuatorEndTime, time_point);
     SetEnabled(mUI.actuatorEndTime, false);
-    SetValue(mUI.actuatorGroup, app::toString("Trigger - %1", item->text));
+    SetValue(mUI.actuatorGroup, selected_trigger->GetName());
 
     if (selected_trigger->GetType() == game::AnimationTriggerClass::Type::EmitParticlesTrigger)
     {
@@ -2089,7 +2127,21 @@ void AnimationTrackWidget::TimelineTriggerChanged(const TimelineWidget::Timeline
         SetValue(mUI.audioTriggerGraph, ListItemId { audio_graph_id });
         SetValue(mUI.audioTriggerStream, stream);
 
-    } else BUG("Unhandled audio trigger type.");
+    }
+    else if (selected_trigger->GetType() == game::AnimationTriggerClass::Type::SpawnEntity)
+    {
+        mUI.actuatorProperties->setCurrentWidget(mUI.spawnEntityTrigger);
+
+        int render_layer = 0;
+        std::string entity_class_id;
+        selected_trigger->GetParameter("entity-class-id", &entity_class_id);
+        selected_trigger->GetParameter("entity-render-layer", &render_layer);
+
+        SetList(mUI.entityTriggerList, mWorkspace->ListUserDefinedEntities());
+        SetValue(mUI.entityTriggerList, ListItemId { entity_class_id });
+        SetValue(mUI.entityRenderLayer, render_layer);
+    }
+    else BUG("Unhandled audio trigger type.");
 }
 void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineItem* item)
 {
@@ -2105,7 +2157,7 @@ void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineIte
         const auto len = QString::number(end - start, 'f', 2);
         SetValue(mUI.actuatorStartTime, start);
         SetValue(mUI.actuatorEndTime, end);
-        SetValue(mUI.actuatorGroup, tr("Animator - %1, %2s").arg(item->text).arg(len));
+        SetValue(mUI.actuatorGroup, animator->GetName());
     }
     else if (item->type == TimelineWidget::TimelineItem::Type::Point)
     {
@@ -2115,6 +2167,7 @@ void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineIte
         const auto duration = mState.track->GetDuration();
         const auto time_point = item->starttime * duration;
         SetValue(mUI.actuatorStartTime, time_point);
+        SetValue(mUI.actuatorEndTime, time_point);
     }
 }
 
@@ -2148,7 +2201,8 @@ void AnimationTrackWidget::AddAnimatorAction()
     ASSERT(timeline_index >= 0);
     ASSERT(timeline_index <= mState.timelines.size());
 
-    AddAnimatorFromTimeline(type, time_point, timeline_index);
+    if (!AddAnimatorFromTimeline(type, time_point, timeline_index))
+        return;
 
     // hack for now
     if (type == game::AnimatorClass::Type::KinematicAnimator)
@@ -2238,7 +2292,18 @@ void AnimationTrackWidget::AddTriggerAction()
         if (action_text.contains("Music"))
             trigger.SetParameter("audio-stream", game::AnimationTriggerClass::AudioStreamType::Music);
 
-    } else BUG("Unhandled animation trigger type.");
+    }
+    else if (type == game::AnimationTriggerClass::Type::SpawnEntity)
+    {
+        const auto& list = mWorkspace->ListUserDefinedEntities();
+        SetList(mUI.entityTriggerList, list);
+        if (!list.empty())
+        {
+            trigger.SetParameter("entity-class-id", list[0].id);
+        }
+        trigger.SetParameter("entity-render-layer", 0);
+    }
+    else BUG("Unhandled animation trigger type.");
 
     mState.track->AddTrigger(trigger);
     mUI.timeline->Rebuild();
@@ -2519,7 +2584,7 @@ void AnimationTrackWidget::UpdateTransformActuatorUI()
     }
 }
 
-void AnimationTrackWidget::AddAnimatorFromTimeline(game::AnimatorClass::Type type, float seconds, unsigned timeline_index)
+bool AnimationTrackWidget::AddAnimatorFromTimeline(game::AnimatorClass::Type type, float seconds, unsigned timeline_index)
 {
     ASSERT(timeline_index < mState.timelines.size());
 
@@ -2538,11 +2603,19 @@ void AnimationTrackWidget::AddAnimatorFromTimeline(game::AnimatorClass::Type typ
 
         const auto start = animator.GetStartTime();
         const auto end   = animator.GetStartTime() + animator.GetDuration();
+        // don't let overlapping animators to be added.
+        if (position >= start && position <= end)
+            return false;
 
         if (start >= position)
             hi_bound = std::min(hi_bound, start);
         if (end <= position)
             lo_bound = std::max(lo_bound, end);
+    }
+    if (hi_bound <= lo_bound || hi_bound - lo_bound < 0.01)
+    {
+        NOTE("No animator time slot available.");
+        return false;
     }
 
     const auto& name = base::FormatString("Animator_%1", mState.track->GetNumAnimators());
@@ -2634,6 +2707,7 @@ void AnimationTrackWidget::AddAnimatorFromTimeline(game::AnimatorClass::Type typ
     }
     DEBUG("New timeline animator on target node. [type=%1, node=%2, start=%3s, end=%4s]", type, node->GetName(),
           node_start_time * duration, node_end_time * duration);
+    return true;
 }
 
 void AnimationTrackWidget::CreateTimelines()
