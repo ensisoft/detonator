@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 #include <queue>
-
+#include <vector>
 
 #include "audio/buffer.h"
 #include "audio/format.h"
@@ -117,6 +117,22 @@ namespace audio
             using CmdType = detail::MessageImpl<std::remove_reference_t<CmdT>, 0>;
             auto ret = std::make_unique<CmdType>(std::forward<CmdT>(cmd));
             return ret;
+        }
+
+        virtual void PortPing(size_t ping_counter)
+        {
+            for (unsigned i=0; i<GetNumOutputPorts(); ++i)
+            {
+                auto& port = GetOutputPort(i);
+                std::vector<PortControlMessage> messages;
+                port.TransferMessages(&messages);
+                for (unsigned i=0; i<GetNumInputPorts(); ++i)
+                {
+                    auto& port = GetInputPort(i);
+                    for (auto msg : messages)
+                        port.PushMessage(std::move(msg));
+                }
+            }
         }
 
     private:

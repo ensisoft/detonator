@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include <string>
+#include <vector>
 
 #include "audio/buffer.h"
 #include "audio/format.h"
@@ -27,6 +28,10 @@ namespace audio
 {
     struct PortDesc {
         std::string name;
+    };
+
+    struct PortControlMessage {
+        std::string message;
     };
 
     // Port provides an input/output abstraction for connecting
@@ -40,10 +45,11 @@ namespace audio
         using BufferHandle = audio::BufferHandle;
         using Format = audio::Format;
 
-        explicit Port(const std::string& name)
-          : mName(name)
+        explicit Port(std::string name) noexcept
+          : mName(std::move(name))
         {}
-
+        Port(const Port& other) = default;
+        Port() = default;
         // Push a new buffer for into the port.
         // The audio graph will *pull* from the source output ports
         // and *push* into the destination input ports.
@@ -73,6 +79,15 @@ namespace audio
             mBuffer = BufferHandle {};
             return true;
         }
+
+        inline bool HasMessages() const noexcept
+        { return !mMessages.empty(); }
+
+        inline void TransferMessages(std::vector<PortControlMessage>* out) noexcept
+        { *out = std::move(mMessages); }
+
+        inline void PushMessage(PortControlMessage message) noexcept
+        { mMessages.push_back(std::move(message)); }
 
         // Get the human -readable name of the port.
         inline std::string GetName() const
@@ -107,7 +122,8 @@ namespace audio
             return mBuffer ? true : false;
         }
     private:
-        const std::string mName;
+        std::string mName;
+        std::vector<PortControlMessage> mMessages;
         Format mFormat;
         BufferHandle mBuffer;
     };

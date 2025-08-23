@@ -41,14 +41,15 @@ namespace audio
                    std::string file,
                    SampleType type = SampleType::Int16,
                    unsigned loops = 1);
-        FileSource(FileSource&& other);
-       ~FileSource();
+        FileSource(FileSource&& other) noexcept;
+       ~FileSource() override;
         std::string GetId() const override
         { return mId; }
         std::string GetName() const override
         { return mName; }
         std::string GetType() const override
         { return "FileSource"; }
+        void PortPing(size_t ping_counter) override;
         bool Prepare(const Loader& loader, const PrepareParams& params) override;
         void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
         void Shutdown() override;

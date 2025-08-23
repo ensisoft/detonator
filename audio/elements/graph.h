@@ -152,33 +152,36 @@ namespace audio
         { return mFormat; }
 
         // Element implementation note that  GetName is already part of the Source impl
-        virtual std::string GetId() const override
+        std::string GetId() const override
         { return mId; }
-        virtual std::string GetName() const override
+        std::string GetName() const override
         { return mName; }
-        virtual std::string GetType() const override
+        std::string GetType() const override
         { return "Graph"; }
-        virtual bool IsSource() const override
+        bool IsSource() const override
         { return true; }
-        virtual bool IsSourceDone() const override
+        bool IsSourceDone() const override
         { return mDone; }
-        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
-        virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
-        virtual void Shutdown() override;
-        virtual void Advance(unsigned int ms) override;
-        virtual unsigned GetNumOutputPorts() const override
+        bool Prepare(const Loader& loader, const PrepareParams& params) override;
+        void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
+        void Shutdown() override;
+        void Advance(unsigned int ms) override;
+        unsigned GetNumOutputPorts() const override
         { return 1; }
-        virtual Port& GetOutputPort(unsigned index) override
+        Port& GetOutputPort(unsigned index) override
         {
             if (index == 0) return mPort;
             BUG("No such port index.");
         }
-        virtual bool DispatchCommand(const std::string& dest, Element::Command& cmd) override;
+        bool DispatchCommand(const std::string& dest, Element::Command& cmd) override;
         Graph& operator=(const Graph&) = delete;
+    private:
+        void PropagateMessages();
     private:
         using AdjacencyList = std::unordered_set<Element*>;
         const std::string mName;
         const std::string mId;
+        std::size_t mPingCounter = 0;
         // Maps an element to its source elements, i.e. answers
         // the question "which elements does this element depend on?".
         std::unordered_map<Element*, AdjacencyList> mSrcMap;
