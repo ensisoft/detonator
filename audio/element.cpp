@@ -130,6 +130,8 @@ const ElementDesc* FindElementDesc(const std::string& type)
             playlist.input_ports.push_back({"in0"});
             playlist.input_ports.push_back({"in1"});
             playlist.output_ports.push_back({"out"});
+            playlist.args["repeat_mode"] = audio::Playlist::RepeatMode::PlayAll;
+            playlist.args["playback_mode"] = audio::Playlist::PlaybackMode::Sequential;
             map["Playlist"] = playlist;
         }
         {
@@ -247,7 +249,15 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
     if (desc.type == "Queue")
         return std::make_unique<Queue>(desc.name, desc.id);
     else if (desc.type == "Playlist")
-        return Construct<Playlist>(desc.name, desc.id, &desc.input_ports);
+    {
+        auto ret = Construct<Playlist>(desc.name, desc.id, &desc.input_ports);
+        if (const auto* arg = GetOptionalArg<Playlist::RepeatMode>(args, "repeat_mode", name))
+            ret->SetRepeatMode(*arg);
+        if (const auto* arg = GetOptionalArg<Playlist::PlaybackMode>(args, "playback_mode", name))
+            ret->SetPlaybackMode(*arg);
+        ret->Shuffle();
+        return ret;
+    }
     else if (desc.type == "StereoMaker")
         return Construct<StereoMaker>(desc.name, desc.id,
             GetArg<StereoMaker::Channel>(args, "channel", name));

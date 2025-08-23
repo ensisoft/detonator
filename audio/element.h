@@ -29,6 +29,7 @@
 #include "audio/elements/effect.h"
 #include "audio/elements/file_source.h"
 #include "audio/elements/stereo_maker.h"
+#include "audio/elements/playlist.h"
 
 namespace audio
 {
@@ -38,7 +39,9 @@ namespace audio
             Format,
             FileSource::IOStrategy,
             StereoMaker::Channel,
-            Effect::Kind>;
+            Effect::Kind,
+            Playlist::RepeatMode,
+            Playlist::PlaybackMode>;
 
     struct ElementDesc {
         std::vector<PortDesc> input_ports;
