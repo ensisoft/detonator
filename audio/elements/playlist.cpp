@@ -127,6 +127,13 @@ void Playlist::Process(Allocator& allocator, EventQueue& events, unsigned millis
         else BUG("Missing repeat mode handling.");
     }
 
+    Buffer::InfoTag tag;
+    tag.element.name = mName;
+    tag.element.id   = mId;
+    tag.element.source = true;
+    tag.element.source_done = mSrcIndex == mSrcs.size();
+    buffer->AddInfoTag(tag);
+
     mOut.PushBuffer(buffer);
 }
 
