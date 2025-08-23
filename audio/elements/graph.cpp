@@ -447,6 +447,9 @@ bool Graph::Prepare(const Loader& loader, const PrepareParams& params)
             }
         }
     }
+
+    PropagateMessages();
+
     mTopoOrder = std::move(order);
     mFormat    = mPort.GetFormat();
     if (!IsValid(mFormat))
@@ -519,6 +522,8 @@ void Graph::Process(Allocator& allocator, EventQueue& events, unsigned milliseco
             }
         }
     }
+
+    PropagateMessages();
 
     // check if we're all done
     bool graph_done = true;
@@ -593,6 +598,29 @@ bool Graph::DispatchCommand(const std::string& dest, Element::Command& cmd)
     return false;
 }
 
+void Graph::PropagateMessages()
+{
+    for (auto it = mTopoOrder.rbegin(); it != mTopoOrder.rend(); ++it)
+    {
+        auto* element = *it;
+        for (unsigned i=0; i<element->GetNumInputPorts(); ++i)
+        {
+            auto& in_port = element->GetInputPort(i);
+            std::vector<PortControlMessage> messages;
+            in_port.TransferMessages(&messages);
+
+            auto* out_port = FindSrcPort(&in_port);
+            ASSERT(out_port);
+            for (auto message : messages)
+                out_port->PushMessage(std::move(message));
+
+            auto* out_element = FindOutputPortOwner(out_port);
+            ASSERT(out_element);
+            out_element->PortPing(mPingCounter);
+        }
+    }
+    ++mPingCounter;
+}
 
 
 } // namespace

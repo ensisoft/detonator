@@ -44,7 +44,7 @@ struct FileSource::PCMBuffer {
 class FileSource::PCMDecoder : public audio::Decoder
 {
 public:
-    PCMDecoder(const std::shared_ptr<const PCMBuffer>& pcm)
+    explicit PCMDecoder(const std::shared_ptr<const PCMBuffer>& pcm)
       : mBuffer(pcm)
     {}
     unsigned GetSampleRate() const override
@@ -114,7 +114,7 @@ FileSource::FileSource(std::string name, std::string id, std::string file, Sampl
     mFormat.sample_type = type;
 }
 
-FileSource::FileSource(FileSource&& other)
+FileSource::FileSource(FileSource&& other) noexcept
   : mName(other.mName)
   , mId(other.mId)
   , mFile(other.mFile)
@@ -125,6 +125,26 @@ FileSource::FileSource(FileSource&& other)
 {}
 
 FileSource::~FileSource() = default;
+
+void FileSource::PortPing(size_t ping_counter)
+{
+    std::vector<PortControlMessage> messages;
+    mPort.TransferMessages(&messages);
+
+    for (const auto& msg : messages)
+    {
+        if (msg.message == "Shutdown")
+        {
+            DEBUG("Audio file source shutting down on control message. [name='%1']", mName);
+            Shutdown();
+        }
+        else
+        {
+            DEBUG("Audio file source received control message. [name='%1, msg=%2]", mName, msg.message);
+        }
+    }
+}
+
 
 bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
 {
@@ -174,14 +194,14 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
                   , mStream(std::move(stream))
                   , mSampleType(type)
                 {}
-                virtual void DoTask() override
+                void DoTask() override
                 {
                     if (!mDecoder->Open(mStream, mSampleType))
                     {
                         mFlags.set(Flags::Error, true);
                     }
                 }
-                virtual void GetValue(const char* key, void* ptr) override
+                void GetValue(const char* key, void* ptr) override
                 {
                     ASSERT(!std::strcmp(key, "decoder"));
                     using DecoderPtr = std::unique_ptr<Decoder>;
@@ -221,14 +241,14 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
                   : mDecoder(std::move(decoder))
                   , mStream(std::move(stream))
                 {}
-                virtual void DoTask() override
+                void DoTask() override
                 {
                     if (!mDecoder->Open(mStream))
                     {
                         mFlags.set(Flags::Error, true);
                     }
                 }
-                virtual void GetValue(const char* key, void* ptr) override
+                void GetValue(const char* key, void* ptr) override
                 {
                     ASSERT(!std::strcmp(key, "decoder"));
                     using DecoderPtr = std::unique_ptr<Decoder>;
@@ -388,6 +408,7 @@ void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned mill
 void FileSource::Shutdown()
 {
     mDecoder.reset();
+    mOpenDecoderTask.Clear();
 }
 
 bool FileSource::IsSourceDone() const
