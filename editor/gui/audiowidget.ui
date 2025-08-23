@@ -359,8 +359,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>448</width>
-             <height>926</height>
+             <width>346</width>
+             <height>914</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -418,7 +418,7 @@
                    </property>
                    <item>
                     <layout class="QGridLayout" name="gridLayout_2">
-                     <item row="17" column="1">
+                     <item row="19" column="1">
                       <widget class="QCheckBox" name="pcmCaching">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -431,37 +431,10 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="14" column="1">
-                      <widget class="gui::TimeWidget" name="startTime">
-                       <property name="focusPolicy">
-                        <enum>Qt::TabFocus</enum>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="13" column="1">
-                      <widget class="gui::TimeWidget" name="delay">
-                       <property name="focusPolicy">
-                        <enum>Qt::TabFocus</enum>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="9" column="0">
-                      <widget class="QLabel" name="lblGain">
+                     <item row="4" column="0">
+                      <widget class="QLabel" name="lblSampleRate">
                        <property name="text">
-                        <string>Gain</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="0">
-                      <widget class="QLabel" name="lblSampleType">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="text">
-                        <string>Sample type</string>
+                        <string>Sample rate</string>
                        </property>
                       </widget>
                      </item>
@@ -472,12 +445,6 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="5" column="1">
-                      <widget class="QComboBox" name="channels"/>
-                     </item>
-                     <item row="15" column="1">
-                      <widget class="QComboBox" name="effect"/>
-                     </item>
                      <item row="10" column="0">
                       <widget class="QLabel" name="lblFrequency">
                        <property name="text">
@@ -485,85 +452,23 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="11" column="0">
-                      <widget class="QLabel" name="lblDuration">
-                       <property name="text">
-                        <string>Duration</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="15" column="0">
-                      <widget class="QLabel" name="lblEffect">
-                       <property name="text">
-                        <string>Effect</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="9" column="1">
-                      <widget class="QDoubleSpinBox" name="gainValue">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="maximum">
-                        <double>100.000000000000000</double>
-                       </property>
-                       <property name="stepType">
-                        <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                       </property>
-                       <property name="value">
-                        <double>1.000000000000000</double>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="11" column="1">
-                      <widget class="gui::TimeWidget" name="duration">
-                       <property name="focusPolicy">
-                        <enum>Qt::TabFocus</enum>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="1">
-                      <widget class="QComboBox" name="sampleType">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="2" column="1">
-                      <widget class="QLineEdit" name="elemName">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="4" column="0">
-                      <widget class="QLabel" name="lblSampleRate">
-                       <property name="text">
-                        <string>Sample rate</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="16" column="0">
-                      <widget class="QLabel" name="lblLoops">
-                       <property name="text">
-                        <string>Loops</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="7" column="0">
-                      <widget class="QLabel" name="lblFileSource">
-                       <property name="text">
-                        <string>File source</string>
-                       </property>
+                     <item row="4" column="1">
+                      <widget class="QComboBox" name="sampleRate">
+                       <item>
+                        <property name="text">
+                         <string>8000</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>16000</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>44100</string>
+                        </property>
+                       </item>
                       </widget>
                      </item>
                      <item row="10" column="1">
@@ -588,10 +493,50 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="14" column="0">
-                      <widget class="QLabel" name="lblStartTime">
+                     <item row="20" column="1">
+                      <widget class="QCheckBox" name="fileCaching">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
                        <property name="text">
-                        <string>Start time</string>
+                        <string>Enable file caching</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="0">
+                      <widget class="QLabel" name="lblFileSource">
+                       <property name="text">
+                        <string>File source</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="15" column="0">
+                      <widget class="QLabel" name="lblEffect">
+                       <property name="text">
+                        <string>Effect</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="14" column="1">
+                      <widget class="gui::TimeWidget" name="startTime">
+                       <property name="focusPolicy">
+                        <enum>Qt::TabFocus</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="1">
+                      <widget class="QComboBox" name="ioStrategy"/>
+                     </item>
+                     <item row="2" column="1">
+                      <widget class="QLineEdit" name="elemName">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
                        </property>
                       </widget>
                      </item>
@@ -605,6 +550,61 @@
                        </property>
                        <property name="text">
                         <string>ID</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="11" column="0">
+                      <widget class="QLabel" name="lblDuration">
+                       <property name="text">
+                        <string>Duration</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="13" column="0">
+                      <widget class="QLabel" name="lblDelay">
+                       <property name="text">
+                        <string>Delay</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="14" column="0">
+                      <widget class="QLabel" name="lblStartTime">
+                       <property name="text">
+                        <string>Start time</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="0">
+                      <widget class="QLabel" name="lblSampleType">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="text">
+                        <string>Sample type</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="0">
+                      <widget class="QLabel" name="lblGain">
+                       <property name="text">
+                        <string>Gain</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="16" column="0">
+                      <widget class="QLabel" name="lblLoops">
+                       <property name="text">
+                        <string>Loops</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="13" column="1">
+                      <widget class="gui::TimeWidget" name="delay">
+                       <property name="focusPolicy">
+                        <enum>Qt::TabFocus</enum>
                        </property>
                       </widget>
                      </item>
@@ -627,36 +627,10 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="13" column="0">
-                      <widget class="QLabel" name="lblDelay">
-                       <property name="text">
-                        <string>Delay</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="18" column="1">
-                      <widget class="QCheckBox" name="fileCaching">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="text">
-                        <string>Enable file caching</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="2" column="0">
-                      <widget class="QLabel" name="label_3">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="text">
-                        <string>Name</string>
+                     <item row="11" column="1">
+                      <widget class="gui::TimeWidget" name="duration">
+                       <property name="focusPolicy">
+                        <enum>Qt::TabFocus</enum>
                        </property>
                       </widget>
                      </item>
@@ -682,6 +656,16 @@
                        </property>
                        <property name="value">
                         <number>1</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="1">
+                      <widget class="QComboBox" name="sampleType">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
                        </property>
                       </widget>
                      </item>
@@ -725,32 +709,68 @@
                        </item>
                       </layout>
                      </item>
-                     <item row="4" column="1">
-                      <widget class="QComboBox" name="sampleRate">
-                       <item>
-                        <property name="text">
-                         <string>8000</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>16000</string>
-                        </property>
-                       </item>
-                       <item>
-                        <property name="text">
-                         <string>44100</string>
-                        </property>
-                       </item>
+                     <item row="17" column="1">
+                      <widget class="QComboBox" name="repeatMode"/>
+                     </item>
+                     <item row="15" column="1">
+                      <widget class="QComboBox" name="effect"/>
+                     </item>
+                     <item row="2" column="0">
+                      <widget class="QLabel" name="label_3">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="text">
+                        <string>Name</string>
+                       </property>
                       </widget>
                      </item>
-                     <item row="6" column="1">
-                      <widget class="QComboBox" name="ioStrategy"/>
+                     <item row="9" column="1">
+                      <widget class="QDoubleSpinBox" name="gainValue">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximum">
+                        <double>100.000000000000000</double>
+                       </property>
+                       <property name="stepType">
+                        <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                       </property>
+                       <property name="value">
+                        <double>1.000000000000000</double>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="1">
+                      <widget class="QComboBox" name="channels"/>
                      </item>
                      <item row="6" column="0">
                       <widget class="QLabel" name="lblIoStrategy">
                        <property name="text">
-                        <string>IO Strategy</string>
+                        <string>IO strategy</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="18" column="1">
+                      <widget class="QComboBox" name="playbackMode"/>
+                     </item>
+                     <item row="17" column="0">
+                      <widget class="QLabel" name="lblRepeatMode">
+                       <property name="text">
+                        <string>Repeat mode</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="18" column="0">
+                      <widget class="QLabel" name="lblPlaybackMode">
+                       <property name="text">
+                        <string>Playback mode</string>
                        </property>
                       </widget>
                      </item>
@@ -1147,6 +1167,8 @@
   <tabstop>startTime</tabstop>
   <tabstop>effect</tabstop>
   <tabstop>loopCount</tabstop>
+  <tabstop>repeatMode</tabstop>
+  <tabstop>playbackMode</tabstop>
   <tabstop>pcmCaching</tabstop>
   <tabstop>fileCaching</tabstop>
   <tabstop>afChannels</tabstop>
