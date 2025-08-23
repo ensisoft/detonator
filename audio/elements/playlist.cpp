@@ -16,6 +16,9 @@
 
 #include "config.h"
 
+#include <algorithm>
+#include <random>
+
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/trace.h"
@@ -38,6 +41,30 @@ Playlist::Playlist(std::string name, std::string id, const std::vector<PortDesc>
 Playlist::Playlist(std::string name, const std::vector<PortDesc>& srcs)
   : Playlist(std::move(name), base::RandomString(10), srcs)
 {}
+
+void Playlist::Shuffle()
+{
+    if (mPlaybackMode == PlaybackMode::Shuffle)
+    {
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(mSrcs.begin(), mSrcs.end(), g);
+    }
+    else if (mPlaybackMode == PlaybackMode::Sequential)
+    {
+        // nothing to do, for posterity
+    } else BUG("Missing playback mode handling.");
+
+    if (mRepeatMode == RepeatMode::PlayOne)
+    {
+        for (size_t i=1; i<mSrcs.size(); ++i)
+        {
+            PortControlMessage msg;
+            msg.message = "Shutdown";
+            mSrcs[i].PushMessage(msg);
+        }
+    }
+}
 
 bool Playlist::Prepare(const Loader& loader, const PrepareParams& params)
 {
@@ -73,6 +100,7 @@ void Playlist::Process(Allocator& allocator, EventQueue& events, unsigned millis
 
     if (mSrcIndex == mSrcs.size())
         return;
+
     BufferHandle buffer;
     if (!mSrcs[mSrcIndex].PullBuffer(buffer))
         return;
@@ -89,8 +117,15 @@ void Playlist::Process(Allocator& allocator, EventQueue& events, unsigned millis
         if (!tag.element.source_done)
             all_sources_done = false;
     }
+
     if (all_sources_done)
-        mSrcIndex++;
+    {
+        if (mRepeatMode == RepeatMode::PlayOne)
+            mSrcIndex = mSrcs.size();
+        else if (mRepeatMode == RepeatMode::PlayAll)
+            ++mSrcIndex;
+        else BUG("Missing repeat mode handling.");
+    }
 
     mOut.PushBuffer(buffer);
 }

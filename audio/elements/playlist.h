@@ -29,6 +29,13 @@ namespace audio
     class Playlist : public Element
     {
     public:
+        enum class RepeatMode {
+            PlayAll, PlayOne
+        };
+        enum class PlaybackMode {
+            Sequential, Shuffle
+        };
+
         Playlist(std::string name, std::string id, const std::vector<PortDesc>& srcs);
         Playlist(std::string, const std::vector<PortDesc>& srcs);
         std::string GetId() const override
@@ -37,8 +44,7 @@ namespace audio
         { return mName; }
         std::string GetType() const override
         { return "Playlist"; }
-        bool Prepare(const Loader& loader, const PrepareParams& params) override;
-        void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
+
         unsigned GetNumOutputPorts() const override
         { return 1; }
         unsigned GetNumInputPorts() const override
@@ -50,11 +56,27 @@ namespace audio
         }
         Port& GetInputPort(unsigned index) override
         { return base::SafeIndex(mSrcs, index); }
+
+        void SetRepeatMode(RepeatMode mode) noexcept
+        { mRepeatMode = mode; }
+        void SetPlaybackMode(PlaybackMode mode) noexcept
+        { mPlaybackMode = mode; }
+        auto GetRepeatMode() const noexcept
+        { return mRepeatMode; }
+        auto GetPlaybackMode() const noexcept
+        { return mPlaybackMode; }
+
+        void Shuffle();
+        bool Prepare(const Loader& loader, const PrepareParams& params) override;
+        void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
+
     private:
         const std::string mName;
         const std::string mId;
         std::vector<SingleSlotPort> mSrcs;
         std::size_t mSrcIndex = 0;
         SingleSlotPort mOut;
+        RepeatMode mRepeatMode = RepeatMode::PlayAll;
+        PlaybackMode mPlaybackMode = PlaybackMode::Sequential;
     };
 } // namespace
