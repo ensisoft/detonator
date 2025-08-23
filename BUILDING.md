@@ -197,19 +197,27 @@ must be copied manually from `c:\Qt\5.15.2\msvc2019_64\`to `editor\dist`.
 
 ## Step 1) Building the Editor & Engine for Desktop Linux 🐧
 
+> [!IMPORTANT] 
+> Linux is an unstable beta platform where everything is always moving and breaking and 
+> binary (or API) stability is a joke. In order to avoid version incompatibility issues,
+> it is recommended to use the packages (zlib, freetype etc.) provided by your distribution. 
+> Using system packages is default option for the Linux build.<br>
+>
+> IF you do choose to use Conan then run the `conan install` command before cmake configure 
+> and append `-DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake` and `-DPREFER_SYSTEM_PACKAGES=OFF` 
+> to the cmake configure command.
+
 <details><summary>How to install dependencies</summary>
 
 *See your distro manuals for how to install the packages.*
 
 Install these packages:
 
-- GCC (or Clang) compiler suite
+- GCC C++ compiler
 - CMake build tool
-- Conan💩💩 package manager (VERSION 2)
-  - On Archlinux you can use 'yay' to install conan + its dependencies from AUR*
-  - See below for installing yay + conan💩💩
 - Git version control system
-- Qt5 application framework
+- assimp qt5 mpg123 boost freetype harfbuzz zlib 
+
 
 </details>
 
@@ -221,11 +229,18 @@ Install these packages:
   $ git submodule update --init --recursive
   $ mkdir build
   $ cd build
-  $ conan install .. --output-folder=conan --build missing
-  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Release
   $ make -j16 install
   $ ctest -j16
 ```
+
+With conan 
+```
+  $ cd build
+  $ conan install .. --output-folder=conan --build missing
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake -DPREFER_SYSTEM_PACKAGES=OFF
+```
+
 </details>
 
 <details><summary>How to build the project in DEBUG [OPTIONAL]</summary>
@@ -236,11 +251,18 @@ Install these packages:
   $ git submodule update --init --recursive
   $ mkdir build_d
   $ cd build_d
-  $ conan install .. --output-folder=conan --build missing -s build_type=Debug
-  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Debug
   $ make -j16 install
   $ ctest -j16
 ```
+
+With conan
+```
+  $ cd build_d
+  $ conan install .. --output-folder=conan --build missing -s build_type=Debug
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake -DPREFER_SYSTEM_PACKAGES=OFF
+```
+
 </details>
 
 <details><summary>How to build the project in PROFILE [OPTIONAL] </summary>
@@ -252,10 +274,18 @@ Install these packages:
   $ git submodule update --init --recursive
   $ mkdir build_profile
   $ cd build_profile
-  $ conan install .. --output-folder=conan --build missing -s build_type=RelWithDebInfo
-  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
   $ make -j16 install
 ```
+
+With conan
+```
+  $ mkdir build_profile
+  $ conan install .. --output-folder=conan --build missing -s build_type=RelWithDebInfo
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake -DPREFER_SYSTEM_PACKAGES=OFF
+```
+
+
 - Then in order to profile and analyze the output use the combination of valgrind and kcachegrind.
   For example:
 ```
@@ -265,10 +295,22 @@ Install these packages:
 ```
 </details>
 
-<details><summary>How to build with Ninja, Clang and Mold linker [OPTIONAL]</summary>
+<details><summary>How to build with Ninja, Clang and Mold linker in RELEASE [OPTIONAL]</summary>
 
 - These are alternative instructions for build using Ninja, Clang and Mold linker.
+- Likely broken since this is not the normal build workflow. Rather a test to try to improve the build and link times.
 
+```
+  $ git clone https://github.com/ensisoft/detonator
+  $ cd detonator
+  $ git submodule update --init --recursive
+  $ mkdir build
+  $ cd build
+  $ cmake -G "Ninja" .. -DCMAKE_BUILD_TYPE=Release -DUSE_MOLD_LINKER=ON
+  $ ninja -j16 install
+```
+
+With conan
 ```
   $ export CC=/usr/bin/clang
   $ export CXX=/usr/bin/clang++
@@ -279,10 +321,11 @@ Install these packages:
   $ git submodule update --init --recursive
   $ mkdir build
   $ cd build
-  $ conan install .. --build missing --profile detonator-clang
-  $ cmake -G "Ninja" .. -DCMAKE_BUILD_TYPE=Release -DUSE_MOLD_LINKER=ON
+  $ conan install .. --output-folder=conan --build missing --profile detonator-clang
+  $ cmake -G "Ninja" .. -DCMAKE_BUILD_TYPE=Release -DUSE_MOLD_LINKER=ON -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake -DPREFER_SYSTEM_PACKAGES=OFF
   $ ninja -j16 install
 ```
+
 </details>
 
 <details><summary>How to build Qt5 designer plugin [OPTIONAL]</summary>
