@@ -8,6 +8,19 @@ project(DETONATOR2D)
 option(USE_MOLD_LINKER "Use mold linker. https://github.com/rui314/mold" OFF)
 option(BUILD_QT_STUFF "Build the editor (and other Qt dependant components" ON)
 
+# On linux we have the problem that transitive dependencies can (and WILL) cause
+# problems. For example the stuff we depend on depends on libpng x.y.z but the
+# system also has libpng installed just that it's got a version z.y.x.
+# Typical example is a random crash in some a library that makes no sense
+# such as libpng crashing when opening the Qt file dialog. This happens
+# because Qt links against the *system* libpng and the libpng symbols got
+# mangled with the symbols from the libpng that we linked against (conan libs)
+option(PREFER_SYSTEM_PACKAGES "Use system packages instead of Conan packages on Linux" ON)
+
+if (WIN32)
+    set(PREFER_SYSTEM_PACKAGES OFF)
+endif()
+
 message(STATUS "
             ~~ DETONATOR 2D ~~
 
@@ -20,12 +33,34 @@ message(STATUS "
 
 ")
 
-find_package(ZLIB REQUIRED)
-find_package(HARFBUZZ REQUIRED)
-find_package(FREETYPE REQUIRED)
-find_package(MPG123 REQUIRED)
-find_package(Boost REQUIRED)
-find_package(assimp REQUIRED)
+# conan2 doesn't provide CONAN_LIBS anymore, so we'll setup our own array var
+# for the same purpose
+set(CONAN_LIBS)
+if (PREFER_SYSTEM_PACKAGES)
+    list(APPEND CONAN_LIBS harfbuzz freetype mpg123 z assimp)
+    include_directories("/usr/include/harfbuzz")
+    include_directories("/usr/include/freetype2")
+else()
+    find_package(ZLIB     REQUIRED)
+    find_package(HARFBUZZ REQUIRED)
+    find_package(FREETYPE REQUIRED)
+    find_package(MPG123   REQUIRED)
+    find_package(Boost    REQUIRED)
+    find_package(assimp   REQUIRED)
+
+    list(APPEND CONAN_LIBS "harfbuzz::harfbuzz")
+    list(APPEND CONAN_LIBS "Freetype::Freetype")
+    list(APPEND CONAN_LIBS "mpg123::mpg123")
+    list(APPEND CONAN_LIBS "ZLIB::ZLIB")
+    list(APPEND CONAN_LIBS "assimp::assimp")
+
+    # play  stupid games, win stupid prices.  shove this shit here to make the headers
+    # found same like before conan -> conan2 upgrade
+    include_directories(${Boost_INCLUDE_DIRS})
+    include_directories(${harfbuzz_INCLUDE_DIRS})
+    include_directories(${freetype_INCLUDE_DIRS})
+    include_directories(${zlib_INCLUDE_DIRS})
+endif()
 
 # set variables that are useful when building game specific
 # engine libraries. See blast demo for an example of how to
@@ -41,21 +76,6 @@ set(ENGINE_INC
 set(ENGINE_DEF)
 set(ENGINE_COMPILE_OPTIONS)
 set(ENGINE_LINK_OPTIONS)
-
-# conan2 doesn't provide CONAN_LIBS anymore, so we'll setup our own array var
-# for the same purpose
-set(CONAN_LIBS)
-list(APPEND CONAN_LIBS "harfbuzz::harfbuzz")
-list(APPEND CONAN_LIBS "Freetype::Freetype")
-list(APPEND CONAN_LIBS "mpg123::mpg123")
-list(APPEND CONAN_LIBS "ZLIB::ZLIB")
-list(APPEND CONAN_LIBS "assimp::assimp")
-
-# play  stupid games, win stupid prices.  shove this shit here to make the headers
-# found same like before conan -> conan2 upgrade
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${harfbuzz_INCLUDE_DIRS})
-include_directories(${freetype_INCLUDE_DIRS})
 
 # https://cmake.org/cmake/help/latest/module/FetchContent.html#examples
 # https://jonathanhamberg.com/post/cmake-embedding-git-hash/
@@ -193,6 +213,12 @@ else()
     message("Skipping Qt build. No amazing DETONATOR editor for you! Boo.
 But let's get those custom game engines built!
 ")
+endif()
+
+if (PREFER_SYSTEM_PACKAGES)
+    message("Using system packages. Good luck!")
+else()
+    message("Using conan packages. God bless!")
 endif()
 
 set(CMAKE_AUTOMOC ON)
@@ -474,7 +500,11 @@ if (BUILD_QT_STUFF)
         third_party/quazip/quazip/quazipfileinfo.cpp
         third_party/quazip/quazip/quazipnewinfo.cpp)
     target_compile_definitions(QuaZip PUBLIC QUAZIP_STATIC)
-    target_link_libraries(QuaZip Qt5::Core ZLIB::ZLIB)
+    target_link_libraries(QuaZip Qt5::Core)
+    if (NOT PREFER_SYSTEM_PACKAGES)
+        target_link_libraries(QuaZip ZLIB::ZLIB)
+    endif()
+
 
     add_library(QtColorWidgets
             third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
