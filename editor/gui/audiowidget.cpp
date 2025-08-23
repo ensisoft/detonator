@@ -45,6 +45,31 @@
 #include "editor/gui/clipboard.h"
 #include "editor/gui/translation.h"
 
+namespace audio {
+    std::string TranslateEnum(audio::Playlist::PlaybackMode mode)
+    {
+        using M = audio::Playlist::PlaybackMode;
+        if (mode == M::Sequential)
+            return "Play Sequentially";
+        else if (mode == M::Shuffle)
+            return "Shuffle";
+        else BUG("Missing translation");
+        return "???";
+    }
+
+    std::string TranslateEnum(audio::Playlist::RepeatMode mode)
+    {
+        using M = audio::Playlist::RepeatMode;
+        if (mode == M::PlayAll)
+            return "Play All";
+        else if (mode == M::PlayOne)
+            return "Play One";
+        else BUG("Missing translation");
+        return "???";
+    }
+} // namespace
+
+
 namespace {
 struct PortDesc {
     std::string name;
@@ -1113,6 +1138,9 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
     PopulateFromEnum<audio::Channels>(mUI.channels);
     PopulateFromEnum<audio::Effect::Kind>(mUI.effect);
     PopulateFromEnum<audio::IOStrategy>(mUI.ioStrategy);
+    PopulateFromEnum<audio::Playlist::RepeatMode>(mUI.repeatMode);
+    PopulateFromEnum<audio::Playlist::PlaybackMode>(mUI.playbackMode);
+
     SetValue(mUI.graphName, QString("My Graph"));
     SetValue(mUI.graphID, base::RandomString(10));
     SetEnabled(mUI.actionPause, false);
@@ -1937,6 +1965,14 @@ void AudioWidget::on_fileCaching_stateChanged(int)
 {
     SetSelectedElementProperties();
 }
+void AudioWidget::on_repeatMode_currentIndexChanged(int)
+{
+    SetSelectedElementProperties();
+}
+void AudioWidget::on_playbackMode_currentIndexChanged(int)
+{
+    SetSelectedElementProperties();
+}
 
 void AudioWidget::SceneSelectionChanged()
 {
@@ -2111,6 +2147,11 @@ void AudioWidget::ShowSelectedElementProperties()
     SetVisible(mUI.lblEffect,     false);
     SetVisible(mUI.lblLoops,      false);
 
+    SetVisible(mUI.lblPlaybackMode, false),
+    SetVisible(mUI.lblRepeatMode,   false);
+    SetVisible(mUI.repeatMode,      false);
+    SetVisible(mUI.playbackMode,    false);
+
     auto items = mScene->selectedItems();
     if (items.isEmpty()) return;
     const auto* item = dynamic_cast<AudioElement*>(items[0]);
@@ -2233,6 +2274,18 @@ void AudioWidget::ShowSelectedElementProperties()
         SetVisible(mUI.lblEffect, true);
         SetValue(mUI.effect, *val);
     }
+    if (const auto* val = item->GetArgValue<audio::Playlist::PlaybackMode>("playback_mode"))
+    {
+        SetVisible(mUI.lblPlaybackMode, true);
+        SetVisible(mUI.playbackMode, true);
+        SetValue(mUI.playbackMode, *val);
+    }
+    if (const auto* val = item->GetArgValue<audio::Playlist::RepeatMode>("repeat_mode"))
+    {
+        SetVisible(mUI.lblRepeatMode, true);
+        SetVisible(mUI.repeatMode, true);
+        SetValue(mUI.repeatMode, *val);
+    }
 
     if (item->IsFileSource())
     {
@@ -2301,6 +2354,10 @@ void AudioWidget::SetSelectedElementProperties()
         *val = GetValue(mUI.fileCaching);
     if (auto* val = item->GetArgValue<audio::FileSource::IOStrategy>("io_strategy"))
         *val = GetValue(mUI.ioStrategy);
+    if (auto* val = item->GetArgValue<audio::Playlist::PlaybackMode>("playback_mode"))
+        *val = GetValue(mUI.playbackMode);
+    if (auto* val = item->GetArgValue<audio::Playlist::RepeatMode>("repeat_mode"))
+        *val = GetValue(mUI.repeatMode);
 
     mScene->invalidate();
 }

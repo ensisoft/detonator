@@ -112,7 +112,7 @@ namespace gui
         void OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event);
         void OnAudioPlayerEvent(const audio::Player::SourceProgressEvent& event);
         void OnAudioPlayerEvent(const audio::Player::SourceEventEvent& event);
-        virtual void keyPressEvent(QKeyEvent* key) override;
+        void keyPressEvent(QKeyEvent* key) override;
     private slots:
         void on_btnSelectFile_clicked();
         void on_btnEditFile_clicked();
@@ -145,6 +145,8 @@ namespace gui
         void on_loopCount_valueChanged(int);
         void on_pcmCaching_stateChanged(int);
         void on_fileCaching_stateChanged(int);
+        void on_repeatMode_currentIndexChanged(int);
+        void on_playbackMode_currentIndexChanged(int);
 
         void SceneSelectionChanged();
         void AddElementAction();
