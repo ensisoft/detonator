@@ -237,6 +237,9 @@ void CppRuntime::Update(double game_time, double dt)
 
 void CppRuntime::Tick(double game_time, double dt)
 {
+    if (!mScene)
+        return;
+
     if (mEntityScripts.empty())
         return;
 
