@@ -323,11 +323,10 @@ void MainWindow::LoadSettings()
     settings.GetValue("Settings", "vcs_cmd_commit_file",        &mSettings.vcs_cmd_commit_file);
     settings.GetValue("Settings", "vcs_ignore_list",            &mSettings.vcs_ignore_list);
     settings.GetValue("Settings", "main_tab_position",          &mSettings.main_tab_position);
+
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
-    // disabling the VSYNC setting for now since there are just too many problems
-    // making it scale nicely when having multiple windows.
-    GfxWindow::SetVSYNC(false); // mSettings.vsync
     GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
+
     gui::SetGridColor(ToGfx(mSettings.grid_color));
 
     ScriptWidget::Settings script_widget_settings;

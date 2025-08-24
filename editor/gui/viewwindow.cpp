@@ -119,7 +119,6 @@ ViewWindow::ViewWindow(QApplication& app) : mApp(app)
 
     // set defaults
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
-    GfxWindow::SetVSYNC(mSettings.vsync);
     GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
     gui::SetGridColor(ToGfx(mSettings.grid_color));
 
@@ -281,9 +280,6 @@ void ViewWindow::JsonMessageReceived(const QJsonObject& json)
         app::JsonReadSafe(json, "vsync",        &mSettings.vsync);
         app::JsonReadSafe(json, "geometry",     &mSettings.viewer_geometry);
 
-        // disabling the VSYNC setting for now since there are just too many problems
-        // making it scale nicely when having multiple windows.
-        GfxWindow::SetVSYNC(false); //mSettings.vsync);
         GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
         GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
         gui::SetGridColor(ToGfx(mSettings.grid_color));

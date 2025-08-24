@@ -245,7 +245,6 @@ namespace gui
             struct {
                 bool  valid = true;
                 float fps   = 0.0f;
-                bool  vsync = false;
             } graphics;
             struct {
                 // nothing here yet.

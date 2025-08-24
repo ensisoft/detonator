@@ -1225,7 +1225,6 @@ bool UIWidget::GetStats(Stats* stats) const
     stats->time  = mPlayTime;
     stats->graphics.valid = true;
     stats->graphics.fps   = mUI.viewport->getCurrentFPS();
-    stats->graphics.vsync = mUI.viewport->haveVSYNC();
     const auto& dev_stats = mUI.viewport->getDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
     stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;

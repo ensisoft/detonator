@@ -415,9 +415,8 @@ void ChildWindow::UpdateStats()
     mWidget->GetStats(&stats);
     SetValue(mUI.statTime, QString::number(stats.time));
     SetVisible(mUI.lblFps,    stats.graphics.valid);
-    SetVisible(mUI.lblVsync,  stats.graphics.valid);
     SetVisible(mUI.statFps,   stats.graphics.valid);
-    SetVisible(mUI.statVsync, stats.graphics.valid);
+    //SetVisible(mUI.statVsync, stats.graphics.valid);
     SetVisible(mUI.statVBO,   stats.graphics.valid);
     SetVisible(mUI.lblVBO,    stats.graphics.valid);
     if (!stats.graphics.valid)
@@ -433,7 +432,7 @@ void ChildWindow::UpdateStats()
             .arg(vbo_use / kb, 0, 'f', 1, ' ').arg(vbo_alloc / kb, 0, 'f', 1, ' '));
 
     SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
-    SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
+    //SetValue(mUI.statVsync, stats.graphics.vsync ? QString("ON") : QString("OFF"));
 }
 
 } // namespace

@@ -485,7 +485,6 @@ bool MaterialWidget::GetStats(Stats* stats) const
     stats->time  = mTime;
     stats->graphics.valid = true;
     stats->graphics.fps   = mUI.widget->getCurrentFPS();
-    stats->graphics.vsync = mUI.widget->haveVSYNC();
     const auto& dev_stats = mUI.widget->getDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
     stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;
