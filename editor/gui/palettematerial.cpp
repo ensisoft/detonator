@@ -143,10 +143,10 @@ void PaletteMaterial::on_btnSelectMaterial_clicked()
     // rendering and the tilemap widget goes blank.
     // This seems similar to previous bug in the UI widget that was
     // fixed in commit  a7c167ca991f9c0a688212f4c926fc32d9cea77a
-    DlgMaterial dlg(mParent, mWorkspace);
+    DlgMaterial dlg(mParent, mWorkspace, false);
 
     dlg.SetPreviewScale(mPreviewScale);
-    dlg.SetMaterialId(GetItemId(mUI.cmbMaterial));
+    dlg.SetSelectedMaterialId(GetItemId(mUI.cmbMaterial));
     dlg.SetTileIndex(GetValue(mUI.tileIndex));
 
     if (dlg.exec() == QDialog::Rejected)

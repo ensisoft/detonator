@@ -1937,7 +1937,8 @@ void UIWidget::on_btnShapeContentSelectMaterial_clicked()
 {
     if (const auto* widget = GetCurrentWidget())
     {
-        DlgMaterial dlg(this, mState.workspace, GetItemId(mUI.shapeMaterial));
+        DlgMaterial dlg(this, mState.workspace, false);
+        dlg.SetSelectedMaterialId(GetItemId(mUI.shapeMaterial));
         if (dlg.exec() == QDialog::Rejected)
             return;
 

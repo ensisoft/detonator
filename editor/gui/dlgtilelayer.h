@@ -186,8 +186,8 @@ namespace gui
         }
         void on_btnSelectMaterial_clicked()
         {
-            DlgMaterial dlg(this, mWorkspace);
-            dlg.SetMaterialId(GetItemId(mUI.cmbMaterial));
+            DlgMaterial dlg(this, mWorkspace, false);
+            dlg.SetSelectedMaterialId(GetItemId(mUI.cmbMaterial));
             dlg.SetTileIndex(GetValue(mUI.tileIndex));
             if (dlg.exec() == QDialog::Rejected)
                 return;

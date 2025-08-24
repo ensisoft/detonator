@@ -914,7 +914,8 @@ void DlgWidgetStyleProperties::SetWidgetMaterial()
     if (indices.empty())
         return;
 
-    DlgMaterial dlg(this, mWorkspace, GetItemId(mUI.widgetMaterial));
+    DlgMaterial dlg(this, mWorkspace, false);
+    dlg.SetSelectedMaterialId(GetItemId(mUI.widgetMaterial));
     if (dlg.exec() == QDialog::Rejected)
         return;
 
