@@ -2835,9 +2835,13 @@ void MaterialWidget::ShowTextureProperties()
     SetValue(mUI.rectW, 1.0f);
     SetValue(mUI.rectH, 1.0f);
 
+    mUI.sprite->SetSelectedTextureId("");
+
     const auto* source = GetSelectedTextureSrc();
     if (source == nullptr)
         return;
+
+    mUI.sprite->SetSelectedTextureId(source->GetId());
 
     SetEnabled(mUI.textureProp,    true);
     SetEnabled(mUI.textureRect,    true);
@@ -2902,9 +2906,13 @@ void MaterialWidget::ShowTextureMapProperties()
     SetVisible(mUI.spriteDuration,    false);
     SetVisible(mUI.textureMapFlags,   false);
 
+    mUI.sprite->SetSelectedTextureMapId("");
+
     const auto* map = GetSelectedTextureMap();
     if (map == nullptr)
         return;
+
+    mUI.sprite->SetSelectedTextureMapId(map->GetId());
 
     SetEnabled(mUI.textureMap, true);
     SetValue(mUI.textureMapID,    map->GetId());
