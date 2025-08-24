@@ -48,8 +48,27 @@
 
 namespace {
     enum class MaterialType {
-        Texture, Sprite
+        // all selected images are one sprite animation cycle
+        SpriteAnimation,
+        // Each selected image is a single material with single static texture
+        SpriteTexture,
+        // Each selected image is combined into a single static sprite material
+        // with multiple textures
+        SpriteSheet
     };
+
+    std::string TranslateEnum(MaterialType type)
+    {
+        if (type == MaterialType::SpriteAnimation)
+            return "As A Single Sprite Animation";
+        else if (type == MaterialType::SpriteTexture)
+            return "Each Image as a Separate Sprite Texture";
+        else if (type == MaterialType::SpriteSheet)
+            return "All Images Combined into a Single Sprite Sheet";
+        else BUG("Missing translation");
+        return "???";
+    }
+
 }// namespace
 
 namespace gui
@@ -195,18 +214,17 @@ void DlgTileImport::on_btnClose_clicked()
 
 void DlgTileImport::on_btnImport_clicked()
 {
-    bool have_selection = false;
+    unsigned selection_size = 0;
     for (const auto& img : mPack.images)
     {
-        if (img.selected) {
-            have_selection = true;
-            break;
-        }
+        if (img.selected)
+            selection_size++;
     }
-    if (!have_selection)
+    if (selection_size == 0)
     {
         QMessageBox msg(this);
-        msg.setText("You haven't selected any tiles!");
+        msg.setText("You haven't selected any images!n"
+            "Select the images you want to import in the 'Select Images' tab.");
         msg.setIcon(QMessageBox::Information);
         msg.exec();
         return;
@@ -226,7 +244,59 @@ void DlgTileImport::on_btnImport_clicked()
     AutoEnabler close(mUI.btnClose);
     AutoEnabler import(mUI.btnImport);
 
-    if (type == MaterialType::Texture)
+    if (type == MaterialType::SpriteSheet)
+    {
+        if (!MustHaveInput(mUI.spriteName))
+            return;
+
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture, base::RandomString(10));
+        klass.SetSurfaceType(GetValue(mUI.surfaceType));
+        klass.SetTextureMinFilter(GetValue(mUI.minFilter));
+        klass.SetTextureMagFilter(GetValue(mUI.magFilter));
+        klass.SetName(GetValue(mUI.spriteName));
+        klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, premul_alpha_blend);
+        if (const auto& cutoff = mUI.alphaCutoff->GetValue())
+            klass.SetAlphaCutoff(cutoff.value());
+
+        unsigned texture_map_index = 0;
+        for (size_t index=0; index<mPack.images.size(); ++index)
+        {
+            const auto& img  = mPack.images[index];
+            if (!img.selected)
+                continue;
+
+            const auto& name = img.widget->GetName();
+            auto texture = std::make_unique<gfx::TextureFileSource>();
+            texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
+            texture->SetFlag(gfx::TextureFileSource::Flags::PremulAlpha, premul_alpha);
+            texture->SetFileName(mFileUri);
+            texture->SetName(name);
+
+            gfx::FRect rect;
+            rect.Move(img.xpos, img.ypos);
+            rect.Translate(tile_margin_left, tile_margin_top);
+            rect.SetWidth(img.width - tile_margin_left - tile_margin_right);
+            rect.SetHeight(img.height - tile_margin_top - tile_margin_bottom);
+            rect = rect.Normalize(base::FSize(mWidth, mHeight));
+
+            auto map = std::make_unique<gfx::TextureMap>();
+            map->SetType(gfx::TextureMap::Type::Texture2D);
+            map->SetName(name);
+            map->SetNumTextures(1);
+            map->SetTextureSource(0, std::move(texture));
+            map->SetTextureRect(0, rect);
+
+            if (texture_map_index == 0)
+                klass.SetActiveTextureMap(map->GetId());
+            klass.SetNumTextureMaps(texture_map_index + 1);
+            klass.SetTextureMap(texture_map_index, std::move(map));
+            texture_map_index++;
+        }
+        app::MaterialResource res(klass, GetValue(mUI.spriteName));
+        mWorkspace->SaveResource(res);
+
+    }
+    else if (type == MaterialType::SpriteTexture)
     {
         for (size_t index=0; index<mPack.images.size(); ++index)
         {
@@ -279,7 +349,7 @@ void DlgTileImport::on_btnImport_clicked()
             mWorkspace->SaveResource(res);
         }
     }
-    else if (type == MaterialType::Sprite)
+    else if (type == MaterialType::SpriteAnimation)
     {
         if (!MustHaveInput(mUI.spriteName))
             return;
@@ -587,7 +657,7 @@ void DlgTileImport::on_widgetColor_colorChanged(QColor color)
 void DlgTileImport::on_materialType_currentIndexChanged(int)
 {
     const MaterialType type = GetValue(mUI.materialType);
-    if(type == MaterialType::Sprite)
+    if(type == MaterialType::SpriteAnimation)
     {
         SetEnabled(mUI.chkBlendFrames, true);
         SetEnabled(mUI.spriteFps, true);
@@ -595,15 +665,23 @@ void DlgTileImport::on_materialType_currentIndexChanged(int)
         SetValue(mUI.spriteName, mSpriteName);
         SetPlaceholderText(mUI.spriteName, QString(""));
     }
-    else
+    else if (type == MaterialType::SpriteSheet)
+    {
+        SetEnabled(mUI.chkBlendFrames, false);
+        SetEnabled(mUI.spriteFps, false);
+        SetEnabled(mUI.spriteName, true);
+        SetValue(mUI.spriteName, mSpriteName);
+        SetPlaceholderText(mUI.spriteName, QString(""));
+    }
+    else if (type == MaterialType::SpriteTexture)
     {
         mSpriteName = GetValue(mUI.spriteName);
         SetEnabled(mUI.chkBlendFrames, false);
         SetEnabled(mUI.spriteFps, false);
         SetEnabled(mUI.spriteName, false);
         SetValue(mUI.spriteName, QString(""));
-        SetPlaceholderText(mUI.spriteName, QString("From tilename"));
-    }
+        SetPlaceholderText(mUI.spriteName, QString("From Image Name"));
+    } else BUG("Missing material type handling.");
 }
 
 void DlgTileImport::on_cmbColorSpace_currentIndexChanged(int)
@@ -871,12 +949,12 @@ void DlgTileImport::OnPaintScene(gfx::Painter& painter, double secs)
     if (!mMaterial)
     {
         ShowInstruction(
-            "Import tilemap data as materials and textures.\n\n"
+            "Import image data as material(s).\n\n"
             "INSTRUCTIONS\n"
-            "1. Select a tilemap image file.\n"
-            "2. Click on any tile to toggle selection.\n"
-            "3. Go to 'Review Tiles' and select options.\n"
-            "4. Click 'Import' to import the tiles into project.\n",
+            "1. Select an image and (JSON) description file.\n"
+            "2. Click on any sub-image to toggle selection.\n"
+            "3. Go to 'Import Images' and select import options.\n"
+            "4. Click 'Import' to import the images into project.\n",
             gfx::FRect(0, 0, width, height), painter);
         return;
     }
