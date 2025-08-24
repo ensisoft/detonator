@@ -18,6 +18,7 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
+#include "base/utility.h"
 #include "device/graphics.h"
 #include "graphics/program.h"
 #include "graphics/device_program.h"
@@ -57,7 +58,14 @@ bool DeviceProgram::Build(const std::vector<gfx::ShaderPtr>& shaders)
     auto program = mDevice->BuildProgram(shader_handles, &build_info);
     if (!program.IsValid())
     {
-        ERROR("Program build error. [error='%1']", build_info);
+        ERROR("Program build error. [name='%1']",  mName);
+        const auto& error_lines = base::SplitString(build_info, '\n');
+        for (const auto& error_line : error_lines)
+        {
+            if (error_line.empty() || error_line == "\n")
+                continue;
+            ERROR("Program error: %1", error_line);
+        }
 
         for (const auto& shader : shaders)
         {
@@ -67,7 +75,16 @@ bool DeviceProgram::Build(const std::vector<gfx::ShaderPtr>& shaders)
         return false;
     }
 
-    DEBUG("Program was built successfully. [name='%1', info='%2']", mName, build_info);
+    DEBUG("Program was built successfully. [name='%1']", mName);
+
+    const auto& info_lines = base::SplitString(build_info, '\n');
+    for (const auto& info_line : info_lines)
+    {
+        if (info_line.empty() || info_line == "'\n")
+            continue;;
+        INFO("Program info: %1", info_line);
+    }
+
     for (auto& shader : shaders)
     {
         const auto* ptr = static_cast<const gfx::DeviceShader*>(shader.get());
