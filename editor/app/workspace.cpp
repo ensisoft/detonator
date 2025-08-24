@@ -640,7 +640,7 @@ QVariant Workspace::data(const QModelIndex& index, int role) const
     else if (role == Qt::DisplayRole)
     {
         if (index.column() == 0)
-            return toString(res->GetType());
+            return Resource::GetTypeName(res->GetType());
         else if (index.column() == 1)
             return res->GetName();
     }

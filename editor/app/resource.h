@@ -354,6 +354,20 @@ namespace app
             }
             return QIcon();
         }
+        static QString GetTypeName(Resource::Type type)
+        {
+            if (type == Resource::Type::Script)
+                return "Lua Script";
+            else if (type == Resource::Type::CppSource)
+                return "C++ Source";
+            else if (type == Resource::Type::AudioGraph)
+                return "Audio";
+            else if (type == Resource::Type::UI)
+                return "User Interface";
+            else if (type == Resource::Type::ParticleSystem)
+                return "Particles";
+            return toString(type);
+        }
     protected:
         virtual void* GetRaw() = 0;
         virtual const void* GetRaw() const = 0;

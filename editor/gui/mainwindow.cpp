@@ -2289,8 +2289,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
         if (val == app::Resource::Type::Drawable)
             continue;
 
-        const std::string name(magic_enum::enum_name(val));
-        QAction* action = show.addAction(app::FromUtf8(name));
+        QAction* action = show.addAction(app::Resource::GetTypeName(val));
         connect(action, &QAction::toggled, this, &MainWindow::ToggleShowResource);
         action->setData(magic_enum::enum_integer(val));
         action->setCheckable(true);
