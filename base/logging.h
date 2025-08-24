@@ -126,13 +126,13 @@ namespace base
     class NullLogger : public Logger
     {
     public:
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
+        void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
         { }
-        virtual void Write(LogEvent type, const char* msg) override
+        void Write(LogEvent type, const char* msg) override
         {}
-        virtual void Flush() override
+        void Flush() override
         {}
-        virtual base::bitflag<WriteType> GetWriteMask() const override
+        base::bitflag<WriteType> GetWriteMask() const override
         { return base::bitflag<WriteType>(); }
     private:
     };
@@ -146,13 +146,14 @@ namespace base
         };
 
         OStreamLogger() = default;
-        OStreamLogger(std::ostream& out);
+        explicit OStreamLogger(std::ostream& out);
 
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override;
-        virtual void Write(LogEvent type, const char* msg) override;
-        virtual void Flush() override;
-        virtual base::bitflag<WriteType> GetWriteMask() const override
+        void Write(LogEvent type, const char* file, int line, const char* msg, double time) override;
+        void Write(LogEvent type, const char* msg) override;
+        void Flush() override;
+        base::bitflag<WriteType> GetWriteMask() const override
         { return WriteType::WriteRaw; }
+
         void SetStyle(Style style)
         { mStyle = style; }
         // compatibility api
@@ -173,14 +174,14 @@ namespace base
     {
     public:
         CursesLogger();
-       ~CursesLogger();
+       ~CursesLogger() override;
 
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
+        void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
         { /* not supported */ }
-        virtual void Write(LogEvent type, const char* msg) override;
-        virtual void Flush() override
+        void Write(LogEvent type, const char* msg) override;
+        void Flush() override
         { /* no op */ }
-        virtual base::bitflag<WriteType> GetWriteMask() const override
+        base::bitflag<WriteType> GetWriteMask() const override
         { return WriteType::WriteFormatted; }
     private:
     };
@@ -197,26 +198,27 @@ namespace base
             mWrites.set(WriteType::WriteFormatted);
             mWrites.set(WriteType::WriteRaw);
         }
-        LockedLogger(WrappedLogger&& other) : LockedLogger()
+        explicit LockedLogger(WrappedLogger&& other) : LockedLogger()
         { mLogger = std::move(other); }
 
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
+        void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
         {
             std::unique_lock<std::mutex> lock(mMutex);
             mLogger.Write(type, file, line, msg, time);
         }
-        virtual void Write(LogEvent type, const char* msg) override
+        void Write(LogEvent type, const char* msg) override
         {
             std::unique_lock<std::mutex> lock(mMutex);
             mLogger.Write(type, msg);
         }
-        virtual void Flush() override
+        void Flush() override
         {
             std::unique_lock<std::mutex> lock(mMutex);
             mLogger.Flush();
         }
-        virtual bitflag<WriteType> GetWriteMask() const override
+        bitflag<WriteType> GetWriteMask() const override
         { return mWrites; }
+
         class LoggerAccess
         {
         public:
@@ -272,10 +274,10 @@ namespace base
             mWrites.set(WriteType::WriteFormatted);
             mWrites.set(WriteType::WriteRaw);
         }
-        BufferLogger(WrappedLogger&& other) : BufferLogger()
+        explicit BufferLogger(WrappedLogger&& other) : BufferLogger()
         {  mLogger = std::move(other); }
 
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
+        void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
         {
             LogMessage log;
             log.type = type;
@@ -285,19 +287,19 @@ namespace base
             log.time = time;
             mBuffer.push_back(std::move(log));
         }
-        virtual void Write(LogEvent type, const char* msg) override
+        void Write(LogEvent type, const char* msg) override
         {
             LogMessage log;
             log.type = type;
             log.msg  = msg;
             mBuffer.push_back(std::move(log));
         }
-        virtual void Flush() override
+        void Flush() override
         {
             // not implemented because of potentially
             // using this buffer logger with the locked logger.
         }
-        virtual bitflag<WriteType> GetWriteMask() const override
+        bitflag<WriteType> GetWriteMask() const override
         { return mWrites; }
 
         // Dispatch the buffered log messages to the actual
