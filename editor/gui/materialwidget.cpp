@@ -2848,10 +2848,14 @@ void MaterialWidget::ShowTextureProperties()
 
     if (const auto bitmap = source->GetData())
     {
-        SetImage(mUI.texturePreview, *bitmap);
-        SetValue(mUI.textureWidth,  bitmap->GetWidth());
-        SetValue(mUI.textureHeight, bitmap->GetHeight());
-        SetValue(mUI.textureDepth,  bitmap->GetDepthBits());
+        const auto& texture_src_rect = mMaterial->FindTextureRect(source->GetId());
+        const auto& texture_view_rect = base::MapToGlobalExpand(bitmap->GetRect(), texture_src_rect);
+        const auto& texture_preview = bitmap->CopyRect(texture_view_rect);
+
+        SetImage(mUI.texturePreview, *texture_preview);
+        SetValue(mUI.textureWidth,  texture_preview->GetWidth());
+        SetValue(mUI.textureHeight, texture_preview->GetHeight());
+        SetValue(mUI.textureDepth,  texture_preview->GetDepthBits());
     } else WARN("Failed to load texture preview.");
 
     const auto& rect = mMaterial->FindTextureRect(source->GetId());
@@ -3277,7 +3281,8 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
             if (!map->IsSpriteMap())
                 continue;
 
-            ShowMessage(base::FormatString("Press %1 for '%2'", i, map->GetName()), gfx::FPoint(20.0f, 20.0f  + i * 20.0f), painter);
+            ShowMessage(base::FormatString("Press %1 to run '%2'", i+1, map->GetName()),
+                gfx::FPoint(20.0f, 20.0f  + i * 20.0f), painter);
         }
     }
 }
@@ -3345,16 +3350,15 @@ bool MaterialWidget::KeyPress(QKeyEvent* key)
         return false;
 
     static const std::unordered_map<int, unsigned> map {
-        {Qt::Key_0, 0},
-        {Qt::Key_1, 1},
-        {Qt::Key_2, 2},
-        {Qt::Key_3, 3},
-        {Qt::Key_4, 4},
-        {Qt::Key_5, 5},
-        {Qt::Key_6, 6},
-        {Qt::Key_7, 7},
-        {Qt::Key_8, 8},
-        {Qt::Key_9, 9}
+        {Qt::Key_1, 0},
+        {Qt::Key_2, 1},
+        {Qt::Key_3, 2},
+        {Qt::Key_4, 3},
+        {Qt::Key_5, 4},
+        {Qt::Key_6, 5},
+        {Qt::Key_7, 6},
+        {Qt::Key_8, 7},
+        {Qt::Key_9, 8},
     };
     auto it = map.find(key->key());
     if (it == map.end())
