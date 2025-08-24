@@ -114,12 +114,10 @@ namespace gui
         void ResetClearColor()
         { mClearColor.reset(); }
 
-        bool haveVSYNC() const;
-
         float getCurrentFPS() const
         { return mCurrentFps; }
 
-        void CreateRenderingSurface(bool vsync);
+        void CreateRenderingSurface();
 
         void SetCursorShape(CursorShape shape);
 
@@ -161,9 +159,6 @@ namespace gui
         static void BeginFrame();
         static bool EndFrame();
 
-        static void SetVSYNC(bool on_off);
-        static bool GetVSYNC();
-
         static void SetMouseCursor(MouseCursor cursor);
         static MouseCursor GetMouseCursor();
     public slots:
@@ -174,15 +169,15 @@ namespace gui
     private:
         void initializeGL();
         void paintGL();
-        virtual void mouseMoveEvent(QMouseEvent* mickey) override;
-        virtual void mousePressEvent(QMouseEvent* mickey) override;
-        virtual void mouseReleaseEvent(QMouseEvent* mickey) override;
-        virtual void mouseDoubleClickEvent(QMouseEvent* mickey) override;
-        virtual void keyPressEvent(QKeyEvent* key) override;
-        virtual void keyReleaseEvent(QKeyEvent* key) override;
-        virtual void wheelEvent(QWheelEvent* wheel) override;
-        virtual void focusInEvent(QFocusEvent* event) override;
-        virtual void focusOutEvent(QFocusEvent* event) override;
+        void mouseMoveEvent(QMouseEvent* mickey) override;
+        void mousePressEvent(QMouseEvent* mickey) override;
+        void mouseReleaseEvent(QMouseEvent* mickey) override;
+        void mouseDoubleClickEvent(QMouseEvent* mickey) override;
+        void keyPressEvent(QKeyEvent* key) override;
+        void keyReleaseEvent(QKeyEvent* key) override;
+        void wheelEvent(QWheelEvent* wheel) override;
+        void focusInEvent(QFocusEvent* event) override;
+        void focusOutEvent(QFocusEvent* event) override;
 
     private:
         std::shared_ptr<gfx::Device> mCustomGraphicsDevice;
@@ -192,7 +187,6 @@ namespace gui
         std::optional<gfx::Color4f> mArrowCursorColor;
     private:
         QElapsedTimer mClock;
-        bool mVsync       = false;
         bool mHasFocus    = false;
         bool mInitDone    = false;
     private:
@@ -227,8 +221,7 @@ namespace gui
 
         bool hasInputFocus() const
         { return mWindow->hasInputFocus(); }
-        bool haveVSYNC() const
-        { return mWindow->haveVSYNC(); }
+
         float getCurrentFPS() const
         { return mWindow->getCurrentFPS(); }
 
@@ -303,7 +296,6 @@ namespace gui
         void triggerPaint();
     private:
         void TranslateZoomInOut(QWheelEvent* event);
-        void ToggleVSync();
         enum class WidgetFocus {
             FocusNextWidget,
             FocusPrevWidget
@@ -311,9 +303,9 @@ namespace gui
         void FocusNextPrev(WidgetFocus which);
 
     private:
-        virtual void resizeEvent(QResizeEvent* event) override;
-        virtual void focusInEvent(QFocusEvent* focus) override;
-        virtual void focusOutEvent(QFocusEvent* focus) override;
+        void resizeEvent(QResizeEvent* event) override;
+        void focusInEvent(QFocusEvent* focus) override;
+        void focusOutEvent(QFocusEvent* focus) override;
     private:
         GfxWindow* mWindow = nullptr;
         QWidget* mContainer = nullptr;

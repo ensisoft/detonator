@@ -90,8 +90,6 @@
 // see commit. e14c0325af44512740ad711d0c13fd276efc25b7
 
 namespace {
-    // a global flag for toggling vsync on/off.
-    bool should_have_vsync = false;
     std::weak_ptr<QOpenGLContext> shared_context;
     std::weak_ptr<gfx::Device> shared_gfx_device;
     // current surfaces ugh.
@@ -148,11 +146,6 @@ GfxWindow::GfxWindow()
     QTimer::singleShot(10, this, &GfxWindow::doInit);
 }
 
-bool GfxWindow::haveVSYNC() const
-{
-    return should_have_vsync;
-}
-
 void GfxWindow::SetCursorColor(const gfx::Color4f& color, CursorShape shape)
 {
     if (shape == CursorShape::ArrowCursor)
@@ -189,12 +182,7 @@ void GfxWindow::dispose()
     // The nvidia-settings application can be used to quickly inspect the
     // memory consumption.
     destroy();
-
     DEBUG("Released GfxWindow device and painter.");
-    if (mVsync)
-    {
-        DEBUG("Lost VSYNC GfxWindow.");
-    }
 }
 
 bool GfxWindow::hasInputFocus() const
@@ -373,21 +361,13 @@ void GfxWindow::paintGL()
     //mCustomGraphicsDevice->CleanGarbage(60);
 }
 
-void GfxWindow::CreateRenderingSurface(bool vsync)
+void GfxWindow::CreateRenderingSurface()
 {
     // native resources must be recreated. see the comment up top
     destroy();
-
-    // set swap interval value on the surface format.
-    QSurfaceFormat fmt = format();
-    fmt.setSwapInterval(vsync ? 1 : 0);
-
-    setFormat(fmt);
     create();
     show();
-
-    mVsync = vsync;
-    DEBUG("Created rendering surface. [VSYNC=%1]", vsync);
+    DEBUG("Created rendering surface.");
 }
 
 void GfxWindow::SetCursorShape(CursorShape shape)
@@ -422,7 +402,7 @@ void GfxWindow::doInit()
         setCursor(Qt::BlankCursor);
     }
 
-    CreateRenderingSurface(false);
+    CreateRenderingSurface();
 
     auto context = shared_context.lock();
     if (!context)
@@ -440,15 +420,15 @@ void GfxWindow::doInit()
     public:
         WindowContext(QOpenGLContext* context) : mContext(context)
         {}
-        virtual void Display() override
+        void Display() override
         {}
-        virtual void MakeCurrent() override
+        void MakeCurrent() override
         {}
-        virtual void* Resolve(const char* name) override
+        void* Resolve(const char* name) override
         {
             return (void*)mContext->getProcAddress(name);
         }
-        virtual Version GetVersion() const override
+        Version GetVersion() const override
         {
             return Version::OpenGL_ES3;
         }
@@ -568,91 +548,12 @@ void GfxWindow::DeleteTexture(const std::string& gpuId)
 // static
 void GfxWindow::BeginFrame()
 {
-    if (should_have_vsync)
-    {
-        // look for any vsync windows.
-        bool have_vsync = false;
-        for (auto* window : surfaces)
-        {
-            if (!window->mInitDone)
-                continue;
 
-            if (window->mVsync && window->isExposed())
-            {
-                have_vsync = true;
-                break;
-            }
-        }
-        // got on, ok done!
-        if (have_vsync)
-            return;
-
-        for (auto* window : surfaces)
-        {
-            if (!window->mInitDone)
-                continue;
-
-            if (window->mVsync)
-                window->CreateRenderingSurface(false);
-        }
-
-        // find first window that has been initialized
-        // and re-create the rendering surface with the
-        // vsync flag.
-        for (auto* window : surfaces)
-        {
-            if (!window->mInitDone)
-                continue;
-
-            if (window->isExposed())
-            {
-                window->CreateRenderingSurface(true);
-                break;
-            }
-        }
-    }
-    else
-    {
-        // recreate any vsynced windows.
-        for (auto* window : surfaces)
-        {
-            if (window->mVsync && window->mInitDone && window->isExposed())
-                window->CreateRenderingSurface(false);
-        }
-    }
 }
 // static
 bool GfxWindow::EndFrame()
 {
-    bool did_vsync = false;
-
-    for (auto* window : surfaces)
-    {
-        if (!window->mInitDone)
-            continue;
-        else if (!window->isExposed())
-            continue;
-
-        // can't be done here because this will not work
-        // with dialogs since those don't put the application
-        // in the "accelerated" render loop. 
-        //window->mContext->makeCurrent(window);
-        //window->mContext->swapBuffers(window);
-        if (window->mVsync)
-            did_vsync = true;
-    }
-    return did_vsync;
-}
-// static
-void GfxWindow::SetVSYNC(bool on_off)
-{
-    should_have_vsync = on_off;
-    DEBUG("Set GfxWindow VSYNC to: %1", on_off);
-}
-// static
-bool GfxWindow::GetVSYNC()
-{
-    return should_have_vsync;
+    return true;
 }
 
 void GfxWindow::SetMouseCursor(MouseCursor cursor)
@@ -891,12 +792,6 @@ void GfxWidget::TranslateZoomInOut(QWheelEvent* wheel)
         else if (num_zoom_steps < 0 && onZoomOut)
             onZoomOut();
     }
-}
-
-void GfxWidget::ToggleVSync()
-{
-    should_have_vsync = !should_have_vsync;
-    DEBUG("VSYNC set to %1", should_have_vsync);
 }
 
 void GfxWidget::FocusNextPrev(WidgetFocus which)

@@ -691,7 +691,6 @@ bool ParticleEditorWidget::GetStats(Stats* stats) const
 {
     stats->time  = mTime;
     stats->graphics.valid = true;
-    stats->graphics.vsync = mUI.widget->haveVSYNC();
     stats->graphics.fps   = mUI.widget->getCurrentFPS();
     const auto& dev_stats = mUI.widget->getDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
