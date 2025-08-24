@@ -29,6 +29,37 @@
 
 namespace {
     constexpr auto ScrollStepSize = 10.0f;
+
+    auto MakeDemoMaterial()
+    {
+        static std::shared_ptr<gfx::SpriteClass> demo_material;
+        if (demo_material)
+            return demo_material;
+
+        gfx::TextureMap map;
+        map.SetType(gfx::TextureMap::Type::Sprite);
+        map.SetName("Sample");
+        map.SetSpriteFrameRate(10.0f);
+
+        map.SetNumTextures(8);
+        map.SetTextureSource(0, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-1.png"));
+        map.SetTextureSource(1, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-2.png"));
+        map.SetTextureSource(2, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-3.png"));
+        map.SetTextureSource(3, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-4.png"));
+        map.SetTextureSource(4, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-5.png"));
+        map.SetTextureSource(5, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-6.png"));
+        map.SetTextureSource(6, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-7.png"));
+        map.SetTextureSource(7, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-8.png"));
+
+        demo_material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Sprite);
+        demo_material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        demo_material->SetBaseColor(gfx::Color4f(gfx::Color::LightGray, 0.46f));
+        demo_material->SetNumTextureMaps(1);
+        demo_material->SetActiveTextureMap(map.GetId());
+        demo_material->SetTextureMap(0, std::move(map));
+        return demo_material;
+    }
+
 } // namespace
 
 namespace gui
@@ -61,56 +92,99 @@ void SpriteWidget::on_horizontalScrollBar_valueChanged(int)
 
 void SpriteWidget::PaintScene(gfx::Painter& painter, double dt)
 {
-    auto material = mMaterial;
-    bool demo_mode = false;
-
-    if (!material || material->GetType() != gfx::MaterialClass::Type::Sprite)
+    if (mMaterial && mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
+        PaintSprite(mMaterial.get(), painter, dt);
+    else if (mMaterial && mMaterial->GetType() == gfx::MaterialClass::Type::Texture)
+        PaintTexture(mMaterial.get(), painter, dt);
+    else
     {
-        static std::shared_ptr<gfx::SpriteClass> demo_material;
-        if (!demo_material)
-        {
-            gfx::TextureMap map;
-            map.SetType(gfx::TextureMap::Type::Sprite);
-            map.SetName("Sample");
-            map.SetSpriteFrameRate(10.0f);
+        auto material = MakeDemoMaterial();
+        PaintSprite(material.get(), painter, dt);
 
-            map.SetNumTextures(8);
-            map.SetTextureSource(0, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-1.png"));
-            map.SetTextureSource(1, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-2.png"));
-            map.SetTextureSource(2, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-3.png"));
-            map.SetTextureSource(3, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-4.png"));
-            map.SetTextureSource(4, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-5.png"));
-            map.SetTextureSource(5, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-6.png"));
-            map.SetTextureSource(6, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-7.png"));
-            map.SetTextureSource(7, gfx::LoadTextureFromFile("app://textures/editor/sprite-demo/frame-8.png"));
+        const auto widget_height = mUI.widget->height();
+        const auto widget_width = mUI.widget->width();
+        ShowInstruction("Sprite frames + timeline", Rect2Df(0.0f, 0.0f, widget_width, widget_height), painter);
+    }
+}
 
-            demo_material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Sprite);
-            demo_material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-            demo_material->SetBaseColor(gfx::Color4f(gfx::Color::LightGray, 0.46f));
-            demo_material->SetNumTextureMaps(1);
-            demo_material->SetActiveTextureMap(map.GetId());
-            demo_material->SetTextureMap(0, std::move(map));
-        }
-        material = demo_material;
-        demo_mode = true;
+void SpriteWidget::PaintTexture(const gfx::MaterialClass *klass, gfx::Painter &painter, double dt)
+{
+    const auto widget_height = mUI.widget->height();
+    const auto widget_width = mUI.widget->width();
+    const auto rect_height = widget_height - 30.0;
+    const auto rect_width = rect_height + 2.0f * 5.0f; // little bit of space between items
+    const auto texture_count = klass->GetNumTextureMaps();
+
+    if (texture_count == 0)
+    {
+        ShowInstruction("Sprite has no texture maps.", Rect2Df(0.0f, 0.0f, widget_width, widget_height), painter);
+        return;
     }
 
-    const auto& type = material->GetType();
-    if (type != gfx::MaterialClass::Type::Sprite)
-        return;
+    for (unsigned texture_index=0; texture_index<texture_count; ++texture_index)
+    {
+        gfx::FRect rect;
+        rect.Resize(rect_width, rect_height);
+        rect.Translate(10.0f, 15.0f); // left margin, top margin
+        rect.Translate(rect_width * texture_index, 0.0);
+        rect.Translate(5.0f, 0.0f); // little padding around each rect
+        rect.Translate(-mTranslateX, 0.0); // scrolling
+
+        const auto* texture_map = klass->GetTextureMap(texture_index);
+        if (!texture_map || texture_map->GetNumTextures() == 0)
+        {
+            gfx::DrawTextRect(painter, "Missing\nTexture", "app://fonts/orbitron-medium.otf", 14, rect,
+                  gfx::Color::HotPink,
+                  gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter);
+            if (texture_map && texture_map->GetId() == mSelectedTextureMapId)
+            {
+                gfx::DrawRectOutline(painter, rect, gfx::Color::Green);
+            }
+            continue;
+        }
+
+        const auto* texture_src = texture_map->GetTextureSource(0);
+        const auto& texture_rect = texture_map->GetTextureRect(0);
+
+        gfx::MaterialClass temp(gfx::MaterialClass::Type::Texture);
+        temp.SetSurfaceType(mMaterial->GetSurfaceType());
+        temp.SetBaseColor(mMaterial->GetBaseColor());
+        temp.SetTextureMinFilter(mMaterial->GetTextureMinFilter());
+        temp.SetTextureMagFilter(mMaterial->GetTextureMagFilter());
+        temp.AddTexture(texture_src->Copy());
+        temp.SetTextureRect(texture_rect);
+        gfx::FillRect(painter, rect, gfx::MaterialInstance(temp));
+
+        if (texture_map->GetId() == mSelectedTextureMapId)
+        {
+            gfx::DrawRectOutline(painter, rect, gfx::Color::Green);
+        }
+    }
+    const auto render_width = rect_width * texture_count;
+    ComputeScrollBars(render_width);
+}
+
+void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter& painter, double dt)
+{
+    const auto widget_height = mUI.widget->height();
+    const auto widget_width = mUI.widget->width();
 
     const auto& active_texture_map = material->GetActiveTextureMap();
     const auto* texture_map = material->FindTextureMapById(active_texture_map);
-    if (texture_map == nullptr || texture_map->GetType() != gfx::TextureMap::Type::Sprite)
+    if (texture_map == nullptr)
+    {
+        ShowInstruction("Active texture map is not selected.", Rect2Df(0.0f, 0.0f, widget_width, widget_height), painter);
         return;
+    }
 
     const auto texture_count = texture_map->GetNumTextures();
     const auto frame_count = texture_map->GetSpriteFrameCount();
     if (texture_count == 0 || frame_count == 0)
+    {
+        ShowInstruction("Sprite animation has no textures.", Rect2Df(0.0f, 0.0f, widget_width, widget_height), painter);
         return;
+    }
 
-    const auto widget_height = mUI.widget->height();
-    const auto widget_width = mUI.widget->width();
     const auto rect_height = widget_height - 30.0;
     const auto rect_width = rect_height + 2.0f * 5.0f; // little bit of space between items
     const auto cycle_width = frame_count * rect_width;
@@ -260,28 +334,8 @@ void SpriteWidget::PaintScene(gfx::Painter& painter, double dt)
         }
     }
 
-    if (demo_mode)
-    {
-        ShowInstruction("Sprite frames + timeline", Rect2Df(0.0f, 0.0f, widget_width, widget_height), painter);
-    }
-
-
-    const auto cycle_render_width = 10.0f + duration_width + 10.0f;
-
-    if (cycle_render_width > widget_width)
-    {
-        QSignalBlocker s(mUI.horizontalScrollBar);
-        const auto horizontal_excess = cycle_render_width - widget_width;
-        mUI.horizontalScrollBar->setMinimum(0);
-        mUI.horizontalScrollBar->setMaximum(horizontal_excess / ScrollStepSize);
-    }
-    else
-    {
-        QSignalBlocker s(mUI.horizontalScrollBar);
-        mUI.horizontalScrollBar->setRange(0, 0);
-        mUI.horizontalScrollBar->setValue(0);
-        mTranslateX = 0.0;
-    }
+    const auto render_width = 10.0f + duration_width + 10.0f;
+    ComputeScrollBars(render_width);
 }
 
 void SpriteWidget::MousePress(QMouseEvent* mickey)
@@ -301,5 +355,33 @@ void SpriteWidget::MouseMove(QMouseEvent* mickey)
     if (!mDragTime)
         return;
 }
+
+void SpriteWidget::ComputeScrollBars(unsigned render_width)
+{
+    const auto widget_width = mUI.widget->width();
+    if (mPreviousRenderWidth == render_width && mPreviousWidgetWidth == widget_width)
+        return;
+
+    QSignalBlocker s(mUI.horizontalScrollBar);
+
+    if (render_width > widget_width)
+    {
+        const auto horizontal_excess = render_width - widget_width;
+        mUI.horizontalScrollBar->setMinimum(0);
+        mUI.horizontalScrollBar->setMaximum(horizontal_excess / ScrollStepSize);
+        mUI.horizontalScrollBar->setSingleStep(1);
+        mUI.horizontalScrollBar->setValue(0);
+        mTranslateX = 0;
+    }
+    else
+    {
+        mUI.horizontalScrollBar->setRange(0, 0);
+        mUI.horizontalScrollBar->setValue(0);
+        mTranslateX = 0.0;
+    }
+    mPreviousRenderWidth = render_width;
+    mPreviousWidgetWidth = widget_width;
+}
+
 
 } // namespace

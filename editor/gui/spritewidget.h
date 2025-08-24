@@ -35,14 +35,23 @@ namespace gui
     {
         Q_OBJECT
     public:
-        SpriteWidget(QWidget* parent);
-        ~SpriteWidget();
+        explicit SpriteWidget(QWidget* parent);
+        ~SpriteWidget() override;
 
         void Render();
 
         void SetMaterial(std::shared_ptr<const gfx::MaterialClass> klass)
         {
-            mMaterial = klass;
+            mMaterial = std::move(klass);
+        }
+
+        void SetSelectedTextureId(std::string id)
+        {
+            mSelectedTextureId = std::move(id);
+        }
+        void SetSelectedTextureMapId(std::string id)
+        {
+            mSelectedTextureMapId = std::move(id);
         }
 
         void SetClearColor(const QColor& color)
@@ -63,19 +72,25 @@ namespace gui
 
     private:
         void PaintScene(gfx::Painter& painter, double dt);
+        void PaintTexture(const gfx::MaterialClass* klass, gfx::Painter& painter, double dt);
+        void PaintSprite(const gfx::MaterialClass* klass, gfx::Painter& painter, double dt);
         void MousePress(QMouseEvent* mickey);
         void MouseRelease(QMouseEvent* mickey);
         void MouseMove(QMouseEvent* mickey);
+        void ComputeScrollBars(unsigned render_width);
 
     private:
         Ui::SpriteWidget mUI;
     private:
         std::shared_ptr<const gfx::MaterialClass> mMaterial;
-
-    private:
+        std::string mSelectedTextureId;
+        std::string mSelectedTextureMapId;
         float mTranslateX = 0.0f;
         double mTime = 0.0f;
         bool mRenderTime = false;
         bool mDragTime = false;
+
+        unsigned mPreviousRenderWidth = 0;
+        unsigned mPreviousWidgetWidth = 0;
     };
 } // namespace
