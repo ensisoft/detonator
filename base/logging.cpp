@@ -55,6 +55,79 @@ bool isGlobalWarnLogEnabled    = true;
 bool isGlobalInfoLogEnabled    = true;
 bool isGlobalErrorLogEnabled   = true;
 
+std::string FormatWithEscapeSequences(base::LogEvent event, const char* file, int line, const char* msg, double time)
+{
+    std::stringstream out;
+    out << "\033[" << 2 << "m"
+        << "["
+        << std::fixed
+        << std::setprecision(3) // after the radix point
+        //<< std::setw(10)
+        //<< std::setfill('0')
+        << time
+        << "]  "
+        << "\033[m";
+
+    out << std::setfill(' ');
+
+    out << "\033[" << 1 << "m"
+        << std::left
+        << std::setw(7)
+        << base::ToString(event) << " "
+        << "\033[m";
+
+    std::stringstream  ss;
+    std::string file_and_line;
+    ss << file << ":" << line;
+    ss >> file_and_line;
+    if (file_and_line.size() > 25)
+    {
+        const auto count = file_and_line.size() - 25;
+        file_and_line = file_and_line.substr(count);
+    }
+
+    out << "\033[" << 3 << "m"
+        << std::right
+        << std::setw(25)
+        << file_and_line
+        << "  "
+        << "\033[m";
+
+    if (event == base::LogEvent::Error)
+    {
+        out << "\033[" << 1 << "m";
+        out << "\033[" << 91 << "m";
+    }
+    else if (event == base::LogEvent::Warning)
+    {
+        out << "\033[" << 1 << "m";
+        out << "\033[" << 93 << "m";
+    }
+    else if (event == base::LogEvent::Info)
+    {
+        //out << "\033[" << 1 << "m";
+        out << "\033[" << 97 << "m";
+    }
+    else if (event == base::LogEvent::Debug || event == base::LogEvent::Verbose)
+    {
+        //out << "\033[" << 90 << "m";
+    }
+
+    std::string tmp;
+    do
+    {
+        const auto c = *msg++;
+        if (c == '\r')
+            tmp += "\\r";
+        else if (c == '\n')
+            tmp += "\\n";
+        else tmp += c;
+    } while (*msg);
+
+    out << tmp << "\033[m" << "\n";
+    return out.str();
+}
+
 } // namespace
 
 namespace base
@@ -90,64 +163,7 @@ void OStreamLogger::Write(LogEvent type, const char* file, int line, const char*
         auto& out = *m_out;
         std::ios old_state(nullptr);
         old_state.copyfmt(out);
-
-        out << "\033[" << 2 << "m"
-            << "["
-            << std::fixed
-            << std::setprecision(3) // after the radix point
-            //<< std::setw(10)
-            //<< std::setfill('0')
-            << time
-            << "]  "
-            << "\033[m";
-
-        out << std::setfill(' ');
-
-        out << "\033[" << 1 << "m"
-            << std::left
-            << std::setw(7)
-            << ToString(type) << " "
-            << "\033[m";
-
-        std::stringstream  ss;
-        std::string file_and_line;
-        ss << file << ":" << line;
-        ss >> file_and_line;
-        if (file_and_line.size() > 25)
-        {
-            const auto count = file_and_line.size() - 25;
-            file_and_line = file_and_line.substr(count);
-        }
-
-        out << "\033[" << 3 << "m"
-            << std::right
-            << std::setw(25)
-            << file_and_line
-            << "  "
-            << "\033[m";
-
-        if (type == LogEvent::Error)
-        {
-            out << "\033[" << 1 << "m";
-            out << "\033[" << 91 << "m";
-        }
-        else if (type == LogEvent::Warning)
-        {
-            out << "\033[" << 1 << "m";
-            out << "\033[" << 93 << "m";
-        }
-        else if (type == LogEvent::Info)
-        {
-            //out << "\033[" << 1 << "m";
-            out << "\033[" << 97 << "m";
-        }
-        else if (type == LogEvent::Debug || type == LogEvent::Verbose)
-        {
-            //out << "\033[" << 90 << "m";
-        }
-        out << msg << "\033[m";
-        out << "\n";
-
+        out << FormatWithEscapeSequences(type, file, line, msg, time);
         out.copyfmt(old_state);
         return;
     }
