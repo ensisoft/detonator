@@ -86,6 +86,31 @@ namespace {
 
 } // namespace
 
+namespace gfx {
+    std::string TranslateEnum(gfx::MaterialClass::Type type)
+    {
+        using T = gfx::MaterialClass::Type;
+        if (type == T::Color)
+            return "Color Fill";
+        else if (type == T::Custom)
+            return "Custom";
+        else if (type == T::Gradient)
+            return "Color Gradient";
+        else if (type == T::Sprite)
+            return "Sprite Animation";
+        else if (type == T::Texture)
+            return "Sprite Texture";
+        else if (type == T::Tilemap)
+            return "Tile Sheet with Grid Layout";
+        else if (type == T::BasicLight)
+            return "Basic Lit Material";
+        else if (type == T::Particle2D)
+            return "Basic Particle";
+        else BUG("Missing translation");
+        return "???";
+    }
+} // namespace
+
 namespace gui
 {
 
