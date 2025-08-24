@@ -2986,14 +2986,23 @@ void EntityWidget::on_btnSelectMaterial_clicked()
     {
         if (auto* drawable = node->GetDrawable())
         {
-            DlgMaterial dlg(this, mState.workspace, drawable->GetMaterialId());
+            DlgMaterial dlg(this, mState.workspace, true);
+            dlg.SetSelectedMaterialId(drawable->GetMaterialId());
+            if (drawable->HasActiveTextureMap())
+                dlg.SetSelectedTextureMapId(drawable->GetActiveTextureMap());
+            else if (auto material = mState.workspace->FindMaterialClassById(drawable->GetMaterialId()))
+            {
+                dlg.SetSelectedTextureMapId(material->GetActiveTextureMap());
+            }
             if (dlg.exec() == QDialog::Rejected)
                 return;
-            const auto& material = app::ToUtf8(dlg.GetSelectedMaterialId());
-            if (drawable->GetMaterialId() == material)
+            const auto& material_id = dlg.GetSelectedMaterialId();
+            const auto& texture_map_id = dlg.GetSelectedTextureMapId();
+            if (drawable->GetMaterialId() == material_id && drawable->GetActiveTextureMap() == texture_map_id)
                 return;
             drawable->ResetMaterial();
-            drawable->SetMaterialId(material);
+            drawable->SetMaterialId(material_id);
+            drawable->SetActiveTextureMap(texture_map_id);
             DisplayCurrentNodeProperties();
             RealizeEntityChange(mState.entity);
         }

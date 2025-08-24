@@ -144,6 +144,9 @@ namespace app
         const quint64 GetHash() const
         { return qHash(mStr); }
 
+        void Clear()
+        { mStr.clear(); }
+
         bool IsEmpty() const
         { return mStr.isEmpty(); }
 

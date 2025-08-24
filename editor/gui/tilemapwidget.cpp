@@ -1790,7 +1790,7 @@ void TilemapWidget::SelectSelectedTileMaterial()
 
     const auto did_have_focus = mUI.widget->HasInputFocus();
 
-    DlgMaterial dlg(this, mState.workspace, "");
+    DlgMaterial dlg(this, mState.workspace, false);
     dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
 
     // indicate the current tile material when possible.
@@ -1815,7 +1815,7 @@ void TilemapWidget::SelectSelectedTileMaterial()
 
         if (current_palette_index != klass->GetMaxPaletteIndex())
         {
-            dlg.SetMaterialId(klass->GetPaletteMaterialId(current_palette_index));
+            dlg.SetSelectedMaterialId(klass->GetPaletteMaterialId(current_palette_index));
             dlg.SetTileIndex(klass->GetPaletteMaterialTileIndex(current_palette_index));
         }
     }

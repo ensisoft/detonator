@@ -1163,8 +1163,8 @@ void ParticleEditorWidget::on_btnViewMinus90_clicked()
 
 void ParticleEditorWidget::on_btnSelectMaterial_clicked()
 {
-    QString material = GetItemId(mUI.materials);
-    DlgMaterial dlg(this, mWorkspace, material);
+    DlgMaterial dlg(this, mWorkspace, false);
+    dlg.SetSelectedMaterialId(GetItemId(mUI.materials));
     if (dlg.exec() == QDialog::Rejected)
         return;
 

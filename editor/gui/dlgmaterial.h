@@ -43,17 +43,19 @@ namespace gui
         Q_OBJECT
 
     public:
-        DlgMaterial(QWidget* parent, const app::Workspace* workspace, const app::AnyString& material);
-        DlgMaterial(QWidget* parent, const app::Workspace* workspace);
+        DlgMaterial(QWidget* parent, const app::Workspace* workspace, bool expand_maps);
 
         app::AnyString GetSelectedMaterialId() const
         { return mSelectedMaterialId; }
+        app::AnyString GetSelectedTextureMapId() const
+        { return mSelectedTextureMapId; }
         void SetPreviewScale(const Size2Df& scale)
         { mPreviewScale = scale; }
         void SetPreviewScale(float x, float y)
         { mPreviewScale = Size2Df(x, y); }
 
-        void SetMaterialId(const app::AnyString& material);
+        void SetSelectedMaterialId(const app::AnyString& id);
+        void SetSelectedTextureMapId(const app::AnyString& id);
 
         unsigned GetTileIndex() const;
         void SetTileIndex(unsigned index);
@@ -69,17 +71,27 @@ namespace gui
         void MouseDoubleClick(QMouseEvent* mickey);
         void MouseWheel(QWheelEvent* wheel);
         bool KeyPress(QKeyEvent* key);
+        void ListMaterials(const QString& filter_string);
+        bool IsSelectedMaterial(size_t index) const;
     private:
         Ui::DlgMaterial mUI;
     private:
-        QString mSelectedMaterialId;
+        app::AnyString mSelectedMaterialId;
+        app::AnyString mSelectedTextureMapId;
         const app::Workspace* mWorkspace = nullptr;
         unsigned mScrollOffsetRow = 0;
         unsigned mNumVisibleRows = 0;
         bool mFirstPaint = true;
-        app::ResourceList mMaterials;
+
+        struct Material {
+            app::AnyString material_id;
+            app::AnyString texture_map_id;
+            std::shared_ptr<const gfx::MaterialClass> material;
+        };
+        std::vector<Material> mMaterials;
         Size2Df mPreviewScale;
         std::unordered_set<std::string> mFailedMaterials;
+        bool mExpandMaps = false;
     };
 
     class DlgTileChooser : public QDialog

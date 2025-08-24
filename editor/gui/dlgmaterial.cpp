@@ -46,10 +46,11 @@ namespace {
 namespace gui
 {
 
-DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace)
+DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, bool expand_maps)
   : QDialog(parent)
   , mWorkspace(workspace)
   , mPreviewScale(1.0f, 1.0f)
+  , mExpandMaps(expand_maps)
 {
     mUI.setupUi(this);
 
@@ -73,18 +74,17 @@ DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace)
     if (mWorkspace->GetUserProperty("dlg_material_geometry", &geometry))
         this->restoreGeometry(geometry);
 
-    mMaterials = mWorkspace->ListAllMaterials();
+    ListMaterials("");
 }
 
-DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const app::AnyString& material)
-  : DlgMaterial(parent, workspace)
+void DlgMaterial::SetSelectedMaterialId(const app::AnyString& id)
 {
-    mSelectedMaterialId = material;
+    mSelectedMaterialId = id;
 }
 
-void DlgMaterial::SetMaterialId(const app::AnyString& material)
+void DlgMaterial::SetSelectedTextureMapId(const app::AnyString& id)
 {
-    mSelectedMaterialId = material;
+    mSelectedTextureMapId = id;
 }
 
 unsigned DlgMaterial::GetTileIndex() const
@@ -102,7 +102,7 @@ void DlgMaterial::on_btnAccept_clicked()
     const_cast<app::Workspace*>(mWorkspace)->SetUserProperty("dlg_material_geometry", saveGeometry());
 
     // auto default bites again!
-    if (mSelectedMaterialId.isEmpty())
+    if (mSelectedMaterialId.IsEmpty())
         reject();
     else  accept();
 }
@@ -123,29 +123,17 @@ void DlgMaterial::on_filter_textChanged(const QString& text)
     mScrollOffsetRow = 0;
     mNumVisibleRows  = 0;
 
-    if (text.isEmpty())
-    {
-        mMaterials = mWorkspace->ListAllMaterials();
-    }
-    else
-    {
-        mMaterials.clear();
-        auto materials = mWorkspace->ListAllMaterials();
-        for (const auto& material : materials)
-        {
-            const QString& name = material.name;
-            if (name.contains(text, Qt::CaseInsensitive))
-                mMaterials.push_back(material);
-        }
-    }
+    ListMaterials(text);
 
     mFirstPaint = true;
+
     for (size_t i=0; i<mMaterials.size(); ++i)
     {
-        if (mMaterials[i].id == mSelectedMaterialId)
+        if (IsSelectedMaterial(i))
             return;
     }
-    mSelectedMaterialId.clear();
+    mSelectedMaterialId.Clear();
+    mSelectedTextureMapId.Clear();
 }
 
 void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
@@ -162,7 +150,7 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
 
     if (mFirstPaint)
     {
-        if (!mSelectedMaterialId.isEmpty())
+        if (!mSelectedMaterialId.IsEmpty())
         {
             size_t selected_material_row = 0;
             size_t selected_material_col = 0;
@@ -171,7 +159,7 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
             {
                 selected_material_col = i % num_visible_cols;
                 selected_material_row = i / num_visible_cols;
-                if (mMaterials[i].id == mSelectedMaterialId)
+                if (IsSelectedMaterial(i))
                     break;
             }
             const auto row_height = BoxHeight + BoxMargin;
@@ -194,9 +182,7 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
 
     for (index=0; index<mMaterials.size(); ++index)
     {
-        const auto* resource = mMaterials[index].resource;
-
-        auto klass = app::ResourceCast<gfx::MaterialClass>(*resource).GetSharedResource();
+        auto klass = mMaterials[index].material;
 
         const auto col = index % num_visible_cols;
         const auto row = index / num_visible_cols;
@@ -215,6 +201,7 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
             gfx::MaterialInstance material(klass);
             material.SetRuntime(mUI.widget->GetTime());
             material.SetUniform("kTileIndex", (float) GetValue(mUI.tileIndex));
+            material.SetUniform("active_texture_map", mMaterials[index].texture_map_id);
             gfx::FillRect(painter, rect, material);
             if (material.HasError())
             {
@@ -227,11 +214,11 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
             ShowError("Broken\nMaterial", corner, painter);
         }
 
-        if (mMaterials[index].id != mSelectedMaterialId)
-            continue;
-
-        gfx::DrawRectOutline(painter, rect, gfx::Color::Green, 2.0f);
-        SetValue(mUI.groupBox, app::toString("Material Library - %1", mMaterials[index].name));
+        if (IsSelectedMaterial(index))
+        {
+            gfx::DrawRectOutline(painter, rect, gfx::Color::Green, 2.0f);
+            SetValue(mUI.groupBox, app::toString("Material Library - %1", klass->GetName()));
+        }
     }
 
     const auto num_total_rows = index / num_visible_cols + 1;
@@ -273,7 +260,8 @@ void DlgMaterial::MousePress(QMouseEvent* mickey)
 
     if (index >= mMaterials.size())
         return;
-    mSelectedMaterialId = mMaterials[index].id;
+    mSelectedMaterialId = mMaterials[index].material_id;
+    mSelectedTextureMapId = mMaterials[index].texture_map_id;
 }
 
 void DlgMaterial::MouseDoubleClick(QMouseEvent* mickey)
@@ -319,7 +307,7 @@ bool DlgMaterial::KeyPress(QKeyEvent* event)
     }
     else if (key == Qt::Key_Return)
     {
-        if (mSelectedMaterialId.isEmpty())
+        if (mSelectedMaterialId.IsEmpty())
             return false;
         accept();
         return true;
@@ -331,13 +319,14 @@ bool DlgMaterial::KeyPress(QKeyEvent* event)
     size_t index = 0;
     for (; index < mMaterials.size(); ++index)
     {
-        if (mMaterials[index].id == mSelectedMaterialId)
+        if (IsSelectedMaterial(index))
             break;
     }
     if (index == mMaterials.size())
     {
         mScrollOffsetRow    = 0;
-        mSelectedMaterialId = mMaterials[0].id;
+        mSelectedMaterialId = mMaterials[0].material_id;
+        mSelectedTextureMapId = mMaterials[0].texture_map_id;
     }
 
     const auto BoxWidth  = GetBoxWidth(mPreviewScale);
@@ -380,8 +369,60 @@ bool DlgMaterial::KeyPress(QKeyEvent* event)
         mScrollOffsetRow = row;
 
     ASSERT(index < mMaterials.size());
-    mSelectedMaterialId = mMaterials[index].id;
+    mSelectedMaterialId = mMaterials[index].material_id;
+    mSelectedTextureMapId = mMaterials[index].texture_map_id;
     return true;
+}
+
+void DlgMaterial::ListMaterials(const QString &filter_string)
+{
+    mMaterials.clear();
+
+    const auto& resource_list = mWorkspace->ListAllMaterials();
+
+    for (const auto& resource : resource_list)
+    {
+        if (!filter_string.isEmpty())
+        {
+            if (!resource.name.contains(filter_string, Qt::CaseInsensitive))
+                continue;
+        }
+
+        auto klass = app::ResourceCast<gfx::MaterialClass>(*resource.resource).GetSharedResource();
+        const auto type = klass->GetType();
+        if (mExpandMaps && (type == gfx::MaterialClass::Type::Sprite || type == gfx::MaterialClass::Type::Texture))
+        {
+            for (unsigned i=0; i<klass->GetNumTextureMaps(); ++i)
+            {
+                const auto* map = klass->GetTextureMap(i);
+                if (map == nullptr)
+                    continue;
+                Material m;
+                m.material = klass;
+                m.texture_map_id = map->GetId();
+                m.material_id = klass->GetId();
+                mMaterials.push_back(m);
+            }
+            DEBUG("homo");
+        }
+        else
+        {
+            Material m;
+            m.material = klass;
+            m.material_id = klass->GetId();
+            mMaterials.push_back(m);
+        }
+    }
+}
+bool DlgMaterial::IsSelectedMaterial(size_t index) const
+{
+    ASSERT(index < mMaterials.size());
+    if (mMaterials[index].material_id != mSelectedMaterialId)
+        return false;
+    if (mSelectedTextureMapId.IsEmpty())
+        return true;
+
+    return mMaterials[index].texture_map_id == mSelectedTextureMapId;
 }
 
 DlgTileChooser::DlgTileChooser(QWidget* parent, std::shared_ptr<const gfx::MaterialClass> klass) noexcept

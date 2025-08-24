@@ -258,7 +258,8 @@ void WidgetStyleWidget::SetBackgroundMaterial()
 {
     if (mWidget)
     {
-        DlgMaterial dlg(mParent, mWorkspace, GetItemId(mUI.widgetBackground));
+        DlgMaterial dlg(mParent, mWorkspace, false);
+        dlg.SetSelectedMaterialId(GetItemId(mUI.widgetBackground));
         if (dlg.exec() == QDialog::Rejected)
             return;
         SetValue(mUI.widgetBackground, ListItemId(dlg.GetSelectedMaterialId()));
@@ -293,7 +294,8 @@ void WidgetStyleWidget::SetBorderMaterial()
 {
     if (mWidget)
     {
-        DlgMaterial dlg(mParent, mWorkspace, GetItemId(mUI.widgetBorder));
+        DlgMaterial dlg(mParent, mWorkspace, false);
+        dlg.SetSelectedMaterialId(GetItemId(mUI.widgetBorder));
         if (dlg.exec() == QDialog::Rejected)
             return;
         SetValue(mUI.widgetBorder, ListItemId(dlg.GetSelectedMaterialId()));

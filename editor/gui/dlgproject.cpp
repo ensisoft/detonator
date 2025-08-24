@@ -248,7 +248,8 @@ void DlgProject::on_btnResetDebugFont_clicked()
 
 void DlgProject::on_btnSelectMaterial_clicked()
 {
-    DlgMaterial dlg(this, &mWorkspace, GetItemId(mUI.mouseMaterial));
+    DlgMaterial dlg(this, &mWorkspace, false);
+    dlg.SetSelectedMaterialId(GetItemId(mUI.mouseMaterial));
     if (dlg.exec() == QDialog::Rejected)
         return;
 

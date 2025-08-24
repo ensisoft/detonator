@@ -170,14 +170,14 @@ void DlgTileTool::on_btnSelectToolMaterial_clicked()
 {
     if (auto* tile = GetCurrentTile())
     {
-        DlgMaterial dlg(this, mWorkspace);
-        dlg.SetMaterialId(tile->material);
+        DlgMaterial dlg(this, mWorkspace, false);
+        dlg.SetSelectedMaterialId(tile->material);
         dlg.SetTileIndex(tile->tile_index);
         dlg.SetPreviewScale(GetMaterialPreviewScale(*mClass));
         if (dlg.exec() == QDialog::Rejected)
             return;
 
-        tile->material = app::ToUtf8(dlg.GetSelectedMaterialId());
+        tile->material = dlg.GetSelectedMaterialId();
         tile->tile_index = dlg.GetTileIndex();
         tile->apply_material = true;
 
