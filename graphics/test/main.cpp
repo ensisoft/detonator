@@ -23,6 +23,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <filesystem>
 
 #include "base/logging.h"
 #include "base/format.h"
@@ -4251,6 +4252,8 @@ int main(int argc, char* argv[])
     {
         const float dt = 1.0f/60.0f;
 
+        std::filesystem::create_directory("test-results");
+
         for (auto& test : tests)
         {
             if (!test->IsFeatureTest())
@@ -4283,23 +4286,30 @@ int main(int argc, char* argv[])
                 gfx::Bitmap<gfx::Pixel_RGBA> result = gfx_device->ReadColorBuffer(surface_width, surface_height);
                 gfx::SetAlphaToOne(result);
 
-                const auto& resultfile = base::FormatString("%1_%2_%3_Result.png", test->GetName(), i, sampling);
-                const auto& goldfile   = base::FormatString("%1_%2_%3_Gold.png", test->GetName(), i, sampling);
-                const auto& deltafile  = base::FormatString("%1_%2_%3_Delta.png", test->GetName(), i, sampling);
-                if (!base::FileExists(goldfile) || issue_gold)
+                const auto& result_file_name    = base::FormatString("test-results/%1_%2_%3_Result.png", test->GetName(), i, sampling);
+                const auto& reference_file_name = base::FormatString("test-results/%1_%2_%3_Reference.png", test->GetName(), i, sampling);
+                const auto& delta_file_name     = base::FormatString("test-results/%1_%2_%3_Delta.png", test->GetName(), i, sampling);
+                if (issue_gold)
+                {
+                    const auto& gold_file_name  = base::FormatString("gold/%1_%2_%3_Gold.png", test->GetName(), i, sampling);
+                    gfx::WritePNG(result, gold_file_name);
+                    INFO("Wrote new gold image. '%1'", gold_file_name);
+                }
+
+                if (!base::FileExists(reference_file_name))
                 {
                     gfx_device->EndFrame(true /*display*/);
                     gfx_device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
                     // the result is the new gold image. should be eye-balled and verified.
-                    gfx::WritePNG(result, goldfile);
-                    INFO("Wrote new gold file. '%1'", goldfile);
+                    gfx::WritePNG(result, reference_file_name);
+                    INFO("Wrote new local reference image. '%1'", reference_file_name);
                     continue;
                 }
 
                 stop_for_input = true;
 
                 // load gold image
-                gfx::Image img(goldfile);
+                gfx::Image img(reference_file_name);
 
                 const auto& gold = img.AsBitmap<gfx::Pixel_RGBA>();
                 const auto& gold_view = gold.GetPixelReadView();
@@ -4312,7 +4322,7 @@ int main(int argc, char* argv[])
 
                 if (!gfx::PixelBlockCompareBitmaps(gold_view, result_view, mse_block_size, mse_comparator))
                 {
-                    ERROR("'%1' vs '%2' FAILED.", goldfile, resultfile);
+                    ERROR("'%1' vs '%2' FAILED.", reference_file_name, result_file_name);
                     if (gold.GetWidth() != result.GetWidth() || gold.GetHeight() != result.GetHeight())
                     {
                         ERROR("Image dimensions mismatch: Gold = %1x%1 vs. Result = %2x%3",
@@ -4337,14 +4347,14 @@ int main(int argc, char* argv[])
                                 }
                             }
                         }
-                        gfx::WritePNG(diff, deltafile);
+                        gfx::WritePNG(diff, delta_file_name);
                     }
-                    gfx::WritePNG(result, resultfile);
+                    gfx::WritePNG(result, result_file_name);
                     test_result = EXIT_FAILURE;
                 }
                 else
                 {
-                    INFO("'%1' vs '%2' OK.", goldfile, resultfile);
+                    INFO("'%1' vs '%2' OK.", reference_file_name, result_file_name);
                     stop_for_input = false;
                 }
 
