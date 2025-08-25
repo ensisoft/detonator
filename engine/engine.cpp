@@ -1815,7 +1815,11 @@ private:
             if (task->HasException())
             {
                 ERROR("Task has encountered an exception. [task='%1']", task->GetTaskName());
-                // should we rethrow this?
+                // should we rethrow this? Yes the answer is yes.
+                // Exceptions such as Lua LuaErrors mean the game code is all bonkers trying to
+                // access a nil variable for example.
+                task->RethrowException();
+
             }
         }
         mUpdateTasks.clear();
