@@ -22,6 +22,7 @@
 #  include <glm/vec2.hpp>
 #include "warnpop.h"
 
+#include "base/bitflag.h"
 #include "game/timeline_animator_base.h"
 
 #include "base/snafu.h"
@@ -33,8 +34,14 @@ namespace game
     class TransformAnimatorClass : public detail::AnimatorClassBase<TransformAnimatorClass>
     {
     public:
+        enum class Transformations {
+            Scale, Translate, Rotate, Resize
+        };
+
         // The interpolation method.
         using Interpolation = math::Interpolation;
+
+        TransformAnimatorClass();
 
         Interpolation GetInterpolation() const
         { return mInterpolation; }
@@ -64,11 +71,34 @@ namespace game
         void SetEndScale(float x, float y)
         { mEndScale = glm::vec2(x, y); }
 
+        inline void EnableRotation(bool enabled) noexcept
+        { mTransformations.set(Transformations::Rotate, enabled); }
+        inline void EnableTranslation(bool enabled) noexcept
+        { mTransformations.set(Transformations::Translate, enabled); ; }
+        inline void EnableScaling(bool enabled) noexcept
+        { mTransformations.set(Transformations::Scale, enabled); }
+        inline void EnableResize(bool enabled) noexcept
+        { mTransformations.set(Transformations::Resize, enabled); }
+
+        inline auto IsRotationEnable() const noexcept
+        { return mTransformations.test(Transformations::Rotate); }
+        inline auto IsTranslationEnabled() const noexcept
+        { return mTransformations.test(Transformations::Translate); }
+        inline auto IsScalingEnabled() const noexcept
+        { return mTransformations.test(Transformations::Scale); }
+        inline auto IsResizeEnabled() const noexcept
+        { return mTransformations.test(Transformations::Resize); }
+
+        inline auto GetTransformationBits() const noexcept
+        { return mTransformations; }
+        void ClearTransformBits() noexcept
+        { mTransformations.clear(); }
+
         virtual Type GetType() const override
         { return Type::TransformAnimator; }
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-        virtual std::size_t GetHash() const override;
+        void IntoJson(data::Writer& data) const override;
+        bool FromJson(const data::Reader& data) override;
+        std::size_t GetHash() const override;
     private:
         // the interpolation method to be used.
         Interpolation mInterpolation = Interpolation::Linear;
@@ -81,19 +111,22 @@ namespace game
         glm::vec2 mEndScale = {1.0f, 1.0f};
         // the ending rotation.
         float mEndRotation = 0.0f;
+        base::bitflag<Transformations> mTransformations;
     };
 
     // Apply change to the target nodes' transform.
     class TransformAnimator final : public Animator
     {
     public:
+        using Transformations = TransformAnimatorClass::Transformations;
+
         explicit TransformAnimator(std::shared_ptr<const TransformAnimatorClass> klass) noexcept;
         explicit TransformAnimator(const TransformAnimatorClass& klass)
             : TransformAnimator(std::make_shared<TransformAnimatorClass>(klass))
         {}
-        virtual void Start(EntityNode& node) override;
-        virtual void Apply(EntityNode& node, float t) override;
-        virtual void Finish(EntityNode& node) override;
+        void Start(EntityNode& node) override;
+        void Apply(EntityNode& node, float t) override;
+        void Finish(EntityNode& node) override;
 
         virtual float GetStartTime() const override
         { return mClass->GetStartTime(); }
