@@ -160,13 +160,13 @@ function AsteroidHit(player, asteroid)
     Game:DebugPrint('You were hit by an asteroid!')
 end
 
-function FireRocket(player)
+function FireRocket(player, type)
     local weapon = player:FindNodeByClassName('Mine')
     local matrix = Scene:FindEntityNodeTransform(player, weapon)
 
     -- setup the args for spawning a new bullet.
     local args = game.EntityArgs:new()
-    args.class = ClassLib:FindEntityClassByName('Rocket')
+    args.class = ClassLib:FindEntityClassByName(type)
     args.position = util.GetTranslationFromMatrix(matrix)
     args.name = 'rocket'
     args.logging = false
@@ -346,7 +346,8 @@ function OnKeyDown(player, symbol, modifier_bits)
 
     if symbol == wdk.Keys.Key1 then
         if mine_ready then
-            FireRocket(player, 'Rocket')
+            FireRocket(player, 'Left Rocket')
+            FireRocket(player, 'Right Rocket')
             mine_ready = false
             mine_load_time = 5.0
         else
@@ -382,10 +383,22 @@ function OnKeyUp(player, symbol, modifier_bits)
         _keydown_bits = _keydown_bits & ~_Keys.Fire
     end
 
-    if PreviewMode then
-        if symbol == wdk.Keys.F1 then
-            IndicateDamage(player)
-        end
+    -- for development
+    if PreviewMode == false then
+        return
+    end
+
+    -- react to some special key presses in preview/development
+    -- mode in order to test battles and such
+
+    local scene = player:GetScene()
+
+    if symbol == wdk.Keys.F1 then
+        IndicateDamage(player)
+    elseif symbol == wdk.Keys.F2 then
+        scene:SpawnEntity('Enemy/Intermediate', {
+            y = -500
+        })
     end
 end
 

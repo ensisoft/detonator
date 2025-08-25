@@ -40,29 +40,28 @@ end
 function SpawnSpaceRock()
     local maybe = util.Random(0, 2)
     local scale = glm.vec2:new(1.0, 1.0)
-    local radius = 30
-    local time_scale = 2.0
+    local radius = 80.0
     local speed = 300.0
+    local position = glm.vec2:new(util.Random(-550, 550), -500)
+    local rotation = util.Random(0.0, 1.34)
+
     if maybe == 1 then
         local size = util.Random(0, 2)
         if size == 1 then
             scale = glm.vec2:new(2.0, 2.0)
-            radius = 60
-            time_scale = 0.3
+            radius = 160.0
             speed = 150.0
         end
-        local asteroid = ClassLib:FindEntityClassByName('Asteroid')
-        local args = game.EntityArgs:new()
-        args.class = asteroid
-        args.name = 'asteroid'
-        args.position = glm.vec2:new(util.Random(-550, 550), -500)
-        args.scale = scale
-        local entity = Scene:SpawnEntity(args, true)
-        local body = entity:GetNode(0)
-        local item = body:GetDrawable()
-        item:SetTimeScale(time_scale)
-        entity.radius = radius
-        entity.speed = speed
+        Scene:SpawnEntity('Asteroid', {
+            asyn = true,
+            pos = position,
+            scale = scale,
+            r = rotation,
+            vars = {
+                radius = radius,
+                speed = speed
+            }
+        })
     end
 end
 

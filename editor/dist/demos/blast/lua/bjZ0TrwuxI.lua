@@ -4,6 +4,23 @@
 -- You're free to delete functions you don't need.
 function BulletHit(asteroid, bullet)
     bullet:Die()
+
+    if bullet.player == false then
+        return
+    end
+
+    if asteroid:HasScheduledDeath() then
+        return
+    end
+
+    local damage = asteroid.damage
+    damage = damage + 20.0
+    if damage >= 100.0 then
+        asteroid:DieLater(2.0)
+        asteroid:PlayAnimation('Explode')
+        return
+    end
+    asteroid.damage = damage
 end
 
 -- Called when the game play begins for a scene.
@@ -23,11 +40,16 @@ function Update(asteroid, game_time, dt)
 end
 
 function PostUpdate(asteroid, game_time, dt)
-    local node = asteroid:GetNode(0)
-    local asteroid_pos = node:GetTranslation()
+
+    if asteroid:HasScheduledDeath() then
+        return
+    end
+
+    local asteroid_node = asteroid:GetNode(0)
+    local asteroid_pos = asteroid_node:GetTranslation()
 
     -- player's ship can get hurt if hit by an asteroid!
-    local player = Scene:FindEntityByInstanceName('Player')
+    local player = Scene:FindEntity('Player')
     if player == nil then
         return
     end
