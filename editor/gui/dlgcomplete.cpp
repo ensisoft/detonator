@@ -19,12 +19,18 @@
 #include "config.h"
 
 #include "warnpush.h"
-
+#  include <QNetworkAccessManager>
+#  include <QUrl>
+#  include <QFileInfo>
+#  include <QNetworkReply>
 #include "warnpop.h"
+
+#include <unordered_map>
 
 #include "editor/app/platform.h"
 #include "editor/app/process.h"
 #include "editor/app/workspace.h"
+#include "editor/app/eventlog.h"
 #include "editor/gui/dlgcomplete.h"
 #include "editor/gui/utility.h"
 
@@ -33,10 +39,14 @@ namespace gui
 
 DlgComplete::DlgComplete(QWidget* parent,
                          const app::Workspace& workspace,
-                         const app::Workspace::ContentPackingOptions& package)
+                         const app::Workspace::ContentPackingOptions& package,
+                         const app::Workspace::ReleaseArtifactsList& artifacts,
+                         const gui::AppSettings& settings)
   : QDialog(parent)
   , mWorkspace(workspace)
   , mPackage(package)
+  , mArtifacts(artifacts)
+  , mSettings(settings)
 {
     mUI.setupUi(this);
 
@@ -59,6 +69,13 @@ DlgComplete::DlgComplete(QWidget* parent,
         browsers << "Edge";
 #endif
     SetList(mUI.cmbBrowser, browsers);
+
+    if (mArtifacts.empty() ||
+        mSettings.web_server_api.isEmpty() ||
+        mSettings.web_server_key.isEmpty())
+        SetEnabled(mUI.btnDeploy, false);
+
+    SetVisible(mUI.progressBar, false);
 }
 
 DlgComplete::~DlgComplete()
@@ -148,6 +165,117 @@ void DlgComplete::on_btnPlayNative_clicked()
 void DlgComplete::on_btnClose_clicked()
 {
     close();
+}
+
+void DlgComplete::on_btnDeploy_clicked()
+{
+    AutoEnabler fofo(mUI.btnDeploy);
+
+    QNetworkAccessManager manager;
+
+    const auto& apiKey = mSettings.web_server_key;
+    const auto& webUrl = mSettings.web_server_api;
+    const auto& subDir = mWorkspace.GetProjectSettings().game_name; // todo:
+    bool errors = false;
+
+    struct UploadInfo {
+        QString fileName;
+        quint64 file_size = 0;
+        quint64 sent_bytes = 0;
+        bool errors =false;
+        bool complete = false;
+    };
+    std::unordered_map<QNetworkReply*, UploadInfo> waiting;
+
+    quint64 total_file_sizes = 0;
+    quint64 total_upload = 0;
+
+    for (const auto& artifact : mArtifacts)
+    {
+        const QFileInfo info(artifact.filename);
+        const auto& fileName = info.fileName();
+        if (fileName == "http-server.py")
+            continue;
+
+        total_file_sizes += info.size();
+
+        DEBUG("Uploading artifact file. [file='%1', uri='%2]", artifact.filename, webUrl);
+
+        QFile file(artifact.filename);
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            ERROR("Failed to open artifact file for uploading. [file='%1']", artifact.filename);
+            errors = true;
+            continue;
+        }
+        QByteArray fileData = file.readAll();
+        file.close();
+
+        QUrl url(webUrl);
+        QUrlQuery query;
+        query.addQueryItem("subdir", subDir);
+        query.addQueryItem("filename", fileName);
+        url.setQuery(query);
+
+        // --- REQUEST ---
+        QNetworkRequest request(url);
+        request.setRawHeader("X-Api-Key", apiKey.toUtf8());
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
+        QNetworkReply *reply = manager.put(request, fileData);
+
+        UploadInfo up;
+        up.fileName = fileName;
+        waiting.insert({reply, up});
+
+        connect(reply, &QNetworkReply::finished, [&waiting, reply]() {
+            if (reply->error() == QNetworkReply::NoError)
+            {
+                INFO("File upload completed successfully. [file='%1]", waiting[reply].fileName);
+                DEBUG("%1", reply->readAll().toStdString());
+            }
+            else
+            {
+                ERROR("File upload failed. [file='%1', error='%2]]", waiting[reply].fileName,reply->errorString());
+                ERROR("%1", reply->readAll().toStdString());
+                waiting[reply].errors = true;
+            }
+            waiting[reply].complete = true;
+        });
+        connect(reply, &QNetworkReply::uploadProgress, [&waiting, reply](qint64 bytesSent, qint64 bytesTotal) {
+            waiting[reply].sent_bytes = bytesSent;
+        });
+    }
+
+    AutoHider hoho(mUI.progressBar);
+
+    mUI.progressBar->setMinimum(0);
+    mUI.progressBar->setMaximum(waiting.size());
+
+    while (!waiting.empty())
+    {
+        qApp->processEvents();
+
+        double total_bytes = 0;
+        double total_sent = 0;
+
+        auto it = waiting.begin();
+        while (it != waiting.end())
+        {
+            auto* reply = it->first;
+            total_bytes += it->second.file_size;
+            total_sent  += it->second.sent_bytes;
+            const int progress = (total_sent / total_bytes) * 100;
+            //mUI.progressBar->setValue(progress);
+
+            if (reply->isFinished())
+            {
+                reply->deleteLater();
+                it = waiting.erase(it);
+                SetValue(mUI.progressBar, mUI.progressBar->value() + 1);
+            }
+            else ++it;
+        }
+    }
 }
 
 } // namespace

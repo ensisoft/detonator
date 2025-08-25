@@ -64,10 +64,9 @@ namespace gui
         void on_btnClose_clicked();
 
     private:
-        virtual void closeEvent(QCloseEvent* event) override;
+        void closeEvent(QCloseEvent* event) override;
     private:
         Ui::DlgPackage mUI;
-    private:
     private:
         struct UpdateMessage {
             QString msg;

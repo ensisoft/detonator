@@ -91,6 +91,8 @@ end
     });
 
     // general application settings.
+    SetUIValue(mUI.webKey,                      settings.web_server_key);
+    SetUIValue(mUI.webAPI,                      settings.web_server_api);
     SetUIValue(mUI.edtCodeEditorExecutable,     settings.code_editor_executable);
     SetUIValue(mUI.edtCodeEditorArguments,      settings.code_editor_arguments);
     SetUIValue(mUI.edtImageEditorExecutable,    settings.image_editor_executable);
@@ -164,6 +166,8 @@ void DlgSettings::UpdateSampleCode()
 void DlgSettings::on_btnAccept_clicked()
 {
     // general settings
+    GetUIValue(mUI.webKey,                      &mSettings.web_server_key);
+    GetUIValue(mUI.webAPI,                      &mSettings.web_server_api);
     GetUIValue(mUI.edtCodeEditorExecutable,     &mSettings.code_editor_executable);
     GetUIValue(mUI.edtCodeEditorArguments,      &mSettings.code_editor_arguments);
     GetUIValue(mUI.edtImageEditorExecutable,    &mSettings.image_editor_executable);

@@ -323,6 +323,8 @@ void MainWindow::LoadSettings()
     settings.GetValue("Settings", "vcs_cmd_commit_file",        &mSettings.vcs_cmd_commit_file);
     settings.GetValue("Settings", "vcs_ignore_list",            &mSettings.vcs_ignore_list);
     settings.GetValue("Settings", "main_tab_position",          &mSettings.main_tab_position);
+    settings.GetValue("Settings", "web_server_api",             &mSettings.web_server_api);
+    settings.GetValue("Settings", "web_server_key",             &mSettings.web_server_key);
 
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
@@ -3685,6 +3687,8 @@ void MainWindow::SaveSettings()
     settings.SetValue("Settings", "vcs_cmd_commit_file",        mSettings.vcs_cmd_commit_file);
     settings.SetValue("Settings", "vcs_ignore_list",            mSettings.vcs_ignore_list);
     settings.SetValue("Settings", "main_tab_position",          mSettings.main_tab_position);
+    settings.SetValue("Settings", "web_server_api",             mSettings.web_server_api);
+    settings.SetValue("Settings", "web_server_key",             mSettings.web_server_key);
 
     ScriptWidget::Settings script_widget_settings;
     ScriptWidget::GetDefaultSettings(&script_widget_settings);

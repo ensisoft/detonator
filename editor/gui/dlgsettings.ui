@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>800</height>
+    <height>759</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -71,6 +71,59 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="cmbStyle"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_21">
+            <property name="text">
+             <string>Mouse cursor</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="cmbWinOrTab">
+            <item>
+             <property name="text">
+              <string>Window</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Tab</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="webKey">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="placeholderText">
+             <string>API key for deploying games to your web server</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="cmbMouseCursor"/>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_25">
+            <property name="text">
+             <string>Web server API key</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="cmbTabPosition"/>
+          </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_9">
             <property name="text">
@@ -88,38 +141,25 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="cmbStyle"/>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="cmbTabPosition"/>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="cmbWinOrTab">
-            <item>
-             <property name="text">
-              <string>Window</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Tab</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_21">
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_26">
             <property name="text">
-             <string>Mouse cursor</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             <string>Web server API endpoint</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
-           <widget class="QComboBox" name="cmbMouseCursor"/>
+          <item row="6" column="1">
+           <widget class="QLineEdit" name="webAPI">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="placeholderText">
+             <string>The host name of your game server for example</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -1586,7 +1626,9 @@
   <tabstop>cmbWinOrTab</tabstop>
   <tabstop>cmbTabPosition</tabstop>
   <tabstop>cmbMouseCursor</tabstop>
+  <tabstop>webKey</tabstop>
   <tabstop>spinFrameDelay</tabstop>
+  <tabstop>webAPI</tabstop>
   <tabstop>chkVSYNC</tabstop>
   <tabstop>chkSaveAutomatically</tabstop>
   <tabstop>clearColor</tabstop>
