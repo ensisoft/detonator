@@ -263,7 +263,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="gui::GfxWidget" name="widget">
+         <widget class="gui::GfxWidget" name="widget" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
             <horstretch>0</horstretch>
@@ -354,7 +354,7 @@
               </widget>
              </item>
              <item>
-              <widget class="color_widgets::ColorSelector" name="widgetColor">
+              <widget class="color_widgets::ColorSelector" name="widgetColor" native="true">
                <property name="minimumSize">
                 <size>
                  <width>30</width>
@@ -878,7 +878,7 @@
              <enum>QFrame::Plain</enum>
             </property>
             <property name="currentIndex">
-             <number>3</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="transformActuator">
              <layout class="QGridLayout" name="gridLayout_5">
@@ -924,8 +924,8 @@
                 </item>
                </layout>
               </item>
-              <item row="2" column="1">
-               <widget class="QDoubleSpinBox" name="transformEndPosY">
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="transformEndPosX">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -943,14 +943,8 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
-               <widget class="QDoubleSpinBox" name="transformEndPosX">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
+              <item row="2" column="3">
+               <widget class="QDoubleSpinBox" name="transformEndSizeY">
                 <property name="minimum">
                  <double>-10000.000000000000000</double>
                 </property>
@@ -959,6 +953,25 @@
                 </property>
                 <property name="stepType">
                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="5">
+               <widget class="QDoubleSpinBox" name="transformEndScaleY">
+                <property name="minimum">
+                 <double>0.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>10000.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+                <property name="stepType">
+                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
                 </property>
                </widget>
               </item>
@@ -979,13 +992,13 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="2">
-               <widget class="QLabel" name="label_24">
+              <item row="2" column="4">
+               <widget class="QLabel" name="label_29">
                 <property name="styleSheet">
-                 <string notr="true">color: rgb(0, 200, 0)</string>
+                 <string notr="true">color: rgb(200,0, 0)</string>
                 </property>
                 <property name="text">
-                 <string>X Size</string>
+                 <string>Y Scale</string>
                 </property>
                </widget>
               </item>
@@ -996,25 +1009,6 @@
                 </property>
                 <property name="text">
                  <string>Y Size</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="5">
-               <widget class="QDoubleSpinBox" name="transformEndScaleY">
-                <property name="minimum">
-                 <double>0.000000000000000</double>
-                </property>
-                <property name="maximum">
-                 <double>10000.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-                <property name="stepType">
-                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                </property>
-                <property name="value">
-                 <double>1.000000000000000</double>
                 </property>
                </widget>
               </item>
@@ -1043,42 +1037,20 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_26">
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(200,0, 0)</string>
-                </property>
-                <property name="text">
-                 <string>Y Pos</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="4">
-               <widget class="QLabel" name="label_29">
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(200,0, 0)</string>
-                </property>
-                <property name="text">
-                 <string>Y Scale</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="3">
-               <widget class="QDoubleSpinBox" name="transformEndSizeX">
+              <item row="0" column="1" colspan="5">
+               <widget class="QComboBox" name="transformInterpolation">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="minimum">
-                 <double>-10000.000000000000000</double>
-                </property>
-                <property name="maximum">
-                 <double>10000.000000000000000</double>
-                </property>
-                <property name="stepType">
-                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_28">
+                <property name="text">
+                 <string>Rotation</string>
                 </property>
                </widget>
               </item>
@@ -1108,13 +1080,6 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="label_28">
-                <property name="text">
-                 <string>Rotation</string>
-                </property>
-               </widget>
-              </item>
               <item row="3" column="4" colspan="2">
                <widget class="QPushButton" name="btnTransformReset">
                 <property name="sizePolicy">
@@ -1128,8 +1093,24 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="3">
-               <widget class="QDoubleSpinBox" name="transformEndSizeY">
+              <item row="1" column="2">
+               <widget class="QLabel" name="label_24">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(0, 200, 0)</string>
+                </property>
+                <property name="text">
+                 <string>X Size</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QDoubleSpinBox" name="transformEndSizeX">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="minimum">
                  <double>-10000.000000000000000</double>
                 </property>
@@ -1141,15 +1122,66 @@
                 </property>
                </widget>
               </item>
-              <item row="0" column="1" colspan="5">
-               <widget class="QComboBox" name="transformInterpolation">
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_26">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(200,0, 0)</string>
+                </property>
+                <property name="text">
+                 <string>Y Pos</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDoubleSpinBox" name="transformEndPosY">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="minimum">
+                 <double>-10000.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>10000.000000000000000</double>
+                </property>
+                <property name="stepType">
+                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
                </widget>
+              </item>
+              <item row="4" column="0" colspan="6">
+               <layout class="QHBoxLayout" name="horizontalLayout">
+                <item>
+                 <widget class="QCheckBox" name="translate">
+                  <property name="text">
+                   <string>Translate</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="rotate">
+                  <property name="text">
+                   <string>Rotate</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="resize">
+                  <property name="text">
+                   <string>Resize</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="scale">
+                  <property name="text">
+                   <string>Scale</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -1902,6 +1934,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>gui::TreeWidget</class>
+   <extends>QFrame</extends>
+   <header>treewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>color_widgets::ColorPreview</class>
    <extends>QWidget</extends>
    <header>color_preview.hpp</header>
@@ -1912,20 +1950,15 @@
    <header>color_selector.hpp</header>
   </customwidget>
   <customwidget>
-   <class>gui::TreeWidget</class>
-   <extends>QFrame</extends>
-   <header>treewidget.h</header>
+   <class>gui::GfxWidget</class>
+   <extends>QWidget</extends>
+   <header>gfxwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>gui::CurveWidget</class>
    <extends>QFrame</extends>
    <header>curvewidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>gui::GfxWidget</class>
-   <extends>QWidget</extends>
-   <header>gfxwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1983,6 +2016,10 @@
   <tabstop>btnTransformPlus90</tabstop>
   <tabstop>btnTransformMinus90</tabstop>
   <tabstop>btnTransformReset</tabstop>
+  <tabstop>translate</tabstop>
+  <tabstop>rotate</tabstop>
+  <tabstop>resize</tabstop>
+  <tabstop>scale</tabstop>
   <tabstop>setvalInterpolation</tabstop>
   <tabstop>setvalName</tabstop>
   <tabstop>setvalJoint</tabstop>
@@ -1999,6 +2036,12 @@
   <tabstop>flagTime</tabstop>
   <tabstop>flagAction</tabstop>
   <tabstop>flagJoint</tabstop>
+  <tabstop>entityTriggerList</tabstop>
+  <tabstop>entityRenderLayer</tabstop>
+  <tabstop>emitCount</tabstop>
+  <tabstop>spriteCycles</tabstop>
+  <tabstop>audioTriggerGraph</tabstop>
+  <tabstop>audioTriggerStream</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

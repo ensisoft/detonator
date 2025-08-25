@@ -1142,6 +1142,10 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     };
     std::vector<Animator> animator_type_list;
     animator_type_list.push_back( {game::AnimatorClass::Type::TransformAnimator,       "Transform Animator" });
+    animator_type_list.push_back( {game::AnimatorClass::Type::TransformAnimator,       "Transform Animator on Position" });
+    animator_type_list.push_back( {game::AnimatorClass::Type::TransformAnimator,       "Transform Animator on Size" });
+    animator_type_list.push_back( {game::AnimatorClass::Type::TransformAnimator,       "Transform Animator on Scale" });
+    animator_type_list.push_back( {game::AnimatorClass::Type::TransformAnimator,       "Transform Animator on Rotation" });
     animator_type_list.push_back( {game::AnimatorClass::Type::KinematicAnimator,       "Kinematic Animator on Rigid Body" });
     animator_type_list.push_back( {game::AnimatorClass::Type::KinematicAnimator,       "Kinematic Animator on Linear Mover" });
     animator_type_list.push_back( {game::AnimatorClass::Type::MaterialAnimator,        "Material Animator" });
@@ -1290,6 +1294,23 @@ void AnimationTrackWidget::on_transformEndRotation_valueChanged(double value)
         node->SetRotation(qDegreesToRadians(value));
         SetSelectedAnimatorProperties();
     }
+}
+
+void AnimationTrackWidget::on_translate_stateChanged(int)
+{
+    SetSelectedAnimatorProperties();
+}
+void AnimationTrackWidget::on_resize_stateChanged(int)
+{
+    SetSelectedAnimatorProperties();
+}
+void AnimationTrackWidget::on_rotate_stateChanged(int)
+{
+    SetSelectedAnimatorProperties();
+}
+void AnimationTrackWidget::on_scale_stateChanged(int)
+{
+    SetSelectedAnimatorProperties();
 }
 
 void AnimationTrackWidget::on_setvalEndValue_ValueChanged()
@@ -1519,6 +1540,10 @@ void AnimationTrackWidget::SetSelectedAnimatorProperties()
         transform->SetEndSize(GetValue(mUI.transformEndSizeX), GetValue(mUI.transformEndSizeY));
         transform->SetEndScale(GetValue(mUI.transformEndScaleX), GetValue(mUI.transformEndScaleY));
         transform->SetEndRotation(qDegreesToRadians((float) GetValue(mUI.transformEndRotation)));
+        transform->EnableResize(GetValue(mUI.resize));
+        transform->EnableRotation(GetValue(mUI.rotate));
+        transform->EnableTranslation(GetValue(mUI.translate));
+        transform->EnableScaling(GetValue(mUI.scale));
 
         mUI.curve->SetFunction(transform->GetInterpolation());
     }
@@ -1909,7 +1934,20 @@ void AnimationTrackWidget::TimelineAnimatorChanged(const TimelineWidget::Timelin
         SetValue(mUI.transformEndScaleY, scale.y);
         SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
         SetValue(mUI.actuatorIsStatic, ptr->TestFlag(game::TransformAnimatorClass::Flags::StaticInstance));
+        SetValue(mUI.translate, ptr->IsTranslationEnabled());
+        SetValue(mUI.resize, ptr->IsResizeEnabled());
+        SetValue(mUI.scale, ptr->IsScalingEnabled());
+        SetValue(mUI.rotate, ptr->IsRotationEnable());
         SetEnabled(mUI.actuatorIsStatic, true);
+
+        SetEnabled(mUI.transformEndPosX, ptr->IsTranslationEnabled());
+        SetEnabled(mUI.transformEndPosY, ptr->IsTranslationEnabled());
+        SetEnabled(mUI.transformEndSizeX, ptr->IsResizeEnabled());
+        SetEnabled(mUI.transformEndSizeY, ptr->IsResizeEnabled());
+        SetEnabled(mUI.transformEndScaleY, ptr->IsScalingEnabled());
+        SetEnabled(mUI.transformEndScaleY, ptr->IsScalingEnabled());
+        SetEnabled(mUI.transformEndRotation, ptr->IsRotationEnable());
+
         mUI.actuatorProperties->setCurrentWidget(mUI.transformActuator);
         mUI.curve->SetFunction(ptr->GetInterpolation());
 
@@ -2203,6 +2241,8 @@ void AnimationTrackWidget::AddAnimatorAction()
     if (!AddAnimatorFromTimeline(type, time_point, timeline_index))
         return;
 
+    const auto& action_text = action->text();
+
     // hack for now
     if (type == game::AnimatorClass::Type::KinematicAnimator)
     {
@@ -2213,6 +2253,37 @@ void AnimationTrackWidget::AddAnimatorAction()
             auto* ptr = dynamic_cast<game::KinematicAnimatorClass*>(selected);
             ptr->SetTarget(target);
             SetValue(mUI.kinematicTarget, target);
+
+            SelectedItemChanged(mUI.timeline->SelectItem(selected->GetId()));
+        }
+    }
+    else if (type == game::AnimatorClass::Type::TransformAnimator)
+    {
+        if (auto* selected = GetCurrentAnimator())
+        {
+            auto* transform = dynamic_cast<game::TransformAnimatorClass*>(selected);
+            if (action_text.contains("on Position"))
+            {
+                transform->ClearTransformBits();
+                transform->EnableTranslation(true);
+            }
+            else if (action_text.contains("on Size"))
+            {
+                transform->ClearTransformBits();
+                transform->EnableResize(true);
+            }
+            else if (action_text.contains("on Scale"))
+            {
+                transform->ClearTransformBits();
+                transform->EnableScaling(true);
+            }
+            else if (action_text.contains("on Rotation"))
+            {
+                transform->ClearTransformBits();
+                transform->EnableRotation(true);
+            }
+
+            SelectedItemChanged(mUI.timeline->SelectItem(selected->GetId()));
         }
     }
 }

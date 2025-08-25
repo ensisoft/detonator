@@ -126,6 +126,10 @@ namespace gui
         void on_transformEndScaleX_valueChanged(double value);
         void on_transformEndScaleY_valueChanged(double value);
         void on_transformEndRotation_valueChanged(double value);
+        void on_translate_stateChanged(int);
+        void on_resize_stateChanged(int);
+        void on_rotate_stateChanged(int);
+        void on_scale_stateChanged(int);
         void on_setvalEndValue_ValueChanged();
         void on_setvalJoint_currentIndexChanged(int index);
         void on_actuatorIsStatic_toggled(bool on);
