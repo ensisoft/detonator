@@ -26,6 +26,7 @@
 
 #include "editor/app/workspace.h"
 #include "editor/app/process.h"
+#include "editor/gui/appsettings.h"
 
 namespace gui
 {
@@ -36,22 +37,28 @@ namespace gui
     public:
         DlgComplete(QWidget* parent,
                     const app::Workspace& workspace,
-                    const app::Workspace::ContentPackingOptions& package);
-       ~DlgComplete();
+                    const app::Workspace::ContentPackingOptions& package,
+                    const app::Workspace::ReleaseArtifactsList& artifacts,
+                    const gui::AppSettings& settings);
+       ~DlgComplete() override;
 
     private slots:
         void on_btnOpenFolder_clicked();
         void on_btnPlayBrowser_clicked();
         void on_btnPlayNative_clicked();
         void on_btnClose_clicked();
+        void on_btnDeploy_clicked();
 
     private:
         Ui::DlgComplete mUI;
     private:
         const app::Workspace& mWorkspace;
         const app::Workspace::ContentPackingOptions& mPackage;
+        const app::Workspace::ReleaseArtifactsList& mArtifacts;
+        const gui::AppSettings& mSettings;
         app::Process mPython;
         app::Process mGame;
+
     };
 
 } // namespace

@@ -30,6 +30,8 @@ namespace gui
 {
     // Collection of global application settings.
     struct AppSettings {
+        QString web_server_api;
+        QString web_server_key;
         // The python interpreter used to run emscripten packaging tools
         QString python_executable;
         // Path to emscripten sdk

@@ -75,46 +75,46 @@ namespace app
         Q_OBJECT
 
     public:
-        Workspace(const QString& dir);
-       ~Workspace();
+        explicit Workspace(const QString& dir);
+       ~Workspace() override;
 
         // QAbstractTableModel implementation
-        virtual QVariant data(const QModelIndex& index, int role) const override;
-        virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-        virtual int rowCount(const QModelIndex&) const override
+        QVariant data(const QModelIndex& index, int role) const override;
+        QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+        int rowCount(const QModelIndex&) const override
         { return static_cast<int>(mUserResourceCount); }
-        virtual int columnCount(const QModelIndex&) const override
+        int columnCount(const QModelIndex&) const override
         { return 2; }
         // QAbstractFileEngineHandler implementation
-        virtual QAbstractFileEngine* create(const QString& file) const override;
+        QAbstractFileEngine* create(const QString& file) const override;
         // game::ClassLibrary implementation
         // The methods here allow requests for resources that don't exist and return
         // nullptr as specified in the ClassLibrary API.
-        virtual engine::ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const override;
-        virtual engine::ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override;
-        virtual engine::ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
-        virtual engine::ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
-        virtual engine::ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override;
-        virtual engine::ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
-        virtual engine::ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
-        virtual engine::ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
-        virtual engine::ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
-        virtual engine::ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
-        virtual engine::ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
-        virtual engine::ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override;
+        engine::ClassHandle<const audio::GraphClass> FindAudioGraphClassById(const std::string& id) const override;
+        engine::ClassHandle<const audio::GraphClass> FindAudioGraphClassByName(const std::string& name) const override;
+        engine::ClassHandle<const uik::Window> FindUIByName(const std::string& name) const override;
+        engine::ClassHandle<const uik::Window> FindUIById(const std::string& id) const override;
+        engine::ClassHandle<const gfx::MaterialClass> FindMaterialClassByName(const std::string& name) const override;
+        engine::ClassHandle<const gfx::MaterialClass> FindMaterialClassById(const std::string& id) const override;
+        engine::ClassHandle<const gfx::DrawableClass> FindDrawableClassById(const std::string& id) const override;
+        engine::ClassHandle<const game::EntityClass> FindEntityClassByName(const std::string& name) const override;
+        engine::ClassHandle<const game::EntityClass> FindEntityClassById(const std::string& id) const override;
+        engine::ClassHandle<const game::SceneClass> FindSceneClassByName(const std::string& name) const override;
+        engine::ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
+        engine::ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override;
         // engine::EngineDataLoader implementation.
-        virtual engine::EngineDataHandle LoadEngineDataUri(const std::string& URI) const override;
-        virtual engine::EngineDataHandle LoadEngineDataFile(const std::string& filename) const override;
-        virtual engine::EngineDataHandle LoadEngineDataId(const std::string& id) const override;
+        engine::EngineDataHandle LoadEngineDataUri(const std::string& URI) const override;
+        engine::EngineDataHandle LoadEngineDataFile(const std::string& filename) const override;
+        engine::EngineDataHandle LoadEngineDataId(const std::string& id) const override;
 
         // gfx::ResourceLoader implementation
-        virtual gfx::ResourceHandle LoadResource(const gfx::Loader::ResourceDesc& desc) override;
+        gfx::ResourceHandle LoadResource(const gfx::Loader::ResourceDesc& desc) override;
 
         // audio::Loader implementation
-        virtual audio::SourceStreamHandle OpenAudioStream(const std::string& URI,
+        audio::SourceStreamHandle OpenAudioStream(const std::string& URI,
             AudioIOStrategy strategy, bool enable_file_caching) const override;
         // game::Loader implementation
-        virtual game::TilemapDataHandle LoadTilemapData(const game::Loader::TilemapDataDesc& desc) const override;
+        game::TilemapDataHandle LoadTilemapData(const game::Loader::TilemapDataDesc& desc) const override;
 
         static gfx::ResourceHandle LoadAppResource(const std::string& URI);
 
@@ -483,6 +483,11 @@ namespace app
             QString emsdk_path;
         };
 
+        struct ReleaseArtifact {
+            QString filename;
+        };
+        using ReleaseArtifactsList = std::vector<ReleaseArtifact>;
+
         // Build the selected resources into a deployable release "package", that
         // can be redistributed to the end users.
         // This includes copying the resource files such as fonts, textures and shaders
@@ -493,7 +498,8 @@ namespace app
         // and the package process might have failed in some way.
         // Errors/warnings encountered during the process will be logged.
         bool BuildReleasePackage(const std::vector<const Resource*>& resources, const ContentPackingOptions& options,
-                                 WorkspaceAsyncWorkObserver* observer = nullptr);
+                                 WorkspaceAsyncWorkObserver* observer = nullptr,
+                                 std::vector<ReleaseArtifact>* artifacts = nullptr);
 
         static void ClearAppGraphicsCache();
 
