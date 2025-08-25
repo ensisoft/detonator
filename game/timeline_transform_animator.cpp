@@ -26,6 +26,14 @@
 namespace game
 {
 
+TransformAnimatorClass::TransformAnimatorClass()
+{
+    mTransformations.set(Transformations::Resize, true);
+    mTransformations.set(Transformations::Rotate, true);
+    mTransformations.set(Transformations::Scale, true);
+    mTransformations.set(Transformations::Translate, true);
+}
+
 void TransformAnimatorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",        mId);
@@ -40,6 +48,7 @@ void TransformAnimatorClass::IntoJson(data::Writer& data) const
     data.Write("scale",     mEndScale);
     data.Write("rotation",  mEndRotation);
     data.Write("flags",     mFlags);
+    data.Write("transformations", mTransformations);
 }
 
 bool TransformAnimatorClass::FromJson(const data::Reader& data)
@@ -57,6 +66,7 @@ bool TransformAnimatorClass::FromJson(const data::Reader& data)
     ok &= data.Read("rotation",  &mEndRotation);
     ok &= data.Read("method",    &mInterpolation);
     ok &= data.Read("flags",     &mFlags);
+    ok &= data.Read("transformations", &mTransformations);
     return ok;
 }
 
@@ -75,6 +85,7 @@ std::size_t TransformAnimatorClass::GetHash() const
     hash = base::hash_combine(hash, mEndScale);
     hash = base::hash_combine(hash, mEndRotation);
     hash = base::hash_combine(hash, mFlags);
+    hash = base::hash_combine(hash, mTransformations);
     return hash;
 }
 
@@ -105,14 +116,31 @@ void TransformAnimator::Apply(EntityNode& node, float t)
 
     // apply interpolated state on the node.
     const auto method = mClass->GetInterpolation();
-    const auto& p = math::interpolate(mStartPosition, inst.end_position, t, method);
-    const auto& s = math::interpolate(mStartSize,     inst.end_size,     t, method);
-    const auto& r = math::interpolate(mStartRotation, inst.end_rotation, t, method);
-    const auto& f = math::interpolate(mStartScale,    inst.end_scale,    t, method);
-    node.SetTranslation(p);
-    node.SetSize(s);
-    node.SetRotation(r);
-    node.SetScale(f);
+    const auto bits = mClass->GetTransformationBits();
+
+    if (bits.test(Transformations::Translate))
+    {
+        const auto& p = math::interpolate(mStartPosition, inst.end_position, t, method);
+        node.SetTranslation(p);
+    }
+
+    if (bits.test(Transformations::Resize))
+    {
+        const auto& s = math::interpolate(mStartSize, inst.end_size, t, method);
+        node.SetSize(s);
+    }
+
+    if (bits.test(Transformations::Rotate))
+    {
+        const auto& r = math::interpolate(mStartRotation, inst.end_rotation, t, method);
+        node.SetRotation(r);
+    }
+
+    if (bits.test(Transformations::Scale))
+    {
+        const auto& f = math::interpolate(mStartScale, inst.end_scale, t, method);
+        node.SetScale(f);
+    }
 
     if (auto* rigid_body = node.GetRigidBody())
         rigid_body->ResetTransform();
@@ -122,10 +150,15 @@ void TransformAnimator::Finish(EntityNode& node)
 {
     const auto& inst = GetInstance();
 
-    node.SetTranslation(inst.end_position);
-    node.SetRotation(inst.end_rotation);
-    node.SetSize(inst.end_size);
-    node.SetScale(inst.end_scale);
+    const auto bits = mClass->GetTransformationBits();
+    if (bits.test(Transformations::Translate))
+        node.SetTranslation(inst.end_position);
+    if (bits.test(Transformations::Rotate))
+        node.SetRotation(inst.end_rotation);
+    if (bits.test(Transformations::Resize))
+        node.SetSize(inst.end_size);
+    if (bits.test(Transformations::Scale))
+        node.SetScale(inst.end_scale);
 
     if (auto* rigid_body = node.GetRigidBody())
         rigid_body->ResetTransform();
