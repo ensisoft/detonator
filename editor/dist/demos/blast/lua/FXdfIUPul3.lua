@@ -6,15 +6,6 @@ require('common')
 
 local tick_counter = 0
 
-function BroadcastDeath(ship)
-    local event = game.GameEvent:new()
-    event.from = 'enemy'
-    event.message = 'dead'
-    event.to = 'game'
-    event.value = ship.score
-    Game:PostEvent(event)
-end
-
 function RocketBlast(ship, mine)
     local ship_node = ship:GetNode(0)
     local ship_pos = ship_node:GetTranslation()
@@ -59,8 +50,23 @@ function BulletHit(ship, bullet)
 
     bullet:Die()
 
+    -- ship death is handled in the native c++ code in the
+    -- update function. this function will also move to native 
+    -- code once the c++ game runtime features become more
+    -- developed.
+
     if ship.type == 'basic' then
         ship:Die()
+    end
+
+    if ship.type == 'intermediate' then
+        local hit_count = ship.hit_count
+        hit_count = hit_count + 1
+        if hit_count == 20 then
+            ship:Die()
+        end
+        ship.hit_count = hit_count
+        ship:PlayAnimation('Indicate Damage')
     end
 
     if ship.type == 'advanced' then
@@ -87,15 +93,19 @@ function BulletHit(ship, bullet)
 
 end
 
-function FireAdvancedWeapon(ship, weapon, bullet)
-    local weapon = ship:FindNodeByClassName(weapon)
+function FireWeapon(ship, weapon, bullet, bullet_speed)
+    local weapon = ship:FindNode(weapon)
     local matrix = Scene:FindEntityNodeTransform(ship, weapon)
-    local args = game.EntityArgs:new()
-    args.class = ClassLib:FindEntityClassByName(bullet)
-    args.position = util.GetTranslationFromMatrix(matrix)
-    args.name = 'bullet'
-    args.async = true
-    Scene:SpawnEntity(args, true)
+    local position = util.GetTranslationFromMatrix(matrix)
+
+    Scene:SpawnEntity(bullet, {
+        async = true,
+        pos = position,
+        vars = {
+            velocity = bullet_speed
+        }
+    })
+
 end
 
 function BasicWeaponry(ship)
@@ -103,24 +113,28 @@ function BasicWeaponry(ship)
         return
     end
 
-    local weapon = ship:FindNodeByClassName('Weapon')
-    local matrix = Scene:FindEntityNodeTransform(ship, weapon)
-    Scene:SpawnEntity('Bullet/Enemy/Basic', {
-        pos = util.GetTranslationFromMatrix(matrix),
-        name = 'blue bullet',
-        async = true,
-        vars = {
-            velocity = ship.velocity.y + 100.0
-        }
-    })
+    local bullet_velocity = ship.velocity.y + 100.0
+    FireWeapon(ship, 'Weapon', 'Bullet/Enemy/Basic', bullet_velocity)
+end
+
+function IntermediateWeaponry(ship)
+    if ship.type ~= 'intermediate' then
+        return
+    end
+
+    FireWeapon(ship, 'Weapon0', 'Bullet/Enemy/Advanced', 500.0)
+    FireWeapon(ship, 'Weapon1', 'Bullet/Enemy/Advanced', 500.0)
+    Audio:PlaySoundEffect('Fire 6')
+
 end
 
 function AdvancedWeaponry(ship)
     if ship.type ~= 'advanced' then
         return
     end
-    FireAdvancedWeapon(ship, 'Weapon0', 'Bullet/Enemy/Advanced')
-    FireAdvancedWeapon(ship, 'Weapon1', 'Bullet/Enemy/Advanced')
+    FireWeapon(ship, 'Weapon0', 'Bullet/Enemy/Advanced', 1000.0)
+    FireWeapon(ship, 'Weapon1', 'Bullet/Enemy/Advanced', 1000.0)
+    ship:PlayAnimation('Fire Weapons')
 end
 
 -- Called when the game play begins for a scene.
@@ -139,6 +153,7 @@ function Tick(ship, game_time, dt)
 
     if math.fmod(tick_counter, 3) ~= 0 then
         BasicWeaponry(ship)
+        IntermediateWeaponry(ship)
     end
 
     if math.fmod(tick_counter, 6) ~= 0 then
