@@ -40,6 +40,13 @@ void GetEntityScripts(std::vector<EntityScriptRegistration>* out)
         reg.script  = std::make_unique<blast::EnemyShip>();
         out->push_back(std::move(reg));
     }
+
+    {
+        EntityScriptRegistration reg;
+        reg.classId = "41Od2TRXue";
+        reg.script = std::make_unique<blast::EnemyShip>();
+        out->push_back(std::move(reg));
+    }
 }
 
 } // namespace

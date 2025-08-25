@@ -15,17 +15,17 @@ require('app://scripts/utility/utility.lua')
 local the_player = nil
 
 -- current wave of enemies that is coming.
-local wave_count          = 0
+local wave_count = 0
 
 -- tick count is used to throttle the spawning of enemies
-local game_tick_count     = 0
+local game_tick_count = 0
 
 -- enemy ship velocity increment. as the game goes on the enemies get
 -- faster and faster, thus making the game harder and harder
 local ship_velo_increment = 1.0
 
 -- previous formation. used to avoid spawning same formation again back to back
-local prev_formation      = -1
+local prev_formation = -1
 
 local game_over = false
 
@@ -48,8 +48,6 @@ function ComboKill()
 
     Scene:SpawnEntity('Combo', {})
 
-    Audio:PlaySoundEffect('Combo Kill')
-
     local combo_kill_score = 1000
 
     game_score = game_score + combo_kill_score
@@ -59,23 +57,48 @@ function ComboKill()
     UpdateScore()
 end
 
-function SpawnEnemy(x, y, velocity)
-    local ship = ClassLib:FindEntityClassByName('Enemy/Basic')
-    local args = game.EntityArgs:new()
-    args.class = ship
-    args.name = "enemy"
-    args.position = glm.vec2:new(x, y)
-    args.layer = 1
-    local ship = Scene:SpawnEntity(args, true)
-    ship.velocity = velocity * ship_velo_increment
-    ship.score = math.floor(ship.score * ship_velo_increment)
-end
+function SpawnBasicEnemy(x, y, velocity)
+    local velocity = velocity * ship_velo_increment
+    local score = math.floor(100.0 * ship_velo_increment)
 
-function SpawnBigBastard()
-    Scene:SpawnEntity('Enemy/Advanced', {
-        pos = glm.vec2:new(0.0, -500.0)
+    Scene:SpawnEntity('Enemy/Basic', {
+        async = true,
+        x = x,
+        y = y,
+        layer = 1,
+        vars = {
+            velocity = velocity,
+            score = score
+        }
     })
 
+end
+
+function SpawnAdvancedEnemy()
+
+    -- use the entity list to determine whether we already have 
+    -- one of these guys in the play. multiple don't work well
+    -- since their motion patterns will have them overlap
+    local list = Scene:ListEntitiesByClassName('Enemy/Advanced')
+    if not list:IsEmpty() then
+        return
+    end
+
+    Scene:SpawnEntity('Enemy/Advanced', {
+        x = 0.0,
+        y = -500.0,
+        async = true,
+        layer = 1
+    })
+end
+
+function SpawnIntermediateEnemy(x, y)
+    Scene:SpawnEntity('Enemy/Intermediate', {
+        x = x,
+        y = y,
+        async = true,
+        layer = 1
+    })
 end
 
 function SpawnWaveLeft()
@@ -83,7 +106,7 @@ function SpawnWaveLeft()
     local y = -500
     local velocity = glm.vec2:new(-200.0, 150.0)
     for i = 1, 10, 1 do
-        SpawnEnemy(x, y, velocity)
+        SpawnBasicEnemy(x, y, velocity)
         x = x + 100
         y = y - 40
     end
@@ -94,7 +117,7 @@ function SpawnWaveRight()
     local y = -500
     local velocity = glm.vec2:new(200.0, 150.0)
     for i = 1, 10, 1 do
-        SpawnEnemy(x, y, velocity)
+        SpawnBasicEnemy(x, y, velocity)
         x = x - 100
         y = y - 40
     end
@@ -102,15 +125,15 @@ end
 
 function SpawnChevron()
     local velocity = glm.vec2:new(0.0, 150.0)
-    SpawnEnemy(-400.0, -660.0, velocity)
-    SpawnEnemy(-300.0, -620.0, velocity)
-    SpawnEnemy(-200.0, -580.0, velocity)
-    SpawnEnemy(-100.0, -540.0, velocity)
-    SpawnEnemy(0.0, -500.0, velocity)
-    SpawnEnemy(100.0, -540.0, velocity)
-    SpawnEnemy(200.0, -580.0, velocity)
-    SpawnEnemy(300.0, -620.0, velocity)
-    SpawnEnemy(400.0, -660.0, velocity)
+    SpawnBasicEnemy(-400.0, -660.0, velocity)
+    SpawnBasicEnemy(-300.0, -620.0, velocity)
+    SpawnBasicEnemy(-200.0, -580.0, velocity)
+    SpawnBasicEnemy(-100.0, -540.0, velocity)
+    SpawnBasicEnemy(0.0, -500.0, velocity)
+    SpawnBasicEnemy(100.0, -540.0, velocity)
+    SpawnBasicEnemy(200.0, -580.0, velocity)
+    SpawnBasicEnemy(300.0, -620.0, velocity)
+    SpawnBasicEnemy(400.0, -660.0, velocity)
 end
 
 function SpawnRow()
@@ -118,9 +141,16 @@ function SpawnRow()
     local y = -500
     local velocity = glm.vec2:new(0.0, 150.0)
     for i = 1, 10, 1 do
-        SpawnEnemy(x, y, velocity)
+        SpawnBasicEnemy(x, y, velocity)
         y = y - 100
     end
+end
+
+function SpawnGrid()
+    SpawnIntermediateEnemy(-500.0, -500.0)
+    SpawnIntermediateEnemy(-250.0, -300.0)
+    SpawnIntermediateEnemy(250.0, -300.0)
+    SpawnIntermediateEnemy(500.0, -500.0)
 end
 
 function BeginPlay(game, map)
@@ -164,9 +194,9 @@ function Tick(game, game_time, dt)
     if math.fmod(game_tick_count, 5) == 0 then
 
         -- randomly select a new formation
-        local next_formation = util.Random(0, 3)
+        local next_formation = util.Random(0, 4)
         while next_formation == prev_formation do
-            next_formation = util.Random(0, 3)
+            next_formation = util.Random(0, 4)
         end
         prev_formation = next_formation
 
@@ -178,6 +208,8 @@ function Tick(game, game_time, dt)
             SpawnWaveRight()
         elseif next_formation == 3 then
             SpawnChevron()
+        elseif next_formation == 4 then
+            SpawnIntermediateEnemy(0.0, -500.0)
         end
 
         -- increase the velocity of the enemies after each wave
@@ -200,7 +232,7 @@ function Tick(game, game_time, dt)
     end
 
     if math.fmod(game_tick_count, 18) == 0 then
-        SpawnBigBastard()
+        SpawnAdvancedEnemy()
     end
 
     game_tick_count = game_tick_count + 1

@@ -7,6 +7,7 @@
 
 -- flag to indicate whether we're showing the developer UI or not.
 local developer_ui = false
+local tick_counter = 10
 
 -- LuaFormatter on
 
@@ -49,6 +50,7 @@ function StartGame()
     Game:SetViewport(base.FRect:new(-600.0, -400.0, 1200, 800.0))
     Game:Play('Menu')
     Game:OpenUI('MainMenu')
+
 end
 
 function SaveGame()
@@ -69,6 +71,34 @@ end
 
 function Tick(game_time, dt)
     collectgarbage('step')
+
+    if Scene == nil then
+        return
+    end
+
+    if Scene:GetClassName() ~= 'Menu' then
+        return
+    end
+
+    local game_title = Scene:FindEntity('game_title')
+    local spark_effect_node = game_title:FindNode('spark_effect')
+    local spark_effect_draw = spark_effect_node:GetDrawable()
+
+    local smoke_effect_node = game_title:FindNode('smoke_effect')
+    local smoke_effect_draw = smoke_effect_node:GetDrawable()
+
+    if tick_counter == 10 then
+        spark_effect_draw:Command('EmitParticles', {
+            count = 5
+        })
+        smoke_effect_draw:Command('EmitParticles', {
+            count = 5
+        })
+        tick_counter = 0
+        Audio:PlaySoundEffect('electricFX')
+    end
+
+    tick_counter = tick_counter + 1
 end
 
 function Update(game_time, dt)

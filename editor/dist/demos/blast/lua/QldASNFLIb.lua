@@ -57,15 +57,16 @@ function Tick(redmine, game_time, dt)
 end
 
 -- Called on every iteration of game loop.
-function Update(redmine, game_time, dt)
-    if redmine:IsDying() then
+function Update(rocket, game_time, dt)
+    if rocket:IsDying() then
         return
     end
 
-    local mine_body = redmine:GetNode(0)
-    local mine_pos = mine_body:GetTranslation()
-    if redmine:HasExpired() then
-        Explode(redmine, mine_pos)
+    local rocket_body = rocket:GetNode(0)
+    local rocket_pos = rocket_body:GetTranslation()
+    if rocket:HasExpired() then
+        -- Explode(rocket, rocket_pos)
+        rocket:Die()
         return
     end
 
@@ -75,17 +76,17 @@ function Update(redmine, game_time, dt)
         if enemy:GetTag() == '#enemy' then
             local ship_body = enemy:GetNode(0)
             local ship_pos = ship_body:GetTranslation()
-            if (util.DistanceIsLessOrEqual(ship_pos, mine_pos, 50.0)) then
-                Explode(redmine, mine_pos)
+            if (util.DistanceIsLessOrEqual(ship_pos, rocket_pos, 50.0)) then
+                Explode(rocket, rocket_pos)
                 return
             end
         end
     end
 
-    mine_pos.y = mine_pos.y + dt * velocity;
-    mine_body:SetTranslation(mine_pos)
-    if mine_pos.y < -500 then
-        Scene:KillEntity(redmine)
+    --    rocket_pos.y = rocket_pos.y + dt * velocity;
+    --    rocket_body:SetTranslation(rocket_pos)
+    if rocket_pos.y < -500 then
+        Scene:KillEntity(rocket)
         return
     end
 end

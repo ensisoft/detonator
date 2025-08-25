@@ -1,0 +1,797 @@
+{
+  "image_file": "partss-sheet.png",
+  "image_height": 1024,
+  "image_width": 1024,
+  "images": [
+    {
+      "height": 171,
+      "index": 29,
+      "name": "spaceParts_030",
+      "width": 64,
+      "xpos": 2,
+      "ypos": 2
+    },
+    {
+      "height": 171,
+      "index": 14,
+      "name": "spaceParts_015",
+      "width": 64,
+      "xpos": 70,
+      "ypos": 2
+    },
+    {
+      "height": 171,
+      "index": 15,
+      "name": "spaceParts_016",
+      "width": 64,
+      "xpos": 2,
+      "ypos": 177
+    },
+    {
+      "height": 167,
+      "index": 8,
+      "name": "spaceParts_009",
+      "width": 51,
+      "xpos": 70,
+      "ypos": 177
+    },
+    {
+      "height": 167,
+      "index": 9,
+      "name": "spaceParts_010",
+      "width": 51,
+      "xpos": 138,
+      "ypos": 2
+    },
+    {
+      "height": 167,
+      "index": 26,
+      "name": "spaceParts_027",
+      "width": 51,
+      "xpos": 138,
+      "ypos": 173
+    },
+    {
+      "height": 163,
+      "index": 13,
+      "name": "spaceParts_014",
+      "width": 86,
+      "xpos": 193,
+      "ypos": 2
+    },
+    {
+      "height": 163,
+      "index": 28,
+      "name": "spaceParts_029",
+      "width": 86,
+      "xpos": 193,
+      "ypos": 169
+    },
+    {
+      "height": 163,
+      "index": 12,
+      "name": "spaceParts_013",
+      "width": 86,
+      "xpos": 2,
+      "ypos": 352
+    },
+    {
+      "height": 156,
+      "index": 10,
+      "name": "spaceParts_011",
+      "width": 71,
+      "xpos": 92,
+      "ypos": 352
+    },
+    {
+      "height": 156,
+      "index": 11,
+      "name": "spaceParts_012",
+      "width": 71,
+      "xpos": 167,
+      "ypos": 352
+    },
+    {
+      "height": 156,
+      "index": 27,
+      "name": "spaceParts_028",
+      "width": 71,
+      "xpos": 283,
+      "ypos": 2
+    },
+    {
+      "height": 153,
+      "index": 16,
+      "name": "spaceParts_017",
+      "width": 89,
+      "xpos": 358,
+      "ypos": 2
+    },
+    {
+      "height": 153,
+      "index": 17,
+      "name": "spaceParts_018",
+      "width": 89,
+      "xpos": 358,
+      "ypos": 159
+    },
+    {
+      "height": 153,
+      "index": 30,
+      "name": "spaceParts_031",
+      "width": 89,
+      "xpos": 358,
+      "ypos": 316
+    },
+    {
+      "height": 152,
+      "index": 18,
+      "name": "spaceParts_019",
+      "width": 71,
+      "xpos": 283,
+      "ypos": 162
+    },
+    {
+      "height": 152,
+      "index": 19,
+      "name": "spaceParts_020",
+      "width": 71,
+      "xpos": 283,
+      "ypos": 318
+    },
+    {
+      "height": 152,
+      "index": 31,
+      "name": "spaceParts_032",
+      "width": 71,
+      "xpos": 2,
+      "ypos": 519
+    },
+    {
+      "height": 144,
+      "index": 25,
+      "name": "spaceParts_026",
+      "width": 73,
+      "xpos": 77,
+      "ypos": 519
+    },
+    {
+      "height": 144,
+      "index": 6,
+      "name": "spaceParts_007",
+      "width": 73,
+      "xpos": 154,
+      "ypos": 519
+    },
+    {
+      "height": 144,
+      "index": 7,
+      "name": "spaceParts_008",
+      "width": 73,
+      "xpos": 231,
+      "ypos": 519
+    },
+    {
+      "height": 141,
+      "index": 23,
+      "name": "spaceParts_024",
+      "width": 78,
+      "xpos": 308,
+      "ypos": 519
+    },
+    {
+      "height": 141,
+      "index": 3,
+      "name": "spaceParts_004",
+      "width": 78,
+      "xpos": 451,
+      "ypos": 2
+    },
+    {
+      "height": 141,
+      "index": 2,
+      "name": "spaceParts_003",
+      "width": 78,
+      "xpos": 451,
+      "ypos": 147
+    },
+    {
+      "height": 140,
+      "index": 95,
+      "name": "spaceParts_096",
+      "width": 75,
+      "xpos": 451,
+      "ypos": 292
+    },
+    {
+      "height": 140,
+      "index": 94,
+      "name": "spaceParts_095",
+      "width": 75,
+      "xpos": 451,
+      "ypos": 436
+    },
+    {
+      "height": 140,
+      "index": 24,
+      "name": "spaceParts_025",
+      "width": 81,
+      "xpos": 533,
+      "ypos": 2
+    },
+    {
+      "height": 140,
+      "index": 20,
+      "name": "spaceParts_021",
+      "width": 75,
+      "xpos": 533,
+      "ypos": 146
+    },
+    {
+      "height": 140,
+      "index": 35,
+      "name": "spaceParts_036",
+      "width": 69,
+      "xpos": 533,
+      "ypos": 290
+    },
+    {
+      "height": 140,
+      "index": 48,
+      "name": "spaceParts_049",
+      "width": 69,
+      "xpos": 533,
+      "ypos": 434
+    },
+    {
+      "height": 140,
+      "index": 5,
+      "name": "spaceParts_006",
+      "width": 81,
+      "xpos": 2,
+      "ypos": 675
+    },
+    {
+      "height": 140,
+      "index": 4,
+      "name": "spaceParts_005",
+      "width": 81,
+      "xpos": 87,
+      "ypos": 675
+    },
+    {
+      "height": 139,
+      "index": 21,
+      "name": "spaceParts_022",
+      "width": 96,
+      "xpos": 172,
+      "ypos": 675
+    },
+    {
+      "height": 139,
+      "index": 96,
+      "name": "spaceParts_097",
+      "width": 96,
+      "xpos": 272,
+      "ypos": 675
+    },
+    {
+      "height": 139,
+      "index": 97,
+      "name": "spaceParts_098",
+      "width": 96,
+      "xpos": 372,
+      "ypos": 675
+    },
+    {
+      "height": 135,
+      "index": 40,
+      "name": "spaceParts_041",
+      "width": 103,
+      "xpos": 472,
+      "ypos": 675
+    },
+    {
+      "height": 135,
+      "index": 53,
+      "name": "spaceParts_054",
+      "width": 103,
+      "xpos": 618,
+      "ypos": 2
+    },
+    {
+      "height": 133,
+      "index": 0,
+      "name": "spaceParts_001",
+      "width": 98,
+      "xpos": 618,
+      "ypos": 141
+    },
+    {
+      "height": 133,
+      "index": 22,
+      "name": "spaceParts_023",
+      "width": 98,
+      "xpos": 618,
+      "ypos": 278
+    },
+    {
+      "height": 133,
+      "index": 1,
+      "name": "spaceParts_002",
+      "width": 98,
+      "xpos": 618,
+      "ypos": 415
+    },
+    {
+      "height": 132,
+      "index": 41,
+      "name": "spaceParts_042",
+      "width": 68,
+      "xpos": 618,
+      "ypos": 552
+    },
+    {
+      "height": 132,
+      "index": 44,
+      "name": "spaceParts_045",
+      "width": 80,
+      "xpos": 725,
+      "ypos": 2
+    },
+    {
+      "height": 131,
+      "index": 39,
+      "name": "spaceParts_040",
+      "width": 119,
+      "xpos": 2,
+      "ypos": 819
+    },
+    {
+      "height": 131,
+      "index": 52,
+      "name": "spaceParts_053",
+      "width": 119,
+      "xpos": 125,
+      "ypos": 819
+    },
+    {
+      "height": 131,
+      "index": 51,
+      "name": "spaceParts_052",
+      "width": 88,
+      "xpos": 248,
+      "ypos": 819
+    },
+    {
+      "height": 131,
+      "index": 38,
+      "name": "spaceParts_039",
+      "width": 88,
+      "xpos": 340,
+      "ypos": 819
+    },
+    {
+      "height": 125,
+      "index": 46,
+      "name": "spaceParts_047",
+      "width": 64,
+      "xpos": 725,
+      "ypos": 138
+    },
+    {
+      "height": 125,
+      "index": 33,
+      "name": "spaceParts_034",
+      "width": 64,
+      "xpos": 725,
+      "ypos": 267
+    },
+    {
+      "height": 124,
+      "index": 37,
+      "name": "spaceParts_038",
+      "width": 75,
+      "xpos": 725,
+      "ypos": 396
+    },
+    {
+      "height": 124,
+      "index": 43,
+      "name": "spaceParts_044",
+      "width": 86,
+      "xpos": 618,
+      "ypos": 688
+    },
+    {
+      "height": 124,
+      "index": 50,
+      "name": "spaceParts_051",
+      "width": 75,
+      "xpos": 725,
+      "ypos": 524
+    },
+    {
+      "height": 123,
+      "index": 47,
+      "name": "spaceParts_048",
+      "width": 95,
+      "xpos": 432,
+      "ypos": 819
+    },
+    {
+      "height": 123,
+      "index": 34,
+      "name": "spaceParts_035",
+      "width": 95,
+      "xpos": 531,
+      "ypos": 819
+    },
+    {
+      "height": 56,
+      "index": 86,
+      "name": "spaceParts_087",
+      "width": 116,
+      "xpos": 630,
+      "ypos": 819
+    },
+    {
+      "height": 113,
+      "index": 49,
+      "name": "spaceParts_050",
+      "width": 81,
+      "xpos": 809,
+      "ypos": 2
+    },
+    {
+      "height": 113,
+      "index": 36,
+      "name": "spaceParts_037",
+      "width": 81,
+      "xpos": 809,
+      "ypos": 119
+    },
+    {
+      "height": 111,
+      "index": 32,
+      "name": "spaceParts_033",
+      "width": 74,
+      "xpos": 809,
+      "ypos": 236
+    },
+    {
+      "height": 111,
+      "index": 45,
+      "name": "spaceParts_046",
+      "width": 74,
+      "xpos": 809,
+      "ypos": 351
+    },
+    {
+      "height": 24,
+      "index": 87,
+      "name": "spaceParts_088",
+      "width": 108,
+      "xpos": 630,
+      "ypos": 879
+    },
+    {
+      "height": 28,
+      "index": 89,
+      "name": "spaceParts_090",
+      "width": 102,
+      "xpos": 630,
+      "ypos": 907
+    },
+    {
+      "height": 52,
+      "index": 88,
+      "name": "spaceParts_089",
+      "width": 95,
+      "xpos": 2,
+      "ypos": 954
+    },
+    {
+      "height": 94,
+      "index": 42,
+      "name": "spaceParts_043",
+      "width": 58,
+      "xpos": 809,
+      "ypos": 466
+    },
+    {
+      "height": 84,
+      "index": 93,
+      "name": "spaceParts_094",
+      "width": 32,
+      "xpos": 809,
+      "ypos": 564
+    },
+    {
+      "height": 76,
+      "index": 91,
+      "name": "spaceParts_092",
+      "width": 32,
+      "xpos": 845,
+      "ypos": 564
+    },
+    {
+      "height": 44,
+      "index": 85,
+      "name": "spaceParts_086",
+      "width": 72,
+      "xpos": 809,
+      "ypos": 652
+    },
+    {
+      "height": 66,
+      "index": 79,
+      "name": "spaceParts_080",
+      "width": 18,
+      "xpos": 871,
+      "ypos": 466
+    },
+    {
+      "height": 66,
+      "index": 62,
+      "name": "spaceParts_063",
+      "width": 18,
+      "xpos": 809,
+      "ypos": 700
+    },
+    {
+      "height": 66,
+      "index": 63,
+      "name": "spaceParts_064",
+      "width": 18,
+      "xpos": 831,
+      "ypos": 700
+    },
+    {
+      "height": 66,
+      "index": 61,
+      "name": "spaceParts_062",
+      "width": 18,
+      "xpos": 853,
+      "ypos": 700
+    },
+    {
+      "height": 66,
+      "index": 64,
+      "name": "spaceParts_065",
+      "width": 19,
+      "xpos": 809,
+      "ypos": 770
+    },
+    {
+      "height": 66,
+      "index": 81,
+      "name": "spaceParts_082",
+      "width": 18,
+      "xpos": 832,
+      "ypos": 770
+    },
+    {
+      "height": 66,
+      "index": 82,
+      "name": "spaceParts_083",
+      "width": 19,
+      "xpos": 854,
+      "ypos": 770
+    },
+    {
+      "height": 66,
+      "index": 80,
+      "name": "spaceParts_081",
+      "width": 18,
+      "xpos": 809,
+      "ypos": 840
+    },
+    {
+      "height": 64,
+      "index": 60,
+      "name": "spaceParts_061",
+      "width": 33,
+      "xpos": 831,
+      "ypos": 840
+    },
+    {
+      "height": 64,
+      "index": 78,
+      "name": "spaceParts_079",
+      "width": 33,
+      "xpos": 725,
+      "ypos": 652
+    },
+    {
+      "height": 64,
+      "index": 92,
+      "name": "spaceParts_093",
+      "width": 28,
+      "xpos": 762,
+      "ypos": 652
+    },
+    {
+      "height": 62,
+      "index": 70,
+      "name": "spaceParts_071",
+      "width": 38,
+      "xpos": 725,
+      "ypos": 720
+    },
+    {
+      "height": 62,
+      "index": 71,
+      "name": "spaceParts_072",
+      "width": 56,
+      "xpos": 533,
+      "ypos": 578
+    },
+    {
+      "height": 61,
+      "index": 90,
+      "name": "spaceParts_091",
+      "width": 22,
+      "xpos": 868,
+      "ypos": 840
+    },
+    {
+      "height": 60,
+      "index": 77,
+      "name": "spaceParts_078",
+      "width": 40,
+      "xpos": 451,
+      "ypos": 580
+    },
+    {
+      "height": 60,
+      "index": 59,
+      "name": "spaceParts_060",
+      "width": 40,
+      "xpos": 390,
+      "ypos": 519
+    },
+    {
+      "height": 60,
+      "index": 73,
+      "name": "spaceParts_074",
+      "width": 25,
+      "xpos": 767,
+      "ypos": 720
+    },
+    {
+      "height": 60,
+      "index": 55,
+      "name": "spaceParts_056",
+      "width": 25,
+      "xpos": 690,
+      "ypos": 552
+    },
+    {
+      "height": 58,
+      "index": 76,
+      "name": "spaceParts_077",
+      "width": 48,
+      "xpos": 390,
+      "ypos": 583
+    },
+    {
+      "height": 58,
+      "index": 54,
+      "name": "spaceParts_055",
+      "width": 27,
+      "xpos": 690,
+      "ypos": 616
+    },
+    {
+      "height": 58,
+      "index": 72,
+      "name": "spaceParts_073",
+      "width": 27,
+      "xpos": 495,
+      "ypos": 580
+    },
+    {
+      "height": 58,
+      "index": 58,
+      "name": "spaceParts_059",
+      "width": 48,
+      "xpos": 894,
+      "ypos": 2
+    },
+    {
+      "height": 56,
+      "index": 75,
+      "name": "spaceParts_076",
+      "width": 28,
+      "xpos": 894,
+      "ypos": 64
+    },
+    {
+      "height": 56,
+      "index": 57,
+      "name": "spaceParts_058",
+      "width": 28,
+      "xpos": 894,
+      "ypos": 124
+    },
+    {
+      "height": 52,
+      "index": 65,
+      "name": "spaceParts_066",
+      "width": 52,
+      "xpos": 750,
+      "ypos": 819
+    },
+    {
+      "height": 52,
+      "index": 83,
+      "name": "spaceParts_084",
+      "width": 52,
+      "xpos": 101,
+      "ypos": 954
+    },
+    {
+      "height": 51,
+      "index": 74,
+      "name": "spaceParts_075",
+      "width": 33,
+      "xpos": 894,
+      "ypos": 184
+    },
+    {
+      "height": 51,
+      "index": 56,
+      "name": "spaceParts_057",
+      "width": 33,
+      "xpos": 894,
+      "ypos": 239
+    },
+    {
+      "height": 50,
+      "index": 67,
+      "name": "spaceParts_068",
+      "width": 34,
+      "xpos": 894,
+      "ypos": 294
+    },
+    {
+      "height": 42,
+      "index": 68,
+      "name": "spaceParts_069",
+      "width": 46,
+      "xpos": 894,
+      "ypos": 348
+    },
+    {
+      "height": 36,
+      "index": 69,
+      "name": "spaceParts_070",
+      "width": 42,
+      "xpos": 894,
+      "ypos": 394
+    },
+    {
+      "height": 32,
+      "index": 84,
+      "name": "spaceParts_085",
+      "width": 32,
+      "xpos": 894,
+      "ypos": 434
+    },
+    {
+      "height": 32,
+      "index": 66,
+      "name": "spaceParts_067",
+      "width": 32,
+      "xpos": 894,
+      "ypos": 470
+    }
+  ],
+  "json_version": 1,
+  "made_with_app": "DETONATOR 2D",
+  "made_with_ver": "rel-???",
+  "padding": 2,
+  "power_of_two": true,
+  "premultiply_alpha": false
+}
