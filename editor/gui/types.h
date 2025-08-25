@@ -198,6 +198,14 @@ namespace gui
         { return {mW, mH}; }
         operator Tuple () const noexcept
         { return {mW, mH}; }
+        bool IsNonZero() const noexcept
+        {
+            return mW != 0.0f || mH != 0.0f;
+        }
+        bool IsZero() const noexcept
+        {
+            return !IsNonZero();
+        }
     private:
         float mW = 0.0f;
         float mH = 0.0f;

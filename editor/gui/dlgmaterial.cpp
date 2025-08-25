@@ -196,12 +196,18 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
         if (!DoesIntersect(rect, gfx::FRect(0.0f, 0.0f, width, height)))
             continue;
 
+        if (!mMaterials[index].texture_rect.IsEmpty())
+        {
+            rect = base::CenterRectInsideRect(rect, mMaterials[index].texture_rect);
+        }
+
         if (!base::Contains(mFailedMaterials, klass->GetId()))
         {
             gfx::MaterialInstance material(klass);
             material.SetRuntime(mUI.widget->GetTime());
             material.SetUniform("kTileIndex", (float) GetValue(mUI.tileIndex));
             material.SetUniform("active_texture_map", mMaterials[index].texture_map_id);
+
             gfx::FillRect(painter, rect, material);
             if (material.HasError())
             {
@@ -401,6 +407,8 @@ void DlgMaterial::ListMaterials(const QString &filter_string)
                 m.material = klass;
                 m.texture_map_id = map->GetId();
                 m.material_id = klass->GetId();
+                if (map->GetNumTextures() == 1 && mPreviewScale.IsZero())
+                    m.texture_rect = map->GetTextureRect(0);
                 mMaterials.push_back(m);
             }
             DEBUG("homo");
