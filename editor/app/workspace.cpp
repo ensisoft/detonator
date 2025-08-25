@@ -2487,7 +2487,8 @@ bool Workspace::ImportResourceArchive(ZipArchive& zip)
 }
 
 bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resources,
-                                    const ContentPackingOptions& options, WorkspaceAsyncWorkObserver* observer)
+                                    const ContentPackingOptions& options, WorkspaceAsyncWorkObserver* observer,
+                                    std::vector<ReleaseArtifact>* artifacts)
 {
     const QString& outdir = JoinPath(options.directory, options.package_name);
     if (!MakePath(outdir))
@@ -2831,6 +2832,16 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
                       error_code, options.python_executable, package_script);
                 ++errors;
             }
+            else if (artifacts)
+            {
+                ReleaseArtifact artifact;
+                artifact.filename = JoinPath(options.directory, "FILESYSTEM");
+                artifacts->push_back(artifact);
+
+                ReleaseArtifact artifact2;
+                artifact2.filename = JoinPath(options.directory, "FILESYSTEM.js");
+                artifacts->push_back(artifact2);
+            }
         }
     }
 
@@ -2858,9 +2869,9 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         files.push_back({ engine_wasm_file, true });
         files.push_back({ engine_js_file, true });
         files.push_back({ engine_worker_js_file, true });
-        files.push_back({engine_version_txt_file, false});
-        files.push_back({ "app://html5/http-server.py", false});
-        files.push_back({ "app://html5/FileSaver.js", false});
+        files.push_back({engine_version_txt_file, false });
+        files.push_back({ "app://html5/http-server.py", false });
+        files.push_back({ "app://html5/FileSaver.js", false });
 
         for (const auto& file : files)
         {
@@ -2882,6 +2893,12 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
                     WARN("But there might be limited functionality.");
                 }
             }
+            if (artifacts)
+            {
+                ReleaseArtifact artifact;
+                artifact.filename = dst;
+                artifacts->push_back(artifact);
+            }
         }
     }
     if (options.write_html5_game_file)
@@ -2900,6 +2917,12 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         {
             ERROR("Failed to copy game html file. [src='1%', dst='%2', error='%3']", src, dst, error);
             ++errors;
+        }
+        if (artifacts)
+        {
+            ReleaseArtifact artifact;
+            artifact.filename = dst;
+            artifacts->push_back(artifact);
         }
     }
 

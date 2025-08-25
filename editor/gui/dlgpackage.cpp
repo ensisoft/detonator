@@ -305,7 +305,9 @@ void DlgPackage::on_btnStart_clicked()
     options.write_html5_content_fs_image  = GetValue(mUI.chkGenerateHtml5FS);
     options.python_executable             = mSettings.python_executable;
     options.emsdk_path                    = mSettings.emsdk;
-    const auto success = mWorkspace.BuildReleasePackage(resources, options, this);
+
+    app::Workspace::ReleaseArtifactsList artifacts;
+    const auto success = mWorkspace.BuildReleasePackage(resources, options, this, &artifacts);
 
     mUI.btnStart->setEnabled(true);
     mUI.btnClose->setEnabled(true);
@@ -314,7 +316,7 @@ void DlgPackage::on_btnStart_clicked()
 
     if (success)
     {
-        DlgComplete dlg(this, mWorkspace, options);
+        DlgComplete dlg(this, mWorkspace, options, artifacts, mSettings);
         dlg.exec();
     }
     else
