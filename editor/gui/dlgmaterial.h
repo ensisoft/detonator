@@ -87,6 +87,7 @@ namespace gui
             app::AnyString material_id;
             app::AnyString texture_map_id;
             std::shared_ptr<const gfx::MaterialClass> material;
+            gfx::FRect texture_rect;
         };
         std::vector<Material> mMaterials;
         Size2Df mPreviewScale;

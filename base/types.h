@@ -880,6 +880,22 @@ namespace base
         return R(minX, minY, maxX - minX, maxY - minY);
     }
 
+    template<typename T>
+    Rect<T> CenterRectInsideRect(const Rect<T>& target, const Rect<T>& source)
+    {
+        const float target_width = target.GetWidth();
+        const float target_height = target.GetHeight();
+        const float src_width = source.GetWidth();
+        const float src_height = source.GetHeight();
+        const auto scaler = std::min(target_width / src_width, target_height / src_height);
+        const auto actual_width = src_width * scaler;
+        const auto actual_height = src_height * scaler;
+        const auto x = (target_width - actual_width) / 2.0f;
+        const auto y = (target_height - actual_height) / 2.0f;
+
+        return Rect<T>(target.GetX() + x, target.GetY() + y, actual_width, actual_height);
+    }
+
     namespace detail {
         struct Radians {};
         struct Degrees {};
