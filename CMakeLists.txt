@@ -559,6 +559,10 @@ if (BUILD_QT_STUFF)
             third_party/tree-sitter/lua/scanner.c)
     target_include_directories(tree-sitter PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
 
+    if(WIN32)
+        set(ICON_SOURCE "editor/resource/icon.rc")
+    endif()
+
     # Editor application.
     add_executable(Detonator
         audio/format.cpp
@@ -843,6 +847,7 @@ if (BUILD_QT_STUFF)
         editor/gui/spritewidget.cpp
         editor/resource/resource.qrc
         editor/welcome.qrc
+        ${ICON_SOURCE}
         editor/gui/darkstyle/darkstyle.cpp
         editor/gui/darkstyle/darkstyle.h
         editor/gui/darkstyle/stylecommon.h
@@ -919,6 +924,7 @@ if (BUILD_QT_STUFF)
         editor/gui/dlgeventlog.ui
         editor/gui/dlgeventlog.cpp
         editor/resource/resource.qrc
+        ${ICON_SOURCE}
         editor/gui/darkstyle/darkstyle.cpp
         editor/gui/darkstyle/darkstyle.h
         editor/gui/darkstyle/stylecommon.h
