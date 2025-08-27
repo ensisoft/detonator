@@ -335,6 +335,81 @@ void unit_test_wireframe()
     }
 }
 
+void unit_test_triangle_mesh()
+{
+    TEST_CASE(test::Type::Feature)
+
+    {
+        std::vector<gfx::Vertex2D> verts;
+        verts.resize(6);
+        verts[0].aPosition = gfx::Vec2 { -1.0f,  1.0f };
+        verts[1].aPosition = gfx::Vec2 { -1.0f, -1.0f };
+        verts[2].aPosition = gfx::Vec2 {  1.0f, -1.0f };
+        verts[3].aPosition = gfx::Vec2 { -1.0f,  1.0f };
+        verts[4].aPosition = gfx::Vec2 {  1.0f, -1.0f };
+        verts[5].aPosition = gfx::Vec2 {  1.0f,  1.0f };
+
+        gfx::GeometryBuffer buffer;
+        buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        buffer.UploadVertices(verts.data(), verts.size() * sizeof(gfx::Vertex2D));
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 0, 3);
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 3, 3);
+
+        gfx::GeometryBuffer result;
+        gfx::CreateTriangleMesh(buffer, result, 0);
+        TEST_REQUIRE(result.GetVertexBytes() == 6 * sizeof(gfx::Vertex2D));
+        TEST_REQUIRE(result.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(result.GetDrawCmd(0).type == gfx::Geometry::DrawType::Triangles);
+        TEST_REQUIRE(result.GetDrawCmd(0).offset == 0);
+        TEST_REQUIRE(result.GetDrawCmd(0).count == std::numeric_limits<uint32_t>::max());
+
+        const gfx::VertexStream stream(result.GetLayout(),
+                              result.GetVertexDataPtr(),
+                              result.GetVertexBytes());
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(0)->aPosition == verts[0].aPosition);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(1)->aPosition == verts[1].aPosition);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(2)->aPosition == verts[2].aPosition);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(3)->aPosition == verts[3].aPosition);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(4)->aPosition == verts[4].aPosition);
+        TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(5)->aPosition == verts[5].aPosition);
+    }
+
+    {
+        std::vector<gfx::Vertex2D> verts;
+        verts.resize(6);
+        verts[0].aPosition = gfx::Vec2 { -1.0f,  1.0f };
+        verts[1].aPosition = gfx::Vec2 { -1.0f, -1.0f };
+        verts[2].aPosition = gfx::Vec2 {  1.0f, -1.0f };
+        verts[3].aPosition = gfx::Vec2 { -1.0f,  1.0f };
+        verts[4].aPosition = gfx::Vec2 {  1.0f, -1.0f };
+        verts[5].aPosition = gfx::Vec2 {  1.0f,  1.0f };
+
+        gfx::GeometryBuffer buffer;
+        buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        buffer.UploadVertices(verts.data(), verts.size() * sizeof(gfx::Vertex2D));
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 0, 3);
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 3, 3);
+
+        gfx::GeometryBuffer result;
+        gfx::CreateTriangleMesh(buffer, result, 1);
+        TEST_REQUIRE(result.GetVertexBytes() == 2 * 4 * 3 * sizeof(gfx::Vertex2D));
+        TEST_REQUIRE(result.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(result.GetDrawCmd(0).type == gfx::Geometry::DrawType::Triangles);
+        TEST_REQUIRE(result.GetDrawCmd(0).offset == 0);
+        TEST_REQUIRE(result.GetDrawCmd(0).count == std::numeric_limits<uint32_t>::max());
+
+
+        // todo
+        //const gfx::VertexStream stream(result.GetLayout(), result.GetVertexDataPtr(), esult.GetVertexBytes());
+        // TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(0)->aPosition == verts[0].aPosition);
+        // TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(1)->aPosition == verts[1].aPosition);
+        // TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(2)->aPosition == verts[2].aPosition);
+        // TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(3)->aPosition == verts[3].aPosition);
+        // TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(4)->aPosition == verts[4].aPosition);
+        // TEST_REQUIRE(stream.GetVertex<gfx::Vertex2D>(5)->aPosition == verts[5].aPosition);
+    }
+}
+
 void unit_test_tangents()
 {
     TEST_CASE(test::Type::Feature)
@@ -929,6 +1004,7 @@ int test_main(int argc, char* argv[])
     unit_test_vertex_stream();
     unit_test_command_stream();
     unit_test_wireframe();
+    unit_test_triangle_mesh();
     unit_test_tangents();
     unit_test_polygon_builder_json();
     unit_test_polygon_builder_build();

@@ -449,6 +449,15 @@ namespace gfx
             mBuffer->resize(bytes);
         }
 
+        // Pushback one uninitialized vertex and return pointer to it.
+        void* PushBack()
+        {
+            ASSERT(mLayout.vertex_struct_size);
+            const auto size = mBuffer->size();
+            mBuffer->resize(mBuffer->size() + mLayout.vertex_struct_size);
+            return &(*mBuffer)[size];
+        }
+
         template<typename T>
         std::vector<T> CopyBuffer() const
         {

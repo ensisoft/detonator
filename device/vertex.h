@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <initializer_list>
 
+#include "base/assert.h"
 #include "data/fwd.h"
 
 namespace dev
@@ -54,6 +55,30 @@ namespace dev
             : vertex_struct_size(struct_size)
             , attributes(std::move(attrs))
         {}
+
+        const Attribute* FindAttribute(const char* name) const noexcept
+        {
+            for (const auto& a : attributes)
+            {
+                if (a.name == name)
+                    return &a;
+            }
+            return nullptr;
+        }
+
+        template<typename T>
+        static const T* GetVertexAttributePtr(const Attribute& attribute, const void* ptr) noexcept
+        {
+            ASSERT(sizeof(T) == attribute.num_vector_components * sizeof(float));
+            return reinterpret_cast<const T*>(reinterpret_cast<const intptr_t>(ptr)+attribute.offset);
+        }
+
+        template<typename T>
+        static T* GetVertexAttributePtr(const Attribute& attribute, void* ptr) noexcept
+        {
+            ASSERT(sizeof(T) == attribute.num_vector_components * sizeof(float));
+            return reinterpret_cast<T*>(reinterpret_cast<intptr_t>(ptr)+attribute.offset);
+        }
 
         bool FromJson(const data::Reader& reader) noexcept;
         void IntoJson(data::Writer& writer) const;
