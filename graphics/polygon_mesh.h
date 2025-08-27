@@ -41,7 +41,7 @@ namespace gfx
     class PolygonMeshClass : public DrawableClass
     {
     public:
-        enum class MeshType {
+        enum class RenderMeshType {
             Simple2D,
             Simple3D,
             Model3D,
@@ -63,33 +63,33 @@ namespace gfx
         // In this case static can be set to false and the polygon
         // will map to a (single) dynamic geometry object more optimized
         // for draw/discard type of use.
-        inline bool IsStatic() const noexcept
+        bool IsStatic() const noexcept
         { return mStatic; }
         // Set the polygon static or not. See comments in IsStatic.
-        inline void SetStatic(bool on_off) noexcept
+        void SetStatic(bool on_off) noexcept
         { mStatic = on_off; }
-        inline void SetDynamic(bool on_off) noexcept
+        void SetDynamic(bool on_off) noexcept
         { mStatic = !on_off; }
-        inline void SetContentHash(size_t hash) noexcept
+        void SetContentHash(size_t hash) noexcept
         { mContentHash = hash; }
-        inline size_t GetContentHash() const noexcept
+        size_t GetContentHash() const noexcept
         { return mContentHash; }
-        inline bool HasInlineData() const noexcept
+        bool HasInlineData() const noexcept
         { return mData.has_value(); }
-        inline bool HasContentUri() const noexcept
+        bool HasContentUri() const noexcept
         { return !mContentUri.empty(); }
-        inline void ResetContentUri() noexcept
+        void ResetContentUri() noexcept
         { mContentUri.clear(); }
-        inline void SetContentUri(std::string uri) noexcept
+        void SetContentUri(std::string uri) noexcept
         { mContentUri = std::move(uri); }
-        inline void SetMeshType(MeshType type) noexcept
-        { mMesh = type; }
-        inline std::string GetContentUri() const
+        void SetMeshType(RenderMeshType type) noexcept
+        { mRenderMeshType = type; }
+        auto GetContentUri() const
         { return mContentUri; }
-        inline std::string GetShaderSrc() const
+        std::string GetShaderSrc() const
         { return mShaderSrc; }
-        inline MeshType GetMeshType() const noexcept
-        { return mMesh; }
+        auto GetRenderMeshType() const noexcept
+        { return mRenderMeshType; }
         void SetShaderSrc(std::string src) noexcept
         { mShaderSrc = std::move(src); }
         bool HasShaderSrc() const noexcept
@@ -165,7 +165,7 @@ namespace gfx
             Geometry::IndexType index_type = Geometry::IndexType::Index16;
         };
         std::optional<InlineData> mData;
-        MeshType mMesh = MeshType::Simple2D;
+        RenderMeshType mRenderMeshType = RenderMeshType::Simple2D;
         std::unordered_map<std::string, DrawCmd> mSubMeshes;
         bool mStatic = true;
     };
@@ -173,7 +173,7 @@ namespace gfx
     class PolygonMeshInstance : public Drawable
     {
     public:
-        using MeshType = PolygonMeshClass::MeshType;
+        using RenderMeshType = PolygonMeshClass::RenderMeshType;
 
         // Data to support geometric (polygonal) tile rendering.
         // This is only used / required when the mesh type is
@@ -189,17 +189,17 @@ namespace gfx
                                      std::string sub_mesh_key = "") noexcept;
         explicit PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key = "");
 
-        inline MeshType GetMeshType() const noexcept
-        { return mClass->GetMeshType(); }
-        inline std::string GetSubMeshKey() const
+        auto GetRenderMeshType() const noexcept
+        { return mClass->GetRenderMeshType(); }
+        std::string GetSubMeshKey() const
         { return mSubMeshKey; }
-        inline void SetSubMeshKey(std::string key) noexcept
+        void SetSubMeshKey(std::string key) noexcept
         { mSubMeshKey = std::move(key); }
-        inline void SetTime(double time) noexcept
+        void SetTime(double time) noexcept
         { mTime = time; }
-        inline void SetRandomValue(float value) noexcept
+        void SetRandomValue(float value) noexcept
         { mRandom = value; }
-        inline void SetPerceptualGeometry(const Perceptual3DGeometry& geometry) noexcept
+        void SetPerceptualGeometry(const Perceptual3DGeometry& geometry) noexcept
         { mPerceptualGeometry = geometry; }
 
         bool ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
