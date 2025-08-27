@@ -49,9 +49,9 @@ bool Is3DShape(const Drawable& drawable) noexcept
     {
         if (const auto* instance = dynamic_cast<const PolygonMeshInstance*>(&drawable))
         {
-            const auto mesh = instance->GetMeshType();
-            if (mesh == PolygonMeshInstance::MeshType::Simple3D ||
-                mesh == PolygonMeshInstance::MeshType::Model3D)
+            const auto mesh = instance->GetRenderMeshType();
+            if (mesh == PolygonMeshInstance::RenderMeshType::Simple3D ||
+                mesh == PolygonMeshInstance::RenderMeshType::Model3D)
                 return true;
         }
     }
@@ -72,9 +72,9 @@ bool Is3DShape(const DrawableClass& klass) noexcept
     {
         if (const auto* polygon = dynamic_cast<const PolygonMeshClass*>(&klass))
         {
-            const auto mesh = polygon->GetMeshType();
-            if (mesh == PolygonMeshClass::MeshType::Simple3D ||
-                mesh == PolygonMeshClass::MeshType::Model3D)
+            const auto mesh = polygon->GetRenderMeshType();
+            if (mesh == PolygonMeshClass::RenderMeshType::Simple3D ||
+                mesh == PolygonMeshClass::RenderMeshType::Model3D)
                 return true;
         }
     }

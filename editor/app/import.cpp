@@ -381,7 +381,7 @@ bool ModelImporter::LoadModel(const app::AnyString& file)
     mesh->SetVertexBuffer(std::move(vertex_buffer));
     mesh->SetIndexBuffer(std::move(index_buffer));
     mesh->SetCommandBuffer(std::move(command_buffer));
-    mesh->SetMeshType(gfx::PolygonMeshClass::MeshType::Model3D);
+    mesh->SetMeshType(gfx::PolygonMeshClass::RenderMeshType::Model3D);
 
     for (const auto& draw : drawable_infos)
     {
