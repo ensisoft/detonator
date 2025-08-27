@@ -76,75 +76,75 @@ namespace gfx
             mIndexType  = type;
         }
 
-        inline void ClearDraws() noexcept
+        void ClearDraws() noexcept
         { mDrawCmds.clear(); }
-        inline void AddDrawCmd(const DrawCommand& cmd)
+        void AddDrawCmd(const DrawCommand& cmd)
         {  mDrawCmds.push_back(cmd); }
-        inline void SetVertexLayout(const VertexLayout& layout)
+        void SetVertexLayout(const VertexLayout& layout)
         { mVertexLayout = layout; }
-        inline size_t GetNumDrawCmds() const noexcept
+        auto GetNumDrawCmds() const noexcept
         { return mDrawCmds.size(); }
-        inline size_t GetVertexBytes() const noexcept
+        auto GetVertexBytes() const noexcept
         { return mVertexData.size(); }
-        inline size_t GetIndexBytes() const noexcept
+        auto GetIndexBytes() const noexcept
         { return mIndexData.size(); }
-        inline const void* GetVertexDataPtr() const noexcept
+        const void* GetVertexDataPtr() const noexcept
         { return mVertexData.empty() ? nullptr : &mVertexData[0]; }
-        inline const void* GetIndexDataPtr() const noexcept
+        const void* GetIndexDataPtr() const noexcept
         { return mIndexData.empty() ? nullptr : &mIndexData[0]; }
-        inline auto& GetLayout() const & noexcept
+        auto& GetLayout() const & noexcept
         { return mVertexLayout; }
-        inline auto&& GetLayout() && noexcept
+        auto&& GetLayout() && noexcept
         { return std::move(mVertexLayout); }
-        inline IndexType GetIndexType() const noexcept
+        auto GetIndexType() const noexcept
         { return mIndexType; }
-        inline const DrawCommand GetDrawCmd(size_t index) const
+        const auto& GetDrawCmd(size_t index) const
         { return mDrawCmds[index]; }
 
         // Update the geometry object's data buffer contents.
         template<typename Vertex>
-        inline void SetVertexBuffer(const Vertex* vertices, std::size_t count)
+        void SetVertexBuffer(const Vertex* vertices, std::size_t count)
         { UploadVertices(vertices, count * sizeof(Vertex)); }
 
         template<typename Vertex>
-        inline void SetVertexBuffer(const std::vector<Vertex>& vertices)
+        void SetVertexBuffer(const std::vector<Vertex>& vertices)
         { UploadVertices(vertices.data(), vertices.size() * sizeof(Vertex)); }
 
         template<typename Vertex>
-        inline void SetVertexBuffer(const TypedVertexBuffer<Vertex>& buffer)
+        void SetVertexBuffer(const TypedVertexBuffer<Vertex>& buffer)
         { mVertexData = buffer.CopyRawBuffer(); }
 
         template<typename Vertex>
-        inline void SetVertexBuffer(TypedVertexBuffer<Vertex>&& buffer)
+        void SetVertexBuffer(TypedVertexBuffer<Vertex>&& buffer)
         { mVertexData = std::move(buffer.TransferRawBuffer()); }
 
-        inline void SetVertexBuffer(std::vector<uint8_t>&& data) noexcept
+        void SetVertexBuffer(std::vector<uint8_t>&& data) noexcept
         { mVertexData = std::move(data); }
 
-        inline void SetVertexBuffer(const VertexBuffer& buffer)
+        void SetVertexBuffer(const VertexBuffer& buffer)
         { mVertexData = buffer.CopyBuffer(); }
 
-        inline void SetVertexBuffer(VertexBuffer&& buffer)
+        void SetVertexBuffer(VertexBuffer&& buffer)
         { mVertexData = std::move(buffer.TransferBuffer()); }
 
-        inline void SetIndexBuffer(std::vector<uint8_t>&& data) noexcept
+        void SetIndexBuffer(std::vector<uint8_t>&& data) noexcept
         { mIndexData = std::move(data); }
 
-        inline void SetIndexBuffer(const Index16* indices, size_t count)
+        void SetIndexBuffer(const Index16* indices, size_t count)
         { UploadIndices(indices, count * sizeof(Index16), IndexType::Index16); }
 
-        inline void SetIndexBuffer(const Index32* indices, size_t count)
+        void SetIndexBuffer(const Index32* indices, size_t count)
         { UploadIndices(indices, count * sizeof(Index32), IndexType::Index32); }
 
-        inline void SetIndexBuffer(const std::vector<Index16>& indices)
+        void SetIndexBuffer(const std::vector<Index16>& indices)
         { SetIndexBuffer(indices.data(), indices.size()); }
 
-        inline void SetIndexBuffer(const std::vector<Index32>& indices)
+        void SetIndexBuffer(const std::vector<Index32>& indices)
         { SetIndexBuffer(indices.data(), indices.size()); }
 
         // Add a draw command that starts at offset 0 and covers the whole
         // current vertex buffer (i.e. count = num of vertices)
-        inline void AddDrawCmd(DrawType type)
+        void AddDrawCmd(DrawType type)
         {
             DrawCommand cmd;
             cmd.type   = type;
@@ -155,7 +155,7 @@ namespace gfx
 
         // Add a draw command for some particular set of vertices within
         // the current vertex buffer.
-        inline void AddDrawCmd(DrawType type, uint32_t offset, size_t count)
+        void AddDrawCmd(DrawType type, uint32_t offset, size_t count)
         {
             DrawCommand cmd;
             cmd.type   = type;
@@ -164,30 +164,30 @@ namespace gfx
             AddDrawCmd(cmd);
         }
 
-        inline void SetDrawCommands(const std::vector<DrawCommand>& commands)
+        void SetDrawCommands(const std::vector<DrawCommand>& commands)
         { mDrawCmds = commands; }
-        inline void SetDrawCommands(std::vector<DrawCommand>&& commands) noexcept
+        void SetDrawCommands(std::vector<DrawCommand>&& commands) noexcept
         { mDrawCmds = std::move(commands); }
 
-        inline const auto& GetDrawCommands() const & noexcept
+        const auto& GetDrawCommands() const & noexcept
         { return mDrawCmds; }
 
-        inline auto GetDrawCommands() && noexcept
+        auto GetDrawCommands() && noexcept
         { return std::move(mDrawCmds); }
 
-        inline bool HasData() const noexcept
+        bool HasData() const noexcept
         { return !mVertexData.empty(); }
 
-        inline size_t GetVertexCount() const noexcept
+        auto GetVertexCount() const noexcept
         {
             ASSERT(mVertexLayout.vertex_struct_size);
             return mVertexData.size() / mVertexLayout.vertex_struct_size;
         }
 
-        inline const auto& GetVertexBuffer() const noexcept
+        const auto& GetVertexBuffer() const noexcept
         { return mVertexData; }
 
-        inline auto& GetVertexBuffer() noexcept
+        auto& GetVertexBuffer() noexcept
         { return mVertexData; }
 
     private:
@@ -250,6 +250,9 @@ namespace gfx
 
     bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals,
                           unsigned flags = NormalMeshFlags::Normals, float line_length = 0.2f);
+
+    bool CreateTriangleMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
+        unsigned num_subdivisions);
 
     bool ComputeTangents(GeometryBuffer& geometry);
 

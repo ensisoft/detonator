@@ -65,7 +65,80 @@ namespace {
 
         return {tangent, bitangent };
     }
-}
+
+    void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr,
+        const gfx::VertexLayout& layout, gfx::VertexBuffer& buffer)
+    {
+        using namespace gfx;
+
+        void* vertex = buffer.PushBack();
+
+        for (const auto& attr : layout.attributes)
+        {
+            if (attr.num_vector_components == 2)
+            {
+                const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(attr, v0_ptr));
+                const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(attr, v1_ptr));
+                const auto& result = (v1 - v0) * 0.5f + v0;
+
+                *VertexLayout::GetVertexAttributePtr<Vec2>(attr, vertex) = ToVec(result);
+            }
+            else if (attr.num_vector_components == 3)
+            {
+                const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec3>(attr, v0_ptr));
+                const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec3>(attr, v1_ptr));
+                const auto& result = (v1 - v0) * 0.5f + v0;
+
+                *VertexLayout::GetVertexAttributePtr<Vec3>(attr, vertex) = ToVec(result);
+            }
+            else if (attr.num_vector_components == 4)
+            {
+                const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec4>(attr, v0_ptr));
+                const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec4>(attr, v1_ptr));
+                const auto& result = (v1 - v0) * 0.5f + v0;
+
+                *VertexLayout::GetVertexAttributePtr<Vec4>(attr, vertex) = ToVec(result);
+            }
+        }
+
+        return vertex;
+    }
+
+    void SubdivideTriangle(const void* v0_ptr, const void* v1_ptr, const void* v2_ptr,
+        const gfx::VertexLayout& layout, gfx::VertexBuffer& buffer, gfx::VertexBuffer& temp,
+        unsigned current_subdivision,
+        unsigned maximum_subdivisions)
+    {
+        if (current_subdivision == maximum_subdivisions)
+        {
+            buffer.PushBack(v0_ptr);
+            buffer.PushBack(v1_ptr);
+            buffer.PushBack(v2_ptr);
+        }
+        else
+        {
+            // first algo
+            // split triangle in half and then the bottom half
+            // into 3 triangles.
+
+            void* v0_v1 = InterpolateVertex(v0_ptr, v1_ptr, layout, temp);
+            void* v0_v2 = InterpolateVertex(v0_ptr, v2_ptr, layout, temp);
+            void* v1_v2 = InterpolateVertex(v1_ptr, v2_ptr, layout, temp);
+
+            // top triangle
+            SubdivideTriangle(v0_ptr, v0_v1, v0_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+            // bottom half, left triangle
+            SubdivideTriangle(v0_v1, v1_ptr, v1_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+
+            // bottom half center triangle
+            SubdivideTriangle(v0_v1, v1_v2, v0_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+
+            // bottom half right triangle
+            SubdivideTriangle(v0_v2, v1_v2, v2_ptr, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+        }
+    }
+
+} // namespace
 
 namespace gfx
 {
@@ -153,6 +226,89 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
     wireframe.SetVertexBuffer(std::move(vertex_data));
     wireframe.SetVertexLayout(geometry.GetLayout());
     wireframe.AddDrawCmd(Geometry::DrawType::Lines);
+}
+
+bool CreateTriangleMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer, unsigned subdiv_count)
+{
+    const VertexStream vertices(geometry.GetLayout(),
+                            geometry.GetVertexDataPtr(),
+                            geometry.GetVertexBytes());
+
+    const IndexStream indices(geometry.GetIndexDataPtr(),
+                              geometry.GetIndexBytes(),
+                              geometry.GetIndexType());
+
+    std::vector<uint8_t> vertex_data;
+    VertexBuffer vertex_buffer(geometry.GetLayout(), &vertex_data);
+
+    const auto& vertex_layout = geometry.GetLayout();
+    const auto vertex_count = vertices.GetCount();
+    const auto index_count  = indices.GetCount();
+    const auto has_index = indices.IsValid();
+
+    for (size_t i=0; i<geometry.GetNumDrawCmds(); ++i)
+    {
+        const auto& cmd = geometry.GetDrawCmd(i);
+        const auto primitive_count = cmd.count != std::numeric_limits<uint32_t>::max()
+                           ? (cmd.count)
+                           : (has_index ? index_count : vertex_count);
+
+        if (cmd.type == Geometry::DrawType::Triangles)
+        {
+            ASSERT((primitive_count % 3) == 0);
+            const auto triangles = primitive_count / 3;
+
+            for (size_t j=0; j<triangles; ++j)
+            {
+                const auto start = cmd.offset + j * 3;
+                const uint32_t i0 = has_index ? indices.GetIndex(start+0) : start+0;
+                const uint32_t i1 = has_index ? indices.GetIndex(start+1) : start+1;
+                const uint32_t i2 = has_index ? indices.GetIndex(start+2) : start+2;
+
+                const auto* v0 = vertices.GetVertexPtr(i0);
+                const auto* v1 = vertices.GetVertexPtr(i1);
+                const auto* v2 = vertices.GetVertexPtr(i2);
+
+                // triangle v0, v1, v2
+                gfx::VertexBuffer temp(vertex_layout);
+                SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, 0, subdiv_count);
+            }
+        }
+        else if (cmd.type == Geometry::DrawType::TriangleFan)
+        {
+            ASSERT(primitive_count >= 3);
+            // the first 3 vertices form a triangle and then
+            // every subsequent vertex creates another triangle with
+            // the first and previous vertex.
+            const uint32_t i0 = has_index ? indices.GetIndex(cmd.offset+0) : cmd.offset+0;
+            const uint32_t i1 = has_index ? indices.GetIndex(cmd.offset+1) : cmd.offset+1;
+            const uint32_t i2 = has_index ? indices.GetIndex(cmd.offset+2) : cmd.offset+2;
+            const void* v0 = vertices.GetVertexPtr(i0);
+            const void* v1 = vertices.GetVertexPtr(i1);
+            const void* v2 = vertices.GetVertexPtr(i2);
+
+            // first triangle v0, v1, v2
+            gfx::VertexBuffer temp(vertex_layout);
+            SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, 0, subdiv_count);
+
+            for (size_t j=3; j<primitive_count; ++j)
+            {
+                const auto start = cmd.offset + j;
+                const uint32_t iPrev = has_index ? indices.GetIndex(start-1) : start-1;
+                const uint32_t iCurr = has_index ? indices.GetIndex(start-0) : start-0;
+                const void* vPrev = vertices.GetVertexPtr(iPrev);
+                const void* vCurr = vertices.GetVertexPtr(iCurr);
+
+                // triangle v0, vPrev, vCurr
+                gfx::VertexBuffer temp(vertex_layout);
+                SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, 0, subdiv_count);
+            }
+        }
+    }
+    buffer.SetVertexBuffer(std::move(vertex_data));
+    buffer.SetVertexLayout(geometry.GetLayout());
+    buffer.AddDrawCmd(Geometry::DrawType::Triangles);
+    return true;
 }
 
 bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, unsigned flags, float line_length)
