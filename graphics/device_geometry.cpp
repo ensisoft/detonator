@@ -39,17 +39,17 @@ DeviceGeometry::~DeviceGeometry()
 
 void DeviceGeometry::Upload() const
 {
-    if (!mPendingUpload.has_value())
+    if (!mPendingUpload)
         return;
 
-    auto upload = std::move(mPendingUpload.value());
+    const auto upload = std::move(mPendingUpload);
 
     mPendingUpload.reset();
 
-    const auto vertex_bytes = upload.GetVertexBytes();
-    const auto index_bytes  = upload.GetIndexBytes();
-    const auto vertex_ptr   = upload.GetVertexDataPtr();
-    const auto index_ptr    = upload.GetIndexDataPtr();
+    const auto vertex_bytes = upload->GetVertexBytes();
+    const auto index_bytes  = upload->GetIndexBytes();
+    const auto vertex_ptr   = upload->GetVertexDataPtr();
+    const auto index_ptr    = upload->GetIndexDataPtr();
     if (vertex_bytes == 0)
         return;
 
@@ -63,8 +63,8 @@ void DeviceGeometry::Upload() const
     }
 
     mDevice->UploadBuffer(mVertexBuffer, vertex_ptr, vertex_bytes);
-    mVertexLayout = std::move(upload.GetLayout());
-    mDrawCommands = std::move(upload.GetDrawCommands());
+    mVertexLayout = upload->GetLayout();
+    mDrawCommands = upload->GetDrawCommands();
 
     if (index_bytes == 0)
         return;
@@ -79,7 +79,7 @@ void DeviceGeometry::Upload() const
     }
 
     mDevice->UploadBuffer(mIndexBuffer, index_ptr, index_bytes);
-    mIndexBufferType = upload.GetIndexType();
+    mIndexBufferType = upload->GetIndexType();
 }
 
 } // namespace

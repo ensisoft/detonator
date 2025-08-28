@@ -212,6 +212,11 @@ namespace gfx
         using IndexType   = GeometryBuffer::IndexType;
 
         struct CreateArgs {
+            // This is the geometry data buffer with vertex and index data
+            // and the draw commands. Use this or the buffer as an alternative.
+            std::shared_ptr<const GeometryBuffer> buffer_ptr;
+            // This is the geometry data buffer with vertex and index data
+            // and the draw commands. Use this or the buffer_ptr as an alternative.
             GeometryBuffer buffer;
             // Set the expected usage of the geometry. Should be set before
             // calling any methods to upload the data.
