@@ -82,7 +82,7 @@ set(ENGINE_LINK_OPTIONS)
 include(FetchContent)
 FetchContent_Declare(cmake_git_version_tracking
   GIT_REPOSITORY https://github.com/ensisoft/cmake-git-version-tracking.git
-  GIT_TAG 7b0d0fcb7e6f5fcadd238dd1292350e9e1363d36
+  GIT_TAG aa600bb67ac18c13ed721af30e4084d64af5c92d
 )
 FetchContent_MakeAvailable(cmake_git_version_tracking)
 
