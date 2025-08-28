@@ -18,10 +18,10 @@
 
 #include "config.h"
 
-#include <optional>
 #include <string>
 #include <vector>
 #include <cstddef>
+#include <memory>
 
 #include "device/enum.h"
 #include "device/vertex.h"
@@ -30,7 +30,7 @@
 
 namespace gfx
 {
-    class DeviceGeometry : public gfx::Geometry
+    class DeviceGeometry final : public Geometry
     {
     public:
         explicit DeviceGeometry(dev::GraphicsDevice* device) noexcept
@@ -49,69 +49,69 @@ namespace gfx
         std::string GetName() const override
         { return mName; }
 
-        inline void SetBuffer(gfx::GeometryBuffer&& buffer) noexcept
+        void SetBuffer(std::shared_ptr<const GeometryBuffer> buffer) noexcept
         { mPendingUpload = std::move(buffer); }
-        inline void SetUsage(Usage usage) noexcept
+        void SetUsage(Usage usage) noexcept
         { mUsage = usage; }
-        inline void SetDataHash(size_t hash) noexcept
+        void SetDataHash(size_t hash) noexcept
         { mHash = hash; }
-        inline void SetName(const std::string& name) noexcept
+        void SetName(const std::string& name) noexcept
         { mName = name; }
-        inline void SetFrameStamp(size_t frame_number) const noexcept
+        void SetFrameStamp(size_t frame_number) const noexcept
         { mFrameNumber = frame_number; }
-        inline size_t GetFrameStamp() const noexcept
+        size_t GetFrameStamp() const noexcept
         { return mFrameNumber; }
 
-        inline bool IsEmpty() const noexcept
+        bool IsEmpty() const noexcept
         { return mVertexBuffer.buffer_bytes == 0; }
 
-        inline size_t GetVertexBufferByteOffset() const noexcept
+        size_t GetVertexBufferByteOffset() const noexcept
         { return mVertexBuffer.buffer_offset; }
-        inline size_t GetVertexBufferByteSize() const noexcept
+        size_t GetVertexBufferByteSize() const noexcept
         { return mVertexBuffer.buffer_bytes; }
 
-        inline size_t GetIndexBufferByteOffset() const noexcept
+        size_t GetIndexBufferByteOffset() const noexcept
         { return mIndexBuffer.buffer_offset; }
-        inline size_t GetIndexBufferByteSize() const noexcept
+        size_t GetIndexBufferByteSize() const noexcept
         { return mIndexBuffer.buffer_bytes; }
 
-        inline IndexType GetIndexBufferType() const noexcept
+        IndexType GetIndexBufferType() const noexcept
         { return mIndexBufferType; }
 
-        inline bool UsesIndexBuffer() const noexcept
+        bool UsesIndexBuffer() const noexcept
         { return mIndexBuffer.IsValid(); }
 
-        inline const gfx::VertexLayout& GetVertexLayout() const noexcept
+        const VertexLayout& GetVertexLayout() const noexcept
         { return mVertexLayout; }
 
-        inline const dev::GraphicsBuffer& GetVertexBuffer() const noexcept
+        const dev::GraphicsBuffer& GetVertexBuffer() const noexcept
         { return mVertexBuffer; }
 
-        inline const dev::GraphicsBuffer& GetIndexBuffer() const noexcept
+        const dev::GraphicsBuffer& GetIndexBuffer() const noexcept
         { return mIndexBuffer; }
 
-        inline size_t GetVertexCount() const noexcept
+        size_t GetVertexCount() const noexcept
         { return mVertexBuffer.buffer_bytes / mVertexLayout.vertex_struct_size; }
 
-        inline size_t GetIndexCount() const noexcept
+        size_t GetIndexCount() const noexcept
         { return mIndexBuffer.buffer_bytes / dev::GetIndexByteSize(mIndexBufferType); }
 
-        inline size_t GetIndexByteSize() const noexcept
+        size_t GetIndexByteSize() const noexcept
         { return dev::GetIndexByteSize(mIndexBufferType); }
 
         void Upload() const;
     private:
         dev::GraphicsDevice* mDevice = nullptr;
-        dev::BufferUsage mUsage = dev::BufferUsage::Static;
+        dev::BufferUsage mUsage = BufferUsage::Static;
         std::size_t mHash = 0;
         std::string mName;
 
         mutable std::size_t mFrameNumber = 0;
-        mutable std::optional<gfx::GeometryBuffer> mPendingUpload;
+        mutable std::shared_ptr<const GeometryBuffer> mPendingUpload;
         mutable std::vector<DrawCommand> mDrawCommands;
         mutable dev::GraphicsBuffer mVertexBuffer;
         mutable dev::GraphicsBuffer mIndexBuffer;
-        mutable dev::IndexType mIndexBufferType = dev::IndexType::Index16;
+        mutable dev::IndexType mIndexBufferType = IndexType::Index16;
         mutable dev::VertexLayout mVertexLayout;
     };
 } // namespace

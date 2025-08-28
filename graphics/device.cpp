@@ -252,7 +252,9 @@ gfx::GeometryPtr GraphicsDevice::CreateGeometry(const std::string& id, gfx::Geom
     geometry->SetName(args.content_name);
     geometry->SetDataHash(args.content_hash);
     geometry->SetUsage(args.usage);
-    geometry->SetBuffer(std::move(args.buffer));
+    if (args.buffer_ptr)
+        geometry->SetBuffer(args.buffer_ptr);
+    else geometry->SetBuffer(std::make_shared<gfx::GeometryBuffer>(std::move(args.buffer)));
     geometry->Upload();
 
     mGeoms[id] = geometry;
