@@ -53,7 +53,7 @@ namespace dev
         VertexLayout() = default;
         VertexLayout(std::size_t struct_size, std::initializer_list<Attribute> attrs) noexcept
             : vertex_struct_size(struct_size)
-            , attributes(std::move(attrs))
+            , attributes(attrs)
         {}
 
         const Attribute* FindAttribute(const char* name) const noexcept
@@ -78,6 +78,13 @@ namespace dev
         {
             ASSERT(sizeof(T) == attribute.num_vector_components * sizeof(float));
             return reinterpret_cast<T*>(reinterpret_cast<intptr_t>(ptr)+attribute.offset);
+        }
+
+        void AppendAttribute(Attribute attribute)
+        {
+            attribute.offset = vertex_struct_size;
+            vertex_struct_size += attribute.num_vector_components * sizeof(float);
+            attributes.push_back(attribute);
         }
 
         bool FromJson(const data::Reader& reader) noexcept;
