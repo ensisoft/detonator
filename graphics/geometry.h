@@ -190,6 +190,8 @@ namespace gfx
         auto& GetVertexBuffer() noexcept
         { return mVertexData; }
 
+        size_t GetHash() noexcept;
+
     private:
         GeometryDataLayout mVertexLayout;
         std::vector<DrawCommand> mDrawCmds;
@@ -253,6 +255,16 @@ namespace gfx
         Bitangents = 0x4
     };
 
+    // Interpolate between two vertices and and push the interpolation
+    // result into result buffer. Returns a pointer to the vertex.
+    void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr,
+        const gfx::VertexLayout& layout, gfx::VertexBuffer& result);
+
+    void SubdivideTriangle(const void* v0_ptr, const void* v1_ptr, const void* v2_ptr,
+        const gfx::VertexLayout& layout, gfx::VertexBuffer& buffer, gfx::VertexBuffer& temp,
+        unsigned current_subdivision,
+        unsigned maximum_subdivisions);
+
     bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals,
                           unsigned flags = NormalMeshFlags::Normals, float line_length = 0.2f);
 
@@ -260,5 +272,7 @@ namespace gfx
         unsigned num_subdivisions);
 
     bool ComputeTangents(GeometryBuffer& geometry);
+
+    bool FindGeometryMinMax(const GeometryBuffer& buffer, glm::vec3* minimums, glm::vec3* maximums);
 
 } // namespace

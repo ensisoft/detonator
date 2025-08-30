@@ -16,8 +16,13 @@
 
 #include <cstring>
 #include <tuple>
+#include <limits>
+#include <algorithm>
 
+#include "base/hash.h"
 #include "graphics/geometry.h"
+
+#include "base/snafu.h"
 
 namespace {
     std::tuple<glm::vec3, glm::vec3> ComputeTangent(const gfx::Vec3& vertex_pos0,
@@ -66,82 +71,108 @@ namespace {
         return {tangent, bitangent };
     }
 
-    void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr,
-        const gfx::VertexLayout& layout, gfx::VertexBuffer& buffer)
-    {
-        using namespace gfx;
-
-        void* vertex = buffer.PushBack();
-
-        for (const auto& attr : layout.attributes)
-        {
-            if (attr.num_vector_components == 2)
-            {
-                const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(attr, v0_ptr));
-                const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(attr, v1_ptr));
-                const auto& result = (v1 - v0) * 0.5f + v0;
-
-                *VertexLayout::GetVertexAttributePtr<Vec2>(attr, vertex) = ToVec(result);
-            }
-            else if (attr.num_vector_components == 3)
-            {
-                const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec3>(attr, v0_ptr));
-                const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec3>(attr, v1_ptr));
-                const auto& result = (v1 - v0) * 0.5f + v0;
-
-                *VertexLayout::GetVertexAttributePtr<Vec3>(attr, vertex) = ToVec(result);
-            }
-            else if (attr.num_vector_components == 4)
-            {
-                const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec4>(attr, v0_ptr));
-                const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec4>(attr, v1_ptr));
-                const auto& result = (v1 - v0) * 0.5f + v0;
-
-                *VertexLayout::GetVertexAttributePtr<Vec4>(attr, vertex) = ToVec(result);
-            }
-        }
-
-        return vertex;
-    }
-
-    void SubdivideTriangle(const void* v0_ptr, const void* v1_ptr, const void* v2_ptr,
-        const gfx::VertexLayout& layout, gfx::VertexBuffer& buffer, gfx::VertexBuffer& temp,
-        unsigned current_subdivision,
-        unsigned maximum_subdivisions)
-    {
-        if (current_subdivision == maximum_subdivisions)
-        {
-            buffer.PushBack(v0_ptr);
-            buffer.PushBack(v1_ptr);
-            buffer.PushBack(v2_ptr);
-        }
-        else
-        {
-            // first algo
-            // split triangle in half and then the bottom half
-            // into 3 triangles.
-
-            void* v0_v1 = InterpolateVertex(v0_ptr, v1_ptr, layout, temp);
-            void* v0_v2 = InterpolateVertex(v0_ptr, v2_ptr, layout, temp);
-            void* v1_v2 = InterpolateVertex(v1_ptr, v2_ptr, layout, temp);
-
-            // top triangle
-            SubdivideTriangle(v0_ptr, v0_v1, v0_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
-            // bottom half, left triangle
-            SubdivideTriangle(v0_v1, v1_ptr, v1_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
-
-            // bottom half center triangle
-            SubdivideTriangle(v0_v1, v1_v2, v0_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
-
-            // bottom half right triangle
-            SubdivideTriangle(v0_v2, v1_v2, v2_ptr, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
-        }
-    }
-
 } // namespace
 
 namespace gfx
 {
+
+size_t GeometryBuffer::GetHash() noexcept
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mVertexLayout.GetHash());
+    hash = base::hash_combine(hash, mDrawCmds);
+    hash = base::hash_combine(hash, mVertexData);
+    hash = base::hash_combine(hash, mIndexData);
+    hash = base::hash_combine(hash, mIndexType);
+    return hash;
+}
+
+void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr, const gfx::VertexLayout& layout, gfx::VertexBuffer& buffer)
+{
+    using namespace gfx;
+
+    void* vertex = buffer.PushBack();
+
+    for (const auto& attr : layout.attributes)
+    {
+        if (attr.num_vector_components == 2)
+        {
+            const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(attr, v0_ptr));
+            const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(attr, v1_ptr));
+            const auto& result = (v1 - v0) * 0.5f + v0;
+
+            *VertexLayout::GetVertexAttributePtr<Vec2>(attr, vertex) = ToVec(result);
+        }
+        else if (attr.num_vector_components == 3)
+        {
+            const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec3>(attr, v0_ptr));
+            const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec3>(attr, v1_ptr));
+            const auto& result = (v1 - v0) * 0.5f + v0;
+
+            *VertexLayout::GetVertexAttributePtr<Vec3>(attr, vertex) = ToVec(result);
+        }
+        else if (attr.num_vector_components == 4)
+        {
+            const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec4>(attr, v0_ptr));
+            const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec4>(attr, v1_ptr));
+            const auto& result = (v1 - v0) * 0.5f + v0;
+
+            *VertexLayout::GetVertexAttributePtr<Vec4>(attr, vertex) = ToVec(result);
+        }
+    }
+    return vertex;
+}
+
+void SubdivideTriangle(const void* v0_ptr, const void* v1_ptr, const void* v2_ptr,
+        const gfx::VertexLayout& layout, gfx::VertexBuffer& buffer, gfx::VertexBuffer& temp,
+        unsigned current_subdivision,
+        unsigned maximum_subdivisions)
+{
+    ASSERT(current_subdivision <= maximum_subdivisions);
+
+    if (current_subdivision == maximum_subdivisions)
+    {
+        buffer.PushBack(v0_ptr);
+        buffer.PushBack(v1_ptr);
+        buffer.PushBack(v2_ptr);
+    }
+    else
+    {
+        if (temp.GetCapacity() == 0)
+        {
+            unsigned triangle_count = 4;
+            for (unsigned i=0; i<maximum_subdivisions; ++i)
+                triangle_count *= 4;
+
+            temp.Reserve(triangle_count * 3);
+        }
+
+        // first algo
+        // split triangle in half and then the bottom half
+        // into 3 triangles.
+
+        const auto vertex_capacity = temp.GetCapacity();
+        const auto vertex_count = temp.GetCount();
+        ASSERT(vertex_capacity > vertex_count &&
+                (vertex_capacity - vertex_count) >= 3);
+
+        void* v0_v1 = InterpolateVertex(v0_ptr, v1_ptr, layout, temp);
+        void* v0_v2 = InterpolateVertex(v0_ptr, v2_ptr, layout, temp);
+        void* v1_v2 = InterpolateVertex(v1_ptr, v2_ptr, layout, temp);
+
+        // top triangle
+        SubdivideTriangle(v0_ptr, v0_v1, v0_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+
+        // bottom half, left triangle
+        SubdivideTriangle(v0_v1, v1_ptr, v1_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+
+        // bottom half center triangle
+        SubdivideTriangle(v0_v1, v1_v2, v0_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+
+        // bottom half right triangle
+        SubdivideTriangle(v0_v2, v1_v2, v2_ptr, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+    }
+}
 
 void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
 {
@@ -560,6 +591,59 @@ bool ComputeTangents(GeometryBuffer& geometry)
     return true;
 }
 
+bool FindGeometryMinMax(const GeometryBuffer& buffer, glm::vec3* minimums, glm::vec3* maximums)
+{
+    const VertexStream vertex_stream(buffer.GetLayout(), buffer.GetVertexBuffer());
+    const auto vertex_count = vertex_stream.GetCount();
+    const auto* vertex_position = vertex_stream.FindAttribute("aPosition");
+    if (!vertex_position)
+        return false;
 
+    glm::vec3 max = {
+        std::numeric_limits<float>::lowest(),
+        std::numeric_limits<float>::lowest(),
+        std::numeric_limits<float>::lowest()
+    };
+    glm::vec3 min = {
+        std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::max()
+    };
+
+    for (size_t i=0; i<vertex_count; ++i)
+    {
+        const auto* vertex = vertex_stream.GetVertexPtr(i);
+
+        if (vertex_position->num_vector_components == 2)
+        {
+            const auto p = *VertexLayout::GetVertexAttributePtr<Vec2>(*vertex_position, vertex);
+            min.x = std::min(min.x, p.x);
+            min.y = std::min(min.y, p.y);
+
+            max.x = std::max(max.x, p.x);
+            max.y = std::max(max.y, p.y);
+        }
+        else if (vertex_position->num_vector_components == 3)
+        {
+            const auto p = *VertexLayout::GetVertexAttributePtr<Vec3>(*vertex_position, vertex);
+            min.x = std::min(min.x, p.x);
+            min.y = std::min(min.y, p.y);
+            min.z = std::min(min.z, p.z);
+
+            max.x = std::max(max.x, p.x);
+            max.y = std::max(max.y, p.y);
+            max.z = std::max(max.z, p.z);
+        }
+    }
+    *minimums = min;
+    *maximums = max;
+
+    if (vertex_position->num_vector_components == 2)
+    {
+        minimums->z = 0.0f;
+        maximums->z = 0.0f;
+    }
+    return true;
+}
 
 } // namespace
