@@ -39,7 +39,6 @@ bool operator==(const gfx::Vec3& lhs, const gfx::Vec3& rhs)
            real::equals(lhs.z, rhs.z);
 }
 
-
 bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
 {
     return real::equals(lhs.aPosition.x, rhs.aPosition.x) &&
@@ -338,6 +337,64 @@ void unit_test_wireframe()
 void unit_test_triangle_mesh()
 {
     TEST_CASE(test::Type::Feature)
+
+    // vertex interpolation
+    {
+        gfx::Vertex2D v0, v1;
+        v0.aPosition = {3.0f, 5.0f};
+        v0.aTexCoord = {-1.0f, -2.0f};
+
+        v1.aPosition = {4.0f, 6.0f};
+        v1.aTexCoord = {0.0f, 1.0f};
+
+        const auto& layout = gfx::GetVertexLayout<gfx::Vertex2D>();
+        gfx::VertexBuffer result(layout);
+        gfx::InterpolateVertex(&v0, &v1, layout, result);
+
+        TEST_REQUIRE(result.GetCount() == 1);
+
+        const auto* vertex = result.GetVertex<gfx::Vertex2D>(0);
+        TEST_REQUIRE(vertex->aPosition.x == 3.5f);
+        TEST_REQUIRE(vertex->aPosition.y == 5.5f);
+        TEST_REQUIRE(vertex->aTexCoord.x == -0.5f);
+        TEST_REQUIRE(vertex->aTexCoord.y == -0.5f);
+    }
+    // vertex interpolation
+    {
+        gfx::Vertex2D v0, v1;
+        v0.aPosition = { 0.0f, 0.0f};
+        v1.aPosition = {-1.5f, 3.0f};
+
+        const auto& layout = gfx::GetVertexLayout<gfx::Vertex2D>();
+        gfx::VertexBuffer result(layout);
+        gfx::InterpolateVertex(&v0, &v1, layout, result);
+
+        TEST_REQUIRE(result.GetCount() == 1);
+        const auto* vertex = result.GetVertex<gfx::Vertex2D>(0);
+        TEST_REQUIRE(vertex->aPosition.x == -0.75f);
+        TEST_REQUIRE(vertex->aPosition.y == 1.5f);
+    }
+
+    // triangle sub-div 1
+    {
+        gfx::Vertex2D v0, v1, v2;
+        v0.aPosition = { 0.0f, 0.0f};
+        v1.aPosition = {-1.5f, 3.0f};
+        v2.aPosition = { 1.5f, 3.0f};
+
+        const auto& layout = gfx::GetVertexLayout<gfx::Vertex2D>();
+        gfx::VertexBuffer result(layout);
+        gfx::VertexBuffer tmp(layout);
+
+        gfx::SubdivideTriangle(&v0, &v1, &v2, layout, result, tmp, 0, 1);
+
+        const auto& verts = result.CopyBuffer<gfx::Vertex2D>();
+        TEST_REQUIRE(verts.size() == 4 * 3);
+
+        // todo check verts
+        //TEST_REQUIRE(foo[0].aPosition.x == 0.0f);
+        //TEST_REQUIRE(foo[0].aPosition.y == 0.0f);
+    }
 
     {
         std::vector<gfx::Vertex2D> verts;
