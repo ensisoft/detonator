@@ -386,7 +386,8 @@ void unit_test_triangle_mesh()
         gfx::VertexBuffer result(layout);
         gfx::VertexBuffer tmp(layout);
 
-        gfx::SubdivideTriangle(&v0, &v1, &v2, layout, result, tmp, 0, 1);
+        gfx::SubdivideTriangle(&v0, &v1, &v2, layout, result, tmp,
+            gfx::TessellationAlgo::MidpointSubdivision, 0, 1);
 
         const auto& verts = result.CopyBuffer<gfx::Vertex2D>();
         TEST_REQUIRE(verts.size() == 4 * 3);
@@ -413,7 +414,7 @@ void unit_test_triangle_mesh()
         buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 3, 3);
 
         gfx::GeometryBuffer result;
-        gfx::CreateTriangleMesh(buffer, result, 0);
+        gfx::TessellateMesh(buffer, result, gfx::TessellationAlgo::MidpointSubdivision, 0);
         TEST_REQUIRE(result.GetVertexBytes() == 6 * sizeof(gfx::Vertex2D));
         TEST_REQUIRE(result.GetNumDrawCmds() == 1);
         TEST_REQUIRE(result.GetDrawCmd(0).type == gfx::Geometry::DrawType::Triangles);
@@ -448,7 +449,7 @@ void unit_test_triangle_mesh()
         buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 3, 3);
 
         gfx::GeometryBuffer result;
-        gfx::CreateTriangleMesh(buffer, result, 1);
+        gfx::TessellateMesh(buffer, result, gfx::TessellationAlgo::MidpointSubdivision, 1);
         TEST_REQUIRE(result.GetVertexBytes() == 2 * 4 * 3 * sizeof(gfx::Vertex2D));
         TEST_REQUIRE(result.GetNumDrawCmds() == 1);
         TEST_REQUIRE(result.GetDrawCmd(0).type == gfx::Geometry::DrawType::Triangles);

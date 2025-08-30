@@ -1631,15 +1631,15 @@ void unit_test_polygon_shader()
         klass1.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
 
         gfx::DrawableClass::Environment env;
-        env.instanced_draw = false;
+        env.use_instancing = false;
         TEST_REQUIRE(klass0.GetShaderId(env) == klass1.GetShaderId(env));
 
-        env.instanced_draw = true;
+        env.use_instancing = true;
         TEST_REQUIRE(klass0.GetShaderId(env) == klass1.GetShaderId(env));
 
-        env.instanced_draw = true;
+        env.use_instancing = true;
         std::string id0 = klass0.GetShaderId(env);
-        env.instanced_draw = false;
+        env.use_instancing = false;
         std::string id1 = klass1.GetShaderId(env);
         TEST_REQUIRE(id0 != id1);
 
@@ -1649,7 +1649,7 @@ void CustomVertexTransform(inout VertexData vs) {
   vs.vertex = vec4(0.0);
 }
         )");
-        env.instanced_draw = false;
+        env.use_instancing = false;
         TEST_REQUIRE(klass0.GetShaderId(env) != klass1.GetShaderId(env));
 
     }
@@ -1669,7 +1669,7 @@ void CustomVertexTransform(inout VertexData vs) {
 
         TestDevice dev;
         gfx::DrawableClass::Environment env;
-        env.instanced_draw = false;
+        env.use_instancing = false;
 
         const auto& src = klass.GetShader(env, dev);
         const auto& source = src.GetSource();

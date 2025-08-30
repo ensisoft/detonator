@@ -55,6 +55,7 @@
 #include "graphics/linebatch.h"
 #include "graphics/guidegrid.h"
 #include "graphics/debug_drawable.h"
+#include "graphics/effect_drawable.h"
 #include "graphics/utility.h"
 #include "graphics/tool/polygon.h"
 #include "graphics/texture_texture_source.h"
@@ -3428,14 +3429,65 @@ public:
         return false;
     }
 private:
+};
 
+class MeshExplosionTest : public GraphicsTest
+{
+public:
+    void Render(gfx::Painter& painter) override
+    {
+        gfx::Transform transform;
+        transform.Resize(200.0f, 200.0f);
+        transform.MoveTo(300.0f, 300.0f);
+        painter.Draw(*mDrawable, transform, //gfx::CreateMaterialFromColor(gfx::Color::DarkGreen));
+            gfx::CreateMaterialFromSprite("textures/asteroid_dark.png"));
+    }
+    void Start() override
+    {
+        auto klass = std::make_shared<gfx::RectangleClass>();
+        auto inst = gfx::CreateDrawableInstance(klass);
+
+        using RandomGen = math::RandomGenerator<float, 0x123>;
+
+        gfx::EffectDrawable::SetRandomGenerator([r = RandomGen()](float min, float max) {
+            return r(min, max);
+        });
+
+        gfx::EffectDrawable::MeshExplosionEffectArgs args;
+        args.mesh_subdivision_count = 1;
+        args.shard_linear_speed = 1.0f;
+        args.shard_linear_acceleration = 2.0f;
+        args.shard_rotational_speed = 2.0f;
+        args.shard_rotational_acceleration = 1.0f;
+
+        auto effect = std::make_unique<gfx::EffectDrawable>(std::move(inst), base::RandomString(3));
+        effect->SetEffectType(gfx::EffectDrawable::EffectType::MeshExplosion);
+        effect->SetEffectArgs(args);
+        effect->EnableEffect();
+        mDrawable = std::move(effect);
+    }
+    void Update(float dt) override
+    {
+        if (!mDrawable)
+            return;
+
+        gfx::Drawable::Environment env;
+        mDrawable->Update(env, dt);
+    }
+
+    std::string GetName() const override
+    {
+        return "MeshExplosionTest";
+    }
+private:
+    std::unique_ptr<gfx::Drawable> mDrawable;
 };
 
 
 class BasicFog3DTest : public GraphicsTest
 {
 public:
-    using FogMode = gfx::GenericShaderProgram::FogMode;
+        using FogMode = gfx::GenericShaderProgram::FogMode;
 
     explicit BasicFog3DTest(FogMode mode) noexcept
       : mFogMode(mode)
@@ -4167,6 +4219,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new Shape3DTest);
     tests.emplace_back(new DepthLayerTest);
     tests.emplace_back(new OrthoDepthTest);
+    tests.emplace_back(new MeshExplosionTest);
 
     // GL ES3 specific tests
     if (version == 3)

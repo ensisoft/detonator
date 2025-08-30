@@ -34,6 +34,7 @@ DrawCategory DrawableClass::MapDrawableCategory(Type type)
     else if (type == Type::SimpleShape ||
              type == Type::Polygon ||
              type == Type::DebugDrawable ||
+             type == Type::EffectsDrawable ||
              type == Type::LineBatch3D ||
              type == Type::LineBatch2D ||
              type == Type::GuideGrid)

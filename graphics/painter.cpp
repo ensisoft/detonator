@@ -60,7 +60,7 @@ void Painter::Prime(DrawCommand& draw) const
     Drawable::Environment drawable_env;
     drawable_env.editing_mode   = mEditingMode;
     drawable_env.pixel_ratio    = mPixelRatio;
-    drawable_env.instanced_draw = draw.instanced_draw.has_value();
+    drawable_env.use_instancing = draw.instanced_draw.has_value();
     drawable_env.view_matrix    = draw.view       ? draw.view       : &mViewMatrix;
     drawable_env.proj_matrix    = draw.projection ? draw.projection : &mProjMatrix;
     drawable_env.model_matrix   = draw.model      ? draw.model      : &Identity;
@@ -95,7 +95,7 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program, const Col
         Drawable::Environment drawable_env;
         drawable_env.editing_mode   = mEditingMode;
         drawable_env.pixel_ratio    = mPixelRatio;
-        drawable_env.instanced_draw = draw.instanced_draw.has_value();
+        drawable_env.use_instancing = draw.instanced_draw.has_value();
         drawable_env.view_matrix    = draw.view       ? draw.view       : &mViewMatrix;
         drawable_env.proj_matrix    = draw.projection ? draw.projection : &mProjMatrix;
         drawable_env.model_matrix   = draw.model      ? draw.model      : &Identity;
@@ -259,7 +259,7 @@ bool Painter::Draw(const Drawable& drawable,
 // static
 std::unique_ptr<Painter> Painter::Create(std::shared_ptr<Device> device)
 {
-    return std::make_unique<Painter>(device);
+    return std::make_unique<Painter>(std::move(device));
 }
 // static
 std::unique_ptr<Painter> Painter::Create(Device* device)

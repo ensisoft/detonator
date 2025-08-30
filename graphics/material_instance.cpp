@@ -288,6 +288,10 @@ MaterialInstance CreateMaterialFromImage(const std::string& uri)
 {
     return MaterialInstance(CreateMaterialClassFromImage(uri));
 }
+MaterialInstance CreateMaterialFromSprite(const std::string& uri)
+{
+    return MaterialInstance(CreateMaterialClassFromSprite(uri));
+}
 
 MaterialInstance CreateMaterialFromImages(const std::initializer_list<std::string>& uris)
 {

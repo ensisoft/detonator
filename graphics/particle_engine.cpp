@@ -74,7 +74,7 @@ namespace gfx
 
 std::string ParticleEngineClass::GetShaderId(const Environment& env) const
 {
-    return env.instanced_draw ? "instanced-particle-shader" : "particle-shader";
+    return env.use_instancing ? "instanced-particle-shader" : "particle-shader";
 }
 
 std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
@@ -94,7 +94,7 @@ ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device
     ShaderSource source;
     source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
     source.SetType(gfx::ShaderSource::Type::Vertex);
-    if (env.instanced_draw)
+    if (env.use_instancing)
     {
         source.AddPreprocessorDefinition("INSTANCED_DRAW");
     }
@@ -103,13 +103,13 @@ ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device
     source.AddShaderName("2D Particle Shader");
     source.AddShaderSourceUri("shaders/vertex_shader_base.glsl");
     source.AddShaderSourceUri("shaders/vertex_2d_particle_shader.glsl");
-    source.AddDebugInfo("Instanced", env.instanced_draw ? "YES" : "NO");
+    source.AddDebugInfo("Instanced", env.use_instancing ? "YES" : "NO");
     return source;
 }
 
 std::string ParticleEngineClass::GetShaderName(const Environment& env) const
 {
-    return env.instanced_draw ? "InstancedParticleShader" : "ParticleShader";
+    return env.use_instancing ? "InstancedParticleShader" : "ParticleShader";
 }
 
 bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const InstanceState& state, Geometry::CreateArgs& create) const

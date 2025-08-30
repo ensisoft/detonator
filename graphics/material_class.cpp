@@ -1776,6 +1776,20 @@ ColorClass CreateMaterialClassFromColor(const Color4f& color)
     return material;
 }
 
+MaterialClass CreateMaterialClassFromSprite(const std::string& uri)
+{
+    auto map = std::make_unique<TextureMap>("");
+    map->SetName("Sprite");
+    map->SetNumTextures(1);
+    map->SetTextureSource(0, LoadTextureFromFile(uri, ""));
+
+    MaterialClass material(MaterialClass::Type::Texture, std::string(""));
+    material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+    material.SetNumTextureMaps(1);
+    material.SetTextureMap(0, std::move(map));
+    return material;
+}
+
 TextureMap2DClass CreateMaterialClassFromImage(const std::string& uri)
 {
     auto map = std::make_unique<TextureMap>("");

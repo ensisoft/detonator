@@ -588,7 +588,7 @@ void ShapeWidget::on_actionShowShader_triggered()
 
     gfx::Drawable::Environment environment;
     environment.editing_mode  = false; // we want to see the shader as it will be, so using false here
-    environment.instanced_draw = false;
+    environment.use_instancing = false;
     const auto& source = mPolygon.GetShader(environment, *device);
 
     DlgTextEdit dlg(this);
