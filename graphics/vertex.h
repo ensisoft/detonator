@@ -260,26 +260,26 @@ namespace gfx
     class VertexStream
     {
     public:
-        VertexStream(const VertexLayout& layout, const void* buffer, size_t bytes)
-          : mLayout(layout)
+        VertexStream(VertexLayout layout, const void* buffer, size_t bytes) noexcept
+          : mLayout(std::move(layout))
           , mBuffer((const uint8_t*)buffer)
           , mCount(GetCount(layout.vertex_struct_size, bytes))
         {}
-        VertexStream(const VertexLayout& layout, const std::vector<uint8_t>& buffer)
-          : mLayout(layout)
+        VertexStream(VertexLayout layout, const std::vector<uint8_t>& buffer) noexcept
+          : mLayout(std::move(layout))
           , mBuffer(buffer.data())
           , mCount(GetCount(layout.vertex_struct_size, buffer.size()))
         {}
 
         template<typename Vertex>
-        VertexStream(const VertexLayout& layout, const Vertex* buffer, size_t count)
-          : mLayout(layout)
+        VertexStream(VertexLayout layout, const Vertex* buffer, size_t count) noexcept
+          : mLayout(std::move(layout))
           , mBuffer((const uint8_t*)buffer)
           , mCount(count)
         {}
         template<typename Vertex>
-        VertexStream(const VertexLayout& layout, const std::vector<Vertex>& buffer)
-          : mLayout(layout)
+        VertexStream(VertexLayout layout, const std::vector<Vertex>& buffer) noexcept
+          : mLayout(std::move(layout))
           , mBuffer((const uint8_t*)buffer.data())
           , mCount(buffer.size())
         {}
@@ -308,11 +308,11 @@ namespace gfx
             const auto offset = index * mLayout.vertex_struct_size;
             return static_cast<const void*>(mBuffer + offset);
         }
-        inline bool HasAttribute(const char* name) const noexcept
+        bool HasAttribute(const char* name) const noexcept
         {  return FindAttribute(name) != nullptr; }
-        inline size_t GetCount() const noexcept
+        size_t GetCount() const noexcept
         { return mCount; }
-        inline bool IsValid() const noexcept
+        bool IsValid() const noexcept
         { return mBuffer != nullptr; }
 
         void IntoJson(data::Writer& writer) const;
@@ -351,22 +351,22 @@ namespace gfx
     class VertexBuffer
     {
     public:
-        VertexBuffer(const VertexLayout& layout, std::vector<uint8_t>* buffer)
-          : mLayout(layout)
+        VertexBuffer(VertexLayout layout, std::vector<uint8_t>* buffer) noexcept
+          : mLayout(std::move(layout))
           , mBuffer(buffer)
         {}
-        explicit VertexBuffer(const VertexLayout& layout)
-          : mLayout(layout)
+        explicit VertexBuffer(VertexLayout layout) noexcept
+          : mLayout(std::move(layout))
           , mBuffer(&mStorage)
         {}
-        explicit VertexBuffer(std::vector<uint8_t>* buffer)
+        explicit VertexBuffer(std::vector<uint8_t>* buffer) noexcept
           : mBuffer(buffer)
         {}
         VertexBuffer()
           : mBuffer(&mStorage)
         {}
 
-        inline void PushBack(const void* ptr)
+        void PushBack(const void* ptr)
         {
             ASSERT(mLayout.vertex_struct_size);
             const auto byte_offset = mBuffer->size();
@@ -375,24 +375,43 @@ namespace gfx
             std::memcpy(&(*mBuffer)[byte_offset], ptr, byte_size);
         }
 
-        inline const auto& GetLayout() const &  noexcept
+        const auto& GetLayout() const &  noexcept
         { return mLayout; }
-        inline auto&& GetLayout() && noexcept
+        auto&& GetLayout() && noexcept
         { return std::move(mLayout); }
 
-        inline const void* GetBufferPtr() const noexcept
+        const void* GetBufferPtr() const noexcept
         { return mBuffer->empty() ? nullptr : mBuffer->data(); }
-        inline std::size_t GetBufferSize() const noexcept
+        std::size_t GetBufferSize() const noexcept
         { return mBuffer->size(); }
-        inline std::size_t GetCount() const noexcept
+        std::size_t GetCount() const noexcept
         { return mBuffer->size() / mLayout.vertex_struct_size; };
-        inline void SetVertexLayout(VertexLayout layout) noexcept
+        std::size_t GetCapacity() const noexcept
+        { return mBuffer->capacity() / mLayout.vertex_struct_size; }
+        void SetVertexLayout(VertexLayout layout) noexcept
         { mLayout = std::move(layout); }
 
-        inline const auto& GetVertexBuffer() const & noexcept
+        const auto& GetVertexBuffer() const noexcept
         { return *mBuffer; }
-        inline auto&& GetVertexBuffer() && noexcept
+
+        auto& GetVertexBuffer() noexcept
+        { return *mBuffer; }
+
+        auto&& TransferVertexBuffer() noexcept
         { return std::move(*mBuffer); }
+
+        void* GetVertexPtr(size_t index) noexcept
+        {
+            ASSERT(index < GetCount());
+            const auto offset = index * mLayout.vertex_struct_size;
+            return &(*mBuffer)[offset];
+        }
+        const void* GetVertexPtr(size_t index) const noexcept
+        {
+            ASSERT(index < GetCount());
+            const auto offset = index * mLayout.vertex_struct_size;
+            return &(*mBuffer)[offset];
+        }
 
         template<typename T>
         const T* GetVertex(size_t index) const noexcept
@@ -432,6 +451,19 @@ namespace gfx
             return reinterpret_cast<A*>(mBuffer->data() + offset);
         }
 
+        // Copy over vertex data. Note that the incoming data *may* be less
+        // than what is the current vertex size per current vertex layout.
+        // This lets us copy over vertex data that is  in a compatible format
+        // for the byte_size bytes of the current format. Useful when the
+        // vertex layout has had new attributes appended to it.
+        void CopyVertex(const void* vertex, size_t byte_size, size_t index)
+        {
+            ASSERT(index < GetCount());
+            ASSERT(byte_size <= mLayout.vertex_struct_size);
+            void* ptr = GetVertexPtr(index);
+            std::memcpy(ptr, vertex, byte_size);
+        }
+
         const VertexLayout::Attribute* FindAttribute(const char* name) const noexcept
         {
             for (const auto& attr : mLayout.attributes)
@@ -447,6 +479,13 @@ namespace gfx
             ASSERT(mLayout.vertex_struct_size);
             const auto bytes = count * mLayout.vertex_struct_size;
             mBuffer->resize(bytes);
+        }
+
+        void Reserve(size_t count)
+        {
+            ASSERT(mLayout.vertex_struct_size);
+            const auto bytes = count * mLayout.vertex_struct_size;
+            mBuffer->reserve(bytes);
         }
 
         // Pushback one uninitialized vertex and return pointer to it.
@@ -468,12 +507,12 @@ namespace gfx
                 std::memcpy(ret.data(), mBuffer->data(), mBuffer->size());
             return ret;
         }
-        inline auto CopyBuffer() const
+        auto CopyBuffer() const
         {
             return std::vector<uint8_t>{*mBuffer};
         }
 
-        inline auto TransferBuffer()
+        auto TransferBuffer()
         {
             return std::move(*mBuffer);
         }
@@ -501,15 +540,19 @@ namespace gfx
     class TypedVertexBuffer
     {
     public:
-        TypedVertexBuffer(const VertexLayout& layout, std::vector<uint8_t>* buffer)
-          : mBuffer(layout, buffer)
+        TypedVertexBuffer(VertexLayout layout, std::vector<uint8_t>* buffer) noexcept
+          : mBuffer(std::move(layout), buffer)
         {}
-        explicit TypedVertexBuffer(const VertexLayout& layout)
-          : mBuffer(layout)
+        TypedVertexBuffer(VertexLayout layout, std::vector<uint8_t>& buffer) noexcept
+           : mBuffer(std::move(layout), &buffer)
         {}
-        explicit TypedVertexBuffer(std::vector<uint8_t>* buffer)
+        explicit TypedVertexBuffer(VertexLayout layout) noexcept
+          : mBuffer(std::move(layout))
+        {}
+        explicit TypedVertexBuffer(std::vector<uint8_t>* buffer) noexcept
           : mBuffer(buffer)
         {}
+
         TypedVertexBuffer() = default;
 
         T* GetVertex(size_t index) noexcept
@@ -518,13 +561,13 @@ namespace gfx
         const T* GetVertex(size_t index) const noexcept
         { return mBuffer.GetVertex<T>(index); }
 
-        inline void Append(const T& value)
-        { mBuffer.PushBack((const void*)&value); }
+        void Append(const T& value)
+        { mBuffer.PushBack(&value); }
 
-        inline void SetVertexLayout(VertexLayout layout) noexcept
+        void SetVertexLayout(VertexLayout layout) noexcept
         { mBuffer.SetVertexLayout(std::move(layout)); }
 
-        inline void Resize(size_t count)
+        void Resize(size_t count)
         { mBuffer.Resize(count); }
 
         std::vector<T> CopyBuffer() const
@@ -614,40 +657,40 @@ namespace gfx
     public:
         using Type = IndexType;
 
-        explicit IndexBuffer(Type type, std::vector<uint8_t>* buffer)
+        explicit IndexBuffer(Type type, std::vector<uint8_t>* buffer) noexcept
           : mType(type)
           , mBuffer(buffer)
         {}
-        explicit IndexBuffer(Type type)
+        explicit IndexBuffer(Type type) noexcept
           : mType(type)
           , mBuffer(&mStorage)
         {}
-        IndexBuffer(std::vector<uint8_t>* buffer)
+        explicit IndexBuffer(std::vector<uint8_t>* buffer) noexcept
           : mBuffer(buffer)
         {}
-        IndexBuffer()
+        IndexBuffer() noexcept
           : mBuffer(&mStorage)
         {}
 
-        inline void SetType(Type type) noexcept
+        void SetType(Type type) noexcept
         { mType = type;}
 
-        inline size_t GetCount() const noexcept
+        size_t GetCount() const noexcept
         { return mBuffer->size() / GetIndexByteSize(mType); }
 
-        inline const void* GetBufferPtr() const noexcept
+        const void* GetBufferPtr() const noexcept
         { return mBuffer->data(); }
 
-        inline size_t GetBufferSize() const noexcept
+        size_t GetBufferSize() const noexcept
         { return mBuffer->size(); }
 
-        inline Type GetType()  const noexcept
+        Type GetType()  const noexcept
         { return mType; }
 
-        inline const auto& GetIndexBuffer() const & noexcept
+        const auto& GetIndexBuffer() const & noexcept
         { return *mBuffer; }
 
-        inline auto&& GetIndexBuffer() && noexcept
+        auto&& GetIndexBuffer() && noexcept
         { return std::move(*mBuffer); }
 
         void PushBack(Index16 value) noexcept
