@@ -52,9 +52,15 @@ namespace gfx
     class DrawableClass
     {
     public:
+        // Which polygon faces to cull. Note that this only applies
+        // to polygons, not to lines or points.
         using Culling = Device::RasterState::Culling;
 
         using Usage = Geometry::Usage;
+
+        // Style of the drawable's geometry determines how the geometry
+        // is to be rasterized.
+        using DrawPrimitive = gfx::DrawPrimitive;
 
         // Type of the drawable (and its instances)
         enum class Type {
@@ -64,17 +70,17 @@ namespace gfx
             LineBatch2D,
             LineBatch3D,
             SimpleShape,
+            GuideGrid,
             DebugDrawable,
-            GuideGrid
+            EffectsDrawable
         };
-
-        // Style of the drawable's geometry determines how the geometry
-        // is to be rasterized.
-        using DrawPrimitive = gfx::DrawPrimitive;
-
+        // The environment that possibly affects the geometry and drawable
+        // generation and update in some way.
         struct Environment {
+            // true if the draw is with "effects", i.e. per triangle transform
+            bool use_effects = false;
             // true to indicate that we're going to do instanced draw.
-            bool instanced_draw = false;
+            bool use_instancing = false;
             // true if running in an "editor mode", which means that even
             // content marked static might have changed and should be checked
             // in case it has been modified and should be re-uploaded.
@@ -147,23 +153,15 @@ namespace gfx
     class Drawable
     {
     public:
-        using DrawPrimitive = DrawableClass::DrawPrimitive;
-        // Which polygon faces to cull. Note that this only applies
-        // to polygons, not to lines or points.
-        using Culling = DrawableClass::Culling;
-        // The environment that possibly affects the geometry and drawable
-        // generation and update in some way.
+        using Culling     = DrawableClass::Culling;
         using Environment = DrawableClass::Environment;
-
-        using Type = DrawableClass::Type;
-
-        using Usage = DrawableClass::Usage;
-
-        using DrawCmd = DrawableClass::DrawCmd;
-
-        using DrawInstance = DrawableClass::DrawInstance;
+        using Type        = DrawableClass::Type;
+        using Usage       = DrawableClass::Usage;
+        using DrawCmd     = DrawableClass::DrawCmd;
+        using DrawPrimitive     = DrawableClass::DrawPrimitive;
+        using DrawInstance      = DrawableClass::DrawInstance;
         using DrawInstanceArray = DrawableClass::DrawInstanceArray;
-        using InstancedDraw = DrawableClass::InstancedDraw;
+        using InstancedDraw     = DrawableClass::InstancedDraw;
 
         // Rasterizer state that the geometry can manipulate.
         struct RasterState {
@@ -266,8 +264,7 @@ namespace gfx
         // drawable objects that aren't based on any drawable clas!
         virtual const DrawableClass* GetClass() const { return nullptr; }
 
-
-        inline DrawCategory GetDrawCategory() const
+        DrawCategory GetDrawCategory() const
         { return DrawableClass::MapDrawableCategory(GetType()); }
     private:
     };

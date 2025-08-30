@@ -175,7 +175,7 @@ std::string PolygonMeshClass::GetShaderId(const Environment& env) const
     size_t hash = 0;
     hash = base::hash_combine(hash, mRenderMeshType);
     hash = base::hash_combine(hash, mShaderSrc);
-    hash = base::hash_combine(hash, env.instanced_draw);
+    hash = base::hash_combine(hash, env.use_instancing);
     return std::to_string(hash);
 }
 
@@ -185,7 +185,7 @@ std::string PolygonMeshClass::GetShaderName(const Environment& env) const
         return mName;
 
     return base::FormatString("%1,%2",
-        env.instanced_draw ? "Instanced" : "", mRenderMeshType);
+        env.use_instancing ? "Instanced" : "", mRenderMeshType);
 }
 
 ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& device) const
@@ -194,13 +194,13 @@ ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& d
 
     const auto mesh = GetRenderMeshType();
     if (mesh == RenderMeshType::Simple2D)
-        src = MakeSimple2DVertexShader(device, env.instanced_draw);
+        src = MakeSimple2DVertexShader(device, env.use_instancing, env.use_effects);
     else if (mesh == RenderMeshType::Simple3D)
-        src = MakeSimple3DVertexShader(device, env.instanced_draw);
+        src = MakeSimple3DVertexShader(device, env.use_instancing);
     else if (mesh == RenderMeshType::Model3D)
-        src = MakeModel3DVertexShader(device, env.instanced_draw); // todo:
+        src = MakeModel3DVertexShader(device, env.use_instancing); // todo:
     else if (mesh == RenderMeshType::Perceptual3D)
-        src = MakePerceptual3DVertexShader(device, env.instanced_draw);
+        src = MakePerceptual3DVertexShader(device, env.use_instancing);
     else BUG("No such vertex shader");
 
     if (!mShaderSrc.empty())

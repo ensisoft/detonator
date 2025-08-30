@@ -290,6 +290,7 @@ add_library(GfxLib
     graphics/bitmap.cpp
     graphics/bitmap_noise.cpp
     graphics/debug_drawable.cpp
+    graphics/effect_drawable.cpp
     graphics/device.cpp
     graphics/device_framebuffer.cpp
     graphics/device_geometry.cpp
@@ -396,6 +397,7 @@ add_library(GfxLibTesting
     graphics/bitmap.cpp
     graphics/bitmap_noise.cpp
     graphics/debug_drawable.cpp
+    graphics/effect_drawable.cpp
     graphics/device.cpp
     graphics/device_framebuffer.cpp
     graphics/device_geometry.cpp

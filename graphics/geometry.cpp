@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include "base/hash.h"
+#include "base/math.h"
 #include "graphics/geometry.h"
 
 #include "base/snafu.h"
@@ -87,7 +88,8 @@ size_t GeometryBuffer::GetHash() noexcept
     return hash;
 }
 
-void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr, const gfx::VertexLayout& layout, gfx::VertexBuffer& buffer)
+void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr, const gfx::VertexLayout& layout,
+    gfx::VertexBuffer& buffer, float t)
 {
     using namespace gfx;
 
@@ -99,7 +101,7 @@ void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr, const gfx::Verte
         {
             const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(attr, v0_ptr));
             const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(attr, v1_ptr));
-            const auto& result = (v1 - v0) * 0.5f + v0;
+            const auto& result = (v1 - v0) * t + v0;
 
             *VertexLayout::GetVertexAttributePtr<Vec2>(attr, vertex) = ToVec(result);
         }
@@ -107,7 +109,7 @@ void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr, const gfx::Verte
         {
             const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec3>(attr, v0_ptr));
             const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec3>(attr, v1_ptr));
-            const auto& result = (v1 - v0) * 0.5f + v0;
+            const auto& result = (v1 - v0) * t + v0;
 
             *VertexLayout::GetVertexAttributePtr<Vec3>(attr, vertex) = ToVec(result);
         }
@@ -115,7 +117,7 @@ void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr, const gfx::Verte
         {
             const auto& v0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec4>(attr, v0_ptr));
             const auto& v1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec4>(attr, v1_ptr));
-            const auto& result = (v1 - v0) * 0.5f + v0;
+            const auto& result = (v1 - v0) * t + v0;
 
             *VertexLayout::GetVertexAttributePtr<Vec4>(attr, vertex) = ToVec(result);
         }
@@ -125,52 +127,176 @@ void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr, const gfx::Verte
 
 void SubdivideTriangle(const void* v0_ptr, const void* v1_ptr, const void* v2_ptr,
         const gfx::VertexLayout& layout, gfx::VertexBuffer& buffer, gfx::VertexBuffer& temp,
-        unsigned current_subdivision,
-        unsigned maximum_subdivisions)
+        TessellationAlgo algo, unsigned sub_div, unsigned sub_div_count, bool discard_skinny_slivers)
 {
-    ASSERT(current_subdivision <= maximum_subdivisions);
+    ASSERT(sub_div <= sub_div_count);
 
-    if (current_subdivision == maximum_subdivisions)
+    if (sub_div == sub_div_count)
     {
-        buffer.PushBack(v0_ptr);
-        buffer.PushBack(v1_ptr);
-        buffer.PushBack(v2_ptr);
+        // deal with the skinny slivers here.
+        if (discard_skinny_slivers)
+        {
+            const auto* position_attribute = layout.FindAttribute("aPosition");
+            ASSERT(position_attribute);
+            if (position_attribute->num_vector_components == 2)
+            {
+                // find the ratio of the two sides.
+                const auto& p0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(*position_attribute, v0_ptr));
+                const auto& p1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(*position_attribute, v1_ptr));
+                const auto& p2 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(*position_attribute, v2_ptr));
+
+                const auto& dist_p0_p1 = glm::length(p0 - p1);
+                const auto& dist_p1_p2 = glm::length(p1 - p2);
+                const auto min_dist = std::min(dist_p0_p1, dist_p1_p2);
+                const auto max_dist = std::max(dist_p0_p1, dist_p1_p2);
+                const auto dist_ratio = max_dist / min_dist;
+                if (dist_ratio > 1.75f)
+                {
+                    //gfx::VertexBuffer temp_too(layout);
+                    //SubdivideTriangle(v0_ptr, v1_ptr, v2_ptr, layout, buffer, temp_too,
+                    //   TessellationAlgo::LongestEdgeBisection, 0, 1, false);
+                }
+                else
+                {
+                    buffer.PushBack(v0_ptr);
+                    buffer.PushBack(v1_ptr);
+                    buffer.PushBack(v2_ptr);
+                }
+            }
+            else
+            {
+                buffer.PushBack(v0_ptr);
+                buffer.PushBack(v1_ptr);
+                buffer.PushBack(v2_ptr);
+            }
+        }
+        else
+        {
+            buffer.PushBack(v0_ptr);
+            buffer.PushBack(v1_ptr);
+            buffer.PushBack(v2_ptr);
+        }
     }
     else
     {
         if (temp.GetCapacity() == 0)
         {
-            unsigned triangle_count = 4;
-            for (unsigned i=0; i<maximum_subdivisions; ++i)
+            unsigned triangle_count = 0;
+            if (algo == TessellationAlgo::ApexCut)
+                triangle_count = 2;
+            else if (algo == TessellationAlgo::MidpointSubdivision)
+                triangle_count = 4;
+            else if (algo == TessellationAlgo::CentroidSplit)
+                triangle_count = 3;
+            else if (algo == TessellationAlgo::RandomizedSplit)
+                triangle_count = 3;
+            else if (algo == TessellationAlgo::LongestEdgeBisection)
+                triangle_count = 3;
+            else BUG("Unhandled tessellation algo");
+
+            for (unsigned i=0; i<sub_div_count; ++i)
                 triangle_count *= 4;
 
             temp.Reserve(triangle_count * 3);
         }
-
-        // first algo
-        // split triangle in half and then the bottom half
-        // into 3 triangles.
 
         const auto vertex_capacity = temp.GetCapacity();
         const auto vertex_count = temp.GetCount();
         ASSERT(vertex_capacity > vertex_count &&
                 (vertex_capacity - vertex_count) >= 3);
 
-        void* v0_v1 = InterpolateVertex(v0_ptr, v1_ptr, layout, temp);
-        void* v0_v2 = InterpolateVertex(v0_ptr, v2_ptr, layout, temp);
-        void* v1_v2 = InterpolateVertex(v1_ptr, v2_ptr, layout, temp);
+        if (algo == TessellationAlgo::ApexCut)
+        {
+            void* v1_v2 = InterpolateVertex(v1_ptr, v2_ptr, layout, temp);
 
-        // top triangle
-        SubdivideTriangle(v0_ptr, v0_v1, v0_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+            // left
+            SubdivideTriangle(v0_ptr, v1_ptr, v1_v2, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+            // right
+            SubdivideTriangle(v0_ptr, v1_v2, v2_ptr, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+        }
+        else if (algo == TessellationAlgo::MidpointSubdivision)
+        {
+            void* v0_v1 = InterpolateVertex(v0_ptr, v1_ptr, layout, temp);
+            void* v0_v2 = InterpolateVertex(v0_ptr, v2_ptr, layout, temp);
+            void* v1_v2 = InterpolateVertex(v1_ptr, v2_ptr, layout, temp);
 
-        // bottom half, left triangle
-        SubdivideTriangle(v0_v1, v1_ptr, v1_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+            // top triangle
+            SubdivideTriangle(v0_ptr, v0_v1, v0_v2, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
 
-        // bottom half center triangle
-        SubdivideTriangle(v0_v1, v1_v2, v0_v2, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+            // bottom half, left triangle
+            SubdivideTriangle(v0_v1, v1_ptr, v1_v2, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
 
-        // bottom half right triangle
-        SubdivideTriangle(v0_v2, v1_v2, v2_ptr, layout, buffer, temp, current_subdivision + 1, maximum_subdivisions);
+            // bottom half center triangle
+            SubdivideTriangle(v0_v1, v1_v2, v0_v2, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+
+            // bottom half right triangle
+            SubdivideTriangle(v0_v2, v1_v2, v2_ptr, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+        }
+        else if (algo == TessellationAlgo::CentroidSplit)
+        {
+            void* v1_v2 = InterpolateVertex(v1_ptr, v2_ptr, layout, temp);
+
+            void* v_c = InterpolateVertex(v0_ptr, v1_v2, layout, temp);
+
+            // left
+            SubdivideTriangle(v0_ptr, v1_ptr, v_c, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+
+            // bottom
+            SubdivideTriangle(v1_ptr, v2_ptr, v_c, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+
+            // right
+            SubdivideTriangle(v0_ptr, v_c, v2_ptr, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+        }
+        else if (algo == TessellationAlgo::RandomizedSplit)
+        {
+            const auto t0 = 0.1f + math::rand(0.0f, 0.8f);
+            const auto t1 = 0.1f + math::rand(0.0f, 0.8f);
+
+            void* v0_v1 = InterpolateVertex(v0_ptr, v1_ptr, layout, temp, t0);
+            void* v1_v2 = InterpolateVertex(v1_ptr, v2_ptr, layout, temp, t1);
+            void* v_c = InterpolateVertex(v0_v1, v1_v2, layout, temp, 0.5f);
+
+            // left
+            SubdivideTriangle(v0_ptr, v1_ptr, v_c, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+
+            // bottom
+            SubdivideTriangle(v1_ptr, v2_ptr, v_c, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+
+            // right
+            SubdivideTriangle(v0_ptr, v_c, v2_ptr, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+        }
+        else if (algo == TessellationAlgo::LongestEdgeBisection)
+        {
+            const auto* position_attribute = layout.FindAttribute("aPosition");
+            ASSERT(position_attribute);
+            if (position_attribute->num_vector_components == 2)
+            {
+                // find the ratio of the two sides.
+                const auto& p0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(*position_attribute, v0_ptr));
+                const auto& p1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(*position_attribute, v1_ptr));
+                const auto& p2 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(*position_attribute, v2_ptr));
+
+                const auto& dist_p0_p1 = glm::length(p0 - p1);
+                const auto& dist_p1_p2 = glm::length(p1 - p2);
+                if (dist_p0_p1 > dist_p1_p2)
+                {
+                    void* v0_v1 = InterpolateVertex(v0_ptr, v1_ptr, layout, temp);
+                    void* v0_v2 = InterpolateVertex(v0_ptr, v2_ptr, layout, temp);
+
+                    SubdivideTriangle(v0_ptr, v0_v1, v0_v2, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+                    SubdivideTriangle(v0_v1, v1_ptr, v0_v2, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+                    SubdivideTriangle(v0_v2, v1_ptr, v2_ptr, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+                }
+                else
+                {
+                    void* v1_v2 = InterpolateVertex(v1_ptr, v2_ptr, layout, temp);
+                    void* v0_v2 = InterpolateVertex(v0_ptr, v2_ptr, layout, temp);
+                    SubdivideTriangle(v0_ptr, v1_ptr, v0_v2, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+                    SubdivideTriangle(v0_v2, v1_ptr, v1_v2, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+                    SubdivideTriangle(v0_v2, v1_v2, v2_ptr, layout, buffer, temp, algo, sub_div + 1, sub_div_count, discard_skinny_slivers);
+                }
+            }
+        }
     }
 }
 
@@ -259,7 +385,8 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
     wireframe.AddDrawCmd(Geometry::DrawType::Lines);
 }
 
-bool CreateTriangleMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer, unsigned subdiv_count)
+bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
+    TessellationAlgo algo, unsigned sub_div_count)
 {
     const VertexStream vertices(geometry.GetLayout(),
                             geometry.GetVertexDataPtr(),
@@ -302,7 +429,7 @@ bool CreateTriangleMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer, 
 
                 // triangle v0, v1, v2
                 gfx::VertexBuffer temp(vertex_layout);
-                SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, 0, subdiv_count);
+                SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
             }
         }
         else if (cmd.type == Geometry::DrawType::TriangleFan)
@@ -320,7 +447,7 @@ bool CreateTriangleMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer, 
 
             // first triangle v0, v1, v2
             gfx::VertexBuffer temp(vertex_layout);
-            SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, 0, subdiv_count);
+            SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
 
             for (size_t j=3; j<primitive_count; ++j)
             {
@@ -332,7 +459,7 @@ bool CreateTriangleMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer, 
 
                 // triangle v0, vPrev, vCurr
                 gfx::VertexBuffer temp(vertex_layout);
-                SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, 0, subdiv_count);
+                SubdivideTriangle(v0, vPrev, vCurr, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
             }
         }
     }

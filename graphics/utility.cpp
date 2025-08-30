@@ -124,7 +124,7 @@ glm::mat4 MakePerspectiveProjection(FRadians fov, float aspect, float znear, flo
     return glm::perspective(fov.ToRadians(), aspect, znear, zfar);
 }
 
-gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instancing)
+gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instancing, bool use_effects)
 {
     // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
     // are used to support per particle features.
@@ -146,7 +146,6 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_i
     {
         source.AddPreprocessorDefinition("INSTANCED_DRAW");
     }
-
     source.LoadRawSource(vertex_base);
     source.LoadRawSource(shader);
     source.AddShaderName("2D Vertex Shader");

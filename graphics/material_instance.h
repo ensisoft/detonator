@@ -117,6 +117,7 @@ namespace gfx
                                              const Color4f& bottom_right);
     MaterialInstance CreateMaterialFromColor(const Color4f& color);
     MaterialInstance CreateMaterialFromImage(const std::string& uri);
+    MaterialInstance CreateMaterialFromSprite(const std::string& uri);
     MaterialInstance CreateMaterialFromImages(const std::initializer_list<std::string>& uris);
     MaterialInstance CreateMaterialFromImages(const std::vector<std::string>& uris);
     MaterialInstance CreateMaterialFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames);

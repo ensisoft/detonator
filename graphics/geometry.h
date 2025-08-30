@@ -258,18 +258,34 @@ namespace gfx
     // Interpolate between two vertices and and push the interpolation
     // result into result buffer. Returns a pointer to the vertex.
     void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr,
-        const gfx::VertexLayout& layout, gfx::VertexBuffer& result);
+        const gfx::VertexLayout& layout, gfx::VertexBuffer& result, float t = 0.5f);
+
+    enum class TessellationAlgo {
+        // Cut the triangle into half by extending from the apex (v0) to the
+        // center of the opposite side thus producing 2 triangles
+        ApexCut,
+
+        // Finds the midpoint of each triangle edge and connects the midpoints
+        // thus producing 4 new triangles.
+        MidpointSubdivision,
+
+        CentroidSplit,
+
+        RandomizedSplit,
+
+        LongestEdgeBisection
+    };
 
     void SubdivideTriangle(const void* v0_ptr, const void* v1_ptr, const void* v2_ptr,
         const gfx::VertexLayout& layout, gfx::VertexBuffer& buffer, gfx::VertexBuffer& temp,
-        unsigned current_subdivision,
-        unsigned maximum_subdivisions);
+        TessellationAlgo algo, unsigned sub_div, unsigned sub_div_count,
+        bool discard_skinny_slivers = true);
 
     bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals,
                           unsigned flags = NormalMeshFlags::Normals, float line_length = 0.2f);
 
-    bool CreateTriangleMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
-        unsigned num_subdivisions);
+    bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
+        TessellationAlgo algo, unsigned sub_div_count);
 
     bool ComputeTangents(GeometryBuffer& geometry);
 

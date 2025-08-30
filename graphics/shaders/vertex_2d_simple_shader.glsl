@@ -9,6 +9,10 @@ R"CPP_RAW_STRING(//"
 in vec2 aPosition;
 in vec2 aTexCoord;
 
+#ifdef USE_EFFECTS_MESH
+in vec4 aEffectShardData;
+#endif
+
 // these should be in the base_vertex_shader.glsl but alas
 // it seems that if these are defined *before* the non-instanced
 // attributes we have some weird problems, the graphics_test app
@@ -30,6 +34,13 @@ uniform mat4 kModelViewMatrix;
 #ifdef CUSTOM_VERTEX_TRANSFORM
   uniform float kTime;
   uniform float kRandom;
+#endif
+
+#ifdef USE_EFFECTS_MESH
+  uniform float kEffectTime;
+  uniform vec3 kEffectMeshCenter;
+  uniform vec4 kEffectArgs;
+  uniform int kEffectType;
 #endif
 
 // @varyings
@@ -91,6 +102,10 @@ void VertexShaderMain() {
 
     #ifdef CUSTOM_VERTEX_TRANSFORM
       CustomVertexTransform(vs);
+    #else
+      #if defined(USE_EFFECTS_MESH)
+        MeshEffect(vs);
+      #endif
     #endif
 
     vTexCoord = vs.texcoord;
