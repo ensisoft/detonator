@@ -27,6 +27,8 @@ include_directories(${Boost_INCLUDE_DIRS})
 # https://bugreports.qt.io/browse/QTBUG-53002
 set(CMAKE_CXX_STANDARD 17)
 
+add_compile_definitions(BASE_TYPES_SUPPORT_GLM)
+
 add_library(QtColorWidgets
         ../../../third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
         ../../../third_party/Qt-Color-Widgets/src/bound_color_selector.cpp
