@@ -206,6 +206,16 @@ must be copied manually from `c:\Qt\5.15.2\msvc2019_64\`to `editor\dist`.
 > IF you do choose to use Conan then run the `conan install` command before cmake configure 
 > and append `-DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake` and `-DPREFER_SYSTEM_PACKAGES=OFF` 
 > to the cmake configure command.
+> 
+
+> [!IMPORTANT]
+> It appears that Qt5 QWindow based OpenGL integration is broken under Wayland. Windows don't 
+> always render properly and keyboard event is not working. This probably has something to do  
+> with the so called 'window containers'. Since the twerps at Trolltech have dropped support for
+> Qt5 the bugs will likely not disappear. Additionally the whole wayland architecture itself 
+> is still very much pre-alpha, so the whole situation is trash on more trash.
+> 
+> The current workaround is to use X11. 
 
 <details><summary>How to install dependencies</summary>
 
