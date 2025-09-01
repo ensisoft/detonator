@@ -25,6 +25,9 @@
 #    include <glm/gtx/euler_angles.hpp>
 #    include <glm/gtx/fast_square_root.hpp>
 #  endif
+#  include <boost/random/mersenne_twister.hpp>
+#  include <boost/random/uniform_int_distribution.hpp>
+#  include <boost/random/uniform_real_distribution.hpp>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -532,12 +535,18 @@ namespace math
     template<unsigned Seed, typename T>
     T rand(T min, T max) noexcept
     {
-        static std::default_random_engine engine(Seed);
+        // boost uniform distribution has an assert for the condition
+        // that min < max. We have code that calls  random with (for example
+        // 1.0f, 1.0f) and we must keep this working, so simply return min.
+        if (min >= max)
+            return min;
+
+        static boost::random::mt19937 engine(Seed);
         if constexpr (std::is_floating_point<T>::value) {
-            std::uniform_real_distribution<T> dist(min, max);
+            boost::random::uniform_real_distribution<T> dist(min, max);
             return dist(engine);
         } else {
-            std::uniform_int_distribution<T> dist(min, max);
+            boost::random::uniform_int_distribution<T> dist(min, max);
             return dist(engine);
         }
     }
@@ -547,38 +556,72 @@ namespace math
     template<typename T>
     T rand(T min, T max) noexcept
     {
+        // boost uniform distribution has an assert for the condition
+        // that min < max. We have code that calls  random with (for example
+        // 1.0f, 1.0f) and we must keep this working, so simply return min.
+        if (min >= max)
+            return min;
+
         // if we enable this flag we always give out a deterministic
         // sequence by initializing the engine with a predetermined seed.
         // this is convenient for example testing purposes, enable this
         // flag and always get the same sequence without having to change
         // the calling code that doesn't really care.
     #if defined(MATH_FORCE_DETERMINISTIC_RANDOM)
-        static std::default_random_engine engine(0xdeadbeef);
+        static boost::random::mt19937 engine(0xdeadbeef);
     #else
-        static std::default_random_engine engine(std::time(nullptr));
+        static boost::random::mt19937 engine(std::time(nullptr));
     #endif
         if constexpr (std::is_floating_point<T>::value) {
-            std::uniform_real_distribution<T> dist(min, max);
+            boost::random::uniform_real_distribution<T> dist(min, max);
             return dist(engine);
         } else {
-            std::uniform_int_distribution<T> dist(min, max);
+            boost::random::uniform_int_distribution<T> dist(min, max);
             return dist(engine);
         }
     }
 
-    template<typename T, size_t Seed>
+    template<typename T, unsigned int Seed>
     struct RandomGenerator {
-        inline T operator()() const noexcept {
-            return math::rand<Seed, T>(min_, max_);
+        RandomGenerator()
+        {
+            mersenne_twister_ = boost::mt19937(Seed);
         }
-        inline T operator()(T min, T max) const noexcept {
+        RandomGenerator(T min, T max) noexcept
+          : min_(min), max_(max)
+        {
+            mersenne_twister_ = boost::mt19937(Seed);
+        }
+        T operator()() const noexcept
+        {
+            return Generate(min_, max_);
+        }
+        T operator()(T min, T max) const noexcept
+        {
+            return Generate(min, max);
+        }
+        static T rand(T min, T max) noexcept
+        {
             return math::rand<Seed, T>(min, max);
         }
-        inline static T rand(T min, T max) noexcept {
-            return math::rand<Seed, T>(min, max);
+    private:
+        T Generate(T min, T max) const noexcept
+        {
+            if (min >= max)
+                return min;
+
+            if constexpr (std::is_floating_point<T>::value) {
+                boost::random::uniform_real_distribution<T> dist(min, max);
+                return dist(mersenne_twister_);
+            } else {
+                boost::random::uniform_int_distribution<T> dist(min, max);
+                return dist(mersenne_twister_);
+            }
         }
-        T min_;
-        T max_;
+    private:
+        T min_ = T();
+        T max_ = T();
+        mutable boost::mt19937 mersenne_twister_;
      };
 
     enum class TriangleWindingOrder {
