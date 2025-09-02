@@ -1,6 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
   <qresource>
+    <file>16x16_ico_png/mesh_effect.png</file>
     <file>16x16_ico_png/properties.png</file>
     <file>16x16_ico_png/transform.png</file>
     <file>16x16_ico_png/cpp.png</file>
@@ -180,6 +181,7 @@
     <file>64x64_ico_png/animation-trigger-sound-effect.png</file>
     <file>64x64_ico_png/animation-trigger-music.png</file>
     <file>64x64_ico_png/animation-trigger-spawn.png</file>
+    <file>64x64_ico_png/animation-trigger-mesh-effect.png</file>
 
     <file>logo/html5.png</file>
     <file>logo/linux.png</file>
