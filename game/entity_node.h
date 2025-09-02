@@ -53,6 +53,8 @@ namespace game
     class MapNode;
     class BasicLightClass;
     class BasicLight;
+    class MeshEffectClass;
+    class MeshEffect;
     class Entity;
 
     class EntityNodeClass
@@ -131,43 +133,31 @@ namespace game
         bool TestFlag(Flags flag) const noexcept
         { return mBitFlags.test(flag); }
 
-        // Attach a rigid body to this node class.
+        // Set various node attachments
+
         void SetRigidBody(const RigidBodyClass& body);
-        // Attach a simple static drawable item to this node class.
         void SetDrawable(const DrawableItemClass& drawable);
-        // Attach a text item to this node class.
         void SetTextItem(const TextItemClass& text);
-        // Attach a spatial index node to this node class.
         void SetSpatialNode(const SpatialNodeClass& node);
-        // Attach a rigid body fixture to this node class.
         void SetFixture(const FixtureClass& fixture);
-        // Attach a tilemap node to this node class.
         void SetMapNode(const MapNodeClass& map);
-        // Attach a transformer to this node class
         void SetLinearMover(const LinearMoverClass& mover);
-
         void SetSplineMover(const SplineMoverClass& mover);
-
         void SetBasicLight(const BasicLightClass& light);
+        void SetMeshEffect(const MeshEffectClass& effect);
 
-        // Create and attach a rigid body with default settings.
+        // Create various node attachments
+
         void CreateRigidBody();
-        // Create and attach a drawable with default settings.
         void CreateDrawable();
-        // Create and attach a text item with default settings.
         void CreateTextItem();
-        // Create and attach spatial index  node with default settings.
         void CreateSpatialNode();
-        // Create and attach a fixture with default settings.
         void CreateFixture();
-        // Create and attach a map node with default settings.
         void CreateMapNode();
-        // Create and attach a transformer with default settings.
         void CreateLinearMover();
-
         void CreateSplineMover();
-
         void CreateBasicLight();
+        void CreateMeshEffect();
 
         void RemoveDrawable() noexcept
         { mDrawable.reset(); }
@@ -187,6 +177,8 @@ namespace game
         { mSplineMover.reset(); }
         void RemoveBasicLight() noexcept
         { mBasicLight.reset(); }
+        void RemoveMeshEffect() noexcept
+        { mMeshEffect.reset(); }
 
         // Get the rigid body shared class object if any.
         auto GetSharedRigidBody() const noexcept
@@ -212,7 +204,8 @@ namespace game
         { return mSplineMover; }
         auto GetSharedBasicLight() const noexcept
         { return mBasicLight; }
-
+        auto GetSharedMeshEffect() const noexcept
+        { return mMeshEffect; }
 
         // Returns true if a rigid body has been set for this class.
         bool HasRigidBody() const noexcept
@@ -234,6 +227,8 @@ namespace game
         { return !!mSplineMover; }
         bool HasBasicLight() const noexcept
         { return !!mBasicLight; }
+        bool HasMeshEffect() const noexcept
+        { return !!mMeshEffect; }
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
@@ -263,6 +258,8 @@ namespace game
         { return mSplineMover.get(); }
         BasicLightClass* GetBasicLight() noexcept
         { return mBasicLight.get(); }
+        MeshEffectClass* GetMeshEffect() noexcept
+        { return mMeshEffect.get(); }
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
@@ -295,6 +292,9 @@ namespace game
 
         const BasicLightClass* GetBasicLight() const noexcept
         { return mBasicLight.get(); }
+
+        const MeshEffectClass* GetMeshEffect() const noexcept
+        { return mMeshEffect.get(); }
 
         // Get the transform that applies to this node
         // and the subsequent hierarchy of nodes.
@@ -346,6 +346,7 @@ namespace game
         std::shared_ptr<LinearMoverClass> mLinearMover;
         std::shared_ptr<SplineMoverClass> mSplineMover;
         std::shared_ptr<BasicLightClass> mBasicLight;
+        std::shared_ptr<MeshEffectClass> mMeshEffect;
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
     };
@@ -370,57 +371,57 @@ namespace game
           , rotation(klass.GetRotation())
         {}
 
-        inline void SetScale(glm::vec2 scale) noexcept
+        void SetScale(glm::vec2 scale) noexcept
         { this->scale = scale; }
-        inline void SetScale(float sx, float sy) noexcept
+        void SetScale(float sx, float sy) noexcept
         { this->scale = glm::vec2(sx, sy); }
-        inline void SetSize(glm::vec2 size) noexcept
+        void SetSize(glm::vec2 size) noexcept
         { this->size = size; }
-        inline void SetSize(float width, float height) noexcept
+        void SetSize(float width, float height) noexcept
         { this->size = glm::vec2(width, height); }
-        inline void SetTranslation(glm::vec2 pos) noexcept
+        void SetTranslation(glm::vec2 pos) noexcept
         { this->translation = pos; }
-        inline void SetTranslation(float x, float y) noexcept
+        void SetTranslation(float x, float y) noexcept
         { this->translation = glm::vec2(x, y); }
-        inline void SetRotation(float rotation) noexcept
+        void SetRotation(float rotation) noexcept
         { this->rotation = rotation; }
-        inline void Translate(glm::vec2 vec) noexcept
+        void Translate(glm::vec2 vec) noexcept
         { this->translation += vec; }
-        inline void Translate(float dx, float dy) noexcept
+        void Translate(float dx, float dy) noexcept
         { this->translation += glm::vec2(dx, dy); }
-        inline void Rotate(float dr) noexcept
+        void Rotate(float dr) noexcept
         { this->rotation += dr; }
-        inline void Grow(glm::vec2 vec) noexcept
+        void Grow(glm::vec2 vec) noexcept
         { this->size += vec; }
-        inline void Grow(float dx, float dy) noexcept
+        void Grow(float dx, float dy) noexcept
         { this->size += glm::vec2(dx, dy); }
 
-        inline glm::vec2 GetXVector() const noexcept
+        glm::vec2 GetXVector() const noexcept
         { return math::RotateVectorAroundZ(glm::vec2{1.0f, 0.0f}, this->rotation); }
-        inline glm::vec2 GetYVector() const noexcept
+        glm::vec2 GetYVector() const noexcept
         { return math::RotateVectorAroundZ(glm::vec2{0.0f, 1.0f}, this->rotation); }
 
-        inline glm::vec2 GetForwardVector() const noexcept
+        glm::vec2 GetForwardVector() const noexcept
         { return math::RotateVectorAroundZ(glm::vec2{1.0f, 0.0f}, this->rotation); }
-        inline glm::vec2 GetUpVector() const noexcept
+        glm::vec2 GetUpVector() const noexcept
         { return math::RotateVectorAroundZ(glm::vec2{0.0f -1.0f}, this->rotation); }
 
-        inline glm::vec2 GetTranslation() const noexcept
+        glm::vec2 GetTranslation() const noexcept
         { return this->translation; }
-        inline glm::vec2 GetScale() const noexcept
+        glm::vec2 GetScale() const noexcept
         { return this->scale; }
-        inline glm::vec2 GetSize() const noexcept
+        glm::vec2 GetSize() const noexcept
         { return this->size; }
-        inline float GetRotation() const noexcept
+        float GetRotation() const noexcept
         { return this->rotation; }
 
-        inline float GetWidth() const noexcept
+        float GetWidth() const noexcept
         { return this->size.x; }
-        inline float GetHeight() const noexcept
+        float GetHeight() const noexcept
         { return this->size.y; }
-        inline float GetX() const noexcept
+        float GetX() const noexcept
         { return this->translation.x; }
-        inline float GetY() const noexcept
+        float GetY() const noexcept
         { return this->translation.y; }
     };
 
@@ -432,15 +433,15 @@ namespace game
            : mInstanceId(std::move(id))
            , mInstanceName(std::move(name))
         {}
-        inline void SetName(std::string name) noexcept
+        void SetName(std::string name) noexcept
         { mInstanceName = std::move(name); }
-        inline std::string GetName() const noexcept
+        std::string GetName() const noexcept
         { return mInstanceName; }
-        inline std::string GetId() const noexcept
+        std::string GetId() const noexcept
         { return mInstanceId; }
-        inline Entity* GetEntity() noexcept
+        Entity* GetEntity() noexcept
         { return mEntity; }
-        inline EntityNode* GetNode() noexcept
+        EntityNode* GetNode() noexcept
         { return mNode; }
     private:
         friend class EntityNode;
@@ -469,7 +470,7 @@ namespace game
 
         explicit EntityNode(std::shared_ptr<const EntityNodeClass> klass, EntityNodeAllocator* allocator = nullptr);
         explicit EntityNode(const EntityNodeClass& klass, EntityNodeAllocator* allocator = nullptr);
-        explicit EntityNode(EntityNode&& other);
+        explicit EntityNode(EntityNode&& other) noexcept;
 
         EntityNode(const EntityNode& other) = delete;
        ~EntityNode();
@@ -477,124 +478,94 @@ namespace game
         void Release(EntityNodeAllocator* allocator);
 
         // transformation
-        inline void SetScale(glm::vec2 scale) noexcept
+        void SetScale(glm::vec2 scale) noexcept
         { mTransform->scale = scale; }
-        inline void SetScale(float sx, float sy) noexcept
+        void SetScale(float sx, float sy) noexcept
         { mTransform->scale = glm::vec2(sx, sy); }
-        inline void SetSize(const glm::vec2& size) noexcept
+        void SetSize(const glm::vec2& size) noexcept
         { mTransform->size = size; }
-        inline void SetSize(float width, float height) noexcept
+        void SetSize(float width, float height) noexcept
         { mTransform->size = glm::vec2(width, height); }
-        inline void SetTranslation(glm::vec2 pos) noexcept
+        void SetTranslation(glm::vec2 pos) noexcept
         { mTransform->translation = pos; }
-        inline void SetTranslation(float x, float y) noexcept
+        void SetTranslation(float x, float y) noexcept
         { mTransform->translation = glm::vec2(x, y); }
-        inline void SetRotation(float rotation) noexcept
+        void SetRotation(float rotation) noexcept
         { mTransform->rotation = rotation; }
-        inline void Translate(const glm::vec2& vec) noexcept
+        void Translate(const glm::vec2& vec) noexcept
         { mTransform->translation += vec; }
-        inline void Translate(float dx, float dy) noexcept
+        void Translate(float dx, float dy) noexcept
         { mTransform->translation += glm::vec2(dx, dy); }
-        inline void Rotate(float dr) noexcept
+        void Rotate(float dr) noexcept
         { mTransform->rotation += dr; }
-        inline void Grow(glm::vec2 vec) noexcept
+        void Grow(glm::vec2 vec) noexcept
         { mTransform->size += vec; }
-        inline void Grow(float dx, float dy) noexcept
+        void Grow(float dx, float dy) noexcept
         { mTransform->size += glm::vec2(dx, dy); }
-        inline glm::vec2 GetTranslation() const noexcept
+        glm::vec2 GetTranslation() const noexcept
         { return mTransform->translation; }
-        inline glm::vec2 GetScale() const noexcept
+        glm::vec2 GetScale() const noexcept
         { return mTransform->scale; }
-        inline glm::vec2 GetSize() const noexcept
+        glm::vec2 GetSize() const noexcept
         { return mTransform->size; }
 
-        inline glm::vec2 GetXVector() const noexcept
+        glm::vec2 GetXVector() const noexcept
         { return mTransform->GetXVector(); }
-        inline glm::vec2 GetYVector() const noexcept
+        glm::vec2 GetYVector() const noexcept
         { return mTransform->GetYVector(); }
 
-        inline glm::vec2 GetForwardVector() const noexcept
+        glm::vec2 GetForwardVector() const noexcept
         { return mTransform->GetForwardVector(); }
-        inline glm::vec2 GetUpVector() const noexcept
+        glm::vec2 GetUpVector() const noexcept
         { return mTransform->GetUpVector(); }
 
-        inline float GetRotation() const noexcept
+        float GetRotation() const noexcept
         { return mTransform->rotation; }
 
-        inline void SetName(std::string name) noexcept
+        void SetName(std::string name) noexcept
         { mNodeData->mInstanceName = std::move(name); }
-        inline std::string GetId() const noexcept
+        std::string GetId() const noexcept
         { return mNodeData->mInstanceId; }
-        inline std::string GetName() const noexcept
+        std::string GetName() const noexcept
         { return mNodeData->mInstanceName; }
-        inline Entity* GetEntity() noexcept
+        Entity* GetEntity() noexcept
         { return mNodeData->mEntity; }
-        inline const Entity* GetEntity() const noexcept
+        const Entity* GetEntity() const noexcept
         { return mNodeData->mEntity; }
 
-        inline std::string GetTag() const noexcept
+        std::string GetTag() const noexcept
         { return mClass->GetTag(); }
-        inline bool TestFlag(Flags flags) const noexcept
+        bool TestFlag(Flags flags) const noexcept
         { return mClass->TestFlag(flags); }
 
-        inline void SetEntity(Entity* entity) noexcept
+        void SetEntity(Entity* entity) noexcept
         { mNodeData->mEntity = entity; }
 
-        inline EntityNodeTransform* GetTransform() noexcept
-        { return mTransform; }
-        inline const EntityNodeTransform* GetTransform() const noexcept
-        { return mTransform; }
-        inline EntityNodeData* GetData() noexcept
-        { return mNodeData; }
-        inline const EntityNodeData* GetData() const noexcept
-        { return mNodeData; }
+        EntityNodeTransform* GetTransform() noexcept;
+        EntityNodeData* GetData() noexcept;
+        DrawableItem* GetDrawable() noexcept;
+        RigidBody* GetRigidBody() noexcept;
+        TextItem* GetTextItem() noexcept;
+        Fixture* GetFixture() noexcept;
+        SpatialNode* GetSpatialNode() noexcept;
+        MapNode* GetMapNode() noexcept;
+        LinearMover* GetLinearMover() noexcept;
+        SplineMover* GetSplineMover() noexcept;
+        BasicLight* GetBasicLight() noexcept;
+        MeshEffect* GetMeshEffect() noexcept;
 
-        // Get the node's drawable item if any. If no drawable
-        // item is set then returns nullptr.
-        DrawableItem* GetDrawable();
-        // Get the node's rigid body item if any. If no rigid body
-        // item is set then returns nullptr.
-        RigidBody* GetRigidBody();
-        // Get the node's text item if any. If no text item
-        // is set then returns nullptr.
-        TextItem* GetTextItem();
-        // Get the node's fixture if any. If no fixture is et
-        // then returns nullptr.
-        Fixture* GetFixture();
-
-        SpatialNode* GetSpatialNode();
-
-        MapNode* GetMapNode();
-
-        LinearMover* GetLinearMover();
-
-        SplineMover* GetSplineMover();
-
-        BasicLight* GetBasicLight();
-
-        // Get the node's drawable item if any. If now drawable
-        // item is set then returns nullptr.
-        const DrawableItem* GetDrawable() const;
-        // Get the node's rigid body item if any. If no rigid body
-        // item is set then returns nullptr.
-        const RigidBody* GetRigidBody() const;
-        // Get the node's text item if any. If no text item
-        // is set then returns nullptr.
-        const TextItem* GetTextItem() const;
-        // Get the node's spatial node if any. If no spatial node
-        // is set then returns nullptr.
-        const SpatialNode* GetSpatialNode() const;
-        // Get the node's fixture if any. If no fixture is et
-        // then returns nullptr.
-        const Fixture* GetFixture() const;
-
-        const MapNode* GetMapNode() const;
-
-        const LinearMover* GetLinearMover() const;
-
-        const SplineMover* GetSplineMover() const;
-
-        const BasicLight* GetBasicLight() const;
+        const EntityNodeTransform* GetTransform() const noexcept;
+        const EntityNodeData* GetData() const noexcept;
+        const DrawableItem* GetDrawable() const noexcept;
+        const RigidBody* GetRigidBody() const noexcept;
+        const TextItem* GetTextItem() const noexcept;
+        const SpatialNode* GetSpatialNode() const noexcept;
+        const Fixture* GetFixture() const noexcept;
+        const MapNode* GetMapNode() const noexcept;
+        const LinearMover* GetLinearMover() const noexcept;
+        const SplineMover* GetSplineMover() const noexcept;
+        const BasicLight* GetBasicLight() const noexcept;
+        const MeshEffect* GetMeshEffect() const noexcept;
 
         bool HasRigidBody() const noexcept
         { return !!mRigidBody; }
@@ -614,6 +585,8 @@ namespace game
         { return !!mLinearMover; }
         bool HasSplineMover() const noexcept
         { return !!mSplineMover; }
+        bool HasMeshEffect() const noexcept
+        { return !!mMeshEffect; }
 
         // shortcut for class getters.
         const std::string& GetClassId() const noexcept
@@ -627,14 +600,14 @@ namespace game
 
         // Get the transform that applies to this node
         // and the subsequent hierarchy of nodes.
-        glm::mat4 GetNodeTransform() const;
+        glm::mat4 GetNodeTransform() const noexcept;
         // Get this drawable item's model transform that applies
         // to the node's box based items such as drawables
         // and rigid bodies.
-        glm::mat4 GetModelTransform() const;
+        glm::mat4 GetModelTransform() const noexcept;
 
         const EntityNodeClass& GetClass() const noexcept
-        { return *mClass.get(); }
+        { return *mClass; }
         const EntityNodeClass* operator->() const noexcept
         { return mClass.get(); }
 
@@ -665,7 +638,7 @@ namespace game
         std::unique_ptr<LinearMover> mLinearMover;
         std::unique_ptr<SplineMover> mSplineMover;
         std::unique_ptr<BasicLight> mBasicLight;
-
+        std::unique_ptr<MeshEffect> mMeshEffect;
     };
 
     std::string FastId(std::size_t len);

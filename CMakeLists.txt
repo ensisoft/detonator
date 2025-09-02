@@ -348,6 +348,7 @@ add_library(GameLib
     game/entity_node_tilemap_node.cpp
     game/entity_node_linear_mover.cpp
     game/entity_node_spline_mover.cpp
+    game/entity_node_mesh_effect.cpp
     game/entity_placement.cpp
     game/entity_state.cpp
     game/entity_state_controller.cpp
@@ -1224,6 +1225,7 @@ add_library(GameLibTesting
     game/entity_node_fixture.cpp
     game/entity_node_tilemap_node.cpp
     game/entity_node_light.cpp
+    game/entity_node_mesh_effect.cpp
     game/scriptvar.cpp
     game/spline.cpp
     game/timeline_animation.cpp

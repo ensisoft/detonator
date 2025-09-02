@@ -41,6 +41,7 @@
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_tilemap_node.h"
 #include "game/entity_node_light.h"
+#include "game/entity_node_mesh_effect.h"
 #include "game/timeline_transform_animator.h"
 #include "game/timeline_property_animator.h"
 
@@ -164,6 +165,16 @@ void unit_test_entity_node()
         }
     }
 
+    game::MeshEffectClass mesh_effect;
+    game::MeshEffectClass::MeshExplosionEffectArgs args;
+    args.mesh_subdivision_count = 4;
+    args.shard_linear_speed = 1.0f;
+    args.shard_linear_acceleration = 2.0f;
+    args.shard_rotational_speed = 3.0f;
+    args.shard_rotational_acceleration = 4.0f;
+    mesh_effect.SetEffectArgs(args);
+    mesh_effect.SetEffectType(game::MeshEffectClass::EffectType::MeshExplosion);
+
     game::EntityNodeClass node;
     node.SetName("root");
     node.SetTag("#tag");
@@ -180,6 +191,7 @@ void unit_test_entity_node()
     node.SetLinearMover(mover);
     node.SetSplineMover(spline);
     node.SetBasicLight(light);
+    node.SetMeshEffect(mesh_effect);
 
     TEST_REQUIRE(node.HasDrawable());
     TEST_REQUIRE(node.HasRigidBody());
@@ -190,6 +202,7 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.HasLinearMover());
     TEST_REQUIRE(node.HasSplineMover());
     TEST_REQUIRE(node.HasBasicLight());
+    TEST_REQUIRE(node.HasMeshEffect());
     TEST_REQUIRE(node.GetName()         == "root");
     TEST_REQUIRE(node.GetSize()         == glm::vec2(100.0f, 100.0f));
     TEST_REQUIRE(node.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -244,6 +257,13 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetBasicLight()->GetAmbientColor() == game::Color::Red);
     TEST_REQUIRE(node.GetBasicLight()->GetDiffuseColor() == game::Color::Green);
     TEST_REQUIRE(node.GetBasicLight()->GetSpecularColor() == game::Color::Blue);
+
+    const auto* mesh_effect_args = node.GetMeshEffect()->GetEffectArgs<game::MeshEffectClass::MeshExplosionEffectArgs>();
+    TEST_REQUIRE(mesh_effect_args->mesh_subdivision_count == 4);
+    TEST_REQUIRE(mesh_effect_args->shard_linear_speed == 1.0f);
+    TEST_REQUIRE(mesh_effect_args->shard_linear_acceleration == 2.0f);
+    TEST_REQUIRE(mesh_effect_args->shard_rotational_speed == 3.0f);
+    TEST_REQUIRE(mesh_effect_args->shard_rotational_acceleration == 4.0f);
 
     // to/from json
     {

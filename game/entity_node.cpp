@@ -31,6 +31,7 @@
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_tilemap_node.h"
 #include "game/entity_node_light.h"
+#include "game/entity_node_mesh_effect.h"
 
 namespace game
 {
@@ -75,6 +76,8 @@ EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
         mSplineMover = std::make_shared<SplineMoverClass>(*other.mSplineMover);
     if (other.mBasicLight)
         mBasicLight = std::make_shared<BasicLightClass>(*other.mBasicLight);
+    if (other.mMeshEffect)
+        mMeshEffect = std::make_shared<MeshEffectClass>(*other.mMeshEffect);
 }
 
 EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
@@ -96,6 +99,7 @@ EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
     mLinearMover = std::move(other.mLinearMover);
     mSplineMover = std::move(other.mSplineMover);
     mBasicLight  = std::move(other.mBasicLight);
+    mMeshEffect  = std::move(other.mMeshEffect);
 }
 
 std::size_t EntityNodeClass::GetHash() const
@@ -127,6 +131,8 @@ std::size_t EntityNodeClass::GetHash() const
         hash = base::hash_combine(hash, mSplineMover->GetHash());
     if (mBasicLight)
         hash = base::hash_combine(hash, mBasicLight->GetHash());
+    if (mMeshEffect)
+        hash = base::hash_combine(hash, mMeshEffect->GetHash());
     return hash;
 }
 
@@ -174,6 +180,11 @@ void EntityNodeClass::SetBasicLight(const BasicLightClass& light)
     mBasicLight = std::make_shared<BasicLightClass>(light);
 }
 
+void EntityNodeClass::SetMeshEffect(const MeshEffectClass& effect)
+{
+    mMeshEffect = std::make_shared<MeshEffectClass>(effect);
+}
+
 void EntityNodeClass::CreateRigidBody()
 {
     mRigidBody = std::make_shared<RigidBodyClass>();
@@ -217,6 +228,11 @@ void EntityNodeClass::CreateSplineMover()
 void EntityNodeClass::CreateBasicLight()
 {
     mBasicLight = std::make_shared<BasicLightClass>();
+}
+
+void EntityNodeClass::CreateMeshEffect()
+{
+    mMeshEffect = std::make_shared<MeshEffectClass>();
 }
 
 glm::mat4 EntityNodeClass::GetNodeTransform() const
@@ -311,6 +327,13 @@ void EntityNodeClass::IntoJson(data::Writer& data) const
         mBasicLight->IntoJson(*chunk);
         data.Write("basic_light", std::move(chunk));
     }
+
+    if (mMeshEffect)
+    {
+        auto chunk = data.NewWriteChunk();
+        mMeshEffect->IntoJson(*chunk);
+        data.Write("mesh_effect", std::move(chunk));
+    }
 }
 
 template<typename T>
@@ -348,6 +371,7 @@ bool EntityNodeClass::FromJson(const data::Reader& data)
     ok &= ComponentClassFromJson(mName, "linear_mover",  data, mLinearMover);
     ok &= ComponentClassFromJson(mName, "spline_mover",  data, mSplineMover);
     ok &= ComponentClassFromJson(mName, "basic_light",   data, mBasicLight);
+    ok &= ComponentClassFromJson(mName, "mesh_effect",   data, mMeshEffect);
     return ok;
 }
 
@@ -380,6 +404,7 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
     mSplineMover = std::move(tmp.mSplineMover);
     mBitFlags    = std::move(tmp.mBitFlags);
     mBasicLight  = std::move(tmp.mBasicLight);
+    mMeshEffect  = std::move(tmp.mMeshEffect);
     return *this;
 }
 
@@ -420,13 +445,15 @@ EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass, EntityNodeA
         mSplineMover = std::make_unique<SplineMover>(mClass->GetSharedSplineMover());
     if (mClass->HasBasicLight())
         mBasicLight = std::make_unique<BasicLight>(mClass->GetSharedBasicLight());
+    if (mClass->HasMeshEffect())
+        mMeshEffect = std::make_unique<MeshEffect>(mClass->GetSharedMeshEffect());
 }
 
-EntityNode::EntityNode(EntityNode&& other)
+EntityNode::EntityNode(EntityNode&& other) noexcept
    : mClass         (std::move(other.mClass))
-   , mAllocatorIndex(std::move(other.mAllocatorIndex))
-   , mTransform     (std::move(other.mTransform))
-   , mNodeData      (std::move(other.mNodeData))
+   , mAllocatorIndex(other.mAllocatorIndex)
+   , mTransform     (other.mTransform)
+   , mNodeData      (other.mNodeData)
    , mRigidBody     (std::move(other.mRigidBody))
    , mDrawable      (std::move(other.mDrawable))
    , mTextItem      (std::move(other.mTextItem))
@@ -436,6 +463,7 @@ EntityNode::EntityNode(EntityNode&& other)
    , mLinearMover   (std::move(other.mLinearMover))
    , mSplineMover   (std::move(other.mSplineMover))
    , mBasicLight    (std::move(other.mBasicLight))
+   , mMeshEffect    (std::move(other.mMeshEffect))
 {
     other.mTransform = nullptr;
     other.mNodeData  = nullptr;
@@ -477,76 +505,127 @@ void EntityNode::Release(EntityNodeAllocator* allocator)
         mNodeData  = nullptr;
     }
 }
+EntityNodeTransform* EntityNode::GetTransform() noexcept
+{
+    return mTransform;
+}
 
-DrawableItem* EntityNode::GetDrawable()
-{ return mDrawable.get(); }
+EntityNodeData* EntityNode::GetData() noexcept
+{
+    return mNodeData;
+}
 
-RigidBody* EntityNode::GetRigidBody()
-{ return mRigidBody.get(); }
+DrawableItem* EntityNode::GetDrawable() noexcept
+{
+    return mDrawable.get();
+}
 
-TextItem* EntityNode::GetTextItem()
-{ return mTextItem.get(); }
+RigidBody* EntityNode::GetRigidBody() noexcept
+{
+    return mRigidBody.get();
+}
 
-Fixture* EntityNode::GetFixture()
-{ return mFixture.get(); }
+TextItem* EntityNode::GetTextItem() noexcept
+{
+    return mTextItem.get();
+}
 
-MapNode* EntityNode::GetMapNode()
-{ return mMapNode.get(); }
+Fixture* EntityNode::GetFixture() noexcept
+{
+    return mFixture.get();
+}
 
-SpatialNode* EntityNode::GetSpatialNode()
+MapNode* EntityNode::GetMapNode() noexcept
+{
+    return mMapNode.get();
+}
+
+SpatialNode* EntityNode::GetSpatialNode() noexcept
 {
     return mSpatialNode.get();
 }
 
-LinearMover* EntityNode::GetLinearMover()
+LinearMover* EntityNode::GetLinearMover() noexcept
 {
     return mLinearMover.get();
 }
 
-SplineMover* EntityNode::GetSplineMover()
+SplineMover* EntityNode::GetSplineMover() noexcept
 {
     return mSplineMover.get();
 }
 
-BasicLight* EntityNode::GetBasicLight()
+BasicLight* EntityNode::GetBasicLight() noexcept
 {
     return mBasicLight.get();
 }
 
-const DrawableItem* EntityNode::GetDrawable() const
-{ return mDrawable.get(); }
+MeshEffect *EntityNode::GetMeshEffect() noexcept
+{
+    return mMeshEffect.get();
+}
 
-const RigidBody* EntityNode::GetRigidBody() const
-{ return mRigidBody.get(); }
+const EntityNodeTransform* EntityNode::GetTransform() const noexcept
+{
+    return mTransform;
+}
 
-const TextItem* EntityNode::GetTextItem() const
-{ return mTextItem.get(); }
+const EntityNodeData* EntityNode::GetData() const noexcept
+{
+    return mNodeData;
+}
 
-const SpatialNode* EntityNode::GetSpatialNode() const
-{ return mSpatialNode.get(); }
+const DrawableItem* EntityNode::GetDrawable() const noexcept
+{
+    return mDrawable.get();
+}
 
-const Fixture* EntityNode::GetFixture() const
-{ return mFixture.get(); }
+const RigidBody* EntityNode::GetRigidBody() const noexcept
+{
+    return mRigidBody.get();
+}
 
-const MapNode* EntityNode::GetMapNode() const
-{ return mMapNode.get(); }
+const TextItem* EntityNode::GetTextItem() const noexcept
+{
+    return mTextItem.get();
+}
 
-const LinearMover* EntityNode::GetLinearMover() const
+const SpatialNode* EntityNode::GetSpatialNode() const noexcept
+{
+    return mSpatialNode.get();
+}
+
+const Fixture* EntityNode::GetFixture() const noexcept
+{
+    return mFixture.get();
+}
+
+const MapNode* EntityNode::GetMapNode() const noexcept
+{
+    return mMapNode.get();
+}
+
+const LinearMover* EntityNode::GetLinearMover() const noexcept
 {
     return mLinearMover.get();
 }
 
-const SplineMover* EntityNode::GetSplineMover() const
+const SplineMover* EntityNode::GetSplineMover() const noexcept
 {
     return mSplineMover.get();
 }
 
-const BasicLight* EntityNode::GetBasicLight() const
+const BasicLight* EntityNode::GetBasicLight() const noexcept
 {
     return mBasicLight.get();
 }
 
-glm::mat4 EntityNode::GetNodeTransform() const
+const MeshEffect *EntityNode::GetMeshEffect() const noexcept
+{
+    return mMeshEffect.get();
+}
+
+glm::mat4 EntityNode::GetNodeTransform() const noexcept
 {
     Transform transform;
     transform.Scale(mTransform->scale);
@@ -555,7 +634,7 @@ glm::mat4 EntityNode::GetNodeTransform() const
     return transform.GetAsMatrix();
 }
 
-glm::mat4 EntityNode::GetModelTransform() const
+glm::mat4 EntityNode::GetModelTransform() const noexcept
 {
     const auto& size = mTransform->size;
 

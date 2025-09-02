@@ -43,7 +43,8 @@ namespace game
             EmitParticlesTrigger,
             RunSpriteCycle,
             PlayAudio,
-            SpawnEntity
+            SpawnEntity,
+            StartMeshEffect
         };
         enum class Flags {
             Enabled

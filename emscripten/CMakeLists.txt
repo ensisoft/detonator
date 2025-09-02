@@ -309,6 +309,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_tilemap_node.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_linear_mover.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_spline_mover.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../game/entity_node_mesh_effect.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_state.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/entity_state_controller.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../game/timeline_kinematic_animator.cpp
