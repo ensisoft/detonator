@@ -294,6 +294,12 @@ namespace gui
         void on_splineSpeed_valueChanged(double value);
         void on_splineAcceleration_valueChanged(double value);
         void on_splineFlagEnabled_stateChanged(int);
+        void on_meshEffectType_currentIndexChanged(int);
+        void on_shardIterations_valueChanged(int);
+        void on_shardLinearVelo_valueChanged(double);
+        void on_shardLinearAccel_valueChanged(double);
+        void on_shardRotVelo_valueChanged(double);
+        void on_shardRotAccel_valueChanged(double);
 
         void on_btnDelDrawable_clicked();
         void on_btnDelTextItem_clicked();
@@ -304,6 +310,7 @@ namespace gui
         void on_btnDelLinearMover_clicked();
         void on_btnDelSplineMover_clicked();
         void on_btnDelLight_clicked();
+        void on_btnDelMeshEffect_clicked();
         void on_actionAddLight_triggered();
         void on_actionAddDrawable_triggered();
         void on_actionAddTextItem_triggered();
@@ -313,6 +320,7 @@ namespace gui
         void on_actionAddSpatialNode_triggered();
         void on_actionAddLinearMover_triggered();
         void on_actionAddSplineMover_triggered();
+        void on_actionAddMeshEffect_triggered();
         void on_actionEditEntityScript_triggered();
         void on_actionEditControllerScript_triggered();
 
@@ -338,6 +346,7 @@ namespace gui
         void ToggleTilemapNode(bool on);
         void ToggleLinearMover(bool on);
         void ToggleSplineMover(bool on);
+        void ToggleMeshEffect(bool on);
         void ScrollEntityNodeArea();
 
     private:

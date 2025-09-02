@@ -169,6 +169,8 @@ public:
             }
             else if (trigger_type == game::AnimationTriggerClass::Type::SpawnEntity)
                 item.icon = QPixmap("icons64:animation-trigger-spawn.png");
+            else if (trigger_type == game::AnimationTriggerClass::Type::StartMeshEffect)
+                item.icon = QPixmap("icons64:animation-trigger-mesh-effect.png");
             (*list)[timeline_index].AddItem(item);
         }
     }
@@ -1194,6 +1196,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     trigger_type_list.push_back( { game::AnimationTriggerClass::Type::PlayAudio, "Play Sound Effect" });
     trigger_type_list.push_back( { game::AnimationTriggerClass::Type::PlayAudio, "Play Music" });
     trigger_type_list.push_back( { game::AnimationTriggerClass::Type::SpawnEntity, "Spawn Entity" } );
+    trigger_type_list.push_back( { game::AnimationTriggerClass::Type::StartMeshEffect, "Mesh Effect" });
 
     for (const auto& trigger_type : trigger_type_list)
     {
@@ -1515,6 +1518,10 @@ void AnimationTrackWidget::SetSelectedTriggerProperties()
         const int render_layer = GetValue(mUI.entityRenderLayer);
         trigger->SetParameter("entity-class-id", GetItemId(mUI.entityTriggerList));
         trigger->SetParameter("entity-render-layer", render_layer);
+    }
+    else if (trigger->GetType() == game::AnimationTriggerClass::Type::StartMeshEffect)
+    {
+
     }
     else BUG("Unhandled animation trigger type.");
 
@@ -2178,6 +2185,10 @@ void AnimationTrackWidget::TimelineTriggerChanged(const TimelineWidget::Timeline
         SetValue(mUI.entityTriggerList, ListItemId { entity_class_id });
         SetValue(mUI.entityRenderLayer, render_layer);
     }
+    else if (selected_trigger->GetType() == game::AnimationTriggerClass::Type::StartMeshEffect)
+    {
+
+    }
     else BUG("Unhandled audio trigger type.");
 }
 void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineItem* item)
@@ -2372,6 +2383,9 @@ void AnimationTrackWidget::AddTriggerAction()
             trigger.SetParameter("entity-class-id", list[0].id);
         }
         trigger.SetParameter("entity-render-layer", 0);
+    }
+    else if (type == game::AnimationTriggerClass::Type::StartMeshEffect)
+    {
     }
     else BUG("Unhandled animation trigger type.");
 

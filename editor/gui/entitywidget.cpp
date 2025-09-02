@@ -51,6 +51,7 @@
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_tilemap_node.h"
 #include "game/entity_node_light.h"
+#include "game/entity_node_mesh_effect.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/material_class.h"
@@ -1356,6 +1357,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::SplineMoverClass::PathCurveType>(mUI.splineCurveType);
     PopulateFromEnum<game::SplineMoverClass::RotationMode>(mUI.splineRotation);
     PopulateFromEnum<game::SplineMoverClass::IterationMode>(mUI.splineLooping);
+    PopulateFromEnum<game::MeshEffectClass::EffectType>(mUI.meshEffectType);
     PopulateFontNames(mUI.tiFontName);
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
@@ -1391,6 +1393,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
             mAttachments->addAction(mUI.actionAddSpatialNode);
             mAttachments->addAction(mUI.actionAddLinearMover);
             mAttachments->addAction(mUI.actionAddSplineMover);
+            mAttachments->addAction(mUI.actionAddMeshEffect);
         }
         mAttachments->popup(mUI.btnAddNodeItem->mapToGlobal(point));
     });
@@ -3683,6 +3686,33 @@ void EntityWidget::on_splineFlagEnabled_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_meshEffectType_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_shardIterations_valueChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_shardLinearVelo_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_shardLinearAccel_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_shardRotVelo_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_shardRotAccel_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_btnDelDrawable_clicked()
 {
     ToggleDrawable(false);
@@ -3877,6 +3907,11 @@ void EntityWidget::on_btnDelLight_clicked()
     ToggleLight(false);
 }
 
+void EntityWidget::on_btnDelMeshEffect_clicked()
+{
+    ToggleMeshEffect(false);
+}
+
 void EntityWidget::on_actionAddLight_triggered()
 {
     ToggleLight(true);
@@ -3914,6 +3949,11 @@ void EntityWidget::on_actionAddLinearMover_triggered()
 void EntityWidget::on_actionAddSplineMover_triggered()
 {
     ToggleSplineMover(true);
+}
+
+void EntityWidget::on_actionAddMeshEffect_triggered()
+{
+    ToggleMeshEffect(true);
 }
 
 void EntityWidget::on_actionEditEntityScript_triggered()
@@ -4108,6 +4148,35 @@ void EntityWidget::ToggleSplineMover(bool on)
         DisplayCurrentNodeProperties();
 
         mUI.splineMover->Collapse(!on);
+    }
+}
+
+void EntityWidget::ToggleMeshEffect(bool on)
+{
+    if (auto* node = GetCurrentNode())
+    {
+         if (on && !node->HasMeshEffect())
+         {
+             game::MeshEffectClass::MeshExplosionEffectArgs args;
+             args.mesh_subdivision_count = 1;
+             args.shard_linear_speed = 1.0f;
+             args.shard_linear_acceleration = 2.0f;
+             args.shard_rotational_speed = 1.0f;
+             args.shard_rotational_acceleration = 2.0f;
+
+             game::MeshEffectClass effect;
+             effect.SetEffectType(game::MeshEffectClass::EffectType::MeshExplosion);
+             effect.SetEffectArgs(args);
+
+             node->SetMeshEffect(effect);
+         }
+        else if (!on && node->HasMeshEffect())
+        {
+            node->RemoveMeshEffect();
+        }
+        DisplayCurrentNodeProperties();
+
+        mUI.meshEffect->Collapse(!on);
     }
 }
 
@@ -5058,6 +5127,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetVisible(mUI.linearMover, false);
     SetVisible(mUI.splineMover, false);
     SetVisible(mUI.basicLight,  false);
+    SetVisible(mUI.meshEffect,  false);
 
     if (auto* node = GetCurrentNode())
     {
@@ -5268,6 +5338,20 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.ltSpotHalfAngle, light->GetSpotHalfAngle());
             SetValue(mUI.ltLayer, light->GetLayer());
             SetValue(mUI.ltEnabled, light->IsEnabled());
+        }
+
+        if (const auto* effect = node->GetMeshEffect())
+        {
+            SetVisible(mUI.meshEffect, true);
+            SetValue(mUI.meshEffectType, effect->GetEffectType());
+            if (const auto* args = effect->GetMeshExplosionEffectArgs())
+            {
+                SetValue(mUI.shardIterations, args->mesh_subdivision_count);
+                SetValue(mUI.shardLinearVelo, args->shard_linear_speed);
+                SetValue(mUI.shardLinearAccel, args->shard_linear_acceleration);
+                SetValue(mUI.shardRotVelo, args->shard_rotational_speed);
+                SetValue(mUI.shardRotAccel, args->shard_rotational_acceleration);
+            }
         }
     }
     else
@@ -5497,6 +5581,22 @@ void EntityWidget::UpdateCurrentNodeProperties()
         light->SetSpotHalfAngle(spot_half_angle);
         light->SetLayer(GetValue(mUI.ltLayer));
         light->Enable(GetValue(mUI.ltEnabled));
+    }
+
+    if (auto* effect = node->GetMeshEffect())
+    {
+        effect->SetEffectType(GetValue(mUI.meshEffectType));
+        const auto type = effect->GetEffectType();
+        if (type == game::MeshEffectClass::EffectType::MeshExplosion)
+        {
+            game::MeshEffectClass::MeshExplosionEffectArgs args;
+            args.mesh_subdivision_count = GetValue(mUI.shardIterations);
+            args.shard_linear_speed = GetValue(mUI.shardLinearVelo);
+            args.shard_linear_acceleration = GetValue(mUI.shardLinearAccel);
+            args.shard_rotational_speed = GetValue(mUI.shardRotVelo);
+            args.shard_rotational_acceleration = GetValue(mUI.shardRotAccel);
+            effect->SetEffectArgs(args);
+        }
     }
 
     RealizeEntityChange(mState.entity);
