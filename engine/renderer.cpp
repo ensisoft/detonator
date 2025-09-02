@@ -37,6 +37,7 @@
 #include "graphics/particle_engine.h"
 #include "graphics/tilebatch.h"
 #include "graphics/debug_drawable.h"
+#include "graphics/effect_drawable.h"
 #include "graphics/text_material.h"
 #include "graphics/material_class.h"
 #include "graphics/material_instance.h"
@@ -52,6 +53,7 @@
 #include "game/entity_node_text_item.h"
 #include "game/entity_node_tilemap_node.h"
 #include "game/entity_node_light.h"
+#include "game/entity_node_mesh_effect.h"
 #include "engine/renderer.h"
 #include "engine/graphics.h"
 #include "engine/camera.h"
@@ -1257,17 +1259,19 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
 
     if (const auto* item = entity_node.GetDrawable())
     {
-        const auto& material = item->GetMaterialId();
-        const auto& drawable = item->GetDrawableId();
-        if (paint_node.materialId != material)
+        const auto* mesh_effect = entity_node.GetMeshEffect();
+
+        const auto& materialId = item->GetMaterialId();
+        const auto& drawableId = item->GetDrawableId() + (mesh_effect ? "+MeshEffect" : "");
+        if (paint_node.materialId != materialId)
         {
             paint_node.material.reset();
-            paint_node.materialId = material;
-            auto klass = mClassLib->FindMaterialClassById(material);
+            paint_node.materialId = materialId;
+            auto klass = mClassLib->FindMaterialClassById(materialId);
             if (klass)
                 paint_node.material = gfx::CreateMaterialInstance(klass);
             if (!paint_node.material)
-                WARN("No such material class found. [material='%1', entity='%2', node='%3']", material,
+                WARN("No such material class found. [material='%1', entity='%2', node='%3']", materialId,
                      entity.GetName(), entity_node.GetName());
             if (paint_node.material)
             {
@@ -1277,17 +1281,42 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
                     paint_node.material->SetUniforms(*params);
             }
         }
-        if (paint_node.drawableId != drawable)
+        if (paint_node.drawableId != drawableId)
         {
             paint_node.drawable.reset();
-            paint_node.drawableId = drawable;
+            paint_node.drawableId = drawableId;
 
-            auto klass = mClassLib->FindDrawableClassById(drawable);
+            auto klass = mClassLib->FindDrawableClassById(item->GetDrawableId());
             if (klass)
-                paint_node.drawable = gfx::CreateDrawableInstance(klass);
+            {
+                if (mesh_effect)
+                {
+                    const auto effect_type = mesh_effect->GetEffectType();
+                    auto effect_id = entity.GetId();
+                    auto source_drawable = gfx::CreateDrawableInstance(klass);
+                    auto effect_drawable = std::make_unique<gfx::EffectDrawable>(std::move(source_drawable), std::move(effect_id));
+                    if (effect_type == game::MeshEffectClass::EffectType::MeshExplosion)
+                    {
+                        const auto* effect_args = mesh_effect->GetMeshExplosionEffectArgs();
+                        gfx::EffectDrawable::MeshExplosionEffectArgs args;
+                        args.mesh_subdivision_count = effect_args->mesh_subdivision_count;
+                        args.shard_linear_speed     = effect_args->shard_linear_speed;
+                        args.shard_linear_acceleration = effect_args->shard_linear_acceleration;
+                        args.shard_rotational_speed    = effect_args->shard_rotational_speed;
+                        args.shard_rotational_acceleration = effect_args->shard_rotational_acceleration;
+                        effect_drawable->SetEffectType(gfx::EffectDrawable::EffectType::MeshExplosion);
+                        effect_drawable->SetEffectArgs(args);
+                    }
+                    paint_node.drawable = std::move(effect_drawable);
+                }
+                else
+                {
+                    paint_node.drawable = gfx::CreateDrawableInstance(klass);
+                }
+            }
 
             if (!paint_node.drawable)
-                WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", drawable,
+                WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", item->GetMaterialId(),
                      entity.GetName(), entity_node.GetName());
             if (paint_node.drawable)
             {
