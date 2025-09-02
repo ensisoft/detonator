@@ -137,6 +137,7 @@ add_executable(UnitTest
     ../game/entity_node_fixture.cpp
     ../game/entity_node_tilemap_node.cpp
     ../game/entity_node_light.cpp
+    ../game/entity_node_mesh_effect.cpp
     ../game/scene_class.cpp
     ../game/scene.cpp
     ../game/scriptvar.cpp
