@@ -25,6 +25,7 @@
 #include "data/reader.h"
 #include "game/entity_node.h"
 #include "game/entity_node_drawable_item.h"
+#include "game/entity_node_mesh_effect.h"
 #include "game/timeline_animation_trigger.h"
 
 namespace game
@@ -119,7 +120,22 @@ bool AnimationTriggerClass::FromJson(const data::Reader& data)
 bool AnimationTrigger::Validate(const EntityNode& node) const
 {
     const auto type = mClass->GetType();
-    if (type == Type::EmitParticlesTrigger)
+    if (type == Type::StartMeshEffect)
+    {
+        if (!node.HasDrawable())
+        {
+            WARN("Timeline trigger can't apply on a node without a drawable attachment. [trigger='%1']",
+                 mClass->GetName());
+            return false;
+        }
+        if (!node.HasMeshEffect())
+        {
+            WARN("Timeline trigger can't apply on a node without a mesh effect attachment. [trigger='%1']",
+                 mClass->GetName());
+            return false;
+        }
+    }
+    else if (type == Type::EmitParticlesTrigger)
     {
         if (!node.HasDrawable()) {
             WARN("Timeline trigger can't apply on a node without a drawable attachment. [trigger='%1']",
@@ -195,7 +211,26 @@ void AnimationTrigger::Trigger(game::EntityNode& node, std::vector<Event>* event
         return;
 
     const auto type = mClass->GetType();
-    if (type == Type::EmitParticlesTrigger)
+    if (type == Type::StartMeshEffect)
+    {
+        auto* drawable = node.GetDrawable();
+        if (!drawable)
+            return;
+
+        // the  effect application depends on the existence of the
+        // mesh effect node attachment and the drawable.
+        auto* mesh_effect = node.GetMeshEffect();
+        if (!mesh_effect)
+            return;
+
+        DrawableItem::Command cmd;
+        cmd.name = "EnableMeshEffect";
+        cmd.args["state"] = "on";
+        drawable->EnqueueCommand(std::move(cmd));
+
+        DEBUG("homo kakki!");
+    }
+    else if (type == Type::EmitParticlesTrigger)
     {
         auto* drawable = node.GetDrawable();
         if (!drawable)
