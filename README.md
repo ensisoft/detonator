@@ -141,11 +141,12 @@ and knobs that control the particle effect.</i><br><br>
 
 ## DEV ZONE 👨🏼‍💻
 
-### [Build Instructions](BUILDING.md)
-### [Software Architecture](ARCHITECTURE.md)
-### [Software Design](DESIGN.md)
-### [Tracing & Profiling](PROFILING.md)
-### [Development Roadmap](ROADMAP.md)
+### [Build Instructions](BUILDING.md) 👈
+### [Software Architecture](ARCHITECTURE.md) 📐
+### [Software Design](DESIGN.md) 🐱‍🚀
+### [Tracing & Profiling](PROFILING.md) 🛟
+### [Development Roadmap](ROADMAP.md) 🚧
+### [Current Issues](ISSUES.md) 🤬
 
 ## THANKS 🙏
 

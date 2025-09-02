@@ -525,8 +525,16 @@ When you package your game for the web the editor will copy all the required fil
 These 6 files are then all the files that you need to deploy/copy over to your web server.<br><br>
 
 > [!TIP]<br>
-> You can rename `game.html` to whatever you want, for example  `my-amazing-game.html`. Just don't change the names of any other files
+> You can rename `game.html` to whatever you want, for example  `my-amazing-game.html`. 
+> Just don't change the names of any other files
 
+> [!TIP]<br>
+> The editor can deploy the files to your webserver as long as you have a simple web API end point 
+> that the editor can call. 
+> You can configure your API key and your API endpoint in the editor settings.<br>
+> `X-Api-Key` header will be used for the api key<br>
+> `subdir` and `filename` query parameters will be used to specify the desired target folder `subdir`<br>
+> for the current file upload  `filename`. 
 
 <details><summary>1. Configure Your Web Server</summary>
 
