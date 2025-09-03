@@ -239,6 +239,8 @@ std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name)
         return "Enable Spatial Node";
     else if (name == P::LinearMover_Enabled)
         return "Enable Linear Mover";
+    else if (name == P::LinearMover_RotateToDirection)
+        return "Set Linear Mover Rotate to Direction";
     else if (name == P::RigidBodyJoint_EnableLimits)
         return "Enable Joint Limits";
     else if (name == P::RigidBodyJoint_EnableMotor)

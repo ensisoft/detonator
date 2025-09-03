@@ -3596,6 +3596,10 @@ void EntityWidget::on_tfEnabled_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
 }
+void EntityWidget::on_tfRotate_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
 
 void EntityWidget::on_ltType_currentIndexChanged(int)
 {
@@ -5106,6 +5110,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tfAccelY, 0.0f);
     SetValue(mUI.tfAccelA, 0.0f);
     SetValue(mUI.tfEnabled, false);
+    SetValue(mUI.tfRotate, false);
     SetEnabled(mUI.nodeScrollAreaWidgetContents, false);
 
     SetEnabled(mUI.actionAddDrawable,    true);
@@ -5306,6 +5311,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.tfAccelY, accel.y);
             SetValue(mUI.tfAccelA, mover->GetAngularAcceleration());
             SetValue(mUI.tfEnabled, mover->IsEnabled());
+            SetValue(mUI.tfRotate, mover->RotateToDirection());
         }
         if (auto* mover = node->GetSplineMover())
         {
@@ -5553,6 +5559,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         mover->SetAngularVelocity(GetValue(mUI.tfVelocityA));
         mover->SetAngularAcceleration(GetValue(mUI.tfAccelA));
         mover->SetFlag(game::LinearMoverClass::Flags::Enabled, GetValue(mUI.tfEnabled));
+        mover->SetFlag(game::LinearMoverClass::Flags::RotateToDirection, GetValue(mUI.tfRotate));
     }
 
     if (auto* mover = node->GetSplineMover())
