@@ -247,6 +247,10 @@ MainWindow::MainWindow(QApplication& app, base::ThreadPool* threadpool)
     // hack but we need to set the mainwindow object
     // as the receiver of these events
     ActionEvent::GetReceiver() = this;
+
+    SetVisible(mUI.uploads, false);
+
+    mSystemTrayIcon = new QSystemTrayIcon(this);
 }
 
 MainWindow::~MainWindow()
@@ -833,7 +837,20 @@ void MainWindow::CloseWorkspace()
         ASSERT(mUI.mainTab->count() == 0);
         ASSERT(!mPlayWindow.get());
         ASSERT(!mThreadPool->HasPendingTasks());
+        ASSERT(mFileUploads.empty());
         return;
+    }
+
+    if (!mFileUploads.empty())
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Icon::Question);
+        msg.setText("Cancel Pending Uploads?");
+        msg.setText("You have current pending file uploads that haven't been completed yet.\n"
+            "Are you sure you want to close the workspace and cancel the uploads now?");
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        if (msg.exec() == QMessageBox::No)
+            return;
     }
 
     // move the resource cache to this local variable. make sure that
@@ -2733,6 +2750,59 @@ void MainWindow::RefreshUI()
             }
         }
     }
+
+    if (mFileUploads.empty())
+    {
+        SetVisible(mUI.uploads, false);
+        return;
+    }
+
+    SetVisible(mUI.uploads, true);
+
+    auto it = mFileUploads.begin();
+    while (it != mFileUploads.end())
+    {
+        auto* reply = it->first;
+        if (reply->isFinished())
+        {
+            reply->deleteLater();
+            it = mFileUploads.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+    // ok, so the byte measuring doesn't work...
+    // const auto p = (double)mBytesSent / (double)mBytesQueued;
+    QSignalBlocker s(mUI.uploads);
+    mUI.uploads->setMinimum(0);
+    mUI.uploads->setMaximum(mFilesQueued);
+    mUI.uploads->setValue(mFilesCompleted);
+
+    if (!mFileUploads.empty())
+        return;
+
+    NOTE("Uploads completed!");
+    if (mUploadErrors)
+    {
+        mSystemTrayIcon->showMessage("Failed to deploy game",
+            "All the pending file uploads to deploy your game have been completed\n"
+            "but unfortunately there were some errors.\n"
+            "Please see the log for more details.");
+        ERROR("Game failed to deploy, some files could not be uploaded.");
+        ERROR("Please see the log for more details.");
+    }
+    else
+    {
+        mSystemTrayIcon->showMessage("Your game is ready to play!",
+        "All game files have been uploaded to your server successfully\n"
+        "and your game is ready to play. Have fun!");
+        INFO("Your game is ready to play and all files have been deployed.");
+    }
+    mUploadErrors = false;
+    mBytesSent = 0;
+    mBytesQueued = 0;
 }
 
 void MainWindow::ShowNote(const app::Event& event)
@@ -3271,6 +3341,10 @@ bool MainWindow::event(QEvent* event)
         else if (const auto* ptr = std::get_if<ActionEvent::SaveWorkspace>(&action_data)) {
             SaveWorkspace();
         }
+        else if (const auto* ptr = std::get_if<ActionEvent::DeployGameFile>(&action_data))
+        {
+            DeployGameFile(ptr->file);
+        }
     }
     return QMainWindow::event(event);
 }
@@ -3380,6 +3454,72 @@ bool MainWindow::eventFilter(QObject* destination, QEvent* event)
         return true;
     }
     return false;
+}
+
+void MainWindow::DeployGameFile(const QString& filepath)
+{
+    const auto& apiKey = mSettings.web_server_key;
+    const auto& webUrl = mSettings.web_server_api;
+    const auto& subDir = mWorkspace->GetProjectSettings().game_name; // todo:
+
+
+
+    QFile file(filepath);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        ERROR("Failed to open game deployment file for uploading. [file='%1']", filepath);
+        return;
+    }
+    const QFileInfo info(filepath);
+    const auto fileName = info.fileName();
+
+    QByteArray fileData = file.readAll();
+    file.close();
+
+    QUrl url(webUrl);
+    QUrlQuery query;
+    query.addQueryItem("subdir", subDir);
+    query.addQueryItem("filename", fileName);
+    url.setQuery(query);
+    DEBUG("Uploading game deployment file. [file='%1', url='%2]", filepath, url.toString());
+
+    // --- REQUEST ---
+    QNetworkRequest request(url);
+    request.setRawHeader("X-Api-Key", apiKey.toUtf8());
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
+    QNetworkReply *reply = mNetworkBugManager.put(request, fileData);
+
+    FileDeployment upload;
+    upload.fileName = fileName;
+    upload.file_size = info.size();
+    upload.sent_bytes = 0;
+    upload.errors = false;
+    upload.complete = false;
+    mFileUploads.insert({reply, upload});
+    mBytesQueued += info.size();
+    mFilesQueued++;
+
+    connect(reply, &QNetworkReply::finished, [this, reply]() {
+        if (reply->error() == QNetworkReply::NoError)
+        {
+            INFO("File upload completed successfully. [file='%1]", mFileUploads[reply].fileName);
+            DEBUG("%1", reply->readAll().toStdString());
+        }
+        else
+        {
+            ERROR("File upload failed. [file='%1', error='%2]]", mFileUploads[reply].fileName, reply->errorString());
+            ERROR("%1", reply->readAll().toStdString());
+            mFileUploads[reply].errors = true;
+            mUploadErrors = true;
+        }
+        mFileUploads[reply].complete = true;
+        mFilesCompleted++;
+    });
+    connect(reply, &QNetworkReply::uploadProgress, [this, reply](qint64 bytesSent, qint64 bytesTotal) {
+        mFileUploads[reply].sent_bytes = bytesSent;
+        mBytesSent += bytesSent;
+    });
+
 }
 
 void MainWindow::CloseTab(int index)

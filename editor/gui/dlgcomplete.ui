@@ -202,13 +202,6 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QProgressBar" name="progressBar">
-       <property name="value">
-        <number>24</number>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -224,7 +217,7 @@
      <item>
       <widget class="QPushButton" name="btnDeploy">
        <property name="text">
-        <string>Deploy</string>
+        <string>Deploy to Web</string>
        </property>
       </widget>
      </item>
