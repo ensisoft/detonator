@@ -275,6 +275,7 @@ namespace gui
         void on_tfAccelY_valueChanged(double);
         void on_tfAccelA_valueChanged(double);
         void on_tfEnabled_stateChanged(int);
+        void on_tfRotate_stateChanged(int);
         void on_ltType_currentIndexChanged(int);
         void on_ltAmbient_colorChanged(const QColor&);
         void on_ltDiffuse_colorChanged(const QColor&);

@@ -1187,7 +1187,7 @@
              </size>
             </property>
             <property name="title">
-             <string>Transform</string>
+             <string>Viewport transform</string>
             </property>
             <property name="flat">
              <bool>false</bool>
@@ -1199,18 +1199,6 @@
              <bool>false</bool>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_7">
-             <property name="leftMargin">
-              <number>4</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>4</number>
-             </property>
-             <property name="bottomMargin">
-              <number>4</number>
-             </property>
              <item>
               <widget class="QDoubleSpinBox" name="translateX">
                <property name="sizePolicy">
@@ -1219,8 +1207,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 200, 100)</string>
+               </property>
                <property name="prefix">
-                <string>x = </string>
+                <string/>
                </property>
                <property name="minimum">
                 <double>-10000.000000000000000</double>
@@ -1241,8 +1232,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,100, 100)</string>
+               </property>
                <property name="prefix">
-                <string>y = </string>
+                <string/>
                </property>
                <property name="minimum">
                 <double>-10000.000000000000000</double>
@@ -1263,8 +1257,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 200, 100)</string>
+               </property>
                <property name="prefix">
-                <string>x = </string>
+                <string/>
                </property>
                <property name="suffix">
                 <string/>
@@ -1288,8 +1285,11 @@
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="scaleY">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,100, 100)</string>
+               </property>
                <property name="prefix">
-                <string>y = </string>
+                <string/>
                </property>
                <property name="suffix">
                 <string/>
@@ -1313,6 +1313,9 @@
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="rotation">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 100, 250);</string>
+               </property>
                <property name="wrapping">
                 <bool>true</bool>
                </property>
@@ -1800,6 +1803,9 @@
                   <property name="toolTip">
                    <string>Set the node's width in game units</string>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(100, 200, 100)</string>
+                  </property>
                   <property name="minimum">
                    <double>0.000000000000000</double>
                   </property>
@@ -1827,6 +1833,9 @@
                   </property>
                   <property name="toolTip">
                    <string>Set the node's X position relative to its parent</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(100, 200, 100)</string>
                   </property>
                   <property name="minimum">
                    <double>-10000.000000000000000</double>
@@ -1856,6 +1865,9 @@
                   <property name="toolTip">
                    <string>Set the node's height in game units</string>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(200,100, 100)</string>
+                  </property>
                   <property name="minimum">
                    <double>0.000000000000000</double>
                   </property>
@@ -1874,9 +1886,6 @@
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">color: rgb(0, 200, 0)</string>
                   </property>
                   <property name="text">
                    <string>X Scale</string>
@@ -1899,6 +1908,9 @@
                   </property>
                   <property name="toolTip">
                    <string>Apply a scaling factor on the node and its ascendants</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(100, 200, 100)</string>
                   </property>
                   <property name="minimum">
                    <double>0.000000000000000</double>
@@ -1925,9 +1937,6 @@
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
-                  <property name="styleSheet">
-                   <string notr="true">color: rgb(200,0, 0)</string>
-                  </property>
                   <property name="text">
                    <string>Y Scale</string>
                   </property>
@@ -1940,9 +1949,6 @@
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">color: rgb(200,0, 0)</string>
                   </property>
                   <property name="text">
                    <string>Y Size</string>
@@ -1957,9 +1963,6 @@
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
-                  <property name="styleSheet">
-                   <string notr="true">color: rgb(0, 200, 0)</string>
-                  </property>
                   <property name="text">
                    <string>X Size</string>
                   </property>
@@ -1973,9 +1976,6 @@
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
-                  <property name="styleSheet">
-                   <string notr="true">color: rgb(0, 200, 0)</string>
-                  </property>
                   <property name="text">
                    <string>X Pos</string>
                   </property>
@@ -1988,9 +1988,6 @@
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">color: rgb(200,0, 0)</string>
                   </property>
                   <property name="text">
                    <string>Y Pos</string>
@@ -2013,6 +2010,9 @@
                   </property>
                   <property name="toolTip">
                    <string>Apply a scaling factor on the node and its ascendants</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(200,100, 100)</string>
                   </property>
                   <property name="minimum">
                    <double>0.000000000000000</double>
@@ -2047,6 +2047,9 @@
                   </property>
                   <property name="toolTip">
                    <string>Set the node's Y position relative to its parent</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(200,100, 100)</string>
                   </property>
                   <property name="minimum">
                    <double>-10000.000000000000000</double>
@@ -2087,6 +2090,9 @@
                       <width>138</width>
                       <height>0</height>
                      </size>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">color: rgb(100, 100, 250);</string>
                     </property>
                     <property name="wrapping">
                      <bool>true</bool>
@@ -2235,7 +2241,7 @@
                     <string>Set the node's width in game units</string>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">color: rgb(0, 200, 0);</string>
+                    <string notr="true">color: rgb(100, 200, 100)</string>
                    </property>
                    <property name="minimum">
                     <double>-1000.000000000000000</double>
@@ -2260,7 +2266,7 @@
                     <string>Set the node's width in game units</string>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">color: rgb(200, 0, 0);</string>
+                    <string notr="true">color: rgb(200,100, 100)</string>
                    </property>
                    <property name="minimum">
                     <double>-1000.000000000000000</double>
@@ -2285,7 +2291,7 @@
                     <string>Set the node's width in game units</string>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">color: rgb(0, 100, 250);</string>
+                    <string notr="true">color: rgb(100, 100, 250);</string>
                    </property>
                    <property name="minimum">
                     <double>-1000.000000000000000</double>
@@ -2449,7 +2455,7 @@
                     </sizepolicy>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">color: rgb(0, 200, 0);</string>
+                    <string notr="true">color: rgb(100, 200, 100)</string>
                    </property>
                    <property name="wrapping">
                     <bool>true</bool>
@@ -2480,7 +2486,7 @@
                     </sizepolicy>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">color: rgb(200, 0, 0);</string>
+                    <string notr="true">color: rgb(200,100, 100)</string>
                    </property>
                    <property name="wrapping">
                     <bool>true</bool>
@@ -2511,7 +2517,7 @@
                     </sizepolicy>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">color: rgb(0, 100, 250);</string>
+                    <string notr="true">color: rgb(100, 100, 250);</string>
                    </property>
                    <property name="wrapping">
                     <bool>true</bool>
@@ -4461,48 +4467,16 @@
                <property name="bottomMargin">
                 <number>0</number>
                </property>
-               <item row="3" column="1">
-                <widget class="QDoubleSpinBox" name="tfVelocityA">
+               <item row="2" column="2">
+                <widget class="QDoubleSpinBox" name="tfAccelY">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="suffix">
-                  <string> rad/s</string>
-                 </property>
-                 <property name="minimum">
-                  <double>-1000.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>1000.000000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="QLabel" name="label_66">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Angular acceleration</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QDoubleSpinBox" name="tfAccelX">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(200,100, 100)</string>
                  </property>
                  <property name="prefix">
                   <string/>
@@ -4529,6 +4503,9 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(100, 200, 100)</string>
+                 </property>
                  <property name="prefix">
                   <string/>
                  </property>
@@ -4546,19 +4523,146 @@
                  </property>
                 </widget>
                </item>
-               <item row="2" column="2">
-                <widget class="QDoubleSpinBox" name="tfAccelY">
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_68">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Angular velocity</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="QDoubleSpinBox" name="tfAccelA">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(100, 100, 250);</string>
+                 </property>
+                 <property name="suffix">
+                  <string> rad/s²</string>
+                 </property>
+                 <property name="minimum">
+                  <double>-1000.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>1000.000000000000000</double>
+                 </property>
+                 <property name="stepType">
+                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_66">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Angular acceleration</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QDoubleSpinBox" name="tfVelocityA">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(100, 100, 250);</string>
+                 </property>
+                 <property name="suffix">
+                  <string> rad/s</string>
+                 </property>
+                 <property name="minimum">
+                  <double>-1000.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>1000.000000000000000</double>
+                 </property>
+                 <property name="stepType">
+                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_70">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Linear velocity</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QDoubleSpinBox" name="tfAccelX">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(100, 200, 100)</string>
+                 </property>
                  <property name="prefix">
                   <string/>
                  </property>
                  <property name="suffix">
                   <string> u/s²</string>
+                 </property>
+                 <property name="minimum">
+                  <double>-1000.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>1000.000000000000000</double>
+                 </property>
+                 <property name="stepType">
+                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="1">
+                <widget class="QCheckBox" name="tfEnabled">
+                 <property name="text">
+                  <string>Enabled</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QDoubleSpinBox" name="tfVelocityY">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(200,100, 100)</string>
+                 </property>
+                 <property name="prefix">
+                  <string/>
+                 </property>
+                 <property name="suffix">
+                  <string> u/s</string>
                  </property>
                  <property name="minimum">
                   <double>-1000.000000000000000</double>
@@ -4584,18 +4688,8 @@
                  </property>
                 </widget>
                </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_68">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Angular velocity</string>
-                 </property>
-                </widget>
+               <item row="0" column="1" colspan="2">
+                <widget class="QComboBox" name="tfIntegrator"/>
                </item>
                <item row="2" column="0">
                 <widget class="QLabel" name="label_69">
@@ -4610,73 +4704,13 @@
                  </property>
                 </widget>
                </item>
-               <item row="0" column="1" colspan="2">
-                <widget class="QComboBox" name="tfIntegrator"/>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_70">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+               <item row="6" column="1" colspan="2">
+                <widget class="QCheckBox" name="tfRotate">
+                 <property name="toolTip">
+                  <string>Rotate the node so that it faces the direction of movement</string>
                  </property>
                  <property name="text">
-                  <string>Linear velocity</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="1">
-                <widget class="QDoubleSpinBox" name="tfAccelA">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="suffix">
-                  <string> rad/s²</string>
-                 </property>
-                 <property name="minimum">
-                  <double>-1000.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>1000.000000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="2">
-                <widget class="QDoubleSpinBox" name="tfVelocityY">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="prefix">
-                  <string/>
-                 </property>
-                 <property name="suffix">
-                  <string> u/s</string>
-                 </property>
-                 <property name="minimum">
-                  <double>-1000.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>1000.000000000000000</double>
-                 </property>
-                 <property name="stepType">
-                  <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="1">
-                <widget class="QCheckBox" name="tfEnabled">
-                 <property name="text">
-                  <string>Enabled</string>
+                  <string>Face movement</string>
                  </property>
                 </widget>
                </item>
@@ -6039,6 +6073,7 @@
   <tabstop>tfVelocityA</tabstop>
   <tabstop>tfAccelA</tabstop>
   <tabstop>tfEnabled</tabstop>
+  <tabstop>tfRotate</tabstop>
   <tabstop>btnDelLinearMover</tabstop>
   <tabstop>splineMover</tabstop>
   <tabstop>splinePointView</tabstop>
