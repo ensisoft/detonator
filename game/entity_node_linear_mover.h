@@ -22,6 +22,7 @@
 #  include <glm/mat4x4.hpp>
 #  include <glm/vec2.hpp>
 #  include <glm/glm.hpp>
+#  include <glm/gtx/vector_query.hpp>
 #include "warnpop.h"
 
 #include <memory>
@@ -136,6 +137,15 @@ namespace game
         { return TestFlag(Flags::RotateToDirection); }
         void RotateToDirection(bool on_off) noexcept
         { SetFlag(Flags::RotateToDirection, on_off); }
+
+        void SetDirection(glm::vec2 direction)
+        {
+            if (glm::isNull(direction, 0.0001f))
+                return;
+            direction = glm::normalize(direction);
+            const auto speed = glm::length(mLinearVelocity);
+            mLinearVelocity = direction * speed;
+        }
 
         template<typename Target>
         void TransformObject(float dt, Target& target) noexcept
