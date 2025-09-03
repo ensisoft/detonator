@@ -52,11 +52,17 @@ public:
     { return NextInt(INT_MIN, INT_MAX); }
     int NextInt(int min, int max)
     {
+        if (min >= max)
+            return min;
+
         boost::random::uniform_int_distribution<int> dist(min, max);
         return dist(mTwister);
     }
     float NextFloat(float min, float max)
     {
+        if (min >= max)
+            return min;
+
         boost::random::uniform_real_distribution<float> dist(min, max);
         return dist(mTwister);
     }
