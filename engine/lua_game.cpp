@@ -878,6 +878,19 @@ void BindGameLib(sol::state& L)
         [](LinearMover& transformer, float x, float y) {
             transformer.SetLinearAcceleration(glm::vec2{x, y});
         });
+    linear_mover["SetDirection"] = sol::overload(
+        [](LinearMover& mover, glm::vec2 direction) {
+            mover.SetDirection(direction);
+        },
+        [](LinearMover& mover, float x, float y) {
+            mover.SetDirection({x, y});
+        });
+    linear_mover["SetRotateToDirection"] = [](LinearMover& mover, bool on_off) {
+        mover.RotateToDirection(on_off);
+    };
+    linear_mover["GetRotateToDirection"] = [](LinearMover& mover) {
+        return mover.RotateToDirection();
+    };
 
     auto entity_node = table.new_usertype<EntityNode>("EntityNode");
     entity_node["GetId"]          = &EntityNode::GetId;

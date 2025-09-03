@@ -1132,6 +1132,10 @@ void InitLuaDoc()
     DOC_METHOD_2("void", "SetLinearVelocity", "Set the linear velocity.", "float", "x", "float", "y");
     DOC_METHOD_2("void", "SetLinearAcceleration", "Set the linear velocity.", "float", "x", "float", "y");
     DOC_METHOD_1("void", "Enable", "Enable or disable the transformer.", "bool", "enable");
+    DOC_METHOD_1("void", "SetRotateToDirection", "Enable automatic rotation to face the direction of travel.", "bool", "on_off");
+    DOC_METHOD_0("bool", "GetRotateToDirection", "Check whether automatic rotation to face the direction of travel is on or off.");
+    DOC_METHOD_1("void", "SetDirection", "Set a new direction while keeping the current speed.", "glm.vec2", "direction");
+    DOC_METHOD_2("void", "SetDirection", "Set a new direction while keeping the current speed.", "float", "x", "float", "y");
 
     DOC_TABLE("game.Drawable");
     DOC_METHOD_1("void", "Command", "Send a command to the gfx drawable in the renderer.", "string", "cmd_name");
