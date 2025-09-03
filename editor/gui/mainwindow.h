@@ -24,12 +24,17 @@
 #  include <QElapsedTimer>
 #  include <QStringList>
 #  include <QProcess>
+#  include <QNetworkAccessManager>
+#  include <QNetworkReply>
+#  include <QNetworkRequest>
+#  include <QSystemTrayIcon>
 #  include "ui_mainwindow.h"
 #include "warnpop.h"
 
 #include <vector>
 #include <memory>
 #include <stack>
+#include <unordered_map>
 
 #include "base/threadpool.h"
 #include "engine/frametimer.h"
@@ -68,7 +73,7 @@ namespace gui
 
     public:
         MainWindow(QApplication& app, base::ThreadPool* threadpool);
-       ~MainWindow();
+       ~MainWindow() override;
 
         // Load the main editor settings.
         void LoadSettings();
@@ -221,6 +226,7 @@ namespace gui
         void ViewerJsonMessageReceived(const QJsonObject& json);
 
     private:
+        void DeployGameFile(const QString& file);
         void CloseTab(int index);
         void FloatTab(int index);
         void LaunchGame(bool clean);
@@ -246,11 +252,11 @@ namespace gui
         void DrawResourcePreview(gfx::Painter& painter, double secs);
 
     private:
-        virtual bool event(QEvent* event)  override;
-        virtual void closeEvent(QCloseEvent* event) override;
-        virtual void dragEnterEvent(QDragEnterEvent* drag) override;
-        virtual void dropEvent(QDropEvent* event) override;
-        virtual bool eventFilter(QObject* destination, QEvent* event) override;
+        bool event(QEvent* event)  override;
+        void closeEvent(QCloseEvent* event) override;
+        void dragEnterEvent(QDragEnterEvent* drag) override;
+        void dropEvent(QDropEvent* event) override;
+        bool eventFilter(QObject* destination, QEvent* event) override;
 
     private:
         Ui::MainWindow mUI;
@@ -332,8 +338,23 @@ namespace gui
         Preview mPreview;
 
         FramelessWindow* mFramelessWindow = nullptr;
-
         QByteArray mDockState;
+
+        struct FileDeployment {
+            QString fileName;
+            quint64 file_size = 0;
+            quint64 sent_bytes = 0;
+            bool errors =false;
+            bool complete = false;
+        };
+        bool mUploadErrors = false;
+        QSystemTrayIcon* mSystemTrayIcon = nullptr;
+        QNetworkAccessManager mNetworkBugManager;
+        std::unordered_map<QNetworkReply*, FileDeployment> mFileUploads;
+        quint64 mBytesQueued = 0;
+        quint64 mBytesSent = 0;
+        int mFilesQueued = 0;
+        int mFilesCompleted = 0;
     };
 
 } // namespace

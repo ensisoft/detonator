@@ -74,7 +74,11 @@ namespace gui
             QString id;
         };
         struct SaveWorkspace {};
-        using Action = std::variant<OpenResource, SaveWorkspace>;
+        struct DeployGameFile {
+            QString file;
+        };
+
+        using Action = std::variant<OpenResource, SaveWorkspace, DeployGameFile>;
 
         explicit ActionEvent(Action action)
            : QEvent(GetIdentity())
