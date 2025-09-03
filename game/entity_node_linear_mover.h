@@ -25,6 +25,7 @@
 #include "warnpop.h"
 
 #include <memory>
+#include <cmath>
 
 #include "base/bitflag.h"
 #include "data/fwd.h"
@@ -38,40 +39,43 @@ namespace game
             Euler
         };
         enum class Flags {
-            Enabled
+            Enabled, RotateToDirection
         };
         LinearMoverClass()
         {
             mFlags.set(Flags::Enabled, true);
         }
-        inline void SetIntegrator(Integrator integrator) noexcept
+        void SetIntegrator(Integrator integrator) noexcept
         { mIntegrator = integrator; }
-        inline Integrator GetIntegrator() const noexcept
+        Integrator GetIntegrator() const noexcept
         { return mIntegrator; }
-        inline void SetLinearVelocity(glm::vec2 velocity) noexcept
+        void SetLinearVelocity(glm::vec2 velocity) noexcept
         { mLinearVelocity = velocity; }
-        inline void SetLinearAcceleration(glm::vec2 acceleration) noexcept
+        void SetLinearAcceleration(glm::vec2 acceleration) noexcept
         { mLinearAcceleration = acceleration; }
-        inline glm::vec2 GetLinearVelocity() const noexcept
+        glm::vec2 GetLinearVelocity() const noexcept
         { return mLinearVelocity; }
-        inline glm::vec2 GetLinearAcceleration() const noexcept
+        glm::vec2 GetLinearAcceleration() const noexcept
         { return mLinearAcceleration; }
-        inline float GetAngularVelocity() const noexcept
+        float GetAngularVelocity() const noexcept
         { return mAngularVelocity; }
-        inline float GetAngularAcceleration() const noexcept
+        float GetAngularAcceleration() const noexcept
         { return mAngularAcceleration; }
-        inline void SetAngularVelocity(float velocity) noexcept
+        void SetAngularVelocity(float velocity) noexcept
         { mAngularVelocity = velocity; }
-        inline void SetAngularAcceleration(float acceleration) noexcept
+        void SetAngularAcceleration(float acceleration) noexcept
         { mAngularAcceleration = acceleration;  }
 
-        inline bool TestFlag(Flags flag) const noexcept
+        bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        inline void SetFlag(Flags flag, bool on_off) noexcept
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
-        inline bool IsEnabled() const noexcept
+        bool IsEnabled() const noexcept
         { return TestFlag(Flags::Enabled); }
-        inline base::bitflag<Flags> GetFlags() const noexcept
+        bool RotateToDirection() const noexcept
+        { return TestFlag(Flags::RotateToDirection); }
+
+        base::bitflag<Flags> GetFlags() const noexcept
         { return mFlags; }
 
         size_t GetHash() const noexcept;
@@ -102,51 +106,63 @@ namespace game
             , mAngularVelocity(mClass->GetAngularVelocity())
             , mAngularAcceleration(mClass->GetAngularAcceleration())
         {}
-        inline void SetLinearVelocity(glm::vec2 velocity) noexcept
+        void SetLinearVelocity(glm::vec2 velocity) noexcept
         { mLinearVelocity = velocity; }
-        inline void SetLinearAcceleration(glm::vec2 acceleration) noexcept
+        void SetLinearAcceleration(glm::vec2 acceleration) noexcept
         { mLinearAcceleration = acceleration; }
-        inline glm::vec2 GetLinearVelocity() const noexcept
+        glm::vec2 GetLinearVelocity() const noexcept
         { return mLinearVelocity; }
-        inline glm::vec2 GetLinearAcceleration() const noexcept
+        glm::vec2 GetLinearAcceleration() const noexcept
         { return mLinearAcceleration; }
-        inline float GetAngularVelocity() const noexcept
+        float GetAngularVelocity() const noexcept
         { return mAngularVelocity; }
-        inline float GetAngularAcceleration() const noexcept
+        float GetAngularAcceleration() const noexcept
         { return mAngularAcceleration; }
-        inline void SetAngularVelocity(float velocity) noexcept
+        void SetAngularVelocity(float velocity) noexcept
         { mAngularVelocity = velocity; }
-        inline void SetAngularAcceleration(float acceleration) noexcept
+        void SetAngularAcceleration(float acceleration) noexcept
         { mAngularAcceleration = acceleration;  }
-        inline bool IsEnabled() const noexcept
+        bool IsEnabled() const noexcept
         { return mFlags.test(Flags::Enabled); }
-        inline Integrator GetIntegrator() const noexcept
+        Integrator GetIntegrator() const noexcept
         { return mClass->GetIntegrator(); }
-        inline void SetFlag(Flags flag , bool on_off) noexcept
+        void SetFlag(Flags flag , bool on_off) noexcept
         { mFlags.set(flag, on_off); }
-        inline bool TestFlag(Flags flag) const noexcept
+        bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        inline void Enable(bool on_off) noexcept
+        void Enable(bool on_off) noexcept
         { SetFlag(Flags::Enabled, on_off); }
+        bool RotateToDirection() const noexcept
+        { return TestFlag(Flags::RotateToDirection); }
+        void RotateToDirection(bool on_off) noexcept
+        { SetFlag(Flags::RotateToDirection, on_off); }
 
         template<typename Target>
-        inline void TransformObject(float dt, Target& target) noexcept
+        void TransformObject(float dt, Target& target) noexcept
         {
             if (!IsEnabled())
                 return;
             if (GetIntegrator() == Integrator::Euler)
             {
-                mAngularVelocity += (mAngularAcceleration * dt);
-                target.Rotate(mAngularVelocity * dt);
-
                 mLinearVelocity += (mLinearAcceleration * dt);
                 target.Translate(mLinearVelocity * dt);
+
+                if (RotateToDirection())
+                {
+                    const auto angle = std::atan2(mLinearVelocity.y, mLinearVelocity.x);
+                    target.SetRotation(angle);
+                }
+                else
+                {
+                    mAngularVelocity += (mAngularAcceleration * dt);
+                    target.Rotate(mAngularVelocity * dt);
+                }
             }
         }
 
-        inline const LinearMoverClass& GetClass() const noexcept
+        const LinearMoverClass& GetClass() const noexcept
         { return *mClass; }
-        inline const LinearMoverClass* operator->() const noexcept
+        const LinearMoverClass* operator->() const noexcept
         { return mClass.get(); }
     private:
         std::shared_ptr<const LinearMoverClass> mClass;
