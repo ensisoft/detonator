@@ -139,6 +139,8 @@ void BooleanPropertyAnimator::Start(EntityNode& node)
         mStartState = spatial->TestFlag(SpatialNode::Flags::Enabled);
     else if (flag == FlagName::LinearMover_Enabled)
         mStartState = linear_mover->TestFlag(LinearMover::Flags::Enabled);
+    else if (flag == FlagName::LinearMover_RotateToDirection)
+        mStartState = linear_mover->TestFlag(LinearMover::Flags::RotateToDirection);
     else if (flag == FlagName::RigidBodyJoint_EnableLimits)
     {
         const auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
@@ -247,6 +249,8 @@ void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
         spatial->SetFlag(SpatialNode::Flags::Enabled, next_value);
     else if (flag == FlagName::LinearMover_Enabled)
         linear_mover->SetFlag(LinearMover::Flags::Enabled, next_value);
+    else if (flag == FlagName::LinearMover_RotateToDirection)
+        linear_mover->SetFlag(LinearMover::Flags::RotateToDirection, next_value);
     else if (flag == FlagName::RigidBodyJoint_EnableMotor)
     {
         auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
@@ -331,7 +335,7 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
         }
         return spatial != nullptr;
     }
-    else if (flag == FlagName::LinearMover_Enabled)
+    else if (flag == FlagName::LinearMover_Enabled || flag == FlagName::LinearMover_RotateToDirection)
     {
         if (!linear_mover && verbose)
         {

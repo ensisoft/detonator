@@ -157,6 +157,7 @@ namespace game
             TextItem_PPEnableBloom,
             SpatialNode_Enabled,
             LinearMover_Enabled,
+            LinearMover_RotateToDirection,
             RigidBodyJoint_EnableMotor,
             RigidBodyJoint_EnableLimits,
             BasicLight_Enabled,
