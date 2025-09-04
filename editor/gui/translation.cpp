@@ -216,7 +216,7 @@ std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name)
     else if (name == P::Drawable_DepthTest)
         return "Enable Depth Test for Drawable";
     else if (name == P::Drawable_PPEnableBloom)
-        return "Enable Bloom for Drawable";
+        return "Enable Drawable Bloom";
     else if (name == P::RigidBody_Bullet)
         return "Enable Rigid Body as Bullet";
     else if (name == P::RigidBody_Sensor)
@@ -234,7 +234,7 @@ std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name)
     else if (name == P::TextItem_Underline)
         return "Enable Text Underlining";
     else if (name == P::TextItem_PPEnableBloom)
-        return "Enable Bloom for Text";
+        return "Enable Text Bloom";
     else if (name == P::SpatialNode_Enabled)
         return "Enable Spatial Node";
     else if (name == P::LinearMover_Enabled)
