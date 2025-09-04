@@ -87,7 +87,8 @@ namespace game
         AnimationSpawnEntityTriggerEvent>;
 
     struct AnimationEvent {
-        std::variant<AnimationTriggerEvent> value;
+        std::variant<AnimationAudioTriggerEvent,
+            AnimationSpawnEntityTriggerEvent> event;
         // for debug.
         std::string animation_name;
     };
