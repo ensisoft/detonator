@@ -24,6 +24,7 @@
 #include "base/test_float.h"
 #include "base/test_help.h"
 #include "base/logging.h"
+#include "base/trace.h"
 #include "data/json.h"
 #include "audio/element.h"
 #include "audio/elements/graph.h"
@@ -806,6 +807,11 @@ EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     test::TestLogger logger("unit_test_audio_graph.log");
+
+    // something is fucking with us and setting a tracing pointer
+    // and leaving it behind after the object is gone..but who what where!??
+    base::EnableTracing(false);
+    base::SetThreadTrace(nullptr);
 
     unit_test_basic();
     unit_test_prepare_topologies();
