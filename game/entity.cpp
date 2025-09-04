@@ -380,6 +380,10 @@ void Entity::DieIn(float seconds)
 {
     mScheduledDeath = seconds;
 }
+bool Entity::HasScheduledDeath() const
+{
+    return mScheduledDeath.has_value();
+}
 
 void Entity::Update(float dt, std::vector<Event>* events)
 {
