@@ -585,16 +585,14 @@ void AnimationTrackWidget::Update(double secs)
         const auto* animation_event = std::get_if<game::Entity::AnimationEvent>(&event);
         if (!animation_event)
             continue;;
-        const auto* animation_trigger_event = std::get_if<game::AnimationTriggerEvent>(&animation_event->value);
-        if (!animation_trigger_event)
-            continue;;
-        if (const auto* ptr = std::get_if<game::AnimationAudioTriggerEvent>(animation_trigger_event))
+
+        if (const auto* ptr = std::get_if<game::AnimationAudioTriggerEvent>(&animation_event->event))
         {
             EventMessage msg;
             msg.message = "Audio trigger";
             mEventMessages.push_back(std::move(msg));
         }
-        else if (const auto* ptr = std::get_if<game::AnimationSpawnEntityTriggerEvent>(animation_trigger_event))
+        else if (const auto* ptr = std::get_if<game::AnimationSpawnEntityTriggerEvent>(&animation_event->event))
         {
             EventMessage msg;
             msg.message = "Spawn trigger";

@@ -386,8 +386,10 @@ void Animation::Apply(EntityNode& node, std::vector<AnimationEvent>* events) con
                     for (auto& trigger_event : trigger_events)
                     {
                         AnimationEvent animation_event;
-                        animation_event.value = std::move(trigger_event);
                         animation_event.animation_name = mClass->GetName();
+                        std::visit([&animation_event](auto e) {
+                            animation_event.event = e;
+                        }, trigger_event);
                         events->emplace_back(std::move(animation_event));
                     }
                 }
