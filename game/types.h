@@ -82,13 +82,19 @@ namespace game
         // for debug
         std::string trigger_name;
     };
+    struct AnimationCommitEntitySuicideEvent {
+        float lifetime = 0.0f;
+        std::string trigger_name;
+    };
 
     using AnimationTriggerEvent = std::variant<AnimationAudioTriggerEvent,
-        AnimationSpawnEntityTriggerEvent>;
+        AnimationSpawnEntityTriggerEvent,
+        AnimationCommitEntitySuicideEvent>;
 
     struct AnimationEvent {
         std::variant<AnimationAudioTriggerEvent,
-            AnimationSpawnEntityTriggerEvent> event;
+            AnimationSpawnEntityTriggerEvent,
+            AnimationCommitEntitySuicideEvent> event;
         // for debug.
         std::string animation_name;
     };
