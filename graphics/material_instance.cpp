@@ -76,6 +76,14 @@ bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device,
                 WARN("Incorrect material parameter type set on 'active_texture_map'. String ID expected.");
         }
     }
+    if (!mStaticUniformWarning)
+    {
+        if (mClass->IsStatic() && !mUniforms.empty())
+        {
+            WARN("Trying to set material uniforms on a static material. [name='%1']", mClass->GetName());
+            mStaticUniformWarning = true;
+        }
+    }
 
     mFirstRender = false;
 
@@ -268,6 +276,7 @@ std::unique_ptr<Material> MaterialInstance::Clone() const
     auto dolly = std::make_unique<MaterialInstance>(*this);
     dolly->mFirstRender = false;
     dolly->mError = false;
+    dolly->mStaticUniformWarning = false;
     return dolly;
 }
 
