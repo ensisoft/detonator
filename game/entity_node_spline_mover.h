@@ -119,6 +119,9 @@ namespace game
         inline void SetSpeed(float speed) noexcept
         { mSpeed = speed; }
 
+        void SetPoints(std::vector<SplinePoint> points) noexcept
+        { mSpline.SetPoints(std::move(points)); }
+
         // Redefine a spline control point at the given index.
         // The index must be valid.
         inline void SetPoint(const SplinePoint& point, size_t index)
@@ -165,6 +168,11 @@ namespace game
         { return mFlags; }
 
         double GetPathLength() const;
+
+        // take the curve displacement (travel along the curve)
+        // and map that to a smoothed interpolated t value for sampling
+        // the spline.
+        double Reparametrize(double displacement) const;
 
         SplinePoint Evaluate(const CatmullRomFunction& catmull_rom, float t) const
         {
@@ -245,7 +253,8 @@ namespace game
             } else BUG("Bug on iteration mode");
 
             // normalize displacement.
-            const float t = mDisplacement / mPathLength;
+            //const float t = mDisplacement / mPathLength;
+            const auto t = (float)mClass->Reparametrize(mDisplacement);
 
             const auto coordinate_space = mClass->GetPathCoordinateSpace();
             const auto rotation_mode = mClass->GetRotationMode();
