@@ -103,6 +103,7 @@ namespace gfx
         // of spamming the log continuously.
         mutable bool mFirstRender = true;
         mutable bool mError = false;
+        mutable bool mStaticUniformWarning = false;
     };
 
     // These functions are intended to be used when you just need to draw
