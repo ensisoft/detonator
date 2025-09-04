@@ -457,7 +457,7 @@ QString CodeAssistant::DiscoverDynamicCompletions(const QString& word)
             return "game.Drawable";
         else if (word.contains("text"))
             return "game.TextItem";
-    else if (word.endsWith("transformer"))
+    else if (word.endsWith("mover") && word.contains("linear"))
             return "game.LinearMover";
 
     return app::FindLuaDocTableMatch(word);

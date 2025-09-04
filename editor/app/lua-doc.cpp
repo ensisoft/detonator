@@ -1450,7 +1450,7 @@ void InitLuaDoc()
     DOC_METHOD_0("game.TextItem", "GetTextItem", "Get the node's text item if any. Returns nil if node has no text item.");
     DOC_METHOD_0("game.Drawable", "GetDrawable", "Get the node's drawable item if any. Returns nil if node has no drawable item.");
     DOC_METHOD_0("game.SpatialNode", "GetSpatialNode", "Get the node's spatial node if any. Returns nil if node has no spatial node.");
-    DOC_METHOD_0("game.LinearMover", "GetTransformer", "Get the node's transformer if any. Returns nil if node has no transformer.");
+    DOC_METHOD_0("game.LinearMover", "GetLinearMover", "Get the node's linear mover if any. Returns nil if node has no linear mover.");
     DOC_METHOD_0("game.Entity", "GetEntity", "Get the entity that owns this entity node.");
     DOC_METHOD_1("void", "SetScale", "Set the node's scaling factor that applies to this node and its children.", "glm.vec2", "scale");
     DOC_METHOD_2("void", "SetScale", "Set the node's scaling factor that applies to this node and its children.", "float", "sx", "float", "sy");
@@ -1654,6 +1654,7 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "SetVisible", "Set entity visibility flag.", "bool", "on_off");
     DOC_METHOD_0("void", "Die", "Schedule immediate entity death and have it removed from the scene.");
     DOC_METHOD_1("void", "DieLater", "Schedule future entity death after time in seconds elapses.", "float", "seconds");
+    DOC_METHOD_0("bool", "HasScheduledDeath", "Check whether the entity has been told to die later.");
     DOC_METHOD_2("void", "SetTimer", "Set a named timer on the entity.<br>"
                                      "The timer's resolution is based on the game's update resolution configured in the project settings.<br>"
                                      "When the timer fires OnTimer entity callback is called and the provided value 'jitter' indicates the delta time "
