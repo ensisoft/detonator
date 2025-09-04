@@ -1656,11 +1656,7 @@ private:
         if (!ea_ptr)
             return false;
 
-        const auto* at_ptr = std::get_if<game::AnimationTriggerEvent>(&ea_ptr->event.value);
-        if (!at_ptr)
-            return false;
-
-        const auto* ptr = std::get_if<game::AnimationAudioTriggerEvent>(at_ptr);
+        const auto* ptr = std::get_if<game::AnimationAudioTriggerEvent>(&ea_ptr->event.event);
         if (!ptr)
             return false;
 
@@ -1689,11 +1685,7 @@ private:
         if (!ea_ptr)
             return false;
 
-        const auto* at_ptr = std::get_if<game::AnimationTriggerEvent>(&ea_ptr->event.value);
-        if (!at_ptr)
-            return false;
-
-        const auto* ptr = std::get_if<game::AnimationSpawnEntityTriggerEvent>(at_ptr);
+        const auto* ptr = std::get_if<game::AnimationSpawnEntityTriggerEvent>(&ea_ptr->event.event);
         if (!ptr)
             return false;
 
