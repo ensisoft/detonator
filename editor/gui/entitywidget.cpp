@@ -312,8 +312,78 @@ private:
 class EntityWidget::ScriptVarModel : public QAbstractTableModel
 {
 public:
-    ScriptVarModel(EntityWidget::State& state) : mState(state)
+    explicit ScriptVarModel(EntityWidget::State& state) : mState(state)
     {}
+    Qt::ItemFlags flags(const QModelIndex& index) const override
+    {
+        if (index.column() == 0)
+            return Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled;
+
+        const auto& var = mState.entity->GetScriptVar(index.row());
+        if (var.IsArray())
+            return Qt::ItemIsEnabled;
+
+        const auto type = var.GetType();
+        if (type == game::ScriptVar::Type::Integer ||
+            type == game::ScriptVar::Type::String ||
+            type == game::ScriptVar::Type::Float ||
+            type == game::ScriptVar::Type::Boolean)
+            return Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled;
+
+        return Qt::ItemIsEnabled;
+    }
+    bool setData(const QModelIndex& index, const QVariant& variant, int role) override
+    {
+        const auto row = index.row();
+        const auto col = index.column();
+
+        auto& var = mState.entity->GetScriptVar(index.row());
+
+        bool success = false;
+        if (col == 0)
+        {
+            const auto& name = variant.toString();
+            if (name.isEmpty() || name.isNull())
+                return false;
+            var.SetName(app::ToUtf8(name));
+        }
+        else if (col == 1)
+        {
+            if (var.IsArray())
+                return false;
+            const auto type = var.GetType();
+            if (type == game::ScriptVar::Type::Integer)
+            {
+                const auto val = variant.toInt(&success);
+                if (!success)
+                    return false;
+                var.SetValue(val);
+            }
+            else if (type == game::ScriptVar::Type::Float)
+            {
+                const auto val = variant.toFloat(&success);
+                if (!success)
+                    return false;
+                var.SetValue(val);
+            }
+            else if (type == game::ScriptVar::Type::Boolean)
+            {
+                const auto val = variant.toBool();
+                var.SetValue(val);
+            }
+            else if (type == game::ScriptVar::Type::String)
+            {
+                const auto val = variant.toString();
+                if (val.isNull())
+                    return false;
+                var.SetValue(app::ToUtf8(val));
+            }
+            else return false;
+        }
+        emit dataChanged(this->index(row, 0), this->index(row, 0));
+        return true;
+    }
+
     QVariant data(const QModelIndex& index, int role) const override
     {
         const auto& var = mState.entity->GetScriptVar(index.row());
