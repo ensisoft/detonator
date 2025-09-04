@@ -1365,29 +1365,47 @@ void unit_test_entity_node_spline_mover()
 {
     TEST_CASE(test::Type::Feature)
 
-    game::SplineMoverClass spline;
+    // initialize some spline points.
+    std::vector<game::SplinePoint> points;
+    glm::vec2 point = {0.0f, 0.0f};
+    for(unsigned i=0; i<=4; ++i)
     {
-        glm::vec2 point = {0.0f, 0.0f};
-        for(unsigned i=0; i<=4; ++i)
-        {
-            game::SplinePoint p;
-            p.SetPosition(point);
+        game::SplinePoint p;
+        p.SetPosition(point);
 
-            spline.AppendPoint(p);
-            point += glm::vec2{100.0f, 0.0f};
-        }
+        points.push_back(p);
+        point += glm::vec2{100.0f, 0.0f};
     }
 
-    game::EntityNodeClass node_class;
-    node_class.SetSplineMover(spline);
+    // test that the velocity is approx constant.
+    {
+        game::SplineMoverClass spline;
+        spline.SetPoints(points);
+        spline.SetSpeed(100.0f); // 100 u/s
 
-    game::EntityNode node(node_class);
-    TEST_REQUIRE(node.HasSplineMover());
+        game::EntityNodeClass node_class;
+        node_class.SetSplineMover(spline);
 
-    auto* mover = node.GetSplineMover();
-    mover->TransformObject(0.0f, node);
-    mover->TransformObject(0.5f, node);
-    mover->TransformObject(1.0f, node);
+        game::EntityNode node(node_class);
+        TEST_REQUIRE(node.HasSplineMover());
+
+        auto* mover = node.GetSplineMover();
+        mover->TransformObject(0.0f, node);
+        TEST_REQUIRE(node.GetTranslation().x == 0.0f);
+        TEST_REQUIRE(node.GetTranslation().y == 0.0f);
+
+        mover->TransformObject(0.5f, node);
+        TEST_REQUIRE(math::equals(node.GetTranslation().x, 50.0f, 1.0f));
+        TEST_REQUIRE(node.GetTranslation().y == 0.0f);
+
+        mover->TransformObject(0.5f, node);
+        TEST_REQUIRE(math::equals(node.GetTranslation().x, 100.0f, 1.0f));
+        TEST_REQUIRE(node.GetTranslation().y == 0.0f);
+
+        mover->TransformObject(1.0f, node);
+        TEST_REQUIRE(math::equals(node.GetTranslation().x, 200.0f, 1.0f));
+        TEST_REQUIRE(node.GetTranslation().y == 0.0f);
+    }
 }
 
 struct PerfTestDrawableTag{};

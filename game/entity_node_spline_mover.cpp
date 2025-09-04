@@ -17,9 +17,12 @@
 #include "config.h"
 
 #include <unordered_map>
+#include <vector>
+#include <algorithm>
 
 #include "base/logging.h"
 #include "base/hash.h"
+#include "base/math.h"
 #include "data/writer.h"
 #include "data/reader.h"
 #include "game/entity_node_spline_mover.h"
@@ -28,10 +31,15 @@ namespace {
     struct CatmullRomCache {
         std::shared_ptr<const game::Spline::CatmullRomFunction> spline;
         double spline_path_length = 0.0;
+
+        struct DisplacementMapping {
+            double d = 0.0f; // displacement along the  spline path
+            double t = 0.0f; // spline sampling t value at that point.
+        };
+        std::vector<DisplacementMapping> displacement_mappings;
     };
 
-    std::unordered_map<const game::SplineMoverClass*,
-        CatmullRomCache> catmull_rom_cache;
+    std::unordered_map<const game::SplineMoverClass*, CatmullRomCache> catmull_rom_cache;
 } // namespace
 
 namespace game
@@ -69,6 +77,47 @@ double SplineMoverClass::GetPathLength() const
 
     auto spline = MakeCatmullRom();
     return Spline::CalcArcLength(*spline, 0.0f, 1.0f);
+}
+
+double SplineMoverClass::Reparametrize(double displacement) const
+{
+    auto it = catmull_rom_cache.find(this);
+    if (it == catmull_rom_cache.end())
+    {
+        if (!InitClassRuntime())
+            return 0.0;
+        it = catmull_rom_cache.find(this);
+        ASSERT(it != catmull_rom_cache.end());
+    }
+
+    // our mapping table maps distances along the path to t values.
+    // do a lookup and find which t values are the closest to the
+    // current given displacement
+
+    const auto& table  = it->second.displacement_mappings;
+
+    const auto span_count = table.size() - 1;
+    for (size_t i=0; i<span_count; ++i)
+    {
+        const auto start_index = i;
+        const auto end_index   = i+1;
+        ASSERT(start_index < table.size() && end_index < table.size());
+
+        if (displacement >= table[start_index].d  && displacement < table[end_index].d)
+        {
+            const auto  span_distance  = table[end_index].d - table[start_index].d;
+            const auto t0 = table[start_index].t;
+            const auto t1 = table[end_index].t;
+            const auto span_t = (displacement - table[start_index].d) / span_distance;
+            return math::lerp(t0, t1, span_t);
+        }
+    }
+    if (displacement < 0.0f)
+        return 0.0;
+    if (displacement >= table.back().d)
+        return 1.0;
+
+    return 0.0;
 }
 
 size_t SplineMoverClass::GetHash() const noexcept
@@ -127,9 +176,44 @@ bool SplineMoverClass::InitClassRuntime() const
         ok = false;
     }
 
+    const auto max_parameter = catmull_rom->max_parameter();
+    // todo: maybe use a more elaborate mechanism to refine the sampling based on the
+    // "size" of the spliene.
+    constexpr auto max_samples = 50;
+
+    std::vector<SplinePoint> samples;
+    for (size_t i=0; i<max_samples; ++i)
+    {
+        const auto t = static_cast<float>(i) /
+                static_cast<float>(max_samples-1);
+        samples.push_back(catmull_rom->evaluate(t * max_parameter));
+    }
+
+    std::vector<CatmullRomCache::DisplacementMapping> mappings;
+    mappings.push_back({ 0.0, 0.0f });
+    double displacement = 0.0;
+
+    for (unsigned i=1; i<max_samples; ++i)
+    {
+        const auto& s0 = samples[i-1];
+        const auto& s1 = samples[i-0];
+        const auto d = glm::length(s1.GetPosition().ToVec2() - s0.GetPosition().ToVec2());
+        displacement += d;
+
+        const auto t = static_cast<float>(i) /
+                static_cast<float>(max_samples - 1);
+
+        CatmullRomCache::DisplacementMapping m;
+        m.d = displacement;
+        m.t = t;
+        mappings.push_back(m);
+    }
+
     CatmullRomCache cached_spline;
     cached_spline.spline = catmull_rom;
     cached_spline.spline_path_length = Spline::CalcArcLength(*catmull_rom, 0.0f, 1.0f);
+    cached_spline.displacement_mappings = std::move(mappings);
+
     VERBOSE("Computed and cached spline length value. [length='%1']", cached_spline.spline_path_length);
     catmull_rom_cache[this] = cached_spline;
     return true;

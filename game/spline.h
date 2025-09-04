@@ -90,6 +90,9 @@ namespace game
     public:
         using CatmullRomFunction = boost::math::catmull_rom<SplinePoint, 4>;
 
+        void SetPoints(std::vector<SplinePoint> points) noexcept
+        { mPoints = std::move(points); }
+
         // Get the current number of spline control points.
         inline auto GetPointCount() const noexcept
         { return mPoints.size(); }
