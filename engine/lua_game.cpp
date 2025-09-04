@@ -891,6 +891,7 @@ void BindGameLib(sol::state& L)
     linear_mover["GetRotateToDirection"] = [](LinearMover& mover) {
         return mover.RotateToDirection();
     };
+    linear_mover["SetLinearSpeed"] = &LinearMover::SetLinearSpeed;
 
     auto entity_node = table.new_usertype<EntityNode>("EntityNode");
     entity_node["GetId"]          = &EntityNode::GetId;

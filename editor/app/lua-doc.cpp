@@ -1136,6 +1136,8 @@ void InitLuaDoc()
     DOC_METHOD_0("bool", "GetRotateToDirection", "Check whether automatic rotation to face the direction of travel is on or off.");
     DOC_METHOD_1("void", "SetDirection", "Set a new direction while keeping the current speed.", "glm.vec2", "direction");
     DOC_METHOD_2("void", "SetDirection", "Set a new direction while keeping the current speed.", "float", "x", "float", "y");
+    DOC_METHOD_1("void", "SetLinearSpeed", "Set the new speed on the same direction as before. If the current velocity vector is a null vector nothing is done.",
+        "float", "speed");
 
     DOC_TABLE("game.Drawable");
     DOC_METHOD_1("void", "Command", "Send a command to the gfx drawable in the renderer.", "string", "cmd_name");
