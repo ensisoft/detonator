@@ -211,7 +211,17 @@ void AnimationTrigger::Trigger(game::EntityNode& node, std::vector<Event>* event
         return;
 
     const auto type = mClass->GetType();
-    if (type == Type::StartMeshEffect)
+    if (type == Type::CommitSuicide)
+    {
+        if (events)
+        {
+            AnimationCommitEntitySuicideEvent e;
+            e.trigger_name = mClass->GetName();
+            e.lifetime = 0.0f;
+            events->push_back(e);
+        }
+    }
+    else if (type == Type::StartMeshEffect)
     {
         auto* drawable = node.GetDrawable();
         if (!drawable)

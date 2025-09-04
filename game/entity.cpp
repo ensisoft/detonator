@@ -476,6 +476,10 @@ void Entity::Update(float dt, std::vector<Event>* events)
     {
         for (auto& event : animation_events)
         {
+            if (const auto* suicide = std::get_if<AnimationCommitEntitySuicideEvent>(&event.event))
+            {
+                Die();
+            }
             events->emplace_back(std::move(event));
         }
     }
