@@ -44,7 +44,8 @@ namespace game
             RunSpriteCycle,
             PlayAudio,
             SpawnEntity,
-            StartMeshEffect
+            StartMeshEffect,
+            CommitSuicide,
         };
         enum class Flags {
             Enabled
@@ -178,16 +179,16 @@ namespace game
             : mClass(std::make_shared<AnimationTriggerClass>(klass))
         {}
 
-        inline auto GetNodeId() const
+        auto GetNodeId() const
         { return mClass->GetNodeId(); }
 
-        inline auto GetTime() const noexcept
+        auto GetTime() const noexcept
         { return mClass->GetTime(); }
 
-        inline auto GetType() const noexcept
+        auto GetType() const noexcept
         { return mClass->GetType(); }
 
-        inline std::unique_ptr<AnimationTrigger> Copy() const
+        std::unique_ptr<AnimationTrigger> Copy() const
         { return std::make_unique<AnimationTrigger>(*this); }
 
         bool Validate(const EntityNode& node) const;
