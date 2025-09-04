@@ -210,6 +210,8 @@ namespace game
         void Die();
         void DieIn(float seconds);
 
+        bool HasScheduledDeath() const;
+
         // Update the entity state, integrate over time. Bubbles up the
         // various events to the caller as long as events is non-null.
         // Note that IF class runtime services are available entity nodes

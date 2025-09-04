@@ -1177,6 +1177,7 @@ void BindGameLib(sol::state& L)
     entity["QueueAnimationByName"] = &Entity::QueueAnimationByName;
     entity["Die"]                  = &Entity::Die;
     entity["DieLater"]             = &Entity::DieIn;
+    entity["HasScheduledDeath"]    = &Entity::HasScheduledDeath;
     entity["SetTag"]               = &Entity::SetTag;
     entity["TestFlag"]             = &TestFlag<Entity>;
     entity["SetFlag"]              = &SetFlag<Entity>;
