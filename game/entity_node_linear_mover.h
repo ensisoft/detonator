@@ -146,6 +146,13 @@ namespace game
             const auto speed = glm::length(mLinearVelocity);
             mLinearVelocity = direction * speed;
         }
+        void SetLinearSpeed(float speed)
+        {
+            if (glm::isNull(mLinearVelocity, 0.0001f))
+                return;
+            const auto direction = glm::normalize(mLinearVelocity);
+            mLinearVelocity = direction * speed;
+        }
 
         template<typename Target>
         void TransformObject(float dt, Target& target) noexcept
