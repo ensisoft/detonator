@@ -237,8 +237,6 @@ void AnimationTrigger::Trigger(game::EntityNode& node, std::vector<Event>* event
         cmd.name = "EnableMeshEffect";
         cmd.args["state"] = "on";
         drawable->EnqueueCommand(std::move(cmd));
-
-        DEBUG("homo kakki!");
     }
     else if (type == Type::EmitParticlesTrigger)
     {
