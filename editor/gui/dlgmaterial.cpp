@@ -77,6 +77,8 @@ DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, bool 
     ListMaterials("");
 }
 
+DlgMaterial::~DlgMaterial() = default;
+
 void DlgMaterial::SetSelectedMaterialId(const app::AnyString& id)
 {
     mSelectedMaterialId = id;
@@ -203,13 +205,17 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
 
         if (!base::Contains(mFailedMaterials, klass->GetId()))
         {
-            gfx::MaterialInstance material(klass);
-            material.SetRuntime(mUI.widget->GetTime());
-            material.SetUniform("kTileIndex", (float) GetValue(mUI.tileIndex));
-            material.SetUniform("active_texture_map", mMaterials[index].texture_map_id);
+            if (!mMaterials[index].material_instance)
+            {
+                mMaterials[index].material_instance = std::make_unique<gfx::MaterialInstance>(klass);
+            }
+            auto& material_instance = mMaterials[index].material_instance;
+            material_instance->SetRuntime(mUI.widget->GetTime());
+            material_instance->SetUniform("kTileIndex", (float) GetValue(mUI.tileIndex));
+            material_instance->SetUniform("active_texture_map", mMaterials[index].texture_map_id);
 
-            gfx::FillRect(painter, rect, material);
-            if (material.HasError())
+            gfx::FillRect(painter, rect, *material_instance);
+            if (material_instance->HasError())
             {
                 mFailedMaterials.insert(klass->GetId());
             }
@@ -407,18 +413,22 @@ void DlgMaterial::ListMaterials(const QString &filter_string)
                 m.material = klass;
                 m.texture_map_id = map->GetId();
                 m.material_id = klass->GetId();
-                if (map->GetNumTextures() == 1 && mPreviewScale.IsZero())
+                // Isometric tilemap can manipulate the preview scale in order to adjust the rendering
+                // to better display isometric tiles that have a specific height/width ratio.
+                // if we have a preview scale then skip using the texture rect as the scaling
+                // box for the previews.
+                if (map->GetNumTextures() == 1 && mPreviewScale.IsEqual(1.0f))
                     m.texture_rect = map->GetTextureRect(0);
-                mMaterials.push_back(m);
+
+                mMaterials.push_back(std::move(m));
             }
-            DEBUG("homo");
         }
         else
         {
             Material m;
             m.material = klass;
             m.material_id = klass->GetId();
-            mMaterials.push_back(m);
+            mMaterials.push_back(std::move(m));
         }
     }
 }

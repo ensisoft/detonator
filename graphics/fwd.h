@@ -23,6 +23,7 @@ namespace gfx
     class Painter;
     class Material;
     class MaterialClass;
+    class MaterialInstance;
     class Drawable;
     class DrawableClass;
     class Device;
