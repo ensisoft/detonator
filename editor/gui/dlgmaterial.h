@@ -44,6 +44,7 @@ namespace gui
 
     public:
         DlgMaterial(QWidget* parent, const app::Workspace* workspace, bool expand_maps);
+       ~DlgMaterial() override;
 
         app::AnyString GetSelectedMaterialId() const
         { return mSelectedMaterialId; }
@@ -87,6 +88,7 @@ namespace gui
             app::AnyString material_id;
             app::AnyString texture_map_id;
             std::shared_ptr<const gfx::MaterialClass> material;
+            std::unique_ptr<gfx::MaterialInstance> material_instance;
             gfx::FRect texture_rect;
         };
         std::vector<Material> mMaterials;

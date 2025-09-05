@@ -30,6 +30,7 @@
 #include <tuple>
 #include <variant>
 
+#include "base/math.h"
 #include "base/types.h"
 
 namespace gui
@@ -209,6 +210,10 @@ namespace gui
         bool IsZero() const noexcept
         {
             return !IsNonZero();
+        }
+        bool IsEqual(float value) const noexcept
+        {
+            return math::equals(mW, value) && math::equals(mH, value);
         }
     private:
         float mW = 0.0f;
