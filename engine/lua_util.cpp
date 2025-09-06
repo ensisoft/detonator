@@ -27,6 +27,7 @@
 
 #include "base/utility.h"
 #include "base/format.h"
+#include "base/math.h"
 #include "game/util.h"
 #include "game/entity.h"
 #include "engine/lua.h"
@@ -173,22 +174,10 @@ namespace engine
         [](int min, int max) {
             return math::rand(min, max);
         });
-    util["DistanceIsLess"] = [](const glm::vec2& a, const glm::vec2& b, float maximum) {
-        const auto& diff = a - b;
-        return diff.x*diff.x + diff.y*diff.y < maximum*maximum;
-    };
-    util["DistanceIsLessOrEqual"] = [](const glm::vec2& a, const glm::vec2& b, float maximum) {
-        const auto& diff = a - b;
-        return diff.x*diff.x + diff.y*diff.y <= maximum*maximum;
-    };
-    util["DistanceIsMore"] = [](const glm::vec2& a, const glm::vec2& b, float minimum) {
-        const auto& diff = a - b;
-        return diff.x*diff.x + diff.y*diff.y > minimum*minimum;
-    };
-    util["DistanceIsMoreOrEqual"] = [](const glm::vec2& a, const glm::vec2& b, float minimum) {
-        const auto& diff = a - b;
-        return diff.x*diff.x + diff.y*diff.y >= minimum*minimum;
-    };
+    util["DistanceIsLess"]        = &math::DistanceIsLess;
+    util["DistanceIsLessOrEqual"] = &math::DistanceIsLessOrEqual;
+    util["DistanceIsMore"]        = &math::DistanceIsMore;
+    util["DistanceIsMoreOrEqual"] = &math::DistanceIsMoreOrEqual;
 
     util["FindImpulse"] = [](const glm::vec2& current_velocity,
                              const glm::vec2& target_velocity, float mass) {
