@@ -486,10 +486,7 @@ namespace math
     // returns the angle in radians.
     inline float FindVectorRotationAroundZ(const glm::vec2& vec) noexcept
     {
-        const auto cosine = glm::dot(glm::normalize(vec), glm::vec2(1.0f, 0.0f));
-        if (vec.y > 0.0f)
-            return std::acos(cosine);
-        return -std::acos(cosine);
+        return std::atan2f(vec.y, vec.x);
     }
 
     inline float GetRotationFromMatrix(const glm::mat4& mat) noexcept
