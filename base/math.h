@@ -40,6 +40,8 @@
 
 #include "base/assert.h"
 
+#include "base/warnpush.h"
+
 namespace math
 {
     constexpr auto Pi = 3.14159265358979323846;
@@ -47,42 +49,42 @@ namespace math
     constexpr auto SemiCircle = Pi;
 
     namespace detail {
-        template <typename T> inline constexpr
-        int signum(T x, std::false_type is_signed) noexcept {
+        template <typename T> constexpr
+        int signum(T x, std::false_type /* is_signed */) noexcept {
             return T(0) < x;
         }
-        template <typename T> inline constexpr
-        int signum(T x, std::true_type is_signed) noexcept {
+        template <typename T> constexpr
+        int signum(T x, std::true_type /* is_signed */) noexcept {
             return (T(0) < x) - (x < T(0));
         }
     } // namespace
 
-    inline float RunningAvg(float current_average, unsigned count, float next_value) noexcept
+    inline float RunningAvg(const float current_average, const unsigned count, const float next_value) noexcept
     {
-        return current_average + (next_value - current_average) / (float)count;
+        return current_average + (next_value - current_average) / static_cast<float>(count);
     }
-    inline double RunningAvg(double current_average, unsigned count, double next_value) noexcept
+    inline double RunningAvg(const double current_average, const unsigned count, const double next_value) noexcept
     {
-        return current_average + (next_value - current_average) / (double)count;
+        return current_average + (next_value - current_average) / static_cast<double>(count);
     }
 
-    template<typename Float> inline constexpr
+    template<typename Float> constexpr
     Float DegreesToRadians(Float degrees) noexcept
     {
         return degrees * (Pi / 180.0);
     }
-    template<typename Float> inline constexpr
+    template<typename Float> constexpr
     Float RadiansToDegrees(Float radians) noexcept
     {
         return radians * (180.0 / Pi);
     }
 
-    template <typename T> inline constexpr
+    template <typename T> constexpr
     int signum(T x) noexcept {
         return detail::signum(x, std::is_signed<T>());
     }
 
-    template<typename T> inline
+    template<typename T>
     T wrap(T min, T max, T val) noexcept
     {
         if (val > max)
@@ -92,7 +94,7 @@ namespace math
         return val;
     }
 
-    template<typename T> inline
+    template<typename T>
     T clamp(T min, T max, T val) noexcept
     {
         if (val < min)
@@ -102,7 +104,7 @@ namespace math
         return val;
     }
 
-    template<typename T> inline
+    template<typename T>
     T lerp(const T& y0, const T& y1, float t) noexcept
     {
         return (1.0f - t) * y0 + t * y1;
@@ -159,10 +161,10 @@ namespace math
 
         inline float ease_in_elastic(float t) noexcept
         {
-            t = math::clamp(0.0f, 1.0f, t);
+            t = clamp(0.0f, 1.0f, t);
             if (t == 0.0f)
                 return 0.0f;
-            else if (t == 1.0f)
+            if (t == 1.0f)
                 return 1.0f;
 
             const auto c4 = (2.0f * Pi) / 3.0f;
@@ -172,10 +174,10 @@ namespace math
 
         inline float ease_out_elastic(float t) noexcept
         {
-            t = math::clamp(0.0f, 1.0f, t);
+            t = clamp(0.0f, 1.0f, t);
             if (t == 0.0f)
                 return 0.0f;
-            else if (t == 1.0f)
+            if (t == 1.0f)
                 return 1.0f;
 
             const auto c4 = (2.0f * Pi) / 3.0f;
@@ -184,10 +186,10 @@ namespace math
         }
         inline float ease_in_out_elastic(float t) noexcept
         {
-            t = math::clamp(0.0f, 1.0f, t);
+            t = clamp(0.0f, 1.0f, t);
             if (t == 0.0f)
                 return 0.0f;
-            else if (t == 1.0f)
+            if (t == 1.0f)
                 return 1.0f;
 
             const auto c5 = (2.0f * Pi) / 4.5f;
@@ -203,12 +205,12 @@ namespace math
             const auto d1 = 2.75f;
             if (t < 1.0f / d1)
                 return n1 * t * t;
-            else if (t < 2.0f / d1)
+            if (t < 2.0f / d1)
             {
                 const auto x = t - 1.5f/d1;
                 return n1 * x * x + 0.75f;
             }
-            else if (t < 2.5f / d1)
+            if (t < 2.5f / d1)
             {
                 const auto x = t - 2.25f/d1;
                 return n1 * x * x + 0.9375f;
@@ -291,68 +293,69 @@ namespace math
         EaseInOutBounce
     };
 
-    inline float interpolate(float t, Interpolation method) noexcept
+    inline float interpolate(const float t, const Interpolation method) noexcept
     {
         if (method == Interpolation::StepStart)
             return interp::step_start(t);
-        else if (method == Interpolation::Step)
+        if (method == Interpolation::Step)
             return interp::step(t);
-        else if (method == Interpolation::StepEnd)
+        if (method == Interpolation::StepEnd)
             return interp::step_end(t);
-        else if (method == Interpolation::Linear)
-            return math::clamp(0.0f, 1.0f, t);
-        else if (method == Interpolation::Cosine)
+        if (method == Interpolation::Linear)
+            return clamp(0.0f, 1.0f, t);
+        if (method == Interpolation::Cosine)
             return interp::cosine(t);
-        else if (method == Interpolation::SmoothStep)
+        if (method == Interpolation::SmoothStep)
             return interp::smooth_step(t);
-        else if (method == Interpolation::Acceleration)
+        if (method == Interpolation::Acceleration)
             return interp::acceleration(t);
-        else if (method == Interpolation::Deceleration)
+        if (method == Interpolation::Deceleration)
             return interp::deceleration(t);
-        else if (method == Interpolation::EaseInSine)
+        if (method == Interpolation::EaseInSine)
             return easing::ease_in_sine(t);
-        else if (method == Interpolation::EaseOutSine)
+        if (method == Interpolation::EaseOutSine)
             return easing::ease_out_sine(t);
-        else if (method == Interpolation::EaseInOutSine)
+        if (method == Interpolation::EaseInOutSine)
             return easing::ease_in_out_sine(t);
-        else if (method == Interpolation::EaseInQuadratic)
+        if (method == Interpolation::EaseInQuadratic)
             return easing::ease_in_quadratic(t);
-        else if (method == Interpolation::EaseOutQuadratic)
+        if (method == Interpolation::EaseOutQuadratic)
             return easing::ease_out_quadratic(t);
-        else if (method == Interpolation::EaseInOutQuadratic)
+        if (method == Interpolation::EaseInOutQuadratic)
             return easing::ease_in_out_quadratic(t);
-        else if (method == Interpolation::EaseInCubic)
+        if (method == Interpolation::EaseInCubic)
             return easing::ease_in_cubic(t);
-        else if (method == Interpolation::EaseOutCubic)
+        if (method == Interpolation::EaseOutCubic)
             return easing::ease_out_cubic(t);
-        else if (method == Interpolation::EaseInOutCubic)
+        if (method == Interpolation::EaseInOutCubic)
             return easing::ease_in_out_cubic(t);
-        else if (method == Interpolation::EaseInBack)
+        if (method == Interpolation::EaseInBack)
             return easing::ease_in_back(t);
-        else if (method == Interpolation::EaseOutBack)
+        if (method == Interpolation::EaseOutBack)
             return easing::ease_out_back(t);
-        else if (method == Interpolation::EaseInOutBack)
+        if (method == Interpolation::EaseInOutBack)
             return easing::ease_in_out_back(t);
-        else if (method == Interpolation::EaseInElastic)
+        if (method == Interpolation::EaseInElastic)
             return easing::ease_in_elastic(t);
-        else if (method == Interpolation::EaseOutElastic)
+        if (method == Interpolation::EaseOutElastic)
             return easing::ease_out_elastic(t);
-        else if (method == Interpolation::EaseInOutElastic)
+        if (method == Interpolation::EaseInOutElastic)
             return easing::ease_in_out_elastic(t);
-        else if (method == Interpolation::EaseInBounce)
+        if (method == Interpolation::EaseInBounce)
             return easing::ease_in_bounce(t);
-        else if (method == Interpolation::EaseOutBounce)
+        if (method == Interpolation::EaseOutBounce)
             return easing::ease_out_bounce(t);
-        else if (method == Interpolation::EaseInOutBounce)
+        if (method == Interpolation::EaseInOutBounce)
             return easing::ease_in_out_bounce(t);
-        else BUG("Missing interpolation method.");
+
+        BUG("Missing interpolation method.");
         return t;
     }
 
     template<typename T>
-    T interpolate(const T& y0, const T& y1, float t, Interpolation method) noexcept
+    T interpolate(const T& y0, const T& y1, const float t, const Interpolation method) noexcept
     {
-        return math::lerp(y0, y1, math::interpolate(t, method));
+        return math::lerp(y0, y1, interpolate(t, method));
     }
 
     // epsilon based check for float equality
@@ -366,7 +369,7 @@ namespace math
     }
 
 #if defined(MATH_SUPPORT_GLM)
-    inline glm::vec2 RunningAvg(const glm::vec2& current_value, unsigned count, const glm::vec2& next_value) noexcept
+    inline glm::vec2 RunningAvg(const glm::vec2& current_value, const unsigned count, const glm::vec2& next_value) noexcept
     {
         glm::vec2 ret;
         ret.x = RunningAvg(current_value.x, count, next_value.x);
@@ -374,7 +377,7 @@ namespace math
         return ret;
     }
 
-    inline glm::vec3 RunningAvg(const glm::vec3& current_value, unsigned count, const glm::vec3& next_value) noexcept
+    inline glm::vec3 RunningAvg(const glm::vec3& current_value, const unsigned count, const glm::vec3& next_value) noexcept
     {
         glm::vec3 ret;
         ret.x = RunningAvg(current_value.x, count, next_value.x);
@@ -383,7 +386,7 @@ namespace math
         return ret;
     }
 
-    inline glm::vec4 RunningAvg(const glm::vec4& current_value, unsigned count, const glm::vec4& next_value) noexcept
+    inline glm::vec4 RunningAvg(const glm::vec4& current_value, const unsigned count, const glm::vec4& next_value) noexcept
     {
         glm::vec4 ret;
         ret.x = RunningAvg(current_value.x, count, next_value.x);
@@ -393,19 +396,39 @@ namespace math
         return ret;
     }
 
+    inline bool DistanceIsLess(const glm::vec2& target, const glm::vec2& current, const float maximum) noexcept
+    {
+        const auto& diff = target - current;
+        return diff.x*diff.x + diff.y*diff.y < maximum*maximum;
+    }
+    inline bool DistanceIsLessOrEqual(const glm::vec2& target, const glm::vec2& current, const float maximum) noexcept
+    {
+        const auto& diff = target - current;
+        return diff.x*diff.x + diff.y*diff.y <= maximum*maximum;
+    }
+    inline bool DistanceIsMore(const glm::vec2& target, const glm::vec2& current, const float minimum) noexcept
+    {
+        const auto& diff = target - current;
+        return diff.x*diff.x + diff.y*diff.y > minimum*minimum;
+    }
+    inline bool DistanceIsMoreOrEqual(const glm::vec2& target, const glm::vec2& current, const float minimum) noexcept
+    {
+        const auto& diff = target - current;
+        return diff.x*diff.x + diff.y*diff.y >= minimum*minimum;
+    }
 
-    inline bool equals(const glm::vec2& lhs, const glm::vec2& rhs, float epsilon = 0.0001f) noexcept
+    inline bool equals(const glm::vec2& lhs, const glm::vec2& rhs, const float epsilon = 0.0001f) noexcept
     {
         return equals(lhs.x, rhs.x, epsilon) &&
                equals(lhs.y, rhs.y, epsilon);
     }
-    inline bool equals(const glm::vec3& lhs, const glm::vec3& rhs, float epsilon = 0.0001f) noexcept
+    inline bool equals(const glm::vec3& lhs, const glm::vec3& rhs, const float epsilon = 0.0001f) noexcept
     {
         return equals(lhs.x, rhs.x, epsilon) &&
                equals(lhs.y, rhs.y, epsilon) &&
                equals(lhs.z, rhs.z, epsilon);
     }
-    inline bool equals(const glm::vec4& lhs, const glm::vec4& rhs, float epsilon = 0.0001f) noexcept
+    inline bool equals(const glm::vec4& lhs, const glm::vec4& rhs, const float epsilon = 0.0001f) noexcept
     {
         return equals(lhs.x, rhs.x, epsilon) &&
                equals(lhs.y, rhs.y, epsilon) &&
@@ -414,7 +437,7 @@ namespace math
     }
 
     // Rotate a vector on the xy plane around the Z axis.
-    inline glm::vec2 RotateVectorAroundZ(const glm::vec2& vec, float angle) noexcept
+    inline glm::vec2 RotateVectorAroundZ(const glm::vec2& vec, const float angle) noexcept
     {
         return glm::eulerAngleZ(angle) * glm::vec4(vec.x, vec.y, 0.0f, 0.0f);
     }
@@ -533,7 +556,7 @@ namespace math
 
     // Generate pseudo random numbers based on the given seed.
     template<unsigned Seed, typename T>
-    T rand(T min, T max) noexcept
+    T rand(const T min, const T max) noexcept
     {
         // boost uniform distribution has an assert for the condition
         // that min < max. We have code that calls  random with (for example
@@ -730,19 +753,19 @@ namespace math
     }
 
     // Check whether the given point is inside the given rectangle or not.
-    static bool CheckRectPointIntersection(float minX, float maxX, float minY, float maxY, // rectangle
-                                           float x, float y) // point
+    static bool CheckRectPointIntersection(const float minX, const float maxX, const float minY, const float maxY, // rectangle
+                                           const float x, const float y) // point
     {
         if (x < minX || x > maxX)
             return false;
-        else if (y < minY || y > maxY)
+        if (y < minY || y > maxY)
             return false;
         return true;
     }
 
 
-    static bool CheckRectCircleIntersection(float minX, float maxX, float minY, float maxY, // rectangle
-                                            float x, float y, float radius)// circle
+    static bool CheckRectCircleIntersection(const float minX, const float maxX, const float minY, const float maxY, // rectangle
+                                            const float x, const float y, const float radius)// circle
 
     {
         ASSERT(maxX >= minX);
@@ -767,13 +790,14 @@ namespace math
         return collision;
     }
 
-    static bool CheckRectLineIntersection(float minX, float maxX, float minY, float maxY, // rectangle
+    static bool CheckRectLineIntersection(const float minX, const float maxX, const float minY, const float maxY, // rectangle
                                           float x1, float y1, float x2, float y2) // line
     {
         ASSERT(maxX >= minX);
         ASSERT(maxY >= minY);
         //ASSERT(x2 >= x1);
-        if (x2 < x1) {
+        if (x2 < x1)
+        {
             std::swap(x1, x2);
             std::swap(y1, y2);
         }
@@ -790,11 +814,11 @@ namespace math
 
         if (line_maxX < minX) // left check
             return false;
-        else if (line_minX > maxX) // right check
+        if (line_minX > maxX) // right check
             return false;
-        else if (line_maxY < minY) // above check
+        if (line_maxY < minY) // above check
             return false;
-        else if (line_minY > maxY) // below check
+        if (line_minY > maxY) // below check
             return false;
 
         const auto dx = x2 - x1;
@@ -862,3 +886,5 @@ namespace math
     }
 
 } // namespace
+
+#include "base/warnpop.h"
