@@ -418,6 +418,13 @@ void ViewerMain(const std::string& style, const std::string& ipc_socket, QApplic
 
 void EditorMain(QApplication& app)
 {
+#if defined(WINDOWS_OS)
+    auto handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD console_mode;
+    GetConsoleMode(handle, &console_mode);
+    SetConsoleMode(handle, console_mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+#endif
+
     // prefix with a . to make this a "hidden" dir
     // which is the convention on Linux
     app::InitializeAppHome(".Gamestudio Editor");
