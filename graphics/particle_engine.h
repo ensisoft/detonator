@@ -27,6 +27,7 @@
 #include <optional>
 #include <memory>
 #include <mutex>
+#include <functional>
 
 #include "base/bitflag.h"
 #include "base/utility.h"
@@ -329,6 +330,8 @@ namespace gfx
         bool FromJson(const data::Reader& data) override;
         std::unique_ptr<DrawableClass> Clone() const override;
         std::unique_ptr<DrawableClass> Copy() const override;
+
+        static void SetRandomGenerator(std::function<float(float min, float max)> random_function);
     private:
         void InitParticles(const Environment& env, InstanceStatePtr state, size_t num) const;
         void UpdateParticles(const Environment& env, InstanceStatePtr state, float dt) const;
