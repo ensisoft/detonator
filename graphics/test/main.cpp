@@ -3447,12 +3447,6 @@ public:
         auto klass = std::make_shared<gfx::RectangleClass>();
         auto inst = gfx::CreateDrawableInstance(klass);
 
-        using RandomGen = math::RandomGenerator<float, 0x123>;
-
-        gfx::EffectDrawable::SetRandomGenerator([r = RandomGen()](float min, float max) {
-            return r(min, max);
-        });
-
         gfx::EffectDrawable::MeshExplosionEffectArgs args;
         args.mesh_subdivision_count = 1;
         args.shard_linear_speed = 1.0f;
@@ -4171,6 +4165,16 @@ int main(int argc, char* argv[])
     auto painter = gfx::Painter::Create(gfx_device);
     painter->SetEditingMode(false);
     painter->SetDebugMode(debug_context);
+
+    using RandomGen = math::RandomGenerator<float, 0xdeadbeef>;
+    RandomGen rg;
+
+    gfx::EffectDrawable::SetRandomGenerator([&rg](float min, float max) {
+        return rg(min, max);
+    });
+    gfx::ParticleEngineClass::SetRandomGenerator([&rg](float min, float max) {
+        return rg(min, max);
+    });
 
     std::size_t test_index = 0;
     std::vector<std::unique_ptr<GraphicsTest>> tests;

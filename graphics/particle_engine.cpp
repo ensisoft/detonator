@@ -67,7 +67,16 @@ namespace  {
         std::optional<glm::mat4> model_matrix;
         std::optional<glm::mat4> world_matrix;
     };
-}
+
+    std::function<float (float min, float max)> random_function;
+    auto GetRandomGenerator()
+    {
+        if (!random_function)
+            random_function = math::rand<float>;
+        return random_function;
+    }
+
+} // namespace
 
 namespace gfx
 {
@@ -773,6 +782,13 @@ void ParticleEngineClass::UpdateParticles(const Environment& env, const Params& 
     }
 }
 
+// static
+void ParticleEngineClass::SetRandomGenerator(std::function<float(float min, float max)> rd)
+{
+    random_function = std::move(rd);
+}
+
+// static
 void ParticleEngineClass::InitParticles(const Environment& env, InstanceStatePtr state, size_t num) const
 {
     class InitParticlesTask : public base::ThreadTask {
@@ -846,6 +862,8 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
     const auto count = particles.size();
     particles.resize(count + num);
 
+    auto GenRandomNumber = GetRandomGenerator();
+
     if (params.coordinate_space == CoordinateSpace::Global)
     {
         gfx::Transform transform(*env.model_matrix);
@@ -858,27 +876,27 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
 
         for (size_t i=0; i<num; ++i)
         {
-            const auto velocity = math::rand(params.min_velocity, params.max_velocity);
+            const auto velocity = GenRandomNumber(params.min_velocity, params.max_velocity);
 
             glm::vec2 position;
             glm::vec2 direction;
             if (params.shape == EmitterShape::Rectangle)
             {
                 if (params.placement == Placement::Inside)
-                    position = glm::vec2(math::rand(0.0f, 1.0f), math::rand(0.0f, 1.0f));
+                    position = glm::vec2(GenRandomNumber(0.0f, 1.0f), GenRandomNumber(0.0f, 1.0f));
                 else if (params.placement == Placement::Center)
                     position = glm::vec2(0.5f, 0.5f);
                 else if (params.placement == Placement::Edge)
                 {
-                    const auto edge = math::rand(0, 3);
+                    const auto edge = GenRandomNumber(0, 3);
                     if (edge == 0 || edge == 1)
                     {
                         position.x = edge == 0 ? 0.0f : 1.0f;
-                        position.y = math::rand(0.0f, 1.0f);
+                        position.y = GenRandomNumber(0.0f, 1.0f);
                     }
                     else
                     {
-                        position.x = math::rand(0.0f, 1.0f);
+                        position.x = GenRandomNumber(0.0f, 1.0f);
                         position.y = edge == 2 ? 0.0f : 1.0f;
                     }
                 }
@@ -889,15 +907,15 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
                     position = glm::vec2(0.5f, 0.5f);
                 else if (params.placement == Placement::Inside)
                 {
-                    const auto x = math::rand(-emitter_radius, emitter_radius);
-                    const auto y = math::rand(-emitter_radius, emitter_radius);
-                    const auto r = math::rand(0.0f, 1.0f);
+                    const auto x = GenRandomNumber(-emitter_radius, emitter_radius);
+                    const auto y = GenRandomNumber(-emitter_radius, emitter_radius);
+                    const auto r = GenRandomNumber(0.0f, 1.0f);
                     position = glm::normalize(glm::vec2(x, y)) * emitter_radius * r + emitter_center;
                 }
                 else if (params.placement == Placement::Edge)
                 {
-                    const auto x = math::rand(-emitter_radius, emitter_radius);
-                    const auto y = math::rand(-emitter_radius, emitter_radius);
+                    const auto x = GenRandomNumber(-emitter_radius, emitter_radius);
+                    const auto y = GenRandomNumber(-emitter_radius, emitter_radius);
                     position = glm::normalize(glm::vec2(x, y)) * emitter_radius + emitter_center;
                 }
             }
@@ -905,7 +923,7 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
             if (params.direction == Direction::Sector)
             {
                 const auto direction_angle = params.direction_sector_start_angle +
-                                                 math::rand(0.0f, params.direction_sector_size);
+                                                 GenRandomNumber(0.0f, params.direction_sector_size);
 
                 const float model_to_world_rotation = math::GetRotationFromMatrix(*env.model_matrix);
                 const auto world_direction =  math::RotateVectorAroundZ(glm::vec2(1.0f, 0.0f), model_to_world_rotation + direction_angle);
@@ -913,8 +931,8 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
             }
             else if (params.placement == Placement::Center)
             {
-                direction = glm::normalize(glm::vec2(math::rand(-1.0f, 1.0f),
-                                                     math::rand(-1.0f, 1.0f)));
+                direction = glm::normalize(glm::vec2(GenRandomNumber(-1.0f, 1.0f),
+                                                     GenRandomNumber(-1.0f, 1.0f)));
             }
             else if (params.direction == Direction::Inwards)
                 direction = glm::normalize(emitter_center - position);
@@ -926,12 +944,12 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
             // direction vector in order to save space.
             auto& particle = particles[count+i];
             particle.time       = 0.0f;
-            particle.time_scale = can_expire ? math::rand(params.min_lifetime, params.max_lifetime) / params.max_lifetime : 1.0f;
-            particle.pointsize  = math::rand(params.min_point_size, params.max_point_size);
-            particle.alpha      = math::rand(params.min_alpha, params.max_alpha);
+            particle.time_scale = can_expire ? GenRandomNumber(params.min_lifetime, params.max_lifetime) / params.max_lifetime : 1.0f;
+            particle.pointsize  = GenRandomNumber(params.min_point_size, params.max_point_size);
+            particle.alpha      = GenRandomNumber(params.min_alpha, params.max_alpha);
             particle.position   = glm::vec2(world.x, world.y);
             particle.direction  = direction * velocity;
-            particle.randomizer = math::rand(0.0f, 1.0f);
+            particle.randomizer = GenRandomNumber(0.0f, 1.0f);
         }
     }
     else if (params.coordinate_space == CoordinateSpace::Local)
@@ -955,34 +973,34 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
 
         for (size_t i = 0; i < num; ++i)
         {
-            const auto velocity = math::rand(params.min_velocity, params.max_velocity);
+            const auto velocity = GenRandomNumber(params.min_velocity, params.max_velocity);
             glm::vec2 position;
             glm::vec2 direction;
             if (params.shape == EmitterShape::Rectangle)
             {
                 if (params.placement == Placement::Inside)
-                    position = emitter_pos + glm::vec2(math::rand(0.0f, emitter_width),
-                                                       math::rand(0.0f, emitter_height));
+                    position = emitter_pos + glm::vec2(GenRandomNumber(0.0f, emitter_width),
+                                                       GenRandomNumber(0.0f, emitter_height));
                 else if (params.placement == Placement::Center)
                     position = emitter_center;
                 else if (params.placement == Placement::Edge)
                 {
-                    const auto edge = math::rand(0, 3);
+                    const auto edge = GenRandomNumber(0, 3);
                     if (edge == 0 || edge == 1)
                     {
                         position.x = edge == 0 ? emitter_left : emitter_right;
-                        position.y = math::rand(emitter_top, emitter_bot);
+                        position.y = GenRandomNumber(emitter_top, emitter_bot);
                     }
                     else
                     {
-                        position.x = math::rand(emitter_left, emitter_right);
+                        position.x = GenRandomNumber(emitter_left, emitter_right);
                         position.y = edge == 2 ? emitter_top : emitter_bot;
                     }
                 }
                 else if (params.placement == Placement::Outside)
                 {
-                    position.x = math::rand(0.0f, sim_width);
-                    position.y = math::rand(0.0f, sim_height);
+                    position.x = GenRandomNumber(0.0f, sim_width);
+                    position.y = GenRandomNumber(0.0f, sim_height);
                     if (position.y >= emitter_top && position.y <= emitter_bot)
                     {
                         if (position.x < emitter_center.x)
@@ -997,23 +1015,23 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
                     position  = emitter_center;
                 else if (params.placement == Placement::Inside)
                 {
-                    const auto x = math::rand(-1.0f, 1.0f);
-                    const auto y = math::rand(-1.0f, 1.0f);
-                    const auto r = math::rand(0.0f, 1.0f);
+                    const auto x = GenRandomNumber(-1.0f, 1.0f);
+                    const auto y = GenRandomNumber(-1.0f, 1.0f);
+                    const auto r = GenRandomNumber(0.0f, 1.0f);
                     const auto p = glm::normalize(glm::vec2(x, y)) * emitter_radius * r;
                     position = p + emitter_pos + emitter_size * 0.5f;
                 }
                 else if (params.placement == Placement::Edge)
                 {
-                    const auto x = math::rand(-1.0f, 1.0f);
-                    const auto y = math::rand(-1.0f, 1.0f);
+                    const auto x = GenRandomNumber(-1.0f, 1.0f);
+                    const auto y = GenRandomNumber(-1.0f, 1.0f);
                     const auto p = glm::normalize(glm::vec2(x, y)) * emitter_radius;
                     position = p + emitter_pos + emitter_size * 0.5f;
                 }
                 else if (params.placement == Placement::Outside)
                 {
-                    auto p = glm::vec2(math::rand(0.0f, sim_width),
-                                       math::rand(0.0f, sim_height));
+                    auto p = glm::vec2(GenRandomNumber(0.0f, sim_width),
+                                       GenRandomNumber(0.0f, sim_height));
                     auto v = p - emitter_center;
                     if (glm::length(v) < emitter_radius)
                         p = glm::normalize(v) * emitter_radius + emitter_center;
@@ -1024,13 +1042,13 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
 
             if (params.direction == Direction::Sector)
             {
-                const auto angle = math::rand(0.0f, params.direction_sector_size) + params.direction_sector_start_angle;
+                const auto angle = GenRandomNumber(0.0f, params.direction_sector_size) + params.direction_sector_start_angle;
                 direction = glm::vec2(std::cos(angle), std::sin(angle));
             }
             else if (params.placement == Placement::Center)
             {
-                direction = glm::normalize(glm::vec2(math::rand(-1.0f, 1.0f),
-                                                     math::rand(-1.0f, 1.0f)));
+                direction = glm::normalize(glm::vec2(GenRandomNumber(-1.0f, 1.0f),
+                                                     GenRandomNumber(-1.0f, 1.0f)));
             }
             else if (params.direction == Direction::Inwards)
                 direction = glm::normalize(emitter_center - position);
@@ -1041,12 +1059,12 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
             // direction vector in order to save space.
             auto& particle      = particles[count+i];
             particle.time       = 0.0f;
-            particle.time_scale = can_expire ? math::rand(params.min_lifetime, params.max_lifetime) / params.max_lifetime : 1.0f;
-            particle.pointsize  = math::rand(params.min_point_size, params.max_point_size);
-            particle.alpha      = math::rand(params.min_alpha, params.max_alpha);
+            particle.time_scale = can_expire ? GenRandomNumber(params.min_lifetime, params.max_lifetime) / params.max_lifetime : 1.0f;
+            particle.pointsize  = GenRandomNumber(params.min_point_size, params.max_point_size);
+            particle.alpha      = GenRandomNumber(params.min_alpha, params.max_alpha);
             particle.position   = position;
             particle.direction  = direction *  velocity;
-            particle.randomizer = math::rand(0.0f, 1.0f);
+            particle.randomizer = GenRandomNumber(0.0f, 1.0f);
         }
     } else BUG("Unhandled particle system coordinate space.");
 }
