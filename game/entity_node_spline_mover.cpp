@@ -39,7 +39,12 @@ namespace {
         std::vector<DisplacementMapping> displacement_mappings;
     };
 
+    struct PolyLineCache {
+        std::shared_ptr<const game::Spline::PolyLineFunction> polyline;
+    };
+
     std::unordered_map<const game::SplineMoverClass*, CatmullRomCache> catmull_rom_cache;
+    std::unordered_map<const game::SplineMoverClass*, PolyLineCache> polyline_cache;
 } // namespace
 
 namespace game
@@ -53,6 +58,7 @@ SplineMoverClass::SplineMoverClass()
 SplineMoverClass::~SplineMoverClass()
 {
     catmull_rom_cache.erase(this);
+    polyline_cache.erase(this);
 }
 
 std::shared_ptr<const SplineMoverClass::CatmullRomFunction> SplineMoverClass::GetCatmullRom() const
@@ -69,14 +75,41 @@ std::shared_ptr<const SplineMoverClass::CatmullRomFunction> SplineMoverClass::Ma
     return mSpline.MakeCatmullRom();
 }
 
+std::shared_ptr<const SplineMoverClass::PolyLineFunction> SplineMoverClass::GetPolyLine() const
+{
+    auto it = polyline_cache.find(this);
+    if (it != polyline_cache.end())
+        return it->second.polyline;
+
+    return mSpline.MakePolyLine();
+}
+std::shared_ptr<const SplineMoverClass::PolyLineFunction> SplineMoverClass::MakePolyLine() const
+{
+    return mSpline.MakePolyLine();
+}
+
 double SplineMoverClass::GetPathLength() const
 {
-    auto it = catmull_rom_cache.find(this);
-    if (it != catmull_rom_cache.end())
-        return it->second.spline_path_length;
+    if (mPathCurveType == PathCurveType::CatmullRom)
+    {
+        auto it = catmull_rom_cache.find(this);
+        if (it != catmull_rom_cache.end())
+            return it->second.spline_path_length;
 
-    auto spline = MakeCatmullRom();
-    return Spline::CalcArcLength(*spline, 0.0f, 1.0f);
+        auto spline = MakeCatmullRom();
+        return Spline::CalcArcLength(*spline, 0.0f, 1.0f);
+    }
+    if (mPathCurveType == PathCurveType::Linear)
+    {
+        auto it = polyline_cache.find(this);
+        if (it != polyline_cache.end())
+            return it->second.polyline->GetLineLength();
+
+        auto poly_line = MakePolyLine();
+        return poly_line->GetLineLength();
+    }
+    BUG("Missing spline path type handling");
+    return 0.0;
 }
 
 double SplineMoverClass::Reparametrize(double displacement) const
@@ -161,14 +194,7 @@ bool SplineMoverClass::FromJson(const data::Reader& data)
 
 bool SplineMoverClass::InitClassRuntime() const
 {
-    auto catmull_rom = mSpline.MakeCatmullRom();
-    if (!catmull_rom || !catmull_rom->is_valid())
-    {
-        WARN("Entity node spline mover spline definition is invalid.");
-        return false;
-    }
     bool ok = true;
-
     if (mRotationMode == RotationMode::ApplySplineRotation && mPathCoordinateSpace == PathCoordinateSpace::Relative)
     {
         WARN("Spline rotator set to apply object rotation from spline while using relative coordinates.");
@@ -176,9 +202,24 @@ bool SplineMoverClass::InitClassRuntime() const
         ok = false;
     }
 
+    if (mPathCurveType == PathCurveType::CatmullRom)
+        ok &= InitCatmullRomCache();
+
+    return ok;
+}
+
+bool SplineMoverClass::InitCatmullRomCache() const
+{
+    auto catmull_rom = mSpline.MakeCatmullRom();
+    if (!catmull_rom || !catmull_rom->is_valid())
+    {
+        WARN("Entity node spline mover spline definition is invalid.");
+        return false;
+    }
+
     const auto max_parameter = catmull_rom->max_parameter();
     // todo: maybe use a more elaborate mechanism to refine the sampling based on the
-    // "size" of the spliene.
+    // "size" of the spline
     constexpr auto max_samples = 50;
 
     std::vector<SplinePoint> samples;
@@ -225,14 +266,26 @@ SplineMover::SplineMover(std::shared_ptr<const SplineMoverClass> klass)
   , mSpeed(mClass->GetSpeed())
   , mAcceleration(mClass->GetAcceleration())
 {
-    mCatmullRom = mClass->GetCatmullRom();
-    if (!mCatmullRom)
-        return;
+    const auto curve = mClass->GetPathCurveType();
+    if (curve == SplineMoverClass::PathCurveType::CatmullRom)
+    {
+        mCatmullRom = mClass->GetCatmullRom();
+        if (!mCatmullRom)
+            return;
 
-    if (mClass->GetPathCoordinateSpace() == PathCoordinateSpace::Relative)
-        mStartPos = mCatmullRom->evaluate(0.0f).GetPosition();
+        if (mClass->GetPathCoordinateSpace() == PathCoordinateSpace::Relative)
+            mStartPos = mCatmullRom->evaluate(0.0f).GetPosition();
 
-    mPathLength = (float)mClass->GetPathLength();
+        mPathLength = (float)mClass->GetPathLength();
+    }
+    else if (curve == SplineMoverClass::PathCurveType::Linear)
+    {
+        mPolyLine = mClass->GetPolyLine();
+        mPathLength = mPolyLine->GetLineLength();
+
+        if (mClass->GetPathCoordinateSpace() == PathCoordinateSpace::Relative)
+            mStartPos = mPolyLine->GetPoint(0).GetPosition();
+    }
 }
 
 }// namespace
