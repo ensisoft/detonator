@@ -1208,64 +1208,6 @@ add_executable(unit_test_imgpack
 target_include_directories(unit_test_imgpack   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 add_test(NAME unit_test_imgpack   COMMAND unit_test_imgpack)
 
-add_library(GameLibTesting
-    game/entity.cpp
-    game/entity_class.cpp
-    game/entity_node.cpp
-    game/entity_placement.cpp
-    game/entity_state.cpp
-    game/entity_state_controller.cpp
-    game/entity_node_linear_mover.cpp
-    game/entity_node_spline_mover.cpp
-    game/entity_node_rigid_body.cpp
-    game/entity_node_rigid_body_joint.cpp
-    game/entity_node_drawable_item.cpp
-    game/entity_node_text_item.cpp
-    game/entity_node_spatial_node.cpp
-    game/entity_node_fixture.cpp
-    game/entity_node_tilemap_node.cpp
-    game/entity_node_light.cpp
-    game/entity_node_mesh_effect.cpp
-    game/scriptvar.cpp
-    game/spline.cpp
-    game/timeline_animation.cpp
-    game/timeline_animator.cpp
-    game/timeline_transform_animator.cpp
-    game/timeline_kinematic_animator.cpp
-    game/timeline_property_animator.cpp
-    game/timeline_material_animator.cpp
-    game/timeline_animation_trigger.cpp
-    game/scene_class.cpp
-    game/scene.cpp
-    game/tilemap.cpp
-    game/tilemap_layer.cpp
-    game/tilemap_layer_class.cpp)
-add_library(EngineLibTesting
-    engine/ui.cpp
-    engine/audio.cpp
-    engine/physics.cpp
-    engine/renderer.cpp
-    engine/context.cpp
-    engine/camera.cpp
-    engine/graphics.cpp
-    engine/lua_game_runtime.cpp
-    engine/lua_util.cpp
-    engine/lua_base.cpp
-    engine/lua_data.cpp
-    engine/lua_glm.cpp
-    engine/lua_wdk.cpp
-    engine/lua_uik.cpp
-    engine/lua_gfx.cpp
-    engine/lua_game.cpp
-    engine/state.cpp)
-target_include_directories(GameLibTesting   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
-target_include_directories(EngineLibTesting PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
-if (MSVC)
-    target_compile_options(EngineLibTesting PRIVATE /bigobj)
-endif()
-
-target_link_libraries(EngineLibTesting INTERFACE box2d)
-
 add_executable(unit_test_tree      game/unit_test/unit_test_tree.cpp)
 add_executable(unit_test_anim      game/unit_test/unit_test_animation.cpp)
 add_executable(unit_test_entity    game/unit_test/unit_test_entity.cpp)
@@ -1281,16 +1223,16 @@ add_executable(unit_test_ui       engine/unit_test/unit_test_ui.cpp)
 if (MSVC)
     target_compile_options(unit_test_lua PRIVATE /bigobj)
 endif()
-target_link_libraries(unit_test_tilemap   GameLibTesting DataLib BaseLib)
-target_link_libraries(unit_test_scriptvar GameLibTesting DataLib BaseLib)
-target_link_libraries(unit_test_entity    GameLibTesting DataLib BaseLib)
-target_link_libraries(unit_test_scene     GameLibTesting DataLib BaseLib)
-target_link_libraries(unit_test_anim      GameLibTesting DataLib BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_tree      GameLibTesting DataLib BaseLib)
-target_link_libraries(unit_test_lua       EngineLibTesting GameLibTesting GfxLib DataLib UiLib AudioLib BaseLib wdk_system Lua ${CONAN_LIBS})
-target_link_libraries(unit_test_settings  EngineLibTesting DataLib BaseLib UiLib)
-target_link_libraries(unit_test_renderer  EngineLibTesting GameLibTesting GfxLib DataLib BaseLib UiLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
-target_link_libraries(unit_test_ui        EngineLibTesting GameLibTesting GfxLib DataLib BaseLib UiLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
+target_link_libraries(unit_test_tilemap   GameLib DataLib BaseLib)
+target_link_libraries(unit_test_scriptvar GameLib DataLib BaseLib)
+target_link_libraries(unit_test_entity    GameLib DataLib BaseLib)
+target_link_libraries(unit_test_scene     GameLib DataLib BaseLib)
+target_link_libraries(unit_test_anim      GameLib DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_tree      GameLib DataLib BaseLib)
+target_link_libraries(unit_test_lua       EngineLib GameLib GfxLib DataLib UiLib AudioLib BaseLib wdk_system Lua ${CONAN_LIBS})
+target_link_libraries(unit_test_settings  EngineLib DataLib BaseLib UiLib)
+target_link_libraries(unit_test_renderer  EngineLib GameLib GfxLib DataLib BaseLib UiLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
+target_link_libraries(unit_test_ui        EngineLib GameLib GfxLib DataLib BaseLib UiLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
 
 target_include_directories(unit_test_tilemap   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
 target_include_directories(unit_test_scriptvar PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
