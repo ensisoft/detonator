@@ -99,6 +99,9 @@
            <layout class="QHBoxLayout" name="horizontalLayout_10">
             <item>
              <widget class="QDoubleSpinBox" name="minTime">
+              <property name="toolTip">
+               <string>Minimum time for how long the particle engine is considered to be alive</string>
+              </property>
               <property name="specialValueText">
                <string/>
               </property>
@@ -172,6 +175,9 @@
            <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
              <widget class="QDoubleSpinBox" name="maxTime">
+              <property name="toolTip">
+               <string>Maximum time for how long the particle engine is alive</string>
+              </property>
               <property name="specialValueText">
                <string>Unlimited</string>
               </property>
@@ -241,6 +247,9 @@
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
              <widget class="QDoubleSpinBox" name="gravityX">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(100, 200, 100)</string>
+              </property>
               <property name="minimum">
                <double>-1000.000000000000000</double>
               </property>
@@ -260,6 +269,9 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="gravityY">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(200,100, 100)</string>
+              </property>
               <property name="minimum">
                <double>-1000.000000000000000</double>
               </property>
@@ -314,7 +326,14 @@
            </widget>
           </item>
           <item row="13" column="1">
-           <widget class="QDoubleSpinBox" name="warmupTime"/>
+           <widget class="QDoubleSpinBox" name="warmupTime">
+            <property name="toolTip">
+             <string>How many seconds to &quot;dry run&quot; simulate the particles up front before first render</string>
+            </property>
+            <property name="suffix">
+             <string> s</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -351,6 +370,12 @@
           <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
             <widget class="gui::CollapsibleWidget" name="materialGroup">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="collapsed" stdset="0">
               <bool>false</bool>
              </property>
@@ -457,6 +482,12 @@
                  </item>
                  <item row="6" column="1" colspan="2">
                   <widget class="color_widgets::ColorSelector" name="endColor">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -490,6 +521,12 @@
                  </item>
                  <item row="3" column="1" colspan="2">
                   <widget class="color_widgets::ColorSelector" name="startColor">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -506,6 +543,12 @@
                  </item>
                  <item row="4" column="1" colspan="2">
                   <widget class="color_widgets::ColorSelector" name="midColor">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -535,6 +578,12 @@
            </item>
            <item>
             <widget class="gui::CollapsibleWidget" name="particleEmissionGroup">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="collapsed" stdset="0">
               <bool>true</bool>
              </property>
@@ -798,6 +847,12 @@
            </item>
            <item>
             <widget class="gui::CollapsibleWidget" name="simulationSpaceGroup">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="collapsed" stdset="0">
               <bool>true</bool>
              </property>
@@ -899,6 +954,12 @@
            </item>
            <item>
             <widget class="gui::CollapsibleWidget" name="localEmitterGroup">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="collapsed" stdset="0">
               <bool>true</bool>
              </property>
@@ -1030,6 +1091,12 @@
            </item>
            <item>
             <widget class="gui::CollapsibleWidget" name="vizGroup">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="collapsed" stdset="0">
               <bool>true</bool>
              </property>
