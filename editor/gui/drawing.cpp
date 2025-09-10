@@ -96,26 +96,41 @@ void DrawSpline(gfx::Painter& painter,
                 const game::SplineMoverClass* spline,
                 const game::EntityNodeClass* coordinate_reference_node, const game::EntityClass& entity)
 {
-    // todo: use the derivative to segment the line drawing better.
 
-    auto catmull_rom = spline->MakeCatmullRom();
-    if (!catmull_rom || !catmull_rom->is_valid())
-        return;
-
-    const auto segments = 100;
-    for (int i=0; i<segments; ++i)
+    const auto curve = spline->GetPathCurveType();
+    if (curve == game::SplineMoverClass::PathCurveType::CatmullRom)
     {
-        const auto segment_length = 1.0f / segments;
-        const auto t = (float)i;
-        const auto point_t0 = (t + 0.0f) * segment_length;
-        const auto point_t1 = (t + 1.0f) * segment_length;
+        // todo: use the derivative to segment the line drawing better.
+        auto catmull_rom = spline->MakeCatmullRom();
+        if (!catmull_rom || !catmull_rom->is_valid())
+            return;
 
-        const auto spline_local_point0 = spline->Evaluate(*catmull_rom, point_t0).GetPosition();
-        const auto spline_local_point1 = spline->Evaluate(*catmull_rom, point_t1).GetPosition();
+        const auto segments = 100;
+        for (int i=0; i<segments; ++i)
+        {
+            const auto segment_length = 1.0f / segments;
+            const auto t = (float)i;
+            const auto point_t0 = (t + 0.0f) * segment_length;
+            const auto point_t1 = (t + 1.0f) * segment_length;
 
-        const auto& spline_world_point0 = entity.MapCoordsFromNode(spline_local_point0, coordinate_reference_node);
-        const auto& spline_world_point1 = entity.MapCoordsFromNode(spline_local_point1, coordinate_reference_node);
-        DrawLine(painter, spline_world_point0, spline_world_point1);
+            const auto spline_local_point0 = spline->Evaluate(*catmull_rom, point_t0).GetPosition();
+            const auto spline_local_point1 = spline->Evaluate(*catmull_rom, point_t1).GetPosition();
+
+            const auto& spline_world_point0 = entity.MapCoordsFromNode(spline_local_point0, coordinate_reference_node);
+            const auto& spline_world_point1 = entity.MapCoordsFromNode(spline_local_point1, coordinate_reference_node);
+            DrawLine(painter, spline_world_point0, spline_world_point1);
+        }
+    }
+    else if (curve == game::SplineMoverClass::PathCurveType::Linear)
+    {
+        for (size_t i=0; i<spline->GetPointCount()-1; ++i)
+        {
+            const auto spline_local_point0 = spline->GetPathRelativePoint(i+0).GetPosition();
+            const auto spline_local_point1 = spline->GetPathRelativePoint(i+1).GetPosition();
+            const auto& spline_world_point0 = entity.MapCoordsFromNode(spline_local_point0, coordinate_reference_node);
+            const auto& spline_world_point1 = entity.MapCoordsFromNode(spline_local_point1, coordinate_reference_node);
+            DrawLine(painter, spline_world_point0, spline_world_point1);
+        }
     }
 }
 
