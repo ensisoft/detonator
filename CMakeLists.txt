@@ -329,6 +329,7 @@ add_library(GfxLib
     graphics/tilebatch.cpp
     graphics/utility.cpp
     graphics/vertex.cpp
+    graphics/tool/polygon.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp)
@@ -391,60 +392,6 @@ add_library(UiLib
     uikit/layout.cpp
     uikit/widget.cpp
     uikit/window.cpp)
-add_library(GfxLibTesting
-    device/opengles.cpp
-    device/vertex.cpp
-    graphics/algo.cpp
-    graphics/bitmap.cpp
-    graphics/bitmap_noise.cpp
-    graphics/debug_drawable.cpp
-    graphics/effect_drawable.cpp
-    graphics/device.cpp
-    graphics/device_framebuffer.cpp
-    graphics/device_geometry.cpp
-    graphics/device_instance.cpp
-    graphics/device_program.cpp
-    graphics/device_shader.cpp
-    graphics/device_texture.cpp
-    graphics/drawable.cpp
-    graphics/drawcmd.cpp
-    graphics/drawing.cpp
-    graphics/generic_shader_program.cpp
-    graphics/geometry.cpp
-    graphics/guidegrid.cpp
-    graphics/image.cpp
-    graphics/linebatch.cpp
-    graphics/loader.cpp
-    graphics/material.cpp
-    graphics/material_class.cpp
-    graphics/material_instance.cpp
-    graphics/painter.cpp
-    graphics/particle_engine.cpp
-    graphics/pixel.cpp
-    graphics/polygon_mesh.cpp
-    graphics/shader_program.cpp
-    graphics/shader_source.cpp
-    graphics/simple_shape.cpp
-    graphics/text_buffer.cpp
-    graphics/text_font.cpp
-    graphics/text_material.cpp
-    graphics/texture_bitmap_buffer_source.cpp
-    graphics/texture_bitmap_generator_source.cpp
-    graphics/texture_file_source.cpp
-    graphics/texture_map.cpp
-    graphics/texture_text_buffer_source.cpp
-    graphics/texture_texture_source.cpp
-    graphics/tilebatch.cpp
-    graphics/utility.cpp
-    graphics/vertex.cpp
-    graphics/tool/polygon.cpp
-    third_party/stb/stb_image.c
-    third_party/stb/stb_image_write.c
-    third_party/base64/base64.cpp)
-target_include_directories(GfxLibTesting PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/unit_test")
-if (UNIX)
-    target_compile_options(GfxLibTesting PRIVATE -fPIC)
-endif()
 
 target_include_directories(AudioLib  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
 target_include_directories(BaseLib   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/config")
@@ -481,7 +428,6 @@ target_link_libraries(DataLib       PUBLIC ${CONAN_LIBS})
 target_link_libraries(BaseLib       PUBLIC ${CONAN_LIBS})
 target_link_libraries(GameLib       PUBLIC ${CONAN_LIBS})
 target_link_libraries(GfxLib        PUBLIC ${CONAN_LIBS})
-target_link_libraries(GfxLibTesting PUBLIC ${CONAN_LIBS})
 target_link_libraries(EngineLib     PUBLIC ${CONAN_LIBS})
 target_link_libraries(UiLib         PUBLIC ${CONAN_LIBS})
 
@@ -1119,7 +1065,7 @@ add_executable(graphics_test
     graphics/test/main.cpp
 )
 target_include_directories(graphics_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/test")
-target_link_libraries(graphics_test GfxLibTesting)
+target_link_libraries(graphics_test GfxLib)
 target_link_libraries(graphics_test BaseLib DataLib)
 target_link_libraries(graphics_test ${CONAN_LIBS})
 target_link_libraries(graphics_test wdk_system wdk_desktop_gl)
@@ -1165,7 +1111,7 @@ endif()
 # engine perf test app
 add_executable(perf-test engine/test/perftest.cpp)
 target_include_directories(perf-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/test")
-target_link_libraries(perf-test PRIVATE EngineLib GameLib GfxLibTesting AudioLib UiLib DataLib BaseLib)
+target_link_libraries(perf-test PRIVATE EngineLib GameLib GfxLib AudioLib UiLib DataLib BaseLib)
 target_link_libraries(perf-test PRIVATE ${CONAN_LIBS})
 target_link_libraries(perf-test PRIVATE wdk_system wdk_desktop_gl)
 target_link_libraries(perf-test PRIVATE Lua)
@@ -1367,14 +1313,14 @@ add_executable(unit_test_drawable graphics/unit_test/unit_test_drawable.cpp)
 add_executable(unit_test_drawing  graphics/unit_test/unit_test_drawing.cpp)
 add_executable(unit_test_shader   graphics/unit_test/unit_test_shader.cpp)
 
-target_link_libraries(unit_test_image    GfxLibTesting DataLib BaseLib)
-target_link_libraries(unit_test_graphics GfxLibTesting DataLib BaseLib)
-target_link_libraries(unit_test_device   GfxLibTesting DataLib BaseLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
-target_link_libraries(unit_test_material GfxLibTesting DataLib BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_drawable GfxLibTesting DataLib BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_bitmap   GfxLibTesting DataLib BaseLib)
-target_link_libraries(unit_test_drawing  GfxLibTesting DataLib BaseLib ${CONAN_LIBS})
-target_link_libraries(unit_test_shader   GfxLibTesting DataLib BaseLib)
+target_link_libraries(unit_test_image    GfxLib DataLib BaseLib)
+target_link_libraries(unit_test_graphics GfxLib DataLib BaseLib)
+target_link_libraries(unit_test_device   GfxLib DataLib BaseLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
+target_link_libraries(unit_test_material GfxLib DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_drawable GfxLib DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_bitmap   GfxLib DataLib BaseLib)
+target_link_libraries(unit_test_drawing  GfxLib DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_shader   GfxLib DataLib BaseLib)
 
 add_test(NAME unit_test_drawable COMMAND unit_test_drawable)
 add_test(NAME unit_test_drawing  COMMAND unit_test_drawing)
