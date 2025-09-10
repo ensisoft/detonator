@@ -28,6 +28,36 @@
 
 namespace game
 {
+
+float GetPointDistance(const SplinePoint& p0, const SplinePoint& p1) noexcept
+{
+    return glm::length(p1.GetPosition().ToVec2() -
+                       p0.GetPosition().ToVec2());
+}
+SplinePoint InterpolatePoint(const SplinePoint& p0, const SplinePoint& p1, float t) noexcept
+{
+    const auto& pos0 = p0.GetPosition().ToVec2();
+    const auto& pos1 = p1.GetPosition().ToVec2();
+    const auto& lookAt0 = p0.GetLookAt().ToVec2();
+    const auto& lookAt1 = p1.GetLookAt().ToVec2();
+    const auto mix_pos = glm::mix(pos0, pos1, t);
+    const auto mix_lookAt = glm::mix(lookAt0,lookAt1, t);
+    return { mix_pos, mix_lookAt };
+}
+
+SplinePoint ComputePointTangent(const SplinePoint& p0, const SplinePoint& p1, float dist) noexcept
+{
+    // difference in points over distance.
+    const auto& pos0 = p0.GetPosition().ToVec2();
+    const auto& pos1 = p1.GetPosition().ToVec2();
+    const auto& lookAt0 = p0.GetLookAt().ToVec2();
+    const auto& lookAt1 = p1.GetLookAt().ToVec2();
+    const auto pos = (pos1 - pos0) / dist;
+    const auto lookAt = (lookAt1 - lookAt0) / dist;
+    return { pos, lookAt };
+}
+
+
 // Redefine a spline control point at the given index.
 // The index must be valid.
 void Spline::SetPoint(const SplinePoint& point, size_t index)
@@ -67,6 +97,16 @@ std::shared_ptr<const Spline::CatmullRomFunction> Spline::MakeCatmullRom() const
 
     auto copy = mPoints;
     auto func = std::make_shared<CatmullRomFunction>(std::move(copy));
+    return func;
+}
+
+std::shared_ptr<const Spline::PolyLineFunction> Spline::MakePolyLine() const
+{
+    if (mPoints.size() < 2)
+        return nullptr;
+
+    auto copy = mPoints;
+    auto func = std::make_shared<PolyLineFunction>(std::move(copy));
     return func;
 }
 

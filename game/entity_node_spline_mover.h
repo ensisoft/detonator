@@ -70,38 +70,39 @@ namespace game
         };
 
         using CatmullRomFunction = Spline::CatmullRomFunction;
+        using PolyLineFunction   = Spline::PolyLineFunction;
 
         SplineMoverClass();
         ~SplineMoverClass();
 
-        inline auto GetIterationMode() const noexcept
+        auto GetIterationMode() const noexcept
         { return mIterationMode; }
 
-        inline auto GetRotationMode() const noexcept
+        auto GetRotationMode() const noexcept
         { return mRotationMode; }
 
-        inline auto GetAcceleration() const noexcept
+        auto GetAcceleration() const noexcept
         { return mAcceleration; }
 
-        inline auto GetSpeed() const noexcept
+        auto GetSpeed() const noexcept
         { return mSpeed; }
 
-        inline auto GetPathCoordinateSpace() const noexcept
+        auto GetPathCoordinateSpace() const noexcept
         { return mPathCoordinateSpace; }
 
-        inline auto GetPathCurveType() const noexcept
+        auto GetPathCurveType() const noexcept
         { return mPathCurveType; }
 
         // Get the current number of spline control points.
-        inline auto GetPointCount() const noexcept
+        auto GetPointCount() const noexcept
         { return mSpline.GetPointCount(); }
 
         // Get a spline control point at the given index.
         // The index must be valid.
-        inline const auto& GetPoint(size_t index) const noexcept
+        const auto& GetPoint(size_t index) const noexcept
         { return mSpline.GetPoint(index); }
 
-        inline auto GetPathRelativePoint(size_t index) const noexcept
+        auto GetPathRelativePoint(size_t index) const noexcept
         {
             if (mPathCoordinateSpace == PathCoordinateSpace::Absolute)
                 return GetPoint(index);
@@ -113,10 +114,10 @@ namespace game
             point.SetPosition(position - offset);
             return point;
         }
-        inline void SetAcceleration(float acceleration) noexcept
+        void SetAcceleration(float acceleration) noexcept
         { mAcceleration = acceleration; }
 
-        inline void SetSpeed(float speed) noexcept
+        void SetSpeed(float speed) noexcept
         { mSpeed = speed; }
 
         void SetPoints(std::vector<SplinePoint> points) noexcept
@@ -124,47 +125,50 @@ namespace game
 
         // Redefine a spline control point at the given index.
         // The index must be valid.
-        inline void SetPoint(const SplinePoint& point, size_t index)
+        void SetPoint(const SplinePoint& point, size_t index)
         { mSpline.SetPoint(point, index); }
 
         // Append a new control point to the spline.
-        inline void AppendPoint(const SplinePoint& point)
+        void AppendPoint(const SplinePoint& point)
         { mSpline.AppendPoint(point); }
 
-        inline void PrependPoint(const SplinePoint& point)
+        void PrependPoint(const SplinePoint& point)
         { mSpline.PrependPoint(point); }
 
-        inline void ErasePoint(size_t index)
+        void ErasePoint(size_t index)
         { mSpline.ErasePoint(index); }
 
-        inline void SetPathCoordinateSpace(PathCoordinateSpace mode) noexcept
+        void SetPathCoordinateSpace(PathCoordinateSpace mode) noexcept
         { mPathCoordinateSpace = mode; }
 
-        inline void SetPathCurveType(PathCurveType curve) noexcept
+        void SetPathCurveType(PathCurveType curve) noexcept
         { mPathCurveType = curve; }
 
-        inline void SetRotationMode(RotationMode rotation) noexcept
+        void SetRotationMode(RotationMode rotation) noexcept
         { mRotationMode = rotation; }
 
-        inline void SetIterationMode(IterationMode mode) noexcept
+        void SetIterationMode(IterationMode mode) noexcept
         { mIterationMode = mode; }
 
-        inline void SetFlag(Flags flag, bool on_off) noexcept
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
 
-        inline void Enable(bool on_off) noexcept
+        void Enable(bool on_off) noexcept
         { SetFlag(Flags::Enabled, on_off); }
 
-        inline bool TestFlag(Flags flag) const noexcept
+        bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
 
-        inline bool IsEnabled() const noexcept
+        bool IsEnabled() const noexcept
         { return TestFlag(Flags::Enabled); }
 
         std::shared_ptr<const CatmullRomFunction> GetCatmullRom() const;
         std::shared_ptr<const CatmullRomFunction> MakeCatmullRom() const;
 
-        inline auto GetFlags() const noexcept
+        std::shared_ptr<const PolyLineFunction> GetPolyLine() const;
+        std::shared_ptr<const PolyLineFunction> MakePolyLine() const;
+
+        auto GetFlags() const noexcept
         { return mFlags; }
 
         double GetPathLength() const;
@@ -186,10 +190,24 @@ namespace game
             return sample;
         }
 
+        SplinePoint Evaluate(const PolyLineFunction& polyline, float t) const
+        {
+            auto sample = Spline::Evaluate(polyline, t);
+            if (mPathCoordinateSpace == PathCoordinateSpace::Absolute)
+                return sample;
+
+            const auto& offset = GetPoint(0).GetPosition().ToVec2();
+            auto position = sample.GetPosition().ToVec2();
+            sample.SetPosition(position - offset);
+            return sample;
+        }
+
         size_t GetHash() const noexcept;
         void IntoJson(data::Writer& data) const;
         bool FromJson(const data::Reader& data);
         bool InitClassRuntime() const;
+    private:
+        bool InitCatmullRomCache() const;
     private:
         PathCoordinateSpace mPathCoordinateSpace = PathCoordinateSpace::Absolute;
         PathCurveType mPathCurveType = PathCurveType::CatmullRom;
@@ -209,13 +227,15 @@ namespace game
         using RotationMode        = SplineMoverClass::RotationMode;
         using PathCoordinateSpace = SplineMoverClass::PathCoordinateSpace;
         using CatmullRomFunction  = SplineMoverClass::CatmullRomFunction;
+        using PolyLineFunction    = SplineMoverClass::PolyLineFunction;
 
         explicit SplineMover(std::shared_ptr<const SplineMoverClass> klass);
 
         template<typename TargetObject>
         void TransformObject(float dt, TargetObject& object)
         {
-            if (!mCatmullRom || mPathComplete || !IsEnabled())
+            const auto has_curve_function = mCatmullRom || mPolyLine;
+            if (!has_curve_function || mPathComplete || !IsEnabled())
                 return;
 
             const auto iteration_mode = mClass->GetIterationMode();
@@ -252,15 +272,28 @@ namespace game
                 }
             } else BUG("Bug on iteration mode");
 
-            // normalize displacement.
-            //const float t = mDisplacement / mPathLength;
-            const auto t = (float)mClass->Reparametrize(mDisplacement);
-
             const auto coordinate_space = mClass->GetPathCoordinateSpace();
             const auto rotation_mode = mClass->GetRotationMode();
-            const auto max = mCatmullRom->max_parameter();
-            const auto& sample = mCatmullRom->evaluate(t * max);
-            const auto& position = sample.GetPosition();
+            Float2 position;
+            Float2 tangent;
+            if (mCatmullRom)
+            {
+                const auto t = (float)mClass->Reparametrize(mDisplacement);
+                const auto max = mCatmullRom->max_parameter();
+                const auto& sample = mCatmullRom->evaluate(t * max);
+                position = sample.GetPosition();
+
+                if (rotation_mode == RotationMode::ApplySplineRotation)
+                    tangent = mCatmullRom->prime(t * max).GetPosition();
+            }
+            else if (mPolyLine)
+            {
+                const auto& sample = mPolyLine->Interpolate(mDisplacement);
+                position = sample.GetPosition();
+
+                if (rotation_mode == RotationMode::ApplySplineRotation)
+                    tangent  = mPolyLine->FindTangent(mDisplacement).GetPosition();
+            }
 
             if (coordinate_space == PathCoordinateSpace::Absolute)
             {
@@ -281,7 +314,6 @@ namespace game
             {
                 // get the tangent value and from the tangent compute
                 // the rotation value.
-                const auto& tangent = mCatmullRom->prime(t * max).GetPosition();
                 const auto angle = std::atan2(tangent.y, tangent.x);
                 object.SetRotation(angle);
             }
@@ -293,33 +325,34 @@ namespace game
             else BUG("Bug on spline rotation mode.");
         }
 
-        inline void SetAcceleration(float acceleration) noexcept
+        void SetAcceleration(float acceleration) noexcept
         { mAcceleration = acceleration; }
 
-        inline void SetSpeed(float speed) noexcept
+        void SetSpeed(float speed) noexcept
         { mSpeed = speed; }
 
-        inline auto GetAcceleration() const noexcept
+        auto GetAcceleration() const noexcept
         { return mAcceleration; }
 
-        inline auto GetSpeed() const noexcept
+        auto GetSpeed() const noexcept
         { return mSpeed; }
 
-        inline void SetFlag(Flags flag, bool on_off) noexcept
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
 
-        inline void Enable(bool on_off) noexcept
+        void Enable(bool on_off) noexcept
         { SetFlag(Flags::Enabled, on_off); }
 
-        inline bool TestFlag(Flags flag) const noexcept
+        bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
 
-        inline bool IsEnabled() const noexcept
+        bool IsEnabled() const noexcept
         { return TestFlag(Flags::Enabled); }
 
     private:
         std::shared_ptr<const SplineMoverClass> mClass;
         std::shared_ptr<const CatmullRomFunction> mCatmullRom;
+        std::shared_ptr<const PolyLineFunction> mPolyLine;
         base::bitflag<Flags> mFlags;
         Float2 mStartPos;
         float mDirection    = 1.0f;

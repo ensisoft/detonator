@@ -27,6 +27,7 @@
 #include <array>
 
 #include "base/utility.h"
+#include "base/polyline.h"
 #include "data/fwd.h"
 #include "game/types.h"
 
@@ -53,29 +54,29 @@ namespace game
             mData[3] = v3;
         }
 
-        inline float operator[](size_t index) const noexcept
+        float operator[](size_t index) const noexcept
         {
             return mData[index];
         }
 
-        inline float& operator[](size_t index) noexcept
+        float& operator[](size_t index) noexcept
         {
             return mData[index];
         }
-        inline Float2 GetPosition() const noexcept
+        Float2 GetPosition() const noexcept
         {
             return { mData[0], mData[1] };
         }
-        inline Float2 GetLookAt() const noexcept
+        Float2 GetLookAt() const noexcept
         {
             return { mData[2], mData[3] };
         }
-        inline void SetPosition(const Float2& position) noexcept
+        void SetPosition(const Float2& position) noexcept
         {
             mData[0] = position.x;
             mData[1] = position.y;
         }
-        inline void SetLookAt(const Float2& look_at) noexcept
+        void SetLookAt(const Float2& look_at) noexcept
         {
             mData[2] = look_at.x;
             mData[3] = look_at.y;
@@ -85,21 +86,27 @@ namespace game
         std::array<float, 4> mData = {0};
     };
 
+    float GetPointDistance(const SplinePoint& p0, const SplinePoint& p1) noexcept;
+
+    SplinePoint InterpolatePoint(const SplinePoint& p0, const SplinePoint& p1, float t) noexcept;
+    SplinePoint ComputePointTangent(const SplinePoint& p0, const SplinePoint& p1, float dist) noexcept;
+
     class Spline
     {
     public:
         using CatmullRomFunction = boost::math::catmull_rom<SplinePoint, 4>;
+        using PolyLineFunction = base::PolyLine<SplinePoint>;
 
         void SetPoints(std::vector<SplinePoint> points) noexcept
         { mPoints = std::move(points); }
 
         // Get the current number of spline control points.
-        inline auto GetPointCount() const noexcept
+        auto GetPointCount() const noexcept
         { return mPoints.size(); }
 
         // Get a spline control point at the given index.
         // The index must be valid.
-        inline const auto& GetPoint(size_t i) const noexcept
+        const auto& GetPoint(size_t i) const noexcept
         { return base::SafeIndex(mPoints, i); }
 
         // Redefine a spline control point at the given index.
@@ -115,12 +122,14 @@ namespace game
         void ErasePoint(size_t index);
 
         std::shared_ptr<const CatmullRomFunction> MakeCatmullRom() const;
+        std::shared_ptr<const PolyLineFunction> MakePolyLine() const;
 
         std::size_t GetHash() const noexcept;
         void IntoJson(data::Writer& data) const;
         bool FromJson(const data::Reader& data);
 
         static SplinePoint Evaluate(const CatmullRomFunction& spline, float t);
+        static SplinePoint Evaluate(const PolyLineFunction& spline, float t);
 
         static double CalcArcLength(const CatmullRomFunction& spline, float threshold = 1e-4);
         static double CalcArcLength(const CatmullRomFunction& spline, float t0, float t1, float threshold = 1e-4);
