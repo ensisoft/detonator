@@ -121,15 +121,15 @@ void DarkStyle::polish(QApplication *app)
     static const char darkstyle[] = {
 #include "darkstyle.qss"
     };
-    static const char combinear[] = {
-#include "Combinear.qss"
+    static const char detonator[] = {
+#include "Detonator.qss"
     };
 
     QString style = property("style").toString();
     if (style == "Fusion-Dark")
         app->setStyleSheet(darkstyle);
     else if (style == "DETONATOR")
-        app->setStyleSheet(combinear);
+        app->setStyleSheet(detonator);
 }
 
 void DarkStyle::unpolish(QApplication *app)
