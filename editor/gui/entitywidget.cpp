@@ -1518,6 +1518,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
     GetUserProperty(resource, "node_property_group", mUI.nodePropertiesGroup);
     GetUserProperty(resource, "node_transform_group", mUI.nodeTransformGroup);
+    GetUserProperty(resource, "base_properties_group", mUI.baseProperties);
     GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
     GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
@@ -1610,6 +1611,7 @@ void EntityWidget::InitializeSettings(const UISettings& settings)
 void EntityWidget::SetViewerMode()
 {
     SetVisible(mUI.baseProperties,  false);
+    SetVisible(mUI.scripting,       false);
     SetVisible(mUI.animator,        false);
     SetVisible(mUI.entity,          false);
     SetVisible(mUI.scrollArea,      false);
@@ -1740,6 +1742,7 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Entity", mUI.rightSplitter);
     settings.SaveWidget("Entity", mUI.nodePropertiesGroup);
     settings.SaveWidget("Entity", mUI.nodeTransformGroup);
+    settings.SaveWidget("Entity", mUI.baseProperties);
     return true;
 }
 bool EntityWidget::LoadState(const Settings& settings)
@@ -1770,6 +1773,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Entity", mUI.rightSplitter);
     settings.LoadWidget("Entity", mUI.nodePropertiesGroup);
     settings.LoadWidget("Entity", mUI.nodeTransformGroup);
+    settings.LoadWidget("Entity", mUI.baseProperties);
 
     game::EntityClass klass;
     if (!klass.FromJson(json))
@@ -2322,6 +2326,7 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
     SetUserProperty(resource, "node_property_group", mUI.nodePropertiesGroup);
     SetUserProperty(resource, "node_transform_group", mUI.nodeTransformGroup);
+    SetUserProperty(resource, "base_properties_group", mUI.baseProperties);
 
     // save the track properties.
     for (const auto& [id, props] : mTrackProperties)
