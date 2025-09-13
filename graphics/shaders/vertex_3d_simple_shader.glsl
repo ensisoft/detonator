@@ -29,11 +29,20 @@ in vec3 aBitangent;
 uniform mat4 kProjectionMatrix;
 uniform mat4 kModelViewMatrix;
 
+uniform uint kDrawableFlags;
+
 // @varyings
 out vec2 vTexCoord;
 
 void VertexShaderMain() {
     vTexCoord = aTexCoord;
+
+    if ((kDrawableFlags & DRAWABLE_FLAGS_FLIP_UV_HORIZONTALLY) == DRAWABLE_FLAGS_FLIP_UV_HORIZONTALLY) {
+      vTexCoord.x = 1.0 - vTexCoord.x;
+    }
+    if ((kDrawableFlags & DRAWABLE_FLAGS_FLIP_UV_VERTICALLY) == DRAWABLE_FLAGS_FLIP_UV_VERTICALLY) {
+      vTexCoord.y = 1.0 - vTexCoord.y;
+    }
 
     mat4 model_inst_matrix = GetInstanceTransform();
     mat4 model_view_matrix = kModelViewMatrix * model_inst_matrix;

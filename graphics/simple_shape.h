@@ -183,7 +183,7 @@ namespace gfx
           : mId(std::move(id))
           , mName(std::move(name))
           , mShape(shape)
-          , mArgs(std::move(args))
+          , mArgs(args)
         {}
         SimpleShapeClass(const SimpleShapeClass& other, std::string id)
           : mId(std::move(id))
@@ -191,32 +191,32 @@ namespace gfx
           , mShape(other.mShape)
           , mArgs(other.mArgs)
         {}
-        inline const detail::SimpleShapeArgs& GetShapeArgs() const noexcept
+        const detail::SimpleShapeArgs& GetShapeArgs() const noexcept
         { return mArgs; }
-        inline void SetShapeArgs(detail::SimpleShapeArgs args) noexcept
-        { mArgs = std::move(args); }
-        inline Shape GetShapeType() const noexcept
+        void SetShapeArgs(detail::SimpleShapeArgs args) noexcept
+        { mArgs = args; }
+        Shape GetShapeType() const noexcept
         { return mShape; }
 
-        virtual Type GetType() const override
+        Type GetType() const override
         { return Type::SimpleShape; }
-        virtual std::string GetId() const override
+        std::string GetId() const override
         { return mId; }
-        virtual std::string GetName() const override
+        std::string GetName() const override
         { return mName; }
-        virtual void SetName(const std::string& name) override
+        void SetName(const std::string& name) override
         { mName = name; }
-        virtual std::unique_ptr<DrawableClass> Clone() const override
+        std::unique_ptr<DrawableClass> Clone() const override
         { return std::make_unique<SimpleShapeClass>(*this, base::RandomString(10)); }
-        virtual std::unique_ptr<DrawableClass> Copy() const override
+        std::unique_ptr<DrawableClass> Copy() const override
         { return std::make_unique<SimpleShapeClass>(*this); }
-        virtual std::size_t GetHash() const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
+        std::size_t GetHash() const override;
+        void IntoJson(data::Writer& data) const override;
+        bool FromJson(const data::Reader& data) override;
     private:
         std::string mId;
         std::string mName;
-        SimpleShapeType mShape;
+        SimpleShapeType mShape = SimpleShapeType::Arrow;
         detail::SimpleShapeArgs mArgs;
     };
 
@@ -323,15 +323,15 @@ namespace gfx
         const DrawableClass* GetClass() const override
         { return mClass.get(); }
 
-        inline Shape GetShape() const noexcept
+        Shape GetShape() const noexcept
         { return mClass->GetShapeType(); }
-        inline Style GetStyle() const noexcept
+        Style GetStyle() const noexcept
         { return mStyle; }
-        inline void SetStyle(Style style) noexcept
+        void SetStyle(Style style) noexcept
         { mStyle = style; }
     private:
         std::shared_ptr<const Class> mClass;
-        Style mStyle;
+        Style mStyle = Style::Solid;
     };
 
     // Instance of a simple shape without class object.
@@ -362,16 +362,16 @@ namespace gfx
         DrawPrimitive GetDrawPrimitive() const override;
         Usage GetGeometryUsage() const override;
 
-        inline Shape GetShape() const noexcept
+        Shape GetShape() const noexcept
         { return mShape; }
-        inline Style GetStyle() const noexcept
+        Style GetStyle() const noexcept
         { return mStyle; }
-        inline void SetStyle(Style style) noexcept
+        void SetStyle(Style style) noexcept
         { mStyle = style; }
     private:
         SimpleShapeType mShape;
         detail::SimpleShapeArgs mArgs;
-        Style mStyle;
+        Style mStyle = Style::Solid;
     };
 
     namespace detail {
@@ -529,7 +529,7 @@ namespace gfx
     {
         if (const auto* ptr = dynamic_cast<const SimpleShapeInstance*>(&drawable))
             return ptr->GetShape();
-        else if (const auto* ptr = dynamic_cast<const SimpleShape*>(&drawable))
+        if (const auto* ptr = dynamic_cast<const SimpleShape*>(&drawable))
             return ptr->GetShape();
         BUG("Not a simple shape!");
         return SimpleShapeType::Rectangle;

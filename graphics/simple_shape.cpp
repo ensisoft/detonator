@@ -95,7 +95,6 @@ std::string GetShaderId(gfx::SimpleShapeType type, bool use_instancing, bool use
 
 } // namespace
 
-
 namespace gfx {
 namespace detail {
 
@@ -1284,10 +1283,17 @@ bool SimpleShapeClass::FromJson(const data::Reader& data)
 
 bool SimpleShapeInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
+    unsigned flags = 0;
+    if (env.flip_uv_horizontally)
+        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Horizontally);
+    if (env.flip_uv_vertically)
+        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Vertically);
+
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
+    program.SetUniform("kDrawableFlags", flags);
     return true;
 }
 ShaderSource SimpleShapeInstance::GetShader(const Environment& env, const Device& device) const
@@ -1371,10 +1377,17 @@ Drawable::Usage SimpleShapeInstance::GetGeometryUsage() const
 
 bool SimpleShape::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
+    unsigned flags = 0;
+    if (env.flip_uv_horizontally)
+        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Horizontally);
+    if (env.flip_uv_vertically)
+        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Vertically);
+
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
+    program.SetUniform("kDrawableFlags", flags);
     return true;
 }
 ShaderSource SimpleShape::GetShader(const Environment& env, const Device& device) const

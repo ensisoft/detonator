@@ -45,7 +45,8 @@ namespace engine
         using CoordinateSpace = game::CoordinateSpace;
 
         enum class Flags {
-            PP_Bloom, CullPacket
+            PP_Bloom, CullPacket,
+            Flip_UV_Vertically, Flip_UV_Horizontally
         };
         enum class Domain {
             Scene, Editor

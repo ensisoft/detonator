@@ -204,6 +204,8 @@ namespace gfx
             BlendOp blending = BlendOp::None;
             float line_width = 1.0f;
             bool premulalpha = false;
+            bool flip_uv_vertically = false;
+            bool flip_uv_horizontally = false;
         };
 
         struct DrawCommand {
