@@ -77,6 +77,8 @@ namespace gfx
         // The environment that possibly affects the geometry and drawable
         // generation and update in some way.
         struct Environment {
+            bool flip_uv_vertically = false;
+            bool flip_uv_horizontally = false;
             // true if the draw is with "effects", i.e. per triangle transform
             bool use_effects = false;
             // true to indicate that we're going to do instanced draw.
@@ -143,7 +145,7 @@ namespace gfx
 
         static DrawCategory MapDrawableCategory(Type type);
 
-        inline DrawCategory GetDrawCategory() const
+        DrawCategory GetDrawCategory() const
         { return MapDrawableCategory(GetType()); }
     private:
     };

@@ -151,6 +151,8 @@ ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Dra
 
     source.LoadRawSource(vertex_main);
     source.AddShaderSourceUri("shaders/generic_main_vertex_shader.glsl");
+    source.AddPreprocessorDefinition("DRAWABLE_FLAGS_FLIP_UV_VERTICALLY", static_cast<unsigned>(DrawableFlags::Flip_UV_Vertically));
+    source.AddPreprocessorDefinition("DRAWABLE_FLAGS_FLIP_UV_HORIZONTALLY", static_cast<unsigned>(DrawableFlags::Flip_UV_Horizontally));
     return source;
 }
 

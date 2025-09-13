@@ -537,12 +537,19 @@ PolygonMeshInstance::PolygonMeshInstance(const PolygonMeshClass& klass, std::str
 
 bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
+    unsigned flags = 0;
+    if (env.flip_uv_horizontally)
+        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Horizontally);
+    if (env.flip_uv_vertically)
+        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Vertically);
+
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
     program.SetUniform("kTime", (float)mTime);
     program.SetUniform("kRandom",(float)mRandom);
+    program.SetUniform("kDrawableFlags", flags);
 
     if (GetRenderMeshType() == RenderMeshType::Perceptual3D)
     {

@@ -28,6 +28,11 @@ namespace gfx
         EnableBloom = 0x1
     };
 
+    enum class DrawableFlags : uint32_t {
+        Flip_UV_Vertically = 0x1,
+        Flip_UV_Horizontally = 0x2
+    };
+
     enum class BasicLightType : int32_t {
         Ambient,
         Directional,

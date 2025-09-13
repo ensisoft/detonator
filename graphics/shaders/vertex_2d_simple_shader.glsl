@@ -43,6 +43,8 @@ uniform mat4 kModelViewMatrix;
   uniform int kEffectType;
 #endif
 
+uniform uint kDrawableFlags;
+
 // @varyings
 out vec2 vTexCoord;
 
@@ -99,6 +101,13 @@ void VertexShaderMain() {
     vs.tangent = vec3(1.0, 0.0, 0.0);
     vs.bitangent = vec3(0.0, -1.0, 0.0);
     vs.texcoord = aTexCoord;
+
+    if ((kDrawableFlags & DRAWABLE_FLAGS_FLIP_UV_HORIZONTALLY) == DRAWABLE_FLAGS_FLIP_UV_HORIZONTALLY) {
+      vs.texcoord.x = 1.0 - vs.texcoord.x;
+    }
+    if ((kDrawableFlags & DRAWABLE_FLAGS_FLIP_UV_VERTICALLY) == DRAWABLE_FLAGS_FLIP_UV_VERTICALLY) {
+      vs.texcoord.y = 1.0 - vs.texcoord.y;
+    }
 
     #ifdef CUSTOM_VERTEX_TRANSFORM
       CustomVertexTransform(vs);

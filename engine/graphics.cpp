@@ -265,15 +265,17 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
             continue;
 
         gfx::Painter::DrawCommand draw;
-        draw.user               = (void*)&packet;
-        draw.model              = &packet.transform;
-        draw.drawable           = packet.drawable.get();
-        draw.material           = packet.material.get();
-        draw.state.culling      = packet.culling;
-        draw.state.line_width   = packet.line_width;
-        draw.state.depth_test   = packet.depth_test;
-        draw.view               = view;
-        draw.projection         = projection;
+        draw.user                       = (void*)&packet;
+        draw.model                      = &packet.transform;
+        draw.drawable                   = packet.drawable.get();
+        draw.material                   = packet.material.get();
+        draw.state.culling              = packet.culling;
+        draw.state.line_width           = packet.line_width;
+        draw.state.depth_test           = packet.depth_test;
+        draw.state.flip_uv_horizontally = packet.flags.test(DrawPacket::Flags::Flip_UV_Horizontally);
+        draw.state.flip_uv_vertically   = packet.flags.test(DrawPacket::Flags::Flip_UV_Vertically);
+        draw.view                       = view;
+        draw.projection                 = projection;
         scene_painter.Prime(draw);
 
         const auto render_layer_index = packet.render_layer;

@@ -1036,11 +1036,6 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
             // comes from the renderable item instead of the node!
             transform.Push();
                 transform.RotateAroundX(gfx::FDegrees(180.0f));
-                if (horizontal_flip)
-                    transform.Scale(-1.0f, 1.0f);
-                if (vertical_flip)
-                    transform.Scale(1.0f, -1.0f);
-
                 transform.Scale(size.x, size.y, item->GetDepth());
                 transform.Rotate(item->GetRotator());
                 transform.Translate(item->GetOffset());
@@ -1051,11 +1046,6 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
             // model transform.
             transform.Push();
                 transform.Translate(-0.5f, -0.5f);
-                if (horizontal_flip)
-                    transform.Scale(-1.0f, 1.0f);
-                if (vertical_flip)
-                    transform.Scale(1.0f, -1.0f);
-
                 transform.Scale(size);
                 transform.Rotate(item->GetRotator());
                 transform.Translate(item->GetOffset());
@@ -1072,6 +1062,8 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
         gfx::Drawable::Environment env;
         env.model_matrix = &model;
         env.world_matrix = &world;
+        env.flip_uv_horizontally = horizontal_flip;
+        env.flip_uv_vertically   = vertical_flip;
         // todo: other env matrices?
 
         const auto time_scale = item->GetTimeScale();
@@ -1521,11 +1513,6 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             // comes from the renderable item instead of the node!
             transform.Push();
                transform.RotateAroundX(gfx::FDegrees(180.0f));
-               if (horizontal_flip)
-                   transform.Scale(-1.0f, 1.0f);
-               if (vertical_flip)
-                   transform.Scale(1.0f, -1.0f);
-
                transform.Scale(size.x, size.y, item->GetDepth());
                transform.Rotate(item->GetRotator());
                transform.Translate(item->GetOffset());
@@ -1535,11 +1522,6 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             // model transform.
             transform.Push();
                 transform.Translate(-0.5f, -0.5f);
-                if (horizontal_flip)
-                    transform.Scale(-1.0f, 1.0f);
-                if (vertical_flip)
-                    transform.Scale(1.0f, -1.0f);
-
                 transform.Scale(size);
                 transform.Rotate(item->GetRotator());
                 transform.Translate(item->GetOffset());
@@ -1550,6 +1532,8 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
         {
             DrawPacket packet;
             packet.flags.set(DrawPacket::Flags::PP_Bloom, item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
+            packet.flags.set(DrawPacket::Flags::Flip_UV_Vertically, vertical_flip);
+            packet.flags.set(DrawPacket::Flags::Flip_UV_Horizontally, horizontal_flip);
             packet.source       = DrawPacket::Source::Scene;
             packet.domain       = DrawPacket::Domain::Scene;
             packet.culling      = DrawPacket::Culling::Back;
@@ -1581,8 +1565,6 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
 
             if (double_sided)
                 packet.culling = DrawPacket::Culling::None;
-            else if (horizontal_flip ^ vertical_flip)
-                packet.culling = DrawPacket::Culling::Front;
 
             if (depth_test)
                 packet.depth_test = DrawPacket::DepthTest::LessOrEQual;

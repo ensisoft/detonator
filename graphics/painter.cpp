@@ -99,6 +99,8 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program, const Col
         drawable_env.view_matrix    = draw.view       ? draw.view       : &mViewMatrix;
         drawable_env.proj_matrix    = draw.projection ? draw.projection : &mProjMatrix;
         drawable_env.model_matrix   = draw.model      ? draw.model      : &Identity;
+        drawable_env.flip_uv_horizontally = draw.state.flip_uv_horizontally;
+        drawable_env.flip_uv_vertically   = draw.state.flip_uv_vertically;
 
         auto geometry = draw.geometry_gpu_ptr;
         if (geometry == nullptr)

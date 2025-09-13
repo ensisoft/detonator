@@ -2439,7 +2439,7 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>Flip vertically</string>
+                  <string>Flip UVs vertically</string>
                  </property>
                 </widget>
                </item>
@@ -2765,7 +2765,7 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>Flip horizontally</string>
+                  <string>Flip UVs horizontally</string>
                  </property>
                 </widget>
                </item>
