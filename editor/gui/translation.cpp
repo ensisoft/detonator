@@ -305,9 +305,9 @@ std::string TranslateEnum(CoordinateSpace space)
 {
     using S = CoordinateSpace;
     if (space == S::Scene)
-        return "Scene Space";
+        return "Scene Coordinate Space";
     else if (space == S::Camera)
-        return "Camera Space";
+        return "Camera Coordinate Space";
     else BUG("Missing translation");
     return "???";
 }

@@ -5926,6 +5926,66 @@
     <string>Add Mesh Effect</string>
    </property>
   </action>
+  <action name="actionNewCone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/cone.png</normaloff>:/32x32_ico_png/cone.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cone</string>
+   </property>
+  </action>
+  <action name="actionNewCube">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/cube.png</normaloff>:/32x32_ico_png/cube.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cube</string>
+   </property>
+  </action>
+  <action name="actionNewCylinder">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/cylinder.png</normaloff>:/32x32_ico_png/cylinder.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cylinder</string>
+   </property>
+  </action>
+  <action name="actionNewPyramid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/pyramid.png</normaloff>:/32x32_ico_png/pyramid.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pyramid</string>
+   </property>
+  </action>
+  <action name="actionNewSphere">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/sphere.png</normaloff>:/32x32_ico_png/sphere.png</iconset>
+   </property>
+   <property name="text">
+    <string>Sphere</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

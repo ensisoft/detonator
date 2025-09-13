@@ -168,6 +168,11 @@
     <file>32x32_ico_png/record.png</file>
     <file>32x32_ico_png/refresh.png</file>
     <file>32x32_ico_png/connect.png</file>
+    <file>32x32_ico_png/cone.png</file>
+    <file>32x32_ico_png/cube.png</file>
+    <file>32x32_ico_png/cylinder.png</file>
+    <file>32x32_ico_png/pyramid.png</file>
+    <file>32x32_ico_png/sphere.png</file>
 
     <file>64x64_ico_png/create.png</file>
     <file>64x64_ico_png/import.png</file>
