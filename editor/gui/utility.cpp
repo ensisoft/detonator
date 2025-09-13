@@ -296,6 +296,7 @@ void PopulateQtStyles(QComboBox* cmb)
     cmb->clear();
 
     cmb->addItem("DETONATOR"); //
+    cmb->addItem("Cyber Punk");
 
     // add Qt's built-in / plugin styles.
     const auto& styles = QStyleFactory::keys();
@@ -303,7 +304,6 @@ void PopulateQtStyles(QComboBox* cmb)
     {
         cmb->addItem(style);
     }
-
     cmb->addItem("Fusion-Dark"); // custom dark
 
     if (cmb->isEditable())

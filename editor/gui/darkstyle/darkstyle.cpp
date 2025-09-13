@@ -111,6 +111,13 @@ void DarkStyle::polish(QPalette &palette)
         palette.setColor(QPalette::Highlight, QColor("#b78620"));
         palette.setColor(QPalette::AlternateBase, QColor(183, 134, 32, 40));
     }
+    else if (style == "Cyber Punk")
+    {
+        palette.setColor(QPalette::Base, QColor("#232323"));
+        palette.setColor(QPalette::Text, QColor(220, 220, 220));
+        palette.setColor(QPalette::Highlight, QColor("#00c8ff"));
+        palette.setColor(QPalette::AlternateBase, QColor(183, 134, 32, 40));
+    }
 }
 
 void DarkStyle::polish(QApplication *app)
@@ -124,12 +131,17 @@ void DarkStyle::polish(QApplication *app)
     static const char detonator[] = {
 #include "Detonator.qss"
     };
+    static const char cyber_punk[] = {
+#include "cyberpunk.qss"
+    };
 
     QString style = property("style").toString();
     if (style == "Fusion-Dark")
         app->setStyleSheet(darkstyle);
     else if (style == "DETONATOR")
         app->setStyleSheet(detonator);
+    else if (style == "Cyber Punk")
+        app->setStyleSheet(cyber_punk);
 }
 
 void DarkStyle::unpolish(QApplication *app)
