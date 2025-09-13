@@ -1176,12 +1176,22 @@ public:
         const float height = mAlwaysSquare ? hypotenuse : diff.y;
 
         gfx::Transform model;
-        model.Scale(width, height);
+        if (gfx::Is3DShape(*mDrawable))
+            model.RotateAroundX(gfx::FDegrees(180.0f));
+
+        model.Scale(width, height, 100.0f);
         model.Translate(xpos, ypos);
+
+        if (gfx::Is3DShape(*mDrawable))
+            model.Translate(width*0.5f, height*0.5f);
+
         entity.Draw(*mDrawable, model, *mMaterial);
 
+        gfx::Transform rect_model;
+        rect_model.Scale(width, height);
+        rect_model.Translate(xpos, ypos);
         // draw a selection rect around it.
-        entity.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), model,
+        entity.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), rect_model,
                     gfx::CreateMaterialFromColor(gfx::Color::Green));
     }
     void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
@@ -1225,6 +1235,9 @@ public:
         game::DrawableItemClass item;
         item.SetMaterialId(mMaterialClass->GetId());
         item.SetDrawableId(mDrawableClass->GetId());
+        if (gfx::Is3DShape(*mDrawable))
+            item.SetDepth(100.0f);
+
         game::EntityNodeClass node;
         node.SetDrawable(item);
         node.SetName(name);
@@ -1350,19 +1363,31 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mCustomShapes->menuAction()->setIcon(QIcon("icons:polygon.png"));
     mCustomShapes->menuAction()->setText("Custom Shapes");
     mCustomShapes->menuAction()->setToolTip(tr("Place new custom shape"));
-    mBasicShapes = new QMenu(this);
-    mBasicShapes->menuAction()->setIcon(QIcon("icons32:rectangle.png"));
-    mBasicShapes->menuAction()->setText("Basic Shapes");
-    mBasicShapes->menuAction()->setToolTip(tr("Place new basic shape"));
-    mBasicShapes->addAction(mUI.actionNewRect);
-    mBasicShapes->addAction(mUI.actionNewRoundRect);
-    mBasicShapes->addAction(mUI.actionNewCircle);
-    mBasicShapes->addAction(mUI.actionNewSemiCircle);
-    mBasicShapes->addAction(mUI.actionNewIsoscelesTriangle);
-    mBasicShapes->addAction(mUI.actionNewRightTriangle);
-    mBasicShapes->addAction(mUI.actionNewTrapezoid);
-    mBasicShapes->addAction(mUI.actionNewParallelogram);
-    mBasicShapes->addAction(mUI.actionNewCapsule);
+
+    mBasicShapes2D = new QMenu(this);
+    mBasicShapes2D->menuAction()->setIcon(QIcon("icons32:rectangle.png"));
+    mBasicShapes2D->menuAction()->setText("Basic 2D Shapes");
+    mBasicShapes2D->menuAction()->setToolTip(tr("Place new basic 2D shape"));
+    mBasicShapes2D->addAction(mUI.actionNewRect);
+    mBasicShapes2D->addAction(mUI.actionNewRoundRect);
+    mBasicShapes2D->addAction(mUI.actionNewCircle);
+    mBasicShapes2D->addAction(mUI.actionNewSemiCircle);
+    mBasicShapes2D->addAction(mUI.actionNewIsoscelesTriangle);
+    mBasicShapes2D->addAction(mUI.actionNewRightTriangle);
+    mBasicShapes2D->addAction(mUI.actionNewTrapezoid);
+    mBasicShapes2D->addAction(mUI.actionNewParallelogram);
+    mBasicShapes2D->addAction(mUI.actionNewCapsule);
+
+    mBasicShapes3D = new QMenu(this);
+    mBasicShapes3D->menuAction()->setIcon(QIcon("icons32:cube.png"));
+    mBasicShapes3D->menuAction()->setText("Basic 3D Shapes");
+    mBasicShapes3D->menuAction()->setToolTip(tr("Place new basic 3D shape"));
+    mBasicShapes3D->addAction(mUI.actionNewCone);
+    mBasicShapes3D->addAction(mUI.actionNewCube);
+    mBasicShapes3D->addAction(mUI.actionNewCylinder);
+    mBasicShapes3D->addAction(mUI.actionNewPyramid);
+    mBasicShapes3D->addAction(mUI.actionNewSphere);
+
     mBasicLights = new QMenu(this);
     mBasicLights->menuAction()->setIcon(QIcon("icons:light.png"));
     mBasicLights->menuAction()->setText(tr("Basic Lights"));
@@ -1387,7 +1412,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mButtonBar = new QToolBar(this);
     mButtonBar->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
     mButtonBar->setIconSize(QSize(16, 16));
-    mButtonBar->addAction(mBasicShapes->menuAction());
+    mButtonBar->addAction(mBasicShapes2D->menuAction());
+    mButtonBar->addAction(mBasicShapes3D->menuAction());
     mButtonBar->addAction(mCustomShapes->menuAction());
     mButtonBar->addAction(mParticleSystems->menuAction());
     mButtonBar->addAction(mBasicLights->menuAction());
@@ -1669,7 +1695,8 @@ void EntityWidget::AddActions(QMenu& menu)
 
     auto* place_menu =new QMenu(&menu);
     place_menu->setTitle(tr("Place"));
-    place_menu->addAction(mBasicShapes->menuAction());
+    place_menu->addAction(mBasicShapes2D->menuAction());
+    place_menu->addAction(mBasicShapes3D->menuAction());
     place_menu->addAction(mCustomShapes->menuAction());
     place_menu->addAction(mParticleSystems->menuAction());
     place_menu->addAction(mBasicLights->menuAction());
@@ -2443,6 +2470,42 @@ void EntityWidget::on_actionNewParallelogram_triggered()
 
     UncheckPlacementActions();
     mUI.actionNewParallelogram->setChecked(true);
+}
+
+void EntityWidget::on_actionNewCone_triggered()
+{
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_cone", MapMouseCursorToWorld()));
+
+    UncheckPlacementActions();
+    mUI.actionNewCone->setCheckable(true);
+}
+void EntityWidget::on_actionNewCube_triggered()
+{
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_cube", MapMouseCursorToWorld()));
+
+    UncheckPlacementActions();
+    mUI.actionNewCube->setChecked(true);
+}
+void EntityWidget::on_actionNewCylinder_triggered()
+{
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_cylinder", MapMouseCursorToWorld()));
+
+    UncheckPlacementActions();
+    mUI.actionNewCylinder->setChecked(true);
+}
+void EntityWidget::on_actionNewPyramid_triggered()
+{
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_pyramid", MapMouseCursorToWorld()));
+
+    UncheckPlacementActions();
+    mUI.actionNewPyramid->setChecked(true);
+}
+void EntityWidget::on_actionNewSphere_triggered()
+{
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_sphere", MapMouseCursorToWorld()));
+
+    UncheckPlacementActions();
+    mUI.actionNewSphere->setChecked(true);
 }
 
 void EntityWidget::on_actionNewAmbientLight_triggered()

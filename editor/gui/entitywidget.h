@@ -120,6 +120,11 @@ namespace gui
         void on_actionNewSpotlight_triggered();
         void on_actionNewText_triggered();
         void on_actionNewStaticRigidBody_triggered();
+        void on_actionNewCone_triggered();
+        void on_actionNewCube_triggered();
+        void on_actionNewCylinder_triggered();
+        void on_actionNewPyramid_triggered();
+        void on_actionNewSphere_triggered();
 
         void on_actionNodeDelete_triggered();
         void on_actionNodeCut_triggered();
@@ -382,7 +387,8 @@ namespace gui
         QMenu* mParticleSystems = nullptr;
         // menu for the custom shapes
         QMenu* mCustomShapes = nullptr;
-        QMenu* mBasicShapes = nullptr;
+        QMenu* mBasicShapes2D= nullptr;
+        QMenu* mBasicShapes3D= nullptr;
         QMenu* mBasicLights = nullptr;
         QMenu* mTextItems = nullptr;
         QMenu* mPhysItems = nullptr;
