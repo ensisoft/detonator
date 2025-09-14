@@ -297,34 +297,38 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
     }
     TRACE_LEAVE(CreateDrawCmd);
 
-    gfx::Painter::ColorDepthStencilState mask_cover_state;
-    mask_cover_state.bWriteColor   = false;
-    mask_cover_state.stencil_ref   = 0;
-    mask_cover_state.stencil_mask  = 0xff;
-    mask_cover_state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
-    mask_cover_state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
-    mask_cover_state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+    gfx::Painter::RenderPassState mask_cover_state;
+    mask_cover_state.render_pass = gfx::RenderPass::StencilPass;
+    mask_cover_state.cds.bWriteColor   = false;
+    mask_cover_state.cds.stencil_ref   = 0;
+    mask_cover_state.cds.stencil_mask  = 0xff;
+    mask_cover_state.cds.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+    mask_cover_state.cds.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+    mask_cover_state.cds.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
 
-    gfx::Painter::ColorDepthStencilState mask_expose_state;
-    mask_expose_state.bWriteColor   = false;
-    mask_expose_state.stencil_ref   = 1;
-    mask_expose_state.stencil_mask  = 0xff;
-    mask_expose_state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
-    mask_expose_state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
-    mask_expose_state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+    gfx::Painter::RenderPassState mask_expose_state;
+    mask_expose_state.render_pass = gfx::RenderPass::StencilPass;
+    mask_expose_state.cds.bWriteColor   = false;
+    mask_expose_state.cds.stencil_ref   = 1;
+    mask_expose_state.cds.stencil_mask  = 0xff;
+    mask_expose_state.cds.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+    mask_expose_state.cds.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+    mask_expose_state.cds.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
 
-    gfx::Painter::ColorDepthStencilState mask_draw_color_state;
-    mask_draw_color_state.bWriteColor   = true;
-    mask_draw_color_state.stencil_ref   = 1;
-    mask_draw_color_state.stencil_mask  = 0xff;
-    mask_draw_color_state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
-    mask_draw_color_state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
-    mask_draw_color_state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
+    gfx::Painter::RenderPassState mask_draw_color_state;
+    mask_draw_color_state.render_pass = gfx::RenderPass::ColorPass;
+    mask_draw_color_state.cds.bWriteColor   = true;
+    mask_draw_color_state.cds.stencil_ref   = 1;
+    mask_draw_color_state.cds.stencil_mask  = 0xff;
+    mask_draw_color_state.cds.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
+    mask_draw_color_state.cds.stencil_dpass = gfx::Painter::StencilOp::DontModify;
+    mask_draw_color_state.cds.stencil_dfail = gfx::Painter::StencilOp::DontModify;
 
-    gfx::Painter::ColorDepthStencilState draw_color_state;
-    draw_color_state.bWriteColor = true;
-    draw_color_state.stencil_ref = 0;
-    draw_color_state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+    gfx::Painter::RenderPassState draw_color_state;
+    draw_color_state.render_pass = gfx::RenderPass::ColorPass;
+    draw_color_state.cds.bWriteColor = true;
+    draw_color_state.cds.stencil_ref = 0;
+    draw_color_state.cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
 
     TRACE_ENTER(DrawLayers);
     for (const auto& scene_layer : layers)

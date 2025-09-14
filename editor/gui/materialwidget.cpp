@@ -3375,7 +3375,7 @@ bool MaterialWidget::KeyPress(QKeyEvent* key)
     env.editing_mode = true;
     env.draw_primitive = gfx::DrawPrimitive::Triangles;
     env.draw_category  = gfx::DrawCategory::Basic;
-    env.renderpass     = gfx::RenderPass::ColorPass;
+    env.render_pass    = gfx::RenderPass::ColorPass;
 
     gfx::Material::Command cmd;
     cmd.name = "RunSpriteCycle";

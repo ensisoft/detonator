@@ -98,7 +98,7 @@ namespace gfx
             mOutputFeatures.set(OutputFeatures::WriteColorTarget, true);
         }
 
-        explicit GenericShaderProgram(std::string name, RenderPass renderPass) noexcept
+        explicit GenericShaderProgram(std::string name) noexcept
           : mName(std::move(name))
         {
             mOutputFeatures.set(OutputFeatures::WriteColorTarget, true);
@@ -155,9 +155,6 @@ namespace gfx
         std::string GetName() const override
         { return mName; }
 
-        RenderPass GetRenderPass() const override
-        { return mRenderPass; }
-
         std::string GetShaderId(const Material& material, const Material::Environment& env) const override;
         std::string GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const override;
         ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device) const override;
@@ -184,7 +181,6 @@ namespace gfx
         float mBloomThreshold = 0.0f;
         base::bitflag<ShadingFeatures> mShadingFeatures;
         base::bitflag<OutputFeatures> mOutputFeatures;
-        RenderPass mRenderPass = RenderPass::ColorPass;
         Fog mFog;
     };
 } // namespace

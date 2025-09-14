@@ -39,6 +39,7 @@ namespace gfx
         void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
             Painter::DrawState state;
+            state.render_pass  = RenderPass::ColorPass;
             state.write_color  = true;
             state.stencil_func = Painter::StencilFunc::Disabled;
             state.depth_test   = Painter::DepthTest::Disabled;
@@ -74,6 +75,7 @@ namespace gfx
         bool Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
             Painter::DrawState state;
+            state.render_pass   = RenderPass::StencilPass;
             state.write_color   = false;
             state.depth_test    = Painter::DepthTest::Disabled;
             state.stencil_dpass = Painter::StencilOp::WriteRef;
@@ -119,6 +121,7 @@ namespace gfx
         bool Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
             Painter::DrawState state;
+            state.render_pass   = RenderPass::ColorPass;
             state.write_color   = true;
             state.depth_test    = Painter::DepthTest::Disabled;
             state.stencil_func  = Painter::StencilFunc::RefIsEqual;

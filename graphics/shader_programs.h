@@ -26,7 +26,7 @@ namespace gfx
     {
     public:
         FlatShadedColorProgram() noexcept
-          : GenericShaderProgram("FlatShadedColorProgram", RenderPass::ColorPass)
+          : GenericShaderProgram("FlatShadedColorProgram")
         {}
     private:
     };
@@ -35,7 +35,7 @@ namespace gfx
     {
     public:
         StencilShaderProgram() noexcept
-           : GenericShaderProgram("StencilShaderProgram", RenderPass::StencilPass)
+           : GenericShaderProgram("StencilShaderProgram")
         {}
     private:
     };
@@ -44,7 +44,7 @@ namespace gfx
     {
     public:
         BasicLightProgram() noexcept
-          : GenericShaderProgram("BasicLightProgram", RenderPass::ColorPass)
+          : GenericShaderProgram("BasicLightProgram")
         {
             EnableFeature(ShadingFeatures::BasicLight, true);
         }

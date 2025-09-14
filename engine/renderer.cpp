@@ -988,7 +988,7 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
             env.editing_mode   = mEditingMode;
             env.draw_primitive = paint_node.drawable->GetDrawPrimitive();
             env.draw_category  = paint_node.drawable->GetDrawCategory();
-            env.renderpass     = gfx::RenderPass::ColorPass;
+            env.render_pass    = gfx::RenderPass::ColorPass;
 
             for (size_t i=0; i<item->GetNumCommands(); ++i)
             {

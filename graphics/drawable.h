@@ -62,6 +62,8 @@ namespace gfx
         // is to be rasterized.
         using DrawPrimitive = gfx::DrawPrimitive;
 
+        using RenderPass = gfx::RenderPass;
+
         // Type of the drawable (and its instances)
         enum class Type {
             ParticleEngine,
@@ -77,6 +79,7 @@ namespace gfx
         // The environment that possibly affects the geometry and drawable
         // generation and update in some way.
         struct Environment {
+            RenderPass render_pass = RenderPass::ColorPass;
             bool flip_uv_vertically = false;
             bool flip_uv_horizontally = false;
             // true if the draw is with "effects", i.e. per triangle transform

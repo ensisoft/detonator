@@ -34,6 +34,7 @@
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/instance.h"
+#include "graphics/enum.h"
 
 #include "base/snafu.h"
 
@@ -168,7 +169,14 @@ namespace gfx
         using RasterState = Device::RasterState;
         using ColorDepthStencilState = Device::ColorDepthStencilState;
 
+        struct RenderPassState {
+            RenderPass render_pass = RenderPass::ColorPass;
+            ColorDepthStencilState cds;
+        };
+
         struct DrawState {
+            RenderPass render_pass = RenderPass::ColorPass;
+
             bool write_color = true;
             // the stencil test function.
             StencilFunc  stencil_func  = StencilFunc::Disabled;
@@ -226,14 +234,14 @@ namespace gfx
             // Using dodgy/Unsafe void* here for performance reasons. vs. std::any
             void* user = nullptr;
 
-            State state;
+            DrawCommandState state;
 
             std::optional<InstancedDraw> instanced_draw;
 
             InstancedDrawPtr instance_draw_ptr;
             GeometryPtr geometry_gpu_ptr;
         };
-        using DrawList = std::vector<DrawCommand>;
+        using DrawCommandList = std::vector<DrawCommand>;
 
         void Prime(DrawCommand& cmd) const;
 
@@ -241,13 +249,13 @@ namespace gfx
         // which provides the geometrical information of the object to be drawn, a material,
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
-        bool Draw(const DrawList& list, const ShaderProgram& program, const ColorDepthStencilState& cds) const;
+        bool Draw(const DrawCommandList& list, const ShaderProgram& program, const RenderPassState& render_pass_state) const;
 
         bool Draw(const gfx::Drawable& drawable,
                   const gfx::Material& material,
                   const glm::mat4& model,
                   const gfx::ShaderProgram& program,
-                  const ColorDepthStencilState& cds,
+                  const RenderPassState& render_pass_state,
                   const DrawCommandState& state) const
         {
             DrawCommand cmd;
@@ -255,9 +263,10 @@ namespace gfx
             cmd.drawable = &drawable;
             cmd.material = &material;
             cmd.state = state;
-            DrawList list;
+
+            DrawCommandList list;
             list.push_back(cmd);
-            return Draw(list, program, cds);
+            return Draw(list, program, render_pass_state);
         }
 
         // legacy draw functions.
