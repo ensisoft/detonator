@@ -375,6 +375,31 @@ std::string TranslateEnum(SplineMoverClass::IterationMode mode)
     return "???";
 }
 
+std::string TranslateEnum(TextItemClass::VerticalTextAlign align)
+{
+    using A = TextItemClass::VerticalTextAlign;
+    if (align == A::Center)
+        return "Align Vertical Center";
+    else if (align == A::Top)
+        return "Align Top";
+    else if (align == A::Bottom)
+        return "Align Bottom";
+    else BUG("Missing translation");
+    return "???";
+}
+std::string TranslateEnum(TextItemClass::HorizontalTextAlign align)
+{
+    using A = TextItemClass::HorizontalTextAlign;
+    if (align == A::Center)
+        return "Align Horizontal Center";
+    if (align == A::Left)
+        return "Align Left";
+    else if (align == A::Right)
+        return "Align Right";
+    else BUG("Missing translation");
+    return "???";
+}
+
 } // namespace
 
 namespace math
