@@ -51,6 +51,7 @@ MaterialClass::MaterialClass(Type type, std::string id)
 {
     mFlags.set(Flags::BlendFrames, true);
     mFlags.set(Flags::EnableBloom, true);
+    mFlags.set(Flags::EnableLight, true);
 }
 
 MaterialClass::MaterialClass(const MaterialClass& other, bool copy)
@@ -295,6 +296,7 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     source.AddPreprocessorDefinition("TEXTURE_WRAP_MIRROR", static_cast<int>(TextureWrapping::Mirror));
 
     source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_BLOOM", static_cast<unsigned>(MaterialFlags::EnableBloom));
+    source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_LIGHT", static_cast<unsigned>(MaterialFlags::EnableLight));
 
     if (IsBuiltIn())
     {

@@ -123,7 +123,9 @@ namespace gfx
             // RGB values.
             PremultipliedAlpha,
             // Enable bloom output
-            EnableBloom
+            EnableBloom,
+            // Enable light on this material class.
+            EnableLight
         };
 
         // Action to take on per particle random value. This can

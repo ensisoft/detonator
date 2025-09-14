@@ -25,10 +25,14 @@ namespace gfx
 {
 
 TextMaterial::TextMaterial(const TextBuffer& text)  : mText(text)
-{}
+{
+    InitDefaultFlags();
+}
 TextMaterial::TextMaterial(TextBuffer&& text) noexcept
   : mText(std::move(text))
-{}
+{
+    InitDefaultFlags();
+}
 
 bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const
 {
@@ -126,6 +130,7 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
     source.SetPrecision(ShaderSource::Precision::High);
     source.SetVersion(ShaderSource::Version::GLSL_300);
     source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_BLOOM", static_cast<unsigned>(MaterialFlags::EnableBloom));
+    source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_LIGHT", static_cast<unsigned>(MaterialFlags::EnableLight));
 
     const auto format = mText.GetRasterFormat();
     if (format == TextBuffer::RasterFormat::Bitmap)
@@ -184,6 +189,11 @@ std::string TextMaterial::GetShaderName(const Environment&) const
 void TextMaterial::ComputeTextMetrics(unsigned int* width, unsigned int* height) const
 {
     mText.ComputeTextMetrics(width, height);
+}
+
+void TextMaterial::InitDefaultFlags() noexcept
+{
+    TextMaterial::SetFlag(Flags::EnableLight, true);
 }
 
 TextMaterial CreateMaterialFromText(const std::string& text,
