@@ -136,36 +136,36 @@ namespace engine
 
         explicit Renderer(const ClassLibrary* classlib = nullptr);
 
-        inline void SetClassLibrary(const ClassLibrary* classlib) noexcept
+        void SetClassLibrary(const ClassLibrary* classlib) noexcept
         { mClassLib = classlib; }
-        inline void SetEditingMode(bool on_off) noexcept
+        void SetEditingMode(bool on_off) noexcept
         { mEditingMode = on_off; }
-        inline void SetName(std::string name) noexcept
+        void SetName(std::string name) noexcept
         { mRendererName = std::move(name); }
 
 #if !defined(DETONATOR_ENGINE_BUILD)
         // these are not thread safe and are only available in the
         // editor and tests. The engine uses threads so we cannot
         // use these directly.
-        inline void SetBloom(const BloomParams& bloom) noexcept
+        void SetBloom(const BloomParams& bloom) noexcept
         { mFrameSettings.bloom = bloom; }
-        inline void EnableEffect(Effects effect, bool enabled) noexcept
+        void EnableEffect(Effects effect, bool enabled) noexcept
         { mFrameSettings.effects.set(effect, enabled); }
-        inline bool IsEnabled(Effects effect) const noexcept
+        bool IsEnabled(Effects effect) const noexcept
         { return mFrameSettings.effects.test(effect); }
-        inline void SetCamera(const Camera& camera) noexcept
+        void SetCamera(const Camera& camera) noexcept
         { mFrameSettings.camera = camera; }
-        inline void SetSurface(const Surface& surface) noexcept
+        void SetSurface(const Surface& surface) noexcept
         { mFrameSettings.surface = surface; }
-        inline void SetStyle(RenderingStyle style) noexcept
+        void SetStyle(RenderingStyle style) noexcept
         { mFrameSettings.style = style; }
-        inline void SetTileSizeFudge(float fudge) noexcept
+        void SetTileSizeFudge(float fudge) noexcept
         { mFrameSettings.tile_size_fudge = fudge; }
-        inline void SetPacketFilter(PacketFilter* filter) noexcept
+        void SetPacketFilter(PacketFilter* filter) noexcept
         { mPacketFilter = filter; }
-        inline void SetLowLevelRendererHook(LowLevelRendererHook* hook) noexcept
+        void SetLowLevelRendererHook(LowLevelRendererHook* hook) noexcept
         { mLowLevelRendererHook = hook; }
-        inline auto GetNumPaintNodes() const noexcept
+        auto GetNumPaintNodes() const noexcept
         { return mPaintNodes.size(); }
 #endif
         // This the current *real* rendering API used by the engine.
@@ -288,6 +288,7 @@ namespace engine
         void CreateLights(const EntityType& entity,
                           const EntityNodeType& entity_node,
                           const LightNode& light_node,
+                          const FrameSettings& settings,
                           std::vector<Light>& lights) const;
 
         void OffsetPacketLayers(std::vector<DrawPacket>& packets, std::vector<Light>& lights) const;

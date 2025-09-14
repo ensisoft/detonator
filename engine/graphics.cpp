@@ -205,10 +205,6 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
     TRACE_ENTER(LightLayers);
     for (auto& light : lights)
     {
-        // transform the light to view space
-        light.light->position = model_view_scene * light.transform * glm::vec4{0.0f, 0.0f, 0.0f, 1.0};
-        //light.light->direction = light.transform * glm::vec4{light.light->direction, 0.0f};
-
         const auto render_layer_index = light.render_layer;
         ASSERT(render_layer_index >= 0);
         if (render_layer_index >= layers.size())

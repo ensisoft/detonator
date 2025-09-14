@@ -110,7 +110,7 @@ namespace engine
     };
 
     struct Light {
-        std::shared_ptr<gfx::BasicLight> light;
+        std::shared_ptr<const gfx::BasicLight> light;
 
         glm::vec2 sort_point = {0.0f, 0.0f};
 
