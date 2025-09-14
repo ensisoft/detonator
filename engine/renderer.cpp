@@ -215,7 +215,7 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, c
 
                 if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
                 {
-                    CreateLights<Entity, EntityNode>(entity, node, *light, lights);
+                    CreateLights<Entity, EntityNode>(entity, node, *light, settings, lights);
                     light->visited = true;
                 }
             }
@@ -462,7 +462,7 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
                 }
                 if (auto* light = base::SafeFind(mLightNodes, "basic/" + placement->GetId() + "/" + node.GetId()))
                 {
-                    CreateLights<game::EntityClass, game::EntityNodeClass>(*entity, node, *light, entity_lights);
+                    CreateLights<game::EntityClass, game::EntityNodeClass>(*entity, node, *light, mFrameSettings, entity_lights);
                     light->visited = true;
                 }
             }
@@ -569,7 +569,7 @@ void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook*
         {
             if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
             {
-                CreateLights<game::EntityClass, game::EntityNodeClass>(entity, node, *light, lights);
+                CreateLights<game::EntityClass, game::EntityNodeClass>(entity, node, *light, mFrameSettings, lights);
                 light->visited = true;
             }
         }
@@ -612,7 +612,7 @@ void Renderer::CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* h
         }
         if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
         {
-            CreateLights<game::Entity, game::EntityNode>(entity, node, *light, lights);
+            CreateLights<game::Entity, game::EntityNode>(entity, node, *light, mFrameSettings, lights);
             light->visited = true;
         }
 
@@ -1670,6 +1670,7 @@ template<typename EntityType, typename EntityNodeType>
 void Renderer::CreateLights(const EntityType& entity,
                             const EntityNodeType& entity_node,
                             const LightNode& light_node,
+                            const FrameSettings& settings,
                             std::vector<Light>& lights) const
 {
     using LightClassType = typename EntityNodeType::LightClassType;
@@ -1683,7 +1684,7 @@ void Renderer::CreateLights(const EntityType& entity,
 
     gfx::Transform transform;
     transform.Scale(light_node.world_scale);
-    transform.RotateAroundZ(light_node.world_rotation * -1.0f);
+    transform.RotateAroundZ(light_node.world_rotation);
     transform.Translate(light_node.world_pos);
     transform.Push();
          transform.Translate(node_light->GetTranslation());
@@ -1698,25 +1699,27 @@ void Renderer::CreateLights(const EntityType& entity,
         map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
     }
 
-    // hack around here to make the light direction in 3D match
-    // what the user expects to see based on the 2D view
-    glm::vec3 direction = node_light->GetDirection();
-    direction.y *= -1.0;
-    direction.z *= -1.0;
+    const auto& model_view_scene  = CreateModelViewMatrix(GameView::AxisAligned,
+        settings.camera.position,
+        settings.camera.scale, settings.camera.rotation);
 
-    light_node.light->direction = transform * glm::vec4(direction, 0.0f);
+    const auto& light_direction = glm::vec4(node_light->GetDirection(), 0.0f);
+
+    auto light_copy = std::make_shared<gfx::BasicLight>(*light_node.light);
+    light_copy->position = model_view_scene * transform * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    light_copy->direction = model_view_scene * transform * light_direction;
+
+    // todo: should we use the light map sort key somewhere?
 
     Light light;
-    light.light        = light_node.light;
+    light.light        = std::move(light_copy);
     light.transform    = transform;
     light.render_layer = entity.GetRenderLayer();
     light.map_layer    = map_layer;
-    // todo: light_sort key??
     light.packet_index = node_light->GetLayer();
     light.sort_point   = transform * glm::vec4{map_sort_point, 0.0f, 1.0};
-    lights.push_back(light);
+    lights.push_back(std::move(light));
 }
-
 
 void Renderer::OffsetPacketLayers(std::vector<DrawPacket>& packets, std::vector<Light>& lights) const
 {
