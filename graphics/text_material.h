@@ -55,7 +55,7 @@ namespace gfx
 
         void ComputeTextMetrics(unsigned* width, unsigned* height) const;
 
-        inline void SetColor(const Color4f& color) noexcept
+        void SetColor(const Color4f& color) noexcept
         { mColor = color; }
         // Set point sampling to true in order to use a fast filtering
         // when sampling from the texture. This should be for maximum perf
@@ -65,8 +65,10 @@ namespace gfx
         // rasterized dimensions (in pixels) of the rectangle from the
         // dimensions of the rasterized text texture.
         // The default is true.
-        inline void SetPointSampling(bool on_off) noexcept
+        void SetPointSampling(bool on_off) noexcept
         { mPointSampling = on_off; }
+    private:
+        void InitDefaultFlags() noexcept;
     private:
         TextBuffer mText;
         Color4f mColor = Color::White;

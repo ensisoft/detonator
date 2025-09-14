@@ -25,7 +25,8 @@
 namespace gfx
 {
     enum class MaterialFlags : uint32_t {
-        EnableBloom = 0x1
+        EnableBloom = 0x1,
+        EnableLight = 0x2
     };
 
     enum class DrawableFlags : uint32_t {

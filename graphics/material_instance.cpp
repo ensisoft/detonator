@@ -269,6 +269,7 @@ ShaderSource MaterialInstance::GetShader(const Environment& env, const Device& d
 void MaterialInstance::InitFlags() noexcept
 {
     SetFlag(Flags::EnableBloom, mClass->TestFlag(MaterialClass::Flags::EnableBloom));
+    SetFlag(Flags::EnableLight, mClass->TestFlag(MaterialClass::Flags::EnableLight));
 }
 
 std::unique_ptr<Material> MaterialInstance::Clone() const

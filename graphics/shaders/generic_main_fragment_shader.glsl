@@ -79,7 +79,9 @@ void main() {
     vec4 out_color = fs_out.color;
 
     #if defined(ENABLE_BASIC_LIGHT)
-        out_color = ComputeBasicLight();
+        if ((fs_out.flags & MATERIAL_FLAGS_ENABLE_LIGHT) == MATERIAL_FLAGS_ENABLE_LIGHT) {
+            out_color = ComputeBasicLight();
+        }
     #endif
 
     #if defined(ENABLE_BASIC_FOG)
