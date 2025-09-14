@@ -54,7 +54,7 @@ namespace gfx
             bool editing_mode  = false;
             DrawPrimitive draw_primitive = DrawPrimitive::Triangles;
             DrawCategory draw_category = DrawCategory::Basic;
-            RenderPass renderpass = RenderPass::ColorPass;
+            RenderPass render_pass = RenderPass::ColorPass;
         };
         struct RasterState {
             using Blending = Device::RasterState::BlendOp;

@@ -69,7 +69,7 @@ void Painter::Prime(DrawCommand& draw) const
         draw.instance_draw_ptr = GetGpuInstancedDraw(draw.instanced_draw.value(), *draw.drawable, drawable_env);
 }
 
-bool Painter::Draw(const DrawList& list, const ShaderProgram& program, const ColorDepthStencilState& cds) const
+bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, const RenderPassState& render_pass_state) const
 {
     static const glm::mat4 Identity(1.0f);
 
@@ -80,7 +80,7 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program, const Col
     vs.scissor  = MapToDevice(mScissor);
 
     mDevice->SetViewportState(vs);
-    mDevice->SetColorDepthStencilState(cds);
+    mDevice->SetColorDepthStencilState(render_pass_state.cds);
 
     std::unordered_set<std::string> used_programs;
 
@@ -95,6 +95,7 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program, const Col
         Drawable::Environment drawable_env;
         drawable_env.editing_mode   = mEditingMode;
         drawable_env.pixel_ratio    = mPixelRatio;
+        drawable_env.render_pass    = render_pass_state.render_pass;
         drawable_env.use_instancing = draw.instanced_draw.has_value();
         drawable_env.view_matrix    = draw.view       ? draw.view       : &mViewMatrix;
         drawable_env.proj_matrix    = draw.projection ? draw.projection : &mProjMatrix;
@@ -121,7 +122,7 @@ bool Painter::Draw(const DrawList& list, const ShaderProgram& program, const Col
         material_env.editing_mode   = mEditingMode;
         material_env.draw_primitive = draw.drawable->GetDrawPrimitive();
         material_env.draw_category  = draw.drawable->GetDrawCategory();
-        material_env.renderpass     = program.GetRenderPass();
+        material_env.render_pass    = render_pass_state.render_pass;
         ProgramPtr gpu_program;
 
         TRACE_CALL("GetGpuProgram", gpu_program = GetProgram(program, *draw.drawable, *draw.material, drawable_env, material_env));
@@ -197,17 +198,18 @@ bool Painter::Draw(const Drawable& shape,
     list[0].state.culling    = state.culling;
     list[0].state.depth_test = state.depth_test;
 
-    ColorDepthStencilState cds;
-    cds.depth_test    = state.depth_test;
-    cds.stencil_func  = state.stencil_func;
-    cds.stencil_fail  = state.stencil_fail;
-    cds.stencil_dpass = state.stencil_dpass;
-    cds.stencil_dfail = state.stencil_dfail;
-    cds.stencil_mask  = state.stencil_mask;
-    cds.stencil_ref   = state.stencil_ref;
-    cds.bWriteColor   = state.write_color;
+    RenderPassState render_pass_state;
+    render_pass_state.render_pass       = state.render_pass;
+    render_pass_state.cds.depth_test    = state.depth_test;
+    render_pass_state.cds.stencil_func  = state.stencil_func;
+    render_pass_state.cds.stencil_fail  = state.stencil_fail;
+    render_pass_state.cds.stencil_dpass = state.stencil_dpass;
+    render_pass_state.cds.stencil_dfail = state.stencil_dfail;
+    render_pass_state.cds.stencil_mask  = state.stencil_mask;
+    render_pass_state.cds.stencil_ref   = state.stencil_ref;
+    render_pass_state.cds.bWriteColor   = state.write_color;
 
-    return Draw(list, program, cds);
+    return Draw(list, program, render_pass_state);
 }
 
 bool Painter::Draw(const Drawable& shape,
@@ -228,17 +230,18 @@ bool Painter::Draw(const Drawable& shape,
     list[0].state.line_width = legacy_draw_state.line_width;
     list[0].state.culling    = legacy_draw_state.culling;
 
-    ColorDepthStencilState cds;
-    cds.depth_test    = state.depth_test;
-    cds.stencil_func  = state.stencil_func;
-    cds.stencil_fail  = state.stencil_fail;
-    cds.stencil_dpass = state.stencil_dpass;
-    cds.stencil_dfail = state.stencil_dfail;
-    cds.stencil_mask  = state.stencil_mask;
-    cds.stencil_ref   = state.stencil_ref;
-    cds.bWriteColor   = state.write_color;
+    RenderPassState render_pass_state;
+    render_pass_state.render_pass       = state.render_pass;
+    render_pass_state.cds.depth_test    = state.depth_test;
+    render_pass_state.cds.stencil_func  = state.stencil_func;
+    render_pass_state.cds.stencil_fail  = state.stencil_fail;
+    render_pass_state.cds.stencil_dpass = state.stencil_dpass;
+    render_pass_state.cds.stencil_dfail = state.stencil_dfail;
+    render_pass_state.cds.stencil_mask  = state.stencil_mask;
+    render_pass_state.cds.stencil_ref   = state.stencil_ref;
+    render_pass_state.cds.bWriteColor   = state.write_color;
 
-    return Draw(list, program, cds);
+    return Draw(list, program, render_pass_state);
 }
 
 bool Painter::Draw(const Drawable& drawable,
@@ -247,6 +250,7 @@ bool Painter::Draw(const Drawable& drawable,
                    const LegacyDrawState& draw_state) const
 {
     DrawState state;
+    state.render_pass  = RenderPass::ColorPass;
     state.write_color  = true;
     state.stencil_func = StencilFunc::Disabled;
     state.depth_test   = DepthTest::Disabled;

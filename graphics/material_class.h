@@ -176,7 +176,7 @@ namespace gfx
             // set in the class whenever they're set.
             const UniformMap* uniforms = nullptr;
             // Current render pass the material is used in
-            RenderPass renderpass = RenderPass::ColorPass;
+            RenderPass render_pass = RenderPass::ColorPass;
 
             // see material flags
             std::uint32_t flags = 0;

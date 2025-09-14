@@ -44,8 +44,6 @@ namespace gfx
 
         virtual ~ShaderProgram() = default;
 
-        virtual RenderPass GetRenderPass() const { return RenderPass::ColorPass; }
-
         // Inspect the current draw and its associated user object.
         // The void* user maps to void* user in the Painter's DrawCommand.
         // If the function returns false the draw is skipped.

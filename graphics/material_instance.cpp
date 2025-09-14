@@ -50,7 +50,7 @@ bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device,
     state.editing_mode   = env.editing_mode;
     state.draw_primitive = env.draw_primitive;
     state.draw_category  = env.draw_category;
-    state.renderpass     = env.renderpass;
+    state.render_pass    = env.render_pass;
     state.material_time  = mRuntime;
     state.uniforms       = &mUniforms;
     state.first_render   = mFirstRender;

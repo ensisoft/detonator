@@ -727,22 +727,24 @@ public:
 
         // write the mask shape to the stencil buffer by writing
         // zeroes to the stencil buffer to the fragments that are NOT to be modified
-        gfx::Painter::ColorDepthStencilState mask_cover_state;
-        mask_cover_state.bWriteColor   = false;
-        mask_cover_state.stencil_ref   = 0;
-        mask_cover_state.stencil_mask  = 0xff;
-        mask_cover_state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
-        mask_cover_state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
-        mask_cover_state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+        gfx::Painter::RenderPassState mask_cover_state;
+        mask_cover_state.render_pass = gfx::RenderPass::StencilPass;
+        mask_cover_state.cds.bWriteColor   = false;
+        mask_cover_state.cds.stencil_ref   = 0;
+        mask_cover_state.cds.stencil_mask  = 0xff;
+        mask_cover_state.cds.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+        mask_cover_state.cds.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+        mask_cover_state.cds.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
 
         // Set the state so that we modify fragments only when the stencil value is 1.
-        gfx::Painter::ColorDepthStencilState mask_draw_color_state;
-        mask_draw_color_state.bWriteColor   = true;
-        mask_draw_color_state.stencil_ref   = 1;
-        mask_draw_color_state.stencil_mask  = 0xff;
-        mask_draw_color_state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
-        mask_draw_color_state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
-        mask_draw_color_state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
+        gfx::Painter::RenderPassState mask_draw_color_state;
+        mask_draw_color_state.render_pass = gfx::RenderPass::ColorPass;
+        mask_draw_color_state.cds.bWriteColor   = true;
+        mask_draw_color_state.cds.stencil_ref   = 1;
+        mask_draw_color_state.cds.stencil_mask  = 0xff;
+        mask_draw_color_state.cds.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
+        mask_draw_color_state.cds.stencil_dpass = gfx::Painter::StencilOp::DontModify;
+        mask_draw_color_state.cds.stencil_dfail = gfx::Painter::StencilOp::DontModify;
 
         gfx::Transform mask_transform;
         mask_transform.Resize(200.0f, 200.0f);
@@ -781,22 +783,24 @@ public:
 
         // write the mask shape to the stencil buffer by writing
         // ones to the stencil buffer to the fragments that are to be *modified*
-        gfx::Painter::ColorDepthStencilState mask_expose_state;
-        mask_expose_state.bWriteColor   = false;
-        mask_expose_state.stencil_ref   = 1;
-        mask_expose_state.stencil_mask  = 0xff;
-        mask_expose_state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
-        mask_expose_state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
-        mask_expose_state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+        gfx::Painter::RenderPassState mask_expose_state;
+        mask_expose_state.render_pass = gfx::RenderPass::StencilPass;
+        mask_expose_state.cds.bWriteColor   = false;
+        mask_expose_state.cds.stencil_ref   = 1;
+        mask_expose_state.cds.stencil_mask  = 0xff;
+        mask_expose_state.cds.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+        mask_expose_state.cds.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+        mask_expose_state.cds.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
 
         // Set the state so that we modify fragments only when the stencil value is 1.
-        gfx::Painter::ColorDepthStencilState mask_draw_color_state;
-        mask_draw_color_state.bWriteColor   = true;
-        mask_draw_color_state.stencil_ref   = 1;
-        mask_draw_color_state.stencil_mask  = 0xff;
-        mask_draw_color_state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
-        mask_draw_color_state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
-        mask_draw_color_state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
+        gfx::Painter::RenderPassState mask_draw_color_state;
+        mask_draw_color_state.render_pass = gfx::RenderPass::ColorPass;
+        mask_draw_color_state.cds.bWriteColor   = true;
+        mask_draw_color_state.cds.stencil_ref   = 1;
+        mask_draw_color_state.cds.stencil_mask  = 0xff;
+        mask_draw_color_state.cds.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
+        mask_draw_color_state.cds.stencil_dpass = gfx::Painter::StencilOp::DontModify;
+        mask_draw_color_state.cds.stencil_dfail = gfx::Painter::StencilOp::DontModify;
 
         gfx::Transform mask_transform;
         mask_transform.Resize(200.0f, 200.0f);
@@ -3119,17 +3123,18 @@ public:
         cmd.material = &material;
         cmd.instanced_draw = instanced;
 
-        gfx::Painter::DrawList draw_list;
+        gfx::Painter::DrawCommandList draw_list;
         draw_list.push_back(cmd);
 
         gfx::FlatShadedColorProgram program;
 
-        gfx::Painter::ColorDepthStencilState cds;
-        cds.depth_test   = gfx::Painter::DepthTest::Disabled;
-        cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
-        cds.bWriteColor  = true;
+        gfx::Painter::RenderPassState render_pass_state;
+        render_pass_state.render_pass = gfx::RenderPass::ColorPass;
+        render_pass_state.cds.depth_test   = gfx::Painter::DepthTest::Disabled;
+        render_pass_state.cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        render_pass_state.cds.bWriteColor  = true;
 
-        painter.Draw(draw_list, program, cds);
+        painter.Draw(draw_list, program, render_pass_state);
     }
     std::string GetName() const override
     {
@@ -3214,15 +3219,16 @@ public:
         cmd.state.culling  = gfx::Painter::Culling::Back;
         cmd.instanced_draw = instanced;
 
-        gfx::Painter::DrawList draw_list;
+        gfx::Painter::DrawCommandList draw_list;
         draw_list.push_back(cmd);
 
-        gfx::Painter::ColorDepthStencilState cds;
-        cds.depth_test   = gfx::Painter::DepthTest::Disabled;
-        cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
-        cds.bWriteColor  = true;
+        gfx::Painter::RenderPassState render_pass_state;
+        render_pass_state.render_pass = gfx::RenderPass::ColorPass;
+        render_pass_state.cds.depth_test   = gfx::Painter::DepthTest::Disabled;
+        render_pass_state.cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        render_pass_state.cds.bWriteColor  = true;
 
-        p.Draw(draw_list, program, cds);
+        p.Draw(draw_list, program, render_pass_state);
     }
     void Update(float dt) override
     {
@@ -3277,16 +3283,17 @@ public:
         cmd.material = &material;
         cmd.instanced_draw = instanced;
 
-        gfx::Painter::DrawList draw_list;
+        gfx::Painter::DrawCommandList draw_list;
         draw_list.push_back(cmd);
 
-        gfx::Painter::ColorDepthStencilState cds;
-        cds.depth_test   = gfx::Painter::DepthTest::Disabled;
-        cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
-        cds.bWriteColor  = true;
+        gfx::Painter::RenderPassState render_pass_state;
+        render_pass_state.render_pass =gfx::RenderPass::ColorPass;
+        render_pass_state.cds.depth_test   = gfx::Painter::DepthTest::Disabled;
+        render_pass_state.cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        render_pass_state.cds.bWriteColor  = true;
 
         gfx::FlatShadedColorProgram program;
-        painter.Draw(draw_list, program, cds);
+        painter.Draw(draw_list, program, render_pass_state);
     }
 
     std::string GetName() const override
@@ -3351,16 +3358,17 @@ public:
         cmd.material = &material;
         cmd.instanced_draw = instanced;
 
-        gfx::Painter::DrawList draw_list;
+        gfx::Painter::DrawCommandList draw_list;
         draw_list.push_back(cmd);
 
-        gfx::Painter::ColorDepthStencilState cds;
-        cds.depth_test   = gfx::Painter::DepthTest::Disabled;
-        cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
-        cds.bWriteColor  = true;
+        gfx::Painter::RenderPassState render_pass_state;
+        render_pass_state.render_pass = gfx::RenderPass::ColorPass;
+        render_pass_state.cds.depth_test   = gfx::Painter::DepthTest::Disabled;
+        render_pass_state.cds.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        render_pass_state.cds.bWriteColor  = true;
 
         gfx::FlatShadedColorProgram program;
-        painter.Draw(draw_list, program, cds);
+        painter.Draw(draw_list, program, render_pass_state);
     }
 
     void Start() override
@@ -3875,7 +3883,6 @@ private:
     float mTime = 0.0f;
     unsigned mLightIndex = 0;
 };
-
 
 class BasicLightNormalMapMaterialTest : public GraphicsTest
 {
