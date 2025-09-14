@@ -2323,17 +2323,17 @@ public:
             std::string GetName() const override
             { return "TestProgram"; }
 
-            std::string GetShaderId(const gfx::Material& material, const gfx::Material::Environment& env) const
+            std::string GetShaderId(const gfx::Material& material, const gfx::Material::Environment& env) const override
             {
                 return material.GetShaderId(env);
             }
-            std::string GetShaderId(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env) const
+            std::string GetShaderId(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env) const override
             {
                 return drawable.GetShaderId(env);
             }
 
 
-            gfx::ShaderSource GetShader(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env, const gfx::Device& device) const
+            gfx::ShaderSource GetShader(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env, const gfx::Device& device) const override
             {
                 gfx::ShaderSource source;
                 source.SetType(gfx::ShaderSource::Type::Vertex);
@@ -2369,7 +2369,8 @@ void main() {
     gl_Position  = vs_out.clip_position;
 }
 )");
-
+                source.AddPreprocessorDefinition("DRAWABLE_FLAGS_FLIP_UV_VERTICALLY", static_cast<unsigned>(gfx::DrawableFlags::Flip_UV_Vertically));
+                source.AddPreprocessorDefinition("DRAWABLE_FLAGS_FLIP_UV_HORIZONTALLY", static_cast<unsigned>(gfx::DrawableFlags::Flip_UV_Horizontally));
                 source.Merge(drawable.GetShader(env, device));
                 return source;
             }
