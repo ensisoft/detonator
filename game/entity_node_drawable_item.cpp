@@ -37,6 +37,7 @@ DrawableItemClass::DrawableItemClass()
     mBitFlags.set(Flags::DoubleSided,      false);
     mBitFlags.set(Flags::DepthTest,        false);
     mBitFlags.set(Flags::PP_EnableBloom,   true);
+    mBitFlags.set(Flags::EnableLight,      true);
 }
 
 std::size_t DrawableItemClass::GetHash() const

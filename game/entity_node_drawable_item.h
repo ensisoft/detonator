@@ -80,7 +80,9 @@ namespace game
             // Perform depth testing when rendering.
             DepthTest,
             // Contribute to bloom post-processing effect.
-            PP_EnableBloom
+            PP_EnableBloom,
+            // Enable light on this drawable (if the scene is lit)
+            EnableLight
         };
         DrawableItemClass();
 

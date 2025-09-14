@@ -221,6 +221,7 @@ namespace gui
         void on_dsFlipHorizontally_stateChanged(int);
         void on_dsFlipVertically_stateChanged(int);
         void on_dsBloom_stateChanged(int);
+        void on_dsLights_stateChanged(int);
         void on_dsDoubleSided_stateChanged(int);
         void on_dsDepthTest_stateChanged(int);
         void on_rbSimulation_currentIndexChanged(const QString&);
@@ -252,6 +253,7 @@ namespace gui
         void on_tiBlink_stateChanged(int);
         void on_tiStatic_stateChanged(int);
         void on_tiBloom_stateChanged(int);
+        void on_tiLights_stateChanged(int);
         void on_spnShape_currentIndexChanged(const QString&);
         void on_spnEnabled_stateChanged(int);
         void on_fxShape_currentIndexChanged(const QString&);
