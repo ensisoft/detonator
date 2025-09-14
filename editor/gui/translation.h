@@ -36,6 +36,7 @@
 #include "game/entity_node_light.h"
 #include "game/entity_node_spline_mover.h"
 #include "game/entity_node_spline_mover.h"
+#include "game/entity_node_text_item.h"
 
 // TranslateEnum overloads must be in the same namespace as the enum
 // types they overload on in order for the overload resolution to
@@ -67,6 +68,8 @@ namespace game {
     std::string TranslateEnum(SplineMoverClass::PathCurveType type);
     std::string TranslateEnum(SplineMoverClass::RotationMode mode);
     std::string TranslateEnum(SplineMoverClass::IterationMode mode);
+    std::string TranslateEnum(TextItemClass::VerticalTextAlign align);
+    std::string TranslateEnum(TextItemClass::HorizontalTextAlign align);
 } // namespace
 
 namespace math {
