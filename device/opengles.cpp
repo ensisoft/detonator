@@ -1493,6 +1493,7 @@ public:
 
         dev::TextureObject ret;
         ret.handle = handle;
+        ret.format = format;
         ret.type = dev::TextureType::Texture2D;
         ret.texture_width = texture_width;
         ret.texture_height = texture_height;
@@ -1524,6 +1525,7 @@ public:
 
         dev::TextureObject ret;
         ret.handle = handle;
+        ret.format = format;
         ret.type = dev::TextureType::Texture2D;
         ret.texture_width = texture_width;
         ret.texture_height = texture_height;
