@@ -65,7 +65,9 @@ namespace game
             // are not expected to change.
             StaticContent,
             // Contribute to bloom post-processing effect.
-            PP_EnableBloom
+            PP_EnableBloom,
+            // Enable light on this text item  (if the scene is lit)
+            EnableLight
         };
         using CoordinateSpace = game::CoordinateSpace;
 
@@ -73,6 +75,7 @@ namespace game
         {
             mBitFlags.set(Flags::VisibleInGame, true);
             mBitFlags.set(Flags::PP_EnableBloom, true);
+            mBitFlags.set(Flags::EnableLight, true);
         }
         std::size_t GetHash() const;
 

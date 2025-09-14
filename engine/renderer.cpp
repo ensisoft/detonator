@@ -972,6 +972,8 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
 
         paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
             item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
+        paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
+            item->TestFlag(DrawableItemType::Flags::EnableLight));
 
         if constexpr (std::is_same_v<EntityNodeType, game::EntityNode>)
         {
@@ -1122,6 +1124,8 @@ void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeTyp
         paint_node.material->Update(dt);
         paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
             text->TestFlag(TextItemType::Flags::PP_EnableBloom));
+        paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
+            text->TestFlag(TextItemType::Flags::EnableLight));
     }
     if (text && paint_node.drawable)
     {
@@ -1269,6 +1273,8 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
             {
                 paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
                     item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
+                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
+                    item->TestFlag(DrawableItemType::Flags::EnableLight));
                 if (const auto* params = item->GetMaterialParams())
                     paint_node.material->SetUniforms(*params);
             }
@@ -1396,6 +1402,8 @@ void Renderer::CreateTextResources(const EntityType& entity, const EntityNodeTyp
             paint_node.materialId = material;
             paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
                 text->TestFlag(TextItemType::Flags::PP_EnableBloom));
+            paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
+                text->TestFlag(TextItemType::Flags::EnableLight));
         }
         if (!paint_node.drawable)
         {
