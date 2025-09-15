@@ -18,6 +18,8 @@
 
 #include "config.h"
 
+#include <cstdint>
+
 #include "base/assert.h"
 
 namespace dev
@@ -93,14 +95,16 @@ namespace dev
     };
 
     enum class TextureFormat {
-        // non-linear sRGB(A) encoded RGB data.
+        // 8bit non-linear sRGB(A) encoded RGB data.
         sRGB,
         sRGBA,
-        // linear RGB(A) data.
+        // 8bit linear RGB(A) data.
         RGB,
         RGBA,
         // 8bit linear alpha mask
-        AlphaMask
+        AlphaMask,
+        // 32bit floating point depth texture.
+        DepthComponent32f
     };
 
     // Texture minifying filter is used whenever the
@@ -205,21 +209,30 @@ namespace dev
     };
 
     enum class DepthTest {
+        // Depth testing is disabled, depth buffer is also not updated.
         Disabled,
         // Depth test passes and color buffer is updated when the fragments
         // depth value is less or equal to previously written depth value.
-        LessOrEQual
+        LessOrEQual,
+        // Depth test passes always
+        Always
     };
 
     // Each Format specifies the logical buffers and their bitwise representations.
     enum class FramebufferFormat {
+        // Invalid handle value.
         Invalid,
-        // RGBA color buffer with 8bits (unsigned) per channel.
+        // RGBA color texture buffer(s) with 8bits (unsigned) per channel.
+        // Multiple color targets are possible. MSAA is possible.
         ColorRGBA8,
-        // RGBA color buffer with 8bits (unsigned) per channel with 16bit depth buffer.
+        // RGBA color texture buffer(s) with 8bits (unsigned) per channel with 16bit depth buffer.
+        // Multiple color targets are possible. MSAA is possible.
         ColorRGBA8_Depth16,
-        // RGBA color buffer with 8bits (unsigned) per channel with 24bit depth buffer and 8bit stencil buffer.
-        ColorRGBA8_Depth24_Stencil8
+        // RGBA color texture buffer(s) with 8bits (unsigned) per channel with 24bit depth buffer and 8bit stencil buffer.
+        // Multiple color buffers are possible. MSAA is possible.
+        ColorRGBA8_Depth24_Stencil8,
+        // 32bit floating point texture depth buffer. No color or stencil support. MSAA is not possible.
+        DepthTexture32f
     };
 
     enum class ColorAttachment : uint8_t {

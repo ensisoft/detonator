@@ -800,14 +800,16 @@ bool GraphicsDevice::IsTextureFBOTarget(const gfx::Texture* texture) const
     for (const auto& pair: mFBOs)
     {
         const auto* fbo = static_cast<const gfx::DeviceFramebuffer*>(pair.second.get());
-        for (unsigned i = 0; i < fbo->GetClientTextureCount(); ++i)
+        for (unsigned i = 0; i < fbo->GetClientColorTextureCount(); ++i)
         {
-            const auto* client_texture = fbo->GetClientTexture(i);
+            const auto* client_texture = fbo->GetClientColorTexture(i);
             if (client_texture == nullptr)
                 continue;
             if (client_texture == texture)
                 return true;
         }
+        if (texture == fbo->GetClientDepthTexture())
+            return true;
     }
     return false;
 }

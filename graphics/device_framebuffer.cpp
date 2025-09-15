@@ -25,7 +25,7 @@ namespace gfx {
 
 DeviceFramebuffer::~DeviceFramebuffer()
 {
-    mTextures.clear();
+    mColorTextures.clear();
 
     if (mFramebuffer.IsValid())
     {
@@ -36,37 +36,55 @@ DeviceFramebuffer::~DeviceFramebuffer()
 
 void DeviceFramebuffer::SetConfig(const Config& conf)
 {
-    ASSERT(conf.color_target_count >= 1);
-
-    // we don't allow the config to be changed after it has been created.
-    // todo: delete the SetConfig API and take the FBO config in the
-    // device level API to create the FBO.
-    if (mFramebuffer.IsValid())
+    const auto format = conf.format;
+    ASSERT(format != Format::Invalid);
+    if (format == Format::DepthTexture32f)
     {
-        ASSERT(mConfig.format == conf.format);
-        ASSERT(mConfig.msaa == conf.msaa);
-        ASSERT(mConfig.color_target_count == conf.color_target_count);
-
-        // the size can change after the FBO has been created
-        // but only when the format is ColorRGBA8.
-        ASSERT(mConfig.format == Format::ColorRGBA8);
+        ASSERT(conf.color_target_count == 0);
+        ASSERT(conf.msaa == MSAA::Disabled);
+        if (mFramebuffer.IsValid())
+        {
+            ASSERT(mConfig.format == conf.format);
+        }
+        mConfig = conf;
     }
+    else
+    {
+        ASSERT(conf.color_target_count >= 1);
 
-    mConfig = conf;
-    mClientTextures.resize(mConfig.color_target_count);
-    mTextures.resize(mConfig.color_target_count);
+        // we don't allow the config to be changed after it has been created.
+        // todo: delete the SetConfig API and take the FBO config in the
+        // device level API to create the FBO.
+        if (mFramebuffer.IsValid())
+        {
+            ASSERT(mConfig.format == conf.format);
+            ASSERT(mConfig.msaa == conf.msaa);
+            ASSERT(mConfig.color_target_count == conf.color_target_count);
+
+            // the size can change after the FBO has been created
+            // but only when the format is ColorRGBA8. In other wors
+            // there are no render buffer attachments.
+            ASSERT(mConfig.format == Format::ColorRGBA8);
+        }
+
+        mConfig = conf;
+        mClientColorTextures.resize(mConfig.color_target_count);
+        mColorTextures.resize(mConfig.color_target_count);
+    }
 }
 
 void DeviceFramebuffer::SetColorTarget(gfx::Texture* texture, ColorAttachment attachment)
 {
     const auto index = static_cast<uint8_t>(attachment);
 
+    ASSERT(mConfig.format != Format::Invalid);
+    ASSERT(mConfig.format != Format::DepthTexture32f);
     ASSERT(index < mConfig.color_target_count);
 
-    if (texture == mClientTextures[index])
+    if (texture == mClientColorTextures[index])
         return;
 
-    mClientTextures[index] = static_cast<gfx::DeviceTexture*>(texture);
+    mClientColorTextures[index] = static_cast<gfx::DeviceTexture*>(texture);
 
     // if we have a client texture the client texture drives the FBO size.
     // Otherwise the FBO size is based on the size set in the FBO config.
@@ -76,10 +94,10 @@ void DeviceFramebuffer::SetColorTarget(gfx::Texture* texture, ColorAttachment at
     // changed after the FBO has been created the texture size must match
     // the size used to create the other attachments (if any)
 
-    if (mClientTextures[index])
+    if (mClientColorTextures[index])
     {
-        const auto width  = mClientTextures[index]->GetWidth();
-        const auto height = mClientTextures[index]->GetHeight();
+        const auto width  = mClientColorTextures[index]->GetWidth();
+        const auto height = mClientColorTextures[index]->GetHeight();
 
         // don't allow zero size texture.
         ASSERT(width && height);
@@ -98,27 +116,38 @@ void DeviceFramebuffer::SetColorTarget(gfx::Texture* texture, ColorAttachment at
     // check that every client provided texture has the same size.
     unsigned width  = 0;
     unsigned height = 0;
-    for (size_t i=0; i<mClientTextures.size(); ++i)
+    for (size_t i=0; i<mClientColorTextures.size(); ++i)
     {
-        if (!mClientTextures[i])
+        if (!mClientColorTextures[i])
             continue;
 
         if (width == 0 && height == 0)
         {
-            width = mClientTextures[i]->GetWidth();
-            height = mClientTextures[i]->GetHeight();
+            width = mClientColorTextures[i]->GetWidth();
+            height = mClientColorTextures[i]->GetHeight();
         }
         else
         {
-            ASSERT(mClientTextures[i]->GetWidth() == width);
-            ASSERT(mClientTextures[i]->GetHeight() == height);
+            ASSERT(mClientColorTextures[i]->GetWidth() == width);
+            ASSERT(mClientColorTextures[i]->GetHeight() == height);
         }
     }
+}
+
+void DeviceFramebuffer::SetDepthTarget(gfx::Texture* texture)
+{
+    ASSERT(mConfig.format == Format::DepthTexture32f);
+    if (mClientDepthTexture == texture)
+        return;
+
+    mClientDepthTexture = static_cast<DeviceTexture*>(texture);
 }
 
 void DeviceFramebuffer::Resolve(gfx::Texture** color, ColorAttachment attachment) const
 {
     const auto index = static_cast<uint8_t>(attachment);
+    ASSERT(mConfig.format != Format::Invalid);
+    ASSERT(mConfig.format != Format::DepthTexture32f);
 
     // resolve the MSAA render buffer into a texture target with glBlitFramebuffer
     // the insane part here is that we need a *another* frame buffer for resolving
@@ -140,58 +169,79 @@ void DeviceFramebuffer::Resolve(gfx::Texture** color, ColorAttachment attachment
 
 unsigned DeviceFramebuffer::GetWidth() const
 {
-    if (mClientTextures.empty())
+    if (mClientColorTextures.empty())
         return mConfig.width;
 
-    return mClientTextures[0]->GetWidth();
+    return mClientColorTextures[0]->GetWidth();
 }
 
 unsigned DeviceFramebuffer::GetHeight() const
 {
-    if (mClientTextures.empty())
+    if (mClientColorTextures.empty())
         return mConfig.height;
 
-    return mClientTextures[0]->GetHeight();
+    return mClientColorTextures[0]->GetHeight();
 }
 
 gfx::DeviceTexture* DeviceFramebuffer::GetColorBufferTexture(unsigned index) const noexcept
 {
-    if (mClientTextures[index])
-        return mClientTextures[index];
+    if (mClientColorTextures[index])
+        return mClientColorTextures[index];
 
-    return mTextures[index].get();
+    return mColorTextures[index].get();
+}
+
+DeviceTexture* DeviceFramebuffer::GetDepthBufferTexture() const noexcept
+{
+    if (mClientDepthTexture)
+        return mClientDepthTexture;
+
+    return mDepthTexture.get();
 }
 
 bool DeviceFramebuffer::Complete()
 {
-    // in case of a multisampled FBO the color attachment is a multisampled render buffer
-    // and the resolve client texture will be the *resolve* target in the blit framebuffer operation.
-    if (const auto samples = mFramebuffer.samples)
-    {
-        CreateColorBufferTextures();
-        const auto* resolve_target = GetColorBufferTexture(0);
-        const unsigned width  = resolve_target->GetWidth();
-        const unsigned height = resolve_target->GetHeight();
+    std::vector<unsigned> color_attachments;
 
-        for (unsigned i=0; i<mConfig.color_target_count; ++i)
-        {
-            mDevice->AllocateRenderTarget(mFramebuffer, i, width, height);
-        }
+    if (mConfig.format == Format::DepthTexture32f)
+    {
+        CreateDepthBufferTexture();
+
+        auto* depth_target = GetDepthBufferTexture();
+
+        mDevice->BindDepthRenderTargetTexture2D(mFramebuffer, depth_target->GetTexture());
     }
     else
     {
-        CreateColorBufferTextures();
-        for (unsigned i=0; i<mConfig.color_target_count; ++i)
+        // in case of a multisampled FBO the color attachment is a multisampled render buffer
+        // and the resolve client texture will be the *resolve* target in the blit framebuffer operation.
+        if (const auto samples = mFramebuffer.samples)
         {
-            auto* color_target = GetColorBufferTexture(i);
-            // in case of a single sampled FBO the resolve target can be used directly
-            // as the color attachment in the FBO.
-            mDevice->BindRenderTargetTexture2D(mFramebuffer, color_target->GetTexture(), i);
+            CreateColorBufferTextures();
+            const auto* resolve_target = GetColorBufferTexture(0);
+            const unsigned width  = resolve_target->GetWidth();
+            const unsigned height = resolve_target->GetHeight();
+
+            for (unsigned i=0; i<mConfig.color_target_count; ++i)
+            {
+                mDevice->AllocateMSAAColorRenderTarget(mFramebuffer, i, width, height);
+            }
         }
+        else
+        {
+            CreateColorBufferTextures();
+            for (unsigned i=0; i<mConfig.color_target_count; ++i)
+            {
+                auto* color_target = GetColorBufferTexture(i);
+                // in case of a single sampled FBO the resolve target can be used directly
+                // as the color attachment in the FBO.
+                mDevice->BindColorRenderTargetTexture2D(mFramebuffer, color_target->GetTexture(), i);
+            }
+        }
+
+        for (unsigned i=0; i<mConfig.color_target_count; ++i)
+            color_attachments.push_back(i);
     }
-    std::vector<unsigned> color_attachments;
-    for (unsigned i=0; i<mConfig.color_target_count; ++i)
-        color_attachments.push_back(i);
 
     if (!mDevice->CompleteFramebuffer(mFramebuffer, color_attachments))
     {
@@ -205,81 +255,127 @@ bool DeviceFramebuffer::Complete()
 bool DeviceFramebuffer::Create()
 {
     ASSERT(!mFramebuffer.IsValid());
+    ASSERT(mConfig.format != Format::Invalid);
 
-    CreateColorBufferTextures();
+    unsigned fbo_width = 0;
+    unsigned fbo_height = 0;
 
-    auto* texture = GetColorBufferTexture(0);
-    const auto width  = texture->GetWidth();
-    const auto height = texture->GetHeight();
+    if (mConfig.format == Format::DepthTexture32f)
+    {
+        CreateDepthBufferTexture();
 
+        auto* texture = GetDepthBufferTexture();
+        fbo_width = texture->GetWidth();
+        fbo_height = texture->GetHeight();
+    }
+    else
+    {
+        CreateColorBufferTextures();
+
+        auto* texture = GetColorBufferTexture(0);
+        fbo_width  = texture->GetWidth();
+        fbo_height = texture->GetHeight();
+    }
     dev::FramebufferConfig config;
-    config.width  = width;
-    config.height = height;
+    config.width  = fbo_width;
+    config.height = fbo_height;
     config.msaa   = IsMultisampled();
     config.format = mConfig.format;
     mFramebuffer = mDevice->CreateFramebuffer(config);
     DEBUG("Created new frame buffer object. [name='%1', width=%2, height=%3, format=%4, samples=%5]",
-          mName, width, height, mConfig.format, config.msaa);
+          mName, fbo_width, fbo_height, mConfig.format, config.msaa);
 
     // commit the size
-    mConfig.width  = width;
-    mConfig.height = height;
+    mConfig.width  = fbo_width;
+    mConfig.height = fbo_height;
     return true;
 }
 
 void DeviceFramebuffer::SetFrameStamp(size_t stamp)
 {
-    for (auto& texture : mTextures)
+    for (auto& texture : mColorTextures)
     {
         if (texture)
             texture->SetFrameStamp(stamp);
     }
 
-    for (auto* texture : mClientTextures)
+    for (auto* texture : mClientColorTextures)
     {
         if (texture)
             texture->SetFrameStamp(stamp);
     }
+    if (mClientDepthTexture)
+        mClientDepthTexture->SetFrameStamp(stamp);
 
     mFrameNumber = stamp;
 }
 
 void DeviceFramebuffer::CreateColorBufferTextures()
 {
-    mClientTextures.resize(mConfig.color_target_count);
-    mTextures.resize(mConfig.color_target_count);
+    mClientColorTextures.resize(mConfig.color_target_count);
+    mColorTextures.resize(mConfig.color_target_count);
 
     for (unsigned i=0; i<mConfig.color_target_count; ++i)
     {
-        if (mClientTextures[i])
+        if (mClientColorTextures[i])
             continue;
 
         // we must have FBO width and height for creating
         // the color buffer texture.
         ASSERT(mConfig.width && mConfig.height);
 
-        if (!mTextures[i])
+        if (!mColorTextures[i])
         {
             const auto texture_name = "FBO/" + mName + "/Color" + std::to_string(i);
-            mTextures[i] = std::make_unique<gfx::DeviceTexture>(mDevice, texture_name);
-            mTextures[i]->SetName(texture_name);
-            mTextures[i]->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::sRGBA);
-            mTextures[i]->SetFilter(gfx::Texture::MinFilter::Linear);
-            mTextures[i]->SetFilter(gfx::Texture::MagFilter::Linear);
-            mTextures[i]->SetWrapX(gfx::Texture::Wrapping::Clamp);
-            mTextures[i]->SetWrapY(gfx::Texture::Wrapping::Clamp);
-            DEBUG("Allocated new FBO color buffer (texture) target. [name='%1', width=%2, height=%3]]", mName,
+            mColorTextures[i] = std::make_unique<gfx::DeviceTexture>(mDevice, texture_name);
+            mColorTextures[i]->SetName(texture_name);
+            mColorTextures[i]->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::sRGBA);
+            mColorTextures[i]->SetFilter(gfx::Texture::MinFilter::Linear);
+            mColorTextures[i]->SetFilter(gfx::Texture::MagFilter::Linear);
+            mColorTextures[i]->SetWrapX(gfx::Texture::Wrapping::Clamp);
+            mColorTextures[i]->SetWrapY(gfx::Texture::Wrapping::Clamp);
+            DEBUG("Allocated new FBO color buffer (texture) target. [name='%1', width=%2, height=%3]", mName,
                   mConfig.width, mConfig.height);
         }
         else
         {
-            const auto width  = mTextures[i]->GetWidth();
-            const auto height = mTextures[i]->GetHeight();
+            const auto width  = mColorTextures[i]->GetWidth();
+            const auto height = mColorTextures[i]->GetHeight();
             if (width != mConfig.width || height != mConfig.height)
-                mTextures[i]->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::sRGBA);
+                mColorTextures[i]->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::sRGBA);
         }
 
     }
 }
+
+void DeviceFramebuffer::CreateDepthBufferTexture()
+{
+    if (mClientDepthTexture)
+        return;
+
+    ASSERT(mConfig.width && mConfig.height);
+
+    if (!mDepthTexture)
+    {
+        const auto texture_name = "FBO/" + mName + "/DepthTexture";
+        mDepthTexture = std::make_unique<gfx::DeviceTexture>(mDevice, texture_name);
+        mDepthTexture->SetName(texture_name);
+        mDepthTexture->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::DepthComponent32f);
+        mDepthTexture->SetFilter(gfx::Texture::MinFilter::Nearest);
+        mDepthTexture->SetFilter(gfx::Texture::MagFilter::Nearest);
+        mDepthTexture->SetWrapX(gfx::Texture::Wrapping::Clamp);
+        mDepthTexture->SetWrapY(gfx::Texture::Wrapping::Clamp);
+        DEBUG("Allocated new FBO depth buffer (texture) target. [name='%1', width=%2, height=%3]", mName,
+              mConfig.width, mConfig.height);
+    }
+    else
+    {
+        const auto width = mDepthTexture->GetWidth();
+        const auto height = mDepthTexture->GetHeight();
+        if (width != mConfig.width || height != mConfig.height)
+            mDepthTexture->Allocate(mConfig.width, mConfig.height, Texture::Format::DepthComponent32f);
+    }
+}
+
 
 } // namespace

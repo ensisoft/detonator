@@ -67,12 +67,14 @@ namespace dev
 
         template<>
         struct ResourceHandle<dev::ResourceType::Texture> {
-            inline bool IsValid() const noexcept
+            bool IsValid() const noexcept
             { return handle != 0; }
-            inline auto GetHandle() const noexcept
+            auto GetHandle() const noexcept
             { return handle; }
-            inline auto GetType() const noexcept
+            auto GetType() const noexcept
             { return type; }
+            auto GetFormat() const noexcept
+            { return format; }
 
             unsigned handle = 0;
             TextureType type = TextureType::Invalid;

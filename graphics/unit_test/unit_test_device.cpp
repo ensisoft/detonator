@@ -909,7 +909,123 @@ void main() {
         const auto &bmp = dev->ReadColorBuffer(10, 10);
         TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
     }
+}
 
+void unit_test_render_depth()
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto dev = CreateDevice();
+
+    const gfx::Vertex2D verts[] = {
+        {{-1, 1},  {0, 1}},
+        {{-1, -1}, {0, 0}},
+        {{1,  -1}, {1, 0}},
+
+        {{-1, 1},  {0, 1}},
+        {{1,  -1}, {1, 0}},
+        {{1,  1},  {1, 1}}
+    };
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
+
+    // the fragment shader is a dummy, when rendering to a depth
+    // buffer only we don't really need the fragment shader to
+    // output anything. but for the  purposes of the automatic
+    // shader type identification we've added a dummy fragOutColor
+    auto depth_program = MakeTestProgram(*dev,
+R"(#version 300 es
+in vec2 aPosition;
+void main() {
+// -1.0 = front plane, zero depth
+// 1.0 =  far plane, maximum depth
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})",
+
+R"(#version 300 es
+void main() {
+   // fragOutColor = vec4(1.0);
+})", "depth-program");
+
+    auto color_program = MakeTestProgram(*dev,
+R"(#version 300 es
+in vec2 aPosition;
+in vec2 aTexCoord;
+out vec2 vTexCoord;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+  vTexCoord = aTexCoord;
+})",
+
+R"(#version 300 es
+precision mediump float;
+
+in vec2 vTexCoord;
+uniform sampler2D kTexture;
+
+layout (location=0) out vec4 fragOutColor;
+
+void main() {
+  float x = texture2D(kTexture, vTexCoord.xy).r;
+  fragOutColor = vec4(vec3(x), 1.0);
+
+})", "color-program");
+
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor = true;
+    dss.depth_test   = gfx::Device::DepthTest::Always;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
+
+    // use client allocated texture
+    {
+        auto* depth_texture = dev->MakeTexture("depth-texture");
+        depth_texture->Allocate(10, 10, gfx::Texture::Format::DepthComponent32f);
+        depth_texture->SetName("FBO-depth-target");
+
+        gfx::Framebuffer::Config conf;
+        conf.format = gfx::Framebuffer::Format::DepthTexture32f;
+        conf.msaa   = gfx::Framebuffer::MSAA::Disabled;
+        conf.width  = 10;
+        conf.height = 10;
+        conf.color_target_count = 0;
+        auto* fbo = dev->MakeFramebuffer("test");
+        fbo->SetConfig(conf);
+        fbo->SetDepthTarget(depth_texture);
+
+        for (int i=0; i<2; ++i)
+        {
+            dev->BeginFrame();
+
+            // clear depth to 0.0 which as a color is black.
+            dev->ClearDepth(0.0f, fbo);
+            // render the object, writes 1.0 to depth which as a color is white.
+            dev->Draw(*depth_program, gfx::ProgramState(), *geom, state, fbo);
+
+            // render using the second program and sample from the FBO texture.
+            gfx::ProgramState program_state;
+            program_state.SetTexture("kTexture", 0, *depth_texture);
+
+            dev->ClearColor(gfx::Color::Blue, nullptr);
+            dev->Draw(*color_program, program_state, *geom, state, nullptr);
+
+            dev->EndFrame();
+
+            const auto& bmp = dev->ReadColorBuffer(10, 10, nullptr);
+            //gfx::WritePNG(bmp, "depth-render.png");
+            TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
+        }
+    }
 }
 
 void unit_test_render_set_uint_uniforms()
@@ -3127,6 +3243,8 @@ int test_main(int argc, char* argv[])
 
     if (TestContext::GL_ES_Version == 3)
     {
+        unit_test_render_depth();
+
         // uint requires #version 130 or later
         unit_test_render_set_uint_uniforms();
 

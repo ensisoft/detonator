@@ -57,6 +57,8 @@ namespace gfx
         // The texture format must match the FBO config, i.e. the dimension
         // of any other buffers and the configured color format.
         virtual void SetColorTarget(Texture* texture, ColorAttachment attachment) = 0;
+
+        virtual void SetDepthTarget(Texture* texture) = 0;
         // Resolve the framebuffer color buffer contents into a texture that can be
         // used to sample the rendered image.
         virtual void Resolve(Texture** color, ColorAttachment attachment) const = 0;
