@@ -901,7 +901,7 @@ bool PlayWindow::LoadGame(bool clean_game_home)
     return true;
 }
 
-bool PlayWindow::LoadPreview(const std::shared_ptr<const game::EntityClass>& entity)
+bool PlayWindow::LoadPreview(const std::shared_ptr<const game::EntityClass>& entity, game::SceneProjection projection)
 {
     if (!LoadLibrary())
         return false;
@@ -916,8 +916,10 @@ bool PlayWindow::LoadPreview(const std::shared_ptr<const game::EntityClass>& ent
         mClassLibrary->SetEntityPreviewScene(klass);
     else if (auto klass = mWorkspace.FindSceneClassByName("_entity_preview_scene_"))
         mClassLibrary->SetEntityPreviewScene(klass);
-    else {
+    else
+    {
         auto dummy_klass = std::make_shared<game::SceneClass>();
+        dummy_klass->SetProjection(projection);
         dummy_klass->SetName("_entity_preview_scene_");
         mClassLibrary->SetEntityPreviewScene(dummy_klass);
     }

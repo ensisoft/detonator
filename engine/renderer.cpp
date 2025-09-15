@@ -119,7 +119,6 @@ void Renderer::UpdateRendererState(const game::Scene& scene, const game::Tilemap
 
 void Renderer::Update(const Scene& scene, const game::Tilemap* map, double time, float dt)
 {    
-    
     // can't update the renderer state (paint nodes, lights etc)
     // concurrently.
     std::lock_guard<std::mutex> renderer_lock(mRendererLock);
@@ -128,45 +127,43 @@ void Renderer::Update(const Scene& scene, const game::Tilemap* map, double time,
     // with frame rendering.
     std::lock_guard<std::mutex> frame_lock(mFrameLock);
 
+    const auto& projection = scene->GetProjection();
+
     for (size_t i=0; i<scene.GetNumEntities(); ++i)
     {
         const auto& entity = scene.GetEntity(i);
-        Update(entity, time, dt);
-    }
-}
 
-void Renderer::Update(const Entity& entity, double time, float dt)
-{
-    // should hold frame lock here, but we're holding it now in
-    // Scene update which calls this method
-
-    for (size_t i=0; i < entity.GetNumNodes(); ++i)
-    {
-        const auto& node = entity.GetNode(i);
-
-        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+        for (size_t i=0; i < entity.GetNumNodes(); ++i)
         {
-            UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, time, dt);
-            paint->visited = true;
+            const auto& node = entity.GetNode(i);
+
+            if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+            {
+                UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, projection, time, dt);
+                paint->visited = true;
+            }
+
+            if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+            {
+                UpdateTextResources<Entity, EntityNode>(entity, node, *paint, projection, time, dt);
+                paint->visited = true;
+            }
+
+            if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
+            {
+                UpdateLightResources<Entity, EntityNode>(entity, node, *light, projection, time, dt);
+                light->visited = true;
+            }
         }
 
-        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
-        {
-            UpdateTextResources<Entity, EntityNode>(entity, node, *paint, time, dt);
-            paint->visited = true;
-        }
-
-        if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
-        {
-            UpdateLightResources<Entity, EntityNode>(entity, node, *light, time, dt);
-            light->visited = true;
-        }
     }
 }
 
 void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, const FrameSettings& settings)
 {
     std::lock_guard<std::mutex> renderer_lock(mRendererLock);
+
+    const auto projection = scene->GetProjection();
 
     std::vector<DrawPacket> scene_draw_packets;
     std::vector<DrawPacket> map_draw_packets;
@@ -203,19 +200,19 @@ void Renderer::CreateFrame(const game::Scene& scene, const game::Tilemap* map, c
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
                 {
-                    CreateDrawableDrawPackets<Entity, EntityNode>(entity, node, *paint, settings, *packet_list, nullptr);
+                    CreateDrawableDrawPackets<Entity, EntityNode>(entity, node, *paint, settings, projection, *packet_list, nullptr);
                     paint->visited = true;
                 }
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
                 {
-                    CreateTextDrawPackets<Entity, EntityNode>(entity, node, *paint, *packet_list, nullptr);
+                    CreateTextDrawPackets<Entity, EntityNode>(entity, node, *paint, settings, projection, *packet_list, nullptr);
                     paint->visited = true;
                 }
 
                 if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
                 {
-                    CreateLights<Entity, EntityNode>(entity, node, *light, settings, lights);
+                    CreateLights<Entity, EntityNode>(entity, node, *light, settings, projection, lights);
                     light->visited = true;
                 }
             }
@@ -337,19 +334,19 @@ void Renderer::Update(const EntityClass& entity, double time, float dt)
 
         if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
         {
-            UpdateDrawableResources<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
+            UpdateDrawableResources<EntityClass, EntityNodeClass>(entity, node, *paint, mProjection, time, dt);
             paint->visited = true;
         }
 
         if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
         {
-            UpdateTextResources<EntityClass, EntityNodeClass>(entity, node, *paint, time, dt);
+            UpdateTextResources<EntityClass, EntityNodeClass>(entity, node, *paint, mProjection, time, dt);
             paint->visited = true;
         }
 
         if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
         {
-            UpdateLightResources<EntityClass, EntityNodeClass>(entity, node, *light, time, dt);
+            UpdateLightResources<EntityClass, EntityNodeClass>(entity, node, *light, mProjection, time, dt);
             light->visited = true;
         }
     }
@@ -357,6 +354,8 @@ void Renderer::Update(const EntityClass& entity, double time, float dt)
 
 void Renderer::Update(const SceneClass& scene, const game::Tilemap* map, double time, float dt)
 {
+    const auto projection = scene.GetProjection();
+
     for (size_t i=0; i<scene.GetNumNodes(); ++i)
     {
         const auto& placement = scene.GetPlacement(i);
@@ -369,17 +368,17 @@ void Renderer::Update(const SceneClass& scene, const game::Tilemap* map, double 
             const auto& node = entity->GetNode(j);
             if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + placement.GetId() + "/" + node.GetId()))
             {
-                UpdateDrawableResources<EntityClass, EntityNodeClass>(*entity, node, *paint, time, dt);
+                UpdateDrawableResources<EntityClass, EntityNodeClass>(*entity, node, *paint, projection, time, dt);
                 paint->visited = true;
             }
             if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + placement.GetId() + "/" + node.GetId()))
             {
-                UpdateTextResources<EntityClass, EntityNodeClass>(*entity, node, *paint, time, dt);
+                UpdateTextResources<EntityClass, EntityNodeClass>(*entity, node, *paint, projection, time, dt);
                 paint->visited = true;
             }
             if (auto* light = base::SafeFind(mLightNodes, "basic/" + placement.GetId() + "/" + node.GetId()))
             {
-                UpdateLightResources<EntityClass, EntityNodeClass>(*entity, node, *light, time, dt);
+                UpdateLightResources<EntityClass, EntityNodeClass>(*entity, node, *light, projection, time, dt);
                 light->visited = true;
             }
         }
@@ -392,8 +391,36 @@ void Renderer::Update(const game::Tilemap& map, double time, float dt)
     // there's nothing here that needs to be done.
 }
 
+void Renderer::Update(const Entity& entity, double time, float dt)
+{
+    for (size_t i=0; i < entity.GetNumNodes(); ++i)
+    {
+        const auto& node = entity.GetNode(i);
+
+        if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
+        {
+            UpdateDrawableResources<Entity, EntityNode>(entity, node, *paint, mProjection, time, dt);
+            paint->visited = true;
+        }
+
+        if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
+        {
+            UpdateTextResources<Entity, EntityNode>(entity, node, *paint, mProjection, time, dt);
+            paint->visited = true;
+        }
+
+        if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
+        {
+            UpdateLightResources<Entity, EntityNode>(entity, node, *light, mProjection, time, dt);
+            light->visited = true;
+        }
+    }
+}
+
 void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* map, SceneClassDrawHook* scene_hook)
 {
+    const auto projection = scene.GetProjection();
+
     std::vector<DrawPacket> scene_draw_packets;
     std::vector<DrawPacket> map_draw_packets;
 
@@ -451,18 +478,18 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + placement->GetId() + "/" + node.GetId()))
                 {
-                    CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(*entity, node, *paint, mFrameSettings, entity_packets, nullptr);
+                    CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(*entity, node, *paint, mFrameSettings, projection, entity_packets, nullptr);
                     paint->visited = true;
                 }
 
                 if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + placement->GetId() + "/" + node.GetId()))
                 {
-                    CreateTextDrawPackets<game::EntityClass, game::EntityNodeClass>(*entity, node, *paint, entity_packets, nullptr);
+                    CreateTextDrawPackets<game::EntityClass, game::EntityNodeClass>(*entity, node, *paint, mFrameSettings, projection, entity_packets, nullptr);
                     paint->visited = true;
                 }
                 if (auto* light = base::SafeFind(mLightNodes, "basic/" + placement->GetId() + "/" + node.GetId()))
                 {
-                    CreateLights<game::EntityClass, game::EntityNodeClass>(*entity, node, *light, mFrameSettings, entity_lights);
+                    CreateLights<game::EntityClass, game::EntityNodeClass>(*entity, node, *light, mFrameSettings, projection, entity_lights);
                     light->visited = true;
                 }
             }
@@ -549,7 +576,7 @@ void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook*
         {
             if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
             {
-                CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, mFrameSettings, packets, hook);
+                CreateDrawableDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, mFrameSettings, mProjection, packets, hook);
                 paint->visited = true;
                 did_paint = true;
             }
@@ -559,7 +586,7 @@ void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook*
         {
             if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
             {
-                CreateTextDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, packets, hook);
+                CreateTextDrawPackets<game::EntityClass, game::EntityNodeClass>(entity, node, *paint, mFrameSettings, mProjection, packets, hook);
                 paint->visited = true;
                 did_paint = true;
             }
@@ -569,7 +596,7 @@ void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook*
         {
             if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
             {
-                CreateLights<game::EntityClass, game::EntityNodeClass>(entity, node, *light, mFrameSettings, lights);
+                CreateLights<game::EntityClass, game::EntityNodeClass>(entity, node, *light, mFrameSettings, mProjection, lights);
                 light->visited = true;
             }
         }
@@ -599,20 +626,20 @@ void Renderer::CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* h
         bool did_paint = false;
         if (auto* paint = base::SafeFind(mPaintNodes, "drawable/" + node.GetId()))
         {
-            CreateDrawableDrawPackets<game::Entity, game::EntityNode>(entity, node, *paint, mFrameSettings, packets, hook);
+            CreateDrawableDrawPackets<game::Entity, game::EntityNode>(entity, node, *paint, mFrameSettings, mProjection, packets, hook);
             paint->visited = true;
             did_paint = true;
         }
 
         if (auto* paint = base::SafeFind(mPaintNodes, "text-item/" + node.GetId()))
         {
-            CreateTextDrawPackets<game::Entity, game::EntityNode>(entity, node, *paint, packets, hook);
+            CreateTextDrawPackets<game::Entity, game::EntityNode>(entity, node, *paint, mFrameSettings, mProjection, packets, hook);
             paint->visited = true;
             did_paint = true;
         }
         if (auto* light = base::SafeFind(mLightNodes, "basic/" + node.GetId()))
         {
-            CreateLights<game::Entity, game::EntityNode>(entity, node, *light, mFrameSettings, lights);
+            CreateLights<game::Entity, game::EntityNode>(entity, node, *light, mFrameSettings, mProjection, lights);
             light->visited = true;
         }
 
@@ -950,7 +977,7 @@ void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
 
 template<typename EntityType, typename EntityNodeType>
 void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
-                                       double time, float dt) const
+                                       SceneProjection projection, double time, float dt) const
 {
     using DrawableItemType = typename EntityNodeType::DrawableItemType;
     const auto* item = entity_node.GetDrawable();
@@ -1020,12 +1047,13 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
     {
         const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
+        const auto project_3d      = item->TestFlag(DrawableItemType::Flags::ProjectAs3D);
         const auto& shape = paint_node.drawable;
-        const auto view = item->GetRenderView();
         const auto size = entity_node.GetSize();
         const auto is3d = Is3DShape(*shape);
 
-        if (view == game::RenderView::Dimetric)
+        const bool add_dimetric_transform = projection == SceneProjection::Dimetric && (is3d || project_3d);
+        if (add_dimetric_transform)
         {
             transform.Push(CreateModelMatrix(GameView::AxisAligned));
             transform.Push(CreateModelMatrix(GameView::Dimetric));
@@ -1054,7 +1082,7 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
         }
 
         glm::mat4 world(1.0f);
-        if (view == game::RenderView::Dimetric)
+        if (add_dimetric_transform)
         {
             world =  CreateModelMatrix(GameView::Dimetric) *
                      CreateModelMatrix(GameView::AxisAligned);
@@ -1089,7 +1117,7 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
         // pop model transform.
         transform.Pop();
 
-        if (view == game::RenderView::Dimetric)
+        if (add_dimetric_transform)
         {
             // pop view based model transform
             transform.Pop();
@@ -1108,7 +1136,7 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
 
 template<typename EntityType, typename EntityNodeType>
 void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
-                                   double time, float dt) const
+                                   SceneProjection mode, double time, float dt) const
 {
 
     using TextItemType = typename EntityNodeType::TextItemType;
@@ -1146,7 +1174,7 @@ void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeTyp
 
 template<typename EntityType, typename EntityNodeType>
 void Renderer::UpdateLightResources(const EntityType& entity, const EntityNodeType& entity_node, LightNode& light_node,
-                                    double time, float dt) const
+                                    SceneProjection mode, double time, float dt) const
 {
     if (const auto* light = entity_node.GetBasicLight())
     {
@@ -1459,6 +1487,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
                                          const EntityNodeType& entity_node,
                                          const PaintNode& paint_node,
                                          const FrameSettings& settings,
+                                         SceneProjection projection,
                                          std::vector<DrawPacket>& packets,
                                          EntityDrawHook<EntityNodeType>* hook) const
 {
@@ -1492,12 +1521,13 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
         const auto double_sided    = item->TestFlag(DrawableItemType::Flags::DoubleSided);
         const auto depth_test      = item->TestFlag(DrawableItemType::Flags::DepthTest);
+        const auto project_3d      = item->TestFlag(DrawableItemType::Flags::ProjectAs3D);
         const auto& shape = paint_node.drawable;
         const auto size = entity_node.GetSize();
         const auto is3d = Is3DShape(*shape);
-        const auto view = item->GetRenderView();
 
-        if (view == game::RenderView::Dimetric)
+        const auto add_dimetric_transform = projection == SceneProjection::Dimetric && (is3d || project_3d);
+        if (add_dimetric_transform)
         {
             transform.Push(CreateModelMatrix(GameView::AxisAligned));
             transform.Push(CreateModelMatrix(GameView::Dimetric));
@@ -1542,22 +1572,25 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             packet.flags.set(DrawPacket::Flags::PP_Bloom, item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
             packet.flags.set(DrawPacket::Flags::Flip_UV_Vertically, vertical_flip);
             packet.flags.set(DrawPacket::Flags::Flip_UV_Horizontally, horizontal_flip);
-            packet.source       = DrawPacket::Source::Scene;
-            packet.domain       = DrawPacket::Domain::Scene;
-            packet.culling      = DrawPacket::Culling::Back;
-            packet.depth_test   = DrawPacket::DepthTest::Disabled;
-            packet.material     = paint_node.material;
-            packet.drawable     = paint_node.drawable;
-            packet.transform    = transform;
-            packet.sort_point   = map_sort_point;
-            packet.map_layer    = map_layer;
-            packet.map_sort_key = map_sort_key;
-            packet.render_layer = entity.GetRenderLayer();
-            packet.pass         = item->GetRenderPass();
-            packet.projection   = item->GetRenderProjection();
-            packet.packet_index = item->GetLayer();
-            packet.line_width   = item->GetLineWidth();
+            packet.source           = DrawPacket::Source::Scene;
+            packet.domain           = DrawPacket::Domain::Scene;
+            packet.culling          = DrawPacket::Culling::Back;
+            packet.depth_test       = DrawPacket::DepthTest::Disabled;
+            packet.projection       = DrawPacket::Projection::Orthographic;
+            packet.material         = paint_node.material;
+            packet.drawable         = paint_node.drawable;
+            packet.transform        = transform;
+            packet.sort_point       = map_sort_point;
+            packet.map_layer        = map_layer;
+            packet.map_sort_key     = map_sort_key;
+            packet.render_layer     = entity.GetRenderLayer();
+            packet.pass             = item->GetRenderPass();
+            packet.packet_index     = item->GetLayer();
+            packet.line_width       = item->GetLineWidth();
             packet.coordinate_space = item->GetCoordinateSpace();
+
+            if (projection == SceneProjection::AxisAlignedPerspective && (is3d || project_3d))
+                packet.projection = DrawPacket::Projection::Perspective;
 
             if (mEditingMode)
             {
@@ -1584,7 +1617,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
         // pop model transform
         transform.Pop();
 
-        if (view == game::RenderView::Dimetric)
+        if (add_dimetric_transform)
         {
             // pop view based model transform
             transform.Pop();
@@ -1604,6 +1637,8 @@ template<typename EntityType, typename EntityNodeType>
 void Renderer::CreateTextDrawPackets(const EntityType& entity,
                                      const EntityNodeType& entity_node,
                                      const PaintNode& paint_node,
+                                     const FrameSettings& settings,
+                                     SceneProjection mode,
                                      std::vector<DrawPacket>& packets,
                                      EntityDrawHook<EntityNodeType>* hook) const
 {
@@ -1679,6 +1714,7 @@ void Renderer::CreateLights(const EntityType& entity,
                             const EntityNodeType& entity_node,
                             const LightNode& light_node,
                             const FrameSettings& settings,
+                            SceneProjection mode,
                             std::vector<Light>& lights) const
 {
     using LightClassType = typename EntityNodeType::LightClassType;

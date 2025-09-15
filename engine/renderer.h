@@ -111,6 +111,7 @@ namespace engine
     {
     public:
         using RenderingStyle = engine::RenderingStyle;
+        using SceneProjection = game::SceneProjection;
 
         enum class Effects {
             Bloom
@@ -147,6 +148,8 @@ namespace engine
         // these are not thread safe and are only available in the
         // editor and tests. The engine uses threads so we cannot
         // use these directly.
+        void SetProjection(SceneProjection projection) noexcept
+        { mProjection = projection; }
         void SetBloom(const BloomParams& bloom) noexcept
         { mFrameSettings.bloom = bloom; }
         void EnableEffect(Effects effect, bool enabled) noexcept
@@ -182,7 +185,6 @@ namespace engine
         // note that when doing multi-threaded render/update this
         // method cannot run in parallel with DrawFrame.
         void Update(const game::Scene& scene, const game::Tilemap* map, double time, float dt);
-        void Update(const game::Entity& entity, double time, float dt);
 
         // Create the draw commands for the next frame that to be drawn
         // by the call to DrawFrame. This method cannot run in parallel
@@ -202,6 +204,7 @@ namespace engine
         void Update(const game::EntityClass& entity, double time, float dt);
         void Update(const game::SceneClass& scene, const game::Tilemap* map, double time, float dt);
         void Update(const game::Tilemap& map, double time, float dt);
+        void Update(const game::Entity& entity, double time, float dt);
 
         void Update(const game::Scene& scene, double time, float dt)
         {
@@ -255,13 +258,13 @@ namespace engine
 
         template<typename EntityType, typename EntityNodeType>
         void UpdateDrawableResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
-                                     double time, float dt) const;
+                                     SceneProjection mode, double time, float dt) const;
         template<typename EntityType, typename EntityNodeType>
         void UpdateTextResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
-                                 double time, float dt) const;
+                                 SceneProjection mode, double time, float dt) const;
         template<typename EntityType, typename EntityNodeType>
         void UpdateLightResources(const EntityType& entity, const EntityNodeType& entity_node, LightNode& light_node,
-                                  double time, float dt) const;
+                                  SceneProjection mode, double time, float dt) const;
 
         template<typename EntityType, typename EntityNodeType>
         void CreateDrawableResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node) const;
@@ -275,12 +278,15 @@ namespace engine
                                        const EntityNodeType& entity_node,
                                        const PaintNode& paint_node,
                                        const FrameSettings& settings,
+                                       SceneProjection mode,
                                        std::vector<DrawPacket>& packets,
                                        EntityDrawHook<EntityNodeType>* hook) const;
         template<typename EntityType, typename EntityNodeType>
         void CreateTextDrawPackets(const EntityType& entity,
                                    const EntityNodeType& entity_node,
                                    const PaintNode& paint_node,
+                                   const FrameSettings& settings,
+                                   SceneProjection mode,
                                    std::vector<DrawPacket>& packets,
                                    EntityDrawHook<EntityNodeType>* hook) const;
 
@@ -289,6 +295,7 @@ namespace engine
                           const EntityNodeType& entity_node,
                           const LightNode& light_node,
                           const FrameSettings& settings,
+                          SceneProjection mode,
                           std::vector<Light>& lights) const;
 
         void OffsetPacketLayers(std::vector<DrawPacket>& packets, std::vector<Light>& lights) const;
@@ -365,6 +372,7 @@ namespace engine
         std::vector<TilemapLayerPalette> mTilemapPalette;
 
 #if !defined(DETONATOR_ENGINE_BUILD)
+        SceneProjection mProjection = SceneProjection::AxisAlignedOrthographic;
         PacketFilter* mPacketFilter = nullptr;
         LowLevelRendererHook* mLowLevelRendererHook = nullptr;
 #endif

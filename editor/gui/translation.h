@@ -54,7 +54,8 @@ namespace engine {
 } // namespace
 
 namespace game {
-    std::string TranslateEnum(SceneClass::RenderingArgs::ShadingMode mode);
+    std::string TranslateEnum(SceneClass::SceneProjection projection);
+    std::string TranslateEnum(SceneClass::SceneShadingMode mode);
     std::string TranslateEnum(AnimatorClass::Type type);
     std::string TranslateEnum(PropertyAnimatorClass::PropertyName name);
     std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name);

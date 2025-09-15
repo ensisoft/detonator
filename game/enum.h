@@ -74,6 +74,17 @@ namespace game {
         MaskExpose
     };
 
+    enum class SceneProjection {
+        AxisAlignedOrthographic,
+        AxisAlignedPerspective,
+        Dimetric,
+        //Isometric,
+        //Oblique
+    };
+    enum class SceneShadingMode {
+        Flat, BasicLight
+    };
+
     enum class RenderStyle {
         // Rasterize the outline of the shape as lines.
         // Only the fragments that are within the line are shaded.

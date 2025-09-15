@@ -82,7 +82,10 @@ namespace game
             // Contribute to bloom post-processing effect.
             PP_EnableBloom,
             // Enable light on this drawable (if the scene is lit)
-            EnableLight
+            EnableLight,
+            // When the shape is 2D shape this flag controls
+            // whether the drawable is projected into 3D world or not.
+            ProjectAs3D
         };
         DrawableItemClass();
 
@@ -110,10 +113,6 @@ namespace game
         { mRenderPass = pass; }
         void SetRenderStyle(RenderStyle style) noexcept
         { mRenderStyle = style; }
-        void SetRenderView(RenderView view) noexcept
-        { mRenderView = view;  }
-        void SetRenderProjection(RenderProjection projection) noexcept
-        { mRenderProjection = projection; }
         void SetCoordinateSpace(CoordinateSpace space) noexcept
         { mCoordinateSpace = space; }
         void SetTimeScale(float scale) noexcept
@@ -130,6 +129,8 @@ namespace game
         { mMaterialParams = params; }
         void SetMaterialParams(MaterialParamMap&& params)
         { mMaterialParams = std::move(params); }
+        void Set3DProjection(bool on_off) noexcept
+        { SetFlag(Flags::ProjectAs3D, on_off); }
 
         // class getters.
         const std::string& GetDrawableId() const noexcept
@@ -154,14 +155,13 @@ namespace game
         { return mRenderPass; }
         RenderStyle GetRenderStyle() const noexcept
         { return mRenderStyle; }
-        RenderView GetRenderView() const noexcept
-        { return mRenderView; }
-        RenderProjection GetRenderProjection() const noexcept
-        { return mRenderProjection; }
-        CoordinateSpace  GetCoordinateSpace() const noexcept
+        CoordinateSpace GetCoordinateSpace() const noexcept
         { return mCoordinateSpace; }
         base::bitflag<Flags> GetFlags() const noexcept
         { return mBitFlags; }
+        auto ProjectAs3D() const noexcept
+        { return TestFlag(Flags::ProjectAs3D); }
+
         MaterialParamMap GetMaterialParams() noexcept
         { return mMaterialParams; }
         const MaterialParamMap* GetMaterialParams() const noexcept
@@ -231,8 +231,6 @@ namespace game
 
         RenderPass mRenderPass = RenderPass::DrawColor;
         RenderStyle  mRenderStyle = RenderStyle::Solid;
-        RenderView mRenderView = RenderView::AxisAligned;
-        RenderProjection mRenderProjection = RenderProjection::Orthographic;
         CoordinateSpace  mCoordinateSpace = CoordinateSpace::Scene;
         MaterialParamMap mMaterialParams;
     };
@@ -293,10 +291,6 @@ namespace game
         { return mClass->GetRenderPass(); }
         RenderStyle GetRenderStyle() const noexcept
         { return mClass->GetRenderStyle(); }
-        RenderView GetRenderView() const noexcept
-        { return mClass->GetRenderView(); }
-        RenderProjection GetRenderProjection() const noexcept
-        { return mClass->GetRenderProjection(); }
         CoordinateSpace GetCoordinateSpace() const noexcept
         { return mClass->GetCoordinateSpace(); }
         Rotator GetRotator() const noexcept
@@ -323,6 +317,8 @@ namespace game
         { mInstanceRotator = rotator; }
         void SetOffset(glm::vec3 offset) noexcept
         { mInstanceOffset = offset; }
+        auto ProjectAs3D() const noexcept
+        { return mClass->ProjectAs3D(); }
 
         // When you set the material ID to another material remember
         // to consider whether you should also

@@ -629,11 +629,10 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(mUI.tree, &TreeWidget::clickEvent, this, &SceneWidget::TreeClickEvent);
 
     PopulateFromEnum<game::SceneClass::SpatialIndex>(mUI.cmbSpatialIndex);
-    PopulateFromEnum<game::SceneClass::RenderingArgs::ShadingMode>(mUI.cmbShading);
-    PopulateFromEnum<engine::GameView::EnumValue>(mUI.cmbPerspective);
+    PopulateFromEnum<game::SceneClass::SceneShadingMode>(mUI.cmbShading);
+    PopulateFromEnum<game::SceneClass::SceneProjection>(mUI.cmbProjection);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
-    SetValue(mUI.cmbPerspective, engine::GameView::AxisAligned);
     SetValue(mUI.zoom, 1.0f);
     SetValue(mUI.ID, mState.scene->GetId());
     SetValue(mUI.name, mState.scene->GetName());
@@ -664,7 +663,6 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "snap", mUI.actionSnapGrid);
-    GetUserProperty(resource, "perspective", mUI.cmbPerspective);
     GetUserProperty(resource, "show_origin", mUI.actionShowOrigin);
     GetUserProperty(resource, "show_grid", mUI.actionShowGrid);
     GetUserProperty(resource, "show_viewport", mUI.actionShowViewport);
@@ -782,7 +780,6 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.sceneBoundsGroup);
     settings.SaveWidget("Scene", mUI.sceneIndexGroup);
     settings.SaveWidget("Scene", mUI.rendererGroup);
-    settings.SaveWidget("Scene", mUI.cmbPerspective);
     settings.SaveWidget("Scene", mUI.mainSplitter);
     settings.SaveWidget("Scene", mUI.rightSplitter);
     settings.SaveWidget("Scene", mUI.cmbUIOverlay);
@@ -814,7 +811,6 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.sceneBoundsGroup);
     settings.LoadWidget("Scene", mUI.sceneIndexGroup);
     settings.LoadWidget("Scene", mUI.rendererGroup);
-    settings.LoadWidget("Scene", mUI.cmbPerspective);
     settings.LoadWidget("Scene", mUI.mainSplitter);
     settings.LoadWidget("Scene", mUI.rightSplitter);
     settings.LoadWidget("Scene", mUI.cmbUIOverlay);
@@ -1325,6 +1321,11 @@ void SceneWidget::on_cmbShading_currentIndexChanged(int)
     mState.scene->SetShadingMode(GetValue(mUI.cmbShading));
 }
 
+void SceneWidget::on_cmbProjection_currentIndexChanged(int)
+{
+    mState.scene->SetProjection(GetValue(mUI.cmbProjection));
+}
+
 void SceneWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -1367,7 +1368,6 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "zoom", mUI.zoom);
     SetUserProperty(resource, "grid", mUI.cmbGrid);
     SetUserProperty(resource, "snap", mUI.actionSnapGrid);
-    SetUserProperty(resource, "perspective", mUI.cmbPerspective);
     SetUserProperty(resource, "show_origin", mUI.actionShowOrigin);
     SetUserProperty(resource, "show_grid", mUI.actionShowGrid);
     SetUserProperty(resource, "show_viewport", mUI.actionShowViewport);
@@ -2055,7 +2055,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto view   = (engine::GameView::EnumValue)GetValue(mUI.cmbPerspective);
+    const auto view   = engine::GameView::AxisAligned;
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
@@ -2139,10 +2139,10 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         mState.renderer.SetLowLevelRendererHook(&low_level_render_hook);
         mState.renderer.SetPacketFilter(&draw_hook);
 
-        const auto shading = (game::SceneClass::RenderingArgs::ShadingMode)GetValue(mUI.cmbShading);
-        if (shading == game::SceneClass::RenderingArgs::ShadingMode::BasicLight)
+        const auto shading = (game::SceneClass::SceneShadingMode)GetValue(mUI.cmbShading);
+        if (shading == game::SceneClass::SceneShadingMode::BasicLight)
             mState.renderer.SetStyle(engine::Renderer::RenderingStyle::BasicShading);
-        else if (shading == game::SceneClass::RenderingArgs::ShadingMode::Flat)
+        else if (shading == game::SceneClass::SceneShadingMode::Flat)
             mState.renderer.SetStyle(engine::Renderer::RenderingStyle::FlatColor);
 
         if (auto* bloom = mState.scene->GetBloom())
@@ -2316,7 +2316,7 @@ void SceneWidget::MousePress(QMouseEvent* event)
             else if (hotspot == ToolHotspot::Rotate)
                 mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.scene, current));
             else if (hotspot == ToolHotspot::Remove)
-                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, current, snap, grid_size, GetValue(mUI.cmbPerspective)));
+                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, current, snap, grid_size, engine::GameView::AxisAligned));
             else mUI.tree->ClearSelection();
 
         }
@@ -2339,7 +2339,7 @@ void SceneWidget::MousePress(QMouseEvent* event)
                 else if (hotspot == ToolHotspot::Rotate)
                     mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.scene, selection));
                 else if (hotspot == ToolHotspot::Remove)
-                    mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, selection, snap, grid_size, GetValue(mUI.cmbPerspective)));
+                    mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, selection, snap, grid_size, engine::GameView::AxisAligned));
 
                 mUI.tree->SelectItemById(selection->GetId());
             }
@@ -2625,6 +2625,7 @@ void SceneWidget::DisplaySceneProperties()
     }
 
     SetValue(mUI.cmbShading, mState.scene->GetShadingMode());
+    SetValue(mUI.cmbProjection, mState.scene->GetProjection());
 }
 
 void SceneWidget::DisplayCurrentCameraLocation()
@@ -2982,8 +2983,8 @@ void SceneWidget::PrintMousePos(gfx::Painter& painter) const
     const auto width = mUI.widget->width();
     const auto height = mUI.widget->height();
 
-    const auto perspective = (engine::GameView::EnumValue)GetValue(mUI.cmbPerspective);
-    const auto projection  = (engine::Projection)engine::Projection::Orthographic;
+    const auto perspective = engine::GameView::AxisAligned;
+    const auto projection  = engine::Projection::Orthographic;
     const glm::mat4& view_to_clip  = gui::CreateProjectionMatrix(mUI, projection);
     const glm::mat4& world_to_view = gui::CreateViewMatrix(mUI, mState, perspective);
 

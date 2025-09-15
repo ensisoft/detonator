@@ -197,6 +197,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
 
     const auto& settings = workspace->GetProjectSettings();
     PopulateFromEnum<engine::RenderingStyle>(mUI.cmbStyle);
+    PopulateFromEnum<game::SceneProjection>(mUI.cmbSceneProjection);
     PopulateFromEnum<game::TransformAnimatorClass::Interpolation>(mUI.transformInterpolation);
     PopulateFromEnum<game::PropertyAnimatorClass::Interpolation>(mUI.setvalInterpolation);
     PopulateFromEnum<game::PropertyAnimatorClass::PropertyName>(mUI.setvalName);
@@ -407,6 +408,7 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     settings.SaveWidget("TrackWidget", mUI.timelineSplitter);
     settings.SaveWidget("TrackWidget", mUI.centerSplitter);
     settings.SaveAction("TrackWidget", mUI.actionUsePhysics);
+    settings.SaveWidget("TrackWidget", mUI.cmbSceneProjection);
     return true;
 }
 bool AnimationTrackWidget::LoadState(const Settings& settings)
@@ -453,6 +455,7 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.LoadWidget("TrackWidget", mUI.timelineSplitter);
     settings.LoadWidget("TrackWidget", mUI.centerSplitter);
     settings.LoadAction("TrackWidget", mUI.actionUsePhysics);
+    settings.LoadWidget("TrackWidget", mUI.cmbSceneProjection);
 
     // restore entity
     {
@@ -572,6 +575,7 @@ void AnimationTrackWidget::Update(double secs)
     {
         if (mPlayState == PlayState::Stopped)
         {
+            mRenderer.SetProjection(GetValue(mUI.cmbSceneProjection));
             mRenderer.UpdateRendererState(*mEntity);
         }
         return;
@@ -614,6 +618,7 @@ void AnimationTrackWidget::Update(double secs)
         mPhysics.Step();
         mPhysics.UpdateEntity(*mPlaybackAnimation);
     }
+    mRenderer.SetProjection(GetValue(mUI.cmbSceneProjection));
     mRenderer.UpdateRendererState(*mPlaybackAnimation);
     mRenderer.Update(*mPlaybackAnimation, mCurrentTime, secs);
 
@@ -723,6 +728,11 @@ void AnimationTrackWidget::SetGrid(GridDensity grid)
 void AnimationTrackWidget::SetShowViewport(bool on_off)
 {
     SetValue(mUI.chkShowViewport, on_off);
+}
+
+void AnimationTrackWidget::SetProjection(game::SceneProjection projection)
+{
+    SetValue(mUI.cmbSceneProjection, projection);
 }
 
 void AnimationTrackWidget::SetRenderingStyle(engine::RenderingStyle style)
@@ -2492,6 +2502,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     mRenderer.SetClassLibrary(mWorkspace);
     mRenderer.SetName("AnimationWidgetRenderer/" + mState.entity->GetId());
     mRenderer.SetLowLevelRendererHook(&low_level_render_hook);
+    mRenderer.SetProjection(GetValue(mUI.cmbSceneProjection));
 
     if (mPlaybackAnimation)
     {

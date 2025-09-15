@@ -793,6 +793,9 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="iconVisible" stdset="0">
+                 <bool>false</bool>
+                </property>
                 <property name="collapsed" stdset="0">
                  <bool>true</bool>
                 </property>
@@ -801,70 +804,6 @@
                 </property>
                 <widget class="QWidget" name="page">
                  <layout class="QGridLayout" name="gridLayout_5">
-                  <item row="5" column="0">
-                   <widget class="QLabel" name="label_36">
-                    <property name="text">
-                     <string>B channel weight</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="0" colspan="2">
-                   <widget class="QPushButton" name="btnResetBloom">
-                    <property name="text">
-                     <string>Reset bloom defaults</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="1">
-                   <layout class="QVBoxLayout" name="verticalLayout_10">
-                    <item>
-                     <widget class="QDoubleSpinBox" name="bloomRSpin">
-                      <property name="maximum">
-                       <double>1.000000000000000</double>
-                      </property>
-                      <property name="singleStep">
-                       <double>0.010000000000000</double>
-                      </property>
-                      <property name="stepType">
-                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="gui::DoubleSlider" name="bloomRSlide">
-                      <property name="maximum" stdset="0">
-                       <double>1.000000000000000</double>
-                      </property>
-                      <property name="singleStep" stdset="0">
-                       <double>0.100000000000000</double>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="label_30">
-                    <property name="text">
-                     <string>Bloom threshold</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="0">
-                   <widget class="QLabel" name="label_27">
-                    <property name="text">
-                     <string>G channel weight</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="5" column="1">
                    <layout class="QVBoxLayout" name="verticalLayout_13">
                     <item>
@@ -882,6 +821,57 @@
                     </item>
                     <item>
                      <widget class="gui::DoubleSlider" name="bloomBSlide">
+                      <property name="maximum" stdset="0">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="singleStep" stdset="0">
+                       <double>0.100000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item row="6" column="0" colspan="2">
+                   <widget class="QPushButton" name="btnResetBloom">
+                    <property name="text">
+                     <string>Reset bloom defaults</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QCheckBox" name="chkEnableBloom">
+                    <property name="text">
+                     <string>Enable bloom effect</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="label_31">
+                    <property name="text">
+                     <string>R channel weight</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="1">
+                   <layout class="QVBoxLayout" name="verticalLayout_11">
+                    <item>
+                     <widget class="QDoubleSpinBox" name="bloomGSpin">
+                      <property name="maximum">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>0.010000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="gui::DoubleSlider" name="bloomGSlide">
                       <property name="maximum" stdset="0">
                        <double>1.000000000000000</double>
                       </property>
@@ -925,17 +915,40 @@
                     </item>
                    </layout>
                   </item>
-                  <item row="1" column="0">
-                   <widget class="QCheckBox" name="chkEnableBloom">
+                  <item row="5" column="0">
+                   <widget class="QLabel" name="label_36">
                     <property name="text">
-                     <string>Enable bloom effect</string>
+                     <string>B channel weight</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                     </property>
                    </widget>
                   </item>
-                  <item row="4" column="1">
-                   <layout class="QVBoxLayout" name="verticalLayout_11">
+                  <item row="4" column="0">
+                   <widget class="QLabel" name="label_27">
+                    <property name="text">
+                     <string>G channel weight</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="label_30">
+                    <property name="text">
+                     <string>Bloom threshold</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <layout class="QVBoxLayout" name="verticalLayout_10">
                     <item>
-                     <widget class="QDoubleSpinBox" name="bloomGSpin">
+                     <widget class="QDoubleSpinBox" name="bloomRSpin">
                       <property name="maximum">
                        <double>1.000000000000000</double>
                       </property>
@@ -948,7 +961,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="gui::DoubleSlider" name="bloomGSlide">
+                     <widget class="gui::DoubleSlider" name="bloomRSlide">
                       <property name="maximum" stdset="0">
                        <double>1.000000000000000</double>
                       </property>
@@ -959,19 +972,9 @@
                     </item>
                    </layout>
                   </item>
-                  <item row="3" column="0">
-                   <widget class="QLabel" name="label_31">
-                    <property name="text">
-                     <string>R channel weight</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="0" column="0" colspan="2">
-                   <layout class="QHBoxLayout" name="horizontalLayout">
-                    <item>
+                   <layout class="QGridLayout" name="gridLayout_4">
+                    <item row="0" column="0">
                      <widget class="QLabel" name="label_19">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -984,8 +987,18 @@
                       </property>
                      </widget>
                     </item>
-                    <item>
+                    <item row="0" column="1">
                      <widget class="QComboBox" name="cmbShading"/>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_21">
+                      <property name="text">
+                       <string>Projection</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QComboBox" name="cmbProjection"/>
                     </item>
                    </layout>
                   </item>
@@ -1120,9 +1133,6 @@
             </item>
             <item>
              <widget class="QComboBox" name="cmbGrid"/>
-            </item>
-            <item>
-             <widget class="QComboBox" name="cmbPerspective"/>
             </item>
             <item>
              <widget class="QLabel" name="label_20">
@@ -2254,6 +2264,7 @@
   <tabstop>spDenseGridCols</tabstop>
   <tabstop>rendererGroup</tabstop>
   <tabstop>cmbShading</tabstop>
+  <tabstop>cmbProjection</tabstop>
   <tabstop>chkEnableBloom</tabstop>
   <tabstop>bloomThresholdSpin</tabstop>
   <tabstop>bloomThresholdSlide</tabstop>
@@ -2267,7 +2278,6 @@
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
-  <tabstop>cmbPerspective</tabstop>
   <tabstop>cmbUIOverlay</tabstop>
   <tabstop>btnResetUI</tabstop>
   <tabstop>btnHamburger</tabstop>
