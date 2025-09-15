@@ -473,6 +473,7 @@ size_t SceneClass::GetHash() const
     hash = base::hash_combine(hash, mRightBoundary);
     hash = base::hash_combine(hash, mTopBoundary);
     hash = base::hash_combine(hash, mBottomBoundary);
+    hash = base::hash_combine(hash, mRenderingArgs.projection);
     hash = base::hash_combine(hash, mRenderingArgs.shading);
     hash = base::hash_combine(hash, mRenderingArgs.bloom);
     hash = base::hash_combine(hash, mRenderingArgs.fog);
@@ -569,6 +570,7 @@ void SceneClass::IntoJson(data::Writer& data) const
     data.Write("tilemap", mTilemap);
     data.Write("dynamic_spatial_index", mDynamicSpatialIndex);
     data.Write("shading", mRenderingArgs.shading);
+    data.Write("projection", mRenderingArgs.projection);
     if (const auto* ptr = GetQuadTreeArgs())
     {
         data.Write("quadtree_max_items", ptr->max_items);
@@ -633,6 +635,7 @@ bool SceneClass::FromJson(const data::Reader& data)
     ok &= data.Read("top_boundary",          &mTopBoundary);
     ok &= data.Read("bottom_boundary",       &mBottomBoundary);
     ok &= data.Read("shading",               &mRenderingArgs.shading);
+    ok &= data.Read("projection",            &mRenderingArgs.projection);
 
     if (data.HasValue("bloom"))
     {

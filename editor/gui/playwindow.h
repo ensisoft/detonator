@@ -82,7 +82,7 @@ namespace gui
         // preview mode. In preview mode instead of running the main game
         // script, i.e. the actual game script we run another script, the
         // "preview script" instead.
-        bool LoadPreview(const std::shared_ptr<const game::EntityClass>& entity);
+        bool LoadPreview(const std::shared_ptr<const game::EntityClass>& entity, game::SceneProjection projection);
         bool LoadPreview(const std::shared_ptr<const game::SceneClass>& scene);
         bool LoadPreview(const std::shared_ptr<const uik::Window>& window);
 

@@ -1434,10 +1434,9 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
 
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     PopulateFromEnum<engine::Renderer::RenderingStyle>(mUI.cmbStyle);
+    PopulateFromEnum<game::SceneProjection>(mUI.cmbSceneProjection);
     PopulateFromEnum<game::DrawableItemClass::RenderPass>(mUI.dsRenderPass);
     PopulateFromEnum<game::DrawableItemClass::RenderStyle>(mUI.dsRenderStyle);
-    PopulateFromEnum<game::DrawableItemClass::RenderView>(mUI.dsRenderView);
-    PopulateFromEnum<game::DrawableItemClass::RenderProjection>(mUI.dsRenderProj);
     PopulateFromEnum<game::DrawableItemClass::CoordinateSpace>(mUI.dsCoordinateSpace);
     PopulateFromEnum<game::RigidBodyClass::Simulation>(mUI.rbSimulation);
     PopulateFromEnum<game::RigidBodyClass::CollisionShape>(mUI.rbShape);
@@ -1545,6 +1544,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "node_property_group", mUI.nodePropertiesGroup);
     GetUserProperty(resource, "node_transform_group", mUI.nodeTransformGroup);
     GetUserProperty(resource, "base_properties_group", mUI.baseProperties);
+    GetUserProperty(resource, "scene_projection", mUI.cmbSceneProjection);
     GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
     GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
@@ -1770,6 +1770,7 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Entity", mUI.nodePropertiesGroup);
     settings.SaveWidget("Entity", mUI.nodeTransformGroup);
     settings.SaveWidget("Entity", mUI.baseProperties);
+    settings.SaveWidget("Entity", mUI.cmbSceneProjection);
     return true;
 }
 bool EntityWidget::LoadState(const Settings& settings)
@@ -1801,6 +1802,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Entity", mUI.nodePropertiesGroup);
     settings.LoadWidget("Entity", mUI.nodeTransformGroup);
     settings.LoadWidget("Entity", mUI.baseProperties);
+    settings.LoadWidget("Entity", mUI.cmbSceneProjection);
 
     game::EntityClass klass;
     if (!klass.FromJson(json))
@@ -2081,6 +2083,7 @@ void EntityWidget::Shutdown()
 }
 void EntityWidget::Update(double secs)
 {
+    mState.renderer.SetProjection(GetValue(mUI.cmbSceneProjection));
     mState.renderer.UpdateRendererState(*mState.entity);
 
     if (mPlayState == PlayState::Playing)
@@ -2250,7 +2253,7 @@ void EntityWidget::PreviewAnimation(const game::AnimationClass& animation)
     auto preview = std::make_unique<PlayWindow>(*mState.workspace);
     preview->LoadState("preview_window", this);
     preview->ShowWithWAR();
-    preview->LoadPreview(preview_entity);
+    preview->LoadPreview(preview_entity, GetValue(mUI.cmbSceneProjection));
     preview->ConfigurePreviewRenderer(config);
     mPreview = std::move(preview);
 
@@ -2354,6 +2357,7 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "node_property_group", mUI.nodePropertiesGroup);
     SetUserProperty(resource, "node_transform_group", mUI.nodeTransformGroup);
     SetUserProperty(resource, "base_properties_group", mUI.baseProperties);
+    SetUserProperty(resource, "scene_projection", mUI.cmbSceneProjection);
 
     // save the track properties.
     for (const auto& [id, props] : mTrackProperties)
@@ -2389,7 +2393,7 @@ void EntityWidget::on_actionPreview_triggered()
         auto preview = std::make_unique<PlayWindow>(*mState.workspace);
         preview->LoadState("preview_window", this);
         preview->ShowWithWAR();
-        preview->LoadPreview(mState.entity);
+        preview->LoadPreview(mState.entity, GetValue(mUI.cmbSceneProjection));
         preview->ConfigurePreviewRenderer(config);
         mPreview = std::move(preview);
         NOTE("Starting entity '%1' preview.", mState.entity->GetName());
@@ -2929,6 +2933,7 @@ void EntityWidget::on_btnNewTrack_clicked()
     widget->SetSnapGrid(GetValue(mUI.chkSnap));
     widget->SetGrid(GetValue(mUI.cmbGrid));
     widget->SetRenderingStyle(GetValue(mUI.cmbStyle));
+    widget->SetProjection(GetValue(mUI.cmbSceneProjection));
     emit OpenNewWidget(widget);
 }
 void EntityWidget::on_btnEditTrack_clicked()
@@ -3450,6 +3455,11 @@ void EntityWidget::on_dsDoubleSided_stateChanged(int)
 }
 
 void EntityWidget::on_dsDepthTest_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_dsProject3D_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
 }
@@ -4559,6 +4569,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     mState.renderer.SetClassLibrary(mState.workspace);
     mState.renderer.SetEditingMode(true);
     mState.renderer.SetName("EntityWidgetRenderer/" + mState.entity->GetId());
+    mState.renderer.SetProjection(GetValue(mUI.cmbSceneProjection));
 
     mState.renderer.BeginFrame();
     mState.renderer.CreateFrame(*mState.entity, &draw_hook);
@@ -5189,8 +5200,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.dsDrawable, -1);
     SetValue(mUI.dsLayer, 0);
     SetValue(mUI.dsRenderPass, -1);
-    SetValue(mUI.dsRenderView, -1);
-    SetValue(mUI.dsRenderProj, -1);
     SetValue(mUI.dsCoordinateSpace, -1);
     SetValue(mUI.dsRenderStyle, -1);
     SetValue(mUI.dsLineWidth, 1.0f);
@@ -5315,8 +5324,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsDrawable, ListItemId(item->GetDrawableId()));
             SetValue(mUI.dsRenderPass, item->GetRenderPass());
             SetValue(mUI.dsRenderStyle, item->GetRenderStyle());
-            SetValue(mUI.dsRenderView, item->GetRenderView());
-            SetValue(mUI.dsRenderProj, item->GetRenderProjection());
             SetValue(mUI.dsCoordinateSpace, item->GetCoordinateSpace());
             SetValue(mUI.dsLayer, item->GetLayer());
             SetValue(mUI.dsLineWidth, item->GetLineWidth());
@@ -5332,6 +5339,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsLights, item->TestFlag(game::DrawableItemClass::Flags::EnableLight));
             SetValue(mUI.dsDoubleSided, item->TestFlag(game::DrawableItemClass::Flags::DoubleSided));
             SetValue(mUI.dsDepthTest, item->TestFlag(game::DrawableItemClass::Flags::DepthTest));
+            SetValue(mUI.dsProject3D, item->TestFlag(game::DrawableItemClass::Flags::ProjectAs3D));
 
             const auto& rotator = item->GetRotator();
             const auto [x, y, z] = rotator.GetEulerAngles();
@@ -5590,8 +5598,6 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetLayer(GetValue(mUI.dsLayer));
         item->SetRenderStyle(GetValue(mUI.dsRenderStyle));
         item->SetRenderPass(GetValue(mUI.dsRenderPass));
-        item->SetRenderView(GetValue(mUI.dsRenderView));
-        item->SetRenderProjection(GetValue(mUI.dsRenderProj));
         item->SetCoordinateSpace(GetValue(mUI.dsCoordinateSpace));
         item->SetDepth(GetValue(mUI.dsDepth));
 
@@ -5617,6 +5623,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetFlag(game::DrawableItemClass::Flags::EnableLight, GetValue(mUI.dsLights));
         item->SetFlag(game::DrawableItemClass::Flags::DoubleSided, GetValue(mUI.dsDoubleSided));
         item->SetFlag(game::DrawableItemClass::Flags::DepthTest, GetValue(mUI.dsDepthTest));
+        item->SetFlag(game::DrawableItemClass::Flags::ProjectAs3D, GetValue(mUI.dsProject3D));
     }
 
     if (auto* body = node->GetRigidBody())

@@ -32,6 +32,7 @@
 
 #include "base/utility.h"
 #include "data/fwd.h"
+#include "game/enum.h"
 #include "game/tree.h"
 #include "game/scriptvar.h"
 #include "game/entity_placement.h"
@@ -43,9 +44,11 @@ namespace game
     class SceneClass
     {
     public:
-        using RenderTree      = game::RenderTree<EntityPlacement>;
-        using RenderTreeNode  = EntityPlacement;
-        using RenderTreeValue = EntityPlacement;
+        using RenderTree       = game::RenderTree<EntityPlacement>;
+        using RenderTreeNode   = EntityPlacement;
+        using RenderTreeValue  = EntityPlacement;
+        using SceneProjection  = game::SceneProjection;
+        using SceneShadingMode = game::SceneShadingMode;
 
         struct BloomFilter {
             float threshold = 0.98f;
@@ -67,10 +70,8 @@ namespace game
         };
 
         struct RenderingArgs {
-            enum class ShadingMode {
-                Flat, BasicLight
-            };
-            ShadingMode shading = ShadingMode::Flat;
+            SceneProjection projection = SceneProjection::AxisAlignedOrthographic;
+            SceneShadingMode shading = SceneShadingMode::Flat;
             std::optional<BloomFilter> bloom;
             std::optional<Fog> fog;
         };
@@ -292,10 +293,14 @@ namespace game
         { return base::GetOpt(mRenderingArgs.fog); }
         void ResetFog() noexcept
         { mRenderingArgs.fog.reset(); }
-        void SetShadingMode(RenderingArgs::ShadingMode shading) noexcept
+        void SetShadingMode(SceneShadingMode shading) noexcept
         { mRenderingArgs.shading = shading; }
         auto GetShadingMode() const noexcept
         { return mRenderingArgs.shading; }
+        auto GetProjection() const noexcept
+        { return mRenderingArgs.projection; }
+        void SetProjection(SceneProjection projection) noexcept
+        { mRenderingArgs.projection = projection; }
 
         void SetLeftBoundary(float value)  noexcept
         { mLeftBoundary = value; }

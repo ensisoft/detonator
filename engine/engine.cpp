@@ -1773,9 +1773,9 @@ private:
         }
 
         const auto shading = (*runtime.scene)->GetShadingMode();
-        if (shading == game::SceneClass::RenderingArgs::ShadingMode::Flat)
+        if (shading == game::SceneClass::SceneShadingMode::Flat)
             settings.style = engine::Renderer::RenderingStyle::FlatColor;
-        else if (shading == game::SceneClass::RenderingArgs::ShadingMode::BasicLight)
+        else if (shading == game::SceneClass::SceneShadingMode::BasicLight)
             settings.style = engine::Renderer::RenderingStyle::BasicShading;
         else BUG("Bug on renderer shading mode.");
 

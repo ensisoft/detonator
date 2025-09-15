@@ -87,6 +87,7 @@ namespace gui
         void SetShowViewport(bool on_off);
         void SetSnapGrid(bool on_off);
         void SetGrid(GridDensity grid);
+        void SetProjection(game::SceneProjection);
         void SetRenderingStyle(engine::RenderingStyle style);
         void RealizeEntityChange(std::shared_ptr<const game::EntityClass> klass);
     private slots:

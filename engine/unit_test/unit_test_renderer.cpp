@@ -1153,8 +1153,6 @@ void unit_test_scene_culling()
             drawable.SetMaterialId("red");
             drawable.SetDrawableId("circle");
             drawable.SetLayer(0);
-            drawable.SetRenderProjection(game::DrawableItem::RenderProjection::Orthographic);
-            drawable.SetRenderView(game::DrawableItem::RenderView::AxisAligned);
 
             game::EntityNodeClass node;
             node.SetName("node");
@@ -1167,6 +1165,7 @@ void unit_test_scene_culling()
         auto* node = entity.FindNodeByName("node");
 
         renderer.ClearPaintState();
+        renderer.SetProjection(engine::Renderer::SceneProjection::AxisAlignedOrthographic);
 
         node->SetTranslation(410.0f, 0.0f);
         renderer.UpdateRendererState(entity);
@@ -1217,8 +1216,6 @@ void unit_test_scene_culling()
             drawable.SetMaterialId("red");
             drawable.SetDrawableId("circle");
             drawable.SetLayer(0);
-            drawable.SetRenderProjection(game::DrawableItem::RenderProjection::Orthographic);
-            drawable.SetRenderView(game::DrawableItem::RenderView::Dimetric);
 
             game::EntityNodeClass node;
             node.SetName("node");
@@ -1231,6 +1228,7 @@ void unit_test_scene_culling()
         auto* node = entity.FindNodeByName("node");
 
         renderer.ClearPaintState();
+        renderer.SetProjection(engine::Renderer::SceneProjection::Dimetric);
 
         node->SetTranslation(450.0f, 0.0f);
         renderer.UpdateRendererState(entity);

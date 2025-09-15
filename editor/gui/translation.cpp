@@ -88,9 +88,22 @@ std::string TranslateEnum(FileResourceLoader::DefaultAudioIOStrategy strategy)
 
 namespace game {
 
-std::string TranslateEnum(SceneClass::RenderingArgs::ShadingMode mode)
+std::string TranslateEnum(SceneClass::SceneProjection projection)
 {
-    using M = SceneClass::RenderingArgs::ShadingMode;
+    using P = SceneClass::SceneProjection;
+    if (projection == P::AxisAlignedOrthographic)
+        return "Axis Aligned (Orthographic)";
+    else if (projection == P::AxisAlignedPerspective)
+        return "Axis Aligned (Perspective)";
+    else if (projection == P::Dimetric)
+        return "Dimetric (Orthographic)";
+    else BUG("Missing translation");
+    return "???";
+}
+
+std::string TranslateEnum(SceneClass::SceneShadingMode mode)
+{
+    using M = SceneClass::SceneShadingMode;
     if (mode == M::Flat)
         return "Flat Color";
     else if (mode == M::BasicLight)

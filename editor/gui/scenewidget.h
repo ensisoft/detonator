@@ -144,6 +144,7 @@ namespace gui
         void on_bloomBSlide_valueChanged(double);
         void on_btnResetBloom_clicked();
         void on_cmbShading_currentIndexChanged(int);
+        void on_cmbProjection_currentIndexChanged(int);
 
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
