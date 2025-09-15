@@ -54,10 +54,24 @@ namespace dev
         virtual Framebuffer GetDefaultFramebuffer() const = 0;
         virtual Framebuffer CreateFramebuffer(const FramebufferConfig& config) = 0;
 
-        virtual void AllocateRenderTarget(const Framebuffer& framebuffer, unsigned color_attachment,
+        // Allocate a new color target for the given multi sampled frame buffer.
+        // With MSAA you use this to allocate the render target and then resolve
+        // the color target to a texture once done.
+        virtual void AllocateMSAAColorRenderTarget(const Framebuffer& framebuffer, unsigned color_attachment_index,
                                           unsigned width, unsigned height) = 0;
-        virtual void BindRenderTargetTexture2D(const Framebuffer& framebuffer, const TextureObject& texture,
-                                               unsigned color_attachment) = 0;
+
+        // Bind a specific texture object as the color render target in the given
+        // frame buffer's color render target index. The texture object must have been
+        // allocated before with the size that matches the frame buffer size if
+        // there are other attachments such as depth/stencil that the frame
+        // buffer allocates. If the texture is the only render target in the
+        // framebuffer then the size of the texture is used as the fbo size.
+        virtual void BindColorRenderTargetTexture2D(const Framebuffer& framebuffer, const TextureObject& texture,
+                                               unsigned color_attachment_index) = 0;
+        // Bind a specific texture object as the depth render target in the given
+        // frame buffer. The texture object must have the right size and type.
+        virtual void BindDepthRenderTargetTexture2D(const Framebuffer& framebuffer, const TextureObject& texture) = 0;
+
         virtual bool CompleteFramebuffer(const Framebuffer& framebuffer,
                                          const std::vector<unsigned>& color_attachments) = 0;
         virtual void ResolveFramebuffer(const Framebuffer& multisampled_framebuffer, const TextureObject& resolve_target,

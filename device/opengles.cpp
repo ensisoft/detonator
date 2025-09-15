@@ -562,6 +562,11 @@ private:
             GL_CALL(glEnable(GL_DEPTH_TEST));
             GL_CALL(glDepthFunc(GL_LEQUAL));
         }
+        else if (depth_test == dev::DepthTest::Always)
+        {
+            GL_CALL(glEnable(GL_DEPTH_TEST));
+            GL_CALL(glDepthFunc(GL_ALWAYS));
+        }
         else BUG("Bug on depth test state.");
 
         mColorDepthStencilState.depth_test = depth_test;
@@ -1014,6 +1019,7 @@ public:
     struct TextureFormat {
         GLenum sizeFormat = GL_NONE;
         GLenum baseFormat = GL_NONE;
+        GLenum type = GL_NONE;
     };
 
     TextureFormat GetTextureFormat(dev::TextureFormat format) const
@@ -1022,6 +1028,7 @@ public:
 
         GLenum sizeFormat = 0;
         GLenum baseFormat = 0;
+        GLenum type = GL_UNSIGNED_BYTE;
         switch (format)
         {
             case dev::TextureFormat::sRGB:
@@ -1061,6 +1068,11 @@ public:
                 sizeFormat = GL_ALPHA;
                 baseFormat = GL_ALPHA;
                 break;
+            case dev::TextureFormat::DepthComponent32f:
+                sizeFormat = GL_DEPTH_COMPONENT32F;
+                baseFormat = GL_DEPTH_COMPONENT;
+                type = GL_FLOAT;
+                break;
             default:
                 BUG("Unknown texture format.");
                 break;
@@ -1084,6 +1096,7 @@ public:
         TextureFormat ret;
         ret.baseFormat = baseFormat;
         ret.sizeFormat = sizeFormat;
+        ret.type = type;
         return ret;
     }
 
@@ -1255,6 +1268,12 @@ public:
                                                   framebuffer_state.depth_buffer));
             }
         }
+        else if (config.format == dev::FramebufferFormat::DepthTexture32f)
+        {
+            // nothing to do here currently.
+        }
+        else BUG("Unhadled framebuffer format.");
+
         dev::Framebuffer fbo;
         fbo.handle = handle;
         fbo.height = config.height;
@@ -1264,7 +1283,7 @@ public:
         return fbo;
     }
 
-    void AllocateRenderTarget(const dev::Framebuffer& framebuffer, unsigned color_attachment,
+    void AllocateMSAAColorRenderTarget(const dev::Framebuffer& framebuffer, unsigned color_attachment_index,
                               unsigned width, unsigned height) override
     {
         ASSERT(framebuffer.IsValid());
@@ -1275,12 +1294,12 @@ public:
         // this should not leak anything since we only allow the
         // number of color targets to be set once in the SetConfig
         // thus this vector is only ever resized once.
-        if (framebuffer_state.multisample_color_buffers.size() <= color_attachment)
-            framebuffer_state.multisample_color_buffers.resize(color_attachment + 1);
+        if (framebuffer_state.multisample_color_buffers.size() <= color_attachment_index)
+            framebuffer_state.multisample_color_buffers.resize(color_attachment_index + 1);
 
         const auto samples = framebuffer.samples;
 
-        auto& buff = framebuffer_state.multisample_color_buffers[color_attachment];
+        auto& buff = framebuffer_state.multisample_color_buffers[color_attachment_index];
         if (!buff.handle)
             GL_CALL(glGenRenderbuffers(1, &buff.handle));
 
@@ -1300,19 +1319,37 @@ public:
         }
 
         GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.handle));
-        GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_attachment, GL_RENDERBUFFER,
-                                          buff.handle));
+        GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_attachment_index, GL_RENDERBUFFER, buff.handle));
     }
 
-    void BindRenderTargetTexture2D(const dev::Framebuffer& framebuffer, const dev::TextureObject& texture,
-                                   unsigned color_attachment) override
+    void BindColorRenderTargetTexture2D(const dev::Framebuffer& framebuffer, const dev::TextureObject& texture,
+                                   unsigned color_attachment_index) override
+    {
+        const auto texture_format = texture.GetFormat();
+
+        ASSERT(framebuffer.IsValid());
+        ASSERT(framebuffer.IsCustom());
+        ASSERT(texture.IsValid());
+        ASSERT(texture.GetType() == dev::TextureType::Texture2D);
+        ASSERT(texture_format == dev::TextureFormat::RGB ||
+            texture_format == dev::TextureFormat::RGBA ||
+            texture_format == dev::TextureFormat::sRGB ||
+            texture_format == dev::TextureFormat::sRGBA);
+
+        GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.handle));
+        GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_attachment_index, GL_TEXTURE_2D, texture.handle, 0));
+    }
+
+    void BindDepthRenderTargetTexture2D(const dev::Framebuffer &framebuffer, const dev::TextureObject &texture) override
     {
         ASSERT(framebuffer.IsValid());
         ASSERT(framebuffer.IsCustom());
         ASSERT(texture.IsValid());
+        ASSERT(texture.GetType() == dev::TextureType::Texture2D);
+        ASSERT(texture.GetFormat() == dev::TextureFormat::DepthComponent32f);
+
         GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.handle));
-        GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_attachment, GL_TEXTURE_2D,
-                                       texture.handle, 0));
+        GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture.handle, 0));
     }
 
     bool CompleteFramebuffer(const dev::Framebuffer& framebuffer,
@@ -1336,13 +1373,30 @@ public:
         // ES3 shaders too (where not yet done)
         ASSERT(mGL.glDrawBuffers);
 
-        std::vector<GLenum> draw_buffers;
-
-        for (unsigned i = 0; i < color_attachments.size(); ++i)
+        if (framebuffer.format == dev::FramebufferFormat::DepthTexture32f)
         {
-            draw_buffers.push_back(GL_COLOR_ATTACHMENT0 + color_attachments[i]);
+            ASSERT(color_attachments.empty());
+
+            const GLenum nada = GL_NONE;
+
+            // when doing depth texture rendering we have no expected
+            // color output. Turn off writing to the color attachments
+            // by saying that we have no color attachments by saying that
+            // we have 1 attachment that is none ;-)
+            GL_CALL(glDrawBuffers(1, &nada));
+            // some drivers might complain if the READ buffer is something
+            // else than GL_NONE, so set that to nothing to.
+            GL_CALL(glReadBuffer(GL_NONE));
         }
-        GL_CALL(glDrawBuffers(draw_buffers.size(), &draw_buffers[0]));
+        else
+        {
+            std::vector<GLenum> draw_buffers;
+            for (unsigned i = 0; i < color_attachments.size(); ++i)
+            {
+                draw_buffers.push_back(GL_COLOR_ATTACHMENT0 + color_attachments[i]);
+            }
+            GL_CALL(glDrawBuffers(draw_buffers.size(), &draw_buffers[0]));
+        }
 
         // possible FBO *error* statuses are: INCOMPLETE_ATTACHMENT, INCOMPLETE_DIMENSIONS and INCOMPLETE_MISSING_ATTACHMENT
         // we're treating these status codes as BUGS in the engine code that is trying to create the
@@ -1364,9 +1418,14 @@ public:
                             const dev::TextureObject& resolve_target,
                             unsigned color_attachment) override
     {
+        const auto format = multisampled_framebuffer.GetFormat();
+
         ASSERT(multisampled_framebuffer.IsValid());
         ASSERT(multisampled_framebuffer.IsCustom());
         ASSERT(multisampled_framebuffer.IsMultisampled());
+        ASSERT(format == dev::FramebufferFormat::ColorRGBA8 ||
+                format == dev::FramebufferFormat::ColorRGBA8_Depth16 ||
+                format == dev::FramebufferFormat::ColorRGBA8_Depth24_Stencil8);
         ASSERT(resolve_target.IsValid());
         // See the comments in Complete() regarding the glDrawBuffers which is
         // the other half required to deal with multiple color attachments
@@ -1482,7 +1541,7 @@ public:
         GL_CALL(glBindTexture(GL_TEXTURE_2D, handle));
         GL_CALL(glTexImage2D(GL_TEXTURE_2D, texture_level, internal_format.sizeFormat,
                              texture_width, texture_height, texture_border,
-                             internal_format.baseFormat, GL_UNSIGNED_BYTE, nullptr));
+                             internal_format.baseFormat, internal_format.type, nullptr));
 
         auto& texture_state = mTextureState[handle];
         texture_state.min_filter = GL_NONE;
@@ -1514,7 +1573,7 @@ public:
         GL_CALL(glBindTexture(GL_TEXTURE_2D, handle));
         GL_CALL(glTexImage2D(GL_TEXTURE_2D, texture_level, internal_format.sizeFormat,
                              texture_width, texture_height, texture_border,
-                             internal_format.baseFormat, GL_UNSIGNED_BYTE, bytes));
+                             internal_format.baseFormat, internal_format.type, bytes));
 
         auto& texture_state = mTextureState[handle];
         texture_state.min_filter = GL_NONE;

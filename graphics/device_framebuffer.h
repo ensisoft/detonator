@@ -35,6 +35,7 @@ namespace gfx
 
         void SetConfig(const Config& conf) override;
         void SetColorTarget(gfx::Texture* texture, ColorAttachment attachment) override;
+        void SetDepthTarget(gfx::Texture* texture) override;
         void Resolve(gfx::Texture** color, ColorAttachment attachment) const override;
 
         unsigned GetWidth() const override;
@@ -43,26 +44,30 @@ namespace gfx
         Format GetFormat() const override
         { return mConfig.format; }
 
-        inline size_t GetFrameStamp() const noexcept
+        size_t GetFrameStamp() const noexcept
         { return mFrameNumber; }
-        inline bool IsReady() const noexcept
+        bool IsReady() const noexcept
         { return mFramebuffer.IsValid(); }
-        inline bool IsMultisampled() const noexcept
+        bool IsMultisampled() const noexcept
         { return mConfig.msaa == MSAA::Enabled; }
 
-        inline unsigned GetClientTextureCount() const noexcept
+        unsigned GetClientColorTextureCount() const noexcept
         { return mConfig.color_target_count; }
-        inline dev::Framebuffer GetFramebuffer() const noexcept
+        dev::Framebuffer GetFramebuffer() const noexcept
         { return mFramebuffer; }
 
-        inline const gfx::DeviceTexture* GetClientTexture(unsigned index) const noexcept
-        { return mClientTextures[index]; }
-        gfx::DeviceTexture* GetColorBufferTexture(unsigned index) const noexcept;
+        const gfx::DeviceTexture* GetClientDepthTexture() const noexcept
+        { return mClientDepthTexture; }
+        const gfx::DeviceTexture* GetClientColorTexture(unsigned index) const noexcept
+        { return mClientColorTextures[index]; }
+        DeviceTexture* GetColorBufferTexture(unsigned index) const noexcept;
+        DeviceTexture* GetDepthBufferTexture() const noexcept;
 
         bool Complete();
         bool Create();
         void SetFrameStamp(size_t stamp);
         void CreateColorBufferTextures();
+        void CreateDepthBufferTexture();
 
     private:
         const std::string mName;
@@ -70,16 +75,18 @@ namespace gfx
         dev::GraphicsDevice* mDevice = nullptr;
         dev::Framebuffer mFramebuffer;
 
-        // Texture target that we allocate when the use hasn't
+        // Texture target that we allocate when the user hasn't
         // provided a client texture. In case of a single sampled
         // FBO this is used directly as the color attachment
         // in case of multiple sampled this will be used as the
         // resolve target.
-        std::vector<std::unique_ptr<gfx::DeviceTexture>> mTextures;
+        std::vector<std::unique_ptr<gfx::DeviceTexture>> mColorTextures;
+        std::unique_ptr<gfx::DeviceTexture> mDepthTexture;
 
         // Client provided texture(s) that will ultimately contain
         // the rendered result.
-        std::vector<gfx::DeviceTexture*> mClientTextures;
+        std::vector<gfx::DeviceTexture*> mClientColorTextures;
+        gfx::DeviceTexture* mClientDepthTexture = nullptr;
         std::size_t mFrameNumber = 0;
 
         Config mConfig;
