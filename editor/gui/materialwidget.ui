@@ -369,6 +369,9 @@
             </item>
             <item row="5" column="1">
              <widget class="QSpinBox" name="tileLeftPadding">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(100, 200, 100)</string>
+              </property>
               <property name="suffix">
                <string> px</string>
               </property>
@@ -390,6 +393,9 @@
             </item>
             <item row="5" column="2">
              <widget class="QSpinBox" name="tileTopPadding">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(200,100, 100)</string>
+              </property>
               <property name="suffix">
                <string> px</string>
               </property>
@@ -485,6 +491,9 @@
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
                <widget class="QSpinBox" name="tileWidth">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(100, 200, 100)</string>
+                </property>
                 <property name="suffix">
                  <string> px</string>
                 </property>
@@ -495,6 +504,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="tileHeight">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(200,100, 100)</string>
+                </property>
                 <property name="suffix">
                  <string> px</string>
                 </property>
@@ -556,6 +568,9 @@
             </item>
             <item row="4" column="1">
              <widget class="QSpinBox" name="tileLeftOffset">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(100, 200, 100)</string>
+              </property>
               <property name="suffix">
                <string> px</string>
               </property>
@@ -580,6 +595,9 @@
             </item>
             <item row="4" column="2">
              <widget class="QSpinBox" name="tileTopOffset">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(200,100, 100)</string>
+              </property>
               <property name="suffix">
                <string> px</string>
               </property>
@@ -1101,9 +1119,6 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="styleSheet">
-             <string notr="true">color: rgb(0, 200, 0)</string>
-            </property>
             <property name="text">
              <string>X velocity</string>
             </property>
@@ -1117,9 +1132,6 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="styleSheet">
-             <string notr="true">color: rgb(200,0, 0)</string>
-            </property>
             <property name="text">
              <string>Y velocity</string>
             </property>
@@ -1132,6 +1144,9 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(100, 100, 250);</string>
             </property>
             <property name="wrapping">
              <bool>true</bool>
@@ -1157,6 +1172,9 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(100, 200, 100)</string>
             </property>
             <property name="suffix">
              <string/>
@@ -1193,6 +1211,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(200,100, 100)</string>
+            </property>
             <property name="suffix">
              <string/>
             </property>
@@ -1214,9 +1235,6 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: rgb(0, 200, 0)</string>
             </property>
             <property name="text">
              <string>X Scale</string>
@@ -1244,6 +1262,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(100, 100, 250);</string>
+            </property>
             <property name="suffix">
              <string> °/s</string>
             </property>
@@ -1269,6 +1290,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(100, 200, 100)</string>
+            </property>
             <property name="suffix">
              <string> u/s</string>
             </property>
@@ -1288,6 +1312,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(200,100, 100)</string>
+            </property>
             <property name="suffix">
              <string> u/s</string>
             </property>
@@ -1306,9 +1333,6 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: rgb(200,0, 0)</string>
             </property>
             <property name="text">
              <string>Y Scale</string>
@@ -1713,7 +1737,7 @@
           <x>0</x>
           <y>0</y>
           <width>440</width>
-          <height>1008</height>
+          <height>1003</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -2065,6 +2089,9 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(100, 100, 250);</string>
+                </property>
                 <property name="text">
                  <string/>
                 </property>
@@ -2080,6 +2107,9 @@
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(200,100, 100)</string>
                 </property>
                 <property name="text">
                  <string/>
@@ -2147,6 +2177,9 @@
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(100, 200, 100)</string>
                 </property>
                 <property name="readOnly">
                  <bool>true</bool>

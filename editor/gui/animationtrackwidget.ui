@@ -393,7 +393,7 @@
               </sizepolicy>
              </property>
              <property name="title">
-              <string>View transform</string>
+              <string>Viewport transform</string>
              </property>
              <property name="checkable">
               <bool>false</bool>
@@ -402,9 +402,6 @@
               <bool>false</bool>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_4">
-              <property name="topMargin">
-               <number>0</number>
-              </property>
               <item>
                <widget class="QDoubleSpinBox" name="translateX">
                 <property name="sizePolicy">
@@ -413,8 +410,11 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(100, 200, 100)</string>
+                </property>
                 <property name="prefix">
-                 <string>x = </string>
+                 <string/>
                 </property>
                 <property name="minimum">
                  <double>-10000.000000000000000</double>
@@ -435,8 +435,11 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(200,100, 100)</string>
+                </property>
                 <property name="prefix">
-                 <string>y = </string>
+                 <string/>
                 </property>
                 <property name="minimum">
                  <double>-10000.000000000000000</double>
@@ -457,8 +460,11 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(100, 200, 100)</string>
+                </property>
                 <property name="prefix">
-                 <string>x =</string>
+                 <string/>
                 </property>
                 <property name="minimum">
                  <double>0.100000000000000</double>
@@ -479,8 +485,11 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="scaleY">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(200,100, 100)</string>
+                </property>
                 <property name="prefix">
-                 <string>y = </string>
+                 <string/>
                 </property>
                 <property name="minimum">
                  <double>0.100000000000000</double>
@@ -501,6 +510,9 @@
               </item>
               <item>
                <widget class="QDoubleSpinBox" name="rotation">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(100, 100, 250);</string>
+                </property>
                 <property name="wrapping">
                  <bool>true</bool>
                 </property>

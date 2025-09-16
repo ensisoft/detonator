@@ -585,7 +585,7 @@
              </size>
             </property>
             <property name="title">
-             <string>Transform</string>
+             <string>Viewport transform</string>
             </property>
             <property name="flat">
              <bool>false</bool>
@@ -597,18 +597,6 @@
              <bool>false</bool>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_11">
-             <property name="leftMargin">
-              <number>4</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>4</number>
-             </property>
-             <property name="bottomMargin">
-              <number>4</number>
-             </property>
              <item>
               <widget class="QDoubleSpinBox" name="translateX">
                <property name="sizePolicy">
@@ -617,8 +605,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 200, 100)</string>
+               </property>
                <property name="prefix">
-                <string>x = </string>
+                <string/>
                </property>
                <property name="minimum">
                 <double>-10000.000000000000000</double>
@@ -639,8 +630,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,100, 100)</string>
+               </property>
                <property name="prefix">
-                <string>y = </string>
+                <string/>
                </property>
                <property name="minimum">
                 <double>-10000.000000000000000</double>
@@ -661,8 +655,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 200, 100)</string>
+               </property>
                <property name="prefix">
-                <string>x = </string>
+                <string/>
                </property>
                <property name="suffix">
                 <string/>
@@ -686,8 +683,11 @@
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="scaleY">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,100, 100)</string>
+               </property>
                <property name="prefix">
-                <string>y = </string>
+                <string>y</string>
                </property>
                <property name="suffix">
                 <string/>
@@ -711,6 +711,9 @@
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="rotation">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 100, 250);</string>
+               </property>
                <property name="wrapping">
                 <bool>true</bool>
                </property>
@@ -972,11 +975,8 @@
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(200,0, 0)</string>
-                     </property>
                      <property name="text">
-                      <string>Height</string>
+                      <string>Y size</string>
                      </property>
                     </widget>
                    </item>
@@ -1014,9 +1014,6 @@
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(200,0, 0)</string>
-                     </property>
                      <property name="text">
                       <string>Y Pos</string>
                      </property>
@@ -1029,6 +1026,9 @@
                        <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">color: rgb(200,100, 100)</string>
                      </property>
                      <property name="minimum">
                       <double>-10000.000000000000000</double>
@@ -1075,6 +1075,9 @@
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">color: rgb(100, 200, 100)</string>
+                     </property>
                      <property name="minimum">
                       <double>-10000.000000000000000</double>
                      </property>
@@ -1106,9 +1109,6 @@
                        <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(0, 200, 0)</string>
                      </property>
                      <property name="text">
                       <string>X Pos</string>
@@ -1162,6 +1162,9 @@
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">color: rgb(100, 200, 100)</string>
+                     </property>
                      <property name="maximum">
                       <double>10000.000000000000000</double>
                      </property>
@@ -1191,11 +1194,11 @@
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(0, 200, 0)</string>
+                     <property name="autoFillBackground">
+                      <bool>false</bool>
                      </property>
                      <property name="text">
-                      <string>Width</string>
+                      <string>X size</string>
                      </property>
                     </widget>
                    </item>
@@ -1219,6 +1222,9 @@
                        <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">color: rgb(200,100, 100)</string>
                      </property>
                      <property name="maximum">
                       <double>10000.000000000000000</double>
