@@ -888,7 +888,8 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
                     position = glm::vec2(0.5f, 0.5f);
                 else if (params.placement == Placement::Edge)
                 {
-                    const auto edge = GenRandomNumber(0, 3);
+                    const auto value = static_cast<int>(GenRandomNumber(0.0f, 1.0f) * 100.0f);
+                    const auto edge = value % 4;
                     if (edge == 0 || edge == 1)
                     {
                         position.x = edge == 0 ? 0.0f : 1.0f;
@@ -985,7 +986,8 @@ void ParticleEngineClass::InitParticles(const Environment& env, const Params& pa
                     position = emitter_center;
                 else if (params.placement == Placement::Edge)
                 {
-                    const auto edge = GenRandomNumber(0, 3);
+                    const auto value = static_cast<int>(GenRandomNumber(0.0f, 1.0f) * 100.0f);
+                    const auto edge = value % 4;
                     if (edge == 0 || edge == 1)
                     {
                         position.x = edge == 0 ? emitter_left : emitter_right;
