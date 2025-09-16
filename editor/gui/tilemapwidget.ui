@@ -164,6 +164,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(200,100, 100)</string>
+            </property>
             <property name="suffix">
              <string> tiles</string>
             </property>
@@ -185,6 +188,9 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(100, 200, 100)</string>
             </property>
             <property name="suffix">
              <string> tiles</string>
@@ -261,6 +267,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(100, 200, 100)</string>
+              </property>
               <property name="prefix">
                <string/>
               </property>
@@ -282,6 +291,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(200,100, 100)</string>
               </property>
               <property name="prefix">
                <string/>
@@ -527,7 +539,7 @@
              </sizepolicy>
             </property>
             <property name="title">
-             <string>Transform</string>
+             <string>Viewport transform</string>
             </property>
             <property name="checkable">
              <bool>false</bool>
@@ -536,9 +548,6 @@
              <bool>false</bool>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <property name="topMargin">
-              <number>0</number>
-             </property>
              <item>
               <widget class="QDoubleSpinBox" name="translateX">
                <property name="sizePolicy">
@@ -547,8 +556,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 200, 100)</string>
+               </property>
                <property name="prefix">
-                <string>x = </string>
+                <string/>
                </property>
                <property name="decimals">
                 <number>1</number>
@@ -572,8 +584,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,100, 100)</string>
+               </property>
                <property name="prefix">
-                <string>y = </string>
+                <string/>
                </property>
                <property name="decimals">
                 <number>1</number>
@@ -597,8 +612,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 200, 100)</string>
+               </property>
                <property name="prefix">
-                <string>x = </string>
+                <string/>
                </property>
                <property name="minimum">
                 <double>0.100000000000000</double>
@@ -619,8 +637,11 @@
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="scaleY">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,100, 100)</string>
+               </property>
                <property name="prefix">
-                <string>y = </string>
+                <string/>
                </property>
                <property name="minimum">
                 <double>0.100000000000000</double>
@@ -641,6 +662,9 @@
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="rotation">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 100, 250);</string>
+               </property>
                <property name="wrapping">
                 <bool>true</bool>
                </property>
@@ -1165,8 +1189,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>349</width>
-                   <height>464</height>
+                   <width>100</width>
+                   <height>30</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">

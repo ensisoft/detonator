@@ -87,38 +87,38 @@ namespace gui
     {
         Q_OBJECT
     public:
-        SceneWidget(app::Workspace* workspace);
+        explicit SceneWidget(app::Workspace* workspace);
         SceneWidget(app::Workspace* workspace, const app::Resource& resource);
-       ~SceneWidget();
+       ~SceneWidget() override;
 
-        virtual QString GetId() const override;
-        virtual void InitializeSettings(const UISettings& settings) override;
-        virtual void AddActions(QToolBar& bar) override;
-        virtual void AddActions(QMenu& menu) override;
-        virtual bool SaveState(Settings& settings) const override;
-        virtual bool LoadState(const Settings& settings) override;
-        virtual bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
-        virtual void Cut(Clipboard& clipboard) override;
-        virtual void Copy(Clipboard& clipboard) const override;
-        virtual void Paste(const Clipboard& clipboard) override;
-        virtual void Undo() override;
-        virtual void Save() override;
-        virtual void ZoomIn() override;
-        virtual void ZoomOut() override;
-        virtual void ReloadShaders() override;
-        virtual void ReloadTextures() override;
-        virtual void Shutdown() override;
-        virtual void Update(double secs) override;
-        virtual void Render() override;
-        virtual void RunGameLoopOnce() override;
-        virtual bool HasUnsavedChanges() const override;
-        virtual bool OnEscape() override;
-        virtual void Refresh() override;
-        virtual bool GetStats(Stats* stats) const override;
-        virtual void OnAddResource(const app::Resource* resource) override;
-        virtual void OnRemoveResource(const app::Resource* resource) override;
-        virtual void OnUpdateResource(const app::Resource* resource) override;
-        virtual QImage TakeScreenshot() const override;
+        QString GetId() const override;
+        void InitializeSettings(const UISettings& settings) override;
+        void AddActions(QToolBar& bar) override;
+        void AddActions(QMenu& menu) override;
+        bool SaveState(Settings& settings) const override;
+        bool LoadState(const Settings& settings) override;
+        bool CanTakeAction(Actions action, const Clipboard* clipboard) const override;
+        void Cut(Clipboard& clipboard) override;
+        void Copy(Clipboard& clipboard) const override;
+        void Paste(const Clipboard& clipboard) override;
+        void Undo() override;
+        void Save() override;
+        void ZoomIn() override;
+        void ZoomOut() override;
+        void ReloadShaders() override;
+        void ReloadTextures() override;
+        void Shutdown() override;
+        void Update(double secs) override;
+        void Render() override;
+        void RunGameLoopOnce() override;
+        bool HasUnsavedChanges() const override;
+        bool OnEscape() override;
+        void Refresh() override;
+        bool GetStats(Stats* stats) const override;
+        void OnAddResource(const app::Resource* resource) override;
+        void OnRemoveResource(const app::Resource* resource) override;
+        void OnUpdateResource(const app::Resource* resource) override;
+        QImage TakeScreenshot() const override;
     private slots:
         void on_widgetColor_colorChanged(QColor color);
         void on_name_textChanged(const QString&);

@@ -1244,7 +1244,7 @@
              </size>
             </property>
             <property name="title">
-             <string>Transform</string>
+             <string>Viewport transform</string>
             </property>
             <property name="flat">
              <bool>false</bool>
@@ -1256,18 +1256,6 @@
              <bool>false</bool>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_9">
-             <property name="leftMargin">
-              <number>4</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>4</number>
-             </property>
-             <property name="bottomMargin">
-              <number>4</number>
-             </property>
              <item>
               <widget class="QDoubleSpinBox" name="translateX">
                <property name="sizePolicy">
@@ -1276,8 +1264,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 200, 100)</string>
+               </property>
                <property name="prefix">
-                <string>x = </string>
+                <string/>
                </property>
                <property name="minimum">
                 <double>-10000.000000000000000</double>
@@ -1298,8 +1289,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,100, 100)</string>
+               </property>
                <property name="prefix">
-                <string>y = </string>
+                <string/>
                </property>
                <property name="minimum">
                 <double>-10000.000000000000000</double>
@@ -1320,8 +1314,11 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 200, 100)</string>
+               </property>
                <property name="prefix">
-                <string>x = </string>
+                <string/>
                </property>
                <property name="suffix">
                 <string/>
@@ -1345,8 +1342,11 @@
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="scaleY">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,100, 100)</string>
+               </property>
                <property name="prefix">
-                <string>y = </string>
+                <string/>
                </property>
                <property name="suffix">
                 <string/>
@@ -1370,6 +1370,9 @@
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="rotation">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 100, 250);</string>
+               </property>
                <property name="wrapping">
                 <bool>true</bool>
                </property>
@@ -1725,9 +1728,6 @@
              </item>
              <item row="1" column="4">
               <widget class="QLabel" name="label_26">
-               <property name="styleSheet">
-                <string notr="true">color: rgb(200,0, 0)</string>
-               </property>
                <property name="text">
                 <string>Y Pos</string>
                </property>
@@ -1735,9 +1735,6 @@
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_23">
-               <property name="styleSheet">
-                <string notr="true">color: rgb(0, 200, 0)</string>
-               </property>
                <property name="text">
                 <string>X Pos</string>
                </property>
@@ -1750,6 +1747,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 200, 100)</string>
                </property>
                <property name="minimum">
                 <double>-10000.000000000000000</double>
@@ -1770,6 +1770,9 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(100, 200, 100)</string>
+               </property>
                <property name="minimum">
                 <double>0.000000000000000</double>
                </property>
@@ -1789,9 +1792,6 @@
              </item>
              <item row="3" column="4">
               <widget class="QLabel" name="label_29">
-               <property name="styleSheet">
-                <string notr="true">color: rgb(200,0, 0)</string>
-               </property>
                <property name="text">
                 <string>Y Scale</string>
                </property>
@@ -1804,6 +1804,9 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,100, 100)</string>
                </property>
                <property name="minimum">
                 <double>-10000.000000000000000</double>
@@ -1818,9 +1821,6 @@
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_25">
-               <property name="styleSheet">
-                <string notr="true">color: rgb(0, 200, 0)</string>
-               </property>
                <property name="text">
                 <string>X Scale</string>
                </property>
@@ -1828,6 +1828,9 @@
              </item>
              <item row="3" column="5">
               <widget class="QDoubleSpinBox" name="nodeScaleY">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(200,100, 100)</string>
+               </property>
                <property name="minimum">
                 <double>0.000000000000000</double>
                </property>
@@ -1849,6 +1852,9 @@
               <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
                 <widget class="QDoubleSpinBox" name="nodeRotation">
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(100, 100, 250);</string>
+                 </property>
                  <property name="wrapping">
                   <bool>true</bool>
                  </property>
