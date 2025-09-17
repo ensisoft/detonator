@@ -999,8 +999,6 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
 
         paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
             item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
-        paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
-            item->TestFlag(DrawableItemType::Flags::EnableLight));
 
         if constexpr (std::is_same_v<EntityNodeType, game::EntityNode>)
         {
@@ -1051,6 +1049,14 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
         const auto& shape = paint_node.drawable;
         const auto size = entity_node.GetSize();
         const auto is3d = Is3DShape(*shape);
+
+        if (paint_node.material)
+        {
+            if (is3d || project_3d)
+                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
+                    item->TestFlag(DrawableItemType::Flags::Enable3DLight));
+            else paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, false);
+        }
 
         const bool add_dimetric_transform = projection == SceneProjection::Dimetric && (is3d || project_3d);
         if (add_dimetric_transform)
@@ -1304,8 +1310,8 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
             {
                 paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
                     item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
-                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
-                    item->TestFlag(DrawableItemType::Flags::EnableLight));
+                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, false);
+
                 if (const auto* params = item->GetMaterialParams())
                     paint_node.material->SetUniforms(*params);
             }
@@ -1367,6 +1373,16 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
         {
             auto simple = std::static_pointer_cast<gfx::SimpleShapeInstance>(paint_node.drawable);
             simple->SetStyle(gfx::SimpleShapeStyle::Solid);
+        }
+
+        if (paint_node.drawable && paint_node.material)
+        {
+            const auto is_3d = gfx::Is3DShape(*paint_node.drawable);
+            const auto project_as_3d = item->TestFlag(DrawableItemType::Flags::ProjectAs3D);
+            if (is_3d || project_as_3d)
+                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
+                        item->TestFlag(DrawableItemType::Flags::Enable3DLight));
+            else paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, false);
         }
     }
 }
