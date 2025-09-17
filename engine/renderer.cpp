@@ -1077,8 +1077,11 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
             transform.Push();
                 transform.Translate(-0.5f, -0.5f);
                 transform.Scale(size);
-                transform.Rotate(item->GetRotator());
-                transform.Translate(item->GetOffset());
+                if (project_3d)
+                {
+                    transform.Rotate(item->GetRotator());
+                    transform.Translate(item->GetOffset());
+                }
         }
 
         glm::mat4 world(1.0f);
@@ -1553,8 +1556,11 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             transform.Push();
                 transform.Translate(-0.5f, -0.5f);
                 transform.Scale(size);
-                transform.Rotate(item->GetRotator());
-                transform.Translate(item->GetOffset());
+                if (project_3d)
+                {
+                    transform.Rotate(item->GetRotator());
+                    transform.Translate(item->GetOffset());
+                }
         }
 
         // if it doesn't render then no draw packets are generated
