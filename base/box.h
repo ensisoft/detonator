@@ -88,21 +88,23 @@ namespace base
             mBotLeft  = ToVec2(mat * ToVec4(mBotLeft));
             mBotRight = ToVec2(mat * ToVec4(mBotRight));
         }
-        inline float GetWidth() const noexcept
+        float GetWidth() const noexcept
         { return glm::length(mTopRight - mTopLeft); }
-        inline float GetHeight() const noexcept
+        float GetHeight() const noexcept
         { return glm::length(mBotLeft - mTopLeft); }
-        inline glm::vec2 GetTopLeft() const noexcept
+        float GetArea() const noexcept
+        { return GetWidth() * GetHeight(); }
+        glm::vec2 GetTopLeft() const noexcept
         { return mTopLeft; }
-        inline glm::vec2 GetTopRight() const noexcept
+        glm::vec2 GetTopRight() const noexcept
         { return mTopRight; }
-        inline glm::vec2 GetBotLeft() const noexcept
+        glm::vec2 GetBotLeft() const noexcept
         { return mBotLeft; }
-        inline glm::vec2 GetBotRight() const noexcept
+        glm::vec2 GetBotRight() const noexcept
         { return mBotRight; }
-        inline glm::vec2 GetSize() const noexcept
+        glm::vec2 GetSize() const noexcept
         { return glm::vec2(GetWidth(), GetHeight()); }
-        inline glm::vec2 GetCenter() const noexcept
+        glm::vec2 GetCenter() const noexcept
         {
             const auto diagonal = mBotRight - mTopLeft;
             return mTopLeft + diagonal * 0.5f;
