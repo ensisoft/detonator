@@ -693,11 +693,24 @@ namespace gui
                 box = hit_boxes[i];
                 break;
             }
-            else if (hit_nodes[i]->GetLayer() >= layer)
+            if (hit_nodes[i]->GetLayer() > layer)
             {
                 hit = hit_nodes[i];
                 box = hit_boxes[i];
                 layer = hit->GetLayer();
+            }
+            else if (hit_nodes[i]->GetLayer() == layer)
+            {
+                // if the hit node at index i has a smaller bounding
+                // box then choose it, since the hit can be considered
+                // to be "more precise"  by hitting a smaller hit box.
+                const auto bounding_box_this = entity.FindNodeBoundingBox(hit_nodes[i]);
+                const auto bounding_box_current = entity.FindNodeBoundingBox(hit);
+                if (bounding_box_this.GetArea() < bounding_box_current.GetArea())
+                {
+                    hit = hit_nodes[i];
+                    box = hit_boxes[i];
+                }
             }
         }
         return std::make_tuple(hit, box);
