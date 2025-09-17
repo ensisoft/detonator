@@ -295,7 +295,7 @@ namespace engine
                           const EntityNodeType& entity_node,
                           const LightNode& light_node,
                           const FrameSettings& settings,
-                          SceneProjection mode,
+                          SceneProjection projection,
                           std::vector<Light>& lights) const;
 
         void OffsetPacketLayers(std::vector<DrawPacket>& packets, std::vector<Light>& lights) const;

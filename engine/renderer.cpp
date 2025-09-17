@@ -1714,7 +1714,7 @@ void Renderer::CreateLights(const EntityType& entity,
                             const EntityNodeType& entity_node,
                             const LightNode& light_node,
                             const FrameSettings& settings,
-                            SceneProjection mode,
+                            SceneProjection projection,
                             std::vector<Light>& lights) const
 {
     using LightClassType = typename EntityNodeType::LightClassType;
@@ -1726,10 +1726,19 @@ void Renderer::CreateLights(const EntityType& entity,
     if (!node_light || !node_light->IsEnabled() || !light_node.light)
         return;
 
+    const auto add_dimetric_transform = projection == SceneProjection::Dimetric;
+
     gfx::Transform transform;
     transform.Scale(light_node.world_scale);
     transform.RotateAroundZ(light_node.world_rotation);
     transform.Translate(light_node.world_pos);
+
+    if (add_dimetric_transform)
+    {
+        transform.Push(CreateModelMatrix(GameView::AxisAligned));
+        transform.Push(CreateModelMatrix(GameView::Dimetric));
+    }
+
     transform.Push();
          transform.Translate(node_light->GetTranslation());
 
