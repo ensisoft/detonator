@@ -82,9 +82,13 @@ namespace game
             // Contribute to bloom post-processing effect.
             PP_EnableBloom,
             // Enable light on this drawable (if the scene is lit)
-            EnableLight,
+            // Only applies when the shape is either 3D shape or
+            // is being projected as if 3D shape. (See ProjectAs3D)
+            Enable3DLight,
             // When the shape is 2D shape this flag controls
             // whether the drawable is projected into 3D world or not.
+            // This flag controls whether the 3D translation and rotation
+            // take effect on 2D shapes or not.
             ProjectAs3D
         };
         DrawableItemClass();
