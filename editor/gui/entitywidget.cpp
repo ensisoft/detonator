@@ -1236,7 +1236,10 @@ public:
         item.SetMaterialId(mMaterialClass->GetId());
         item.SetDrawableId(mDrawableClass->GetId());
         if (gfx::Is3DShape(*mDrawable))
+        {
             item.SetDepth(100.0f);
+            item.SetFlag(game::DrawableItemClass::Flags::DepthTest, true);
+        }
 
         game::EntityNodeClass node;
         node.SetDrawable(item);
@@ -3452,6 +3455,7 @@ void EntityWidget::on_dsDepthTest_stateChanged(int)
 void EntityWidget::on_dsProject3D_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
+    DisplayCurrentNodeProperties();
 }
 
 void EntityWidget::on_rbSimulation_currentIndexChanged(const QString&)
@@ -5306,6 +5310,15 @@ void EntityWidget::DisplayCurrentNodeProperties()
 
         if (const auto* item = node->GetDrawable())
         {
+            SetEnabled(mUI.dsXRotation, false);
+            SetEnabled(mUI.dsYRotation, false);
+            SetEnabled(mUI.dsZRotation, false);
+            SetEnabled(mUI.dsXOffset, false);
+            SetEnabled(mUI.dsYOffset, false);
+            SetEnabled(mUI.dsZOffset, false);
+            SetEnabled(mUI.dsDepth, false);
+            SetEnabled(mUI.dsLights, false);
+
             SetEnabled(mUI.actionAddDrawable, false);
             SetVisible(mUI.drawable, true);
             SetValue(mUI.dsMaterial, ListItemId(item->GetMaterialId()));
@@ -5314,7 +5327,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsCoordinateSpace, item->GetCoordinateSpace());
             SetValue(mUI.dsLayer, item->GetLayer());
             SetValue(mUI.dsTimeScale, item->GetTimeScale());
-            SetValue(mUI.dsDepth, item->GetDepth());
             SetValue(mUI.dsVisible, item->TestFlag(game::DrawableItemClass::Flags::VisibleInGame));
             SetValue(mUI.dsUpdateDrawable, item->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable));
             SetValue(mUI.dsUpdateMaterial, item->TestFlag(game::DrawableItemClass::Flags::UpdateMaterial));
@@ -5338,6 +5350,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsYOffset, offset.y);
             SetValue(mUI.dsZOffset, offset.z);
 
+            SetValue(mUI.dsDepth, item->GetDepth());
+
             const auto& material = mState.workspace->GetResourceById(GetItemId(mUI.dsMaterial));
             const auto& drawable = mState.workspace->GetResourceById(GetItemId(mUI.dsDrawable));
             SetEnabled(mUI.btnEditMaterial, !material.IsPrimitive());
@@ -5346,6 +5360,22 @@ void EntityWidget::DisplayCurrentNodeProperties()
                 mUI.btnEditDrawable->setIcon(QIcon("icons:polygon.png"));
             else if (drawable.GetType() == app::Resource::Type::ParticleSystem)
                 mUI.btnEditDrawable->setIcon(QIcon("icons:particle.png"));
+
+            const gfx::DrawableClass* drawable_class = nullptr;
+            drawable.GetContent((&drawable_class));
+
+            if (gfx::Is3DShape(*drawable_class) || item->TestFlag(game::DrawableItemClass::Flags::ProjectAs3D))
+            {
+                SetEnabled(mUI.dsXRotation, true);
+                SetEnabled(mUI.dsYRotation, true);
+                SetEnabled(mUI.dsZRotation, true);
+                SetEnabled(mUI.dsXOffset, true);
+                SetEnabled(mUI.dsYOffset, true);
+                SetEnabled(mUI.dsZOffset, true);
+                SetEnabled(mUI.dsLights, true);
+                SetEnabled(mUI.dsDepth, true);
+                SetEnabled(mUI.dsProject3D, gfx::Is2DShape(*drawable_class));
+            }
         }
         if (const auto* body = node->GetRigidBody())
         {
@@ -5531,6 +5561,12 @@ void EntityWidget::UncheckPlacementActions()
     mParticleSystems->menuAction()->setChecked(false);
     mCustomShapes->menuAction()->setChecked(false);
     mUI.actionNewJoint->setChecked(false);
+
+    mUI.actionNewCube->setChecked(false);
+    mUI.actionNewCone->setChecked(false);
+    mUI.actionNewCylinder->setChecked(false);
+    mUI.actionNewPyramid->setChecked(false);
+    mUI.actionNewSphere->setChecked(false);
 
     // this is the wrong place but.. it's convenient
     mUI.widget->SetCursorShape(GfxWidget::CursorShape::ArrowCursor);
