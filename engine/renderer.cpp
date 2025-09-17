@@ -1363,15 +1363,7 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
             paint_node.drawable->GetType() == gfx::Drawable::Type::SimpleShape)
         {
             auto simple = std::static_pointer_cast<gfx::SimpleShapeInstance>(paint_node.drawable);
-
-            gfx::SimpleShapeStyle style;
-            if (item->GetRenderStyle() == RenderStyle::Solid)
-                style = gfx::SimpleShapeStyle::Solid;
-            else if (item->GetRenderStyle() == RenderStyle::Outline)
-                style = gfx::SimpleShapeStyle::Outline;
-            else BUG("Unsupported rendering style.");
-
-            simple->SetStyle(style);
+            simple->SetStyle(gfx::SimpleShapeStyle::Solid);
         }
     }
 }
@@ -1586,7 +1578,6 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             packet.render_layer     = entity.GetRenderLayer();
             packet.pass             = item->GetRenderPass();
             packet.packet_index     = item->GetLayer();
-            packet.line_width       = item->GetLineWidth();
             packet.coordinate_space = item->GetCoordinateSpace();
 
             if (projection == SceneProjection::AxisAlignedPerspective && (is3d || project_3d))

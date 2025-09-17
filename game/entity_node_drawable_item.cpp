@@ -47,9 +47,7 @@ std::size_t DrawableItemClass::GetHash() const
     hash = base::hash_combine(hash, mMaterialId);
     hash = base::hash_combine(hash, mDrawableId);
     hash = base::hash_combine(hash, mLayer);
-    hash = base::hash_combine(hash, mLineWidth);
     hash = base::hash_combine(hash, mRenderPass);
-    hash = base::hash_combine(hash, mRenderStyle);
     hash = base::hash_combine(hash, mTimeScale);
     hash = base::hash_combine(hash, mDepth);
     hash = base::hash_combine(hash, mRotator);
@@ -76,9 +74,7 @@ void DrawableItemClass::IntoJson(data::Writer& data) const
     data.Write("material",    mMaterialId);
     data.Write("drawable",    mDrawableId);
     data.Write("layer",       mLayer);
-    data.Write("linewidth",   mLineWidth);
     data.Write("renderpass",  mRenderPass);
-    data.Write("renderstyle", mRenderStyle);
     data.Write("timescale",   mTimeScale);
     data.Write("depth",       mDepth);
     data.Write("rotator",     mRotator);
@@ -121,9 +117,7 @@ bool DrawableItemClass::FromJson(const data::Reader& data)
     ok &= data.Read("material",    &mMaterialId);
     ok &= data.Read("drawable",    &mDrawableId);
     ok &= data.Read("layer",       &mLayer);
-    ok &= data.Read("linewidth",   &mLineWidth);
     ok &= data.Read("renderpass",  &mRenderPass);
-    ok &= data.Read("renderstyle", &mRenderStyle);
     ok &= data.Read("timescale",   &mTimeScale);
     ok &= data.Read("depth",       &mDepth);
     ok &= data.Read("rotator",     &mRotator);
