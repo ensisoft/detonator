@@ -822,7 +822,6 @@ void unit_test_entity_interface()
         klass->SetMaterialId("material");
         klass->SetDrawableId("drawable");
         klass->SetLayer(5);
-        klass->SetLineWidth(2.0f);
         klass->SetTimeScale(3.0f);
         klass->SetFlag(game::DrawableItemClass::Flags::FlipHorizontally, true);
         klass->SetFlag(game::DrawableItemClass::Flags::RestartDrawable, false);
@@ -835,7 +834,6 @@ function test(node)
    test_str(node:GetMaterialId(), "material")
    test_str(node:GetDrawableId(), "drawable")
    test_int(node:GetLayer(), 5)
-   test_float(node:GetLineWidth(), 2.0)
    test_float(node:GetTimeScale(), 3.0)
    test_float(node:GetMaterialTime(), 2.0)
    test_bool(node:TestFlag('FlipHorizontally'), true)
@@ -1036,7 +1034,6 @@ void unit_test_scene_interface()
         draw.SetMaterialId("material");
         draw.SetDrawableId("drawable");
         draw.SetLayer(5);
-        draw.SetLineWidth(2.0f);
         draw.SetTimeScale(3.0f);
         draw.SetFlag(game::DrawableItemClass::Flags::FlipHorizontally, true);
         draw.SetFlag(game::DrawableItemClass::Flags::RestartDrawable, false);

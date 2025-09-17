@@ -1436,7 +1436,6 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<engine::Renderer::RenderingStyle>(mUI.cmbStyle);
     PopulateFromEnum<game::SceneProjection>(mUI.cmbSceneProjection);
     PopulateFromEnum<game::DrawableItemClass::RenderPass>(mUI.dsRenderPass);
-    PopulateFromEnum<game::DrawableItemClass::RenderStyle>(mUI.dsRenderStyle);
     PopulateFromEnum<game::DrawableItemClass::CoordinateSpace>(mUI.dsCoordinateSpace);
     PopulateFromEnum<game::RigidBodyClass::Simulation>(mUI.rbSimulation);
     PopulateFromEnum<game::RigidBodyClass::CollisionShape>(mUI.rbShape);
@@ -3348,10 +3347,6 @@ void EntityWidget::on_dsRenderPass_currentIndexChanged(const QString&)
 {
     UpdateCurrentNodeProperties();
 }
-void EntityWidget::on_dsRenderStyle_currentIndexChanged(const QString&)
-{
-    UpdateCurrentNodeProperties();
-}
 
 void EntityWidget::on_dsRenderView_currentIndexChanged(int)
 {
@@ -3368,11 +3363,6 @@ void EntityWidget::on_dsCoordinateSpace_currentIndexChanged(int)
 }
 
 void EntityWidget::on_dsLayer_valueChanged(int value)
-{
-    UpdateCurrentNodeProperties();
-}
-
-void EntityWidget::on_dsLineWidth_valueChanged(double value)
 {
     UpdateCurrentNodeProperties();
 }
@@ -5201,8 +5191,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.dsLayer, 0);
     SetValue(mUI.dsRenderPass, -1);
     SetValue(mUI.dsCoordinateSpace, -1);
-    SetValue(mUI.dsRenderStyle, -1);
-    SetValue(mUI.dsLineWidth, 1.0f);
     SetValue(mUI.dsTimeScale, 1.0f);
     SetValue(mUI.dsDepth, 0.0f);
     SetValue(mUI.dsXRotation, 0.0f);
@@ -5323,10 +5311,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsMaterial, ListItemId(item->GetMaterialId()));
             SetValue(mUI.dsDrawable, ListItemId(item->GetDrawableId()));
             SetValue(mUI.dsRenderPass, item->GetRenderPass());
-            SetValue(mUI.dsRenderStyle, item->GetRenderStyle());
             SetValue(mUI.dsCoordinateSpace, item->GetCoordinateSpace());
             SetValue(mUI.dsLayer, item->GetLayer());
-            SetValue(mUI.dsLineWidth, item->GetLineWidth());
             SetValue(mUI.dsTimeScale, item->GetTimeScale());
             SetValue(mUI.dsDepth, item->GetDepth());
             SetValue(mUI.dsVisible, item->TestFlag(game::DrawableItemClass::Flags::VisibleInGame));
@@ -5594,9 +5580,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetDrawableId(GetItemId(mUI.dsDrawable));
         item->SetMaterialId(GetItemId(mUI.dsMaterial));
         item->SetTimeScale(GetValue(mUI.dsTimeScale));
-        item->SetLineWidth(GetValue(mUI.dsLineWidth));
         item->SetLayer(GetValue(mUI.dsLayer));
-        item->SetRenderStyle(GetValue(mUI.dsRenderStyle));
         item->SetRenderPass(GetValue(mUI.dsRenderPass));
         item->SetCoordinateSpace(GetValue(mUI.dsCoordinateSpace));
         item->SetDepth(GetValue(mUI.dsDepth));

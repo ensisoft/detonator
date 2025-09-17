@@ -674,7 +674,6 @@ void BindGameLib(sol::state& L)
     drawable["GetMaterialId"]             = &DrawableItem::GetMaterialId;
     drawable["GetDrawableId"]             = &DrawableItem::GetDrawableId;
     drawable["GetLayer"]                  = &DrawableItem::GetLayer;
-    drawable["GetLineWidth"]              = &DrawableItem::GetLineWidth;
     drawable["GetTimeScale"]              = &DrawableItem::GetTimeScale;
     drawable["SetTimeScale"]              = &DrawableItem::SetTimeScale;
     drawable["IsVisible"]                 = &DrawableItem::IsVisible;

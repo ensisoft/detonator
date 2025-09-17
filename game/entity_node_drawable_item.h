@@ -107,12 +107,8 @@ namespace game
         { mDrawableId.clear(); }
         void SetFlag(Flags flag, bool on_off) noexcept
         { mBitFlags.set(flag, on_off); }
-        void SetLineWidth(float width) noexcept
-        { mLineWidth = width; }
         void SetRenderPass(RenderPass pass) noexcept
         { mRenderPass = pass; }
-        void SetRenderStyle(RenderStyle style) noexcept
-        { mRenderStyle = style; }
         void SetCoordinateSpace(CoordinateSpace space) noexcept
         { mCoordinateSpace = space; }
         void SetTimeScale(float scale) noexcept
@@ -139,8 +135,6 @@ namespace game
         { return mMaterialId; }
         int GetLayer() const noexcept
         { return mLayer; }
-        float GetLineWidth() const noexcept
-        { return mLineWidth; }
         float GetTimeScale() const noexcept
         { return mTimeScale; }
         float GetDepth() const noexcept
@@ -153,8 +147,6 @@ namespace game
         { return mRotator; }
         RenderPass GetRenderPass() const noexcept
         { return mRenderPass; }
-        RenderStyle GetRenderStyle() const noexcept
-        { return mRenderStyle; }
         CoordinateSpace GetCoordinateSpace() const noexcept
         { return mCoordinateSpace; }
         base::bitflag<Flags> GetFlags() const noexcept
@@ -215,8 +207,6 @@ namespace game
         std::string mDrawableId;
         // the layer in which this node should be drawn.
         int mLayer = 0;
-        // linewidth for rasterizing the shape with lines.
-        float mLineWidth = 1.0f;
         // scaler value for changing the time delta values
         // applied to the drawable (material)
         float mTimeScale = 1.0f;
@@ -230,7 +220,6 @@ namespace game
         glm::vec3 mOffset = {0.0f, 0.0f, 0.0f};
 
         RenderPass mRenderPass = RenderPass::DrawColor;
-        RenderStyle  mRenderStyle = RenderStyle::Solid;
         CoordinateSpace  mCoordinateSpace = CoordinateSpace::Scene;
         MaterialParamMap mMaterialParams;
     };
@@ -285,12 +274,8 @@ namespace game
         { return mClass->GetDrawableId(); }
         int GetLayer() const noexcept
         { return mClass->GetLayer(); }
-        float GetLineWidth() const noexcept
-        { return mClass->GetLineWidth(); }
         RenderPass GetRenderPass() const noexcept
         { return mClass->GetRenderPass(); }
-        RenderStyle GetRenderStyle() const noexcept
-        { return mClass->GetRenderStyle(); }
         CoordinateSpace GetCoordinateSpace() const noexcept
         { return mClass->GetCoordinateSpace(); }
         Rotator GetRotator() const noexcept

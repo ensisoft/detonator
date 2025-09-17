@@ -89,7 +89,6 @@ void unit_test_entity_node()
     draw.SetFlag(game::DrawableItemClass::Flags::UpdateDrawable, true);
     draw.SetFlag(game::DrawableItemClass::Flags::RestartDrawable, false);
     draw.SetLayer(10);
-    draw.SetLineWidth(5.0f);
     draw.SetMaterialParam("kFloat", 1.0f);
     draw.SetMaterialParam("kVec2", glm::vec2(1.0f, 2.0f));
     draw.SetMaterialParam("kVec3", glm::vec3(1.0f, 2.0f, 3.0f));
@@ -208,7 +207,6 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetTranslation()  == glm::vec2(150.0f, -150.0f));
     TEST_REQUIRE(node.GetScale()        == glm::vec2(4.0f, 5.0f));
     TEST_REQUIRE(node.GetRotation()     == real::float32(1.5f));
-    TEST_REQUIRE(node.GetDrawable()->GetLineWidth()    == real::float32(5.0f));
     TEST_REQUIRE(node.GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::MaskCover);
     TEST_REQUIRE(node.GetDrawable()->GetLayer()        == 10);
     TEST_REQUIRE(node.GetDrawable()->GetDrawableId()   == "rectangle");
@@ -286,7 +284,6 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.GetRotation()     == real::float32(1.5f));
         TEST_REQUIRE(ret.GetDrawable()->GetDrawableId()   == "rectangle");
         TEST_REQUIRE(ret.GetDrawable()->GetMaterialId()   == "test");
-        TEST_REQUIRE(ret.GetDrawable()->GetLineWidth()    == real::float32(5.0f));
         TEST_REQUIRE(ret.GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::MaskCover);
         TEST_REQUIRE(ret.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable) == true);
         TEST_REQUIRE(ret.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::RestartDrawable) == false);
@@ -352,7 +349,6 @@ void unit_test_entity_node()
         TEST_REQUIRE(clone.GetRotation()     == real::float32(1.5f));
         TEST_REQUIRE(clone.GetDrawable()->GetDrawableId()   == "rectangle");
         TEST_REQUIRE(clone.GetDrawable()->GetMaterialId()   == "test");
-        TEST_REQUIRE(clone.GetDrawable()->GetLineWidth()    == real::float32(5.0f));
         TEST_REQUIRE(clone.GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::MaskCover);
         TEST_REQUIRE(clone.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable) == true);
         TEST_REQUIRE(clone.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::RestartDrawable) == false);
@@ -390,7 +386,6 @@ void unit_test_entity_node()
         TEST_REQUIRE(instance.HasBasicLight());
         TEST_REQUIRE(instance.GetLinearMover());
         TEST_REQUIRE(instance.GetSplineMover());
-        TEST_REQUIRE(instance.GetDrawable()->GetLineWidth()   == real::float32(5.0f));
         TEST_REQUIRE(instance.GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::MaskCover);
         TEST_REQUIRE(instance.GetRigidBody()->GetPolygonShapeId() == "shape");
         TEST_REQUIRE(instance->GetTextItem());
