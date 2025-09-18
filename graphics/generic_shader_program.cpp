@@ -231,10 +231,10 @@ void GenericShaderProgram::ApplyFogState(const Device& device, ProgramState& pro
 #pragma pack(push, 1)
     struct Fog {
         Vec4 color;
-        Vec3 center;
+        Vec3 camera;
         float density;
-        float start_dist;
-        float end_dist;
+        float start_depth;
+        float end_depth;
         uint32_t mode;
     };
 #pragma pack(pop)
@@ -242,10 +242,10 @@ void GenericShaderProgram::ApplyFogState(const Device& device, ProgramState& pro
     UniformBlockData<Fog> data;
     data.Resize(1);
     data[0].color  = ToVec(mFog.color);
-    data[0].center = ToVec(mCameraCenter);
+    data[0].camera = ToVec(mCameraCenter);
     data[0].density = mFog.density;
-    data[0].start_dist = mFog.start_dist;
-    data[0].end_dist   = mFog.end_dist;
+    data[0].start_depth = mFog.start_depth;
+    data[0].end_depth   = mFog.end_depth;
     data[0].mode  = static_cast<uint32_t>(mFog.mode);
     program.SetUniformBlock(UniformBlock("FogData", std::move(data)));
 

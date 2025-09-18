@@ -70,8 +70,10 @@ namespace gfx
 
     struct BasicFog {
         gfx::Color4f color;
-        float start_dist = 10.0f;
-        float end_dist = 100.0f;
+        // the fog start depth relative to the camera/viewer
+        float start_depth= 10.0f;
+        // the fot end depth relative to the camera / viewer
+        float end_depth = 100.0f;
         float density = 1.0f;
         BasicFogMode mode = BasicFogMode::Linear;
     };
