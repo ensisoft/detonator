@@ -3526,8 +3526,8 @@ public:
         gfx::GenericShaderProgram::Fog fog;
         fog.mode = mFogMode;
         fog.color = gfx::Color4f(gfx::Color::DarkGray);
-        fog.start_dist = 0.0f;
-        fog.end_dist   = 100.0f;
+        fog.start_depth= 0.0f;
+        fog.end_depth  = 100.0f;
         fog.density    = 3.0f;
 
         program.EnableFeature(gfx::GenericShaderProgram::ShadingFeatures::BasicFog, true);

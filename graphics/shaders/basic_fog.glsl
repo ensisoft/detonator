@@ -9,10 +9,10 @@ R"CPP_RAW_STRING(//"
 
 struct Fog {
     vec4 color;
-    vec3 center;
+    vec3 camera;
     float density;
-    float start_dist;
-    float end_dist;
+    float start_depth;
+    float end_depth;
     uint mode;
 };
 
@@ -25,12 +25,12 @@ layout(std140) uniform FogData {
 // @code
 
 vec4 ComputeBasicFog(vec4 color) {
-    // view space distance between position and center of fog
-    float distance_to_fog = length(fog.center - vertexViewPosition);
+    // view space distance between position and viewer (camera)
+    float distance_from_camera = length(fog.camera - vertexViewPosition);
 
     // normalized scaler value based on distance into fog
     float fog_scaler = 0.0;
-    fog_scaler = max(distance_to_fog - fog.start_dist, 0.0) / fog.end_dist;
+    fog_scaler = max(distance_from_camera - fog.start_depth, 0.0) / fog.end_depth;
     fog_scaler = min(fog_scaler, 1.0);
 
     // final fog factor for color blend
