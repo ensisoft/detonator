@@ -650,7 +650,7 @@ bool SceneClass::FromJson(const data::Reader& data)
     }
     if (data.HasValue("fog"))
     {
-        Fog fog;
+        BasicFogParameters fog;
         const auto& chunk = data.GetReadChunk("fog");
         if (chunk->Read("mode",           &fog.mode) &&
             chunk->Read("start_distance", &fog.start_dist) &&

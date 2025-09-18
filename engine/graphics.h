@@ -34,6 +34,7 @@
 #include "engine/types.h"
 #include "engine/color.h"
 #include "game/enum.h"
+#include "game/types.h"
 
 namespace engine
 {
@@ -154,6 +155,8 @@ namespace engine
             float green = 0.0f;
             float blue  = 0.0f;
         };
+        using BasicFogMode   = game::BasicFogMode;
+        using BasicFogParams = game::BasicFogParameters;
 
         struct Camera {
             Color4f clear_color;
@@ -181,8 +184,10 @@ namespace engine
             bool editing_mode = false;
             bool enable_bloom = false;
             bool enable_lights = false;
+            bool enable_fog    = false;
             glm::vec2 pixel_ratio = {1.0f, 1.0f};
             BloomParams bloom;
+            BasicFogParams fog;
         };
 
         struct GPUResources {
@@ -203,45 +208,54 @@ namespace engine
         using Camera = LowLevelRendererHook::Camera;
         using Surface = LowLevelRendererHook::Surface;
         using RenderSettings = LowLevelRendererHook::RenderSettings;
+        using BasicFogParams = LowLevelRendererHook::BasicFogParams;
 
         LowLevelRenderer(const std::string* name, gfx::Device& device);
 
-        inline void SetBloom(const BloomParams& bloom) noexcept
+        void SetBloom(const BloomParams& bloom) noexcept
         {
             mSettings.bloom = bloom;
         }
-        inline void SetCamera(const Camera& camera) noexcept
+        void SetFog(const BasicFogParams& fog) noexcept
+        {
+            mSettings.fog = fog;
+        }
+        void SetCamera(const Camera& camera) noexcept
         {
             mSettings.camera = camera;
         }
-        inline void SetSurface(const Surface& surface) noexcept
+        void SetSurface(const Surface& surface) noexcept
         {
             mSettings.surface = surface;
         }
 
-        inline void SetPixelRatio(const glm::vec2& ratio) noexcept
+        void SetPixelRatio(const glm::vec2& ratio) noexcept
         {
             mSettings.pixel_ratio = ratio;
         }
-        inline void SetEditingMode(bool on_off) noexcept
+        void SetEditingMode(bool on_off) noexcept
         {
             mSettings.editing_mode = on_off;
         }
 
-        inline void EnableLights(bool on_off) noexcept
+        void EnableLights(bool on_off) noexcept
         {
             mSettings.enable_lights = on_off;
         }
+        void EnableFog(bool on_off) noexcept
+        {
+            mSettings.enable_fog = on_off;
+        }
 
-        inline void EnableBloom(bool on_off) noexcept
+        void EnableBloom(bool on_off) noexcept
         {
             mSettings.enable_bloom = on_off;
         }
-        inline void SetRenderHook(LowLevelRendererHook* hook) noexcept
+        void SetRenderHook(LowLevelRendererHook* hook) noexcept
         {
             mRenderHook = hook;
         }
-        inline void SetPacketFilter(PacketFilter* packet_filter) noexcept
+        void SetPacketFilter(PacketFilter* packet_filter) noexcept
         {
             mPacketFilter = packet_filter;
         }
@@ -258,6 +272,8 @@ namespace engine
         {
             return mSettings.surface.size.GetHeight();
         }
+        void ConfigureProgram(gfx::GenericShaderProgram& program) const;
+
         void DrawDefault(DrawPacketList& packets, LightList& lights) const;
         void DrawFramebuffer(DrawPacketList& packets, LightList& lights) const;
         void Draw(DrawPacketList& packets, LightList& lights, gfx::Framebuffer* fbo, gfx::GenericShaderProgram& program) const;

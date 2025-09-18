@@ -34,6 +34,7 @@
 #include "data/fwd.h"
 #include "game/enum.h"
 #include "game/tree.h"
+#include "game/types.h"
 #include "game/scriptvar.h"
 #include "game/entity_placement.h"
 
@@ -49,6 +50,8 @@ namespace game
         using RenderTreeValue  = EntityPlacement;
         using SceneProjection  = game::SceneProjection;
         using SceneShadingMode = game::SceneShadingMode;
+        using BasicFogMode     = game::BasicFogMode;
+        using BasicFogParams   = game::BasicFogParameters;
 
         struct BloomFilter {
             float threshold = 0.98f;
@@ -57,23 +60,11 @@ namespace game
             float blue  = 0.0722f;
         };
 
-        struct Fog {
-            enum class Mode {
-                Linear, Exp1, Exp2
-            };
-
-            base::Color4f color;
-            float start_dist = 10.0f;
-            float end_dist   = 100.0f;
-            float density    = 1.0f;
-            Mode mode = Mode::Linear;
-        };
-
         struct RenderingArgs {
             SceneProjection projection = SceneProjection::AxisAlignedOrthographic;
             SceneShadingMode shading = SceneShadingMode::Flat;
             std::optional<BloomFilter> bloom;
-            std::optional<Fog> fog;
+            std::optional<BasicFogParameters> fog;
         };
 
         enum class SpatialIndex {
@@ -285,11 +276,11 @@ namespace game
         void ResetBloom() noexcept
         { mRenderingArgs.bloom.reset(); }
 
-        void SetFog(const Fog& fog) noexcept
+        void SetFog(const BasicFogParameters& fog) noexcept
         { mRenderingArgs.fog = fog; }
-        const Fog* GetFog() const noexcept
+        const BasicFogParameters* GetFog() const noexcept
         { return base::GetOpt(mRenderingArgs.fog); }
-        Fog* GetFog() noexcept
+        BasicFogParameters* GetFog() noexcept
         { return base::GetOpt(mRenderingArgs.fog); }
         void ResetFog() noexcept
         { mRenderingArgs.fog.reset(); }

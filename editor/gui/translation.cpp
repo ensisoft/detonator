@@ -88,6 +88,21 @@ std::string TranslateEnum(FileResourceLoader::DefaultAudioIOStrategy strategy)
 
 namespace game {
 
+std::string TranslateEnum(SceneClass::BasicFogMode mode)
+{
+    using M = SceneClass::BasicFogMode;
+    if (mode == M::Linear)
+        return "Strong Fog";
+    else if (mode == M::None)
+        return "No Fog";
+    else if (mode == M::Exp1)
+        return "Medium Fog";
+    else if (mode == M::Exp2)
+        return "Soft Fog";
+    else BUG("Missing translation");
+    return "???";
+}
+
 std::string TranslateEnum(SceneClass::SceneProjection projection)
 {
     using P = SceneClass::SceneProjection;

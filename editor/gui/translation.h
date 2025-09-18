@@ -54,6 +54,7 @@ namespace engine {
 } // namespace
 
 namespace game {
+    std::string TranslateEnum(SceneClass::BasicFogMode mode);
     std::string TranslateEnum(SceneClass::SceneProjection projection);
     std::string TranslateEnum(SceneClass::SceneShadingMode mode);
     std::string TranslateEnum(AnimatorClass::Type type);
