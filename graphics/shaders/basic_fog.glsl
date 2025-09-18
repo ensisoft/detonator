@@ -37,6 +37,8 @@ vec4 ComputeBasicFog(vec4 color) {
     float fog_factor = 0.0;
 
     if (fog.mode == BASIC_FOG_MODE_LINEAR) {
+        float density_factor = fog.density / 5.0;
+        fog_scaler = fog_scaler * 0.8 + density_factor * 0.2;
         fog_factor = 1.0 - fog_scaler;
     } else if (fog.mode == BASIC_FOG_MODE_EXP1) {
         float fog_exponent = fog.density * fog_scaler;
