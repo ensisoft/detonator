@@ -32,6 +32,10 @@ namespace game {
         Ambient, Directional, Spot, Point
     };
 
+    enum class BasicFogMode {
+        None, Linear, Exp1, Exp2
+    };
+
     enum class RigidBodyJointSetting {
         EnableMotor,
         EnableLimit,

@@ -116,6 +116,13 @@ namespace game
         EntityPostedEventValue value;
     };
 
-} // namespace
+    struct BasicFogParameters {
+        Color4f color;
+        float start_dist = 10.0f;
+        float end_dist   = 100.0f;
+        float density    = 1.0f;
+        BasicFogMode mode = BasicFogMode::None;
+    };
 
+} // namespace
 

@@ -117,16 +117,19 @@ namespace engine
             Bloom
         };
 
+        using BasicFogParams   = LowLevelRenderer::BasicFogParams;
         using BloomParams = LowLevelRenderer::BloomParams;
         using Camera = LowLevelRenderer::Camera;
         using Surface = LowLevelRenderer::Surface;
 
         struct FrameSettings {
             base::bitflag<Effects> effects;
+            BasicFogParams fog;
             BloomParams bloom;
             Camera camera;
             Surface surface;
             RenderingStyle style = RenderingStyle::FlatColor;
+            bool enable_fog = false;
             // render units (= scene units?)
             // add a little fudge to the renderable tile size in order to try to
             // close any possible gap between the tiles. if the tiles are exactly
@@ -152,6 +155,10 @@ namespace engine
         { mProjection = projection; }
         void SetBloom(const BloomParams& bloom) noexcept
         { mFrameSettings.bloom = bloom; }
+        void SetFog(const BasicFogParams& fog) noexcept
+        { mFrameSettings.fog = fog; }
+        void EnableFog(bool on_off) noexcept
+        { mFrameSettings.enable_fog = on_off; }
         void EnableEffect(Effects effect, bool enabled) noexcept
         { mFrameSettings.effects.set(effect, enabled); }
         bool IsEnabled(Effects effect) const noexcept

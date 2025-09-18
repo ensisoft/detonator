@@ -55,6 +55,36 @@ void LowLevelRenderer::DrawPackets(DrawPacketList& packets, LightList& lights) c
     }
 }
 
+void LowLevelRenderer::ConfigureProgram(gfx::GenericShaderProgram& program) const
+{
+    program.SetCameraCenter(0.0f, 0.0f, 10000.0f);
+    program.EnableFeature(gfx::GenericShaderProgram::OutputFeatures::WriteBloomTarget, mSettings.enable_bloom);
+    program.EnableFeature(gfx::GenericShaderProgram::ShadingFeatures::BasicLight, mSettings.enable_lights);
+    program.EnableFeature(gfx::GenericShaderProgram::ShadingFeatures::BasicFog, mSettings.enable_fog);
+
+    if (mSettings.enable_bloom)
+    {
+        const auto& bloom = mSettings.bloom;
+        program.SetBloomColor(gfx::Color4f(bloom.red, bloom.green, bloom.blue, 1.0f));
+        program.SetBloomThreshold(bloom.threshold);
+    }
+
+    gfx::GenericShaderProgram::Fog fog;
+    fog.color = mSettings.fog.color;
+    fog.density = mSettings.fog.density;
+    fog.start_depth = mSettings.fog.start_dist;
+    fog.end_depth   = mSettings.fog.end_dist;
+    if (mSettings.fog.mode == game::BasicFogMode::Linear)
+        fog.mode = gfx::GenericShaderProgram::FogMode::Linear;
+    else if (mSettings.fog.mode == game::BasicFogMode::Exp1)
+        fog.mode = gfx::GenericShaderProgram::FogMode::Exponential1;
+    else if (mSettings.fog.mode == game::BasicFogMode::Exp2)
+        fog.mode = gfx::GenericShaderProgram::FogMode::Exponential2;
+    else if (mSettings.fog.mode == game::BasicFogMode::None)
+        program.EnableFeature(gfx::GenericShaderProgram::ShadingFeatures::BasicFog, false);
+    program.SetFog(fog);
+}
+
 void LowLevelRenderer::DrawDefault(DrawPacketList& packets, LightList& lights) const
 {
     // draw using the default frame buffer
@@ -71,9 +101,7 @@ void LowLevelRenderer::DrawDefault(DrawPacketList& packets, LightList& lights) c
     }
 
     gfx::GenericShaderProgram program;
-    program.SetCameraCenter(0.0f, 0.0f, 10000.0f);
-    program.EnableFeature(gfx::GenericShaderProgram::OutputFeatures::WriteBloomTarget, false);
-    program.EnableFeature(gfx::GenericShaderProgram::ShadingFeatures::BasicLight, mSettings.enable_lights);
+    ConfigureProgram(program);
 
     Draw(packets, lights, nullptr, program);
 
@@ -111,13 +139,8 @@ void LowLevelRenderer::DrawFramebuffer(DrawPacketList& packets, LightList& light
         mRenderHook->BeginDraw(mSettings, res);
     }
 
-    const auto& bloom = mSettings.bloom;
     gfx::GenericShaderProgram program;
-    program.SetBloomColor(gfx::Color4f(bloom.red, bloom.green, bloom.blue, 1.0f));
-    program.SetBloomThreshold(bloom.threshold);
-    program.SetCameraCenter(0.0f, 0.0f, 10000.0f);
-    program.EnableFeature(gfx::GenericShaderProgram::OutputFeatures::WriteBloomTarget, true);
-    program.EnableFeature(gfx::GenericShaderProgram::ShadingFeatures::BasicLight, mSettings.enable_lights);
+    ConfigureProgram(program);
 
     Draw(packets, lights, mMainFBO, program);
 

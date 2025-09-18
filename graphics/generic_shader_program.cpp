@@ -242,7 +242,10 @@ void GenericShaderProgram::ApplyFogState(const Device& device, ProgramState& pro
     UniformBlockData<Fog> data;
     data.Resize(1);
     data[0].color  = ToVec(mFog.color);
-    data[0].camera = ToVec(mCameraCenter);
+    // actually we don't need the camera position, easier to say
+    // the camera is at 0.0, 0.0, 0.0, the world moves around. (as it is
+    // with the view transform).
+    data[0].camera =  Vec3{0.0f, 0.0f, 0.0f}; //ToVec(mCameraCenter);
     data[0].density = mFog.density;
     data[0].start_depth = mFog.start_depth;
     data[0].end_depth   = mFog.end_depth;

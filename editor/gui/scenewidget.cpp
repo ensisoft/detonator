@@ -608,6 +608,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
             mHamburger->addAction(mUI.actionShowOrigin);
             mHamburger->addAction(mUI.actionShowGrid);
             mHamburger->addAction(mUI.actionShowMap);
+            mHamburger->addAction(mUI.actionShowFog);
         }
         QPoint point;
         point.setX(0);
@@ -631,12 +632,14 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::SceneClass::SpatialIndex>(mUI.cmbSpatialIndex);
     PopulateFromEnum<game::SceneClass::SceneShadingMode>(mUI.cmbShading);
     PopulateFromEnum<game::SceneClass::SceneProjection>(mUI.cmbProjection);
+    PopulateFromEnum<game::SceneClass::BasicFogMode>(mUI.cmbFogMode);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.zoom, 1.0f);
     SetValue(mUI.ID, mState.scene->GetId());
     SetValue(mUI.name, mState.scene->GetName());
     SetVisible(mUI.transform, false);
+    SetValue(mUI.fogColor, QColor(0x2f, 0x2f, 0x2f, 0xff));
 
     RebuildMenus();
     RebuildCombos();
@@ -667,6 +670,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "show_grid", mUI.actionShowGrid);
     GetUserProperty(resource, "show_viewport", mUI.actionShowViewport);
     GetUserProperty(resource, "show_map", mUI.actionShowMap);
+    GetUserProperty(resource, "show_fog", mUI.actionShowFog);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
@@ -722,7 +726,7 @@ void SceneWidget::InitializeSettings(const UISettings& settings)
     SetValue(mUI.cmbGrid,            settings.grid);
     SetValue(mUI.zoom,               settings.zoom);
     SetValue(mUI.actionShowMap,      true);
-
+    SetValue(mUI.actionShowFog,      true);
 }
 
 void SceneWidget::AddActions(QToolBar& bar)
@@ -774,6 +778,7 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.actionSnapGrid);
     settings.SaveWidget("Scene", mUI.cmbGrid);
     settings.SaveWidget("Scene", mUI.actionShowMap);
+    settings.SaveWidget("Scene", mUI.actionShowFog);
     settings.SaveWidget("Scene", mUI.zoom);
     settings.SaveWidget("Scene", mUI.widget);
     settings.SaveWidget("Scene", mUI.sceneVariablesGroup);
@@ -805,6 +810,7 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.actionSnapGrid);
     settings.LoadWidget("Scene", mUI.cmbGrid);
     settings.LoadWidget("Scene", mUI.actionShowMap);
+    settings.LoadWidget("Scene", mUI.actionShowFog);
     settings.LoadWidget("Scene", mUI.zoom);
     settings.LoadWidget("Scene", mUI.widget);
     settings.LoadWidget("Scene", mUI.sceneVariablesGroup);
@@ -1326,6 +1332,30 @@ void SceneWidget::on_cmbProjection_currentIndexChanged(int)
     mState.scene->SetProjection(GetValue(mUI.cmbProjection));
 }
 
+void SceneWidget::on_cmbFogMode_currentIndexChanged(int)
+{
+    SetSceneFog();
+}
+
+void SceneWidget::on_fogColor_colorChanged(const QColor&)
+{
+    SetSceneFog();
+}
+
+void SceneWidget::on_fogStartDepth_valueChanged(double)
+{
+    SetSceneFog();
+}
+void SceneWidget::on_fogEndDepth_valueChanged(double)
+{
+    SetSceneFog();
+}
+
+void SceneWidget::on_fogDensity_valueChanged()
+{
+    SetSceneFog();
+}
+
 void SceneWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -1372,6 +1402,7 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_grid", mUI.actionShowGrid);
     SetUserProperty(resource, "show_viewport", mUI.actionShowViewport);
     SetUserProperty(resource, "show_map", mUI.actionShowMap);
+    SetUserProperty(resource, "show_fog", mUI.actionShowFog);
     SetUserProperty(resource, "widget", mUI.widget);
     SetUserProperty(resource, "quadtree_max_items", mUI.spQuadMaxItems);
     SetUserProperty(resource, "quadtree_max_levels", mUI.spQuadMaxLevels);
@@ -2160,6 +2191,16 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             mState.renderer.EnableEffect(engine::Renderer::Effects::Bloom, false);
         }
 
+        if (auto* fog = mState.scene->GetFog())
+        {
+            const bool show_fog = GetValue(mUI.actionShowFog);
+            mState.renderer.SetFog(*fog);
+            mState.renderer.EnableFog(show_fog);
+        }
+        else
+        {
+            mState.renderer.EnableFog(false);
+        }
         // we don't have an UI to control the individual map layers in the
         // scene widget so only expose a "master" flag that controls the map
         // visibility in the scene overall and then the layers are controlled
@@ -2624,6 +2665,27 @@ void SceneWidget::DisplaySceneProperties()
         SetEnabled(mUI.bloomBSlide,         false);
     }
 
+    if (const auto* fog = mState.scene->GetFog())
+    {
+        SetEnabled(mUI.fogColor,      true);
+        SetEnabled(mUI.fogStartDepth, true);
+        SetEnabled(mUI.fogEndDepth,   true);
+        SetEnabled(mUI.fogDensity,    true);
+        SetValue(mUI.cmbFogMode, fog->mode);
+        SetValue(mUI.fogColor, fog->color);
+        SetValue(mUI.fogStartDepth, fog->start_dist);
+        SetValue(mUI.fogEndDepth, fog->end_dist);
+        SetValue(mUI.fogDensity, fog->density / 5.0f * 100.0f);
+    }
+    else
+    {
+        SetEnabled(mUI.fogColor,      false);
+        SetEnabled(mUI.fogStartDepth, false);
+        SetEnabled(mUI.fogEndDepth,   false);
+        SetEnabled(mUI.fogDensity,    false);
+
+    }
+
     SetValue(mUI.cmbShading, mState.scene->GetShadingMode());
     SetValue(mUI.cmbProjection, mState.scene->GetProjection());
 }
@@ -2781,6 +2843,25 @@ void SceneWidget::SetSceneBoundary()
         mState.scene->SetTopBoundary(top.value());
     if (const auto& bottom = mUI.spinBottomBoundary->GetValue())
         mState.scene->SetBottomBoundary(bottom.value());
+}
+
+void SceneWidget::SetSceneFog()
+{
+    if (!mState.scene->GetFog())
+    {
+        game::SceneClass::BasicFogParams fog;
+        fog.color = game::Color::DarkGray;
+        mState.scene->SetFog(fog);
+    }
+    const float density = GetValue(mUI.fogDensity);
+
+    auto* fog = mState.scene->GetFog();
+    fog->mode = GetValue(mUI.cmbFogMode);
+    fog->color = GetValue(mUI.fogColor);
+    fog->end_dist = GetValue(mUI.fogEndDepth);
+    fog->start_dist = GetValue(mUI.fogStartDepth);
+    fog->density = density / 100.0f * 5.0f;
+    DisplaySceneProperties();
 }
 
 void SceneWidget::FindNode(const game::EntityPlacement* node)

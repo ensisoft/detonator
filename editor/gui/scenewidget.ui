@@ -797,7 +797,7 @@
                  <bool>false</bool>
                 </property>
                 <property name="collapsed" stdset="0">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                 <property name="text" stdset="0">
                  <string>Renderer config</string>
@@ -974,7 +974,39 @@
                   </item>
                   <item row="0" column="0" colspan="2">
                    <layout class="QGridLayout" name="gridLayout_4">
-                    <item row="0" column="0">
+                    <item row="2" column="1">
+                     <widget class="QComboBox" name="cmbProjection"/>
+                    </item>
+                    <item row="4" column="1">
+                     <widget class="QComboBox" name="cmbFogMode"/>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QLabel" name="label_21">
+                      <property name="text">
+                       <string>Projection</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="7" column="1">
+                     <widget class="QDoubleSpinBox" name="fogEndDepth">
+                      <property name="minimum">
+                       <double>-500.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>2000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                      <property name="value">
+                       <double>500.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="0">
                      <widget class="QLabel" name="label_19">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -987,18 +1019,82 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="0" column="1">
-                     <widget class="QComboBox" name="cmbShading"/>
-                    </item>
-                    <item row="1" column="0">
-                     <widget class="QLabel" name="label_21">
-                      <property name="text">
-                       <string>Projection</string>
+                    <item row="5" column="1">
+                     <widget class="color_widgets::ColorSelector" name="fogColor">
+                      <property name="focusPolicy">
+                       <enum>Qt::TabFocus</enum>
+                      </property>
+                      <property name="sRGB" stdset="0">
+                       <bool>true</bool>
                       </property>
                      </widget>
                     </item>
-                    <item row="1" column="1">
-                     <widget class="QComboBox" name="cmbProjection"/>
+                    <item row="7" column="0">
+                     <widget class="QLabel" name="label_34">
+                      <property name="text">
+                       <string>Fog end depth</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="6" column="1">
+                     <widget class="QDoubleSpinBox" name="fogStartDepth">
+                      <property name="minimum">
+                       <double>-500.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>20000.000000000000000</double>
+                      </property>
+                      <property name="singleStep">
+                       <double>1.000000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                      <property name="value">
+                       <double>0.000000000000000</double>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="1">
+                     <widget class="QComboBox" name="cmbShading"/>
+                    </item>
+                    <item row="6" column="0">
+                     <widget class="QLabel" name="label_33">
+                      <property name="text">
+                       <string>Fog start depth</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="0">
+                     <widget class="QLabel" name="label_22">
+                      <property name="text">
+                       <string>Fog mode</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="5" column="0">
+                     <widget class="QLabel" name="label_32">
+                      <property name="text">
+                       <string>Fog color</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="8" column="0">
+                     <widget class="QLabel" name="label_35">
+                      <property name="text">
+                       <string>Fog density</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="8" column="1">
+                     <widget class="QSlider" name="fogDensity">
+                      <property name="maximum">
+                       <number>100</number>
+                      </property>
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                     </widget>
                     </item>
                    </layout>
                   </item>
@@ -1211,6 +1307,9 @@
               </property>
               <property name="focusPolicy">
                <enum>Qt::TabFocus</enum>
+              </property>
+              <property name="hascolor" stdset="0">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -2199,6 +2298,14 @@
     <string>Show map</string>
    </property>
   </action>
+  <action name="actionShowFog">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Apply fog</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -2269,8 +2376,13 @@
   <tabstop>spDenseGridRows</tabstop>
   <tabstop>spDenseGridCols</tabstop>
   <tabstop>rendererGroup</tabstop>
-  <tabstop>cmbShading</tabstop>
   <tabstop>cmbProjection</tabstop>
+  <tabstop>cmbShading</tabstop>
+  <tabstop>cmbFogMode</tabstop>
+  <tabstop>fogColor</tabstop>
+  <tabstop>fogStartDepth</tabstop>
+  <tabstop>fogEndDepth</tabstop>
+  <tabstop>fogDensity</tabstop>
   <tabstop>chkEnableBloom</tabstop>
   <tabstop>bloomThresholdSpin</tabstop>
   <tabstop>bloomThresholdSlide</tabstop>

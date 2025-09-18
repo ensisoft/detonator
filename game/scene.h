@@ -64,6 +64,7 @@ namespace game
         using RenderTreeValue = Entity;
         using SpatialIndex    = game::SpatialIndex<EntityNode>;
         using BloomFilter     = SceneClass::BloomFilter;
+        using BasicFogParams  = SceneClass::BasicFogParams;
 
         explicit Scene(std::shared_ptr<const SceneClass> klass);
         explicit Scene(const SceneClass& klass);
@@ -290,6 +291,8 @@ namespace game
         // Get the bloom filter settings if any.
         const BloomFilter* GetBloom() const noexcept
         { return mClass->GetBloom(); }
+        const BasicFogParams* GetFog() const noexcept
+        { return mClass->GetFog(); }
         // Get access to the scene class object.
         const SceneClass& GetClass() const noexcept
         { return *mClass.get(); }

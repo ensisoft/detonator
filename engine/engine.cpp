@@ -1771,6 +1771,11 @@ private:
             settings.bloom.blue      = bloom->blue;
             settings.effects.set(engine::Renderer::Effects::Bloom, true);
         }
+        if (auto* fog = runtime.scene->GetFog())
+        {
+            settings.fog = *fog;
+            settings.enable_fog = true;
+        }
 
         const auto shading = (*runtime.scene)->GetShadingMode();
         if (shading == game::SceneClass::SceneShadingMode::Flat)

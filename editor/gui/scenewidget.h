@@ -145,6 +145,11 @@ namespace gui
         void on_btnResetBloom_clicked();
         void on_cmbShading_currentIndexChanged(int);
         void on_cmbProjection_currentIndexChanged(int);
+        void on_cmbFogMode_currentIndexChanged(int);
+        void on_fogColor_colorChanged(const QColor&);
+        void on_fogStartDepth_valueChanged(double);
+        void on_fogEndDepth_valueChanged(double);
+        void on_fogDensity_valueChanged();
 
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
@@ -220,6 +225,7 @@ namespace gui
         void UpdateResourceReferences();
         void SetSpatialIndexParams();
         void SetSceneBoundary();
+        void SetSceneFog();
         void FindNode(const game::EntityPlacement* node);
         game::EntityPlacement* SelectNode(const QPoint& click_point);
         game::EntityPlacement* GetCurrentNode();

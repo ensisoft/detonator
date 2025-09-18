@@ -277,8 +277,10 @@ void Renderer::DrawFrame(gfx::Device& device) const
     low_level_renderer.SetEditingMode(mEditingMode);
     low_level_renderer.SetSurface(mFrameSettings.surface);
     low_level_renderer.SetBloom(mFrameSettings.bloom);
+    low_level_renderer.SetFog(mFrameSettings.fog);
     low_level_renderer.EnableBloom(enable_bloom);
     low_level_renderer.EnableLights(enable_lights);
+    low_level_renderer.EnableFog(mFrameSettings.enable_fog);
 #if !defined(DETONATOR_ENGINE_BUILD)
     low_level_renderer.SetRenderHook(mLowLevelRendererHook);
     low_level_renderer.SetPacketFilter(mPacketFilter);
