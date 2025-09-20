@@ -18,6 +18,10 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/mat4x4.hpp>
+#include "warnpop.h"
+
 #include <string>
 #include <cstdint>
 #include <optional>
@@ -28,6 +32,7 @@
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "graphics/types.h"
+#include "graphics/enum.h"
 
 namespace gfx
 {
@@ -41,6 +46,12 @@ namespace gfx
     {
     public:
         using RenderPass = gfx::RenderPass;
+        struct Environment {
+            RenderPass render_pass = RenderPass::ColorPass;
+            const glm::mat4* view_matrix = nullptr;
+            const glm::mat4* proj_matrix = nullptr;
+            const glm::mat4* model_matrix = nullptr;
+        };
 
         virtual ~ShaderProgram() = default;
 
@@ -66,7 +77,8 @@ namespace gfx
         // required to draw. I.e. the state coming in is the combination of the state from the
         // drawable, material and painter. This applies both to the program and the state object.
         // This is called for every painter draw command.
-        virtual void ApplyDynamicState(const Device& device, ProgramState& program, Device::RasterState& state, void* user) const {}
+        virtual void ApplyDynamicState(const Device& device, const Environment& env,
+            ProgramState& program, Device::RasterState& state, void* user) const {}
 
         // Apply any shader program state dynamically once on the GPU program when the
         // program is used for the first time for the current draw command list.

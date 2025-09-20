@@ -285,6 +285,14 @@ public:
         return nullptr;
     }
 
+    const gfx::Texture* FindTexture(const std::string &name) const override
+    {
+        auto it = mTextureIndexMap.find(name);
+        if (it == mTextureIndexMap.end())
+            return nullptr;
+        return mTextures[it->second].get();
+    }
+
     // Resource deletion APIs
     void DeleteShaders() override
     {}

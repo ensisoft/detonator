@@ -21,6 +21,13 @@ struct Light {
     uint type;
 };
 
+struct LightTransform {
+    vec4 vector0;
+    vec4 vector1;
+    vec4 vector2;
+    vec4 vector3;
+};
+
 // @uniforms
 
 layout (std140) uniform LightArray {
@@ -36,9 +43,64 @@ layout (std140) uniform LightArray {
     vec3 camera_center;
     // number of lights in the above array
     uint light_count;
+
+    uint lighting_flags;
 };
 
+layout (std140) uniform LightTransformArray {
+    LightTransform light_transforms[BASIC_LIGHT_MAX_LIGHTS];
+};
+
+uniform sampler2D kShadowMap0;
+
 // @code
+
+float ComputeShadow(uint light_index, vec3 surface_normal) {
+    mat4 light_map_transform;
+    light_map_transform[0] = light_transforms[light_index].vector0;
+    light_map_transform[1] = light_transforms[light_index].vector1;
+    light_map_transform[2] = light_transforms[light_index].vector2;
+    light_map_transform[3] = light_transforms[light_index].vector3;
+
+    // compute the fragment position in the current light coordinate space.
+    vec4 frag_pos_light_space = light_map_transform * vec4(vertexViewPosition, 1.0);
+    vec3 frag_pos_light_map = frag_pos_light_space.xyz / frag_pos_light_space.w;
+    frag_pos_light_map = frag_pos_light_map * 0.5 + 0.5;
+
+    // combat shadow map edge artifacts here. If the object that is casting
+    // a shadow is clipping the shadow map border and we sample from the
+    // shadow map while clamping we're just going to get shadow values.
+    // so try to smooth it out a little bit
+    float border = 0.05;
+    float x = frag_pos_light_map.x;
+    float y = frag_pos_light_map.y;
+    float sx = 1.0;
+    float sy = 1.0;
+    if (x < border)
+        sx = smoothstep(0.0, border, x);
+    if (x > 1.0 - border)
+        sx = 1.0 - smoothstep(1.0 - border, 1.0, x);
+
+    if (y < border)
+        sy = smoothstep(0.0, border, y);
+    if (y > 1.0 - border)
+        sy = 1.0 - smoothstep(1.0 - border, 1.0, y);
+
+    float shadow_map_depth = texture(kShadowMap0, frag_pos_light_map.xy).r;
+    float fragment_depth = frag_pos_light_map.z;
+
+    vec3 direction_towards_light = normalize(lights[light_index].position -vertexViewPosition);
+
+    //float bias = max(0.05 * (1.0 * dot(direction_towards_light, surface_normal)), 0.005);
+    float bias = 0.005;
+
+    if (fragment_depth - bias > shadow_map_depth) {
+        // the fragment is in shadow
+        return 1.0 * sx * sy;
+    }
+
+    return 0.0;
+}
 
 vec4 ComputeBasicLight() {
    vec4 color = fs_out.color;
@@ -71,12 +133,15 @@ vec4 ComputeBasicLight() {
 
         if (light.type == BASIC_LIGHT_TYPE_AMBIENT) {
             total_color += (light.ambient_color * material_ambient_color);
-
         } else {
             float light_strength = 1.0;
             float light_spot_factor = 1.0;
             vec3 direction_towards_light;
             vec3 direction_towards_point;
+
+            float shadow_factor = 1.0;
+            if ((lighting_flags & BASIC_LIGHTING_FLAGS_ENABLE_SHADOWS) == BASIC_LIGHTING_FLAGS_ENABLE_SHADOWS)
+                shadow_factor = 1.0 - ComputeShadow(i, surface_normal);
 
             // compute light attenuation for point and spot lights
             if (light.type == BASIC_LIGHT_TYPE_POINT || light.type == BASIC_LIGHT_TYPE_SPOT) {
@@ -128,7 +193,11 @@ vec4 ComputeBasicLight() {
             }
 
             // total light accumulation
-            total_color += (ambient_color + diffuse_color + specular_color);
+            total_color += ambient_color;
+            total_color += (shadow_factor * diffuse_color + shadow_factor * specular_color);
+            //total_color += (ambient_color + diffuse_color + specular_color);
+
+            //total_color = vec4(shadow_factor, shadow_factor, shadow_factor, 1.0);
         }
     }
 

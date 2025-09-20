@@ -2277,7 +2277,7 @@ void unit_test_algo_texture_read()
     // flip back to our presentation.
     bmp.FlipHorizontally();
 
-    const auto& ret = gfx::algo::ReadTexture(tex, dev.get());
+    const auto& ret = gfx::algo::ReadColorTexture(tex, dev.get());
     TEST_REQUIRE(ret);
     TEST_REQUIRE(ret->GetDepthBits() == 32);
     TEST_REQUIRE(ret->GetWidth() == 10);
@@ -2726,7 +2726,7 @@ void main() {
         {
             gfx::Texture* color0 = nullptr;
             fbo->Resolve(&color0, gfx::Framebuffer::ColorAttachment::Attachment0);
-            const auto& ret = gfx::algo::ReadTexture(color0, dev.get());
+            const auto& ret = gfx::algo::ReadColorTexture(color0, dev.get());
             TEST_REQUIRE(ret);
             TEST_REQUIRE(ret->GetDepthBits() == 32);
             TEST_REQUIRE(ret->GetWidth() == 10);
@@ -2738,7 +2738,7 @@ void main() {
         {
             gfx::Texture* color1 = nullptr;
             fbo->Resolve(&color1, gfx::Framebuffer::ColorAttachment::Attachment1);
-            const auto& ret = gfx::algo::ReadTexture(color1, dev.get());
+            const auto& ret = gfx::algo::ReadColorTexture(color1, dev.get());
             TEST_REQUIRE(ret);
             TEST_REQUIRE(ret->GetDepthBits() == 32);
             TEST_REQUIRE(ret->GetWidth() == 10);
@@ -2777,7 +2777,7 @@ void main() {
 
         {
             fbo->Resolve(nullptr, gfx::Framebuffer::ColorAttachment::Attachment0);
-            const auto& ret = gfx::algo::ReadTexture(color0, dev.get());
+            const auto& ret = gfx::algo::ReadColorTexture(color0, dev.get());
             TEST_REQUIRE(ret);
             TEST_REQUIRE(ret->GetDepthBits() == 32);
             TEST_REQUIRE(ret->GetWidth() == 10);
@@ -2788,7 +2788,7 @@ void main() {
 
         {
             fbo->Resolve(nullptr, gfx::Framebuffer::ColorAttachment::Attachment1);
-            const auto& ret = gfx::algo::ReadTexture(color1, dev.get());
+            const auto& ret = gfx::algo::ReadColorTexture(color1, dev.get());
             TEST_REQUIRE(ret);
             TEST_REQUIRE(ret->GetDepthBits() == 32);
             TEST_REQUIRE(ret->GetWidth() == 10);
@@ -2830,11 +2830,11 @@ void unit_test_fbo_clear_specific_attachment(gfx::Framebuffer::Format format, gf
             fbo->Resolve(&attachment0, gfx::Framebuffer::ColorAttachment::Attachment0);
             fbo->Resolve(&attachment1, gfx::Framebuffer::ColorAttachment::Attachment1);
 
-            const auto& bmp0 = gfx::algo::ReadTexture(attachment0, dev.get());
+            const auto& bmp0 = gfx::algo::ReadColorTexture(attachment0, dev.get());
             const auto* rgba_ret0 = dynamic_cast<gfx::RgbaBitmap*>(bmp0.get());
             TEST_REQUIRE(rgba_ret0->PixelCompare(gfx::Color::Red));
 
-            const auto& bmp1 = gfx::algo::ReadTexture(attachment1, dev.get());
+            const auto& bmp1 = gfx::algo::ReadColorTexture(attachment1, dev.get());
             const auto* rgba_ret1 = dynamic_cast<gfx::RgbaBitmap*>(bmp1.get());
             TEST_REQUIRE(rgba_ret1->PixelCompare(gfx::Color::Green));
 
@@ -2870,11 +2870,11 @@ void unit_test_fbo_clear_specific_attachment(gfx::Framebuffer::Format format, gf
             fbo->Resolve(nullptr, gfx::Framebuffer::ColorAttachment::Attachment0);
             fbo->Resolve(nullptr, gfx::Framebuffer::ColorAttachment::Attachment1);
 
-            const auto& bmp0 = gfx::algo::ReadTexture(attachment0, dev.get());
+            const auto& bmp0 = gfx::algo::ReadColorTexture(attachment0, dev.get());
             const auto* rgba_ret0 = dynamic_cast<gfx::RgbaBitmap*>(bmp0.get());
             TEST_REQUIRE(rgba_ret0->PixelCompare(gfx::Color::Red));
 
-            const auto& bmp1 = gfx::algo::ReadTexture(attachment1, dev.get());
+            const auto& bmp1 = gfx::algo::ReadColorTexture(attachment1, dev.get());
             const auto* rgba_ret1 = dynamic_cast<gfx::RgbaBitmap*>(bmp1.get());
             TEST_REQUIRE(rgba_ret1->PixelCompare(gfx::Color::Green));
 

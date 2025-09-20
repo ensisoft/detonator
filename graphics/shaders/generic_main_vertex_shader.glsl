@@ -38,24 +38,34 @@ struct VS_OUT {
 void main() {
     vs_out.have_tbn = false;
     vs_out.need_tbn = false;
-#ifdef ENABLE_BASIC_LIGHT
-    vs_out.need_tbn = true;
-#endif
+
+#if defined(VERTEX_SHADER_MAIN_RENDER_PASS)
+    #if defined(ENABLE_BASIC_LIGHT)
+        vs_out.need_tbn = true;
+    #endif
 
     VertexShaderMain();
 
-#if defined(ENABLE_BASIC_LIGHT) || defined(ENABLE_BASIC_FOG)
-    vertexViewPosition = vs_out.view_position.xyz;
-#endif
+    #if defined(ENABLE_BASIC_LIGHT) || defined(ENABLE_BASIC_FOG)
+        vertexViewPosition = vs_out.view_position.xyz;
+    #endif
 
-#ifdef ENABLE_BASIC_LIGHT
-    if (vs_out.have_tbn) {
-        vertexViewNormal = vs_out.view_normal;
-
-        TBN = mat3(vs_out.view_tangent,
-                   vs_out.view_bitangent,
-                   vs_out.view_normal);
-    }
+    #if defined(ENABLE_BASIC_LIGHT)
+        if (vs_out.have_tbn) {
+            vertexViewNormal = vs_out.view_normal;
+            TBN = mat3(vs_out.view_tangent,
+                       vs_out.view_bitangent,
+                       vs_out.view_normal);
+        }
+    #endif
+#elif defined(VERTEX_SHADER_STENCIL_MASK_RENDER_PASS)
+    // we support stencil masking based on texture alpha masks
+    // by doing fragment discard. so in order to support that
+    // properly we cannot just do a simple vertex shader but
+    // must transform texture coordinates, sample texture etc.
+    VertexShaderMain();
+#elif defined(VERTEX_SHADER_SHADOW_MAP_RENDER_PASS)
+    VertexShaderShadowPass();
 #endif
 
     gl_PointSize = vs_out.point_size;

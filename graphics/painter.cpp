@@ -155,8 +155,12 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
             {
                 program.ApplyDynamicState(*mDevice, gpu_program_state);
             }
-
-            program.ApplyDynamicState(*mDevice, gpu_program_state, device_state, draw.user);
+            ShaderProgram::Environment program_env;
+            program_env.render_pass  = render_pass_state.render_pass;
+            program_env.proj_matrix  = draw.projection ? draw.projection : &mProjMatrix;
+            program_env.view_matrix  = draw.view       ? draw.view       : &mViewMatrix;
+            program_env.model_matrix = draw.model      ? draw.model      : &Identity;
+            program.ApplyDynamicState(*mDevice, program_env, gpu_program_state, device_state, draw.user);
         );
         if (!state_ok)
             continue;

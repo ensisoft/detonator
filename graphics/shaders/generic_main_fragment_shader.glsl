@@ -69,14 +69,16 @@ vec4 Bloom(vec4 color) {
 void main() {
     fs_out.have_material_colors = false;
     fs_out.have_surface_normal = false;
+    vec4 out_color;
 
+#if defined(FRAGMENT_SHADER_MAIN_RENDER_PASS)
     #if defined(CUSTOM_FRAGMENT_MAIN)
         CustomFragmentShaderMain();
     #else
         FragmentShaderMain();
     #endif
 
-    vec4 out_color = fs_out.color;
+    out_color = fs_out.color;
 
     #if defined(ENABLE_BASIC_LIGHT)
         if ((fs_out.flags & MATERIAL_FLAGS_ENABLE_LIGHT) == MATERIAL_FLAGS_ENABLE_LIGHT) {
@@ -88,6 +90,20 @@ void main() {
         out_color = ComputeBasicFog(out_color);
     #endif
 
+#elif defined(FRAGMENT_SHADER_STENCIL_MASK_RENDER_PASS)
+    // todo: maybe have separate stencil function here...
+    #if defined(CUSTOM_FRAGMENT_MAIN)
+        CustomFragmentShaderMain();
+    #else
+        FragmentShaderMain();
+    #endif
+    out_color = fs_out.color;
+
+#elif defined(FRAGMENT_SHADER_SHADOW_MAP_RENDER_PASS)
+    // do nothing for now!
+    return;
+#endif
+
     #if defined(ENABLE_COLOR_OUT)
         fragOutColor0 = sRGB_encode(out_color);
     #endif
@@ -98,7 +114,6 @@ void main() {
             fragOutColor1 = sRGB_encode(bloom);
         }
     #endif
-
 }
 
 )CPP_RAW_STRING"

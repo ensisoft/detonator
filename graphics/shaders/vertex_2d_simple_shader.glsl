@@ -135,4 +135,13 @@ void VertexShaderMain() {
     }
 }
 
+void VertexShaderShadowPass() {
+  vec4 vertex = vec4(aPosition.x, -aPosition.y, 0.0, 1.0);
+
+  mat4 model_inst_matrix = GetInstanceTransform();
+  mat4 model_view_matrix = kModelViewMatrix * model_inst_matrix;
+  vec4 view_position = model_view_matrix * vertex;
+  vs_out.clip_position = kProjectionMatrix * view_position;
+}
+
 )CPP_RAW_STRING"

@@ -25,8 +25,8 @@ namespace gfx
     class FlatShadedColorProgram : public GenericShaderProgram
     {
     public:
-        FlatShadedColorProgram() noexcept
-          : GenericShaderProgram("FlatShadedColorProgram")
+        FlatShadedColorProgram(std::string renderer_name = "") noexcept
+          : GenericShaderProgram("FlatShadedColorProgram", std::move(renderer_name))
         {}
     private:
     };
@@ -34,8 +34,8 @@ namespace gfx
     class StencilShaderProgram : public GenericShaderProgram
     {
     public:
-        StencilShaderProgram() noexcept
-           : GenericShaderProgram("StencilShaderProgram")
+        StencilShaderProgram(std::string renderer_name = "") noexcept
+           : GenericShaderProgram("StencilShaderProgram", std::move(renderer_name))
         {}
     private:
     };
@@ -43,8 +43,8 @@ namespace gfx
     class BasicLightProgram : public GenericShaderProgram
     {
     public:
-        BasicLightProgram() noexcept
-          : GenericShaderProgram("BasicLightProgram")
+        BasicLightProgram(std::string renderer_name = "") noexcept
+          : GenericShaderProgram("BasicLightProgram", std::move(renderer_name))
         {
             EnableFeature(ShadingFeatures::BasicLight, true);
         }

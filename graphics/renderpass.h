@@ -18,8 +18,6 @@
 
 #include "config.h"
 
-#include <optional>
-
 #include "graphics/types.h"
 #include "graphics/painter.h"
 #include "graphics/shader_programs.h"
@@ -136,6 +134,53 @@ namespace gfx
     private:
         const PassValue mStencilRefValue;
         Painter& mPainter;
+    };
+
+    class ShadowMapRenderPass
+    {
+    public:
+        explicit ShadowMapRenderPass(std::string renderer_name, BasicLightProgram& program, Device* device) noexcept
+          : mRendererName(std::move(renderer_name))
+          , mProgram(program)
+          , mDevice(device)
+        {}
+
+        using DrawCommand     = Painter::DrawCommand;
+        using DrawCommandList = Painter::DrawCommandList;
+        using LightProjectionType = BasicLightProgram::LightProjectionType;
+
+        void InitState() const;
+
+        bool Draw(const DrawCommandList& draw_cmd_list) const;
+
+        bool Draw(const Drawable& drawable,
+                  const Material& material,
+                  const Transform& transform) const
+        {
+            const glm::mat4& model_to_world = transform.GetAsMatrix();
+            DrawCommand cmd;
+            cmd.drawable = &drawable;
+            cmd.material = &material;
+            cmd.model    = &model_to_world;
+            DrawCommandList cmd_list;
+            cmd_list.push_back(cmd);
+            return Draw(cmd_list);
+        }
+        Texture* GetDepthTexture(unsigned light_index) const;
+
+        glm::mat4 GetLightViewMatrix(unsigned light_index) const;
+        glm::mat4 GetLightProjectionMatrix(unsigned light_index) const;
+        float GetLightProjectionNearPlane(unsigned light_index) const;
+        float GetLightProjectionFarPlane(unsigned light_index) const;
+
+        LightProjectionType GetLightProjectionType(unsigned light_index) const;
+    private:
+        Framebuffer* CreateFramebuffer() const;
+
+    private:
+        std::string mRendererName;
+        BasicLightProgram& mProgram;
+        Device* mDevice = nullptr;
     };
 
 } // namespace

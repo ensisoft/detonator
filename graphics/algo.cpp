@@ -33,6 +33,115 @@
 #include "graphics/framebuffer.h"
 #include "graphics/utility.h"
 
+namespace {
+std::unique_ptr<gfx::IBitmap> ReadDepthTexture(const gfx::Texture* depth_texture, gfx::Device* device, bool linear, float near, float far)
+{
+    const auto format = depth_texture->GetFormat();
+    const auto width  = depth_texture->GetWidth();
+    const auto height = depth_texture->GetHeight();
+    ASSERT(width && height);
+    ASSERT(format == gfx::Texture::Format::DepthComponent32f);
+
+    auto* fbo = device->FindFramebuffer("AlgoFBO");
+    if (!fbo)
+    {
+        fbo = device->MakeFramebuffer("AlgoFBO");
+        gfx::Framebuffer::Config conf;
+        conf.width  = 0;// irrelevant since using texture target we allocate
+        conf.height = 0; // irrelevant since using texture target we allocate
+        conf.format = gfx::Framebuffer::Format::ColorRGBA8;
+        conf.msaa   = gfx::Framebuffer::MSAA::Disabled;
+        conf.color_target_count = 1;
+        fbo->SetConfig(conf);
+    }
+
+    // allocate a RGB (note linear!) color render target for the FBO.
+    // we don't want any sRGB encoding in this particular case.
+    auto* color_target = device->MakeTexture("algo-tmp-color");
+    color_target->SetFilter(gfx::Texture::MinFilter::Nearest);
+    color_target->SetFilter(gfx::Texture::MagFilter::Nearest);
+    color_target->SetWrapX(gfx::Texture::Wrapping::Clamp);
+    color_target->SetWrapY(gfx::Texture::Wrapping::Clamp);
+    color_target->Allocate(width, height, gfx::Texture::Format::RGBA);
+    fbo->SetColorTarget(color_target);
+
+    constexpr auto* vertex_src = R"(
+#version 300 es
+in vec2 aPosition;
+in vec2 aTexCoord;
+
+out vec2 vTexCoord;
+void main() {
+  gl_Position = vec4(aPosition.xy, 0.0, 1.0);
+  vTexCoord   = aTexCoord;
+}
+)";
+    constexpr auto* fragment_src = R"(
+#version 300 es
+precision highp float;
+
+in vec2 vTexCoord;
+
+uniform sampler2D kTexture;
+uniform vec2 kNearFar;
+uniform uint kLinearizeDepth;
+
+layout (location=0) out vec4 fragOutColor;
+
+float LinearizeDepth(float depth) {
+  float near = kNearFar.x;
+  float far  = kNearFar.y;
+
+  float ndc = depth * 2.0 - 1.0;
+  float linear = (2.0 * near * far) / (far + near - ndc * (far - near));
+  return linear / far;
+}
+
+void main() {
+  float depth  = texture(kTexture, vTexCoord.xy).r;
+  if (kLinearizeDepth == 1u) {
+    depth = LinearizeDepth(depth);
+  }
+  fragOutColor = vec4(vec3(depth), 1.0);
+}
+)";
+    auto program = device->FindProgram("DepthColorProgram");
+    if (!program)
+        program = MakeProgram(vertex_src, fragment_src, "DepthColorProgram", *device);
+
+    gfx::Device::RasterState state;
+    state.premulalpha  = false;
+    state.culling      = gfx::Device::RasterState::Culling::None;
+    state.blending     = gfx::Device::RasterState::BlendOp::None;
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, width, height);
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.depth_test   = gfx::Device::ColorDepthStencilState ::DepthTest::Disabled;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState ::StencilFunc::Disabled;
+
+    gfx::DeviceState ds(device);
+    ds.SetState(vs);
+    ds.SetState(dss);
+
+    gfx::ProgramState ps;
+    ps.SetTexture("kTexture", 0, *depth_texture);
+    ps.SetUniform("kNearFar", glm::vec2 { near, far });
+    ps.SetUniform("kLinearizeDepth", linear ? 0u : 1u);
+    ps.SetTextureCount(1);
+
+    auto quad = MakeFullscreenQuad(*device);
+
+    device->Draw(*program, ps, *quad, state, fbo);
+
+    auto bitmap = device->ReadColorBuffer(width, height, fbo);
+
+    return std::make_unique<gfx::RgbaBitmap>(std::move(bitmap));
+}
+} // namespace
+
 namespace gfx::algo {
 
 void ExtractColor(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device,
@@ -569,7 +678,7 @@ void FlipTexture(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* 
     }
 }
 
-std::unique_ptr<IBitmap> ReadTexture(const gfx::Texture* texture, gfx::Device* device)
+std::unique_ptr<IBitmap> ReadColorTexture(const gfx::Texture* texture, gfx::Device* device)
 {
     const auto format = texture->GetFormat();
     const auto width  = texture->GetWidth();
@@ -597,6 +706,16 @@ std::unique_ptr<IBitmap> ReadTexture(const gfx::Texture* texture, gfx::Device* d
     fbo->SetColorTarget(nullptr);
 
     return std::make_unique<RgbaBitmap>(std::move(bmp));
+}
+
+
+std::unique_ptr<IBitmap> ReadOrthographicDepthTexture(const Texture* texture, Device* device)
+{
+    return ReadDepthTexture(texture, device, true, 0.0f, 0.0f);
+}
+std::unique_ptr<IBitmap> ReadPerspectiveDepthTexture(const Texture* texture, Device* device, float near, float far)
+{
+    return ReadDepthTexture(texture, device, false, near, far);
 }
 
 void ClearTexture(gfx::Texture* texture, gfx::Device* device, const gfx::Color4f& clear_color)

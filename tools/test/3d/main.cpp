@@ -773,7 +773,7 @@ int main(int argc, char* argv[])
             window.Destroy();
         else if (key.symbol == wdk::Keysym::Key2)
         {
-            const auto& depth = gfx::algo::ReadTexture(state.depth, state.device);
+            const auto& depth = gfx::algo::ReadColorTexture(state.depth, state.device);
             gfx::WritePNG(*depth, "depth.png");
         }
         else top_level_key = false;

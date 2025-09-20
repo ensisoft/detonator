@@ -74,6 +74,8 @@ namespace gfx
     //   * Includes direction, cutoff angle (cone angle), and attenuation for realistic spotlight effects.
     //
 
+    class Texture;
+    class Device;
 
     class GenericShaderProgram : public ShaderProgram
     {
@@ -81,11 +83,14 @@ namespace gfx
         static constexpr auto MAX_LIGHTS = 10;
 
         enum class ShadingFeatures {
-            BasicLight, BasicFog
+            BasicLight, BasicFog, BasicShadows
         };
 
         enum class OutputFeatures {
             WriteColorTarget, WriteBloomTarget
+        };
+        enum class LightProjectionType {
+            Invalid, Orthographic, Perspective
         };
 
         using LightType = BasicLightType;
@@ -98,62 +103,75 @@ namespace gfx
             mOutputFeatures.set(OutputFeatures::WriteColorTarget, true);
         }
 
-        explicit GenericShaderProgram(std::string name) noexcept
-          : mName(std::move(name))
+        explicit GenericShaderProgram(std::string program_name,
+                                      std::string renderer_name = "") noexcept
+          : mProgramName(std::move(program_name))
+         , mRendererName(std::move(renderer_name))
         {
             mOutputFeatures.set(OutputFeatures::WriteColorTarget, true);
         }
 
-        inline auto GetLightCount() const noexcept
+        auto GetLightCount() const noexcept
         { return mLights.size(); }
 
-        inline const auto& GetLight(size_t index) const noexcept
+        const auto& GetLight(size_t index) const noexcept
         { return base::SafeIndex(mLights, index); }
-        inline auto GetLight(size_t index) noexcept
+        auto GetLight(size_t index) noexcept
         { return *base::SafeIndex(mLights, index); }
 
-        inline void AddLight(const Light& light)
+        auto GetShadowMapWidth() const noexcept
+        { return static_cast<unsigned>(mShadowMapWidth); }
+        auto GetShadowMapHeight() const noexcept
+        { return static_cast<unsigned>(mShadowMapHeight); }
+
+        void AddLight(const Light& light)
         { mLights.push_back(MakeSharedLight(light)); }
-        inline void AddLight(Light&& light)
+        void AddLight(Light&& light)
         { mLights.push_back(MakeSharedLight(std::move(light))); }
-        inline void AddLight(std::shared_ptr<const Light> light)
+        void AddLight(std::shared_ptr<const Light> light)
         { mLights.push_back(std::move(light)); }
 
-        inline void SetLight(const Light& light, size_t index) noexcept
+        void SetLight(const Light& light, size_t index) noexcept
         { base::SafeIndex(mLights, index) = MakeSharedLight(light); }
-        inline void SetLight(Light&& light, size_t index) noexcept
+        void SetLight(Light&& light, size_t index) noexcept
         { base::SafeIndex(mLights, index) = MakeSharedLight(std::move(light)); }
 
-        inline void ClearLights() noexcept
+        void ClearLights() noexcept
         { mLights.clear(); }
 
-        inline void SetFog(const Fog& fog) noexcept
+        void SetFog(const Fog& fog) noexcept
         { mFog = fog; }
 
-        inline void SetBloomColor(const gfx::Color4f& color) noexcept
+        void SetBloomColor(const gfx::Color4f& color) noexcept
         { mBloomColor = color; }
-        inline void SetBloomThreshold(float threshold) noexcept
+        void SetBloomThreshold(float threshold) noexcept
         { mBloomThreshold = threshold; }
 
-        inline void SetCameraCenter(glm::vec3 center) noexcept
+        void SetCameraCenter(glm::vec3 center) noexcept
         { mCameraCenter = center; }
-        inline void SetCameraCenter(float x, float y, float z) noexcept
+        void SetCameraCenter(float x, float y, float z) noexcept
         { mCameraCenter = glm::vec3 {x, y, z }; }
 
-        inline void EnableFeature(ShadingFeatures feature, bool on_off) noexcept
+        void EnableFeature(ShadingFeatures feature, bool on_off) noexcept
         { mShadingFeatures.set(feature, on_off); }
 
-        inline void EnableFeature(OutputFeatures features, bool on_off) noexcept
+        void EnableFeature(OutputFeatures features, bool on_off) noexcept
         { mOutputFeatures.set(features, on_off); }
 
-        inline bool TestFeature(ShadingFeatures feature) const noexcept
+        bool TestFeature(ShadingFeatures feature) const noexcept
         { return mShadingFeatures.test(feature); }
 
-        inline bool TestFeature(OutputFeatures feature) const noexcept
+        bool TestFeature(OutputFeatures feature) const noexcept
         { return mOutputFeatures.test(feature); }
 
+        void SetShadowMapSize(unsigned width, unsigned height)
+        {
+            mShadowMapWidth = static_cast<float>(width);
+            mShadowMapHeight = static_cast<float>(height);
+        }
+
         std::string GetName() const override
-        { return mName; }
+        { return mProgramName; }
 
         std::string GetShaderId(const Material& material, const Material::Environment& env) const override;
         std::string GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const override;
@@ -161,8 +179,18 @@ namespace gfx
         ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const override;
 
         void ApplyDynamicState(const Device& device, ProgramState& program) const override;
+        void ApplyDynamicState(const Device &device, const Environment &env, ProgramState &program, Device::RasterState &state, void *user) const override;
         void ApplyLightState(const Device& device, ProgramState& program) const;
         void ApplyFogState(const Device& device, ProgramState& program) const;
+
+        glm::mat4 GetLightViewMatrix(unsigned light_index) const;
+        glm::mat4 GetLightProjectionMatrix(unsigned light_index) const;
+        LightProjectionType GetLightProjectionType(unsigned light_index) const;
+
+        float GetLightProjectionNearPlane(unsigned light_index) const;
+        float GetLightProjectionFarPlane(unsigned light_index) const;
+
+        const Texture* GetLightShadowMap(const Device& device, unsigned light_index) const;
 
         static std::shared_ptr<const Light> MakeSharedLight(const Light& data)
         {
@@ -172,13 +200,17 @@ namespace gfx
         {
             return std::make_shared<Light>(std::move(light));
         }
-
     private:
-        std::string mName;
+        std::string mProgramName;
+        std::string mRendererName;
         std::vector<std::shared_ptr<const Light>> mLights;
         glm::vec3 mCameraCenter = {0.0f, 0.0f, 0.0f};
         gfx::Color4f mBloomColor;
         float mBloomThreshold = 0.0f;
+        float mShadowMapWidth = 1024.0f;
+        float mShadowMapHeight = 1024.0f;
+        float mLightNearPlane = 1.0f;
+        float mLightFarPlane  = 10.0f;
         base::bitflag<ShadingFeatures> mShadingFeatures;
         base::bitflag<OutputFeatures> mOutputFeatures;
         Fog mFog;

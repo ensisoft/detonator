@@ -1208,7 +1208,6 @@ void Renderer::UpdateLightResources(const EntityType& entity, const EntityNodeTy
             light_node.light->constant_attenuation = light->GetConstantAttenuation();
             light_node.light->linear_attenuation = light->GetLinearAttenuation();
             light_node.light->quadratic_attenuation = light->GetQuadraticAttenuation();
-            light_node.light->direction = light->GetDirection();
             light_node.light->spot_half_angle = light->GetSpotHalfAngle();
         }
     }
@@ -1489,7 +1488,6 @@ void Renderer::CreateLightResources(const EntityType& entity, const EntityNodeTy
            light_node.light->constant_attenuation = light->GetConstantAttenuation();
            light_node.light->linear_attenuation = light->GetLinearAttenuation();
            light_node.light->quadratic_attenuation = light->GetQuadraticAttenuation();
-           light_node.light->direction = light->GetDirection();
            light_node.light->spot_half_angle = light->GetSpotHalfAngle();
        }
    }
@@ -1743,19 +1741,19 @@ void Renderer::CreateLights(const EntityType& entity,
 
     const auto add_dimetric_transform = projection == SceneProjection::Dimetric;
 
-    gfx::Transform transform;
-    transform.Scale(light_node.world_scale);
-    transform.RotateAroundZ(light_node.world_rotation);
-    transform.Translate(light_node.world_pos);
+    gfx::Transform light_to_world;
+    light_to_world.Scale(light_node.world_scale);
+    light_to_world.RotateAroundZ(light_node.world_rotation);
+    light_to_world.Translate(light_node.world_pos);
 
     if (add_dimetric_transform)
     {
-        transform.Push(CreateModelMatrix(GameView::AxisAligned));
-        transform.Push(CreateModelMatrix(GameView::Dimetric));
+        light_to_world.Push(CreateModelMatrix(GameView::AxisAligned));
+        light_to_world.Push(CreateModelMatrix(GameView::Dimetric));
     }
 
-    transform.Push();
-         transform.Translate(node_light->GetTranslation());
+    light_to_world.Push();
+         light_to_world.Translate(node_light->GetTranslation());
 
     auto map_sort_point = glm::vec2 {0.5f, 1.0f};
     auto map_layer      = std::uint16_t(0);
@@ -1767,25 +1765,28 @@ void Renderer::CreateLights(const EntityType& entity,
         map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
     }
 
-    const auto& model_view_scene  = CreateModelViewMatrix(GameView::AxisAligned,
+    const auto& light_to_view  = CreateModelViewMatrix(GameView::AxisAligned,
         settings.camera.position,
         settings.camera.scale, settings.camera.rotation);
 
-    const auto& light_direction = glm::vec4(node_light->GetDirection(), 0.0f);
+    const auto& light_direction = node_light->GetDirection();
+    const auto& light_position  = glm::vec3(0.0f, 0.0f, 0.0f);
 
     auto light_copy = std::make_shared<gfx::BasicLight>(*light_node.light);
-    light_copy->position = model_view_scene * transform * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    light_copy->direction = model_view_scene * transform * light_direction;
+    light_copy->world_direction = math::TransformDirection(light_to_world, light_direction);
+    light_copy->world_position  = math::TransformPosition(light_to_world, light_position);
+    light_copy->view_direction  = math::TransformDirection(light_to_view * light_to_world, light_direction);
+    light_copy->view_position   = math::TransformPosition(light_to_view * light_to_world, light_position);
 
     // todo: should we use the light map sort key somewhere?
 
     Light light;
     light.light        = std::move(light_copy);
-    light.transform    = transform;
+    light.transform    = light_to_world;
     light.render_layer = entity.GetRenderLayer();
     light.map_layer    = map_layer;
     light.packet_index = node_light->GetLayer();
-    light.sort_point   = transform * glm::vec4{map_sort_point, 0.0f, 1.0};
+    light.sort_point   = light_to_world * glm::vec4{map_sort_point, 0.0f, 1.0};
     lights.push_back(std::move(light));
 }
 
