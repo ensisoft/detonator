@@ -48,6 +48,7 @@ namespace gfx
     enum class RenderPass {
         ColorPass,
         StencilPass,
+        ShadowMapPass
     };
 
     // Text alignment inside a rect

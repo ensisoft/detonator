@@ -30,6 +30,7 @@
 
 #include "base/assert.h"
 #include "base/types.h"
+#include "base/math.h"
 #include "graphics/enum.h"
 #include "graphics/color4f.h"
 
@@ -54,11 +55,16 @@ namespace gfx
         BasicLightType type = BasicLightType::Ambient;
         // lights position in view space. in other words the
         // result of transforming the light with the light's model
-        // view matrix.
-        glm::vec3 position = {0.0f, 0.0f, 0.0f};
+        // view matrix. This is used to compute the actual light
+        // and material interaction.
+        glm::vec3 view_position = {0.0f, 0.0f, 0.0f};
+        glm::vec3 world_position = {0.0f, 0.0f, 0.0f};
         // light's direction vector that applies to spot and
-        // directional lights.
-        glm::vec3 direction = {0.0f, 0.0f, -1.0f};
+        // directional lights. the direction vector should also
+        // be expressed in the view space.
+        glm::vec3 view_direction = {0.0f, 0.0f, -1.0f};
+        glm::vec3 world_direction = {0.0f, 0.0f, -1.0f};
+
         gfx::Color4f ambient_color;
         gfx::Color4f diffuse_color;
         gfx::Color4f specular_color;
@@ -66,6 +72,10 @@ namespace gfx
         float constant_attenuation = 1.0f;
         float linear_attenuation = 0.0f;
         float quadratic_attenuation = 0.0f;
+
+        // for the shadow map projection.
+        float near_plane = 1.0f;
+        float far_plane  = 100.0f;
     };
 
     struct BasicFog {

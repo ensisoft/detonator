@@ -25,6 +25,7 @@
 #include <string>
 #include <memory>
 
+#include "texture.h"
 #include "graphics/bitmap.h"
 
 namespace gfx
@@ -73,7 +74,19 @@ enum class FlipDirection {
 };
 void FlipTexture(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device, FlipDirection direction);
 
-std::unique_ptr<IBitmap> ReadTexture(const gfx::Texture* texture, gfx::Device* device);
+std::unique_ptr<IBitmap> ReadColorTexture(const gfx::Texture* texture, gfx::Device* device);
+
+// Read the depth buffer when the depth values are produced by an
+// orthographic projection matrix. In other words assume that the
+// depth buffer values are simply linear.
+std::unique_ptr<IBitmap> ReadOrthographicDepthTexture(const Texture* texture, Device* device);
+
+// Read the depth buffer when the depth values are non-linear and
+// produced by a perspective matrix that scales the depth values
+// non-uniformly in order to have better range for objects far away.
+// This type of depth values are produced typically by perspective
+// projection matrices
+std::unique_ptr<IBitmap> ReadPerspectiveDepthTexture(const Texture* texture, Device* device, float near, float far);
 
 void ClearTexture(gfx::Texture* texture, gfx::Device* device, const gfx::Color4f& clear_color);
 

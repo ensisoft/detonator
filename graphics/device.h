@@ -138,6 +138,7 @@ namespace gfx
         virtual InstancedDrawPtr FindInstancedDraw(const std::string& id) = 0;
         virtual InstancedDrawPtr CreateInstancedDraw(const std::string& id, InstancedDraw::CreateArgs args) = 0;
         virtual Texture* FindTexture(const std::string& name) = 0;
+        virtual const Texture* FindTexture(const std::string& name) const = 0;
         virtual Texture* MakeTexture(const std::string& name) = 0;
         virtual Framebuffer* FindFramebuffer(const std::string& name) = 0;
         virtual Framebuffer* MakeFramebuffer(const std::string& name) = 0;

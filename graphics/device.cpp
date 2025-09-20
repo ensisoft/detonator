@@ -69,6 +69,8 @@ public:
     gfx::Framebuffer* FindFramebuffer(const std::string& name) override;
     gfx::Framebuffer* MakeFramebuffer(const std::string& name) override;
 
+    const gfx::Texture* FindTexture(const std::string& name) const override;
+
     void DeleteShaders() override;
     void DeletePrograms() override;
     void DeleteGeometries() override;
@@ -320,6 +322,15 @@ gfx::Framebuffer* GraphicsDevice::MakeFramebuffer(const std::string& name)
     auto* ret = fbo.get();
     mFBOs[name] = std::move(fbo);
     return ret;
+}
+
+const gfx::Texture* GraphicsDevice::FindTexture(const std::string& name) const
+{
+    auto it = mTextures.find(name);
+    if (it == std::end(mTextures))
+        return nullptr;
+
+    return it->second.get();
 }
 
 void GraphicsDevice::DeleteShaders()

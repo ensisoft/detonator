@@ -3117,11 +3117,11 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
             gfx::BasicLightProgram program;
             gfx::BasicLightProgram::Light light;
             light.type = gfx::BasicLightProgram::LightType::Directional;
-            light.position = glm::vec3 { 0.0f, size, -size*0.5f };
+            light.view_position = glm::vec3 { 0.0f, size, -size*0.5f };
+            light.view_direction = glm::vec3 { 0.0f, -1.0f, 0.0f };
             light.ambient_color = gfx::Color4f(gfx::Color::White) * 0.5f;
             light.diffuse_color = gfx::Color4f(gfx::Color::White) * 1.0f;
             light.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
-            light.direction = glm::vec3 { 0.0f, -1.0f, 0.0f };
             light.quadratic_attenuation = 0.00005;
             light.spot_half_angle = gfx::FDegrees(35.0f);
             program.AddLight(light);
@@ -3214,11 +3214,11 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
             gfx::BasicLightProgram program;
             gfx::BasicLightProgram::Light light;
             light.type = gfx::BasicLightProgram::LightType::Point;
-            light.position = light_position;
+            light.view_position = light_position;
+            light.view_direction = glm::vec3 { 0.0f, 1.0f, 0.0f };
             light.ambient_color = gfx::Color4f(gfx::Color::White) * 0.5f;
             light.diffuse_color = gfx::Color4f(gfx::Color::White) * 1.0f;
             light.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
-            light.direction = glm::vec3 { 0.0f, 1.0f, 0.0f };
             light.quadratic_attenuation = 0.00005;
             light.spot_half_angle = gfx::FDegrees(35.0f);
             program.AddLight(light);

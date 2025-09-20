@@ -71,6 +71,8 @@
 
 #include "base/snafu.h"
 
+#undef far
+
 class GraphicsTest
 {
 public:
@@ -3635,8 +3637,8 @@ public:
             light.ambient_color  = gfx::Color4f(gfx::Color::Red) * 0.5;
             light.diffuse_color  = gfx::Color4f(gfx::Color::Black);
             light.specular_color = gfx::Color4f(gfx::Color::Black);
-            light.position  = light_pos;
-            light.direction = mLightDirection;
+            light.view_position  = light_pos;
+            light.view_direction = glm::normalize(mLightDirection);
             light.quadratic_attenuation = 0.005f;
             light.spot_half_angle = mLightHalfAngle;
             program.AddLight(light);
@@ -3657,8 +3659,8 @@ public:
             light.ambient_color  = gfx::Color4f(gfx::Color::Black);
             light.diffuse_color  = gfx::Color4f(gfx::Color::Green);
             light.specular_color = gfx::Color4f(gfx::Color::Black);
-            light.position  = light_pos;
-            light.direction = mLightDirection;
+            light.view_position  = light_pos;
+            light.view_direction = glm::normalize(mLightDirection);
             light.quadratic_attenuation = 0.005f;
             light.spot_half_angle = mLightHalfAngle;
             program.AddLight(light);
@@ -3680,8 +3682,8 @@ public:
             light.ambient_color  = gfx::Color4f(gfx::Color::Black);
             light.diffuse_color  = gfx::Color4f(gfx::Color::Black);
             light.specular_color = gfx::Color4f(gfx::Color::Blue);
-            light.position  = light_pos;
-            light.direction = mLightDirection;
+            light.view_position  = light_pos;
+            light.view_direction = glm::normalize(mLightDirection);
             light.quadratic_attenuation = 0.005f;
             light.spot_half_angle = mLightHalfAngle;
             program.AddLight(light);
@@ -3703,8 +3705,8 @@ public:
             light.ambient_color  = gfx::Color4f(gfx::Color::DarkGray) * 0.5f;
             light.diffuse_color  = gfx::Color4f(gfx::Color::LightGray) * 0.8;
             light.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
-            light.position  = light_pos;
-            light.direction = mLightDirection;
+            light.view_position  = light_pos;
+            light.view_direction = glm::normalize(mLightDirection);
             light.quadratic_attenuation = 0.005f;
             light.spot_half_angle = mLightHalfAngle;
             program.AddLight(light);
@@ -3802,8 +3804,8 @@ public:
         light.ambient_color  = gfx::Color4f(gfx::Color::White) * 0.33f;
         light.diffuse_color  = gfx::Color4f(gfx::Color::White) * 1.0f;
         light.specular_color = gfx::Color4f(gfx::Color::White) * 0.8;
-        light.position  = glm::vec3 {x, y, -10.0f};
-        light.direction = glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - glm::vec3(x, y, 0.0f));
+        light.view_position  = glm::vec3 {x, y, -10.0f};
+        light.view_direction = glm::normalize(glm::vec3(0.0f, 0.0f, 0.0f) - glm::vec3(x, y, 0.0f));
         light.quadratic_attenuation = 0.005f;
         light.spot_half_angle = gfx::FDegrees{30.0f};
         program.AddLight(light);
@@ -3820,7 +3822,7 @@ public:
         {
             gfx::Transform transform;
             transform.Resize(0.2f, 0.2f, 0.2f);
-            transform.MoveTo(light.position);
+            transform.MoveTo(light.view_position);
             p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::White));
         }
     }
@@ -3884,6 +3886,161 @@ private:
     unsigned mLightIndex = 0;
 };
 
+class BasicShadowMapTest : public GraphicsTest
+{
+public:
+    using LightType = gfx::BasicLightProgram::LightType;
+
+    explicit BasicShadowMapTest(LightType light) noexcept
+        : mLightType(light)
+    {}
+    void Render(gfx::Painter& painter) override
+    {
+        constexpr auto aspect = 1024.0 / 768.0f;
+
+        const float t = std::sin(mTime * 0.4) * 0.5 + 0.5;
+        const auto x = std::cos(math::Circle * t);
+        const auto y = std::sin(math::Circle * t);
+
+        gfx::Painter::DrawState state;
+        state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
+        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.write_color  = true;
+
+        glm::mat4 view;
+
+        gfx::Painter p(painter);
+        p.ResetViewMatrix();
+        p.SetProjectionMatrix(gfx::MakePerspectiveProjection(gfx::FDegrees { 45.0f }, aspect, 1.0f, 100.0f));
+
+        {
+            const auto a = mTime / math::Pi;
+            const auto x = std::cos(a);
+            const auto y = std::sin(a);
+            const auto t = y * 0.5 + 0.5f;
+            const auto cam_pos = glm::vec3(x*10.0f, 3.0f, y*10.0f);
+            view = glm::lookAt(cam_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            p.SetViewMatrix(view);
+        }
+
+        gfx::BasicLightProgram program("test");
+        program.EnableFeature(gfx::BasicLightProgram::ShadingFeatures::BasicLight, true);
+        program.EnableFeature(gfx::BasicLightProgram::ShadingFeatures::BasicShadows, mEnableShadows);
+        program.SetShadowMapSize(1024*2, 768*2);
+
+        auto light_world_position  = glm::vec3 {x*1.5f, 3.0f, y*1.5f }; //glm::vec3 {x, y, -10.0f};
+        auto light_world_direction = glm::vec3 {0.0f, -1.0f, 0.0f};
+
+        gfx::BasicLightProgram::Light light;
+        light.type = mLightType;
+        light.ambient_color  = gfx::Color4f(gfx::Color::DarkGray) * 0.5f;
+        light.diffuse_color  = gfx::Color4f(gfx::Color::LightGray) * 0.8f;
+        light.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
+        light.view_position  = math::TransformPosition(view, light_world_position);
+        light.view_direction = math::TransformDirection(view, light_world_direction);
+        light.world_direction = light_world_direction;
+        light.world_position  = light_world_position;
+        light.quadratic_attenuation = 0.005f;
+        light.spot_half_angle = gfx::FDegrees{30.0f};
+        light.far_plane = 10.0f;
+        program.AddLight(light);
+
+        gfx::Transform cube_transform;
+        cube_transform.Resize(2.0f, 2.0f, 2.0f);
+        //cube_transform.RotateAroundY(std::sin(t));
+        //cube_transform.RotateAroundX(std::cos(t));
+        cube_transform.Translate(0.0f, -1.0f, 0.0f);
+
+        gfx::Transform plane_transform;
+        plane_transform.Resize(10.0f, 10.0f, 1.0f);
+        plane_transform.RotateAroundX(gfx::FDegrees(-90.0f));
+        plane_transform.Translate(0.0f, -3.0f, 0.0f);
+        plane_transform.Push();
+          plane_transform.Translate(-0.5f, -0.5f);
+          plane_transform.RotateAroundX(gfx::FDegrees(180.0f));
+
+        const auto& cube_material = gfx::CreateMaterialFromColor(gfx::Color::DarkGreen);
+        const auto& plane_material = gfx::CreateMaterialFromColor(gfx::Color::White);
+
+        gfx::ShadowMapRenderPass shadow_pass("test", program, painter.GetDevice());
+        shadow_pass.InitState();
+        shadow_pass.Draw(gfx::Sphere(), cube_material, cube_transform);
+        shadow_pass.Draw(gfx::Rectangle(), plane_material, plane_transform);
+
+        if (mWriteMaps)
+        {
+            auto* device = painter.GetDevice();
+            const auto* depth_texture = shadow_pass.GetDepthTexture(0);
+            const auto light_projection = shadow_pass.GetLightProjectionType(0);
+            if (light_projection == gfx::ShadowMapRenderPass::LightProjectionType::Orthographic)
+            {
+                auto bitmap = gfx::algo::ReadOrthographicDepthTexture(depth_texture, device);
+                gfx::WritePNG(*bitmap, "depth-texture-light0.png");
+            }
+            else if (light_projection == gfx::ShadowMapRenderPass::LightProjectionType::Perspective)
+            {
+                const auto near = shadow_pass.GetLightProjectionNearPlane(0);
+                const auto far  = shadow_pass.GetLightProjectionFarPlane(0);
+                auto bitmap = gfx::algo::ReadPerspectiveDepthTexture(depth_texture, device, near, far);
+                gfx::WritePNG(*bitmap, "depth-texture-light0.png");
+            }
+            mWriteMaps = false;
+        }
+
+
+        if (mShowLightView)
+            p.SetViewMatrix(shadow_pass.GetLightViewMatrix(0));
+
+        p.Draw(gfx::Sphere(), cube_transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), state, program);
+        p.Draw(gfx::Rectangle(), plane_transform, gfx::CreateMaterialFromColor(gfx::Color::White), state, program);
+
+        if (mLightType == LightType::Point || mLightType == LightType::Spot)
+        {
+            gfx::Transform transform;
+            transform.Resize(0.2f, 0.2f, 0.2f);
+            transform.MoveTo(light_world_position);
+            p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::White));
+        }
+    }
+
+    std::string GetName() const override
+    {
+        return base::FormatString("Basic%1ShadowMapTest", mLightType);
+    }
+    void Start() override
+    {
+        mTime = 0.0f;
+    }
+    void Update(float dt) override
+    {
+        mTime += dt;
+    }
+    void KeyDown(const wdk::WindowEventKeyDown& key) override
+    {
+        if (key.symbol == wdk::Keysym::Space)
+        {
+            ++mLightIndex;
+
+            const auto light_index = mLightIndex % 4;
+            mLightType = static_cast<LightType>(light_index);
+            INFO("Light type changed to '%1'", mLightType);
+        }
+        else if (key.symbol == wdk::Keysym::KeyQ)
+            mWriteMaps = true;
+        else if (key.symbol == wdk::Keysym::KeyW)
+            mShowLightView = !mShowLightView;
+        else if (key.symbol == wdk::Keysym::KeyS)
+            mEnableShadows = !mEnableShadows;
+    }
+private:
+    LightType mLightType = LightType::Point;
+    float mTime = 0.0f;
+    unsigned mLightIndex = 0;
+    bool mWriteMaps = false;
+    bool mShowLightView = false;
+    bool mEnableShadows = true;
+};
+
 class BasicLightNormalMapMaterialTest : public GraphicsTest
 {
 public:
@@ -3916,8 +4073,8 @@ public:
         light.ambient_color = gfx::Color4f(gfx::Color::White) * 0.25;
         light.diffuse_color = gfx::Color4f(gfx::Color::White) * 1.0f;
         light.specular_color = gfx::Color4f(gfx::Color::White) * 0.3f;
-        light.position = glm::vec3{x, y, -7.0f};
-        light.direction = glm::normalize(glm::vec3(0.0f, 0.0f, -10.0f) - glm::vec3(x, y, -7.0f));
+        light.view_position = glm::vec3{x, y, -7.0f};
+        light.view_direction = glm::normalize(glm::vec3(0.0f, 0.0f, -10.0f) - glm::vec3(x, y, -7.0f));
         light.quadratic_attenuation = 0.0005f;
         light.spot_half_angle = mLightHalfAngle;
         program.AddLight(light);
@@ -3941,7 +4098,7 @@ public:
         {
             gfx::Transform transform;
             transform.Resize(0.2f, 0.2f, 0.2f);
-            transform.MoveTo(light.position);
+            transform.MoveTo(light.view_position);
             p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::White));
         }
     }
@@ -4258,6 +4415,10 @@ int main(int argc, char* argv[])
         tests.emplace_back(new BasicFog3DTest(BasicFog3DTest::FogMode::Linear));
         tests.emplace_back(new BasicFog3DTest(BasicFog3DTest::FogMode::Exponential1));
         tests.emplace_back(new BasicFog3DTest(BasicFog3DTest::FogMode::Exponential2));
+
+        tests.emplace_back(new BasicShadowMapTest(BasicShadowMapTest::LightType::Directional));
+        tests.emplace_back(new BasicShadowMapTest(BasicShadowMapTest::LightType::Spot));
+        tests.emplace_back(new BasicShadowMapTest(BasicShadowMapTest::LightType::Point));
     }
 
     bool stop_for_input = false;

@@ -14,26 +14,51 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "generic_shader_program.h"
+
 #include "config.h"
 
 #include <cstddef>
 
 #include "base/logging.h"
 #include "base/utility.h"
+#include "base/format.h"
 #include "graphics/enum.h"
 #include "graphics/shader_source.h"
 #include "graphics/generic_shader_program.h"
 
+#include "renderpass.h"
+
+namespace {
+    enum class LightingFlags : uint32_t {
+        EnableShadows = 0x1
+    };
+}
 namespace gfx
 {
 
 std::string GenericShaderProgram::GetShaderId(const Material& material, const Material::Environment& env) const
 {
     std::string id;
-    id += TestFeature(ShadingFeatures::BasicLight) ? "Lit:yes" : "Lit:no";
-    id += TestFeature(ShadingFeatures::BasicFog)   ? "Fog:Yes" : "Fog:no";
-    id += TestFeature(OutputFeatures::WriteBloomTarget) ? "Bloom:yes" : "Bloom:no";
-    id += TestFeature(OutputFeatures::WriteColorTarget) ? "Color:yes" : "Color:no";
+    id += "Pass:";
+    id += base::ToString(env.render_pass);
+    if (env.render_pass == RenderPass::ColorPass)
+    {
+        id += "Lit";
+        id += TestFeature(ShadingFeatures::BasicLight) ? "yes": "no";
+        id += "Fog";
+        id += TestFeature(ShadingFeatures::BasicFog)   ? "yes" : "no";
+        id += "Bloom:";
+        id += TestFeature(OutputFeatures::WriteBloomTarget) ? "yes" : "no";
+        id += "Color:";
+        id += TestFeature(OutputFeatures::WriteColorTarget) ? "yes" : "no";
+    }
+    else if (env.render_pass == RenderPass::StencilPass)
+    {
+        // todo: see below do we need this??
+        id += "Color:";
+        id += TestFeature(OutputFeatures::WriteColorTarget) ? "yes" : "no";
+    }
     id += "Material:";
     id += material.GetShaderId(env);
     return id;
@@ -41,8 +66,15 @@ std::string GenericShaderProgram::GetShaderId(const Material& material, const Ma
 std::string GenericShaderProgram::GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const
 {
     std::string id;
-    id += TestFeature(ShadingFeatures::BasicLight) ? "Lit:yes" : "Lit:no";
-    id += TestFeature(ShadingFeatures::BasicFog)   ? "Fog:yes" : "Fog:no";
+    id += "Pass:";
+    id += base::ToString(env.render_pass);
+    if (env.render_pass == RenderPass::ColorPass)
+    {
+        id += "Lit:";
+        id += TestFeature(ShadingFeatures::BasicLight) ? "yes" : "no";
+        id += "Fog:";
+        id += TestFeature(ShadingFeatures::BasicFog)   ? "yes" : "no";
+    }
     id += "Drawable:";
     id += drawable.GetShaderId(env);
     return id;
@@ -88,31 +120,46 @@ ShaderSource GenericShaderProgram::GetShader(const Material& material, const Mat
     source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_DIRECTIONAL", static_cast<unsigned>(LightType::Directional));
     source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_SPOT",        static_cast<unsigned>(LightType::Spot));
     source.AddPreprocessorDefinition("BASIC_LIGHT_TYPE_POINT",       static_cast<unsigned>(LightType::Point));
+    source.AddPreprocessorDefinition("BASIC_LIGHTING_FLAGS_ENABLE_SHADOWS",    static_cast<unsigned>(LightingFlags::EnableShadows));
 
     source.AddPreprocessorDefinition("BASIC_FOG_MODE_LINEAR", static_cast<unsigned>(FogMode::Linear));
     source.AddPreprocessorDefinition("BASIC_FOG_MODE_EXP1", static_cast<unsigned>(FogMode::Exponential1));
     source.AddPreprocessorDefinition("BASIC_FOG_MODE_EXP2", static_cast<unsigned>(FogMode::Exponential2));
 
-    if (TestFeature(ShadingFeatures::BasicLight))
+    if (env.render_pass == RenderPass::ColorPass)
     {
-        source.AddPreprocessorDefinition("ENABLE_BASIC_LIGHT");
-        source.LoadRawSource(basic_light);
-        source.AddShaderSourceUri("shaders/basic_light.glsl");
-    }
-    if (TestFeature(ShadingFeatures::BasicFog))
-    {
-        source.AddPreprocessorDefinition("ENABLE_BASIC_FOG");
-        source.LoadRawSource(basic_fog);
-        source.AddShaderSourceUri("shaders/basic_fog.glsl");
-    }
+        if (TestFeature(ShadingFeatures::BasicLight))
+        {
+            source.AddPreprocessorDefinition("ENABLE_BASIC_LIGHT");
+            source.LoadRawSource(basic_light);
+            source.AddShaderSourceUri("shaders/basic_light.glsl");
+        }
+        if (TestFeature(ShadingFeatures::BasicFog))
+        {
+            source.AddPreprocessorDefinition("ENABLE_BASIC_FOG");
+            source.LoadRawSource(basic_fog);
+            source.AddShaderSourceUri("shaders/basic_fog.glsl");
+        }
 
-    if (TestFeature(OutputFeatures::WriteBloomTarget))
-    {
-        source.AddPreprocessorDefinition("ENABLE_BLOOM_OUT");
+        if (TestFeature(OutputFeatures::WriteBloomTarget))
+            source.AddPreprocessorDefinition("ENABLE_BLOOM_OUT");
+        if (TestFeature(OutputFeatures::WriteColorTarget))
+            source.AddPreprocessorDefinition("ENABLE_COLOR_OUT");
+
+        source.AddPreprocessorDefinition("FRAGMENT_SHADER_MAIN_RENDER_PASS");
     }
-    if (TestFeature(OutputFeatures::WriteColorTarget))
+    else if (env.render_pass == RenderPass::StencilPass)
     {
-        source.AddPreprocessorDefinition("ENABLE_COLOR_OUT");
+        // todo: probably should not need this?? if we're doing stencil
+        // pass then we dont need to write to color target actually..
+        if (TestFeature(OutputFeatures::WriteColorTarget))
+            source.AddPreprocessorDefinition("ENABLE_COLOR_OUT");
+
+        source.AddPreprocessorDefinition("FRAGMENT_SHADER_STENCIL_MASK_RENDER_PASS");
+    }
+    else if (env.render_pass == RenderPass::ShadowMapPass)
+    {
+        source.AddPreprocessorDefinition("FRAGMENT_SHADER_SHADOW_MAP_RENDER_PASS");
     }
 
     source.LoadRawSource(utility_func);
@@ -140,13 +187,23 @@ ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Dra
         ERROR("Non supported GLSL version. Version must be 300 es. [shader='%1']", source.GetShaderName());
         return {};
     }
-    if (TestFeature(ShadingFeatures::BasicLight))
+
+    if (env.render_pass == RenderPass::ColorPass)
     {
-        source.AddPreprocessorDefinition("ENABLE_BASIC_LIGHT");
+        source.AddPreprocessorDefinition("VERTEX_SHADER_MAIN_RENDER_PASS");
+
+        if (TestFeature(ShadingFeatures::BasicLight))
+            source.AddPreprocessorDefinition("ENABLE_BASIC_LIGHT");
+        if (TestFeature(ShadingFeatures::BasicFog))
+            source.AddPreprocessorDefinition("ENABLE_BASIC_FOG");
     }
-    if (TestFeature(ShadingFeatures::BasicFog))
+    else if (env.render_pass == RenderPass::ShadowMapPass)
     {
-        source.AddPreprocessorDefinition("ENABLE_BASIC_FOG");
+        source.AddPreprocessorDefinition("VERTEX_SHADER_SHADOW_MAP_RENDER_PASS");
+    }
+    else if (env.render_pass == RenderPass::StencilPass)
+    {
+        source.AddPreprocessorDefinition("VERTEX_SHADER_STENCIL_MASK_RENDER_PASS");
     }
 
     source.LoadRawSource(vertex_main);
@@ -190,24 +247,26 @@ void GenericShaderProgram::ApplyLightState(const Device& device, ProgramState& p
         uint32_t type;
         float padding[1];
     };
-    static_assert((sizeof(Light) % 16) == 0);
-
     struct LightArrayUniformBlock {
         Light lights[MAX_LIGHTS];
         Vec3 camera_center;
         uint32_t light_count;
-        float padding1_[1];
+        uint32_t flags;
     };
-
+#pragma pack(pop)
+    static_assert((sizeof(Light) % 16) == 0);
     static_assert((offsetof(LightArrayUniformBlock, camera_center) % 16) == 0,
                   "incorrect std140 layout");
 
-#pragma pack(pop)
+    uint32_t lighting_flags = 0;
+    if (TestFeature(ShadingFeatures::BasicShadows))
+        lighting_flags |= static_cast<uint32_t>(LightingFlags::EnableShadows);
 
     UniformBlockData<LightArrayUniformBlock> data;
     data.Resize(1);
     data[0].light_count   = light_count;
     data[0].camera_center = ToVec(mCameraCenter);
+    data[0].flags         = lighting_flags;
 
     for (unsigned i=0; i<light_count; ++i)
     {
@@ -215,8 +274,8 @@ void GenericShaderProgram::ApplyLightState(const Device& device, ProgramState& p
         data[0].lights[i].diffuse_color  = ToVec(light->diffuse_color);
         data[0].lights[i].ambient_color  = ToVec(light->ambient_color);
         data[0].lights[i].specular_color = ToVec(light->specular_color);
-        data[0].lights[i].direction = ToVec(glm::normalize(light->direction));
-        data[0].lights[i].position  = ToVec(light->position);
+        data[0].lights[i].direction      = ToVec(light->view_direction);
+        data[0].lights[i].position       = ToVec(light->view_position);
         data[0].lights[i].constant_attenuation  = light->constant_attenuation;
         data[0].lights[i].linear_attenuation    = light->linear_attenuation;
         data[0].lights[i].quadratic_attenuation = light->quadratic_attenuation;
@@ -224,6 +283,64 @@ void GenericShaderProgram::ApplyLightState(const Device& device, ProgramState& p
         data[0].lights[i].type = static_cast<int32_t>(light->type);
     }
     program.SetUniformBlock(UniformBlock("LightArray", std::move(data)));
+}
+
+void GenericShaderProgram::ApplyDynamicState(const Device &device, const Environment &env, ProgramState &program, Device::RasterState &state, void *user) const
+{
+#pragma pack(push, 1)
+    struct LightTransform {
+        Vec4 vector0;
+        Vec4 vector1;
+        Vec4 vector2;
+        Vec4 vector3;
+    };
+    struct LightTransformUniformBlock {
+        LightTransform transforms[MAX_LIGHTS];
+    };
+#pragma pack(pop)
+    static_assert((sizeof(LightTransform) % 16) == 0);
+
+    if (env.render_pass == RenderPass::ColorPass &&
+        TestFeature(ShadingFeatures::BasicLight) &&
+        TestFeature(ShadingFeatures::BasicShadows))
+    {
+        const auto light_count = std::min(MAX_LIGHTS, static_cast<int>(mLights.size()));
+
+        UniformBlockData<LightTransformUniformBlock> data;
+        data.Resize(1);
+
+        const auto& view_to_world = glm::inverse(*env.view_matrix);
+
+        const auto sampler_count = program.GetSamplerCount();
+        const auto texture_count = program.GetTextureCount();
+
+        // for each light create a transformation matrix that will transform a
+        // a coordinate from view space to the light coordinate space for
+        // shadow mapping.
+        for (unsigned light_index=0; light_index<light_count; ++light_index)
+        {
+            const auto& light = mLights[light_index];
+            if (light->type == BasicLightType::Ambient)
+                continue;
+
+            const auto& world_to_light = GetLightViewMatrix(light_index);
+            const auto& light_projection = GetLightProjectionMatrix(light_index);
+            const auto& view_to_light = world_to_light * view_to_world;
+            const auto& light_to_map  =  light_projection * view_to_light;
+            data[0].transforms[light_index].vector0 = ToVec(light_to_map[0]);
+            data[0].transforms[light_index].vector1 = ToVec(light_to_map[1]);
+            data[0].transforms[light_index].vector2 = ToVec(light_to_map[2]);
+            data[0].transforms[light_index].vector3 = ToVec(light_to_map[3]);
+
+            const auto* shadow_map = GetLightShadowMap(device, light_index);
+            ASSERT(shadow_map);
+            const auto sampler_name  = "kShadowMap" + std::to_string(light_index);
+            const auto sampler_index = sampler_count + light_index;
+            program.SetTexture(sampler_name.c_str(), sampler_index, *shadow_map);
+        }
+        program.SetUniformBlock(UniformBlock("LightTransformArray", std::move(data)));
+        program.SetTextureCount(texture_count + light_count);
+    }
 }
 
 void GenericShaderProgram::ApplyFogState(const Device& device, ProgramState& program) const
@@ -251,7 +368,67 @@ void GenericShaderProgram::ApplyFogState(const Device& device, ProgramState& pro
     data[0].end_depth   = mFog.end_depth;
     data[0].mode  = static_cast<uint32_t>(mFog.mode);
     program.SetUniformBlock(UniformBlock("FogData", std::move(data)));
+}
 
+glm::mat4 GenericShaderProgram::GetLightViewMatrix(unsigned light_index) const
+{
+    const auto& light = *mLights[light_index];
+
+    // remember that when using glm::lookAt if the view direction (the direction
+    // the camera is pointed at) is collinear with the "up" vector the math breaks
+    // so we need to choose a different basis vector for the lookAt to use in order
+    // to compute its cross product.
+    glm::vec3 reference = glm::vec3(0.0f, 1.0f, 0.0f);
+    if (std::abs(glm::dot(light.world_direction, reference)) > 0.99f)
+        reference = glm::vec3(1.0f, 0.0f, 0.0f); // go with god.. no I mean with x axis
+
+    const auto world_to_light = glm::lookAt(light.world_position,
+        light.world_position + light.world_direction * 1.0f, reference);
+    return world_to_light;
+}
+
+glm::mat4 GenericShaderProgram::GetLightProjectionMatrix(unsigned light_index) const
+{
+    const auto light = mLights[light_index];
+    const auto near_plane = light->near_plane;
+    const auto far_plane  = light->far_plane;
+    const auto aspect = float(mShadowMapWidth) /  float(mShadowMapHeight);
+
+    if (light->type == BasicLightType::Directional)
+        return glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    else if (light->type == BasicLightType::Point)
+        return glm::perspective(glm::radians(65.0f),  aspect, near_plane, far_plane);
+    else if (light->type == BasicLightType::Spot)
+        return glm::perspective(glm::radians(65.0f),  aspect, near_plane, far_plane);
+    else BUG("Bug on light projection.");
+}
+
+GenericShaderProgram::LightProjectionType GenericShaderProgram::GetLightProjectionType(unsigned light_index) const
+{
+    const auto& light = mLights[light_index];
+    if (light->type == BasicLightType::Ambient)
+        return LightProjectionType::Invalid;
+    else if (light->type == BasicLightType::Directional)
+        return LightProjectionType::Orthographic;
+    else if (light->type == BasicLightType::Point)
+        return LightProjectionType::Perspective;
+    else if (light->type == BasicLightType::Spot)
+        return LightProjectionType::Perspective;
+    BUG("Bug on light projection type.");
+}
+
+const Texture* GenericShaderProgram::GetLightShadowMap(const Device& device, unsigned light_index) const
+{
+    return device.FindTexture(mRendererName + "/ShadowMap" + std::to_string(light_index));
+}
+
+float GenericShaderProgram::GetLightProjectionNearPlane(unsigned light_index) const
+{
+    return mLights[light_index]->near_plane;
+}
+float GenericShaderProgram::GetLightProjectionFarPlane(unsigned light_index) const
+{
+    return mLights[light_index]->far_plane;
 }
 
 } // namespace
