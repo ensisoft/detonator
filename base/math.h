@@ -442,41 +442,32 @@ namespace math
         return glm::eulerAngleZ(angle) * glm::vec4(vec.x, vec.y, 0.0f, 0.0f);
     }
 
-    // transform a direction vector (such as a normal) safely even if the
+    // transform a vector (such as a normal, or any direction vector) safely even if the
     // transformation matrix contains a non-uniform scale.
-    inline glm::vec3 TransformNormalVector(const glm::mat4& matrix, const glm::vec3& vector) noexcept
+    inline glm::vec3 TransformDirection(const glm::mat4& matrix, const glm::vec3& vector) noexcept
     {
-        const auto& normal_transform = glm::mat3(glm::transpose(glm::inverse(matrix)));
-        return normal_transform * vector;
+        const auto& normal_transform = glm::transpose(glm::inverse(glm::mat3(matrix)));
+        return glm::normalize(normal_transform * vector);
     }
-    inline glm::vec4 TransformNormalVector(const glm::mat4& matrix, const glm::vec4& vector) noexcept
+    inline glm::vec4 TransformDirection(const glm::mat4& matrix, const glm::vec4& vector) noexcept
     {
-        const auto& ret = TransformNormalVector(matrix, glm::vec3{vector.x, vector.y, vector.z});
+        const auto& ret = TransformDirection(matrix, glm::vec3{vector.x, vector.y, vector.z});
         return {ret.x, ret.y, ret.z, 0.0f};
     }
-
-    // transform a direction vector (such as a normal) safely even if the
-    // transformation matrix contains a non-uniform scale.
-    inline glm::vec2 TransformNormalVector(const glm::mat4& matrix, const glm::vec2& vector) noexcept
+    inline glm::vec2 TransformDirection(const glm::mat4& matrix, const glm::vec2& vector) noexcept
     {
-        return TransformNormalVector(matrix, glm::vec3(vector, 0.0f));
+        return TransformDirection(matrix, glm::vec3(vector, 0.0f));
     }
 
-    inline glm::vec4 TransformVector(const glm::mat4& matrix, const glm::vec4& vector) noexcept
-    {
-        return glm::normalize(matrix * glm::vec4(vector.x, vector.y, vector.z, 0.0f)); // disregard translation
-    }
-    inline glm::vec4 TransformVector(const glm::mat4& matrix, const glm::vec2& vector) noexcept
-    {
-        return glm::normalize(matrix * glm::vec4(vector.x, vector.y, 0.0f, 0.0f));
-    }
-
-    inline glm::vec4 TransformPoint(const glm::mat4& matrix, const glm::vec4& point) noexcept
+    inline glm::vec4 TransformPosition(const glm::mat4& matrix, const glm::vec4& point) noexcept
     {
         return matrix * point;
     }
-
-    inline glm::vec4 TransformPoint(const glm::mat4& matrix, const glm::vec2& point) noexcept
+    inline glm::vec3 TransformPosition(const glm::mat4& matrix, const glm::vec3& point) noexcept
+    {
+        return matrix * glm::vec4(point.x, point.y, point.z, 1.0);
+    }
+    inline glm::vec4 TransformPosition(const glm::mat4& matrix, const glm::vec2& point) noexcept
     {
         return matrix * glm::vec4(point.x, point.y, 0.0f, 1.0f);
     }
