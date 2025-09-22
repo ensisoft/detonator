@@ -4613,7 +4613,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             const auto& params = std::get<game::EntityClass::PrismaticJointParams>(joint.params);
 
             const auto& direction_vector_local = game::RotateVectorAroundZ(glm::vec2(1.0f, 0.0f), params.direction_angle.ToRadians());
-            const auto& direction_vector_world = game::TransformVector(mState.entity->FindNodeTransform(src_node), direction_vector_local);
+            const auto& direction_vector_world = game::TransformDirection(mState.entity->FindNodeTransform(src_node), direction_vector_local);
 
             DrawDot(entity_painter, src_anchor_point_world);
             DrawDir(entity_painter, src_anchor_point_world, game::FindVectorRotationAroundZ(direction_vector_world));

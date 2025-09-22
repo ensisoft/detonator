@@ -648,32 +648,32 @@ FBox Scene::FindEntityNodeBoundingBox(const Entity* entity, const EntityNode* no
 glm::vec2 Scene::MapVectorFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& vector) const
 {
     const auto& from_entity_to_world = FindEntityNodeTransform(entity, node);
-    return TransformVector(from_entity_to_world, vector);
+    return TransformDirection(from_entity_to_world, vector);
 }
 glm::vec3 Scene::MapVectorFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec3& vector) const
 {
     const auto& from_entity_to_world = FindEntityNodeTransform(entity, node);
-    return TransformVector(from_entity_to_world, vector);
+    return TransformDirection(from_entity_to_world, vector);
 }
 
 glm::vec2 Scene::MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& point) const
 {
     const auto& from_entity_to_world = FindEntityNodeTransform(entity, node);
-    return TransformPoint(from_entity_to_world, point);
+    return TransformPosition(from_entity_to_world, point);
 }
 
 glm::vec2 Scene::MapVectorToEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& vector) const
 {
     const auto& from_entity_to_world = FindEntityNodeTransform(entity, node);
     const auto& from_world_to_entity = glm::inverse(from_entity_to_world);
-    return TransformVector(from_world_to_entity, vector);
+    return TransformDirection(from_world_to_entity, vector);
 }
 
 glm::vec2 Scene::MapPointToEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& point) const
 {
     const auto& from_entity_to_world = FindEntityNodeTransform(entity, node);
     const auto& from_world_to_entity = glm::inverse(from_entity_to_world);
-    return TransformPoint(from_world_to_entity, point);
+    return TransformPosition(from_world_to_entity, point);
 }
 
 const ScriptVar* Scene::FindScriptVarByName(const std::string& name) const

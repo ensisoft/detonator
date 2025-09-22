@@ -35,9 +35,8 @@
 namespace game
 {
     using math::RotateVectorAroundZ;
-    using math::TransformNormalVector;
-    using math::TransformVector;
-    using math::TransformPoint;
+    using math::TransformDirection;
+    using math::TransformPosition;
     using math::FindVectorRotationAroundZ;
     using math::GetRotationFromMatrix;
     using math::GetScaleFromMatrix;
