@@ -265,6 +265,7 @@ public:
             texture_source->SetName("Detonator Logo");
 
             gfx::MaterialClass logo(gfx::MaterialClass::Type::Texture);
+            logo.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
             logo.SetTexture(std::move(texture_source));
 
             state->logo = gfx::CreateMaterialInstance(logo);
