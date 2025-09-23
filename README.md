@@ -4,8 +4,6 @@
 DETONATOR 2D 💣💥
 ===================
 
-<strong> 🚀 <i>Ignite creativity, explode possibilities.</i> 💥 </strong>
-
 
 An OpenGL ES3 based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
 as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time strategy and tactics 🗺️.
@@ -28,6 +26,7 @@ as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time 
   * <i>Multiple demo projects ready to run!</i>  
 * <b>Support for scripting and native game development</b> 🍌
   * <i>Write your game logic in Lua or in C++</i>
+  
 
 <details><summary><strong>Click here for more features...</strong></summary>
 
@@ -62,8 +61,22 @@ as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time 
   * Bitmap font mapper (map glyps to characters and vice versa)
   * SVG viewer and PNG exporter
   * VCS (Git) integration for syncing project changes to Git
+* Built-in tracing in the engine that produce performance traces related to game /engine perf.
+* Debug printing, logging, pause/step, screenshot
+* Quick play and preview mode with hot content reloading (save your asset and changes will apply)
+* Customizable previews (with Lua scripts)
+* Several included fonts and particle textures 
 
 </details>
+
+### LINKS
+
+<strong>FIND THE DEV BLOG ON ITCH.IO</strong><br>
+<strong>https://ensisoft.itch.io/detonator</strong>
+
+<strong>PLAY THE DEMOS ON GAMES123.NET</strong><br>
+<strong>https://games123.net</strong>
+
 
 ## GETTING STARTED 👈
 
@@ -94,6 +107,8 @@ then follow the [Build Instructions](BUILDING.md)
 ## SCREENSHOTS
 
 ![Demos](screens/detonator.png "Animated demo content GIF")
+<i>Scene editor with 'Steam Punk' editor skin</i> 
+
 
 <details><summary><strong>Click here for more screenshots...</strong></summary>
 <br>
