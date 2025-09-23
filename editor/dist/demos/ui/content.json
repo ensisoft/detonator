@@ -105,6 +105,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -174,6 +175,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -233,6 +235,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -292,6 +295,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -362,6 +366,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -421,6 +426,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -499,6 +505,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -564,6 +571,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -623,6 +631,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -693,6 +702,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -761,6 +771,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -820,6 +831,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -879,6 +891,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -938,6 +951,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -997,6 +1011,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": true,
         "Static": false
       },
@@ -1056,6 +1071,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -1126,6 +1142,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -1185,6 +1202,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -1308,7 +1326,8 @@
       "resource_id": "04w68bxEMa",
       "resource_name": "Fantasy Particle",
       "resource_ver": 2,
-      "shape": "Rectangle"
+      "shape": "Rectangle",
+      "warmup_time": 0.0
     }
   ],
   "scripts": [

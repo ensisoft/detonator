@@ -74,16 +74,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -97,9 +98,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -135,16 +133,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -158,9 +157,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -196,16 +192,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -219,9 +216,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -257,16 +251,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -280,9 +275,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -318,16 +310,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -341,9 +334,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -379,16 +369,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -411,9 +402,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -449,16 +437,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -481,9 +470,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -519,16 +505,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -547,9 +534,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -585,16 +569,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -617,9 +602,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -655,16 +637,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -687,9 +670,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -725,16 +705,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -757,9 +738,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -795,16 +773,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -818,9 +797,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -856,16 +832,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -879,9 +856,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -917,16 +891,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -949,9 +924,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -987,16 +959,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -1019,9 +992,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1057,16 +1027,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -1089,9 +1060,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -1127,16 +1095,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -1150,9 +1119,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -1264,16 +1230,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -1287,9 +1254,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -1456,16 +1420,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "RhslGRtQQR",
             "offset": {
               "x": 0.0,
@@ -1473,9 +1438,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1564,16 +1526,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "QR14nEb7T3",
             "offset": {
               "x": 0.0,
@@ -1581,9 +1544,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1693,16 +1653,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -1716,9 +1677,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -1754,16 +1712,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -1777,9 +1736,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1815,16 +1771,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -1838,9 +1795,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1929,16 +1883,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -1961,9 +1916,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -1999,16 +1951,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -2031,9 +1984,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -2069,16 +2019,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -2101,9 +2052,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -2139,16 +2087,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -2171,9 +2120,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -2209,16 +2155,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -2232,9 +2179,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -2270,16 +2214,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -2293,9 +2238,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -2331,16 +2273,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -2354,9 +2297,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -2392,16 +2332,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -2424,9 +2365,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2462,16 +2400,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -2494,9 +2433,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2532,16 +2468,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -2555,9 +2492,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -2717,16 +2651,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "OjjDopHnYW",
             "offset": {
               "x": 0.0,
@@ -2734,9 +2669,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -2839,16 +2771,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "gzjp7PwMQd",
             "offset": {
               "x": 0.0,
@@ -2856,9 +2789,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -2942,7 +2872,8 @@
                 "name": "",
                 "node": "WyKYhKjCKB",
                 "starttime": 0.0,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             }
@@ -3021,16 +2952,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -3044,9 +2976,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3082,16 +3011,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -3105,9 +3035,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3143,16 +3070,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -3166,9 +3094,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3204,16 +3129,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -3227,9 +3153,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3338,6 +3261,7 @@
                 "name": "RigidBody_LinearVelocityY",
                 "node": "YSKiINjHyw",
                 "starttime": 0.0,
+                "timeline": "",
                 "value": -5.0
               },
               "type": "PropertyAnimator"
@@ -3355,6 +3279,7 @@
                 "name": "RigidBody_LinearVelocityY",
                 "node": "YSKiINjHyw",
                 "starttime": 0.25,
+                "timeline": "",
                 "value": 0.0
               },
               "type": "PropertyAnimator"
@@ -3372,6 +3297,7 @@
                 "name": "RigidBody_LinearVelocityY",
                 "node": "YSKiINjHyw",
                 "starttime": 0.4995872378349304,
+                "timeline": "",
                 "value": 5.0
               },
               "type": "PropertyAnimator"
@@ -3389,6 +3315,7 @@
                 "name": "RigidBody_LinearVelocityY",
                 "node": "YSKiINjHyw",
                 "starttime": 0.75,
+                "timeline": "",
                 "value": 0.0
               },
               "type": "PropertyAnimator"
@@ -3416,7 +3343,14 @@
                   "x": 400.0,
                   "y": 100.0
                 },
-                "starttime": 0.9461187124252319
+                "starttime": 0.9461187124252319,
+                "timeline": "",
+                "transformations": {
+                  "Resize": true,
+                  "Rotate": true,
+                  "Scale": true,
+                  "Translate": true
+                }
               },
               "type": "TransformAnimator"
             }
@@ -3450,7 +3384,8 @@
                 "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.0,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3475,7 +3410,8 @@
                 "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.25,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3500,7 +3436,8 @@
                 "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.5,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3525,7 +3462,8 @@
                 "name": "",
                 "node": "YSKiINjHyw",
                 "starttime": 0.75,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3552,7 +3490,14 @@
                   "x": 400.0,
                   "y": 100.0
                 },
-                "starttime": 0.9495798349380493
+                "starttime": 0.9495798349380493,
+                "timeline": "",
+                "transformations": {
+                  "Resize": true,
+                  "Rotate": true,
+                  "Scale": true,
+                  "Translate": true
+                }
               },
               "type": "TransformAnimator"
             }
@@ -3586,7 +3531,8 @@
                 "name": "Animator_0",
                 "node": "YSKiINjHyw",
                 "starttime": 0.0,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3611,7 +3557,8 @@
                 "name": "Animator_1",
                 "node": "YSKiINjHyw",
                 "starttime": 0.25,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3636,7 +3583,8 @@
                 "name": "Animator_2",
                 "node": "YSKiINjHyw",
                 "starttime": 0.4997114837169647,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3661,7 +3609,8 @@
                 "name": "Animator_3",
                 "node": "YSKiINjHyw",
                 "starttime": 0.75,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3688,7 +3637,14 @@
                   "x": 400.0,
                   "y": 100.0
                 },
-                "starttime": 0.9549959301948547
+                "starttime": 0.9549959301948547,
+                "timeline": "",
+                "transformations": {
+                  "Resize": true,
+                  "Rotate": true,
+                  "Scale": true,
+                  "Translate": true
+                }
               },
               "type": "TransformAnimator"
             }
@@ -3722,7 +3678,8 @@
                 "name": "Animator_0",
                 "node": "YSKiINjHyw",
                 "starttime": 0.0,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3747,7 +3704,8 @@
                 "name": "Animator_1",
                 "node": "YSKiINjHyw",
                 "starttime": 0.25,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3772,7 +3730,8 @@
                 "name": "Animator_2",
                 "node": "YSKiINjHyw",
                 "starttime": 0.5,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3797,7 +3756,8 @@
                 "name": "Animator_3",
                 "node": "YSKiINjHyw",
                 "starttime": 0.75,
-                "target": "RigidBody"
+                "target": "RigidBody",
+                "timeline": ""
               },
               "type": "KinematicAnimator"
             },
@@ -3824,7 +3784,14 @@
                   "x": 400.0,
                   "y": 100.0
                 },
-                "starttime": 0.9508671164512634
+                "starttime": 0.9508671164512634,
+                "timeline": "",
+                "transformations": {
+                  "Resize": true,
+                  "Rotate": true,
+                  "Scale": true,
+                  "Translate": true
+                }
               },
               "type": "TransformAnimator"
             }
@@ -3865,16 +3832,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -3888,9 +3856,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -3926,16 +3891,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -3949,9 +3915,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -3987,16 +3950,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -4010,9 +3974,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -4048,16 +4009,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -4071,9 +4033,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -4109,16 +4068,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -4132,9 +4092,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -4208,16 +4165,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -4240,9 +4198,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -4278,16 +4233,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -4310,9 +4266,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -4348,16 +4301,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -4380,9 +4334,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -4418,16 +4369,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -4450,9 +4402,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -4488,16 +4437,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -4520,9 +4470,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -4558,16 +4505,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -4586,9 +4534,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -4624,16 +4569,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -4656,9 +4602,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -4694,16 +4637,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -4726,9 +4670,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -4764,16 +4705,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -4796,9 +4738,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -4834,16 +4773,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -4866,9 +4806,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -4904,16 +4841,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -4936,9 +4874,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -4974,16 +4909,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5006,9 +4942,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -5044,16 +4977,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5076,9 +5010,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -5114,16 +5045,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5146,9 +5078,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -5184,16 +5113,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5216,9 +5146,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -5254,16 +5181,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5286,9 +5214,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -5324,16 +5249,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5356,9 +5282,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -5394,16 +5317,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5426,9 +5350,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -5464,16 +5385,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5496,9 +5418,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -5534,16 +5453,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5562,9 +5482,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -5600,16 +5517,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5628,9 +5546,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -5666,16 +5581,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5698,9 +5614,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -5736,16 +5649,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5768,9 +5682,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -5806,16 +5717,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5838,9 +5750,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -5876,16 +5785,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -5908,9 +5818,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -5946,16 +5853,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -5969,9 +5877,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6007,16 +5912,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -6030,9 +5936,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6264,16 +6167,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "8P3itGhZMZ",
             "offset": {
               "x": 0.0,
@@ -6281,9 +6185,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6319,16 +6220,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "sRhs1N4xxk",
             "offset": {
               "x": 0.0,
@@ -6336,9 +6238,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6374,16 +6273,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "w3KArM85Dn",
             "offset": {
               "x": 0.0,
@@ -6391,9 +6291,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6429,16 +6326,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "sevEbwzjbX",
             "offset": {
               "x": 0.0,
@@ -6446,9 +6344,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6484,16 +6379,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "aCYwdGPdoX",
             "offset": {
               "x": 0.0,
@@ -6501,9 +6397,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6539,16 +6432,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "qeHXJf0e7Y",
             "offset": {
               "x": 0.0,
@@ -6556,9 +6450,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6594,16 +6485,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "njoEqKFkK2",
             "offset": {
               "x": 0.0,
@@ -6611,9 +6503,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6649,16 +6538,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "hhf8BOw4BK",
             "offset": {
               "x": 0.0,
@@ -6666,9 +6556,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6704,16 +6591,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "aCYwdGPdoX",
             "offset": {
               "x": 0.0,
@@ -6721,9 +6609,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6759,16 +6644,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": true,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "8P3itGhZMZ",
             "offset": {
               "x": 0.0,
@@ -6776,9 +6662,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6814,16 +6697,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "xdu4r3XCxM",
             "offset": {
               "x": 0.0,
@@ -6831,9 +6715,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6869,16 +6750,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "0Xb8A3djuF",
             "offset": {
               "x": 0.0,
@@ -6886,9 +6768,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6924,16 +6803,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "k7l5bsJiYt",
             "offset": {
               "x": 0.0,
@@ -6941,9 +6821,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -6979,16 +6856,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "xdu4r3XCxM",
             "offset": {
               "x": 0.0,
@@ -6996,9 +6874,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -7034,16 +6909,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "mB6OwE5XO5",
             "offset": {
               "x": 0.0,
@@ -7051,9 +6927,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -7089,16 +6962,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "8P3itGhZMZ",
             "offset": {
               "x": 0.0,
@@ -7106,9 +6980,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -7255,16 +7126,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -7278,9 +7150,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -7316,16 +7185,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -7339,9 +7209,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -7377,16 +7244,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -7400,9 +7268,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -7438,16 +7303,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -7461,9 +7327,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -7499,16 +7362,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -7522,9 +7386,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -7560,16 +7421,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -7583,9 +7445,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -7621,16 +7480,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -7644,9 +7504,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -7682,16 +7539,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -7705,9 +7563,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -7994,16 +7849,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "bvJqe9fGu5",
             "offset": {
               "x": 0.0,
@@ -8011,9 +7867,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -8130,16 +7983,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8153,9 +8007,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -8191,16 +8042,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8214,9 +8066,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -8252,16 +8101,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8275,9 +8125,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -8313,16 +8160,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8336,9 +8184,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -8374,16 +8219,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8397,9 +8243,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -8435,16 +8278,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8458,9 +8302,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -8496,16 +8337,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8519,9 +8361,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -8557,16 +8396,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8580,9 +8420,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -8618,16 +8455,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8641,9 +8479,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -8679,16 +8514,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8702,9 +8538,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -8778,16 +8611,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8801,9 +8635,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -8839,16 +8670,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8862,9 +8694,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -8900,16 +8729,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8923,9 +8753,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -8961,16 +8788,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -8984,9 +8812,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -9022,16 +8847,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -9045,9 +8871,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -9196,16 +9019,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "2ynNMbWOK3",
             "offset": {
               "x": 0.0,
@@ -9213,9 +9037,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -9329,7 +9150,14 @@
                   "x": 10.0,
                   "y": 10.0
                 },
-                "starttime": 0.0
+                "starttime": 0.0,
+                "timeline": "",
+                "transformations": {
+                  "Resize": true,
+                  "Rotate": true,
+                  "Scale": true,
+                  "Translate": true
+                }
               },
               "type": "TransformAnimator"
             }
@@ -9370,16 +9198,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "8P3itGhZMZ",
             "offset": {
               "x": 0.0,
@@ -9387,9 +9216,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -9461,16 +9287,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "2ynNMbWOK3",
             "offset": {
               "x": 0.0,
@@ -9478,9 +9305,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -9552,16 +9376,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "oTLKJxJ07d",
             "offset": {
               "x": 0.0,
@@ -9569,9 +9394,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -9681,16 +9503,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -9704,9 +9527,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -9742,16 +9562,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -9765,9 +9586,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -9851,16 +9669,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": -2,
-            "linewidth": 1.0,
             "material": "8zhqFxuNB5",
             "offset": {
               "x": 0.0,
@@ -9868,9 +9687,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -9906,16 +9722,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "4Dr42BHlGR",
             "offset": {
               "x": 0.0,
@@ -9923,9 +9740,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -9961,16 +9775,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": true,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "4Dr42BHlGR",
             "offset": {
               "x": 0.0,
@@ -9978,9 +9793,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10016,16 +9828,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "w3KArM85Dn",
             "offset": {
               "x": 0.0,
@@ -10033,9 +9846,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10071,16 +9881,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "sevEbwzjbX",
             "offset": {
               "x": 0.0,
@@ -10088,9 +9899,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10126,16 +9934,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "aCYwdGPdoX",
             "offset": {
               "x": 0.0,
@@ -10143,9 +9952,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10181,16 +9987,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "qeHXJf0e7Y",
             "offset": {
               "x": 0.0,
@@ -10198,9 +10005,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10236,16 +10040,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "njoEqKFkK2",
             "offset": {
               "x": 0.0,
@@ -10253,9 +10058,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10291,16 +10093,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "hhf8BOw4BK",
             "offset": {
               "x": 0.0,
@@ -10308,9 +10111,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10346,16 +10146,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "aCYwdGPdoX",
             "offset": {
               "x": 0.0,
@@ -10363,9 +10164,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10401,16 +10199,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 3,
-            "linewidth": 1.0,
             "material": "2ynNMbWOK3",
             "offset": {
               "x": 0.0,
@@ -10418,9 +10217,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10456,16 +10252,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 3,
-            "linewidth": 1.0,
             "material": "2ynNMbWOK3",
             "offset": {
               "x": 0.0,
@@ -10473,9 +10270,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10511,16 +10305,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 3,
-            "linewidth": 1.0,
             "material": "2ynNMbWOK3",
             "offset": {
               "x": 0.0,
@@ -10528,9 +10323,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10566,16 +10358,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "RhslGRtQQR",
             "offset": {
               "x": 0.0,
@@ -10583,9 +10376,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10676,16 +10466,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "RhslGRtQQR",
             "offset": {
               "x": 0.0,
@@ -10693,9 +10484,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10748,16 +10536,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "RhslGRtQQR",
             "offset": {
               "x": 0.0,
@@ -10765,9 +10554,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -10896,16 +10682,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 3,
-            "linewidth": 1.0,
             "material": "2ynNMbWOK3",
             "offset": {
               "x": 0.0,
@@ -10913,9 +10700,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -11082,16 +10866,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "ZNHaSAwLKu",
             "offset": {
               "x": 0.0,
@@ -11099,9 +10884,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -11211,16 +10993,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yYKJ58xHel",
             "offset": {
               "x": 0.0,
@@ -11228,9 +11011,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -11409,16 +11189,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -11432,9 +11213,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -11470,16 +11248,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -11493,9 +11272,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -11531,16 +11307,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -11554,9 +11331,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -11592,16 +11366,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -11615,9 +11390,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -11653,16 +11425,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -11676,9 +11449,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -11714,16 +11484,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -11737,9 +11508,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -11775,16 +11543,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -11798,9 +11567,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -11836,16 +11602,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -11859,9 +11626,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -11897,16 +11661,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -11920,9 +11685,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -11958,16 +11720,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -11981,9 +11744,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -12019,16 +11779,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -12042,9 +11803,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -12080,16 +11838,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "pLLsz5BQGH",
             "material_params": [
               {
@@ -12103,9 +11862,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": 0.0,
@@ -12313,16 +12069,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -12336,9 +12093,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -12374,16 +12128,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -12397,9 +12152,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -12473,16 +12225,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -12496,9 +12249,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -12534,16 +12284,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -12557,9 +12308,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -12633,16 +12381,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -12656,9 +12405,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -12694,16 +12440,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -12717,9 +12464,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -12793,16 +12537,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -12816,9 +12561,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -12854,16 +12596,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -12877,9 +12620,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13052,16 +12792,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13075,9 +12816,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13113,16 +12851,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13136,9 +12875,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13174,16 +12910,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13197,9 +12934,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13235,16 +12969,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13258,9 +12993,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13296,16 +13028,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13319,9 +13052,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13357,16 +13087,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "offset": {
               "x": 0.0,
@@ -13374,9 +13105,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13480,16 +13208,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13503,9 +13232,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13541,16 +13267,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13564,9 +13291,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13602,16 +13326,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13625,9 +13350,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13663,16 +13385,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13686,9 +13409,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13724,16 +13444,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13747,9 +13468,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13785,16 +13503,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13808,9 +13527,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13846,16 +13562,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13869,9 +13586,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13907,16 +13621,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13930,9 +13645,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -13968,16 +13680,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -13991,9 +13704,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -14029,16 +13739,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -14052,9 +13763,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -14090,16 +13798,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -14113,9 +13822,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -14151,16 +13857,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -14174,9 +13881,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -14212,16 +13916,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -14235,9 +13940,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -14273,16 +13975,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "yRAwB3Bfsm",
             "material_params": [
               {
@@ -14296,9 +13999,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -14715,6 +14415,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -14774,6 +14475,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -14949,6 +14651,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15045,6 +14748,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15104,6 +14808,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15209,6 +14914,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15268,6 +14974,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15327,6 +15034,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15392,6 +15100,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15561,6 +15270,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15626,6 +15336,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15685,6 +15396,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15750,6 +15462,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15809,6 +15522,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15868,6 +15582,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15990,6 +15705,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16055,6 +15771,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16120,6 +15837,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16185,6 +15903,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16307,6 +16026,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16366,6 +16086,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16425,6 +16146,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16484,6 +16206,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16543,6 +16266,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16602,6 +16326,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16724,6 +16449,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16802,6 +16528,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16884,6 +16611,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -16943,6 +16671,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17065,6 +16794,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17124,6 +16854,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17246,6 +16977,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17368,6 +17100,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17427,6 +17160,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17486,6 +17220,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -17568,6 +17303,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -18787,7 +18523,8 @@
       "resource_id": "T12tMDJSly",
       "resource_name": "Flurries",
       "resource_ver": 2,
-      "shape": "Rectangle"
+      "shape": "Rectangle",
+      "warmup_time": 0.0
     },
     {
       "alpha_over_dist": 0.0,
@@ -18833,7 +18570,8 @@
       "resource_id": "nnXiuEEnwL",
       "resource_name": "Coins",
       "resource_ver": 2,
-      "shape": "Rectangle"
+      "shape": "Rectangle",
+      "warmup_time": 0.0
     }
   ],
   "scenes": [
@@ -18888,6 +18626,7 @@
           }
         }
       ],
+      "projection": "AxisAlignedOrthographic",
       "render_tree": {
         "children": [
           {
@@ -22335,6 +22074,7 @@
           }
         }
       ],
+      "projection": "AxisAlignedOrthographic",
       "render_tree": {
         "children": [
           {

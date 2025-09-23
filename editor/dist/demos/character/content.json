@@ -312,16 +312,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "Hxhn1HHoak",
             "offset": {
               "x": 0.0,
@@ -329,9 +330,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -420,16 +418,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "vlTIdw4iq5",
             "offset": {
               "x": 0.0,
@@ -437,9 +436,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -454,7 +450,8 @@
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
-              "Enabled": true
+              "Enabled": true,
+              "RotateToDirection": false
             },
             "integrator": "Euler",
             "linear_acceleration": {
@@ -546,16 +543,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": -1,
-            "linewidth": 1.0,
             "material": "_Black",
             "offset": {
               "x": 0.0,
@@ -563,9 +561,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -601,16 +596,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "wrQHZ3iizg",
             "offset": {
               "x": 0.0,
@@ -618,9 +614,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -656,16 +649,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "r7XlZHD5We",
             "material_params": [
               {
@@ -679,9 +673,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -785,74 +776,6 @@
       ]
     },
     {
-      "animators": [
-        {
-          "flags": {
-            "ReceiveKeyboardInput": false,
-            "ReceiveMouseInput": false
-          },
-          "id": "ZgT9qKps6b",
-          "initial_state": "Zqve6DOvh1",
-          "name": "My Animator",
-          "script_id": "7lLEJ9i9vM",
-          "states": [
-            {
-              "id": "6FJhzdZKS3",
-              "name": "Dead"
-            },
-            {
-              "id": "EWkuBJIenK",
-              "name": "Attack"
-            },
-            {
-              "id": "QshKX68fjT",
-              "name": "Walking"
-            },
-            {
-              "id": "Zqve6DOvh1",
-              "name": "Idle"
-            }
-          ],
-          "transition_mode": "Continuous",
-          "transitions": [
-            {
-              "dst_state_id": "6FJhzdZKS3",
-              "duration": 0.0,
-              "id": "iSRBkUNaPz",
-              "name": "",
-              "src_state_id": "Zqve6DOvh1"
-            },
-            {
-              "dst_state_id": "Zqve6DOvh1",
-              "duration": 0.0,
-              "id": "2WCte8hltO",
-              "name": "",
-              "src_state_id": "EWkuBJIenK"
-            },
-            {
-              "dst_state_id": "EWkuBJIenK",
-              "duration": 0.0,
-              "id": "ZYrJiUu1GJ",
-              "name": "",
-              "src_state_id": "Zqve6DOvh1"
-            },
-            {
-              "dst_state_id": "QshKX68fjT",
-              "duration": 0.0,
-              "id": "uLqRIQOx46",
-              "name": "",
-              "src_state_id": "Zqve6DOvh1"
-            },
-            {
-              "dst_state_id": "Zqve6DOvh1",
-              "duration": 0.0,
-              "id": "ZhsaCTXewp",
-              "name": "",
-              "src_state_id": "QshKX68fjT"
-            }
-          ]
-        }
-      ],
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": true,
@@ -880,16 +803,17 @@
             "flags": {
               "DepthTest": true,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "_Black",
             "offset": {
               "x": 0.0,
@@ -897,9 +821,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -935,16 +856,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "f85ZCt9KqW",
             "offset": {
               "x": 0.0,
@@ -952,9 +874,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -990,16 +909,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "2ohLK3pIux",
             "offset": {
               "x": 0.0,
@@ -1007,9 +927,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1045,16 +962,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 2,
-            "linewidth": 1.0,
             "material": "LLq889I6UO",
             "offset": {
               "x": 0.0,
@@ -1062,9 +980,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1100,16 +1015,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "_Black",
             "material_params": [
               {
@@ -1128,9 +1044,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1160,6 +1073,7 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
               "UnderlineText": false,
@@ -1191,16 +1105,17 @@
             "flags": {
               "DepthTest": true,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "r7XlZHD5We",
             "material_params": [
               {
@@ -1214,9 +1129,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1320,6 +1232,72 @@
       "resource_name": "LPC/Character/Player",
       "resource_ver": 3,
       "script_file": "J4xx3ThJjX",
+      "state-controller": {
+        "flags": {
+          "ReceiveKeyboardInput": false,
+          "ReceiveMouseInput": false
+        },
+        "id": "ZgT9qKps6b",
+        "initial_state": "Zqve6DOvh1",
+        "name": "My Animator",
+        "script_id": "7lLEJ9i9vM",
+        "states": [
+          {
+            "id": "6FJhzdZKS3",
+            "name": "Dead"
+          },
+          {
+            "id": "EWkuBJIenK",
+            "name": "Attack"
+          },
+          {
+            "id": "QshKX68fjT",
+            "name": "Walking"
+          },
+          {
+            "id": "Zqve6DOvh1",
+            "name": "Idle"
+          }
+        ],
+        "transition_mode": "Continuous",
+        "transitions": [
+          {
+            "dst_state_id": "6FJhzdZKS3",
+            "duration": 0.0,
+            "id": "iSRBkUNaPz",
+            "name": "",
+            "src_state_id": "Zqve6DOvh1"
+          },
+          {
+            "dst_state_id": "Zqve6DOvh1",
+            "duration": 0.0,
+            "id": "2WCte8hltO",
+            "name": "",
+            "src_state_id": "EWkuBJIenK"
+          },
+          {
+            "dst_state_id": "EWkuBJIenK",
+            "duration": 0.0,
+            "id": "ZYrJiUu1GJ",
+            "name": "",
+            "src_state_id": "Zqve6DOvh1"
+          },
+          {
+            "dst_state_id": "QshKX68fjT",
+            "duration": 0.0,
+            "id": "uLqRIQOx46",
+            "name": "",
+            "src_state_id": "Zqve6DOvh1"
+          },
+          {
+            "dst_state_id": "Zqve6DOvh1",
+            "duration": 0.0,
+            "id": "ZhsaCTXewp",
+            "name": "",
+            "src_state_id": "QshKX68fjT"
+          }
+        ]
+      },
       "tag": "#player",
       "vars": [
         {
@@ -1575,16 +1553,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "57djXhQN4Z",
             "offset": {
               "x": 0.0,
@@ -1592,9 +1571,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1630,16 +1606,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "_Black",
             "offset": {
               "x": 0.0,
@@ -1647,9 +1624,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1792,16 +1766,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "XFu97RXb8t",
             "offset": {
               "x": 0.0,
@@ -1809,9 +1784,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -1826,7 +1798,8 @@
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
-              "Enabled": true
+              "Enabled": true,
+              "RotateToDirection": false
             },
             "integrator": "Euler",
             "linear_acceleration": {
@@ -1886,6 +1859,7 @@
                 "name": "LinearMover_LinearVelocity",
                 "node": "WLST0ZxIsj",
                 "starttime": 0.0,
+                "timeline": "",
                 "value": {
                   "x": 0.0,
                   "y": 500.0
@@ -1949,16 +1923,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "KEChSTgnxU",
             "offset": {
               "x": 0.0,
@@ -1966,9 +1941,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2057,16 +2029,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "vHygmkluU4",
             "offset": {
               "x": 0.0,
@@ -2074,9 +2047,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2165,16 +2135,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": false,
               "UpdateMaterial": false,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "v3gahEDshf",
             "offset": {
               "x": 0.0,
@@ -2182,9 +2153,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2199,7 +2167,8 @@
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
-              "Enabled": true
+              "Enabled": true,
+              "RotateToDirection": false
             },
             "integrator": "Euler",
             "linear_acceleration": {
@@ -2264,16 +2233,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": false
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "X6jH7ZUDrO",
             "offset": {
               "x": 0.0,
@@ -2281,9 +2251,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2340,16 +2307,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "r7XlZHD5We",
             "material_params": [
               {
@@ -2363,9 +2331,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2448,7 +2413,8 @@
                 "name": "Actuator_0",
                 "node": "jW0eLXKfWl",
                 "starttime": 0.0,
-                "time": 0.0
+                "time": 0.0,
+                "timeline": ""
               },
               "type": "BooleanPropertyAnimator"
             },
@@ -2465,7 +2431,8 @@
                 "name": "Actuator_1",
                 "node": "jW0eLXKfWl",
                 "starttime": 0.0,
-                "time": 1.0
+                "time": 1.0,
+                "timeline": ""
               },
               "type": "BooleanPropertyAnimator"
             }
@@ -2506,16 +2473,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "jS7kGm3IkK",
             "offset": {
               "x": 0.0,
@@ -2523,9 +2491,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2561,16 +2526,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": true,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "jS7kGm3IkK",
             "offset": {
               "x": 0.0,
@@ -2578,9 +2544,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2616,16 +2579,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": true,
               "FlipVertically": true,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "jS7kGm3IkK",
             "offset": {
               "x": 0.0,
@@ -2633,9 +2597,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2671,16 +2632,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": true,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "jS7kGm3IkK",
             "offset": {
               "x": 0.0,
@@ -2688,9 +2650,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2750,88 +2709,6 @@
       "tag": ""
     },
     {
-      "animators": [
-        {
-          "flags": {
-            "ReceiveKeyboardInput": false,
-            "ReceiveMouseInput": false
-          },
-          "id": "guvf6HEfso",
-          "initial_state": "468yaoYZ51",
-          "name": "My Animator",
-          "script_id": "RR5yoJ3rxj",
-          "states": [
-            {
-              "id": "63Z0tn2jrC",
-              "name": "Active"
-            },
-            {
-              "id": "468yaoYZ51",
-              "name": "Idle"
-            },
-            {
-              "id": "R0zvZ900Ox",
-              "name": "Die"
-            },
-            {
-              "id": "XjrLutqPTs",
-              "name": "Attack"
-            }
-          ],
-          "transition_mode": "Continuous",
-          "transitions": [
-            {
-              "dst_state_id": "R0zvZ900Ox",
-              "duration": 0.0,
-              "id": "IRxr7u21Ia",
-              "name": "",
-              "src_state_id": "XjrLutqPTs"
-            },
-            {
-              "dst_state_id": "R0zvZ900Ox",
-              "duration": 0.0,
-              "id": "GwoD1LrUA6",
-              "name": "",
-              "src_state_id": "468yaoYZ51"
-            },
-            {
-              "dst_state_id": "R0zvZ900Ox",
-              "duration": 0.0,
-              "id": "RpEAwQ6xoZ",
-              "name": "",
-              "src_state_id": "63Z0tn2jrC"
-            },
-            {
-              "dst_state_id": "XjrLutqPTs",
-              "duration": 0.0,
-              "id": "3IsUSuxo1Q",
-              "name": "",
-              "src_state_id": "468yaoYZ51"
-            },
-            {
-              "dst_state_id": "468yaoYZ51",
-              "duration": 0.0,
-              "id": "RNC9hF4KzO",
-              "name": "",
-              "src_state_id": "XjrLutqPTs"
-            },
-            {
-              "dst_state_id": "63Z0tn2jrC",
-              "duration": 0.0,
-              "id": "qsDSrPBIf3",
-              "name": "",
-              "src_state_id": "468yaoYZ51"
-            },
-            {
-              "dst_state_id": "468yaoYZ51",
-              "duration": 0.0,
-              "id": "GUUhZhDRw7",
-              "name": "",
-              "src_state_id": "63Z0tn2jrC"
-            }
-          ]
-        }
-      ],
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": true,
@@ -2897,16 +2774,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "zRjZSLqKyS",
             "offset": {
               "x": 0.0,
@@ -2914,9 +2792,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -2952,16 +2827,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "_Black",
             "material_params": [
               {
@@ -2980,9 +2856,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3012,6 +2885,7 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
               "UnderlineText": false,
@@ -3061,6 +2935,86 @@
       "resource_name": "Bandit/Bandit",
       "resource_ver": 3,
       "script_file": "32oNogwII0",
+      "state-controller": {
+        "flags": {
+          "ReceiveKeyboardInput": false,
+          "ReceiveMouseInput": false
+        },
+        "id": "guvf6HEfso",
+        "initial_state": "468yaoYZ51",
+        "name": "My Animator",
+        "script_id": "RR5yoJ3rxj",
+        "states": [
+          {
+            "id": "63Z0tn2jrC",
+            "name": "Active"
+          },
+          {
+            "id": "468yaoYZ51",
+            "name": "Idle"
+          },
+          {
+            "id": "R0zvZ900Ox",
+            "name": "Die"
+          },
+          {
+            "id": "XjrLutqPTs",
+            "name": "Attack"
+          }
+        ],
+        "transition_mode": "Continuous",
+        "transitions": [
+          {
+            "dst_state_id": "R0zvZ900Ox",
+            "duration": 0.0,
+            "id": "IRxr7u21Ia",
+            "name": "",
+            "src_state_id": "XjrLutqPTs"
+          },
+          {
+            "dst_state_id": "R0zvZ900Ox",
+            "duration": 0.0,
+            "id": "GwoD1LrUA6",
+            "name": "",
+            "src_state_id": "468yaoYZ51"
+          },
+          {
+            "dst_state_id": "R0zvZ900Ox",
+            "duration": 0.0,
+            "id": "RpEAwQ6xoZ",
+            "name": "",
+            "src_state_id": "63Z0tn2jrC"
+          },
+          {
+            "dst_state_id": "XjrLutqPTs",
+            "duration": 0.0,
+            "id": "3IsUSuxo1Q",
+            "name": "",
+            "src_state_id": "468yaoYZ51"
+          },
+          {
+            "dst_state_id": "468yaoYZ51",
+            "duration": 0.0,
+            "id": "RNC9hF4KzO",
+            "name": "",
+            "src_state_id": "XjrLutqPTs"
+          },
+          {
+            "dst_state_id": "63Z0tn2jrC",
+            "duration": 0.0,
+            "id": "qsDSrPBIf3",
+            "name": "",
+            "src_state_id": "468yaoYZ51"
+          },
+          {
+            "dst_state_id": "468yaoYZ51",
+            "duration": 0.0,
+            "id": "GUUhZhDRw7",
+            "name": "",
+            "src_state_id": "63Z0tn2jrC"
+          }
+        ]
+      },
       "tag": ""
     },
     {
@@ -3091,16 +3045,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "AFmNqXIZB4",
             "offset": {
               "x": 0.0,
@@ -3108,9 +3063,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3146,16 +3098,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "sUFADPSjD3",
             "offset": {
               "x": 0.0,
@@ -3163,9 +3116,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3201,16 +3151,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 2,
-            "linewidth": 1.0,
             "material": "Li1gMjv4ev",
             "offset": {
               "x": 0.0,
@@ -3218,9 +3169,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3302,16 +3250,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "wswjut7TuG",
             "offset": {
               "x": 0.0,
@@ -3319,9 +3268,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3393,16 +3339,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "M8Cqt8qtGb",
             "offset": {
               "x": 0.0,
@@ -3410,9 +3357,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3427,7 +3371,8 @@
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
-              "Enabled": true
+              "Enabled": true,
+              "RotateToDirection": false
             },
             "integrator": "Euler",
             "linear_acceleration": {
@@ -3519,16 +3464,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "3im7gYgEte",
             "offset": {
               "x": 0.0,
@@ -3536,9 +3482,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3600,88 +3543,6 @@
       "tag": ""
     },
     {
-      "animators": [
-        {
-          "flags": {
-            "ReceiveKeyboardInput": false,
-            "ReceiveMouseInput": false
-          },
-          "id": "ACiqyjSOBK",
-          "initial_state": "DTu0oujhw2",
-          "name": "My Animator",
-          "script_id": "7lLEJ9i9vM",
-          "states": [
-            {
-              "id": "DTu0oujhw2",
-              "name": "Idle"
-            },
-            {
-              "id": "QjRnk93rkS",
-              "name": "Walking"
-            },
-            {
-              "id": "90UJ2AsZsy",
-              "name": "Attack"
-            },
-            {
-              "id": "W8i3KO2bSA",
-              "name": "Dead"
-            }
-          ],
-          "transition_mode": "Continuous",
-          "transitions": [
-            {
-              "dst_state_id": "W8i3KO2bSA",
-              "duration": 0.0,
-              "id": "2WpliK9A1M",
-              "name": "",
-              "src_state_id": "90UJ2AsZsy"
-            },
-            {
-              "dst_state_id": "QjRnk93rkS",
-              "duration": 0.0,
-              "id": "othAlfk1Wr",
-              "name": "",
-              "src_state_id": "DTu0oujhw2"
-            },
-            {
-              "dst_state_id": "DTu0oujhw2",
-              "duration": 0.0,
-              "id": "39w6Uf2TZt",
-              "name": "",
-              "src_state_id": "QjRnk93rkS"
-            },
-            {
-              "dst_state_id": "90UJ2AsZsy",
-              "duration": 0.0,
-              "id": "ugX6hSA45a",
-              "name": "",
-              "src_state_id": "DTu0oujhw2"
-            },
-            {
-              "dst_state_id": "DTu0oujhw2",
-              "duration": 0.0,
-              "id": "Waaru00eg6",
-              "name": "",
-              "src_state_id": "90UJ2AsZsy"
-            },
-            {
-              "dst_state_id": "W8i3KO2bSA",
-              "duration": 0.0,
-              "id": "M5i0r7W94n",
-              "name": "",
-              "src_state_id": "QjRnk93rkS"
-            },
-            {
-              "dst_state_id": "W8i3KO2bSA",
-              "duration": 0.0,
-              "id": "htYyfiff30",
-              "name": "",
-              "src_state_id": "DTu0oujhw2"
-            }
-          ]
-        }
-      ],
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": true,
@@ -3709,16 +3570,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "_Black",
             "offset": {
               "x": 0.0,
@@ -3726,9 +3588,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3764,16 +3623,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "rDpZrE3UuD",
             "offset": {
               "x": 0.0,
@@ -3781,9 +3641,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3819,16 +3676,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "r7XlZHD5We",
             "material_params": [
               {
@@ -3842,9 +3700,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3908,16 +3763,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 2,
-            "linewidth": 1.0,
             "material": "KnPvBZqDs4",
             "offset": {
               "x": 0.0,
@@ -3925,9 +3781,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -3991,6 +3844,86 @@
       "resource_name": "LPC/Character/Skeleton",
       "resource_ver": 3,
       "script_file": "JuKilpgDfP",
+      "state-controller": {
+        "flags": {
+          "ReceiveKeyboardInput": false,
+          "ReceiveMouseInput": false
+        },
+        "id": "ACiqyjSOBK",
+        "initial_state": "DTu0oujhw2",
+        "name": "My Animator",
+        "script_id": "7lLEJ9i9vM",
+        "states": [
+          {
+            "id": "DTu0oujhw2",
+            "name": "Idle"
+          },
+          {
+            "id": "QjRnk93rkS",
+            "name": "Walking"
+          },
+          {
+            "id": "90UJ2AsZsy",
+            "name": "Attack"
+          },
+          {
+            "id": "W8i3KO2bSA",
+            "name": "Dead"
+          }
+        ],
+        "transition_mode": "Continuous",
+        "transitions": [
+          {
+            "dst_state_id": "W8i3KO2bSA",
+            "duration": 0.0,
+            "id": "2WpliK9A1M",
+            "name": "",
+            "src_state_id": "90UJ2AsZsy"
+          },
+          {
+            "dst_state_id": "QjRnk93rkS",
+            "duration": 0.0,
+            "id": "othAlfk1Wr",
+            "name": "",
+            "src_state_id": "DTu0oujhw2"
+          },
+          {
+            "dst_state_id": "DTu0oujhw2",
+            "duration": 0.0,
+            "id": "39w6Uf2TZt",
+            "name": "",
+            "src_state_id": "QjRnk93rkS"
+          },
+          {
+            "dst_state_id": "90UJ2AsZsy",
+            "duration": 0.0,
+            "id": "ugX6hSA45a",
+            "name": "",
+            "src_state_id": "DTu0oujhw2"
+          },
+          {
+            "dst_state_id": "DTu0oujhw2",
+            "duration": 0.0,
+            "id": "Waaru00eg6",
+            "name": "",
+            "src_state_id": "90UJ2AsZsy"
+          },
+          {
+            "dst_state_id": "W8i3KO2bSA",
+            "duration": 0.0,
+            "id": "M5i0r7W94n",
+            "name": "",
+            "src_state_id": "QjRnk93rkS"
+          },
+          {
+            "dst_state_id": "W8i3KO2bSA",
+            "duration": 0.0,
+            "id": "htYyfiff30",
+            "name": "",
+            "src_state_id": "DTu0oujhw2"
+          }
+        ]
+      },
       "tag": "",
       "vars": [
         {
@@ -4112,45 +4045,6 @@
       ]
     },
     {
-      "animators": [
-        {
-          "flags": {
-            "ReceiveKeyboardInput": false,
-            "ReceiveMouseInput": false
-          },
-          "id": "LLpPNnW7Up",
-          "initial_state": "NyoiMIp6ms",
-          "name": "My Animator",
-          "script_id": "DFRO8f967k",
-          "states": [
-            {
-              "id": "NDKGyBbExx",
-              "name": "Running"
-            },
-            {
-              "id": "NyoiMIp6ms",
-              "name": "Idle"
-            }
-          ],
-          "transition_mode": "Continuous",
-          "transitions": [
-            {
-              "dst_state_id": "NyoiMIp6ms",
-              "duration": 0.0,
-              "id": "U99KpBiEUN",
-              "name": "",
-              "src_state_id": "NDKGyBbExx"
-            },
-            {
-              "dst_state_id": "NDKGyBbExx",
-              "duration": 0.0,
-              "id": "wBJXvKbIiQ",
-              "name": "",
-              "src_state_id": "NyoiMIp6ms"
-            }
-          ]
-        }
-      ],
       "flags": {
         "KillAtBoundary": true,
         "KillAtLifetime": true,
@@ -4178,16 +4072,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "t1YfjyevnO",
             "material_params": [
               {
@@ -4201,9 +4096,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -4239,16 +4131,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 1,
-            "linewidth": 1.0,
             "material": "_Red",
             "offset": {
               "x": 0.0,
@@ -4256,9 +4149,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -4315,16 +4205,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "_Black",
             "material_params": [
               {
@@ -4343,9 +4234,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -4375,6 +4263,7 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
               "UnderlineText": false,
@@ -4431,6 +4320,43 @@
       "resource_name": "8-dir-char-template/Dummy",
       "resource_ver": 3,
       "script_file": "KHnqtB85vy",
+      "state-controller": {
+        "flags": {
+          "ReceiveKeyboardInput": false,
+          "ReceiveMouseInput": false
+        },
+        "id": "LLpPNnW7Up",
+        "initial_state": "NyoiMIp6ms",
+        "name": "My Animator",
+        "script_id": "DFRO8f967k",
+        "states": [
+          {
+            "id": "NDKGyBbExx",
+            "name": "Running"
+          },
+          {
+            "id": "NyoiMIp6ms",
+            "name": "Idle"
+          }
+        ],
+        "transition_mode": "Continuous",
+        "transitions": [
+          {
+            "dst_state_id": "NyoiMIp6ms",
+            "duration": 0.0,
+            "id": "U99KpBiEUN",
+            "name": "",
+            "src_state_id": "NDKGyBbExx"
+          },
+          {
+            "dst_state_id": "NDKGyBbExx",
+            "duration": 0.0,
+            "id": "wBJXvKbIiQ",
+            "name": "",
+            "src_state_id": "NyoiMIp6ms"
+          }
+        ]
+      },
       "tag": ""
     },
     {
@@ -4476,6 +4402,7 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
               "UnderlineText": false,
@@ -4543,16 +4470,17 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
+              "Enable3DLight": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
+              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
             "layer": 0,
-            "linewidth": 1.0,
             "material": "8N7BmAmgYL",
             "offset": {
               "x": 0.0,
@@ -4560,9 +4488,6 @@
               "z": 0.0
             },
             "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
             "rotator": {
               "x": 0.0,
               "y": -0.0,
@@ -4577,7 +4502,8 @@
             "angular_acceleration": 0.0,
             "angular_velocity": 0.0,
             "flags": {
-              "Enabled": true
+              "Enabled": true,
+              "RotateToDirection": false
             },
             "integrator": "Euler",
             "linear_acceleration": {
@@ -4713,6 +4639,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -4772,6 +4699,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -4831,6 +4759,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -4890,6 +4819,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -4949,6 +4879,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5008,6 +4939,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5067,6 +4999,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5126,6 +5059,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5304,6 +5238,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5363,6 +5298,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5422,6 +5358,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5481,6 +5418,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5540,6 +5478,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5605,6 +5544,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5783,6 +5723,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5848,6 +5789,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5907,6 +5849,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -5966,6 +5909,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6025,6 +5969,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6084,6 +6029,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6143,6 +6089,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6469,6 +6416,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6538,6 +6486,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6597,6 +6546,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6656,6 +6606,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6715,6 +6666,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6774,6 +6726,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6833,6 +6786,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6892,6 +6846,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -6951,6 +6906,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7010,6 +6966,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7069,6 +7026,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7128,6 +7086,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7187,6 +7146,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7365,6 +7325,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7424,6 +7385,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7483,6 +7445,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7542,6 +7505,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7601,6 +7565,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7660,6 +7625,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7719,6 +7685,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7897,6 +7864,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -7956,6 +7924,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8134,6 +8103,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8193,6 +8163,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8252,6 +8223,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8311,6 +8283,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8372,6 +8345,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8550,6 +8524,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8617,6 +8592,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8684,6 +8660,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8743,6 +8720,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8802,6 +8780,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8861,6 +8840,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8920,6 +8900,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -8979,6 +8960,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9038,6 +9020,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9097,6 +9080,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9156,6 +9140,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9215,6 +9200,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9274,6 +9260,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9333,6 +9320,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9392,6 +9380,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9451,6 +9440,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9510,6 +9500,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9569,6 +9560,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9628,6 +9620,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9687,6 +9680,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9748,6 +9742,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9807,6 +9802,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -9985,6 +9981,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10044,6 +10041,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10103,6 +10101,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10162,6 +10161,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10221,6 +10221,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10280,6 +10281,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10339,6 +10341,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10398,6 +10401,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10457,6 +10461,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10516,6 +10521,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10688,6 +10694,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10747,6 +10754,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10806,6 +10814,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10865,6 +10874,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10924,6 +10934,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -10983,6 +10994,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11042,6 +11054,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11133,6 +11146,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11192,6 +11206,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11370,6 +11385,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11429,6 +11445,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11488,6 +11505,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11547,6 +11565,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11606,6 +11625,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11665,6 +11685,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11724,6 +11745,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11783,6 +11805,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11842,6 +11865,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11901,6 +11925,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -11960,6 +11985,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -12019,6 +12045,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -12078,6 +12105,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -12256,6 +12284,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -12302,6 +12331,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -12480,6 +12510,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -12539,6 +12570,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -12598,6 +12630,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -12657,6 +12690,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -12716,6 +12750,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13042,6 +13077,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13101,6 +13137,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13279,6 +13316,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13340,6 +13378,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13399,6 +13438,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13577,6 +13617,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13636,6 +13677,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13695,6 +13737,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13762,6 +13805,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13827,6 +13871,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13886,6 +13931,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -13945,6 +13991,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -14004,6 +14051,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -14063,6 +14111,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -15404,6 +15453,7 @@
           }
         }
       ],
+      "projection": "AxisAlignedOrthographic",
       "render_tree": {
         "children": [
           {
@@ -15690,6 +15740,7 @@
           }
         }
       ],
+      "projection": "AxisAlignedOrthographic",
       "quadtree_max_items": 4,
       "quadtree_max_levels": 4,
       "render_tree": {
@@ -16643,6 +16694,7 @@
           }
         }
       ],
+      "projection": "AxisAlignedOrthographic",
       "render_tree": {
         "children": [
           {
@@ -17112,6 +17164,7 @@
           }
         }
       ],
+      "projection": "AxisAlignedOrthographic",
       "render_tree": {
         "children": [
           {
@@ -17557,6 +17610,7 @@
           }
         }
       ],
+      "projection": "AxisAlignedOrthographic",
       "render_tree": {
         "children": [
           {
