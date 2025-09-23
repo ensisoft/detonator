@@ -94,7 +94,7 @@
           <item>
            <widget class="QLabel" name="www">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.ensisoft.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;http://www.ensisoft.com&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://www.gamestudio.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://www.github.com/ensisoft/gamestudio&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;https://github.com/ensisoft/detonator&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.ensisoft.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;https://www.ensisoft.com&lt;br/&gt;https://games123.net&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://www.gamestudio.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;&lt;a href=&quot;http://www.github.com/ensisoft/gamestudio&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2eb8e6;&quot;&gt;https://github.com/ensisoft/detonator&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
@@ -163,8 +163,8 @@
               <item>
                <widget class="QPlainTextEdit" name="plainTextEdit_22">
                 <property name="plainText">
-                 <string>Copyright (C) 2020-2024 Sami Väisänen
-Copyright (C) 2020-2024 Ensisoft http://www.ensisoft.com
+                 <string>Copyright (C) 2020-2025 Sami Väisänen
+Copyright (C) 2020-2025 Ensisoft http://www.ensisoft.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
