@@ -203,6 +203,14 @@ being found.
 
 <b>!!!!  NEVER TRUST THE DESIGNER BUT ALWAYS CHECK THE XML!!!1 !!!</b>
 
+<details><summary>Qt designer shows old image</summary>
+
+  * Changing a resource file such as a .png file doesn't change the image in the Qt designer
+  * Apparently there's a magic cache somewhere that cannot be nuked. (Where the f is it??)
+  * As a workaround, rename files.
+
+</details>
+
 <details><summary>QPushButton fucks up with `auto default`</summary>
 
 * Buttons when added to a dialog can have 'auto default' property which creates surprising
