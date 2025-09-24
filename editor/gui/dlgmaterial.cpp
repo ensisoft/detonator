@@ -409,6 +409,7 @@ void DlgMaterial::ListMaterials(const QString &filter_string)
                 const auto* map = klass->GetTextureMap(i);
                 if (map == nullptr)
                     continue;
+
                 Material m;
                 m.material = klass;
                 m.texture_map_id = map->GetId();
@@ -418,7 +419,19 @@ void DlgMaterial::ListMaterials(const QString &filter_string)
                 // if we have a preview scale then skip using the texture rect as the scaling
                 // box for the previews.
                 if (map->GetNumTextures() == 1 && mPreviewScale.IsEqual(1.0f))
-                    m.texture_rect = map->GetTextureRect(0);
+                {
+                    auto texture_rect = map->GetTextureRect(0);
+                    if (const auto* sprite_sheet = map->GetSpriteSheet())
+                    {
+                        const auto width = texture_rect.GetWidth() / sprite_sheet->cols;
+                        const auto height = texture_rect.GetHeight() / sprite_sheet->rows;
+                        gfx::FRect src;
+                        src.Resize(width, height);
+                        src.Translate(texture_rect.GetX(), texture_rect.GetY());
+                        texture_rect = src;
+                    }
+                    m.texture_rect = texture_rect;
+                }
 
                 mMaterials.push_back(std::move(m));
             }
