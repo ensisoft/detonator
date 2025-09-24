@@ -326,6 +326,7 @@ struct OpenGLFunctions
     PFNGLACTIVETEXTUREPROC           glActiveTexture;
     PFNGLGENERATEMIPMAPPROC          glGenerateMipmap;
     PFNGLTEXIMAGE2DPROC              glTexImage2D;
+    PFNGLTEXIMAGE3DPROC              glTexImage3D;
     PFNGLTEXPARAMETERIPROC           glTexParameteri;
     PFNGLPIXELSTOREIPROC             glPixelStorei;
     PFNGLENABLEPROC                  glEnable;
@@ -640,6 +641,7 @@ public:
         RESOLVE(glActiveTexture);
         RESOLVE(glGenerateMipmap);
         RESOLVE(glTexImage2D);
+        RESOLVE(glTexImage3D);
         RESOLVE(glTexParameteri);
         RESOLVE(glPixelStorei);
         RESOLVE(glEnable);
@@ -1532,8 +1534,8 @@ public:
                                          unsigned texture_height, dev::TextureFormat format) override
     {
         const auto& internal_format = GetTextureFormat(format);
-        const auto texture_border = 0;
-        const auto texture_level = 0; // mip level
+        constexpr auto texture_border = 0;
+        constexpr auto texture_level = 0; // mip level
 
         GLuint handle = 0;
         GL_CALL(glGenTextures(1, &handle));
@@ -1556,6 +1558,38 @@ public:
         ret.type = dev::TextureType::Texture2D;
         ret.texture_width = texture_width;
         ret.texture_height = texture_height;
+        return ret;
+    }
+    dev::TextureObject AllocateTexture2DArray(unsigned texture_width,
+                                              unsigned texture_height,
+                                              unsigned texture_array_size, dev::TextureFormat format) override
+    {
+        const auto& internal_format = GetTextureFormat(format);
+        constexpr auto texture_border = 0;
+        constexpr auto texture_level = 0; // mip level
+
+        GLuint handle = 0;
+        GL_CALL(glGenTextures(1, &handle));
+        GL_CALL(glActiveTexture(GL_TEXTURE0 + mTempTextureUnitIndex));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D_ARRAY, handle));
+        GL_CALL(glTexImage3D(GL_TEXTURE_2D_ARRAY, texture_level, internal_format.sizeFormat,
+                             texture_width, texture_height, texture_array_size, texture_border,
+                             internal_format.baseFormat, internal_format.type, nullptr));
+
+        auto& texture_state = mTextureState[handle];
+        texture_state.min_filter = GL_NONE;
+        texture_state.mag_filter = GL_NONE;
+        texture_state.wrap_x = GL_NONE;
+        texture_state.wrap_y = GL_NONE;
+        texture_state.has_mips = false;
+
+        dev::TextureObject ret;
+        ret.handle = handle;
+        ret.format = format;
+        ret.type = dev::TextureType::Texture2D;
+        ret.texture_width = texture_width;
+        ret.texture_height = texture_height;
+        ret.texture_array_size = texture_array_size;
         return ret;
     }
 
@@ -1641,6 +1675,7 @@ public:
     {
         ASSERT(texture.IsValid());
         ASSERT(texture.texture_width && texture.texture_height);
+        ASSERT(texture.texture_array_size == 0);
 
         if (texture_unit >= mTextureUnitCount)
         {

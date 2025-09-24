@@ -85,6 +85,9 @@ namespace dev
 
         virtual TextureObject AllocateTexture2D(unsigned texture_width,
                                                 unsigned texture_height, TextureFormat format) = 0;
+        virtual TextureObject AllocateTexture2DArray(unsigned texture_width,
+                                                     unsigned texture_height,
+                                                     unsigned texture_array_size, TextureFormat format) = 0;
         virtual TextureObject UploadTexture2D(const void* bytes,
                                               unsigned texture_width,
                                               unsigned texture_height, TextureFormat format) = 0;

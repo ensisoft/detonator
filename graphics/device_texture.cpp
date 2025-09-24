@@ -58,6 +58,44 @@ void DeviceTexture::Upload(const void* bytes, unsigned width, unsigned height, F
     mWidth  = width;
     mHeight = height;
     mFormat = format;
+    mArraySize = 0;
+    mHasMips = false;
+}
+
+void DeviceTexture::Allocate(unsigned width, unsigned height, Format format)
+{
+    if (mTexture.IsValid())
+    {
+        mDevice->DeleteTexture(mTexture);
+    }
+    mTexture = mDevice->AllocateTexture2D(width, height, format);
+    if (!IsTransient())
+    {
+        DEBUG("Allocated new texture object. [name='%1', size=%2x%3]", mName, width, height);
+    }
+    mWidth  = width;
+    mHeight = height;
+    mFormat = format;
+    mArraySize = 0;
+    mHasMips = false;
+}
+
+void DeviceTexture::AllocateArray(unsigned width, unsigned height, unsigned array_size, Format format)
+{
+    if (mTexture.IsValid())
+    {
+        mDevice->DeleteTexture(mTexture);
+    }
+    mTexture = mDevice->AllocateTexture2DArray(width, height, array_size, format);
+    if (!IsTransient())
+    {
+        DEBUG("Allocated new texture array object. [name='%1', size=%2x%3,%4]", mName, width, height, array_size);
+    }
+
+    mWidth  = width;
+    mHeight = height;
+    mFormat = format;
+    mArraySize = array_size;
     mHasMips = false;
 }
 

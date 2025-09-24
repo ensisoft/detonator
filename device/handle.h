@@ -76,12 +76,13 @@ namespace dev
             auto GetFormat() const noexcept
             { return format; }
 
-            unsigned handle = 0;
             TextureType type = TextureType::Invalid;
             TextureFormat format = TextureFormat::sRGBA;
-            size_t texture_width  = 0;
-            size_t texture_height = 0;
-            size_t texture_depth  = 0;
+            unsigned handle = 0;
+            unsigned texture_width  = 0;
+            unsigned texture_height = 0;
+            unsigned texture_depth  = 0;
+            unsigned texture_array_size = 0;
         };
 
         template<>
