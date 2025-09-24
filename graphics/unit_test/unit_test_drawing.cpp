@@ -118,10 +118,22 @@ public:
         mHeight = yres;
         mFormat = format;
     }
+    void Allocate(unsigned width, unsigned height, Format format) override
+    {
+        mWidth = width;
+        mHash = height;
+        mFormat = format;
+    }
+    void AllocateArray(unsigned width, unsigned height, unsigned array_size, Format format) override
+    {
+
+    }
     unsigned GetWidth() const override
     { return mWidth; }
     unsigned GetHeight() const override
     { return mHeight; }
+    unsigned GetArraySize() const override
+    { return 0; }
     Format GetFormat() const override
     { return mFormat; }
     void SetContentHash(size_t hash) override

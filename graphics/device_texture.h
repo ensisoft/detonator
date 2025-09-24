@@ -41,6 +41,8 @@ namespace gfx {
         ~DeviceTexture() override;
 
         void Upload(const void* bytes, unsigned width, unsigned height, Format format) override;
+        void Allocate(unsigned width, unsigned height, Format format) override;
+        void AllocateArray(unsigned width, unsigned height, unsigned array_size, Format format) override;
         bool GenerateMips() override;
 
         void SetFlag(Flags flag, bool on_off) override
@@ -69,6 +71,8 @@ namespace gfx {
         { return mWidth; }
         unsigned GetHeight() const override
         { return mHeight; }
+        unsigned GetArraySize() const override
+        { return mArraySize; }
         Texture::Format GetFormat() const override
         { return mFormat; }
         void SetContentHash(size_t hash) override
@@ -126,6 +130,7 @@ namespace gfx {
     private:
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
+        unsigned mArraySize = 0;
 
         std::size_t mHash = 0;
         std::string mName;

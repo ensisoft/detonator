@@ -88,12 +88,28 @@ namespace gfx
         // Upload the texture contents from the given CPU side buffer.
         // This will overwrite any previous contents and reshape the texture dimensions.
         virtual void Upload(const void* bytes, unsigned width, unsigned height, Format format) = 0;
+        // Allocate texture storage based on the texture format and dimensions.
+        // The contents of the texture are unspecified and any previous contents
+        // are no longer valid/available. The primary use case for this method is
+        // to be able to allocate texture storage for using the texture as a render
+        // target when rendering to an FBO. Any mipmap generation must then be
+        // performed later after the rendering has completed or then the filtering
+        // mode must be set not to use mips either.
+        virtual void Allocate(unsigned width, unsigned height, Format format) = 0;
+        // Allocate an array of textures of specified width, height and format.
+        // The contents of the texture are unspecified and any previous contents
+        // are no longer valid/available. The primary use case for this method is
+        // to allocate an array of shadow map textures.
+        virtual void AllocateArray(unsigned width, unsigned height, unsigned array_size, Format format) = 0;
         // Get the texture width. Initially 0 until Upload is called
         // and new texture contents are uploaded.
         virtual unsigned GetWidth() const = 0;
         // Get the texture height. Initially 0 until Upload is called
         // and texture contents are uploaded.
         virtual unsigned GetHeight() const = 0;
+        // Get the number of textures in a texture array allocated by a previous call
+        // to  AllocateArray. If the texture is not an array then this will return 0.
+        virtual unsigned GetArraySize() const = 0;
         // Get the texture format.
         virtual Format GetFormat() const = 0;
         // Set the hash value that identifies the data.
@@ -156,15 +172,6 @@ namespace gfx
             return GetWidth() && GetHeight();
         }
 
-        // Allocate texture storage based on the texture format and dimensions.
-        // The contents of the texture are unspecified and any previous contents
-        // are no longer valid/available. The primary use case for this method is
-        // to be able to allocate texture storage for using the texture as a render
-        // target when rendering to an FBO. Any mipmap generation must then be
-        // performed later after the rendering has completed or then the filtering
-        // mode must be set not to use mips either.
-        void Allocate(unsigned width, unsigned height, Format format)
-        { Upload(nullptr, width, height, format); }
 
     protected:
     private:
