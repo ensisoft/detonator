@@ -151,6 +151,7 @@ void SpriteWidget::PaintTexture(const gfx::MaterialClass *klass, gfx::Painter &p
         temp.SetBaseColor(mMaterial->GetBaseColor());
         temp.SetTextureMinFilter(mMaterial->GetTextureMinFilter());
         temp.SetTextureMagFilter(mMaterial->GetTextureMagFilter());
+        temp.SetAlphaCutoff(mMaterial->GetAlphaCutoff());
         temp.AddTexture(texture_src->Copy());
         temp.SetTextureRect(texture_rect);
         gfx::FillRect(painter, rect, gfx::MaterialInstance(temp));
@@ -258,6 +259,7 @@ void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter&
         temp.SetTextureMinFilter(material->GetTextureMinFilter());
         temp.SetTextureMagFilter(material->GetTextureMagFilter());
         temp.SetBaseColor(material->GetBaseColor());
+        temp.SetAlphaCutoff(material->GetAlphaCutoff());
         temp.AddTexture(texture_src->Copy());
 
         for (unsigned row=0; row<sprite_sheet->rows; ++row)
@@ -296,6 +298,7 @@ void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter&
             temp.SetBaseColor(material->GetBaseColor());
             temp.SetTextureMinFilter(material->GetTextureMinFilter());
             temp.SetTextureMagFilter(material->GetTextureMagFilter());
+            temp.SetAlphaCutoff(material->GetAlphaCutoff());
             temp.AddTexture(texture_src->Copy());
             temp.SetTextureRect(texture_rect);
 
