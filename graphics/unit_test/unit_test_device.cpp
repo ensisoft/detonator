@@ -1001,7 +1001,7 @@ void main() {
         conf.color_target_count = 0;
         auto* fbo = dev->MakeFramebuffer("test");
         fbo->SetConfig(conf);
-        fbo->SetDepthTarget(depth_texture);
+        fbo->SetDepthTarget(depth_texture, 0);
 
         for (int i=0; i<2; ++i)
         {

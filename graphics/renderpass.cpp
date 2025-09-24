@@ -40,7 +40,7 @@ void ShadowMapRenderPass::InitState() const
     for (size_t i=0; i<mProgram.GetLightCount(); ++i)
     {
         auto* depth_texture = GetDepthTexture(i);
-        fbo->SetDepthTarget(depth_texture);
+        fbo->SetDepthTarget(depth_texture, 0);
         mDevice->ClearDepth(1.0f, fbo);
     }
 }
@@ -76,7 +76,7 @@ bool ShadowMapRenderPass::Draw(const DrawCommandList& draw_cmd_list) const
             continue;
 
         auto* depth_texture = GetDepthTexture(i);
-        fbo->SetDepthTarget(depth_texture);
+        fbo->SetDepthTarget(depth_texture, 0);
 
         const auto& world_to_light = GetLightViewMatrix(i);
         const auto& light_projection = GetLightProjectionMatrix(i);

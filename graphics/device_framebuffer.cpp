@@ -134,13 +134,14 @@ void DeviceFramebuffer::SetColorTarget(gfx::Texture* texture, ColorAttachment at
     }
 }
 
-void DeviceFramebuffer::SetDepthTarget(gfx::Texture* texture)
+void DeviceFramebuffer::SetDepthTarget(gfx::Texture* texture, unsigned texture_array_index)
 {
+    const auto texture_array_size = texture->GetArraySize();
     ASSERT(mConfig.format == Format::DepthTexture32f);
-    if (mClientDepthTexture == texture)
-        return;
+    ASSERT(texture_array_size == 0 || texture_array_index < texture_array_size);
 
     mClientDepthTexture = static_cast<DeviceTexture*>(texture);
+    mDepthTextureArrayIndex = texture_array_index;
 }
 
 void DeviceFramebuffer::Resolve(gfx::Texture** color, ColorAttachment attachment) const
@@ -209,7 +210,7 @@ bool DeviceFramebuffer::Complete()
 
         auto* depth_target = GetDepthBufferTexture();
 
-        mDevice->BindDepthRenderTargetTexture2D(mFramebuffer, depth_target->GetTexture());
+        mDevice->BindDepthRenderTargetTexture2D(mFramebuffer, depth_target->GetTexture(), mDepthTextureArrayIndex);
     }
     else
     {
@@ -367,6 +368,7 @@ void DeviceFramebuffer::CreateDepthBufferTexture()
         mDepthTexture->SetWrapY(gfx::Texture::Wrapping::Clamp);
         DEBUG("Allocated new FBO depth buffer (texture) target. [name='%1', width=%2, height=%3]", mName,
               mConfig.width, mConfig.height);
+        mDepthTextureArrayIndex = 0;
     }
     else
     {
@@ -374,6 +376,7 @@ void DeviceFramebuffer::CreateDepthBufferTexture()
         const auto height = mDepthTexture->GetHeight();
         if (width != mConfig.width || height != mConfig.height)
             mDepthTexture->Allocate(mConfig.width, mConfig.height, Texture::Format::DepthComponent32f);
+        mDepthTextureArrayIndex = 0;
     }
 }
 

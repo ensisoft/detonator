@@ -353,6 +353,7 @@ struct OpenGLFunctions
     PFNGLRENDERBUFFERSTORAGEPROC     glRenderbufferStorage;
     PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC glRenderbufferStorageMultisample;
     PFNGLFRAMEBUFFERTEXTURE2DPROC    glFramebufferTexture2D;
+    PFNGLFRAMEBUFFERTEXTURELAYERPROC glFramebufferTextureLayer;
     PFNGLCHECKFRAMEBUFFERSTATUSPROC  glCheckFramebufferStatus;
     PFNGLBLITFRAMEBUFFERPROC         glBlitFramebuffer;
     PFNGLDRAWBUFFERSPROC             glDrawBuffers;
@@ -669,6 +670,7 @@ public:
         RESOLVE(glRenderbufferStorageMultisample);
         RESOLVE(glBlitFramebuffer);
         RESOLVE(glFramebufferTexture2D);
+        RESOLVE(glFramebufferTextureLayer);
         RESOLVE(glCheckFramebufferStatus);
         RESOLVE(glDrawBuffers)
         RESOLVE(glReadBuffer)
@@ -1337,21 +1339,29 @@ public:
             texture_format == dev::TextureFormat::RGBA ||
             texture_format == dev::TextureFormat::sRGB ||
             texture_format == dev::TextureFormat::sRGBA);
+        ASSERT(texture.texture_array_size == 0);
 
         GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.handle));
         GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_attachment_index, GL_TEXTURE_2D, texture.handle, 0));
     }
 
-    void BindDepthRenderTargetTexture2D(const dev::Framebuffer &framebuffer, const dev::TextureObject &texture) override
+    void BindDepthRenderTargetTexture2D(const dev::Framebuffer &framebuffer, const dev::TextureObject &texture,
+                                        unsigned texture_array_index) override
     {
         ASSERT(framebuffer.IsValid());
         ASSERT(framebuffer.IsCustom());
         ASSERT(texture.IsValid());
         ASSERT(texture.GetType() == dev::TextureType::Texture2D);
         ASSERT(texture.GetFormat() == dev::TextureFormat::DepthComponent32f);
+        ASSERT((texture_array_index < texture.texture_array_size) || texture.texture_array_size == 0);
+
+        constexpr auto mipmap_level = 0;
 
         GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.handle));
-        GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture.handle, 0));
+        if (texture.texture_array_size)
+            GL_CALL(glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture.handle, mipmap_level,
+                                              static_cast<GLint>(texture_array_index)));
+        else GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture.handle, mipmap_level));
     }
 
     bool CompleteFramebuffer(const dev::Framebuffer& framebuffer,
@@ -1675,7 +1685,9 @@ public:
     {
         ASSERT(texture.IsValid());
         ASSERT(texture.texture_width && texture.texture_height);
-        ASSERT(texture.texture_array_size == 0);
+
+        const auto is_array = texture.texture_array_size > 0;
+        const auto texture_target = is_array ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D;
 
         if (texture_unit >= mTextureUnitCount)
         {
@@ -1747,11 +1759,11 @@ public:
             texture_state.wrap_y != internal_texture_y_wrap)
         {
             GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_unit));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture.handle));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, internal_texture_x_wrap));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, internal_texture_y_wrap));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, internal_texture_mag_filter));
-            GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, internal_texture_min_filter));
+            GL_CALL(glBindTexture(texture_target, texture.handle));
+            GL_CALL(glTexParameteri(texture_target, GL_TEXTURE_WRAP_S, internal_texture_x_wrap));
+            GL_CALL(glTexParameteri(texture_target, GL_TEXTURE_WRAP_T, internal_texture_y_wrap));
+            GL_CALL(glTexParameteri(texture_target, GL_TEXTURE_MAG_FILTER, internal_texture_mag_filter));
+            GL_CALL(glTexParameteri(texture_target, GL_TEXTURE_MIN_FILTER, internal_texture_min_filter));
             GL_CALL(glUniform1i(sampler.location, texture_unit));
             texture_state.mag_filter = internal_texture_mag_filter;
             texture_state.min_filter = internal_texture_min_filter;
@@ -1762,7 +1774,7 @@ public:
         {
             // set the texture unit to the sampler
             GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_unit));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture.handle));
+            GL_CALL(glBindTexture(texture_target, texture.handle));
             GL_CALL(glUniform1i(sampler.location, texture_unit));
         }
         return true;
