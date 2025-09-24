@@ -51,7 +51,7 @@ layout (std140) uniform LightTransformArray {
     LightTransform light_transforms[BASIC_LIGHT_MAX_LIGHTS];
 };
 
-uniform sampler2D kShadowMap0;
+uniform sampler2DArray kShadowMap;
 
 // @code
 
@@ -86,7 +86,9 @@ float ComputeShadow(uint light_index, vec3 surface_normal) {
     if (y > 1.0 - border)
         sy = 1.0 - smoothstep(1.0 - border, 1.0, y);
 
-    float shadow_map_depth = texture(kShadowMap0, frag_pos_light_map.xy).r;
+    float shadow_map_layer = float(light_index);
+
+    float shadow_map_depth = texture(kShadowMap, vec3(frag_pos_light_map.xy, shadow_map_layer)).r;
     float fragment_depth = frag_pos_light_map.z;
 
     vec3 direction_towards_light = normalize(lights[light_index].position -vertexViewPosition);

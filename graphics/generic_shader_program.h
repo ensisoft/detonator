@@ -190,7 +190,7 @@ namespace gfx
         float GetLightProjectionNearPlane(unsigned light_index) const;
         float GetLightProjectionFarPlane(unsigned light_index) const;
 
-        const Texture* GetLightShadowMap(const Device& device, unsigned light_index) const;
+        const Texture* GetLightShadowMap(const Device& device) const;
 
         static std::shared_ptr<const Light> MakeSharedLight(const Light& data)
         {
