@@ -50,21 +50,21 @@ namespace {
     enum class MaterialType {
         // all selected images are one sprite animation cycle
         SpriteAnimation,
-        // Each selected image is a single material with single static texture
-        SpriteTexture,
         // Each selected image is combined into a single static sprite material
         // with multiple textures
-        SpriteSheet
+        SpriteSheet,
+        // Each selected image is a single material with single static texture
+        StaticTexture
     };
 
     std::string TranslateEnum(MaterialType type)
     {
         if (type == MaterialType::SpriteAnimation)
-            return "As A Single Sprite Animation";
-        else if (type == MaterialType::SpriteTexture)
-            return "Each Image as a Separate Sprite Texture";
+            return "As a Sprite Animation with Multiple Sprite Images";
+        else if (type == MaterialType::StaticTexture)
+            return "Each Image as a Separate Static Texture";
         else if (type == MaterialType::SpriteSheet)
-            return "All Images Combined into a Single Sprite Sheet";
+            return "As a Sprite Animation with a Single Sprite Sheet";
         else BUG("Missing translation");
         return "???";
     }
@@ -296,7 +296,7 @@ void DlgTileImport::on_btnImport_clicked()
         mWorkspace->SaveResource(res);
 
     }
-    else if (type == MaterialType::SpriteTexture)
+    else if (type == MaterialType::StaticTexture)
     {
         for (size_t index=0; index<mPack.images.size(); ++index)
         {
@@ -668,12 +668,12 @@ void DlgTileImport::on_materialType_currentIndexChanged(int)
     else if (type == MaterialType::SpriteSheet)
     {
         SetEnabled(mUI.chkBlendFrames, false);
-        SetEnabled(mUI.spriteFps, false);
+        SetEnabled(mUI.spriteFps, true);
         SetEnabled(mUI.spriteName, true);
         SetValue(mUI.spriteName, mSpriteName);
         SetPlaceholderText(mUI.spriteName, QString(""));
     }
-    else if (type == MaterialType::SpriteTexture)
+    else if (type == MaterialType::StaticTexture)
     {
         mSpriteName = GetValue(mUI.spriteName);
         SetEnabled(mUI.chkBlendFrames, false);
