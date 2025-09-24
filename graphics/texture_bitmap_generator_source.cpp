@@ -53,7 +53,7 @@ Texture* TextureBitmapGeneratorSource::Upload(const Environment& env, Device& de
     {
         texture->SetContentHash(content_hash);
         texture->Upload(bitmap->GetDataPtr(), bitmap->GetWidth(), bitmap->GetHeight(),
-            Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB), false);
+            Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB));
         texture->SetFilter(Texture::MinFilter::Linear);
         texture->SetFilter(Texture::MagFilter::Linear);
 

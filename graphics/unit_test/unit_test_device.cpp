@@ -372,7 +372,7 @@ void main() {
     {
 
         auto* target = dev->MakeTexture("target");
-        target->Upload(nullptr, 10, 10, gfx::Texture::Format::RGBA, false);
+        target->Upload(nullptr, 10, 10, gfx::Texture::Format::RGBA);
         target->SetName("FBO-color-target");
 
         gfx::Framebuffer::Config conf;
@@ -2205,7 +2205,8 @@ void unit_test_algo_texture_copy()
     bmp.Fill(gfx::URect(0, 0, 10, 5), gfx::Color::Green);
     // flip the bitmap now temporarily to match the layout expected by OpenGL
     bmp.FlipHorizontally();
-    src->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA, true);
+    src->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA);
+    src->GenerateMips();
     // flip back to our representation.
     bmp.FlipHorizontally();
 
@@ -2238,7 +2239,8 @@ void unit_test_algo_texture_flip()
     bmp.Fill(gfx::URect(0, 0, 10, 5), gfx::Color::Green);
     // flip the bitmap now temporarily to match the layout expected by OpenGL
     bmp.FlipHorizontally();
-    tex->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA, true);
+    tex->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA);
+    tex->GenerateMips();
     // flip back to our presentation.
     bmp.FlipHorizontally();
 
@@ -2273,7 +2275,8 @@ void unit_test_algo_texture_read()
     bmp.Fill(gfx::URect(0, 0, 10, 5), gfx::Color::Green);
     // flip the bitmap now temporarily to match the layout expected by OpenGL
     bmp.FlipHorizontally();
-    tex->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA, true);
+    tex->Upload(bmp.GetDataPtr(), 10, 10, gfx::Texture::Format::RGBA);
+    tex->GenerateMips();
     // flip back to our presentation.
     bmp.FlipHorizontally();
 

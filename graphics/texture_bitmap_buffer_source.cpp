@@ -64,12 +64,12 @@ Texture* TextureBitmapBufferSource::Upload(const Environment& env, Device& devic
     }
 
     const auto sRGB = mColorSpace == ColorSpace::sRGB;
-    constexpr auto generate_mips = true;
 
     texture->SetName(mName);
     texture->SetContentHash(content_hash);
     texture->Upload(mBitmap->GetDataPtr(), mBitmap->GetWidth(), mBitmap->GetHeight(),
-        Texture::DepthToFormat(mBitmap->GetDepthBits(), sRGB), generate_mips);
+        Texture::DepthToFormat(mBitmap->GetDepthBits(), sRGB));
+    texture->GenerateMips();
     return texture;
 }
 
