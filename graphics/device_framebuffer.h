@@ -35,7 +35,7 @@ namespace gfx
 
         void SetConfig(const Config& conf) override;
         void SetColorTarget(gfx::Texture* texture, ColorAttachment attachment) override;
-        void SetDepthTarget(gfx::Texture* texture) override;
+        void SetDepthTarget(gfx::Texture* texture, unsigned texture_array_index) override;
         void Resolve(gfx::Texture** color, ColorAttachment attachment) const override;
 
         unsigned GetWidth() const override;
@@ -82,6 +82,7 @@ namespace gfx
         // resolve target.
         std::vector<std::unique_ptr<gfx::DeviceTexture>> mColorTextures;
         std::unique_ptr<gfx::DeviceTexture> mDepthTexture;
+        unsigned mDepthTextureArrayIndex = 0;
 
         // Client provided texture(s) that will ultimately contain
         // the rendered result.

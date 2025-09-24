@@ -70,7 +70,8 @@ namespace dev
                                                unsigned color_attachment_index) = 0;
         // Bind a specific texture object as the depth render target in the given
         // frame buffer. The texture object must have the right size and type.
-        virtual void BindDepthRenderTargetTexture2D(const Framebuffer& framebuffer, const TextureObject& texture) = 0;
+        virtual void BindDepthRenderTargetTexture2D(const Framebuffer& framebuffer, const TextureObject& texture,
+                                                    unsigned texture_array_index) = 0;
 
         virtual bool CompleteFramebuffer(const Framebuffer& framebuffer,
                                          const std::vector<unsigned>& color_attachments) = 0;
