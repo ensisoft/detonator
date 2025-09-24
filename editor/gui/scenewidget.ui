@@ -797,7 +797,7 @@
                  <bool>false</bool>
                 </property>
                 <property name="collapsed" stdset="0">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text" stdset="0">
                  <string>Renderer config</string>
@@ -835,6 +835,9 @@
                    <widget class="QPushButton" name="btnResetBloom">
                     <property name="text">
                      <string>Reset bloom defaults</string>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
                     </property>
                    </widget>
                   </item>
@@ -1294,6 +1297,9 @@
               <property name="icon">
                <iconset resource="../resource/resource.qrc">
                 <normaloff>:/16x16_ico_png/hamburger.png</normaloff>:/16x16_ico_png/hamburger.png</iconset>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
              </widget>
             </item>

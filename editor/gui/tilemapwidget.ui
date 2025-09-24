@@ -500,6 +500,9 @@
                <iconset resource="../resource/resource.qrc">
                 <normaloff>:/16x16_ico_png/hamburger.png</normaloff>:/16x16_ico_png/hamburger.png</iconset>
               </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -812,6 +815,9 @@
                <iconset resource="../resource/resource.qrc">
                 <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
               </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -832,6 +838,9 @@
                <iconset resource="../resource/resource.qrc">
                 <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
               </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -851,6 +860,9 @@
               <property name="icon">
                <iconset resource="../resource/resource.qrc">
                 <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -879,8 +891,17 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="tabPosition">
+          <enum>QTabWidget::North</enum>
+         </property>
          <property name="currentIndex">
           <number>0</number>
+         </property>
+         <property name="documentMode">
+          <bool>false</bool>
+         </property>
+         <property name="tabBarAutoHide">
+          <bool>false</bool>
          </property>
          <widget class="QWidget" name="tabLayerProperties">
           <attribute name="title">
@@ -1189,8 +1210,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>100</width>
-                   <height>30</height>
+                   <width>349</width>
+                   <height>464</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">

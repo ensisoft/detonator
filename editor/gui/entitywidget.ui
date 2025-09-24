@@ -271,6 +271,9 @@
                  <iconset resource="../resource/resource.qrc">
                   <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
                 </property>
+                <property name="flat">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
              </layout>
@@ -1151,6 +1154,9 @@
                <iconset resource="../resource/resource.qrc">
                 <normaloff>:/16x16_ico_png/hamburger.png</normaloff>:/16x16_ico_png/hamburger.png</iconset>
               </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -1492,7 +1498,7 @@
           <x>0</x>
           <y>0</y>
           <width>428</width>
-          <height>1132</height>
+          <height>1110</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -2794,6 +2800,9 @@
                   <iconset resource="../resource/resource.qrc">
                    <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
                  </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
                 </widget>
                </item>
                <item row="10" column="1">
@@ -3047,6 +3056,9 @@
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
                    <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -3585,6 +3597,9 @@
                   <iconset resource="../resource/resource.qrc">
                    <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
                  </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
                 </widget>
                </item>
               </layout>
@@ -3879,6 +3894,9 @@
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
                    <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -4181,6 +4199,9 @@
                 <iconset resource="../resource/resource.qrc">
                  <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
                </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
             </layout>
@@ -4236,6 +4257,9 @@
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
                    <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -4432,6 +4456,9 @@
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
                    <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -4758,6 +4785,9 @@
                 <iconset resource="../resource/resource.qrc">
                  <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
                </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
             </layout>
@@ -4956,6 +4986,9 @@
                <property name="icon">
                 <iconset resource="../resource/resource.qrc">
                  <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -5156,6 +5189,9 @@
                <property name="icon">
                 <iconset resource="../resource/resource.qrc">
                  <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
                </property>
               </widget>
              </item>

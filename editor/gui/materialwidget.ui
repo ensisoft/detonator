@@ -2243,6 +2243,9 @@
                 <property name="text">
                  <string>Edit Texture ...</string>
                 </property>
+                <property name="flat">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="14" column="2">
@@ -2270,6 +2273,9 @@
                <widget class="QPushButton" name="btnSelectTextureRect">
                 <property name="text">
                  <string>Select Area ...</string>
+                </property>
+                <property name="flat">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
