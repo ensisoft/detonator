@@ -99,7 +99,7 @@ namespace gfx {
         else if (type == T::Sprite)
             return "Sprite Animation";
         else if (type == T::Texture)
-            return "Sprite Texture";
+            return "Static Texture";
         else if (type == T::Tilemap)
             return "Tile Sheet with Grid Layout";
         else if (type == T::BasicLight)
