@@ -32,7 +32,7 @@ DeviceTexture::~DeviceTexture()
     }
 }
 
-void DeviceTexture::Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips)
+void DeviceTexture::Upload(const void* bytes, unsigned width, unsigned height, Format format)
 {
     if (mTexture.IsValid())
     {
@@ -41,42 +41,24 @@ void DeviceTexture::Upload(const void* bytes, unsigned xres, unsigned yres, Form
 
     if (bytes)
     {
-        mTexture = mDevice->UploadTexture2D(bytes, xres, yres, format);
+        mTexture = mDevice->UploadTexture2D(bytes, width, height, format);
         if (!IsTransient())
         {
-            DEBUG("Uploaded new texture object. [name='%1', size=%2x%3]", mName, xres, yres);
-        }
-
-        if (mips)
-        {
-            const auto ret = mDevice->GenerateMipmaps(mTexture);
-            if (ret == dev::GraphicsDevice::MipStatus::UnsupportedSize)
-                WARN("Unsupported texture size for mipmap generation. [name='%1]", mName);
-            else if (ret == dev::GraphicsDevice::MipStatus::UnsupportedFormat)
-                WARN("Unsupported texture format for mipmap generation. [name='%1']", mName);
-            else if (ret == dev::GraphicsDevice::MipStatus::Error)
-                WARN("Failed to generate mips on texture. [name='%1']", mName);
-            else if (ret == dev::GraphicsDevice::MipStatus::Success)
-            {
-                if (!IsTransient())
-                    DEBUG("Successfully generated texture mips. [name='%1']", mName);
-            }
-            else BUG("Bug on mipmap status.");
-
-            mHasMips = ret == dev::GraphicsDevice::MipStatus::Success;
+            DEBUG("Uploaded new texture object. [name='%1', size=%2x%3]", mName, width, height);
         }
     }
     else
     {
-        mTexture = mDevice->AllocateTexture2D(xres, yres, format);
+        mTexture = mDevice->AllocateTexture2D(width, height, format);
         if (!IsTransient())
         {
-            DEBUG("Allocated new texture object. [name='%1', size=%2x%3]", mName, xres, yres);
+            DEBUG("Allocated new texture object. [name='%1', size=%2x%3]", mName, width, height);
         }
     }
-    mWidth  = xres;
-    mHeight = yres;
+    mWidth  = width;
+    mHeight = height;
     mFormat = format;
+    mHasMips = false;
 }
 
 bool DeviceTexture::GenerateMips()

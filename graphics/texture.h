@@ -87,9 +87,7 @@ namespace gfx
         virtual Wrapping GetWrapY() const = 0;
         // Upload the texture contents from the given CPU side buffer.
         // This will overwrite any previous contents and reshape the texture dimensions.
-        // If mips is false (no mipmap generation) the texture minification filter
-        // must be set not to use any mips either.
-        virtual void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips=true) = 0;
+        virtual void Upload(const void* bytes, unsigned width, unsigned height, Format format) = 0;
         // Get the texture width. Initially 0 until Upload is called
         // and new texture contents are uploaded.
         virtual unsigned GetWidth() const = 0;
@@ -127,33 +125,33 @@ namespace gfx
         virtual std::string GetId() const = 0;
 
         // helpers.
-        inline float GetWidthF() const noexcept
-        { return (float)GetWidth(); }
-        inline float GetHeightF() const noexcept
-        { return (float)GetHeight(); }
-        inline int GetWidthI() const noexcept
-        { return (int)GetWidth(); }
-        inline int GetHeightI() const noexcept
-        { return (int)GetHeight(); }
+        auto GetWidthF() const noexcept
+        { return static_cast<float>(GetWidth()); }
+        auto GetHeightF() const noexcept
+        { return static_cast<float>(GetHeight()); }
+        auto GetWidthI() const noexcept
+        { return static_cast<int>(GetWidth()); }
+        auto GetHeightI() const noexcept
+        { return static_cast<int>(GetHeight()); }
 
-        inline void SetTransient(bool on_off)
+        void SetTransient(bool on_off)
         { SetFlag(Flags::Transient, on_off); }
-        inline void SetGarbageCollection(bool on_off)
+        void SetGarbageCollection(bool on_off)
         { SetFlag(Flags::GarbageCollect, on_off); }
 
-        inline bool IsTransient() const noexcept
+        auto IsTransient() const noexcept
         { return TestFlag(Flags::Transient); }
-        inline bool GarbageCollect() const noexcept
+        auto GarbageCollect() const noexcept
         { return TestFlag(Flags::GarbageCollect); }
         // Check whether the texture is an alpha mask (and should be used as one)
         // even if the underlying pixel format isn't
-        inline bool IsAlphaMask() const noexcept
+        auto IsAlphaMask() const noexcept
         {
             if (GetFormat() == Format::AlphaMask || TestFlag(Flags::AlphaMask))
                 return true;
             return false;
         }
-        bool HasSize() const noexcept
+        auto HasSize() const noexcept
         {
             return GetWidth() && GetHeight();
         }
@@ -166,7 +164,7 @@ namespace gfx
         // performed later after the rendering has completed or then the filtering
         // mode must be set not to use mips either.
         void Allocate(unsigned width, unsigned height, Format format)
-        { Upload(nullptr, width, height, format, false); }
+        { Upload(nullptr, width, height, format); }
 
     protected:
     private:

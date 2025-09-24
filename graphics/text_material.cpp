@@ -43,20 +43,9 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
     auto* texture = device.FindTexture(gpu_id);
     if (!texture)
     {
-        // current text rendering use cases for this TextMaterial
-        // are such that we expect the rendered geometry to match
-        // the underlying rasterized text texture size almost exactly.
-        // this means that we can skip the mipmap generation and use
-        // a simple fast nearest/linear texture filter without mips.
-        const bool mips = false;
-
         const auto format = mText.GetRasterFormat();
         if (format == TextBuffer::RasterFormat::Bitmap)
         {
-            // create the texture object first. The if check above
-            // will then act as a throttle and prevent superfluous
-            // attempts to rasterize when the contents of the text
-            // buffer have not changed.
             texture = device.MakeTexture(gpu_id);
             texture->SetTransient(true); // set transient flag up front to tone down DEBUG noise
             texture->SetName("TextMaterialTexture");
@@ -66,7 +55,7 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
                 return false;
             const auto width = bitmap->GetWidth();
             const auto height = bitmap->GetHeight();
-            texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::AlphaMask, mips);
+            texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::AlphaMask);
         }
         else if (format == TextBuffer::RasterFormat::Texture)
         {
@@ -79,7 +68,6 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
                 return false;
             texture->SetTransient(true);
             texture->SetName("TextMaterialTexture");
-            // texture->GenerateMips(); << this would be the place to generate mips if needed.
         } else if (format == TextBuffer::RasterFormat::None)
             return false;
         else BUG("Unhandled texture raster format.");
@@ -106,6 +94,13 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
 #endif
         texture->SetFilter(Texture::MinFilter::Linear);
         texture->SetFilter(Texture::MagFilter::Linear);
+        // current text rendering use cases for this TextMaterial
+        // are such that we expect the rendered geometry to match
+        // the underlying rasterized text texture size almost exactly.
+        // this means that we can skip the mipmap generation and use
+        // a simple fast nearest/linear texture filter without mips.
+
+        // texture->GenerateMips(); << this would be the place to generate mips if needed.
     }
 
     // might have been allocated but failed to rasterize any content.

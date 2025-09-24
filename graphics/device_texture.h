@@ -40,7 +40,7 @@ namespace gfx {
         }
         ~DeviceTexture() override;
 
-        void Upload(const void* bytes, unsigned xres, unsigned yres, Format format, bool mips) override;
+        void Upload(const void* bytes, unsigned width, unsigned height, Format format) override;
         bool GenerateMips() override;
 
         void SetFlag(Flags flag, bool on_off) override

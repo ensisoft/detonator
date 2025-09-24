@@ -60,7 +60,7 @@ Texture* TextureTextBufferSource::Upload(const Environment& env, Device& device)
         if (const auto& mask = mTextBuffer.RasterizeBitmap())
         {
             texture->SetContentHash(content_hash);
-            texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::AlphaMask, false);
+            texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::AlphaMask);
             texture->SetFilter(Texture::MinFilter::Linear);
             texture->SetFilter(Texture::MagFilter::Linear);
             texture->SetContentHash(content_hash);

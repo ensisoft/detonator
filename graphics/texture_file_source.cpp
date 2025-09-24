@@ -95,15 +95,13 @@ Texture* TextureFileSource::Upload(const Environment& env, Device& device) const
 
     if (const auto& bitmap = GetData())
     {
-        constexpr auto generate_mips = true;
-        constexpr auto skip_mips = false;
         const auto sRGB = mColorSpace == ColorSpace::sRGB;
         texture->SetContentHash(content_hash);
         texture->Upload(bitmap->GetDataPtr(),
                         bitmap->GetWidth(),
                         bitmap->GetHeight(),
-                        Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB),
-                        skip_mips);
+                        Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB));
+
         texture->SetFilter(Texture::MinFilter::Linear);
         texture->SetFilter(Texture::MagFilter::Linear);
 
