@@ -354,6 +354,9 @@
                 <iconset resource="../resource/resource.qrc">
                  <normaloff>:/16x16_ico_png/hamburger.png</normaloff>:/16x16_ico_png/hamburger.png</iconset>
                </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
              <item>
