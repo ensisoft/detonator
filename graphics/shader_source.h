@@ -49,7 +49,7 @@ namespace gfx
             Vec2i, Vec3i, Vec4i,
             Mat2f, Mat3f, Mat4f,
             Color4f,
-            Sampler2D
+            Sampler2D, Sampler2DArray
         };
         using AttributeType = ShaderDataType;
         using UniformType   = ShaderDataType;

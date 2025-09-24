@@ -331,15 +331,15 @@ void GenericShaderProgram::ApplyDynamicState(const Device &device, const Environ
             data[0].transforms[light_index].vector1 = ToVec(light_to_map[1]);
             data[0].transforms[light_index].vector2 = ToVec(light_to_map[2]);
             data[0].transforms[light_index].vector3 = ToVec(light_to_map[3]);
-
-            const auto* shadow_map = GetLightShadowMap(device, light_index);
-            ASSERT(shadow_map);
-            const auto sampler_name  = "kShadowMap" + std::to_string(light_index);
-            const auto sampler_index = sampler_count + light_index;
-            program.SetTexture(sampler_name.c_str(), sampler_index, *shadow_map);
         }
+
+        const auto sampler_index = sampler_count + 0;
+        const auto* shadow_map = GetLightShadowMap(device);
+        ASSERT(shadow_map);
+
         program.SetUniformBlock(UniformBlock("LightTransformArray", std::move(data)));
-        program.SetTextureCount(texture_count + light_count);
+        program.SetTexture("kShadowMap", sampler_index, *shadow_map);
+        program.SetTextureCount(texture_count + 1);
     }
 }
 
@@ -417,9 +417,9 @@ GenericShaderProgram::LightProjectionType GenericShaderProgram::GetLightProjecti
     BUG("Bug on light projection type.");
 }
 
-const Texture* GenericShaderProgram::GetLightShadowMap(const Device& device, unsigned light_index) const
+const Texture* GenericShaderProgram::GetLightShadowMap(const Device& device) const
 {
-    return device.FindTexture(mRendererName + "/ShadowMap" + std::to_string(light_index));
+    return device.FindTexture(mRendererName + "/ShadowMap");
 }
 
 float GenericShaderProgram::GetLightProjectionNearPlane(unsigned light_index) const

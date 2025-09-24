@@ -37,10 +37,10 @@ void ShadowMapRenderPass::InitState() const
 {
     auto* fbo = CreateFramebuffer();
 
-    for (size_t i=0; i<mProgram.GetLightCount(); ++i)
+    for (unsigned light_index=0; light_index<mProgram.GetLightCount(); ++light_index)
     {
-        auto* depth_texture = GetDepthTexture(i);
-        fbo->SetDepthTarget(depth_texture, 0);
+        auto* depth_texture = GetDepthTexture();
+        fbo->SetDepthTarget(depth_texture, light_index);
         mDevice->ClearDepth(1.0f, fbo);
     }
 }
@@ -69,17 +69,17 @@ bool ShadowMapRenderPass::Draw(const DrawCommandList& draw_cmd_list) const
     // for each light, create a  depth render target.
     // render each object from the lights perspective into the
     // render buffer depth target
-    for (size_t i=0; i<mProgram.GetLightCount(); ++i)
+    for (unsigned light_index=0; light_index<mProgram.GetLightCount(); ++light_index)
     {
-        const auto& light = mProgram.GetLight(i);
+        const auto& light = mProgram.GetLight(light_index);
         if (light.type == BasicLightType::Ambient)
             continue;
 
-        auto* depth_texture = GetDepthTexture(i);
-        fbo->SetDepthTarget(depth_texture, 0);
+        auto* depth_texture = GetDepthTexture();
+        fbo->SetDepthTarget(depth_texture, light_index);
 
-        const auto& world_to_light = GetLightViewMatrix(i);
-        const auto& light_projection = GetLightProjectionMatrix(i);
+        const auto& world_to_light = GetLightViewMatrix(light_index);
+        const auto& light_projection = GetLightProjectionMatrix(light_index);
 
         shadow_painter.SetViewMatrix(world_to_light);
         shadow_painter.SetProjectionMatrix(light_projection);
@@ -105,28 +105,30 @@ Framebuffer* ShadowMapRenderPass::CreateFramebuffer() const
     fbo->SetConfig(config);
     return fbo;
 }
-Texture* ShadowMapRenderPass::GetDepthTexture(unsigned light_index) const
+Texture* ShadowMapRenderPass::GetDepthTexture() const
 {
     const auto shadow_map_width = mProgram.GetShadowMapWidth();
     const auto shadow_map_height = mProgram.GetShadowMapHeight();
+    const auto light_count = mProgram.GetLightCount();
 
-    auto* texture = mDevice->FindTexture(mRendererName + "/ShadowMap" + std::to_string(light_index));
+    auto* texture = mDevice->FindTexture(mRendererName + "/ShadowMap");
     if (!texture)
     {
-        texture = mDevice->MakeTexture(mRendererName + "/ShadowMap" + std::to_string(light_index));
-        texture->SetName(mRendererName + "/ShadowMap" + std::to_string(light_index));
+        texture = mDevice->MakeTexture(mRendererName + "/ShadowMap");
+        texture->SetName(mRendererName + "/ShadowMap");
         texture->SetFilter(gfx::Texture::MagFilter::Nearest);
         texture->SetFilter(gfx::Texture::MinFilter::Nearest);
         texture->SetWrapY(gfx::Texture::Wrapping::Clamp);
         texture->SetWrapX(gfx::Texture::Wrapping::Clamp);
-        texture->Allocate(shadow_map_width, shadow_map_height, Texture::Format::DepthComponent32f);
+        texture->AllocateArray(shadow_map_width, shadow_map_height, light_count, Texture::Format::DepthComponent32f);
     }
     else
     {
         const auto texture_width  = texture->GetWidth();
         const auto texture_height = texture->GetHeight();
-        if (texture_width != shadow_map_width || texture_height != shadow_map_height)
-            texture->Allocate(shadow_map_width, shadow_map_height, Texture::Format::DepthComponent32f);
+        const auto texture_array_size = texture->GetArraySize();
+        if (texture_width != shadow_map_width || texture_height != shadow_map_height || texture_array_size != light_count)
+            texture->AllocateArray(shadow_map_width, shadow_map_height, light_count, Texture::Format::DepthComponent32f);
     }
     return texture;
 }

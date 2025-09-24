@@ -138,6 +138,8 @@ namespace {
             return t::Mat4f;
         else if (str =="sampler2D")
             return t::Sampler2D;
+        else if (str == "sampler2DArray")
+            return t::Sampler2DArray;
 
         return std::nullopt;
     }
@@ -186,6 +188,8 @@ namespace {
             return "vec4";
         else if (type == T::Sampler2D)
             return "sampler2D";
+        else if (type == T::Sampler2DArray)
+            return "sampler2DArray";
        BUG("Bug on shader type string.");
     }
 

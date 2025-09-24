@@ -3967,6 +3967,8 @@ public:
         shadow_pass.Draw(gfx::Sphere(), cube_material, cube_transform);
         shadow_pass.Draw(gfx::Rectangle(), plane_material, plane_transform);
 
+        // todo: dumping the depth map doesn't work yet with 2D array texture.
+        /*
         if (mWriteMaps)
         {
             auto* device = painter.GetDevice();
@@ -3986,6 +3988,7 @@ public:
             }
             mWriteMaps = false;
         }
+        */
 
 
         if (mShowLightView)
@@ -3994,12 +3997,16 @@ public:
         p.Draw(gfx::Sphere(), cube_transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), state, program);
         p.Draw(gfx::Rectangle(), plane_transform, gfx::CreateMaterialFromColor(gfx::Color::White), state, program);
 
-        if (mLightType == LightType::Point || mLightType == LightType::Spot)
+        for (unsigned light_index = 0; light_index < program.GetLightCount(); ++light_index)
         {
-            gfx::Transform transform;
-            transform.Resize(0.2f, 0.2f, 0.2f);
-            transform.MoveTo(light_world_position);
-            p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::White));
+            const auto& light = program.GetLight(light_index);
+            if (light.type == LightType::Point || light.type == LightType::Spot)
+            {
+                gfx::Transform transform;
+                transform.Resize(0.2f, 0.2f, 0.2f);
+                transform.MoveTo(light_world_position);
+                p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::White));
+            }
         }
     }
 
@@ -4040,6 +4047,133 @@ private:
     bool mShowLightView = false;
     bool mEnableShadows = true;
 };
+
+class BasicMultiLightShadowMapTest : public GraphicsTest
+{
+public:
+    using LightType = gfx::BasicLightProgram::LightType;
+
+    explicit BasicMultiLightShadowMapTest() noexcept
+    {}
+    void Render(gfx::Painter& painter) override
+    {
+        constexpr auto aspect = 1024.0 / 768.0f;
+
+        const float t = std::sin(mTime * 0.4) * 0.5 + 0.5;
+        const auto x = std::cos(math::Circle * t);
+        const auto y = std::sin(math::Circle * t);
+
+        gfx::Painter::DrawState state;
+        state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
+        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.write_color  = true;
+
+        glm::mat4 view;
+
+        gfx::Painter p(painter);
+        p.ResetViewMatrix();
+        p.SetProjectionMatrix(gfx::MakePerspectiveProjection(gfx::FDegrees { 45.0f }, aspect, 1.0f, 100.0f));
+
+        {
+            const auto a = mTime / math::Pi;
+            const auto x = std::cos(a);
+            const auto y = std::sin(a);
+            const auto t = y * 0.5 + 0.5f;
+            const auto cam_pos = glm::vec3(x*10.0f, 3.0f, y*10.0f);
+            view = glm::lookAt(cam_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            p.SetViewMatrix(view);
+        }
+
+        gfx::BasicLightProgram program("test");
+        program.EnableFeature(gfx::BasicLightProgram::ShadingFeatures::BasicLight, true);
+        program.EnableFeature(gfx::BasicLightProgram::ShadingFeatures::BasicShadows, true);
+        program.SetShadowMapSize(1024*2, 768*2);
+
+        auto light_world_position  = glm::vec3 {x*1.5f, 3.0f, y*1.5f }; //glm::vec3 {x, y, -10.0f};
+        auto light_world_direction = glm::vec3 {0.0f, -1.0f, 0.0f};
+
+        gfx::BasicLightProgram::Light spot;
+        spot.type = LightType::Spot;
+        spot.ambient_color  = gfx::Color4f(gfx::Color::DarkGray) * 0.5f;
+        spot.diffuse_color  = gfx::Color4f(gfx::Color::LightGray) * 0.8f;
+        spot.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
+        spot.view_position  = math::TransformPosition(view, light_world_position);
+        spot.view_direction = math::TransformDirection(view, light_world_direction);
+        spot.world_direction = light_world_direction;
+        spot.world_position  = light_world_position;
+        spot.quadratic_attenuation = 0.005f;
+        spot.spot_half_angle = gfx::FDegrees{30.0f};
+        spot.far_plane = 10.0f;
+        program.AddLight(spot);
+
+        gfx::BasicLightProgram::Light directional;
+        directional.type = LightType::Directional;
+        directional.ambient_color  = gfx::Color4f(gfx::Color::DarkGray) * 0.5f;
+        directional.diffuse_color  = gfx::Color4f(gfx::Color::LightGray) * 0.8f;
+        directional.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
+        directional.world_direction = glm::normalize(glm::vec3(1.0f, -1.0f, 0.0f));
+        directional.world_position  = glm::vec3 { 0.0f, 5.0f, 0.0f };
+        directional.view_position  = math::TransformPosition(view, directional.world_position);
+        directional.view_direction = math::TransformDirection(view, directional.world_direction);
+        directional.quadratic_attenuation = 0.005f;
+        directional.spot_half_angle = gfx::FDegrees{30.0f};
+        directional.far_plane = 400.0f;
+        program.AddLight(directional);
+
+        gfx::Transform cube_transform;
+        cube_transform.Resize(2.0f, 2.0f, 2.0f);
+        //cube_transform.RotateAroundY(std::sin(t));
+        //cube_transform.RotateAroundX(std::cos(t));
+        cube_transform.Translate(0.0f, -1.0f, 0.0f);
+
+        gfx::Transform plane_transform;
+        plane_transform.Resize(10.0f, 10.0f, 1.0f);
+        plane_transform.RotateAroundX(gfx::FDegrees(-90.0f));
+        plane_transform.Translate(0.0f, -3.0f, 0.0f);
+        plane_transform.Push();
+          plane_transform.Translate(-0.5f, -0.5f);
+          plane_transform.RotateAroundX(gfx::FDegrees(180.0f));
+
+        const auto& cube_material = gfx::CreateMaterialFromColor(gfx::Color::DarkGreen);
+        const auto& plane_material = gfx::CreateMaterialFromColor(gfx::Color::White);
+
+        gfx::ShadowMapRenderPass shadow_pass("test", program, painter.GetDevice());
+        shadow_pass.InitState();
+        shadow_pass.Draw(gfx::Sphere(), cube_material, cube_transform);
+        shadow_pass.Draw(gfx::Rectangle(), plane_material, plane_transform);
+
+        p.Draw(gfx::Sphere(), cube_transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), state, program);
+        p.Draw(gfx::Rectangle(), plane_transform, gfx::CreateMaterialFromColor(gfx::Color::White), state, program);
+
+        for (unsigned light_index = 0; light_index < program.GetLightCount(); ++light_index)
+        {
+            const auto& light = program.GetLight(light_index);
+            if (light.type == LightType::Point || light.type == LightType::Spot)
+            {
+                gfx::Transform transform;
+                transform.Resize(0.2f, 0.2f, 0.2f);
+                transform.MoveTo(light_world_position);
+                p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::White));
+            }
+        }
+    }
+
+    std::string GetName() const override
+    {
+        return "BasicMultiLightShadowMapTest";
+    }
+    void Start() override
+    {
+        mTime = 0.0f;
+    }
+    void Update(float dt) override
+    {
+        mTime += dt;
+    }
+private:
+    float mTime = 0.0f;
+};
+
 
 class BasicLightNormalMapMaterialTest : public GraphicsTest
 {
@@ -4419,6 +4553,8 @@ int main(int argc, char* argv[])
         tests.emplace_back(new BasicShadowMapTest(BasicShadowMapTest::LightType::Directional));
         tests.emplace_back(new BasicShadowMapTest(BasicShadowMapTest::LightType::Spot));
         tests.emplace_back(new BasicShadowMapTest(BasicShadowMapTest::LightType::Point));
+
+        tests.emplace_back(new BasicMultiLightShadowMapTest());
     }
 
     bool stop_for_input = false;

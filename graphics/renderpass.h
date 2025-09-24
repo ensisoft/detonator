@@ -166,7 +166,7 @@ namespace gfx
             cmd_list.push_back(cmd);
             return Draw(cmd_list);
         }
-        Texture* GetDepthTexture(unsigned light_index) const;
+        Texture* GetDepthTexture() const;
 
         glm::mat4 GetLightViewMatrix(unsigned light_index) const;
         glm::mat4 GetLightProjectionMatrix(unsigned light_index) const;
