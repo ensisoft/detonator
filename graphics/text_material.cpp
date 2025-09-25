@@ -126,6 +126,7 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
     source.SetVersion(ShaderSource::Version::GLSL_300);
     source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_BLOOM", static_cast<unsigned>(MaterialFlags::EnableBloom));
     source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_LIGHT", static_cast<unsigned>(MaterialFlags::EnableLight));
+    source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_FOG",   static_cast<unsigned>(MaterialFlags::EnableFog));
 
     const auto format = mText.GetRasterFormat();
     if (format == TextBuffer::RasterFormat::Bitmap)

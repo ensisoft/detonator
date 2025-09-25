@@ -3501,20 +3501,21 @@ public:
 
     void Render(gfx::Painter& painter) override
     {
-        constexpr auto const aspect = 1024.0 / 768.0f;
-        const float t = std::sin(mTime * 0.4) * 0.5 + 0.5;
+        constexpr auto aspect = 1024.0 / 768.0f;
+        const auto t = static_cast<float>(std::sin(mTime * 0.4) * 0.5 + 0.5);
         const auto index = mShapeIndex % 4;
         std::unique_ptr<gfx::Drawable> drawable;
         if (index == 0)
-            drawable.reset(new gfx::Sphere);
+            drawable = std::make_unique<gfx::Sphere>();
         else if (index == 1)
-            drawable.reset(new gfx::Cone);
+            drawable = std::make_unique<gfx::Cone>();
         else if (index == 2)
-            drawable.reset(new gfx::Cube);
+            drawable = std::make_unique<gfx::Cube>();
         else if (index == 3)
-            drawable.reset(new gfx::Cylinder);
+            drawable = std::make_unique<gfx::Cylinder>();
 
         auto material = gfx::CreateMaterialFromColor(gfx::Color::DarkRed);
+        material.SetFlag(gfx::Material::Flags::EnableFog, true);
 
         gfx::Painter p(painter);
         p.ResetViewMatrix();
@@ -3542,7 +3543,7 @@ public:
             transform.RotateAroundY(std::sin(t));
             transform.RotateAroundX(std::cos(t));
             transform.MoveTo(-3.5f, 0.0f, -10.0f);
-            transform.Translate(2.0f * std::pow(float(i), 1.873f), 0.0f, -5.0f * std::pow(float(i), 1.5f));
+            transform.Translate(2.0f * std::pow(static_cast<float>(i), 1.873f), 0.0f, -5.0f * std::pow(static_cast<float>(i), 1.5f));
             p.Draw(*drawable, transform, material, state, program);
         }
     }

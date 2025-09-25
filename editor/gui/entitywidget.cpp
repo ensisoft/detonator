@@ -1240,6 +1240,7 @@ public:
             item.SetDepth(100.0f);
             item.SetFlag(game::DrawableItemClass::Flags::DepthTest, true);
             item.SetFlag(game::DrawableItemClass::Flags::Enable3DLight, true);
+            item.SetFlag(game::DrawableItemClass::Flags::Enable3DFog, true);
         }
 
         game::EntityNodeClass node;
@@ -3443,6 +3444,11 @@ void EntityWidget::on_dsLights3D_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_dsFog3D_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_dsDoubleSided_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
@@ -5319,6 +5325,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetEnabled(mUI.dsZOffset, false);
             SetEnabled(mUI.dsDepth, false);
             SetEnabled(mUI.dsLights3D, false);
+            SetEnabled(mUI.dsFog3D, false);
 
             SetEnabled(mUI.actionAddDrawable, false);
             SetVisible(mUI.drawable, true);
@@ -5336,6 +5343,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsFlipVertically, item->TestFlag(game::DrawableItemClass::Flags::FlipVertically));
             SetValue(mUI.dsBloom, item->TestFlag(game::DrawableItemClass::Flags::PP_EnableBloom));
             SetValue(mUI.dsLights3D, item->TestFlag(game::DrawableItemClass::Flags::Enable3DLight));
+            SetValue(mUI.dsFog3D, item->TestFlag(game::DrawableItemClass::Flags::Enable3DFog));
             SetValue(mUI.dsDoubleSided, item->TestFlag(game::DrawableItemClass::Flags::DoubleSided));
             SetValue(mUI.dsDepthTest, item->TestFlag(game::DrawableItemClass::Flags::DepthTest));
             SetValue(mUI.dsProject3D, item->TestFlag(game::DrawableItemClass::Flags::ProjectAs3D));
@@ -5375,6 +5383,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
                 SetEnabled(mUI.dsYOffset, true);
                 SetEnabled(mUI.dsZOffset, true);
                 SetEnabled(mUI.dsLights3D, true);
+                SetEnabled(mUI.dsFog3D, true);
                 SetEnabled(mUI.dsDepth, true);
             }
 
@@ -5643,6 +5652,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetFlag(game::DrawableItemClass::Flags::FlipVertically, GetValue(mUI.dsFlipVertically));
         item->SetFlag(game::DrawableItemClass::Flags::PP_EnableBloom, GetValue(mUI.dsBloom));
         item->SetFlag(game::DrawableItemClass::Flags::Enable3DLight, GetValue(mUI.dsLights3D));
+        item->SetFlag(game::DrawableItemClass::Flags::Enable3DFog, GetValue(mUI.dsFog3D));
         item->SetFlag(game::DrawableItemClass::Flags::DoubleSided, GetValue(mUI.dsDoubleSided));
         item->SetFlag(game::DrawableItemClass::Flags::DepthTest, GetValue(mUI.dsDepthTest));
         item->SetFlag(game::DrawableItemClass::Flags::ProjectAs3D, GetValue(mUI.dsProject3D));

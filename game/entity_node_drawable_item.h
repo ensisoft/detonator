@@ -85,6 +85,10 @@ namespace game
             // Only applies when the shape is either 3D shape or
             // is being projected as if 3D shape. (See ProjectAs3D)
             Enable3DLight,
+            // Enable fog on this drawable (if the scene has fog).
+            // Only applies when the shape is either 3D shape or
+            // is being projected as if 3D shape. (See ProjectAs3D)
+            Enable3DFog,
             // When the shape is 2D shape this flag controls
             // whether the drawable is projected into 3D world or not.
             // This flag controls whether the 3D translation and rotation

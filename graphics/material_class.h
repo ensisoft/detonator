@@ -125,7 +125,9 @@ namespace gfx
             // Enable bloom output
             EnableBloom,
             // Enable light on this material class.
-            EnableLight
+            EnableLight,
+            // Enable fog on this material class.
+            EnableFog
         };
 
         // Action to take on per particle random value. This can
