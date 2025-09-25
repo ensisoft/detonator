@@ -52,19 +52,20 @@ namespace gfx
     {
     public:
         Painter() = default;
-        explicit Painter(std::shared_ptr<Device> device)
-          : mDeviceInst(device)
-          , mDevice(device.get())
-        {}
-        explicit Painter(Device* device)
+        explicit Painter(std::shared_ptr<Device> device) noexcept
+          : mDeviceInst(std::move(device))
+        {
+            mDevice = mDeviceInst.get();
+        }
+        explicit Painter(Device* device) noexcept
           : mDevice(device)
         {}
 
         // Set the current projection matrix for projecting the scene onto a 2D plane.
-        inline void SetProjectionMatrix(const glm::mat4& matrix) noexcept
+        void SetProjectionMatrix(const glm::mat4& matrix) noexcept
         { mProjMatrix = matrix; }
         // Set the current view matrix for transforming the scene into camera space.
-        inline void SetViewMatrix(const glm::mat4& matrix) noexcept
+        void SetViewMatrix(const glm::mat4& matrix) noexcept
         { mViewMatrix = matrix;}
         // Set the size of the target rendering surface. (The surface that
         // is the backing surface of the device context).
@@ -72,17 +73,17 @@ namespace gfx
         // You should call this whenever the surface (for example the window)
         // has been resized. The setting will be kept until the next call
         // to surface size.
-        inline void SetSurfaceSize(const USize& size) noexcept
+        void SetSurfaceSize(const USize& size) noexcept
         { mSize = size; }
-        inline void SetSurfaceSize(unsigned width, unsigned height) noexcept
+        void SetSurfaceSize(unsigned width, unsigned height) noexcept
         { mSize = USize(width, height); }
         // Set the current render target/device view port.
         // x and y are the top left coordinate (in pixels) of the
         // viewport's location wrt to the actual render target.
         // width and height are the dimensions of the viewport.
-        inline void SetViewport(const IRect& viewport) noexcept
+        void SetViewport(const IRect& viewport) noexcept
         { mViewport = viewport; }
-        inline void SetViewport(int x, int y, unsigned width, unsigned height) noexcept
+        void SetViewport(int x, int y, unsigned width, unsigned height) noexcept
         { mViewport = IRect(x, y, width, height); }
         // Set the current clip (scissor) rect that will limit the rasterized
         // fragments inside the scissor rectangle only and discard any fragments
@@ -91,68 +92,70 @@ namespace gfx
         // (i.e window coordinates). X and Y are the top left corner of the
         // scissor rectangle with width extending to the right and height
         // extending towards the bottom.
-        inline void SetScissor(const IRect& scissor) noexcept
+        void SetScissor(const IRect& scissor) noexcept
         { mScissor = scissor; }
-        inline void SetScissor(int x, int y, unsigned width, unsigned height) noexcept
+        void SetScissor(int x, int y, unsigned width, unsigned height) noexcept
         { mScissor = IRect(x, y, width, height); }
         // Clear the scissor rect to nothing, i.e. no scissor is set.
-        inline void ClearScissor() noexcept
+        void ClearScissor() noexcept
         { mScissor = IRect(0, 0, 0, 0); }
         // Set the ratio of rendering surface pixels to game units.
-        inline void SetPixelRatio(const glm::vec2& ratio) noexcept
+        void SetPixelRatio(const glm::vec2& ratio) noexcept
         { mPixelRatio = ratio; }
         // Reset the view matrix to identity matrix.
-        inline void ResetViewMatrix() noexcept
+        void ResetViewMatrix() noexcept
         { mViewMatrix = glm::mat4{1.0f}; }
         // Set flag that enables "editing" mode which indicates, that even
         // content marked "static" should be checked against modifications
         // and possibly regenerated/re-uploaded to the device. Set this to
         // true in order to have live changes made to content take place
         // dynamically on every render.
-        inline void SetEditingMode(bool on_off) noexcept
+        void SetEditingMode(bool on_off) noexcept
         { mEditingMode = on_off; }
-        inline void SetDebugMode(bool on_off) noexcept
+        void SetDebugMode(bool on_off) noexcept
         { mDebugMode = on_off; }
-        inline void SetDevice(std::shared_ptr<Device> device) noexcept
+        void SetDevice(std::shared_ptr<Device> device) noexcept
         { mDeviceInst = device; mDevice = mDeviceInst.get(); }
-        inline void SetDevice(Device* device) noexcept
+        void SetDevice(Device* device) noexcept
         { mDevice = device; }
-        inline void SetFramebuffer(Framebuffer* fbo) noexcept
+        void SetFramebuffer(Framebuffer* fbo) noexcept
         { mFrameBuffer = fbo; }
 
-        inline const glm::mat4& GetViewMatrix() const noexcept
+        auto GetViewMatrix() const noexcept
         { return mViewMatrix; }
-        inline const glm::mat4& GetProjMatrix() const noexcept
+        auto GetProjMatrix() const noexcept
         { return mProjMatrix; }
-        inline USize GetSurfaceSize() const noexcept
+        auto GetSurfaceSize() const noexcept
         { return mSize; }
-        inline IRect GetViewport() const noexcept
+        auto GetViewport() const noexcept
         { return mViewport; }
-        inline IRect GetScissor() const noexcept
+        auto GetScissor() const noexcept
         { return mScissor; }
-        inline glm::vec2 GetPixelRatio() const noexcept
+        auto GetPixelRatio() const noexcept
         { return mPixelRatio; }
         // Get the current graphics set on the painter.
-        inline Device* GetDevice() noexcept
+        auto* GetDevice() noexcept
         { return mDevice; }
-        inline const Device* GetDevice() const noexcept
+        const auto* GetDevice() const noexcept
         { return mDevice; }
-        inline Framebuffer* GetFramebuffer() noexcept
+        auto* GetFramebuffer() noexcept
         { return mFrameBuffer; }
-        inline const Framebuffer* GetFramebuffer() const noexcept
+        const auto* GetFramebuffer() const noexcept
         { return mFrameBuffer; }
 
-        inline bool HasScissor() const noexcept
+        auto HasScissor() const noexcept
         { return !mScissor.IsEmpty(); }
 
-        inline void ClearErrors() noexcept
+        void ClearErrors() const noexcept
         { mErrors.clear(); }
-        inline std::vector<std::string> GetErrors() const
+        auto GetErrors() const
         { return mErrors; }
-        inline std::size_t GetErrorCount() const noexcept
+        auto GetErrorCount() const noexcept
         { return mErrors.size(); }
-        inline std::string GetError(size_t index) const noexcept
+        auto GetError(size_t index) const noexcept
         { return mErrors[index]; }
+        auto HasErrors() const noexcept
+        { return !mErrors.empty(); }
 
         // Clear the current render target color buffer with the given clear color.
         void ClearColor(const Color4f& color) const;
