@@ -52,6 +52,7 @@ MaterialClass::MaterialClass(Type type, std::string id)
     mFlags.set(Flags::BlendFrames, true);
     mFlags.set(Flags::EnableBloom, true);
     mFlags.set(Flags::EnableLight, true);
+    mFlags.set(Flags::EnableFog,   true);
 }
 
 MaterialClass::MaterialClass(const MaterialClass& other, bool copy)
@@ -297,6 +298,7 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
 
     source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_BLOOM", static_cast<unsigned>(MaterialFlags::EnableBloom));
     source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_LIGHT", static_cast<unsigned>(MaterialFlags::EnableLight));
+    source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_FOG",   static_cast<unsigned>(MaterialFlags::EnableFog));
 
     if (IsBuiltIn())
     {

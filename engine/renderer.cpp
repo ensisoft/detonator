@@ -1055,9 +1055,17 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
         if (paint_node.material)
         {
             if (is3d || project_3d)
+            {
                 paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
                     item->TestFlag(DrawableItemType::Flags::Enable3DLight));
-            else paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, false);
+                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog,
+                    item->TestFlag(DrawableItemType::Flags::Enable3DFog));
+            }
+            else
+            {
+                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, false);
+                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog, false);
+            }
         }
 
         const bool add_dimetric_transform = projection == SceneProjection::Dimetric && (is3d || project_3d);
@@ -1381,9 +1389,17 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
             const auto is_3d = gfx::Is3DShape(*paint_node.drawable);
             const auto project_as_3d = item->TestFlag(DrawableItemType::Flags::ProjectAs3D);
             if (is_3d || project_as_3d)
+            {
                 paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
                         item->TestFlag(DrawableItemType::Flags::Enable3DLight));
-            else paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, false);
+                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog,
+                    item->TestFlag(DrawableItemType::Flags::Enable3DFog));
+            }
+            else
+            {
+                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, false);
+                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog, false);
+            }
         }
     }
 }

@@ -220,6 +220,7 @@ namespace gui
         void on_dsFlipVertically_stateChanged(int);
         void on_dsBloom_stateChanged(int);
         void on_dsLights3D_stateChanged(int);
+        void on_dsFog3D_stateChanged(int);
         void on_dsDoubleSided_stateChanged(int);
         void on_dsDepthTest_stateChanged(int);
         void on_dsProject3D_stateChanged(int);

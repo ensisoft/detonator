@@ -87,7 +87,9 @@ void main() {
     #endif
 
     #if defined(ENABLE_BASIC_FOG)
-        out_color = ComputeBasicFog(out_color);
+        if ((fs_out.flags & MATERIAL_FLAGS_ENABLE_FOG) == MATERIAL_FLAGS_ENABLE_FOG) {
+            out_color = ComputeBasicFog(out_color);
+        }
     #endif
 
 #elif defined(FRAGMENT_SHADER_STENCIL_MASK_RENDER_PASS)
