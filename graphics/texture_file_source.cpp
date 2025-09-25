@@ -123,7 +123,7 @@ Texture* TextureFileSource::Upload(const Environment& env, Device& device) const
         texture->GenerateMips();
         DEBUG("Uploaded texture file source texture. [name='%1', file='%2', effects=%3]", mName, mFile, mEffects);
         return texture;
-    } else ERROR("Failed to upload texture source texture. [name='%1', file='%2']", mName, mFile);
+    } else ERROR("Failed to upload texture file source texture. [name='%1', file='%2']", mName, mFile);
     return nullptr;
 }
 
@@ -133,7 +133,7 @@ std::shared_ptr<IBitmap> TextureFileSource::GetData() const
     Image file(mFile);
     if (!file.IsValid())
     {
-        ERROR("Failed to load texture. [file='%1']", mFile);
+        ERROR("Failed to load texture image file. [file='%1']", mFile);
         return nullptr;
     }
 
