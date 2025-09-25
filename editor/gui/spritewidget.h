@@ -66,6 +66,10 @@ namespace gui
         {
             mRenderTime = on_off;
         }
+        void EnablePaint(bool enable)
+        {
+            mEnablePaint = enable;
+        }
 
     private slots:
         void on_horizontalScrollBar_valueChanged(int);
@@ -89,6 +93,7 @@ namespace gui
         double mTime = 0.0f;
         bool mRenderTime = false;
         bool mDragTime = false;
+        bool mEnablePaint = true;
 
         unsigned mPreviousRenderWidth = 0;
         unsigned mPreviousWidgetWidth = 0;

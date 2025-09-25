@@ -92,6 +92,9 @@ void SpriteWidget::on_horizontalScrollBar_valueChanged(int)
 
 void SpriteWidget::PaintScene(gfx::Painter& painter, double dt)
 {
+    if (!mEnablePaint)
+        return;
+
     if (mMaterial && mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
         PaintSprite(mMaterial.get(), painter, dt);
     else if (mMaterial && mMaterial->GetType() == gfx::MaterialClass::Type::Texture)

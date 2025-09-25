@@ -2979,11 +2979,12 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         for (unsigned i = 0; i < mMaterial->GetNumTextureMaps(); ++i)
         {
             const auto& map = mMaterial->GetTextureMap(i);
-            if (map->GetNumTextures() > 0)
-                continue;
-
-            ShowMessage(base::FormatString("Missing texture map '%1' texture", map->GetName()), painter);
-            return;
+            if (map->GetNumTextures() == 0)
+            {
+                ShowMessage(base::FormatString("Missing texture map '%1' texture", map->GetName()), painter);
+                mUI.sprite->EnablePaint(false);
+                return;
+            }
         }
     }
 
@@ -2994,6 +2995,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         if (uri.empty())
         {
             ShowMessage("No shader has been selected.", painter);
+            mUI.sprite->EnablePaint(false);
             return;
         }
     }
@@ -3254,7 +3256,9 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     if (mMaterialInst->HasError())
     {
         ShowError("Error in material!", gfx::FPoint(10.0f, 10.0f), painter);
+        mUI.sprite->EnablePaint(false);
     }
+
     if (painter.GetErrorCount())
     {
         ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
@@ -3271,6 +3275,9 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
             mShaderEditor->ClearError();
         }
     }
+
+    const auto have_errors = mMaterialInst->HasError() || painter.HasErrors();
+    mUI.sprite->EnablePaint(!have_errors);
 
     if (type == gfx::MaterialClass::Type::Sprite && mState == PlayState::Playing)
     {
