@@ -490,6 +490,7 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
         program.SetUniform("kParticleEndColor",     GetParticleEndColor());
         program.SetUniform("kParticleMidColor",     GetParticleMidColor());
         program.SetUniform("kParticleBaseRotation", GetParticleBaseRotation());
+        program.SetUniform("kAlphaCutoff",          GetAlphaCutoff());
     }
     else if (mType == Type::BasicLight)
     {
@@ -1627,6 +1628,7 @@ bool MaterialClass::ApplyParticleDynamicState(const State& state, Device& device
         SetUniform("kParticleEndColor",     state.uniforms, GetParticleEndColor(), program);
         SetUniform("kParticleMidColor",     state.uniforms, GetParticleMidColor(), program);
         SetUniform("kParticleBaseRotation", state.uniforms, GetParticleBaseRotation(), program);
+        SetUniform("kAlphaCutoff",          state.uniforms, GetAlphaCutoff(), program);
     }
     SetUniform("kParticleRotation", state.uniforms, static_cast<unsigned>(GetParticleRotation()), program);
 

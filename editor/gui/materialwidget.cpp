@@ -2718,6 +2718,8 @@ void MaterialWidget::ShowMaterialProperties()
         else if (mMaterial->GetType() == gfx::MaterialClass::Type::Particle2D)
         {
             SetVisible(mUI.builtInProperties,       true);
+            SetVisible(mUI.lblAlphaCutoff,          true);
+            SetVisible(mUI.alphaCutoff,             true);
             SetVisible(mUI.lblParticleStartColor,   true);
             SetVisible(mUI.lblParticleEndColor,     true);
             SetVisible(mUI.lblParticleMidColor,     true);

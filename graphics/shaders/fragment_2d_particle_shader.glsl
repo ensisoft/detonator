@@ -25,6 +25,10 @@ uniform vec4 kParticleEndColor;
 uniform float kParticleBaseRotation;
 // particle rotation mode.
 uniform uint kParticleRotation;
+// Alpha cutoff for controllling when to discard the fragment.
+// This is useful for using "opaque" rendering with alpha
+// cutout sprites.
+uniform float kAlphaCutoff;
 
 // @varyings
 
@@ -73,7 +77,7 @@ void MixColors(float alpha) {
         // transparency but modulates the intensity of the color
         fs_out.color.rgb = color.rgb * color.a * alpha * vParticleAlpha;
         fs_out.color.a = 1.0;
-    } else {
+    } else if (kSurfaceType == MATERIAL_SURFACE_TYPE_OPAQUE) {
         fs_out.color.rgb = color.rgb;
     }
 }
@@ -137,6 +141,8 @@ void FragmentShaderMain() {
     // coordinates are not from vertex data but provided
     // by the rasterizer in gl_PointCoord
     float alpha = ReadTextureAlpha(gl_PointCoord);
+    if (alpha <= kAlphaCutoff)
+        discard;
 
     MixColors(alpha);
 #endif
@@ -153,6 +159,8 @@ void FragmentShaderMain() {
     // the preview, right now it doesn't know about point rendering
     // yet so it uses a textured shape.
     float alpha = ReadTextureAlpha(vTexCoord);
+    if (alpha <= kAlphaCutoff)
+        discard;
 
     MixColors(alpha);
 #endif
