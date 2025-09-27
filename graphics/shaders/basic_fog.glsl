@@ -49,10 +49,14 @@ vec4 ComputeBasicFog(vec4 color) {
         fog_factor = pow(E, -fog_exponent*fog_exponent);
         fog_factor = min(fog_factor, 1.0);
     }
+    float alpha = color.a;
+
     // this seems odd, but if you check the curve on the Eulers
     // and rembember that negative exponent on x^-n equals 1.0/x^n
     // so we start at 1.0 and then drop as the distance increases
-    return fog_factor * color + (1.0 - fog_factor) * fog.color;
+    vec4 color_with_fog = fog_factor * color + (1.0 - fog_factor) * fog.color;
+    color_with_fog.a = alpha;
+    return color_with_fog;
 }
 
 )CPP_RAW_STRING"
