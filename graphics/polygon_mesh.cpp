@@ -176,6 +176,7 @@ std::string PolygonMeshClass::GetShaderId(const Environment& env) const
     hash = base::hash_combine(hash, mRenderMeshType);
     hash = base::hash_combine(hash, mShaderSrc);
     hash = base::hash_combine(hash, env.use_instancing);
+    hash = base::hash_combine(hash, env.use_effects);
     return std::to_string(hash);
 }
 
