@@ -134,9 +134,10 @@ bool TileBatch::Construct(const Environment& env, Geometry::CreateArgs& create) 
     if (shape == TileShape::Square)
     {
         using TileVertex = Tile;
+        using DataType = VertexLayout::Attribute::DataType;
         static const VertexLayout layout(sizeof(TileVertex), {
-            {"aTilePosition", 0, 4, 0, offsetof(TileVertex, pos)},
-            {"aTileData",     0, 2, 0, offsetof(TileVertex, data)}
+            {"aTilePosition", 0, 4, 0, offsetof(TileVertex, pos),  DataType::Float},
+            {"aTileData",     0, 2, 0, offsetof(TileVertex, data), DataType::Float}
         });
 
         create.content_name = "TileBatch";
@@ -154,10 +155,11 @@ bool TileBatch::Construct(const Environment& env, Geometry::CreateArgs& create) 
             Vec2 data;
             Vec2 corner;
         };
+        using DataType = VertexLayout::Attribute::DataType;
         static const VertexLayout layout(sizeof(TileVertex), {
-            {"aTilePosition", 0, 3, 0, offsetof(TileVertex, position)},
-            {"aTileData",     0, 2, 0, offsetof(TileVertex, data)},
-            {"aTileCorner",   0, 2, 0, offsetof(TileVertex, corner)},
+            {"aTilePosition", 0, 3, 0, offsetof(TileVertex, position), DataType::Float},
+            {"aTileData",     0, 2, 0, offsetof(TileVertex, data),     DataType::Float},
+            {"aTileCorner",   0, 2, 0, offsetof(TileVertex, corner),   DataType::Float},
         });
         std::vector<TileVertex> vertices;
         vertices.reserve(6 * mTiles.size());
