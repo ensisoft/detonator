@@ -67,27 +67,37 @@ std::string NameAspectRatio(float width, float height, RoundFunc Round, const ch
     return ret;
 }
 
-std::string GetShaderName(gfx::SimpleShapeType type, bool use_instancing, bool use_effects)
+std::string GetShaderName(gfx::SimpleShapeType type, bool use_instancing, gfx::Drawable::MeshType mesh_type)
 {
     std::string name;
     name += "Simple";
     if (use_instancing)
         name += "Instanced";
-    if (use_effects)
-        name += "Effects";
+
+    if (mesh_type == gfx::Drawable::MeshType::NormalRenderMesh)
+        name += "RenderMesh";
+    else if (mesh_type == gfx::Drawable::MeshType::ShardedEffectMesh)
+        name += "ShardEffectMesh";
+    else BUG("Unhandled mesh type.");
+
     name += (Is3DShape(type) ? "3D" : "2D");
     name += "VertexShader";
     return name;
 }
 
-std::string GetShaderId(gfx::SimpleShapeType type, bool use_instancing, bool use_effects)
+std::string GetShaderId(gfx::SimpleShapeType type, bool use_instancing, gfx::Drawable::MeshType mesh_type)
 {
     std::string id;
     id += "simple-";
     if (use_instancing)
         id += "instanced-";
-    if (use_effects)
-        id += "effects-";
+
+    if (mesh_type == gfx::Drawable::MeshType::NormalRenderMesh)
+        id += "render-mesh-";
+    else if (mesh_type == gfx::Drawable::MeshType::ShardedEffectMesh)
+        id += "shard-effect-mesh-";
+    else BUG("Unhandled mesh type.");
+
     id += (Is3DShape(type) ? "3D-" : "2D-");
     id += "vertex-shader";
     return id;
@@ -1301,7 +1311,7 @@ ShaderSource SimpleShapeInstance::GetShader(const Environment& env, const Device
     if (Is3DShape(mClass->GetShapeType()))
         return MakeSimple3DVertexShader(device, env.use_instancing);
 
-    return MakeSimple2DVertexShader(device, env.use_instancing, env.use_effects);
+    return MakeSimple2DVertexShader(device, env.use_instancing);
 }
 std::string SimpleShapeInstance::GetGeometryId(const Environment& env) const
 {
@@ -1346,12 +1356,12 @@ bool SimpleShapeInstance::Construct(const Environment& env, const InstancedDraw&
 
 std::string SimpleShapeInstance::GetShaderId(const Environment& env) const
 {
-    return ::GetShaderId(mClass->GetShapeType(), env.use_instancing, env.use_effects);
+    return ::GetShaderId(mClass->GetShapeType(), env.use_instancing, env.mesh_type);
 }
 
 std::string SimpleShapeInstance::GetShaderName(const Environment& env) const
 {
-    return ::GetShaderName(mClass->GetShapeType(), env.use_instancing, env.use_effects);
+    return ::GetShaderName(mClass->GetShapeType(), env.use_instancing, env.mesh_type);
 }
 
 Drawable::Type SimpleShapeInstance::GetType() const
@@ -1395,16 +1405,16 @@ ShaderSource SimpleShape::GetShader(const Environment& env, const Device& device
     if (Is3DShape(mShape))
         return MakeSimple3DVertexShader(device, env.use_instancing);
 
-    return MakeSimple2DVertexShader(device, env.use_instancing, env.use_effects);
+    return MakeSimple2DVertexShader(device, env.use_instancing);
 }
 std::string SimpleShape::GetShaderId(const Environment& env) const
 {
-    return ::GetShaderId(mShape, env.use_instancing, env.use_effects);
+    return ::GetShaderId(mShape, env.use_instancing, env.mesh_type);
 }
 
 std::string SimpleShape::GetShaderName(const Environment& env) const
 {
-    return ::GetShaderName(mShape, env.use_instancing, env.use_effects);
+    return ::GetShaderName(mShape, env.use_instancing, env.mesh_type);
 }
 
 std::string SimpleShape::GetGeometryId(const Environment& env) const

@@ -68,10 +68,10 @@ glm::mat4 MakeOrthographicProjection(float left, float right, float top, float b
 glm::mat4 MakePerspectiveProjection(FDegrees fov, float aspect, float znear, float zfar);
 glm::mat4 MakePerspectiveProjection(FRadians fov, float aspect, float znear, float zfar);
 
-gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instancing, bool use_effects);
-gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instancing);
-gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_instancing);
-gfx::ShaderSource MakePerceptual3DVertexShader(const gfx::Device& device, bool use_instancing);
+ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instancing);
+ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instancing);
+ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_instancing);
+ShaderSource MakePerceptual3DVertexShader(const gfx::Device& device, bool use_instancing);
 
 } // namespace
 

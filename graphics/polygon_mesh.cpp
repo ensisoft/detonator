@@ -176,7 +176,7 @@ std::string PolygonMeshClass::GetShaderId(const Environment& env) const
     hash = base::hash_combine(hash, mMeshType);
     hash = base::hash_combine(hash, mShaderSrc);
     hash = base::hash_combine(hash, env.use_instancing);
-    hash = base::hash_combine(hash, env.use_effects);
+    hash = base::hash_combine(hash, env.mesh_type);
     return std::to_string(hash);
 }
 
@@ -195,7 +195,7 @@ ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& d
 
     const auto mesh = GetMeshType();
     if (mesh == MeshType::Simple2DRenderMesh)
-        src = MakeSimple2DVertexShader(device, env.use_instancing, env.use_effects);
+        src = MakeSimple2DVertexShader(device, env.use_instancing);
     else if (mesh == MeshType::Simple3DRenderMesh)
         src = MakeSimple3DVertexShader(device, env.use_instancing);
     else if (mesh == MeshType::Model3DRenderMesh)

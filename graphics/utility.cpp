@@ -124,7 +124,7 @@ glm::mat4 MakePerspectiveProjection(FRadians fov, float aspect, float znear, flo
     return glm::perspective(fov.ToRadians(), aspect, znear, zfar);
 }
 
-gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instancing, bool use_effects)
+ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instancing)
 {
     // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
     // are used to support per particle features.
@@ -155,7 +155,7 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_i
     return source;
 }
 
-gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instancing)
+ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instancing)
 {
     static const char* shader = {
 #include "shaders/vertex_3d_simple_shader.glsl"
@@ -177,7 +177,7 @@ gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_i
     return source;
 }
 
-gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_instancing)
+ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_instancing)
 {
     static const char* shader = {
 #include "shaders/vertex_3d_model_shader.glsl"
@@ -199,7 +199,7 @@ gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_in
     return source;
 }
 
-gfx::ShaderSource MakePerceptual3DVertexShader(const gfx::Device& device, bool use_instancing)
+ShaderSource MakePerceptual3DVertexShader(const gfx::Device& device, bool use_instancing)
 {
     static const char* shader = {
 #include "shaders/vertex_perceptual_3d_shader.glsl"
