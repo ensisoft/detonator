@@ -76,14 +76,19 @@ namespace gfx
             DebugDrawable,
             EffectsDrawable
         };
+        enum class MeshType {
+            NormalRenderMesh,
+            ShardedEffectMesh
+        };
+
         // The environment that possibly affects the geometry and drawable
         // generation and update in some way.
         struct Environment {
             RenderPass render_pass = RenderPass::ColorPass;
+            // true if the draw is with "effects", i.e. per triangle transform
+            MeshType mesh_type = MeshType::NormalRenderMesh;
             bool flip_uv_vertically = false;
             bool flip_uv_horizontally = false;
-            // true if the draw is with "effects", i.e. per triangle transform
-            bool use_effects = false;
             // true to indicate that we're going to do instanced draw.
             bool use_instancing = false;
             // true if running in an "editor mode", which means that even
@@ -167,6 +172,7 @@ namespace gfx
         using DrawInstance      = DrawableClass::DrawInstance;
         using DrawInstanceArray = DrawableClass::DrawInstanceArray;
         using InstancedDraw     = DrawableClass::InstancedDraw;
+        using MeshType = DrawableClass::MeshType;
 
         // Rasterizer state that the geometry can manipulate.
         struct RasterState {

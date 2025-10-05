@@ -49,7 +49,7 @@ void EffectDrawable::DisableEffect()
 bool EffectDrawable::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState&  state) const
 {
     Environment e = env;
-    e.use_effects = mEnabled;
+    e.mesh_type =  mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
 
     if (mEnabled)
     {
@@ -78,7 +78,7 @@ ShaderSource EffectDrawable::GetShader(const Environment& env, const Device& dev
     };
 
     Environment e = env;
-    e.use_effects =  mEnabled;
+    e.mesh_type =  mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
 
     if (mEnabled)
     {
@@ -99,13 +99,13 @@ ShaderSource EffectDrawable::GetShader(const Environment& env, const Device& dev
 std::string EffectDrawable::GetShaderId(const Environment& env) const
 {
     Environment e = env;
-    e.use_effects = mEnabled;
+    e.mesh_type = mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
     return mDrawable->GetShaderId(e);
 }
 std::string EffectDrawable::GetShaderName(const Environment& env) const
 {
     Environment e = env;
-    e.use_effects = mEnabled;
+    e.mesh_type = mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
     return mDrawable->GetShaderName(e);
 }
 std::string EffectDrawable::GetGeometryId(const Environment& env) const
@@ -127,7 +127,8 @@ std::string EffectDrawable::GetGeometryId(const Environment& env) const
     // each effect maps to a different GPU geometry.
 
     Environment e = env;
-    e.use_effects = true;
+    e.mesh_type = mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
+
     std::string id;
     id += mDrawable->GetGeometryId(e);
     id += "Effect:";
@@ -260,7 +261,7 @@ void EffectDrawable::SetRandomGenerator(std::function<float(float min, float max
 bool EffectDrawable::ConstructExplosionMesh(const Environment& env, Geometry::CreateArgs& create) const
 {
     Environment e = env;
-    e.use_effects = true;
+    e.mesh_type = MeshType::ShardedEffectMesh;
 
     Geometry::CreateArgs args;
     if (!mDrawable->Construct(env, args))
