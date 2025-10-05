@@ -41,11 +41,16 @@ namespace gfx
     class PolygonMeshClass : public DrawableClass
     {
     public:
-        enum class RenderMeshType {
-            Simple2D,
-            Simple3D,
-            Model3D,
-            Perceptual3D
+        enum class MeshType {
+            // This mesh type is used for rendering 2D with Vertex2D.
+            Simple2DRenderMesh,
+            // This mesh type is used for rendering 3D with sing Vertex3D
+            Simple3DRenderMesh,
+
+            Model3DRenderMesh,
+            // This mesh type is used for rendering isometric 2D tiles
+            // with perceptual 3D support for things such as lights.
+            Perceptual3DRenderMesh
         };
 
         explicit PolygonMeshClass(std::string id = base::RandomString(10),
@@ -82,14 +87,14 @@ namespace gfx
         { mContentUri.clear(); }
         void SetContentUri(std::string uri) noexcept
         { mContentUri = std::move(uri); }
-        void SetMeshType(RenderMeshType type) noexcept
-        { mRenderMeshType = type; }
+        void SetMeshType(MeshType type) noexcept
+        { mMeshType = type; }
         auto GetContentUri() const
         { return mContentUri; }
         std::string GetShaderSrc() const
         { return mShaderSrc; }
-        auto GetRenderMeshType() const noexcept
-        { return mRenderMeshType; }
+        auto GetMeshType() const noexcept
+        { return mMeshType; }
         void SetShaderSrc(std::string src) noexcept
         { mShaderSrc = std::move(src); }
         bool HasShaderSrc() const noexcept
@@ -165,7 +170,7 @@ namespace gfx
             Geometry::IndexType index_type = Geometry::IndexType::Index16;
         };
         std::optional<InlineData> mData;
-        RenderMeshType mRenderMeshType = RenderMeshType::Simple2D;
+        MeshType mMeshType = MeshType::Simple2DRenderMesh;
         std::unordered_map<std::string, DrawCmd> mSubMeshes;
         bool mStatic = true;
     };
@@ -173,7 +178,7 @@ namespace gfx
     class PolygonMeshInstance : public Drawable
     {
     public:
-        using RenderMeshType = PolygonMeshClass::RenderMeshType;
+        using MeshType = PolygonMeshClass::MeshType;
 
         // Data to support geometric (polygonal) tile rendering.
         // This is only used / required when the mesh type is
@@ -189,8 +194,8 @@ namespace gfx
                                      std::string sub_mesh_key = "") noexcept;
         explicit PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key = "");
 
-        auto GetRenderMeshType() const noexcept
-        { return mClass->GetRenderMeshType(); }
+        auto GetMeshType() const noexcept
+        { return mClass->GetMeshType(); }
         std::string GetSubMeshKey() const
         { return mSubMeshKey; }
         void SetSubMeshKey(std::string key) noexcept
