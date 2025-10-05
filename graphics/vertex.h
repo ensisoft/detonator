@@ -191,11 +191,12 @@ namespace gfx
     template<> inline
     const VertexLayout& GetVertexLayout<Perceptual3DVertex>()
     {
+        using DataType = VertexLayout::Attribute::DataType;
         static const VertexLayout layout(sizeof(Perceptual3DVertex), {
-            {"aPosition",           0, 2, 0, offsetof(Perceptual3DVertex, aPosition)},
-            {"aTexCoord",           0, 2, 0, offsetof(Perceptual3DVertex, aTexCoord)},
-            {"aPerceptualPosition", 0, 3, 0, offsetof(Perceptual3DVertex, aPerceptualPosition)},
-            {"aPerceptualNormal",   0, 3, 0, offsetof(Perceptual3DVertex, aPerceptualNormal)}
+            {"aPosition",           0, 2, 0, offsetof(Perceptual3DVertex, aPosition),           DataType::Float},
+            {"aTexCoord",           0, 2, 0, offsetof(Perceptual3DVertex, aTexCoord),           DataType::Float},
+            {"aPerceptualPosition", 0, 3, 0, offsetof(Perceptual3DVertex, aPerceptualPosition), DataType::Float},
+            {"aPerceptualNormal",   0, 3, 0, offsetof(Perceptual3DVertex, aPerceptualNormal),   DataType::Float}
         });
         return layout;
     }
@@ -207,9 +208,10 @@ namespace gfx
         // specify the vertex attribute indices properly.
         // todo: if using instanced rendering then need to specify
         // the divisors properly.
+        using DataType = VertexLayout::Attribute::DataType;
         static const VertexLayout layout(sizeof(Vertex2D), {
-            {"aPosition", 0, 2, 0, offsetof(Vertex2D, aPosition)},
-            {"aTexCoord", 0, 2, 0, offsetof(Vertex2D, aTexCoord)}
+            {"aPosition", 0, 2, 0, offsetof(Vertex2D, aPosition), DataType::Float},
+            {"aTexCoord", 0, 2, 0, offsetof(Vertex2D, aTexCoord), DataType::Float}
         });
         return layout;
     }
@@ -217,12 +219,13 @@ namespace gfx
     template<> inline
     const VertexLayout& GetVertexLayout<Vertex3D>()
     {
+        using DataType = VertexLayout::Attribute::DataType;
         static const VertexLayout layout(sizeof(Vertex3D), {
-            {"aPosition",   0, 3, 0, offsetof(Vertex3D, aPosition)},
-            {"aNormal",     0, 3, 0, offsetof(Vertex3D, aNormal)},
-            {"aTexCoord",   0, 2, 0, offsetof(Vertex3D, aTexCoord)},
-            {"aTangent",    0, 3, 0, offsetof(Vertex3D, aTangent)},
-            {"aBitangent",  0, 3, 0, offsetof(Vertex3D, aBitangent)}
+            {"aPosition",   0, 3, 0, offsetof(Vertex3D, aPosition),  DataType::Float},
+            {"aNormal",     0, 3, 0, offsetof(Vertex3D, aNormal),    DataType::Float},
+            {"aTexCoord",   0, 2, 0, offsetof(Vertex3D, aTexCoord),  DataType::Float},
+            {"aTangent",    0, 3, 0, offsetof(Vertex3D, aTangent),   DataType::Float},
+            {"aBitangent",  0, 3, 0, offsetof(Vertex3D, aBitangent), DataType::Float}
         });
         return layout;
     }
@@ -230,12 +233,13 @@ namespace gfx
     template<> inline
     const VertexLayout& GetVertexLayout<ModelVertex3D>()
     {
+        using DataType = VertexLayout::Attribute::DataType;
         static const VertexLayout layout(sizeof(ModelVertex3D), {
-            {"aPosition",  0, 3, 0, offsetof(ModelVertex3D, aPosition)},
-            {"aNormal",    0, 3, 0, offsetof(ModelVertex3D, aNormal)},
-            {"aTexCoord",  0, 2, 0, offsetof(ModelVertex3D, aTexCoord)},
-            {"aTangent",   0, 3, 0, offsetof(ModelVertex3D, aTangent)},
-            {"aBitangent", 0, 3, 0, offsetof(ModelVertex3D, aBitangent)},
+            {"aPosition",  0, 3, 0, offsetof(ModelVertex3D, aPosition),  DataType::Float},
+            {"aNormal",    0, 3, 0, offsetof(ModelVertex3D, aNormal),    DataType::Float},
+            {"aTexCoord",  0, 2, 0, offsetof(ModelVertex3D, aTexCoord),  DataType::Float},
+            {"aTangent",   0, 3, 0, offsetof(ModelVertex3D, aTangent),   DataType::Float},
+            {"aBitangent", 0, 3, 0, offsetof(ModelVertex3D, aBitangent), DataType::Float},
         });
         return layout;
     }
@@ -248,11 +252,12 @@ namespace gfx
     template<> inline
     const InstanceDataLayout& GetInstanceDataLayout<InstanceAttribute>()
     {
+        using DataType = VertexLayout::Attribute::DataType;
         static const InstanceDataLayout layout(sizeof(InstanceAttribute), {
-            {"iaModelVectorX", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorX)},
-            {"iaModelVectorY", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorY)},
-            {"iaModelVectorZ", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorZ)},
-            {"iaModelVectorW", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorW)}
+            {"iaModelVectorX", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorX), DataType::Float},
+            {"iaModelVectorY", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorY), DataType::Float},
+            {"iaModelVectorZ", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorZ), DataType::Float},
+            {"iaModelVectorW", 0, 4, 1, offsetof(InstanceAttribute, iaModelVectorW), DataType::Float}
         });
         return layout;
     }

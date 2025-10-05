@@ -30,6 +30,10 @@ namespace dev
 {
     struct VertexLayout {
         struct Attribute {
+            enum class DataType {
+                Float, UnsignedInt
+            };
+
             // name of the attribute in the shader code.
             std::string name;
             // the index of the attribute.
@@ -46,6 +50,8 @@ namespace dev
             // relative offset in the vertex data
             // typically offsetof(MyVertex, member)
             unsigned offset = 0;
+
+            DataType type = DataType::Float;
         };
         unsigned vertex_struct_size = 0;
         std::vector<Attribute> attributes;

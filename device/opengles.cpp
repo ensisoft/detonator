@@ -291,6 +291,7 @@ struct OpenGLFunctions
     PFNGLDRAWELEMENTSINSTANCEDPROC   glDrawElementsInstanced;
     PFNGLGETATTRIBLOCATIONPROC       glGetAttribLocation;
     PFNGLVERTEXATTRIBPOINTERPROC     glVertexAttribPointer;
+    PFNGLVERTEXATTRIBIPOINTERPROC    glVertexAttribIPointer;
     PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
     PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray;
     PFNGLVERTEXATTRIBDIVISORPROC     glVertexAttribDivisor;
@@ -607,6 +608,7 @@ public:
         RESOLVE(glDrawElementsInstanced);
         RESOLVE(glGetAttribLocation);
         RESOLVE(glVertexAttribPointer);
+        RESOLVE(glVertexAttribIPointer);
         RESOLVE(glEnableVertexAttribArray);
         RESOLVE(glDisableVertexAttribArray);
         RESOLVE(glVertexAttribDivisor);
@@ -1938,7 +1940,13 @@ public:
             const auto size = attr.num_vector_components;
             const auto stride = vertex_layout.vertex_struct_size;
             const auto attr_ptr = base_ptr + attr.offset;
-            GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, attr_ptr));
+
+            if (attr.type == dev::VertexLayout::Attribute::DataType::Float)
+                GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, attr_ptr));
+            else if (attr.type == dev::VertexLayout::Attribute::DataType::UnsignedInt)
+                GL_CALL(glVertexAttribIPointer(location, size, GL_UNSIGNED_INT, stride, attr_ptr));
+            else BUG("Unhandled vertex attribute data type.");
+
             GL_CALL(glVertexAttribDivisor(location, attr.divisor));
             GL_CALL(glEnableVertexAttribArray(location));
         }

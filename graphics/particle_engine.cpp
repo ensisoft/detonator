@@ -141,10 +141,11 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
         Vec4 aData;
     };
 #pragma pack(pop)
+    using DataType = VertexLayout::Attribute::DataType;
     static const VertexLayout layout(sizeof(ParticleVertex), {
-        {"aPosition",  0, 2, 0, offsetof(ParticleVertex, aPosition)},
-        {"aDirection", 0, 2, 0, offsetof(ParticleVertex, aDirection)},
-        {"aData",      0, 4, 0, offsetof(ParticleVertex, aData)}
+        {"aPosition",  0, 2, 0, offsetof(ParticleVertex, aPosition),  DataType::Float},
+        {"aDirection", 0, 2, 0, offsetof(ParticleVertex, aDirection), DataType::Float},
+        {"aData",      0, 4, 0, offsetof(ParticleVertex, aData),      DataType::Float}
     });
     static_assert(std::is_trivially_copyable<ParticleVertex>::value &&
                   std::is_trivially_copy_assignable<ParticleVertex>::value &&

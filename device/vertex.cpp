@@ -34,11 +34,18 @@ bool operator==(const VertexLayout& lhs, const VertexLayout& rhs) noexcept
         const auto& l = lhs.attributes[i];
         const auto& r = rhs.attributes[i];
 
-        if (l.num_vector_components != r.num_vector_components) return false;
-        else if (l.name != r.name) return false;
-        else if (l.offset != r.offset) return false;
-        else if (l.divisor != r.divisor) return false;
-        else if (l.index != r.index) return false;
+        if (l.num_vector_components != r.num_vector_components)
+            return false;
+        if (l.name != r.name)
+            return false;
+        if (l.offset != r.offset)
+            return false;
+        if (l.divisor != r.divisor)
+            return false;
+        if (l.index != r.index)
+            return false;
+        if (l.type != r.type)
+            return false;
     }
     return true;
 }
@@ -66,6 +73,7 @@ bool VertexLayout::FromJson(const data::Reader& reader) noexcept
         ok &= chunk->Read("size",    &attr.num_vector_components);
         ok &= chunk->Read("divisor", &attr.divisor);
         ok &= chunk->Read("offset",  &attr.offset);
+        ok &= chunk->Read("type",    &attr.type);
         attributes.push_back(std::move(attr));
     }
     return ok;
@@ -85,6 +93,7 @@ void VertexLayout::IntoJson(data::Writer& writer) const
         chunk->Write("size",    attr.num_vector_components);
         chunk->Write("divisor", attr.divisor);
         chunk->Write("offset",  attr.offset);
+        chunk->Write("type",    attr.type);
         layout->AppendChunk("attributes", std::move(chunk));
     }
     writer.Write("vertex_layout", std::move(layout));
@@ -102,6 +111,7 @@ size_t VertexLayout::GetHash() const noexcept
         hash = base::hash_combine(hash, attr.num_vector_components);
         hash = base::hash_combine(hash, attr.divisor);
         hash = base::hash_combine(hash, attr.offset);
+        hash = base::hash_combine(hash, attr.type);
     }
     return hash;
 }
