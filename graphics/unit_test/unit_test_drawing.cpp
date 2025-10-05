@@ -1642,12 +1642,12 @@ void unit_test_polygon_shader()
     {
         gfx::PolygonMeshClass klass0;
         klass0.SetName("klass0");
-        klass0.SetMeshType(gfx::PolygonMeshClass::RenderMeshType::Simple2D);
+        klass0.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
         klass0.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
 
         gfx::PolygonMeshClass klass1;
         klass1.SetName("klass1");
-        klass1.SetMeshType(gfx::PolygonMeshClass::RenderMeshType::Simple2D);
+        klass1.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
         klass1.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
 
         gfx::DrawableClass::Environment env;
@@ -1678,7 +1678,7 @@ void CustomVertexTransform(inout VertexData vs) {
     {
         gfx::PolygonMeshClass klass;
         klass.SetName("klass0");
-        klass.SetMeshType(gfx::PolygonMeshClass::RenderMeshType::Simple2D);
+        klass.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
         klass.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
         klass.SetShaderSrc(R"(
 void CustomVertexTransform(inout VertexData vs) {

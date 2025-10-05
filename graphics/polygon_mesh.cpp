@@ -173,7 +173,7 @@ std::string PolygonMeshClass::GetGeometryId(const Environment& env) const
 std::string PolygonMeshClass::GetShaderId(const Environment& env) const
 {
     size_t hash = 0;
-    hash = base::hash_combine(hash, mRenderMeshType);
+    hash = base::hash_combine(hash, mMeshType);
     hash = base::hash_combine(hash, mShaderSrc);
     hash = base::hash_combine(hash, env.use_instancing);
     hash = base::hash_combine(hash, env.use_effects);
@@ -186,21 +186,21 @@ std::string PolygonMeshClass::GetShaderName(const Environment& env) const
         return mName;
 
     return base::FormatString("%1,%2",
-        env.use_instancing ? "Instanced" : "", mRenderMeshType);
+        env.use_instancing ? "Instanced" : "", mMeshType);
 }
 
 ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& device) const
 {
     ShaderSource src;
 
-    const auto mesh = GetRenderMeshType();
-    if (mesh == RenderMeshType::Simple2D)
+    const auto mesh = GetMeshType();
+    if (mesh == MeshType::Simple2DRenderMesh)
         src = MakeSimple2DVertexShader(device, env.use_instancing, env.use_effects);
-    else if (mesh == RenderMeshType::Simple3D)
+    else if (mesh == MeshType::Simple3DRenderMesh)
         src = MakeSimple3DVertexShader(device, env.use_instancing);
-    else if (mesh == RenderMeshType::Model3D)
+    else if (mesh == MeshType::Model3DRenderMesh)
         src = MakeModel3DVertexShader(device, env.use_instancing); // todo:
-    else if (mesh == RenderMeshType::Perceptual3D)
+    else if (mesh == MeshType::Perceptual3DRenderMesh)
         src = MakePerceptual3DVertexShader(device, env.use_instancing);
     else BUG("No such vertex shader");
 
@@ -210,7 +210,7 @@ ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& d
         src.AddPreprocessorDefinition("CUSTOM_VERTEX_TRANSFORM");
         src.AddDebugInfo("Mesh Class Name", mName);
         src.AddDebugInfo("Mesh Class ID", mId);
-        src.AddDebugInfo("Mesh Type", base::ToString(mRenderMeshType));
+        src.AddDebugInfo("Mesh Type", base::ToString(mMeshType));
     }
     return src;
 }
@@ -228,7 +228,7 @@ const PolygonMeshClass::DrawCmd* PolygonMeshClass::GetSubMeshDrawCmd(const std::
 void PolygonMeshClass::ClearContent()
 {
     mData.reset();
-    mRenderMeshType = RenderMeshType::Simple2D;
+    mMeshType = MeshType::Simple2DRenderMesh;
     mSubMeshes.clear();
     mContentUri.clear();
     mContentHash = 0;
@@ -243,7 +243,7 @@ std::size_t PolygonMeshClass::GetHash() const
     hash = base::hash_combine(hash, mContentHash);
     hash = base::hash_combine(hash, mContentUri);
     hash = base::hash_combine(hash, mShaderSrc);
-    hash = base::hash_combine(hash, mRenderMeshType);
+    hash = base::hash_combine(hash, mMeshType);
 
     std::set<std::string> keys;
     for (const auto& it : mSubMeshes)
@@ -294,7 +294,7 @@ void PolygonMeshClass::IntoJson(data::Writer& writer) const
     writer.Write("static", mStatic);
     writer.Write("uri",    mContentUri);
     writer.Write("src",    mShaderSrc);
-    writer.Write("mesh",   mRenderMeshType);
+    writer.Write("mesh",   mMeshType);
 
     if (mData.has_value())
     {
@@ -341,7 +341,7 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
     ok &= reader.Read("name",   &mName);
     ok &= reader.Read("static", &mStatic);
     ok &= reader.Read("uri",    &mContentUri);
-    ok &= reader.Read("mesh",   &mRenderMeshType);
+    ok &= reader.Read("mesh",   &mMeshType);
     if (reader.HasValue("src"))
         ok &= reader.Read("src", &mShaderSrc);
 
@@ -552,7 +552,7 @@ bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, ProgramState
     program.SetUniform("kRandom",(float)mRandom);
     program.SetUniform("kDrawableFlags", flags);
 
-    if (GetRenderMeshType() == RenderMeshType::Perceptual3D)
+    if (GetMeshType() == MeshType::Perceptual3DRenderMesh)
     {
         ASSERT(mPerceptualGeometry.has_value());
         const auto& geometry = mPerceptualGeometry.value();
