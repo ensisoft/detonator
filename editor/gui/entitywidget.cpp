@@ -3353,15 +3353,6 @@ void EntityWidget::on_dsRenderPass_currentIndexChanged(const QString&)
     UpdateCurrentNodeProperties();
 }
 
-void EntityWidget::on_dsRenderView_currentIndexChanged(int)
-{
-    UpdateCurrentNodeProperties();
-}
-void EntityWidget::on_dsRenderProj_currentIndexChanged(int)
-{
-    UpdateCurrentNodeProperties();
-}
-
 void EntityWidget::on_dsCoordinateSpace_currentIndexChanged(int)
 {
     UpdateCurrentNodeProperties();
