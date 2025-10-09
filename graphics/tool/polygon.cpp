@@ -142,6 +142,12 @@ void PolygonBuilder<Vertex>::InsertVertex(const void* vertex, size_t cmd_index, 
 }
 
 template<typename Vertex>
+void PolygonBuilder<Vertex>::AppendVertex(const void* vertex)
+{
+    mVertices.push_back(*static_cast<const Vertex*>(vertex));
+}
+
+template<typename Vertex>
 void PolygonBuilder<Vertex>::UpdateDrawCommand(const DrawCommand& cmd, size_t index) noexcept
 {
     ASSERT(index < mDrawCommands.size());
