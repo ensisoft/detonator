@@ -91,7 +91,6 @@ namespace gui
         Ui::ShapeWidget mUI;
     private:
         class VertexDataTable;
-        class Vertex2DTable;
 
         enum class GridDensity {
             Grid10x10 = 10,

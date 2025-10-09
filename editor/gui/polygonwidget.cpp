@@ -83,80 +83,227 @@ float PointDist(const QPoint& a, const QPoint& b)
 namespace gui
 {
 
-class ShapeWidget::VertexDataTable : public QAbstractTableModel
-{
+class ShapeWidget::VertexDataTable : public QAbstractTableModel {
 public:
-    virtual void UpdateVertex(const gfx::Vertex2D& vertex, size_t vertex_index) = 0;
-    virtual void InsertVertex(const gfx::Vertex2D& vertex, size_t vertex_index, size_t cmd_index) = 0;
-    virtual void AddVertices(std::vector<gfx::Vertex2D> vertices) = 0;
-    virtual void EraseVertex(size_t vertex_index) = 0;
-    virtual void Reset() = 0;
-};
-
-class ShapeWidget::Vertex2DTable : public VertexDataTable {
-public:
-    explicit Vertex2DTable(gfx::tool::PolygonBuilder2D& builder) : mBuilder(builder)
+    explicit VertexDataTable(gfx::tool::IPolygonBuilder& builder, gfx::PolygonMeshClass& polygon)
+      : mBuilder(builder), mPolygon(polygon)
     {}
     Qt::ItemFlags flags(const QModelIndex& index) const override
     {
         return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
     }
 
+    static bool SetVertexData(const gfx::VertexLayout& layout,
+                       const gfx::VertexLayout::Attribute& attribute,
+                       const QVariant& variant,
+                       void* vertex, unsigned vector_index)
+    {
+        using DataType = gfx::VertexLayout::Attribute::DataType;
+
+        if (attribute.num_vector_components == 1)
+        {
+            ASSERT(attribute.type == DataType::UnsignedInt);
+            // todo:
+        }
+        else if (attribute.num_vector_components == 2)
+        {
+            ASSERT(attribute.type == DataType::Float);
+
+            bool success = false;
+            const float value = variant.toFloat(&success);
+            if (!success)
+                return false;
+
+            auto* vec2 = gfx::VertexLayout::GetVertexAttributePtr<gfx::Vec2>(attribute, vertex);
+            if (vector_index == 0)
+                vec2->x = value;
+            else if (vector_index == 1)
+                vec2->y = value;
+            else BUG("Vector index out of bounds.");
+            return true;
+        }
+        else if (attribute.num_vector_components == 3)
+        {
+            ASSERT(attribute.type == DataType::Float);
+
+            bool success = false;
+            const float value = variant.toFloat(&success);
+            if (!success)
+                return false;
+
+            auto* vec3 = gfx::VertexLayout::GetVertexAttributePtr<gfx::Vec3>(attribute, vertex);
+            if (vector_index == 0)
+                vec3->x = value;
+            else if (vector_index == 1)
+                vec3->y = value;
+            else if (vector_index == 2)
+                vec3->z = value;
+            else BUG("Vector index out of bounds.");
+            return true;
+        }
+        else if (attribute.num_vector_components == 4)
+        {
+            ASSERT(attribute.type == DataType::Float);
+
+            bool success = false;
+            const float value = variant.toFloat(&success);
+            if (!success)
+                return false;
+
+            auto* vec4 = gfx::VertexLayout::GetVertexAttributePtr<gfx::Vec4>(attribute, vertex);
+            if (vector_index == 0)
+                vec4->x = value;
+            else if (vector_index == 1)
+                vec4->y = value;
+            else if (vector_index == 2)
+                vec4->z = value;
+            else if (vector_index == 3)
+                vec4->w = value;
+            else BUG("Vector index out of bounds.");
+            return true;
+        }
+        else BUG("Unhandled number of vector components.");
+        return false;
+    }
+
     bool setData(const QModelIndex& index, const QVariant& variant, int role) override
     {
-        const auto row = static_cast<size_t>(index.row());
-        const auto col = static_cast<size_t>(index.column());
+        const auto row = static_cast<unsigned>(index.row());
+        const auto col = static_cast<unsigned>(index.column());
 
-        bool success = false;
-        const float value = variant.toFloat(&success);
-        if (!success)
+        const auto* layout = mPolygon.GetVertexLayout();
+        if (!layout)
             return false;
 
-        auto& vertex = mBuilder.GetVertex(row);
-        if (col == 0)
-            vertex.aPosition.x = value;
-        else if (col == 1)
-            vertex.aPosition.y = value;
-        else if (col == 2)
-            vertex.aTexCoord.x = value;
-        else if (col == 3)
-            vertex.aTexCoord.y = value;
+        void* vertex = mBuilder.GetVertexPtr(row);
 
-        emit dataChanged(this->index(row, 0), this->index(row, 4));
-        return true;
+        unsigned count = 0;
+        for (const auto& attr : layout->attributes)
+        {
+            for (unsigned i=0; i<attr.num_vector_components; ++i)
+            {
+                if (count == col)
+                {
+                    if (SetVertexData(*layout, attr, variant, vertex, i))
+                    {
+                        emit dataChanged(this->index(row, 0), this->index(row, 4));
+                        return true;
+                    }
+                    return false;
+                }
+                ++count;
+            }
+        }
+        return false;
+    }
+
+    static QVariant GetVertexData(const gfx::VertexLayout& layout,
+                                  const gfx::VertexLayout::Attribute& attribute, const void* vertex,
+                                  unsigned vector_index)
+    {
+        using DataType = gfx::VertexLayout::Attribute::DataType;
+
+        if (attribute.num_vector_components == 1)
+        {
+            ASSERT(attribute.type == DataType::UnsignedInt);
+            // todo:
+        }
+        else if (attribute.num_vector_components == 2)
+        {
+            ASSERT(attribute.type == DataType::Float);
+            const auto* vec2 = gfx::VertexLayout::GetVertexAttributePtr<gfx::Vec2>(attribute, vertex);
+            if (vector_index == 0)
+                return QString::number(vec2->x, 'f', 2);
+            else if (vector_index == 1)
+                return QString::number(vec2->y, 'f', 2);
+            else BUG("Vector index out of bounds.");
+        }
+        else if (attribute.num_vector_components == 3)
+        {
+            ASSERT(attribute.type == DataType::Float);
+            const auto* vec3 = gfx::VertexLayout::GetVertexAttributePtr<gfx::Vec3>(attribute, vertex);
+            if (vector_index == 0)
+                return QString::number(vec3->x, 'f', 2);
+            else if (vector_index == 1)
+                return QString::number(vec3->y, 'f', 2);
+            else if (vector_index == 2)
+                return QString::number(vec3->z, 'f', 2);
+            else BUG("Vector index out of bounds.");
+        }
+        else if (attribute.num_vector_components == 4)
+        {
+            ASSERT(attribute.type == DataType::Float);
+            const auto* vec4 = gfx::VertexLayout::GetVertexAttributePtr<gfx::Vec4>(attribute, vertex);
+            if (vector_index == 0)
+                return QString::number(vec4->x, 'f', 2);
+            else if (vector_index == 1)
+                return QString::number(vec4->y, 'f', 2);
+            else if (vector_index == 2)
+                return QString::number(vec4->z, 'f', 2);
+            else if  (vector_index == 3)
+                return QString::number(vec4->w, 'f', 2);
+            else BUG("Vector index out of bounds.");
+        }
+        else BUG("Unhandled number of vector components.");
+        return {};
     }
 
     QVariant data(const QModelIndex& index, int role) const override
     {
-        const auto row = static_cast<size_t>(index.row());
-        const auto col = static_cast<size_t>(index.column());
-        if (role == Qt::DisplayRole)
-        {
-            const auto& vertex = mBuilder.GetVertex(row);
-            if (col == 0)
-                return QString::number(vertex.aPosition.x, 'f', 2);
-            else if (col == 1)
-                return QString::number(vertex.aPosition.y, 'f', 2);
-            else if (col == 2)
-                return QString::number(vertex.aTexCoord.x, 'f', 2);
-            else if (col == 3)
-                return QString::number(vertex.aTexCoord.y, 'f', 2);
+        const auto row = static_cast<unsigned>(index.row());
+        const auto col = static_cast<unsigned>(index.column());
+        if (role != Qt::DisplayRole)
+            return {};
 
+        const auto* layout = mPolygon.GetVertexLayout();
+        if (layout == nullptr)
+            return {};
+
+        const void* vertex = mBuilder.GetVertexPtr(row);
+
+        unsigned count = 0;
+        for (const auto& attr : layout->attributes)
+        {
+            for (unsigned i=0; i<attr.num_vector_components; ++i)
+            {
+                if (count == col)
+                    return GetVertexData(*layout, attr, vertex, i);
+                ++count;
+            }
         }
         return {};
     }
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override
     {
-        if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+        if ((role != Qt::DisplayRole) || (orientation != Qt::Horizontal))
+            return {};
+
+        const auto* layout = mPolygon.GetVertexLayout();
+        if (layout == nullptr)
+            return {};
+
+        static const char* vector_suffix[] = {
+            "X", "Y", "Z", "W"
+        };
+        unsigned index = 0;
+
+        for (const auto& attr : layout->attributes)
         {
-            if (section == 0)
-                return "aPosition X";
-            else if (section == 1)
-                return "aPosition Y";
-            else if (section == 2)
-                return "aTexCoord X";
-            else if (section == 3)
-                return "aTexCoord Y";
+            if (attr.num_vector_components == 1)
+            {
+                if (index == section)
+                    return app::FromLatin(attr.name);
+                ++index;
+            }
+            else
+            {
+                for (unsigned i=0; i<attr.num_vector_components; ++i)
+                {
+                    if (index == section)
+                        return app::FromLatin(attr.name + " " + vector_suffix[i]);
+                    ++index;
+                }
+            }
         }
         return {};
     }
@@ -166,52 +313,77 @@ public:
     }
     int columnCount(const QModelIndex&) const override
     {
-        return 4;
+        unsigned count = 0;
+
+        const auto* layout = mPolygon.GetVertexLayout();
+        if (!layout)
+            return 0;
+
+        for (const auto& attr : layout->attributes)
+        {
+            count += attr.num_vector_components;
+        }
+        return static_cast<int>(count);
     }
 
-    void UpdateVertex(const gfx::Vertex2D& vertex, size_t vertex_index) override
+    void UpdateVertex(const gfx::Vertex2D& vertex, size_t vertex_index)
     {
         const auto row = static_cast<int>(vertex_index);
 
-        mBuilder.UpdateVertex(vertex, vertex_index);
+        const auto* layout = mPolygon.GetVertexLayout();
+        ASSERT(*layout == gfx::GetVertexLayout<gfx::Vertex2D>());
+
+        mBuilder.UpdateVertex(&vertex, vertex_index);
 
         emit dataChanged(this->index(row, 0), this->index(row, 4));
     }
-    void InsertVertex(const gfx::Vertex2D& vertex, size_t vertex_index, size_t cmd_index) override
+    void InsertVertex(const gfx::Vertex2D& vertex, size_t vertex_index, size_t cmd_index)
     {
         const auto first_index = static_cast<int>(vertex_index);
         const auto last_index = static_cast<int>(vertex_index);
 
+        const auto* layout = mPolygon.GetVertexLayout();
+        ASSERT(*layout == gfx::GetVertexLayout<gfx::Vertex2D>());
+
         beginInsertRows(QModelIndex(),
             static_cast<int>(first_index), static_cast<int>(last_index));
-        mBuilder.InsertVertex(vertex, cmd_index, vertex_index);
+        mBuilder.InsertVertex(&vertex, cmd_index, vertex_index);
         endInsertRows();
     }
 
-    void AddVertices(std::vector<gfx::Vertex2D> vertices) override
+    void AddVertices(const std::vector<gfx::Vertex2D>& vertices)
     {
         const auto first_index = mBuilder.GetVertexCount();
         const auto last_index = first_index + vertices.size() - 1;
 
+        const auto* layout = mPolygon.GetVertexLayout();
+        ASSERT(*layout == gfx::GetVertexLayout<gfx::Vertex2D>());
+
         beginInsertRows(QModelIndex(),
             static_cast<int>(first_index), static_cast<int>(last_index));
-        mBuilder.AddVertices(std::move(vertices));
+
+        for (const auto& vertex : vertices)
+        {
+            mBuilder.AppendVertex(&vertex);
+        }
+
         endInsertRows();
     }
-    void EraseVertex(size_t index) override
+    void EraseVertex(size_t index)
     {
         beginRemoveRows(QModelIndex(), static_cast<int>(index), static_cast<int>(index));
         mBuilder.EraseVertex(index);
         endRemoveRows();
     }
 
-    void Reset() override
+    void Reset()
     {
         beginResetModel();
         endResetModel();
     }
 private:
-    gfx::tool::PolygonBuilder2D& mBuilder;
+    gfx::tool::IPolygonBuilder& mBuilder;
+    gfx::PolygonMeshClass& mPolygon;
 };
 
 
@@ -256,9 +428,11 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
 
     mPolygon.SetName(GetValue(mUI.name));
     mPolygon.SetStatic(GetValue(mUI.staticInstance));
+    mPolygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    mPolygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
     mOriginalHash = mPolygon.GetHash();
 
-    mTable = std::make_unique<Vertex2DTable>(mBuilder);
+    mTable = std::make_unique<VertexDataTable>(mBuilder, mPolygon);
     mUI.tableView->setModel(mTable.get());
 
     // Adwaita theme bugs out and doesn't show the data without this

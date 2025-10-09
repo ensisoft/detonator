@@ -58,6 +58,8 @@ namespace tool {
         // incremented by 1.
         virtual void InsertVertex(const void* vertex, size_t cmd_index, size_t index) = 0;
 
+        virtual void AppendVertex(const void* vertex) = 0;
+
         virtual void AddDrawCommand(const DrawCommand& cmd) = 0;
 
         virtual void UpdateDrawCommand(const DrawCommand& cmd, size_t index) noexcept = 0;
@@ -79,6 +81,10 @@ namespace tool {
         virtual const DrawCommand& GetDrawCommand(size_t index ) const = 0;
 
         virtual void GetVertex(void* vertex, size_t index) const noexcept = 0;
+
+        virtual const void* GetVertexPtr(size_t vertex_index) const noexcept = 0;
+
+        virtual void* GetVertexPtr(size_t vertex_index) noexcept = 0;
 
         virtual bool IsStatic() const noexcept = 0;
         virtual void SetStatic(bool on_off) noexcept = 0;
@@ -114,6 +120,8 @@ namespace tool {
         void InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index);
         void InsertVertex(const void* vertex, size_t cmd_index, size_t index) override;
 
+        void AppendVertex(const void* vertex) override;
+
         void AddDrawCommand(const DrawCommand& cmd) override;
 
         void UpdateDrawCommand(const DrawCommand& cmd, size_t index) noexcept override;
@@ -129,13 +137,26 @@ namespace tool {
         const DrawCommand& GetDrawCommand(size_t index) const noexcept override
         { return mDrawCommands[index]; }
 
-        void GetVertex(void* vertex, size_t index) const noexcept override
+        void GetVertex(void* vertex, size_t vertex_index) const noexcept override
         {
-            const auto& vert = mVertices[index];
+            ASSERT(vertex_index < mVertices.size());
+            const auto& vert = mVertices[vertex_index];
             std::memcpy(vertex, &vert, sizeof(vert));
         }
+        const void* GetVertexPtr(size_t vertex_index) const noexcept override
+        {
+            ASSERT(vertex_index < mVertices.size());
+            const auto* vert = &mVertices[vertex_index];
+            return vert;
+        }
+        void* GetVertexPtr(size_t vertex_index) noexcept override
+        {
+            ASSERT(vertex_index < mVertices.size());
+            auto* vert =  &mVertices[vertex_index];
+            return vert;
+        }
 
-        inline const Vertex& GetVertex(size_t index) const noexcept
+        const Vertex& GetVertex(size_t index) const noexcept
         { return mVertices[index]; }
         Vertex& GetVertex(size_t index) noexcept
         { return mVertices[index]; }
