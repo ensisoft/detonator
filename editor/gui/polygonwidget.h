@@ -99,19 +99,22 @@ namespace gui
             Grid100x100 = 100
         };
         GridDensity mGrid = GridDensity::Grid20x20;
-        // the current workspace.
-        app::Workspace* mWorkspace = nullptr;
-        // the current polygon we're editing.
-        gfx::PolygonMeshClass mPolygon;
-        // the builder tool for editing the shape
-        gfx::tool::PolygonBuilder2D mBuilder;
-        // the current material for the blueprint (the background image)
-        std::unique_ptr<gfx::Material> mBlueprint;
+
+        struct State {
+            // the current workspace.
+            app::Workspace* workspace = nullptr;
+            // the current polygon we're editing.
+            gfx::PolygonMeshClass polygon;
+            // the builder tool for editing the shape
+            gfx::tool::PolygonBuilder2D builder;
+            // the data table.
+            std::unique_ptr<VertexDataTable> table;
+        } mState;
         // the list of points for adding the next draw command.
         std::vector<QPoint> mPoints;
 
-        std::unique_ptr<VertexDataTable> mTable;
-
+        // the current material for the blueprint (the background image)
+        std::unique_ptr<gfx::Material> mBlueprint;
         // the most current (latest) point is where the mouse
         // currently is.
         QPoint mCurrentPoint;
@@ -126,7 +129,7 @@ namespace gui
         // current animation time.
         double mTime = 0.0f;
         // Index of the currently selected vertex.
-        std::size_t mVertexIndex = 0;
+        std::size_t mVertexIndex = 0xffffff;
     private:
         // the original hash value that is used to
         // check against if there are unsaved changes.
