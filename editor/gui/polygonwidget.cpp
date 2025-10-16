@@ -387,9 +387,11 @@ private:
 };
 
 
-ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
+ShapeWidget::ShapeWidget(app::Workspace* workspace)
 {
     DEBUG("Create PolygonWidget");
+
+    mState.workspace = workspace;
 
     mUI.setupUi(this);
     mUI.widget->onPaintScene = std::bind(&ShapeWidget::PaintScene,
@@ -417,8 +419,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
     SetValue(mUI.name, QString("My Shape"));
-    SetValue(mUI.ID, mPolygon.GetId());
-    SetValue(mUI.staticInstance, mPolygon.IsStatic());
+    SetValue(mUI.ID, mState.polygon.GetId());
+    SetValue(mUI.staticInstance, mState.polygon.IsStatic());
     SetValue(mUI.shaderFile, "Built-in Shader");
     setWindowTitle(GetValue(mUI.name));
     setFocusPolicy(Qt::StrongFocus);
@@ -426,18 +428,18 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid20x20);
 
-    mPolygon.SetName(GetValue(mUI.name));
-    mPolygon.SetStatic(GetValue(mUI.staticInstance));
-    mPolygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
-    mPolygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
-    mOriginalHash = mPolygon.GetHash();
+    mState.polygon.SetName(GetValue(mUI.name));
+    mState.polygon.SetStatic(GetValue(mUI.staticInstance));
+    mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
+    mOriginalHash = mState.polygon.GetHash();
 
-    mTable = std::make_unique<VertexDataTable>(mBuilder, mPolygon);
-    mUI.tableView->setModel(mTable.get());
+    mState.table = std::make_unique<VertexDataTable>(mState.builder, mState.polygon);
+    mUI.tableView->setModel(mState.table.get());
 
     // Adwaita theme bugs out and doesn't show the data without this
     // little hack here.
-    mTable->Reset();
+    mState.table->Reset();
 
     QObject::connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
                      [this](const QItemSelection&, const QItemSelection&) {
@@ -451,9 +453,9 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
 {
     DEBUG("Editing shape '%1'", resource.GetName());
 
-    mPolygon = *resource.GetContent<gfx::PolygonMeshClass>();
-    mOriginalHash = mPolygon.GetHash();
-    mBuilder.InitFrom(mPolygon);
+    mState.polygon = *resource.GetContent<gfx::PolygonMeshClass>();
+    mOriginalHash = mState.polygon.GetHash();
+    mState.builder.InitFrom(mState.polygon);
 
     QString material;
     GetProperty(resource, "material", &material);
@@ -465,18 +467,18 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "kRandom",      mUI.kRandom);
 
     SetValue(mUI.name, resource.GetName());
-    SetValue(mUI.ID, mPolygon.GetId());
-    SetValue(mUI.staticInstance, mPolygon.IsStatic());
-    SetValue(mUI.shaderFile, mPolygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
-    SetEnabled(mUI.btnResetShader, mPolygon.HasShaderSrc());
-    SetEnabled(mUI.actionClear, mPolygon.HasInlineData());
+    SetValue(mUI.ID, mState.polygon.GetId());
+    SetValue(mUI.staticInstance, mState.polygon.IsStatic());
+    SetValue(mUI.shaderFile, mState.polygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
+    SetEnabled(mUI.btnResetShader, mState.polygon.HasShaderSrc());
+    SetEnabled(mUI.actionClear, mState.polygon.HasInlineData());
     SetValue(mUI.blueprints, ListItemId(material));
 
     if (!material.isEmpty())
     {
-        if (mWorkspace->IsValidMaterial(material))
+        if (mState.workspace->IsValidMaterial(material))
         {
-            auto klass = mWorkspace->FindMaterialClassById(app::ToUtf8(material));
+            auto klass = mState.workspace->FindMaterialClassById(app::ToUtf8(material));
             mBlueprint = gfx::CreateMaterialInstance(klass);
         }
         else
@@ -555,8 +557,8 @@ bool ShapeWidget::SaveState(Settings& settings) const
 {
     data::JsonObject json;
 
-    mBuilder.BuildPoly(const_cast<gfx::PolygonMeshClass&>(mPolygon));
-    mPolygon.IntoJson(json);
+    mState.builder.BuildPoly(const_cast<gfx::PolygonMeshClass&>(mState.polygon));
+    mState.polygon.IntoJson(json);
 
     settings.SetValue("Polygon", "content", json);
     settings.SetValue("Polygon", "material", (QString)GetItemId(mUI.blueprints));
@@ -585,17 +587,17 @@ bool ShapeWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Polygon", mUI.splitter);
     settings.LoadWidget("Polygon", mUI.kRandom);
 
-    if (!mPolygon.FromJson(json))
+    if (!mState.polygon.FromJson(json))
         WARN("Failed to restore polygon shape state.");
 
-    SetValue(mUI.ID, mPolygon.GetId());
-    SetValue(mUI.staticInstance, mPolygon.IsStatic());
+    SetValue(mUI.ID, mState.polygon.GetId());
+    SetValue(mUI.staticInstance, mState.polygon.IsStatic());
     SetValue(mUI.blueprints, ListItemId(material));
-    SetValue(mUI.shaderFile, mPolygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
-    SetEnabled(mUI.btnResetShader, mPolygon.HasShaderSrc());
-    SetEnabled(mUI.actionClear, mPolygon.HasInlineData());
+    SetValue(mUI.shaderFile, mState.polygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
+    SetEnabled(mUI.btnResetShader, mState.polygon.HasShaderSrc());
+    SetEnabled(mUI.actionClear, mState.polygon.HasInlineData());
 
-    mBuilder.InitFrom(mPolygon);
+    mState.builder.InitFrom(mState.polygon);
 
     on_blueprints_currentIndexChanged(0);
     return true;
@@ -658,9 +660,9 @@ void ShapeWidget::Save()
 
 bool ShapeWidget::HasUnsavedChanges() const
 {
-    auto clone = mPolygon.Copy();
+    auto clone = mState.polygon.Copy();
     auto* poly = dynamic_cast<gfx::PolygonMeshClass*>(clone.get());
-    mBuilder.BuildPoly(*poly);
+    mState.builder.BuildPoly(*poly);
 
     poly->SetStatic(GetValue(mUI.staticInstance));
     poly->SetName(GetValue(mUI.name));
@@ -728,9 +730,9 @@ void ShapeWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.name))
         return;
 
-    mBuilder.BuildPoly(mPolygon);
+    mState.builder.BuildPoly(mState.polygon);
 
-    app::CustomShapeResource resource(mPolygon, GetValue(mUI.name));
+    app::CustomShapeResource resource(mState.polygon, GetValue(mUI.name));
     SetProperty(resource, "material", (QString)GetItemId(mUI.blueprints));
     SetUserProperty(resource, "grid",         mUI.cmbGrid);
     SetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
@@ -739,8 +741,8 @@ void ShapeWidget::on_actionSave_triggered()
     SetUserProperty(resource, "splitter",     mUI.splitter);
     SetUserProperty(resource, "kRandom",      mUI.kRandom);
 
-    mWorkspace->SaveResource(resource);
-    mOriginalHash = mPolygon.GetHash();
+    mState.workspace->SaveResource(resource);
+    mOriginalHash = mState.polygon.GetHash();
 }
 
 void ShapeWidget::on_actionNewTriangleFan_toggled(bool checked)
@@ -763,15 +765,15 @@ void ShapeWidget::on_actionShowShader_triggered()
     gfx::Drawable::Environment environment;
     environment.editing_mode  = false; // we want to see the shader as it will be, so using false here
     environment.use_instancing = false;
-    const auto& source = mPolygon.GetShader(environment, *device);
+    const auto& source = mState.polygon.GetShader(environment, *device);
 
     DlgTextEdit dlg(this);
     dlg.SetText(source.GetSource(), "GLSL");
     dlg.SetReadOnly(true);
     dlg.SetTitle("Shader Source");
-    dlg.LoadGeometry(mWorkspace, "polygon-shader-source-dialog-geometry");
+    dlg.LoadGeometry(mState.workspace, "polygon-shader-source-dialog-geometry");
     dlg.execFU();
-    dlg.SaveGeometry(mWorkspace, "polygon-shader-source-dialog-geometry");
+    dlg.SaveGeometry(mState.workspace, "polygon-shader-source-dialog-geometry");
 }
 
 void ShapeWidget::on_actionCustomizeShader_triggered()
@@ -782,10 +784,10 @@ void ShapeWidget::on_actionCustomizeShader_triggered()
         return;
     }
 
-    mCustomizedSource = mPolygon.GetShaderSrc();
-    if (!mPolygon.HasShaderSrc())
+    mCustomizedSource = mState.polygon.GetShaderSrc();
+    if (!mState.polygon.HasShaderSrc())
     {
-        mPolygon.SetShaderSrc(R"(
+        mState.polygon.SetShaderSrc(R"(
 // this is your custom vertex transform function.
 // you can modify the incoming vertex data here as want.
 void CustomVertexTransform(inout VertexData vs) {
@@ -796,27 +798,27 @@ void CustomVertexTransform(inout VertexData vs) {
     }
 
     mShaderEditor = new DlgTextEdit(this);
-    mShaderEditor->LoadGeometry(mWorkspace, "polygon-shader-editor-geometry");
-    mShaderEditor->SetText(mPolygon.GetShaderSrc(), "GLSL");
+    mShaderEditor->LoadGeometry(mState.workspace, "polygon-shader-editor-geometry");
+    mShaderEditor->SetText(mState.polygon.GetShaderSrc(), "GLSL");
     mShaderEditor->SetTitle("Shader Source");
     mShaderEditor->EnableSaveApply();
     mShaderEditor->showFU();
     mShaderEditor->finished = [this](int ret) {
         if (ret == QDialog::Rejected)
-            mPolygon.SetShaderSrc(mCustomizedSource);
+            mState.polygon.SetShaderSrc(mCustomizedSource);
         else if (ret == QDialog::Accepted)
-            mPolygon.SetShaderSrc(mShaderEditor->GetText());
-        mShaderEditor->SaveGeometry(mWorkspace, "polygon-shader-editor-geometry");
+            mState.polygon.SetShaderSrc(mShaderEditor->GetText());
+        mShaderEditor->SaveGeometry(mState.workspace, "polygon-shader-editor-geometry");
         mShaderEditor->deleteLater();
         mShaderEditor = nullptr;
 
-        SetValue(mUI.shaderFile, mPolygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
-        SetEnabled(mUI.btnResetShader, mPolygon.HasShaderSrc());
+        SetValue(mUI.shaderFile, mState.polygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
+        SetEnabled(mUI.btnResetShader, mState.polygon.HasShaderSrc());
 
         mUI.widget->GetPainter()->ClearErrors();
     };
     mShaderEditor->applyFunction = [this]() {
-        mPolygon.SetShaderSrc(mShaderEditor->GetText());
+        mState.polygon.SetShaderSrc(mShaderEditor->GetText());
 
         mUI.widget->GetPainter()->ClearErrors();
     };
@@ -824,8 +826,8 @@ void CustomVertexTransform(inout VertexData vs) {
 
 void ShapeWidget::on_actionClear_triggered()
 {
-    mBuilder.ClearVertices();
-    mBuilder.ClearDrawCommands();
+    mState.builder.ClearVertices();
+    mState.builder.ClearDrawCommands();
     mUI.actionClear->setEnabled(false);
 }
 
@@ -835,13 +837,13 @@ void ShapeWidget::on_blueprints_currentIndexChanged(int)
     if (mUI.blueprints->currentIndex() == -1)
         return;
 
-    auto klass = mWorkspace->GetMaterialClassById(GetItemId(mUI.blueprints));
+    auto klass = mState.workspace->GetMaterialClassById(GetItemId(mUI.blueprints));
     mBlueprint = gfx::CreateMaterialInstance(klass);
 }
 
 void ShapeWidget::on_btnResetShader_clicked()
 {
-    mPolygon.SetShaderSrc(std::string{});
+    mState.polygon.SetShaderSrc(std::string{});
     SetValue(mUI.shaderFile, "Built-In Shader");
     SetEnabled(mUI.btnResetShader, false);
 
@@ -856,7 +858,7 @@ void ShapeWidget::on_btnResetBlueprint_clicked()
 
 void ShapeWidget::on_staticInstance_stateChanged(int)
 {
-    mBuilder.SetStatic(GetValue(mUI.staticInstance));
+    mState.builder.SetStatic(GetValue(mUI.staticInstance));
 }
 
 void ShapeWidget::OnAddResource(const app::Resource* resource)
@@ -864,7 +866,7 @@ void ShapeWidget::OnAddResource(const app::Resource* resource)
     if (resource->GetType() != app::Resource::Type::Material)
         return;
 
-    SetList(mUI.blueprints, mWorkspace->ListUserDefinedMaterials());
+    SetList(mUI.blueprints, mState.workspace->ListUserDefinedMaterials());
 }
 
 void ShapeWidget::OnRemoveResource(const app::Resource* resource)
@@ -872,7 +874,7 @@ void ShapeWidget::OnRemoveResource(const app::Resource* resource)
     if (resource->GetType() != app::Resource::Type::Material)
         return;
 
-    SetList(mUI.blueprints, mWorkspace->ListUserDefinedMaterials());
+    SetList(mUI.blueprints, mState.workspace->ListUserDefinedMaterials());
     if (mBlueprint && mBlueprint->GetClassId() == resource->GetIdUtf8())
         mBlueprint.reset();
 }
@@ -934,10 +936,10 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         // the same class ID but with different hash (because it has different
         // content when it's being edited).
         // so hack around this problem by adding a suffix here.
-        gfx::PolygonMeshClass poly(mPolygon.GetId() + "_1");
-        poly.SetShaderSrc(mPolygon.GetShaderSrc());
-        poly.SetName(mPolygon.GetName());
-        mBuilder.BuildPoly(poly);
+        gfx::PolygonMeshClass poly(mState.polygon.GetId() + "_1");
+        poly.SetShaderSrc(mState.polygon.GetShaderSrc());
+        poly.SetName(mState.polygon.GetName());
+        mState.builder.BuildPoly(poly);
 
         // set to true since we're constructing this polygon on every frame
         // without this we'll eat all the static vertex/index buffers. argh!
@@ -957,9 +959,9 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         gfx::Transform view;
         view.Resize(15, 15);
 
-        for (size_t i = 0; i < mBuilder.GetVertexCount(); ++i)
+        for (size_t i = 0; i < mState.builder.GetVertexCount(); ++i)
         {
-            const auto& vert = mBuilder.GetVertex(i);
+            const auto& vert = mState.builder.GetVertex(i);
             const auto x = width * vert.aPosition.x;
             const auto y = height * -vert.aPosition.y;
             view.MoveTo(x, y);
@@ -1010,7 +1012,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         builder.AddVertices(MakeVerts(points, width, height));
         builder.AddDrawCommand(cmd);
 
-        gfx::PolygonMeshClass current(mPolygon.GetId() + "_2");
+        gfx::PolygonMeshClass current(mState.polygon.GetId() + "_2");
         builder.BuildPoly(current);
         current.SetStatic(false);
 
@@ -1049,9 +1051,9 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 
     const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
 
-    for (size_t i=0; i<mBuilder.GetVertexCount(); ++i)
+    for (size_t i=0; i<mState.builder.GetVertexCount(); ++i)
     {
-        const auto& vert = mBuilder.GetVertex(i);
+        const auto& vert = mState.builder.GetVertex(i);
         const auto x = width * vert.aPosition.x;
         const auto y = height * -vert.aPosition.y;
         const auto r = QPoint(x, y) - point;
@@ -1125,7 +1127,7 @@ void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
         if (ctrl)
             snap = !snap;
 
-        auto vertex = mBuilder.GetVertex(mVertexIndex);
+        auto vertex = mState.builder.GetVertex(mVertexIndex);
         if (snap)
         {
             const GridDensity grid = GetValue(mUI.cmbGrid);
@@ -1156,7 +1158,7 @@ void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
         }
         vertex.aTexCoord.x =  vertex.aPosition.x;
         vertex.aTexCoord.y = -vertex.aPosition.y;
-        mTable->UpdateVertex(vertex, mVertexIndex);
+        mState.table->UpdateVertex(vertex, mVertexIndex);
     }
     else
     {
@@ -1179,7 +1181,7 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
     const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
 
-    const auto num_vertices = mBuilder.GetVertexCount();
+    const auto num_vertices = mState.builder.GetVertexCount();
 
     QPoint point = pos;
     bool snap = GetValue(mUI.chkSnap);
@@ -1203,7 +1205,7 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     size_t vertex_index = 0;
     for (size_t i=0; i<num_vertices; ++i)
     {
-        const auto vert = MapVertexToWidget(mBuilder.GetVertex(i), width, height);
+        const auto vert = MapVertexToWidget(mState.builder.GetVertex(i), width, height);
         const auto len  = PointDist(point, vert);
         if (len < distance)
         {
@@ -1215,14 +1217,14 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     // not found ?
     if (vertex_index == num_vertices)
         return;
-    const auto cmd_index = mBuilder.FindDrawCommand(vertex_index);
+    const auto cmd_index = mState.builder.FindDrawCommand(vertex_index);
     if (cmd_index == std::numeric_limits<size_t>::max())
         return;
 
     DEBUG("Closest vertex: index %1 draw cmd %2", vertex_index, cmd_index);
 
     // degenerate left over triangle ?
-    const auto& cmd = mBuilder.GetDrawCommand(cmd_index);
+    const auto& cmd = mState.builder.GetDrawCommand(cmd_index);
     if (cmd.count < 3)
         return;
 
@@ -1247,12 +1249,12 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     // note that there's still a possibility for a degenerate
     // case (such as when any of the two vertices are collinear)
     // and this isn't properly handled yet.
-    const auto first = mBuilder.GetVertex(cmd.offset);
-    const auto closest = mBuilder.GetVertex(vertex_index);
+    const auto first = mState.builder.GetVertex(cmd.offset);
+    const auto closest = mState.builder.GetVertex(vertex_index);
     const auto winding = math::FindTriangleWindingOrder(first.aPosition, closest.aPosition, vertex.aPosition);
     if (winding == math::TriangleWindingOrder::CounterClockwise)
-        mTable->InsertVertex(vertex, cmd_vertex_index + 1, cmd_index);
-    else mTable->InsertVertex(vertex, cmd_vertex_index, cmd_index);
+        mState.table->InsertVertex(vertex, cmd_vertex_index + 1, cmd_index);
+    else mState.table->InsertVertex(vertex, cmd_vertex_index, cmd_index);
 }
 
 bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
@@ -1268,9 +1270,9 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
         gfx::Geometry::DrawCommand cmd;
         cmd.type   = gfx::Geometry::DrawType::TriangleFan;
         cmd.count  = mPoints.size();
-        cmd.offset = mBuilder.GetVertexCount();
-        mTable->AddVertices(MakeVerts(mPoints, width, height));
-        mBuilder.AddDrawCommand(cmd);
+        cmd.offset = mState.builder.GetVertexCount();
+        mState.table->AddVertices(MakeVerts(mPoints, width, height));
+        mState.builder.AddDrawCommand(cmd);
         mPoints.clear();
 
         mUI.actionNewTriangleFan->setChecked(false);
@@ -1280,14 +1282,14 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
     else if (key->key() == Qt::Key_Delete ||
              key->key() == Qt::Key_D)
     {
-        if (mVertexIndex < mBuilder.GetVertexCount())
+        if (mVertexIndex < mState.builder.GetVertexCount())
         {
-            mTable->EraseVertex(mVertexIndex);
+            mState.table->EraseVertex(mVertexIndex);
             mVertexIndex = 0xffffff;
             ClearSelection(mUI.tableView);
         }
 
-        if (mBuilder.GetVertexCount() == 0)
+        if (mState.builder.GetVertexCount() == 0)
             mUI.actionClear->setEnabled(false);
     }
     else if (key->key() == Qt::Key_E)
