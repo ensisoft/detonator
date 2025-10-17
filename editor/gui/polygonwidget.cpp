@@ -386,6 +386,180 @@ private:
     gfx::PolygonMeshClass& mPolygon;
 };
 
+class ShapeWidget::MouseTool
+{
+public:
+    struct ViewState {
+        GridDensity grid;
+        bool snap = false;
+        float width  = 0;
+        float height = 0;
+    };
+
+    virtual ~MouseTool() = default;
+    virtual void MousePress(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view)  {}
+    virtual void MouseMove(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) {}
+    virtual bool MouseRelease(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) = 0;
+    virtual void CompleteTool(const ViewState& view) {};
+    virtual void DrawTool(gfx::Painter& painter, const ViewState& view) const {}
+    virtual void DrawHelp(gfx::Painter& painter) const {};
+};
+
+class ShapeWidget::MoveVertex2DTool : public MouseTool {
+public:
+    explicit MoveVertex2DTool(State& state, size_t vertex_index)
+      : mState(state)
+      , mVertexIndex(vertex_index)
+    {}
+    void MousePress(const QMouseEvent* mickey, const QPoint& pos, const ViewState&) override
+    {
+        mCurrentPoint = pos;
+    }
+    void MouseMove(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) override
+    {
+        const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
+
+        bool snap = view.snap;
+        if (ctrl)
+            snap = !snap;
+
+        auto vertex = mState.builder.GetVertex(mVertexIndex);
+        if (snap)
+        {
+            const auto num_cells = static_cast<float>(view.grid);
+            const auto cell_width = view.width / num_cells;
+            const auto cell_height = view.height / num_cells;
+            const auto new_x = std::round(pos.x() / cell_width) * cell_width;
+            const auto new_y = std::round(pos.y() / cell_height) * cell_height;
+            const auto old_x = std::round((vertex.aPosition.x * view.width) / cell_width) * cell_width;
+            const auto old_y = std::round((vertex.aPosition.y * -view.height) / cell_height) * cell_height;
+            vertex.aPosition.x = new_x / view.width;
+            vertex.aPosition.y = new_y / -view.height;
+            if (new_x != old_x || new_y != old_y)
+            {
+                mCurrentPoint = QPoint(static_cast<int>(new_x),
+                                       static_cast<int>(new_y));
+            }
+        }
+        else
+        {
+            const auto dx = static_cast<float>(mCurrentPoint.x() - pos.x());
+            const auto dy = static_cast<float>(mCurrentPoint.y() - pos.y());
+            vertex.aPosition.x -= (dx / view.width);
+            vertex.aPosition.y += (dy / view.height);
+            mCurrentPoint = pos;
+        }
+        vertex.aTexCoord.x =  vertex.aPosition.x;
+        vertex.aTexCoord.y = -vertex.aPosition.y;
+        mState.table->UpdateVertex(vertex, mVertexIndex);
+    }
+    bool MouseRelease(const QMouseEvent *mickey, const QPoint &pos, const ViewState &view) override
+    {
+        return true;
+    }
+    void DrawHelp(gfx::Painter& painter) const override
+    {
+        ShowMessage("Move mouse to drag the vertex around.", gfx::FPoint(10.0f, 10.0f), painter);
+    }
+private:
+    ShapeWidget::State& mState;
+    QPoint mCurrentPoint;
+    const size_t mVertexIndex;
+};
+
+class ShapeWidget::AddVertex2DTriangleFanTool : public MouseTool {
+public:
+    explicit AddVertex2DTriangleFanTool(State& state)
+        : mState(state)
+    {}
+
+    void CompleteTool(const ViewState& view) override
+    {
+        gfx::Geometry::DrawCommand cmd;
+        cmd.type   = gfx::Geometry::DrawType::TriangleFan;
+        cmd.count  = mPoints.size();
+        cmd.offset = mState.builder.GetVertexCount();
+        mState.table->AddVertices(MakeVerts(mPoints, view.width, view.height));
+        mState.builder.AddDrawCommand(cmd);
+        mPoints.clear();
+    }
+
+    void MouseMove(const QMouseEvent* mickey, const QPoint& pos, const ViewState&) override
+    {
+        mCurrentPoint = pos;
+    }
+    bool MouseRelease(const QMouseEvent *mickey, const QPoint &pos, const ViewState &view) override
+    {
+        const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
+
+        bool snap = view.snap;
+        if (ctrl)
+            snap = !snap;
+
+        if (snap)
+        {
+            const auto num_cells = static_cast<float>(view.grid);
+
+            const auto cell_width = view.width / num_cells;
+            const auto cell_height = view.height / num_cells;
+            const auto x = std::round(pos.x() / cell_width) * cell_width;
+            const auto y = std::round(pos.y() / cell_height) * cell_height;
+            mPoints.emplace_back(QPoint(x, y));
+        }
+        else
+        {
+            mPoints.push_back(pos);
+        }
+
+        return false;
+    }
+    void DrawTool(gfx::Painter& painter, const ViewState& view) const override
+    {
+        if (!mPoints.empty())
+        {
+            const QPoint& a = mPoints.back();
+            const QPoint& b = mCurrentPoint;
+            gfx::DebugDrawLine(painter, ToGfx(a), ToGfx(b), gfx::Color::HotPink, 2.0f);
+        }
+
+        std::vector<QPoint> points = mPoints;
+        points.push_back(mCurrentPoint);
+
+        gfx::Transform  transform;
+        transform.Resize(view.width, view.height);
+
+        gfx::Geometry::DrawCommand cmd;
+        cmd.type = gfx::Geometry::DrawType::TriangleFan;
+        cmd.offset = 0;
+        cmd.count = points.size();
+
+        gfx::tool::PolygonBuilder2D builder;
+        builder.AddVertices(MakeVerts(points, view.width, view.height));
+        builder.AddDrawCommand(cmd);
+
+        gfx::PolygonMeshClass current(mState.polygon.GetId() + "_2");
+        builder.BuildPoly(current);
+        current.SetStatic(false);
+
+        const auto alpha = 0.87f;
+        static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
+        color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
+        color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+
+        painter.Draw(gfx::PolygonMeshInstance(current), transform,
+            gfx::MaterialInstance(color));
+    }
+    void DrawHelp(gfx::Painter& painter) const  override
+    {
+        if (mPoints.empty())
+            ShowMessage("Click to place first vertex", gfx::FPoint(10.0f, 10.0f), painter);
+        else ShowMessage("Move mouse and click to place a vertex", gfx::FPoint(10.0f, 10.0f), painter);
+    }
+private:
+    ShapeWidget::State& mState;
+    std::vector<QPoint> mPoints;
+    QPoint mCurrentPoint;
+};
 
 ShapeWidget::ShapeWidget(app::Workspace* workspace)
 {
@@ -745,17 +919,10 @@ void ShapeWidget::on_actionSave_triggered()
     mOriginalHash = mState.polygon.GetHash();
 }
 
-void ShapeWidget::on_actionNewTriangleFan_toggled(bool checked)
+void ShapeWidget::on_actionNewTriangleFan_triggered()
 {
-    if (checked)
-    {
-        mActive = true;
-    }
-    else
-    {
-        mPoints.clear();
-        mActive = false;
-    }
+    mMouseTool = std::make_unique<AddVertex2DTriangleFanTool>(mState);
+    SetValue(mUI.actionNewTriangleFan, true);
 }
 
 void ShapeWidget::on_actionShowShader_triggered()
@@ -886,8 +1053,8 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto size = std::min(widget_width, widget_height);
     const auto xoffset = Margin + (widget_width - size) / 2;
     const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width = float(size);
-    const auto height = float(size);
+    const auto width = static_cast<float>(size);
+    const auto height = static_cast<float>(size);
     painter.SetViewport(xoffset, yoffset, size, size);
     painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width , height));
 
@@ -969,7 +1136,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
             if (mVertexIndex == i)
             {
                 painter.Draw(gfx::Circle(), view, gfx::CreateMaterialFromColor(gfx::Color::Green));
-                if (!mDragging)
+                if (!mMouseTool)
                 {
                     const auto time = fmod(base::GetTime(), 1.5) / 1.5;
                     const auto size = 15.0f + time * 50.0f;
@@ -988,44 +1155,33 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     }
 
     // visualize the current triangle
-    if (mActive)
+    if (mMouseTool)
     {
-        if (!mPoints.empty())
-        {
-            const QPoint& a = mPoints.back();
-            const QPoint& b = mCurrentPoint;
-            gfx::DebugDrawLine(painter, ToGfx(a), ToGfx(b), gfx::Color::HotPink, 2.0f);
-        }
+        MouseTool::ViewState view;
+        view.width = width;
+        view.height = height;
+        view.snap = GetValue(mUI.chkSnap);
+        view.grid = GetValue(mUI.cmbGrid);
+        mMouseTool->DrawTool(painter, view);
+    }
 
-        std::vector<QPoint> points = mPoints;
-        points.push_back(mCurrentPoint);
+    if (mMouseTool && painter.GetErrorCount() == 0)
+    {
+        const auto width  = static_cast<float>(mUI.widget->width());
+        const auto height = static_cast<float>(mUI.widget->height());
+        painter.SetViewport(0.0f, 0.0f, width, height);
+        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width, height));
 
-        gfx::Transform  view;
-        view.Resize(width, height);
-
-        gfx::Geometry::DrawCommand cmd;
-        cmd.type = gfx::Geometry::DrawType::TriangleFan;
-        cmd.offset = 0;
-        cmd.count = points.size();
-
-        gfx::tool::PolygonBuilder2D builder;
-        builder.AddVertices(MakeVerts(points, width, height));
-        builder.AddDrawCommand(cmd);
-
-        gfx::PolygonMeshClass current(mState.polygon.GetId() + "_2");
-        builder.BuildPoly(current);
-        current.SetStatic(false);
-
-        painter.Draw(gfx::PolygonMeshInstance(current), view, gfx::MaterialInstance(color));
+        mMouseTool->DrawHelp(painter);
     }
 
     if (painter.GetErrorCount())
     {
-        const auto width = float(mUI.widget->width());
-        const auto height = float(mUI.widget->height());
-
+        const auto width  = static_cast<float>(mUI.widget->width());
+        const auto height = static_cast<float>(mUI.widget->height());
         painter.SetViewport(0.0, 0.0, width, height);
         painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width, height));
+
         ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
         ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
 
@@ -1046,65 +1202,62 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
     const auto size = std::min(widget_width, widget_height);
     const auto xoffset = Margin + (widget_width - size) / 2;
     const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width  = float(size);
-    const auto height = float(size);
+    const auto width  = static_cast<float>(size);
+    const auto height = static_cast<float>(size);
 
     const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
 
-    for (size_t i=0; i<mState.builder.GetVertexCount(); ++i)
+    if (!mMouseTool)
     {
-        const auto& vert = mState.builder.GetVertex(i);
-        const auto x = width * vert.aPosition.x;
-        const auto y = height * -vert.aPosition.y;
-        const auto r = QPoint(x, y) - point;
-        const auto l = std::sqrt(r.x() * r.x() + r.y() * r.y());
-        if (l <= 10)
+        // select a vertex based on proximity to the click point.
+        for (size_t i=0; i<mState.builder.GetVertexCount(); ++i)
         {
-            mDragging = true;
-            mVertexIndex = i;
-            SelectRow(mUI.tableView, mVertexIndex);
-            break;
+            const auto& vertex = mState.builder.GetVertex(i);
+            const auto x = width * vertex.aPosition.x;
+            const auto y = height * -vertex.aPosition.y;
+            const auto r = QPoint(x, y) - point;
+            const auto l = std::sqrt(r.x() * r.x() + r.y() * r.y());
+            if (l <= 10)
+            {
+                mVertexIndex = i;
+                mMouseTool = std::make_unique<MoveVertex2DTool>(mState, mVertexIndex);
+                SelectRow(mUI.tableView, mVertexIndex);
+                break;
+            }
         }
+    }
+    if (mMouseTool)
+    {
+        MouseTool::ViewState view;
+        view.grid   = GetValue(mUI.cmbGrid);
+        view.snap   = GetValue(mUI.chkSnap);
+        view.width  = width;
+        view.height = height;
+        mMouseTool->MousePress(mickey, point, view);
     }
 }
 
 void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
 {
-    mDragging = false;
-
-    if (!mActive)
-        return;
-
     const auto widget_width  = mUI.widget->width() - Margin * 2;
     const auto widget_height = mUI.widget->height() - Margin * 2;
     const auto size = std::min(widget_width, widget_height);
     const auto xoffset = Margin + (widget_width - size) / 2;
     const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width  = float(size);
-    const auto height = float(size);
+    const auto width  = static_cast<float>(size);
+    const auto height = static_cast<float>(size);
 
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
 
-    const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
-
-    bool snap = GetValue(mUI.chkSnap);
-    if (ctrl)
-        snap = !snap;
-
-    if (snap)
+    if (mMouseTool)
     {
-        const GridDensity grid = GetValue(mUI.cmbGrid);
-        const auto num_cells = static_cast<float>(grid);
-
-        const auto cell_width = width / num_cells;
-        const auto cell_height = height / num_cells;
-        const auto x = std::round(pos.x() / cell_width) * cell_width;
-        const auto y = std::round(pos.y() / cell_height) * cell_height;
-        mPoints.emplace_back(QPoint(x, y));
-    }
-    else
-    {
-        mPoints.push_back(pos);
+        MouseTool::ViewState view;
+        view.grid   = GetValue(mUI.cmbGrid);
+        view.snap   = GetValue(mUI.chkSnap);
+        view.width  = width;
+        view.height = height;
+        if (mMouseTool->MouseRelease(mickey, pos, view))
+            mMouseTool.reset();
     }
 }
 
@@ -1115,54 +1268,18 @@ void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
     const auto size = std::min(widget_width, widget_height);
     const auto xoffset = Margin + (widget_width - size) / 2;
     const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width  = float(size);
-    const auto height = float(size);
+    const auto width  = static_cast<float>(size);
+    const auto height = static_cast<float>(size);
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
 
-    const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
-
-    if (mDragging)
+    if (mMouseTool)
     {
-        bool snap = GetValue(mUI.chkSnap);
-        if (ctrl)
-            snap = !snap;
-
-        auto vertex = mState.builder.GetVertex(mVertexIndex);
-        if (snap)
-        {
-            const GridDensity grid = GetValue(mUI.cmbGrid);
-            const auto num_cells = static_cast<float>(grid);
-
-            const auto cell_width = width / num_cells;
-            const auto cell_height = height / num_cells;
-            const auto new_x = std::round(pos.x() / cell_width) * cell_width;
-            const auto new_y = std::round(pos.y() / cell_height) * cell_height;
-            const auto old_x = std::round((vertex.aPosition.x * width) / cell_width) * cell_width;
-            const auto old_y = std::round((vertex.aPosition.y * -height) / cell_height) * cell_height;
-            vertex.aPosition.x = new_x / width;
-            vertex.aPosition.y = new_y / -height;
-            if (new_x != old_x || new_y != old_y)
-            {
-                const QPoint& snap_point =  QPoint(new_x, new_y);
-                QCursor::setPos(mUI.widget->mapToGlobal(snap_point + QPoint(xoffset, yoffset)));
-                mCurrentPoint = snap_point;
-            }
-        }
-        else
-        {
-            const auto dx = float(mCurrentPoint.x() - pos.x());
-            const auto dy = float(mCurrentPoint.y() - pos.y());
-            vertex.aPosition.x -= (dx / width);
-            vertex.aPosition.y += (dy / height);
-            mCurrentPoint = pos;
-        }
-        vertex.aTexCoord.x =  vertex.aPosition.x;
-        vertex.aTexCoord.y = -vertex.aPosition.y;
-        mState.table->UpdateVertex(vertex, mVertexIndex);
-    }
-    else
-    {
-        mCurrentPoint = pos;
+        MouseTool::ViewState view;
+        view.grid   = GetValue(mUI.cmbGrid);
+        view.snap   = GetValue(mUI.chkSnap);
+        view.width  = width;
+        view.height = height;
+        mMouseTool->MouseMove(mickey, pos, view);
     }
 }
 
@@ -1262,22 +1379,21 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
     const auto widget_width  = mUI.widget->width() - Margin * 2;
     const auto widget_height = mUI.widget->height() - Margin * 2;
     const auto size = std::min(widget_width, widget_height);
-    const auto width  = size;
-    const auto height = size;
+    const auto width  = static_cast<float>(size);
+    const auto height = static_cast<float>(size);
 
-    if (key->key() == Qt::Key_Escape && mActive)
+    if (key->key() == Qt::Key_Escape && mMouseTool)
     {
-        gfx::Geometry::DrawCommand cmd;
-        cmd.type   = gfx::Geometry::DrawType::TriangleFan;
-        cmd.count  = mPoints.size();
-        cmd.offset = mState.builder.GetVertexCount();
-        mState.table->AddVertices(MakeVerts(mPoints, width, height));
-        mState.builder.AddDrawCommand(cmd);
-        mPoints.clear();
+        MouseTool::ViewState view;
+        view.width = width;
+        view.height = height;
+        view.snap = GetValue(mUI.chkSnap);
+        view.grid = GetValue(mUI.cmbGrid);
+        mMouseTool->CompleteTool(view);
+        mMouseTool.reset();
 
         mUI.actionNewTriangleFan->setChecked(false);
         mUI.actionClear->setEnabled(true);
-        mActive = false;
     }
     else if (key->key() == Qt::Key_Delete ||
              key->key() == Qt::Key_D)
@@ -1300,6 +1416,5 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
 
     return true;
 }
-
 
 } // namespace

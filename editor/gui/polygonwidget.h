@@ -70,7 +70,7 @@ namespace gui
         void on_actionPause_triggered();
         void on_actionStop_triggered();
         void on_actionSave_triggered();
-        void on_actionNewTriangleFan_toggled(bool checked);
+        void on_actionNewTriangleFan_triggered();
         void on_actionClear_triggered();
         void on_actionShowShader_triggered();
         void on_actionCustomizeShader_triggered();
@@ -91,6 +91,9 @@ namespace gui
         Ui::ShapeWidget mUI;
     private:
         class VertexDataTable;
+        class MouseTool;
+        class AddVertex2DTriangleFanTool;
+        class MoveVertex2DTool;
 
         enum class GridDensity {
             Grid10x10 = 10,
@@ -110,18 +113,11 @@ namespace gui
             // the data table.
             std::unique_ptr<VertexDataTable> table;
         } mState;
-        // the list of points for adding the next draw command.
-        std::vector<QPoint> mPoints;
+        std::unique_ptr<MouseTool> mMouseTool;
 
         // the current material for the blueprint (the background image)
         std::unique_ptr<gfx::Material> mBlueprint;
-        // the most current (latest) point is where the mouse
-        // currently is.
-        QPoint mCurrentPoint;
-        // true when adding a new draw command.
-        bool mActive = false;
-        // true when dragging a vertex around.
-        bool mDragging = false;
+
         // true when playback is paused.
         bool mPaused = false;
         // true when playing.
