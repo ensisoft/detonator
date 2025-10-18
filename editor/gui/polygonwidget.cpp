@@ -405,8 +405,11 @@ public:
     virtual void DrawHelp(gfx::Painter& painter) const {};
 };
 
+template<typename VertexType>
 class ShapeWidget::MoveVertex2DTool : public MouseTool {
 public:
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+
     explicit MoveVertex2DTool(State& state, size_t vertex_index)
       : mState(state)
       , mVertexIndex(vertex_index)
@@ -423,7 +426,9 @@ public:
         if (ctrl)
             snap = !snap;
 
-        auto vertex = mState.builder.GetVertex(mVertexIndex);
+        auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
+
+        auto vertex = builder->GetVertex(mVertexIndex);
         if (snap)
         {
             const auto num_cells = static_cast<float>(view.grid);
@@ -467,8 +472,11 @@ private:
     const size_t mVertexIndex;
 };
 
+template<typename VertexType>
 class ShapeWidget::AddVertex2DTriangleFanTool : public MouseTool {
 public:
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+
     explicit AddVertex2DTriangleFanTool(State& state)
         : mState(state)
     {}
@@ -478,9 +486,9 @@ public:
         gfx::Geometry::DrawCommand cmd;
         cmd.type   = gfx::Geometry::DrawType::TriangleFan;
         cmd.count  = mPoints.size();
-        cmd.offset = mState.builder.GetVertexCount();
+        cmd.offset = mState.builder->GetVertexCount();
         mState.table->AddVertices(MakeVerts(mPoints, view.width, view.height));
-        mState.builder.AddDrawCommand(cmd);
+        mState.builder->AddDrawCommand(cmd);
         mPoints.clear();
     }
 
@@ -606,9 +614,10 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     mState.polygon.SetStatic(GetValue(mUI.staticInstance));
     mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
     mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
+    mState.builder = std::make_unique<gfx::tool::PolygonBuilder2D>();
+    mState.table   = std::make_unique<VertexDataTable>(*mState.builder, mState.polygon);
     mOriginalHash = mState.polygon.GetHash();
 
-    mState.table = std::make_unique<VertexDataTable>(mState.builder, mState.polygon);
     mUI.tableView->setModel(mState.table.get());
 
     // Adwaita theme bugs out and doesn't show the data without this
@@ -629,7 +638,7 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
 
     mState.polygon = *resource.GetContent<gfx::PolygonMeshClass>();
     mOriginalHash = mState.polygon.GetHash();
-    mState.builder.InitFrom(mState.polygon);
+    mState.builder->InitFrom(mState.polygon);
 
     QString material;
     GetProperty(resource, "material", &material);
@@ -731,7 +740,7 @@ bool ShapeWidget::SaveState(Settings& settings) const
 {
     data::JsonObject json;
 
-    mState.builder.BuildPoly(const_cast<gfx::PolygonMeshClass&>(mState.polygon));
+    mState.builder->BuildPoly(const_cast<gfx::PolygonMeshClass&>(mState.polygon));
     mState.polygon.IntoJson(json);
 
     settings.SetValue("Polygon", "content", json);
@@ -771,7 +780,7 @@ bool ShapeWidget::LoadState(const Settings& settings)
     SetEnabled(mUI.btnResetShader, mState.polygon.HasShaderSrc());
     SetEnabled(mUI.actionClear, mState.polygon.HasInlineData());
 
-    mState.builder.InitFrom(mState.polygon);
+    mState.builder->InitFrom(mState.polygon);
 
     on_blueprints_currentIndexChanged(0);
     return true;
@@ -836,7 +845,7 @@ bool ShapeWidget::HasUnsavedChanges() const
 {
     auto clone = mState.polygon.Copy();
     auto* poly = dynamic_cast<gfx::PolygonMeshClass*>(clone.get());
-    mState.builder.BuildPoly(*poly);
+    mState.builder->BuildPoly(*poly);
 
     poly->SetStatic(GetValue(mUI.staticInstance));
     poly->SetName(GetValue(mUI.name));
@@ -904,7 +913,7 @@ void ShapeWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.name))
         return;
 
-    mState.builder.BuildPoly(mState.polygon);
+    mState.builder->BuildPoly(mState.polygon);
 
     app::CustomShapeResource resource(mState.polygon, GetValue(mUI.name));
     SetProperty(resource, "material", (QString)GetItemId(mUI.blueprints));
@@ -921,7 +930,9 @@ void ShapeWidget::on_actionSave_triggered()
 
 void ShapeWidget::on_actionNewTriangleFan_triggered()
 {
-    mMouseTool = std::make_unique<AddVertex2DTriangleFanTool>(mState);
+    using ToolType = AddVertex2DTriangleFanTool<gfx::Vertex2D>;
+
+    mMouseTool = std::make_unique<ToolType>(mState);
     SetValue(mUI.actionNewTriangleFan, true);
 }
 
@@ -993,8 +1004,8 @@ void CustomVertexTransform(inout VertexData vs) {
 
 void ShapeWidget::on_actionClear_triggered()
 {
-    mState.builder.ClearVertices();
-    mState.builder.ClearDrawCommands();
+    mState.builder->ClearVertices();
+    mState.builder->ClearDrawCommands();
     mUI.actionClear->setEnabled(false);
 }
 
@@ -1025,7 +1036,7 @@ void ShapeWidget::on_btnResetBlueprint_clicked()
 
 void ShapeWidget::on_staticInstance_stateChanged(int)
 {
-    mState.builder.SetStatic(GetValue(mUI.staticInstance));
+    mState.builder->SetStatic(GetValue(mUI.staticInstance));
 }
 
 void ShapeWidget::OnAddResource(const app::Resource* resource)
@@ -1106,7 +1117,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         gfx::PolygonMeshClass poly(mState.polygon.GetId() + "_1");
         poly.SetShaderSrc(mState.polygon.GetShaderSrc());
         poly.SetName(mState.polygon.GetName());
-        mState.builder.BuildPoly(poly);
+        mState.builder->BuildPoly(poly);
 
         // set to true since we're constructing this polygon on every frame
         // without this we'll eat all the static vertex/index buffers. argh!
@@ -1126,9 +1137,11 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         gfx::Transform view;
         view.Resize(15, 15);
 
-        for (size_t i = 0; i < mState.builder.GetVertexCount(); ++i)
+        const auto* builder = dynamic_cast<const gfx::tool::PolygonBuilder2D*>(mState.builder.get());
+
+        for (size_t i = 0; i < mState.builder->GetVertexCount(); ++i)
         {
-            const auto& vert = mState.builder.GetVertex(i);
+            const auto& vert = builder->GetVertex(i);
             const auto x = width * vert.aPosition.x;
             const auto y = height * -vert.aPosition.y;
             view.MoveTo(x, y);
@@ -1209,10 +1222,14 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 
     if (!mMouseTool)
     {
+        const auto* builder = dynamic_cast<const gfx::tool::PolygonBuilder2D*>(mState.builder.get());
+
+        using ToolType = MoveVertex2DTool<gfx::Vertex2D>;
+
         // select a vertex based on proximity to the click point.
-        for (size_t i=0; i<mState.builder.GetVertexCount(); ++i)
+        for (size_t i=0; i<mState.builder->GetVertexCount(); ++i)
         {
-            const auto& vertex = mState.builder.GetVertex(i);
+            const auto& vertex = builder->GetVertex(i);
             const auto x = width * vertex.aPosition.x;
             const auto y = height * -vertex.aPosition.y;
             const auto r = QPoint(x, y) - point;
@@ -1220,7 +1237,7 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
             if (l <= 10)
             {
                 mVertexIndex = i;
-                mMouseTool = std::make_unique<MoveVertex2DTool>(mState, mVertexIndex);
+                mMouseTool = std::make_unique<ToolType>(mState, mVertexIndex);
                 SelectRow(mUI.tableView, mVertexIndex);
                 break;
             }
@@ -1298,7 +1315,9 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
     const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
 
-    const auto num_vertices = mState.builder.GetVertexCount();
+    const auto num_vertices = mState.builder->GetVertexCount();
+
+    const auto* builder = dynamic_cast<const gfx::tool::PolygonBuilder2D*>(mState.builder.get());
 
     QPoint point = pos;
     bool snap = GetValue(mUI.chkSnap);
@@ -1322,7 +1341,7 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     size_t vertex_index = 0;
     for (size_t i=0; i<num_vertices; ++i)
     {
-        const auto vert = MapVertexToWidget(mState.builder.GetVertex(i), width, height);
+        const auto vert = MapVertexToWidget(builder->GetVertex(i), width, height);
         const auto len  = PointDist(point, vert);
         if (len < distance)
         {
@@ -1334,14 +1353,14 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     // not found ?
     if (vertex_index == num_vertices)
         return;
-    const auto cmd_index = mState.builder.FindDrawCommand(vertex_index);
+    const auto cmd_index = mState.builder->FindDrawCommand(vertex_index);
     if (cmd_index == std::numeric_limits<size_t>::max())
         return;
 
     DEBUG("Closest vertex: index %1 draw cmd %2", vertex_index, cmd_index);
 
     // degenerate left over triangle ?
-    const auto& cmd = mState.builder.GetDrawCommand(cmd_index);
+    const auto& cmd = mState.builder->GetDrawCommand(cmd_index);
     if (cmd.count < 3)
         return;
 
@@ -1366,8 +1385,8 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     // note that there's still a possibility for a degenerate
     // case (such as when any of the two vertices are collinear)
     // and this isn't properly handled yet.
-    const auto first = mState.builder.GetVertex(cmd.offset);
-    const auto closest = mState.builder.GetVertex(vertex_index);
+    const auto first = builder->GetVertex(cmd.offset);
+    const auto closest = builder->GetVertex(vertex_index);
     const auto winding = math::FindTriangleWindingOrder(first.aPosition, closest.aPosition, vertex.aPosition);
     if (winding == math::TriangleWindingOrder::CounterClockwise)
         mState.table->InsertVertex(vertex, cmd_vertex_index + 1, cmd_index);
@@ -1398,14 +1417,14 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
     else if (key->key() == Qt::Key_Delete ||
              key->key() == Qt::Key_D)
     {
-        if (mVertexIndex < mState.builder.GetVertexCount())
+        if (mVertexIndex < mState.builder->GetVertexCount())
         {
             mState.table->EraseVertex(mVertexIndex);
             mVertexIndex = 0xffffff;
             ClearSelection(mUI.tableView);
         }
 
-        if (mState.builder.GetVertexCount() == 0)
+        if (mState.builder->GetVertexCount() == 0)
             mUI.actionClear->setEnabled(false);
     }
     else if (key->key() == Qt::Key_E)

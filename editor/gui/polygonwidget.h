@@ -92,8 +92,8 @@ namespace gui
     private:
         class VertexDataTable;
         class MouseTool;
-        class AddVertex2DTriangleFanTool;
-        class MoveVertex2DTool;
+        template<typename T> class AddVertex2DTriangleFanTool;
+        template<typename T> class MoveVertex2DTool;
 
         enum class GridDensity {
             Grid10x10 = 10,
@@ -109,7 +109,7 @@ namespace gui
             // the current polygon we're editing.
             gfx::PolygonMeshClass polygon;
             // the builder tool for editing the shape
-            gfx::tool::PolygonBuilder2D builder;
+            std::unique_ptr<gfx::tool::IPolygonBuilder> builder;
             // the data table.
             std::unique_ptr<VertexDataTable> table;
         } mState;
