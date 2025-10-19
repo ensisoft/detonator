@@ -50,24 +50,25 @@ namespace {
 
 constexpr auto Margin = 20; // pixels
 
-std::vector<gfx::Vertex2D> MakeVerts(const std::vector<QPoint>& points,
-                                                     float width, float height)
+template<typename VertexType>
+std::vector<VertexType> MakeVerts2D(const std::vector<QPoint>& points, float width, float height)
 {
-    std::vector<gfx::Vertex2D> verts;
+    std::vector<VertexType> vertices;
     for (const auto& p : points)
     {
-        gfx::Vertex2D vertex;
+        VertexType vertex;
         vertex.aPosition.x = p.x() / width;
         vertex.aPosition.y = p.y() / height * -1.0;
         vertex.aTexCoord.x = p.x() / width;
         vertex.aTexCoord.y = p.y() / height;
-        verts.push_back(vertex);
+        vertices.push_back(vertex);
     }
-    return verts;
+    return vertices;
 }
 
 // Map vertex to widget space.
-QPoint MapVertexToWidget(const gfx::Vertex2D& vertex, float width, float height)
+template<typename VertexType>
+QPoint MapVertexToWidget2D(const VertexType& vertex, float width, float height)
 {
     return QPoint(vertex.aPosition.x * width, vertex.aPosition.y * height * -1.0f);
 }
@@ -83,6 +84,16 @@ float PointDist(const QPoint& a, const QPoint& b)
 namespace gui
 {
 
+std::string TranslateEnum(ShapeWidget::MeshType type)
+{
+    if (type == ShapeWidget::MeshType::Simple2DRenderMesh)
+        return "2D Render Mesh";
+    else if (type == ShapeWidget::MeshType::Simple2DShardEffectMesh)
+        return "2D Shard Effect Mesh";
+    else BUG("Unhandled translation");
+    return "???";
+}
+
 class ShapeWidget::VertexDataTable : public QAbstractTableModel {
 public:
     explicit VertexDataTable(gfx::tool::IPolygonBuilder& builder, gfx::PolygonMeshClass& polygon)
@@ -90,6 +101,13 @@ public:
     {}
     Qt::ItemFlags flags(const QModelIndex& index) const override
     {
+        const auto row = static_cast<unsigned>(index.row());
+        const auto col = static_cast<unsigned>(index.column());
+
+        const auto& field = headerData(col, Qt::Orientation::Horizontal, Qt::DisplayRole);
+        if (field.toString() == "aShardIndex")
+            return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+
         return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
     }
 
@@ -206,7 +224,8 @@ public:
         if (attribute.num_vector_components == 1)
         {
             ASSERT(attribute.type == DataType::UnsignedInt);
-            // todo:
+            const auto* value = gfx::VertexLayout::GetVertexAttributePtr<uint32_t>(attribute, vertex);
+            return QString::number(*value);
         }
         else if (attribute.num_vector_components == 2)
         {
@@ -326,38 +345,41 @@ public:
         return static_cast<int>(count);
     }
 
-    void UpdateVertex(const gfx::Vertex2D& vertex, size_t vertex_index)
+    template<typename VertexType>
+    void UpdateVertex(const VertexType& vertex, size_t vertex_index)
     {
         const auto row = static_cast<int>(vertex_index);
 
         const auto* layout = mPolygon.GetVertexLayout();
-        ASSERT(*layout == gfx::GetVertexLayout<gfx::Vertex2D>());
+        ASSERT(*layout == gfx::GetVertexLayout<VertexType>());
 
         mBuilder.UpdateVertex(&vertex, vertex_index);
 
         emit dataChanged(this->index(row, 0), this->index(row, 4));
     }
-    void InsertVertex(const gfx::Vertex2D& vertex, size_t vertex_index, size_t cmd_index)
+
+    template<typename VertexType>
+    void InsertVertex(const VertexType& vertex, size_t vertex_index, size_t cmd_index)
     {
         const auto first_index = static_cast<int>(vertex_index);
         const auto last_index = static_cast<int>(vertex_index);
 
         const auto* layout = mPolygon.GetVertexLayout();
-        ASSERT(*layout == gfx::GetVertexLayout<gfx::Vertex2D>());
+        ASSERT(*layout == gfx::GetVertexLayout<VertexType>());
 
-        beginInsertRows(QModelIndex(),
-            static_cast<int>(first_index), static_cast<int>(last_index));
+        beginInsertRows(QModelIndex(), first_index, last_index);
         mBuilder.InsertVertex(&vertex, cmd_index, vertex_index);
         endInsertRows();
     }
 
-    void AddVertices(const std::vector<gfx::Vertex2D>& vertices)
+    template<typename VertexType>
+    void AddVertices(const std::vector<VertexType>& vertices)
     {
         const auto first_index = mBuilder.GetVertexCount();
         const auto last_index = first_index + vertices.size() - 1;
 
         const auto* layout = mPolygon.GetVertexLayout();
-        ASSERT(*layout == gfx::GetVertexLayout<gfx::Vertex2D>());
+        ASSERT(*layout == gfx::GetVertexLayout<VertexType>());
 
         beginInsertRows(QModelIndex(),
             static_cast<int>(first_index), static_cast<int>(last_index));
@@ -379,6 +401,14 @@ public:
     void Reset()
     {
         beginResetModel();
+        endResetModel();
+    }
+
+    void ClearAndReset()
+    {
+        beginResetModel();
+        mBuilder.ClearVertices();
+        mBuilder.ClearDrawCommands();
         endResetModel();
     }
 private:
@@ -483,11 +513,34 @@ public:
 
     void CompleteTool(const ViewState& view) override
     {
+        auto vertices = MakeVerts2D<VertexType>(mPoints, view.width, view.height);
+
+        if constexpr (std::is_same<VertexType, gfx::ShardVertex2D>::value)
+        {
+            const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
+            const auto vertex_count = builder->GetVertexCount();
+
+            if (vertex_count)
+            {
+                uint32_t shard_index = 0;
+                for (size_t i=0; i<builder->GetVertexCount(); ++i)
+                {
+                    const auto& shard_vertex = builder->GetVertex(i);
+                    shard_index = std::max(shard_index, shard_vertex.aShardIndex);
+                }
+                for (auto& v : vertices)
+                {
+                    v.aShardIndex = shard_index + 1;
+                }
+            }
+        }
+
         gfx::Geometry::DrawCommand cmd;
         cmd.type   = gfx::Geometry::DrawType::TriangleFan;
         cmd.count  = mPoints.size();
         cmd.offset = mState.builder->GetVertexCount();
-        mState.table->AddVertices(MakeVerts(mPoints, view.width, view.height));
+
+        mState.table->AddVertices(std::move(vertices));
         mState.builder->AddDrawCommand(cmd);
         mPoints.clear();
     }
@@ -537,12 +590,12 @@ public:
         transform.Resize(view.width, view.height);
 
         gfx::Geometry::DrawCommand cmd;
-        cmd.type = gfx::Geometry::DrawType::TriangleFan;
+        cmd.type   = gfx::Geometry::DrawType::TriangleFan;
         cmd.offset = 0;
-        cmd.count = points.size();
+        cmd.count  = points.size();
 
-        gfx::tool::PolygonBuilder2D builder;
-        builder.AddVertices(MakeVerts(points, view.width, view.height));
+        BuilderType builder;
+        builder.AddVertices(MakeVerts2D<VertexType>(points, view.width, view.height));
         builder.AddDrawCommand(cmd);
 
         gfx::PolygonMeshClass current(mState.polygon.GetId() + "_2");
@@ -608,28 +661,15 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     setFocusPolicy(Qt::StrongFocus);
 
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
+    PopulateFromEnum<MeshType>(mUI.cmbMeshType);
     SetValue(mUI.cmbGrid, GridDensity::Grid20x20);
+    SetValue(mUI.cmbMeshType, MeshType::Simple2DRenderMesh);
 
     mState.polygon.SetName(GetValue(mUI.name));
     mState.polygon.SetStatic(GetValue(mUI.staticInstance));
-    mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
-    mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
-    mState.builder = std::make_unique<gfx::tool::PolygonBuilder2D>();
-    mState.table   = std::make_unique<VertexDataTable>(*mState.builder, mState.polygon);
+    SetMeshType(MeshType::Simple2DRenderMesh);
+    CreateMeshBuilder();
     mOriginalHash = mState.polygon.GetHash();
-
-    mUI.tableView->setModel(mState.table.get());
-
-    // Adwaita theme bugs out and doesn't show the data without this
-    // little hack here.
-    mState.table->Reset();
-
-    QObject::connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
-                     [this](const QItemSelection&, const QItemSelection&) {
-        const auto row = GetSelectedRow(mUI.tableView);
-        mVertexIndex = row;
-    });
-
 }
 
 ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resource) : ShapeWidget(workspace)
@@ -638,6 +678,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
 
     mState.polygon = *resource.GetContent<gfx::PolygonMeshClass>();
     mOriginalHash = mState.polygon.GetHash();
+
+    CreateMeshBuilder();
     mState.builder->InitFrom(mState.polygon);
 
     QString material;
@@ -653,9 +695,10 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
     SetValue(mUI.ID, mState.polygon.GetId());
     SetValue(mUI.staticInstance, mState.polygon.IsStatic());
     SetValue(mUI.shaderFile, mState.polygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
+    SetValue(mUI.blueprints, ListItemId(material));
+    SetValue(mUI.cmbMeshType, GetMeshType());
     SetEnabled(mUI.btnResetShader, mState.polygon.HasShaderSrc());
     SetEnabled(mUI.actionClear, mState.polygon.HasInlineData());
-    SetValue(mUI.blueprints, ListItemId(material));
 
     if (!material.isEmpty())
     {
@@ -777,9 +820,11 @@ bool ShapeWidget::LoadState(const Settings& settings)
     SetValue(mUI.staticInstance, mState.polygon.IsStatic());
     SetValue(mUI.blueprints, ListItemId(material));
     SetValue(mUI.shaderFile, mState.polygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
+    SetValue(mUI.cmbMeshType, GetMeshType());
     SetEnabled(mUI.btnResetShader, mState.polygon.HasShaderSrc());
     SetEnabled(mUI.actionClear, mState.polygon.HasInlineData());
 
+    CreateMeshBuilder();
     mState.builder->InitFrom(mState.polygon);
 
     on_blueprints_currentIndexChanged(0);
@@ -845,8 +890,8 @@ bool ShapeWidget::HasUnsavedChanges() const
 {
     auto clone = mState.polygon.Copy();
     auto* poly = dynamic_cast<gfx::PolygonMeshClass*>(clone.get());
-    mState.builder->BuildPoly(*poly);
 
+    mState.builder->BuildPoly(*poly);
     poly->SetStatic(GetValue(mUI.staticInstance));
     poly->SetName(GetValue(mUI.name));
 
@@ -906,6 +951,10 @@ void ShapeWidget::on_actionStop_triggered()
     mPaused = false;
     mPlaying = false;
     mTime = 0.0;
+    if (mBlueprint)
+    {
+        mBlueprint->SetRuntime(0.0);
+    }
 }
 
 void ShapeWidget::on_actionSave_triggered()
@@ -914,6 +963,8 @@ void ShapeWidget::on_actionSave_triggered()
         return;
 
     mState.builder->BuildPoly(mState.polygon);
+    mState.polygon.SetName(GetValue(mUI.name));
+    mState.polygon.SetStatic(GetValue(mUI.staticInstance));
 
     app::CustomShapeResource resource(mState.polygon, GetValue(mUI.name));
     SetProperty(resource, "material", (QString)GetItemId(mUI.blueprints));
@@ -930,9 +981,18 @@ void ShapeWidget::on_actionSave_triggered()
 
 void ShapeWidget::on_actionNewTriangleFan_triggered()
 {
-    using ToolType = AddVertex2DTriangleFanTool<gfx::Vertex2D>;
+    const auto mesh_type = GetMeshType();
+    if (mesh_type == MeshType::Simple2DRenderMesh)
+    {
+        using ToolType = AddVertex2DTriangleFanTool<gfx::Vertex2D>;
+        mMouseTool = std::make_unique<ToolType>(mState);
+    }
+    else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+    {
+        using ToolType = AddVertex2DTriangleFanTool<gfx::ShardVertex2D>;
+        mMouseTool = std::make_unique<ToolType>(mState);
+    } else BUG("Missing mesh type handling.");
 
-    mMouseTool = std::make_unique<ToolType>(mState);
     SetValue(mUI.actionNewTriangleFan, true);
 }
 
@@ -1004,8 +1064,7 @@ void CustomVertexTransform(inout VertexData vs) {
 
 void ShapeWidget::on_actionClear_triggered()
 {
-    mState.builder->ClearVertices();
-    mState.builder->ClearDrawCommands();
+    mState.table->ClearAndReset();
     mUI.actionClear->setEnabled(false);
 }
 
@@ -1037,6 +1096,29 @@ void ShapeWidget::on_btnResetBlueprint_clicked()
 void ShapeWidget::on_staticInstance_stateChanged(int)
 {
     mState.builder->SetStatic(GetValue(mUI.staticInstance));
+}
+
+void ShapeWidget::on_cmbMeshType_currentIndexChanged(int)
+{
+    const MeshType mesh_type = GetValue(mUI.cmbMeshType);
+    if (mesh_type == GetMeshType())
+        return;
+
+    if (mState.polygon.GetVertexCount())
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Icon::Question);
+        msg.setText("Changing the mesh type will reset all vertex data.\n"
+            "Are you sure you want to continue?");
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        if (msg.exec() == QMessageBox::No)
+        {
+            SetValue(mUI.cmbMeshType, GetMeshType());
+            return;
+        }
+    }
+    SetMeshType(mesh_type);
+    CreateMeshBuilder();
 }
 
 void ShapeWidget::OnAddResource(const app::Resource* resource)
@@ -1134,37 +1216,12 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // visualize the vertices.
     {
-        gfx::Transform view;
-        view.Resize(15, 15);
-
-        const auto* builder = dynamic_cast<const gfx::tool::PolygonBuilder2D*>(mState.builder.get());
-
-        for (size_t i = 0; i < mState.builder->GetVertexCount(); ++i)
-        {
-            const auto& vert = builder->GetVertex(i);
-            const auto x = width * vert.aPosition.x;
-            const auto y = height * -vert.aPosition.y;
-            view.MoveTo(x, y);
-            view.Translate(-7.5, -7.5);
-            if (mVertexIndex == i)
-            {
-                painter.Draw(gfx::Circle(), view, gfx::CreateMaterialFromColor(gfx::Color::Green));
-                if (!mMouseTool)
-                {
-                    const auto time = fmod(base::GetTime(), 1.5) / 1.5;
-                    const auto size = 15.0f + time * 50.0f;
-                    gfx::Transform model;
-                    model.Resize(size, size);
-                    model.MoveTo(x, y);
-                    model.Translate(-size*0.5f, -size*0.5f);
-                    painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
-                }
-            }
-            else
-            {
-                painter.Draw(gfx::Circle(), view, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
-            }
-        }
+        const auto mesh_type = GetMeshType();
+        if (mesh_type == MeshType::Simple2DRenderMesh)
+            PaintVertices2D<gfx::Vertex2D>(painter);
+        else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+            PaintVertices2D<gfx::ShardVertex2D>(painter);
+        else BUG("Missing mesh type handling.");
     }
 
     // visualize the current triangle
@@ -1222,26 +1279,12 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 
     if (!mMouseTool)
     {
-        const auto* builder = dynamic_cast<const gfx::tool::PolygonBuilder2D*>(mState.builder.get());
-
-        using ToolType = MoveVertex2DTool<gfx::Vertex2D>;
-
-        // select a vertex based on proximity to the click point.
-        for (size_t i=0; i<mState.builder->GetVertexCount(); ++i)
-        {
-            const auto& vertex = builder->GetVertex(i);
-            const auto x = width * vertex.aPosition.x;
-            const auto y = height * -vertex.aPosition.y;
-            const auto r = QPoint(x, y) - point;
-            const auto l = std::sqrt(r.x() * r.x() + r.y() * r.y());
-            if (l <= 10)
-            {
-                mVertexIndex = i;
-                mMouseTool = std::make_unique<ToolType>(mState, mVertexIndex);
-                SelectRow(mUI.tableView, mVertexIndex);
-                break;
-            }
-        }
+        const auto mesh_type = GetMeshType();
+        if (mesh_type == MeshType::Simple2DRenderMesh)
+            PickVertex2D<gfx::Vertex2D>(point, width, height);
+        else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+            PickVertex2D<gfx::ShardVertex2D>(point, width, height);
+        else BUG("Unhandled mesh type.");
     }
     if (mMouseTool)
     {
@@ -1310,14 +1353,10 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     const auto size = std::min(widget_width, widget_height);
     const auto xoffset = Margin + (widget_width - size) / 2;
     const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width  = float(size);
-    const auto height = float(size);
+    const auto width  = static_cast<float>(size);
+    const auto height = static_cast<float>(size);
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
     const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
-
-    const auto num_vertices = mState.builder->GetVertexCount();
-
-    const auto* builder = dynamic_cast<const gfx::tool::PolygonBuilder2D*>(mState.builder.get());
 
     QPoint point = pos;
     bool snap = GetValue(mUI.chkSnap);
@@ -1336,61 +1375,12 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
         point = QPoint(x, y);
     }
 
-    // find the vertex closest to the click point.
-    float distance = std::numeric_limits<float>::max();
-    size_t vertex_index = 0;
-    for (size_t i=0; i<num_vertices; ++i)
-    {
-        const auto vert = MapVertexToWidget(builder->GetVertex(i), width, height);
-        const auto len  = PointDist(point, vert);
-        if (len < distance)
-        {
-            vertex_index = i;
-            distance = len;
-        }
-    }
-
-    // not found ?
-    if (vertex_index == num_vertices)
-        return;
-    const auto cmd_index = mState.builder->FindDrawCommand(vertex_index);
-    if (cmd_index == std::numeric_limits<size_t>::max())
-        return;
-
-    DEBUG("Closest vertex: index %1 draw cmd %2", vertex_index, cmd_index);
-
-    // degenerate left over triangle ?
-    const auto& cmd = mState.builder->GetDrawCommand(cmd_index);
-    if (cmd.count < 3)
-        return;
-
-    const auto cmd_vertex_index = vertex_index - cmd.offset;
-
-    gfx::Vertex2D vertex;
-    vertex.aPosition.x = point.x() / (float)width;
-    vertex.aPosition.y = point.y() / (float)height * -1.0f;
-    vertex.aTexCoord.x = vertex.aPosition.x;
-    vertex.aTexCoord.y = -vertex.aPosition.y;
-
-    // currently back face culling is enabled and the winding
-    // order is set to CCW. That means that in order to
-    // determine where the new vertex should be placed within
-    // the draw command we can check the winding order.
-    // We have two options:
-    // root -> closest -> new vertex
-    // root -> new vertex -> closest
-    //
-    // One of the above should have a CCW winding order and
-    // give us the info where to place the new vertex.
-    // note that there's still a possibility for a degenerate
-    // case (such as when any of the two vertices are collinear)
-    // and this isn't properly handled yet.
-    const auto first = builder->GetVertex(cmd.offset);
-    const auto closest = builder->GetVertex(vertex_index);
-    const auto winding = math::FindTriangleWindingOrder(first.aPosition, closest.aPosition, vertex.aPosition);
-    if (winding == math::TriangleWindingOrder::CounterClockwise)
-        mState.table->InsertVertex(vertex, cmd_vertex_index + 1, cmd_index);
-    else mState.table->InsertVertex(vertex, cmd_vertex_index, cmd_index);
+    const auto mesh_type = GetMeshType();
+    if (mesh_type == MeshType::Simple2DRenderMesh)
+        InsertVertex2D<gfx::Vertex2D>(point, width, height);
+    else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+        InsertVertex2D<gfx::ShardVertex2D>(point, width, height);
+    else BUG("Missing mesh type handling.");
 }
 
 bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
@@ -1435,5 +1425,197 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
 
     return true;
 }
+
+template<typename VertexType>
+void ShapeWidget::PaintVertices2D(gfx::Painter& painter) const
+{
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+
+    const auto widget_width  = mUI.widget->width() - Margin * 2;
+    const auto widget_height = mUI.widget->height() - Margin * 2;
+    const auto size = std::min(widget_width, widget_height);
+    const auto width = static_cast<float>(size);
+    const auto height = static_cast<float>(size);
+    const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
+
+    for (size_t i = 0; i < mState.builder->GetVertexCount(); ++i)
+    {
+        const auto& vert = builder->GetVertex(i);
+        const auto x = width * vert.aPosition.x;
+        const auto y = height * -vert.aPosition.y;
+
+        gfx::Transform model;
+        model.Resize(15, 15);
+        model.MoveTo(x, y);
+        model.Translate(-7.5, -7.5);
+
+        if (mVertexIndex == i)
+        {
+            painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+            if (!mMouseTool)
+            {
+                const auto time = fmod(base::GetTime(), 1.5) / 1.5;
+                const auto size = 15.0f + time * 50.0f;
+                gfx::Transform model;
+                model.Resize(size, size);
+                model.MoveTo(x, y);
+                model.Translate(-size*0.5f, -size*0.5f);
+                painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+            }
+        }
+        else
+        {
+            painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+        }
+    }
+}
+
+template<typename VertexType>
+void ShapeWidget::PickVertex2D(const QPoint& pick_point, float width, float height)
+{
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+    using ToolType = MoveVertex2DTool<VertexType>;
+
+    const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
+
+    // select a vertex based on proximity to the click point.
+    for (size_t i=0; i<mState.builder->GetVertexCount(); ++i)
+    {
+        const auto& vertex = builder->GetVertex(i);
+        const auto x = width * vertex.aPosition.x;
+        const auto y = height * -vertex.aPosition.y;
+        const auto r = QPoint(x, y) - pick_point;
+        const auto l = std::sqrt(r.x() * r.x() + r.y() * r.y());
+        if (l <= 10)
+        {
+            mVertexIndex = i;
+            mMouseTool = std::make_unique<ToolType>(mState, mVertexIndex);
+            SelectRow(mUI.tableView, mVertexIndex);
+            break;
+        }
+    }
+}
+
+template<typename VertexType>
+void ShapeWidget::InsertVertex2D(const QPoint& click_point, float width, float height)
+{
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+
+    const auto num_vertices = mState.builder->GetVertexCount();
+    const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
+
+    // find the vertex closest to the click point.
+    float distance = std::numeric_limits<float>::max();
+    size_t vertex_index = 0;
+    for (size_t i=0; i<num_vertices; ++i)
+    {
+        const auto vert = MapVertexToWidget2D(builder->GetVertex(i), width, height);
+        const auto len  = PointDist(click_point, vert);
+        if (len < distance)
+        {
+            vertex_index = i;
+            distance = len;
+        }
+    }
+
+    // not found ?
+    if (vertex_index == num_vertices)
+        return;
+    const auto cmd_index = mState.builder->FindDrawCommand(vertex_index);
+    if (cmd_index == std::numeric_limits<size_t>::max())
+        return;
+
+    DEBUG("Closest vertex: index %1 draw cmd %2", vertex_index, cmd_index);
+
+    // degenerate left over triangle ?
+    const auto& cmd = mState.builder->GetDrawCommand(cmd_index);
+    if (cmd.count < 3)
+        return;
+
+    const auto cmd_vertex_index = vertex_index - cmd.offset;
+
+    VertexType vertex;
+    vertex.aPosition.x = click_point.x() / (float)width;
+    vertex.aPosition.y = click_point.y() / (float)height * -1.0f;
+    vertex.aTexCoord.x = vertex.aPosition.x;
+    vertex.aTexCoord.y = -vertex.aPosition.y;
+
+    // currently back face culling is enabled and the winding
+    // order is set to CCW. That means that in order to
+    // determine where the new vertex should be placed within
+    // the draw command we can check the winding order.
+    // We have two options:
+    // root -> closest -> new vertex
+    // root -> new vertex -> closest
+    //
+    // One of the above should have a CCW winding order and
+    // give us the info where to place the new vertex.
+    // note that there's still a possibility for a degenerate
+    // case (such as when any of the two vertices are collinear)
+    // and this isn't properly handled yet.
+    const auto first = builder->GetVertex(cmd.offset);
+    const auto closest = builder->GetVertex(vertex_index);
+    const auto winding = math::FindTriangleWindingOrder(first.aPosition, closest.aPosition, vertex.aPosition);
+    if (winding == math::TriangleWindingOrder::CounterClockwise)
+        mState.table->InsertVertex(vertex, cmd_vertex_index + 1, cmd_index);
+    else mState.table->InsertVertex(vertex, cmd_vertex_index, cmd_index);
+}
+
+ShapeWidget::MeshType ShapeWidget::GetMeshType() const
+{
+    const auto type = mState.polygon.GetMeshType();
+    if (type == gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh)
+        return MeshType::Simple2DRenderMesh;
+    else if (type == gfx::PolygonMeshClass::MeshType::Simple2DShardEffectMesh)
+        return MeshType::Simple2DShardEffectMesh;
+    else BUG("Unhandled mesh type.");
+    return MeshType::Simple2DRenderMesh;
+}
+
+void ShapeWidget::SetMeshType(MeshType mesh_type)
+{
+    mState.polygon.ClearContent();
+
+    if (mesh_type == MeshType::Simple2DRenderMesh)
+    {
+        mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
+        mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    }
+    else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+    {
+        mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DShardEffectMesh);
+        mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::ShardVertex2D>());
+
+    } else BUG("Unhandled mesh type.");
+}
+
+void ShapeWidget::CreateMeshBuilder()
+{
+    const auto type = GetMeshType();
+
+    if (type == MeshType::Simple2DRenderMesh)
+    {
+        mState.builder = std::make_unique<gfx::tool::PolygonBuilder2D>();
+        mState.table   = std::make_unique<VertexDataTable>(*mState.builder, mState.polygon);
+    }
+    else if (type == MeshType::Simple2DShardEffectMesh)
+    {
+        mState.builder = std::make_unique<gfx::tool::PolygonBuilderShard2D>();
+        mState.table   = std::make_unique<VertexDataTable>(*mState.builder, mState.polygon);
+
+    } else BUG("Unhandled mesh type.");
+
+    mUI.tableView->setModel(mState.table.get());
+    // Adwaita theme bugs out and doesn't show the data without this
+    // little hack here.
+    mState.table->Reset();
+
+    QObject::connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+        [this](const QItemSelection&, const QItemSelection&) {
+            const auto row = GetSelectedRow(mUI.tableView);
+            mVertexIndex = row;
+        });
+}
+
 
 } // namespace

@@ -222,14 +222,16 @@ void PolygonBuilder<Vertex>::BuildPoly(PolygonMeshClass& polygon) const
 
     const auto count = mVertices.size();
     const auto bytes = count * sizeof(Vertex);
-    if (count == 0)
-        return;
 
-    std::vector<uint8_t> buffer;
-    buffer.resize(bytes);
-    std::memcpy(buffer.data(), mVertices.data(), bytes);
+    if (count)
+    {
+        std::vector<uint8_t> buffer;
+        buffer.resize(bytes);
+        std::memcpy(buffer.data(), mVertices.data(), bytes);
 
-    polygon.SetVertexBuffer(std::move(buffer));
+        polygon.SetVertexBuffer(std::move(buffer));
+    }
+
     polygon.SetContentHash(GetContentHash());
     polygon.SetVertexLayout(gfx::GetVertexLayout<Vertex>());
     polygon.SetCommandBuffer(mDrawCommands);
@@ -254,7 +256,7 @@ void PolygonBuilder<Vertex>::InitFrom(const PolygonMeshClass& polygon)
         if (count)
             std::memcpy(mVertices.data(), ptr, bytes);
 
-        for (size_t i=0; i<polygon.GetNumDrawCmds(); ++i)
+        for (size_t i=0; i<polygon.GetDrawCmdCount(); ++i)
         {
             mDrawCommands.push_back(*polygon.GetDrawCmd(i));
         }
@@ -264,7 +266,7 @@ void PolygonBuilder<Vertex>::InitFrom(const PolygonMeshClass& polygon)
 
 template class PolygonBuilder<Vertex2D>;
 template class PolygonBuilder<Perceptual3DVertex>;
-
+template class PolygonBuilder<ShardVertex2D>;
 
 } // namespace
 } // namespace

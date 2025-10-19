@@ -40,6 +40,11 @@ namespace gui
         Q_OBJECT
 
     public:
+        enum class MeshType {
+            Simple2DRenderMesh,
+            Simple2DShardEffectMesh
+        };
+
         explicit ShapeWidget(app::Workspace* workspace);
         ShapeWidget(app::Workspace* workspace, const app::Resource& resource);
        ~ShapeWidget() override;
@@ -78,6 +83,7 @@ namespace gui
         void on_btnResetShader_clicked();
         void on_btnResetBlueprint_clicked();
         void on_staticInstance_stateChanged(int);
+        void on_cmbMeshType_currentIndexChanged(int);
 
     private:
         void PaintScene(gfx::Painter& painter, double secs);
@@ -86,6 +92,19 @@ namespace gui
         void OnMouseMove(QMouseEvent* mickey);
         void OnMouseDoubleClick(QMouseEvent* mickey);
         bool OnKeyPressEvent(QKeyEvent* key);
+
+        template<typename Vertex>
+        void PaintVertices2D(gfx::Painter& painter) const;
+
+        template<typename Vertex>
+        void PickVertex2D(const QPoint& pick_point, float width, float height);
+
+        template<typename Vertex>
+        void InsertVertex2D(const QPoint& click_point, float width, float height);
+
+        MeshType GetMeshType() const;
+        void SetMeshType(MeshType mesh);
+        void CreateMeshBuilder();
 
     private:
         Ui::ShapeWidget mUI;

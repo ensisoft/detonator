@@ -1028,7 +1028,7 @@ void unit_test_polygon_data()
         gfx::PolygonMeshClass ret;
         TEST_REQUIRE(ret.FromJson(json));
         TEST_REQUIRE(ret.HasInlineData());
-        TEST_REQUIRE(ret.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(ret.GetDrawCmdCount() == 1);
         TEST_REQUIRE(ret.GetVertexBufferSize() == sizeof(gfx::Vertex2D) * 3);
         TEST_REQUIRE(*ret.GetVertexLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
         TEST_REQUIRE(ret.GetDrawCmd(0)->type == gfx::Geometry::DrawType::TriangleFan);

@@ -123,6 +123,16 @@ namespace gfx
         Vec2 aTexCoord;
     };
 
+    // Vertex type for 2D sharded mesh effects.
+    struct ShardVertex2D {
+        // Coordinate / position of the vertex in the model space
+        Vec2 aPosition;
+        // Texture coordinate for the vertex.
+        Vec2 aTexCoord;
+        // Index into shard data for this vertex.
+        uint32_t aShardIndex = 0;
+    };
+
     // Vertex for rendering 2D shapes, such as quads, where the content
     // of the 2D shape rendered (basically the texture) is partially
     // mapped into a 3D world.
@@ -187,6 +197,18 @@ namespace gfx
 
     template<typename Vertex>
     const VertexLayout& GetVertexLayout();
+
+    template<> inline
+    const VertexLayout& GetVertexLayout<ShardVertex2D>()
+    {
+        using DataType = VertexLayout::Attribute::DataType;
+        static const VertexLayout layout(sizeof(ShardVertex2D), {
+            {"aPosition",   0, 2, 0, offsetof(ShardVertex2D, aPosition),   DataType::Float},
+            {"aTexCoord",   0, 2, 0, offsetof(ShardVertex2D, aTexCoord),   DataType::Float},
+            {"aShardIndex", 0, 1, 0, offsetof(ShardVertex2D, aShardIndex), DataType::UnsignedInt}
+        });
+        return layout;
+    }
 
     template<> inline
     const VertexLayout& GetVertexLayout<Perceptual3DVertex>()
