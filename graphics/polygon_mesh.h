@@ -44,9 +44,11 @@ namespace gfx
         enum class MeshType {
             // This mesh type is used for rendering 2D with Vertex2D.
             Simple2DRenderMesh,
+            // This mesh type is used for rendering 2D effect with Vertex2D.
+            Simple2DShardEffectMesh,
             // This mesh type is used for rendering 3D with sing Vertex3D
             Simple3DRenderMesh,
-
+            // todo.
             Model3DRenderMesh,
             // This mesh type is used for rendering isometric 2D tiles
             // with perceptual 3D support for things such as lights.
@@ -118,7 +120,8 @@ namespace gfx
         const VertexLayout* GetVertexLayout() const noexcept;
         const void* GetVertexBufferPtr() const noexcept;
         size_t GetVertexBufferSize() const noexcept;
-        size_t GetNumDrawCmds() const noexcept;
+        size_t GetVertexCount() const noexcept;
+        size_t GetDrawCmdCount() const noexcept;
         const Geometry::DrawCommand* GetDrawCmd(size_t index) const noexcept;
 
         std::string GetGeometryId(const Environment& env) const;

@@ -180,6 +180,7 @@ namespace tool {
 
     using PolygonBuilder2D = PolygonBuilder<Vertex2D>;
     using PolygonBuilderPerceptual3D = PolygonBuilder<Perceptual3DVertex>;
+    using PolygonBuilderShard2D = PolygonBuilder<ShardVertex2D>;
 
 } // namespace
 } // namespace

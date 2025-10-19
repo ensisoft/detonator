@@ -139,7 +139,7 @@ const void* PolygonMeshClass::GetVertexBufferPtr() const noexcept
     return nullptr;
 }
 
-size_t PolygonMeshClass::GetNumDrawCmds() const noexcept
+size_t PolygonMeshClass::GetDrawCmdCount() const noexcept
 {
     if (mData.has_value())
         return mData.value().cmds.size();
@@ -153,6 +153,15 @@ size_t PolygonMeshClass::GetVertexBufferSize() const noexcept
         return mData.value().vertices.size();
 
     return 0;
+}
+size_t PolygonMeshClass::GetVertexCount() const noexcept
+{
+    if (!mData.has_value())
+        return 0;
+
+    const auto vertex_bytes = mData.value().vertices.size();
+    const auto vertex_size = mData.value().layout.vertex_struct_size;
+    return vertex_bytes / vertex_size;
 }
 
 const Geometry::DrawCommand* PolygonMeshClass::GetDrawCmd(size_t index) const noexcept
@@ -196,6 +205,8 @@ ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& d
     const auto mesh = GetMeshType();
     if (mesh == MeshType::Simple2DRenderMesh)
         src = MakeSimple2DVertexShader(device, env.use_instancing);
+    else if (mesh == MeshType::Simple2DShardEffectMesh)
+        src = MakeSimple2DVertexShader(device, env.use_instancing);
     else if (mesh == MeshType::Simple3DRenderMesh)
         src = MakeSimple3DVertexShader(device, env.use_instancing);
     else if (mesh == MeshType::Model3DRenderMesh)
@@ -228,7 +239,6 @@ const PolygonMeshClass::DrawCmd* PolygonMeshClass::GetSubMeshDrawCmd(const std::
 void PolygonMeshClass::ClearContent()
 {
     mData.reset();
-    mMeshType = MeshType::Simple2DRenderMesh;
     mSubMeshes.clear();
     mContentUri.clear();
     mContentHash = 0;
