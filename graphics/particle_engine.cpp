@@ -1179,7 +1179,7 @@ bool ParticleEngineClass::UpdateParticle(const Environment& env, const Params& p
     return true;
 }
 
-bool ParticleEngineInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
+bool ParticleEngineInstance::ApplyDynamicState(const Environment& env, Device&, ProgramState& program, RasterState& state) const
 {
     // state.line_width = 1.0; // don't change the line width
     state.culling    = Culling::None;
@@ -1203,12 +1203,12 @@ std::string ParticleEngineInstance::GetGeometryId(const Environment& env) const
     return mClass->GetGeometryId(env);
 }
 
-bool ParticleEngineInstance::Construct(const Environment& env, Geometry::CreateArgs& create) const
+bool ParticleEngineInstance::Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const
 {
     return mClass->Construct(env, *mState, create);
 }
 
-bool ParticleEngineInstance::Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+bool ParticleEngineInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
 {
     return mClass->Construct(env, *mState, draw, args);
 }

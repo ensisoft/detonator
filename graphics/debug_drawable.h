@@ -38,12 +38,12 @@ namespace gfx
         };
         using FlagBits = base::bitflag<Flags>;
 
-        bool ApplyDynamicState(const Environment& env, ProgramState& program, RasterState&  state) const override;
+        bool ApplyDynamicState(const Environment& env, Device&, ProgramState& program, RasterState&  state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
         std::string GetGeometryId(const Environment& env) const override;
-        bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
+        bool Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const override;
         Usage GetGeometryUsage() const override;
         size_t GetGeometryHash() const override;
     protected:

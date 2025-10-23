@@ -141,7 +141,7 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
             Drawable::RasterState drawable_raster_state;
             drawable_raster_state.culling    = draw.state.culling;
             drawable_raster_state.line_width = draw.state.line_width;
-            state_ok &= draw.drawable->ApplyDynamicState(drawable_env, gpu_program_state, drawable_raster_state);
+            state_ok &= draw.drawable->ApplyDynamicState(drawable_env, *mDevice, gpu_program_state, drawable_raster_state);
 
             device_state.blending      = material_raster_state.blending;
             device_state.premulalpha   = material_raster_state.premultiplied_alpha;
@@ -382,7 +382,7 @@ GeometryPtr Painter::GetGpuGeometry(const Drawable& drawable, const Drawable::En
     if (usage == Drawable::Usage::Stream)
     {
         Geometry::CreateArgs args;
-        if (!drawable.Construct(env, args))
+        if (!drawable.Construct(env, *mDevice, args))
             return nullptr;
 
         return mDevice->CreateGeometry(id, std::move(args));
@@ -393,7 +393,7 @@ GeometryPtr Painter::GetGpuGeometry(const Drawable& drawable, const Drawable::En
         if (geom == nullptr)
         {
             Geometry::CreateArgs args;
-            if (!drawable.Construct(env, args))
+            if (!drawable.Construct(env, *mDevice, args))
                 return nullptr;
 
             return mDevice->CreateGeometry(id, std::move(args));
@@ -402,7 +402,7 @@ GeometryPtr Painter::GetGpuGeometry(const Drawable& drawable, const Drawable::En
             return geom;
 
         Geometry::CreateArgs args;
-        if (!drawable.Construct(env, args))
+        if (!drawable.Construct(env, *mDevice, args))
             return nullptr;
 
         return mDevice->CreateGeometry(id, std::move(args));
@@ -413,7 +413,7 @@ GeometryPtr Painter::GetGpuGeometry(const Drawable& drawable, const Drawable::En
         if (geom == nullptr)
         {
             Geometry::CreateArgs args;
-            if (!drawable.Construct(env, args))
+            if (!drawable.Construct(env, *mDevice, args))
                 return nullptr;
 
             return mDevice->CreateGeometry(id, std::move(args));
@@ -425,7 +425,7 @@ GeometryPtr Painter::GetGpuGeometry(const Drawable& drawable, const Drawable::En
             return geom;
 
         Geometry::CreateArgs args;
-        if (!drawable.Construct(env, args))
+        if (!drawable.Construct(env, *mDevice, args))
             return nullptr;
 
         return mDevice->CreateGeometry(id, std::move(args));
@@ -441,7 +441,7 @@ InstancedDrawPtr Painter::GetGpuInstancedDraw(const InstancedDraw& draw, const g
     if (usage == BufferUsage::Stream)
     {
         gfx::InstancedDraw::CreateArgs args;
-        if (!drawable.Construct(env, draw, args))
+        if (!drawable.Construct(env, *mDevice, draw, args))
             return nullptr;
 
         return mDevice->CreateInstancedDraw(id, std::move(args));
@@ -452,7 +452,7 @@ InstancedDrawPtr Painter::GetGpuInstancedDraw(const InstancedDraw& draw, const g
         if (foo == nullptr)
         {
             gfx::InstancedDraw::CreateArgs args;
-            if (!drawable.Construct(env, draw, args))
+            if (!drawable.Construct(env, *mDevice, draw, args))
                 return nullptr;
 
             return mDevice->CreateInstancedDraw(draw.gpu_id, std::move(args));
@@ -461,7 +461,7 @@ InstancedDrawPtr Painter::GetGpuInstancedDraw(const InstancedDraw& draw, const g
             return foo;
 
         gfx::InstancedDraw::CreateArgs args;
-        if (!drawable.Construct(env, draw, args))
+        if (!drawable.Construct(env, *mDevice, draw, args))
             return nullptr;
 
         return mDevice->CreateInstancedDraw(id, std::move(args));
@@ -472,7 +472,7 @@ InstancedDrawPtr Painter::GetGpuInstancedDraw(const InstancedDraw& draw, const g
         if (foo == nullptr)
         {
             gfx::InstancedDraw::CreateArgs args;
-            if (!drawable.Construct(env, draw, args))
+            if (!drawable.Construct(env, *mDevice, draw, args))
                 return nullptr;
 
             return mDevice->CreateInstancedDraw(id, std::move(args));
@@ -485,7 +485,7 @@ InstancedDrawPtr Painter::GetGpuInstancedDraw(const InstancedDraw& draw, const g
             return foo;
 
         gfx::InstancedDraw::CreateArgs args;
-        if (!drawable.Construct(env, draw, args))
+        if (!drawable.Construct(env, *mDevice, draw, args))
             return nullptr;
 
         return mDevice->CreateInstancedDraw(id, std::move(args));

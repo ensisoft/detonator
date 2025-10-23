@@ -24,7 +24,7 @@
 namespace gfx
 {
 
-bool Grid::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
+bool Grid::ApplyDynamicState(const Environment& env, Device&, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
@@ -59,7 +59,7 @@ std::string Grid::GetGeometryId(const Environment& env) const
     return std::to_string(hash);
 }
 
-bool Grid::Construct(const Environment&, Geometry::CreateArgs& create) const
+bool Grid::Construct(const Environment&, Device&, Geometry::CreateArgs& create) const
 {
     std::vector<Vertex2D> verts;
 

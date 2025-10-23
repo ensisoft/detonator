@@ -390,13 +390,13 @@ namespace gfx
           : mClass(std::make_shared<ParticleEngineClass>(params))
           , mState(std::make_shared<ParticleEngineClass::InstanceState>())
         {}
-        bool ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& env, Device&, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment&  env) const override;
         std::string GetShaderName(const Environment& env) const override;
         std::string GetGeometryId(const Environment& env) const override;
-        bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
-        bool Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
+        bool Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const override;
+        bool Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
         void Update(const Environment& env, float dt) override;
         bool IsAlive() const override;
         void Restart(const Environment& env) override;

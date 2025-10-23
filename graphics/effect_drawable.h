@@ -63,13 +63,13 @@ namespace gfx
         void SetEffectArgs(EffectArgs args)
         { mArgs = args; }
 
-        bool ApplyDynamicState(const Environment& env, ProgramState& program, RasterState&  state) const override;
+        bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState&  state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
         std::string GetShaderName(const Environment& env) const override;
         std::string GetGeometryId(const Environment& env) const override;
-        bool Construct(const Environment& env, Geometry::CreateArgs& create) const override;
-        bool Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
+        bool Construct(const Environment& env, Device& device, Geometry::CreateArgs& create) const override;
+        bool Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
         void Update(const Environment& env, float dt) override;
         void Restart(const Environment& env) override;
         size_t GetGeometryHash() const override;
@@ -85,7 +85,7 @@ namespace gfx
 
         static void SetRandomGenerator(std::function<float(float min, float max)> random_function);
     private:
-        bool ConstructExplosionMesh(const Environment& env, Geometry::CreateArgs& create) const;
+        bool ConstructExplosionMesh(const Environment& env, Device& device, Geometry::CreateArgs& create) const;
     private:
         std::shared_ptr<Drawable> mDrawable;
         std::string mEffectId;
