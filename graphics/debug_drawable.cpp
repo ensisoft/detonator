@@ -23,9 +23,9 @@
 namespace gfx
 {
 
-bool DebugDrawableBase::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
+bool DebugDrawableBase::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
 {
-    return mDrawable->ApplyDynamicState(env, program, state);
+    return mDrawable->ApplyDynamicState(env, device, program, state);
 }
 
 ShaderSource DebugDrawableBase::GetShader(const Environment& env, const Device& device) const
@@ -55,15 +55,15 @@ std::string DebugDrawableBase::GetGeometryId(const Environment& env) const
     return id;
 }
 
-bool DebugDrawableBase::Construct(const Environment& env, Geometry::CreateArgs& create) const
+bool DebugDrawableBase::Construct(const Environment& env, Device& device, Geometry::CreateArgs& create) const
 {
     if (mDrawable->GetDrawPrimitive() != DrawPrimitive::Triangles)
     {
-        return mDrawable->Construct(env, create);
+        return mDrawable->Construct(env, device, create);
     }
 
     Geometry::CreateArgs temp;
-    if (!mDrawable->Construct(env, temp))
+    if (!mDrawable->Construct(env, device, temp))
         return false;
 
     if (!temp.buffer.HasData())

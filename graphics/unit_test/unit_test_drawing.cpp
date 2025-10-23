@@ -1736,8 +1736,8 @@ void unit_test_local_particles()
         gfx::DrawableClass::Environment env;
 
         eng.Restart(env);
-
-        TEST_REQUIRE(eng.Construct(env, args));
+        TestDevice dev;
+        TEST_REQUIRE(eng.Construct(env, dev, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
 
         const gfx::VertexStream stream(args.buffer.GetLayout(),
@@ -1775,7 +1775,8 @@ void unit_test_local_particles()
 
         eng.Restart(env);
 
-        TEST_REQUIRE(eng.Construct(env, args));
+        TestDevice dev;
+        TEST_REQUIRE(eng.Construct(env, dev, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
 
         const gfx::VertexStream stream(args.buffer.GetLayout(),
@@ -1812,7 +1813,8 @@ void unit_test_local_particles()
 
         eng.Restart(env);
 
-        TEST_REQUIRE(eng.Construct(env, args));
+        TestDevice dev;
+        TEST_REQUIRE(eng.Construct(env, dev, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
 
         const gfx::VertexStream stream(args.buffer.GetLayout(),
@@ -1851,7 +1853,8 @@ void unit_test_local_particles()
 
         eng.Restart(env);
 
-        TEST_REQUIRE(eng.Construct(env, args));
+        TestDevice dev;
+        TEST_REQUIRE(eng.Construct(env, dev, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
 
         const gfx::VertexStream stream(args.buffer.GetLayout(),
@@ -1895,7 +1898,8 @@ void unit_test_local_particles()
 
             eng.Restart(env);
 
-            TEST_REQUIRE(eng.Construct(env, args));
+            TestDevice dev;
+            TEST_REQUIRE(eng.Construct(env, dev, args));
             TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
 
             const gfx::VertexStream stream(args.buffer.GetLayout(),
@@ -1943,7 +1947,8 @@ void unit_test_local_particles()
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
 
-        TEST_REQUIRE(eng.Construct(env, args));
+        TestDevice dev;
+        TEST_REQUIRE(eng.Construct(env, dev, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
 
         const gfx::VertexStream stream(args.buffer.GetLayout(),
@@ -1983,7 +1988,8 @@ void unit_test_local_particles()
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
 
-        TEST_REQUIRE(eng.Construct(env, args));
+        TestDevice dev;
+        TEST_REQUIRE(eng.Construct(env, dev, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
 
         const gfx::VertexStream stream(args.buffer.GetLayout(),
@@ -2042,7 +2048,7 @@ void unit_test_global_particles()
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
 
-        TEST_REQUIRE(eng.Construct(env, args));
+        TEST_REQUIRE(eng.Construct(env, dev, args));
         TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
 
         const gfx::VertexStream stream(args.buffer.GetLayout(),

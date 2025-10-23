@@ -23,7 +23,7 @@
 namespace gfx
 {
 
-bool TileBatch::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& raster) const
+bool TileBatch::ApplyDynamicState(const Environment& env, Device&, ProgramState& program, RasterState& raster) const
 {
     const auto pixel_scale = std::min(env.pixel_ratio.x, env.pixel_ratio.y);
 
@@ -128,7 +128,7 @@ std::string TileBatch::GetGeometryId(const Environment& env) const
     return "tile-buffer";
 }
 
-bool TileBatch::Construct(const Environment& env, Geometry::CreateArgs& create) const
+bool TileBatch::Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const
 {
     const auto shape = ResolveTileShape();
     if (shape == TileShape::Square)

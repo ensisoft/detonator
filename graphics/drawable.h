@@ -193,7 +193,7 @@ namespace gfx
 
         virtual ~Drawable() = default;
         // Apply the drawable's state (if any) on the program and set the rasterizer state.
-        virtual bool ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const = 0;
+        virtual bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const = 0;
         // Get the device specific shader source applicable for this drawable, its state
         // and the given environment in which it should execute.
         // Should return an empty string on any error.
@@ -209,10 +209,10 @@ namespace gfx
         virtual std::string GetGeometryId(const Environment& env) const = 0;
         // Construct geometry object create args.
         // Returns true if successful or false if geometry is unavailable.
-        virtual bool Construct(const Environment& env, Geometry::CreateArgs& geometry) const = 0;
+        virtual bool Construct(const Environment& env, Device& device, Geometry::CreateArgs& geometry) const = 0;
         // Construct geometry instance buffer.
         // Returns true if successful or false if geometry is unavailable.
-        virtual bool Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const { return false; }
+        virtual bool Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const { return false; }
         // Update the state of the drawable object. dt is the
         // elapsed (delta) time in seconds.
         virtual void Update(const Environment& env, float dt) {}

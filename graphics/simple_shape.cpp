@@ -1291,7 +1291,7 @@ bool SimpleShapeClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-bool SimpleShapeInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
+bool SimpleShapeInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
 {
     unsigned flags = 0;
     if (env.flip_uv_horizontally)
@@ -1318,7 +1318,7 @@ std::string SimpleShapeInstance::GetGeometryId(const Environment& env) const
     return detail::GetSimpleShapeGeometryId(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType());
 }
 
-bool SimpleShapeInstance::Construct(const Environment& env, Geometry::CreateArgs& geometry) const
+bool SimpleShapeInstance::Construct(const Environment& env, Device&, Geometry::CreateArgs& geometry) const
 {
     detail::ConstructSimpleShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), geometry);
 
@@ -1328,7 +1328,7 @@ bool SimpleShapeInstance::Construct(const Environment& env, Geometry::CreateArgs
     return true;
 }
 
-bool SimpleShapeInstance::Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+bool SimpleShapeInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
 {
     InstancedDrawBuffer buffer;
     buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
@@ -1385,7 +1385,7 @@ Drawable::Usage SimpleShapeInstance::GetGeometryUsage() const
     return Usage::Static;
 }
 
-bool SimpleShape::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
+bool SimpleShape::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
 {
     unsigned flags = 0;
     if (env.flip_uv_horizontally)
@@ -1422,7 +1422,7 @@ std::string SimpleShape::GetGeometryId(const Environment& env) const
     return detail::GetSimpleShapeGeometryId(mArgs, env, mStyle, mShape);
 }
 
-bool SimpleShape::Construct(const Environment& env, Geometry::CreateArgs& geometry) const
+bool SimpleShape::Construct(const Environment& env, Device& device, Geometry::CreateArgs& geometry) const
 {
     detail::ConstructSimpleShape(mArgs, env, mStyle, mShape, geometry);
 
@@ -1432,7 +1432,7 @@ bool SimpleShape::Construct(const Environment& env, Geometry::CreateArgs& geomet
     return true;
 }
 
-bool SimpleShape::Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+bool SimpleShape::Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
 {
     InstancedDrawBuffer buffer;
     buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());

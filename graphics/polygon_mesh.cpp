@@ -546,7 +546,7 @@ PolygonMeshInstance::PolygonMeshInstance(const PolygonMeshClass& klass, std::str
     , mRandom(math::rand<0x12e4584>(0.0f, 1.0f))
 {}
 
-bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
+bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
 {
     unsigned flags = 0;
     if (env.flip_uv_horizontally)
@@ -582,12 +582,12 @@ std::string PolygonMeshInstance::GetGeometryId(const Environment& env) const
     return mClass->GetGeometryId(env);
 }
 
-bool PolygonMeshInstance::Construct(const Environment& env, Geometry::CreateArgs& create) const
+bool PolygonMeshInstance::Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const
 {
     return mClass->Construct(env, create);
 }
 
-bool PolygonMeshInstance::Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+bool PolygonMeshInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
 {
     InstancedDrawBuffer buffer;
     buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());

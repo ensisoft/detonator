@@ -23,7 +23,7 @@
 namespace gfx
 {
 
-bool LineBatch2D::ApplyDynamicState(const Environment &environment, ProgramState &program, RasterState &state) const
+bool LineBatch2D::ApplyDynamicState(const Environment &environment, Device&, ProgramState &program, RasterState &state) const
 {
     program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
@@ -49,7 +49,7 @@ std::string LineBatch2D::GetGeometryId(const Environment &environment) const
 {
     return "line-buffer-2d";
 }
-bool LineBatch2D::Construct(const Environment& environment, Geometry::CreateArgs& create) const
+bool LineBatch2D::Construct(const Environment& environment, Device&, Geometry::CreateArgs& create) const
 {
     std::vector<Vertex2D> vertices;
     for (const auto& line : mLines)
@@ -73,7 +73,7 @@ bool LineBatch2D::Construct(const Environment& environment, Geometry::CreateArgs
     return true;
 }
 
-bool LineBatch3D::ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const
+bool LineBatch3D::ApplyDynamicState(const Environment& environment, Device&, ProgramState& program, RasterState& state) const
 {
     program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
@@ -100,7 +100,7 @@ std::string LineBatch3D::GetGeometryId(const Environment& environment) const
     return "line-buffer-3D";
 }
 
-bool LineBatch3D::Construct(const Environment& environment, Geometry::CreateArgs& create) const
+bool LineBatch3D::Construct(const Environment& environment, Device&, Geometry::CreateArgs& create) const
 {
     // it's also possible to draw without generating geometry by simply having
     // the two line end points as uniforms in the vertex shader and then using

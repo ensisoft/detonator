@@ -46,7 +46,7 @@ void EffectDrawable::DisableEffect()
     mEnabled = false;
 }
 
-bool EffectDrawable::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState&  state) const
+bool EffectDrawable::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState&  state) const
 {
     Environment e = env;
     e.mesh_type =  mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
@@ -68,7 +68,7 @@ bool EffectDrawable::ApplyDynamicState(const Environment& env, ProgramState& pro
             program.SetUniform("kEffectArgs", args);
         }
     }
-    return mDrawable->ApplyDynamicState(e, program, state);
+    return mDrawable->ApplyDynamicState(e, device, program, state);
 }
 
 ShaderSource EffectDrawable::GetShader(const Environment& env, const Device& device) const
@@ -135,10 +135,10 @@ std::string EffectDrawable::GetGeometryId(const Environment& env) const
     id += mEffectId;
     return id;
 }
-bool EffectDrawable::Construct(const Environment& env, Geometry::CreateArgs& create) const
+bool EffectDrawable::Construct(const Environment& env, Device& device, Geometry::CreateArgs& create) const
 {
     if (!mEnabled)
-        return mDrawable->Construct(env, create);
+        return mDrawable->Construct(env, device, create);
 
     const auto source_draw_primitive = mDrawable->GetDrawPrimitive();
     if (source_draw_primitive != DrawPrimitive::Triangles)
@@ -149,14 +149,14 @@ bool EffectDrawable::Construct(const Environment& env, Geometry::CreateArgs& cre
     }
 
     if (mType == EffectType::MeshExplosion)
-        return ConstructExplosionMesh(env, create);
+        return ConstructExplosionMesh(env, device, create);
     else BUG("Unhandled effect drawable type.");
 
     return false;
 }
-bool EffectDrawable::Construct(const Environment& env, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+bool EffectDrawable::Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
 {
-    return mDrawable->Construct(env, draw, args);
+    return mDrawable->Construct(env, device, draw, args);
 }
 
 void EffectDrawable::Update(const Environment &env, float dt)
@@ -258,13 +258,13 @@ void EffectDrawable::SetRandomGenerator(std::function<float(float min, float max
     random_function = rf;
 }
 
-bool EffectDrawable::ConstructExplosionMesh(const Environment& env, Geometry::CreateArgs& create) const
+bool EffectDrawable::ConstructExplosionMesh(const Environment& env, Device& device, Geometry::CreateArgs& create) const
 {
     Environment e = env;
     e.mesh_type = MeshType::ShardedEffectMesh;
 
     Geometry::CreateArgs args;
-    if (!mDrawable->Construct(env, args))
+    if (!mDrawable->Construct(env, device, args))
     {
         ERROR("Failed to construct mesh.");
         return false;

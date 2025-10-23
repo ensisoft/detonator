@@ -65,12 +65,12 @@ namespace gfx
             mLines.push_back(line);
         }
 
-        bool ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& environment, Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& environment, const Device& device) const override;
         std::string GetShaderId(const Environment& environment) const override;
         std::string GetShaderName(const Environment& environment) const override;
         std::string GetGeometryId(const Environment& environment) const override;
-        bool Construct(const Environment& environment, Geometry::CreateArgs& create) const override;
+        bool Construct(const Environment& environment, Device&, Geometry::CreateArgs& create) const override;
         DrawPrimitive GetDrawPrimitive() const override
         { return DrawPrimitive::Lines; }
         Usage GetGeometryUsage() const override
@@ -106,12 +106,12 @@ namespace gfx
         inline void AddLine(glm::vec3 start, glm::vec3 end)
         { mLines.push_back({ start, end }); }
 
-        bool ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& environment, Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& environment, const Device& device) const override;
         std::string GetShaderId(const Environment& environment) const override;
         std::string GetShaderName(const Environment& environment) const override;
         std::string GetGeometryId(const Environment& environment) const override;
-        bool Construct(const Environment& environment, Geometry::CreateArgs& create) const override;
+        bool Construct(const Environment& environment, Device&, Geometry::CreateArgs& create) const override;
         DrawPrimitive GetDrawPrimitive() const override
         { return DrawPrimitive::Lines; }
         Usage GetGeometryUsage() const override
