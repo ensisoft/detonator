@@ -101,6 +101,8 @@ namespace dev
         // 8bit linear RGB(A) data.
         RGB,
         RGBA,
+        // Floating point 4 channel linear.
+        RGBA32f,
         // 8bit linear alpha mask
         AlphaMask,
         // 32bit floating point depth texture.
