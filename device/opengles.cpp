@@ -436,6 +436,7 @@ private:
     struct Extensions {
         bool EXT_sRGB = false;
         bool OES_packed_depth_stencil = false;
+        bool OES_texture_float = false;
         // support multiple color attachments in GL ES2.
         bool GL_EXT_draw_buffers = false;
     } mExtensions;
@@ -755,12 +756,15 @@ public:
                 mExtensions.OES_packed_depth_stencil = true;
             else if (extension == "GL_EXT_draw_buffers")
                 mExtensions.GL_EXT_draw_buffers = true;
+            else if (extension == "GL_OES_texture_float")
+                mExtensions.OES_texture_float = true;
 
             VERBOSE("Found extension '%1'", extension);
         }
         INFO("sRGB textures: %1", mExtensions.EXT_sRGB ? "YES" : "NO");
         INFO("FBO packed depth+stencil: %1", mExtensions.OES_packed_depth_stencil ? "YES" : "NO");
         INFO("EXT draw buffers: %1", mExtensions.GL_EXT_draw_buffers ? "YES" : "NO");
+        INFO("Texture float32: %1", mExtensions.OES_texture_float ? "YES" : "NO");
 
         if (context->IsDebug() && mGL.glDebugMessageCallback)
         {
@@ -1032,8 +1036,8 @@ public:
     {
         const auto version = mContext->GetVersion();
 
-        GLenum sizeFormat = 0;
-        GLenum baseFormat = 0;
+        GLenum sizeFormat = 0; // aka "sized internal format"
+        GLenum baseFormat = 0; // aka "format"
         GLenum type = GL_UNSIGNED_BYTE;
         switch (format)
         {
@@ -1079,6 +1083,11 @@ public:
                 baseFormat = GL_DEPTH_COMPONENT;
                 type = GL_FLOAT;
                 break;
+            case dev::TextureFormat::RGBA32f:
+                sizeFormat = GL_RGBA32F;
+                baseFormat = GL_RGBA;
+                type = GL_FLOAT;
+                break;
             default:
                 BUG("Unknown texture format.");
                 break;
@@ -1097,6 +1106,19 @@ public:
                 sizeFormat = GL_RGBA;
                 baseFormat = GL_RGBA;
                 WARN("Treating sRGBA texture as RGBA texture in the absence of EXT_sRGB.");
+            }
+            else if (format == dev::TextureFormat::RGBA32f)
+            {
+                if (mExtensions.OES_texture_float)
+                {
+                    sizeFormat = GL_RGBA;
+                    baseFormat = GL_RGBA;
+                    type = GL_FLOAT;
+                }
+                else
+                {
+                    ERROR("Trying to create a float32 texture without support for float32 textures.");
+                }
             }
         }
         TextureFormat ret;
