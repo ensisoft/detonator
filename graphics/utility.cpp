@@ -70,7 +70,9 @@ Texture* PackDataTexture(const std::string& texture_id,
         if (pixels >= src_pixel_count)
             break;
     }
-    ASSERT(texture_map_index < base::ArraySize(texture_sizes));
+    if (texture_map_index == base::ArraySize(texture_sizes))
+        return nullptr;
+
     const auto texture_width  = texture_sizes[texture_map_index].width;
     const auto texture_height = texture_sizes[texture_map_index].height;
     const auto dst_pixel_count = texture_width * texture_height;
