@@ -9,8 +9,8 @@ R"CPP_RAW_STRING(//"
 in vec2 aPosition;
 in vec2 aTexCoord;
 
-#ifdef USE_EFFECTS_MESH
-in vec4 aEffectShardData;
+#ifdef VERTEX_HAS_SHARD_INDEX_ATTRIBUTE
+  in uint aShardIndex;
 #endif
 
 // these should be in the base_vertex_shader.glsl but alas
@@ -36,7 +36,7 @@ uniform mat4 kModelViewMatrix;
   uniform float kRandom;
 #endif
 
-#ifdef USE_EFFECTS_MESH
+#ifdef APPLY_SHARD_MESH_EFFECT
   uniform float kEffectTime;
   uniform vec3 kEffectMeshCenter;
   uniform vec4 kEffectArgs;
@@ -44,6 +44,10 @@ uniform mat4 kModelViewMatrix;
 #endif
 
 uniform uint kDrawableFlags;
+
+#ifdef APPLY_SHARD_MESH_EFFECT
+  uniform sampler2D kShardDataTexture;
+#endif
 
 // @varyings
 out vec2 vTexCoord;
@@ -60,6 +64,16 @@ struct VertexData {
 #ifdef CUSTOM_VERTEX_TRANSFORM
 // $CUSTOM_VERTEX_TRANSFORM
 #endif
+
+#ifdef APPLY_SHARD_MESH_EFFECT
+  vec4 UnpackVec4ShardData(int index) {
+      ivec2 texture_size = textureSize(kShardDataTexture, 0);
+      int x = index % texture_size.x;
+      int y = index / texture_size.x;
+      return texelFetch(kShardDataTexture, ivec2(x, y), 0);
+  }
+#endif
+
 
 void VertexShaderMain() {
     // there was some historical reason why the 2D shapes were
@@ -109,11 +123,12 @@ void VertexShaderMain() {
       vs.texcoord.y = 1.0 - vs.texcoord.y;
     }
 
-    #ifdef CUSTOM_VERTEX_TRANSFORM
+    #if defined(CUSTOM_VERTEX_TRANSFORM)
       CustomVertexTransform(vs);
     #else
-      #if defined(USE_EFFECTS_MESH)
-        MeshEffect(vs);
+      #if defined(APPLY_SHARD_MESH_EFFECT)
+        vec4 shard_data = UnpackVec4ShardData(int(aShardIndex));
+        ApplyShardEffect(vs, shard_data);
       #endif
     #endif
 

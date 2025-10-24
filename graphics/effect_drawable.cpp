@@ -20,6 +20,8 @@
 #include "graphics/program.h"
 #include "graphics/geometry.h"
 #include "graphics/effect_drawable.h"
+#include "graphics/texture.h"
+#include "graphics/utility.h"
 
 namespace {
 std::function<float (float min, float max)> random_function;
@@ -51,11 +53,23 @@ bool EffectDrawable::ApplyDynamicState(const Environment& env, Device& device, P
     Environment e = env;
     e.mesh_type =  mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
 
+    if (!mDrawable->ApplyDynamicState(e, device, program, state))
+        return false;
+
     if (mEnabled)
     {
+        auto* texture = device.FindTexture(mEffectId);
+        if (!texture)
+            return false;
+
+        const auto texture_count = program.GetSamplerCount();
+
         program.SetUniform("kEffectMeshCenter", mShapeCenter);
         program.SetUniform("kEffectTime", static_cast<float>(mCurrentTime));
         program.SetUniform("kEffectType", static_cast<int>(mType));
+        program.SetTexture("kShardDataTexture", texture_count, *texture);
+        program.SetTextureCount(texture_count + 1);
+
         if (mType == EffectType::MeshExplosion)
         {
             ASSERT(std::holds_alternative<MeshExplosionEffectArgs>(mArgs));
@@ -68,7 +82,7 @@ bool EffectDrawable::ApplyDynamicState(const Environment& env, Device& device, P
             program.SetUniform("kEffectArgs", args);
         }
     }
-    return mDrawable->ApplyDynamicState(e, device, program, state);
+    return true;
 }
 
 ShaderSource EffectDrawable::GetShader(const Environment& env, const Device& device) const
@@ -86,8 +100,9 @@ ShaderSource EffectDrawable::GetShader(const Environment& env, const Device& dev
         source.SetType(ShaderSource::Type::Vertex);
         source.SetVersion(ShaderSource::Version::GLSL_300);
         source.LoadRawSource(effect_shader);
-        source.AddPreprocessorDefinition("USE_EFFECTS_MESH");
-        source.AddPreprocessorDefinition("MESH_EFFECT_TYPE_EXPLOSION", static_cast<int>(EffectType::MeshExplosion));
+        source.AddPreprocessorDefinition("VERTEX_HAS_SHARD_INDEX_ATTRIBUTE");
+        source.AddPreprocessorDefinition("APPLY_SHARD_MESH_EFFECT");
+        source.AddPreprocessorDefinition("MESH_EFFECT_TYPE_SHARD_EXPLOSION", static_cast<int>(EffectType::MeshExplosion));
         source.AddShaderSourceUri("shaders/vertex_2d_effect.glsl");
         source.AddDebugInfo("Effects", "YES");
 
@@ -149,7 +164,11 @@ bool EffectDrawable::Construct(const Environment& env, Device& device, Geometry:
     }
 
     if (mType == EffectType::MeshExplosion)
-        return ConstructExplosionMesh(env, device, create);
+    {
+        ASSERT(std::holds_alternative<MeshExplosionEffectArgs>(mArgs));
+        const auto* effect_args = std::get_if<MeshExplosionEffectArgs>(&mArgs);
+        return ConstructShardMesh(env, device, create, effect_args->mesh_subdivision_count);
+    }
     else BUG("Unhandled effect drawable type.");
 
     return false;
@@ -258,7 +277,8 @@ void EffectDrawable::SetRandomGenerator(std::function<float(float min, float max
     random_function = rf;
 }
 
-bool EffectDrawable::ConstructExplosionMesh(const Environment& env, Device& device, Geometry::CreateArgs& create) const
+bool EffectDrawable::ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
+    unsigned mesh_subdivision_count) const
 {
     Environment e = env;
     e.mesh_type = MeshType::ShardedEffectMesh;
@@ -269,15 +289,11 @@ bool EffectDrawable::ConstructExplosionMesh(const Environment& env, Device& devi
         ERROR("Failed to construct mesh.");
         return false;
     }
-
-    ASSERT(std::holds_alternative<MeshExplosionEffectArgs>(mArgs));
-    const auto* effect_args = std::get_if<MeshExplosionEffectArgs>(&mArgs);
-
+    
     // the triangle mesh computation produces a  mesh that  has the same
     // vertex layout as the original drawables geometry  buffer.
     auto effect_mesh_buffer = std::make_shared<GeometryBuffer>();
-    if (!TessellateMesh(args.buffer, *effect_mesh_buffer, TessellationAlgo::LongestEdgeBisection,
-            effect_args->mesh_subdivision_count))
+    if (!TessellateMesh(args.buffer, *effect_mesh_buffer, TessellationAlgo::LongestEdgeBisection, mesh_subdivision_count))
     {
         ERROR("Failed to compute triangle mesh.");
         return false;
@@ -295,19 +311,43 @@ bool EffectDrawable::ConstructExplosionMesh(const Environment& env, Device& devi
     const auto& original_mesh_buffer = effect_mesh_buffer->GetVertexBuffer();
     const auto triangle_count = vertex_count / 3;
 
+    // ES 3.0 (which is the basis of WebGL 2.0) does not have Shared Storage
+    // Buffer Object ((SSBO). The standard workaround is to use a float32
+    // texture for packing the data into and then read the data via texelFetch
+    // in the shader and manually unpack from the texels.
+    // The number of shards can be arbitrary and we really only have 3 choices.
+    // 1. Bake the per shard data in each vertex. That's currently 2 * 4 * 4
+    //    bytes of overhead per each triangle shard
+    // 2. Use Uniform Buffer Object (UBO) and shader uniform block. Works but
+    //    requires knowing the maximum buffer sizes up front since.
+    // 3. Use float texture workaround.
+
+    // Note that GL ES 3.1 does have SSBO BUT that's not part of WebGL. Rather
+    // WebGL 2.0 Compute has SSBO but that's just a completely different WebGL
+    // context (compute context vs. rendering context) and is not supported by
+    // Emscripten either.
+
+    struct ShardData {
+        Vec4 data[1];
+    };
+    std::vector<ShardData> shard_data_buffer;
+    shard_data_buffer.reserve(triangle_count);
+
     // we're going to amend the vertex layout and add the following
     // per vertex data (vertex attribute)
-     const VertexLayout::Attribute per_shard_data = {
-        "aEffectShardData", 0, 4, 0, 0
+    const VertexLayout::Attribute shard_index_attribute_data = {
+        "aShardIndex", 0, 1, 0, 0, VertexLayout::Attribute::DataType::UnsignedInt
     };
 
     auto effect_mesh_layout = effect_mesh_buffer->GetLayout();
-    effect_mesh_layout.AppendAttribute(per_shard_data);
+    effect_mesh_layout.AppendAttribute(shard_index_attribute_data);
     effect_mesh_buffer->SetVertexLayout(effect_mesh_layout);
-    const auto* effect_shard_data_attribute = effect_mesh_layout.FindAttribute("aEffectShardData");
 
     const VertexStream vertex_stream(original_mesh_layout, original_mesh_buffer);
-
+    // Copy vertex data from the shard mesh over to the new vertex buffer
+    // where each vertex has an added aShardIndex attribute. This works
+    // because we're *appending* an attribute while keeping the earlier
+    // attributes as-is, which then retains binary compatibility.
     VertexBuffer vertex_buffer_copy(effect_mesh_layout);
     vertex_buffer_copy.Resize(vertex_count);
     for (size_t i=0; i<vertex_count; ++i)
@@ -323,8 +363,8 @@ bool EffectDrawable::ConstructExplosionMesh(const Environment& env, Device& devi
 
     const auto shape_bounds_dimensions = maximums - minimums;
     const auto shape_center = minimums + shape_bounds_dimensions * 0.5f;
+    const auto* shard_index_attribute = effect_mesh_layout.FindAttribute("aShardIndex");
 
-    //mTriangleState.resize(triangle_count);
     for (size_t triangle_index=0; triangle_index < triangle_count; ++triangle_index)
     {
         const auto vertex_index = triangle_index * 3;
@@ -341,24 +381,35 @@ bool EffectDrawable::ConstructExplosionMesh(const Environment& env, Device& devi
             const auto& shard_center = ((p0 + p1 + p2) / 3.0f);
             const auto shard_random_value = random_function(0.0f, 1.0f);
 
+            const uint32_t shard_index = shard_data_buffer.size();
+
             // use a vec4 to pack shard data that has the shard center (x, y) and
             // and a random value.
-            Vec4 shard_data;
-            shard_data.x = shard_center.x;
-            shard_data.y = shard_center.y;
-            shard_data.z = 0.0f;
-            shard_data.w = shard_random_value;
+            ShardData shard_data;
+            shard_data.data[0].x = shard_center.x;
+            shard_data.data[0].y = shard_center.y;
+            shard_data.data[0].z = 0.0f;
+            shard_data.data[0].w = shard_random_value;
+            shard_data_buffer.push_back(shard_data);
 
-            // shove this into each vertex , alternative would be to use something like
-            // an uniform buffer, but then we have to know up front how much data
-            // we're going to be dealing with, i.e. how many shards we will have.
-            auto* t0 = VertexLayout::GetVertexAttributePtr<Vec4>(*effect_shard_data_attribute, v0);
-            auto* t1 = VertexLayout::GetVertexAttributePtr<Vec4>(*effect_shard_data_attribute, v1);
-            auto* t2 = VertexLayout::GetVertexAttributePtr<Vec4>(*effect_shard_data_attribute, v2);
-            *t0 = shard_data;
-            *t1 = shard_data;
-            *t2 = shard_data;
+            // Update the shard index attribute in each shard vertex to point to
+            // the right shard data in he data shard data buffer.
+            auto* t0 = VertexLayout::GetVertexAttributePtr<uint32_t>(*shard_index_attribute, v0);
+            auto* t1 = VertexLayout::GetVertexAttributePtr<uint32_t>(*shard_index_attribute, v1);
+            auto* t2 = VertexLayout::GetVertexAttributePtr<uint32_t>(*shard_index_attribute, v2);
+            *t0 = shard_index;
+            *t1 = shard_index;
+            *t2 = shard_index;
         }
+    }
+
+    auto* texture = PackDataTexture(mEffectId, "Shard data texture",
+                                    &shard_data_buffer[0], shard_data_buffer.size(),
+                                    device);
+    if (!texture)
+    {
+        ERROR("Shard data exceeds available data texture size. [shards=%1]", shard_data_buffer.size());
+        return false;
     }
 
     effect_mesh_buffer->SetVertexBuffer(vertex_buffer_copy.TransferBuffer());

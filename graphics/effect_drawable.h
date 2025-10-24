@@ -85,7 +85,8 @@ namespace gfx
 
         static void SetRandomGenerator(std::function<float(float min, float max)> random_function);
     private:
-        bool ConstructExplosionMesh(const Environment& env, Device& device, Geometry::CreateArgs& create) const;
+        bool ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
+            unsigned mesh_subdivision_count) const;
     private:
         std::shared_ptr<Drawable> mDrawable;
         std::string mEffectId;
