@@ -20,12 +20,17 @@
 #  include <glm/gtc/matrix_transform.hpp>
 #include "warnpop.h"
 
+#include <vector>
+
 #include "base/assert.h"
+#include "base/utility.h"
 #include "graphics/utility.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
+#include "graphics/texture.h"
+#include "graphics/vertex.h"
 #include "graphics/shader_source.h"
 
 namespace {
@@ -36,6 +41,55 @@ namespace {
 
 namespace gfx
 {
+
+Texture* PackDataTexture(const std::string& texture_id,
+                         const std::string& texture_name,
+                         const Vec4* data, size_t count,
+                         Device& device)
+{
+    // allocate a 4 channel float (RGBA32f) texture for packing
+    // vector data into.
+    const auto src_pixel_count = count;
+
+    struct TextureSize {
+        unsigned width  = 0;
+        unsigned height = 0;
+    };
+    static TextureSize texture_sizes[] = {
+        {2, 2}, {2, 4}, {2, 8}, {2, 16}, {2, 32}, {2, 64}, {2, 128},
+        {4, 2}, {4, 4}, {4, 8}, {4, 16}, {4, 32}, {4, 64}, {4, 128},
+        {8, 2}, {8, 4}, {8, 8}, {8, 16}, {8, 32}, {8, 64}, {8, 128},
+    };
+    // todo: should we try to maintain aspect ratio close to 1.0 here?
+
+    size_t texture_map_index = 0;
+    for (texture_map_index   = 0; texture_map_index<base::ArraySize(texture_sizes); ++texture_map_index)
+    {
+        const auto pixels = texture_sizes[texture_map_index].width *
+                            texture_sizes[texture_map_index].height;
+        if (pixels >= src_pixel_count)
+            break;
+    }
+    ASSERT(texture_map_index < base::ArraySize(texture_sizes));
+    const auto texture_width  = texture_sizes[texture_map_index].width;
+    const auto texture_height = texture_sizes[texture_map_index].height;
+    const auto dst_pixel_count = texture_width * texture_height;
+    ASSERT(dst_pixel_count >= src_pixel_count);
+
+    std::vector<Vec4> pixel_buffer;
+    pixel_buffer.resize(dst_pixel_count);
+    std::memcpy(&pixel_buffer[0], data, sizeof(Vec4) * count);
+
+    auto* texture = device.MakeTexture(texture_id);
+    texture->SetGarbageCollection(true);
+    texture->SetName(texture_name);
+    texture->SetFilter(Texture::MagFilter::Nearest);
+    texture->SetFilter(Texture::MinFilter::Nearest);
+    texture->SetWrapX(Texture::Wrapping::Clamp);
+    texture->SetWrapY(Texture::Wrapping::Clamp);
+    texture->Upload(pixel_buffer.data(), texture_width, texture_height, Texture::Format::RGBA32f);
+    return texture;
+}
 
 ProgramPtr MakeProgram(const std::string& vertex_source,
                        const std::string& fragment_source,
