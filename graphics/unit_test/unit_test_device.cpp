@@ -34,6 +34,7 @@
 #include "graphics/framebuffer.h"
 #include "graphics/drawcmd.h"
 #include "graphics/instance.h"
+#include "graphics/utility.h"
 
 // We need this to create the rendering context.
 #include "wdk/opengl/context.h"
@@ -2668,6 +2669,76 @@ void main() {
 
 }
 
+void unit_test_data_texture()
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto dev = CreateDevice();
+    auto geom = MakeQuad(*dev);
+    auto p0 = MakeTestProgram(*dev,
+R"(#version 300 es
+in vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 0.0, 1.0);
+}
+)",
+
+R"(#version 300 es
+precision highp float;
+
+uniform sampler2D dataTexture;
+
+layout(location = 0) out vec4 fragOutColor;
+
+vec4 UnpackVec4(int index) {
+  ivec2 texture_size = textureSize(dataTexture, 0);
+  int x = index % texture_size.x;
+  int y = index / texture_size.x;
+  return texelFetch(dataTexture, ivec2(x, y), 0);
+}
+
+void main() {
+  vec4 v0 = UnpackVec4(0);
+  vec4 v1 = UnpackVec4(1);
+  vec4 v2 = UnpackVec4(2);
+  vec4 v3 = UnpackVec4(3);
+  fragOutColor = vec4(v0.r, v1.g, v2.b, v3.a);
+}
+)", "p0");
+
+    const gfx::Vec4 data[] = {
+        {1.0f, 0.0f, 0.0f, 0.0f},
+        {0.0f, 1.0f, 0.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f, 0.0f},
+        {0.0f, 0.0f, 0.0f, 1.0f}
+    };
+    auto* texture = gfx::PackDataTexture("texture", "data-texture", data, 4, *dev);
+
+    gfx::Device::RasterState state;
+    state.blending = gfx::Device::RasterState::BlendOp::None;
+
+    gfx::Device::ColorDepthStencilState dss;
+    dss.bWriteColor  = true;
+    dss.stencil_func = gfx::Device::ColorDepthStencilState::StencilFunc::Disabled;
+    dev->SetColorDepthStencilState(dss);
+
+    gfx::Device::ViewportState vs;
+    vs.viewport = gfx::IRect(0, 0, 10, 10);
+    dev->SetViewportState(vs);
+
+    gfx::GeometryDrawCommand draw_command(*geom);
+    gfx::ProgramState program_state;
+    program_state.SetTexture("dataTexture", 0, *texture);
+
+    dev->BeginFrame();
+      dev->ClearColor(gfx::Color::White);
+      dev->Draw(*p0, program_state, draw_command, state);
+    dev->EndFrame();
+
+    const auto bmp = dev->ReadColorBuffer(10, 10);
+    TEST_REQUIRE(bmp.PixelCompare(gfx::Color::White));
+}
+
 void unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format format,
                                                  gfx::Framebuffer::MSAA msaa)
 {
@@ -3254,6 +3325,7 @@ int test_main(int argc, char* argv[])
         unit_test_instanced_rendering();
         unit_test_uniform_buffer();
         unit_test_uniform_buffer_array();
+        unit_test_data_texture();
 
         unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8, gfx::Framebuffer::MSAA::Disabled);
         unit_test_render_fbo_multiple_color_targets(gfx::Framebuffer::Format::ColorRGBA8_Depth16, gfx::Framebuffer::MSAA::Disabled);

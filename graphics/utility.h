@@ -24,6 +24,7 @@
 
 #include <string>
 
+#include "base/assert.h"
 #include "graphics/types.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
@@ -35,11 +36,36 @@ namespace gfx
 class Device;
 class Geometry;
 class ShaderSource;
+class Texture;
 
-gfx::ProgramPtr MakeProgram(const std::string& vertex_source,
-                            const std::string& fragment_source,
-                            const std::string& program_name,
-                            Device& device);
+struct Vec4;
+
+Texture* PackDataTexture(const std::string& texture_id,
+                         const std::string& texture_name,
+                         const Vec4* data, size_t count,
+                         Device& device);
+
+template<typename Struct>
+Texture* PackDataTexture(const std::string& texture_id,
+                         const std::string& texture_name,
+                         const Struct* data, size_t count,
+                         Device& device)
+{
+    constexpr auto struct_size = sizeof(Struct);
+    static_assert(struct_size % sizeof(Vec4) == 0);
+
+    const auto byte_count = count * struct_size;
+    const auto vec4_count = byte_count / sizeof(Vec4);
+    ASSERT((byte_count % struct_size) == 0);
+
+    return PackDataTexture(texture_id, texture_name,
+                           reinterpret_cast<const Vec4*>(data), vec4_count, device);
+}
+
+ProgramPtr MakeProgram(const std::string& vertex_source,
+                       const std::string& fragment_source,
+                       const std::string& program_name,
+                       Device& device);
 
 GeometryPtr MakeFullscreenQuad(Device& device);
 
