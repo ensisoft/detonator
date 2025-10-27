@@ -330,6 +330,9 @@ namespace gfx
         void SetStyle(Style style) noexcept
         { mStyle = style; }
     private:
+        bool ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
+            unsigned mesh_subdivision_count) const;
+    private:
         std::shared_ptr<const Class> mClass;
         Style mStyle = Style::Solid;
     };
@@ -523,6 +526,10 @@ namespace gfx
             shape == SimpleShapeType::Sphere)
             return true;
         return false;
+    }
+    inline bool Is2DShape(SimpleShapeType shape) noexcept
+    {
+        return !Is3DShape(shape);
     }
 
     inline SimpleShapeType GetSimpleShapeType(const Drawable& drawable)

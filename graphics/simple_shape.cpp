@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "base/format.h"
+#include "base/logging.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "graphics/simple_shape.h"
@@ -1311,20 +1312,32 @@ ShaderSource SimpleShapeInstance::GetShader(const Environment& env, const Device
     if (Is3DShape(mClass->GetShapeType()))
         return MakeSimple3DVertexShader(device, env.use_instancing);
 
-    return MakeSimple2DVertexShader(device, env.use_instancing);
+    const bool enable_effect = env.mesh_type == MeshType::ShardedEffectMesh;
+
+    return MakeSimple2DVertexShader(device, env.use_instancing, enable_effect);
 }
 std::string SimpleShapeInstance::GetGeometryId(const Environment& env) const
 {
     return detail::GetSimpleShapeGeometryId(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType());
 }
 
-bool SimpleShapeInstance::Construct(const Environment& env, Device&, Geometry::CreateArgs& geometry) const
+bool SimpleShapeInstance::Construct(const Environment& env, Device& device, Geometry::CreateArgs& geometry) const
 {
+    if (env.mesh_type == MeshType::ShardedEffectMesh)
+    {
+        if (!Is2DShape(mClass->GetShapeType()))
+            return false;
+        if (mStyle != Style::Solid)
+            return false;
+
+        const auto& args = std::get<ShardedEffectMeshArgs>(env.mesh_args);
+        return ConstructShardMesh(env, device, geometry, args.mesh_subdivision_count);
+    }
+
     detail::ConstructSimpleShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), geometry);
 
     if (Is3DShape(mClass->GetShapeType()))
         ASSERT(ComputeTangents(geometry.buffer));
-
     return true;
 }
 
@@ -1385,6 +1398,56 @@ Drawable::Usage SimpleShapeInstance::GetGeometryUsage() const
     return Usage::Static;
 }
 
+bool SimpleShapeInstance::ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
+    unsigned mesh_subdivision_count) const
+{
+    Geometry::CreateArgs args;
+    detail::ConstructSimpleShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), args);
+
+    // the triangle mesh computation produces a  mesh that  has the same
+    // vertex layout as the original drawables geometry  buffer.
+    GeometryBuffer geometry_buffer;
+    if (!TessellateMesh(args.buffer, geometry_buffer, TessellationAlgo::LongestEdgeBisection, mesh_subdivision_count))
+    {
+        ERROR("Failed to compute triangle mesh.");
+        return false;
+    }
+    ASSERT(geometry_buffer.GetLayout() == GetVertexLayout<Vertex2D>());
+    ASSERT(geometry_buffer.HasIndexData() == false);
+
+    const VertexStream vertex_stream(geometry_buffer.GetLayout(),
+                                      geometry_buffer.GetVertexBuffer());
+    const auto vertex_count = vertex_stream.GetCount();
+
+    // change the vertex format to ShardVertex2D and compute shard indices
+    // for each vertex using this vertex buffer.
+    VertexBuffer vertex_buffer;
+    vertex_buffer.SetVertexLayout(GetVertexLayout<ShardVertex2D>());
+    vertex_buffer.Resize(vertex_count);
+
+    for (size_t vertex_index = 0; vertex_index < vertex_count; ++vertex_index)
+    {
+        const auto triangle_index = vertex_index / 3;
+        const auto* src_vertex = vertex_stream.GetVertex<Vertex2D>(vertex_index);
+
+        ShardVertex2D vertex;
+        vertex.aPosition   = src_vertex->aPosition;
+        vertex.aTexCoord   = src_vertex->aTexCoord;
+        vertex.aShardIndex = triangle_index;
+        vertex_buffer.SetVertex(vertex, vertex_index);
+    }
+    // change the layout and the vertex data.
+    // the draw commands remain unchanged.
+    geometry_buffer.SetVertexLayout(GetVertexLayout<ShardVertex2D>());
+    geometry_buffer.SetVertexBuffer(vertex_buffer.TransferBuffer());
+
+    create.buffer       = std::move(geometry_buffer);
+    create.usage        = args.usage;
+    create.content_hash = args.content_hash;
+    create.content_name = args.content_name;
+    return true;
+}
+
 bool SimpleShape::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
 {
     unsigned flags = 0;
@@ -1405,7 +1468,11 @@ ShaderSource SimpleShape::GetShader(const Environment& env, const Device& device
     if (Is3DShape(mShape))
         return MakeSimple3DVertexShader(device, env.use_instancing);
 
-    return MakeSimple2DVertexShader(device, env.use_instancing);
+    // not supporting the effect mesh operation in this render path right now
+    // since it's not needed.
+    ASSERT(env.mesh_type == MeshType::NormalRenderMesh);
+    constexpr auto enable_effect = false;
+    return MakeSimple2DVertexShader(device, env.use_instancing, enable_effect);
 }
 std::string SimpleShape::GetShaderId(const Environment& env) const
 {

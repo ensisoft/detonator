@@ -1348,7 +1348,7 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
                         args.shard_linear_acceleration = effect_args->shard_linear_acceleration;
                         args.shard_rotational_speed    = effect_args->shard_rotational_speed;
                         args.shard_rotational_acceleration = effect_args->shard_rotational_acceleration;
-                        effect_drawable->SetEffectType(gfx::EffectDrawable::EffectType::MeshExplosion);
+                        effect_drawable->SetEffectType(gfx::EffectDrawable::EffectType::ShardedMeshExplosion);
                         effect_drawable->SetEffectArgs(args);
                     }
                     paint_node.drawable = std::move(effect_drawable);

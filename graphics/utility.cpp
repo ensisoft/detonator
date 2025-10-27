@@ -180,7 +180,7 @@ glm::mat4 MakePerspectiveProjection(FRadians fov, float aspect, float znear, flo
     return glm::perspective(fov.ToRadians(), aspect, znear, zfar);
 }
 
-ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instancing)
+ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instancing, bool enable_effect)
 {
     // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
     // are used to support per particle features.
@@ -195,6 +195,9 @@ ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instan
     static const char* shader = {
 #include "shaders/vertex_2d_simple_shader.glsl"
     };
+    static const char* effect_shader = {
+#include "shaders/vertex_2d_effect.glsl"
+    };
 
     ShaderSource source;
     source.SetType(gfx::ShaderSource::Type::Vertex);
@@ -202,12 +205,22 @@ ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instan
     {
         source.AddPreprocessorDefinition("INSTANCED_DRAW");
     }
+    if (enable_effect)
+    {
+        source.LoadRawSource(effect_shader);
+        source.AddShaderSourceUri("shaders/vertex_2d_effect.glsl");
+        source.AddPreprocessorDefinition("VERTEX_HAS_SHARD_INDEX_ATTRIBUTE");
+        source.AddPreprocessorDefinition("APPLY_SHARD_MESH_EFFECT");
+        source.AddPreprocessorDefinition("MESH_EFFECT_TYPE_SHARD_EXPLOSION", static_cast<int>(MeshEffectType::ShardedMeshExplosion));
+    }
+
     source.LoadRawSource(vertex_base);
     source.LoadRawSource(shader);
     source.AddShaderName("2D Vertex Shader");
     source.AddShaderSourceUri("shaders/vertex_base.glsl");
     source.AddShaderSourceUri("shaders/vertex_2d_simple_shader.glsl");
     source.AddDebugInfo("Instanced", use_instancing ? "YES" : "NO");
+    source.AddDebugInfo("Effects", enable_effect ? "YES" : "NO");
     return source;
 }
 

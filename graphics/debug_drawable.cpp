@@ -66,7 +66,7 @@ bool DebugDrawableBase::Construct(const Environment& env, Device& device, Geomet
     if (!mDrawable->Construct(env, device, temp))
         return false;
 
-    if (!temp.buffer.HasData())
+    if (!temp.buffer.HasVertexData())
         return false;
 
     if (mFeature == Feature::Wireframe)

@@ -70,7 +70,7 @@ bool EffectDrawable::ApplyDynamicState(const Environment& env, Device& device, P
         program.SetTexture("kShardDataTexture", texture_count, *texture);
         program.SetTextureCount(texture_count + 1);
 
-        if (mType == EffectType::MeshExplosion)
+        if (mType == EffectType::ShardedMeshExplosion)
         {
             ASSERT(std::holds_alternative<MeshExplosionEffectArgs>(mArgs));
             const auto* effect_args = std::get_if<MeshExplosionEffectArgs>(&mArgs);
@@ -87,28 +87,8 @@ bool EffectDrawable::ApplyDynamicState(const Environment& env, Device& device, P
 
 ShaderSource EffectDrawable::GetShader(const Environment& env, const Device& device) const
 {
-    static const char* effect_shader = {
-#include "shaders/vertex_2d_effect.glsl"
-    };
-
     Environment e = env;
     e.mesh_type =  mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
-
-    if (mEnabled)
-    {
-        ShaderSource source;
-        source.SetType(ShaderSource::Type::Vertex);
-        source.SetVersion(ShaderSource::Version::GLSL_300);
-        source.LoadRawSource(effect_shader);
-        source.AddPreprocessorDefinition("VERTEX_HAS_SHARD_INDEX_ATTRIBUTE");
-        source.AddPreprocessorDefinition("APPLY_SHARD_MESH_EFFECT");
-        source.AddPreprocessorDefinition("MESH_EFFECT_TYPE_SHARD_EXPLOSION", static_cast<int>(EffectType::MeshExplosion));
-        source.AddShaderSourceUri("shaders/vertex_2d_effect.glsl");
-        source.AddDebugInfo("Effects", "YES");
-
-        source.Merge(mDrawable->GetShader(e, device));
-        return source;
-    }
     return mDrawable->GetShader(e, device);
 }
 std::string EffectDrawable::GetShaderId(const Environment& env) const
@@ -163,7 +143,7 @@ bool EffectDrawable::Construct(const Environment& env, Device& device, Geometry:
         return false;
     }
 
-    if (mType == EffectType::MeshExplosion)
+    if (mType == EffectType::ShardedMeshExplosion)
     {
         ASSERT(std::holds_alternative<MeshExplosionEffectArgs>(mArgs));
         const auto* effect_args = std::get_if<MeshExplosionEffectArgs>(&mArgs);
@@ -282,34 +262,62 @@ bool EffectDrawable::ConstructShardMesh(const Environment& env, Device& device, 
 {
     Environment e = env;
     e.mesh_type = MeshType::ShardedEffectMesh;
+    e.mesh_args = ShardedEffectMeshArgs { mesh_subdivision_count };
 
     Geometry::CreateArgs args;
-    if (!mDrawable->Construct(env, device, args))
+    if (!mDrawable->Construct(e, device, args))
     {
         ERROR("Failed to construct mesh.");
         return false;
     }
-    
-    // the triangle mesh computation produces a  mesh that  has the same
-    // vertex layout as the original drawables geometry  buffer.
-    auto effect_mesh_buffer = std::make_shared<GeometryBuffer>();
-    if (!TessellateMesh(args.buffer, *effect_mesh_buffer, TessellationAlgo::LongestEdgeBisection, mesh_subdivision_count))
-    {
-        ERROR("Failed to compute triangle mesh.");
-        return false;
-    }
 
-    glm::vec3 minimums, maximums;
+    glm::vec3 minimums = {0.0f, 0.0f, 0.0f};
+    glm::vec3 maximums = {0.0f, 0.0f, 0.0f};
     if (!FindGeometryMinMax(args.buffer, &minimums, &maximums))
     {
         ERROR("Failed to compute mesh bounds.");
         return false;
     }
+    const auto shape_bounds_dimensions = maximums - minimums;
+    mShapeCenter = minimums + shape_bounds_dimensions * 0.5f;
 
-    const auto vertex_count = effect_mesh_buffer->GetVertexCount();
-    const auto original_mesh_layout = effect_mesh_buffer->GetLayout();
-    const auto& original_mesh_buffer = effect_mesh_buffer->GetVertexBuffer();
-    const auto triangle_count = vertex_count / 3;
+    ASSERT(args.buffer.GetLayout() == GetVertexLayout<ShardVertex2D>());
+    const VertexStream vertex_stream(args.buffer.GetLayout(),
+                                     args.buffer.GetVertexBuffer());
+    const auto vertex_count = vertex_stream.GetCount();
+
+    struct ShardTempData {
+        glm::vec2 aPosition = {0.0f, 0.0f};
+        unsigned vertex_count = 0;
+    };
+    std::vector<ShardTempData> shard_temp_data;
+
+    for (size_t i=0; i<vertex_count; ++i)
+    {
+        const auto* vertex = vertex_stream.GetVertex<ShardVertex2D>(i);
+        const auto shard_index = vertex->aShardIndex;
+        if (shard_index >= shard_temp_data.size())
+            shard_temp_data.resize(shard_index + 1);
+        shard_temp_data[shard_index].aPosition.x += vertex->aPosition.x;
+        shard_temp_data[shard_index].aPosition.y += vertex->aPosition.y;
+        shard_temp_data[shard_index].vertex_count++;
+    }
+
+    struct ShardData {
+        Vec4 data[1];
+    };
+    std::vector<ShardData> shard_data_buffer;
+    shard_data_buffer.resize(shard_temp_data.size());
+    for (size_t i=0; i<shard_data_buffer.size(); ++i)
+    {
+        // compute the arithmetic center (centroid of vertices)
+        const auto& shard_center = shard_temp_data[i].aPosition / float(shard_temp_data[i].vertex_count);
+        const auto shard_random_value = random_function(0.0f, 1.0f);
+        shard_data_buffer[i].data[0].x = shard_center.x;
+        shard_data_buffer[i].data[0].y = shard_center.y;
+        shard_data_buffer[i].data[0].z = 0.0f; // reserved
+        shard_data_buffer[i].data[0].w = shard_random_value;
+    }
 
     // ES 3.0 (which is the basis of WebGL 2.0) does not have Shared Storage
     // Buffer Object ((SSBO). The standard workaround is to use a float32
@@ -326,100 +334,16 @@ bool EffectDrawable::ConstructShardMesh(const Environment& env, Device& device, 
     // WebGL 2.0 Compute has SSBO but that's just a completely different WebGL
     // context (compute context vs. rendering context) and is not supported by
     // Emscripten either.
-
-    struct ShardData {
-        Vec4 data[1];
-    };
-    std::vector<ShardData> shard_data_buffer;
-    shard_data_buffer.reserve(triangle_count);
-
-    // we're going to amend the vertex layout and add the following
-    // per vertex data (vertex attribute)
-    const VertexLayout::Attribute shard_index_attribute_data = {
-        "aShardIndex", 0, 1, 0, 0, VertexLayout::Attribute::DataType::UnsignedInt
-    };
-
-    auto effect_mesh_layout = effect_mesh_buffer->GetLayout();
-    effect_mesh_layout.AppendAttribute(shard_index_attribute_data);
-    effect_mesh_buffer->SetVertexLayout(effect_mesh_layout);
-
-    const VertexStream vertex_stream(original_mesh_layout, original_mesh_buffer);
-    // Copy vertex data from the shard mesh over to the new vertex buffer
-    // where each vertex has an added aShardIndex attribute. This works
-    // because we're *appending* an attribute while keeping the earlier
-    // attributes as-is, which then retains binary compatibility.
-    VertexBuffer vertex_buffer_copy(effect_mesh_layout);
-    vertex_buffer_copy.Resize(vertex_count);
-    for (size_t i=0; i<vertex_count; ++i)
-    {
-        const auto* src_vertex_ptr =  vertex_stream.GetVertexPtr(i);
-        const auto src_vertex_size = original_mesh_layout.vertex_struct_size;
-        vertex_buffer_copy.CopyVertex(src_vertex_ptr, src_vertex_size, i);
-    }
-
-    const auto* vertex_position_attribute = effect_mesh_layout.FindAttribute("aPosition");
-    if (!vertex_position_attribute)
-        return false;
-
-    const auto shape_bounds_dimensions = maximums - minimums;
-    const auto shape_center = minimums + shape_bounds_dimensions * 0.5f;
-    const auto* shard_index_attribute = effect_mesh_layout.FindAttribute("aShardIndex");
-
-    for (size_t triangle_index=0; triangle_index < triangle_count; ++triangle_index)
-    {
-        const auto vertex_index = triangle_index * 3;
-        auto* v0 = vertex_buffer_copy.GetVertexPtr(vertex_index + 0);
-        auto* v1 = vertex_buffer_copy.GetVertexPtr(vertex_index + 1);
-        auto* v2 = vertex_buffer_copy.GetVertexPtr(vertex_index + 2);
-
-        if (vertex_position_attribute->num_vector_components == 2)
-        {
-            const auto& p0 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(*vertex_position_attribute, v0));
-            const auto& p1 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(*vertex_position_attribute, v1));
-            const auto& p2 = ToVec(*VertexLayout::GetVertexAttributePtr<Vec2>(*vertex_position_attribute, v2));
-
-            const auto& shard_center = ((p0 + p1 + p2) / 3.0f);
-            const auto shard_random_value = random_function(0.0f, 1.0f);
-
-            const uint32_t shard_index = shard_data_buffer.size();
-
-            // use a vec4 to pack shard data that has the shard center (x, y) and
-            // and a random value.
-            ShardData shard_data;
-            shard_data.data[0].x = shard_center.x;
-            shard_data.data[0].y = shard_center.y;
-            shard_data.data[0].z = 0.0f;
-            shard_data.data[0].w = shard_random_value;
-            shard_data_buffer.push_back(shard_data);
-
-            // Update the shard index attribute in each shard vertex to point to
-            // the right shard data in he data shard data buffer.
-            auto* t0 = VertexLayout::GetVertexAttributePtr<uint32_t>(*shard_index_attribute, v0);
-            auto* t1 = VertexLayout::GetVertexAttributePtr<uint32_t>(*shard_index_attribute, v1);
-            auto* t2 = VertexLayout::GetVertexAttributePtr<uint32_t>(*shard_index_attribute, v2);
-            *t0 = shard_index;
-            *t1 = shard_index;
-            *t2 = shard_index;
-        }
-    }
-
-    auto* texture = PackDataTexture(mEffectId, "Shard data texture",
-                                    &shard_data_buffer[0], shard_data_buffer.size(),
-                                    device);
-    if (!texture)
+    if (!PackDataTexture(mEffectId, "Shard data texture", &shard_data_buffer[0], shard_data_buffer.size(), device))
     {
         ERROR("Shard data exceeds available data texture size. [shards=%1]", shard_data_buffer.size());
         return false;
     }
 
-    effect_mesh_buffer->SetVertexBuffer(vertex_buffer_copy.TransferBuffer());
-    effect_mesh_buffer->SetVertexLayout(effect_mesh_layout);
-
-    mShapeCenter = shape_center;
-    create.buffer_ptr = std::move(effect_mesh_buffer);
-    create.usage = mDrawable->GetGeometryUsage();
-    create.content_hash = mDrawable->GetGeometryHash();
-    create.content_name = "EffectMesh:" + mEffectId;
+    create.buffer = std::move(args.buffer);
+    create.usage  = args.usage;
+    create.content_hash = args.content_hash;
+    create.content_name = args.content_name;
     return true;
 }
 

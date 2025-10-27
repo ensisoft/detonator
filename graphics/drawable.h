@@ -80,6 +80,10 @@ namespace gfx
             NormalRenderMesh,
             ShardedEffectMesh
         };
+        struct ShardedEffectMeshArgs {
+            unsigned mesh_subdivision_count = 0;
+        };
+        using MeshArgs = std::variant<std::monostate, ShardedEffectMeshArgs>;
 
         // The environment that possibly affects the geometry and drawable
         // generation and update in some way.
@@ -87,6 +91,8 @@ namespace gfx
             RenderPass render_pass = RenderPass::ColorPass;
             // true if the draw is with "effects", i.e. per triangle transform
             MeshType mesh_type = MeshType::NormalRenderMesh;
+            MeshArgs mesh_args;
+
             bool flip_uv_vertically = false;
             bool flip_uv_horizontally = false;
             // true to indicate that we're going to do instanced draw.
@@ -173,6 +179,8 @@ namespace gfx
         using DrawInstanceArray = DrawableClass::DrawInstanceArray;
         using InstancedDraw     = DrawableClass::InstancedDraw;
         using MeshType = DrawableClass::MeshType;
+        using MeshArgs = DrawableClass::MeshArgs;
+        using ShardedEffectMeshArgs = DrawableClass::ShardedEffectMeshArgs;
 
         // Rasterizer state that the geometry can manipulate.
         struct RasterState {

@@ -3466,7 +3466,7 @@ public:
         args.shard_rotational_acceleration = 1.0f;
 
         auto effect = std::make_unique<gfx::EffectDrawable>(std::move(inst), base::RandomString(3));
-        effect->SetEffectType(gfx::EffectDrawable::EffectType::MeshExplosion);
+        effect->SetEffectType(gfx::EffectDrawable::EffectType::ShardedMeshExplosion);
         effect->SetEffectArgs(args);
         effect->EnableEffect();
         mDrawable = std::move(effect);

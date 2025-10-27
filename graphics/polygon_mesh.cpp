@@ -201,12 +201,11 @@ std::string PolygonMeshClass::GetShaderName(const Environment& env) const
 ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& device) const
 {
     ShaderSource src;
-
     const auto mesh = GetMeshType();
     if (mesh == MeshType::Simple2DRenderMesh)
-        src = MakeSimple2DVertexShader(device, env.use_instancing);
+        src = MakeSimple2DVertexShader(device, env.use_instancing, false);
     else if (mesh == MeshType::Simple2DShardEffectMesh)
-        src = MakeSimple2DVertexShader(device, env.use_instancing);
+        src = MakeSimple2DVertexShader(device, env.use_instancing, false);
     else if (mesh == MeshType::Simple3DRenderMesh)
         src = MakeSimple3DVertexShader(device, env.use_instancing);
     else if (mesh == MeshType::Model3DRenderMesh)

@@ -19,12 +19,17 @@
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "data/json.h"
+#include "graphics/device.h"
+#include "graphics/texture.h"
 #include "graphics/drawable.h"
 #include "graphics/geometry.h"
 #include "graphics/drawcmd.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/particle_engine.h"
+#include "graphics/simple_shape.h"
 #include "graphics/tool/polygon.h"
+
+#include "test_device.cpp"
 
 bool operator==(const gfx::Vec2& lhs, const gfx::Vec2& rhs)
 {
@@ -1056,6 +1061,36 @@ void unit_test_polygon_data()
     }
 }
 
+void unit_test_simple_shape_shard_mesh()
+{
+    TEST_CASE(test::Type::Feature)
+
+    {
+        auto klass = std::make_shared<gfx::RectangleClass>();
+        gfx::RectangleClassInstance rect(klass);
+
+        TestDevice device;
+        gfx::Drawable::Environment env;
+        env.mesh_type = gfx::Drawable::MeshType::ShardedEffectMesh;
+        env.mesh_args = gfx::Drawable::ShardedEffectMeshArgs { 0 }; // should produce two triangles
+
+        gfx::Geometry::CreateArgs geometry;
+        rect.Construct(env, device, geometry);
+
+        TEST_REQUIRE(geometry.buffer.GetLayout() == gfx::GetVertexLayout<gfx::ShardVertex2D>());
+        const gfx::VertexStream stream(geometry.buffer.GetLayout(),
+                                       geometry.buffer.GetVertexBuffer());
+        TEST_REQUIRE(stream.GetCount() == 6);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(0)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(1)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(2)->aShardIndex == 0);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(3)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(4)->aShardIndex == 1);
+        TEST_REQUIRE(stream.GetVertex<gfx::ShardVertex2D>(5)->aShardIndex == 1);
+
+    }
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -1068,6 +1103,7 @@ int test_main(int argc, char* argv[])
     unit_test_polygon_builder_build();
     unit_test_particle_engine_data();
     unit_test_polygon_data();
+    unit_test_simple_shape_shard_mesh();
     return 0;
 }
 ) // TEST_MAIN
