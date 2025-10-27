@@ -38,9 +38,8 @@ namespace gfx
     class EffectDrawable : public Drawable
     {
     public:
-        enum class EffectType : uint32_t {
-            MeshExplosion = 1
-        };
+        using EffectType = MeshEffectType;
+
         struct MeshExplosionEffectArgs {
             unsigned mesh_subdivision_count = 1;
             float shard_linear_speed = 0.0f;
@@ -90,7 +89,7 @@ namespace gfx
     private:
         std::shared_ptr<Drawable> mDrawable;
         std::string mEffectId;
-        EffectType mType = EffectType::MeshExplosion;
+        EffectType mType = EffectType::ShardedMeshExplosion;
         EffectArgs mArgs;
 
         bool mEnabled = false;

@@ -175,8 +175,10 @@ namespace gfx
         auto GetDrawCommands() && noexcept
         { return std::move(mDrawCmds); }
 
-        bool HasData() const noexcept
+        bool HasVertexData() const noexcept
         { return !mVertexData.empty(); }
+        bool HasIndexData() const noexcept
+        { return !mIndexData.empty(); }
 
         auto GetVertexCount() const noexcept
         {

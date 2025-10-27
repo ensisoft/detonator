@@ -24,6 +24,10 @@
 
 namespace gfx
 {
+    enum class MeshEffectType : uint32_t {
+        ShardedMeshExplosion = 1
+    };
+
     enum class MaterialFlags : uint32_t {
         EnableBloom = 0x1,
         EnableLight = 0x2,

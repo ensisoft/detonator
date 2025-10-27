@@ -40,7 +40,8 @@ std::string Grid::GetShaderId(const Environment&) const
 
 ShaderSource Grid::GetShader(const Environment&, const Device& device) const
 {
-    return MakeSimple2DVertexShader(device, false);
+    constexpr auto enable_effects = false;
+    return MakeSimple2DVertexShader(device, false, enable_effects);
 }
 
 std::string Grid::GetShaderName(const Environment& env) const

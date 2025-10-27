@@ -32,7 +32,8 @@ bool LineBatch2D::ApplyDynamicState(const Environment &environment, Device&, Pro
 
 ShaderSource LineBatch2D::GetShader(const Environment& environment, const Device& device) const
 {
-    return MakeSimple2DVertexShader(device, false);
+    constexpr auto enable_effects = false;
+    return MakeSimple2DVertexShader(device, false, enable_effects);
 }
 
 std::string LineBatch2D::GetShaderId(const Environment& environment) const
