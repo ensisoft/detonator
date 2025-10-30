@@ -26,6 +26,7 @@ namespace  game
 void MeshEffectClass::IntoJson(data::Writer& data) const
 {
     data.Write("mesh-effect-type", mEffectType);
+    data.Write("effect-shape-id", mEffectShapeId);
     if (const auto* ptr = std::get_if<MeshExplosionEffectArgs>(&mEffectArgs))
     {
         auto chunk = data.NewWriteChunk();
@@ -42,6 +43,7 @@ bool MeshEffectClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("mesh-effect-type", &mEffectType);
+    ok &= data.Read("effect-shape-id", &mEffectShapeId);
     if (data.HasChunk("mesh-explosion-args"))
     {
         const auto& chunk = data.GetReadChunk("mesh-explosion-args");
@@ -51,6 +53,7 @@ bool MeshEffectClass::FromJson(const data::Reader& data)
         chunk->Read("shard-linear-acceleration",     &args.shard_linear_acceleration);
         chunk->Read("shard-rotational-speed",        &args.shard_rotational_speed);
         chunk->Read("shard-rotational-acceleration", &args.shard_rotational_acceleration);
+
         mEffectArgs = args;
     }
     return ok;
@@ -60,6 +63,7 @@ size_t MeshEffectClass::GetHash() const
     size_t hash = 0;
     hash = base::hash_combine(hash, mEffectType);
     hash = base::hash_combine(hash, mEffectArgs);
+    hash = base::hash_combine(hash, mEffectShapeId);
     return hash;
 }
 } // namespace

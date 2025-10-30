@@ -55,6 +55,9 @@ namespace gfx
         bool EnableEffect();
         void DisableEffect();
 
+        void SetEffectDrawable(std::shared_ptr<Drawable> effect_drawable)
+        { mEffectDrawable = std::move(effect_drawable); }
+
         auto GetEffectType() const noexcept
         { return mType; }
         void SetEffectType(EffectType type) noexcept
@@ -88,6 +91,8 @@ namespace gfx
             unsigned mesh_subdivision_count) const;
     private:
         std::shared_ptr<Drawable> mDrawable;
+        std::shared_ptr<Drawable> mSourceDrawable;
+        std::shared_ptr<Drawable> mEffectDrawable;
         std::string mEffectId;
         EffectType mType = EffectType::ShardedMeshExplosion;
         EffectArgs mArgs;

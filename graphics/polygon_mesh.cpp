@@ -205,7 +205,7 @@ ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& d
     if (mesh == MeshType::Simple2DRenderMesh)
         src = MakeSimple2DVertexShader(device, env.use_instancing, false);
     else if (mesh == MeshType::Simple2DShardEffectMesh)
-        src = MakeSimple2DVertexShader(device, env.use_instancing, false);
+        src = MakeSimple2DVertexShader(device, env.use_instancing, true);
     else if (mesh == MeshType::Simple3DRenderMesh)
         src = MakeSimple3DVertexShader(device, env.use_instancing);
     else if (mesh == MeshType::Model3DRenderMesh)
@@ -446,6 +446,12 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
 
 bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& create) const
 {
+    if (env.mesh_type == DrawableClass::MeshType::ShardedEffectMesh)
+    {
+        if (mMeshType != MeshType::Simple2DShardEffectMesh)
+            return false;
+    }
+
     const auto usage = mStatic ? Geometry::Usage::Static
                                : Geometry::Usage::Dynamic;
 

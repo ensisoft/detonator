@@ -35,11 +35,16 @@ EffectDrawable::EffectDrawable(std::shared_ptr<Drawable> drawable, std::string e
 {
     if (!random_function)
         random_function = math::rand<float>;
+
+    mSourceDrawable = mDrawable;
 }
 
 bool EffectDrawable::EnableEffect()
 {
     mEnabled = true;
+    if (mEffectDrawable)
+        mDrawable = mEffectDrawable;
+
     return true;
 }
 
@@ -237,6 +242,15 @@ void EffectDrawable::Execute(const Environment& env, const Command& command)
                 else if (*state == "off")
                     mEnabled = false;
                 else WARN("Ignoring enable mesh effect command with unexpected state parameter. [state='%1']", state);
+                if (mEnabled)
+                {
+                    if (mEffectDrawable)
+                        mDrawable = mEffectDrawable;
+                }
+                else
+                {
+                    mDrawable = mSourceDrawable;
+                }
             }
             else
             {
@@ -270,6 +284,10 @@ bool EffectDrawable::ConstructShardMesh(const Environment& env, Device& device, 
         ERROR("Failed to construct mesh.");
         return false;
     }
+    ASSERT(args.buffer.GetLayout() == GetVertexLayout<ShardVertex2D>());
+    const VertexStream vertex_stream(args.buffer.GetLayout(),
+                                 args.buffer.GetVertexBuffer());
+    const auto vertex_count = vertex_stream.GetCount();
 
     glm::vec3 minimums = {0.0f, 0.0f, 0.0f};
     glm::vec3 maximums = {0.0f, 0.0f, 0.0f};
@@ -281,10 +299,9 @@ bool EffectDrawable::ConstructShardMesh(const Environment& env, Device& device, 
     const auto shape_bounds_dimensions = maximums - minimums;
     mShapeCenter = minimums + shape_bounds_dimensions * 0.5f;
 
-    ASSERT(args.buffer.GetLayout() == GetVertexLayout<ShardVertex2D>());
-    const VertexStream vertex_stream(args.buffer.GetLayout(),
-                                     args.buffer.GetVertexBuffer());
-    const auto vertex_count = vertex_stream.GetCount();
+    // hmm, is this adequate?
+    if (vertex_count == 0)
+        return true;
 
     struct ShardTempData {
         glm::vec2 aPosition = {0.0f, 0.0f};
