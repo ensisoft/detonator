@@ -301,11 +301,13 @@ namespace gui
         void on_splineAcceleration_valueChanged(double value);
         void on_splineFlagEnabled_stateChanged(int);
         void on_meshEffectType_currentIndexChanged(int);
+        void on_meshEffectShape_currentIndexChanged(int);
         void on_shardIterations_valueChanged(int);
         void on_shardLinearVelo_valueChanged(double);
         void on_shardLinearAccel_valueChanged(double);
         void on_shardRotVelo_valueChanged(double);
         void on_shardRotAccel_valueChanged(double);
+        void on_btnResetEffectShape_clicked();
 
         void on_btnDelDrawable_clicked();
         void on_btnDelTextItem_clicked();

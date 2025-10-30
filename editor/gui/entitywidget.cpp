@@ -3845,6 +3845,19 @@ void EntityWidget::on_meshEffectType_currentIndexChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_meshEffectShape_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* effect = node->GetMeshEffect())
+        {
+            SetEnabled(mUI.btnResetEffectShape, effect->HasEffectShapeId());
+            SetEnabled(mUI.shardIterations, !effect->HasEffectShapeId());
+        }
+    }
+}
+
 void EntityWidget::on_shardIterations_valueChanged(int)
 {
     UpdateCurrentNodeProperties();
@@ -3865,6 +3878,18 @@ void EntityWidget::on_shardRotVelo_valueChanged(double)
 void EntityWidget::on_shardRotAccel_valueChanged(double)
 {
     UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_btnResetEffectShape_clicked()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (auto* mesh = node->GetMeshEffect())
+        {
+            mesh->ResetEffectShapeId();
+            DisplayCurrentNodeProperties();
+        }
+    }
 }
 
 void EntityWidget::on_btnDelDrawable_clicked()
@@ -5527,6 +5552,9 @@ void EntityWidget::DisplayCurrentNodeProperties()
         {
             SetVisible(mUI.meshEffect, true);
             SetValue(mUI.meshEffectType, effect->GetEffectType());
+            SetValue(mUI.meshEffectShape, ListItemId(effect->GetEffectShapeId()));
+            SetEnabled(mUI.btnResetEffectShape, effect->HasEffectShapeId());
+            SetEnabled(mUI.shardIterations, !effect->HasEffectShapeId());
             if (const auto* args = effect->GetMeshExplosionEffectArgs())
             {
                 SetValue(mUI.shardIterations, args->mesh_subdivision_count);
@@ -5776,6 +5804,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
     if (auto* effect = node->GetMeshEffect())
     {
         effect->SetEffectType(GetValue(mUI.meshEffectType));
+        effect->SetEffectShapeId(GetItemId(mUI.meshEffectShape));
         const auto type = effect->GetEffectType();
         if (type == game::MeshEffectClass::EffectType::MeshExplosion)
         {
@@ -5827,6 +5856,8 @@ void EntityWidget::RebuildCombos()
 
     std::vector<ResourceListItem> polygons;
     std::vector<ResourceListItem> scripts;
+    std::vector<ResourceListItem> effect_polygons;
+
     // for the rigid body we need to list the polygonal (custom) shape
     // objects. (note that it's actually possible that these would be concave
     // but this case isn't currently supported)
@@ -5836,15 +5867,25 @@ void EntityWidget::RebuildCombos()
         ResourceListItem pair;
         pair.name = res.GetName();
         pair.id   = res.GetId();
-        if (res.GetType() == app::Resource::Type::Shape) {
+        if (res.GetType() == app::Resource::Type::Shape)
+        {
             polygons.push_back(pair);
-        } else if (res.GetType() == app::Resource::Type::Script) {
+
+            const gfx::PolygonMeshClass* polygon_class = nullptr;
+            res.GetContent(&polygon_class);
+            ASSERT(polygon_class);
+            if (polygon_class->GetMeshType() == gfx::PolygonMeshClass::MeshType::Simple2DShardEffectMesh)
+                effect_polygons.push_back(pair);
+        }
+        else if (res.GetType() == app::Resource::Type::Script)
+        {
             scripts.push_back(pair);
         }
     }
     SetList(mUI.rbPolygon, polygons);
     SetList(mUI.fxPolygon, polygons);
     SetList(mUI.scriptFile, scripts);
+    SetList(mUI.meshEffectShape, effect_polygons);
 }
 
 void EntityWidget::RebuildCombosInternal()
@@ -5919,6 +5960,18 @@ void EntityWidget::UpdateDeletedResourceReferences()
             {
                 // clean away stale data.
                 fixture->ResetPolygonShapeId();
+            }
+        }
+        if (auto* effect = node.GetMeshEffect())
+        {
+            if (effect->HasEffectShapeId())
+            {
+                const auto& effect_shape_id = effect->GetEffectShapeId();
+                if (!mState.workspace->IsValidDrawable(effect_shape_id))
+                {
+                    WARN("Entity node '%1' mesh effect uses an effect shape which is no longer available.", node.GetName());
+                    effect->ResetEffectShapeId();
+                }
             }
         }
     }

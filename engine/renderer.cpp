@@ -1351,6 +1351,21 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
                         effect_drawable->SetEffectType(gfx::EffectDrawable::EffectType::ShardedMeshExplosion);
                         effect_drawable->SetEffectArgs(args);
                     }
+                    if (mesh_effect->HasEffectShapeId())
+                    {
+                        const auto& effect_shape_id = mesh_effect->GetEffectShapeId();
+                        if (const auto& effect_shape_klass = mClassLib->FindDrawableClassById(effect_shape_id))
+                        {
+                            const auto type = effect_shape_klass->GetType();
+                            if (type == gfx::DrawableClass::Type::Polygon)
+                            {
+                                auto effect_shape = gfx::CreateDrawableInstance(effect_shape_klass);
+                                effect_drawable->SetEffectDrawable(std::move(effect_shape));
+                            } else WARN("Mesh effect shape has unexpected/unsupported type. (Expected user defined shape class). [shape='%1', entity='%2', node='%3']",
+                                effect_shape_klass->GetName(), entity.GetName(), entity_node.GetName());
+                        } else WARN("No such effect shape class found. [effect='%1', entity='%2', node='%3']",
+                                    effect_shape_id, entity.GetName(), entity_node.GetName());
+                    }
                     paint_node.drawable = std::move(effect_drawable);
                 }
                 else

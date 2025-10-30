@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <variant>
+#include <string>
 
 #include "data/fwd.h"
 #include "game/types.h"
@@ -45,6 +46,17 @@ namespace game
         { mEffectType = effect; }
         auto GetEffectType() const noexcept
         { return mEffectType; }
+
+        auto GetEffectShapeId() const noexcept
+        { return mEffectShapeId; }
+        void ResetEffectShapeId() noexcept
+        { mEffectShapeId.clear(); }
+
+        void SetEffectShapeId(std::string shapeId)
+        { mEffectShapeId = std::move(shapeId); }
+
+        auto HasEffectShapeId() const noexcept
+        { return !mEffectShapeId.empty(); }
 
         void SetEffectArgs(EffectArgs args)
         { mEffectArgs = args; }
@@ -72,6 +84,7 @@ namespace game
     private:
         EffectType mEffectType = EffectType::MeshExplosion;
         EffectArgs mEffectArgs;
+        std::string mEffectShapeId;
     };
 
     class MeshEffect
@@ -87,6 +100,10 @@ namespace game
 
         auto GetEffectType() const noexcept
         { return mClass->GetEffectType(); }
+        auto GetEffectShapeId() const noexcept
+        { return mClass->GetEffectShapeId(); }
+        auto HasEffectShapeId() const noexcept
+        { return mClass->HasEffectShapeId(); }
 
         template<typename T>
         const auto* GetEffectArgs() const noexcept
