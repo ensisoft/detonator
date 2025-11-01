@@ -466,7 +466,8 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
         create.content_name = mName;
 
         geometry_buffer.SetVertexLayout(data.layout);
-        geometry_buffer.UploadVertices(data.vertices.data(), data.vertices.size());
+        if (const auto vertex_count = data.vertices.size())
+            geometry_buffer.UploadVertices(data.vertices.data(), vertex_count);
 
         if (!data.indices.empty())
             geometry_buffer.UploadIndices(data.indices.data(), data.indices.size(), data.index_type);
