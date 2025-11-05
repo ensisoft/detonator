@@ -8,8 +8,8 @@ R"CPP_RAW_STRING(//"
 // @attributes
 in vec2 aPosition;
 in vec2 aTexCoord;
-in vec3 aPerceptualPosition;
-in vec3 aPerceptualNormal;
+in vec3 aLocalOffset;
+in vec3 aWorldNormal;
 
 #ifdef INSTANCED_DRAW
   // the per instance model-to-world mat4 is broken
@@ -38,8 +38,8 @@ out vec2 vTexCoord;
 struct VertexData {
   vec4 render_vertex;
   vec3 render_normal;
-  vec4 perceptual_vertex;
-  vec3 perceptual_normal;
+  vec4 local_offset;
+  vec3 world_normal;
   vec2 texcoord;
 };
 
@@ -55,8 +55,8 @@ void VertexShaderMain() {
     VertexData vs;
     vs.render_vertex = vec4(aPosition.x, -aPosition.y, 0.0, 1.0);
     vs.render_normal = vec3(0.0, 0.0, -1.0);
-    vs.perceptual_vertex = vec4(aPerceptualPosition, 1.0);
-    vs.perceptual_normal = vec4(aPerceptualNormal, 1.0);
+    vs.local_offset = vec4(aLocalOffset, 1.0);
+    vs.world_normal = vec4(aWorldNormal, 1.0);
     vs.texcoord = aTexCoord;
 
     #ifdef CUSTOM_VERTEX_TRANSFORM
@@ -72,8 +72,8 @@ void VertexShaderMain() {
 
     // transform the perceptual position from a local coordinate to
     // the world coordinate.
-    vec3 world_view_position = kWorldPosition + aPerceptualPosition * kWorldSize;
-    vec3 world_view_normal = aPerceptualNormal;
+    vec3 world_view_position = kWorldPosition + aLocalOffset * kWorldSize;
+    vec3 world_view_normal = aWorldNormal;
 
     vs_out.clip_position = kProjectionMatrix * render_view_position;
     vs_out.view_position = vec4(world_view_position, 1.0);

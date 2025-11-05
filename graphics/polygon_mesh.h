@@ -52,7 +52,7 @@ namespace gfx
             Model3DRenderMesh,
             // This mesh type is used for rendering isometric 2D tiles
             // with perceptual 3D support for things such as lights.
-            Perceptual3DRenderMesh
+            Dimetric2DRenderMesh
         };
 
         explicit PolygonMeshClass(std::string id = base::RandomString(10),

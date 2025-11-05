@@ -147,9 +147,9 @@ namespace gfx
         // coordinate in the "tile 3D space". i.e. relative to
         // the tile plane. We use this information to compute lights
         // in perceptual 3D space.
-        Vec3 aPerceptualPosition;
+        Vec3 aLocalOffset;
         // Normal of the vertex in the tile 3D space.
-        Vec3 aPerceptualNormal;
+        Vec3 aWorldNormal;
     };
 
     // Vertex for #D drawing in the XYZ space.
@@ -215,10 +215,10 @@ namespace gfx
     {
         using DataType = VertexLayout::Attribute::DataType;
         static const VertexLayout layout(sizeof(Perceptual3DVertex), {
-            {"aPosition",           0, 2, 0, offsetof(Perceptual3DVertex, aPosition),           DataType::Float},
-            {"aTexCoord",           0, 2, 0, offsetof(Perceptual3DVertex, aTexCoord),           DataType::Float},
-            {"aPerceptualPosition", 0, 3, 0, offsetof(Perceptual3DVertex, aPerceptualPosition), DataType::Float},
-            {"aPerceptualNormal",   0, 3, 0, offsetof(Perceptual3DVertex, aPerceptualNormal),   DataType::Float}
+            {"aPosition",    0, 2, 0, offsetof(Perceptual3DVertex, aPosition),    DataType::Float},
+            {"aTexCoord",    0, 2, 0, offsetof(Perceptual3DVertex, aTexCoord),    DataType::Float},
+            {"aLocalOffset", 0, 3, 0, offsetof(Perceptual3DVertex, aLocalOffset), DataType::Float},
+            {"aWorldNormal", 0, 3, 0, offsetof(Perceptual3DVertex, aWorldNormal), DataType::Float}
         });
         return layout;
     }
