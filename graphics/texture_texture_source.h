@@ -30,22 +30,23 @@ namespace gfx
           : mId(base::RandomString(10))
         {}
         //  Persistence only works with a known GPU texture ID.
-        explicit TextureTextureSource(std::string gpu_id, gfx::Texture* texture =  nullptr, std::string id = base::RandomString(10))
+        explicit TextureTextureSource(std::string gpu_id,  std::string id = base::RandomString(10))
           : mId(std::move(id))
           , mGpuId(std::move(gpu_id))
-          , mTexture(texture)
         {}
-        virtual ColorSpace GetColorSpace() const override
-        { return ColorSpace::Linear; }
-        virtual Source GetSourceType() const override
+        explicit TextureTextureSource(gfx::Texture* texture, std::string id = base::RandomString((10)));
+
+        ColorSpace GetColorSpace() const override;
+
+        Source GetSourceType() const override
         { return Source::Texture; }
-        virtual std::string GetId() const override
+        std::string GetId() const override
         { return mId; }
-        virtual std::string GetGpuId() const override
+        std::string GetGpuId() const override
         { return mGpuId; }
-        virtual std::string GetName() const override
+        std::string GetName() const override
         { return mName; }
-        virtual std::size_t GetHash() const override
+        std::size_t GetHash() const override
         {
             size_t hash = 0;
             hash = base::hash_combine(hash, mId);
@@ -53,18 +54,18 @@ namespace gfx
             hash = base::hash_combine(hash, mGpuId);
             return hash;
         }
-        virtual void SetName(const std::string& name) override
+        void SetName(const std::string& name) override
         { mName = name; }
-        virtual std::shared_ptr<IBitmap> GetData() const override
+        std::shared_ptr<IBitmap> GetData() const override
         { return nullptr; }
-        virtual Texture* Upload(const Environment& env, Device& device) const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
+        Texture* Upload(const Environment& env, Device& device) const override;
+        void IntoJson(data::Writer& data) const override;
+        bool FromJson(const data::Reader& data) override;
 
-        inline void SetTexture(gfx::Texture* texture) noexcept
-        { mTexture = texture; }
+        void SetTexture(Texture* texture);
+        void SetTextureGpuId(std::string texture_gpu_id);
     protected:
-        virtual std::unique_ptr<TextureSource> MakeCopy(std::string copy_id) const override
+        std::unique_ptr<TextureSource> MakeCopy(std::string copy_id) const override
         {
             auto ret = std::make_unique<TextureTextureSource>(*this);
             ret->mId = std::move(copy_id);
@@ -74,12 +75,12 @@ namespace gfx
         std::string mId;
         std::string mName;
         std::string mGpuId;
-        mutable gfx::Texture* mTexture = nullptr;
+        mutable Texture* mTexture = nullptr;
     };
 
-    inline auto  UseExistingTexture(std::string gpu_id, gfx::Texture* texture = nullptr, std::string id = base::RandomString(10))
+    inline auto  UseExistingTexture(Texture* texture, std::string id = base::RandomString(10))
     {
-        return std::make_unique<TextureTextureSource>(std::move(gpu_id), texture, std::move(id));
+        return std::make_unique<TextureTextureSource>(texture, std::move(id));
     }
 
 } // namespacex

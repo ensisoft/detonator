@@ -410,7 +410,7 @@ void DrawEdges(const gfx::Painter& scene_painter,
         gfx::Transform model;
         model.Resize(window_size.GetWidth(), window_size.GetHeight());
         model.MoveTo(0.0f, 0.0f);
-        window_painter.Draw(gfx::Rectangle(), model, gfx::CreateMaterialFromTexture("", result));
+        window_painter.Draw(gfx::Rectangle(), model, gfx::CreateMaterialFromTexture(result));
     }
 }
 

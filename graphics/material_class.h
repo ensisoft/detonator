@@ -603,27 +603,26 @@ namespace gfx
     //             !! NO CLASS IDS ARE CREATED !!
 
     // Create gradient material based on 4 colors
-    GradientClass CreateMaterialClassFromColor(const Color4f& top_left,
+    MaterialClass CreateMaterialClassFromColor(const Color4f& top_left,
                                                const Color4f& top_right,
                                                const Color4f& bottom_left,
                                                const Color4f& bottom_right);
 
     // Create material based on a simple color only.
-    ColorClass CreateMaterialClassFromColor(const Color4f& color);
+    MaterialClass CreateMaterialClassFromColor(const Color4f& color);
     // Create a material based on a single image file.
     MaterialClass CreateMaterialClassFromSprite(const std::string& uri);
     // Create a material based on a single image file.
-    TextureMap2DClass CreateMaterialClassFromImage(const std::string& uri);
+    MaterialClass CreateMaterialClassFromImage(const std::string& uri);
     // Create a sprite from multiple images.
-    SpriteClass CreateMaterialClassFromImages(const std::initializer_list<std::string>& uris);
+    MaterialClass CreateMaterialClassFromImages(const std::initializer_list<std::string>& uris);
     // Create a sprite from multiple images.
-    SpriteClass CreateMaterialClassFromImages(const std::vector<std::string>& uris);
+    MaterialClass CreateMaterialClassFromImages(const std::vector<std::string>& uris);
     // Create a sprite from a texture atlas where all the sprite frames
     // are packed inside the single texture.
-    SpriteClass CreateMaterialClassFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames);
+    MaterialClass CreateMaterialClassFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames);
     // Create a material class from a text buffer.
-    TextureMap2DClass CreateMaterialClassFromText(const TextBuffer& text);
-    TextureMap2DClass CreateMaterialClassFromText(TextBuffer&& text);
-
+    MaterialClass CreateMaterialClassFromText(const TextBuffer& text);
+    MaterialClass CreateMaterialClassFromText(TextBuffer&& text);
 
 } // namespace

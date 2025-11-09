@@ -328,13 +328,13 @@ MaterialInstance CreateMaterialFromText(TextBuffer&& text)
     return MaterialInstance(CreateMaterialClassFromText(std::move(text)));
 }
 
-MaterialInstance CreateMaterialFromTexture(std::string gpu_id, Texture* texture)
+MaterialInstance CreateMaterialFromTexture(Texture* texture)
 {
     auto map = std::make_unique<TextureMap>("");
     map->SetType(TextureMap::Type::Texture2D);
     map->SetName("Texture");
     map->SetNumTextures(1);
-    map->SetTextureSource(0, UseExistingTexture(std::move(gpu_id), texture));
+    map->SetTextureSource(0, UseExistingTexture(texture));
 
     MaterialClass material(MaterialClass::Type::Texture, std::string(""));
     material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
