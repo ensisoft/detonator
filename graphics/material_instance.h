@@ -124,7 +124,7 @@ namespace gfx
     MaterialInstance CreateMaterialFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames);
     MaterialInstance CreateMaterialFromText(const TextBuffer& text);
     MaterialInstance CreateMaterialFromText(TextBuffer&& text);
-    MaterialInstance CreateMaterialFromTexture(std::string gpu_id, Texture* texture = nullptr);
+    MaterialInstance CreateMaterialFromTexture(Texture* texture);
 
     std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass);
     std::unique_ptr<Material> CreateMaterialInstance(MaterialClass&& klass);

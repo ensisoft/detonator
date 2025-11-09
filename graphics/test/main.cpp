@@ -1012,7 +1012,7 @@ private:
 
         gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
-        material.AddTexture(gfx::UseExistingTexture(dst_texture->GetId(), dst_texture, ""));
+        material.AddTexture(gfx::UseExistingTexture(dst_texture, ""));
         return material;
     }
 
@@ -2944,7 +2944,7 @@ public:
                 transform.Resize(512.0f, 512.0f);
                 transform.MoveTo(0.0f, 20.0f);
                 gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
-                klass.SetTexture(gfx::UseExistingTexture("fbo_msaa_disabled_out", result, ""));
+                klass.SetTexture(gfx::UseExistingTexture(result, ""));
                 klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
                 painter.Draw(gfx::Rectangle(), transform, gfx::MaterialInstance(klass));
             }
@@ -2988,7 +2988,7 @@ public:
                     transform.Resize(512.0f, 512.0f);
                     transform.MoveTo(512.0f, 20.0f);
                     gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
-                    klass.SetTexture(gfx::UseExistingTexture("fbo_msaa_enabled_out", result, ""));
+                    klass.SetTexture(gfx::UseExistingTexture(result, ""));
                     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
                     painter.Draw(gfx::Rectangle(), transform, gfx::MaterialInstance(klass));
                 }

@@ -14,13 +14,49 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
+#include "base/assert.h"
 #include "data/writer.h"
 #include "data/reader.h"
 #include "graphics/device.h"
+#include "graphics/texture.h"
 #include "graphics/texture_texture_source.h"
 
 namespace gfx
 {
+
+TextureSource::ColorSpace TextureTextureSource::GetColorSpace() const
+{
+    if (mTexture)
+    {
+        const auto format = mTexture->GetFormat();
+        if (format == Texture::Format::sRGB || format == Texture::Format::sRGBA)
+            return ColorSpace::sRGB;
+    }
+    return ColorSpace::Linear;
+}
+
+TextureTextureSource::TextureTextureSource(Texture* texture, std::string id)
+    : mId(std::move(id))
+    , mTexture(texture)
+{
+    ASSERT(mTexture);
+    mGpuId = mTexture->GetId();
+}
+
+void TextureTextureSource::SetTexture(Texture* texture)
+{
+    ASSERT(texture);
+    mTexture = texture;
+    mGpuId = texture->GetId();
+}
+
+void TextureTextureSource::SetTextureGpuId(std::string texture_gpu_id)
+{
+    mTexture = nullptr;
+    mGpuId = std::move(texture_gpu_id);
+}
 
 Texture* TextureTextureSource::Upload(const Environment& env, Device& device) const
 {

@@ -1828,7 +1828,7 @@ SpriteClass CreateMaterialClassFromImages(const std::initializer_list<std::strin
     return material;
 }
 
-SpriteClass CreateMaterialClassFromImages(const std::vector<std::string>& uris)
+MaterialClass CreateMaterialClassFromImages(const std::vector<std::string>& uris)
 {
     auto map = std::make_unique<TextureMap>("");
     map->SetName("Sprite");
@@ -1844,7 +1844,7 @@ SpriteClass CreateMaterialClassFromImages(const std::vector<std::string>& uris)
     return material;
 }
 
-SpriteClass CreateMaterialClassFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames)
+MaterialClass CreateMaterialClassFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames)
 {
     auto map = std::make_unique<TextureMap>("");
     map->SetName("Sprite");
@@ -1863,7 +1863,7 @@ SpriteClass CreateMaterialClassFromSpriteAtlas(const std::string& uri, const std
     return material;
 }
 
-TextureMap2DClass CreateMaterialClassFromText(const TextBuffer& text)
+MaterialClass CreateMaterialClassFromText(const TextBuffer& text)
 {
     auto map = std::make_unique<TextureMap>("");
     map->SetType(TextureMap::Type::Texture2D);
@@ -1878,7 +1878,7 @@ TextureMap2DClass CreateMaterialClassFromText(const TextBuffer& text)
     return material;
 }
 
-TextureMap2DClass CreateMaterialClassFromText(TextBuffer&& text)
+MaterialClass CreateMaterialClassFromText(TextBuffer&& text)
 {
     auto map = std::make_unique<TextureMap>("");
     map->SetType(TextureMap::Type::Texture2D);
