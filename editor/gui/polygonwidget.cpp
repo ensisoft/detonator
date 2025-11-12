@@ -28,6 +28,9 @@
 #include "base/math.h"
 #include "base/utility.h"
 #include "data/json.h"
+#include "engine/camera.h"
+#include "graphics/algo.h"
+#include "graphics/framebuffer.h"
 #include "graphics/material.h"
 #include "graphics/material_class.h"
 #include "graphics/material_instance.h"
@@ -35,16 +38,21 @@
 #include "graphics/drawing.h"
 #include "graphics/transform.h"
 #include "graphics/utility.h"
+#include "graphics/linebatch.h"
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/guidegrid.h"
+#include "graphics/texture.h"
+#include "graphics/device.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/format.h"
+#include "editor/app/resource-uri.h"
 #include "editor/gui/polygonwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/dlgtextedit.h"
 #include "editor/gui/drawing.h"
+#include "graphics/linebatch.h"
 
 namespace {
 
@@ -64,6 +72,119 @@ std::vector<VertexType> MakeVerts2D(const std::vector<QPoint>& points, float wid
         vertices.push_back(vertex);
     }
     return vertices;
+}
+
+bool FindExpectedDimetricGuideTextureSize(const gfx::Material& material, gfx::Device& device,
+    unsigned* texture_width, unsigned* texture_height)
+{
+    const auto* material_class = material.GetClass();
+    if (!material_class)
+        return false;
+
+    if (material_class->GetNumTextureMaps() != 1)
+        return false;
+
+    const auto* texture_map = material_class->GetTextureMap(0);
+    if (texture_map->GetNumTextures() != 1)
+        return false;
+
+    const auto* tile_texture_src = texture_map->GetTextureSource(0);
+    const auto& tile_texture_gpu_id = tile_texture_src->GetGpuId();
+    const auto* dimetric_tile_texture = device.FindTexture(tile_texture_gpu_id);
+    if (!dimetric_tile_texture)
+        return false;
+
+    const auto whole_texture_width = dimetric_tile_texture->GetWidth();
+    const auto whole_texture_height = dimetric_tile_texture->GetHeight();
+
+    const auto& tile_rect = texture_map->GetTextureRect(0);
+    *texture_width = tile_rect.GetWidth() * whole_texture_width;
+    *texture_height = tile_rect.GetHeight() * whole_texture_height;
+    return true;
+}
+
+gfx::Texture* RenderDimetricGuide(const std::string& gpu_id, gfx::Device& device,
+    unsigned texture_width, unsigned texture_height)
+{
+    // expect the texture height to be an even multiple of the texture width.
+    // the base case for isometric tiles is that tiles have a regular size
+    // such as 64x64 px, but it's possible to have tiles that have tall objects
+    // such as "walls", "trees" etc and the rendered image is then taller
+    // for example 256x512 px.
+    if (texture_height % texture_width)
+        return nullptr;
+
+    auto* texture = device.FindTexture(gpu_id);
+    if (!texture)
+    {
+        texture = device.MakeTexture(gpu_id);
+        texture->SetName("Dimetric Guide");
+    }
+    if (texture->GetWidth() != texture_width || texture->GetHeight() != texture_height)
+        texture->Allocate(texture_width, texture_height, gfx::Texture::Format::sRGBA);
+
+    auto* fbo = device.FindFramebuffer("PolygonWidgetFBO");
+    if (!fbo)
+    {
+        fbo = device.MakeFramebuffer("PolygonWidgetFBO");
+        gfx::Framebuffer::Config conf;
+        conf.width  = 0; // irrelevant since using texture target
+        conf.height = 0; // irrelevant since using texture target.
+        conf.format = gfx::Framebuffer::Format::ColorRGBA8;
+        conf.msaa   = gfx::Framebuffer::MSAA::Enabled;
+        fbo->SetConfig(conf);
+    }
+    fbo->SetColorTarget(texture);
+    device.ClearColor(gfx::Color::Transparent, fbo);
+
+    gfx::Painter tile_painter;
+    tile_painter.SetFramebuffer(fbo);
+    tile_painter.SetDevice(&device);
+    tile_painter.SetSurfaceSize(texture_width, texture_height);
+    tile_painter.SetPixelRatio({1.0f, 1.0f});
+    if (texture_height > texture_width)
+    {
+        tile_painter.SetViewport(0, static_cast<int>(texture_height) - static_cast<int>(texture_width),
+                                 texture_width, texture_width);
+        tile_painter.SetProjectionMatrix(engine::CreateProjectionMatrix(engine::Projection::Orthographic, texture_width, texture_width));
+    }
+    else
+    {
+        tile_painter.SetViewport(0, 0, texture_width, texture_height);
+        tile_painter.SetProjectionMatrix(engine::CreateProjectionMatrix(engine::Projection::Orthographic, texture_width, texture_height));
+    }
+    tile_painter.SetViewMatrix(engine::CreateModelViewMatrix(engine::GameView::Dimetric, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f));
+
+    // solve the size of the tile based on the Pythagoras theorem
+    // a² + b² = c²
+    // we know that the tile is a square so each side is equal length
+    // thus we have
+    //      2a² = c²
+    //       a² = c² / 2
+    // sqrt(a²) = sqrt(c²)/sqrt(2)
+    //        a = c/sqrt(2.0)
+    //
+    // we can figure out the hypotenuse for this equation by projecting
+    // a point from our scene space visible edge to the tile plane and
+    // doubling that distance.
+
+    const auto scene_edge_point = static_cast<float>(texture_width) / 2.0f;
+    const auto tile_edge_point = engine::MapFromScenePlaneToTilePlane(glm::vec4 { scene_edge_point, 0.0f, 0.0f, 0.0f}, engine::GameView::Dimetric);
+    const auto tile_hypotenuse = glm::length(tile_edge_point) * 2.0f;
+    const auto tile_size= tile_hypotenuse / std::sqrt(2.0);
+
+    gfx::Transform tile;
+    tile.Scale(tile_size, tile_size);
+    tile.MoveTo(0.0f, 0.0f);
+    tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Solid), tile, gfx::CreateMaterialFromImage(res::Checkerboard));
+
+    gfx::Texture* result = nullptr;
+    fbo->Resolve(&result);
+
+    gfx::algo::FlipTexture("PolygonWidgetGpuId", result, &device, gfx::algo::FlipDirection::Horizontal);
+
+    result->GenerateMips();
+    return result;
 }
 
 // Map vertex to widget space.
@@ -90,6 +211,10 @@ std::string TranslateEnum(ShapeWidget::MeshType type)
         return "2D Render Mesh";
     else if (type == ShapeWidget::MeshType::Simple2DShardEffectMesh)
         return "2D Shard Effect Mesh";
+    else if (type == ShapeWidget::MeshType::Dimetric2DRenderMesh)
+        return "2.5D Dimetric Render Mesh";
+    else if (type == ShapeWidget::MeshType::Isometric2DRenderMesh)
+        return "2.5D Isometric Render Mesh";
     else BUG("Unhandled translation");
     return "???";
 }
@@ -155,7 +280,11 @@ public:
             else if (vector_index == 1)
                 vec3->y = value;
             else if (vector_index == 2)
-                vec3->z = value;
+            {
+                if (attribute.name == "aLocalOffset" || attribute.name == "aWorldNormal")
+                    vec3->z = value * -1.0f;
+                else vec3->z = value;
+            }
             else BUG("Vector index out of bounds.");
             return true;
         }
@@ -246,7 +375,11 @@ public:
             else if (vector_index == 1)
                 return QString::number(vec3->y, 'f', 2);
             else if (vector_index == 2)
+            {
+                if (attribute.name == "aLocalOffset" || attribute.name == "aWorldNormal")
+                    return QString::number(vec3->z * -1.0f, 'f', 2);
                 return QString::number(vec3->z, 'f', 2);
+            }
             else BUG("Vector index out of bounds.");
         }
         else if (attribute.num_vector_components == 4)
@@ -343,6 +476,12 @@ public:
             count += attr.num_vector_components;
         }
         return static_cast<int>(count);
+    }
+
+    void RefreshVertex(size_t vertex_index)
+    {
+        const auto row = static_cast<int>(vertex_index);
+        emit dataChanged(this->index(row, 0), this->index(row, 4));
     }
 
     template<typename VertexType>
@@ -629,18 +768,14 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     mState.workspace = workspace;
 
     mUI.setupUi(this);
-    mUI.widget->onPaintScene = std::bind(&ShapeWidget::PaintScene,
-        this, std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onMousePress  = std::bind(&ShapeWidget::OnMousePress,
-        this, std::placeholders::_1);
-    mUI.widget->onMouseRelease = std::bind(&ShapeWidget::OnMouseRelease,
-        this, std::placeholders::_1);
-    mUI.widget->onMouseMove = std::bind(&ShapeWidget::OnMouseMove,
-        this, std::placeholders::_1);
-    mUI.widget->onMouseDoubleClick = std::bind(&ShapeWidget::OnMouseDoubleClick,
-        this, std::placeholders::_1);
-    mUI.widget->onKeyPress = std::bind(&ShapeWidget::OnKeyPressEvent,
-        this, std::placeholders::_1);
+    mUI.widget->onPaintScene   = std::bind(&ShapeWidget::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onKeyPress     = std::bind(&ShapeWidget::OnKeyPressEvent, this, std::placeholders::_1);
+    mUI.widget->onKeyRelease   = std::bind(&ShapeWidget::OnKeyReleaseEvent, this, std::placeholders::_1);
+    mUI.widget->onMousePress   = std::bind(&ShapeWidget::OnMousePress,this, std::placeholders::_1);
+    mUI.widget->onMouseRelease = std::bind(&ShapeWidget::OnMouseRelease, this, std::placeholders::_1);
+    mUI.widget->onMouseMove    = std::bind(&ShapeWidget::OnMouseMove, this, std::placeholders::_1);
+    mUI.widget->onMouseWheel   = std::bind(&ShapeWidget::OnMouseWheel, this, std::placeholders::_1);
+    mUI.widget->onMouseDoubleClick = std::bind(&ShapeWidget::OnMouseDoubleClick,this, std::placeholders::_1);
 
     mUI.widget->SetCursorColor(gfx::Color::HotPink, GfxWidget::CursorShape::CrossHair);
     mUI.widget->SetCursorColor(gfx::Color::HotPink, GfxWidget::CursorShape::ArrowCursor);
@@ -656,6 +791,10 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
             mHamburger = new QMenu(this);
             mHamburger->addAction(mUI.chkSnap);
             mHamburger->addAction(mUI.chkShowGrid);
+            mHamburger->addAction(mUI.chkShowNormals);
+            mHamburger->addAction(mUI.chkShowVertices);
+            mHamburger->addAction(mUI.chkShowSurfaces);
+            mHamburger->addAction(mUI.chkShowBlueprint);
         }
         QPoint point;
         point.setX(0);
@@ -697,12 +836,16 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
 
     QString material;
     GetProperty(resource, "material", &material);
-    GetUserProperty(resource, "grid",         mUI.cmbGrid);
-    GetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
-    GetUserProperty(resource, "show_grid",    mUI.chkShowGrid);
-    GetUserProperty(resource, "widget",       mUI.widget);
-    GetUserProperty(resource, "splitter",     mUI.splitter);
-    GetUserProperty(resource, "kRandom",      mUI.kRandom);
+    GetUserProperty(resource, "grid",           mUI.cmbGrid);
+    GetUserProperty(resource, "snap_to_grid",   mUI.chkSnap);
+    GetUserProperty(resource, "show_grid",      mUI.chkShowGrid);
+    GetUserProperty(resource, "show_normals",   mUI.chkShowNormals);
+    GetUserProperty(resource, "show_vertices",  mUI.chkShowVertices);
+    GetUserProperty(resource, "show_surfaces",  mUI.chkShowSurfaces);
+    GetUserProperty(resource, "show_blueprint", mUI.chkShowBlueprint);
+    GetUserProperty(resource, "widget",         mUI.widget);
+    GetUserProperty(resource, "splitter",       mUI.splitter);
+    GetUserProperty(resource, "kRandom",        mUI.kRandom);
 
     SetValue(mUI.name, resource.GetName());
     SetValue(mUI.ID, mState.polygon.GetId());
@@ -743,6 +886,10 @@ void ShapeWidget::InitializeSettings(const UISettings& settings)
     SetValue(mUI.cmbGrid,     settings.grid);
     SetValue(mUI.chkSnap,     settings.snap_to_grid);
     SetValue(mUI.chkShowGrid, settings.show_grid);
+    SetValue(mUI.chkShowNormals,   true);
+    SetValue(mUI.chkShowBlueprint, true);
+    SetValue(mUI.chkShowVertices,  true);
+    SetValue(mUI.chkShowSurfaces,  true);
 }
 
 void ShapeWidget::InitializeContent()
@@ -804,6 +951,10 @@ bool ShapeWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Polygon", mUI.name);
     settings.SaveWidget("Polygon", mUI.chkShowGrid);
     settings.SaveWidget("Polygon", mUI.chkSnap);
+    settings.SaveWidget("Polygon", mUI.chkShowNormals);
+    settings.SaveWidget("Polygon", mUI.chkShowVertices);
+    settings.SaveWidget("Polygon", mUI.chkShowSurfaces);
+    settings.SaveWidget("Polygon", mUI.chkShowBlueprint);
     settings.SaveWidget("Polygon", mUI.cmbGrid);
     settings.SaveWidget("Polygon", mUI.widget);
     settings.SaveWidget("Polygon", mUI.splitter);
@@ -820,6 +971,10 @@ bool ShapeWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Polygon", mUI.name);
     settings.LoadWidget("Polygon", mUI.chkShowGrid);
     settings.LoadWidget("Polygon", mUI.chkSnap);
+    settings.LoadWidget("Polygon", mUI.chkShowNormals);
+    settings.LoadWidget("Polygon", mUI.chkShowVertices);
+    settings.LoadWidget("Polygon", mUI.chkShowSurfaces);
+    settings.LoadWidget("Polygon", mUI.chkShowBlueprint);
     settings.LoadWidget("Polygon", mUI.cmbGrid);
     settings.LoadWidget("Polygon", mUI.widget);
     settings.LoadWidget("Polygon", mUI.splitter);
@@ -980,12 +1135,16 @@ void ShapeWidget::on_actionSave_triggered()
 
     app::CustomShapeResource resource(mState.polygon, GetValue(mUI.name));
     SetProperty(resource, "material", (QString)GetItemId(mUI.blueprints));
-    SetUserProperty(resource, "grid",         mUI.cmbGrid);
-    SetUserProperty(resource, "snap_to_grid", mUI.chkSnap);
-    SetUserProperty(resource, "show_grid",    mUI.chkShowGrid);
-    SetUserProperty(resource, "widget",       mUI.widget);
-    SetUserProperty(resource, "splitter",     mUI.splitter);
-    SetUserProperty(resource, "kRandom",      mUI.kRandom);
+    SetUserProperty(resource, "grid",           mUI.cmbGrid);
+    SetUserProperty(resource, "snap_to_grid",   mUI.chkSnap);
+    SetUserProperty(resource, "show_grid",      mUI.chkShowGrid);
+    SetUserProperty(resource, "show_normals",   mUI.chkShowNormals);
+    SetUserProperty(resource, "show_vertices",  mUI.chkShowVertices);
+    SetUserProperty(resource, "show_surfaces",  mUI.chkShowSurfaces);
+    SetUserProperty(resource, "show_blueprint", mUI.chkShowBlueprint);
+    SetUserProperty(resource, "widget",         mUI.widget);
+    SetUserProperty(resource, "splitter",       mUI.splitter);
+    SetUserProperty(resource, "kRandom",        mUI.kRandom);
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.polygon.GetHash();
@@ -1002,6 +1161,11 @@ void ShapeWidget::on_actionNewTriangleFan_triggered()
     else if (mesh_type == MeshType::Simple2DShardEffectMesh)
     {
         using ToolType = AddVertex2DTriangleFanTool<gfx::ShardVertex2D>;
+        mMouseTool = std::make_unique<ToolType>(mState);
+    }
+    else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+    {
+        using ToolType = AddVertex2DTriangleFanTool<gfx::Perceptual3DVertex>;
         mMouseTool = std::make_unique<ToolType>(mState);
     } else BUG("Missing mesh type handling.");
 
@@ -1133,6 +1297,51 @@ void ShapeWidget::on_cmbMeshType_currentIndexChanged(int)
     CreateMeshBuilder();
 }
 
+void ShapeWidget::on_tableView_customContextMenuRequested(const QPoint& point)
+{
+    QMenu menu(this);
+
+    const auto mesh_type = GetMeshType();
+    if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+    {
+        const bool have_selection = mVertexIndex < mState.builder->GetVertexCount();
+        auto* set_normal_positive_x = menu.addAction("Orient normal to +X");
+        auto* set_normal_negative_x = menu.addAction("Orient normal to -X");
+        auto* set_normal_positive_y = menu.addAction("Orient normal to +Y");
+        auto* set_normal_negative_y = menu.addAction("Orient normal to -Y");
+        auto* set_normal_positive_z = menu.addAction("Orient normal to +Z");
+        auto* set_normal_negative_z = menu.addAction("Orient normal to -Z");
+        SetEnabled(set_normal_positive_x, have_selection);
+        SetEnabled(set_normal_negative_x, have_selection);
+        SetEnabled(set_normal_positive_y, have_selection);
+        SetEnabled(set_normal_negative_y, have_selection);
+        SetEnabled(set_normal_positive_z, have_selection);
+        SetEnabled(set_normal_negative_z, have_selection);
+
+        connect(set_normal_positive_x, &QAction::triggered, this, [this]() {
+            SetSelectedVertexNormal({1.0f, 0.0f, 0.0f});
+        });
+        connect(set_normal_negative_x, &QAction::triggered, this, [this]() {
+            SetSelectedVertexNormal({-1.0f, 0.0f, 0.0f});
+        });
+        connect(set_normal_positive_y, &QAction::triggered, this, [this]() {
+            SetSelectedVertexNormal({0.0f, 1.0f, 0.0f});
+        });
+        connect(set_normal_negative_y, &QAction::triggered, this, [this]() {
+            SetSelectedVertexNormal({0.0f, -1.0f, 0.0f});
+        });
+        // z axel handedness is swapped between reality and what user sees.
+        connect(set_normal_positive_z, &QAction::triggered, this, [this]() {
+            SetSelectedVertexNormal({0.0f, 0.0f, -1.0f});
+        });
+        connect(set_normal_negative_z, &QAction::triggered, this, [this]() {
+            SetSelectedVertexNormal({0.0f, 0.0f, 1.0f});
+        });
+    }
+
+    menu.exec(QCursor::pos());
+}
+
 void ShapeWidget::OnAddResource(const app::Resource* resource)
 {
     if (resource->GetType() != app::Resource::Type::Material)
@@ -1151,6 +1360,37 @@ void ShapeWidget::OnRemoveResource(const app::Resource* resource)
         mBlueprint.reset();
 }
 
+bool ShapeWidget::OnEscape()
+{
+    if (mMouseTool)
+    {
+        const auto widget_width  = mUI.widget->width() - Margin * 2;
+        const auto widget_height = mUI.widget->height() - Margin * 2;
+        const auto size = std::min(widget_width, widget_height);
+        const auto width  = static_cast<float>(size);
+        const auto height = static_cast<float>(size);
+
+        MouseTool::ViewState view;
+        view.width = width;
+        view.height = height;
+        view.snap = GetValue(mUI.chkSnap);
+        view.grid = GetValue(mUI.cmbGrid);
+        mMouseTool->CompleteTool(view);
+        mMouseTool.reset();
+
+        mUI.actionNewTriangleFan->setChecked(false);
+        mUI.actionClear->setEnabled(true);
+    }
+    else if (mVertexIndex < mState.builder->GetVertexCount())
+    {
+        mVertexIndex = 0xfffffff;
+        ClearSelection(mUI.tableView);
+    }
+    else return false;
+
+    return true;
+}
+
 void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 {
     const auto widget_width  = mUI.widget->width() - Margin * 2;
@@ -1160,17 +1400,163 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto yoffset = Margin + (widget_height - size) / 2;
     const auto width = static_cast<float>(size);
     const auto height = static_cast<float>(size);
-    painter.SetViewport(xoffset, yoffset, size, size);
-    painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width , height));
+    const auto mesh_type = GetMeshType();
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    // if we have some blueprint then use it on the background.
-    if (mBlueprint)
+    painter.SetViewport(xoffset, yoffset, size, size);
+    painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width, height));
+
+    std::unique_ptr<gfx::Painter> tile_painter;
+    glm::vec3 tile_base_size;
+    mPixelDistance2Dand3D.reset();
+
+    if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
     {
-        gfx::Transform view;
-        view.Resize(width, height);
-        painter.Draw(gfx::Rectangle(), view, *mBlueprint);
+        auto* device = painter.GetDevice();
+
+        const auto game_view = mesh_type == MeshType::Dimetric2DRenderMesh
+                                   ? engine::GameView::EnumValue::Dimetric
+                                   : engine::GameView::EnumValue::Isometric;
+
+        unsigned guide_texture_width  = 1024;
+        unsigned guide_texture_height = 1024;
+        std::string guide_texture_gpu_id = "DimetricGuide";
+        if (mBlueprint)
+        {
+            unsigned texture_width  = 0;
+            unsigned texture_height = 0;
+            if (FindExpectedDimetricGuideTextureSize(*mBlueprint, *device, &texture_width, &texture_height))
+            {
+                guide_texture_gpu_id = "DimetricGuide/" + mBlueprint->GetClassId();
+                const auto aspect = static_cast<float>(texture_width)/static_cast<float>(texture_height);
+                guide_texture_width = guide_texture_width * aspect;
+            }
+        }
+        /*
+        if (auto* guide_texture = RenderDimetricGuide(guide_texture_gpu_id, *device, guide_texture_width, guide_texture_height))
+        {
+            auto material = gfx::CreateMaterialFromTexture(guide_texture);
+            gfx::Transform model;
+            model.Resize(width, height);
+            painter.Draw(gfx::Rectangle(), model, material);
+        }
+        */
+
+        const auto ortho_left = static_cast<float>(guide_texture_width) / -2.0f;
+        const auto ortho_right = static_cast<float>(guide_texture_width) / 2.0f;
+        const auto ortho_bottom = 0.0f;
+        const auto ortho_top = static_cast<float>(guide_texture_height); // / 2.0f;
+
+        tile_painter = std::make_unique<gfx::Painter>();
+        tile_painter->SetDevice(painter.GetDevice());
+        tile_painter->SetViewport(painter.GetViewport());
+        tile_painter->SetSurfaceSize(painter.GetSurfaceSize());
+        tile_painter->SetPixelRatio({1.0f, 1.0f});
+        tile_painter->SetProjectionMatrix(glm::ortho(ortho_left, ortho_right, ortho_bottom, ortho_top, -10000.0f, 10000.0f));
+        tile_painter->SetViewMatrix(engine::CreateModelViewMatrix(game_view, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f));
+
+        // solve the size of the tile based on the Pythagoras theorem
+        // a² + b² = c²
+        // we know that the tile is a square so each side is equal length
+        // thus we have
+        //      2a² = c²
+        //       a² = c² / 2
+        // sqrt(a²) = sqrt(c²)/sqrt(2)
+        //        a = c/sqrt(2.0)
+        //
+        // we can figure out the hypotenuse for this equation by projecting
+        // a point from our scene space visible edge to the tile plane and
+        // doubling that distance.
+
+        const auto scene_edge_point = static_cast<float>(guide_texture_width) / 2.0f;
+        const auto tile_edge_point = engine::MapFromScenePlaneToTilePlane(glm::vec4 { scene_edge_point, 0.0f, 0.0f, 0.0f}, game_view);
+        const auto tile_hypotenuse = glm::length(tile_edge_point) * 2.0f;
+        const auto tile_size= static_cast<float>(tile_hypotenuse / std::sqrt(2.0));
+
+        auto checkerboard = gfx::CreateMaterialFromImage(res::Checkerboard);
+
+        tile_base_size = glm::vec3 { tile_size, tile_size, tile_size };
+
+        // ground reference
+        {
+            gfx::Transform tile;
+            tile.Resize(tile_base_size);
+            tile.MoveTo(-tile_size, -tile_size);
+            tile_painter->Draw(gfx::Rectangle(), tile, checkerboard);
+        }
+
+        // right back reference
+        {
+            gfx::Transform tile;
+            tile.Resize(tile_base_size);
+            tile.MoveTo(-tile_size, -tile_size);
+            tile.Push();
+                tile.RotateAroundX(gfx::FDegrees(-90.0f));
+
+            checkerboard.SetUniform("kBaseColor", gfx::Color::Green);
+            tile_painter->Draw(gfx::Rectangle(), tile, checkerboard, gfx::Painter::Culling::None);
+        }
+
+        // left back reference
+        {
+            gfx::Transform tile;
+            tile.Resize(tile_base_size);
+            tile.MoveTo(-tile_size, -tile_size);
+            tile.Push();
+                tile.RotateAroundY(gfx::FDegrees(90.0f));
+
+            checkerboard.SetUniform("kBaseColor", gfx::Color::Red);
+            tile_painter->Draw(gfx::Rectangle(), tile, checkerboard, gfx::Painter::Culling::None);
+        }
+
+        // unit cube that should completely obscure the tile floor and the back walls.
+        if (false)
+        {
+            gfx::Transform tile;
+            tile.Resize(tile_base_size);
+            tile.MoveTo(-tile_size, -tile_size);
+
+            checkerboard.SetUniform("kBaseColor", gfx::Color::White);
+            tile_painter->Draw(gfx::Cube(), tile, checkerboard);
+        }
+
+        // putting this computation here since conveniently we have the matrices
+        // available here for doing the mathy stuff.
+        if (mVertexIndex < mState.builder->GetVertexCount())
+        {
+            using BuilderType = gfx::tool::PolygonBuilder<gfx::Perceptual3DVertex>;
+            const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
+            const auto& vertex = builder->GetVertex(mVertexIndex);
+
+            const auto& projection_matrix_2d = painter.GetProjMatrix();
+            const auto& projection_matrix_3d = tile_painter->GetProjMatrix();
+            const auto& view_matrix_3d = tile_painter->GetViewMatrix();
+
+            const auto vertex_2d_clip_space = projection_matrix_2d * glm::vec4 {
+                width * vertex.aPosition.x, height * -vertex.aPosition.y, 0.0f, 1.0f };
+
+            const auto vertex_3d_clip_space = projection_matrix_3d * view_matrix_3d * glm::vec4 {
+                -tile_base_size.x + vertex.aLocalOffset.x * tile_base_size.x,
+                -tile_base_size.y + vertex.aLocalOffset.y * tile_base_size.y,
+                                    vertex.aLocalOffset.z * tile_base_size.z, 1.0f };
+            //DEBUG("%1 vs %2", vertex_2d_clip_space, vertex_3d_clip_space);
+            // now both vertices are in clip space, map to pixel distances.
+            const auto horizontal_distance_pixels = std::abs(vertex_2d_clip_space.x - vertex_3d_clip_space.x) * width * 0.5;
+            const auto vertical_distance_pixels = std::abs(vertex_2d_clip_space.y - vertex_3d_clip_space.y) * width * 0.5;
+            const auto pixel_distance = std::sqrt(horizontal_distance_pixels*horizontal_distance_pixels +
+                                                  vertical_distance_pixels*vertical_distance_pixels);
+            mPixelDistance2Dand3D = pixel_distance;
+            //DEBUG("Pixel distance between points = %1", static_cast<int>(pixel_distance));
+        }
+    }
+
+    // if we have some blueprint then use it on the background.
+    if (GetValue(mUI.chkShowBlueprint) && mBlueprint)
+    {
+        gfx::Transform model;
+        model.Resize(width, height);
+        painter.Draw(gfx::Rectangle(), model, *mBlueprint);
     }
 
     if (GetValue(mUI.chkShowGrid))
@@ -1198,6 +1584,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
     // draw the polygon we're working on
+    if (GetValue(mUI.chkShowSurfaces))
     {
         // hack hack if we have the main window preview window displaying this
         // same custom shape then we have a competition of hash values used
@@ -1227,12 +1614,14 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     }
 
     // visualize the vertices.
+    if (GetValue(mUI.chkShowVertices))
     {
-        const auto mesh_type = GetMeshType();
         if (mesh_type == MeshType::Simple2DRenderMesh)
             PaintVertices2D<gfx::Vertex2D>(painter);
         else if (mesh_type == MeshType::Simple2DShardEffectMesh)
             PaintVertices2D<gfx::ShardVertex2D>(painter);
+        else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+            PaintVertices25D<gfx::Perceptual3DVertex>(tile_base_size, painter, *tile_painter.get());
         else BUG("Missing mesh type handling.");
     }
 
@@ -1247,31 +1636,33 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         mMouseTool->DrawTool(painter, view);
     }
 
+    const auto actual_width  = static_cast<float>(mUI.widget->width());
+    const auto actual_height = static_cast<float>(mUI.widget->height());
+    painter.SetViewport(0.0f, 0.0f, actual_width, actual_height);
+    painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(actual_width, actual_height));
+
     if (mMouseTool && painter.GetErrorCount() == 0)
     {
-        const auto width  = static_cast<float>(mUI.widget->width());
-        const auto height = static_cast<float>(mUI.widget->height());
-        painter.SetViewport(0.0f, 0.0f, width, height);
-        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width, height));
-
         mMouseTool->DrawHelp(painter);
     }
 
     if (painter.GetErrorCount())
     {
-        const auto width  = static_cast<float>(mUI.widget->width());
-        const auto height = static_cast<float>(mUI.widget->height());
-        painter.SetViewport(0.0, 0.0, width, height);
-        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width, height));
-
         ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
         ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
-
         if (mShaderEditor)
             mShaderEditor->ShowError("Shader compile error");
     }
     else
     {
+        if (mPixelDistance2Dand3D)
+        {
+            const auto px_diff = static_cast<int>(mPixelDistance2Dand3D.value());
+            ShowMessage("Use mouse wheel + keys 'x', 'y' and 'z' to adjust 3D point", gfx::FPoint(10.0f, 10.0f), painter);
+            ShowMessage(base::FormatString("Point difference %1 px", px_diff), gfx::FPoint(10.0f, 30.0f), painter);
+            if (px_diff == 0)
+                ShowMessage("POINT SET", gfx::FPoint(10.0f, 50.0f), painter);
+        }
         if (mShaderEditor)
             mShaderEditor->ClearError();
     }
@@ -1296,6 +1687,8 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
             PickVertex2D<gfx::Vertex2D>(point, width, height);
         else if (mesh_type == MeshType::Simple2DShardEffectMesh)
             PickVertex2D<gfx::ShardVertex2D>(point, width, height);
+        else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+            PickVertex2D<gfx::Perceptual3DVertex>(point, width, height);
         else BUG("Unhandled mesh type.");
     }
     if (mMouseTool)
@@ -1392,32 +1785,28 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
         InsertVertex2D<gfx::Vertex2D>(point, width, height);
     else if (mesh_type == MeshType::Simple2DShardEffectMesh)
         InsertVertex2D<gfx::ShardVertex2D>(point, width, height);
+    else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+        InsertVertex2D<gfx::Perceptual3DVertex>(point, width, height);
     else BUG("Missing mesh type handling.");
+}
+
+void ShapeWidget::OnMouseWheel(QWheelEvent* wheel)
+{
+    if (mVertexIndex >= mState.builder->GetVertexCount())
+        return;
+
+    const auto mesh_type = GetMeshType();
+    if (mesh_type == MeshType::Isometric2DRenderMesh || mesh_type == MeshType::Dimetric2DRenderMesh)
+        return HandleWheelEvent<gfx::Perceptual3DVertex>(wheel);
 }
 
 bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
 {
-    const auto widget_width  = mUI.widget->width() - Margin * 2;
-    const auto widget_height = mUI.widget->height() - Margin * 2;
-    const auto size = std::min(widget_width, widget_height);
-    const auto width  = static_cast<float>(size);
-    const auto height = static_cast<float>(size);
-
-    if (key->key() == Qt::Key_Escape && mMouseTool)
+    if (key->key() == Qt::Key_Escape)
     {
-        MouseTool::ViewState view;
-        view.width = width;
-        view.height = height;
-        view.snap = GetValue(mUI.chkSnap);
-        view.grid = GetValue(mUI.cmbGrid);
-        mMouseTool->CompleteTool(view);
-        mMouseTool.reset();
-
-        mUI.actionNewTriangleFan->setChecked(false);
-        mUI.actionClear->setEnabled(true);
+        OnEscape();
     }
-    else if (key->key() == Qt::Key_Delete ||
-             key->key() == Qt::Key_D)
+    else if (key->key() == Qt::Key_Delete || key->key() == Qt::Key_D)
     {
         if (mVertexIndex < mState.builder->GetVertexCount())
         {
@@ -1433,7 +1822,26 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
     {
 
     }
+    else if (key->key() == Qt::Key_X)
+        mHotkeysPressed.insert(Hotkey::KeyX);
+    else if (key->key() == Qt::Key_Y)
+        mHotkeysPressed.insert(Hotkey::KeyY);
+    else if (key->key() == Qt::Key_Z)
+        mHotkeysPressed.insert(Hotkey::KeyZ);
     else  return false;
+
+    return true;
+}
+
+bool ShapeWidget::OnKeyReleaseEvent(QKeyEvent* key)
+{
+    if (key->key() == Qt::Key_X)
+        mHotkeysPressed.erase(Hotkey::KeyX);
+    else if (key->key() == Qt::Key_Y)
+        mHotkeysPressed.erase(Hotkey::KeyY);
+    else if (key->key() == Qt::Key_Z)
+        mHotkeysPressed.erase(Hotkey::KeyZ);
+    else return false;
 
     return true;
 }
@@ -1483,12 +1891,98 @@ void ShapeWidget::PaintVertices2D(gfx::Painter& painter) const
 }
 
 template<typename VertexType>
+void ShapeWidget::PaintVertices25D(const glm::vec3& tile_base_size,
+                                   gfx::Painter& painter, gfx::Painter& tile_painter) const
+{
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+
+    const auto widget_width  = mUI.widget->width() - Margin * 2;
+    const auto widget_height = mUI.widget->height() - Margin * 2;
+    const auto size = std::min(widget_width, widget_height);
+    const auto width = static_cast<float>(size);
+    const auto height = static_cast<float>(size);
+    const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
+
+    const bool show_normals = GetValue(mUI.chkShowNormals);
+
+    for (size_t i = 0; i < mState.builder->GetVertexCount(); ++i)
+    {
+        const auto& vertex = builder->GetVertex(i);
+        const auto x = width * vertex.aPosition.x;
+        const auto y = height * -vertex.aPosition.y;
+
+        gfx::Transform model;
+        model.Resize(15, 15);
+        model.MoveTo(x, y);
+        model.Translate(-7.5, -7.5);
+
+        if (mVertexIndex == i)
+        {
+            painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+
+            // local offset is normalized and expressed in multiples of the tile size.
+            // so always remember to multiple the local offset by the desired tile size
+            // to express the coordinate in the current tile space units.
+            const auto& local_offset = gfx::ToVec(vertex.aLocalOffset);
+
+            gfx::Transform tile_vertex;
+            tile_vertex.Resize(10.0f, 10.0f, 10.0f);
+            tile_vertex.MoveTo(-tile_base_size.x, -tile_base_size.y, 0.0f);
+            tile_vertex.Translate(tile_base_size * local_offset);
+            //tile_painter.Draw(gfx::Sphere(), tile_vertex, gfx::CreateMaterialFromColor(gfx::Color::White));
+
+            gfx::Transform line;
+            line.MoveTo(-tile_base_size.x, -tile_base_size.y, 0.0f);
+            tile_painter.Draw(gfx::LineBatch3D(
+                { local_offset.x * tile_base_size.x, 0.0f, local_offset.z * tile_base_size.z },
+                { local_offset.x * tile_base_size.x, tile_base_size.y, local_offset.z * tile_base_size.z }), line,
+                gfx::CreateMaterialFromColor(gfx::Color::Green), 2.0f);
+
+            tile_painter.Draw(gfx::LineBatch3D(
+                { 0.0f, local_offset.y * tile_base_size.y, local_offset.z * tile_base_size.z },
+                { tile_base_size.x, local_offset.y * tile_base_size.y, local_offset.z * tile_base_size.z }), line,
+                gfx::CreateMaterialFromColor(gfx::Color::Red), 2.0f);
+
+
+            if (!mMouseTool)
+            {
+                const auto time = fmod(base::GetTime(), 1.5) / 1.5;
+                const auto size = 15.0f + time * 50.0f;
+                gfx::Transform model;
+                model.Resize(size, size);
+                model.MoveTo(x, y);
+                model.Translate(-size*0.5f, -size*0.5f);
+                painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+            }
+        }
+        else
+        {
+            painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+        }
+        if (show_normals)
+        {
+            const auto normal = glm::normalize(gfx::ToVec(vertex.aWorldNormal));
+            const auto offset = gfx::ToVec(vertex.aLocalOffset);
+            const auto line_point_a = glm::vec3 { -tile_base_size.x, -tile_base_size.y, 0.0f } +
+                                      tile_base_size * offset;
+            const auto line_point_b = line_point_a + normal * 50.0f;
+            gfx::Transform model;
+            tile_painter.Draw(gfx::LineBatch3D(line_point_a, line_point_b), model,
+                gfx::CreateMaterialFromColor(gfx::Color::HotPink), 5.0f);
+        }
+    }
+}
+
+
+template<typename VertexType>
 void ShapeWidget::PickVertex2D(const QPoint& pick_point, float width, float height)
 {
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
     using ToolType = MoveVertex2DTool<VertexType>;
 
     const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
+
+    const auto current_index = mVertexIndex;
 
     // select a vertex based on proximity to the click point.
     for (size_t i=0; i<mState.builder->GetVertexCount(); ++i)
@@ -1501,7 +1995,11 @@ void ShapeWidget::PickVertex2D(const QPoint& pick_point, float width, float heig
         if (l <= 10)
         {
             mVertexIndex = i;
-            mMouseTool = std::make_unique<ToolType>(mState, mVertexIndex);
+            // only start the vertex move tool if clicking on the previously
+            // selected vertex.this reduces accidental vertex moves on tool
+            // activation when the goal was to actually pick a different vertex.
+            if (current_index == mVertexIndex)
+                mMouseTool = std::make_unique<ToolType>(mState, mVertexIndex);
             SelectRow(mUI.tableView, mVertexIndex);
             break;
         }
@@ -1573,6 +2071,51 @@ void ShapeWidget::InsertVertex2D(const QPoint& click_point, float width, float h
     else mState.table->InsertVertex(vertex, cmd_vertex_index, cmd_index);
 }
 
+template<typename VertexType>
+void ShapeWidget::HandleWheelEvent(const QWheelEvent* wheel)
+{
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+
+    auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
+
+    const QPoint& num_degrees = wheel->angleDelta() / 8;
+    const QPoint& num_steps = num_degrees / 15;
+
+    const auto mods = wheel->modifiers();
+
+    float step = 0.1f;
+    if (mPixelDistance2Dand3D.has_value())
+    {
+        const auto px_diff = static_cast<int>(mPixelDistance2Dand3D.value());
+        if (px_diff < 50)
+            step = 0.05f;
+        if (px_diff < 20)
+            step = 0.01f;
+        if (px_diff < 5)
+            step = 0.005f;
+    }
+    if (mods & Qt::ShiftModifier)
+        step /= 2.0f;
+
+    const auto d = -step * num_steps.y();
+
+    auto& vertex = builder->GetVertex(mVertexIndex);
+
+    if (base::Contains(mHotkeysPressed, Hotkey::KeyX))
+        vertex.aLocalOffset.x += d;
+    else if (base::Contains(mHotkeysPressed, Hotkey::KeyY))
+        vertex.aLocalOffset.y += d;
+    else if (base::Contains(mHotkeysPressed, Hotkey::KeyZ))
+        vertex.aLocalOffset.z += d;
+
+    vertex.aLocalOffset.x = math::clamp(0.0f, 1.0f, vertex.aLocalOffset.x);
+    vertex.aLocalOffset.y = math::clamp(0.0f, 1.0f, vertex.aLocalOffset.y);
+    if (vertex.aLocalOffset.z > 0.0f)
+        vertex.aLocalOffset.z = 0.0f;
+
+    mState.table->RefreshVertex(mVertexIndex);
+}
+
 ShapeWidget::MeshType ShapeWidget::GetMeshType() const
 {
     const auto type = mState.polygon.GetMeshType();
@@ -1580,6 +2123,10 @@ ShapeWidget::MeshType ShapeWidget::GetMeshType() const
         return MeshType::Simple2DRenderMesh;
     else if (type == gfx::PolygonMeshClass::MeshType::Simple2DShardEffectMesh)
         return MeshType::Simple2DShardEffectMesh;
+    else if (type == gfx::PolygonMeshClass::MeshType::Dimetric2DRenderMesh)
+        return MeshType::Dimetric2DRenderMesh;
+    else if (type == gfx::PolygonMeshClass::MeshType::Isometric2DRenderMesh)
+        return MeshType::Isometric2DRenderMesh;
     else BUG("Unhandled mesh type.");
     return MeshType::Simple2DRenderMesh;
 }
@@ -1598,7 +2145,18 @@ void ShapeWidget::SetMeshType(MeshType mesh_type)
         mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DShardEffectMesh);
         mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::ShardVertex2D>());
 
-    } else BUG("Unhandled mesh type.");
+    }
+    else if (mesh_type == MeshType::Dimetric2DRenderMesh)
+    {
+        mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Dimetric2DRenderMesh);
+        mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Perceptual3DVertex>());
+    }
+    else if (mesh_type == MeshType::Isometric2DRenderMesh)
+    {
+        mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Isometric2DRenderMesh);
+        mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Perceptual3DVertex>());
+    }
+    else BUG("Unhandled mesh type.");
 }
 
 void ShapeWidget::CreateMeshBuilder()
@@ -1615,7 +2173,13 @@ void ShapeWidget::CreateMeshBuilder()
         mState.builder = std::make_unique<gfx::tool::PolygonBuilderShard2D>();
         mState.table   = std::make_unique<VertexDataTable>(*mState.builder, mState.polygon);
 
-    } else BUG("Unhandled mesh type.");
+    }
+    else if (type == MeshType::Dimetric2DRenderMesh || type == MeshType::Isometric2DRenderMesh)
+    {
+        mState.builder = std::make_unique<gfx::tool::PolygonBuilderPerceptual3D>();
+        mState.table   = std::make_unique<VertexDataTable>(*mState.builder, mState.polygon);
+    }
+    else BUG("Unhandled mesh type.");
 
     mUI.tableView->setModel(mState.table.get());
     // Adwaita theme bugs out and doesn't show the data without this
@@ -1629,5 +2193,21 @@ void ShapeWidget::CreateMeshBuilder()
         });
 }
 
+void ShapeWidget::SetSelectedVertexNormal(const glm::vec3& normal)
+{
+    if (mVertexIndex >= mState.builder->GetVertexCount())
+        return;
+
+    const auto mesh_type = GetMeshType();
+    if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+    {
+        using BuilderType = gfx::tool::PolygonBuilder<gfx::Perceptual3DVertex>;
+        auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
+        auto& vertex = builder->GetVertex(mVertexIndex);
+        vertex.aWorldNormal = gfx::ToVec(normal);
+
+        mState.table->RefreshVertex(mVertexIndex);
+    }
+}
 
 } // namespace

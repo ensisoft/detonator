@@ -338,6 +338,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::CustomContextMenu</enum>
+        </property>
         <property name="editTriggers">
          <set>QAbstractItemView::DoubleClicked</set>
         </property>
@@ -593,6 +596,41 @@
    </property>
    <property name="toolTip">
     <string>Toggle whether to snap vertices to the grid or not</string>
+   </property>
+  </action>
+  <action name="chkShowNormals">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show normals</string>
+   </property>
+   <property name="toolTip">
+    <string>Show normals (where applicable)</string>
+   </property>
+  </action>
+  <action name="chkShowBlueprint">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show material blueprint</string>
+   </property>
+  </action>
+  <action name="chkShowVertices">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show vertices</string>
+   </property>
+  </action>
+  <action name="chkShowSurfaces">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show surfaces</string>
    </property>
   </action>
  </widget>

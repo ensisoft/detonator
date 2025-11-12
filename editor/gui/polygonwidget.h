@@ -20,11 +20,14 @@
 
 #include "warnpush.h"
 #  include "ui_polygonwidget.h"
+#  include <glm/vec3.hpp>
 #  include <QMenu>
 #include "warnpop.h"
 
 #include <vector>
 #include <memory>
+#include <unordered_set>
+#include <optional>
 
 #include "editor/gui/mainwidget.h"
 #include "editor/app/workspace.h"
@@ -43,7 +46,9 @@ namespace gui
     public:
         enum class MeshType {
             Simple2DRenderMesh,
-            Simple2DShardEffectMesh
+            Simple2DShardEffectMesh,
+            Dimetric2DRenderMesh,
+            Isometric2DRenderMesh
         };
 
         explicit ShapeWidget(app::Workspace* workspace);
@@ -69,6 +74,7 @@ namespace gui
         bool GetStats(Stats* stats) const override;
         void OnAddResource(const app::Resource* resource) override;
         void OnRemoveResource(const app::Resource* resource) override;
+        bool OnEscape() override;
 
     private slots:
         void on_widgetColor_colorChanged(const QColor& color);
@@ -85,6 +91,7 @@ namespace gui
         void on_btnResetBlueprint_clicked();
         void on_staticInstance_stateChanged(int);
         void on_cmbMeshType_currentIndexChanged(int);
+        void on_tableView_customContextMenuRequested(const QPoint& point);
 
     private:
         void PaintScene(gfx::Painter& painter, double secs);
@@ -92,10 +99,16 @@ namespace gui
         void OnMouseRelease(QMouseEvent* mickey);
         void OnMouseMove(QMouseEvent* mickey);
         void OnMouseDoubleClick(QMouseEvent* mickey);
+        void OnMouseWheel(QWheelEvent* wheel);
         bool OnKeyPressEvent(QKeyEvent* key);
+        bool OnKeyReleaseEvent(QKeyEvent* key);
 
         template<typename Vertex>
         void PaintVertices2D(gfx::Painter& painter) const;
+
+        template<typename Vertex>
+        void PaintVertices25D(const glm::vec3& tile_base_size,
+            gfx::Painter& painter, gfx::Painter& tile_painter) const;
 
         template<typename Vertex>
         void PickVertex2D(const QPoint& pick_point, float width, float height);
@@ -103,9 +116,13 @@ namespace gui
         template<typename Vertex>
         void InsertVertex2D(const QPoint& click_point, float width, float height);
 
+        template<typename Vertex>
+        void HandleWheelEvent(const QWheelEvent* wheel);
+
         MeshType GetMeshType() const;
         void SetMeshType(MeshType mesh);
         void CreateMeshBuilder();
+        void SetSelectedVertexNormal(const glm::vec3& normal);
 
     private:
         Ui::ShapeWidget mUI;
@@ -115,6 +132,11 @@ namespace gui
         class MouseTool;
         template<typename T> class AddVertex2DTriangleFanTool;
         template<typename T> class MoveVertex2DTool;
+
+        enum class Hotkey {
+            None, KeyX, KeyY, KeyZ
+        };
+        std::unordered_set<Hotkey> mHotkeysPressed;
 
         enum class GridDensity {
             Grid10x10 = 10,
@@ -147,6 +169,7 @@ namespace gui
         double mTime = 0.0f;
         // Index of the currently selected vertex.
         std::size_t mVertexIndex = 0xffffff;
+        std::optional<float> mPixelDistance2Dand3D;
     private:
         // the original hash value that is used to
         // check against if there are unsaved changes.
