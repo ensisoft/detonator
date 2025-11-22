@@ -153,6 +153,12 @@ private:
 #define TEST_MESSAGE(msg, ...) \
     test::Print(test::Color::Message, "%s (%d): '" msg "'\n", __FUNCTION__, __LINE__, ## __VA_ARGS__); \
 
+#define TEST_FAIL(msg)                                                                     \
+    do {                                                                                   \
+        test::Print(test::Color::Message, "%s (%d): '" msg "'\n", __FUNCTION__, __LINE__); \
+        test::BlurpFailure(msg, __FILE__, __FUNCTION__, __LINE__, true);                 \
+   } while(0)
+
 #define TEST_EXCEPTION(expr)                                                        \
     do {                                                                            \
         bool have_exception = false;                                                \
