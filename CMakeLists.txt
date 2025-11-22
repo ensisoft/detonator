@@ -1063,6 +1063,8 @@ install(TARGETS audio_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/audio/test/")
 # graphics test application. Uses the graphics APIs to draw stuff.
 # needs DETERMINISTIC_RANDOM flag
 add_executable(graphics_test
+    base/wavefront.cpp
+    graphics/wavefront_mesh.cpp
     graphics/test/main.cpp
 )
 target_include_directories(graphics_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/test")

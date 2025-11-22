@@ -50,6 +50,7 @@
 #include "graphics/shader_programs.h"
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
+#include "graphics/wavefront_mesh.h"
 #include "graphics/particle_engine.h"
 #include "graphics/tilebatch.h"
 #include "graphics/linebatch.h"
@@ -3488,6 +3489,58 @@ private:
     std::unique_ptr<gfx::Drawable> mDrawable;
 };
 
+class WavefrontMeshTest : public GraphicsTest
+{
+public:
+    void Render(gfx::Painter& painter) override
+    {
+        constexpr auto const aspect = 1024.0 / 768.0f;
+
+        gfx::Painter p(painter);
+        p.ResetViewMatrix();
+        p.SetProjectionMatrix(gfx::MakePerspectiveProjection(gfx::FDegrees { 45.0f }, aspect, 1.0f, 100.0f));
+
+        gfx::BasicLightProgram program;
+        gfx::BasicLightProgram::Light light;
+        light.type = gfx::BasicLightProgram::LightType::Directional;
+        light.ambient_color  = gfx::Color4f(gfx::Color::Red) * 0.5;
+        light.diffuse_color  = gfx::Color4f(gfx::Color::White);
+        light.specular_color = gfx::Color4f(gfx::Color::Black);
+        light.view_position  = glm::vec3 { 1.0f, 5.0f, 0.0f };
+        light.view_direction = glm::vec3 { 0.0f, -1.0f, 0.0f };
+        light.quadratic_attenuation = 0.005f;
+        program.AddLight(light);
+
+        gfx::Painter::DrawState state;
+        state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
+        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.write_color  = true;
+
+        gfx::Transform transform;
+        transform.Resize(5.0f, 5.0f, 5.0f);
+        transform.RotateAroundY(base::FDegrees(180.0f));
+        transform.RotateAroundY(std::sin(mTime));
+        transform.RotateAroundX(std::cos(mTime));
+        transform.MoveTo(0.0f, 0.0f, -10.0f);
+        p.Draw(gfx::WavefrontMesh("models/bear3.obj"), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+    }
+    void Update(float dt) override
+    {
+        mTime += dt;
+    }
+    void Start() override
+    {
+        mTime = 0.0f;
+    }
+    std::string GetName() const override
+    {
+        return "WavefrontMeshTest";
+    }
+private:
+    float mTime = 0.0f;
+};
+
 
 class BasicFog3DTest : public GraphicsTest
 {
@@ -4524,6 +4577,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new DepthLayerTest);
     tests.emplace_back(new OrthoDepthTest);
     tests.emplace_back(new MeshExplosionTest);
+    tests.emplace_back(new WavefrontMeshTest);
 
     // GL ES3 specific tests
     if (version == 3)

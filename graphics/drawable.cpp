@@ -37,7 +37,8 @@ DrawCategory DrawableClass::MapDrawableCategory(Type type)
              type == Type::EffectsDrawable ||
              type == Type::LineBatch3D ||
              type == Type::LineBatch2D ||
-             type == Type::GuideGrid)
+             type == Type::GuideGrid ||
+             type == Type::Other)
         return DrawCategory::Basic;
     BUG("Bug on draw category mapping based on drawable type.");
     return DrawCategory::Basic;

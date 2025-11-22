@@ -74,7 +74,8 @@ namespace gfx
             SimpleShape,
             GuideGrid,
             DebugDrawable,
-            EffectsDrawable
+            EffectsDrawable,
+            Other
         };
         enum class MeshType {
             NormalRenderMesh,
