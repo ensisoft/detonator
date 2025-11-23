@@ -32,6 +32,7 @@
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
 #include "editor/gui/tool.h"
+#include "editor/gui/drawing.h"
 #include "game/entity.h"
 #include "engine/renderer.h"
 
@@ -125,6 +126,9 @@ namespace gui
         void on_actionNewCylinder_triggered();
         void on_actionNewPyramid_triggered();
         void on_actionNewSphere_triggered();
+        void on_actionSelectObject_triggered();
+        void on_actionRotateObject_triggered();
+        void on_actionTranslateObject_triggered();
 
         void on_actionNodeDelete_triggered();
         void on_actionNodeCut_triggered();
@@ -377,6 +381,9 @@ namespace gui
         void RebuildCombos();
         void RebuildCombosInternal();
         void UpdateDeletedResourceReferences();
+        void SelectTile();
+        void UpdateGizmos();
+        bool CurrentDrawableIs3D() const;
         game::EntityNodeClass* GetCurrentNode();
         const game::EntityNodeClass* GetCurrentNode() const;
         size_t ComputeHash() const;
@@ -400,6 +407,7 @@ namespace gui
 
         UIAnimator mAnimator;
     private:
+        class Transform3DTool;
         class SplineTool;
         class JointTool;
         class PlaceRigidBodyTool;
@@ -409,9 +417,11 @@ namespace gui
         class ScriptVarModel;
         class JointModel;
         class SplineModel;
+
         enum class PlayState {
             Playing, Paused, Stopped
         };
+
         struct State {
             SplineModel* spline_model = nullptr;
             // shared with the animation track widget.
@@ -447,6 +457,9 @@ namespace gui
         // the entity preview window if any.
         std::unique_ptr<PlayWindow> mPreview;
         bool mViewerMode = false;
+
+        TransformGizmo3D mTransformGizmo = TransformGizmo3D::None;
+        TransformHandle3D mTransformHandle = TransformHandle3D::None;
     };
 
     QString GenerateEntityScriptSource(QString entity);

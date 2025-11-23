@@ -39,6 +39,7 @@
 #include "base/assert.h"
 #include "base/format.h"
 #include "base/math.h"
+#include "base/utility.h"
 #include "data/json.h"
 #include "game/treeop.h"
 #include "game/entity_class.h"
@@ -565,6 +566,97 @@ private:
     }
 private:
     EntityWidget::State& mState;
+};
+
+class EntityWidget::Transform3DTool : public MouseTool
+{
+public:
+    explicit Transform3DTool(TransformGizmo3D gizmo, TransformHandle3D handle,
+        gui::EntityWidget::State& state, game::EntityNodeClass* node, bool shift)
+      : mTransformGizmo(gizmo)
+        , mTransformHandle(handle)
+        , mState(state)
+        , mNode(node)
+        , mShiftKey(shift)
+    {}
+    void Render(gfx::Painter&, gfx::Painter&) const override
+    {
+        const auto time_now = base::GetTime();
+        const auto time_elapsed = time_now - mTime;
+        auto* drawable = mNode->GetDrawable();
+
+        if (mTransformGizmo == TransformGizmo3D::Translate)
+        {
+            const auto velocity = mShiftKey ? -200.0f : 200.0f; // units per second
+            auto offset = drawable->GetOffset();
+            if (mTransformHandle == TransformHandle3D::XAxis)
+                offset.x += velocity * time_elapsed;
+            else if (mTransformHandle == TransformHandle3D::YAxis)
+                offset.y += velocity * time_elapsed;
+            else if (mTransformHandle == TransformHandle3D::ZAxis)
+                offset.z += velocity * time_elapsed;
+
+            drawable->SetOffset(offset);
+        }
+        else if (mTransformGizmo == TransformGizmo3D::Rotate)
+        {
+            const auto velocity = mShiftKey ? -90.0f : 90.0f; // degrees per second
+
+            auto rotator = drawable->GetRotator();
+            auto [x, y, z] = rotator.GetEulerAngles();
+            auto deg_x = x.ToDegrees();
+            auto deg_y = y.ToDegrees();
+            auto deg_z = z.ToDegrees();
+            if (mTransformHandle == TransformHandle3D::XAxis)
+                deg_x += velocity * time_elapsed;
+            else if (mTransformHandle == TransformHandle3D::YAxis)
+                deg_y += velocity * time_elapsed;
+            else if (mTransformHandle == TransformHandle3D::ZAxis)
+                deg_z += velocity * time_elapsed;
+
+            deg_x = math::clamp(-180.0f, 180.0f, deg_x);
+            deg_y = math::clamp(-180.0f, 180.0f, deg_y);
+            deg_z = math::clamp(-180.0f, 180.0f, deg_z);
+            drawable->SetRotator(base::Rotator::FromEulerXYZ(base::FDegrees(deg_x), base::FDegrees(deg_y), base::FDegrees(deg_z)));
+        }
+
+        mTime = time_now;
+    }
+    void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
+    {
+        mTime = base::GetTime();
+        if (mTransformHandle == TransformHandle3D::Reset)
+        {
+            auto* drawable = mNode->GetDrawable();
+            if (mTransformGizmo == TransformGizmo3D::Translate)
+                drawable->SetOffset(glm::vec3{0.0f, 0.0f, 0.0f});
+            else if (mTransformGizmo == TransformGizmo3D::Rotate)
+                drawable->SetRotator(game::Rotator());
+        }
+    }
+    bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
+    {
+        return true;
+    }
+    void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
+    {}
+    bool KeyPress(QKeyEvent* key) override
+    {
+        if (key->key() == Qt::Key_Shift)
+        {
+            mShiftKey = !mShiftKey;
+            return true;
+        }
+        return false;
+    }
+
+private:
+    const TransformGizmo3D mTransformGizmo = TransformGizmo3D::None;
+    const TransformHandle3D mTransformHandle = TransformHandle3D::None;
+    EntityWidget::State& mState;
+    game::EntityNodeClass* mNode = nullptr;
+    mutable double mTime = 0.0;
+    bool mShiftKey = true;
 };
 
 class EntityWidget::SplineTool : public MouseTool
@@ -1687,6 +1779,10 @@ void EntityWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionPreview);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
+    bar.addSeparator();
+    bar.addAction(mUI.actionSelectObject);
+    bar.addAction(mUI.actionRotateObject);
+    bar.addAction(mUI.actionTranslateObject);
 }
 
 void EntityWidget::AddActions(QMenu& menu)
@@ -2199,7 +2295,12 @@ bool EntityWidget::OnEscape()
     }
     else if (const auto* node = GetCurrentNode())
     {
-        if (const auto* spline = node->GetSplineMover())
+        if (mTransformGizmo != TransformGizmo3D::None)
+        {
+            mTransformGizmo = TransformGizmo3D::None;
+            UpdateGizmos();
+        }
+        else if (const auto* spline = node->GetSplineMover())
         {
             const auto row = GetSelectedRow(mUI.splinePointView);
             if (row != -1)
@@ -2514,6 +2615,54 @@ void EntityWidget::on_actionNewSphere_triggered()
 
     UncheckPlacementActions();
     mUI.actionNewSphere->setChecked(true);
+}
+
+void EntityWidget::on_actionSelectObject_triggered()
+{
+    mTransformGizmo = TransformGizmo3D::None;
+    UpdateGizmos();
+}
+
+void EntityWidget::on_actionRotateObject_triggered()
+{
+    if (CurrentDrawableIs3D())
+    {
+        if (mTransformGizmo == TransformGizmo3D::Rotate)
+        {
+            mTransformGizmo = TransformGizmo3D::None;
+        }
+        else
+        {
+            mTransformGizmo = TransformGizmo3D::Rotate;
+            NOTE("Activate 3D model rotate tool.");
+        }
+    }
+    else
+    {
+        NOTE("The selected object doesn't have a 3D drawable.");
+    }
+    UpdateGizmos();
+}
+
+void EntityWidget::on_actionTranslateObject_triggered()
+{
+    if (CurrentDrawableIs3D())
+    {
+        if (mTransformGizmo == TransformGizmo3D::Translate)
+        {
+            mTransformGizmo = TransformGizmo3D::None;
+        }
+        else
+        {
+            mTransformGizmo = TransformGizmo3D::Translate;
+            NOTE("Activate 3D model translate tool.");
+        }
+    }
+    else
+    {
+        NOTE("The selected object doesn't have a 3D drawable.");
+    }
+    UpdateGizmos();
 }
 
 void EntityWidget::on_actionNewAmbientLight_triggered()
@@ -3454,6 +3603,14 @@ void EntityWidget::on_dsProject3D_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
     DisplayCurrentNodeProperties();
+
+    if (mTransformGizmo != TransformGizmo3D::None)
+    {
+        mTransformGizmo = TransformGizmo3D::None;
+        UpdateGizmos();
+        if (const auto* tool = dynamic_cast<const Transform3DTool*>(mCurrentTool.get()))
+            mCurrentTool.reset();
+    }
 }
 
 void EntityWidget::on_rbSimulation_currentIndexChanged(const QString&)
@@ -4447,6 +4604,9 @@ void EntityWidget::ScrollEntityNodeArea()
 void EntityWidget::TreeCurrentNodeChangedEvent()
 {
     DisplayCurrentNodeProperties();
+    mTransformGizmo = TransformGizmo3D::None;
+    mTransformHandle = TransformHandle3D::None;
+    UpdateGizmos();
 }
 void EntityWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
 {
@@ -4538,6 +4698,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
     const auto view   = engine::GameView::AxisAligned;
+    const auto scene_projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
@@ -4551,7 +4712,17 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
     DrawHook draw_hook(GetCurrentNode());
     draw_hook.SetDrawVectors(true);
+    draw_hook.SetDrawSelectionBox(true);
     draw_hook.SetIsPlaying(mPlayState == PlayState::Playing);
+    draw_hook.SetSceneProjection(scene_projection);
+    draw_hook.SetTransformGizmo(mTransformGizmo);
+    draw_hook.SetTransformHandle(mTransformHandle);
+
+    if (mTransformGizmo != TransformGizmo3D::None)
+    {
+        draw_hook.SetDrawSelectionBox(false);
+        draw_hook.SetDrawVectors(false);
+    }
 
     const auto camera_position = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
     const auto camera_scale    = glm::vec2{xs, ys};
@@ -4586,7 +4757,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     mState.renderer.SetClassLibrary(mState.workspace);
     mState.renderer.SetEditingMode(true);
     mState.renderer.SetName("EntityWidgetRenderer/" + mState.entity->GetId());
-    mState.renderer.SetProjection(GetValue(mUI.cmbSceneProjection));
+    mState.renderer.SetProjection(scene_projection);
 
     mState.renderer.BeginFrame();
     mState.renderer.CreateFrame(*mState.entity, &draw_hook);
@@ -4719,7 +4890,13 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     }
 
     if (mCurrentTool)
+    {
         mCurrentTool->Render(painter, entity_painter);
+        if (const auto* ptr = dynamic_cast<const Transform3DTool*>(mCurrentTool.get()))
+        {
+            DisplayCurrentNodeProperties();
+        }
+    }
 
     if (mState.entity->GetNumNodes() == 0)
     {
@@ -4756,6 +4933,60 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     }
 
     PrintMousePos(mUI, mState, painter,view, engine::Projection::Orthographic);
+
+    if (mTransformGizmo != TransformGizmo3D::None && !mCurrentTool)
+    {
+        const auto& mouse_point = mUI.widget->mapFromGlobal(QCursor::pos());
+        if (mouse_point.x() < 0 || mouse_point.x() >= width)
+            return;
+        if (mouse_point.y() < 0 || mouse_point.y() >= height)
+            return;
+
+        const auto* current = GetCurrentNode();
+        const auto node_box_size = current->GetSize();
+        const auto& node_to_world = mState.entity->FindNodeTransform(current);
+
+        // limit the pixel sampling by checking against the tool hotspot
+        // and only proceed to check for the transform handle axis if the
+        // mouse pointer is currently inside the current node's selection box.
+        gfx::FRect box;
+        box.Resize(node_box_size.x, node_box_size.y);
+        box.Translate(-node_box_size.x * 0.5f, -node_box_size.y * 0.5f);
+
+        if (scene_projection == game::SceneProjection::Dimetric)
+        {
+            // fudge it a little bit in case of dimetric projection since the box
+            // doesn't actually cover the whole 3D renderable object.
+            box.Grow(20.0f, 20.0f);
+            box.Translate(-10.0f, -10.0f);
+        }
+        const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, mouse_point);
+        if (hotspot != ToolHotspot::Remove)
+        {
+            mTransformHandle = TransformHandle3D::None;
+            return;
+        }
+
+        // going to take a shortcut here and just read a pixel under the
+        // mouse that use that to determine that transform handle.
+        // This could be wrong if there's another object occluding the
+        // currently selected object, and it happens to have the same color
+        // as on of the transform axis we're going to check against.
+        // A better solution would require some selective rendering similar
+        // to what we have in the scene widget.
+        const auto& bitmap = device->ReadColorBuffer(mouse_point.x(), height - mouse_point.y(), 1, 1);
+        const auto& pixel = bitmap.GetPixel(0, 0);
+        if (pixel == gfx::Color::Green)
+            mTransformHandle = TransformHandle3D::XAxis;
+        else if (pixel == gfx::Color::Red)
+            mTransformHandle = TransformHandle3D::YAxis;
+        else if (pixel == gfx::Color::Blue)
+            mTransformHandle = TransformHandle3D::ZAxis;
+        else if (pixel == gfx::Color::White)
+            mTransformHandle = TransformHandle3D::Reset;
+        else if (pixel != gfx::Color::Yellow)
+            mTransformHandle = TransformHandle3D::None;
+    }
 }
 
 void EntityWidget::MouseZoom(const std::function<void(void)>& zoom_function)
@@ -4808,6 +5039,17 @@ void EntityWidget::MousePress(QMouseEvent* event)
 {
     const MouseEvent mickey(event, mUI, mState);
 
+    if (!mCurrentTool && !mViewerMode && (mickey->button() == Qt::RightButton))
+    {
+        if (auto* current = GetCurrentNode())
+        {
+            if (mTransformGizmo != TransformGizmo3D::None && mTransformHandle != TransformHandle3D::None)
+            {
+                mCurrentTool.reset(new Transform3DTool(mTransformGizmo, mTransformHandle, mState, current, true));
+            }
+        }
+    }
+
     if (!mCurrentTool && !mViewerMode && (mickey->button() == Qt::LeftButton))
     {
         const auto snap = (bool)GetValue(mUI.chkSnap);
@@ -4845,6 +5087,11 @@ void EntityWidget::MousePress(QMouseEvent* event)
                     }
                 }
             }
+            if (mTransformGizmo != TransformGizmo3D::None && mTransformHandle != TransformHandle3D::None)
+            {
+                mCurrentTool.reset(new Transform3DTool(mTransformGizmo, mTransformHandle, mState, current, false));
+            }
+
             if (!mCurrentTool)
             {
                 const auto node_box_size = current->GetSize();
@@ -4884,6 +5131,9 @@ void EntityWidget::MousePress(QMouseEvent* event)
                     mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
 
                 mUI.tree->SelectItemById(hitnode->GetId());
+                mTransformGizmo = TransformGizmo3D::None;
+                mTransformHandle = TransformHandle3D::None;
+                UpdateGizmos();
             }
         }
     }
@@ -4948,6 +5198,10 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* event)
 {
     const MouseEvent mickey(event, mUI, mState);
 
+
+    if (const auto* ptr = dynamic_cast<const Transform3DTool*>(mCurrentTool.get()))
+        return;
+
     // double click is preceded by a regular click event and quick
     // googling suggests that there's really no way to filter out
     // single click when trying to react only to double click other
@@ -4961,6 +5215,9 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* event)
         return;
 
     const bool did_have_focus = mUI.widget->hasFocus() || mUI.widget->hasInputFocus();
+    mTransformGizmo = TransformGizmo3D::None;
+    mTransformHandle = TransformHandle3D::None;
+    UpdateGizmos();
 
     if (auto* drawable = hitnode->GetDrawable())
     {
@@ -5069,25 +5326,21 @@ bool EntityWidget::KeyPress(QKeyEvent* event)
         }
         else if (auto* draw = node->GetDrawable())
         {
-            const auto& id = draw->GetMaterialId();
-            const auto& mat = mState.workspace->FindMaterialClassById(id);
-            if (mat && mat->GetType() == gfx::MaterialClass::Type::Tilemap && key == Qt::Key_T)
+            if (CurrentDrawableIs3D())
             {
-                DlgTileChooser dlg(this, mat);
-                if (const auto* ptr = draw->GetMaterialParamValue<float>("kTileIndex"))
-                    dlg.SetTileIndex(static_cast<unsigned>(*ptr));
-
-                if (dlg.exec() == QDialog::Accepted)
+                if (key == Qt::Key_T)
                 {
-                    draw->SetMaterialParam("kTileIndex", static_cast<float>(dlg.GetTileIndex()));
+                    on_actionTranslateObject_triggered();
                 }
-                QTimer::singleShot(100, this, [this]() {
-                    //qApp->focusWidget()->clearFocus();
-                    //mUI.widget->raise();
-                    mUI.widget->activateWindow();
-                    mUI.widget->setFocus();
-                });
-                return true;
+                else if (key == Qt::Key_R)
+                {
+                    on_actionRotateObject_triggered();
+                }
+            }
+            else
+            {
+                if (key == Qt::Key_T)
+                    SelectTile();
             }
         }
     }
@@ -5125,7 +5378,8 @@ bool EntityWidget::KeyPress(QKeyEvent* event)
             OnEscape();
             break;
         case Qt::Key_Space:
-            if (auto* node = GetCurrentNode()) {
+            if (auto* node = GetCurrentNode())
+            {
                 if (event->modifiers() & Qt::Key_Shift)
                 {
                     if (auto* drawable = node->GetDrawable())
@@ -5402,7 +5656,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
                 SetEnabled(mUI.dsFog3D, true);
                 SetEnabled(mUI.dsDepth, true);
             }
-
         }
         if (const auto* body = node->GetRigidBody())
         {
@@ -5905,6 +6158,63 @@ void EntityWidget::RebuildCombosInternal()
     }
     SetList(mUI.fxBody, bodies);
 }
+
+void EntityWidget::SelectTile()
+{
+    auto* node = GetCurrentNode();
+    if (!node)
+        return;
+
+    auto* drawable = node->GetDrawable();
+    if (!drawable)
+        return;
+
+    const auto& material = mState.workspace->FindMaterialClassById(drawable->GetMaterialId());
+    if (!material || material->GetType() != gfx::MaterialClass::Type::Tilemap)
+        return;
+
+    DlgTileChooser dlg(this, material);
+    if (const auto* ptr = drawable->GetMaterialParamValue<float>("kTileIndex"))
+        dlg.SetTileIndex(static_cast<unsigned>(*ptr));
+
+    if (dlg.exec() == QDialog::Accepted)
+        drawable->SetMaterialParam("kTileIndex", static_cast<float>(dlg.GetTileIndex()));
+
+    QTimer::singleShot(100, this, [this]() {
+        //qApp->focusWidget()->clearFocus();
+        //mUI.widget->raise();
+        mUI.widget->activateWindow();
+        mUI.widget->setFocus();
+    });
+}
+
+void EntityWidget::UpdateGizmos()
+{
+    SetValue(mUI.actionSelectObject, mTransformGizmo == TransformGizmo3D::None);
+    SetValue(mUI.actionRotateObject, mTransformGizmo == TransformGizmo3D::Rotate);
+    SetValue(mUI.actionTranslateObject, mTransformGizmo == TransformGizmo3D::Translate);
+}
+
+bool EntityWidget::CurrentDrawableIs3D() const
+{
+    if (const auto* node = GetCurrentNode())
+    {
+        if (const auto* item = node->GetDrawable())
+        {
+            if (item->TestFlag(game::DrawableItemClass::Flags::ProjectAs3D))
+                return true;
+
+            const gfx::DrawableClass* drawable_class = nullptr;
+            const auto& drawable_id = item->GetDrawableId();
+            const auto& drawable_resource = mState.workspace->GetResourceById(app::FromUtf8(drawable_id));
+            drawable_resource.GetContent((&drawable_class));
+            if (gfx::Is3DShape(*drawable_class))
+                return true;
+        }
+    }
+    return false;
+}
+
 
 void EntityWidget::UpdateDeletedResourceReferences()
 {

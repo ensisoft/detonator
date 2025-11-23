@@ -1498,7 +1498,7 @@
           <x>0</x>
           <y>0</y>
           <width>429</width>
-          <height>1076</height>
+          <height>1109</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -6047,6 +6047,51 @@
    </property>
    <property name="text">
     <string>Sphere</string>
+   </property>
+  </action>
+  <action name="actionRotateObject">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/rotate-gizmo.png</normaloff>:/32x32_ico_png/rotate-gizmo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotate</string>
+   </property>
+   <property name="toolTip">
+    <string>Activate drawable 3D rotation tool</string>
+   </property>
+  </action>
+  <action name="actionTranslateObject">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/translate-gizmo.png</normaloff>:/32x32_ico_png/translate-gizmo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Translate</string>
+   </property>
+   <property name="toolTip">
+    <string>Activate drawable 3D translation tool</string>
+   </property>
+  </action>
+  <action name="actionSelectObject">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/select-gizmo.png</normaloff>:/32x32_ico_png/select-gizmo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select</string>
+   </property>
+   <property name="toolTip">
+    <string>Activate object select tool</string>
    </property>
   </action>
  </widget>

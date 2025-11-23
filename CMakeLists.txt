@@ -547,8 +547,10 @@ if (BUILD_QT_STUFF)
         audio/elements/stereo_splitter.cpp
         audio/elements/stream_source.cpp
         audio/elements/zero_source.cpp
+        base/wavefront.cpp
         graphics/tool/polygon.cpp
         graphics/format.cpp
+        graphics/wavefront_mesh.cpp
         editor/app/import.h
         editor/app/import.cpp
         editor/app/event.h
