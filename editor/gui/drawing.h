@@ -47,6 +47,21 @@ class QWidget;
 namespace gui
 {
 
+enum class GridDensity {
+    Grid10x10   = 10,
+    Grid20x20   = 20,
+    Grid50x50   = 50,
+    Grid100x100 = 100
+};
+
+enum class TransformGizmo3D {
+    Translate, Rotate, None
+};
+
+enum class TransformHandle3D {
+    XAxis, YAxis, ZAxis, Reset, None
+};
+
 void DrawSplineControlPoint(gfx::Painter& painter, const glm::vec2& pos, bool active);
 void DrawSpline(gfx::Painter& painter,
                 const game::SplineMoverClass* spline,
@@ -61,6 +76,10 @@ void DrawBasisVectors(gfx::Transform& trans, std::vector<engine::DrawPacket>& pa
 void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
 void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
 void DrawLightIndicator(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
+void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& trans, std::vector<engine::DrawPacket>& packets,
+    game::SceneProjection projection, TransformHandle3D handle);
+void DrawRotateGizmo(const game::EntityNodeClass* node, gfx::Transform& trans, std::vector<engine::DrawPacket>& packets,
+    game::SceneProjection projection, TransformHandle3D handle);
 
 void DrawEdges(const gfx::Painter& scene_painter,
                const gfx::Painter& window_painter,
@@ -68,13 +87,6 @@ void DrawEdges(const gfx::Painter& scene_painter,
                const gfx::Material& material,
                const glm::mat4& model,
                const std::string& widget_id);
-
-enum class GridDensity {
-    Grid10x10   = 10,
-    Grid20x20   = 20,
-    Grid50x50   = 50,
-    Grid100x100 = 100
-};
 
 std::string TranslateEnum(GridDensity density);
 
@@ -255,6 +267,9 @@ class DrawHook : public engine::EntityClassDrawHook,
                  public engine::PacketFilter
 {
 public:
+    using TransformGizmo3D = gui::TransformGizmo3D;
+    using TransformHandle3D = gui::TransformHandle3D;
+
     DrawHook() = default;
 
     explicit DrawHook(const game::EntityNode* selected)
@@ -268,15 +283,22 @@ public:
       , mViewRect(view)
     {}
 
-    void SetDrawVectors(bool on_off)
+    void SetTransformGizmo(TransformGizmo3D gizmo) noexcept
+    { mGizmo = gizmo; }
+    void SetTransformHandle(TransformHandle3D handle) noexcept
+    { mHandle = handle; }
+    void SetDrawVectors(bool on_off) noexcept
     { mDrawVectors = on_off; }
-    void SetIsPlaying(bool on_off)
+    void SetDrawSelectionBox(bool on_off) noexcept
+    { mDrawSelectionBox = on_off; }
+    void SetIsPlaying(bool on_off) noexcept
     { mPlaying = on_off; }
-    void SetViewMatrix(const glm::mat4& view)
+    void SetViewMatrix(const glm::mat4& view) noexcept
     { mView = view; }
-
-    void SetTilemap(const game::Tilemap* map)
+    void SetTilemap(const game::Tilemap* map) noexcept
     { mMap = map; }
+    void SetSceneProjection(game::SceneProjection projection) noexcept
+    { mProjection = projection; }
 
     // EntityNode
     bool InspectPacket(const game::EntityNode* node, engine::DrawPacket& packet) override
@@ -453,9 +475,38 @@ private:
         if (!is_selected)
             return;
 
-        DrawSelectionBox(trans, packets, rect);
+        if (mDrawSelectionBox)
+            DrawSelectionBox(trans, packets, rect);
+
         if (mDrawVectors)
             DrawBasisVectors(trans, packets);
+
+        DrawGizmo(node, rect, trans, packets);
+
+    }
+    void DrawGizmo(const game::EntityNodeClass* node, const gfx::FRect& rect, gfx::Transform& model,
+        std::vector<engine::DrawPacket>& packets) const
+    {
+        if (mProjection == game::SceneProjection::Dimetric)
+        {
+            model.Push(engine::CreateModelMatrix(engine::GameView::AxisAligned));
+            model.Push(engine::CreateModelMatrix(engine::GameView::Dimetric));
+        }
+
+        if (mGizmo == TransformGizmo3D::Translate)
+            DrawTranslateGizmo(node, model, packets, mProjection, mHandle);
+        else if (mGizmo == TransformGizmo3D::Rotate)
+            DrawRotateGizmo(node, model, packets, mProjection, mHandle);
+
+        if (mProjection == game::SceneProjection::Dimetric)
+        {
+            model.Pop();
+            model.Pop();
+        }
+    }
+    void DrawGizmo(const game::EntityNode* node, const gfx::FRect& rect, gfx::Transform& model,
+        std::vector<engine::DrawPacket>& packets) const
+    {
     }
 
     inline bool IsSelected(const game::EntityNodeClass* node) const
@@ -496,8 +547,12 @@ private:
     const game::EntityPlacement* mSelectedSceneNode       = nullptr;
     const game::FRect mViewRect;
     const game::Tilemap* mMap = nullptr;
-    bool mPlaying        = false;
-    bool mDrawVectors    = false;
+    bool mPlaying          = false;
+    bool mDrawVectors      = false;
+    bool mDrawSelectionBox = true;
+    TransformGizmo3D mGizmo = TransformGizmo3D::None;
+    TransformHandle3D mHandle = TransformHandle3D::None;
+    game::SceneProjection mProjection = game::SceneProjection::AxisAlignedOrthographic;
     glm::mat4 mView = glm::mat4(1.0f);
 
     struct TileHighlight {

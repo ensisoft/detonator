@@ -45,6 +45,7 @@
 #include "graphics/framebuffer.h"
 #include "graphics/simple_shape.h"
 #include "graphics/guidegrid.h"
+#include "graphics/wavefront_mesh.h"
 
 namespace {
     gfx::Color4f DefaultGridColor = gfx::Color::LightGray;
@@ -191,10 +192,8 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
 
 void DrawBasisVectors(gfx::Transform& model, std::vector<engine::DrawPacket>& packets)
 {
-    static auto green = std::make_shared<gfx::MaterialInstance>(
-            gfx::CreateMaterialClassFromColor(gfx::Color::Green));
-    static auto red   = std::make_shared<gfx::MaterialInstance>(
-            gfx::CreateMaterialClassFromColor(gfx::Color::Red));
+    static auto green = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Green));
+    static auto red   = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Red));
     static auto arrow = std::make_shared<gfx::Arrow>();
 
     // draw the X vector
@@ -234,8 +233,7 @@ void DrawBasisVectors(gfx::Transform& model, std::vector<engine::DrawPacket>& pa
 
 void DrawSelectionBox(gfx::Transform& model, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect)
 {
-    static const auto green  = std::make_shared<gfx::MaterialInstance>(
-            gfx::CreateMaterialClassFromColor(gfx::Color::Green));
+    static const auto green  = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Green));
     static const auto outline = std::make_shared<gfx::Rectangle>(gfx::SimpleShapeStyle::Outline);
     static const auto circle  = std::make_shared<gfx::Circle>(gfx::SimpleShapeStyle::Outline);
 
@@ -348,6 +346,222 @@ void DrawLightIndicator(gfx::Transform& transform, std::vector<engine::DrawPacke
         box.line_width        = 2.0f;
         packets.push_back(box);
     transform.Pop();
+}
+
+void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model, std::vector<engine::DrawPacket>& packets,
+    game::SceneProjection projection, TransformHandle3D handle)
+{
+    static const auto Arrow   = std::make_shared<gfx::WavefrontMesh>(res::TranslateGizmo);
+    static const auto Cube    = std::make_shared<gfx::Cube>();
+    static const auto Green   = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Green));
+    static const auto Red     = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Red));
+    static const auto Blue    = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Blue));
+    static const auto White   = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::White));
+    static const auto Yellow  = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Yellow));
+
+    // remember that for 3D shapes the 3D is a "rendering" gimmick only
+    // and thus the 3rd (z) dimension is int eh drawable item and not in the node.
+    // (the entity nodes are always on the XY plane since this is a 2D game engine...)
+    const auto& node_size_xy = node->GetSize();
+    const auto& node_depth = node->GetDrawable()->GetDepth();
+
+    const auto time = fmod(base::GetTime(), 2.0f) / 2.0f;
+    const auto s = handle == TransformHandle3D::None ? std::sin(time * math::Pi) : 0.0f;
+
+    //if (handle == TransformHandle3D::None || handle == TransformHandle3D::Reset)
+    {
+        model.Push();
+            model.Scale(20.0f, 20.0f, 20.0f);
+
+            engine::DrawPacket packet;
+            packet.domain     = engine::DrawPacket::Domain::Editor;
+            packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
+            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.transform  = model;
+            packet.material   = handle == TransformHandle3D::Reset ? Yellow : White;
+            packet.drawable   = Cube;
+            packets.push_back(std::move(packet));
+        model.Pop();
+    }
+
+    //if (handle == TransformHandle3D::None || handle == TransformHandle3D::XAxis)
+    {
+        model.Push();
+            model.Scale(100.0f, 100.0f, 100.0f);
+            model.Translate(20.0f, 0.0f, 0.0f);
+            model.Translate(20.0f * s, 0.0f, 0.0f);
+
+            engine::DrawPacket packet;
+            packet.domain     = engine::DrawPacket::Domain::Editor;
+            packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
+            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.transform  = model;
+            packet.material   = handle == TransformHandle3D::XAxis ? Yellow : Green;
+            packet.drawable   = Arrow;
+            packets.push_back(std::move(packet));
+        model.Pop();
+    }
+
+    //if (handle == TransformHandle3D::None || handle == TransformHandle3D::YAxis)
+    {
+        model.Push();
+            model.Scale(100.0f, 100.0f, 100.0f);
+            model.RotateAroundZ(gfx::FDegrees(90.0f));
+            model.Translate(0.0f, 20.0f, 0.0f);
+            model.Translate(0.0f, 20.0f * s, 0.0f);
+
+            engine::DrawPacket packet;
+            packet.domain     = engine::DrawPacket::Domain::Editor;
+            packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
+            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.transform  = model;
+            packet.material   = handle == TransformHandle3D::YAxis ? Yellow : Red;
+            packet.drawable   = Arrow;
+            packets.push_back(std::move(packet));
+        model.Pop();
+    }
+
+    if (projection == game::SceneProjection::AxisAlignedOrthographic ||
+        projection == game::SceneProjection::AxisAlignedPerspective)
+    {
+        //if (handle == TransformHandle3D::None || handle == TransformHandle3D::ZAxis)
+        {
+            model.Push();
+                model.Scale(100.0f, 100.0f, 100.0f);
+                model.RotateAroundZ(gfx::FDegrees(-45.0f));
+                model.Translate(0.0f, -20.0f, 0.0f);
+                model.Translate(20.0f * s, -20.0f * s, 0.0f);
+
+                engine::DrawPacket packet;
+                packet.domain     = engine::DrawPacket::Domain::Editor;
+                packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
+                packet.projection = engine::DrawPacket::Projection::Perspective;
+                packet.transform  = model;
+                packet.material   = handle == TransformHandle3D::ZAxis ? Yellow: Blue;
+                packet.drawable   = Arrow;
+                packets.push_back(std::move(packet));
+            model.Pop();
+        }
+    }
+    else if (projection == game::SceneProjection::Dimetric)
+    {
+        //if (handle == TransformHandle3D::None || handle == TransformHandle3D::ZAxis)
+        {
+            model.Push();
+                model.Scale(100.0f, 100.0f, 100.0f);
+                model.RotateAroundY(gfx::FDegrees(-90.0f));
+                model.Translate(0.0f, 0.0f, 20.0f);
+                model.Translate(0.0f, 0.0f, 20.0f * s);
+
+                engine::DrawPacket packet;
+                packet.domain     = engine::DrawPacket::Domain::Editor;
+                packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
+                packet.projection = engine::DrawPacket::Projection::Perspective;
+                packet.transform  = model;
+                packet.material   = handle == TransformHandle3D::ZAxis ? Yellow : Blue;
+                packet.drawable   = Arrow;
+                packets.push_back(std::move(packet));
+            model.Pop();
+        }
+    }
+}
+void DrawRotateGizmo(const game::EntityNodeClass* node, gfx::Transform& model, std::vector<engine::DrawPacket>& packets,
+    game::SceneProjection projection, TransformHandle3D handle)
+{
+    static const auto Torus = std::make_shared<gfx::WavefrontMesh>(res::RotateGizmo);
+    static const auto Cube  = std::make_shared<gfx::Cube>();
+    static const auto Green = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Green));
+    static const auto Red   = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Red));
+    static const auto Blue  = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Blue));
+    static const auto Yellow  = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Yellow));
+    static const auto White   = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::White));
+
+    // remember that for 3D shapes the 3D is a "rendering" gimmick only
+    // and thus the 3rd (z) dimension is int eh drawable item and not in the node.
+    // (the entity nodes are always on the XY plane since this is a 2D game engine...)
+    const auto& node_size_xy = node->GetSize();
+    const auto& node_depth = node->GetDrawable()->GetDepth();
+    const auto size = 85.0f;
+
+    const auto translation = glm::vec3 { 0.0f, 0.0f, 0.0f };
+    const auto scale = glm::vec3 { size, size, size };
+
+    const auto time = fmod(base::GetTime(), 2.0f) / 2.0f;
+    const auto s = handle == TransformHandle3D::None ? std::sin(time * math::Pi) : 0.0f;
+
+    const auto render_layer = node->GetDrawable()->GetLayer();
+
+    if (handle == TransformHandle3D::None || handle == TransformHandle3D::Reset)
+    {
+        model.Push();
+            model.Scale(20.0f, 20.0f, 20.0f);
+
+            engine::DrawPacket packet;
+            packet.domain     = engine::DrawPacket::Domain::Editor;
+            packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
+            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.transform  = model;
+            packet.material   = handle == TransformHandle3D::Reset ? Yellow : White;
+            packet.drawable   = Cube;
+            packets.push_back(std::move(packet));
+        model.Pop();
+    }
+
+    if (handle == TransformHandle3D::None || handle == TransformHandle3D::XAxis)
+    {
+        model.Push();
+            model.Scale(scale * 1.0f);
+            model.RotateAroundZ(gfx::FDegrees(20.0f * s));
+            model.RotateAroundY(gfx::FDegrees(90.0));
+
+            engine::DrawPacket packet;
+            packet.domain     = engine::DrawPacket::Domain::Editor;
+            packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
+            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.transform  = model;
+            packet.material   = handle == TransformHandle3D::XAxis ? Yellow : Green;
+            packet.drawable   = Torus;
+            packet.render_layer = render_layer + 1;
+            packets.push_back(std::move(packet));
+        model.Pop();
+    }
+
+    if (handle == TransformHandle3D::None || handle == TransformHandle3D::YAxis)
+    {
+        model.Push();
+            model.Scale(scale);
+            model.RotateAroundZ(gfx::FDegrees(20.0f * s));
+            model.RotateAroundX(gfx::FDegrees(90.0f));
+
+            engine::DrawPacket packet;
+            packet.domain     = engine::DrawPacket::Domain::Editor;
+            packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
+            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.transform  = model;
+            packet.material   = handle == TransformHandle3D::YAxis ? Yellow : Red;
+            packet.drawable   = Torus;
+            packet.render_layer = render_layer + 1;
+            packets.push_back(std::move(packet));
+        model.Pop();
+    }
+
+    if (handle == TransformHandle3D::None || handle == TransformHandle3D::ZAxis)
+    {
+        model.Push();
+            model.Scale(scale);
+            model.RotateAroundZ(gfx::FDegrees(20.0f * s));
+
+            engine::DrawPacket packet;
+            packet.domain     = engine::DrawPacket::Domain::Editor;
+            packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
+            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.transform  = model;
+            packet.material   = handle == TransformHandle3D::ZAxis ? Yellow : Blue;
+            packet.drawable   = Torus;
+            packet.render_layer = render_layer + 1;
+            packets.push_back(std::move(packet));
+        model.Pop();
+    }
 }
 
 void DrawEdges(const gfx::Painter& scene_painter,

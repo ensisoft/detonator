@@ -141,12 +141,12 @@ namespace gui
           , mCanTransform(true)
           , mGameView(view)
         {}
-        inline Point2Df WindowPos() const noexcept
+        Point2Df WindowPos() const noexcept
         { return mMickey->pos(); }
-        inline bool CanTransform() const
+        bool CanTransform() const
         { return mCanTransform; }
 
-        inline Point2Df MapToPlane() const noexcept
+        Point2Df MapToPlane() const noexcept
         {
             const auto& view_to_clip = engine::CreateProjectionMatrix(engine::Projection::Orthographic, mWindowSize);
             const auto& world_to_view = engine::CreateModelViewMatrix(mGameView, mCameraPos, mCameraScale * mZoom,
@@ -154,7 +154,7 @@ namespace gui
             const auto ret = engine::MapFromWindowToWorldPlane(view_to_clip, world_to_view, WindowPos(), mWindowSize);
             return {ret.x, ret.y};
         }
-        inline Point2Df MapMouse(const gfx::Transform& old_view_transform) const
+        Point2Df MapMouse(const gfx::Transform& old_view_transform) const
         {
             if (mCanTransform)
                 return MapToPlane();
@@ -164,9 +164,9 @@ namespace gui
             const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
             return {mouse_pos_in_view.x, mouse_pos_in_view.y};
         }
-        inline Point2Df MapBetweenPerspectives(const Point2Df& point,
-                                               engine::GameView src,
-                                               engine::GameView dst) const
+        Point2Df MapBetweenPerspectives(const Point2Df& point,
+                                        engine::GameView src,
+                                        engine::GameView dst) const
         {
             if (src == dst)
                 return point;
@@ -197,9 +197,17 @@ namespace gui
         const QMouseEvent* operator->() const
         { return mMickey; }
 
-        const bool TestModKey(Qt::KeyboardModifier mod) const noexcept
+        bool TestModKey(Qt::KeyboardModifier mod) const noexcept
         {
             return mMickey->modifiers() & mod;
+        }
+        bool TestShiftKey() const noexcept
+        {
+            return TestModKey(Qt::KeyboardModifier::ShiftModifier);
+        }
+        bool TestCtrlKey() const noexcept
+        {
+            return TestModKey(Qt::KeyboardModifier::ControlModifier);
         }
     private:
         const QMouseEvent* mMickey = nullptr;

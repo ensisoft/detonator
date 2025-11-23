@@ -170,6 +170,7 @@ namespace gfx
         using WindigOrder = Device::RasterState::WindingOrder;
         using BlendOp     = Device::RasterState::BlendOp;
         using RasterState = Device::RasterState;
+        using RenderPass  = gfx::RenderPass;
         using ColorDepthStencilState = Device::ColorDepthStencilState;
 
         struct RenderPassState {

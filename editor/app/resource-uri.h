@@ -22,5 +22,7 @@ namespace res {
     constexpr const char* AcceptIcon   = "app://textures/editor/accept_icon.png";
     constexpr const char* CrosshairCursor = "app://textures/editor/crosshair009.png";
     constexpr const char* LightIcon = "app://textures/editor/light.png";
+    constexpr const char* TranslateGizmo = "app://models/editor/translate_gizmo.obj";
+    constexpr const char* RotateGizmo = "app://models/editor/rotate_gizmo.obj";
 
 } // namespace

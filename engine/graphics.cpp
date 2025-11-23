@@ -424,7 +424,24 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
             if (packet.source == DrawPacket::Source::Map)
                 continue;
 
-            scene_painter.Draw(*packet.drawable, packet.transform, *packet.material);
+            if (packet.projection == DrawPacket::Projection::Orthographic)
+                scene_painter.SetProjectionMatrix(orthographic);
+            else if (packet.projection == DrawPacket::Projection::Perspective)
+                scene_painter.SetProjectionMatrix(perspective);
+
+            gfx::Painter::DrawState draw_state;
+            draw_state.render_pass  = gfx::Painter::RenderPass::ColorPass;
+            draw_state.culling      = gfx::Painter::Culling::Back;
+            draw_state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+            draw_state.write_color  = true;
+            if (packet.depth_test == DrawPacket::DepthTest::LessOrEQual)
+                draw_state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
+            else if (packet.depth_test == DrawPacket::DepthTest::Disabled)
+                draw_state.depth_test = gfx::Painter::DepthTest::Disabled;
+            else BUG("Missing depth test state.");
+
+            gfx::FlatShadedColorProgram draw_program;
+            scene_painter.Draw(*packet.drawable, packet.transform, *packet.material, draw_state, draw_program);
 
             if (mRenderHook)
             {
