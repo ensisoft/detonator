@@ -196,6 +196,7 @@ namespace engine
             gfx::Texture* main_image = nullptr;
         };
 
+        virtual ~LowLevelRendererHook() = default;
         virtual void BeginDraw(const RenderSettings& settings, const GPUResources& gpu) {}
         virtual void EndDraw(const RenderSettings& settings, const GPUResources& gpu) {}
         virtual void EndDrawPacket(const RenderSettings& settings, const GPUResources& gpu, const DrawPacket& packet, gfx::Painter& painter) {}
