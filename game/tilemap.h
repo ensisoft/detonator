@@ -43,12 +43,7 @@ namespace game
     class TilemapClass
     {
     public:
-        enum class Perspective {
-            // Map from top down or side-on view
-            AxisAligned,
-            // Dimetric orthographic view from a fixed angle.
-            Dimetric
-        };
+        using Perspective = RenderView;
 
         TilemapClass();
         TilemapClass(const TilemapClass& other);

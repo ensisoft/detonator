@@ -83,7 +83,7 @@ namespace {
 namespace engine
 {
 
-glm::mat4 CreateProjectionMatrix(Projection projection, const game::FRect& viewport)
+glm::mat4 CreateProjectionMatrix(Projection projection, const base::FRect& viewport)
 {
     ASSERT(projection == Projection::Orthographic);
 
@@ -121,7 +121,7 @@ glm::mat4 CreateProjectionMatrix(Projection projection, const glm::vec2& surface
     const auto ypos = surface_size.y / -2.0f;
     const auto width = surface_size.x;
     const auto height = surface_size.y;
-    return CreateProjectionMatrix(projection, game::FRect(xpos, ypos, width, height));
+    return CreateProjectionMatrix(projection, base::FRect(xpos, ypos, width, height));
 }
 
 glm::mat4 CreateProjectionMatrix(Projection projection, float surface_width, float surface_height)
@@ -129,7 +129,7 @@ glm::mat4 CreateProjectionMatrix(Projection projection, float surface_width, flo
     return CreateProjectionMatrix(projection, glm::vec2{surface_width, surface_height});
 }
 
-PerspectiveProjectionArgs ComputePerspectiveProjection(const game::FRect& viewport)
+PerspectiveProjectionArgs ComputePerspectiveProjection(const base::FRect& viewport)
 {
     const auto width  = viewport.GetWidth();
     const auto height = viewport.GetHeight();
@@ -146,7 +146,7 @@ PerspectiveProjectionArgs ComputePerspectiveProjection(const game::FRect& viewpo
 }
 
 
-glm::mat4 CreateProjectionMatrix(const game::FRect& viewport, const PerspectiveProjectionArgs& args)
+glm::mat4 CreateProjectionMatrix(const base::FRect& viewport, const PerspectiveProjectionArgs& args)
 {
     const auto& ortho = CreateProjectionMatrix(Projection::Orthographic, viewport);
 
@@ -455,7 +455,7 @@ glm::vec4 MapFromWindowToWorld(const glm::mat4& view_to_clip,
 
 glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
                                 const glm::vec2& tile_size,
-                                game::Tilemap::Perspective perspective)
+                                GameView perspective)
 {
     const auto tile_width_units  = tile_size.x;
     const auto tile_height_units = tile_size.y;
@@ -465,22 +465,23 @@ glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
     const auto tile_left_top     = tile_to_render * glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
     const auto tile_right_bottom = tile_to_render * glm::vec4{tile_width_units, tile_height_units, 0.0f, 1.0f};
 
-    if (perspective == game::Tilemap::Perspective::Dimetric)
+    if (perspective == GameView::Dimetric)
     {
         const auto tile_width_render_units  = glm::length(tile_left_bottom - tile_right_top);
         const auto tile_height_render_units = glm::length(tile_left_top - tile_right_bottom);
         return {tile_width_render_units, tile_height_render_units};
     }
-    else if (perspective == game::Tilemap::Perspective::AxisAligned)
+    else if (perspective == GameView::AxisAligned)
     {
         const auto tile_width_render_units  = glm::length(tile_left_top - tile_right_top);
         const auto tile_height_render_units = glm::length(tile_left_top - tile_left_bottom);
         return {tile_width_render_units, tile_height_render_units};
     } else BUG("Unknown perspective");
+
     return {0.0f, 0.0f};
 }
 
-glm::vec3 GetTileCuboidFactors(game::Tilemap::Perspective perspective)
+glm::vec3 GetTileCuboidFactors(GameView perspective)
 {
     // When dealing with an isometric cube you'd be inclined to think that the isometric
     // sprite represents a cube, but this is actually not the case. Rather the tile
@@ -515,7 +516,7 @@ glm::vec3 GetTileCuboidFactors(game::Tilemap::Perspective perspective)
     // I spent some time trying to compute the ratios of the projected sides using
     // algebra but didn't manage to do so yet. :-(
 
-    if (perspective == game::Tilemap::Perspective::Dimetric)
+    if (perspective == GameView::Dimetric)
     {
         // so this doesn't work right...
         //const auto projected_tile_vertical_height = 0.5f;
