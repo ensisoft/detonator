@@ -2647,9 +2647,8 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
 
     // a test case for mapping the corners of the tilemap from the isometric space
     // into our 2D axis aligned space. this is here simply because of convenience.
-#if 0
+    if (Editor::DebugEditor())
     {
-
         const auto tile_width  = mState.klass->GetTileWidth();
         const auto tile_height = mState.klass->GetTileHeight();
         const auto tile_depth  = mState.klass->GetTileDepth();
@@ -2670,13 +2669,12 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         {
             const auto base_size = glm::vec3{tile_width, tile_height, tile_depth};
             const auto size_factors = engine::GetTileCuboidFactors(mState.klass->GetPerspective());
-            //const auto size_factors = glm::vec3 { 1.0f, 1.0f, 0.8994f };
 
             auto checkerboard = mState.workspace->GetMaterialClassById("_checkerboard");
             gfx::Transform model;
             model.Translate(0.5f, 0.5f, -0.5f);
             model.Scale(base_size * size_factors);
-            //tile_painter.Draw(gfx::Cube(), model, gfx::MaterialInstance(checkerboard));
+            tile_painter.Draw(gfx::Cube(), model, gfx::MaterialInstance(checkerboard));
         }
 
 
@@ -2707,7 +2705,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
             }
         }
     }
-#endif
 
     if (!mState.klass->GetNumLayers())
     {
