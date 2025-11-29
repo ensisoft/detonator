@@ -23,9 +23,8 @@
 
 #include <vector>
 
+#include "base/types.h"
 #include "game/enum.h"
-#include "game/types.h"
-#include "game/tilemap.h"
 
 namespace engine
 {
@@ -95,21 +94,23 @@ namespace engine
             // todo: ObliqueTopDown
             //Oblique
         };
+        GameView() = default;
+
         GameView(EnumValue value) noexcept
           : value(value)
         {}
-        GameView() = default;
-        GameView(game::Tilemap::Perspective perspective)
+        GameView(game::RenderView view) noexcept
         {
-            if (perspective == game::Tilemap::Perspective::AxisAligned)
+            if (view == game::RenderView::AxisAligned)
                 value = EnumValue::AxisAligned;
-            else if (perspective == game::Tilemap::Perspective::Dimetric)
+            else if (view == game::RenderView::Dimetric)
                 value = EnumValue::Dimetric;
             else BUG("Unknown tilemap perspective.");
         }
-        inline operator EnumValue () const noexcept
-        { return value; }
-
+        operator EnumValue () const noexcept
+        {
+            return value;
+        }
         EnumValue value = AxisAligned;
     };
 
@@ -129,7 +130,7 @@ namespace engine
         Perspective
     };
 
-    glm::mat4 CreateProjectionMatrix(Projection projection, const game::FRect& viewport);
+    glm::mat4 CreateProjectionMatrix(Projection projection, const base::FRect& viewport);
     glm::mat4 CreateProjectionMatrix(Projection projection, const glm::vec2& surface_size);
     glm::mat4 CreateProjectionMatrix(Projection projection, float surface_width, float surface_height);
 
@@ -139,9 +140,9 @@ namespace engine
         float fov        = 45.0f;
         float aspect     = 1.0f;
     };
-    PerspectiveProjectionArgs ComputePerspectiveProjection(const game::FRect& viewport);
+    PerspectiveProjectionArgs ComputePerspectiveProjection(const base::FRect& viewport);
 
-    glm::mat4 CreateProjectionMatrix(const game::FRect& viewport, const PerspectiveProjectionArgs& args);
+    glm::mat4 CreateProjectionMatrix(const base::FRect& viewport, const PerspectiveProjectionArgs& args);
 
     // Create model transformation matrix for a certain type of game perspective.
     // This matrix adds a perspective specific rotation to the model transformation.
@@ -271,8 +272,8 @@ namespace engine
 
     glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
                                     const glm::vec2& tile_size,
-                                    game::Tilemap::Perspective perspective);
+                                    GameView perspective);
 
-    glm::vec3 GetTileCuboidFactors(game::Tilemap::Perspective perspective);
+    glm::vec3 GetTileCuboidFactors(GameView perspective);
 
 } // namespace

@@ -78,13 +78,6 @@ namespace game {
         MaskExpose
     };
 
-    enum class SceneProjection {
-        AxisAlignedOrthographic,
-        AxisAlignedPerspective,
-        Dimetric,
-        //Isometric,
-        //Oblique
-    };
     enum class SceneShadingMode {
         Flat, BasicLight
     };
@@ -99,12 +92,53 @@ namespace game {
         Solid
     };
 
+    // Render view describes the logical view into a scene (or tilemap)
+    // i.e. the way the camera looks into the scene. Note that this is
+    // only the logical camera view. Conceptually this is different from
+    // the *projection* which defines how the 3D objects get projected
+    // to the 2D render target/surface. That being said in practice
+    // we only have few expected combinations.
+    // Axis aligned + perspective projection
+    // Axis aligned + orthographic projection
+    // Dimetric + orthographic projection
     enum class RenderView {
-        AxisAligned, Dimetric
+        // Axis aligned projection infers a camera position that
+        // is perpendicular to one of the coordinate space axis. This can be
+        // used to produce "top down" or "side on" views.
+        // When used in games this view can be used for example for side-scrollers,
+        // top-down shooters, platform and puzzle games.
+        AxisAligned,
+        // Dimetric perspective infers a camera position that is
+        // angled at a fixed yaw and tilt (pitch) to look in a certain direction.
+        // This camera vantage point is then combined with an orthographic
+        // projection to produce a 2D rendering where multiple sides of an
+        // object are visible but without any perspective foreshortening.
+        // This type of perspective is common in strategy and simulation games.
+        // This is often (incorrectly) called "isometric" even though mathematically
+        // isometric and dimetric are not the same 2D projections.
+        Dimetric
     };
 
+    // Projection defines how objects are transformed geometrically
+    // when being projected onto the 2D render target/surface.
+    // To conclude the final rendering we must use a combination
+    // of "logical camera view" + "projection".
+    // In order to produce an axonometric rendering result such as
+    // "dimetric" rendering we need to combine the dimetric logical
+    // view with orthographic projection. I.e. no illusion of depth
+    // or perspective.
     enum class RenderProjection {
-        Orthographic, Perspective
+        Orthographic,
+        Perspective
+    };
+
+    // Shorthand combination of RenderView + RenderProjection.
+    enum class SceneProjection {
+        AxisAlignedOrthographic,
+        AxisAlignedPerspective,
+        Dimetric,
+        //Isometric,
+        //Oblique
     };
 
     enum class CoordinateSpace {
