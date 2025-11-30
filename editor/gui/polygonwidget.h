@@ -20,6 +20,7 @@
 
 #include "warnpush.h"
 #  include "ui_polygonwidget.h"
+#  include <QMenu>
 #include "warnpop.h"
 
 #include <vector>
@@ -108,6 +109,7 @@ namespace gui
 
     private:
         Ui::ShapeWidget mUI;
+        QMenu* mHamburger = nullptr;
     private:
         class VertexDataTable;
         class MouseTool;

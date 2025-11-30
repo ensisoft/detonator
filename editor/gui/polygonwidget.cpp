@@ -650,6 +650,19 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     menu->addAction(mUI.actionShowShader);
     mUI.btnAddShader->setMenu(menu);
 
+    connect(mUI.btnHamburger, &QPushButton::clicked, this, [this]() {
+        if (mHamburger == nullptr)
+        {
+            mHamburger = new QMenu(this);
+            mHamburger->addAction(mUI.chkSnap);
+            mHamburger->addAction(mUI.chkShowGrid);
+        }
+        QPoint point;
+        point.setX(0);
+        point.setY(mUI.btnHamburger->width());
+        mHamburger->popup(mUI.btnHamburger->mapToGlobal(point));
+    });
+
     SetList(mUI.blueprints, workspace->ListUserDefinedMaterials());
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
@@ -745,8 +758,7 @@ void ShapeWidget::SetViewerMode()
     SetVisible(mUI.baseProperties, false);
     SetVisible(mUI.lblHelp,        false);
     SetVisible(mUI.blueprints,     false);
-    SetVisible(mUI.chkSnap,        false);
-    SetVisible(mUI.chkSnap,        false);
+    SetVisible(mUI.btnHamburger,   false);
     SetVisible(mUI.btnResetBlueprint, false);
     SetVisible(mUI.lblRandom, false);
     SetVisible(mUI.kRandom, false);
