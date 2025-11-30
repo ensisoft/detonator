@@ -36,7 +36,8 @@ namespace {
         const auto perspective = klass.GetPerspective();
         if (perspective == game::TilemapClass::Perspective::AxisAligned)
             return {1.0f, 1.0};
-        else if (perspective == game::TilemapClass::Perspective::Dimetric)
+        else if (perspective == game::TilemapClass::Perspective::Dimetric ||
+                 perspective == game::TilemapClass::Perspective::Isometric)
             return {1.0f, 2.0f};
         else BUG("Unknown perspective");
         return {1.0f, 1.0f};
@@ -399,6 +400,8 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
                 batch.SetProjection(gfx::TileBatch::Projection::AxisAligned);
             else if (perspective == game::Tilemap::Perspective::Dimetric)
                 batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
+            else if (perspective == game::Tilemap::Perspective::Isometric)
+                batch.SetProjection(gfx::TileBatch::Projection::Isometric);
             else BUG("missing tile projection.");
 
             // re-create the material if the tool's material setting has changed.

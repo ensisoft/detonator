@@ -103,15 +103,17 @@ std::string TranslateEnum(SceneClass::BasicFogMode mode)
     return "???";
 }
 
-std::string TranslateEnum(SceneClass::SceneProjection projection)
+std::string TranslateEnum(SceneProjection projection)
 {
     using P = SceneClass::SceneProjection;
     if (projection == P::AxisAlignedOrthographic)
-        return "Axis Aligned (Orthographic)";
+        return "Orthographic Axis Aligned";
     else if (projection == P::AxisAlignedPerspective)
-        return "Axis Aligned (Perspective)";
+        return "Perspective Axis Aligned";
     else if (projection == P::Dimetric)
-        return "Dimetric (Orthographic)";
+        return "Orthographic Dimetric";
+    else if (projection == P::Isometric)
+        return "Orthographic Isometric";
     else BUG("Missing translation");
     return "???";
 }

@@ -48,7 +48,7 @@ bool TileBatch::ApplyDynamicState(const Environment& env, Device&, ProgramState&
     glm::vec3 tile_point_offset = {0.0f, 0.0f, 0.0f};
     if (mProjection == Projection::AxisAligned && shape == TileShape::Square)
         tile_point_offset = mTileWorldSize * glm::vec3{0.5f, 0.5f, 0.0f};
-    else if (mProjection == Projection::Dimetric && shape == TileShape::Rectangle)
+    else if ((mProjection == Projection::Dimetric || mProjection == Projection::Isometric) && shape == TileShape::Rectangle)
         tile_point_offset = mTileWorldSize * glm::vec3{1.0f, 1.0f, 0.0f};  // bottom right corner is the basis for the billboard
     else if (mProjection == Projection::AxisAligned && shape == TileShape::Rectangle)
         tile_point_offset = mTileWorldSize * glm::vec3{0.5f, 1.0f, 0.0f}; // middle of the bottom edge

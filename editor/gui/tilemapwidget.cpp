@@ -58,7 +58,8 @@ namespace{
         const auto perspective = klass.GetPerspective();
         if (perspective == game::TilemapClass::Perspective::AxisAligned)
             return {1.0f, 1.0};
-        else if (perspective == game::TilemapClass::Perspective::Dimetric)
+        else if (perspective == game::TilemapClass::Perspective::Dimetric ||
+                 perspective == game::TilemapClass::Perspective::Isometric)
             return {1.0f, 2.0f};
         else BUG("Unknown perspective");
         return {1.0f, 1.0f};
@@ -410,6 +411,8 @@ public:
                 batch.SetProjection(gfx::TileBatch::Projection::AxisAligned);
             else if (perspective == game::Tilemap::Perspective::Dimetric)
                 batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
+            else if (perspective == game::Tilemap::Perspective::Isometric)
+                batch.SetProjection(gfx::TileBatch::Projection::Isometric);
             else BUG("missing tile projection.");
 
             // draw the tile batch
@@ -684,6 +687,8 @@ public:
                     batch.SetProjection(gfx::TileBatch::Projection::AxisAligned);
                 else if (perspective == game::Tilemap::Perspective::Dimetric)
                     batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
+                else if (perspective == game::Tilemap::Perspective::Isometric)
+                    batch.SetProjection(gfx::TileBatch::Projection::Isometric);
                 else BUG("missing tile projection.");
 
                 if (!tile_data.material_instance ||
@@ -2479,6 +2484,8 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                             tiles.SetProjection(gfx::TileBatch::Projection::AxisAligned);
                         else if (perspective == game::Tilemap::Perspective::Dimetric)
                             tiles.SetProjection(gfx::TileBatch::Projection::Dimetric);
+                        else if (perspective == game::Tilemap::Perspective::Isometric)
+                            tiles.SetProjection(gfx::TileBatch::Projection::Isometric);
                         else BUG("unknown projection");
 
                         //DrawEdges(painter, mWindowPainter, tiles, *packet.material, packet.transform, mState.klass->GetId());
