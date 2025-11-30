@@ -443,7 +443,7 @@ void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model
             model.Pop();
         }
     }
-    else if (projection == game::SceneProjection::Dimetric)
+    else if (projection == game::SceneProjection::Dimetric || projection == game::SceneProjection::Isometric)
     {
         //if (handle == TransformHandle3D::None || handle == TransformHandle3D::ZAxis)
         {
@@ -715,7 +715,7 @@ void DrawCoordinateGrid(gfx::Painter& scene,
     const auto material = gfx::CreateMaterialFromColor(DefaultGridColor);
 
 
-    if (view == engine::GameView::Dimetric)
+    if (view == engine::GameView::Dimetric || view == engine::GameView::Isometric)
     {
         // map the center of the screen to a position on the world plane.
         // basically this means that when we draw the grid at this position
@@ -752,9 +752,11 @@ void DrawCoordinateGrid(gfx::Painter& scene,
         // But rendering the plane in "2D" on the scene plane (parallel to the
         // projection plane itself) the clipping problem doesn't exist.
 
+        const auto squish = view == engine::GameView::Dimetric ? 0.5f : 0.577;
+
         transform.Push();
         transform.RotateAroundZ(gfx::FDegrees(45.0f));
-        transform.Scale(1.0f, 0.5f);
+        transform.Scale(1.0f, squish);
 
         transform.Push();
         transform.Translate(0.0f, 0.0f);

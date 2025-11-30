@@ -4953,7 +4953,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         box.Resize(node_box_size.x, node_box_size.y);
         box.Translate(-node_box_size.x * 0.5f, -node_box_size.y * 0.5f);
 
-        if (scene_projection == game::SceneProjection::Dimetric)
+        if (game::IsAxonometricProjection(scene_projection))
         {
             // fudge it a little bit in case of dimetric projection since the box
             // doesn't actually cover the whole 3D renderable object.

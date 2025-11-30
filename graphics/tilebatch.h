@@ -38,7 +38,7 @@ namespace gfx
             Automatic, Square, Rectangle
         };
         enum class Projection {
-            Dimetric, AxisAligned
+            Isometric, Dimetric, AxisAligned
         };
 
         struct Tile {

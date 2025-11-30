@@ -803,6 +803,8 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
                 tiles->SetProjection(gfx::TileBatch::Projection::AxisAligned);
             else if (map_view == game::Tilemap::Perspective::Dimetric)
                 tiles->SetProjection(gfx::TileBatch::Projection::Dimetric);
+            else if (map_view == game::Tilemap::Perspective::Isometric)
+                tiles->SetProjection(gfx::TileBatch::Projection::Isometric);
             else BUG("unknown projection");
 
             DrawPacket packet;
@@ -1068,11 +1070,11 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
             }
         }
 
-        const bool add_dimetric_transform = projection == SceneProjection::Dimetric && (is3d || project_3d);
-        if (add_dimetric_transform)
+        const bool add_axonometric_transform = IsAxonometricProjection(projection) && (is3d || project_3d);
+        if (add_axonometric_transform)
         {
             transform.Push(CreateModelMatrix(GameView::AxisAligned));
-            transform.Push(CreateModelMatrix(GameView::Dimetric));
+            transform.Push(CreateModelMatrix(projection));
         }
 
         if (is3d)
@@ -1101,9 +1103,9 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
         }
 
         glm::mat4 world(1.0f);
-        if (add_dimetric_transform)
+        if (add_axonometric_transform)
         {
-            world =  CreateModelMatrix(GameView::Dimetric) *
+            world =  CreateModelMatrix(projection) *
                      CreateModelMatrix(GameView::AxisAligned);
         }
 
@@ -1136,7 +1138,7 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
         // pop model transform.
         transform.Pop();
 
-        if (add_dimetric_transform)
+        if (add_axonometric_transform)
         {
             // pop view based model transform
             transform.Pop();
@@ -1568,11 +1570,11 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
         const auto size = entity_node.GetSize();
         const auto is3d = Is3DShape(*shape);
 
-        const auto add_dimetric_transform = projection == SceneProjection::Dimetric && (is3d || project_3d);
-        if (add_dimetric_transform)
+        const auto add_axonometric_projection = IsAxonometricProjection(projection) && (is3d || project_3d);
+        if (add_axonometric_projection)
         {
             transform.Push(CreateModelMatrix(GameView::AxisAligned));
-            transform.Push(CreateModelMatrix(GameView::Dimetric));
+            transform.Push(CreateModelMatrix(projection));
         }
 
         // The 2D and 3D shapes are different so that the 2D shapes are laid out in
@@ -1661,7 +1663,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
         // pop model transform
         transform.Pop();
 
-        if (add_dimetric_transform)
+        if (add_axonometric_projection)
         {
             // pop view based model transform
             transform.Pop();
@@ -1770,17 +1772,17 @@ void Renderer::CreateLights(const EntityType& entity,
     if (!node_light || !node_light->IsEnabled() || !light_node.light)
         return;
 
-    const auto add_dimetric_transform = projection == SceneProjection::Dimetric;
+    const auto add_axonometric_transform = IsAxonometricProjection(projection);
 
     gfx::Transform light_to_world;
     light_to_world.Scale(light_node.world_scale);
     light_to_world.RotateAroundZ(light_node.world_rotation);
     light_to_world.Translate(light_node.world_pos);
 
-    if (add_dimetric_transform)
+    if (add_axonometric_transform)
     {
         light_to_world.Push(CreateModelMatrix(GameView::AxisAligned));
-        light_to_world.Push(CreateModelMatrix(GameView::Dimetric));
+        light_to_world.Push(CreateModelMatrix(projection));
     }
 
     light_to_world.Push();

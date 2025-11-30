@@ -64,9 +64,9 @@ namespace {
 
     glm::mat4 CreateDimetricModelTransform()
     {
-        constexpr const static glm::vec3 WorldUp = {0.0f, 1.0f, 0.0f};
-        constexpr const static float Yaw   = -90.0f - 45.0f;
-        constexpr const static float Pitch = -30.0f;
+        constexpr static glm::vec3 WorldUp = {0.0f, 1.0f, 0.0f};
+        constexpr static float Yaw   = -90.0f - 45.0f;
+        constexpr static float Pitch = -30.0f;
 
         glm::vec3 position = {0.0f, 0.0f, 0.0f};
 
@@ -78,6 +78,24 @@ namespace {
 
         return glm::lookAt(position, position + direction, WorldUp);
     }
+
+    glm::mat4 CreateIsometricModelTransform()
+    {
+        constexpr static glm::vec3 WorldUp = {0.0f, 1.0f, 0.0f};
+        constexpr static float Yaw   = -90.0f - 45.0f;
+        constexpr static float Pitch = -35.264f;
+
+        glm::vec3 position = {0.0f, 0.0f, 0.0f};
+
+        glm::vec3 direction;
+        direction.x = std::cos(glm::radians(Yaw)) * std::cos(glm::radians(Pitch));
+        direction.y = std::sin(glm::radians(Pitch));
+        direction.z = std::sin(glm::radians(Yaw)) * std::cos(glm::radians(Pitch));
+        direction = glm::normalize(direction);
+
+        return glm::lookAt(position, position + direction, WorldUp);
+    }
+
 } // namespace
 
 namespace engine
@@ -204,6 +222,13 @@ glm::mat4 CreateModelMatrix(GameView view)
     else if (view == GameView::Dimetric)
     {
         const static auto dimetric_rotation = CreateDimetricModelTransform();
+        const static auto plane_rotation = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3 { 1.0f, 0.0f, 0.0f });
+        const static auto model_matrix = dimetric_rotation * plane_rotation;
+        return model_matrix;
+    }
+    else if (view == GameView::Isometric)
+    {
+        const static auto dimetric_rotation = CreateIsometricModelTransform();
         const static auto plane_rotation = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3 { 1.0f, 0.0f, 0.0f });
         const static auto model_matrix = dimetric_rotation * plane_rotation;
         return model_matrix;
@@ -465,7 +490,7 @@ glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
     const auto tile_left_top     = tile_to_render * glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
     const auto tile_right_bottom = tile_to_render * glm::vec4{tile_width_units, tile_height_units, 0.0f, 1.0f};
 
-    if (perspective == GameView::Dimetric)
+    if (perspective == GameView::Dimetric || perspective == GameView::Isometric)
     {
         const auto tile_width_render_units  = glm::length(tile_left_bottom - tile_right_top);
         const auto tile_height_render_units = glm::length(tile_left_top - tile_right_bottom);

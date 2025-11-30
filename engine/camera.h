@@ -76,14 +76,15 @@ namespace engine
     {
         // NOTE: no *class* on purpose, the outer struct is the class
         enum EnumValue {
-            // Orthographic axis aligned projection infers a camera position that
+            // Axis aligned view infers a camera position that
             // is perpendicular to one of the coordinate space axis. This can be
             // used to produce "top down" or "side on" views.
             // When used in games this view can be used for example for side-scrollers,
             // top-down shooters, platform and puzzle games.
             AxisAligned,
-            // Orthographic dimetric perspective infers a camera position that is
-            // angled at a fixed yaw and tilt (pitch) to look in a certain direction.
+            // Dimetric view infers a camera position that is angled at a
+            // fixed yaw and tilt (pitch) to look in a certain direction.
+            // The angles are (degrees) 45 around the Y axis and -30 around X (camera points down)
             // This camera vantage point is then combined with an orthographic
             // projection to produce a 2D rendering where multiple sides of an
             // object are visible but without any perspective foreshortening.
@@ -91,6 +92,17 @@ namespace engine
             // This is often (incorrectly) called "isometric" even though mathematically
             // isometric and dimetric are not the same projections.
             Dimetric,
+            // Isometric view infers a camera position that is angled at a
+            // fixed yaw and tilt (pitch) look in a certain direction.
+            // The angles are (degrees) 45 around the Y axis and -35.264 around X (camera points down)
+            // This camera vantage point is then combined with an orthographic
+            // projection to produce a 2D rendering where multiple sides of an
+            // object are visible but without any perspective foreshortening.
+            // This type of perspective is common in strategy and simulation games.
+            // This is often (incorrectly) called "isometric" even though mathematically
+            // isometric and dimetric are not the same projections.
+            Isometric,
+
             // todo: ObliqueTopDown
             //Oblique
         };
@@ -105,7 +117,20 @@ namespace engine
                 value = EnumValue::AxisAligned;
             else if (view == game::RenderView::Dimetric)
                 value = EnumValue::Dimetric;
+            else if (view == game::RenderView::Isometric)
+                value = EnumValue::Isometric;
             else BUG("Unknown tilemap perspective.");
+        }
+        GameView(game::SceneProjection view) noexcept
+        {
+            if (view == game::SceneProjection::AxisAlignedOrthographic ||
+                view == game::SceneProjection::AxisAlignedPerspective)
+                value = EnumValue::AxisAligned;
+            else if (view == game::SceneProjection::Dimetric)
+                value = EnumValue::Dimetric;
+            else if (view == game::SceneProjection::Isometric)
+                value = EnumValue::Isometric;
+            else BUG("Missing projection");
         }
         operator EnumValue () const noexcept
         {

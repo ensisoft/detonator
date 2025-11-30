@@ -28,6 +28,7 @@
 #include "engine/enum.h"
 #include "graphics/drawable.h"
 #include "graphics/material_class.h"
+#include "game/enum.h"
 #include "game/scene_class.h"
 #include "game/timeline_animator.h"
 #include "game/timeline_property_animator.h"
@@ -54,8 +55,8 @@ namespace engine {
 } // namespace
 
 namespace game {
+    std::string TranslateEnum(SceneProjection projection);
     std::string TranslateEnum(SceneClass::BasicFogMode mode);
-    std::string TranslateEnum(SceneClass::SceneProjection projection);
     std::string TranslateEnum(SceneClass::SceneShadingMode mode);
     std::string TranslateEnum(AnimatorClass::Type type);
     std::string TranslateEnum(PropertyAnimatorClass::PropertyName name);

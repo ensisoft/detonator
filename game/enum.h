@@ -116,7 +116,9 @@ namespace game {
         // This type of perspective is common in strategy and simulation games.
         // This is often (incorrectly) called "isometric" even though mathematically
         // isometric and dimetric are not the same 2D projections.
-        Dimetric
+        Dimetric,
+        // todo
+        Isometric
     };
 
     // Projection defines how objects are transformed geometrically
@@ -137,9 +139,16 @@ namespace game {
         AxisAlignedOrthographic,
         AxisAlignedPerspective,
         Dimetric,
-        //Isometric,
+        Isometric,
         //Oblique
     };
+
+    inline bool IsAxonometricProjection(SceneProjection p) noexcept
+    {
+        if (p == SceneProjection::Dimetric || p == SceneProjection::Isometric)
+            return true;
+        return false;
+    }
 
     enum class CoordinateSpace {
         // The entity exists in scene space, meaning it is positioned and transformed

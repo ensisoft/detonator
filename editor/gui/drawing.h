@@ -492,13 +492,18 @@ private:
             model.Push(engine::CreateModelMatrix(engine::GameView::AxisAligned));
             model.Push(engine::CreateModelMatrix(engine::GameView::Dimetric));
         }
+        else if (mProjection == game::SceneProjection::Isometric)
+        {
+            model.Push(engine::CreateModelMatrix(engine::GameView::AxisAligned));
+            model.Push(engine::CreateModelMatrix(engine::GameView::Isometric));
+        }
 
         if (mGizmo == TransformGizmo3D::Translate)
             DrawTranslateGizmo(node, model, packets, mProjection, mHandle);
         else if (mGizmo == TransformGizmo3D::Rotate)
             DrawRotateGizmo(node, model, packets, mProjection, mHandle);
 
-        if (mProjection == game::SceneProjection::Dimetric)
+        if (mProjection == game::SceneProjection::Dimetric || mProjection == game::SceneProjection::Isometric)
         {
             model.Pop();
             model.Pop();
