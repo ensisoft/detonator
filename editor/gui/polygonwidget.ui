@@ -440,21 +440,15 @@
         </spacer>
        </item>
        <item>
-        <widget class="QCheckBox" name="chkSnap">
+        <widget class="QPushButton" name="btnHamburger">
          <property name="text">
-          <string>Snap to grid</string>
+          <string/>
          </property>
-         <property name="checked">
-          <bool>true</bool>
+         <property name="icon">
+          <iconset resource="../resource/resource.qrc">
+           <normaloff>:/16x16_ico_png/hamburger.png</normaloff>:/16x16_ico_png/hamburger.png</iconset>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="chkShowGrid">
-         <property name="text">
-          <string>Show grid</string>
-         </property>
-         <property name="checked">
+         <property name="flat">
           <bool>true</bool>
          </property>
         </widget>
@@ -579,6 +573,28 @@
     <string>Customize a built-in shader</string>
    </property>
   </action>
+  <action name="chkShowGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Grid</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle show reference grid</string>
+   </property>
+  </action>
+  <action name="chkSnap">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Snap to grid</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle whether to snap vertices to the grid or not</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -612,8 +628,6 @@
   <tabstop>blueprints</tabstop>
   <tabstop>btnResetBlueprint</tabstop>
   <tabstop>kRandom</tabstop>
-  <tabstop>chkSnap</tabstop>
-  <tabstop>chkShowGrid</tabstop>
   <tabstop>widgetColor</tabstop>
  </tabstops>
  <resources>
