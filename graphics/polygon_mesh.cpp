@@ -210,7 +210,7 @@ ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& d
         src = MakeSimple3DVertexShader(device, env.use_instancing);
     else if (mesh == MeshType::Model3DRenderMesh)
         src = MakeModel3DVertexShader(device, env.use_instancing); // todo:
-    else if (mesh == MeshType::Dimetric2DRenderMesh)
+    else if (mesh == MeshType::Dimetric2DRenderMesh || mesh == MeshType::Isometric2DRenderMesh)
         src = MakePerceptual3DVertexShader(device, env.use_instancing);
     else BUG("No such vertex shader");
 
@@ -568,7 +568,8 @@ bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, Device& devi
     program.SetUniform("kRandom",(float)mRandom);
     program.SetUniform("kDrawableFlags", flags);
 
-    if (GetMeshType() == MeshType::Dimetric2DRenderMesh)
+    const auto type = GetMeshType();
+    if (type == MeshType::Dimetric2DRenderMesh || type == MeshType::Isometric2DRenderMesh)
     {
         ASSERT(mPerceptualGeometry.has_value());
         const auto& geometry = mPerceptualGeometry.value();
