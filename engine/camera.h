@@ -299,6 +299,4 @@ namespace engine
                                     const glm::vec2& tile_size,
                                     GameView perspective);
 
-    glm::vec3 GetTileCuboidFactors(GameView perspective);
-
 } // namespace

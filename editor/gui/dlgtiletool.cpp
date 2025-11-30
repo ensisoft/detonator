@@ -370,7 +370,6 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
 
     const auto tile_render_width_scale  = mClass->GetTileRenderWidthScale();
     const auto tile_render_height_scale = mClass->GetTileRenderHeightScale();
-    const auto cuboid_scale = engine::GetTileCuboidFactors(perspective);
     const auto tile_size = glm::vec3{tile_width_units, tile_height_units, tile_depth_units};
     const auto render_size = engine::ComputeTileRenderSize(tile_projection_transform_matrix,
                                                            {tile_width_units, tile_height_units},
@@ -392,7 +391,7 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
 
             gfx::TileBatch batch;
             batch.AddTile(tile);
-            batch.SetTileWorldSize(tile_size * cuboid_scale);
+            batch.SetTileWorldSize(tile_size);
             batch.SetTileRenderWidth(render_size.x * tile_render_width_scale);
             batch.SetTileRenderHeight(render_size.y * tile_render_height_scale);
             batch.SetTileShape(gfx::TileBatch::TileShape::Automatic);
