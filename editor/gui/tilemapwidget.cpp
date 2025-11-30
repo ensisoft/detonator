@@ -378,7 +378,6 @@ public:
         const auto tile_depth_units  = mState.klass->GetTileDepth() * tile_scaler;
         const auto tile_render_width_scale = mState.klass->GetTileRenderWidthScale();
         const auto tile_render_height_scale = mState.klass->GetTileRenderHeightScale();
-        const auto cuboid_scale = engine::GetTileCuboidFactors(perspective);
         const auto tile_size = glm::vec3{tile_width_units, tile_height_units, tile_depth_units};
         const auto render_size = engine::ComputeTileRenderSize(tile_projection_transform_matrix,
                                                                {tile_width_units, tile_height_units},
@@ -403,7 +402,7 @@ public:
 
             gfx::TileBatch batch;
             batch.AddTile(tile);
-            batch.SetTileWorldSize(tile_size * cuboid_scale);
+            batch.SetTileWorldSize(tile_size);
             batch.SetTileRenderWidth(render_size.x * tile_render_width_scale);
             batch.SetTileRenderHeight(render_size.y * tile_render_height_scale);
             batch.SetTileShape(gfx::TileBatch::TileShape::Automatic);
@@ -650,7 +649,6 @@ public:
         const auto tile_depth_units  = mState.klass->GetTileDepth() * tile_scaler;
         const auto tile_render_width_scale = mState.klass->GetTileRenderWidthScale();
         const auto tile_render_height_scale = mState.klass->GetTileRenderHeightScale();
-        const auto cuboid_scale = engine::GetTileCuboidFactors(perspective);
         const auto tile_size = glm::vec3{tile_width_units, tile_height_units, tile_depth_units};
         const auto render_size = engine::ComputeTileRenderSize(tile_projection_transform_matrix,
                                                                {tile_width_units, tile_height_units},
@@ -679,7 +677,7 @@ public:
 
                 gfx::TileBatch batch;
                 batch.AddTile(tile);
-                batch.SetTileWorldSize(tile_size * cuboid_scale);
+                batch.SetTileWorldSize(tile_size);
                 batch.SetTileRenderWidth(render_size.x * tile_render_width_scale);
                 batch.SetTileRenderHeight(render_size.y * tile_render_height_scale);
                 batch.SetTileShape(gfx::TileBatch::TileShape::Automatic);
@@ -2600,7 +2598,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         const auto layer_tile_height = tile_height * tile_scaler;
         const auto layer_tile_depth  = tile_depth * tile_scaler;
         const auto layer_tile_size   = glm::vec3{layer_tile_width, layer_tile_height, layer_tile_depth};
-        const auto cuboid_scale = engine::GetTileCuboidFactors(map_view);
 
         // draw the map boundary
         {
@@ -2675,12 +2672,11 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
 
         {
             const auto base_size = glm::vec3{tile_width, tile_height, tile_depth};
-            const auto size_factors = engine::GetTileCuboidFactors(mState.klass->GetPerspective());
 
             auto checkerboard = mState.workspace->GetMaterialClassById("_checkerboard");
             gfx::Transform model;
             model.Translate(0.5f, 0.5f, -0.5f);
-            model.Scale(base_size * size_factors);
+            model.Scale(base_size);
             tile_painter.Draw(gfx::Cube(), model, gfx::MaterialInstance(checkerboard));
         }
 
