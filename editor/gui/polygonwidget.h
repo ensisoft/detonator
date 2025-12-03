@@ -94,7 +94,13 @@ namespace gui
         void on_tableView_customContextMenuRequested(const QPoint& point);
 
     private:
+        using PolygonClassHandle = std::shared_ptr<const gfx::PolygonMeshClass>;
+
         void PaintScene(gfx::Painter& painter, double secs);
+        void PaintEditScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device);
+        void PaintLitAxonometricScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device) const;
+        void Paint3DAxonometricScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device) const;
+        void PaintViewRect(const QRect& rect, gfx::Device* device) const;
         void OnMousePress(QMouseEvent* mickey);
         void OnMouseRelease(QMouseEvent* mickey);
         void OnMouseMove(QMouseEvent* mickey);
@@ -107,8 +113,7 @@ namespace gui
         void PaintVertices2D(gfx::Painter& painter) const;
 
         template<typename Vertex>
-        void PaintVertices25D(const glm::vec3& tile_base_size,
-            gfx::Painter& painter, gfx::Painter& tile_painter) const;
+        void PaintVertices25D(gfx::Painter& painter) const;
 
         template<typename Vertex>
         void PickVertex2D(const QPoint& pick_point, float width, float height);
@@ -117,14 +122,25 @@ namespace gui
         void InsertVertex2D(const QPoint& click_point, float width, float height);
 
         template<typename Vertex>
-        void HandleWheelEvent(const QWheelEvent* wheel);
+        void ScrollAxonometricVertex(const QWheelEvent* wheel);
+        void ScrollAxonometricLight(const QWheelEvent* wheel);
 
         MeshType GetMeshType() const;
         void SetMeshType(MeshType mesh);
         void CreateMeshBuilder();
         void SetSelectedVertexNormal(const glm::vec3& normal);
+        void ConfigureTilePainter(gfx::Painter& painter) const;
+
+        enum class ViewType {
+            EditView,
+            LitView,
+            Axo3DView
+        };
 
         QRect GetMainRenderRect() const;
+        QRect GetLitRenderRect() const;
+        QRect GetAxo3DRenderRect() const;
+        QRect GetViewRect(ViewType view) const;
 
     private:
         Ui::ShapeWidget mUI;
@@ -152,7 +168,7 @@ namespace gui
             // the current workspace.
             app::Workspace* workspace = nullptr;
             // the current polygon we're editing.
-            gfx::PolygonMeshClass polygon;
+            std::shared_ptr<gfx::PolygonMeshClass> polygon;
             // the builder tool for editing the shape
             std::unique_ptr<gfx::tool::IPolygonBuilder> builder;
             // the data table.
@@ -172,6 +188,19 @@ namespace gui
         // Index of the currently selected vertex.
         std::size_t mVertexIndex = 0xffffff;
         std::optional<float> mPixelDistance2Dand3D;
+
+        unsigned mAxonometricTextureWidth  = 0;
+        unsigned mAxonometricTextureHeight = 0;
+        glm::vec3 mAxonometricTileBaseSize = {0.0f, 0.0f, 0.0f};
+        glm::vec3 mAxonometricLightPosition = {0.0f, 0.0f, 0.0f};
+        ViewType mMainView = ViewType::EditView;
+
+        enum class LightType {
+            None, Spot, Point, Directional
+        };
+        LightType mLightType = LightType::Point;
+
+        mutable std::vector<std::string> mMessages;
     private:
         // the original hash value that is used to
         // check against if there are unsaved changes.

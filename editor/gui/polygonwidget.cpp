@@ -16,6 +16,8 @@
 
 #define LOGTAG "gui"
 
+#include "polygonwidget.h"
+
 #include "warnpush.h"
 #  include <QMessageBox>
 #  include <QVector2D>
@@ -40,6 +42,7 @@
 #include "graphics/utility.h"
 #include "graphics/linebatch.h"
 #include "graphics/simple_shape.h"
+#include "graphics/shader_programs.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/guidegrid.h"
 #include "graphics/texture.h"
@@ -74,7 +77,7 @@ std::vector<VertexType> MakeVerts2D(const std::vector<QPoint>& points, float wid
     return vertices;
 }
 
-bool FindExpectedDimetricGuideTextureSize(const gfx::Material& material, gfx::Device& device,
+bool FindAxonometricTextureSize(const gfx::Material& material, gfx::Device& device,
     unsigned* texture_width, unsigned* texture_height)
 {
     const auto* material_class = material.GetClass();
@@ -737,7 +740,7 @@ public:
         builder.AddVertices(MakeVerts2D<VertexType>(points, view.width, view.height));
         builder.AddDrawCommand(cmd);
 
-        gfx::PolygonMeshClass current(mState.polygon.GetId() + "_2");
+        gfx::PolygonMeshClass current(mState.polygon->GetId() + "_2");
         builder.BuildPoly(current);
         current.SetStatic(false);
 
@@ -766,6 +769,7 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     DEBUG("Create PolygonWidget");
 
     mState.workspace = workspace;
+    mState.polygon = std::make_shared<gfx::PolygonMeshClass>();
 
     mUI.setupUi(this);
     mUI.widget->onPaintScene   = std::bind(&ShapeWidget::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
@@ -806,8 +810,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
     SetValue(mUI.name, QString("My Shape"));
-    SetValue(mUI.ID, mState.polygon.GetId());
-    SetValue(mUI.staticInstance, mState.polygon.IsStatic());
+    SetValue(mUI.ID, mState.polygon->GetId());
+    SetValue(mUI.staticInstance, mState.polygon->IsStatic());
     SetValue(mUI.shaderFile, "Built-in Shader");
     setWindowTitle(GetValue(mUI.name));
     setFocusPolicy(Qt::StrongFocus);
@@ -817,22 +821,22 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     SetValue(mUI.cmbGrid, GridDensity::Grid20x20);
     SetValue(mUI.cmbMeshType, MeshType::Simple2DRenderMesh);
 
-    mState.polygon.SetName(GetValue(mUI.name));
-    mState.polygon.SetStatic(GetValue(mUI.staticInstance));
+    mState.polygon->SetName(GetValue(mUI.name));
+    mState.polygon->SetStatic(GetValue(mUI.staticInstance));
     SetMeshType(MeshType::Simple2DRenderMesh);
     CreateMeshBuilder();
-    mOriginalHash = mState.polygon.GetHash();
+    mOriginalHash = mState.polygon->GetHash();
 }
 
 ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resource) : ShapeWidget(workspace)
 {
     DEBUG("Editing shape '%1'", resource.GetName());
 
-    mState.polygon = *resource.GetContent<gfx::PolygonMeshClass>();
-    mOriginalHash = mState.polygon.GetHash();
+    *mState.polygon = *resource.GetContent<gfx::PolygonMeshClass>();
+    mOriginalHash = mState.polygon->GetHash();
 
     CreateMeshBuilder();
-    mState.builder->InitFrom(mState.polygon);
+    mState.builder->InitFrom(*mState.polygon);
 
     QString material;
     GetProperty(resource, "material", &material);
@@ -846,15 +850,21 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "widget",         mUI.widget);
     GetUserProperty(resource, "splitter",       mUI.splitter);
     GetUserProperty(resource, "kRandom",        mUI.kRandom);
+    unsigned main_view_value = 0;
+    GetUserProperty(resource, "main_view", &main_view_value);
+    if (main_view_value == static_cast<unsigned>(ViewType::EditView))
+        mMainView = ViewType::EditView;
+    else if (main_view_value == static_cast<unsigned>(ViewType::LitView))
+        mMainView = ViewType::LitView;
 
     SetValue(mUI.name, resource.GetName());
-    SetValue(mUI.ID, mState.polygon.GetId());
-    SetValue(mUI.staticInstance, mState.polygon.IsStatic());
-    SetValue(mUI.shaderFile, mState.polygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
+    SetValue(mUI.ID, mState.polygon->GetId());
+    SetValue(mUI.staticInstance, mState.polygon->IsStatic());
+    SetValue(mUI.shaderFile, mState.polygon->HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
     SetValue(mUI.blueprints, ListItemId(material));
     SetValue(mUI.cmbMeshType, GetMeshType());
-    SetEnabled(mUI.btnResetShader, mState.polygon.HasShaderSrc());
-    SetEnabled(mUI.actionClear, mState.polygon.HasInlineData());
+    SetEnabled(mUI.btnResetShader, mState.polygon->HasShaderSrc());
+    SetEnabled(mUI.actionClear, mState.polygon->HasInlineData());
 
     if (!material.isEmpty())
     {
@@ -942,12 +952,13 @@ bool ShapeWidget::SaveState(Settings& settings) const
 {
     data::JsonObject json;
 
-    mState.builder->BuildPoly(const_cast<gfx::PolygonMeshClass&>(mState.polygon));
-    mState.polygon.IntoJson(json);
+    mState.builder->BuildPoly(*const_cast<gfx::PolygonMeshClass*>(mState.polygon.get()));
+    mState.polygon->IntoJson(json);
 
     settings.SetValue("Polygon", "content", json);
     settings.SetValue("Polygon", "material", (QString)GetItemId(mUI.blueprints));
     settings.SetValue("Polygon", "hash", mOriginalHash);
+    settings.SetValue("Polygon", "main_view", mMainView);
     settings.SaveWidget("Polygon", mUI.name);
     settings.SaveWidget("Polygon", mUI.chkShowGrid);
     settings.SaveWidget("Polygon", mUI.chkSnap);
@@ -968,6 +979,7 @@ bool ShapeWidget::LoadState(const Settings& settings)
     settings.GetValue("Polygon", "content", &json);
     settings.GetValue("Polygon", "material", &material);
     settings.GetValue("Polygon", "hash", &mOriginalHash);
+    settings.GetValue("Polygon", "main_view", &mMainView);
     settings.LoadWidget("Polygon", mUI.name);
     settings.LoadWidget("Polygon", mUI.chkShowGrid);
     settings.LoadWidget("Polygon", mUI.chkSnap);
@@ -980,19 +992,19 @@ bool ShapeWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Polygon", mUI.splitter);
     settings.LoadWidget("Polygon", mUI.kRandom);
 
-    if (!mState.polygon.FromJson(json))
+    if (!mState.polygon->FromJson(json))
         WARN("Failed to restore polygon shape state.");
 
-    SetValue(mUI.ID, mState.polygon.GetId());
-    SetValue(mUI.staticInstance, mState.polygon.IsStatic());
+    SetValue(mUI.ID, mState.polygon->GetId());
+    SetValue(mUI.staticInstance, mState.polygon->IsStatic());
     SetValue(mUI.blueprints, ListItemId(material));
-    SetValue(mUI.shaderFile, mState.polygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
+    SetValue(mUI.shaderFile, mState.polygon->HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
     SetValue(mUI.cmbMeshType, GetMeshType());
-    SetEnabled(mUI.btnResetShader, mState.polygon.HasShaderSrc());
-    SetEnabled(mUI.actionClear, mState.polygon.HasInlineData());
+    SetEnabled(mUI.btnResetShader, mState.polygon->HasShaderSrc());
+    SetEnabled(mUI.actionClear, mState.polygon->HasInlineData());
 
     CreateMeshBuilder();
-    mState.builder->InitFrom(mState.polygon);
+    mState.builder->InitFrom(*mState.polygon);
 
     on_blueprints_currentIndexChanged(0);
     return true;
@@ -1055,7 +1067,7 @@ void ShapeWidget::Save()
 
 bool ShapeWidget::HasUnsavedChanges() const
 {
-    auto clone = mState.polygon.Copy();
+    auto clone = mState.polygon->Copy();
     auto* poly = dynamic_cast<gfx::PolygonMeshClass*>(clone.get());
 
     mState.builder->BuildPoly(*poly);
@@ -1129,9 +1141,9 @@ void ShapeWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.name))
         return;
 
-    mState.builder->BuildPoly(mState.polygon);
-    mState.polygon.SetName(GetValue(mUI.name));
-    mState.polygon.SetStatic(GetValue(mUI.staticInstance));
+    mState.builder->BuildPoly(*mState.polygon);
+    mState.polygon->SetName(GetValue(mUI.name));
+    mState.polygon->SetStatic(GetValue(mUI.staticInstance));
 
     app::CustomShapeResource resource(mState.polygon, GetValue(mUI.name));
     SetProperty(resource, "material", (QString)GetItemId(mUI.blueprints));
@@ -1145,9 +1157,10 @@ void ShapeWidget::on_actionSave_triggered()
     SetUserProperty(resource, "widget",         mUI.widget);
     SetUserProperty(resource, "splitter",       mUI.splitter);
     SetUserProperty(resource, "kRandom",        mUI.kRandom);
+    SetUserProperty(resource, "main_view", static_cast<unsigned>(mMainView));
 
     mState.workspace->SaveResource(resource);
-    mOriginalHash = mState.polygon.GetHash();
+    mOriginalHash = mState.polygon->GetHash();
 }
 
 void ShapeWidget::on_actionNewTriangleFan_triggered()
@@ -1179,7 +1192,7 @@ void ShapeWidget::on_actionShowShader_triggered()
     gfx::Drawable::Environment environment;
     environment.editing_mode  = false; // we want to see the shader as it will be, so using false here
     environment.use_instancing = false;
-    const auto& source = mState.polygon.GetShader(environment, *device);
+    const auto& source = mState.polygon->GetShader(environment, *device);
 
     DlgTextEdit dlg(this);
     dlg.SetText(source.GetSource(), "GLSL");
@@ -1198,10 +1211,10 @@ void ShapeWidget::on_actionCustomizeShader_triggered()
         return;
     }
 
-    mCustomizedSource = mState.polygon.GetShaderSrc();
-    if (!mState.polygon.HasShaderSrc())
+    mCustomizedSource = mState.polygon->GetShaderSrc();
+    if (!mState.polygon->HasShaderSrc())
     {
-        mState.polygon.SetShaderSrc(R"(
+        mState.polygon->SetShaderSrc(R"(
 // this is your custom vertex transform function.
 // you can modify the incoming vertex data here as want.
 void CustomVertexTransform(inout VertexData vs) {
@@ -1213,26 +1226,26 @@ void CustomVertexTransform(inout VertexData vs) {
 
     mShaderEditor = new DlgTextEdit(this);
     mShaderEditor->LoadGeometry(mState.workspace, "polygon-shader-editor-geometry");
-    mShaderEditor->SetText(mState.polygon.GetShaderSrc(), "GLSL");
+    mShaderEditor->SetText(mState.polygon->GetShaderSrc(), "GLSL");
     mShaderEditor->SetTitle("Shader Source");
     mShaderEditor->EnableSaveApply();
     mShaderEditor->showFU();
     mShaderEditor->finished = [this](int ret) {
         if (ret == QDialog::Rejected)
-            mState.polygon.SetShaderSrc(mCustomizedSource);
+            mState.polygon->SetShaderSrc(mCustomizedSource);
         else if (ret == QDialog::Accepted)
-            mState.polygon.SetShaderSrc(mShaderEditor->GetText());
+            mState.polygon->SetShaderSrc(mShaderEditor->GetText());
         mShaderEditor->SaveGeometry(mState.workspace, "polygon-shader-editor-geometry");
         mShaderEditor->deleteLater();
         mShaderEditor = nullptr;
 
-        SetValue(mUI.shaderFile, mState.polygon.HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
-        SetEnabled(mUI.btnResetShader, mState.polygon.HasShaderSrc());
+        SetValue(mUI.shaderFile, mState.polygon->HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
+        SetEnabled(mUI.btnResetShader, mState.polygon->HasShaderSrc());
 
         mUI.widget->GetPainter()->ClearErrors();
     };
     mShaderEditor->applyFunction = [this]() {
-        mState.polygon.SetShaderSrc(mShaderEditor->GetText());
+        mState.polygon->SetShaderSrc(mShaderEditor->GetText());
 
         mUI.widget->GetPainter()->ClearErrors();
     };
@@ -1256,7 +1269,7 @@ void ShapeWidget::on_blueprints_currentIndexChanged(int)
 
 void ShapeWidget::on_btnResetShader_clicked()
 {
-    mState.polygon.SetShaderSrc(std::string{});
+    mState.polygon->SetShaderSrc(std::string{});
     SetValue(mUI.shaderFile, "Built-In Shader");
     SetEnabled(mUI.btnResetShader, false);
 
@@ -1280,7 +1293,7 @@ void ShapeWidget::on_cmbMeshType_currentIndexChanged(int)
     if (mesh_type == GetMeshType())
         return;
 
-    if (mState.polygon.GetVertexCount())
+    if (mState.polygon->GetVertexCount())
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Icon::Question);
@@ -1388,67 +1401,44 @@ bool ShapeWidget::OnEscape()
 
 void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 {
-    const auto& main_rect = GetMainRenderRect();
-    const float width = main_rect.width();
-    const float height = main_rect.height();
-    const float xoffset = main_rect.x();
-    const float yoffset = main_rect.y();
+    mMessages.clear();
+
+    auto* device = painter.GetDevice();
+
+    // hack hack if we have the main window preview window displaying this
+    // same custom shape then we have a competition of hash values used
+    // to compare the polygon data content against the content in the GPU
+    // buffer. And the competition is between the class object stored in
+    // the workspace that has the same Class ID but different content hash
+    // and *this* polygon class instance here that is a copy but maps to
+    // the same class ID but with different hash (because it has different
+    // content when it's being edited).
+    // so hack around this problem by adding a suffix here.
+    auto poly = std::make_shared<gfx::PolygonMeshClass>(mState.polygon->GetId() + "_1");
+    poly->SetMeshType(mState.polygon->GetMeshType());
+    poly->SetShaderSrc(mState.polygon->GetShaderSrc());
+    poly->SetName(mState.polygon->GetName());
+    mState.builder->BuildPoly(*poly);
+
+    // set to true since we're constructing this polygon on every frame
+    // without this we'll eat all the static vertex/index buffers. argh!
+    poly->SetDynamic(true);
 
     const auto mesh_type = GetMeshType();
-
-    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
-
-    painter.SetViewport(xoffset, yoffset, width, height);
-    painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width, height));
-
-    std::unique_ptr<gfx::Painter> tile_painter;
-    glm::vec3 tile_base_size;
-    mPixelDistance2Dand3D.reset();
-
     if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
     {
-        auto* device = painter.GetDevice();
-
-        const auto game_view = mesh_type == MeshType::Dimetric2DRenderMesh
-                                   ? engine::GameView::EnumValue::Dimetric
-                                   : engine::GameView::EnumValue::Isometric;
-
-        unsigned guide_texture_width  = 1024;
-        unsigned guide_texture_height = 1024;
-        std::string guide_texture_gpu_id = "DimetricGuide";
+        mAxonometricTextureWidth  = 1024;
+        mAxonometricTextureHeight = 1024;
         if (mBlueprint)
         {
             unsigned texture_width  = 0;
             unsigned texture_height = 0;
-            if (FindExpectedDimetricGuideTextureSize(*mBlueprint, *device, &texture_width, &texture_height))
+            if (FindAxonometricTextureSize(*mBlueprint, *device, &texture_width, &texture_height))
             {
-                guide_texture_gpu_id = "DimetricGuide/" + mBlueprint->GetClassId();
                 const auto aspect = static_cast<float>(texture_width)/static_cast<float>(texture_height);
-                guide_texture_width = guide_texture_width * aspect;
+                mAxonometricTextureWidth  = mAxonometricTextureWidth * aspect;
             }
         }
-        /*
-        if (auto* guide_texture = RenderDimetricGuide(guide_texture_gpu_id, *device, guide_texture_width, guide_texture_height))
-        {
-            auto material = gfx::CreateMaterialFromTexture(guide_texture);
-            gfx::Transform model;
-            model.Resize(width, height);
-            painter.Draw(gfx::Rectangle(), model, material);
-        }
-        */
-
-        const auto ortho_left = static_cast<float>(guide_texture_width) / -2.0f;
-        const auto ortho_right = static_cast<float>(guide_texture_width) / 2.0f;
-        const auto ortho_bottom = 0.0f;
-        const auto ortho_top = static_cast<float>(guide_texture_height); // / 2.0f;
-
-        tile_painter = std::make_unique<gfx::Painter>();
-        tile_painter->SetDevice(painter.GetDevice());
-        tile_painter->SetViewport(painter.GetViewport());
-        tile_painter->SetSurfaceSize(painter.GetSurfaceSize());
-        tile_painter->SetPixelRatio({1.0f, 1.0f});
-        tile_painter->SetProjectionMatrix(glm::ortho(ortho_left, ortho_right, ortho_bottom, ortho_top, -10000.0f, 10000.0f));
-        tile_painter->SetViewMatrix(engine::CreateModelViewMatrix(game_view, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f));
 
         // solve the size of the tile based on the Pythagoras theorem
         // a² + b² = c²
@@ -1463,21 +1453,75 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         // a point from our scene space visible edge to the tile plane and
         // doubling that distance.
 
-        const auto scene_edge_point = static_cast<float>(guide_texture_width) / 2.0f;
+        const auto game_view = mesh_type == MeshType::Dimetric2DRenderMesh
+                                   ? engine::GameView::EnumValue::Dimetric
+                                   : engine::GameView::EnumValue::Isometric;
+        const auto scene_edge_point = static_cast<float>(mAxonometricTextureWidth) / 2.0f;
         const auto tile_edge_point = engine::MapFromScenePlaneToTilePlane(glm::vec4 { scene_edge_point, 0.0f, 0.0f, 0.0f}, game_view);
         const auto tile_hypotenuse = glm::length(tile_edge_point) * 2.0f;
-        const auto tile_size= static_cast<float>(tile_hypotenuse / std::sqrt(2.0));
+        const auto tile_size = static_cast<float>(tile_hypotenuse / std::sqrt(2.0));
+        mAxonometricTileBaseSize = glm::vec3 { tile_size, tile_size, tile_size };
+
+        PaintLitAxonometricScene(GetViewRect(ViewType::LitView), poly, device);
+        Paint3DAxonometricScene(GetViewRect(ViewType::Axo3DView), poly, device);
+    }
+
+    poly->SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
+
+    PaintEditScene(GetViewRect(ViewType::EditView), poly, device);
+
+    if (mMessages.empty() && mMouseTool)
+    {
+        mMouseTool->DrawHelp(painter);
+    }
+    else
+    {
+        gfx::FPoint point;
+        point.Translate(Margin, Margin);
+        for (const auto& msg : mMessages)
+        {
+            ShowMessage(msg, point, painter);
+            point.Translate(0.0f, 25.0f);
+        }
+    }
+}
+
+void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device)
+{
+    const float width   = rect.width();
+    const float height  = rect.height();
+    const float xoffset = rect.x();
+    const float yoffset = rect.y();
+    const auto mesh_type = GetMeshType();
+    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
+
+    gfx::Painter painter;
+    painter.SetDevice(device);
+    painter.SetSurfaceSize(mUI.widget->width(), mUI.widget->height());
+    painter.SetViewport(xoffset, yoffset, width, height);
+    painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width, height));
+
+    mPixelDistance2Dand3D.reset();
+
+    if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+    {
+        gfx::Painter tile_painter;
+        tile_painter.SetDevice(device);
+        tile_painter.SetSurfaceSize(mUI.widget->width(), mUI.widget->height());
+        tile_painter.SetViewport(xoffset, yoffset, width, height);
+        ConfigureTilePainter(tile_painter);
 
         auto checkerboard = gfx::CreateMaterialFromImage(res::Checkerboard);
 
-        tile_base_size = glm::vec3 { tile_size, tile_size, tile_size };
+        const auto tile_base_size = mAxonometricTileBaseSize;
+        const auto tile_size = tile_base_size.x;
 
         // ground reference
         {
             gfx::Transform tile;
             tile.Resize(tile_base_size);
             tile.MoveTo(-tile_size, -tile_size);
-            tile_painter->Draw(gfx::Rectangle(), tile, checkerboard);
+            tile_painter.Draw(gfx::Rectangle(), tile, checkerboard);
         }
 
         // right back reference
@@ -1489,7 +1533,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
                 tile.RotateAroundX(gfx::FDegrees(-90.0f));
 
             checkerboard.SetUniform("kBaseColor", gfx::Color::Green);
-            tile_painter->Draw(gfx::Rectangle(), tile, checkerboard, gfx::Painter::Culling::None);
+            tile_painter.Draw(gfx::Rectangle(), tile, checkerboard, gfx::Painter::Culling::None);
         }
 
         // left back reference
@@ -1501,7 +1545,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
                 tile.RotateAroundY(gfx::FDegrees(90.0f));
 
             checkerboard.SetUniform("kBaseColor", gfx::Color::Red);
-            tile_painter->Draw(gfx::Rectangle(), tile, checkerboard, gfx::Painter::Culling::None);
+            tile_painter.Draw(gfx::Rectangle(), tile, checkerboard, gfx::Painter::Culling::None);
         }
 
         // unit cube that should completely obscure the tile floor and the back walls.
@@ -1512,7 +1556,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
             tile.MoveTo(-tile_size, -tile_size);
 
             checkerboard.SetUniform("kBaseColor", gfx::Color::White);
-            tile_painter->Draw(gfx::Cube(), tile, checkerboard);
+            tile_painter.Draw(gfx::Cube(), tile, checkerboard);
         }
 
         // putting this computation here since conveniently we have the matrices
@@ -1524,8 +1568,8 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
             const auto& vertex = builder->GetVertex(mVertexIndex);
 
             const auto& projection_matrix_2d = painter.GetProjMatrix();
-            const auto& projection_matrix_3d = tile_painter->GetProjMatrix();
-            const auto& view_matrix_3d = tile_painter->GetViewMatrix();
+            const auto& projection_matrix_3d = tile_painter.GetProjMatrix();
+            const auto& view_matrix_3d = tile_painter.GetViewMatrix();
 
             const auto vertex_2d_clip_space = projection_matrix_2d * glm::vec4 {
                 width * vertex.aPosition.x, height * -vertex.aPosition.y, 0.0f, 1.0f };
@@ -1571,6 +1615,17 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), view,
                      gfx::CreateMaterialFromColor(gfx::Color::LightGray));
     }
+    if (mMainView != ViewType::EditView)
+    {
+        const auto mouse_pos_widget = mUI.widget->mapFromGlobal(QCursor::pos());
+        if (rect.contains(mouse_pos_widget))
+        {
+            gfx::Transform view;
+            view.Resize(width, height);
+            painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), view,
+                         gfx::CreateMaterialFromColor(gfx::Color::Green));
+        }
+    }
 
     const auto alpha = 0.87f;
     static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
@@ -1580,25 +1635,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     // draw the polygon we're working on
     if (GetValue(mUI.chkShowSurfaces))
     {
-        // hack hack if we have the main window preview window displaying this
-        // same custom shape then we have a competition of hash values used
-        // to compare the polygon data content against the content in the GPU
-        // buffer. And the competition is between the class object stored in
-        // the workspace that has the same Class ID but different content hash
-        // and *this* polygon class instance here that is a copy but maps to
-        // the same class ID but with different hash (because it has different
-        // content when it's being edited).
-        // so hack around this problem by adding a suffix here.
-        gfx::PolygonMeshClass poly(mState.polygon.GetId() + "_1");
-        poly.SetShaderSrc(mState.polygon.GetShaderSrc());
-        poly.SetName(mState.polygon.GetName());
-        mState.builder->BuildPoly(poly);
-
-        // set to true since we're constructing this polygon on every frame
-        // without this we'll eat all the static vertex/index buffers. argh!
-        poly.SetDynamic(true);
-
-        gfx::PolygonMeshInstance mesh(poly);
+        gfx::PolygonMeshInstance mesh(polygon);
         mesh.SetTime(mTime);
         mesh.SetRandomValue(GetValue(mUI.kRandom));
 
@@ -1615,7 +1652,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         else if (mesh_type == MeshType::Simple2DShardEffectMesh)
             PaintVertices2D<gfx::ShardVertex2D>(painter);
         else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
-            PaintVertices25D<gfx::Perceptual3DVertex>(tile_base_size, painter, *tile_painter.get());
+            PaintVertices25D<gfx::Perceptual3DVertex>(painter);
         else BUG("Missing mesh type handling.");
     }
 
@@ -1630,20 +1667,12 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         mMouseTool->DrawTool(painter, view);
     }
 
-    const auto actual_width  = static_cast<float>(mUI.widget->width());
-    const auto actual_height = static_cast<float>(mUI.widget->height());
-    painter.SetViewport(0.0f, 0.0f, actual_width, actual_height);
-    painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(actual_width, actual_height));
-
-    if (mMouseTool && painter.GetErrorCount() == 0)
-    {
-        mMouseTool->DrawHelp(painter);
-    }
-
     if (painter.GetErrorCount())
     {
-        ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
-        ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
+        mMessages.push_back("Shader compile error:");
+        for (const auto& msg : painter.GetErrors())
+            mMessages.push_back(msg);
+
         if (mShaderEditor)
             mShaderEditor->ShowError("Shader compile error");
     }
@@ -1652,44 +1681,234 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
         if (mPixelDistance2Dand3D)
         {
             const auto px_diff = static_cast<int>(mPixelDistance2Dand3D.value());
-            ShowMessage("Use mouse wheel + keys 'x', 'y' and 'z' to adjust 3D point", gfx::FPoint(10.0f, 10.0f), painter);
-            ShowMessage(base::FormatString("Point difference %1 px", px_diff), gfx::FPoint(10.0f, 30.0f), painter);
-            if (px_diff == 0)
-                ShowMessage("POINT SET", gfx::FPoint(10.0f, 50.0f), painter);
+            mMessages.push_back("Use mouse wheel + keys 'x', 'y' and 'z' to adjust 3D point");
+            mMessages.push_back(base::FormatString("Point difference %1 px %2", px_diff, px_diff == 0 ? "POINT SET" : ""));
         }
         if (mShaderEditor)
             mShaderEditor->ClearError();
     }
 }
 
+void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClassHandle& poly, gfx::Device* device) const
+{
+    const auto widget_width  = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
+    const auto view_width = static_cast<float>(rect.width());
+    const auto view_height = static_cast<float>(rect.height());
+
+    gfx::Painter painter;
+    painter.SetDevice(device);
+    painter.SetViewport(rect.x(), rect.y(), rect.width(), rect.height());
+    painter.SetSurfaceSize(widget_width, widget_height);
+    painter.SetPixelRatio({1.0f, 1.0f});
+    painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, view_width, 0.0f, view_height, -1000.0f, 1000.0f));
+
+    const auto tile_size = mAxonometricTileBaseSize;
+    const auto light_position  = glm::vec3 { tile_size.x * 0.5f, tile_size.y * 0.5f, -200.0f } + mAxonometricLightPosition;
+    const auto light_direction = glm::vec3 { 0.0f, 0.0f, 1.0f };
+
+    gfx::Transform axonometric_model_to_view;
+    axonometric_model_to_view.Resize(tile_size);
+
+    gfx::PolygonMeshInstance instance(poly);
+    gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
+    geometry.axonometric_model_view = axonometric_model_to_view;
+    instance.SetPerceptualGeometry(geometry);
+
+    gfx::BasicLightProgram lit_program;
+    if (mLightType != LightType::None)
+    {
+        gfx::BasicLightProgram::Light light;
+        if (mLightType == LightType::Point)
+            light.type = gfx::BasicLightProgram::LightType::Point;
+        else if (mLightType == LightType::Spot)
+            light.type = gfx::BasicLightProgram::LightType::Spot;
+        else if (mLightType == LightType::Directional)
+            light.type = gfx::BasicLightProgram::LightType::Directional;
+        else BUG("Missing light type.");
+
+        light.view_position = light_position;
+        light.view_direction = light_direction;
+        light.ambient_color = gfx::Color4f(gfx::Color::White) * 0.5f;
+        light.diffuse_color = gfx::Color4f(gfx::Color::White) * 1.0f;
+        light.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
+        light.quadratic_attenuation = 0.00005;
+        light.spot_half_angle = gfx::FDegrees(35.0f);
+        lit_program.AddLight(light);
+    }
+    // todo: this isn't correct. we should find the camera
+    // position here such that the camera looks at the object
+    // at the correct axonometric angle.
+    lit_program.SetCameraCenter(200.0f, 200.0f, -200.0f);
+
+    gfx::Painter::DrawState state;
+    state.depth_test = gfx::Painter::DepthTest::Disabled;
+    state.culling    = gfx::Painter::Culling::Back;
+    state.line_width = 4.0f;
+
+    gfx::Transform render_model_to_view;
+    render_model_to_view.Resize(view_width, view_height);
+    if (mBlueprint)
+        painter.Draw(instance, render_model_to_view, *mBlueprint, state, lit_program);
+    else painter.Draw(instance, render_model_to_view, gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, lit_program);
+
+    if (mMainView == ViewType::LitView)
+    {
+        gfx::Painter tile_painter;
+        tile_painter.SetDevice(painter.GetDevice());
+        tile_painter.SetViewport(painter.GetViewport());
+        tile_painter.SetSurfaceSize(painter.GetSurfaceSize());
+        ConfigureTilePainter(tile_painter);
+
+        if (mLightType == LightType::Point || mLightType == LightType::Spot)
+        {
+            gfx::FlatShadedColorProgram flat_program;
+            gfx::Transform transform;
+            transform.Resize(40.0f, 40.0f, 40.0f);
+            transform.Translate(-tile_size.x, -tile_size.y);
+            transform.Translate(light_position);
+            tile_painter.Draw(gfx::Sphere(), transform, gfx::CreateMaterialFromColor(gfx::Color::White), state, flat_program);
+        }
+        mMessages.push_back("Use mouse wheel + keys 'x', 'y' and 'z' to adjust light position.");
+        mMessages.push_back("Press 'p' for point light, 's' for spot light and 'd' for directional light.");
+    }
+    PaintViewRect(rect, device);
+}
+
+void ShapeWidget::Paint3DAxonometricScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device) const
+{
+    const auto widget_width  = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
+    const auto view_width = static_cast<float>(rect.width());
+    const auto view_height = static_cast<float>(rect.height());
+
+    gfx::Painter painter;
+    painter.SetDevice(device);
+    painter.SetViewport(rect.x(), rect.y(), rect.width(), rect.height());
+    painter.SetSurfaceSize(widget_width, widget_height);
+    painter.SetPixelRatio({1.0f, 1.0f});
+    painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(-500.0f, 500.0f, 500.0f, -500.0f, -1000.0f, 1000.0f));
+
+    const auto cam_world_pos = glm::vec3(100.0f, 100.0f, 100.0f);
+    const auto cam_look_at = glm::vec3(0.0f, 0.0f, 0.0f);
+    painter.SetViewMatrix(glm::lookAt(cam_world_pos, cam_look_at, glm::vec3(0.0f, 1.0f, 0.0f)));
+
+    gfx::Transform axonometric_model_to_view;
+    gfx::PolygonMeshInstance instance(polygon);
+    gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
+    geometry.axonometric_model_view = axonometric_model_to_view;
+    geometry.enable_perceptual_3D   = true;
+    instance.SetPerceptualGeometry(geometry);
+
+    gfx::Painter::DrawState state;
+    state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
+    state.culling    = gfx::Painter::Culling::Back;
+
+    const auto size = glm::vec3 {300.0f, 300.0f, 300.0f };
+    const auto time = base::GetTime();
+    auto checkerboard = gfx::CreateMaterialFromImage(res::Checkerboard);
+
+    double angle = time * 30.0f;
+    if (angle > 360.0f)
+        angle -= 360.0f;
+
+    gfx::FlatShadedColorProgram flat_program;
+    gfx::Transform transform;
+    transform.RotateAroundY(gfx::FDegrees(-angle));
+
+    transform.Push();
+        transform.Resize(size);
+        transform.RotateAroundX(gfx::FDegrees(90.0f));
+        transform.Translate(-size.x*0.5f, 0.0f, -size.y*0.5f);
+        transform.Translate(0.0f, -100.0f,  0.0f);
+
+    painter.Draw(instance, transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, flat_program);
+    painter.Draw(gfx::Rectangle(), transform, checkerboard, state, flat_program);
+
+    PaintViewRect(rect, device);
+}
+
+void ShapeWidget::PaintViewRect(const QRect& rect, gfx::Device* device) const
+{
+    const auto widget_width  = mUI.widget->width();
+    const auto widget_height = mUI.widget->height();
+    const auto view_width = static_cast<float>(rect.width());
+    const auto view_height = static_cast<float>(rect.height());
+
+    gfx::Painter painter;
+    painter.SetDevice(device);
+    painter.SetViewport(rect.x(), rect.y(), rect.width(), rect.height());
+    painter.SetSurfaceSize(widget_width, widget_height);
+    painter.SetPixelRatio({1.0f, 1.0f});
+    painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, view_width, 0.0f, view_height, -1000.0f, 1000.0f));
+
+    gfx::Transform model;
+    // a little tweak for OpenGL on windows that would not otherwise rasterize
+    // the bottom and right edges
+    model.Resize(view_width-2.0f, view_height-2.0f);
+    model.Translate(1.0f, 1.0f);
+    const auto mouse_pos_widget = mUI.widget->mapFromGlobal(QCursor::pos());
+    const auto outline_color = rect.contains(mouse_pos_widget) ? gfx::Color::Green : gfx::Color::DarkGray;
+    painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), model,
+                 gfx::CreateMaterialFromColor(outline_color));
+}
+
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 {
     const auto& rect = GetMainRenderRect();
-    const float xoffset = rect.x();
-    const float yoffset = rect.y();
-    const float width  = rect.width();
-    const float height = rect.height();
-    const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
 
-    if (!mMouseTool)
+    if (rect.contains(mickey->pos()))
+    {
+        const float width  = rect.width();
+        const float height = rect.height();
+        const float xoffset = rect.x();
+        const float yoffset = rect.y();
+        const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
+
+        if (mMainView == ViewType::EditView)
+        {
+            if (!mMouseTool)
+            {
+                const auto mesh_type = GetMeshType();
+                if (mesh_type == MeshType::Simple2DRenderMesh)
+                    PickVertex2D<gfx::Vertex2D>(point, width, height);
+                else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+                    PickVertex2D<gfx::ShardVertex2D>(point, width, height);
+                else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+                    PickVertex2D<gfx::Perceptual3DVertex>(point, width, height);
+                else BUG("Unhandled mesh type.");
+            }
+        }
+        if (mMouseTool)
+        {
+            MouseTool::ViewState view;
+            view.grid   = GetValue(mUI.cmbGrid);
+            view.snap   = GetValue(mUI.chkSnap);
+            view.width  = width;
+            view.height = height;
+            mMouseTool->MousePress(mickey, point, view);
+        }
+    }
+    else
     {
         const auto mesh_type = GetMeshType();
-        if (mesh_type == MeshType::Simple2DRenderMesh)
-            PickVertex2D<gfx::Vertex2D>(point, width, height);
-        else if (mesh_type == MeshType::Simple2DShardEffectMesh)
-            PickVertex2D<gfx::ShardVertex2D>(point, width, height);
-        else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
-            PickVertex2D<gfx::Perceptual3DVertex>(point, width, height);
-        else BUG("Unhandled mesh type.");
-    }
-    if (mMouseTool)
-    {
-        MouseTool::ViewState view;
-        view.grid   = GetValue(mUI.cmbGrid);
-        view.snap   = GetValue(mUI.chkSnap);
-        view.width  = width;
-        view.height = height;
-        mMouseTool->MousePress(mickey, point, view);
+        if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+        {
+            const auto& lit = GetLitRenderRect();
+            const auto& v3d = GetAxo3DRenderRect();
+            if (lit.contains(mickey->pos()))
+            {
+                if (mMainView == ViewType::LitView)
+                    mMainView = ViewType::EditView;
+                else mMainView = ViewType::LitView;
+            }
+            else if (v3d.contains(mickey->pos()))
+            {
+                if (mMainView == ViewType::Axo3DView)
+                    mMainView = ViewType::EditView;
+                else mMainView = ViewType::Axo3DView;
+            }
+        }
     }
 }
 
@@ -1777,21 +1996,29 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
 
 void ShapeWidget::OnMouseWheel(QWheelEvent* wheel)
 {
-    if (mVertexIndex >= mState.builder->GetVertexCount())
-        return;
-
     const auto mesh_type = GetMeshType();
     if (mesh_type == MeshType::Isometric2DRenderMesh || mesh_type == MeshType::Dimetric2DRenderMesh)
-        return HandleWheelEvent<gfx::Perceptual3DVertex>(wheel);
+    {
+        if (mMainView == ViewType::EditView)
+            return ScrollAxonometricVertex<gfx::Perceptual3DVertex>(wheel);
+        else if (mMainView == ViewType::LitView)
+            return ScrollAxonometricLight(wheel);
+    }
 }
 
 bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
 {
+    auto SetLight = [this](LightType light) {
+        if (mLightType == light)
+            mLightType = LightType::None;
+        else mLightType = light;
+    };
+
     if (key->key() == Qt::Key_Escape)
     {
         OnEscape();
     }
-    else if (key->key() == Qt::Key_Delete || key->key() == Qt::Key_D)
+    else if (key->key() == Qt::Key_Delete)
     {
         if (mVertexIndex < mState.builder->GetVertexCount())
         {
@@ -1813,6 +2040,12 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
         mHotkeysPressed.insert(Hotkey::KeyY);
     else if (key->key() == Qt::Key_Z)
         mHotkeysPressed.insert(Hotkey::KeyZ);
+    else if (key->key() == Qt::Key_P)
+        SetLight(LightType::Point);
+    else if (key->key() == Qt::Key_S)
+        SetLight(LightType::Spot);
+    else if (key->key() == Qt::Key_D)
+        SetLight(LightType::Directional);
     else  return false;
 
     return true;
@@ -1836,7 +2069,7 @@ void ShapeWidget::PaintVertices2D(gfx::Painter& painter) const
 {
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
 
-    const auto& rect = GetMainRenderRect();
+    const auto& rect = GetViewRect(ViewType::EditView);
     const float width  = rect.width();
     const float height = rect.height();
 
@@ -1875,17 +2108,24 @@ void ShapeWidget::PaintVertices2D(gfx::Painter& painter) const
 }
 
 template<typename VertexType>
-void ShapeWidget::PaintVertices25D(const glm::vec3& tile_base_size,
-                                   gfx::Painter& painter, gfx::Painter& tile_painter) const
+void ShapeWidget::PaintVertices25D(gfx::Painter& painter) const
 {
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
 
-    const auto& rect = GetMainRenderRect();
+    const auto& rect = GetViewRect(ViewType::EditView);
     const float width  = rect.width();
     const float height = rect.height();
     const bool show_normals = GetValue(mUI.chkShowNormals);
 
     const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
+
+    const auto tile_base_size = mAxonometricTileBaseSize;
+
+    gfx::Painter tile_painter;
+    tile_painter.SetDevice(painter.GetDevice());
+    tile_painter.SetViewport(painter.GetViewport());
+    tile_painter.SetSurfaceSize(painter.GetSurfaceSize());
+    ConfigureTilePainter(tile_painter);
 
     for (size_t i = 0; i < mState.builder->GetVertexCount(); ++i)
     {
@@ -1950,7 +2190,7 @@ void ShapeWidget::PaintVertices25D(const glm::vec3& tile_base_size,
             const auto line_point_b = line_point_a + normal * 50.0f;
             gfx::Transform model;
             tile_painter.Draw(gfx::LineBatch3D(line_point_a, line_point_b), model,
-                gfx::CreateMaterialFromColor(gfx::Color::HotPink), 5.0f);
+                gfx::CreateMaterialFromColor(gfx::Color::HotPink), 1.0f);
         }
     }
 }
@@ -2054,8 +2294,11 @@ void ShapeWidget::InsertVertex2D(const QPoint& click_point, float width, float h
 }
 
 template<typename VertexType>
-void ShapeWidget::HandleWheelEvent(const QWheelEvent* wheel)
+void ShapeWidget::ScrollAxonometricVertex(const QWheelEvent* wheel)
 {
+    if (mVertexIndex >= mState.builder->GetVertexCount())
+        return;
+
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
 
     auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
@@ -2098,9 +2341,24 @@ void ShapeWidget::HandleWheelEvent(const QWheelEvent* wheel)
     mState.table->RefreshVertex(mVertexIndex);
 }
 
+void ShapeWidget::ScrollAxonometricLight(const QWheelEvent* wheel)
+{
+    const QPoint& num_degrees = wheel->angleDelta() / 8;
+    const QPoint& num_steps = num_degrees / 15;
+    const float step = 20.0f;
+    const float steps = step * num_steps.y();
+
+    if (base::Contains(mHotkeysPressed, Hotkey::KeyX))
+        mAxonometricLightPosition.x += steps;
+    else if (base::Contains(mHotkeysPressed, Hotkey::KeyY))
+        mAxonometricLightPosition.y += steps;
+    else if (base::Contains(mHotkeysPressed, Hotkey::KeyZ))
+        mAxonometricLightPosition.z += steps;
+}
+
 ShapeWidget::MeshType ShapeWidget::GetMeshType() const
 {
-    const auto type = mState.polygon.GetMeshType();
+    const auto type = mState.polygon->GetMeshType();
     if (type == gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh)
         return MeshType::Simple2DRenderMesh;
     else if (type == gfx::PolygonMeshClass::MeshType::Simple2DShardEffectMesh)
@@ -2115,28 +2373,28 @@ ShapeWidget::MeshType ShapeWidget::GetMeshType() const
 
 void ShapeWidget::SetMeshType(MeshType mesh_type)
 {
-    mState.polygon.ClearContent();
+    mState.polygon->ClearContent();
 
     if (mesh_type == MeshType::Simple2DRenderMesh)
     {
-        mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
-        mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        mState.polygon->SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
+        mState.polygon->SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
     }
     else if (mesh_type == MeshType::Simple2DShardEffectMesh)
     {
-        mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DShardEffectMesh);
-        mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::ShardVertex2D>());
+        mState.polygon->SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DShardEffectMesh);
+        mState.polygon->SetVertexLayout(gfx::GetVertexLayout<gfx::ShardVertex2D>());
 
     }
     else if (mesh_type == MeshType::Dimetric2DRenderMesh)
     {
-        mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Dimetric2DRenderMesh);
-        mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Perceptual3DVertex>());
+        mState.polygon->SetMeshType(gfx::PolygonMeshClass::MeshType::Dimetric2DRenderMesh);
+        mState.polygon->SetVertexLayout(gfx::GetVertexLayout<gfx::Perceptual3DVertex>());
     }
     else if (mesh_type == MeshType::Isometric2DRenderMesh)
     {
-        mState.polygon.SetMeshType(gfx::PolygonMeshClass::MeshType::Isometric2DRenderMesh);
-        mState.polygon.SetVertexLayout(gfx::GetVertexLayout<gfx::Perceptual3DVertex>());
+        mState.polygon->SetMeshType(gfx::PolygonMeshClass::MeshType::Isometric2DRenderMesh);
+        mState.polygon->SetVertexLayout(gfx::GetVertexLayout<gfx::Perceptual3DVertex>());
     }
     else BUG("Unhandled mesh type.");
 }
@@ -2148,18 +2406,18 @@ void ShapeWidget::CreateMeshBuilder()
     if (type == MeshType::Simple2DRenderMesh)
     {
         mState.builder = std::make_unique<gfx::tool::PolygonBuilder2D>();
-        mState.table   = std::make_unique<VertexDataTable>(*mState.builder, mState.polygon);
+        mState.table   = std::make_unique<VertexDataTable>(*mState.builder, *mState.polygon);
     }
     else if (type == MeshType::Simple2DShardEffectMesh)
     {
         mState.builder = std::make_unique<gfx::tool::PolygonBuilderShard2D>();
-        mState.table   = std::make_unique<VertexDataTable>(*mState.builder, mState.polygon);
+        mState.table   = std::make_unique<VertexDataTable>(*mState.builder, *mState.polygon);
 
     }
     else if (type == MeshType::Dimetric2DRenderMesh || type == MeshType::Isometric2DRenderMesh)
     {
         mState.builder = std::make_unique<gfx::tool::PolygonBuilderPerceptual3D>();
-        mState.table   = std::make_unique<VertexDataTable>(*mState.builder, mState.polygon);
+        mState.table   = std::make_unique<VertexDataTable>(*mState.builder, *mState.polygon);
     }
     else BUG("Unhandled mesh type.");
 
@@ -2192,6 +2450,23 @@ void ShapeWidget::SetSelectedVertexNormal(const glm::vec3& normal)
     }
 }
 
+void ShapeWidget::ConfigureTilePainter(gfx::Painter& tile_painter) const
+{
+    const auto mesh_type = GetMeshType();
+    const auto game_view = mesh_type == MeshType::Dimetric2DRenderMesh
+                               ? engine::GameView::EnumValue::Dimetric
+                               : engine::GameView::EnumValue::Isometric;
+
+    const auto ortho_left = static_cast<float>(mAxonometricTextureWidth) / -2.0f;
+    const auto ortho_right = static_cast<float>(mAxonometricTextureWidth) / 2.0f;
+    const auto ortho_bottom = 0.0f;
+    const auto ortho_top = static_cast<float>(mAxonometricTextureHeight); // / 2.0f;
+
+    tile_painter.SetPixelRatio({1.0f, 1.0f});
+    tile_painter.SetProjectionMatrix(glm::ortho(ortho_left, ortho_right, ortho_bottom, ortho_top, -10000.0f, 10000.0f));
+    tile_painter.SetViewMatrix(engine::CreateModelViewMatrix(game_view, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f));
+}
+
 QRect ShapeWidget::GetMainRenderRect() const
 {
     const auto widget_width  = mUI.widget->width() - Margin * 2;
@@ -2199,10 +2474,63 @@ QRect ShapeWidget::GetMainRenderRect() const
     const auto size = std::min(widget_width, widget_height);
     const auto width = static_cast<float>(size);
     const auto height = static_cast<float>(size);
-    const auto xoffset = Margin + (widget_width - size) / 2;
-    const auto yoffset = Margin + (widget_height - size) / 2;
+
+    const auto small_rect_height = (height - 3 * Margin) / 4;
+    const auto small_rect_width  = small_rect_height;
+    const auto total_width = small_rect_width + width + Margin;
+
+    auto xoffset = Margin; // + (widget_width - size) / 2;
+    auto yoffset = Margin; // + (widget_height - size) / 2;
+    if (widget_width > total_width)
+        xoffset = (widget_width - total_width) / 2;
 
     return QRect(xoffset, yoffset, width, height);
+}
+
+QRect ShapeWidget::GetLitRenderRect() const
+{
+    const auto widget_width  = mUI.widget->width() - Margin * 2;
+    const auto widget_height = mUI.widget->height() - Margin * 2;
+    const auto main_rect = GetMainRenderRect();
+    const auto width = widget_width - main_rect.width() - Margin;
+    const auto height = (main_rect.height() - 3 * Margin) / 4; // space for 4 previews
+    const auto size = std::min(width, height);
+
+    const auto xoffset = Margin + main_rect.x() + main_rect.width();
+    const auto yoffset = Margin;
+    return QRect(xoffset, yoffset, size, size);
+}
+
+QRect ShapeWidget::GetAxo3DRenderRect() const
+{
+    QRect rect = GetLitRenderRect();
+    rect.translate(0, rect.height());
+    rect.translate(0, Margin);
+    return rect;
+}
+
+QRect ShapeWidget::GetViewRect(ViewType view) const
+{
+    if (mMainView == ViewType::EditView && view == ViewType::EditView)
+        return GetMainRenderRect();
+    else if (mMainView == ViewType::EditView && view == ViewType::LitView)
+        return GetLitRenderRect();
+    else if (mMainView == ViewType::EditView && view == ViewType::Axo3DView)
+        return GetAxo3DRenderRect();
+    else if (mMainView == ViewType::LitView && view == ViewType::EditView)
+        return GetLitRenderRect();
+    else if (mMainView == ViewType::LitView && view == ViewType::LitView)
+        return GetMainRenderRect();
+    else if (mMainView == ViewType::LitView && view == ViewType::Axo3DView)
+        return GetAxo3DRenderRect();
+    else if (mMainView == ViewType::Axo3DView && view == ViewType::EditView)
+        return GetAxo3DRenderRect();
+    else if (mMainView == ViewType::Axo3DView && view == ViewType::LitView)
+        return GetLitRenderRect();
+    else if (mMainView == ViewType::Axo3DView && view == ViewType::Axo3DView)
+        return GetMainRenderRect();
+    else BUG("Missing view rect mapping handling");
+    return QRect();
 }
 
 } // namespace
