@@ -190,10 +190,11 @@ namespace gfx
         // This is only used / required when the mesh type is
         // Perceptual3DTile
         struct Perceptual3DGeometry{
-            // Mesh position in the perceptual 3D space.
-            glm::vec3 position;
-            // Mesh size (scaling coefficients) in the perceptual 3D space.
-            glm::vec3 size;
+            // The axonometric view transformation that applies.
+            glm::mat4 axonometric_model_view;
+            // use the 3D data as the output from the perceptual vertex shader
+            // instead of the 2D data.
+            bool enable_perceptual_3D = false;
         };
 
         explicit PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass,

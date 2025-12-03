@@ -560,6 +560,12 @@ bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, Device& devi
     if (env.flip_uv_vertically)
         flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Vertically);
 
+    if (const auto* geom = base::GetOpt(mPerceptualGeometry))
+    {
+        if (geom->enable_perceptual_3D)
+            flags |= static_cast<unsigned>(DrawableFlags::EnablePerceptual3D);
+    }
+
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
@@ -573,8 +579,7 @@ bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, Device& devi
     {
         ASSERT(mPerceptualGeometry.has_value());
         const auto& geometry = mPerceptualGeometry.value();
-        program.SetUniform("kWorldPosition",geometry.position);
-        program.SetUniform("kWorldSize", geometry.size);
+        program.SetUniform("kAxonometricModelViewMatrix", geometry.axonometric_model_view);
     }
     return true;
 }
