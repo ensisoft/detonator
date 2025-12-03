@@ -1364,15 +1364,10 @@ bool ShapeWidget::OnEscape()
 {
     if (mMouseTool)
     {
-        const auto widget_width  = mUI.widget->width() - Margin * 2;
-        const auto widget_height = mUI.widget->height() - Margin * 2;
-        const auto size = std::min(widget_width, widget_height);
-        const auto width  = static_cast<float>(size);
-        const auto height = static_cast<float>(size);
-
+        const auto& rect = GetMainRenderRect();
         MouseTool::ViewState view;
-        view.width = width;
-        view.height = height;
+        view.width = rect.width();
+        view.height = rect.height();
         view.snap = GetValue(mUI.chkSnap);
         view.grid = GetValue(mUI.cmbGrid);
         mMouseTool->CompleteTool(view);
@@ -1393,18 +1388,17 @@ bool ShapeWidget::OnEscape()
 
 void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 {
-    const auto widget_width  = mUI.widget->width() - Margin * 2;
-    const auto widget_height = mUI.widget->height() - Margin * 2;
-    const auto size = std::min(widget_width, widget_height);
-    const auto xoffset = Margin + (widget_width - size) / 2;
-    const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width = static_cast<float>(size);
-    const auto height = static_cast<float>(size);
+    const auto& main_rect = GetMainRenderRect();
+    const float width = main_rect.width();
+    const float height = main_rect.height();
+    const float xoffset = main_rect.x();
+    const float yoffset = main_rect.y();
+
     const auto mesh_type = GetMeshType();
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    painter.SetViewport(xoffset, yoffset, size, size);
+    painter.SetViewport(xoffset, yoffset, width, height);
     painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width, height));
 
     std::unique_ptr<gfx::Painter> tile_painter;
@@ -1670,14 +1664,11 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 {
-    const auto widget_width  = mUI.widget->width() - Margin * 2;
-    const auto widget_height = mUI.widget->height() - Margin * 2;
-    const auto size = std::min(widget_width, widget_height);
-    const auto xoffset = Margin + (widget_width - size) / 2;
-    const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width  = static_cast<float>(size);
-    const auto height = static_cast<float>(size);
-
+    const auto& rect = GetMainRenderRect();
+    const float xoffset = rect.x();
+    const float yoffset = rect.y();
+    const float width  = rect.width();
+    const float height = rect.height();
     const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
 
     if (!mMouseTool)
@@ -1704,15 +1695,12 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 
 void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
 {
-    const auto widget_width  = mUI.widget->width() - Margin * 2;
-    const auto widget_height = mUI.widget->height() - Margin * 2;
-    const auto size = std::min(widget_width, widget_height);
-    const auto xoffset = Margin + (widget_width - size) / 2;
-    const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width  = static_cast<float>(size);
-    const auto height = static_cast<float>(size);
-
-    const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
+    const auto& rect = GetMainRenderRect();
+    const float xoffset = rect.x();
+    const float yoffset = rect.y();
+    const float width  = rect.width();
+    const float height = rect.height();
+    const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
 
     if (mMouseTool)
     {
@@ -1721,21 +1709,19 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
         view.snap   = GetValue(mUI.chkSnap);
         view.width  = width;
         view.height = height;
-        if (mMouseTool->MouseRelease(mickey, pos, view))
+        if (mMouseTool->MouseRelease(mickey, point, view))
             mMouseTool.reset();
     }
 }
 
 void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
 {
-    const auto widget_width  = mUI.widget->width() - 2 * Margin;
-    const auto widget_height = mUI.widget->height() - 2 * Margin;
-    const auto size = std::min(widget_width, widget_height);
-    const auto xoffset = Margin + (widget_width - size) / 2;
-    const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width  = static_cast<float>(size);
-    const auto height = static_cast<float>(size);
-    const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
+    const auto& rect = GetMainRenderRect();
+    const float xoffset = rect.x();
+    const float yoffset = rect.y();
+    const float width  = rect.width();
+    const float height = rect.height();
+    const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
 
     if (mMouseTool)
     {
@@ -1744,7 +1730,7 @@ void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
         view.snap   = GetValue(mUI.chkSnap);
         view.width  = width;
         view.height = height;
-        mMouseTool->MouseMove(mickey, pos, view);
+        mMouseTool->MouseMove(mickey, point, view);
     }
 }
 
@@ -1753,14 +1739,13 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     // find the vertex closes to the click point
     // use polygon winding order to figure out whether
     // the new vertex should come before or after the closest vertex
-    const auto widget_width  = mUI.widget->width() - Margin * 2;
-    const auto widget_height = mUI.widget->height() - Margin * 2;
-    const auto size = std::min(widget_width, widget_height);
-    const auto xoffset = Margin + (widget_width - size) / 2;
-    const auto yoffset = Margin + (widget_height - size) / 2;
-    const auto width  = static_cast<float>(size);
-    const auto height = static_cast<float>(size);
+    const auto& rect = GetMainRenderRect();
+    const float xoffset = rect.x();
+    const float yoffset = rect.y();
+    const float width  = rect.width();
+    const float height = rect.height();
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
+
     const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
 
     QPoint point = pos;
@@ -1851,11 +1836,10 @@ void ShapeWidget::PaintVertices2D(gfx::Painter& painter) const
 {
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
 
-    const auto widget_width  = mUI.widget->width() - Margin * 2;
-    const auto widget_height = mUI.widget->height() - Margin * 2;
-    const auto size = std::min(widget_width, widget_height);
-    const auto width = static_cast<float>(size);
-    const auto height = static_cast<float>(size);
+    const auto& rect = GetMainRenderRect();
+    const float width  = rect.width();
+    const float height = rect.height();
+
     const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
 
     for (size_t i = 0; i < mState.builder->GetVertexCount(); ++i)
@@ -1896,14 +1880,12 @@ void ShapeWidget::PaintVertices25D(const glm::vec3& tile_base_size,
 {
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
 
-    const auto widget_width  = mUI.widget->width() - Margin * 2;
-    const auto widget_height = mUI.widget->height() - Margin * 2;
-    const auto size = std::min(widget_width, widget_height);
-    const auto width = static_cast<float>(size);
-    const auto height = static_cast<float>(size);
-    const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
-
+    const auto& rect = GetMainRenderRect();
+    const float width  = rect.width();
+    const float height = rect.height();
     const bool show_normals = GetValue(mUI.chkShowNormals);
+
+    const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
 
     for (size_t i = 0; i < mState.builder->GetVertexCount(); ++i)
     {
@@ -2208,6 +2190,19 @@ void ShapeWidget::SetSelectedVertexNormal(const glm::vec3& normal)
 
         mState.table->RefreshVertex(mVertexIndex);
     }
+}
+
+QRect ShapeWidget::GetMainRenderRect() const
+{
+    const auto widget_width  = mUI.widget->width() - Margin * 2;
+    const auto widget_height = mUI.widget->height() - Margin * 2;
+    const auto size = std::min(widget_width, widget_height);
+    const auto width = static_cast<float>(size);
+    const auto height = static_cast<float>(size);
+    const auto xoffset = Margin + (widget_width - size) / 2;
+    const auto yoffset = Margin + (widget_height - size) / 2;
+
+    return QRect(xoffset, yoffset, width, height);
 }
 
 } // namespace

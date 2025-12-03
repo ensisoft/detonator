@@ -124,6 +124,8 @@ namespace gui
         void CreateMeshBuilder();
         void SetSelectedVertexNormal(const glm::vec3& normal);
 
+        QRect GetMainRenderRect() const;
+
     private:
         Ui::ShapeWidget mUI;
         QMenu* mHamburger = nullptr;
