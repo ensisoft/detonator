@@ -4331,7 +4331,11 @@ void MainWindow::DrawResourcePreview(gfx::Painter& painter, double dt)
                     material_class = mWorkspace->FindMaterialClassById("_checkerboard");
 
                 const auto& klass = resource.GetContent<gfx::PolygonMeshClass>();
-                mPreview.drawable = std::make_unique<gfx::PolygonMeshInstance>(*klass);
+                auto drawable = std::make_unique<gfx::PolygonMeshInstance>(*klass);
+                gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
+                geometry.axonometric_model_view = glm::mat4(1.0f); // not needed right now.
+                drawable->SetPerceptualGeometry(geometry);
+                mPreview.drawable = std::move(drawable);
                 mPreview.material = std::make_unique<gfx::MaterialInstance>(material_class);
             }
             else
