@@ -1166,11 +1166,12 @@ void MainWindow::on_mainTab_currentChanged(int index)
 
 void MainWindow::on_mainTab_tabCloseRequested(int index)
 {
-    CloseTab(index);
-    UpdateWindowMenu();
-    FocusPreviousTab();
-
-    QTimer::singleShot(1000, this, &MainWindow::CleanGarbage);
+    if (CloseTab(index))
+    {
+        UpdateWindowMenu();
+        FocusPreviousTab();
+        QTimer::singleShot(1000, this, &MainWindow::CleanGarbage);
+    }
 }
 
 void MainWindow::on_actionClearGraphicsCache_triggered()
@@ -3522,7 +3523,7 @@ void MainWindow::DeployGameFile(const QString& filepath)
 
 }
 
-void MainWindow::CloseTab(int index)
+bool MainWindow::CloseTab(int index)
 {
     auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(index));
     if (widget->HasUnsavedChanges())
@@ -3533,7 +3534,7 @@ void MainWindow::CloseTab(int index)
         msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
         const auto ret = msg.exec();
         if (ret == QMessageBox::Cancel)
-            return;
+            return false;
         else if (ret == QMessageBox::Yes)
             widget->Save();
     }
@@ -3553,6 +3554,7 @@ void MainWindow::CloseTab(int index)
     //
     //widget->setParent(nullptr);
     delete widget;
+    return true;
 }
 
 void MainWindow::FloatTab(int index)

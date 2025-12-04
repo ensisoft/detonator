@@ -227,7 +227,7 @@ namespace gui
 
     private:
         void DeployGameFile(const QString& file);
-        void CloseTab(int index);
+        bool CloseTab(int index);
         void FloatTab(int index);
         void LaunchGame(bool clean);
         void BuildRecentWorkspacesMenu();
