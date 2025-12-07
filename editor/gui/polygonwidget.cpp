@@ -809,6 +809,10 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     SetList(mUI.blueprints, workspace->ListUserDefinedMaterials());
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
+    SetValue(mUI.chkShowNormals,   true);
+    SetValue(mUI.chkShowBlueprint, true);
+    SetValue(mUI.chkShowVertices,  true);
+    SetValue(mUI.chkShowSurfaces,  true);
     SetValue(mUI.name, QString("My Shape"));
     SetValue(mUI.ID, mState.polygon->GetId());
     SetValue(mUI.staticInstance, mState.polygon->IsStatic());
