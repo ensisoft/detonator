@@ -72,6 +72,9 @@ namespace gfx
 
         // Get the human-readable name of the shader pass for debugging/logging purposes.
         virtual std::string GetName() const = 0;
+
+        virtual void InitializeResources(Device& device) const {};
+
         // Apply any shader program state on the GPU program object and on the device state.
         // When any object is being rendered this is the final place to change any of the state
         // required to draw. I.e. the state coming in is the combination of the state from the

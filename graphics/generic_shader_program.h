@@ -178,6 +178,7 @@ namespace gfx
         ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device) const override;
         ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const override;
 
+        void InitializeResources(Device &device) const override;
         void ApplyDynamicState(const Device& device, ProgramState& program) const override;
         void ApplyDynamicState(const Device &device, const Environment &env, ProgramState &program, Device::RasterState &state, void *user) const override;
         void ApplyLightState(const Device& device, ProgramState& program) const;
