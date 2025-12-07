@@ -489,6 +489,32 @@ vec4 x = vec4(1.0);
 )"));
 }
 
+void unit_test_sampler2DArray_bug()
+{
+    TEST_CASE(test::Type::Feature)
+
+    gfx::ShaderSource source;
+    source.SetType(gfx::ShaderSource::Type::Fragment);
+    source.LoadRawSource(R"(
+#version 300 es
+uniform highp sampler2DArray kSamplerArray;
+void FragmentShaderMain() {
+}
+)");
+
+    TEST_REQUIRE(source.HasUniform("kSamplerArray"));
+    TEST_REQUIRE(source.FindShaderBlock("kSamplerArray")->data == "uniform highp sampler2DArray kSamplerArray;");
+
+    const auto& src = source.GetSource();
+    TEST_REQUIRE(CleanStr(src) == CleanStr(R"(
+#version 300 es
+uniform highp sampler2DArray kSamplerArray;
+void FragmentShaderMain() {
+}
+)"));
+
+}
+
 
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
@@ -499,6 +525,8 @@ int test_main(int argc, char* argv[])
     unit_test_raw_source_combine();
     unit_test_conditional_data();
     unit_test_token_replacement();
+
+    unit_test_sampler2DArray_bug();
     return 0;
 }
 ) // EXPORT_TEST_MAIN

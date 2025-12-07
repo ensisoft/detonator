@@ -701,17 +701,39 @@ bool ShaderSource::LoadRawSource(const std::string& source)
                  base::StartsWith(trimmed, "in ") || // SPACE HERE on purpose to distinguish from int
                  base::StartsWith(trimmed, "out"))
         {
+            std::optional<ShaderDataDeclarationType> decl_type;
+            std::optional<ShaderDataType> data_type;
+            std::optional<std::string> decl_name;
             const auto& parts = base::SplitString(trimmed);
-            const auto& decl_type = DeclTypeFromString(GetToken(parts, 0), mType);
-            const auto& data_type = DataTypeFromString(GetToken(parts, 1));
-            const auto& name = GetTokenName(GetToken(parts, 2));
-            if (!decl_type.has_value() || !data_type.has_value() || !name.has_value())
+
+            decl_type = DeclTypeFromString(GetToken(parts, 0), mType);
+            if (!decl_type.has_value())
+                ERROR_RETURN(false, "Failed to parse GLSL declaration '%1'", trimmed);
+
+            const auto declaration = decl_type.value();
+            if (declaration == ShaderDataDeclarationType::Uniform && parts.size() == 4)
+            {
+                const auto& maybe_precision = GetToken(parts, 1);
+                const auto& maybe_sampler = GetToken(parts, 2);
+                if ((maybe_sampler == "sampler2DArray") &&
+                    (maybe_precision == "highp" || maybe_precision == "mediump" || maybe_precision == "lowp"))
+                {
+                    data_type = ShaderDataType::Sampler2DArray;
+                    decl_name = GetTokenName(GetToken(parts, 3));
+                }
+            }
+            else
+            {
+                data_type = DataTypeFromString(GetToken(parts, 1));
+                decl_name = GetTokenName(GetToken(parts, 2));
+            }
+            if (!data_type.has_value() || !decl_name.has_value())
                 ERROR_RETURN(false, "Failed to parse GLSL declaration '%1'.", trimmed);
 
             ShaderDataDeclaration decl;
             decl.data_type = data_type.value();
             decl.decl_type = decl_type.value();
-            decl.name      = name.value();
+            decl.name      = decl_name.value();
 
             ShaderBlock block;
             block.type = ShaderBlockType::ShaderDataDeclaration;
