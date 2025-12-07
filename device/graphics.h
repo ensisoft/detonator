@@ -119,15 +119,15 @@ namespace dev
         virtual void DeleteProgram(const GraphicsProgram& program) = 0;
 
         // draw with vertex and index buffer
-        virtual void Draw(DrawType draw_primitive, IndexType index_type,
+        virtual void DrawElementsInstanced(DrawType draw_primitive, IndexType index_type,
                           unsigned primitive_count, unsigned index_buffer_byte_offset, unsigned instance_count) const = 0;
-        virtual void Draw(DrawType draw_primitive, IndexType index_type,
+        virtual void DrawElements(DrawType draw_primitive, IndexType index_type,
                           unsigned primitive_count, unsigned index_buffer_byte_offset) const = 0;
 
         // draw with vertex buffer
-        virtual void Draw(DrawType draw_primitive, unsigned vertex_start_index,
+        virtual void DrawArraysInstanced(DrawType draw_primitive, unsigned vertex_start_index,
                           unsigned vertex_draw_count, unsigned instance_count) const = 0;
-        virtual void Draw(DrawType draw_primitive, unsigned vertex_start_index, unsigned vertex_draw_count) const = 0;
+        virtual void DrawArrays(DrawType draw_primitive, unsigned vertex_start_index, unsigned vertex_draw_count) const = 0;
 
         virtual void ClearColor(const base::Color4f& color, const Framebuffer& fbo, ColorAttachment attachment) const = 0;
         virtual void ClearStencil(int value, const Framebuffer& fbo) const = 0;
