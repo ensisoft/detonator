@@ -370,8 +370,36 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
         data.index_type = index_buffer.GetType();
 
         mData = std::move(data);
-    }
 
+        MeshType expected_mesh_type;
+
+        auto& layout = mData->layout;
+        for (auto& attr : layout.attributes)
+        {
+            if (attr.name == "aShardIndex")
+                attr.type = VertexLayout::Attribute::DataType::UnsignedInt;
+        }
+        if (layout == gfx::GetVertexLayout<ShardVertex2D>())
+            expected_mesh_type = MeshType::Simple2DShardEffectMesh;
+        else if (layout == gfx::GetVertexLayout<Vertex2D>())
+            expected_mesh_type = MeshType::Simple2DRenderMesh;
+        else if (layout == gfx::GetVertexLayout<ModelVertex3D>())
+            expected_mesh_type = MeshType::Model3DRenderMesh;
+        else if (layout == gfx::GetVertexLayout<Vertex3D>())
+            expected_mesh_type = MeshType::Simple3DRenderMesh;
+        else if (layout == gfx::GetVertexLayout<Perceptual3DVertex>())
+        {
+            expected_mesh_type = MeshType::Dimetric2DRenderMesh;
+            if (mMeshType == MeshType::Dimetric2DRenderMesh || mMeshType == MeshType::Isometric2DRenderMesh)
+                expected_mesh_type = mMeshType;
+        } else BUG("Missing inline data vertex layout handling.");
+        if (expected_mesh_type != mMeshType)
+        {
+            WARN("Unexpected polygon mesh type vs. inline vertex data layout. [name='%1', type=%2]",
+                mName, mMeshType);
+            mMeshType = expected_mesh_type;
+        }
+    }
     // legacy load
     if (reader.HasArray("vertices") && reader.HasArray("draws"))
     {
