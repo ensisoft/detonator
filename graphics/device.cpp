@@ -537,7 +537,7 @@ void GraphicsDevice::Draw(const gfx::Program& program,
                 const auto draw_cmd_offset = draw_cmd.offset;
 
                 // draw elements instanced
-                mDevice->Draw(draw_cmd_primitive_type, index_buffer_type, draw_cmd_primitive_count,
+                mDevice->DrawElementsInstanced(draw_cmd_primitive_type, index_buffer_type, draw_cmd_primitive_count,
                               index_buffer_offset + draw_cmd_offset * index_item_byte_size, instance_count);
             }
         }
@@ -552,7 +552,7 @@ void GraphicsDevice::Draw(const gfx::Program& program,
                 const auto draw_cmd_offset = draw_cmd.offset;
 
                 // draw elements
-                mDevice->Draw(draw_cmd_primitive_type, index_buffer_type, draw_cmd_primitive_count,
+                mDevice->DrawElements(draw_cmd_primitive_type, index_buffer_type, draw_cmd_primitive_count,
                               index_buffer_offset + draw_cmd_offset * index_item_byte_size);
             }
         }
@@ -579,7 +579,7 @@ void GraphicsDevice::Draw(const gfx::Program& program,
                 const auto draw_cmd_offset = draw_cmd.offset;
 
                 // draw arrays instanced
-                mDevice->Draw(draw_cmd_primitive_type, draw_cmd_offset, draw_cmd_primitive_count, instance_count);
+                mDevice->DrawArraysInstanced(draw_cmd_primitive_type, draw_cmd_offset, draw_cmd_primitive_count, instance_count);
 
             }
         }
@@ -594,7 +594,7 @@ void GraphicsDevice::Draw(const gfx::Program& program,
                 const auto draw_cmd_offset = draw_cmd.offset;
 
                 // draw arrays
-                mDevice->Draw(draw_cmd_primitive_type, draw_cmd_offset, draw_cmd_primitive_count);
+                mDevice->DrawArrays(draw_cmd_primitive_type, draw_cmd_offset, draw_cmd_primitive_count);
             }
         }
     }

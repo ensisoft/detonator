@@ -2201,7 +2201,7 @@ public:
         }
     }
 
-    void Draw(dev::DrawType draw_primitive, dev::IndexType index_type,
+    void DrawElementsInstanced(dev::DrawType draw_primitive, dev::IndexType index_type,
               unsigned primitive_count, unsigned index_buffer_byte_offset, unsigned instance_count) const override
     {
         const auto primitive_draw_mode = GetEnum(draw_primitive);
@@ -2213,7 +2213,7 @@ public:
                                         (const void*) ptrdiff_t(index_buffer_byte_offset), instance_count));
     }
 
-    void Draw(dev::DrawType draw_primitive, dev::IndexType index_type,
+    void DrawElements(dev::DrawType draw_primitive, dev::IndexType index_type,
               unsigned primitive_count, unsigned index_buffer_byte_offset) const override
     {
         const auto primitive_draw_mode = GetEnum(draw_primitive);
@@ -2224,7 +2224,7 @@ public:
                                primitive_index_type, (const void*) ptrdiff_t(index_buffer_byte_offset)));
     }
 
-    void Draw(dev::DrawType draw_primitive, unsigned vertex_start_index,
+    void DrawArraysInstanced(dev::DrawType draw_primitive, unsigned vertex_start_index,
               unsigned vertex_draw_count, unsigned instance_count) const override
     {
         const auto primitive_draw_mode = GetEnum(draw_primitive);
@@ -2233,7 +2233,7 @@ public:
                                       vertex_start_index, vertex_draw_count, instance_count));
     }
 
-    void Draw(dev::DrawType draw_primitive, unsigned vertex_start_index, unsigned vertex_draw_count) const override
+    void DrawArrays(dev::DrawType draw_primitive, unsigned vertex_start_index, unsigned vertex_draw_count) const override
     {
         const auto primitive_draw_mode = GetEnum(draw_primitive);
 
