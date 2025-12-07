@@ -82,6 +82,8 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
     mDevice->SetViewportState(vs);
     mDevice->SetColorDepthStencilState(render_pass_state.cds);
 
+    program.InitializeResources(*mDevice);
+
     std::unordered_set<std::string> used_programs;
 
     bool success = false;

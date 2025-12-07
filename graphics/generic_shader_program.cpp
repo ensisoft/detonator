@@ -26,8 +26,8 @@
 #include "graphics/enum.h"
 #include "graphics/shader_source.h"
 #include "graphics/generic_shader_program.h"
-
-#include "renderpass.h"
+#include "graphics/renderpass.h"
+#include "graphics/texture.h"
 
 namespace {
     enum class LightingFlags : uint32_t {
@@ -214,6 +214,22 @@ ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Dra
     return source;
 }
 
+void GenericShaderProgram::InitializeResources(Device& device) const
+{
+    // create a temp/dummy shadow map array texture to make
+    // sure the driver is happy with shadow sampler being
+    // bound to something.
+    if (!mShadingFeatures.test(ShadingFeatures::BasicShadows))
+    {
+        auto* temp_shadow_map = device.FindTexture("DummyShadowMapArrayTexture");
+        if (temp_shadow_map)
+            return;
+
+        temp_shadow_map = device.MakeTexture("DummyShadowMapArrayTexture");
+        temp_shadow_map->AllocateArray(1, 1, 1, dev::TextureFormat::DepthComponent32f);
+    }
+}
+
 void GenericShaderProgram::ApplyDynamicState(const Device& device, ProgramState& program) const
 {
     if (TestFeature(ShadingFeatures::BasicLight))
@@ -301,6 +317,9 @@ void GenericShaderProgram::ApplyDynamicState(const Device &device, const Environ
 #pragma pack(pop)
     static_assert((sizeof(LightTransform) % 16) == 0);
 
+    const auto sampler_count = program.GetSamplerCount();
+    const auto texture_count = program.GetTextureCount();
+
     if (env.render_pass == RenderPass::ColorPass &&
         TestFeature(ShadingFeatures::BasicLight) &&
         TestFeature(ShadingFeatures::BasicShadows))
@@ -311,9 +330,6 @@ void GenericShaderProgram::ApplyDynamicState(const Device &device, const Environ
         data.Resize(1);
 
         const auto& view_to_world = glm::inverse(*env.view_matrix);
-
-        const auto sampler_count = program.GetSamplerCount();
-        const auto texture_count = program.GetTextureCount();
 
         // for each light create a transformation matrix that will transform a
         // a coordinate from view space to the light coordinate space for
@@ -340,6 +356,13 @@ void GenericShaderProgram::ApplyDynamicState(const Device &device, const Environ
 
         program.SetUniformBlock(UniformBlock("LightTransformArray", std::move(data)));
         program.SetTexture("kShadowMap", sampler_index, *shadow_map);
+        program.SetTextureCount(texture_count + 1);
+    }
+    else
+    {
+        const auto sampler_index = sampler_count + 0;
+        auto* dummy_shadow_map = device.FindTexture("DummyShadowMapArrayTexture");
+        program.SetTexture("kShadowMap", sampler_index, *dummy_shadow_map);
         program.SetTextureCount(texture_count + 1);
     }
 }
