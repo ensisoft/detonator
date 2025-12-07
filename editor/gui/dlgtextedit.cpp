@@ -62,6 +62,7 @@ protected:
             {QStringLiteral("#define"),             RuleType::Keyword},
             {QStringLiteral("#ifdef"),              RuleType::Keyword},
             {QStringLiteral("#else"),               RuleType::Keyword},
+            {QStringLiteral("#elif"),               RuleType::Keyword},
             {QStringLiteral("#endif"),              RuleType::Keyword},
             {QStringLiteral("#ifndef"),             RuleType::Keyword},
 
