@@ -51,7 +51,7 @@ layout (std140) uniform LightTransformArray {
     LightTransform light_transforms[BASIC_LIGHT_MAX_LIGHTS];
 };
 
-uniform sampler2DArray kShadowMap;
+uniform highp sampler2DArray kShadowMap;
 
 // @code
 
