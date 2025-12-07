@@ -42,7 +42,7 @@ namespace gui
         Q_OBJECT
     public:
         explicit DlgTextEdit(QWidget* parent);
-        ~DlgTextEdit();
+        ~DlgTextEdit() override;
 
         void SetTitle(const QString& str);
         void SetText(const app::AnyString& str, const std::string& format);

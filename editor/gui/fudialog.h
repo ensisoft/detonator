@@ -40,7 +40,7 @@ namespace gui
     {
     public:
         explicit FUDialog(QWidget* parent);
-        ~FUDialog();
+        virtual ~FUDialog();
 
         void LoadGeometry(const app::Workspace* workspace, const QString& key);
         void SaveGeometry(app::Workspace* workspace, const QString& key) const;
