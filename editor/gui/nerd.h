@@ -25,6 +25,10 @@
 #  include <glm/gtx/matrix_decompose.hpp>
 #include "warnpop.h"
 
+#include <functional>
+
+#include "base/assert.h"
+#include "game/enum.h"
 #include "graphics/transform.h"
 #include "engine/camera.h"
 #include "editor/gui/types.h"
@@ -96,6 +100,29 @@ Point2Df MapWindowCoordinateToWorld(const UI& ui,
 }
 
 template<typename UI, typename State>
+Point2Df MapWindowCoordinateToWorld(const UI& ui,
+                                   const State& state,
+                                   const Point2Df& window_point,
+                                   game::SceneProjection projection)
+{
+    if (projection == game::SceneProjection::AxisAlignedOrthographic)
+        return MapWindowCoordinateToWorld(ui, state, window_point,
+            engine::GameView::AxisAligned, engine::Projection::Orthographic);
+    else if (projection == game::SceneProjection::AxisAlignedPerspective)
+        return MapWindowCoordinateToWorld(ui, state, window_point,
+            engine::GameView::AxisAligned, engine::Projection::Perspective);
+    else if (projection == game::SceneProjection::Dimetric)
+        return MapWindowCoordinateToWorld(ui, state, window_point,
+            engine::GameView::Dimetric, engine::Projection::Orthographic);
+    else if (projection == game::SceneProjection::Isometric)
+        return MapWindowCoordinateToWorld(ui, state, window_point,
+            engine::GameView::Isometric, engine::Projection::Orthographic);
+
+    BUG("Missing projection handling");
+    return {};
+}
+
+template<typename UI, typename State>
 Point2Df MapWorldCoordinateToWindow(const UI& ui,
                                     const State& state,
                                     const Point2Df& world_point,
@@ -108,6 +135,84 @@ Point2Df MapWorldCoordinateToWindow(const UI& ui,
     const auto& view_matrix = CreateViewMatrix(ui, state, view);
     const auto pos = engine::MapFromWorldPlaneToWindow(proj_matrix, view_matrix, world_point, window_size);
     return {pos.x, pos.y};
+}
+
+template<typename UI, typename State>
+Point2Df MapWorldCoordinateToWindow(const UI& ui,
+                                    const State& state,
+                                    const Point2Df& world_point,
+                                    game::SceneProjection projection)
+{
+    if (projection == game::SceneProjection::AxisAlignedOrthographic)
+        return MapWorldCoordinateToWindow(ui, state, world_point,
+            engine::GameView::AxisAligned, engine::Projection::Orthographic);
+    else if (projection == game::SceneProjection::AxisAlignedPerspective)
+        return MapWorldCoordinateToWindow(ui, state, world_point,
+            engine::GameView::AxisAligned, engine::Projection::Perspective);
+    else if (projection == game::SceneProjection::Dimetric)
+        return MapWorldCoordinateToWindow(ui, state, world_point,
+            engine::GameView::Dimetric, engine::Projection::Orthographic);
+    else if (projection == game::SceneProjection::Isometric)
+        return MapWorldCoordinateToWindow(ui, state, world_point,
+            engine::GameView::Isometric, engine::Projection::Orthographic);
+
+    BUG("Missing projection handling");
+    return {};
+}
+
+template<typename UI, typename State>
+bool MouseZoom(const UI& ui, State& state, const std::function<void(void)>& zoom_function)
+{
+    const auto width  = ui.widget->width();
+    const auto height = ui.widget->height();
+
+    // where's the mouse in the widget
+    const auto& mickey_widget_pos = ui.widget->mapFromGlobal(QCursor::pos());
+    // can't use underMouse here because of the way the gfx widget
+    // is constructed i.e QWindow and Widget as container
+    if (mickey_widget_pos.x() < 0 || mickey_widget_pos.y() < 0 ||
+        mickey_widget_pos.x() > width || mickey_widget_pos.y() > height)
+        return false;
+
+    glm::vec4 world_pos_before_zoom;
+    glm::vec4 world_pos_after_zoom;
+    const auto window_size = glm::vec2{width, height};
+    const float rotation = 0.0f; // ignored so that the camera movement stays
+    // irrespective of the camera rotation
+
+    {
+
+        const float zoom   = GetValue(ui.zoom);
+        const float xs     = GetValue(ui.scaleX);
+        const float ys     = GetValue(ui.scaleY);
+        const auto view_to_clip  = engine::CreateProjectionMatrix(engine::Projection::Orthographic, width, height);
+        const auto world_to_view = engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
+                                                     state.camera_offset_x,
+                                                     state.camera_offset_y,
+                                                     zoom * xs, zoom * ys,
+                                                     rotation);
+        world_pos_before_zoom = engine::MapFromWindowToWorld(view_to_clip, world_to_view, ToVec2(mickey_widget_pos), window_size);
+    }
+
+    zoom_function();
+
+    {
+        const float zoom   = GetValue(ui.zoom);
+        const float xs     = GetValue(ui.scaleX);
+        const float ys     = GetValue(ui.scaleY);
+        const auto view_to_clip  = engine::CreateProjectionMatrix(engine::Projection::Orthographic, width, height);
+        const auto world_to_view = engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
+                                                     state.camera_offset_x,
+                                                     state.camera_offset_y,
+                                                     zoom * xs, zoom * ys,
+                                                     rotation);
+        world_pos_after_zoom = engine::MapFromWindowToWorld(view_to_clip, world_to_view, ToVec2(mickey_widget_pos), window_size);
+    }
+
+    const auto world_delta = world_pos_after_zoom - world_pos_before_zoom;
+    state.camera_offset_x -= world_delta.x;
+    state.camera_offset_y -= world_delta.y;
+    return true;
 }
 
 } // namespace

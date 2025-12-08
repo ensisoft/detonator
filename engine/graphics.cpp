@@ -273,7 +273,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
             if (CullDrawPacket(packet, *projection, model_view_scene))
             {
                 packet.flags.set(DrawPacket::Flags::CullPacket, true);
-                //DEBUG("culled packet %1", packet.name);
+                //DEBUG("culled packet");
             }
         }
 

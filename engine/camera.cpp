@@ -103,7 +103,10 @@ namespace engine
 
 glm::mat4 CreateProjectionMatrix(Projection projection, const base::FRect& viewport)
 {
-    ASSERT(projection == Projection::Orthographic);
+    //ASSERT(projection == Projection::Orthographic);
+
+    // todo: this API is used to produce orthographic projections in some
+    // select use cases. the signature should change.
 
     const auto width  = viewport.GetWidth();
     const auto height = viewport.GetHeight();

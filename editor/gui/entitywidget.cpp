@@ -2090,9 +2090,8 @@ void EntityWidget::Paste(const Clipboard& clipboard)
         mickey.y() < 0 || mickey.y() > mUI.widget->height())
         mickey = QPoint(mUI.widget->width() * 0.5, mUI.widget->height() * 0.5);
 
-    const auto view = engine::GameView::AxisAligned;
-    const auto proj = engine::Projection::Orthographic;
-    const auto& mouse_pos_scene = MapWindowCoordinateToWorld(mUI, mState, mickey, view, proj);
+    const auto projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
+    const auto& mouse_pos_scene = MapWindowCoordinateToWorld(mUI, mState, mickey, projection);
 
     auto* paste_root = nodes[0].get();
     paste_root->SetTranslation(mouse_pos_scene);
@@ -4697,14 +4696,13 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto view   = engine::GameView::AxisAligned;
     const auto scene_projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     gfx::Device* device = painter.GetDevice();
     gfx::Painter entity_painter(device);
-    entity_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, view));
+    entity_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, scene_projection));
     entity_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI,  engine::Projection::Orthographic));
     entity_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
     entity_painter.SetViewport(0, 0, width, height);
@@ -4731,7 +4729,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     LowLevelRenderHook low_level_render_hook(
             camera_position,
             camera_scale,
-            view,
+            scene_projection,
             camera_rotation,
             width, height,
             zoom,
@@ -4932,7 +4930,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
 
-    PrintMousePos(mUI, mState, painter,view, engine::Projection::Orthographic);
+    PrintMousePos(mUI, mState, painter, scene_projection);
 
     if (mTransformGizmo != TransformGizmo3D::None && !mCurrentTool)
     {
@@ -4960,7 +4958,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             box.Grow(20.0f, 20.0f);
             box.Translate(-10.0f, -10.0f);
         }
-        const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, mouse_point);
+        const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, mouse_point, scene_projection);
         if (hotspot != ToolHotspot::Remove)
         {
             mTransformHandle = TransformHandle3D::None;
@@ -4991,41 +4989,16 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
 void EntityWidget::MouseZoom(const std::function<void(void)>& zoom_function)
 {
-    // where's the mouse in the widget
-    const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
-    // can't use underMouse here because of the way the gfx widget
-    // is constructed i.e QWindow and Widget as container
-    if (mickey.x() < 0 || mickey.y() < 0 ||
-        mickey.x() > mUI.widget->width() ||
-        mickey.y() > mUI.widget->height())
-        return;
-
-    const auto view = engine::GameView::AxisAligned;
-    const auto proj = engine::Projection::Orthographic;
-    Point2Df mickey_world_before_zoom;
-    Point2Df mickey_world_after_zoom;
-
-    {
-        mickey_world_before_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, view, proj);
-    }
-
-    zoom_function();
-
-    {
-        mickey_world_after_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, view, proj);
-    }
-    glm::vec2 before = mickey_world_before_zoom;
-    glm::vec2 after  = mickey_world_after_zoom;
-    mState.camera_offset_x += (before.x - after.x);
-    mState.camera_offset_y += (before.y - after.y);
-    DisplayCurrentCameraLocation();
+    if (gui::MouseZoom(mUI, mState, zoom_function))
+        DisplayCurrentCameraLocation();
 }
 
 void EntityWidget::MouseMove(QMouseEvent* event)
 {
     if (mCurrentTool)
     {
-        const MouseEvent mickey(event, mUI, mState);
+        const auto projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
+        const MouseEvent mickey(event, mUI, mState, projection);
 
         mCurrentTool->MouseMove(mickey);
 
@@ -5037,7 +5010,8 @@ void EntityWidget::MouseMove(QMouseEvent* event)
 }
 void EntityWidget::MousePress(QMouseEvent* event)
 {
-    const MouseEvent mickey(event, mUI, mState);
+    const auto projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
+    const MouseEvent mickey(event, mUI, mState, projection);
 
     if (!mCurrentTool && !mViewerMode && (mickey->button() == Qt::RightButton))
     {
@@ -5055,7 +5029,6 @@ void EntityWidget::MousePress(QMouseEvent* event)
         const auto snap = (bool)GetValue(mUI.chkSnap);
         const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
         const auto grid_size = static_cast<unsigned>(grid);
-        const auto click_point = mickey->pos();
 
         if (auto* current = GetCurrentNode())
         {
@@ -5100,7 +5073,7 @@ void EntityWidget::MousePress(QMouseEvent* event)
                 box.Resize(node_box_size.x, node_box_size.y);
                 box.Translate(-node_box_size.x * 0.5f, -node_box_size.y * 0.5f);
 
-                const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, click_point);
+                const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, mickey->pos(), projection);
                 if (hotspot == ToolHotspot::Resize)
                     mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, current, snap, grid_size));
                 else if (hotspot == ToolHotspot::Rotate)
@@ -5122,7 +5095,7 @@ void EntityWidget::MousePress(QMouseEvent* event)
                 box.Resize(node_box_size.x, node_box_size.y);
                 box.Translate(-node_box_size.x*0.5f, -node_box_size.y*0.5f);
 
-                const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, click_point);
+                const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, mickey->pos(), projection);
                 if (hotspot == ToolHotspot::Resize)
                     mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
                 else if (hotspot == ToolHotspot::Rotate)
@@ -5149,7 +5122,8 @@ void EntityWidget::MouseRelease(QMouseEvent* event)
     if (!mCurrentTool)
         return;
 
-    const MouseEvent mickey(event, mUI, mState);
+    const auto projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
+    const MouseEvent mickey(event, mUI, mState, projection);
 
     if (mCurrentTool->MouseRelease(mickey))
     {
@@ -5196,8 +5170,8 @@ void EntityWidget::MouseRelease(QMouseEvent* event)
 
 void EntityWidget::MouseDoubleClick(QMouseEvent* event)
 {
-    const MouseEvent mickey(event, mUI, mState);
-
+    const auto projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
+    const MouseEvent mickey(event, mUI, mState, projection);
 
     if (const auto* ptr = dynamic_cast<const Transform3DTool*>(mCurrentTool.get()))
         return;
@@ -6344,7 +6318,8 @@ size_t EntityWidget::ComputeHash() const
 glm::vec2 EntityWidget::MapMouseCursorToWorld() const
 {
     const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
-    return MapWindowCoordinateToWorld(mUI, mState, mickey);
+    const auto projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
+    return MapWindowCoordinateToWorld(mUI, mState, mickey, projection);
 }
 
 QString GenerateEntityScriptSource(QString entity)

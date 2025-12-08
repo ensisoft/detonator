@@ -157,6 +157,21 @@ void PrintMousePos(const UI& ui, const State& state, gfx::Painter& painter,
                   painter, ui.widget);
 }
 
+template<typename UI, typename State>
+void PrintMousePos(const UI& ui, const State& state, gfx::Painter& painter,
+                   game::SceneProjection projection)
+{
+    if (projection == game::SceneProjection::AxisAlignedOrthographic)
+        PrintMousePos(ui, state, painter, engine::GameView::AxisAligned, engine::Projection::Orthographic);
+    else if (projection == game::SceneProjection::AxisAlignedPerspective)
+        PrintMousePos(ui, state, painter, engine::GameView::AxisAligned, engine::Projection::Perspective);
+    else if (projection == game::SceneProjection::Dimetric)
+        PrintMousePos(ui, state, painter, engine::GameView::Dimetric, engine::Projection::Orthographic);
+    else if (projection == game::SceneProjection::Isometric)
+        PrintMousePos(ui, state, painter, engine::GameView::Isometric, engine::Projection::Orthographic);
+    else BUG("Missing projection handling");
+}
+
 class LowLevelRenderHook : public engine::LowLevelRendererHook
 {
 public:
@@ -364,8 +379,7 @@ public:
             const auto& node_class = entity_class->GetNode(i);
             if (const auto* tilemap_node = node_class.GetMapNode())
             {
-                const auto& world_pos = glm::vec4 { packet.sort_point, 0.0f, 1.0f};
-                const auto& plane_pos = engine::MapFromScenePlaneToTilePlane(world_pos, mMap->GetPerspective());
+                const auto& plane_pos = packet.sort_point;
                 if (!mMap->TestPlaneCoordinate(plane_pos, layer))
                     continue;
                 const auto& tile_pos = mMap->MapFromPlane(plane_pos, layer);
@@ -487,27 +501,10 @@ private:
     void DrawGizmo(const game::EntityNodeClass* node, const gfx::FRect& rect, gfx::Transform& model,
         std::vector<engine::DrawPacket>& packets) const
     {
-        if (mProjection == game::SceneProjection::Dimetric)
-        {
-            model.Push(engine::CreateModelMatrix(engine::GameView::AxisAligned));
-            model.Push(engine::CreateModelMatrix(engine::GameView::Dimetric));
-        }
-        else if (mProjection == game::SceneProjection::Isometric)
-        {
-            model.Push(engine::CreateModelMatrix(engine::GameView::AxisAligned));
-            model.Push(engine::CreateModelMatrix(engine::GameView::Isometric));
-        }
-
         if (mGizmo == TransformGizmo3D::Translate)
             DrawTranslateGizmo(node, model, packets, mProjection, mHandle);
         else if (mGizmo == TransformGizmo3D::Rotate)
             DrawRotateGizmo(node, model, packets, mProjection, mHandle);
-
-        if (mProjection == game::SceneProjection::Dimetric || mProjection == game::SceneProjection::Isometric)
-        {
-            model.Pop();
-            model.Pop();
-        }
     }
     void DrawGizmo(const game::EntityNode* node, const gfx::FRect& rect, gfx::Transform& model,
         std::vector<engine::DrawPacket>& packets) const
