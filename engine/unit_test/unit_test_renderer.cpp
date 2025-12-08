@@ -1230,28 +1230,28 @@ void unit_test_scene_culling()
         renderer.ClearPaintState();
         renderer.SetProjection(engine::Renderer::SceneProjection::Dimetric);
 
-        node->SetTranslation(450.0f, 0.0f);
+        node->SetTranslation(1000.0f, 0.0f);
         renderer.UpdateRendererState(entity);
         renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == true);
         TEST_REQUIRE(filter.counter == 1);
 
-        node->SetTranslation(-450.0f, 0.0f);
+        node->SetTranslation(1000.0f, 0.0f);
         renderer.UpdateRendererState(entity);
         renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == true);
         TEST_REQUIRE(filter.counter == 2);
 
-        node->SetTranslation(0.0f, 450.0f);
+        node->SetTranslation(0.0f, 1000.0f);
         renderer.UpdateRendererState(entity);
         renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);
         TEST_REQUIRE(filter.culling == true);
         TEST_REQUIRE(filter.counter == 3);
 
-        node->SetTranslation(0.0f, -450.0f);
+        node->SetTranslation(0.0f, -1000.0f);
         renderer.UpdateRendererState(entity);
         renderer.CreateFrame(entity);
         renderer.DrawFrame(*device);

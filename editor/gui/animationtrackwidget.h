@@ -170,7 +170,7 @@ namespace gui
         void AddNodeTimelineAction();
     private:
         void PaintScene(gfx::Painter& painter, double secs);
-        void MouseZoom(std::function<void(void)> zoom_function);
+        void MouseZoom(const std::function<void(void)>& zoom_function);
         void MouseMove(QMouseEvent* mickey);
         void MousePress(QMouseEvent* mickey);
         void MouseRelease(QMouseEvent* mickey);

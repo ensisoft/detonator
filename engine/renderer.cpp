@@ -538,7 +538,13 @@ void Renderer::CreateFrame(const game::SceneClass& scene, const game::Tilemap* m
         if (scene_hook)
         {
             // this is the model, aka model_to_world transform
-            gfx::Transform transform(node.node_to_scene);
+            gfx::Transform transform;
+            if (IsAxonometricProjection(projection))
+            {
+                transform.Push(CreateModelMatrix(GameView::AxisAligned));
+                transform.Push(CreateModelMatrix(projection));
+            }
+            transform.Push(node.node_to_scene);
 
             scene_hook->AppendPackets(*placement, transform, *packet_list);
             scene_hook->EndDrawEntity(*placement);
@@ -605,7 +611,13 @@ void Renderer::CreateFrame(const game::EntityClass& entity, EntityClassDrawHook*
 
         if (hook && !did_paint)
         {
-            gfx::Transform transform(entity.FindNodeTransform(&node));
+            gfx::Transform transform;
+            if (IsAxonometricProjection(mProjection))
+            {
+                transform.Push(CreateModelMatrix(GameView::AxisAligned));
+                transform.Push(CreateModelMatrix(mProjection));
+            }
+            transform.Push(entity.FindNodeTransform(&node));
             hook->AppendPackets(&node, transform, packets);
         }
     }
@@ -647,7 +659,13 @@ void Renderer::CreateFrame(const game::Entity& entity, EntityInstanceDrawHook* h
 
         if (hook && !did_paint)
         {
-            gfx::Transform transform(entity.FindNodeTransform(&node));
+            gfx::Transform transform;
+            if (IsAxonometricProjection(mProjection))
+            {
+                transform.Push(CreateModelMatrix(GameView::AxisAligned));
+                transform.Push(CreateModelMatrix(mProjection));
+            }
+            transform.Push(entity.FindNodeTransform(&node));
             hook->AppendPackets(&node, transform, packets);
         }
     }
@@ -986,11 +1004,6 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
     using DrawableItemType = typename EntityNodeType::DrawableItemType;
     const auto* item = entity_node.GetDrawable();
 
-    gfx::Transform transform;
-    transform.Scale(paint_node.world_scale);
-    transform.RotateAroundZ(paint_node.world_rotation);
-    transform.Translate(paint_node.world_pos);
-
     if (item && paint_node.material)
     {
         paint_node.material->ResetUniforms();
@@ -1070,49 +1083,56 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
             }
         }
 
-        const bool add_axonometric_transform = IsAxonometricProjection(projection) && (is3d || project_3d);
-        if (add_axonometric_transform)
+        gfx::Transform model_transform;
+
+        if (IsAxonometricProjection(projection))
         {
-            transform.Push(CreateModelMatrix(GameView::AxisAligned));
-            transform.Push(CreateModelMatrix(projection));
+            model_transform.Push(CreateModelMatrix(GameView::AxisAligned));
+            model_transform.Push(CreateModelMatrix(projection));
         }
+
+        model_transform.Push();
+            model_transform.Scale(paint_node.world_scale);
+            model_transform.RotateAroundZ(paint_node.world_rotation);
+            model_transform.Translate(paint_node.world_pos);
 
         if (is3d)
         {
             // model transform. keep in mind 3D only applies to the
             // renderable item (so it's visual only) thus the 3rd dimension
             // comes from the renderable item instead of the node!
-            transform.Push();
-                transform.RotateAroundX(gfx::FDegrees(180.0f));
-                transform.Scale(size.x, size.y, item->GetDepth());
-                transform.Rotate(item->GetRotator());
-                transform.Translate(item->GetOffset());
+            model_transform.Push();
+                model_transform.RotateAroundX(gfx::FDegrees(180.0f));
+                model_transform.Scale(size.x, size.y, item->GetDepth());
+                model_transform.Rotate(item->GetRotator());
+                model_transform.Translate(item->GetOffset());
 
         }
         else
         {
             // model transform.
-            transform.Push();
-                transform.Translate(-0.5f, -0.5f);
-                transform.Scale(size);
+            model_transform.Push();
+                model_transform.Translate(-0.5f, -0.5f);
+                model_transform.Scale(size);
                 if (project_3d)
                 {
-                    transform.Rotate(item->GetRotator());
-                    transform.Translate(item->GetOffset());
+                    model_transform.Rotate(item->GetRotator());
+                    model_transform.Translate(item->GetOffset());
                 }
         }
 
-        glm::mat4 world(1.0f);
-        if (add_axonometric_transform)
+        gfx::Transform world_transform;
+        if (IsAxonometricProjection(projection))
         {
-            world =  CreateModelMatrix(projection) *
-                     CreateModelMatrix(GameView::AxisAligned);
+            world_transform.Push(CreateModelMatrix(GameView::AxisAligned));
+            world_transform.Push(CreateModelMatrix(projection));
         }
 
-        const auto& model = transform.GetAsMatrix();
+        const auto& model_transform_matrix = model_transform.GetAsMatrix();
+        const auto& world_transform_matrix = world_transform.GetAsMatrix();
         gfx::Drawable::Environment env;
-        env.model_matrix = &model;
-        env.world_matrix = &world;
+        env.model_matrix = &model_transform_matrix;
+        env.world_matrix = &world_transform_matrix;
         env.flip_uv_horizontally = horizontal_flip;
         env.flip_uv_vertically   = vertical_flip;
         // todo: other env matrices?
@@ -1134,16 +1154,6 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
                 paint_node.drawable->Execute(env, gfx_cmd);
             }
         }
-
-        // pop model transform.
-        transform.Pop();
-
-        if (add_axonometric_transform)
-        {
-            // pop view based model transform
-            transform.Pop();
-            transform.Pop();
-        }
     }
 
     if (item)
@@ -1157,16 +1167,28 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
 
 template<typename EntityType, typename EntityNodeType>
 void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeType& entity_node, PaintNode& paint_node,
-                                   SceneProjection mode, double time, float dt) const
+                                   SceneProjection projection, double time, float dt) const
 {
 
     using TextItemType = typename EntityNodeType::TextItemType;
     const auto* text = entity_node.GetTextItem();
+    const auto& size = entity_node.GetSize();
 
     gfx::Transform transform;
-    transform.Scale(paint_node.world_scale);
-    transform.RotateAroundZ(paint_node.world_rotation);
-    transform.Translate(paint_node.world_pos);
+
+    if (IsAxonometricProjection(projection))
+    {
+        transform.Push(CreateModelMatrix(GameView::AxisAligned));
+        transform.Push(CreateModelMatrix(projection));
+    }
+
+    transform.Push();
+        transform.Scale(paint_node.world_scale);
+        transform.RotateAroundZ(paint_node.world_rotation);
+        transform.Translate(paint_node.world_pos);
+        transform.Push();
+            transform.Translate(-0.5f, -0.5f);
+            transform.Scale(size);
 
     if (text && paint_node.material)
     {
@@ -1178,18 +1200,12 @@ void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeTyp
     }
     if (text && paint_node.drawable)
     {
-        // push the actual model transform
-        transform.Push(entity_node.GetModelTransform());
-
-        const auto& model = transform.GetAsMatrix();
+        const auto& world_matrix = glm::mat4(1.0f);
+        const auto& model_matrix = transform.GetAsMatrix();
         gfx::Drawable::Environment env;
-        env.model_matrix = &model;
-        // todo: other env matrices?
-
+        env.model_matrix = &model_matrix;
+        env.world_matrix = &world_matrix;// todo: other env matrices?
         paint_node.drawable->Update(env, dt);
-
-        // pop model transform
-        transform.Pop();
     }
 }
 
@@ -1538,44 +1554,51 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
     using DrawableItemType = typename EntityNodeType::DrawableItemType;
 
     const bool entity_visible = entity.TestFlag(EntityType::Flags::VisibleInGame);
+    const bool valid_paint = paint_node.drawable && paint_node.material;
+    const auto* drawable = entity_node.GetDrawable();
 
-    gfx::Transform transform;
-    transform.Scale(paint_node.world_scale);
-    transform.RotateAroundZ(paint_node.world_rotation);
-    transform.Translate(paint_node.world_pos);
-
-    auto map_sort_point  = glm::vec2 {0.5f, 1.0f};
-    auto map_layer       = uint16_t(0);
-    auto map_sort_key    = static_cast<uint8_t>(game::TileOcclusion::None);
-    if (const auto* map = entity_node.GetMapNode())
+    if (drawable && drawable->TestFlag(DrawableItemType::Flags::VisibleInGame) && entity_visible && valid_paint)
     {
-        map_sort_point = map->GetSortPoint();
-        map_layer      = map->GetMapLayer();
-        map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
-    }
+        auto map_sort_point  = glm::vec2 {0.5f, 1.0f};
+        auto map_layer       = uint16_t(0);
+        auto map_sort_key    = static_cast<uint8_t>(game::TileOcclusion::None);
+        if (const auto* map = entity_node.GetMapNode())
+        {
+            map_sort_point = map->GetSortPoint();
+            map_layer      = map->GetMapLayer();
+            map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
+        }
 
-    transform.Push(entity_node.GetModelTransform());
-       map_sort_point = transform * glm::vec4{map_sort_point, 0.0f, 1.0};
-     transform.Pop();
+        {
+            gfx::Transform transform;
+            transform.Scale(paint_node.world_scale);
+            transform.RotateAroundZ(paint_node.world_rotation);
+            transform.Translate(paint_node.world_pos);
+            transform.Push(entity_node.GetModelTransform());
+            map_sort_point = transform * glm::vec4{map_sort_point, 0.0f, 1.0};
+        }
 
-    const auto* item = entity_node.GetDrawable();
-    if (item && paint_node.drawable && paint_node.material)
-    {
-        const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
-        const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
-        const auto double_sided    = item->TestFlag(DrawableItemType::Flags::DoubleSided);
-        const auto depth_test      = item->TestFlag(DrawableItemType::Flags::DepthTest);
-        const auto project_3d      = item->TestFlag(DrawableItemType::Flags::ProjectAs3D);
+        const auto horizontal_flip = drawable->TestFlag(DrawableItemType::Flags::FlipHorizontally);
+        const auto vertical_flip   = drawable->TestFlag(DrawableItemType::Flags::FlipVertically);
+        const auto double_sided    = drawable->TestFlag(DrawableItemType::Flags::DoubleSided);
+        const auto depth_test      = drawable->TestFlag(DrawableItemType::Flags::DepthTest);
+        const auto project_3d      = drawable->TestFlag(DrawableItemType::Flags::ProjectAs3D);
         const auto& shape = paint_node.drawable;
         const auto size = entity_node.GetSize();
         const auto is3d = Is3DShape(*shape);
 
-        const auto add_axonometric_projection = IsAxonometricProjection(projection) && (is3d || project_3d);
-        if (add_axonometric_projection)
+        gfx::Transform transform;
+
+        if (IsAxonometricProjection(projection))
         {
             transform.Push(CreateModelMatrix(GameView::AxisAligned));
             transform.Push(CreateModelMatrix(projection));
         }
+
+        transform.Push();
+           transform.Scale(paint_node.world_scale);
+           transform.RotateAroundZ(paint_node.world_rotation);
+           transform.Translate(paint_node.world_pos);
 
         // The 2D and 3D shapes are different so that the 2D shapes are laid out in
         // the XY quadrant and one corner is aligned with local coordinate space origin,
@@ -1595,9 +1618,9 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             // comes from the renderable item instead of the node!
             transform.Push();
                transform.RotateAroundX(gfx::FDegrees(180.0f));
-               transform.Scale(size.x, size.y, item->GetDepth());
-               transform.Rotate(item->GetRotator());
-               transform.Translate(item->GetOffset());
+               transform.Scale(size.x, size.y, drawable->GetDepth());
+               transform.Rotate(drawable->GetRotator());
+               transform.Translate(drawable->GetOffset());
         }
         else
         {
@@ -1607,74 +1630,70 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
                 transform.Scale(size);
                 if (project_3d)
                 {
-                    transform.Rotate(item->GetRotator());
-                    transform.Translate(item->GetOffset());
+                    transform.Rotate(drawable->GetRotator());
+                    transform.Translate(drawable->GetOffset());
                 }
         }
 
-        // if it doesn't render then no draw packets are generated
-        if (item->TestFlag(DrawableItemType::Flags::VisibleInGame) && entity_visible)
+        DrawPacket packet;
+        packet.flags.set(DrawPacket::Flags::PP_Bloom, drawable->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
+        packet.flags.set(DrawPacket::Flags::Flip_UV_Vertically, vertical_flip);
+        packet.flags.set(DrawPacket::Flags::Flip_UV_Horizontally, horizontal_flip);
+        packet.source           = DrawPacket::Source::Scene;
+        packet.domain           = DrawPacket::Domain::Scene;
+        packet.culling          = DrawPacket::Culling::Back;
+        packet.depth_test       = DrawPacket::DepthTest::Disabled;
+        packet.projection       = DrawPacket::Projection::Orthographic;
+        packet.material         = paint_node.material;
+        packet.drawable         = paint_node.drawable;
+        packet.transform        = transform;
+        packet.sort_point       = map_sort_point;
+        packet.map_layer        = map_layer;
+        packet.map_sort_key     = map_sort_key;
+        packet.render_layer     = entity.GetRenderLayer();
+        packet.pass             = drawable->GetRenderPass();
+        packet.packet_index     = drawable->GetLayer();
+        packet.coordinate_space = drawable->GetCoordinateSpace();
+
+        if (projection == SceneProjection::AxisAlignedPerspective && (is3d || project_3d))
+            packet.projection = DrawPacket::Projection::Perspective;
+
+        if (mEditingMode)
         {
-            DrawPacket packet;
-            packet.flags.set(DrawPacket::Flags::PP_Bloom, item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
-            packet.flags.set(DrawPacket::Flags::Flip_UV_Vertically, vertical_flip);
-            packet.flags.set(DrawPacket::Flags::Flip_UV_Horizontally, horizontal_flip);
-            packet.source           = DrawPacket::Source::Scene;
-            packet.domain           = DrawPacket::Domain::Scene;
-            packet.culling          = DrawPacket::Culling::Back;
-            packet.depth_test       = DrawPacket::DepthTest::Disabled;
-            packet.projection       = DrawPacket::Projection::Orthographic;
-            packet.material         = paint_node.material;
-            packet.drawable         = paint_node.drawable;
-            packet.transform        = transform;
-            packet.sort_point       = map_sort_point;
-            packet.map_layer        = map_layer;
-            packet.map_sort_key     = map_sort_key;
-            packet.render_layer     = entity.GetRenderLayer();
-            packet.pass             = item->GetRenderPass();
-            packet.packet_index     = item->GetLayer();
-            packet.coordinate_space = item->GetCoordinateSpace();
-
-            if (projection == SceneProjection::AxisAlignedPerspective && (is3d || project_3d))
-                packet.projection = DrawPacket::Projection::Perspective;
-
-            if (mEditingMode)
+            if (settings.style == RenderingStyle::Wireframe &&
+                    packet.drawable->GetDrawPrimitive() == gfx::Drawable::DrawPrimitive::Triangles)
             {
-                if (settings.style == RenderingStyle::Wireframe &&
-                        packet.drawable->GetDrawPrimitive() == gfx::Drawable::DrawPrimitive::Triangles)
-                {
-                    static auto wireframe_color = std::make_shared<gfx::MaterialInstance>(
-                            gfx::CreateMaterialClassFromColor(gfx::Color::Gray));
-                    packet.drawable = std::make_shared<gfx::WireframeInstance>(packet.drawable);
-                    packet.material = wireframe_color;
-                }
+                static auto wireframe_color = std::make_shared<gfx::MaterialInstance>(
+                        gfx::CreateMaterialClassFromColor(gfx::Color::Gray));
+                packet.drawable = std::make_shared<gfx::WireframeInstance>(packet.drawable);
+                packet.material = wireframe_color;
             }
-
-            if (double_sided)
-                packet.culling = DrawPacket::Culling::None;
-
-            if (depth_test)
-                packet.depth_test = DrawPacket::DepthTest::LessOrEQual;
-
-            if (!hook || hook->InspectPacket(&entity_node , packet))
-                packets.push_back(std::move(packet));
         }
 
-        // pop model transform
-        transform.Pop();
+        if (double_sided)
+            packet.culling = DrawPacket::Culling::None;
+        if (depth_test)
+            packet.depth_test = DrawPacket::DepthTest::LessOrEQual;
 
-        if (add_axonometric_projection)
-        {
-            // pop view based model transform
-            transform.Pop();
-            transform.Pop();
-        }
+        if (!hook || hook->InspectPacket(&entity_node , packet))
+            packets.push_back(std::move(packet));
     }
 
     // append any extra packets if needed.
     if (hook)
     {
         // Allow the draw hook to append any extra draw packets for this node.
+        gfx::Transform transform;
+        if (IsAxonometricProjection(projection))
+        {
+            transform.Push(CreateModelMatrix(GameView::AxisAligned));
+            transform.Push(CreateModelMatrix(projection));
+        }
+        transform.Push();
+            transform.Scale(paint_node.world_scale);
+            transform.RotateAroundZ(paint_node.world_rotation);
+            transform.Translate(paint_node.world_pos);
+
         hook->AppendPackets(&entity_node, transform, packets);
     }
 }
@@ -1684,31 +1703,17 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
                                      const EntityNodeType& entity_node,
                                      const PaintNode& paint_node,
                                      const FrameSettings& settings,
-                                     SceneProjection mode,
+                                     SceneProjection projection,
                                      std::vector<DrawPacket>& packets,
                                      EntityDrawHook<EntityNodeType>* hook) const
 {
     using DrawableItemType = typename EntityNodeType::DrawableItemType;
 
     const bool entity_visible = entity.TestFlag(EntityType::Flags::VisibleInGame);
-
-    gfx::Transform transform;
-    transform.Scale(paint_node.world_scale);
-    transform.RotateAroundZ(paint_node.world_rotation);
-    transform.Translate(paint_node.world_pos);
-
-    auto map_sort_point = glm::vec2 {0.5f, 1.0f};
-    auto map_layer      = uint16_t(0);
-    auto map_sort_key   = static_cast<uint8_t>(game::TileOcclusion::None);
-    if (const auto* map = entity_node.GetMapNode())
-    {
-        map_sort_point = map->GetSortPoint();
-        map_layer      = map->GetMapLayer();
-        map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
-    }
-
+    const bool valid_paint = paint_node.drawable && paint_node.material;
     const auto* text = entity_node.GetTextItem();
-    if (text && paint_node.drawable && paint_node.material)
+
+    if (text && text->TestFlag(TextItemClass::Flags::VisibleInGame) && entity_visible && valid_paint)
     {
         bool visible_now = true;
         if (text->TestFlag(TextItemClass::Flags::BlinkText))
@@ -1720,30 +1725,61 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             if (time >= half_period)
                 visible_now = false;
         }
-        if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && entity_visible && visible_now)
+        if (visible_now)
         {
+            auto map_sort_point = glm::vec2 {0.5f, 1.0f};
+            auto map_layer      = uint16_t(0);
+            auto map_sort_key   = static_cast<uint8_t>(game::TileOcclusion::None);
+            if (const auto* map = entity_node.GetMapNode())
+            {
+                map_sort_point = map->GetSortPoint();
+                map_layer      = map->GetMapLayer();
+                map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
+            }
+
+            {
+                gfx::Transform transform;
+                transform.Scale(paint_node.world_scale);
+                transform.RotateAroundZ(paint_node.world_rotation);
+                transform.Translate(paint_node.world_pos);
+                transform.Push(entity_node.GetModelTransform());
+                map_sort_point = transform * glm::vec4{map_sort_point, 0.0f, 1.0};
+            }
+
+            const auto size = entity_node.GetSize();
+
             // push the actual model transform
-            transform.Push(entity_node.GetModelTransform());
+            gfx::Transform transform;
+            if (IsAxonometricProjection(projection))
+            {
+                transform.Push(CreateModelMatrix(GameView::AxisAligned));
+                transform.Push(CreateModelMatrix(projection));
+            }
+
+            transform.Push();
+                transform.Scale(paint_node.world_scale);
+                transform.RotateAroundZ(paint_node.world_rotation);
+                transform.Translate(paint_node.world_pos);
+                transform.Push();
+                    transform.Translate(-0.5f, -0.5f);
+                    transform.Scale(size);
 
             DrawPacket packet;
             packet.flags.set(DrawPacket::Flags::PP_Bloom, text->TestFlag(TextItemClass::Flags::PP_EnableBloom));
-            packet.source       = DrawPacket::Source::Scene;
-            packet.domain       = DrawPacket::Domain::Scene;
-            packet.pass         = DrawPacket::RenderPass::DrawColor;
-            packet.drawable     = paint_node.drawable;
-            packet.material     = paint_node.material;
-            packet.transform    = transform;
-            packet.sort_point   = transform * glm::vec4{map_sort_point, 0.0f, 1.0f};
-            packet.map_layer    = map_layer;
-            packet.map_sort_key = map_sort_key;
-            packet.packet_index = text->GetLayer();
-            packet.render_layer = entity.GetRenderLayer();
+            packet.source           = DrawPacket::Source::Scene;
+            packet.domain           = DrawPacket::Domain::Scene;
+            packet.pass             = DrawPacket::RenderPass::DrawColor;
+            packet.drawable         = paint_node.drawable;
+            packet.material         = paint_node.material;
+            packet.transform        = transform;
+            packet.sort_point       = map_sort_point;
+            packet.map_layer        = map_layer;
+            packet.map_sort_key     = map_sort_key;
+            packet.packet_index     = text->GetLayer();
+            packet.render_layer     = entity.GetRenderLayer();
             packet.coordinate_space = text->GetCoordinateSpace();
             if (!hook || hook->InspectPacket(&entity_node, packet))
                 packets.push_back(std::move(packet));
-
-            // pop model transform
-            transform.Pop();
         }
     }
 
@@ -1751,6 +1787,17 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
     if (hook)
     {
         // Allow the draw hook to append any extra draw packets for this node.
+        gfx::Transform transform;
+        if (IsAxonometricProjection(projection))
+        {
+            transform.Push(CreateModelMatrix(GameView::AxisAligned));
+            transform.Push(CreateModelMatrix(projection));
+        }
+        transform.Push();
+            transform.Scale(paint_node.world_scale);
+            transform.RotateAroundZ(paint_node.world_rotation);
+            transform.Translate(paint_node.world_pos);
+
         hook->AppendPackets(&entity_node, transform, packets);
     }
 }
@@ -1772,21 +1819,20 @@ void Renderer::CreateLights(const EntityType& entity,
     if (!node_light || !node_light->IsEnabled() || !light_node.light)
         return;
 
-    const auto add_axonometric_transform = IsAxonometricProjection(projection);
-
     gfx::Transform light_to_world;
-    light_to_world.Scale(light_node.world_scale);
-    light_to_world.RotateAroundZ(light_node.world_rotation);
-    light_to_world.Translate(light_node.world_pos);
 
-    if (add_axonometric_transform)
+    if (IsAxonometricProjection(projection))
     {
         light_to_world.Push(CreateModelMatrix(GameView::AxisAligned));
         light_to_world.Push(CreateModelMatrix(projection));
     }
 
     light_to_world.Push();
-         light_to_world.Translate(node_light->GetTranslation());
+        light_to_world.Scale(light_node.world_scale);
+        light_to_world.RotateAroundZ(light_node.world_rotation);
+        light_to_world.Translate(light_node.world_pos);
+        light_to_world.Push();
+            light_to_world.Translate(node_light->GetTranslation());
 
     auto map_sort_point = glm::vec2 {0.5f, 1.0f};
     auto map_layer      = std::uint16_t(0);
@@ -1796,6 +1842,14 @@ void Renderer::CreateLights(const EntityType& entity,
         map_sort_point = map->GetSortPoint();
         map_layer      = map->GetMapLayer();
         map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
+    }
+
+    {
+        gfx::Transform transform;
+        transform.Scale(light_node.world_scale);
+        transform.RotateAroundZ(light_node.world_rotation);
+        transform.Translate(light_node.world_pos);
+        map_sort_point = transform * glm::vec4(map_sort_point, 0.0f, 1.0);
     }
 
     const auto& light_to_view  = CreateModelViewMatrix(GameView::AxisAligned,
@@ -1817,9 +1871,9 @@ void Renderer::CreateLights(const EntityType& entity,
     light.light        = std::move(light_copy);
     light.transform    = light_to_world;
     light.render_layer = entity.GetRenderLayer();
-    light.map_layer    = map_layer;
     light.packet_index = node_light->GetLayer();
-    light.sort_point   = light_to_world * glm::vec4{map_sort_point, 0.0f, 1.0};
+    light.map_layer    = map_layer;
+    light.sort_point   = map_sort_point;
     lights.push_back(std::move(light));
 }
 
@@ -2059,13 +2113,7 @@ void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
     for (size_t i=packet_start_index; i<packets.size(); ++i)
     {
         auto& packet = packets[i];
-
-        // take a model space coordinate and transform by the packet's model transform
-        // into world space in the scene.
-        const auto scene_world_pos = glm::vec4{packet.sort_point, 0.0, 1.0};
-        //DEBUG("Scene pos = %1", scene_world_pos);
-        // map the scene world pos to a tilemap plane position.
-        const auto map_plane_pos = MapFromScenePlaneToTilePlane(scene_world_pos, map_view);
+        const auto map_plane_pos = packet.sort_point;
         const auto map_plane_pos_xy = glm::vec2{math::clamp(0.0f, map_width * tile_width_units, map_plane_pos.x),
                                                 math::clamp(0.0f, map_height * tile_height_units, map_plane_pos.y)};
         const uint32_t map_row = math::clamp(0u, map_height-1, (unsigned)(map_plane_pos_xy.y / tile_height_units));

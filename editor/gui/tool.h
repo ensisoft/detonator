@@ -149,8 +149,7 @@ namespace gui
         Point2Df MapToPlane() const noexcept
         {
             const auto& view_to_clip = engine::CreateProjectionMatrix(engine::Projection::Orthographic, mWindowSize);
-            const auto& world_to_view = engine::CreateModelViewMatrix(mGameView, mCameraPos, mCameraScale * mZoom,
-                                                                      mCameraRotation);
+            const auto& world_to_view = engine::CreateModelViewMatrix(mGameView, mCameraPos, mCameraScale * mZoom, mCameraRotation);
             const auto ret = engine::MapFromWindowToWorldPlane(view_to_clip, world_to_view, WindowPos(), mWindowSize);
             return {ret.x, ret.y};
         }
@@ -792,10 +791,33 @@ namespace gui
     ToolHotspot TestToolHotspot(const UI& ui, const State& state,
                                 const glm::mat4& model_to_world,
                                 const gfx::FRect& world_box,
-                                const Point2Df& window_point)
+                                const Point2Df& window_point,
+                                game::SceneProjection projection)
     {
-        return TestToolHotspot(CreateProjectionMatrix(ui),
-                               CreateViewMatrix(ui, state),
+        glm::mat4 proj_matrix;
+        glm::mat4 view_matrix;
+        if (projection == game::SceneProjection::AxisAlignedOrthographic)
+        {
+            proj_matrix = CreateProjectionMatrix(ui, engine::Projection::Orthographic);
+            view_matrix = CreateViewMatrix(ui, state, engine::GameView::AxisAligned);
+        }
+        else if (projection == game::SceneProjection::AxisAlignedPerspective)
+        {
+            proj_matrix = CreateProjectionMatrix(ui, engine::Projection::Perspective);
+            view_matrix = CreateViewMatrix(ui, state, engine::GameView::AxisAligned);
+        }
+        else if (projection == game::SceneProjection::Dimetric)
+        {
+            proj_matrix = CreateProjectionMatrix(ui, engine::Projection::Orthographic);
+            view_matrix = CreateViewMatrix(ui, state, engine::GameView::Dimetric);
+        }
+        else if (projection == game::SceneProjection::Isometric)
+        {
+            proj_matrix = CreateProjectionMatrix(ui, engine::Projection::Orthographic);
+            view_matrix = CreateViewMatrix(ui, state, engine::GameView::Isometric);
+        } else BUG("Missing projection handling.");
+
+        return TestToolHotspot(proj_matrix, view_matrix,
                                model_to_world, world_box, window_point, ui.widget->size());
     }
 
