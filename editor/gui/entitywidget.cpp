@@ -5113,7 +5113,7 @@ void EntityWidget::MousePress(QMouseEvent* event)
 
         if (!GetCurrentNode())
         {
-            auto [hitnode, hitpos] = SelectNode(mUI, mState, click_point, *mState.entity, GetCurrentNode());
+            auto [hitnode, hitpos] = SelectNode(mickey.MapToPlane(), *mState.entity, GetCurrentNode());
             if (hitnode)
             {
                 const auto node_box_size = hitnode->GetSize();
@@ -5210,7 +5210,7 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* event)
     mCurrentTool.reset();
     UncheckPlacementActions();
 
-    auto [hitnode, hitpos] = SelectNode(mUI, mState, mickey->pos(), *mState.entity, GetCurrentNode());
+    auto [hitnode, hitpos] = SelectNode(mickey.MapToPlane(), *mState.entity, GetCurrentNode());
     if (!hitnode)
         return;
 
