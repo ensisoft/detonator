@@ -82,18 +82,9 @@ namespace game
             // Contribute to bloom post-processing effect.
             PP_EnableBloom,
             // Enable light on this drawable (if the scene is lit)
-            // Only applies when the shape is either 3D shape or
-            // is being projected as if 3D shape. (See ProjectAs3D)
-            Enable3DLight,
+            EnableLight,
             // Enable fog on this drawable (if the scene has fog).
-            // Only applies when the shape is either 3D shape or
-            // is being projected as if 3D shape. (See ProjectAs3D)
-            Enable3DFog,
-            // When the shape is 2D shape this flag controls
-            // whether the drawable is projected into 3D world or not.
-            // This flag controls whether the 3D translation and rotation
-            // take effect on 2D shapes or not.
-            ProjectAs3D
+            EnableFog,
         };
         DrawableItemClass();
 
@@ -133,8 +124,6 @@ namespace game
         { mMaterialParams = params; }
         void SetMaterialParams(MaterialParamMap&& params)
         { mMaterialParams = std::move(params); }
-        void Set3DProjection(bool on_off) noexcept
-        { SetFlag(Flags::ProjectAs3D, on_off); }
 
         // class getters.
         const std::string& GetDrawableId() const noexcept
@@ -159,8 +148,6 @@ namespace game
         { return mCoordinateSpace; }
         base::bitflag<Flags> GetFlags() const noexcept
         { return mBitFlags; }
-        auto ProjectAs3D() const noexcept
-        { return TestFlag(Flags::ProjectAs3D); }
 
         MaterialParamMap GetMaterialParams() noexcept
         { return mMaterialParams; }
@@ -310,8 +297,6 @@ namespace game
         { mInstanceRotator = rotator; }
         void SetOffset(glm::vec3 offset) noexcept
         { mInstanceOffset = offset; }
-        auto ProjectAs3D() const noexcept
-        { return mClass->ProjectAs3D(); }
 
         // When you set the material ID to another material remember
         // to consider whether you should also

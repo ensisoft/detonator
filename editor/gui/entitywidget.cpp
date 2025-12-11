@@ -1327,12 +1327,12 @@ public:
         game::DrawableItemClass item;
         item.SetMaterialId(mMaterialClass->GetId());
         item.SetDrawableId(mDrawableClass->GetId());
+        item.SetFlag(game::DrawableItemClass::Flags::DepthTest, true);
+        item.SetFlag(game::DrawableItemClass::Flags::EnableLight, true);
+        item.SetFlag(game::DrawableItemClass::Flags::EnableFog, true);
         if (gfx::Is3DShape(*mDrawable))
         {
             item.SetDepth(100.0f);
-            item.SetFlag(game::DrawableItemClass::Flags::DepthTest, true);
-            item.SetFlag(game::DrawableItemClass::Flags::Enable3DLight, true);
-            item.SetFlag(game::DrawableItemClass::Flags::Enable3DFog, true);
         }
 
         game::EntityNodeClass node;
@@ -5561,16 +5561,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
 
         if (const auto* item = node->GetDrawable())
         {
-            SetEnabled(mUI.dsXRotation, false);
-            SetEnabled(mUI.dsYRotation, false);
-            SetEnabled(mUI.dsZRotation, false);
-            SetEnabled(mUI.dsXOffset, false);
-            SetEnabled(mUI.dsYOffset, false);
-            SetEnabled(mUI.dsZOffset, false);
-            SetEnabled(mUI.dsDepth, false);
-            SetEnabled(mUI.dsLights3D, false);
-            SetEnabled(mUI.dsFog3D, false);
-
             SetEnabled(mUI.actionAddDrawable, false);
             SetVisible(mUI.drawable, true);
             SetValue(mUI.dsMaterial, ListItemId(item->GetMaterialId()));
@@ -5586,11 +5576,10 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsFlipHorizontally, item->TestFlag(game::DrawableItemClass::Flags::FlipHorizontally));
             SetValue(mUI.dsFlipVertically, item->TestFlag(game::DrawableItemClass::Flags::FlipVertically));
             SetValue(mUI.dsBloom, item->TestFlag(game::DrawableItemClass::Flags::PP_EnableBloom));
-            SetValue(mUI.dsLights3D, item->TestFlag(game::DrawableItemClass::Flags::Enable3DLight));
-            SetValue(mUI.dsFog3D, item->TestFlag(game::DrawableItemClass::Flags::Enable3DFog));
+            SetValue(mUI.dsLights3D, item->TestFlag(game::DrawableItemClass::Flags::EnableLight));
+            SetValue(mUI.dsFog3D, item->TestFlag(game::DrawableItemClass::Flags::EnableFog));
             SetValue(mUI.dsDoubleSided, item->TestFlag(game::DrawableItemClass::Flags::DoubleSided));
             SetValue(mUI.dsDepthTest, item->TestFlag(game::DrawableItemClass::Flags::DepthTest));
-            SetValue(mUI.dsProject3D, item->TestFlag(game::DrawableItemClass::Flags::ProjectAs3D));
 
             const auto& rotator = item->GetRotator();
             const auto [x, y, z] = rotator.GetEulerAngles();
@@ -5602,7 +5591,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsXOffset, offset.x);
             SetValue(mUI.dsYOffset, offset.y);
             SetValue(mUI.dsZOffset, offset.z);
-
             SetValue(mUI.dsDepth, item->GetDepth());
 
             const auto& material = mState.workspace->GetResourceById(GetItemId(mUI.dsMaterial));
@@ -5613,23 +5601,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
                 mUI.btnEditDrawable->setIcon(QIcon("icons:polygon.png"));
             else if (drawable.GetType() == app::Resource::Type::ParticleSystem)
                 mUI.btnEditDrawable->setIcon(QIcon("icons:particle.png"));
-
-            const gfx::DrawableClass* drawable_class = nullptr;
-            drawable.GetContent((&drawable_class));
-            SetEnabled(mUI.dsProject3D, gfx::Is2DShape(*drawable_class));
-
-            if (gfx::Is3DShape(*drawable_class) || item->TestFlag(game::DrawableItemClass::Flags::ProjectAs3D))
-            {
-                SetEnabled(mUI.dsXRotation, true);
-                SetEnabled(mUI.dsYRotation, true);
-                SetEnabled(mUI.dsZRotation, true);
-                SetEnabled(mUI.dsXOffset, true);
-                SetEnabled(mUI.dsYOffset, true);
-                SetEnabled(mUI.dsZOffset, true);
-                SetEnabled(mUI.dsLights3D, true);
-                SetEnabled(mUI.dsFog3D, true);
-                SetEnabled(mUI.dsDepth, true);
-            }
         }
         if (const auto* body = node->GetRigidBody())
         {
@@ -5897,11 +5868,10 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetFlag(game::DrawableItemClass::Flags::FlipHorizontally, GetValue(mUI.dsFlipHorizontally));
         item->SetFlag(game::DrawableItemClass::Flags::FlipVertically, GetValue(mUI.dsFlipVertically));
         item->SetFlag(game::DrawableItemClass::Flags::PP_EnableBloom, GetValue(mUI.dsBloom));
-        item->SetFlag(game::DrawableItemClass::Flags::Enable3DLight, GetValue(mUI.dsLights3D));
-        item->SetFlag(game::DrawableItemClass::Flags::Enable3DFog, GetValue(mUI.dsFog3D));
+        item->SetFlag(game::DrawableItemClass::Flags::EnableLight, GetValue(mUI.dsLights3D));
+        item->SetFlag(game::DrawableItemClass::Flags::EnableFog, GetValue(mUI.dsFog3D));
         item->SetFlag(game::DrawableItemClass::Flags::DoubleSided, GetValue(mUI.dsDoubleSided));
         item->SetFlag(game::DrawableItemClass::Flags::DepthTest, GetValue(mUI.dsDepthTest));
-        item->SetFlag(game::DrawableItemClass::Flags::ProjectAs3D, GetValue(mUI.dsProject3D));
     }
 
     if (auto* body = node->GetRigidBody())
@@ -6175,15 +6145,7 @@ bool EntityWidget::CurrentDrawableIs3D() const
     {
         if (const auto* item = node->GetDrawable())
         {
-            if (item->TestFlag(game::DrawableItemClass::Flags::ProjectAs3D))
-                return true;
-
-            const gfx::DrawableClass* drawable_class = nullptr;
-            const auto& drawable_id = item->GetDrawableId();
-            const auto& drawable_resource = mState.workspace->GetResourceById(app::FromUtf8(drawable_id));
-            drawable_resource.GetContent((&drawable_class));
-            if (gfx::Is3DShape(*drawable_class))
-                return true;
+            return true;
         }
     }
     return false;
