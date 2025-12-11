@@ -1497,8 +1497,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>429</width>
-          <height>1109</height>
+          <width>445</width>
+          <height>1124</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -2194,7 +2194,7 @@
             <bool>true</bool>
            </property>
            <property name="collapsed" stdset="0">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
            <property name="text" stdset="0">
             <string>Drawable</string>
@@ -2315,7 +2315,7 @@
                <item row="12" column="1">
                 <widget class="QCheckBox" name="dsLights3D">
                  <property name="text">
-                  <string>Apply 3D lights</string>
+                  <string>Apply lights</string>
                  </property>
                 </widget>
                </item>
@@ -2512,13 +2512,6 @@
                  </item>
                 </layout>
                </item>
-               <item row="10" column="0">
-                <widget class="QLabel" name="label_4">
-                 <property name="text">
-                  <string>3D flags</string>
-                 </property>
-                </widget>
-               </item>
                <item row="20" column="1">
                 <widget class="QCheckBox" name="dsFlipVertically">
                  <property name="sizePolicy">
@@ -2699,13 +2692,6 @@
                  </property>
                 </widget>
                </item>
-               <item row="10" column="1">
-                <widget class="QCheckBox" name="dsProject3D">
-                 <property name="text">
-                  <string>Project as 3D</string>
-                 </property>
-                </widget>
-               </item>
                <item row="7" column="0">
                 <widget class="QLabel" name="label_65">
                  <property name="text">
@@ -2822,7 +2808,14 @@
                <item row="13" column="1">
                 <widget class="QCheckBox" name="dsFog3D">
                  <property name="text">
-                  <string>Apply 3D fog</string>
+                  <string>Apply fog</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="12" column="0">
+                <widget class="QLabel" name="label_4">
+                 <property name="text">
+                  <string>Env flags</string>
                  </property>
                 </widget>
                </item>
@@ -5019,7 +5012,7 @@
             <bool>true</bool>
            </property>
            <property name="collapsed" stdset="0">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text" stdset="0">
             <string>Mesh Effect</string>
@@ -6210,7 +6203,6 @@
   <tabstop>dsYOffset</tabstop>
   <tabstop>dsZOffset</tabstop>
   <tabstop>dsDepth</tabstop>
-  <tabstop>dsProject3D</tabstop>
   <tabstop>dsLights3D</tabstop>
   <tabstop>dsFog3D</tabstop>
   <tabstop>dsVisible</tabstop>

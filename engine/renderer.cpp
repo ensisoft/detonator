@@ -1062,25 +1062,14 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
     {
         const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
-        const auto project_3d      = item->TestFlag(DrawableItemType::Flags::ProjectAs3D);
         const auto& shape = paint_node.drawable;
         const auto size = entity_node.GetSize();
         const auto is3d = Is3DShape(*shape);
 
         if (paint_node.material)
         {
-            if (is3d || project_3d)
-            {
-                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
-                    item->TestFlag(DrawableItemType::Flags::Enable3DLight));
-                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog,
-                    item->TestFlag(DrawableItemType::Flags::Enable3DFog));
-            }
-            else
-            {
-                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, false);
-                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog, false);
-            }
+            paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, item->TestFlag(DrawableItemType::Flags::EnableLight));
+            paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog,   item->TestFlag(DrawableItemType::Flags::EnableFog));
         }
 
         gfx::Transform model_transform;
@@ -1114,11 +1103,8 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
             model_transform.Push();
                 model_transform.Translate(-0.5f, -0.5f);
                 model_transform.Scale(size);
-                if (project_3d)
-                {
-                    model_transform.Rotate(item->GetRotator());
-                    model_transform.Translate(item->GetOffset());
-                }
+                model_transform.Rotate(item->GetRotator());
+                model_transform.Translate(item->GetOffset());
         }
 
         gfx::Transform world_transform;
@@ -1419,20 +1405,8 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
 
         if (paint_node.drawable && paint_node.material)
         {
-            const auto is_3d = gfx::Is3DShape(*paint_node.drawable);
-            const auto project_as_3d = item->TestFlag(DrawableItemType::Flags::ProjectAs3D);
-            if (is_3d || project_as_3d)
-            {
-                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
-                        item->TestFlag(DrawableItemType::Flags::Enable3DLight));
-                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog,
-                    item->TestFlag(DrawableItemType::Flags::Enable3DFog));
-            }
-            else
-            {
-                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, false);
-                paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog, false);
-            }
+            paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, item->TestFlag(DrawableItemType::Flags::EnableLight));
+            paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog,   item->TestFlag(DrawableItemType::Flags::EnableFog));
         }
     }
 }
@@ -1582,7 +1556,6 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
         const auto vertical_flip   = drawable->TestFlag(DrawableItemType::Flags::FlipVertically);
         const auto double_sided    = drawable->TestFlag(DrawableItemType::Flags::DoubleSided);
         const auto depth_test      = drawable->TestFlag(DrawableItemType::Flags::DepthTest);
-        const auto project_3d      = drawable->TestFlag(DrawableItemType::Flags::ProjectAs3D);
         const auto& shape = paint_node.drawable;
         const auto size = entity_node.GetSize();
         const auto is3d = Is3DShape(*shape);
@@ -1628,11 +1601,8 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             transform.Push();
                 transform.Translate(-0.5f, -0.5f);
                 transform.Scale(size);
-                if (project_3d)
-                {
-                    transform.Rotate(drawable->GetRotator());
-                    transform.Translate(drawable->GetOffset());
-                }
+                transform.Rotate(drawable->GetRotator());
+                transform.Translate(drawable->GetOffset());
         }
 
         DrawPacket packet;
@@ -1655,7 +1625,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
         packet.packet_index     = drawable->GetLayer();
         packet.coordinate_space = drawable->GetCoordinateSpace();
 
-        if (projection == SceneProjection::AxisAlignedPerspective && (is3d || project_3d))
+        if (projection == SceneProjection::AxisAlignedPerspective)
             packet.projection = DrawPacket::Projection::Perspective;
 
         if (mEditingMode)
