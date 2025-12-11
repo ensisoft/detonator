@@ -376,7 +376,7 @@ void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model
             engine::DrawPacket packet;
             packet.domain     = engine::DrawPacket::Domain::Editor;
             packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
-            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.projection = engine::DrawPacket::Projection::Orthographic;
             packet.transform  = model;
             packet.material   = handle == TransformHandle3D::Reset ? Yellow : White;
             packet.drawable   = Cube;
@@ -394,7 +394,7 @@ void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model
             engine::DrawPacket packet;
             packet.domain     = engine::DrawPacket::Domain::Editor;
             packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
-            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.projection = engine::DrawPacket::Projection::Orthographic;
             packet.transform  = model;
             packet.material   = handle == TransformHandle3D::XAxis ? Yellow : Green;
             packet.drawable   = Arrow;
@@ -413,7 +413,7 @@ void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model
             engine::DrawPacket packet;
             packet.domain     = engine::DrawPacket::Domain::Editor;
             packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
-            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.projection = engine::DrawPacket::Projection::Orthographic;
             packet.transform  = model;
             packet.material   = handle == TransformHandle3D::YAxis ? Yellow : Red;
             packet.drawable   = Arrow;
@@ -435,7 +435,7 @@ void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model
                 engine::DrawPacket packet;
                 packet.domain     = engine::DrawPacket::Domain::Editor;
                 packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
-                packet.projection = engine::DrawPacket::Projection::Perspective;
+                packet.projection = engine::DrawPacket::Projection::Orthographic;
                 packet.transform  = model;
                 packet.material   = handle == TransformHandle3D::ZAxis ? Yellow: Blue;
                 packet.drawable   = Arrow;
@@ -456,7 +456,7 @@ void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model
                 engine::DrawPacket packet;
                 packet.domain     = engine::DrawPacket::Domain::Editor;
                 packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
-                packet.projection = engine::DrawPacket::Projection::Perspective;
+                packet.projection = engine::DrawPacket::Projection::Orthographic;
                 packet.transform  = model;
                 packet.material   = handle == TransformHandle3D::ZAxis ? Yellow : Blue;
                 packet.drawable   = Arrow;
@@ -499,7 +499,7 @@ void DrawRotateGizmo(const game::EntityNodeClass* node, gfx::Transform& model, s
             engine::DrawPacket packet;
             packet.domain     = engine::DrawPacket::Domain::Editor;
             packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
-            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.projection = engine::DrawPacket::Projection::Orthographic;
             packet.transform  = model;
             packet.material   = handle == TransformHandle3D::Reset ? Yellow : White;
             packet.drawable   = Cube;
@@ -517,7 +517,7 @@ void DrawRotateGizmo(const game::EntityNodeClass* node, gfx::Transform& model, s
             engine::DrawPacket packet;
             packet.domain     = engine::DrawPacket::Domain::Editor;
             packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
-            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.projection = engine::DrawPacket::Projection::Orthographic;
             packet.transform  = model;
             packet.material   = handle == TransformHandle3D::XAxis ? Yellow : Green;
             packet.drawable   = Torus;
@@ -536,7 +536,7 @@ void DrawRotateGizmo(const game::EntityNodeClass* node, gfx::Transform& model, s
             engine::DrawPacket packet;
             packet.domain     = engine::DrawPacket::Domain::Editor;
             packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
-            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.projection = engine::DrawPacket::Projection::Orthographic;
             packet.transform  = model;
             packet.material   = handle == TransformHandle3D::YAxis ? Yellow : Red;
             packet.drawable   = Torus;
@@ -554,7 +554,7 @@ void DrawRotateGizmo(const game::EntityNodeClass* node, gfx::Transform& model, s
             engine::DrawPacket packet;
             packet.domain     = engine::DrawPacket::Domain::Editor;
             packet.depth_test = engine::DrawPacket::DepthTest::Disabled;
-            packet.projection = engine::DrawPacket::Projection::Perspective;
+            packet.projection = engine::DrawPacket::Projection::Orthographic;
             packet.transform  = model;
             packet.material   = handle == TransformHandle3D::ZAxis ? Yellow : Blue;
             packet.drawable   = Torus;
