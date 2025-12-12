@@ -114,10 +114,10 @@ namespace game
         { mTimeScale = scale; }
         void SetDepth(float depth) noexcept
         { mDepth = depth; }
-        void SetRotator(const Rotator& rotator) noexcept
-        { mRotator = rotator; }
-        void SetOffset(const glm::vec3& offset) noexcept
-        { mOffset = offset; }
+        void SetRenderRotation(const Rotator& rotator) noexcept
+        { mRenderRotation = rotator; }
+        void SetRenderTranslation(const glm::vec3& translation) noexcept
+        { mRenderTranslation = translation; }
         void SetMaterialParam(const std::string& name, const MaterialParam& value)
         { mMaterialParams[name] = value; }
         void SetMaterialParams(const MaterialParamMap& params)
@@ -138,10 +138,10 @@ namespace game
         { return mDepth; }
         bool TestFlag(Flags flag) const noexcept
         { return mBitFlags.test(flag); }
-        glm::vec3 GetOffset() const noexcept
-        { return mOffset; }
-        Rotator GetRotator() const noexcept
-        { return mRotator; }
+        auto GetRenderTranslation() const noexcept
+        { return mRenderTranslation; }
+        auto GetRenderRotation() const noexcept
+        { return mRenderRotation; }
         RenderPass GetRenderPass() const noexcept
         { return mRenderPass; }
         CoordinateSpace GetCoordinateSpace() const noexcept
@@ -210,9 +210,9 @@ namespace game
         float mDepth = 1.0f;
         // drawable 3D rotator that encodes the rotational
         // transformation for producing the desired orientation.
-        Rotator mRotator;
+        Rotator mRenderRotation;
         // drawable offset in local drawable space.
-        glm::vec3 mOffset = {0.0f, 0.0f, 0.0f};
+        glm::vec3 mRenderTranslation = {0.0f, 0.0f, 0.0f};
 
         RenderPass mRenderPass = RenderPass::DrawColor;
         CoordinateSpace  mCoordinateSpace = CoordinateSpace::Scene;
@@ -248,8 +248,8 @@ namespace game
           , mInstanceFlags(mClass->GetFlags())
           , mInstanceTimeScale(mClass->GetTimeScale())
           , mInstanceDepth(mClass->GetDepth())
-          , mInstanceRotator(mClass->GetRotator())
-          , mInstanceOffset(mClass->GetOffset())
+          , mInstanceRotator(mClass->GetRenderRotation())
+          , mInstanceOffset(mClass->GetRenderTranslation())
         {
             const auto* params = mClass->GetMaterialParams();
             if (!params->empty())
@@ -273,9 +273,9 @@ namespace game
         { return mClass->GetRenderPass(); }
         CoordinateSpace GetCoordinateSpace() const noexcept
         { return mClass->GetCoordinateSpace(); }
-        Rotator GetRotator() const noexcept
+        auto GetRenderRotation() const noexcept
         { return mInstanceRotator; }
-        glm::vec3 GetOffset() const noexcept
+        auto GetRenderTranslation() const noexcept
         { return mInstanceOffset; }
         bool TestFlag(Flags flag) const noexcept
         { return mInstanceFlags.test(flag); }
@@ -293,9 +293,9 @@ namespace game
         { mInstanceTimeScale = scale; }
         void SetDepth(float depth) noexcept
         { mInstanceDepth = depth; }
-        void SetRotator(const Rotator& rotator) noexcept
+        void SetRenderRotation(const Rotator& rotator) noexcept
         { mInstanceRotator = rotator; }
-        void SetOffset(glm::vec3 offset) noexcept
+        void SetRenderTranslation(glm::vec3 offset) noexcept
         { mInstanceOffset = offset; }
 
         // When you set the material ID to another material remember
