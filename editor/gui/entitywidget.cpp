@@ -30,6 +30,7 @@
 #  include <base64/base64.h>
 #  include <glm/glm.hpp>
 #  include <glm/gtx/matrix_decompose.hpp>
+#  include <glm/gtx/quaternion.hpp>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -583,26 +584,25 @@ public:
     {
         const auto time_now = base::GetTime();
         const auto time_elapsed = time_now - mTime;
-        auto* drawable = mNode->GetDrawable();
 
         if (mTransformGizmo == TransformGizmo3D::Translate)
         {
             const auto velocity = mShiftKey ? -200.0f : 200.0f; // units per second
-            auto offset = drawable->GetRenderTranslation();
+            auto translation = GetTranslation();
             if (mTransformHandle == TransformHandle3D::XAxis)
-                offset.x += velocity * time_elapsed;
+                translation.x += velocity * time_elapsed;
             else if (mTransformHandle == TransformHandle3D::YAxis)
-                offset.y += velocity * time_elapsed;
+                translation.y += velocity * time_elapsed;
             else if (mTransformHandle == TransformHandle3D::ZAxis)
-                offset.z += velocity * time_elapsed;
+                translation.z += velocity * time_elapsed;
 
-            drawable->SetRenderTranslation(offset);
+            SetTranslation(translation);
         }
         else if (mTransformGizmo == TransformGizmo3D::Rotate)
         {
             const auto velocity = mShiftKey ? -90.0f : 90.0f; // degrees per second
 
-            auto rotator = drawable->GetRenderRotation();
+            auto rotator = GetRotation();
             auto [x, y, z] = rotator.GetEulerAngles();
             auto deg_x = x.ToDegrees();
             auto deg_y = y.ToDegrees();
@@ -617,7 +617,7 @@ public:
             deg_x = math::clamp(-180.0f, 180.0f, deg_x);
             deg_y = math::clamp(-180.0f, 180.0f, deg_y);
             deg_z = math::clamp(-180.0f, 180.0f, deg_z);
-            drawable->SetRenderRotation(base::Rotator::FromEulerXYZ(base::FDegrees(deg_x), base::FDegrees(deg_y), base::FDegrees(deg_z)));
+            SetRotation(base::Rotator::FromEulerXYZ(base::FDegrees(deg_x), base::FDegrees(deg_y), base::FDegrees(deg_z)));
         }
 
         mTime = time_now;
@@ -627,11 +627,10 @@ public:
         mTime = base::GetTime();
         if (mTransformHandle == TransformHandle3D::Reset)
         {
-            auto* drawable = mNode->GetDrawable();
             if (mTransformGizmo == TransformGizmo3D::Translate)
-                drawable->SetRenderTranslation(glm::vec3{0.0f, 0.0f, 0.0f});
+                SetTranslation(glm::vec3{0.0f, 0.0f, 0.0f});
             else if (mTransformGizmo == TransformGizmo3D::Rotate)
-                drawable->SetRenderRotation(game::Rotator());
+                SetRotation(game::Rotator());
         }
     }
     bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
@@ -648,6 +647,49 @@ public:
             return true;
         }
         return false;
+    }
+private:
+    game::Rotator GetRotation() const
+    {
+        if (const auto* drawable = mNode->GetDrawable())
+            return drawable->GetRenderRotation();
+        else if (const auto* text = mNode->GetTextItem())
+            return text->GetRenderRotation();
+        else if (const auto* light = mNode->GetBasicLight())
+            return base::Rotator::FromDirection(light->GetDirection());
+        BUG("No attachment for gizmo tool to work on.");
+        return {};
+    }
+    glm::vec3 GetTranslation() const
+    {
+        if (const auto* drawable = mNode->GetDrawable())
+            return drawable->GetRenderTranslation();
+        else if (const auto* text = mNode->GetTextItem())
+            return text->GetRenderTranslation();
+        else if (const auto* light = mNode->GetBasicLight())
+            return light->GetTranslation();
+        BUG("No attachment for gizmo tool to work on.");
+        return {};
+    }
+    void SetTranslation(const glm::vec3& value) const
+    {
+        if (auto* drawable = mNode->GetDrawable())
+            drawable->SetRenderTranslation(value);
+        else if (auto* text = mNode->GetTextItem())
+            text->SetRenderTranslation(value);
+        else if (auto* light = mNode->GetBasicLight())
+            light->SetTranslation(value);
+        else BUG("No attachment for gizmo tool to work on.");
+    }
+    void SetRotation(const game::Rotator& value) const
+    {
+        if (auto* drawable = mNode->GetDrawable())
+            drawable->SetRenderRotation(value);
+        else if (auto* text = mNode->GetTextItem())
+            text->SetRenderRotation(value);
+        else if (auto* light = mNode->GetBasicLight())
+            light->SetDirection(value.ToDirectionVector());
+        else BUG("No attachment for gizmo tool to work on.");
     }
 
 private:
@@ -2624,7 +2666,7 @@ void EntityWidget::on_actionSelectObject_triggered()
 
 void EntityWidget::on_actionRotateObject_triggered()
 {
-    if (CurrentDrawableIs3D())
+    if (CanApplyGizmo())
     {
         if (mTransformGizmo == TransformGizmo3D::Rotate)
         {
@@ -2645,7 +2687,7 @@ void EntityWidget::on_actionRotateObject_triggered()
 
 void EntityWidget::on_actionTranslateObject_triggered()
 {
-    if (CurrentDrawableIs3D())
+    if (CanApplyGizmo())
     {
         if (mTransformGizmo == TransformGizmo3D::Translate)
         {
@@ -4753,7 +4795,6 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
     if (mTransformGizmo != TransformGizmo3D::None)
     {
-        draw_hook.SetDrawSelectionBox(false);
         draw_hook.SetDrawVectors(false);
     }
 
@@ -5288,77 +5329,45 @@ bool EntityWidget::KeyPress(QKeyEvent* event)
         return true;
 
     const auto key = event->key();
-
-    if (auto* node = GetCurrentNode())
-    {
-        auto* spline = node->GetSplineMover();
-        const int spline_point_index = spline ? GetSelectedRow(mUI.splinePointView) : -1;
-
-        if (spline && spline_point_index != -1 && key == Qt::Key_Delete)
-        {
-            const auto spline_point_count = spline->GetPointCount();
-            if (spline_point_count > 4)
-                mSplineModel->ErasePoint(spline_point_index);
-            else NOTE("Spline needs a minimum of 4 control points.");
-            return true;
-        }
-        else if (auto* text = node->GetTextItem())
-        {
-            if (key == Qt::Key_Delete)
-            {
-                std::string str = text->GetText();
-                if (!str.empty())
-                {
-                    str.clear();
-                    text->SetText(std::move(str));
-                    return true;
-                }
-
-            }
-            else if (key  == Qt::Key_Backspace)
-            {
-                std::string str = text->GetText();
-                if (!str.empty())
-                {
-                    str.pop_back();
-                    text->SetText(std::move(str));
-                    return true;
-                }
-            }
-            else if (std::isprint(key))
-            {
-                std::string str = text->GetText();
-                str += app::ToUtf8(event->text());
-                text->SetText(std::move(str));
-                return true;
-            }
-        }
-        else if (auto* draw = node->GetDrawable())
-        {
-            if (CurrentDrawableIs3D())
-            {
-                if (key == Qt::Key_T)
-                {
-                    on_actionTranslateObject_triggered();
-                }
-                else if (key == Qt::Key_R)
-                {
-                    on_actionRotateObject_triggered();
-                }
-            }
-            else
-            {
-                if (key == Qt::Key_T)
-                    SelectTile();
-            }
-        }
-    }
+    const auto shift= event->modifiers() & Qt::Key_Shift;
 
     switch (key)
     {
         case Qt::Key_Delete:
-            on_actionNodeDelete_triggered();
+            if (auto* node = GetCurrentNode())
+            {
+                auto* spline = node->GetSplineMover();
+                const int spline_point_index = spline ? GetSelectedRow(mUI.splinePointView) : -1;
+                if (spline && spline_point_index != -1)
+                {
+                    const auto spline_point_count = spline->GetPointCount();
+                    if (spline_point_count > 4)
+                        mSplineModel->ErasePoint(spline_point_index);
+                    else NOTE("Spline needs a minimum of 4 control points.");
+                }
+                else
+                {
+                    on_actionNodeDelete_triggered();
+                }
+            }
             break;
+        case Qt::Key_T:
+            if (shift)
+            {
+                SelectTile();
+            }
+            else if (CanApplyGizmo())
+            {
+                on_actionTranslateObject_triggered();
+            }
+            break;
+        case Qt::Key_R:
+            if (CanApplyGizmo())
+            {
+                on_actionRotateObject_triggered();
+            }
+            break;
+
         case Qt::Key_W:
             TranslateCamera(0.0f, 20.0f);
             break;
@@ -6209,14 +6218,12 @@ void EntityWidget::UpdateGizmos()
     SetValue(mUI.actionTranslateObject, mTransformGizmo == TransformGizmo3D::Translate);
 }
 
-bool EntityWidget::CurrentDrawableIs3D() const
+bool EntityWidget::CanApplyGizmo() const
 {
     if (const auto* node = GetCurrentNode())
     {
-        if (const auto* item = node->GetDrawable())
-        {
+        if (node->HasDrawable() || node->HasTextItem() || node->HasBasicLight())
             return true;
-        }
     }
     return false;
 }

@@ -323,6 +323,8 @@ void DrawInvisibleItemBox(gfx::Transform& model, std::vector<engine::DrawPacket>
 void DrawLightIndicator(gfx::Transform& transform, std::vector<engine::DrawPacket>& packets, const gfx::FRect& node_rect,
     game::SceneProjection projection, bool selected, const glm::vec3& light_position, const glm::vec3& light_direction)
 {
+    static const auto Arrow   = std::make_shared<gfx::WavefrontMesh>(res::TranslateGizmo);
+    static const auto Green   = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Yellow));
     static const auto rect = std::make_shared<gfx::Rectangle>();
     static const auto cube = std::make_shared<gfx::Cube>();
     static std::shared_ptr<gfx::Material> light_material;
@@ -365,6 +367,27 @@ void DrawLightIndicator(gfx::Transform& transform, std::vector<engine::DrawPacke
             packet.line_width        = 2.0f;
             packets.push_back(std::move(packet));
         transform.Pop();
+
+
+        const auto rotator = base::Rotator::FromDirection(light_direction);
+
+        transform.Push();
+        transform.Push(rotator.GetAsMatrix());
+            transform.Translate(light_position);
+            transform.Translate(light_direction * 30.0f);
+            transform.Resize(30.0f, 30.0f, 30.0f);
+
+            engine::DrawPacket packet2;
+            packet2.domain            = engine::DrawPacket::Domain::Editor;
+            packet2.transform         = transform;
+            packet2.material          = Green;
+            packet2.drawable          = Arrow;
+            packet2.render_layer      = 0;
+            packet2.packet_index      = 0;
+            packet2.line_width        = 2.0f;
+            packets.push_back(std::move(packet2));
+        transform.Pop();
+        transform.Pop();
     }
 }
 
@@ -378,12 +401,6 @@ void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model
     static const auto Blue    = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Blue));
     static const auto White   = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::White));
     static const auto Yellow  = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Yellow));
-
-    // remember that for 3D shapes the 3D is a "rendering" gimmick only
-    // and thus the 3rd (z) dimension is int eh drawable item and not in the node.
-    // (the entity nodes are always on the XY plane since this is a 2D game engine...)
-    const auto& node_size_xy = node->GetSize();
-    const auto& node_depth = node->GetDrawable()->GetDepth();
 
     const auto time = fmod(base::GetTime(), 2.0f) / 2.0f;
     const auto s = handle == TransformHandle3D::None ? std::sin(time * math::Pi) : 0.0f;
@@ -407,9 +424,8 @@ void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model
     //if (handle == TransformHandle3D::None || handle == TransformHandle3D::XAxis)
     {
         model.Push();
-            model.Scale(100.0f, 100.0f, 100.0f);
+            model.Scale(100.0f + s * 20.0f, 100.0f, 100.0f);
             model.Translate(20.0f, 0.0f, 0.0f);
-            model.Translate(20.0f * s, 0.0f, 0.0f);
 
             engine::DrawPacket packet;
             packet.domain     = engine::DrawPacket::Domain::Editor;
@@ -425,10 +441,9 @@ void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model
     //if (handle == TransformHandle3D::None || handle == TransformHandle3D::YAxis)
     {
         model.Push();
-            model.Scale(100.0f, 100.0f, 100.0f);
+            model.Scale(100.0f + s * 20.0f, 100.0f, 100.0f);
             model.RotateAroundZ(gfx::FDegrees(90.0f));
             model.Translate(0.0f, 20.0f, 0.0f);
-            model.Translate(0.0f, 20.0f * s, 0.0f);
 
             engine::DrawPacket packet;
             packet.domain     = engine::DrawPacket::Domain::Editor;
@@ -447,10 +462,9 @@ void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model
         //if (handle == TransformHandle3D::None || handle == TransformHandle3D::ZAxis)
         {
             model.Push();
-                model.Scale(100.0f, 100.0f, 100.0f);
+                model.Scale(100.0f + s * 20.0f, 100.0f, 100.0f);
                 model.RotateAroundZ(gfx::FDegrees(-45.0f));
                 model.Translate(0.0f, -20.0f, 0.0f);
-                model.Translate(20.0f * s, -20.0f * s, 0.0f);
 
                 engine::DrawPacket packet;
                 packet.domain     = engine::DrawPacket::Domain::Editor;
@@ -468,10 +482,9 @@ void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model
         //if (handle == TransformHandle3D::None || handle == TransformHandle3D::ZAxis)
         {
             model.Push();
-                model.Scale(100.0f, 100.0f, 100.0f);
+                model.Scale(100.0f + s * 20.0f, 100.0f, 100.0f);
                 model.RotateAroundY(gfx::FDegrees(-90.0f));
                 model.Translate(0.0f, 0.0f, 20.0f);
-                model.Translate(0.0f, 0.0f, 20.0f * s);
 
                 engine::DrawPacket packet;
                 packet.domain     = engine::DrawPacket::Domain::Editor;
@@ -496,20 +509,17 @@ void DrawRotateGizmo(const game::EntityNodeClass* node, gfx::Transform& model, s
     static const auto Yellow  = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::Yellow));
     static const auto White   = std::make_shared<gfx::MaterialInstance>(gfx::CreateMaterialClassFromColor(gfx::Color::White));
 
-    // remember that for 3D shapes the 3D is a "rendering" gimmick only
-    // and thus the 3rd (z) dimension is int eh drawable item and not in the node.
-    // (the entity nodes are always on the XY plane since this is a 2D game engine...)
-    const auto& node_size_xy = node->GetSize();
-    const auto& node_depth = node->GetDrawable()->GetDepth();
     const auto size = 85.0f;
-
-    const auto translation = glm::vec3 { 0.0f, 0.0f, 0.0f };
     const auto scale = glm::vec3 { size, size, size };
+    const auto angle = 0.0f; //fmodf(base::GetTime() * 90.0, 360.0f);
 
-    const auto time = fmod(base::GetTime(), 2.0f) / 2.0f;
-    const auto s = handle == TransformHandle3D::None ? std::sin(time * math::Pi) : 0.0f;
-
-    const auto render_layer = node->GetDrawable()->GetLayer();
+    auto render_layer = 0;
+    if (const auto* drawable = node->GetDrawable())
+        render_layer = drawable->GetLayer();
+    else if (const auto* text = node->GetTextItem())
+        render_layer = text->GetLayer();
+    else if (const auto* light = node->GetBasicLight())
+        render_layer = light->GetLayer();
 
     if (handle == TransformHandle3D::None || handle == TransformHandle3D::Reset)
     {
@@ -531,7 +541,7 @@ void DrawRotateGizmo(const game::EntityNodeClass* node, gfx::Transform& model, s
     {
         model.Push();
             model.Scale(scale * 1.0f);
-            model.RotateAroundZ(gfx::FDegrees(20.0f * s));
+            model.RotateAroundZ(gfx::FDegrees(angle));
             model.RotateAroundY(gfx::FDegrees(90.0));
 
             engine::DrawPacket packet;
@@ -550,7 +560,7 @@ void DrawRotateGizmo(const game::EntityNodeClass* node, gfx::Transform& model, s
     {
         model.Push();
             model.Scale(scale);
-            model.RotateAroundZ(gfx::FDegrees(20.0f * s));
+            model.RotateAroundZ(gfx::FDegrees(angle));
             model.RotateAroundX(gfx::FDegrees(90.0f));
 
             engine::DrawPacket packet;
@@ -569,7 +579,7 @@ void DrawRotateGizmo(const game::EntityNodeClass* node, gfx::Transform& model, s
     {
         model.Push();
             model.Scale(scale);
-            model.RotateAroundZ(gfx::FDegrees(20.0f * s));
+            model.RotateAroundZ(gfx::FDegrees(angle));
 
             engine::DrawPacket packet;
             packet.domain     = engine::DrawPacket::Domain::Editor;

@@ -22,6 +22,7 @@
 #  include <glm/gtc/matrix_transform.hpp>
 #  include <glm/gtc/quaternion.hpp>
 #  include <glm/gtx/euler_angles.hpp>
+#  include <glm/gtx/quaternion.hpp>
 #include "warnpop.h"
 
 #include <tuple>
@@ -75,6 +76,12 @@ namespace base
         inline glm::vec3 ToVector() const noexcept
         {
             return glm::vec3 { mX.ToRadians(), mY.ToRadians(), mZ.ToRadians() };
+        }
+
+        glm::vec3 ToDirectionVector() const noexcept
+        {
+            const auto& quat = GetAsQuaternion();
+            return glm::normalize(quat * glm::vec3(1.0f, 0.0f, 0.0f));
         }
 
         inline glm::quat GetAsQuaternion() const noexcept
@@ -137,6 +144,17 @@ namespace base
         static Rotator FromEulerXYZ(FAngle<Unit> x, FAngle<Unit> y,FAngle<Unit> z) noexcept
         {
             return Rotator(x, y, z);
+        }
+
+        static Rotator FromDirection(const glm::vec3& direction)
+        {
+            if (glm::length(direction) < 0.0005)
+                return Rotator();
+
+            constexpr auto canonical_vector = glm::vec3(1.0f, 0.0f, 0.0f);
+            const auto& normal_direction = glm::normalize(direction);
+            const auto& rotation_quaternion = glm::rotation(canonical_vector, normal_direction);
+            return Rotator(rotation_quaternion);
         }
 
     private:

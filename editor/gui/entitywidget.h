@@ -391,7 +391,7 @@ namespace gui
         void UpdateDeletedResourceReferences();
         void SelectTile();
         void UpdateGizmos();
-        bool CurrentDrawableIs3D() const;
+        bool CanApplyGizmo() const;
         game::EntityNodeClass* GetCurrentNode();
         const game::EntityNodeClass* GetCurrentNode() const;
         size_t ComputeHash() const;
