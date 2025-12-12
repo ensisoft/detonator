@@ -320,9 +320,11 @@ void DrawInvisibleItemBox(gfx::Transform& model, std::vector<engine::DrawPacket>
     model.Pop();
 }
 
-void DrawLightIndicator(gfx::Transform& transform, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect)
+void DrawLightIndicator(gfx::Transform& transform, std::vector<engine::DrawPacket>& packets, const gfx::FRect& node_rect,
+    game::SceneProjection projection, bool selected, const glm::vec3& light_position, const glm::vec3& light_direction)
 {
-    static const auto shape  = std::make_shared<gfx::Rectangle>();
+    static const auto rect = std::make_shared<gfx::Rectangle>();
+    static const auto cube = std::make_shared<gfx::Cube>();
     static std::shared_ptr<gfx::Material> light_material;
     if (!light_material)
     {
@@ -336,16 +338,34 @@ void DrawLightIndicator(gfx::Transform& transform, std::vector<engine::DrawPacke
     transform.Push();
         transform.Scale(width, height);
         transform.Translate(-width*0.5, -height*0.5);
-        engine::DrawPacket box;
-        box.domain            = engine::DrawPacket::Domain::Editor;
-        box.transform         = transform;
-        box.material          = light_material;
-        box.drawable          = shape;
-        box.render_layer      = 0;
-        box.packet_index      = 0;
-        box.line_width        = 2.0f;
-        packets.push_back(box);
+        engine::DrawPacket packet;
+        packet.domain            = engine::DrawPacket::Domain::Editor;
+        packet.transform         = transform;
+        packet.material          = light_material;
+        packet.drawable          = rect;
+        packet.render_layer      = 0;
+        packet.packet_index      = 0;
+        packet.line_width        = 2.0f;
+        packets.push_back(std::move(packet));
     transform.Pop();
+
+    if (selected && game::IsAxonometricProjection(projection))
+    {
+        transform.Push();
+            transform.Translate(light_position);
+            transform.Resize(30.0f, 30.0f, 30.0f);
+
+            engine::DrawPacket packet;
+            packet.domain            = engine::DrawPacket::Domain::Editor;
+            packet.transform         = transform;
+            packet.material          = light_material;
+            packet.drawable          = cube;
+            packet.render_layer      = 0;
+            packet.packet_index      = 0;
+            packet.line_width        = 2.0f;
+            packets.push_back(std::move(packet));
+        transform.Pop();
+    }
 }
 
 void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& model, std::vector<engine::DrawPacket>& packets,
