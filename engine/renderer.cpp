@@ -1741,6 +1741,7 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             packet.source           = DrawPacket::Source::Scene;
             packet.domain           = DrawPacket::Domain::Scene;
             packet.pass             = DrawPacket::RenderPass::DrawColor;
+            packet.depth_test       = DrawPacket::DepthTest::Disabled;
             packet.drawable         = paint_node.drawable;
             packet.material         = paint_node.material;
             packet.transform        = transform;
@@ -1750,6 +1751,10 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             packet.packet_index     = text->GetLayer();
             packet.render_layer     = entity.GetRenderLayer();
             packet.coordinate_space = text->GetCoordinateSpace();
+
+            if (text->TestFlag(TextItemClass::Flags::DepthTest))
+                packet.depth_test = DrawPacket::DepthTest::LessOrEQual;
+
             if (!hook || hook->InspectPacket(&entity_node, packet))
                 packets.push_back(std::move(packet));
         }

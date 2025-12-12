@@ -3088,6 +3088,85 @@
                  </property>
                 </widget>
                </item>
+               <item row="11" column="1">
+                <layout class="QHBoxLayout" name="horizontalLayout_22">
+                 <item>
+                  <widget class="QDoubleSpinBox" name="tiXTranslation">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="toolTip">
+                    <string>Set the node's width in game units</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color: rgb(100, 200, 100)</string>
+                   </property>
+                   <property name="minimum">
+                    <double>-1000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                   <property name="stepType">
+                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QDoubleSpinBox" name="tiYTranslation">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="toolTip">
+                    <string>Set the node's width in game units</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color: rgb(200,100, 100)</string>
+                   </property>
+                   <property name="minimum">
+                    <double>-1000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                   <property name="stepType">
+                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QDoubleSpinBox" name="tiZTranslation">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="toolTip">
+                    <string>Set the node's width in game units</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color: rgb(100, 100, 250);</string>
+                   </property>
+                   <property name="minimum">
+                    <double>-1000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                   <property name="stepType">
+                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
                <item row="1" column="0">
                 <widget class="QLabel" name="label_42">
                  <property name="text">
@@ -3163,7 +3242,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="21" column="0" colspan="2">
+               <item row="24" column="0" colspan="2">
                 <widget class="QPushButton" name="btnDelTextItem">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -3207,6 +3286,13 @@
                 <widget class="QLabel" name="label_46">
                  <property name="text">
                   <string>Line height</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="11" column="0">
+                <widget class="QLabel" name="label_95">
+                 <property name="text">
+                  <string>3D translation</string>
                  </property>
                 </widget>
                </item>
@@ -3450,89 +3536,10 @@
                  </property>
                 </widget>
                </item>
-               <item row="11" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_22">
-                 <item>
-                  <widget class="QDoubleSpinBox" name="tiXTranslation">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="toolTip">
-                    <string>Set the node's width in game units</string>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">color: rgb(100, 200, 100)</string>
-                   </property>
-                   <property name="minimum">
-                    <double>-1000.000000000000000</double>
-                   </property>
-                   <property name="maximum">
-                    <double>1000.000000000000000</double>
-                   </property>
-                   <property name="stepType">
-                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QDoubleSpinBox" name="tiYTranslation">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="toolTip">
-                    <string>Set the node's width in game units</string>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">color: rgb(200,100, 100)</string>
-                   </property>
-                   <property name="minimum">
-                    <double>-1000.000000000000000</double>
-                   </property>
-                   <property name="maximum">
-                    <double>1000.000000000000000</double>
-                   </property>
-                   <property name="stepType">
-                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QDoubleSpinBox" name="tiZTranslation">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="toolTip">
-                    <string>Set the node's width in game units</string>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">color: rgb(100, 100, 250);</string>
-                   </property>
-                   <property name="minimum">
-                    <double>-1000.000000000000000</double>
-                   </property>
-                   <property name="maximum">
-                    <double>1000.000000000000000</double>
-                   </property>
-                   <property name="stepType">
-                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="11" column="0">
-                <widget class="QLabel" name="label_95">
+               <item row="20" column="1">
+                <widget class="QCheckBox" name="tiDepthTest">
                  <property name="text">
-                  <string>3D translation</string>
+                  <string>Depth test</string>
                  </property>
                 </widget>
                </item>
@@ -6441,6 +6448,7 @@
   <tabstop>tiBloom</tabstop>
   <tabstop>tiLights</tabstop>
   <tabstop>tiFog</tabstop>
+  <tabstop>tiDepthTest</tabstop>
   <tabstop>btnDelTextItem</tabstop>
   <tabstop>rigidBody</tabstop>
   <tabstop>rbSimulation</tabstop>
