@@ -1093,8 +1093,8 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
             model_transform.Push();
                 model_transform.RotateAroundX(gfx::FDegrees(180.0f));
                 model_transform.Scale(size.x, size.y, item->GetDepth());
-                model_transform.Rotate(item->GetRotator());
-                model_transform.Translate(item->GetOffset());
+                model_transform.Rotate(item->GetRenderRotation());
+                model_transform.Translate(item->GetRenderTranslation());
 
         }
         else
@@ -1103,8 +1103,8 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
             model_transform.Push();
                 model_transform.Translate(-0.5f, -0.5f);
                 model_transform.Scale(size);
-                model_transform.Rotate(item->GetRotator());
-                model_transform.Translate(item->GetOffset());
+                model_transform.Rotate(item->GetRenderRotation());
+                model_transform.Translate(item->GetRenderTranslation());
         }
 
         gfx::Transform world_transform;
@@ -1592,8 +1592,8 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             transform.Push();
                transform.RotateAroundX(gfx::FDegrees(180.0f));
                transform.Scale(size.x, size.y, drawable->GetDepth());
-               transform.Rotate(drawable->GetRotator());
-               transform.Translate(drawable->GetOffset());
+               transform.Rotate(drawable->GetRenderRotation());
+               transform.Translate(drawable->GetRenderTranslation());
         }
         else
         {
@@ -1601,8 +1601,8 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
             transform.Push();
                 transform.Translate(-0.5f, -0.5f);
                 transform.Scale(size);
-                transform.Rotate(drawable->GetRotator());
-                transform.Translate(drawable->GetOffset());
+                transform.Rotate(drawable->GetRenderRotation());
+                transform.Translate(drawable->GetRenderTranslation());
         }
 
         DrawPacket packet;
