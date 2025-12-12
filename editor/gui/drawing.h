@@ -33,6 +33,7 @@
 #include "game/enum.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
+#include "game/entity_node_light.h"
 #include "game/spline.h"
 #include "game/tilemap.h"
 #include "graphics/material.h"
@@ -75,7 +76,8 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans);
 void DrawBasisVectors(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets);
 void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
 void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
-void DrawLightIndicator(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
+void DrawLightIndicator(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect,
+    game::SceneProjection projection, bool selected, const glm::vec3& light_position, const glm::vec3& light_direction);
 void DrawTranslateGizmo(const game::EntityNodeClass* node, gfx::Transform& trans, std::vector<engine::DrawPacket>& packets,
     game::SceneProjection projection, TransformHandle3D handle);
 void DrawRotateGizmo(const game::EntityNodeClass* node, gfx::Transform& trans, std::vector<engine::DrawPacket>& packets,
@@ -404,12 +406,13 @@ public:
 
         const auto& entity = placement.GetEntityClass();
         const auto& bounds =  entity->GetBoundingRect();
+        const auto is_selected = IsSelected(&placement);
 
         model.Push();
         model.Translate(bounds.GetPosition());
         model.Translate(bounds.GetWidth()*0.5f, bounds.GetHeight()*0.5f);
 
-        if (&placement == mSelectedSceneNode)
+        if (is_selected)
         {
             DrawSelectionBox(model, packets, bounds);
             if (mDrawVectors)
@@ -418,6 +421,18 @@ public:
         else if (!placement.TestFlag(game::EntityPlacement::Flags::VisibleInGame))
         {
             DrawInvisibleItemBox(model, packets, bounds);
+        }
+
+        for (unsigned i=0; i<entity->GetNumNodes(); ++i)
+        {
+            const auto& node = entity->GetNode(i);
+            if (const auto* light = node.GetBasicLight())
+            {
+                gfx::FRect rect;
+                rect.Resize(node.GetSize());
+                DrawLightIndicator(model, packets, rect, mProjection, is_selected,
+                                       light->GetTranslation(), light->GetDirection());
+            }
         }
 
         model.Pop();
@@ -475,7 +490,8 @@ private:
         {
             if (!is_playing)
             {
-                DrawLightIndicator(trans, packets, rect);
+                DrawLightIndicator(trans, packets, rect, mProjection, is_selected,
+                    light->GetTranslation(), light->GetDirection());
             }
         }
         // if a node is visible in the editor but doesn't draw any game
@@ -518,6 +534,10 @@ private:
     inline bool IsSelected(const game::EntityNode* node) const
     {
         return node == mSelectedEntityNode;
+    }
+    inline bool IsSelected(const game::EntityPlacement* placement) const
+    {
+        return placement == mSelectedSceneNode;
     }
 
     template<typename EntityNode>
