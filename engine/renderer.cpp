@@ -1179,10 +1179,9 @@ void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeTyp
     if (text && paint_node.material)
     {
         paint_node.material->Update(dt);
-        paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
-            text->TestFlag(TextItemType::Flags::PP_EnableBloom));
-        paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
-            text->TestFlag(TextItemType::Flags::EnableLight));
+        paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom, text->TestFlag(TextItemType::Flags::PP_EnableBloom));
+        paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, text->TestFlag(TextItemType::Flags::EnableLight));
+        paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog, text->TestFlag(TextItemType::Flags::EnableFog));
     }
     if (text && paint_node.drawable)
     {
@@ -1463,10 +1462,9 @@ void Renderer::CreateTextResources(const EntityType& entity, const EntityNodeTyp
             mat->SetColor(text->GetTextColor());
             paint_node.material = std::move(mat);
             paint_node.materialId = material;
-            paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom,
-                text->TestFlag(TextItemType::Flags::PP_EnableBloom));
-            paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight,
-                text->TestFlag(TextItemType::Flags::EnableLight));
+            paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableBloom, text->TestFlag(TextItemType::Flags::PP_EnableBloom));
+            paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableLight, text->TestFlag(TextItemType::Flags::EnableLight));
+            paint_node.material->SetFlag(gfx::MaterialInstance::Flags::EnableFog, text->TestFlag(TextItemType::Flags::EnableFog));
         }
         if (!paint_node.drawable)
         {

@@ -67,16 +67,14 @@ namespace game
             // Contribute to bloom post-processing effect.
             PP_EnableBloom,
             // Enable light on this text item  (if the scene is lit)
-            EnableLight
+            EnableLight,
+            // Enable fog on this text item (if the scene has fog)
+            EnableFog
         };
         using CoordinateSpace = game::CoordinateSpace;
 
-        TextItemClass()
-        {
-            mBitFlags.set(Flags::VisibleInGame, true);
-            mBitFlags.set(Flags::PP_EnableBloom, true);
-            mBitFlags.set(Flags::EnableLight, true);
-        }
+        TextItemClass();
+
         std::size_t GetHash() const;
 
         // class setters

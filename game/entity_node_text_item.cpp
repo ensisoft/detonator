@@ -21,6 +21,14 @@
 
 namespace game
 {
+TextItemClass::TextItemClass()
+{
+    mBitFlags.set(Flags::VisibleInGame, true);
+    mBitFlags.set(Flags::PP_EnableBloom, true);
+    mBitFlags.set(Flags::EnableLight, true);
+    mBitFlags.set(Flags::EnableFog, true);
+}
+
 size_t TextItemClass::GetHash() const
 {
     size_t hash = 0;
