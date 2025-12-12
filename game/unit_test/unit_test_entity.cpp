@@ -120,6 +120,8 @@ void unit_test_entity_node()
     text.SetAlign(game::TextItemClass::VerticalTextAlign::Top);
     text.SetAlign(game::TextItemClass::HorizontalTextAlign::Left);
     text.SetTextColor(game::Color::HotPink);
+    text.SetRenderTranslation(glm::vec3 { -1.0f, 2.0f, 2.0f });
+    text.SetRenderRotation(game::Rotator(1.0f, 2.0f, 3.0f));
 
     game::SpatialNodeClass spatial;
     spatial.SetShape(game::SpatialNodeClass::Shape::AABB);
@@ -234,6 +236,8 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetTextItem()->GetFontName() == "fontname.otf");
     TEST_REQUIRE(node.GetTextItem()->GetRasterWidth() == 100);
     TEST_REQUIRE(node.GetTextItem()->GetRasterHeight() == 200);
+    TEST_REQUIRE(node.GetTextItem()->GetRenderTranslation() == glm::vec3(-1.0f, 2.0f, 2.0f));
+    TEST_REQUIRE(node.GetTextItem()->GetRenderRotation() == game::Rotator(1.0f, 2.0f, 3.0f));
     TEST_REQUIRE(node.GetSpatialNode()->GetShape() == game::SpatialNodeClass::Shape::AABB);
     TEST_REQUIRE(node.GetFixture()->GetCollisionShape() == game::FixtureClass::CollisionShape::Circle);
     TEST_REQUIRE(*node.GetFixture()->GetDensity() == real::float32(2.0f));
