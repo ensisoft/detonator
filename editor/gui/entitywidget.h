@@ -249,6 +249,12 @@ namespace gui
         void on_tiRasterWidth_valueChanged(int);
         void on_tiRasterHeight_valueChanged(int);
         void on_tiCoordinateSpace_currentIndexChanged(int);
+        void on_tiXRotation_valueChanged(double value);
+        void on_tiYRotation_valueChanged(double value);
+        void on_tiZRotation_valueChanged(double value);
+        void on_tiXTranslation_valueChanged(double value);
+        void on_tiYTranslation_valueChanged(double value);
+        void on_tiZTranslation_valueChanged(double value);
         void on_tiText_textChanged();
         void on_tiVisible_stateChanged(int);
         void on_tiUnderline_stateChanged(int);

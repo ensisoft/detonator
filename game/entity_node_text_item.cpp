@@ -44,6 +44,8 @@ size_t TextItemClass::GetHash() const
     hash = base::hash_combine(hash, mLineHeight);
     hash = base::hash_combine(hash, mTextColor);
     hash = base::hash_combine(hash, mCoordinateSpace);
+    hash = base::hash_combine(hash, mRenderTranslation);
+    hash = base::hash_combine(hash, mRenderRotation);
     return hash;
 }
 
@@ -61,8 +63,9 @@ void TextItemClass::IntoJson(data::Writer& data) const
     data.Write("line_height",      mLineHeight);
     data.Write("text_color",       mTextColor);
     data.Write("coordinate_space", mCoordinateSpace);
+    data.Write("render_translation", mRenderTranslation);
+    data.Write("render_rotation", mRenderRotation);
 }
-
 
 bool TextItemClass::FromJson(const data::Reader& data)
 {
@@ -80,6 +83,8 @@ bool TextItemClass::FromJson(const data::Reader& data)
     ok &= data.Read("text_color",       &mTextColor);
     if (data.HasValue("coordinate_space"))
         ok &= data.Read("coordinate_space", &mCoordinateSpace);
+    ok &= data.Read("render_translation", &mRenderTranslation);
+    ok &= data.Read("render_rotation", &mRenderRotation);
     return ok;
 }
 } // namespace

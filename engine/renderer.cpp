@@ -1160,22 +1160,6 @@ void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeTyp
     const auto* text = entity_node.GetTextItem();
     const auto& size = entity_node.GetSize();
 
-    gfx::Transform transform;
-
-    if (IsAxonometricProjection(projection))
-    {
-        transform.Push(CreateModelMatrix(GameView::AxisAligned));
-        transform.Push(CreateModelMatrix(projection));
-    }
-
-    transform.Push();
-        transform.Scale(paint_node.world_scale);
-        transform.RotateAroundZ(paint_node.world_rotation);
-        transform.Translate(paint_node.world_pos);
-        transform.Push();
-            transform.Translate(-0.5f, -0.5f);
-            transform.Scale(size);
-
     if (text && paint_node.material)
     {
         paint_node.material->Update(dt);
@@ -1185,6 +1169,24 @@ void Renderer::UpdateTextResources(const EntityType& entity, const EntityNodeTyp
     }
     if (text && paint_node.drawable)
     {
+        gfx::Transform transform;
+
+        if (IsAxonometricProjection(projection))
+        {
+            transform.Push(CreateModelMatrix(GameView::AxisAligned));
+            transform.Push(CreateModelMatrix(projection));
+        }
+
+        transform.Push();
+            transform.Scale(paint_node.world_scale);
+            transform.RotateAroundZ(paint_node.world_rotation);
+            transform.Translate(paint_node.world_pos);
+            transform.Push();
+                transform.Translate(-0.5f, -0.5f);
+                transform.Scale(size);
+                transform.Rotate(text->GetRenderRotation());
+                transform.Translate(text->GetRenderTranslation());
+
         const auto& world_matrix = glm::mat4(1.0f);
         const auto& model_matrix = transform.GetAsMatrix();
         gfx::Drawable::Environment env;
@@ -1731,6 +1733,8 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
                 transform.Push();
                     transform.Translate(-0.5f, -0.5f);
                     transform.Scale(size);
+                    transform.Rotate(text->GetRenderRotation());
+                    transform.Translate(text->GetRenderTranslation());
 
             DrawPacket packet;
             packet.flags.set(DrawPacket::Flags::PP_Bloom, text->TestFlag(TextItemClass::Flags::PP_EnableBloom));

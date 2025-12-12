@@ -2956,7 +2956,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="10" column="0">
+               <item row="12" column="0">
                 <widget class="QLabel" name="label_18">
                  <property name="text">
                   <string>Text</string>
@@ -3019,7 +3019,7 @@
                  </item>
                 </layout>
                </item>
-               <item row="11" column="0">
+               <item row="13" column="0">
                 <widget class="QLabel" name="label_57">
                  <property name="text">
                   <string>Flags</string>
@@ -3039,7 +3039,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="16" column="1">
+               <item row="18" column="1">
                 <widget class="QCheckBox" name="tiLights">
                  <property name="text">
                   <string>Apply lights</string>
@@ -3056,7 +3056,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="13" column="1">
+               <item row="15" column="1">
                 <widget class="QCheckBox" name="tiBlink">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -3075,7 +3075,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="11" column="1">
+               <item row="13" column="1">
                 <widget class="QCheckBox" name="tiVisible">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -3095,7 +3095,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="12" column="1">
+               <item row="14" column="1">
                 <widget class="QCheckBox" name="tiUnderline">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -3111,7 +3111,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="15" column="1">
+               <item row="17" column="1">
                 <widget class="QCheckBox" name="tiBloom">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -3163,7 +3163,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="19" column="0" colspan="2">
+               <item row="21" column="0" colspan="2">
                 <widget class="QPushButton" name="btnDelTextItem">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -3210,7 +3210,14 @@
                  </property>
                 </widget>
                </item>
-               <item row="10" column="1">
+               <item row="19" column="1">
+                <widget class="QCheckBox" name="tiFog">
+                 <property name="text">
+                  <string>Apply fog</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="12" column="1">
                 <widget class="QPlainTextEdit" name="tiText">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -3293,6 +3300,13 @@
                  </property>
                 </widget>
                </item>
+               <item row="10" column="0">
+                <widget class="QLabel" name="label_55">
+                 <property name="text">
+                  <string>3D rotation</string>
+                 </property>
+                </widget>
+               </item>
                <item row="6" column="1">
                 <widget class="QSpinBox" name="tiLayer">
                  <property name="sizePolicy">
@@ -3312,7 +3326,7 @@
                <item row="7" column="1">
                 <widget class="QComboBox" name="tiCoordinateSpace"/>
                </item>
-               <item row="14" column="1">
+               <item row="16" column="1">
                 <widget class="QCheckBox" name="tiStatic">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -3324,6 +3338,103 @@
                   <string>Static content</string>
                  </property>
                 </widget>
+               </item>
+               <item row="10" column="1">
+                <layout class="QHBoxLayout" name="horizontalLayout_21">
+                 <item>
+                  <widget class="QDoubleSpinBox" name="tiXRotation">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color: rgb(100, 200, 100)</string>
+                   </property>
+                   <property name="wrapping">
+                    <bool>true</bool>
+                   </property>
+                   <property name="prefix">
+                    <string/>
+                   </property>
+                   <property name="suffix">
+                    <string> °</string>
+                   </property>
+                   <property name="minimum">
+                    <double>-180.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>180.000000000000000</double>
+                   </property>
+                   <property name="stepType">
+                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QDoubleSpinBox" name="tiYRotation">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color: rgb(200,100, 100)</string>
+                   </property>
+                   <property name="wrapping">
+                    <bool>true</bool>
+                   </property>
+                   <property name="prefix">
+                    <string/>
+                   </property>
+                   <property name="suffix">
+                    <string> °</string>
+                   </property>
+                   <property name="minimum">
+                    <double>-180.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>180.000000000000000</double>
+                   </property>
+                   <property name="stepType">
+                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QDoubleSpinBox" name="tiZRotation">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color: rgb(100, 100, 250);</string>
+                   </property>
+                   <property name="wrapping">
+                    <bool>true</bool>
+                   </property>
+                   <property name="prefix">
+                    <string/>
+                   </property>
+                   <property name="suffix">
+                    <string> °</string>
+                   </property>
+                   <property name="minimum">
+                    <double>-180.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>180.000000000000000</double>
+                   </property>
+                   <property name="stepType">
+                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
                <item row="6" column="0">
                 <widget class="QLabel" name="label_47">
@@ -3339,10 +3450,89 @@
                  </property>
                 </widget>
                </item>
-               <item row="17" column="1">
-                <widget class="QCheckBox" name="tiFog">
+               <item row="11" column="1">
+                <layout class="QHBoxLayout" name="horizontalLayout_22">
+                 <item>
+                  <widget class="QDoubleSpinBox" name="tiXTranslation">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="toolTip">
+                    <string>Set the node's width in game units</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color: rgb(100, 200, 100)</string>
+                   </property>
+                   <property name="minimum">
+                    <double>-1000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                   <property name="stepType">
+                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QDoubleSpinBox" name="tiYTranslation">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="toolTip">
+                    <string>Set the node's width in game units</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color: rgb(200,100, 100)</string>
+                   </property>
+                   <property name="minimum">
+                    <double>-1000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                   <property name="stepType">
+                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QDoubleSpinBox" name="tiZTranslation">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="toolTip">
+                    <string>Set the node's width in game units</string>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color: rgb(100, 100, 250);</string>
+                   </property>
+                   <property name="minimum">
+                    <double>-1000.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>1000.000000000000000</double>
+                   </property>
+                   <property name="stepType">
+                    <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="11" column="0">
+                <widget class="QLabel" name="label_95">
                  <property name="text">
-                  <string>Apply fog</string>
+                  <string>3D translation</string>
                  </property>
                 </widget>
                </item>
@@ -6237,6 +6427,12 @@
   <tabstop>btnResetTextRasterWidth</tabstop>
   <tabstop>tiRasterHeight</tabstop>
   <tabstop>btnResetTextRasterHeight</tabstop>
+  <tabstop>tiXRotation</tabstop>
+  <tabstop>tiYRotation</tabstop>
+  <tabstop>tiZRotation</tabstop>
+  <tabstop>tiXTranslation</tabstop>
+  <tabstop>tiYTranslation</tabstop>
+  <tabstop>tiZTranslation</tabstop>
   <tabstop>tiText</tabstop>
   <tabstop>tiVisible</tabstop>
   <tabstop>tiUnderline</tabstop>
