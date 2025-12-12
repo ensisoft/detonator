@@ -3742,6 +3742,11 @@ void EntityWidget::on_tiLights_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_tiFog_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_spnShape_currentIndexChanged(const QString&)
 {
     UpdateCurrentNodeProperties();
@@ -5482,6 +5487,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiStatic, false);
     SetValue(mUI.tiBloom, false);
     SetValue(mUI.tiLights, false);
+    SetValue(mUI.tiFog, false);
     SetValue(mUI.spnShape, -1);
     SetValue(mUI.spnEnabled, true);
     SetValue(mUI.fxBody, -1);
@@ -5650,6 +5656,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.tiStatic, text->TestFlag(game::TextItemClass::Flags::StaticContent));
             SetValue(mUI.tiBloom, text->TestFlag(game::TextItemClass::Flags::PP_EnableBloom));
             SetValue(mUI.tiLights, text->TestFlag(game::TextItemClass::Flags::EnableLight));
+            SetValue(mUI.tiFog, text->TestFlag(game::TextItemClass::Flags::EnableFog));
         }
         if (const auto* sp = node->GetSpatialNode())
         {
@@ -5913,6 +5920,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         text->SetFlag(game::TextItemClass::Flags::StaticContent, GetValue(mUI.tiStatic));
         text->SetFlag(game::TextItemClass::Flags::PP_EnableBloom, GetValue(mUI.tiBloom));
         text->SetFlag(game::TextItemClass::Flags::EnableLight, GetValue(mUI.tiLights));
+        text->SetFlag(game::TextItemClass::Flags::EnableFog, GetValue(mUI.tiFog));
     }
     if (auto* fixture = node->GetFixture())
     {

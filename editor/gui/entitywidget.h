@@ -256,6 +256,7 @@ namespace gui
         void on_tiStatic_stateChanged(int);
         void on_tiBloom_stateChanged(int);
         void on_tiLights_stateChanged(int);
+        void on_tiFog_stateChanged(int);
         void on_spnShape_currentIndexChanged(const QString&);
         void on_spnEnabled_stateChanged(int);
         void on_fxShape_currentIndexChanged(const QString&);
