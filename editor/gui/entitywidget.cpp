@@ -588,7 +588,7 @@ public:
         if (mTransformGizmo == TransformGizmo3D::Translate)
         {
             const auto velocity = mShiftKey ? -200.0f : 200.0f; // units per second
-            auto offset = drawable->GetOffset();
+            auto offset = drawable->GetRenderTranslation();
             if (mTransformHandle == TransformHandle3D::XAxis)
                 offset.x += velocity * time_elapsed;
             else if (mTransformHandle == TransformHandle3D::YAxis)
@@ -596,13 +596,13 @@ public:
             else if (mTransformHandle == TransformHandle3D::ZAxis)
                 offset.z += velocity * time_elapsed;
 
-            drawable->SetOffset(offset);
+            drawable->SetRenderTranslation(offset);
         }
         else if (mTransformGizmo == TransformGizmo3D::Rotate)
         {
             const auto velocity = mShiftKey ? -90.0f : 90.0f; // degrees per second
 
-            auto rotator = drawable->GetRotator();
+            auto rotator = drawable->GetRenderRotation();
             auto [x, y, z] = rotator.GetEulerAngles();
             auto deg_x = x.ToDegrees();
             auto deg_y = y.ToDegrees();
@@ -617,7 +617,7 @@ public:
             deg_x = math::clamp(-180.0f, 180.0f, deg_x);
             deg_y = math::clamp(-180.0f, 180.0f, deg_y);
             deg_z = math::clamp(-180.0f, 180.0f, deg_z);
-            drawable->SetRotator(base::Rotator::FromEulerXYZ(base::FDegrees(deg_x), base::FDegrees(deg_y), base::FDegrees(deg_z)));
+            drawable->SetRenderRotation(base::Rotator::FromEulerXYZ(base::FDegrees(deg_x), base::FDegrees(deg_y), base::FDegrees(deg_z)));
         }
 
         mTime = time_now;
@@ -629,9 +629,9 @@ public:
         {
             auto* drawable = mNode->GetDrawable();
             if (mTransformGizmo == TransformGizmo3D::Translate)
-                drawable->SetOffset(glm::vec3{0.0f, 0.0f, 0.0f});
+                drawable->SetRenderTranslation(glm::vec3{0.0f, 0.0f, 0.0f});
             else if (mTransformGizmo == TransformGizmo3D::Rotate)
-                drawable->SetRotator(game::Rotator());
+                drawable->SetRenderRotation(game::Rotator());
         }
     }
     bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
@@ -5624,16 +5624,16 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsDoubleSided, item->TestFlag(game::DrawableItemClass::Flags::DoubleSided));
             SetValue(mUI.dsDepthTest, item->TestFlag(game::DrawableItemClass::Flags::DepthTest));
 
-            const auto& rotator = item->GetRotator();
+            const auto& rotator = item->GetRenderRotation();
             const auto [x, y, z] = rotator.GetEulerAngles();
             SetValue(mUI.dsXRotation, x.ToDegrees());
             SetValue(mUI.dsYRotation, y.ToDegrees());
             SetValue(mUI.dsZRotation, z.ToDegrees());
 
-            const auto& offset = item->GetOffset();
-            SetValue(mUI.dsXOffset, offset.x);
-            SetValue(mUI.dsYOffset, offset.y);
-            SetValue(mUI.dsZOffset, offset.z);
+            const auto& translation = item->GetRenderTranslation();
+            SetValue(mUI.dsXOffset, translation.x);
+            SetValue(mUI.dsYOffset, translation.y);
+            SetValue(mUI.dsZOffset, translation.z);
             SetValue(mUI.dsDepth, item->GetDepth());
 
             const auto& material = mState.workspace->GetResourceById(GetItemId(mUI.dsMaterial));
@@ -5909,13 +5909,13 @@ void EntityWidget::UpdateCurrentNodeProperties()
                 base::FDegrees((float)GetValue(mUI.dsXRotation)),
                 base::FDegrees((float)GetValue(mUI.dsYRotation)),
                 base::FDegrees((float)GetValue(mUI.dsZRotation)));
-        item->SetRotator(rotator);
+        item->SetRenderRotation(rotator);
 
-        glm::vec3 offset;
-        offset.x = GetValue(mUI.dsXOffset);
-        offset.y = GetValue(mUI.dsYOffset);
-        offset.z = GetValue(mUI.dsZOffset);
-        item->SetOffset(offset);
+        glm::vec3 render_translation;
+        render_translation.x = GetValue(mUI.dsXOffset);
+        render_translation.y = GetValue(mUI.dsYOffset);
+        render_translation.z = GetValue(mUI.dsZOffset);
+        item->SetRenderTranslation(render_translation);
 
         item->SetFlag(game::DrawableItemClass::Flags::VisibleInGame, GetValue(mUI.dsVisible));
         item->SetFlag(game::DrawableItemClass::Flags::UpdateDrawable, GetValue(mUI.dsUpdateDrawable));

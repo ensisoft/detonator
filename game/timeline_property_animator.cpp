@@ -463,17 +463,17 @@ void PropertyAnimator::Start(EntityNode& node)
     if (param == PropertyName::Drawable_TimeScale)
         mStartValue = draw->GetTimeScale();
     else if (param == PropertyName::Drawable_RotationX)
-        mStartValue = draw->GetRotator().GetEulerAngleX().ToRadians();
+        mStartValue = draw->GetRenderRotation().GetEulerAngleX().ToRadians();
     else if (param == PropertyName::Drawable_RotationY)
-        mStartValue = draw->GetRotator().GetEulerAngleY().ToRadians();
+        mStartValue = draw->GetRenderRotation().GetEulerAngleY().ToRadians();
     else if (param == PropertyName::Drawable_RotationZ)
-        mStartValue = draw->GetRotator().GetEulerAngleZ().ToRadians();
+        mStartValue = draw->GetRenderRotation().GetEulerAngleZ().ToRadians();
     else if (param == PropertyName::Drawable_TranslationX)
-        mStartValue = draw->GetOffset().x;
+        mStartValue = draw->GetRenderTranslation().x;
     else if (param == PropertyName::Drawable_TranslationY)
-        mStartValue = draw->GetOffset().y;
+        mStartValue = draw->GetRenderTranslation().y;
     else if (param == PropertyName::Drawable_TranslationZ)
-        mStartValue = draw->GetOffset().z;
+        mStartValue = draw->GetRenderTranslation().z;
     else if (param == PropertyName::Drawable_SizeZ)
         mStartValue = draw->GetDepth();
     else if (param == PropertyName::RigidBody_AngularVelocity)
@@ -567,48 +567,48 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
     }
     else if (param == PropertyName::Drawable_RotationX)
     {
-        const auto& rotator = draw->GetRotator();
+        const auto& rotator = draw->GetRenderRotation();
         const auto& angles  = rotator.GetEulerAngles();
         auto x = Interpolate<float>(t, interpolate);
         auto y = std::get<1>(angles);
         auto z = std::get<2>(angles);
-        draw->SetRotator(Rotator(FRadians(x), y, z));
+        draw->SetRenderRotation(Rotator(FRadians(x), y, z));
     }
     else if (param == PropertyName::Drawable_RotationY)
     {
-        const auto& rotator = draw->GetRotator();
+        const auto& rotator = draw->GetRenderRotation();
         const auto& angles  = rotator.GetEulerAngles();
         auto x = std::get<0>(angles);
         auto y = Interpolate<float>(t, interpolate);
         auto z = std::get<2>(angles);
-        draw->SetRotator(Rotator(x, FRadians(y), z));
+        draw->SetRenderRotation(Rotator(x, FRadians(y), z));
     }
     else if (param == PropertyName::Drawable_RotationZ)
     {
-        const auto& rotator = draw->GetRotator();
+        const auto& rotator = draw->GetRenderRotation();
         const auto& angles  = rotator.GetEulerAngles();
         auto x = std::get<0>(angles);
         auto y = std::get<1>(angles);
         auto z = Interpolate<float>(t, interpolate);
-        draw->SetRotator(Rotator(x, y, FRadians(z)));
+        draw->SetRenderRotation(Rotator(x, y, FRadians(z)));
     }
     else if (param == PropertyName::Drawable_TranslationX)
     {
-        auto vec = draw->GetOffset();
+        auto vec = draw->GetRenderTranslation();
         vec.x = Interpolate<float>(t, interpolate);
-        draw->SetOffset(vec);
+        draw->SetRenderTranslation(vec);
     }
     else if (param == PropertyName::Drawable_TranslationY)
     {
-        auto vec = draw->GetOffset();
+        auto vec = draw->GetRenderTranslation();
         vec.y = Interpolate<float>(t, interpolate);
-        draw->SetOffset(vec);
+        draw->SetRenderTranslation(vec);
     }
     else if (param == PropertyName::Drawable_TranslationZ)
     {
-        auto vec = draw->GetOffset();
+        auto vec = draw->GetRenderTranslation();
         vec.z = Interpolate<float>(t, interpolate);
-        draw->SetOffset(vec);
+        draw->SetRenderTranslation(vec);
     }
     else if (param == PropertyName::Drawable_SizeZ)
     {
