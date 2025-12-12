@@ -18,6 +18,10 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/vec3.hpp>
+#include "warnpop.h"
+
 #include <cstddef>
 #include <string>
 #include <memory>
@@ -27,6 +31,7 @@
 #include "data/fwd.h"
 #include "game/color.h"
 #include "game/enum.h"
+#include "game/types.h"
 
 namespace game
 {
@@ -104,36 +109,44 @@ namespace game
         { mRasterHeight = height; }
         void SetCoordinateSpace(CoordinateSpace space) noexcept
         { mCoordinateSpace = space; }
+        void SetRenderTranslation(const glm::vec3& translation) noexcept
+        { mRenderTranslation = translation; }
+        void SetRenderRotation(const Rotator& rotator) noexcept
+        { mRenderRotation = rotator; }
 
         // class getters
         bool TestFlag(Flags flag) const noexcept
         { return mBitFlags.test(flag); }
         bool IsStatic() const noexcept
         { return TestFlag(Flags::StaticContent); }
-        const Color4f& GetTextColor() const noexcept
+        const auto& GetTextColor() const noexcept
         { return mTextColor; }
-        const std::string& GetText() const noexcept
+        const auto& GetText() const noexcept
         { return mText; }
-        const std::string& GetFontName() const noexcept
+        const auto& GetFontName() const noexcept
         { return mFontName; }
-        int GetLayer() const noexcept
+        auto GetLayer() const noexcept
         { return mLayer; }
-        float GetLineHeight() const noexcept
+        auto  GetLineHeight() const noexcept
         { return mLineHeight; }
-        unsigned GetFontSize() const noexcept
+        auto GetFontSize() const noexcept
         { return mFontSize; }
-        unsigned GetRasterWidth() const noexcept
+        auto GetRasterWidth() const noexcept
         { return mRasterWidth; }
-        unsigned GetRasterHeight() const noexcept
+        auto GetRasterHeight() const noexcept
         { return mRasterHeight; }
-        base::bitflag<Flags> GetFlags() const noexcept
+        auto GetFlags() const noexcept
         { return mBitFlags; }
-        HorizontalTextAlign GetHAlign() const noexcept
+        auto GetHAlign() const noexcept
         { return mHAlign; }
-        VerticalTextAlign GetVAlign() const noexcept
+        auto GetVAlign() const noexcept
         { return mVAlign; }
-        CoordinateSpace  GetCoordinateSpace() const noexcept
+        auto GetCoordinateSpace() const noexcept
         { return mCoordinateSpace; }
+        auto GetRenderTranslation() const noexcept
+        { return mRenderTranslation; }
+        auto GetRenderRotation() const noexcept
+        { return mRenderRotation; }
 
         void IntoJson(data::Writer& data) const;
 
@@ -152,6 +165,8 @@ namespace game
         float mLineHeight = 1.0f;
         Color4f mTextColor = Color::White;
         CoordinateSpace mCoordinateSpace = CoordinateSpace::Scene;
+        glm::vec3 mRenderTranslation = {0.0f, 0.0f, 0.0f};
+        Rotator mRenderRotation;
     };
 
     class TextItem
@@ -197,6 +212,11 @@ namespace game
         { return mFlags.test(flag); }
         bool IsStatic() const noexcept
         { return TestFlag(Flags::StaticContent); }
+        auto GetRenderTranslation() const noexcept
+        { return mClass->GetRenderTranslation(); }
+        auto GetRenderRotation() const noexcept
+        { return mClass->GetRenderRotation(); }
+
         std::size_t GetHash() const noexcept
         {
             size_t hash = 0;

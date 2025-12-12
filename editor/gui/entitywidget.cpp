@@ -3710,6 +3710,31 @@ void EntityWidget::on_tiCoordinateSpace_currentIndexChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_tiXRotation_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiYRotation_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiZRotation_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiXTranslation_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiYTranslation_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tiZTranslation_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_tiText_textChanged()
 {
     UpdateCurrentNodeProperties();
@@ -5481,6 +5506,12 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiRasterHeight, 0);
     SetValue(mUI.tiCoordinateSpace, -1);
     SetValue(mUI.tiText, QString(""));
+    SetValue(mUI.tiXRotation, 0.0f);
+    SetValue(mUI.tiYRotation, 0.0f);
+    SetValue(mUI.tiZRotation, 0.0f);
+    SetValue(mUI.tiXTranslation, 0.0f);
+    SetValue(mUI.tiYTranslation, 0.0f);
+    SetValue(mUI.tiZTranslation, 0.0f);
     SetValue(mUI.tiVisible, true);
     SetValue(mUI.tiUnderline, false);
     SetValue(mUI.tiBlink, false);
@@ -5657,6 +5688,17 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.tiBloom, text->TestFlag(game::TextItemClass::Flags::PP_EnableBloom));
             SetValue(mUI.tiLights, text->TestFlag(game::TextItemClass::Flags::EnableLight));
             SetValue(mUI.tiFog, text->TestFlag(game::TextItemClass::Flags::EnableFog));
+
+            const auto& rotator = text->GetRenderRotation();
+            const auto [x, y, z] = rotator.GetEulerAngles();
+            SetValue(mUI.tiXRotation, x.ToDegrees());
+            SetValue(mUI.tiYRotation, y.ToDegrees());
+            SetValue(mUI.tiZRotation, z.ToDegrees());
+
+            const auto& translation = text->GetRenderTranslation();
+            SetValue(mUI.tiXTranslation, translation.x);
+            SetValue(mUI.tiYTranslation, translation.y);
+            SetValue(mUI.tiZTranslation, translation.z);
         }
         if (const auto* sp = node->GetSpatialNode())
         {
@@ -5902,6 +5944,18 @@ void EntityWidget::UpdateCurrentNodeProperties()
 
     if (auto* text = node->GetTextItem())
     {
+        game::Rotator rotator = base::Rotator::FromEulerXYZ(
+                base::FDegrees((float)GetValue(mUI.tiXRotation)),
+                base::FDegrees((float)GetValue(mUI.tiYRotation)),
+                base::FDegrees((float)GetValue(mUI.tiZRotation)));
+        text->SetRenderRotation(rotator);
+
+        glm::vec3 render_translation = {0.0f, 0.0f, 0.0f};
+        render_translation.x = GetValue(mUI.tiXTranslation);
+        render_translation.y = GetValue(mUI.tiYTranslation);
+        render_translation.z = GetValue(mUI.tiZTranslation);
+        text->SetRenderTranslation(render_translation);
+
         text->SetFontName(GetValue(mUI.tiFontName));
         text->SetFontSize(GetValue(mUI.tiFontSize));
         text->SetAlign((game::TextItemClass::VerticalTextAlign)GetValue(mUI.tiVAlign));
