@@ -74,7 +74,9 @@ namespace game
             // Enable light on this text item  (if the scene is lit)
             EnableLight,
             // Enable fog on this text item (if the scene has fog)
-            EnableFog
+            EnableFog,
+            // perform depth testing when rendering.
+            DepthTest
         };
         using CoordinateSpace = game::CoordinateSpace;
 

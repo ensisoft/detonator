@@ -3772,6 +3772,11 @@ void EntityWidget::on_tiFog_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_tiDepthTest_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_spnShape_currentIndexChanged(const QString&)
 {
     UpdateCurrentNodeProperties();
@@ -5519,6 +5524,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiBloom, false);
     SetValue(mUI.tiLights, false);
     SetValue(mUI.tiFog, false);
+    SetValue(mUI.tiDepthTest, false);
     SetValue(mUI.spnShape, -1);
     SetValue(mUI.spnEnabled, true);
     SetValue(mUI.fxBody, -1);
@@ -5688,6 +5694,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.tiBloom, text->TestFlag(game::TextItemClass::Flags::PP_EnableBloom));
             SetValue(mUI.tiLights, text->TestFlag(game::TextItemClass::Flags::EnableLight));
             SetValue(mUI.tiFog, text->TestFlag(game::TextItemClass::Flags::EnableFog));
+            SetValue(mUI.tiDepthTest, text->TestFlag(game::TextItemClass::Flags::DepthTest));
 
             const auto& rotator = text->GetRenderRotation();
             const auto [x, y, z] = rotator.GetEulerAngles();
@@ -5975,6 +5982,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
         text->SetFlag(game::TextItemClass::Flags::PP_EnableBloom, GetValue(mUI.tiBloom));
         text->SetFlag(game::TextItemClass::Flags::EnableLight, GetValue(mUI.tiLights));
         text->SetFlag(game::TextItemClass::Flags::EnableFog, GetValue(mUI.tiFog));
+        text->SetFlag(game::TextItemClass::Flags::DepthTest, GetValue(mUI.tiDepthTest));
     }
     if (auto* fixture = node->GetFixture())
     {
