@@ -2699,7 +2699,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
             }
 
             {
-                const auto& p = engine::MapFromTilePlaneToScenePlane(glm::vec4{point.x, point.y, point.z, 1.0f}, mState.klass->GetPerspective());
+                const auto& p = engine::MapFromGamePlaneToViewPlane(glm::vec4{point.x, point.y, point.z, 1.0f}, mState.klass->GetPerspective());
                 gfx::Transform model;
                 model.Scale(10.0f, 10.0f);
                 model.Translate(p.x, p.y);

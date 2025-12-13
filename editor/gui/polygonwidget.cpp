@@ -172,7 +172,7 @@ gfx::Texture* RenderDimetricGuide(const std::string& gpu_id, gfx::Device& device
     // doubling that distance.
 
     const auto scene_edge_point = static_cast<float>(texture_width) / 2.0f;
-    const auto tile_edge_point = engine::MapFromScenePlaneToTilePlane(glm::vec4 { scene_edge_point, 0.0f, 0.0f, 0.0f}, engine::GameView::Dimetric);
+    const auto tile_edge_point = engine::MapFromViewPlaneToGamePlane(glm::vec4 { scene_edge_point, 0.0f, 0.0f, 0.0f}, engine::GameView::Dimetric);
     const auto tile_hypotenuse = glm::length(tile_edge_point) * 2.0f;
     const auto tile_size= tile_hypotenuse / std::sqrt(2.0);
 
@@ -1461,7 +1461,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
                                    ? engine::GameView::EnumValue::Dimetric
                                    : engine::GameView::EnumValue::Isometric;
         const auto scene_edge_point = static_cast<float>(mAxonometricTextureWidth) / 2.0f;
-        const auto tile_edge_point = engine::MapFromScenePlaneToTilePlane(glm::vec4 { scene_edge_point, 0.0f, 0.0f, 0.0f}, game_view);
+        const auto tile_edge_point = engine::MapFromViewPlaneToGamePlane(glm::vec4 { scene_edge_point, 0.0f, 0.0f, 0.0f}, game_view);
         const auto tile_hypotenuse = glm::length(tile_edge_point) * 2.0f;
         const auto tile_size = static_cast<float>(tile_hypotenuse / std::sqrt(2.0));
         mAxonometricTileBaseSize = glm::vec3 { tile_size, tile_size, tile_size };

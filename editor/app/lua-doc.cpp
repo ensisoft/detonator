@@ -1826,13 +1826,13 @@ void InitLuaDoc()
                  "float", "x", "float", "y");
     DOC_METHOD_2("unsigned,unsigned", "ClampRowCol", "Clamp a row and a column to a valid range on the map layer.",
                                                      "int", "row", "int", "col");
-    DOC_METHOD_1("glm.vec2|base.FPoint", "MapPointFromScene", "Map a point from the scene plane to the map plane.",
+    DOC_METHOD_1("glm.vec2|base.FPoint", "MapPointFromView", "Map a point from the view plane to the map plane.",
                  "glm.vec2|base.FPoint", "point");
-    DOC_METHOD_1("glm.vec2|base.FPoint", "MapPointToScene", "Map a point from the map plane to scene.",
+    DOC_METHOD_1("glm.vec2|base.FPoint", "MapPointToView", "Map a point from the map plane to view plane.",
                  "glm.vec2|base.FPoint", "point");
-    DOC_METHOD_1("glm.vec2", "MapVectorFromScene", "Map a direction vector from the scene plane to the map plane.",
+    DOC_METHOD_1("glm.vec2", "MapVectorFromView", "Map a direction vector from the view plane to the map plane.",
                  "glm.vec2", "vector");
-    DOC_METHOD_1("glm.vec2", "MapVectorToScene", "Map a direction vector from the map plan plane to scene.",
+    DOC_METHOD_1("glm.vec2", "MapVectorToView", "Map a direction vector from the map plane plane to view plane.",
                  "glm.vec2", "vector");
 
 
