@@ -73,6 +73,7 @@ namespace uik
             Enabled,
             VisibleInGame,
             VisibleInEditor,
+            LockedInEditor,
             ClipChildren
         };
 
