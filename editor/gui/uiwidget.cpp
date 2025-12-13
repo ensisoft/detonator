@@ -261,7 +261,7 @@ public:
         class Visitor : public uik::Window::Visitor
         {
         public:
-            Visitor(std::vector<TreeWidget::TreeItem>& list) : mList(list)
+            explicit Visitor(std::vector<TreeWidget::TreeItem>& list) : mList(list)
             {}
             void EnterNode(uik::Widget* widget) override
             {
@@ -272,6 +272,12 @@ public:
                 if (widget)
                 {
                     const bool visible = widget->TestFlag(uik::Widget::Flags::VisibleInEditor);
+                    const bool locked = widget->TestFlag(uik::Widget::Flags::LockedInEditor);
+                    if (!visible)
+                        item.SetVisibilityIcon(QIcon("icons:crossed_eye.png"));
+                    if (locked)
+                        item.SetLockedIcon(QIcon("icons:lock.png"));
+
                     item.SetUserData(widget);
 
                 }
@@ -291,6 +297,7 @@ public:
         };
         if (!mState.window->GetNumWidgets())
             return;
+
         Visitor visitor(list);
         mState.window->Visit(visitor);
     }
@@ -307,7 +314,7 @@ public:
       , mSnapGrid(snap)
       , mGridSize(grid)
     {}
-    virtual void Render(gfx::Painter&, gfx::Painter&) const override
+    void Render(gfx::Painter&, gfx::Painter&) const override
     {
         uik::TransientState state;
         state.SetValue("design-mode", true);
@@ -318,17 +325,17 @@ public:
         paint.rect.Translate(mWidgetPos.x, mWidgetPos.y);
         mWidget->Paint(paint, state, *mState.painter);
     }
-    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
+    void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         UpdateMousePosition(mickey->pos(), view);
     }
 
-    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
+    void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
         // intentionally empty
     }
 
-    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
+    bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto button = mickey->button();
         if (button != Qt::LeftButton)
@@ -365,6 +372,11 @@ public:
         mWidget->SetPosition(0.0f, 0.0f);
         return false;
     }
+    ToolFunctionType GetToolFunction() const override
+    {
+        return ToolFunctionType::TransformNode;
+    }
+
     void UpdateMousePosition(const QPoint& pos, gfx::Transform& view)
     {
         const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
@@ -404,7 +416,7 @@ public:
       , mSnapGrid(snap)
       , mGridSize(grid)
     {}
-    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
+    void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& mouse_pos_in_window = ToVec4(mickey->pos());
         const auto& window_to_scene = glm::inverse(view.GetAsMatrix());
@@ -418,14 +430,14 @@ public:
         // will then snap the widget into a new place if "snap to grid" was on.
         mWasMoved = true;
     }
-    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
+    void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& mouse_pos_in_window = ToVec4(mickey->pos());
         const auto& window_to_scene = glm::inverse(view.GetAsMatrix());
         const auto& mouse_pos_in_scene = window_to_scene * mouse_pos_in_window;
         mPrevMousePos = mouse_pos_in_scene;
     }
-    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
+    bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         if (!mWasMoved)
             return true;
@@ -442,6 +454,10 @@ public:
             mWidget->SetPosition(x , y);
         }
         return true;
+    }
+    ToolFunctionType GetToolFunction() const override
+    {
+        return ToolFunctionType::TransformNode;
     }
 private:
     UIWidget::State& mState;
@@ -461,7 +477,7 @@ public:
       , mSnapGrid(snap)
       , mGridSize(grid)
     {}
-    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
+    void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& view_to_scene = glm::inverse(view.GetAsMatrix());
         const auto& mouse_pos_view = ToVec4(mickey->pos());
@@ -471,13 +487,13 @@ public:
         mMousePos = mouse_pos_scene;
         mWasSized = true;
     }
-    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
+    void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& view_to_scene = glm::inverse(view.GetAsMatrix());
         const auto& mouse_pos_view = ToVec4(mickey->pos());
         mMousePos = view_to_scene * mouse_pos_view;
     }
-    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
+    bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         if (!mWasSized)
             return true;
@@ -504,6 +520,10 @@ public:
             mWidget->Grow(corner_delta_x, corner_delta_y);
         }
         return true;
+    }
+    ToolFunctionType GetToolFunction() const override
+    {
+        return ToolFunctionType::TransformNode;
     }
 private:
     UIWidget::State& mState;
@@ -2208,9 +2228,18 @@ void UIWidget::TreeClickEvent(TreeWidget::TreeItem* item, unsigned icon_index)
 {
     if (auto* widget = GetCurrentWidget())
     {
-        const bool visibility = !widget->TestFlag(uik::Widget::Flags::VisibleInEditor);
-        widget->SetFlag(uik::Widget::Flags::VisibleInEditor, visibility);
-        item->SetVisibilityIcon(visibility ? QIcon() : QIcon("icons:crossed_eye.png"));
+        if (icon_index == 0)
+        {
+            const bool visibility = !widget->TestFlag(uik::Widget::Flags::VisibleInEditor);
+            widget->SetFlag(uik::Widget::Flags::VisibleInEditor, visibility);
+            item->SetVisibilityIcon(visibility ? QIcon() : QIcon("icons:crossed_eye.png"));
+        }
+        else if (icon_index == 1)
+        {
+            const bool locked = !widget->TestFlag(uik::Widget::Flags::LockedInEditor);
+            widget->SetFlag(uik::Widget::Flags::LockedInEditor, locked);
+            item->SetLockedIcon(locked ? QIcon("icons:lock.png") : QIcon());
+        }
         mUI.tree->Update();
     }
 }
@@ -2611,7 +2640,14 @@ void UIWidget::MousePress(QMouseEvent* mickey)
     }
 
     if (mCurrentTool)
-        mCurrentTool->MousePress(mickey, view);
+    {
+        if (mCurrentTool->GetToolFunction() == MouseTool::ToolFunctionType::TransformNode &&
+            GetCurrentWidget()->TestFlag(uik::Widget::Flags::LockedInEditor))
+        {
+            NOTE("Unlock widget to enable widget transformation.");
+            mCurrentTool.reset();
+        } else mCurrentTool->MousePress(mickey, view);
+    }
 }
 
 void UIWidget::MouseRelease(QMouseEvent* mickey)
