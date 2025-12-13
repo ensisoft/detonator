@@ -581,6 +581,8 @@ Workspace::Workspace(const QString& dir)
     // the material reference can be updated to Checkerboard.
     auto checkerboard = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture, std::string("_checkerboard"));
     checkerboard->SetTexture(gfx::LoadTextureFromFile(res::Checkerboard));
+    checkerboard->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+    checkerboard->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
     checkerboard->SetName("Checkerboard");
     mResources.emplace_back(new MaterialResource(checkerboard, "Checkerboard"));
 
