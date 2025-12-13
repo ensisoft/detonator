@@ -28,7 +28,7 @@ namespace gui
     public:
         RenderTreeModel(TreeModelType& model) : mModel(model)
         {}
-        virtual void Flatten(std::vector<TreeWidget::TreeItem>& list)
+        void Flatten(std::vector<TreeWidget::TreeItem>& list) override
         {
             auto& root = mModel.GetRenderTree();
             using RenderTree = typename TreeModelType::RenderTree;
@@ -39,22 +39,28 @@ namespace gui
             public:
                 Visitor(std::vector<TreeWidget::TreeItem>& list) : mList(list)
                 {}
-                virtual void EnterNode(TreeNode* node)
+                void EnterNode(TreeNode* node) override
                 {
                     TreeWidget::TreeItem item;
-                    item.SetId(node ? app::FromUtf8(node->GetId()) : "root");
-                    item.SetText(node ? app::FromUtf8(node->GetName()) : "Root");
+                    item.SetId(node ? node->GetId() : "root");
+                    item.SetText(node ? node->GetName() : "Root");
                     item.SetUserData(node);
                     item.SetLevel(mLevel);
                     if (node)
                     {
                         const auto visible = node->TestFlag(TreeNode::Flags::VisibleInEditor);
-                        item.SetIcon(visible ? QIcon("icons:eye.png") : QIcon("icons:crossed_eye.png"));
+                        if (!visible)
+                            item.SetVisibilityIcon(QIcon("icons:crossed_eye.png"));
+                    }
+                    else
+                    {
+                        item.SetVisibilityIcon(QIcon("icons:eye.png"));
+                        item.SetLockedIcon(QIcon("icons:lock.png"));
                     }
                     mList.push_back(item);
                     mLevel++;
                 }
-                virtual void LeaveNode(TreeNode* node)
+                void LeaveNode(TreeNode* node) override
                 { mLevel--; }
             private:
                 unsigned mLevel = 0;

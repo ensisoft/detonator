@@ -204,7 +204,7 @@ namespace gui
         void PlaceNewEntity();
         void TreeCurrentNodeChangedEvent();
         void TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
-        void TreeClickEvent(TreeWidget::TreeItem* item);
+        void TreeClickEvent(TreeWidget::TreeItem* item, unsigned icon_index);
 
     private:
         void PaintScene(gfx::Painter& painter, double secs);
