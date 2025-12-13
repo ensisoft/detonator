@@ -49,8 +49,11 @@ namespace gui
                     if (node)
                     {
                         const auto visible = node->TestFlag(TreeNode::Flags::VisibleInEditor);
+                        const auto locked = node->TestFlag(TreeNode::Flags::LockedInEditor);
                         if (!visible)
                             item.SetVisibilityIcon(QIcon("icons:crossed_eye.png"));
+                        if (locked)
+                            item.SetLockedIcon(QIcon("icons:lock.png"));
                     }
                     else
                     {
