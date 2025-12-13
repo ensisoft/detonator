@@ -352,7 +352,7 @@ namespace gui
 
         void TreeCurrentNodeChangedEvent();
         void TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
-        void TreeClickEvent(TreeWidget::TreeItem* item);
+        void TreeClickEvent(TreeWidget::TreeItem* item, unsigned icon_index);
         void PlaceNewParticleSystem();
         void PlaceNewCustomShape();
 

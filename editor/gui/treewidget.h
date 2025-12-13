@@ -31,6 +31,8 @@
 #include <memory>
 #include <string>
 
+#include "editor/app/types.h"
+
 class QPalette;
 class QPainter;
 class QPaintEvent;
@@ -54,14 +56,16 @@ namespace gui
         {
         public:
             // Set the Id that identifies this item
-            void SetId(const QString& id)
+            void SetId(const app::AnyString& id)
             { mId = id;}
             // Set the item text.
-            void SetText(const QString& text)
+            void SetText(const app::AnyString& text)
             { mText = text; }
             // Set the item icon.
-            void SetIcon(const QIcon& icon)
-            { mIcon = icon; }
+            void SetVisibilityIcon(const QIcon& icon)
+            { mVisibilityIcon = icon; }
+            void SetLockedIcon(const QIcon& icon)
+            { mLockedIcon = icon; }
             void SetIconMode(QIcon::Mode mode)
             { mIconMode = mode; }
             // Set the item user data.
@@ -80,8 +84,10 @@ namespace gui
             { return mId; }
             QString GetText() const
             { return mText; }
-            QIcon GetIcon() const
-            { return mIcon; }
+            QIcon GetVisibilityIcon() const
+            { return mVisibilityIcon; }
+            QIcon GetLockedIcon() const
+            { return mLockedIcon; }
             unsigned GetLevel() const
             { return mLevel; }
             QIcon::Mode GetIconMode() const
@@ -90,22 +96,23 @@ namespace gui
         private:
             QString mId;
             QString mText;
-            QIcon   mIcon;
+            QIcon mVisibilityIcon;
+            QIcon mLockedIcon;
             QIcon::Mode mIconMode = QIcon::Normal;
             void*   mUser = nullptr;
             unsigned mLevel  = 0;
         };
         // Abstract interface for getting a list of TreeItems.
         // The model is expected to traverse the underlying tree
-        // hiearchy, visit each node and provide a list of items.
+        // hierarchy, visit each node and provide a list of items.
         // Preorder tree traversal will produce the expected UI
         // hierarchy. To indicate that an item is a child item
-        // identation can be set.
+        // indentation can be set.
         class TreeModel
         {
         public:
             virtual ~TreeModel() = default;
-            // Walk the tree model and fill out the render node hiearchy
+            // Walk the tree model and fill out the render node hierarchy
             // of stuff to render and manage.
             //virtual void BuildTree(RenderTree& root) = 0;
             virtual void Flatten(std::vector<TreeItem>& list) = 0;
@@ -143,30 +150,31 @@ namespace gui
         void ClearSelection();
 
         // QWidget
-        virtual QSize sizeHint() const override
+        QSize sizeHint() const override
         { return QSize(200, 200); }
-        virtual QSize minimumSizeHint() const override
+        QSize minimumSizeHint() const override
         { return QSize(200, 200); }
 
     signals:
         void currentRowChanged();
         void dragEvent(TreeItem* item, TreeItem* target);
-        void clickEvent(TreeItem* item);
+        void clickEvent(TreeItem* item, unsigned icon_index);
 
     protected:
-        virtual void focusOutEvent(QFocusEvent* ford) override;
-        virtual void focusInEvent(QFocusEvent* ford) override;
-        virtual void paintEvent(QPaintEvent* event) override;
-        virtual void mouseMoveEvent(QMouseEvent* mickey) override;
-        virtual void mousePressEvent(QMouseEvent* mickey) override;
-        virtual void mouseReleaseEvent(QMouseEvent* mickey) override;
-        virtual void enterEvent(QEvent*) override;
-        virtual void leaveEvent(QEvent*) override;
-        virtual void keyPressEvent(QKeyEvent* key) override;
-        virtual void resizeEvent(QResizeEvent* resize) override;
-        virtual void scrollContentsBy(int dx, int dy) override;
+        void focusOutEvent(QFocusEvent* ford) override;
+        void focusInEvent(QFocusEvent* ford) override;
+        void paintEvent(QPaintEvent* event) override;
+        void mouseMoveEvent(QMouseEvent* mickey) override;
+        void mousePressEvent(QMouseEvent* mickey) override;
+        void mouseReleaseEvent(QMouseEvent* mickey) override;
+        void enterEvent(QEvent*) override;
+        void leaveEvent(QEvent*) override;
+        void keyPressEvent(QKeyEvent* key) override;
+        void resizeEvent(QResizeEvent* resize) override;
+        void scrollContentsBy(int dx, int dy) override;
     private:
         QPoint MapPoint(const QPoint& widget) const;
+        QRect GetVisibleRect() const;
     private:
         // the provider of the tree widget data i.e. TreeItems
         TreeModel* mModel = nullptr;
@@ -174,10 +182,12 @@ namespace gui
         TreeItem* mSelected = nullptr;
         // The currently hovered item if any.
         TreeItem* mHovered  = nullptr;
+        unsigned mHoveredIconIndex = 0;
         // The current list of tree items.
         std::vector<TreeItem> mItems;
         // item height (in pixels) for each item
         unsigned mItemHeight = 0;
+
         // current scrolling offsets, changed when the scroll
         // bars are moved by the user.
         int mXOffset = 0;
