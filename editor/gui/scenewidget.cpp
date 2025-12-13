@@ -1358,6 +1358,17 @@ void SceneWidget::on_fogDensity_valueChanged()
     SetSceneFog();
 }
 
+void SceneWidget::on_translateX_valueChanged()
+{
+    const float value = GetValue(mUI.translateX);
+    mState.camera_offset_x = -value;
+}
+void SceneWidget::on_translateY_valueChanged()
+{
+    const float value = GetValue(mUI.translateY);
+    mState.camera_offset_y = -value;
+}
+
 void SceneWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
@@ -2684,6 +2695,8 @@ void SceneWidget::DisplaySceneProperties()
 
 void SceneWidget::DisplayCurrentCameraLocation()
 {
+    // viewport shows the NOT the camera position
+    // but the view *transform* which is the *INVERSE* of camera
     SetValue(mUI.translateX, -mState.camera_offset_x);
     SetValue(mUI.translateY, -mState.camera_offset_y);
 }
@@ -2893,29 +2906,27 @@ void SceneWidget::FindNode(const game::EntityPlacement* node)
     if (!entity_klass)
         return;
 
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    const auto zoom   = (float)GetValue(mUI.zoom);
-    const auto xs     = (float)GetValue(mUI.scaleX);
-    const auto ys     = (float)GetValue(mUI.scaleY);
-    const game::FRect viewport(-width*0.5f, -height*0.5f, width, height);
+    // camera x, y is in the view plane space
+    // the goal here is to find camera x,y such that the center of the
+    // entity node maps to the center of the window.
 
-    const auto view = engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
-                                                    glm::vec2 { 0.0f, 0.0f },
-                                                    glm::vec2 { xs * zoom, ys * zoom },
-                                                    GetValue(mUI.rotation));
+    // game plane -> window coord
+    // window coord -> view plane
 
-    const auto proj = engine::CreateProjectionMatrix(engine::Projection::Orthographic, viewport);
+    const auto cam_temp = glm::vec2 {
+        mState.camera_offset_x, mState.camera_offset_y
+    };
 
-    const auto& node_world_pos = mState.scene->MapCoordsFromNodeBox({0.0f, 0.0f}, node).ToVec2();
-    const auto& node_view_pos  = view * glm::vec4(node_world_pos, 0.0f, 1.0f);
-    const auto& node_clip_pos  = proj * node_view_pos;
+    mState.camera_offset_x = 0;
+    mState.camera_offset_y = 0;
 
-    const auto& clip_translation = node_clip_pos - glm::vec4 {0.0f, 0.0f, 0.0f, 1.0f };
-    const auto& view_translation = glm::inverse(proj * view) * clip_translation;
-    const auto& cam_pos = glm::vec2 { view_translation.x, view_translation.y };
-    // the above is incorrect, the jump will reset rotation to zero as a workaround for now.
-    mAnimator.Jump(mUI, mState, cam_pos);
+    const auto& node_world_pos = mState.scene->MapCoordsFromNodeBox({0.0f, 0.0f}, node);
+    const auto node_window_pos = MapWorldCoordinateToWindow(mUI, mState, node_world_pos, mState.scene->GetProjection());
+    const auto node_view_pos = MapWindowCoordinateToViewPlane(mUI, mState, node_window_pos).ToVec2();
+
+    mState.camera_offset_x = cam_temp.x;
+    mState.camera_offset_y = cam_temp.y;
+    mAnimator.Jump(mUI, mState, node_view_pos);
 }
 
 game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)

@@ -340,6 +340,7 @@ namespace gui
             const float rotation = 0.0f; // ignored so that the camera movement stays
                                          // irrespective of the camera rotation
 
+            // we're always moving the camera on the XY view plane.
             mViewToClip  = engine::CreateProjectionMatrix(engine::Projection::Orthographic, width, height);
             mWorldToView = engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
                                                          mState.camera_offset_x,
@@ -384,7 +385,6 @@ namespace gui
         glm::vec4 mWorldPos {0.0f, 0.0f, 0.0f, 0.0f};
         CameraState& mState;
     };
-
 
     template<typename TreeModel, typename TreeNode>
     class MoveRenderTreeNodeTool : public MouseTool
