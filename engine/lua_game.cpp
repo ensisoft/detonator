@@ -1434,37 +1434,37 @@ void BindGameLib(sol::state& L)
         col = math::clamp(0, max_cols-1, col);
         return std::make_tuple(row, col);
     };
-    map["MapPointFromScene"] = sol::overload(
+    map["MapPointFromView"] = sol::overload(
         [](Tilemap& map, const glm::vec2& point) {
-            const glm::vec2 ret = engine::MapFromScenePlaneToTilePlane(glm::vec4{point.x, point.y, 0.0f, 1.0f},
+            const glm::vec2 ret = engine::MapFromViewPlaneToGamePlane(glm::vec4{point.x, point.y, 0.0f, 1.0f},
                                                                        map.GetPerspective());
             return ret;
         },
         [](Tilemap& map, const base::FPoint& point) {
-            const glm::vec2 ret = engine::MapFromScenePlaneToTilePlane(
+            const glm::vec2 ret = engine::MapFromViewPlaneToGamePlane(
                     glm::vec4{point.GetX(), point.GetY(), 0.0f, 1.0f}, map.GetPerspective());
             return base::FPoint(ret.x, ret.y);
         });
-    map["MapPointToScene"] = sol::overload(
+    map["MapPointToView"] = sol::overload(
         [](Tilemap& map, const glm::vec2& point) {
-            const glm::vec2 ret = engine::MapFromTilePlaneToScenePlane(glm::vec4{point.x, point.y, 0.0f, 1.0f},
+            const glm::vec2 ret = engine::MapFromGamePlaneToViewPlane(glm::vec4{point.x, point.y, 0.0f, 1.0f},
                                                                        map.GetPerspective());
             return ret;
         },
         [](Tilemap& map, const base::FPoint& point) {
-            const glm::vec2 ret = engine::MapFromTilePlaneToScenePlane(
+            const glm::vec2 ret = engine::MapFromGamePlaneToViewPlane(
                     glm::vec4{point.GetX(), point.GetY(), 0.0f, 1.0f}, map.GetPerspective());
             return base::FPoint(ret.x, ret.y);
         });
-    map["MapVectorFromScene"] = sol::overload(
+    map["MapVectorFromView"] = sol::overload(
         [](Tilemap& map, const glm::vec2& vector) {
-            const glm::vec2 ret = engine::MapFromScenePlaneToTilePlane(glm::vec4{vector.x, vector.y, 0.0f, 1.0f},
+            const glm::vec2 ret = engine::MapFromViewPlaneToGamePlane(glm::vec4{vector.x, vector.y, 0.0f, 1.0f},
                                                                        map.GetPerspective());
             return ret;
         });
-    map["MapVectorToScene"] = sol::overload(
+    map["MapVectorToView"] = sol::overload(
         [](Tilemap& map, const glm::vec2& vector) {
-            const glm::vec2 ret = engine::MapFromTilePlaneToScenePlane(glm::vec4{vector.x, vector.y, 0.0f, 1.0f},
+            const glm::vec2 ret = engine::MapFromGamePlaneToViewPlane(glm::vec4{vector.x, vector.y, 0.0f, 1.0f},
                                                                        map.GetPerspective());
             return ret;
         });

@@ -375,11 +375,11 @@ std::vector<glm::vec4> MapFromWindowToWorldPlane(const glm::mat4& view_to_clip,
     return ret;
 }
 
-glm::vec4 MapFromScenePlaneToTilePlane(const glm::mat4& scene_view_to_clip,
-                                       const glm::mat4& scene_world_to_view,
-                                       const glm::mat4& plane_view_to_clip,
-                                       const glm::mat4& plane_world_to_view,
-                                       const glm::vec4& scene_pos)
+glm::vec4 MapFromViewPlaneToGamePlane(const glm::mat4& scene_view_to_clip,
+                                      const glm::mat4& scene_world_to_view,
+                                      const glm::mat4& plane_view_to_clip,
+                                      const glm::mat4& plane_world_to_view,
+                                      const glm::vec4& scene_pos)
 {
     constexpr const auto plane_origin_world = glm::vec4 {0.0f, 0.0f, 0.0f, 1.0f};
     constexpr const auto plane_normal_world = glm::vec4 {0.0f, 0.0f, 1.0f, 0.0f};
@@ -406,11 +406,11 @@ glm::vec4 MapFromScenePlaneToTilePlane(const glm::mat4& scene_view_to_clip,
     return intersection_point_world;
 }
 
-glm::vec4 MapFromTilePlaneToScenePlane(const glm::mat4& scene_view_to_clip,
-                                       const glm::mat4& scene_world_to_view,
-                                       const glm::mat4& plane_view_to_clip,
-                                       const glm::mat4& plane_world_to_view,
-                                       const glm::vec4& plane_pos)
+glm::vec4 MapFromGamePlaneToViewPlane(const glm::mat4& scene_view_to_clip,
+                                      const glm::mat4& scene_world_to_view,
+                                      const glm::mat4& plane_view_to_clip,
+                                      const glm::mat4& plane_world_to_view,
+                                      const glm::vec4& plane_pos)
 {
     glm::vec2 clip_space = plane_view_to_clip * plane_world_to_view * plane_pos;
 
@@ -447,14 +447,14 @@ glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, GameView src, GameView dst)
     return glm::inverse(dst_plane_to_world) * intersection_point_world;
 }
 
-glm::vec4 MapFromTilePlaneToScenePlane(const glm::vec4& tile_pos, GameView tile_plane) noexcept
+glm::vec4 MapFromGamePlaneToViewPlane(const glm::vec4& tile_pos, GameView view) noexcept
 {
-    return MapFromPlaneToPlane(tile_pos, tile_plane, GameView::AxisAligned);
+    return MapFromPlaneToPlane(tile_pos, view, GameView::AxisAligned);
 }
 
-glm::vec4 MapFromScenePlaneToTilePlane(const glm::vec4& scene_pos, GameView tile_plane) noexcept
+glm::vec4 MapFromViewPlaneToGamePlane(const glm::vec4& scene_pos, GameView view) noexcept
 {
-    return MapFromPlaneToPlane(scene_pos, GameView::AxisAligned, tile_plane);
+    return MapFromPlaneToPlane(scene_pos, GameView::AxisAligned, view);
 }
 
 glm::vec4 MapFromWindowToWorld(const glm::mat4& view_to_clip,
