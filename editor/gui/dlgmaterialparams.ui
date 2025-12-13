@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>369</height>
+    <width>498</width>
+    <height>401</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -72,12 +72,8 @@ You can change this in the material editor by toggling off &quot;static instance
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="1">
-         <widget class="QComboBox" name="textureMaps">
-          <property name="placeholderText">
-           <string>Material Default</string>
-          </property>
-         </widget>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="tileIndex"/>
         </item>
         <item row="0" column="0">
          <widget class="QLabel" name="lblTextureMap">
@@ -86,10 +82,10 @@ You can change this in the material editor by toggling off &quot;static instance
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QToolButton" name="btnResetActiveMap">
+        <item row="1" column="2">
+         <widget class="QToolButton" name="btnResetTileIndex">
           <property name="toolTip">
-           <string>Reset active texture map to class default</string>
+           <string>Reset tile index to class default (0)</string>
           </property>
           <property name="text">
            <string>...</string>
@@ -113,11 +109,96 @@ You can change this in the material editor by toggling off &quot;static instance
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QSpinBox" name="tileIndex"/>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="textureMaps">
+          <property name="placeholderText">
+           <string>Material Default</string>
+          </property>
+         </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="QToolButton" name="btnResetTileIndex">
+        <item row="0" column="2">
+         <widget class="QToolButton" name="btnResetActiveMap">
+          <property name="toolTip">
+           <string>Reset active texture map to class default</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>false</bool>
+          </property>
+          <property name="arrowType">
+           <enum>Qt::NoArrow</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="lblTextureScale">
+          <property name="text">
+           <string>Texture scale</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QDoubleSpinBox" name="textureScaleX">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(100, 200, 100)</string>
+            </property>
+            <property name="suffix">
+             <string/>
+            </property>
+            <property name="minimum">
+             <double>-99.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="textureScaleY">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(200,100, 100)</string>
+            </property>
+            <property name="suffix">
+             <string/>
+            </property>
+            <property name="minimum">
+             <double>-99.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="2">
+         <widget class="QToolButton" name="btnResetTextureScale">
           <property name="toolTip">
            <string>Reset tile index to class default (0)</string>
           </property>
@@ -204,6 +285,10 @@ You can change this in the material editor by toggling off &quot;static instance
   <tabstop>textureMaps</tabstop>
   <tabstop>btnResetActiveMap</tabstop>
   <tabstop>tileIndex</tabstop>
+  <tabstop>btnResetTileIndex</tabstop>
+  <tabstop>textureScaleX</tabstop>
+  <tabstop>textureScaleY</tabstop>
+  <tabstop>btnResetTextureScale</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>
