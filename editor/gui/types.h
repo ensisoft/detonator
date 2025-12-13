@@ -165,6 +165,11 @@ namespace gui
         { return mX; }
         inline float y() const noexcept
         { return mY; }
+
+        glm::vec2 ToVec2() const noexcept
+        {
+            return {mX, mY};
+        }
     private:
         float mX = 0.0f;
         float mY = 0.0f;

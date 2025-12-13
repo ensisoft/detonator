@@ -150,6 +150,8 @@ namespace gui
         void on_fogStartDepth_valueChanged(double);
         void on_fogEndDepth_valueChanged(double);
         void on_fogDensity_valueChanged();
+        void on_translateX_valueChanged();
+        void on_translateY_valueChanged();
 
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
