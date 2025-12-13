@@ -2805,9 +2805,20 @@ void EntityWidget::on_actionNodeMoveUpLayer_triggered()
         {
             const int layer = item->GetLayer();
             item->SetLayer(layer + 1);
-            DisplayCurrentNodeProperties();
-            RealizeEntityChange(mState.entity);
         }
+        if (auto* text = node->GetTextItem())
+        {
+            const int layer = text->GetLayer();
+            text->SetLayer(layer + 1);
+        }
+        if (auto* light = node->GetBasicLight())
+        {
+            const int layer = light->GetLayer();
+            light->SetLayer(layer + 1);
+        }
+
+        DisplayCurrentNodeProperties();
+        RealizeEntityChange(mState.entity);
     }
 }
 
@@ -2819,9 +2830,20 @@ void EntityWidget::on_actionNodeMoveDownLayer_triggered()
         {
             const int layer = item->GetLayer();
             item->SetLayer(layer - 1);
-            DisplayCurrentNodeProperties();
-            RealizeEntityChange(mState.entity);
+
         }
+        if (auto* text = node->GetTextItem())
+        {
+            const int layer = text->GetLayer();
+            text->SetLayer(layer - 1);
+        }
+        if (auto* light = node->GetBasicLight())
+        {
+            const int layer = light->GetLayer();
+            light->SetLayer(layer - 1);
+        }
+        DisplayCurrentNodeProperties();
+        RealizeEntityChange(mState.entity);
     }
 }
 
@@ -4610,10 +4632,12 @@ void EntityWidget::on_tree_customContextMenuRequested(QPoint)
 {
     const auto* node = GetCurrentNode();
     const auto* item = node ? node->GetDrawable() : nullptr;
+    const auto* text = node ? node->GetTextItem() : nullptr;
+    const auto* light = node ? node->GetBasicLight() : nullptr;
     const auto count = mState.entity->GetNumNodes();
 
-    SetEnabled(mUI.actionNodeMoveDownLayer, item != nullptr);
-    SetEnabled(mUI.actionNodeMoveUpLayer, item != nullptr);
+    SetEnabled(mUI.actionNodeMoveDownLayer, item != nullptr || text != nullptr || light != nullptr);
+    SetEnabled(mUI.actionNodeMoveUpLayer, item != nullptr || text != nullptr || light != nullptr);
     SetEnabled(mUI.actionNodeDelete, node != nullptr);
     SetEnabled(mUI.actionNodeDuplicate, node != nullptr);
     SetEnabled(mUI.actionNodeVarRef, node != nullptr);
