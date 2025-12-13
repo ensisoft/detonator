@@ -193,36 +193,33 @@ namespace engine
                                     float rotation = 0.0f);
 
     // We have 2 noteworthy and relevant planes/spaces in the game world
-    // and actually you should consider them separate spaces. I.e the tile
-    // space where vectors live on the tile plane and the scene space where
-    // the vectors live on the scene plane. Conceptually these are different
-    // coordinate spaces, even though when using axis aligned tile plane these
-    // two spaces are identical.
+    // and actually you should consider them separate spaces. I.e the tile/game
+    // space where vectors live on the tile/game plane and the view space where
+    // the vectors live on the view plane. Conceptually these are different
+    // coordinate spaces, even though when using axis aligned game view the
+    // view and game planes are parallel.
     //
-    // Tile plane (both dimetric or axis aligned)
-    // - Tiles are laid out on the XY plane which is then transformed with a model
-    //   and camera transformation to a certain position relative to
-    //   the camera. Along with an orthographic projection the objects are projected
-    //   onto the projection plane with dimetric angles between the basis vectors.
-    // - When using axis aligned tile plane the plane aligns completely with the
-    //   scene plane even though it's conceptually different plane.
+    // Tile/game/world plane (both dimetric or axis aligned)
+    // - Tiles/entities/game objects are laid out on the XY plane
+    //   When rendering objects on this plane are projected to the view plane.
+    // - When using axis aligned game view this plane aligns completely
+    //   with the view plane even though it's conceptually different plane.
     //
-    // Scene plane
-    // - Entities (and entity nodes) are laid out on this XY plane which is then
-    //   transformed with a model and a camera transformation to a certain position
-    //   relative to the camera.
-    // - The scene plane is parallel to the orthographic projection plane.
-    // - This 2d plane is the is axis aligned game plane of the underlying 3D space,
-    //   in other words the game world takes place on this plane.
+    // View plane
+    // - This is essentially the OpenGL XY plane onto which the objects in the
+    //   game/tile plane get projected onto.
+    // - The view plane is parallel to the orthographic projection plane.
+    // - Moving the game 2D camera changes how the objects get mapped to this
+    //   plane.
     //
-    // Currently every vector in either space is assumed to live exactly on the
+    // Currently, every vector in either space is assumed to live exactly on the
     // plane, i.e. there's no 3rd dimension (Z values are 0.0f).
     // Even though there are instances when the coordinate spaces align it's wise
     // to keep the conceptual distinction in mind and use the functions to map
-    // vectors from one space to another. This should be more future proof when/if
+    // vectors from one space to another. This should be more future-proof when/if
     // another perspective is added.
     //
-    // Finally there's the concept of a "world plane" or "game plane" which is
+    // Finally, there's the concept of a "world plane" or "game plane" which is
     // used when we don't really care about which plane it is that we're dealing
     // with. This is mostly useful for the editor to transform for example mouse
     // and window coordinates to a coordinate on some plane for placing objects.
@@ -251,23 +248,23 @@ namespace engine
                                    const glm::vec2& window_size);
 
     // Map a vector from scene plane to a vector on the tile plane.
-    glm::vec4 MapFromScenePlaneToTilePlane(const glm::mat4& scene_view_to_clip,
-                                           const glm::mat4& scene_world_to_view,
-                                           const glm::mat4& plane_view_to_clip,
-                                           const glm::mat4& plane_world_to_view,
-                                           const glm::vec4& scene_pos);
+    glm::vec4 MapFromViewPlaneToGamePlane(const glm::mat4& scene_view_to_clip,
+                                          const glm::mat4& scene_world_to_view,
+                                          const glm::mat4& plane_view_to_clip,
+                                          const glm::mat4& plane_world_to_view,
+                                          const glm::vec4& scene_pos);
 
     // Map a vector from the tile plane coordinate space to scene plane.
-    glm::vec4 MapFromTilePlaneToScenePlane(const glm::mat4& scene_view_to_clip,
-                                           const glm::mat4& scene_world_to_view,
-                                           const glm::mat4& plane_view_to_clip,
-                                           const glm::mat4& plane_world_to_view,
-                                           const glm::vec4& plane_pos);
+    glm::vec4 MapFromGamePlaneToViewPlane(const glm::mat4& scene_view_to_clip,
+                                          const glm::mat4& scene_world_to_view,
+                                          const glm::mat4& plane_view_to_clip,
+                                          const glm::mat4& plane_world_to_view,
+                                          const glm::vec4& plane_pos);
 
     glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, GameView src, GameView dst);
 
-    glm::vec4 MapFromTilePlaneToScenePlane(const glm::vec4& tile_pos, GameView tile_plane) noexcept;
-    glm::vec4 MapFromScenePlaneToTilePlane(const glm::vec4& scene_pos, GameView tile_plane) noexcept;
+    glm::vec4 MapFromGamePlaneToViewPlane(const glm::vec4& tile_pos, GameView view) noexcept;
+    glm::vec4 MapFromViewPlaneToGamePlane(const glm::vec4& scene_pos, GameView view) noexcept;
 
     // Produce a matrix that transforms a vertex from one coordinate space
     // to another. But remember that this transforms *any* coordinate inside

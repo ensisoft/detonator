@@ -760,7 +760,7 @@ void DrawCoordinateGrid(gfx::Painter& scene,
         const float grid_origin_x = (int)world_pos.x / cell_size_units * cell_size_units;
         const float grid_origin_y = (int)world_pos.y / cell_size_units * cell_size_units;
 
-        const auto paint_pos = engine::MapFromTilePlaneToScenePlane(glm::vec4{grid_origin_x,
+        const auto paint_pos = engine::MapFromGamePlaneToViewPlane(glm::vec4{grid_origin_x,
                                                                               grid_origin_y, 0.0f, 0.0f},
                                                                     view);
         gfx::Transform transform;

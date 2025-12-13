@@ -180,15 +180,15 @@ namespace gui
             glm::vec2 ret;
             if (src == engine::GameView::AxisAligned && dst == engine::GameView::Dimetric)
             {
-                ret = engine::MapFromScenePlaneToTilePlane(src_view_to_clip, src_world_to_view,
+                ret = engine::MapFromViewPlaneToGamePlane(src_view_to_clip, src_world_to_view,
                                                            dst_view_to_clip, dst_world_to_view,
                                                            glm::vec4{point.x(), point.y(), 0.0f, 1.0});
             }
             else if (src == engine::GameView::Dimetric && dst == engine::GameView::AxisAligned)
             {
-                ret = engine::MapFromTilePlaneToScenePlane(src_view_to_clip, src_world_to_view,
-                                                           dst_view_to_clip, dst_world_to_view,
-                                                           glm::vec4{point.x(), point.y(), 0.0f, 1.0});
+                ret = engine::MapFromGamePlaneToViewPlane(src_view_to_clip, src_world_to_view,
+                                                          dst_view_to_clip, dst_world_to_view,
+                                                          glm::vec4{point.x(), point.y(), 0.0f, 1.0});
             }
             return ret;
         }

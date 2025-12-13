@@ -1058,8 +1058,8 @@ public:
             model.Translate(0.0f, 500.0f);
             tile.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGray));
 
-            tile_plane_from_scene_plane = engine::MapFromScenePlaneToTilePlane(world_plane, mPlane);
-            scene_plane_from_tile_plane = engine::MapFromTilePlaneToScenePlane(tile_plane_from_scene_plane, mPlane);
+            tile_plane_from_scene_plane = engine::MapFromViewPlaneToGamePlane(world_plane, mPlane);
+            scene_plane_from_tile_plane = engine::MapFromGamePlaneToViewPlane(tile_plane_from_scene_plane, mPlane);
         }
 
         const auto x = mMickey.x;
@@ -1144,10 +1144,10 @@ public:
                                                           glm::vec2 { 0.0f, 0.0f },
                                                           glm::vec2 { 1.0f, 1.0f }));
 
-                // figure out the x and y "squish" (scale factors) for a square tile
+        // figure out the x and y "squish" (scale factors) for a square tile
         // when projected onto the orthographic projection plane.
-        const auto tile_bottom_right = engine::MapFromTilePlaneToScenePlane(glm::vec4 {100.0f, 100.0f, 0.0f, 0.0f}, engine::GameView::Dimetric);
-        const auto tile_top_right = engine::MapFromTilePlaneToScenePlane(glm::vec4 { 100.0f, 0.0f, 0.0f, 0.0f}, engine::GameView::Dimetric);
+        const auto tile_bottom_right = engine::MapFromGamePlaneToViewPlane(glm::vec4 {100.0f, 100.0f, 0.0f, 0.0f}, engine::GameView::Dimetric);
+        const auto tile_top_right = engine::MapFromGamePlaneToViewPlane(glm::vec4 { 100.0f, 0.0f, 0.0f, 0.0f}, engine::GameView::Dimetric);
 
         float xs = 1.0f;
         float ys = 1.0f;

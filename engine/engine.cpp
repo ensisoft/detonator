@@ -1300,7 +1300,7 @@ private:
             {
                 const auto perspective = mTilemap->GetPerspective();
                 if (perspective != engine::GameView::AxisAligned)
-                    event.map_coord = engine::MapFromScenePlaneToTilePlane(
+                    event.map_coord = engine::MapFromViewPlaneToGamePlane(
                             glm::vec4{event.scene_coord.x, event.scene_coord.y, 0.0f, 1.0}, perspective);
             }
         }
