@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <glm/vec2.hpp>
 #  include "ui_dlgmaterialparams.h"
 #  include <QDialog>
 #include "warnpop.h"
@@ -49,6 +50,9 @@ namespace gui
         void on_btnResetActiveMap_clicked();
         void on_tileIndex_valueChanged(int);
         void on_btnResetTileIndex_clicked();
+        void on_textureScaleX_valueChanged(double);
+        void on_textureScaleY_valueChanged(double);
+        void on_btnResetTextureScale_clicked();
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void UniformValueChanged(const gui::Uniform* uniform);
@@ -60,6 +64,8 @@ namespace gui
         game::MaterialAnimatorClass* mActuator = nullptr;
         game::DrawableItemClass::MaterialParamMap mOldParams;
         std::vector<gui::Uniform*> mUniforms;
+
+        glm::vec2 mTextureScale = {0.0f, 0.0f};
 
         struct ColorUniform {
             std::string desc;

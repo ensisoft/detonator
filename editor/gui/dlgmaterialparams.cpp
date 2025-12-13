@@ -71,14 +71,17 @@ DlgMaterialParams::DlgMaterialParams(QWidget* parent, game::DrawableItemClass* i
   , mOldParams(item->GetMaterialParams())
 {
     mUI.setupUi(this);
-    SetVisible(mUI.builtInParams,  false);
-    SetVisible(mUI.grpMessage,     false);
-    SetVisible(mUI.customUniforms, false);
-    SetVisible(mUI.colorUniforms,  false);
-
-    SetVisible(mUI.lblTileIndex,   false);
-    SetVisible(mUI.tileIndex,      false);
-    SetVisible(mUI.btnResetTileIndex, false);
+    SetVisible(mUI.builtInParams,        false);
+    SetVisible(mUI.grpMessage,           false);
+    SetVisible(mUI.customUniforms,       false);
+    SetVisible(mUI.colorUniforms,        false);
+    SetVisible(mUI.lblTileIndex,         false);
+    SetVisible(mUI.tileIndex,            false);
+    SetVisible(mUI.btnResetTileIndex,    false);
+    SetVisible(mUI.lblTextureScale,      false);
+    SetVisible(mUI.textureScaleX,        false);
+    SetVisible(mUI.textureScaleY,        false);
+    SetVisible(mUI.btnResetTextureScale, false);
 }
 
 DlgMaterialParams::DlgMaterialParams(QWidget* parent, game::DrawableItemClass* item, game::MaterialAnimatorClass* actuator)
@@ -88,14 +91,17 @@ DlgMaterialParams::DlgMaterialParams(QWidget* parent, game::DrawableItemClass* i
   , mOldParams(actuator->GetMaterialParams())
 {
     mUI.setupUi(this);
-    SetVisible(mUI.builtInParams,  false);
-    SetVisible(mUI.grpMessage,     false);
-    SetVisible(mUI.customUniforms, false);
-    SetVisible(mUI.colorUniforms,  false);
-
-    SetVisible(mUI.lblTileIndex,   false);
-    SetVisible(mUI.tileIndex,      false);
-    SetVisible(mUI.btnResetTileIndex, false);
+    SetVisible(mUI.builtInParams,        false);
+    SetVisible(mUI.grpMessage,           false);
+    SetVisible(mUI.customUniforms,       false);
+    SetVisible(mUI.colorUniforms,        false);
+    SetVisible(mUI.lblTileIndex,         false);
+    SetVisible(mUI.tileIndex,            false);
+    SetVisible(mUI.btnResetTileIndex,    false);
+    SetVisible(mUI.lblTextureScale,      false);
+    SetVisible(mUI.textureScaleX,        false);
+    SetVisible(mUI.textureScaleY,        false);
+    SetVisible(mUI.btnResetTextureScale, false);
 }
 
 void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gfx::MaterialClass* material)
@@ -118,46 +124,46 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
         type == gfx::MaterialClass::Type::Tilemap)
     {
         mColorUniforms.push_back({"Base color",
-                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::BaseColor),
+                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::BaseColor),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::BaseColor)});
     }
     else if (type == gfx::MaterialClass::Type::Gradient)
     {
         mColorUniforms.push_back({"Gradient color 0",
-                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor0),
+                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor0),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::GradientColor0)});
         mColorUniforms.push_back({"Gradient color 1",
-                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor1),
+                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor1),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::GradientColor1)});
         mColorUniforms.push_back({"Gradient color 2",
-                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor2),
+                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor2),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::GradientColor2)});
         mColorUniforms.push_back({"Gradient color 3",
-                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor3),
+                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::GradientColor3),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::GradientColor3)});
     }
     else if (type == gfx::MaterialClass::Type::BasicLight)
     {
         mColorUniforms.push_back({"Ambient color",
-                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::AmbientColor),
+                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::AmbientColor),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::AmbientColor)});
         mColorUniforms.push_back({"Diffuse color",
-                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::DiffuseColor),
+                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::DiffuseColor),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::DiffuseColor)});
         mColorUniforms.push_back({"Specular color",
-                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::SpecularColor),
+                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::SpecularColor),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::SpecularColor)});
     }
     else if (type == gfx::MaterialClass::Type::Particle2D)
     {
         mColorUniforms.push_back({"Start color",
-                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleStartColor),
+                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleStartColor),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::ParticleStartColor)});
         mColorUniforms.push_back({"Mid color",
-                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleMidColor),
+                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleMidColor),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::ParticleMidColor)});
         mColorUniforms.push_back({"End color",
-                                  material->GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleEndColor),
+                                  gfx::MaterialClass::GetColorUniformName(gfx::MaterialClass::ColorIndex::ParticleEndColor),
                                   material->GetColor(gfx::MaterialClass::ColorIndex::ParticleEndColor)});
     }
 
@@ -311,6 +317,20 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
                 if (const auto* ptr = mItem->GetMaterialParamValue<float>("kTileIndex"))
                 {
                     SetValue(mUI.tileIndex, (int)*ptr);
+                }
+            }
+            if (type == gfx::MaterialClass::Type::Texture ||  type == gfx::MaterialClass::Type::Sprite)
+            {
+                SetVisible(mUI.lblTextureScale,      true);
+                SetVisible(mUI.textureScaleX,        true);
+                SetVisible(mUI.textureScaleY,        true);
+                SetVisible(mUI.btnResetTextureScale, true);
+                mTextureScale = material->GetTextureScale();
+
+                if (const auto* ptr = mItem->GetMaterialParamValue<glm::vec2>("kTextureScale"))
+                {
+                    SetValue(mUI.textureScaleX, ptr->x);
+                    SetValue(mUI.textureScaleY, ptr->y);
                 }
             }
         }
@@ -508,6 +528,31 @@ void DlgMaterialParams::on_btnResetTileIndex_clicked()
 {
     mItem->DeleteMaterialParam("kTileIndex");
     SetValue(mUI.tileIndex, 0);
+}
+
+void DlgMaterialParams::on_textureScaleX_valueChanged(double)
+{
+    auto scale = mTextureScale;
+    if (const auto* ptr = mItem->GetMaterialParamValue<glm::vec2>("kTextureScale"))
+        scale = *ptr;
+
+    scale.x = GetValue(mUI.textureScaleX);
+    mItem->SetMaterialParam("kTextureScale", scale);
+}
+void DlgMaterialParams::on_textureScaleY_valueChanged(double)
+{
+    auto scale = mTextureScale;
+    if (const auto* ptr = mItem->GetMaterialParamValue<glm::vec2>("kTextureScale"))
+        scale = *ptr;
+
+    scale.y = GetValue(mUI.textureScaleY);
+    mItem->SetMaterialParam("kTextureScale", scale);
+}
+void DlgMaterialParams::on_btnResetTextureScale_clicked()
+{
+    mItem->DeleteMaterialParam("kTextureScale");
+    SetValue(mUI.textureScaleX, mTextureScale.x);
+    SetValue(mUI.textureScaleY, mTextureScale.y);
 }
 
 void DlgMaterialParams::on_btnAccept_clicked()
