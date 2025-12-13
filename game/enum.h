@@ -164,6 +164,7 @@ namespace game {
     enum class EntityFlags {
         // Only pertains to editor (todo: maybe this flag should be removed)
         VisibleInEditor,
+        LockedInEditor,
         // node is visible in the game or not.
         // Even if this is true the node will still need to have some
         // renderable items attached to it such as a shape or
