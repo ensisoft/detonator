@@ -66,7 +66,8 @@ namespace game
 
         enum class Flags {
             // Only pertains to editor (todo: maybe this flag should be removed)
-            VisibleInEditor
+            VisibleInEditor,
+            LockedInEditor
         };
 
         EntityNodeClass();

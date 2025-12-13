@@ -1855,46 +1855,23 @@ void SceneWidget::on_nodeIsVisible_stateChanged(int)
 }
 void SceneWidget::on_nodeTranslateX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        auto translate = node->GetTranslation();
-        translate.x = value;
-        node->SetTranslation(translate);
-    }
+    ApplyNodeTransform();
 }
 void SceneWidget::on_nodeTranslateY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        auto translate = node->GetTranslation();
-        translate.y = value;
-        node->SetTranslation(translate);
-    }
+    ApplyNodeTransform();
 }
 void SceneWidget::on_nodeScaleX_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        auto scale = node->GetScale();
-        scale.x = value;
-        node->SetScale(scale);
-    }
+    ApplyNodeTransform();
 }
 void SceneWidget::on_nodeScaleY_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        auto scale = node->GetScale();
-        scale.y = value;
-        node->SetScale(scale);
-    }
+    ApplyNodeTransform();
 }
 void SceneWidget::on_nodeRotation_valueChanged(double value)
 {
-    if (auto* node = GetCurrentNode())
-    {
-        node->SetRotation(qDegreesToRadians(value));
-    }
+    ApplyNodeTransform();
 }
 
 void SceneWidget::on_btnEditEntity_clicked()
@@ -2027,9 +2004,19 @@ void SceneWidget::TreeClickEvent(TreeWidget::TreeItem* item, unsigned icon_index
 {
     if (auto* node = GetCurrentNode())
     {
-        const bool visibility = !node->TestFlag(game::EntityPlacement::Flags::VisibleInEditor);
-        node->SetFlag(game::EntityPlacement::Flags::VisibleInEditor, visibility);
-        item->SetVisibilityIcon(visibility ? QIcon() : QIcon("icons:crossed_eye.png"));
+        if (icon_index == 0)
+        {
+            const bool visibility = !node->TestFlag(game::EntityPlacement::Flags::VisibleInEditor);
+            node->SetFlag(game::EntityPlacement::Flags::VisibleInEditor, visibility);
+            item->SetVisibilityIcon(visibility ? QIcon() : QIcon("icons:crossed_eye.png"));
+        }
+        else if (icon_index == 1)
+        {
+            const bool locked = !node->TestFlag(game::EntityPlacement::Flags::LockedInEditor);
+            node->SetFlag(game::EntityPlacement::Flags::LockedInEditor, locked);
+            item->SetLockedIcon(locked ? QIcon("icons:lock.png") : QIcon());
+            SetEnabled(mUI.nodeTransform, !locked);
+        }
         mUI.tree->Update();
     }
 }
@@ -2356,7 +2343,6 @@ void SceneWidget::MousePress(QMouseEvent* event)
             else if (hotspot == ToolHotspot::Remove)
                 mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, current, snap, grid_size, engine::GameView::AxisAligned));
             else mUI.tree->ClearSelection();
-
         }
 
         // pick another node
@@ -2389,7 +2375,14 @@ void SceneWidget::MousePress(QMouseEvent* event)
     }
 
     if (mCurrentTool)
-        mCurrentTool->MousePress(mickey);
+    {
+        if (mCurrentTool->GetToolFunction() == MouseTool::ToolFunctionType::TransformNode &&
+            GetCurrentNode()->TestFlag(game::EntityPlacement::Flags::LockedInEditor))
+        {
+            NOTE("Unlock node to apply node transformations.");
+            mCurrentTool.reset();
+        } else mCurrentTool->MousePress(mickey);
+    }
 }
 void SceneWidget::MouseRelease(QMouseEvent* event)
 {
@@ -2504,8 +2497,9 @@ void SceneWidget::DisplayCurrentNodeProperties()
 
     if (const auto* node = GetCurrentNode())
     {
+        const auto locked = node->TestFlag(game::EntityPlacement::Flags::LockedInEditor);
         SetEnabled(mUI.nodeProperties, true);
-        SetEnabled(mUI.nodeTransform, true);
+        SetEnabled(mUI.nodeTransform, !locked);
 
         const auto& translate = node->GetTranslation();
         const auto& scale = node->GetScale();
@@ -2703,6 +2697,12 @@ void SceneWidget::TranslateCurrentNode(float dx, float dy)
 {
     if (auto* node = GetCurrentNode())
     {
+        if (node->TestFlag(game::EntityPlacement::Flags::LockedInEditor))
+        {
+            NOTE("Unlock node to apply node transformations.");
+            return;
+        }
+
         auto pos = node->GetTranslation();
         pos.x += dx;
         pos.y += dy;
@@ -2717,6 +2717,31 @@ void SceneWidget::TranslateCamera(float dx, float dy)
     mState.camera_offset_x += dx;
     mState.camera_offset_y += dy;
     DisplayCurrentCameraLocation();
+}
+
+void SceneWidget::ApplyNodeTransform()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (node->TestFlag(game::EntityPlacement::Flags::LockedInEditor))
+        {
+            NOTE("Unlock node to appply node transformations.");
+            return;
+        }
+
+        glm::vec2 translate;
+        translate.x = GetValue(mUI.nodeTranslateX);
+        translate.y = GetValue(mUI.nodeTranslateY);
+        node->SetTranslation(translate);
+
+        glm::vec2 scale;
+        scale.x = GetValue(mUI.nodeScaleX);
+        scale.y = GetValue(mUI.nodeScaleY);
+        node->SetScale(scale);
+
+        const double rotation = GetValue(mUI.nodeRotation);
+        node->SetRotation(qDegreesToRadians(rotation));
+    }
 }
 
 void SceneWidget::RebuildMenus()

@@ -220,6 +220,7 @@ namespace gui
         void UncheckPlacementActions();
         void TranslateCurrentNode(float dx, float dy);
         void TranslateCamera(float dx, float dy);
+        void ApplyNodeTransform();
         void RebuildMenus();
         void RebuildCombos();
         void UpdateResourceReferences();

@@ -4698,14 +4698,24 @@ void EntityWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeIte
 }
 void EntityWidget::TreeClickEvent(TreeWidget::TreeItem* item, unsigned icon_index)
 {
-    //DEBUG("Tree click event: %1", item->GetId());
+    //DEBUG("Tree click event: %1, icon=%2", item->GetId(), icon_index);
     auto* node = static_cast<game::EntityNodeClass*>(item->GetUserData());
     if (node == nullptr)
         return;
 
-    const bool visibility = !node->TestFlag(game::EntityNodeClass::Flags::VisibleInEditor);
-    node->SetFlag(game::EntityNodeClass::Flags::VisibleInEditor, visibility);
-    item->SetVisibilityIcon(visibility ? QIcon() : QIcon("icons:crossed_eye.png"));
+    if (icon_index == 0)
+    {
+        const bool visibility = !node->TestFlag(game::EntityNodeClass::Flags::VisibleInEditor);
+        node->SetFlag(game::EntityNodeClass::Flags::VisibleInEditor, visibility);
+        item->SetVisibilityIcon(visibility ? QIcon() : QIcon("icons:crossed_eye.png"));
+    }
+    else if (icon_index == 1)
+    {
+        const bool locked = !node->TestFlag(game::EntityNodeClass::Flags::LockedInEditor);
+        node->SetFlag(game::EntityNodeClass::Flags::LockedInEditor, locked);
+        item->SetLockedIcon(locked ? QIcon("icons:lock.png") : QIcon());
+        SetEnabled(mUI.nodeTransform, !locked);
+    }
     mUI.tree->Update();
 }
 
@@ -5190,8 +5200,17 @@ void EntityWidget::MousePress(QMouseEvent* event)
     {
         mCurrentTool.reset(new PerspectiveCorrectCameraTool(mUI, mState));
     }
+
     if (mCurrentTool)
-        mCurrentTool->MousePress(mickey);
+    {
+        if (mCurrentTool->GetToolFunction() == MouseTool::ToolFunctionType::TransformNode &&
+            GetCurrentNode()->TestFlag(game::EntityNodeClass::Flags::LockedInEditor))
+        {
+            NOTE("Unlock node to apply node transformations.");
+            mCurrentTool.reset();
+        } else mCurrentTool->MousePress(mickey);
+    }
+
 }
 void EntityWidget::MouseRelease(QMouseEvent* event)
 {
@@ -5589,8 +5608,10 @@ void EntityWidget::DisplayCurrentNodeProperties()
 
     if (auto* node = GetCurrentNode())
     {
+        const auto locked = node->TestFlag(game::EntityNodeClass::Flags::LockedInEditor);
+
         SetEnabled(mUI.nodeProperties, true);
-        SetEnabled(mUI.nodeTransform,  true);
+        SetEnabled(mUI.nodeTransform,  !locked);
         SetEnabled(mUI.nodeScrollAreaWidgetContents, true);
         SetEnabled(mUI.btnAddNodeItem, true);
 
@@ -5876,6 +5897,12 @@ void EntityWidget::TranslateCurrentNode(float dx, float dy)
 {
     if (auto* node = GetCurrentNode())
     {
+        if (node->TestFlag(game::EntityNodeClass::Flags::LockedInEditor))
+        {
+            NOTE("Unlock node to apply node transformations.");
+            return;
+        }
+
         auto pos = node->GetTranslation();
         pos.x += dx;
         pos.y += dy;
@@ -5892,17 +5919,20 @@ void EntityWidget::UpdateCurrentNodeProperties()
     if (node == nullptr)
         return;
 
-    glm::vec2 size, scale, translation;
-    size.x = GetValue(mUI.nodeSizeX);
-    size.y = GetValue(mUI.nodeSizeY);
-    scale.x = GetValue(mUI.nodeScaleX);
-    scale.y = GetValue(mUI.nodeScaleY);
-    translation.x = GetValue(mUI.nodeTranslateX);
-    translation.y = GetValue(mUI.nodeTranslateY);
-    node->SetSize(size);
-    node->SetScale(scale);
-    node->SetTranslation(translation);
-    node->SetRotation(qDegreesToRadians((float)GetValue(mUI.nodeRotation)));
+    if (!node->TestFlag(game::EntityNodeClass::Flags::LockedInEditor))
+    {
+        glm::vec2 size, scale, translation;
+        size.x = GetValue(mUI.nodeSizeX);
+        size.y = GetValue(mUI.nodeSizeY);
+        scale.x = GetValue(mUI.nodeScaleX);
+        scale.y = GetValue(mUI.nodeScaleY);
+        translation.x = GetValue(mUI.nodeTranslateX);
+        translation.y = GetValue(mUI.nodeTranslateY);
+        node->SetSize(size);
+        node->SetScale(scale);
+        node->SetTranslation(translation);
+        node->SetRotation(qDegreesToRadians((float)GetValue(mUI.nodeRotation)));
+    }
 
     if (auto* item = node->GetDrawable())
     {

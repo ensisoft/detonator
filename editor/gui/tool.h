@@ -225,6 +225,10 @@ namespace gui
     class MouseTool
     {
     public:
+        enum class ToolFunctionType {
+            TransformNode, TransformCamera, Other
+        };
+
         virtual ~MouseTool() = default;
         // Render the visualization of the current tool and/or the action
         // being performed.
@@ -250,19 +254,24 @@ namespace gui
 
         virtual std::string GetName() const { return {}; }
 
+        virtual ToolFunctionType GetToolFunction() const
+        {
+            return ToolFunctionType::Other;
+        }
+
         // Dummy migration shims. Plan is to get rid of the transform param
         // but it can't be done until every caller has been refactored!
-        inline void MouseMove(const MouseEvent& mickey)
+        void MouseMove(const MouseEvent& mickey)
         {
             gfx::Transform  dummy;
             MouseMove(mickey, dummy);
         }
-        inline void MousePress(const MouseEvent& mickey)
+        void MousePress(const MouseEvent& mickey)
         {
             gfx::Transform dummy;
             MousePress(mickey, dummy);
         }
-        inline bool MouseRelease(const MouseEvent& mickey)
+        bool MouseRelease(const MouseEvent& mickey)
         {
             gfx::Transform dummy;
             return MouseRelease(mickey, dummy);
@@ -279,9 +288,9 @@ namespace gui
         explicit MoveCameraTool(CameraState& state)
           : mState(state)
         {}
-        virtual void Render(gfx::Painter& window, gfx::Painter&) const override
+        void Render(gfx::Painter& window, gfx::Painter&) const override
         {}
-        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
+        void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
         {
             const auto& pos = mickey->pos();
             const auto& delta = pos - mMousePos;
@@ -297,14 +306,18 @@ namespace gui
             mState.camera_offset_y += y;
             mMousePos = pos;
         }
-        virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
+        void MousePress(const MouseEvent& mickey, gfx::Transform&) override
         {
             mMousePos = mickey->pos();
         }
-        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
+        bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
         {
             // done on mouse release
             return true;
+        }
+        ToolFunctionType GetToolFunction() const override
+        {
+            return ToolFunctionType::TransformCamera;
         }
     private:
         CameraState& mState;
@@ -335,9 +348,9 @@ namespace gui
                                                          rotation);
             mWindowSize = glm::vec2{width, height};
         }
-        virtual void Render(gfx::Painter& window, gfx::Painter&) const override
+        void Render(gfx::Painter& window, gfx::Painter&) const override
         {}
-        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& ) override
+        void MouseMove(const MouseEvent& mickey, gfx::Transform& ) override
         {
             const auto world_pos = engine::MapFromWindowToWorld(mViewToClip,
                                                                 mWorldToView,
@@ -348,24 +361,28 @@ namespace gui
             mState.camera_offset_y -= world_delta.y;
             mWorldPos = world_pos;
         }
-        virtual void MousePress(const MouseEvent& mickey, gfx::Transform& ) override
+        void MousePress(const MouseEvent& mickey, gfx::Transform& ) override
         {
             mWorldPos = engine::MapFromWindowToWorld(mViewToClip,
                                                      mWorldToView,
                                                      ToVec2(mickey->pos()),
                                                      mWindowSize);
         }
-        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
+        bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
         {
             // done on mouse release
             return true;
         }
+        ToolFunctionType GetToolFunction() const override
+        {
+            return ToolFunctionType::TransformCamera;
+        }
     private:
-        glm::mat4 mViewToClip;
-        glm::mat4 mWorldToView;
-        glm::vec2 mWindowSize;
+        glm::mat4 mViewToClip { 1.0f };
+        glm::mat4 mWorldToView {1.0f};
+        glm::vec2 mWindowSize  {0.0f, 0.0f};
+        glm::vec4 mWorldPos {0.0f, 0.0f, 0.0f, 0.0f};
         CameraState& mState;
-        glm::vec4 mWorldPos;
     };
 
 
@@ -381,7 +398,7 @@ namespace gui
             , mGridSize(grid)
             , mMapping(mapping)
         {}
-        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
+        void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const glm::vec2 mouse_pos = mickey.MapMouse(trans);
 
@@ -421,7 +438,7 @@ namespace gui
             // new place if snap to grid was on.
             mWasMoved = true;
         }
-        virtual void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
+        void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& mouse_pos = mickey.MapMouse(trans);
 
@@ -438,7 +455,7 @@ namespace gui
                 mPreviousMousePos = mouse_pos;
             }
         }
-        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
+        bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
         {
             if (!mWasMoved)
                 return true;
@@ -458,12 +475,16 @@ namespace gui
             // we're done.
             return true;
         }
+        ToolFunctionType GetToolFunction() const override
+        {
+            return ToolFunctionType::TransformNode;
+        }
     private:
         TreeModel& mModel;
         TreeNode*  mNode = nullptr;
         // previous mouse position, for each mouse move we update the objects'
         // position by the delta between previous and current mouse pos.
-        glm::vec2 mPreviousMousePos;
+        glm::vec2 mPreviousMousePos {0.0f, 0.0f};
         // true if we want the x,y coords to be aligned on grid size units.
         bool mSnapToGrid = false;
         bool mWasMoved = false;
@@ -481,12 +502,12 @@ namespace gui
         {
             mScale = mNode->GetScale();
         }
-        virtual void Render(gfx::Painter& window, gfx::Painter& world) const override
+        void Render(gfx::Painter& window, gfx::Painter& world) const override
         {
 
         }
 
-        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
+        void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
         {
             const glm::vec2 mouse_pos = mickey.MapToPlane();
             const glm::vec2 mouse_diff = mouse_pos - mMouseDown;
@@ -499,7 +520,7 @@ namespace gui
             mNode->SetScale(scale);
             mMouseDown = mouse_pos;
         }
-        virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
+        void MousePress(const MouseEvent& mickey, gfx::Transform&) override
         {
             mMouseDown = mickey.MapToPlane();
 
@@ -514,18 +535,22 @@ namespace gui
 
             mViewSize = size;
         }
-        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
+        bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
         {
             // we're done
             return true;
         }
+        ToolFunctionType GetToolFunction() const override
+        {
+            return ToolFunctionType::TransformNode;
+        }
     private:
         TreeModel& mModel;
         TreeNode*  mNode = nullptr;
-        glm::vec2 mMouseDown;
-        glm::vec2 mRealSize;
-        glm::vec2 mViewSize;
-        glm::vec2 mScale;
+        glm::vec2 mMouseDown {0.0f, 0.0f};
+        glm::vec2 mRealSize {0.0f, 0.0f};
+        glm::vec2 mViewSize {0.0f, 0.0f};
+        glm::vec2 mScale {0.0f, 0.0f};
     };
 
     template<typename TreeModel, typename TreeNode>
@@ -538,7 +563,7 @@ namespace gui
           , mSnapToGrid(snap)
           , mGridSize(grid)
         {}
-        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
+        void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& mouse_pos = mickey.MapMouse(trans);
             const auto& mouse_pos_in_node = mModel.MapCoordsToNodeBox(mouse_pos, mNode).ToVec2();
@@ -565,12 +590,12 @@ namespace gui
             mPreviousMousePos = mouse_pos_in_node;
             mWasMoved = true;
         }
-        virtual void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
+        void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& mouse_pos = mickey.MapMouse(trans);
             mPreviousMousePos = mModel.MapCoordsToNodeBox(mouse_pos, mNode);
         }
-        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
+        bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
         {
             if (!mWasMoved)
                 return true;
@@ -592,12 +617,16 @@ namespace gui
             }
             return true;
         }
+        ToolFunctionType GetToolFunction() const override
+        {
+            return ToolFunctionType::TransformNode;
+        }
     private:
         TreeModel& mModel;
         TreeNode* mNode = nullptr;
         // previous mouse position, for each mouse move we update the objects'
         // position by the delta between previous and current mouse pos.
-        glm::vec2 mPreviousMousePos;
+        glm::vec2 mPreviousMousePos {0.0f, 0.0f};
         bool mSnapToGrid = false;
         bool mWasMoved = false;
         unsigned mGridSize = 0;
@@ -621,7 +650,7 @@ namespace gui
                 mNodeCenterInWorld = mModel.MapCoordsFromNodeBox(node_size * 0.5f, mNode);
             }
         }
-        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
+        void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const glm::vec2 world_mouse_pos = mickey.MapMouse(trans);
             // compute the delta between the current mouse position angle and the previous mouse position angle
@@ -637,13 +666,17 @@ namespace gui
             mNode->SetRotation(angle);
             mPreviousMousePos = world_mouse_pos;
         }
-        virtual void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
+        void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             mPreviousMousePos = mickey.MapMouse(trans);
         }
-        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& trans) override
+        bool MouseRelease(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             return true;
+        }
+        ToolFunctionType GetToolFunction() const override
+        {
+            return ToolFunctionType::TransformNode;
         }
     private:
         float GetAngleRadians(const glm::vec2& p) const
@@ -662,8 +695,8 @@ namespace gui
         TreeNode* mNode = nullptr;
         // previous mouse position, for each mouse move we update the object's
         // position by the delta between previous and current mouse pos.
-        glm::vec2 mPreviousMousePos;
-        glm::vec2 mNodeCenterInWorld;
+        glm::vec2 mPreviousMousePos {0.0f, 0.0f};
+        glm::vec2 mNodeCenterInWorld {0.0f, 0.0f};
     };
 
     template<typename EntityType, typename NodeType>
