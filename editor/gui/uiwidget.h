@@ -161,7 +161,7 @@ namespace gui
 
         void TreeCurrentWidgetChangedEvent();
         void TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
-        void TreeClickEvent(TreeWidget::TreeItem* item);
+        void TreeClickEvent(TreeWidget::TreeItem* item, unsigned icon_index);
         void WidgetStyleEdited();
     private:
         void PaintScene(gfx::Painter& painter, double sec);

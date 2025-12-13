@@ -1,6 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
   <qresource>
+    <file>16x16_ico_png/lock.png</file>
     <file>16x16_ico_png/mesh_effect.png</file>
     <file>16x16_ico_png/properties.png</file>
     <file>16x16_ico_png/transform.png</file>

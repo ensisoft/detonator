@@ -254,7 +254,7 @@ class UIWidget::TreeModel : public TreeWidget::TreeModel
 public:
     TreeModel(State& state) : mState(state)
     {}
-    virtual void Flatten(std::vector<TreeWidget::TreeItem>& list) override
+    void Flatten(std::vector<TreeWidget::TreeItem>& list) override
     {
         // visit the window and it's widgets hierarchically
         // and produce the data for the tree widget.
@@ -263,22 +263,27 @@ public:
         public:
             Visitor(std::vector<TreeWidget::TreeItem>& list) : mList(list)
             {}
-            virtual void EnterNode(uik::Widget* widget) override
+            void EnterNode(uik::Widget* widget) override
             {
                 TreeWidget::TreeItem item;
-                item.SetId(widget ? app::FromUtf8(widget->GetId()) : "root");
-                item.SetText(widget ? app::FromUtf8(widget->GetName()) : "Root");
+                item.SetId(widget ? widget->GetId() : "root");
+                item.SetText(widget ? widget->GetName() : "Root");
                 item.SetLevel(mLevel);
                 if (widget)
                 {
                     const bool visible = widget->TestFlag(uik::Widget::Flags::VisibleInEditor);
                     item.SetUserData(widget);
-                    item.SetIcon(QIcon(visible ? "icons:eye.png" : "icons:crossed_eye.png"));
+
+                }
+                else
+                {
+                    item.SetVisibilityIcon(QIcon("icons:eye.png"));
+                    item.SetLockedIcon(QIcon("icons:lock.png"));
                 }
                 mList.push_back(std::move(item));
                 mLevel++;
             }
-            virtual void LeaveNode(uik::Widget* widget) override
+            void LeaveNode(uik::Widget* widget) override
             { mLevel--; }
         private:
             unsigned mLevel = 0;
@@ -2199,13 +2204,14 @@ void UIWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* t
 
     tree.ReparentChild(dst_widget, src_widget);
 }
-void UIWidget::TreeClickEvent(TreeWidget::TreeItem* item)
+void UIWidget::TreeClickEvent(TreeWidget::TreeItem* item, unsigned icon_index)
 {
     if (auto* widget = GetCurrentWidget())
     {
-        const bool visibility = widget->TestFlag(uik::Widget::Flags::VisibleInEditor);
-        widget->SetFlag(uik::Widget::Flags::VisibleInEditor, !visibility);
-        mUI.tree->Rebuild();
+        const bool visibility = !widget->TestFlag(uik::Widget::Flags::VisibleInEditor);
+        widget->SetFlag(uik::Widget::Flags::VisibleInEditor, visibility);
+        item->SetVisibilityIcon(visibility ? QIcon() : QIcon("icons:crossed_eye.png"));
+        mUI.tree->Update();
     }
 }
 

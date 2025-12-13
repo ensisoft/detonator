@@ -4696,7 +4696,7 @@ void EntityWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeIte
     const bool retain_world_transform = true;
     mState.entity->ReparentChild(dst_value, src_value, retain_world_transform);
 }
-void EntityWidget::TreeClickEvent(TreeWidget::TreeItem* item)
+void EntityWidget::TreeClickEvent(TreeWidget::TreeItem* item, unsigned icon_index)
 {
     //DEBUG("Tree click event: %1", item->GetId());
     auto* node = static_cast<game::EntityNodeClass*>(item->GetUserData());
@@ -4705,7 +4705,7 @@ void EntityWidget::TreeClickEvent(TreeWidget::TreeItem* item)
 
     const bool visibility = !node->TestFlag(game::EntityNodeClass::Flags::VisibleInEditor);
     node->SetFlag(game::EntityNodeClass::Flags::VisibleInEditor, visibility);
-    item->SetIcon(visibility ? QIcon("icons:eye.png") : QIcon("icons:crossed_eye.png"));
+    item->SetVisibilityIcon(visibility ? QIcon() : QIcon("icons:crossed_eye.png"));
     mUI.tree->Update();
 }
 

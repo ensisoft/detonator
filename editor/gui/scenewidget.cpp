@@ -2023,13 +2023,13 @@ void SceneWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem
     mState.scene->ReparentChild(dst_value, src_value, retain_world_transform);
 
 }
-void SceneWidget::TreeClickEvent(TreeWidget::TreeItem* item)
+void SceneWidget::TreeClickEvent(TreeWidget::TreeItem* item, unsigned icon_index)
 {
     if (auto* node = GetCurrentNode())
     {
         const bool visibility = !node->TestFlag(game::EntityPlacement::Flags::VisibleInEditor);
         node->SetFlag(game::EntityPlacement::Flags::VisibleInEditor, visibility);
-        item->SetIcon(visibility ? QIcon("icons:eye.png") : QIcon("icons:crossed_eye.png"));
+        item->SetVisibilityIcon(visibility ? QIcon() : QIcon("icons:crossed_eye.png"));
         mUI.tree->Update();
     }
 }

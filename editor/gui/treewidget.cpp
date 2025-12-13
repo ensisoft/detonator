@@ -39,12 +39,16 @@
 
 namespace {
 
-void RenderTreeItem(const gui::TreeWidget::TreeItem& item, const QRect& box, const QPalette& palette, QPainter& painter,
-    bool selected, bool hovered, bool have_focus)
+    // px
+constexpr auto IconBoxSize = 20;
+constexpr auto IconSize = 16;
+constexpr auto LevelOffset = 16;
+constexpr auto IconCount = 2;
+
+void RenderTreeItem(const gui::TreeWidget::TreeItem& item, const QRect& item_box, const QPalette& palette, QPainter& painter,
+    bool selected, bool hovered, bool have_focus, unsigned hovered_icon_index)
 {
-    const unsigned kBaseLevel = 3;
-    const unsigned kLevelOffset = 16; // px
-    const auto offset = kBaseLevel * kLevelOffset + item.GetLevel() * kLevelOffset;
+    const auto text_offset =  IconCount * IconBoxSize + item.GetLevel() * LevelOffset;
     const auto color_group = have_focus ? QPalette::ColorGroup::Active : QPalette::ColorGroup::Inactive;
 
     if (selected)
@@ -52,35 +56,76 @@ void RenderTreeItem(const gui::TreeWidget::TreeItem& item, const QRect& box, con
         QPen pen;
         pen.setColor(palette.color(color_group, QPalette::HighlightedText));
         painter.setPen(pen);
-        painter.fillRect(box, palette.color(color_group, QPalette::Highlight));
-        painter.drawText(box.translated(offset, 0), Qt::AlignVCenter | Qt::AlignLeft, item.GetText());
+        painter.fillRect(item_box, palette.color(color_group, QPalette::Highlight));
+        painter.drawText(item_box.translated(text_offset, 0), Qt::AlignVCenter | Qt::AlignLeft, item.GetText());
     }
     else if (hovered)
     {
         QPen pen;
         pen.setColor(palette.color(color_group, QPalette::Text));
         painter.setPen(pen);
-        painter.fillRect(box.translated(offset, 0), palette.color(color_group, QPalette::AlternateBase));
-        painter.drawText(box.translated(offset, 0), Qt::AlignVCenter | Qt::AlignLeft, item.GetText());
+        painter.fillRect(item_box.translated(text_offset, 0), palette.color(color_group, QPalette::AlternateBase));
+        painter.drawText(item_box.translated(text_offset, 0), Qt::AlignVCenter | Qt::AlignLeft, item.GetText());
     }
     else
     {
         QPen pen;
         pen.setColor(palette.color(color_group, QPalette::Text));
         painter.setPen(pen);
-        painter.fillRect(box, palette.color(color_group, QPalette::Base));
-        painter.drawText(box.translated(offset, 0), Qt::AlignVCenter | Qt::AlignLeft, item.GetText());
+        painter.fillRect(item_box, palette.color(color_group, QPalette::Base));
+        painter.drawText(item_box.translated(text_offset, 0), Qt::AlignVCenter | Qt::AlignLeft, item.GetText());
     }
-    const QIcon& ico = item.GetIcon();
-    if (!ico.isNull())
-    {
-        // hack +2 offset because ico.paint doesn't respect the
-        // transform set on the painter...
-        ico.paint(&painter, box.translated(2, 2), Qt::AlignLeft, item.GetIconMode());
 
+    QRect icon_box_one;
+    icon_box_one.setWidth(IconBoxSize);
+    icon_box_one.setHeight(IconBoxSize);
+    icon_box_one.translate(item_box.x(), item_box.y());
+
+    QRect icon_box_two;
+    icon_box_two.setWidth(IconBoxSize);
+    icon_box_two.setHeight(IconBoxSize);
+    icon_box_two.translate(item_box.x(), item_box.y());
+    icon_box_two.translate(IconBoxSize, 0);
+
+    static_assert(IconBoxSize >= IconSize);
+    constexpr auto IconMargin = (IconBoxSize - IconSize) / 2;
+    const auto& icon_visible = item.GetVisibilityIcon();
+    const auto& icon_locked = item.GetLockedIcon();
+    const auto icon_mode = item.GetIconMode();
+
+    // WARNING: doing icon.pain(painter, ...) does not respect the transform
+    // set on the painter.
+
+    auto DrawIcon = [IconMargin](const QIcon& icon, const QRect& icon_box, QPainter& painter, QIcon::Mode mode) {
+        if (icon.isNull())
+            return;
+        QRect box = icon_box;
+        box.setWidth(IconSize);
+        box.setHeight(IconSize);
+        box.setX(icon_box.x() + IconMargin);
+        box.setY(icon_box.y() + IconMargin);
+        painter.drawPixmap(box, icon.pixmap(IconSize, IconSize, mode));
+    };
+    DrawIcon(icon_visible, icon_box_one, painter, icon_mode);
+    DrawIcon(icon_locked, icon_box_two, painter, icon_mode);
+
+    if (hovered && hovered_icon_index == 0)
+    {
+        QPen pen;
+        pen.setColor(palette.color(color_group, QPalette::Text));
+        pen.setWidth(1.0f);
+        painter.setPen(pen);
+        painter.drawRect(icon_box_one);
+    }
+    else if (hovered && hovered_icon_index == 1)
+    {
+        QPen pen;
+        pen.setColor(palette.color(color_group, QPalette::Text));
+        pen.setWidth(1.0f);
+        painter.setPen(pen);
+        painter.drawRect(icon_box_two);
     }
 }
-
 
 } // namespace
 
@@ -92,7 +137,7 @@ TreeWidget::TreeWidget(QWidget* parent) : QAbstractScrollArea(parent)
     // itemheight is determined by the default font height.
     QFont font;
     QFontMetrics fm(font);
-    mItemHeight = fm.height();
+    mItemHeight = std::min(fm.height(), IconBoxSize);
 
     // need to set the focus policy in order to receive keyboard events.
     setFocusPolicy(Qt::StrongFocus);
@@ -195,16 +240,7 @@ void TreeWidget::focusInEvent(QFocusEvent* ford)
 
 void TreeWidget::paintEvent(QPaintEvent* event)
 {
-    //const QPalette& palette = this->palette();
-
-    const unsigned kBaseLevel    = 1;
-    const unsigned kLevelOffset  = 15; // px
-
-    auto rect = this->viewport()->rect();
-    rect.translate(2.0, 2.0);
-    rect.setWidth(rect.width() - 4);
-    rect.setHeight(rect.height() - 4);
-
+    const auto& rect = GetVisibleRect();
     const unsigned window_width  = rect.width();
     const unsigned window_height = rect.height();
 
@@ -222,23 +258,32 @@ void TreeWidget::paintEvent(QPaintEvent* event)
     for (size_t i=0; i<mItems.size(); ++i)
     {
         const auto& item = mItems[i];
-        const int ypos   = mYOffset * mItemHeight + i * mItemHeight;
-        const int xpos   = mXOffset + item.GetLevel() * kLevelOffset + kBaseLevel * kLevelOffset;
         const bool selected = &item == mSelected;
         const bool hovered  = &item == mHovered;
-        const QRect box(0, ypos, window_width, mItemHeight);
-        RenderTreeItem(item, box, palette, painter, selected, hovered, hasFocus());
+        const auto level = item.GetLevel();
+
+        QRect item_box;
+        item_box.setX(0);
+        item_box.setY(mYOffset * mItemHeight + i * mItemHeight);
+        item_box.setWidth(window_width);
+        item_box.setHeight(mItemHeight);
+        RenderTreeItem(item, item_box, palette, painter, selected, hovered, hasFocus(), mHoveredIconIndex);
 
         // draw the connecting lines between child/parent items.
-        QPen line;
-        line.setColor(palette.color(QPalette::Shadow));
-        painter.setPen(line);
-        painter.drawLine(32 + xpos - 15, ypos + mItemHeight/2,
-                         32 + xpos - 3,  ypos + mItemHeight/2);
-        if (item.GetLevel() > 0)
+        if (level > 0)
         {
-            painter.drawLine(32 + xpos - 15, ypos + mItemHeight/2,
-                             32 + xpos - 15, ypos - 1);
+            const int ypos = mYOffset * mItemHeight + i * mItemHeight;
+            const int xpos = mXOffset + IconCount*IconBoxSize + (level-1)*LevelOffset;
+            const int mid  = ypos+mItemHeight/2;
+
+            QPen line;
+            line.setColor(palette.color(QPalette::Shadow));
+            painter.setPen(line);
+            // draw a little horizontal line
+            painter.drawLine(xpos, mid, xpos+LevelOffset-3, mid);
+
+            // draw a little vertical line
+            painter.drawLine(xpos, ypos-1, xpos, mid);
         }
     }
 
@@ -283,7 +328,7 @@ void TreeWidget::paintEvent(QPaintEvent* event)
             painter.setOpacity(0.5f);
             // render the item being dragged.
             RenderTreeItem(item, QRect(xpos, ypos, window_width, mItemHeight),
-                           palette, painter, true, false, true);
+                           palette, painter, true, false, true, mHoveredIconIndex);
         }
     }
 
@@ -314,14 +359,15 @@ void TreeWidget::mouseMoveEvent(QMouseEvent* mickey)
     }
 
     const auto point = MapPoint(mickey->pos());
-    const auto index = point.y() / mItemHeight;
+    const auto row_index = point.y() / mItemHeight;
 
     mHovered = nullptr;
 
-    if (index >= mItems.size())
+    if (row_index >= mItems.size())
         return;
 
-    mHovered = &mItems[index];
+    mHovered = &mItems[row_index];
+    mHoveredIconIndex = point.x() / IconBoxSize;
 
     // trigger paint
     viewport()->update();
@@ -372,13 +418,16 @@ void TreeWidget::mouseReleaseEvent(QMouseEvent* mickey)
         const auto pos  = MapPoint(mickey->pos());
         const auto xpos = pos.x();
         const auto ypos = pos.y();
-        if (xpos >= 16)
+        if (xpos >= 32)
             return;
 
-        const unsigned index = ypos / mItemHeight;
-        if (index >= mItems.size())
+        const unsigned row_index = ypos / mItemHeight;
+        if (row_index >= mItems.size())
             return;
-        emit clickEvent(&mItems[index]);
+
+        const unsigned icon_index = xpos / IconBoxSize;
+
+        emit clickEvent(&mItems[row_index], icon_index);
         viewport()->update();
         return;
     }
@@ -477,5 +526,15 @@ QPoint TreeWidget::MapPoint(const QPoint& widget) const
     // buffer (still in pixels)
     return QPoint(widget.x(), widget.y() - mItemHeight * mYOffset);
 }
+
+QRect TreeWidget::GetVisibleRect() const
+{
+    QRect rect = viewport()->rect();
+    rect.translate(2.0, 2.0);
+    rect.setWidth(rect.width() -4);
+    rect.setHeight(rect.height() - 4);
+    return rect;
+}
+
 
 } // namespace
