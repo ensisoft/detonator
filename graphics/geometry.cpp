@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
 #include <cstring>
 #include <tuple>
 #include <limits>
@@ -21,7 +23,8 @@
 
 #include "base/hash.h"
 #include "base/math.h"
-#include "graphics/geometry.h"
+#include "graphics/geometry_buffer.h"
+#include "graphics/geometry_algo.h"
 #include "graphics/vertex_algo.h"
 
 #include "base/snafu.h"
@@ -69,7 +72,7 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
                            ? (cmd.count)
                            : (has_index ? index_count : vertex_count);
 
-        if (cmd.type == Geometry::DrawType::Triangles)
+        if (cmd.type == GeometryBuffer::DrawType::Triangles)
         {
             ASSERT((primitive_count % 3) == 0);
             const auto triangles = primitive_count / 3;
@@ -89,7 +92,7 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
                 AddLine(vertex_writer, v2, v0);
             }
         }
-        else if (cmd.type == Geometry::DrawType::TriangleFan)
+        else if (cmd.type == GeometryBuffer::DrawType::TriangleFan)
         {
             ASSERT(primitive_count >= 3);
             // the first 3 vertices form a triangle and then
@@ -122,7 +125,7 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
 
     wireframe.SetVertexBuffer(std::move(vertex_data));
     wireframe.SetVertexLayout(geometry.GetLayout());
-    wireframe.AddDrawCmd(Geometry::DrawType::Lines);
+    wireframe.AddDrawCmd(GeometryBuffer::DrawType::Lines);
 }
 
 bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
@@ -151,7 +154,7 @@ bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
                            ? (cmd.count)
                            : (has_index ? index_count : vertex_count);
 
-        if (cmd.type == Geometry::DrawType::Triangles)
+        if (cmd.type == GeometryBuffer::DrawType::Triangles)
         {
             ASSERT((primitive_count % 3) == 0);
             const auto triangles = primitive_count / 3;
@@ -172,7 +175,7 @@ bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
                 SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
             }
         }
-        else if (cmd.type == Geometry::DrawType::TriangleFan)
+        else if (cmd.type == GeometryBuffer::DrawType::TriangleFan)
         {
             ASSERT(primitive_count >= 3);
             // the first 3 vertices form a triangle and then
@@ -205,7 +208,7 @@ bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
     }
     buffer.SetVertexBuffer(std::move(vertex_data));
     buffer.SetVertexLayout(geometry.GetLayout());
-    buffer.AddDrawCmd(Geometry::DrawType::Triangles);
+    buffer.AddDrawCmd(GeometryBuffer::DrawType::Triangles);
     return true;
 }
 
@@ -314,7 +317,7 @@ bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, u
 
     normals.SetVertexBuffer(std::move(vertex_buffer));
     normals.SetVertexLayout(GetVertexLayout<Vertex3D>());
-    normals.AddDrawCmd(Geometry::DrawType::Lines);
+    normals.AddDrawCmd(GeometryBuffer::DrawType::Lines);
     return true;
 }
 
@@ -397,7 +400,7 @@ bool ComputeTangents(GeometryBuffer& geometry)
                                      ? (cmd.count)
                                      : (has_index ? index_count : vertex_count);
 
-        if (cmd.type == Geometry::DrawType::Triangles)
+        if (cmd.type == GeometryBuffer::DrawType::Triangles)
         {
             ASSERT((primitive_count % 3) == 0);
             const auto triangles = primitive_count / 3;
@@ -415,7 +418,7 @@ bool ComputeTangents(GeometryBuffer& geometry)
                 CalcTangents(i0, i1, i2);
             }
         }
-        else if (cmd.type == Geometry::DrawType::TriangleFan)
+        else if (cmd.type == GeometryBuffer::DrawType::TriangleFan)
         {
             ASSERT(primitive_count >= 3);
             // the first 3 vertices form a triangle and then

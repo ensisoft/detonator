@@ -35,6 +35,7 @@
 #include "graphics/vertex.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
+#include "graphics/geometry_algo.h"
 
 namespace {
 float HalfRound(float value)

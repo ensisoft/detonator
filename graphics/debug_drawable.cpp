@@ -14,11 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
 #include "base/format.h"
 #include "graphics/debug_drawable.h"
 #include "graphics/shader_source.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
+#include "graphics/geometry_algo.h"
 
 namespace gfx
 {
