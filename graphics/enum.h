@@ -151,4 +151,20 @@ namespace gfx
         Flat2D
     };
 
+    enum class TessellationAlgo {
+        // Cut the triangle into half by extending from the apex (v0) to the
+        // center of the opposite side thus producing 2 triangles
+        ApexCut,
+
+        // Finds the midpoint of each triangle edge and connects the midpoints
+        // thus producing 4 new triangles.
+        MidpointSubdivision,
+
+        CentroidSplit,
+
+        RandomizedSplit,
+
+        LongestEdgeBisection
+    };
+
 } // namespace
