@@ -390,6 +390,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/tilebatch.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/utility.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/vertex.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../graphics/vertex_buffer.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../wdk/wdk/keys.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../uikit/animation.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../uikit/window.cpp

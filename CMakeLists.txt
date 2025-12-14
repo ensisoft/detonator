@@ -330,6 +330,7 @@ add_library(GfxLib
     graphics/tilebatch.cpp
     graphics/utility.cpp
     graphics/vertex.cpp
+    graphics/vertex_buffer.cpp
     graphics/tool/polygon.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
