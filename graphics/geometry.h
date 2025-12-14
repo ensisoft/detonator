@@ -18,17 +18,10 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <glm/vec2.hpp>
-#  include <glm/vec3.hpp>
-#  include <glm/vec4.hpp>
-#include "warnpop.h"
-
 #include <cstddef>
 #include <string>
 #include <memory>
 
-#include "graphics/vertex.h"
 #include "graphics/geometry_buffer.h"
 
 namespace gfx
@@ -78,23 +71,5 @@ namespace gfx
     };
 
     using GeometryPtr = std::shared_ptr<const Geometry>;
-
-    void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe);
-
-    enum NormalMeshFlags {
-        Normals = 0x1,
-        Tangents = 0x2,
-        Bitangents = 0x4
-    };
-
-    bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals,
-                          unsigned flags = NormalMeshFlags::Normals, float line_length = 0.2f);
-
-    bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
-        TessellationAlgo algo, unsigned sub_div_count);
-
-    bool ComputeTangents(GeometryBuffer& geometry);
-
-    bool FindGeometryMinMax(const GeometryBuffer& buffer, glm::vec3* minimums, glm::vec3* maximums);
 
 } // namespace

@@ -29,6 +29,7 @@
 #include "graphics/simple_shape.h"
 #include "graphics/tool/polygon.h"
 #include "graphics/vertex_algo.h"
+#include "graphics/geometry_algo.h"
 
 #include "test_device.cpp"
 

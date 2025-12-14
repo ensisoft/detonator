@@ -22,6 +22,7 @@
 #include "base/hash.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
+#include "graphics/geometry_algo.h"
 #include "graphics/device.h"
 #include "graphics/effect_drawable.h"
 #include "graphics/texture.h"
