@@ -26,6 +26,7 @@
 #include "warnpop.h"
 
 #include <cmath>
+#include <algorithm>
 
 #include "base/math.h"
 #include "base/utility.h"
@@ -1321,7 +1322,7 @@ void ShapeWidget::on_tableView_customContextMenuRequested(const QPoint& point)
     const auto mesh_type = GetMeshType();
     if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
     {
-        const bool have_selection = mVertexIndex < mState.builder->GetVertexCount();
+        const bool have_selection = mSelectedVertex < mState.builder->GetVertexCount();
         auto* set_normal_positive_x = menu.addAction("Orient normal to +X");
         auto* set_normal_negative_x = menu.addAction("Orient normal to -X");
         auto* set_normal_positive_y = menu.addAction("Orient normal to +Y");
@@ -1393,9 +1394,9 @@ bool ShapeWidget::OnEscape()
         mUI.actionNewTriangleFan->setChecked(false);
         mUI.actionClear->setEnabled(true);
     }
-    else if (mVertexIndex < mState.builder->GetVertexCount())
+    else if (mSelectedVertex < mState.builder->GetVertexCount())
     {
-        mVertexIndex = 0xfffffff;
+        mSelectedVertex = 0xfffffff;
         ClearSelection(mUI.tableView);
     }
     else return false;
@@ -1565,11 +1566,11 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
 
         // putting this computation here since conveniently we have the matrices
         // available here for doing the mathy stuff.
-        if (mVertexIndex < mState.builder->GetVertexCount())
+        if (mSelectedVertex < mState.builder->GetVertexCount())
         {
             using BuilderType = gfx::tool::PolygonBuilder<gfx::Perceptual3DVertex>;
             const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
-            const auto& vertex = builder->GetVertex(mVertexIndex);
+            const auto& vertex = builder->GetVertex(mSelectedVertex);
 
             const auto& projection_matrix_2d = painter.GetProjMatrix();
             const auto& projection_matrix_3d = tile_painter.GetProjMatrix();
@@ -1631,14 +1632,14 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         }
     }
 
-    const auto alpha = 0.87f;
-    static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
-    color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
-    color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-
     // draw the polygon we're working on
     if (GetValue(mUI.chkShowSurfaces))
     {
+        const auto alpha = 0.87f;
+        static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
+        color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
+        color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+
         gfx::PolygonMeshInstance mesh(polygon);
         mesh.SetTime(mTime);
         mesh.SetRandomValue(GetValue(mUI.kRandom));
@@ -1776,7 +1777,7 @@ void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClass
         mMessages.push_back("Use mouse wheel + keys 'x', 'y' and 'z' to adjust light position.");
         mMessages.push_back("Press 'p' for point light, 's' for spot light and 'd' for directional light.");
     }
-    PaintViewRect(rect, device);
+    PaintViewRect(rect, "Axonometric Lit", device);
 }
 
 void ShapeWidget::Paint3DAxonometricScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device) const
@@ -1829,10 +1830,10 @@ void ShapeWidget::Paint3DAxonometricScene(const QRect& rect, const PolygonClassH
     painter.Draw(instance, transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, flat_program);
     painter.Draw(gfx::Rectangle(), transform, checkerboard, state, flat_program);
 
-    PaintViewRect(rect, device);
+    PaintViewRect(rect, "Axonometric 3D", device);
 }
 
-void ShapeWidget::PaintViewRect(const QRect& rect, gfx::Device* device) const
+void ShapeWidget::PaintViewRect(const QRect& rect, const app::AnyString& name, gfx::Device* device) const
 {
     const auto widget_width  = mUI.widget->width();
     const auto widget_height = mUI.widget->height();
@@ -1855,11 +1856,20 @@ void ShapeWidget::PaintViewRect(const QRect& rect, gfx::Device* device) const
     const auto outline_color = rect.contains(mouse_pos_widget) ? gfx::Color::Green : gfx::Color::DarkGray;
     painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), model,
                  gfx::CreateMaterialFromColor(outline_color));
+
+    gfx::FRect text;
+    text.Move(5.0f, 5.0f);
+    text.Resize(rect.width() - 5.0f, 10.0f);
+    gfx::DrawTextRect(painter, name, "app://fonts/orbitron-medium.otf", 12, text,
+        gfx::Color::DarkGray, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
 
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 {
     const auto& rect = GetMainRenderRect();
+
+    const bool shift = mickey->modifiers() & Qt::ShiftModifier;
+    const bool ctrl = mickey->modifiers() & Qt::ControlModifier;
 
     if (rect.contains(mickey->pos()))
     {
@@ -1873,13 +1883,17 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
         {
             if (!mMouseTool)
             {
+                auto pick_mode = PickMode::Sticky;
+                if (shift)
+                    pick_mode = PickMode::Cycling;
+
                 const auto mesh_type = GetMeshType();
                 if (mesh_type == MeshType::Simple2DRenderMesh)
-                    PickVertex2D<gfx::Vertex2D>(point, width, height);
+                    PickVertex2D<gfx::Vertex2D>(point, width, height, pick_mode);
                 else if (mesh_type == MeshType::Simple2DShardEffectMesh)
-                    PickVertex2D<gfx::ShardVertex2D>(point, width, height);
+                    PickVertex2D<gfx::ShardVertex2D>(point, width, height, pick_mode);
                 else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
-                    PickVertex2D<gfx::Perceptual3DVertex>(point, width, height);
+                    PickVertex2D<gfx::Perceptual3DVertex>(point, width, height, pick_mode);
                 else BUG("Unhandled mesh type.");
             }
         }
@@ -1955,10 +1969,26 @@ void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
         view.height = height;
         mMouseTool->MouseMove(mickey, point, view);
     }
+    else
+    {
+        const auto mesh_type = GetMeshType();
+        if (mesh_type == MeshType::Simple2DRenderMesh)
+            HoverVertex2D<gfx::Vertex2D>(point, width, height);
+        else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+            HoverVertex2D<gfx::ShardVertex2D>(point, width, height);
+        else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+            HoverVertex2D<gfx::Perceptual3DVertex>(point, width, height);
+        else BUG("Unhandled mesh type.");
+    }
 }
 
 void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
 {
+    // try to filter out double clicks that happen when clicking
+    // to pick a vertex.
+    if (!mPickingCandidates.empty())
+        return;
+
     // find the vertex closes to the click point
     // use polygon winding order to figure out whether
     // the new vertex should come before or after the closest vertex
@@ -2024,10 +2054,10 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
     }
     else if (key->key() == Qt::Key_Delete)
     {
-        if (mVertexIndex < mState.builder->GetVertexCount())
+        if (mSelectedVertex < mState.builder->GetVertexCount())
         {
-            mState.table->EraseVertex(mVertexIndex);
-            mVertexIndex = 0xffffff;
+            mState.table->EraseVertex(mSelectedVertex);
+            mSelectedVertex = 0xffffff;
             ClearSelection(mUI.tableView);
         }
 
@@ -2090,9 +2120,9 @@ void ShapeWidget::PaintVertices2D(gfx::Painter& painter) const
         model.MoveTo(x, y);
         model.Translate(-7.5, -7.5);
 
-        if (mVertexIndex == i)
+        if (IsSelected(i))
         {
-            painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+            painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
             if (!mMouseTool)
             {
                 const auto time = fmod(base::GetTime(), 1.5) / 1.5;
@@ -2101,12 +2131,16 @@ void ShapeWidget::PaintVertices2D(gfx::Painter& painter) const
                 model.Resize(size, size);
                 model.MoveTo(x, y);
                 model.Translate(-size*0.5f, -size*0.5f);
-                painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+                painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
             }
+        }
+        else if (IsHovered(i))
+        {
+            painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Yellow));
         }
         else
         {
-            painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+            painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
         }
     }
 }
@@ -2142,9 +2176,9 @@ void ShapeWidget::PaintVertices25D(gfx::Painter& painter) const
         model.MoveTo(x, y);
         model.Translate(-7.5, -7.5);
 
-        if (mVertexIndex == i)
+        if (IsSelected(i))
         {
-            painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+            painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
 
             // local offset is normalized and expressed in multiples of the tile size.
             // so always remember to multiple the local offset by the desired tile size
@@ -2178,13 +2212,18 @@ void ShapeWidget::PaintVertices25D(gfx::Painter& painter) const
                 model.Resize(size, size);
                 model.MoveTo(x, y);
                 model.Translate(-size*0.5f, -size*0.5f);
-                painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+                painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
             }
+        }
+        else if (IsHovered(i))
+        {
+            painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Yellow));
         }
         else
         {
-            painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+            painter.Draw(gfx::Circle(gfx::Circle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
         }
+
         if (show_normals)
         {
             const auto normal = glm::normalize(gfx::ToVec(vertex.aWorldNormal));
@@ -2201,14 +2240,69 @@ void ShapeWidget::PaintVertices25D(gfx::Painter& painter) const
 
 
 template<typename VertexType>
-void ShapeWidget::PickVertex2D(const QPoint& pick_point, float width, float height)
+void ShapeWidget::PickVertex2D(const QPoint& pick_point, float width, float height, PickMode mode)
 {
+    DEBUG("Pick vertex with mode '%1'", mode);
+
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
     using ToolType = MoveVertex2DTool<VertexType>;
 
     const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
 
-    const auto current_index = mVertexIndex;
+    const auto previous_selection = mSelectedVertex;
+
+    mSelectedVertex = InvalidIndex;
+    if (mPickingCandidates.empty())
+        return;
+
+    if (mode == PickMode::Normal || mode == PickMode::Sticky)
+    {
+        if (mode == PickMode::Sticky)
+        {
+            for (const auto& p : mPickingCandidates)
+            {
+                if (p.index == previous_selection)
+                {
+                    mSelectedVertex = p.index;
+                    break;
+                }
+            }
+        }
+        if (mSelectedVertex == InvalidIndex)
+        {
+            auto smallest_distance = mPickingCandidates[0].distance;
+            mSelectedVertex = mPickingCandidates[0].index;
+            for (size_t i=1; i<mPickingCandidates.size(); ++i)
+            {
+                if (mPickingCandidates[i].distance < smallest_distance)
+                {
+                    smallest_distance = mPickingCandidates[i].distance;
+                    mSelectedVertex = mPickingCandidates[i].index;
+                }
+            }
+        }
+    }
+    else if (mode == PickMode::Cycling)
+    {
+        const auto index = (mPickingIndex++) % mPickingCandidates.size();
+        mSelectedVertex = mPickingCandidates[index].index;
+    }
+    ASSERT(mSelectedVertex != InvalidIndex);
+    ASSERT(mSelectedVertex < builder->GetVertexCount());
+
+    mMouseTool = std::make_unique<ToolType>(mState, mSelectedVertex);
+    SelectRow(mUI.tableView, mSelectedVertex);
+}
+
+template<typename VertexType>
+void ShapeWidget::HoverVertex2D(const QPoint& pick_point, float width, float height)
+{
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+
+    const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
+
+    mPickingCandidates.clear();
+    mPickingIndex = 0;
 
     // select a vertex based on proximity to the click point.
     for (size_t i=0; i<mState.builder->GetVertexCount(); ++i)
@@ -2217,19 +2311,20 @@ void ShapeWidget::PickVertex2D(const QPoint& pick_point, float width, float heig
         const auto x = width * vertex.aPosition.x;
         const auto y = height * -vertex.aPosition.y;
         const auto r = QPoint(x, y) - pick_point;
-        const auto l = std::sqrt(r.x() * r.x() + r.y() * r.y());
-        if (l <= 10)
+        const auto distance = std::sqrt(r.x() * r.x() + r.y() * r.y());
+        if (distance <= 10.0f)
         {
-            mVertexIndex = i;
-            // only start the vertex move tool if clicking on the previously
-            // selected vertex.this reduces accidental vertex moves on tool
-            // activation when the goal was to actually pick a different vertex.
-            if (current_index == mVertexIndex)
-                mMouseTool = std::make_unique<ToolType>(mState, mVertexIndex);
-            SelectRow(mUI.tableView, mVertexIndex);
-            break;
+            PickCandidate pc;
+            pc.distance = distance;
+            pc.index = i;
+            pc.tangent = atan2(r.y(), r.x());
+            mPickingCandidates.push_back(pc);
         }
     }
+
+    std::sort(mPickingCandidates.begin(), mPickingCandidates.end(), [](const auto& a, const auto& b) {
+        return a.tangent < b.tangent;
+    });
 }
 
 template<typename VertexType>
@@ -2300,7 +2395,7 @@ void ShapeWidget::InsertVertex2D(const QPoint& click_point, float width, float h
 template<typename VertexType>
 void ShapeWidget::ScrollAxonometricVertex(const QWheelEvent* wheel)
 {
-    if (mVertexIndex >= mState.builder->GetVertexCount())
+    if (mSelectedVertex >= mState.builder->GetVertexCount())
         return;
 
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
@@ -2328,7 +2423,7 @@ void ShapeWidget::ScrollAxonometricVertex(const QWheelEvent* wheel)
 
     const auto d = -step * num_steps.y();
 
-    auto& vertex = builder->GetVertex(mVertexIndex);
+    auto& vertex = builder->GetVertex(mSelectedVertex);
 
     if (base::Contains(mHotkeysPressed, Hotkey::KeyX))
         vertex.aLocalOffset.x += d;
@@ -2342,7 +2437,7 @@ void ShapeWidget::ScrollAxonometricVertex(const QWheelEvent* wheel)
     if (vertex.aLocalOffset.z > 0.0f)
         vertex.aLocalOffset.z = 0.0f;
 
-    mState.table->RefreshVertex(mVertexIndex);
+    mState.table->RefreshVertex(mSelectedVertex);
 }
 
 void ShapeWidget::ScrollAxonometricLight(const QWheelEvent* wheel)
@@ -2433,13 +2528,13 @@ void ShapeWidget::CreateMeshBuilder()
     QObject::connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
         [this](const QItemSelection&, const QItemSelection&) {
             const auto row = GetSelectedRow(mUI.tableView);
-            mVertexIndex = row;
+            mSelectedVertex = row;
         });
 }
 
 void ShapeWidget::SetSelectedVertexNormal(const glm::vec3& normal)
 {
-    if (mVertexIndex >= mState.builder->GetVertexCount())
+    if (mSelectedVertex >= mState.builder->GetVertexCount())
         return;
 
     const auto mesh_type = GetMeshType();
@@ -2447,10 +2542,10 @@ void ShapeWidget::SetSelectedVertexNormal(const glm::vec3& normal)
     {
         using BuilderType = gfx::tool::PolygonBuilder<gfx::Perceptual3DVertex>;
         auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
-        auto& vertex = builder->GetVertex(mVertexIndex);
+        auto& vertex = builder->GetVertex(mSelectedVertex);
         vertex.aWorldNormal = gfx::ToVec(normal);
 
-        mState.table->RefreshVertex(mVertexIndex);
+        mState.table->RefreshVertex(mSelectedVertex);
     }
 }
 
@@ -2535,6 +2630,21 @@ QRect ShapeWidget::GetViewRect(ViewType view) const
         return GetMainRenderRect();
     else BUG("Missing view rect mapping handling");
     return QRect();
+}
+
+bool ShapeWidget::IsHovered(size_t index) const
+{
+    for (const auto& candidate : mPickingCandidates)
+    {
+        if (candidate.index == index)
+            return true;
+    }
+    return false;
+}
+
+bool ShapeWidget::IsSelected(size_t index) const
+{
+    return mSelectedVertex == index;
 }
 
 } // namespace
