@@ -24,6 +24,9 @@
 
 namespace gfx
 {
+    using BufferUsage = dev::BufferUsage;
+    using Culling = dev::Culling;
+
     enum class MeshEffectType : uint32_t {
         ShardedMeshExplosion = 1
     };
@@ -77,12 +80,16 @@ namespace gfx
         Blinking  = 0x2
     };
 
-    using BufferUsage = dev::BufferUsage;
-
     // Style of the drawable's geometry determines how the geometry
     // is to be rasterized.
     enum class DrawPrimitive {
-        Points, Lines, Triangles
+        // Rasterize points
+        Points,
+        // Rasterize lines.
+        Lines,
+        // Rasterize triangles, including triangles
+        // triangle fans and triangle strips.
+        Triangles
     };
 
     // broad category of drawables for describing the semantic

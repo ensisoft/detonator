@@ -14,11 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
 #include "base/math.h"
 #include "base/format.h"
 #include "base/logging.h"
+#include "base/hash.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
+#include "graphics/device.h"
 #include "graphics/effect_drawable.h"
 #include "graphics/texture.h"
 #include "graphics/utility.h"
