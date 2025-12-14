@@ -25,6 +25,7 @@
 
 #include "base/assert.h"
 #include "graphics/vertex.h"
+#include "graphics/vertex_buffer.h"
 #include "graphics/enum.h"
 
 namespace gfx
