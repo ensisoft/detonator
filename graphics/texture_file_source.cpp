@@ -17,7 +17,7 @@
 #include "base/logging.h"
 #include "data/writer.h"
 #include "data/reader.h"
-#include "graphics/algo.h"
+#include "graphics/device_algo.h"
 #include "graphics/device.h"
 #include "graphics/texture.h"
 #include "graphics/image.h"

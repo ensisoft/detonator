@@ -31,7 +31,7 @@
 #include "base/logging.h"
 #include "base/utility.h"
 #include "base/json.h"
-#include "graphics/algo.h"
+#include "graphics/device_algo.h"
 #include "graphics/framebuffer.h"
 #include "graphics/drawing.h"
 #include "graphics/painter.h"

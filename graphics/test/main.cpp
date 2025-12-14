@@ -30,7 +30,7 @@
 #include "data/json.h"
 #include "data/io.h"
 #include "device/device.h"
-#include "graphics/algo.h"
+#include "graphics/device_algo.h"
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/material.h"

@@ -34,7 +34,7 @@
 #include "editor/app/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
-#include "graphics/algo.h"
+#include "graphics/device_algo.h"
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
