@@ -45,6 +45,7 @@ namespace gfx
         std::string GetGeometryId(const Environment& env) const override;
         bool Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const override;
         Usage GetGeometryUsage() const override;
+        SpatialMode GetSpatialMode() const override;
         size_t GetGeometryHash() const override;
     protected:
         DebugDrawableBase(const Drawable* drawable, Feature feature) noexcept

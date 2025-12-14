@@ -71,12 +71,11 @@ namespace gfx
         std::string GetShaderName(const Environment& environment) const override;
         std::string GetGeometryId(const Environment& environment) const override;
         bool Construct(const Environment& environment, Device&, Geometry::CreateArgs& create) const override;
-        DrawPrimitive GetDrawPrimitive() const override
-        { return DrawPrimitive::Lines; }
-        Usage GetGeometryUsage() const override
-        { return Usage::Stream; }
-        Type GetType() const override
-        { return Type::LineBatch2D; }
+
+        DrawPrimitive GetDrawPrimitive() const override;
+        SpatialMode GetSpatialMode() const override;
+        Usage GetGeometryUsage() const override;
+        Type GetType() const override;
     private:
         std::vector<Line> mLines;
     };
@@ -112,12 +111,11 @@ namespace gfx
         std::string GetShaderName(const Environment& environment) const override;
         std::string GetGeometryId(const Environment& environment) const override;
         bool Construct(const Environment& environment, Device&, Geometry::CreateArgs& create) const override;
-        DrawPrimitive GetDrawPrimitive() const override
-        { return DrawPrimitive::Lines; }
-        Usage GetGeometryUsage() const override
-        { return Usage::Stream; }
-        Type GetType() const override
-        { return Type::LineBatch3D; }
+
+        DrawPrimitive GetDrawPrimitive() const override;
+        SpatialMode GetSpatialMode() const override;
+        Usage GetGeometryUsage() const override;
+        Type GetType() const override;
     private:
         std::vector<Line> mLines;
     };

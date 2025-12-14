@@ -42,18 +42,11 @@ namespace gfx
         std::string GetGeometryId(const Environment& env) const override;
         bool Construct(const Environment& env, Device&, Geometry::CreateArgs& geometry) const override;
 
-        Type GetType() const override
-        {
-            return Type::GuideGrid;
-        }
-        DrawPrimitive GetDrawPrimitive() const override
-        {
-            return DrawPrimitive::Lines;
-        }
-        Usage GetGeometryUsage() const override
-        {
-            return Usage::Static;
-        }
+        Type GetType() const override;
+        DrawPrimitive GetDrawPrimitive() const override;
+        SpatialMode GetSpatialMode() const override;
+        Usage GetGeometryUsage() const override;
+
     private:
         unsigned mNumVerticalLines = 1;
         unsigned mNumHorizontalLines = 1;

@@ -289,7 +289,12 @@ std::string WavefrontMesh::GetGeometryId(const Environment& env) const
     return mFileUri;
 }
 
-DrawPrimitive WavefrontMesh::GetDrawPrimitive() const
+SpatialMode WavefrontMesh::GetSpatialMode() const
+{
+    return SpatialMode::True3D;
+}
+
+Drawable::DrawPrimitive WavefrontMesh::GetDrawPrimitive() const
 {
     return DrawPrimitive::Triangles;
 }

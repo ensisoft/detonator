@@ -243,6 +243,41 @@ void PolygonMeshClass::ClearContent()
     mContentHash = 0;
 }
 
+SpatialMode PolygonMeshClass::GetSpatialMode() const
+{
+    if (mMeshType == MeshType::Dimetric2DRenderMesh ||
+        mMeshType == MeshType::Isometric2DRenderMesh)
+        return SpatialMode::Perceptual3D;
+    if (mMeshType == MeshType::Model3DRenderMesh ||
+        mMeshType == MeshType::Simple3DRenderMesh)
+        return SpatialMode::True3D;
+    if (mMeshType == MeshType::Simple2DRenderMesh ||
+        mMeshType == MeshType::Simple2DShardEffectMesh)
+        return SpatialMode::Flat2D;
+
+    BUG("Missing mesh spatial mode mapping.");
+    return SpatialMode::Flat2D;
+}
+
+DrawableClass::Type PolygonMeshClass::GetType() const
+{
+    return Type::Polygon;
+}
+
+std::string PolygonMeshClass::GetId() const
+{
+    return mId;
+}
+std::string PolygonMeshClass::GetName() const
+{
+    return mName;
+}
+
+void PolygonMeshClass::SetName(const std::string& name)
+{
+    mName = name;
+}
+
 std::size_t PolygonMeshClass::GetHash() const
 {
     size_t hash = 0;
@@ -673,6 +708,21 @@ Drawable::DrawCmd PolygonMeshInstance::GetDrawCmd() const
 
     mError = true;
     return {0, 0};
+}
+
+SpatialMode PolygonMeshInstance::GetSpatialMode() const
+{
+    return mClass->GetSpatialMode();
+}
+
+Drawable::DrawPrimitive PolygonMeshInstance::GetDrawPrimitive() const
+{
+    return DrawPrimitive::Triangles;
+}
+
+Drawable::Type PolygonMeshInstance::GetType() const
+{
+    return Type::Polygon;
 }
 
 Drawable::Usage PolygonMeshInstance::GetGeometryUsage() const

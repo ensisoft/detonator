@@ -64,6 +64,8 @@ namespace gfx
         Triangle
     };
 
+    SpatialMode GetSimpleShapeSpatialMode(SimpleShapeType shape);
+
     namespace detail {
         using Environment = Drawable::Environment;
         using Style = SimpleShapeStyle;
@@ -211,6 +213,7 @@ namespace gfx
         std::unique_ptr<DrawableClass> Copy() const override
         { return std::make_unique<SimpleShapeClass>(*this); }
         std::size_t GetHash() const override;
+        SpatialMode GetSpatialMode() const override;;
         void IntoJson(data::Writer& data) const override;
         bool FromJson(const data::Reader& data) override;
     private:
@@ -319,6 +322,7 @@ namespace gfx
         Type GetType() const override;
         DrawPrimitive GetDrawPrimitive() const override;
         Usage GetGeometryUsage() const override;
+        SpatialMode GetSpatialMode() const override;
 
         const DrawableClass* GetClass() const override
         { return mClass.get(); }
@@ -364,6 +368,7 @@ namespace gfx
         Type GetType() const override;
         DrawPrimitive GetDrawPrimitive() const override;
         Usage GetGeometryUsage() const override;
+        SpatialMode GetSpatialMode() const override;
 
         Shape GetShape() const noexcept
         { return mShape; }
@@ -517,19 +522,13 @@ namespace gfx
     using Sector         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Sector>;
 
 
-    inline bool Is3DShape(SimpleShapeType shape) noexcept
+    inline bool Is3DShape(const SimpleShapeType shape) noexcept
     {
-        if (shape == SimpleShapeType::Cone ||
-            shape == SimpleShapeType::Cube ||
-            shape == SimpleShapeType::Cylinder ||
-            shape == SimpleShapeType::Pyramid ||
-            shape == SimpleShapeType::Sphere)
-            return true;
-        return false;
+        return GetSimpleShapeSpatialMode(shape) == SpatialMode::True3D;
     }
-    inline bool Is2DShape(SimpleShapeType shape) noexcept
+    inline bool Is2DShape(const SimpleShapeType shape) noexcept
     {
-        return !Is3DShape(shape);
+        return GetSimpleShapeSpatialMode(shape) == SpatialMode::Flat2D;
     }
 
     inline SimpleShapeType GetSimpleShapeType(const Drawable& drawable)

@@ -317,14 +317,13 @@ namespace gfx
             mParams = std::make_shared<Params>(params);
         }
 
-        Type GetType() const override
-        { return DrawableClass::Type::ParticleEngine; }
-        std::string GetId() const override
-        { return mId; }
-        std::string GetName() const override
-        { return mName; };
-        void SetName(const std::string& name) override
-        { mName = name; }
+        void SetName(const std::string& name) override;
+
+        Type GetType() const override;
+        SpatialMode GetSpatialMode() const override;
+
+        std::string GetId() const override;
+        std::string GetName() const override;
         std::size_t GetHash() const override;
         void IntoJson(data::Writer& data) const override;
         bool FromJson(const data::Reader& data) override;
@@ -401,12 +400,12 @@ namespace gfx
         bool IsAlive() const override;
         void Restart(const Environment& env) override;
         void Execute(const Environment& env, const Command& cmd) override;
-        DrawPrimitive  GetDrawPrimitive() const override;
 
-        Type GetType() const override
-        { return Type::ParticleEngine; }
-        Usage GetGeometryUsage() const override
-        { return Usage::Stream; }
+        DrawPrimitive  GetDrawPrimitive() const override;
+        SpatialMode GetSpatialMode() const override;;
+        Type GetType() const override;
+        Usage GetGeometryUsage() const override;
+
         const DrawableClass* GetClass() const override
         { return mClass.get(); }
 

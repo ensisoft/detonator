@@ -109,6 +109,11 @@ Drawable::Usage DebugDrawableBase::GetGeometryUsage() const
     return mDrawable->GetGeometryUsage();
 }
 
+SpatialMode DebugDrawableBase::GetSpatialMode() const
+{
+    return mDrawable->GetSpatialMode();
+}
+
 size_t DebugDrawableBase::GetGeometryHash() const
 {
     return mDrawable->GetGeometryHash();
