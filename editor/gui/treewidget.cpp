@@ -35,6 +35,8 @@
 #  include <QDebug>
 #include "warnpop.h"
 
+#include <algorithm>
+
 #include "treewidget.h"
 
 namespace {
@@ -137,7 +139,7 @@ TreeWidget::TreeWidget(QWidget* parent) : QAbstractScrollArea(parent)
     // itemheight is determined by the default font height.
     QFont font;
     QFontMetrics fm(font);
-    mItemHeight = std::min(fm.height(), IconBoxSize);
+    mItemHeight = std::max(fm.height(), IconBoxSize);
 
     // need to set the focus policy in order to receive keyboard events.
     setFocusPolicy(Qt::StrongFocus);
