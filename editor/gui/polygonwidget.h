@@ -100,7 +100,7 @@ namespace gui
         void PaintEditScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device);
         void PaintLitAxonometricScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device) const;
         void Paint3DAxonometricScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device) const;
-        void PaintViewRect(const QRect& rect, gfx::Device* device) const;
+        void PaintViewRect(const QRect& rect, const app::AnyString& name, gfx::Device* device) const;
         void OnMousePress(QMouseEvent* mickey);
         void OnMouseRelease(QMouseEvent* mickey);
         void OnMouseMove(QMouseEvent* mickey);
@@ -115,8 +115,14 @@ namespace gui
         template<typename Vertex>
         void PaintVertices25D(gfx::Painter& painter) const;
 
+        enum class PickMode {
+            Normal, Cycling, Sticky
+        };
+
         template<typename Vertex>
-        void PickVertex2D(const QPoint& pick_point, float width, float height);
+        void PickVertex2D(const QPoint& pick_point, float width, float height, PickMode mode);
+        template<typename Vertex>
+        void HoverVertex2D(const QPoint& pick_point, float width, float height);
 
         template<typename Vertex>
         void InsertVertex2D(const QPoint& click_point, float width, float height);
@@ -141,6 +147,9 @@ namespace gui
         QRect GetLitRenderRect() const;
         QRect GetAxo3DRenderRect() const;
         QRect GetViewRect(ViewType view) const;
+
+        bool IsHovered(size_t index) const;
+        bool IsSelected(size_t index) const;
 
     private:
         Ui::ShapeWidget mUI;
@@ -185,8 +194,19 @@ namespace gui
         bool mPlaying = false;
         // current animation time.
         double mTime = 0.0f;
+        static constexpr auto InvalidIndex = 0xffffffff;
         // Index of the currently selected vertex.
-        std::size_t mVertexIndex = 0xffffff;
+        std::size_t mSelectedVertex = InvalidIndex;
+
+        struct PickCandidate {
+            float tangent = 0.0f;
+            float distance = 0.0f;
+            int index = 0;
+
+        };
+        std::vector<PickCandidate> mPickingCandidates;
+        std::size_t mPickingIndex = 0;
+
         std::optional<float> mPixelDistance2Dand3D;
 
         unsigned mAxonometricTextureWidth  = 0;
