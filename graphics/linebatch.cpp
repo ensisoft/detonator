@@ -74,6 +74,26 @@ bool LineBatch2D::Construct(const Environment& environment, Device&, Geometry::C
     return true;
 }
 
+Drawable::DrawPrimitive LineBatch2D::GetDrawPrimitive() const
+{
+    return DrawPrimitive::Lines;
+}
+
+SpatialMode LineBatch2D::GetSpatialMode() const
+{
+    return SpatialMode::Flat2D;
+}
+
+Drawable::Usage LineBatch2D::GetGeometryUsage() const
+{
+    return Usage::Stream;
+}
+
+Drawable::Type LineBatch2D::GetType() const
+{
+    return Type::LineBatch2D;
+}
+
 bool LineBatch3D::ApplyDynamicState(const Environment& environment, Device&, ProgramState& program, RasterState& state) const
 {
     program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
@@ -129,5 +149,24 @@ bool LineBatch3D::Construct(const Environment& environment, Device&, Geometry::C
     return true;
 }
 
+Drawable::DrawPrimitive LineBatch3D::GetDrawPrimitive() const
+{
+    return DrawPrimitive::Lines;
+}
+
+SpatialMode LineBatch3D::GetSpatialMode() const
+{
+    return SpatialMode::True3D;
+}
+
+Drawable::Usage LineBatch3D::GetGeometryUsage() const
+{
+    return Usage::Stream;
+}
+
+Drawable::Type LineBatch3D::GetType() const
+{
+    return Type::LineBatch3D;
+}
 
 } // namespace

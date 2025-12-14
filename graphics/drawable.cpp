@@ -25,7 +25,7 @@
 
 namespace gfx {
 
-DrawCategory DrawableClass::MapDrawableCategory(Type type)
+DrawCategory DrawableClass::MapDrawableCategory(Type type) noexcept
 {
     if (type == Type::ParticleEngine)
         return DrawCategory::Particles;
@@ -42,59 +42,6 @@ DrawCategory DrawableClass::MapDrawableCategory(Type type)
         return DrawCategory::Basic;
     BUG("Bug on draw category mapping based on drawable type.");
     return DrawCategory::Basic;
-}
-
-bool Is3DShape(const Drawable& drawable) noexcept
-{
-    const auto type = drawable.GetType();
-    if (type == Drawable::Type::Polygon)
-    {
-        if (const auto* instance = dynamic_cast<const PolygonMeshInstance*>(&drawable))
-        {
-            const auto mesh = instance->GetMeshType();
-            if (mesh == PolygonMeshInstance::MeshType::Simple3DRenderMesh ||
-                mesh == PolygonMeshInstance::MeshType::Model3DRenderMesh)
-                return true;
-        }
-    }
-
-    if (type != Drawable::Type::SimpleShape)
-        return false;
-    if (const auto* instance = dynamic_cast<const SimpleShapeInstance*>(&drawable))
-        return Is3DShape(instance->GetShape());
-    else if (const auto* instance = dynamic_cast<const SimpleShape*>(&drawable))
-        return Is3DShape(instance->GetShape());
-    else BUG("Unknown drawable shape type.");
-}
-
-bool Is3DShape(const DrawableClass& klass) noexcept
-{
-    const auto type = klass.GetType();
-    if (type == Drawable::Type::Polygon)
-    {
-        if (const auto* polygon = dynamic_cast<const PolygonMeshClass*>(&klass))
-        {
-            const auto mesh = polygon->GetMeshType();
-            if (mesh == PolygonMeshClass::MeshType::Simple3DRenderMesh ||
-                mesh == PolygonMeshClass::MeshType::Model3DRenderMesh)
-                return true;
-        }
-    }
-    if (type != DrawableClass::Type::SimpleShape)
-        return false;
-    if (const auto* simple = dynamic_cast<const SimpleShapeClass*>(&klass))
-        return Is3DShape(simple->GetShapeType());
-    else BUG("Unknown drawable shape type");
-}
-
-bool Is2DShape(const Drawable& drawable) noexcept
-{
-    return !Is3DShape(drawable);
-}
-
-bool Is2DShape(const DrawableClass& klass) noexcept
-{
-    return !Is3DShape(klass);
 }
 
 std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass)

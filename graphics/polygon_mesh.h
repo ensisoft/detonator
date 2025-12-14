@@ -140,14 +140,12 @@ namespace gfx
 
         void ClearContent();
 
-        Type GetType() const override
-        { return Type::Polygon; }
-        std::string GetId() const override
-        { return mId; }
-        std::string GetName() const override
-        { return mName; }
-        void SetName(const std::string& name) override
-        { mName = name; }
+        void SetName(const std::string& name) override;
+
+        SpatialMode GetSpatialMode() const override;
+        Type GetType() const override;
+        std::string GetId() const override;
+        std::string GetName() const override;
         std::size_t GetHash() const override;
         std::unique_ptr<DrawableClass> Clone() const override;
         std::unique_ptr<DrawableClass> Copy() const override;
@@ -224,12 +222,9 @@ namespace gfx
         void Update(const Environment& env, float dt) override;
 
         DrawCmd GetDrawCmd() const override;
-
-        DrawPrimitive GetDrawPrimitive() const override
-        { return DrawPrimitive::Triangles; }
-        Type GetType() const override
-        { return Type::Polygon; }
-
+        SpatialMode GetSpatialMode() const override;
+        DrawPrimitive GetDrawPrimitive() const override;
+        Type GetType() const override;
         Usage GetGeometryUsage() const override;
 
         size_t GetGeometryHash() const override;

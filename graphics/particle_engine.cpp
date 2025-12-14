@@ -581,6 +581,31 @@ std::unique_ptr<DrawableClass> ParticleEngineClass::Copy() const
     return std::make_unique<ParticleEngineClass>(*this);
 }
 
+void ParticleEngineClass::SetName(const std::string& name)
+{
+    mName = name;
+}
+
+Drawable::Type ParticleEngineClass::GetType() const
+{
+    return Type::ParticleEngine;
+}
+
+SpatialMode ParticleEngineClass::GetSpatialMode() const
+{
+    return SpatialMode::Flat2D;
+}
+
+std::string ParticleEngineClass::GetId() const
+{
+    return mId;
+}
+
+std::string ParticleEngineClass::GetName() const
+{
+    return mName;
+}
+
 std::size_t ParticleEngineClass::GetHash() const
 {
     size_t hash = 0;
@@ -1280,8 +1305,23 @@ Drawable::DrawPrimitive ParticleEngineInstance::GetDrawPrimitive() const
              p == ParticleEngineClass::DrawPrimitive::PartialLineBackward ||
              p == ParticleEngineClass::DrawPrimitive::PartialLineForward)
         return DrawPrimitive ::Lines;
-    else BUG("Bug on particle engine draw primitive.");
-    return DrawPrimitive::Points;
+
+    BUG("Bug on particle engine draw primitive.");
+}
+
+SpatialMode ParticleEngineInstance::GetSpatialMode() const
+{
+    return mClass->GetSpatialMode();
+}
+
+Drawable::Type ParticleEngineInstance::GetType() const
+{
+    return Type::ParticleEngine;
+}
+
+Drawable::Usage ParticleEngineInstance::GetGeometryUsage() const
+{
+    return Usage::Stream;
 }
 
 } // namespace

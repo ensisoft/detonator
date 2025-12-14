@@ -123,4 +123,25 @@ namespace gfx
         Int, Float, Vec2, Vec3, Vec4, Color, String
     };
 
+    // Determines the drawable's spatial dimensionality
+    enum class SpatialMode {
+        // The drawable is a proper 3D shape with dimensionality
+        // across three axes (X, Y, Z). These are cubes, spheres,
+        // and other true 3D models.
+        True3D,
+
+        // The drawable is a hybrid 2D/3D shape. It is typically
+        // associated with a pre-rendered texture that visually
+        // represents a 3D object, while also carrying some 3D
+        // spatial data to support features such as dynamic
+        // lighting. These are typically isometric or dimetric
+        // tiles with perceptual depth.
+        Perceptual3D,
+
+        // The drawable is a purely 2D shape with dimensionality
+        // only across the X and Y axes. These include rectangles,
+        // circles, and other flat primitives.
+        Flat2D
+    };
+
 } // namespace

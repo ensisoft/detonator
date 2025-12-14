@@ -1265,8 +1265,48 @@ void ConstructSimpleShape(const SimpleShapeArgs& args,
     else BUG("Missing geometry.");
 }
 
-
 } // namespace detail
+
+SpatialMode GetSimpleShapeSpatialMode(SimpleShapeType shape)
+{
+    // 2D shapes
+    switch (shape)
+    {
+        case SimpleShapeType::Arrow:             return SpatialMode::Flat2D;
+        case SimpleShapeType::ArrowCursor:       return SpatialMode::Flat2D;
+        case SimpleShapeType::BlockCursor:       return SpatialMode::Flat2D;
+        case SimpleShapeType::Capsule:           return SpatialMode::Flat2D;
+        case SimpleShapeType::Circle:            return SpatialMode::Flat2D;
+        case SimpleShapeType::IsoscelesTriangle: return SpatialMode::Flat2D;
+        case SimpleShapeType::Parallelogram:     return SpatialMode::Flat2D;
+        case SimpleShapeType::Rectangle:         return SpatialMode::Flat2D;
+        case SimpleShapeType::RightTriangle:     return SpatialMode::Flat2D;
+        case SimpleShapeType::RoundRect:         return SpatialMode::Flat2D;
+        case SimpleShapeType::Sector:            return SpatialMode::Flat2D;
+        case SimpleShapeType::SemiCircle:        return SpatialMode::Flat2D;
+        case SimpleShapeType::StaticLine:        return SpatialMode::Flat2D;
+        case SimpleShapeType::Trapezoid:         return SpatialMode::Flat2D;
+        case SimpleShapeType::Triangle:          return SpatialMode::Flat2D;
+        default: break;
+    }
+
+    // 3D shapes
+    switch (shape)
+    {
+        case SimpleShapeType::Cone:              return SpatialMode::True3D;
+        case SimpleShapeType::Cube:              return SpatialMode::True3D;
+        case SimpleShapeType::Cylinder:          return SpatialMode::True3D;
+        case SimpleShapeType::Pyramid:           return SpatialMode::True3D;
+        case SimpleShapeType::Sphere:            return SpatialMode::True3D;
+        default: break;
+    }
+
+    // 4D shapes
+    // ... just kidding there are no 4D shapes.
+
+    BUG("Missing simple shape spatial mode mapping.");
+    return SpatialMode::Flat2D;
+}
 
 std::size_t SimpleShapeClass::GetHash() const
 {
@@ -1277,6 +1317,12 @@ std::size_t SimpleShapeClass::GetHash() const
     hash = base::hash_combine(hash, mArgs);
     return hash;
 }
+
+SimpleShapeClass::SpatialMode SimpleShapeClass::GetSpatialMode() const
+{
+    return GetSimpleShapeSpatialMode(mShape);
+}
+
 void SimpleShapeClass::IntoJson(data::Writer& data) const
 {
     data.Write("id", mId);
@@ -1396,6 +1442,11 @@ Drawable::DrawPrimitive SimpleShapeInstance::GetDrawPrimitive() const
 Drawable::Usage SimpleShapeInstance::GetGeometryUsage() const
 {
     return Usage::Static;
+}
+
+SpatialMode SimpleShapeInstance::GetSpatialMode() const
+{
+    return mClass->GetSpatialMode();
 }
 
 bool SimpleShapeInstance::ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
@@ -1544,6 +1595,11 @@ Drawable::DrawPrimitive SimpleShape::GetDrawPrimitive() const
 Drawable::Usage SimpleShape::GetGeometryUsage() const
 {
     return Usage::Static;
+}
+
+SpatialMode SimpleShape::GetSpatialMode() const
+{
+    return GetSimpleShapeSpatialMode(mShape);
 }
 
 

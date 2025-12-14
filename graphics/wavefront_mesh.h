@@ -49,6 +49,7 @@ namespace gfx
         std::string GetShaderName(const Environment &env) const override;
         std::string GetGeometryId(const Environment &env) const override;
 
+        SpatialMode GetSpatialMode() const override;
         DrawPrimitive GetDrawPrimitive() const override;
         Type GetType() const override;
     private:

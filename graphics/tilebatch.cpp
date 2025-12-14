@@ -107,8 +107,8 @@ std::string TileBatch::GetShaderId(const Environment& env) const
         return "square-tile-batch-program";
     else if (shape == TileShape::Rectangle)
         return "rectangle-tile-batch-program";
-    else BUG("Missing tile batch shader id.");
-    return "";
+
+    BUG("Missing tile batch shader id.");
 }
 
 std::string TileBatch::GetShaderName(const Environment& env) const
@@ -119,8 +119,8 @@ std::string TileBatch::GetShaderName(const Environment& env) const
         return "SquareTileBatchShader";
     else if (shape == TileShape::Rectangle)
         return "RectangleTileBatchShader";
-    else BUG("Missing tile batch shader name.");
-    return "";
+
+    BUG("Missing tile batch shader name.");
 }
 
 std::string TileBatch::GetGeometryId(const Environment& env) const
@@ -189,7 +189,6 @@ bool TileBatch::Construct(const Environment& env, Device&, Geometry::CreateArgs&
     return true;
 }
 
-
 Drawable::DrawPrimitive TileBatch::GetDrawPrimitive() const
 {
     const auto shape = ResolveTileShape();
@@ -197,8 +196,23 @@ Drawable::DrawPrimitive TileBatch::GetDrawPrimitive() const
         return DrawPrimitive::Points;
     else if (shape == TileShape::Rectangle)
         return DrawPrimitive::Triangles;
-    else BUG("Unknown tile batch tile shape");
-    return DrawPrimitive::Points;
+
+    BUG("Unknown tile batch tile shape");
+}
+
+Drawable::Type TileBatch::GetType() const
+{
+    return Type::TileBatch;
+}
+
+Drawable::Usage TileBatch::GetGeometryUsage() const
+{
+    return Usage::Stream;
+}
+
+SpatialMode TileBatch::GetSpatialMode() const
+{
+    return SpatialMode::Flat2D;
 }
 
 } // namespace

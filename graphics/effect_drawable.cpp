@@ -195,13 +195,19 @@ Drawable::Usage EffectDrawable::GetGeometryUsage() const
     return mDrawable->GetGeometryUsage();
 }
 
-DrawPrimitive EffectDrawable::GetDrawPrimitive() const
+Drawable::DrawPrimitive EffectDrawable::GetDrawPrimitive() const
 {
     if (!mEnabled)
         return mDrawable->GetDrawPrimitive();
 
     return DrawPrimitive::Triangles;
 }
+
+SpatialMode EffectDrawable::GetSpatialMode() const
+{
+    return mDrawable->GetSpatialMode();
+}
+
 bool EffectDrawable::IsAlive() const
 {
     if (!mEnabled)

@@ -64,11 +64,9 @@ namespace gfx
         bool Construct(const Environment& env, Device& device, Geometry::CreateArgs& create) const override;
 
         DrawPrimitive GetDrawPrimitive() const override;
-
-        Type GetType() const override
-        { return Type::TileBatch; }
-        Usage GetGeometryUsage() const override
-        { return Usage::Stream; }
+        Type GetType() const override;
+        Usage GetGeometryUsage() const override;
+        SpatialMode GetSpatialMode() const override;
 
         inline void AddTile(const Tile& tile)
         { mTiles.push_back(tile); }

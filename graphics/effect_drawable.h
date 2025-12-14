@@ -77,6 +77,7 @@ namespace gfx
         size_t GetGeometryHash() const override;
         Usage GetGeometryUsage() const override;
         DrawPrimitive GetDrawPrimitive() const override;
+        SpatialMode GetSpatialMode() const override;
         bool IsAlive() const override;
         Type GetType() const override;
         Usage GetInstanceUsage(const InstancedDraw& draw) const override;

@@ -117,6 +117,24 @@ bool Grid::Construct(const Environment&, Device&, Geometry::CreateArgs& create) 
     return true;
 }
 
+Drawable::Type Grid::GetType() const
+{
+    return Type::GuideGrid;
+}
 
+Drawable::DrawPrimitive Grid::GetDrawPrimitive() const
+{
+    return DrawPrimitive::Lines;
+}
+
+SpatialMode Grid::GetSpatialMode() const
+{
+    return SpatialMode::Flat2D;
+}
+
+Drawable::Usage Grid::GetGeometryUsage() const
+{
+    return Usage::Static;
+}
 
 } // namespace
