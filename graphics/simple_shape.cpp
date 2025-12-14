@@ -14,17 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
 #include "warnpush.h"
 #  include <glm/glm.hpp>
 #include "warnpop.h"
 
 #include <cmath>
 #include <cstdio>
-
 #include <vector>
 
 #include "base/format.h"
 #include "base/logging.h"
+#include "base/hash.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "graphics/simple_shape.h"
