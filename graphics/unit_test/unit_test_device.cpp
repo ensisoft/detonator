@@ -24,7 +24,7 @@
 
 #include "base/test_minimal.h"
 #include "device/device.h"
-#include "graphics/algo.h"
+#include "graphics/device_algo.h"
 #include "graphics/color4f.h"
 #include "graphics/device.h"
 #include "graphics/program.h"

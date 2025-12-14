@@ -14,10 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
 #include "base/logging.h"
 #include "data/reader.h"
 #include "data/writer.h"
-#include "graphics/algo.h"
+#include "graphics/device_algo.h"
 #include "graphics/device.h"
 #include "graphics/texture.h"
 #include "graphics/texture_bitmap_generator_source.h"

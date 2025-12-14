@@ -286,12 +286,12 @@ add_library(DataLib
 add_library(GfxLib
     device/opengles.cpp
     device/vertex.cpp
-    graphics/algo.cpp
     graphics/bitmap.cpp
     graphics/bitmap_noise.cpp
     graphics/debug_drawable.cpp
     graphics/effect_drawable.cpp
     graphics/device.cpp
+    graphics/device_algo.cpp
     graphics/device_framebuffer.cpp
     graphics/device_geometry.cpp
     graphics/device_instance.cpp

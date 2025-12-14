@@ -20,12 +20,11 @@
 #  include <glm/gtc/type_ptr.hpp>
 #include "warnpop.h"
 
-
 #include <algorithm>
 
 #include "base/assert.h"
-#include "graphics/algo.h"
 #include "graphics/device.h"
+#include "graphics/device_algo.h"
 #include "graphics/geometry.h"
 #include "graphics/drawcmd.h"
 #include "graphics/program.h"

@@ -31,7 +31,7 @@
 #include "base/utility.h"
 #include "data/json.h"
 #include "engine/camera.h"
-#include "graphics/algo.h"
+#include "graphics/device_algo.h"
 #include "graphics/framebuffer.h"
 #include "graphics/material.h"
 #include "graphics/material_class.h"
