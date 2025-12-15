@@ -44,7 +44,7 @@ namespace gui
         Q_PROPERTY(QFrame::Shadow frameShadow READ GetFrameShadow WRITE SetFrameShadow DESIGNABLE true);
     public:
         explicit CollapsibleWidget(QWidget* parent = nullptr);
-        ~CollapsibleWidget();
+        ~CollapsibleWidget() override;
 
         QIcon GetIcon() const;
         void SetIcon(QIcon icon);
@@ -74,10 +74,10 @@ namespace gui
         void StateChanged(bool collapsed);
 
     protected:
-        virtual bool eventFilter(QObject* destination, QEvent* event) override;
-        virtual void focusInEvent(QFocusEvent* ford) override;
-        virtual void focusOutEvent(QFocusEvent* ford) override;
-        virtual bool focusNextPrevChild(bool next) override;
+        bool eventFilter(QObject* destination, QEvent* event) override;
+        void focusInEvent(QFocusEvent* ford) override;
+        void focusOutEvent(QFocusEvent* ford) override;
+        bool focusNextPrevChild(bool next) override;
 
     private slots:
         void on_collapsible_widget_button_clicked();
