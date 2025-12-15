@@ -114,6 +114,15 @@ namespace gfx {
 namespace gui
 {
 
+    // WARNING WARNING WARNING WARNING
+
+    // Collapsible widget will shit and barf and crash on some qt bug
+    // if there's nothing added to it. so therefore as a workaround
+    // there's a placeholder widget inside the custom uniforms collapsible
+    // widget to avoid this crash.
+
+    // WARNING WARNING WARNING WARNING
+
 MaterialWidget::MaterialWidget(app::Workspace* workspace)
 {
     DEBUG("Create MaterialWidget");
@@ -213,6 +222,13 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
     GetUserProperty(resource, "model_rotation", &mModelRotationTotal);
     GetUserProperty(resource, "light_position", &mLightPositionTotal);
+    GetUserProperty(resource, "base_property_group", mUI.baseProperties);
+    GetUserProperty(resource, "builtin_group", mUI.builtInProperties);
+    GetUserProperty(resource, "gradient_group", mUI.gradientMap);
+    GetUserProperty(resource, "custom_uniforms_group", mUI.customUniformsGroup);
+    GetUserProperty(resource, "texture_coordinates_group", mUI.textureCoords);
+    GetUserProperty(resource, "texture_filter_group", mUI.textureFilters);
+    GetUserProperty(resource, "texture_wrap_group", mUI.textureWrap);
 
     // Because of the Qt bugs related to having any effin sanity
     // when it comes to being able to have a splitter division
@@ -255,9 +271,11 @@ void MaterialWidget::InitializeSettings(const UISettings& settings)
 {
     SetValue(mUI.zoom, settings.zoom);
 
-    // open this by default for better user discovery
     QTimer::singleShot(10, this, [this]() {
-        mUI.spriteSplitter->setSizes({50, 150});
+        // open sprite splitter  by default for better user discovery
+        mUI.spriteSplitter->setSizes({80, 150});
+        // the usual fuckery
+        mUI.mainSplitter->setSizes({400, 500, 300});
     });
 }
 
@@ -267,8 +285,9 @@ void MaterialWidget::SetViewerMode()
     SetVisible(mUI.builtInProperties, false);
     SetVisible(mUI.gradientMap,       false);
     SetVisible(mUI.textureCoords,     false);
-    SetVisible(mUI.customUniforms,    false);
+    SetVisible(mUI.customUniformsGroup, false);
     SetVisible(mUI.textureFilters,    false);
+    SetVisible(mUI.textureWrap,       false);
     SetVisible(mUI.textureMaps,       false);
     SetVisible(mUI.textureProp,       false);
     SetVisible(mUI.textureRect,       false);
@@ -335,6 +354,13 @@ bool MaterialWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Material", mUI.mainSplitter);
     settings.LoadWidget("Material", mUI.rightSplitter);
     settings.LoadWidget("Material", mUI.spriteSplitter);
+    settings.LoadWidget("Material", mUI.baseProperties);
+    settings.LoadWidget("Material", mUI.builtInProperties);
+    settings.LoadWidget("Material", mUI.gradientMap);
+    settings.LoadWidget("Material", mUI.customUniformsGroup);
+    settings.LoadWidget("Material", mUI.textureCoords);
+    settings.LoadWidget("Material", mUI.textureFilters);
+    settings.LoadWidget("Material", mUI.textureWrap);
 
     mMaterial = gfx::MaterialClass::ClassFromJson(json);
     if (!mMaterial)
@@ -375,6 +401,14 @@ bool MaterialWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Material", mUI.mainSplitter);
     settings.SaveWidget("Material", mUI.rightSplitter);
     settings.SaveWidget("Material", mUI.spriteSplitter);
+    settings.SaveWidget("Material", mUI.baseProperties);
+    settings.SaveWidget("Material", mUI.builtInProperties);
+    settings.SaveWidget("Material", mUI.gradientMap);
+    settings.SaveWidget("Material", mUI.customUniformsGroup);
+    settings.SaveWidget("Material", mUI.textureCoords);
+    settings.SaveWidget("Material", mUI.textureFilters);
+    settings.SaveWidget("Material", mUI.textureWrap);
+
     if (auto* item = GetSelectedItem(mUI.textures))
         settings.SetValue("Material", "selected_item", (QString)GetItemId(item));
     return true;
@@ -555,6 +589,13 @@ void MaterialWidget::on_actionSave_triggered()
     SetUserProperty(resource, "sprite_splitter", mUI.spriteSplitter);
     SetUserProperty(resource, "model_rotation", mModelRotationTotal);
     SetUserProperty(resource, "light_position", mLightPositionTotal);
+    SetUserProperty(resource, "base_property_group", mUI.baseProperties);
+    SetUserProperty(resource, "builtin_group", mUI.builtInProperties);
+    SetUserProperty(resource, "gradient_group", mUI.gradientMap);
+    SetUserProperty(resource, "custom_uniforms_group", mUI.customUniformsGroup);
+    SetUserProperty(resource, "texture_coordinates_group", mUI.textureCoords);
+    SetUserProperty(resource, "texture_filter_group", mUI.textureFilters);
+    SetUserProperty(resource, "texture_wrap_group", mUI.textureWrap);
 
     if (const auto* previous_material = mWorkspace->FindResourceById(mMaterial->GetId()))
     {
@@ -1989,7 +2030,7 @@ void MaterialWidget::ClearCustomUniforms()
     // layout when a layout already exists on a widget but deleting it
     // doesn't work as expected either!!
     // https://stackoverflow.com/questions/4272196/qt-remove-all-widgets-from-layout
-    if (auto* layout = mUI.customUniforms->layout())
+    if (auto* layout = mUI.customUniformsContainer->layout())
     {
         while (auto* item = layout->takeAt(0))
         {
@@ -2027,9 +2068,9 @@ void MaterialWidget::ApplyShaderDescription()
 
     if (json_root.contains("uniforms"))
     {
-        if (!mUI.customUniforms->layout())
-            mUI.customUniforms->setLayout(new QGridLayout);
-        auto* layout = qobject_cast<QGridLayout*>(mUI.customUniforms->layout());
+        if (!mUI.customUniformsContainer->layout())
+            mUI.customUniformsContainer->setLayout(new QGridLayout);
+        auto* layout = qobject_cast<QGridLayout*>(mUI.customUniformsContainer->layout());
 
         auto uniforms = mMaterial->GetUniforms();
         auto widget_row = 0;
@@ -2537,7 +2578,8 @@ void MaterialWidget::ShowMaterialProperties()
     SetVisible(mUI.gradientMap,        false);
     SetVisible(mUI.textureCoords,      false);
     SetVisible(mUI.textureFilters,     false);
-    SetVisible(mUI.customUniforms,     false);
+    SetVisible(mUI.textureWrap,        false);
+    SetVisible(mUI.customUniformsGroup,false);
 
     SetVisible(mUI.lblDiffuseColor,     false);
     SetVisible(mUI.lblAmbientColor,     false);
@@ -2692,6 +2734,7 @@ void MaterialWidget::ShowMaterialProperties()
             SetVisible(mUI.activeMap,           true);
             SetVisible(mUI.textureCoords,       true);
             SetVisible(mUI.textureFilters,      true);
+            SetVisible(mUI.textureWrap,         true);
         }
         else if (mMaterial->GetType() == gfx::MaterialClass::Type::Tilemap)
         {
@@ -2712,6 +2755,7 @@ void MaterialWidget::ShowMaterialProperties()
             SetVisible(mUI.lblActiveTextureMap, true);
             SetVisible(mUI.activeMap,           true);
             SetVisible(mUI.textureFilters,      true);
+            SetVisible(mUI.textureWrap,         true);
             SetVisible(mUI.lblTileIndex,        true);
             SetVisible(mUI.kTileIndex,          true);
         }
@@ -2731,6 +2775,7 @@ void MaterialWidget::ShowMaterialProperties()
             SetVisible(mUI.particleBaseRotation,    true);
             SetVisible(mUI.particleRotationMode,    true);
             SetVisible(mUI.textureFilters,          true);
+            SetVisible(mUI.textureWrap,             true);
             SetVisible(mUI.lblActiveTextureMap,     true);
             SetVisible(mUI.activeMap,               true);
         }
@@ -2744,7 +2789,7 @@ void MaterialWidget::ShowMaterialProperties()
 
     if (!mUniforms.empty())
     {
-        SetVisible(mUI.customUniforms, true);
+        SetVisible(mUI.customUniformsGroup, true);
         for (auto* widget : mUniforms)
         {
             const auto& name = widget->GetName();
@@ -2767,6 +2812,7 @@ void MaterialWidget::ShowMaterialProperties()
     if (mMaterial->GetNumTextureMaps())
     {
         SetVisible(mUI.textureFilters, true);
+        SetVisible(mUI.textureWrap,    true);
         SetEnabled(mUI.textureMaps,    true);
 
         std::vector<ResourceListItem> maps;

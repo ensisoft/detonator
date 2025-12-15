@@ -54,7 +54,7 @@ namespace gui
     {
         Q_OBJECT
     public:
-        MaterialWidget(app::Workspace* workspace);
+        explicit MaterialWidget(app::Workspace* workspace);
         MaterialWidget(app::Workspace* workspace, const app::Resource& resource);
        ~MaterialWidget() override;;
 
