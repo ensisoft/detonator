@@ -61,6 +61,7 @@
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
+#include "graphics/polygon_mesh.h"
 #include "graphics/simple_shape.h"
 #include "graphics/text_material.h"
 #include "editor/app/eventlog.h"
@@ -1308,16 +1309,30 @@ public:
         const float hypotenuse = std::sqrt(diff.x * diff.x + diff.y * diff.y);
         const float width  = mAlwaysSquare ? hypotenuse : diff.x;
         const float height = mAlwaysSquare ? hypotenuse : diff.y;
+        const auto spatiality = mDrawable->GetSpatialMode();
 
         gfx::Transform model;
-        if (gfx::Is3DShape(*mDrawable))
+
+        if (spatiality == gfx::SpatialMode::True3D)
             model.RotateAroundX(gfx::FDegrees(180.0f));
 
         model.Scale(width, height, 100.0f);
         model.Translate(xpos, ypos);
 
-        if (gfx::Is3DShape(*mDrawable))
+        if (spatiality == gfx::SpatialMode::True3D)
             model.Translate(width*0.5f, height*0.5f);
+
+        if (auto* polygon = dynamic_cast<gfx::PolygonMeshInstance*>(mDrawable.get()))
+        {
+            const auto mesh_type = polygon->GetMeshType();
+            if (mesh_type == gfx::PolygonMeshClass::MeshType::Dimetric2DRenderMesh ||
+                mesh_type == gfx::PolygonMeshClass::MeshType::Isometric2DRenderMesh)
+            {
+                gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
+                geometry.enable_perceptual_3D = true;
+                polygon->SetPerceptualGeometry(geometry);
+            }
+        }
 
         entity.Draw(*mDrawable, model, *mMaterial);
 
@@ -1365,6 +1380,7 @@ public:
         const float hypotenuse = std::sqrt(diff.x * diff.x + diff.y * diff.y);
         const float width = mAlwaysSquare ? hypotenuse : diff.x;
         const float height = mAlwaysSquare ? hypotenuse : diff.y;
+        const auto spatiality = mDrawable->GetSpatialMode();
 
         game::DrawableItemClass item;
         item.SetMaterialId(mMaterialClass->GetId());
@@ -1372,10 +1388,10 @@ public:
         item.SetFlag(game::DrawableItemClass::Flags::DepthTest, true);
         item.SetFlag(game::DrawableItemClass::Flags::EnableLight, true);
         item.SetFlag(game::DrawableItemClass::Flags::EnableFog, true);
-        if (gfx::Is3DShape(*mDrawable))
-        {
+
+        if (spatiality == gfx::SpatialMode::True3D || 
+            spatiality == gfx::SpatialMode::Perceptual3D)
             item.SetDepth(100.0f);
-        }
 
         game::EntityNodeClass node;
         node.SetDrawable(item);

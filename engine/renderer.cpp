@@ -35,6 +35,7 @@
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
 #include "graphics/particle_engine.h"
+#include "graphics/polygon_mesh.h"
 #include "graphics/tilebatch.h"
 #include "graphics/debug_drawable.h"
 #include "graphics/effect_drawable.h"
@@ -1062,9 +1063,8 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
     {
         const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
-        const auto& shape = paint_node.drawable;
+        const auto spatial_mode = paint_node.drawable->GetSpatialMode();
         const auto size = entity_node.GetSize();
-        const auto is3d = Is3DShape(*shape);
 
         if (paint_node.material)
         {
@@ -1085,7 +1085,7 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
             model_transform.RotateAroundZ(paint_node.world_rotation);
             model_transform.Translate(paint_node.world_pos);
 
-        if (is3d)
+        if (spatial_mode == gfx::SpatialMode::True3D)
         {
             // model transform. keep in mind 3D only applies to the
             // renderable item (so it's visual only) thus the 3rd dimension
@@ -1097,7 +1097,7 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
                 model_transform.Translate(item->GetRenderTranslation());
 
         }
-        else
+        else if (spatial_mode == gfx::SpatialMode::Flat2D)
         {
             // model transform.
             model_transform.Push();
@@ -1106,6 +1106,14 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
                 model_transform.Rotate(item->GetRenderRotation());
                 model_transform.Translate(item->GetRenderTranslation());
         }
+        else if (spatial_mode == gfx::SpatialMode::Perceptual3D)
+        {
+            model_transform.Push();
+                model_transform.Scale(size.x, size.y, item->GetDepth());
+                model_transform.Rotate(item->GetRenderRotation());
+                model_transform.Translate(item->GetRenderTranslation());
+        }
+        else BUG("Missing spatial mode handling.");
 
         gfx::Transform world_transform;
         if (IsAxonometricProjection(projection))
@@ -1397,11 +1405,26 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
                 paint_node.drawable->Restart(env);
             }
         }
-        if (paint_node.drawable &&
-            paint_node.drawable->GetType() == gfx::Drawable::Type::SimpleShape)
+        if (paint_node.drawable)
         {
-            auto simple = std::static_pointer_cast<gfx::SimpleShapeInstance>(paint_node.drawable);
-            simple->SetStyle(gfx::SimpleShapeStyle::Solid);
+            const auto type = paint_node.drawable->GetType();
+            if (type == gfx::Drawable::Type::SimpleShape)
+            {
+                auto simple = std::static_pointer_cast<gfx::SimpleShapeInstance>(paint_node.drawable);
+                simple->SetStyle(gfx::SimpleShapeStyle::Solid);
+            }
+            else if (type == gfx::Drawable::Type::Polygon)
+            {
+                auto polygon = std::static_pointer_cast<gfx::PolygonMeshInstance>(paint_node.drawable);
+                const auto mesh_type = polygon->GetMeshType();
+                if (mesh_type == gfx::PolygonMeshInstance::MeshType::Dimetric2DRenderMesh ||
+                    mesh_type == gfx::PolygonMeshInstance::MeshType::Isometric2DRenderMesh)
+                {
+                    gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
+                    geometry.enable_perceptual_3D = true;
+                    polygon->SetPerceptualGeometry(geometry);
+                }
+            }
         }
 
         if (paint_node.drawable && paint_node.material)
@@ -1556,9 +1579,8 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
         const auto vertical_flip   = drawable->TestFlag(DrawableItemType::Flags::FlipVertically);
         const auto double_sided    = drawable->TestFlag(DrawableItemType::Flags::DoubleSided);
         const auto depth_test      = drawable->TestFlag(DrawableItemType::Flags::DepthTest);
-        const auto& shape = paint_node.drawable;
+        const auto spatial_mode    = paint_node.drawable->GetSpatialMode();
         const auto size = entity_node.GetSize();
-        const auto is3d = Is3DShape(*shape);
 
         gfx::Transform transform;
 
@@ -1584,7 +1606,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
         // Probably best way to fix this would be to make all the shapes consistent
         // and then fix the 2D drawing to do an offset adjustment to get simple 2D
         // drawing coordinates.
-        if (is3d)
+        if (spatial_mode == gfx::SpatialMode::True3D)
         {
             // model transform. keep in mind 3D only applies to the
             // renderable item (so it's visual only) thus the 3rd dimension
@@ -1595,7 +1617,7 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
                transform.Rotate(drawable->GetRenderRotation());
                transform.Translate(drawable->GetRenderTranslation());
         }
-        else
+        else if (spatial_mode == gfx::SpatialMode::Flat2D)
         {
             // model transform.
             transform.Push();
@@ -1604,6 +1626,14 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
                 transform.Rotate(drawable->GetRenderRotation());
                 transform.Translate(drawable->GetRenderTranslation());
         }
+        else if (spatial_mode == gfx::SpatialMode::Perceptual3D)
+        {
+            transform.Push();
+                transform.Scale(size.x, size.y, drawable->GetDepth());
+                transform.Rotate(drawable->GetRenderRotation());
+                transform.Translate(drawable->GetRenderTranslation());
+        }
+        else BUG("Missing spatial mode handling.");
 
         DrawPacket packet;
         packet.flags.set(DrawPacket::Flags::PP_Bloom, drawable->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
