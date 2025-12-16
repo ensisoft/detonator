@@ -229,7 +229,25 @@ const ShaderSource::ShaderBlock* ShaderSource::FindShaderBlock(const std::string
     return nullptr;
 }
 
-void ShaderSource::AddSource(std::string source)
+std::vector<ShaderSource::ShaderBlock> ShaderSource::ListImportantUniformBlocks() const
+{
+    std::vector<ShaderBlock> blocks;
+    if (const auto* uniforms = base::SafeFind(mShaderBlocks, "uniforms"))
+    {
+        for (const auto& block : *uniforms)
+        {
+            if (!block.data_decl.has_value())
+                continue;
+            const auto& decl = block.data_decl.value();
+            if (decl.decl_type == ShaderDataDeclarationType::UniformBlock ||
+                (decl.decl_type == ShaderDataDeclarationType::Uniform && decl.data_type == ShaderDataType::Sampler2DArray))
+                blocks.push_back(block);
+        }
+    }
+    return blocks;
+}
+
+void ShaderSource::AddSource(const std::string& source)
 {
     std::string line;
     std::stringstream ss(source);
@@ -242,7 +260,7 @@ void ShaderSource::AddSource(std::string source)
     }
 }
 
-void ShaderSource::AddPreprocessorDefinition(std::string name)
+void ShaderSource::AddPreprocessorDefinition(const std::string& name)
 {
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
@@ -250,7 +268,7 @@ void ShaderSource::AddPreprocessorDefinition(std::string name)
     mShaderBlocks["preprocessor"].push_back(std::move(block));
 }
 
-void ShaderSource::AddPreprocessorDefinition(std::string name, unsigned value)
+void ShaderSource::AddPreprocessorDefinition(const std::string& name, unsigned value)
 {
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
@@ -258,7 +276,7 @@ void ShaderSource::AddPreprocessorDefinition(std::string name, unsigned value)
     mShaderBlocks["preprocessor"].push_back(std::move(block));
 }
 
-void ShaderSource::AddPreprocessorDefinition(std::string name, int value)
+void ShaderSource::AddPreprocessorDefinition(const std::string& name, int value)
 {
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
@@ -266,7 +284,7 @@ void ShaderSource::AddPreprocessorDefinition(std::string name, int value)
     mShaderBlocks["preprocessor"].push_back(std::move(block));
 }
 
-void ShaderSource::AddPreprocessorDefinition(std::string name, float value)
+void ShaderSource::AddPreprocessorDefinition(const std::string& name, float value)
 {
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
@@ -274,7 +292,7 @@ void ShaderSource::AddPreprocessorDefinition(std::string name, float value)
     mShaderBlocks["preprocessor"].push_back(std::move(block));
 }
 
-void ShaderSource::AddPreprocessorDefinition(std::string name, std::string value)
+void ShaderSource::AddPreprocessorDefinition(const std::string& name, std::string value)
 {
     ShaderBlock block;
     block.type = ShaderBlockType::PreprocessorDefine;
@@ -282,7 +300,7 @@ void ShaderSource::AddPreprocessorDefinition(std::string name, std::string value
     mShaderBlocks["preprocessor"].push_back(std::move(block));
 }
 
-void ShaderSource::AddAttribute(std::string name, AttributeType type)
+void ShaderSource::AddAttribute(const std::string& name, AttributeType type)
 {
     std::string code;
     if (mVersion == Version::GLSL_100)
@@ -302,7 +320,7 @@ void ShaderSource::AddAttribute(std::string name, AttributeType type)
     block.data_decl = decl;
     mShaderBlocks["attributes"].push_back(std::move(block));
 }
-void ShaderSource::AddUniform(std::string name, UniformType type)
+void ShaderSource::AddUniform(const std::string& name, UniformType type)
 {
     ShaderDataDeclaration decl;
     decl.decl_type = ShaderDataDeclarationType::Uniform;
@@ -315,7 +333,7 @@ void ShaderSource::AddUniform(std::string name, UniformType type)
     block.data_decl = decl;
     mShaderBlocks["uniforms"].push_back(std::move(block));
 }
-void ShaderSource::AddConstant(std::string name, ShaderDataDeclarationValue value)
+void ShaderSource::AddConstant(const std::string& name, ShaderDataDeclarationValue value)
 {
     const auto data_type  = DataTypeFromValue(value);
 
@@ -331,7 +349,7 @@ void ShaderSource::AddConstant(std::string name, ShaderDataDeclarationValue valu
     block.data_decl = decl;
     mShaderBlocks["constants"].push_back(std::move(block));
 }
-void ShaderSource::AddVarying(std::string name, VaryingType type)
+void ShaderSource::AddVarying(const std::string& name, VaryingType type)
 {
     std::string code;
     if (mVersion == Version::GLSL_100)
@@ -777,10 +795,18 @@ bool ShaderSource::LoadRawSource(const std::string& source)
             if (base::Contains(trimmed, "uniform") && base::Contains(trimmed, "{"))
             {
                 // todo: data declaration parsing.
+                const auto& parts  = base::SplitString(trimmed);
+
                 ShaderBlock block;
                 block.type = ShaderBlockType::ShaderDataDeclaration;
                 block.data = line;
                 block.data += "\n";
+
+                ShaderDataDeclaration decl;
+                decl.decl_type = ShaderDataDeclarationType::UniformBlock;
+                decl.data_type = ShaderDataType::UserDefinedStruct;
+                decl.name = GetToken(parts, 3);
+
                 for (++line_buffer_index; line_buffer_index<line_buffer.size(); ++line_buffer_index)
                 {
                     auto line = line_buffer[line_buffer_index];
@@ -790,6 +816,7 @@ bool ShaderSource::LoadRawSource(const std::string& source)
                     if (base::StartsWith(trimmed, "}") && base::EndsWith(trimmed, ";"))
                         break;
                 }
+                block.data_decl = decl;
                 mShaderBlocks["uniforms"].push_back(std::move(block));
             }
             else if (base::Contains(trimmed, " out "))
