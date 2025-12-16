@@ -311,6 +311,26 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             args.name   = material_shader_source.GetShaderName();
             args.source = material_shader_source.GetSource();
             args.debug  = mDebugMode;
+
+            const auto& uniform_blocks = material_shader_source.ListUniformBlocks();
+            for (const auto& uniform_block : uniform_blocks)
+            {
+                Shader::UniformInfo info;
+                info.name = uniform_block.data_decl->name;
+                if (uniform_block.data_decl->decl_type == ShaderSource::ShaderDataDeclarationType::UniformBlock)
+                {
+                    info.type = Shader::UniformType::UniformBlock;
+                }
+                else if (uniform_block.data_decl->decl_type == ShaderSource::ShaderDataDeclarationType::Uniform)
+                {
+                    if (uniform_block.data_decl->data_type == ShaderSource::ShaderDataType::Sampler2D)
+                        info.type = Shader::UniformType::Sampler2D;
+                    else if (uniform_block.data_decl->data_type == ShaderSource::ShaderDataType::Sampler2DArray)
+                        info.type = Shader::UniformType::Sampler2DArray;
+                } else BUG("Missing shader data type.");
+
+                args.uniform_info.push_back(std::move(info));
+            }
             material_shader = mDevice->CreateShader(material_gpu_id, args);
         }
         if (!material_shader->IsValid())
@@ -340,6 +360,26 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             args.name   = drawable_shader_source.GetShaderName();
             args.source = drawable_shader_source.GetSource();
             args.debug  = mDebugMode;
+
+            const auto& uniform_blocks = drawable_shader_source.ListUniformBlocks();
+            for (const auto& uniform_block : uniform_blocks)
+            {
+                Shader::UniformInfo info;
+                info.name = uniform_block.data_decl->name;
+                if (uniform_block.data_decl->decl_type == ShaderSource::ShaderDataDeclarationType::UniformBlock)
+                {
+                    info.type = Shader::UniformType::UniformBlock;
+                }
+                else if (uniform_block.data_decl->decl_type == ShaderSource::ShaderDataDeclarationType::Uniform)
+                {
+                    if (uniform_block.data_decl->data_type == ShaderSource::ShaderDataType::Sampler2D)
+                        info.type = Shader::UniformType::Sampler2D;
+                    else if (uniform_block.data_decl->data_type == ShaderSource::ShaderDataType::Sampler2DArray)
+                        info.type = Shader::UniformType::Sampler2DArray;
+                } else BUG("Missing shader data type.");
+
+                args.uniform_info.push_back(std::move(info));
+            }
             drawable_shader = mDevice->CreateShader(drawable_gpu_id, args);
         }
         if (!drawable_shader->IsValid())
@@ -353,14 +393,13 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
         DEBUG("Build program: %1", program.GetName());
         DEBUG(" FS GPU ID = %1", material_gpu_id);
         DEBUG(" VS GPU ID = %1", drawable_gpu_id);
+        DEBUG(" FS Name   = %1", material_shader->GetName());
+        DEBUG(" VS Name   = %1", drawable_shader->GetName());
 
         Program::CreateArgs args;
         args.fragment_shader = material_shader;
         args.vertex_shader   = drawable_shader;
-        args.name = base::FormatString("%1(%2, %3)",
-                                       program.GetName(),
-                                       drawable_shader->GetName(),
-                                       material_shader->GetName());
+        args.name = program.GetName();
 
         material.ApplyStaticState(material_environment, *mDevice, args.state);
 

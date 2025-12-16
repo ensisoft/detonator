@@ -26,7 +26,7 @@
 
 namespace gfx {
 
-    class DeviceShader : public gfx::Shader
+    class DeviceShader : public Shader
     {
     public:
         explicit DeviceShader(dev::GraphicsDevice* device) noexcept
@@ -48,10 +48,14 @@ namespace gfx {
         std::string GetCompileInfo() const override
         { return mCompileInfo; }
 
-        inline void SetName(std::string name) noexcept
+        void SetName(std::string name) noexcept
         { mName = std::move(name); }
+        void SetUniformInfo(std::vector<UniformInfo> uniforms) noexcept
+        { mUniformInfo = std::move(uniforms); }
+        const auto& GetUniformInfo() const noexcept
+        { return mUniformInfo; }
 
-        inline dev::GraphicsShader GetShader() const noexcept
+        dev::GraphicsShader GetShader() const noexcept
         { return mShader; }
 
     private:
@@ -59,6 +63,7 @@ namespace gfx {
         dev::GraphicsShader mShader;
         std::string mName;
         std::string mCompileInfo;
+        std::vector<UniformInfo> mUniformInfo;
         mutable std::string mSource;
     };
 

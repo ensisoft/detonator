@@ -31,7 +31,7 @@ namespace gfx
 {
     class DeviceShader;
 
-    class DeviceProgram : public gfx::Program
+    class DeviceProgram : public Program
     {
     public:
         explicit DeviceProgram(dev::GraphicsDevice* device) noexcept
@@ -46,28 +46,39 @@ namespace gfx
         std::string GetId() const override
         { return mGpuId; }
 
-        inline dev::GraphicsProgram GetProgram() const noexcept
+        dev::GraphicsProgram GetProgram() const noexcept
         { return mProgram; }
-        inline size_t GetFrameStamp() const noexcept
+        size_t GetFrameStamp() const noexcept
         { return mFrameNumber; }
 
-        inline void SetName(std::string name) noexcept
+        void SetName(std::string name) noexcept
         { mName = std::move(name); }
-        inline void SetId(std::string id) noexcept
+        void SetId(std::string id) noexcept
         { mGpuId = std::move(id); }
-        inline void SetFrameStamp(size_t frame_number) const noexcept
+        void SetFrameStamp(size_t frame_number) const noexcept
         { mFrameNumber = frame_number; }
 
         bool Build(const std::vector<ShaderPtr>& shaders);
+
         void ApplyTextureState(const ProgramState& state,
             TextureMinFilter device_default_min_filter, TextureMagFilter device_default_mag_filter) const;
         void ApplyUniformState(const ProgramState& state) const;
+        void ValidateProgramState(const ProgramState& state) const;
 
     private:
         dev::GraphicsDevice* mDevice = nullptr;
         dev::GraphicsProgram mProgram;
         std::string mName;
         std::string mGpuId;
+        struct UniformInfo {
+            Shader::UniformType type;
+            std::string name;
+            std::uint8_t texture_unit = 0;
+            bool has_binding = false;
+        };
+        // expected uniform blocks that the program user must bind
+        // lest there be GL_INVALID_OPERATION from the draw call...
+        mutable std::vector<UniformInfo> mUniformInfo;
 
         mutable std::unordered_map<std::string, dev::GraphicsBuffer> mUniformBlockBuffers;
         mutable std::size_t mFrameNumber = 0;

@@ -16,6 +16,8 @@
 
 #include "config.h"
 
+#include <unordered_map>
+
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/utility.h"
@@ -46,12 +48,12 @@ DeviceProgram::~DeviceProgram()
     }
 }
 
-bool DeviceProgram::Build(const std::vector<gfx::ShaderPtr>& shaders)
+bool DeviceProgram::Build(const std::vector<ShaderPtr>& shaders)
 {
     std::vector<dev::GraphicsShader> shader_handles;
     for (const auto& shader : shaders)
     {
-        const auto* ptr = static_cast<const gfx::DeviceShader*>(shader.get());
+        const auto* ptr = static_cast<const DeviceShader*>(shader.get());
         shader_handles.push_back(ptr->GetShader());
     }
 
@@ -70,7 +72,7 @@ bool DeviceProgram::Build(const std::vector<gfx::ShaderPtr>& shaders)
 
         for (const auto& shader : shaders)
         {
-            const auto* ptr = static_cast<const gfx::DeviceShader*>(shader.get());
+            const auto* ptr = static_cast<const DeviceShader*>(shader.get());
             ptr->DumpSource();
         }
         return false;
@@ -88,7 +90,16 @@ bool DeviceProgram::Build(const std::vector<gfx::ShaderPtr>& shaders)
 
     for (auto& shader : shaders)
     {
-        const auto* ptr = static_cast<const gfx::DeviceShader*>(shader.get());
+        const auto* ptr = static_cast<const DeviceShader*>(shader.get());
+        const auto& uniforms = ptr->GetUniformInfo();
+        for (const auto& uniform : uniforms)
+        {
+            UniformInfo info;
+            info.type  = uniform.type;
+            info.name  = uniform.name;
+            info.has_binding = false;
+            mUniformInfo.push_back(std::move(info));
+        }
         ptr->ClearSource();
     }
     mProgram = program;
@@ -141,6 +152,15 @@ void DeviceProgram::ApplyTextureState(const ProgramState &state,
             if (warnings.force_clamp_y)
                 WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
         }
+
+        for (auto& info : mUniformInfo)
+        {
+            if (info.name == sampler.name)
+            {
+                info.has_binding = true;
+                info.texture_unit = texture_unit;
+            }
+        }
     }
 }
 
@@ -152,6 +172,7 @@ void DeviceProgram::ApplyUniformState(const ProgramState& state) const
         const auto& uniform = state.GetUniformSetting(i);
         ps.uniforms.push_back(&uniform);
     }
+
     mDevice->SetProgramState(mProgram, ps);
 
     for (size_t i=0; i<state.GetUniformBlockCount(); ++i)
@@ -170,8 +191,57 @@ void DeviceProgram::ApplyUniformState(const ProgramState& state) const
         mDevice->UploadBuffer(gpu_buffer, cpu_block_buffer.data(), block_buffer_size);
         mDevice->BindProgramBuffer(mProgram, gpu_buffer, block.GetName(), i); // todo: binding index ??
         mUniformBlockBuffers[block.GetName()] = gpu_buffer;
+
+        for (auto& info : mUniformInfo)
+        {
+            if (info.name == block.GetName())
+                info.has_binding = true;
+        }
     }
 }
 
+void DeviceProgram::ValidateProgramState(const ProgramState& state) const
+{
+    std::unordered_map<std::int8_t, Shader::UniformType> texture_unit_types;
+
+    for (const auto& info : mUniformInfo)
+    {
+        // BUG or ERROR? Clearly this is a programmer error, i.e.
+        // a bug (incorrect use of the API). Also the rendering will
+        // simply likely fail anyways if we let the process to continue
+        // AND it will keep spamming the log with the error on
+        // every frame. so BUG it is...! \o/ But use the ERROR macro
+        // to help debugging by printing the message (uniform block name)
+        if (!info.has_binding)
+        {
+            ERROR("Program has an uniform that is not set. [uniform='%1', type=¤%2]", info.name, info.type);
+            ASSERT(info.has_binding);
+        }
+
+        if (info.type == Shader::UniformType::Sampler2D ||
+            info.type == Shader::UniformType::Sampler2DArray)
+        {
+            // texture units can be shared between program samplers only if the
+            // program samplers have the same type.
+            // In other words binding sampler2D and Sampler2DArray to unit X is
+            // illegal since the samplers are different type.
+            // but binding sampler2D and another sampler2D to unit X is OK since
+            // they have the same sampler type.
+            auto it = texture_unit_types.find(info.texture_unit);
+            if (it != texture_unit_types.end())
+            {
+                ASSERT(it->second == info.type);
+            }
+            else
+            {
+                texture_unit_types[info.texture_unit] = info.type;
+            }
+        }
+        else if (info.type == Shader::UniformType::UniformBlock)
+        {
+            // nothing to do here.
+        } else BUG("Missing uniform type in uniform validation.");
+    }
+}
 
 } // namespace

@@ -473,7 +473,7 @@ layout (std140) uniform LightArray {
 uniform highp sampler2DArray kShadowMap;
 
 )"));
-    const auto& blocks = source.ListImportantUniformBlocks();
+    const auto& blocks = source.ListUniformBlocks();
     TEST_REQUIRE(blocks.size() == 2);
     TEST_REQUIRE(blocks[0].data_decl.has_value());
     TEST_REQUIRE(blocks[1].data_decl.has_value());
