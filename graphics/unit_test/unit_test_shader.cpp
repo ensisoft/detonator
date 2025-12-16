@@ -452,6 +452,40 @@ float SomeFunction() {
 
 }
 
+void unit_test_uniform_blocks()
+{
+    TEST_CASE(test::Type::Feature)
+gfx::ShaderSource source;
+    source.SetType(gfx::ShaderSource::Type::Fragment);
+    TEST_REQUIRE(source.LoadRawSource(R"(
+#version 300 es
+
+// @types
+struct Light {
+  vec4 color;
+};
+
+// @uniforms
+layout (std140) uniform LightArray {
+  Light lights[10];
+};
+
+uniform highp sampler2DArray kShadowMap;
+
+)"));
+    const auto& blocks = source.ListImportantUniformBlocks();
+    TEST_REQUIRE(blocks.size() == 2);
+    TEST_REQUIRE(blocks[0].data_decl.has_value());
+    TEST_REQUIRE(blocks[1].data_decl.has_value());
+    TEST_REQUIRE(blocks[0].data_decl->decl_type == gfx::ShaderSource::ShaderDataDeclarationType::UniformBlock);
+    TEST_REQUIRE(blocks[0].data_decl->data_type == gfx::ShaderSource::ShaderDataType::UserDefinedStruct);
+    TEST_REQUIRE(blocks[0].data_decl->name == "LightArray");
+    TEST_REQUIRE(blocks[1].data_decl->decl_type == gfx::ShaderSource::ShaderDataDeclarationType::Uniform);
+    TEST_REQUIRE(blocks[1].data_decl->data_type == gfx::ShaderSource::ShaderDataType::Sampler2DArray);
+    TEST_REQUIRE(blocks[1].data_decl->name == "kShadowMap");
+
+}
+
 void unit_test_token_replacement()
 {
     TEST_CASE(test::Type::Feature)
@@ -525,6 +559,7 @@ int test_main(int argc, char* argv[])
     unit_test_raw_source_combine();
     unit_test_conditional_data();
     unit_test_token_replacement();
+    unit_test_uniform_blocks();
 
     unit_test_sampler2DArray_bug();
     return 0;

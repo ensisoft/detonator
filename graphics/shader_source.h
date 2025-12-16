@@ -49,7 +49,8 @@ namespace gfx
             Vec2i, Vec3i, Vec4i,
             Mat2f, Mat3f, Mat4f,
             Color4f,
-            Sampler2D, Sampler2DArray
+            Sampler2D, Sampler2DArray,
+            UserDefinedStruct
         };
         using AttributeType = ShaderDataType;
         using UniformType   = ShaderDataType;
@@ -93,7 +94,11 @@ namespace gfx
         };
 
         enum class ShaderDataDeclarationType {
-            Attribute, Uniform, Varying, Constant,
+            Attribute, Uniform, Varying, Constant, UniformBlock
+        };
+
+        enum class SourceVariant {
+            Production, Development
         };
 
         struct ShaderDataDeclaration {
@@ -113,73 +118,70 @@ namespace gfx
             std::optional<ShaderDataDeclaration> data_decl;
         };
 
-        ShaderSource() = default;
-
-        inline void SetType(Type type) noexcept
-        { mType = type; }
-        inline void SetPrecision(Precision precision) noexcept
-        { mPrecision = precision; }
-        inline void SetVersion(Version version) noexcept
-        { mVersion = version; }
-        inline bool IsEmpty() const noexcept
-        { return mShaderBlocks.empty(); }
-        inline void Clear() noexcept
-        { mShaderBlocks.clear(); }
-        inline Type GetType() const noexcept
-        { return mType; }
-        inline Precision GetPrecision() const noexcept
-        { return mPrecision; }
-        inline Version GetVersion() const noexcept
-        { return mVersion; }
-
         struct DebugInfo {
             std::string key;
             std::string val;
         };
 
-        inline void AddDebugInfo(std::string key, std::string val) noexcept
+        ShaderSource() = default;
+
+        void SetType(Type type) noexcept
+        { mType = type; }
+        void SetPrecision(Precision precision) noexcept
+        { mPrecision = precision; }
+        void SetVersion(Version version) noexcept
+        { mVersion = version; }
+        bool IsEmpty() const noexcept
+        { return mShaderBlocks.empty(); }
+        void Clear() noexcept
+        { mShaderBlocks.clear(); }
+        Type GetType() const noexcept
+        { return mType; }
+        Precision GetPrecision() const noexcept
+        { return mPrecision; }
+        Version GetVersion() const noexcept
+        { return mVersion; }
+
+        void AddDebugInfo(std::string key, std::string val) noexcept
         { mDebugInfos.push_back( { std::move(key), std::move(val) } ); }
-        inline void AddDebugInfo(DebugInfo info) noexcept
+        void AddDebugInfo(DebugInfo info) noexcept
         { mDebugInfos.push_back(std::move(info)); }
-        inline const auto& GetDebugInfo(size_t index) const noexcept
+        const auto& GetDebugInfo(size_t index) const noexcept
         { return mDebugInfos[index]; }
-        inline auto GetDebugInfoCount() const noexcept
+        auto GetDebugInfoCount() const noexcept
         { return mDebugInfos.size(); }
 
-        inline void AddShaderName(std::string name) noexcept
+        void AddShaderName(std::string name) noexcept
         { AddDebugInfo("Name", std::move(name)); }
-        inline void AddShaderSourceUri(std::string uri) noexcept
+        void AddShaderSourceUri(std::string uri) noexcept
         { AddDebugInfo("Source", std::move(uri)); }
 
         const ShaderDataDeclaration* FindDataDeclaration(const std::string& key) const;
         const ShaderBlock* FindShaderBlock(const std::string& key) const;
 
-        void AddSource(std::string source);
-        void AddPreprocessorDefinition(std::string name);
-        void AddPreprocessorDefinition(std::string name, unsigned value);
-        void AddPreprocessorDefinition(std::string name, int value);
-        void AddPreprocessorDefinition(std::string name, float value);
-        void AddPreprocessorDefinition(std::string name, std::string value);
-        void AddAttribute(std::string name, AttributeType type);
-        void AddUniform(std::string name, UniformType type);
-        void AddConstant(std::string name, ShaderDataDeclarationValue value);
-        void AddVarying(std::string name, VaryingType type);
+        std::vector<ShaderBlock> ListImportantUniformBlocks() const;
+
+        void AddSource(const std::string& source);
+        void AddPreprocessorDefinition(const std::string& name);
+        void AddPreprocessorDefinition(const std::string& name, unsigned value);
+        void AddPreprocessorDefinition(const std::string& name, int value);
+        void AddPreprocessorDefinition(const std::string& name, float value);
+        void AddPreprocessorDefinition(const std::string& name, std::string value);
+        void AddAttribute(const std::string& name, AttributeType type);
+        void AddUniform(const std::string& name, UniformType type);
+        void AddConstant(const std::string& name, ShaderDataDeclarationValue value);
+        void AddVarying(const std::string& name, VaryingType type);
 
         bool HasShaderBlock(const std::string& key, ShaderBlockType type) const;
         bool HasDataDeclaration(const std::string& name, ShaderDataDeclarationType type) const;
 
         void FoldUniform(const std::string& name, ShaderDataDeclarationValue value);
-
         void ReplaceToken(std::string token, std::string source);
 
-        inline bool HasUniform(const std::string& name) const
+        bool HasUniform(const std::string& name) const
         { return HasDataDeclaration(name, ShaderDataDeclarationType::Uniform); }
-        inline bool HasVarying(const std::string& name) const
+        bool HasVarying(const std::string& name) const
         { return HasDataDeclaration(name, ShaderDataDeclarationType::Varying); }
-
-        enum class SourceVariant {
-            Production, Development
-        };
 
         std::string GetShaderName() const;
 
