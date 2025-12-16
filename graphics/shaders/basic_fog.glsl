@@ -18,7 +18,7 @@ struct Fog {
 
 // @uniforms
 
-layout(std140) uniform FogData {
+layout (std140) uniform FogData {
     Fog fog;
 };
 
