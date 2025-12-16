@@ -360,6 +360,9 @@ void GenericShaderProgram::ApplyDynamicState(const Device &device, const Environ
     }
     else
     {
+        LightTransformUniformBlock trash;
+        program.SetUniformBlock(UniformBlock("LightTransformArray", std::move(trash)));
+
         const auto sampler_index = sampler_count + 0;
         auto* dummy_shadow_map = device.FindTexture("DummyShadowMapArrayTexture");
         program.SetTexture("kShadowMap", sampler_index, *dummy_shadow_map);
