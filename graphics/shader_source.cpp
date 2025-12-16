@@ -229,7 +229,7 @@ const ShaderSource::ShaderBlock* ShaderSource::FindShaderBlock(const std::string
     return nullptr;
 }
 
-std::vector<ShaderSource::ShaderBlock> ShaderSource::ListImportantUniformBlocks() const
+std::vector<ShaderSource::ShaderBlock> ShaderSource::ListUniformBlocks() const
 {
     std::vector<ShaderBlock> blocks;
     if (const auto* uniforms = base::SafeFind(mShaderBlocks, "uniforms"))
@@ -239,9 +239,14 @@ std::vector<ShaderSource::ShaderBlock> ShaderSource::ListImportantUniformBlocks(
             if (!block.data_decl.has_value())
                 continue;
             const auto& decl = block.data_decl.value();
-            if (decl.decl_type == ShaderDataDeclarationType::UniformBlock ||
-                (decl.decl_type == ShaderDataDeclarationType::Uniform && decl.data_type == ShaderDataType::Sampler2DArray))
+            if (decl.decl_type == ShaderDataDeclarationType::UniformBlock)
                 blocks.push_back(block);
+            else if (decl.decl_type == ShaderDataDeclarationType::Uniform)
+            {
+                if (decl.data_type == ShaderDataType::Sampler2D ||
+                    decl.data_type == ShaderDataType::Sampler2DArray)
+                    blocks.push_back(block);
+            }
         }
     }
     return blocks;

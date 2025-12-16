@@ -205,6 +205,7 @@ gfx::ShaderPtr GraphicsDevice::CreateShader(const std::string& id, const gfx::Sh
     auto shader = std::make_shared<gfx::DeviceShader>(mDevice);
     shader->SetName(args.name);
     shader->CompileSource(args.source, args.debug);
+    shader->SetUniformInfo(args.uniform_info);
     mShaders[id] = shader;
     return shader;
 }
@@ -421,7 +422,7 @@ void GraphicsDevice::ModifyState(const StateValue& value, StateName name) const
 
 void GraphicsDevice::Draw(const gfx::Program& program,
                           const gfx::ProgramState& program_state,
-                          const gfx::GeometryDrawCommand& geometry, const Device::RasterState& state, gfx::Framebuffer* fbo)
+                          const gfx::GeometryDrawCommand& geometry, const RasterState& state, gfx::Framebuffer* fbo)
 {
 
     dev::Framebuffer framebuffer;
@@ -450,6 +451,10 @@ void GraphicsDevice::Draw(const gfx::Program& program,
         myprog->ApplyUniformState(program_state);
         myprog->ApplyTextureState(program_state, mDefaultMinTextureFilter, mDefaultMagTextureFilter);
     );
+
+    // disabled for now because the uniform info is not accurate with respect
+    // to GLSL conditional compiling.
+    //myprog->ValidateProgramState(program_state);
 
     TRACE_CALL("SetRasterState", mDevice->SetRasterState(state));
 

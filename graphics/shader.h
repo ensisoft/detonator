@@ -20,15 +20,33 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 namespace gfx
 {
     class Shader
     {
     public:
+        enum class UniformType {
+            UniformBlock,
+            Sampler2D,
+            Sampler2DArray
+        };
+
+        struct UniformInfo {
+            UniformType type;
+            std::string name;
+        };
+
         struct CreateArgs {
             std::string name;
             std::string source;
+            // This is a debug feature to let the program know of
+            // expected uniform blocks that need to be bound in the
+            // program state when the program is used to draw.
+            // If these are not bound there will likely be a
+            // GL_INVALID_OPERATION from a some draw call.
+            std::vector<UniformInfo> uniform_info;
             bool debug = false;
         };
 
@@ -40,6 +58,7 @@ namespace gfx
         virtual std::string GetName() const { return ""; }
         // Get the (human-readable) shader (compile) error string if any.
         virtual std::string GetCompileInfo() const { return ""; };
+
     private:
     };
 

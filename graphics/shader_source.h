@@ -159,7 +159,7 @@ namespace gfx
         const ShaderDataDeclaration* FindDataDeclaration(const std::string& key) const;
         const ShaderBlock* FindShaderBlock(const std::string& key) const;
 
-        std::vector<ShaderBlock> ListImportantUniformBlocks() const;
+        std::vector<ShaderBlock> ListUniformBlocks() const;
 
         void AddSource(const std::string& source);
         void AddPreprocessorDefinition(const std::string& name);
