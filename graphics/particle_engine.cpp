@@ -27,6 +27,7 @@
 #include "data/writer.h"
 #include "data/reader.h"
 #include "graphics/particle_engine.h"
+#include "graphics/shader_code.h"
 #include "graphics/shader_source.h"
 #include "graphics/geometry.h"
 #include "graphics/program.h"
@@ -96,12 +97,6 @@ std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
 
 ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device& device) const
 {
-    static const char* base_shader = {
-#include "shaders/vertex_shader_base.glsl"
-    };
-    static const char* particle_shader = {
-#include "shaders/vertex_2d_particle_shader.glsl"
-    };
 
     ShaderSource source;
     source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
@@ -110,8 +105,8 @@ ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device
     {
         source.AddPreprocessorDefinition("INSTANCED_DRAW");
     }
-    source.LoadRawSource(base_shader);
-    source.LoadRawSource(particle_shader);
+    source.LoadRawSource(glsl::vertex_base);
+    source.LoadRawSource(glsl::vertex_2d_particle);
     source.AddShaderName("2D Particle Shader");
     source.AddShaderSourceUri("shaders/vertex_shader_base.glsl");
     source.AddShaderSourceUri("shaders/vertex_2d_particle_shader.glsl");

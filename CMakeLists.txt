@@ -315,6 +315,7 @@ add_library(GfxLib
     graphics/pixel.cpp
     graphics/polygon_mesh.cpp
     graphics/renderpass.cpp
+    graphics/shader_code.cpp
     graphics/shader_program.cpp
     graphics/shader_source.cpp
     graphics/simple_shape.cpp

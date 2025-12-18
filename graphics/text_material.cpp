@@ -18,6 +18,7 @@
 
 #include "graphics/device.h"
 #include "graphics/texture.h"
+#include "graphics/shader_code.h"
 #include "graphics/shader_source.h"
 #include "graphics/text_material.h"
 
@@ -131,20 +132,14 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
     const auto format = mText.GetRasterFormat();
     if (format == TextBuffer::RasterFormat::Bitmap)
     {
-        static const char* fragment_source = {
-#include "shaders/fragment_text_bitmap_shader.glsl"
-        };
-        source.LoadRawSource(fragment_source);
+        source.LoadRawSource(glsl::fragment_bitmap_text_shader);
         source.AddShaderName("Text Shader");
         source.AddShaderSourceUri("shaders/fragment_text_bitmap_shader.glsl");
         return source;
     }
     else if (format == TextBuffer::RasterFormat::Texture)
     {
-        static const char* fragment_source = {
-#include "shaders/fragment_text_texture_shader.glsl"
-        };
-        source.LoadRawSource(fragment_source);
+        source.LoadRawSource(glsl::fragment_texture_text_shader);
         source.AddShaderName("Text Shader");
         source.AddShaderSourceUri("shaders/fragment_text_texture_shader.glsl");
         return source;

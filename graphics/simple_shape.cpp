@@ -29,6 +29,7 @@
 #include "base/hash.h"
 #include "data/reader.h"
 #include "data/writer.h"
+#include "graphics/shader_code.h"
 #include "graphics/simple_shape.h"
 #include "graphics/shader_source.h"
 #include "graphics/utility.h"

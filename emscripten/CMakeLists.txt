@@ -375,6 +375,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/particle_engine.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/pixel.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/polygon_mesh.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../graphics/shader_code.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/shader_program.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/shader_source.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/simple_shape.cpp

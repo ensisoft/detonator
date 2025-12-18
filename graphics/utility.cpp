@@ -32,12 +32,7 @@
 #include "graphics/texture.h"
 #include "graphics/vertex.h"
 #include "graphics/shader_source.h"
-
-namespace {
-    static const char* vertex_base = {
-#include "shaders/vertex_shader_base.glsl"
-    };
-} // namespace
+#include "graphics/shader_code.h"
 
 namespace gfx
 {
@@ -192,13 +187,6 @@ ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instan
     // NDC (normalized device coordinates) (x grows right to 1.0 and
     // y grows up to 1.0 to the top of the screen).
 
-    static const char* shader = {
-#include "shaders/vertex_2d_simple_shader.glsl"
-    };
-    static const char* effect_shader = {
-#include "shaders/vertex_2d_effect.glsl"
-    };
-
     ShaderSource source;
     source.SetType(gfx::ShaderSource::Type::Vertex);
     if (use_instancing)
@@ -207,15 +195,15 @@ ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instan
     }
     if (enable_effect)
     {
-        source.LoadRawSource(effect_shader);
+        source.LoadRawSource(glsl::vertex_2d_effect);
         source.AddShaderSourceUri("shaders/vertex_2d_effect.glsl");
         source.AddPreprocessorDefinition("VERTEX_HAS_SHARD_INDEX_ATTRIBUTE");
         source.AddPreprocessorDefinition("APPLY_SHARD_MESH_EFFECT");
         source.AddPreprocessorDefinition("MESH_EFFECT_TYPE_SHARD_EXPLOSION", static_cast<int>(MeshEffectType::ShardedMeshExplosion));
     }
 
-    source.LoadRawSource(vertex_base);
-    source.LoadRawSource(shader);
+    source.LoadRawSource(glsl::vertex_base);
+    source.LoadRawSource(glsl::vertex_2d_simple);
     source.AddShaderName("2D Vertex Shader");
     source.AddShaderSourceUri("shaders/vertex_base.glsl");
     source.AddShaderSourceUri("shaders/vertex_2d_simple_shader.glsl");
@@ -226,10 +214,6 @@ ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instan
 
 ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instancing)
 {
-    static const char* shader = {
-#include "shaders/vertex_3d_simple_shader.glsl"
-    };
-
     ShaderSource source;
     source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
     source.SetType(ShaderSource::Type::Vertex);
@@ -237,8 +221,8 @@ ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instan
     {
         source.AddPreprocessorDefinition("INSTANCED_DRAW");
     }
-    source.LoadRawSource(vertex_base);
-    source.LoadRawSource(shader);
+    source.LoadRawSource(glsl::vertex_base);
+    source.LoadRawSource(glsl::vertex_3d_simple);
     source.AddShaderName("3D Vertex Shader");
     source.AddShaderSourceUri("shaders/vertex_base.glsl");
     source.AddShaderSourceUri("shaders/vertex_3d_simple_shader.glsl");
@@ -248,10 +232,6 @@ ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instan
 
 ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_instancing)
 {
-    static const char* shader = {
-#include "shaders/vertex_3d_model_shader.glsl"
-    };
-
     ShaderSource source;
     source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
     source.SetType(ShaderSource::Type::Vertex);
@@ -259,8 +239,8 @@ ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_instanc
     {
         source.AddPreprocessorDefinition("INSTANCED_DRAW");
     }
-    source.LoadRawSource(vertex_base);
-    source.LoadRawSource(shader);
+    source.LoadRawSource(glsl::vertex_base);
+    source.LoadRawSource(glsl::vertex_3d_model);
     source.AddShaderName("3D Model Shader");
     source.AddShaderSourceUri("shaders/vertex_base.glsl");
     source.AddShaderSourceUri("shaders/vertex_3d_model_shader.glsl");
@@ -270,10 +250,6 @@ ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_instanc
 
 ShaderSource MakePerceptual3DVertexShader(const gfx::Device& device, bool use_instancing)
 {
-    static const char* shader = {
-#include "shaders/vertex_perceptual_3d_shader.glsl"
-    };
-
     ShaderSource source;
     source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
     source.SetType(ShaderSource::Type::Vertex);
@@ -281,8 +257,8 @@ ShaderSource MakePerceptual3DVertexShader(const gfx::Device& device, bool use_in
     {
         source.AddPreprocessorDefinition("INSTANCED_DRAW");
     }
-    source.LoadRawSource(vertex_base);
-    source.LoadRawSource(shader);
+    source.LoadRawSource(glsl::vertex_base);
+    source.LoadRawSource(glsl::vertex_3d_perceptual);
     source.AddShaderName("Perceptual 3D Shader");
     source.AddShaderSourceUri("shaders/vertex_base.glsl");
     source.AddShaderSourceUri("shaders/vertex_perceptual_3d_shader.glsl");
