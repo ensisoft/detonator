@@ -23,6 +23,7 @@
 #include "base/hash.h"
 #include "data/reader.h"
 #include "data/writer.h"
+#include "graphics/device.h"
 #include "graphics/program.h"
 #include "graphics/shader_source.h"
 #include "graphics/material_class.h"
@@ -1659,10 +1660,27 @@ bool MaterialClass::ApplyBasicLightDynamicState(const State& state, Device& devi
     for (unsigned i=0; i<base::ArraySize(maps); ++i)
     {
         // these textures are optional so if there's no map or the map doesn't
-        // have any textures set then we're just going to skip binding it.
+        // have any textures set then we're just going to skip binding the actual
+        // texture and instead use a dummy.
         const auto* texture_map = FindTextureMapBySampler(maps[i].texture_map_name, 0);
         if (!texture_map || texture_map->GetNumTextures() == 0)
+        {
+            auto* temp_basic_light_map = device.FindTexture("DummyBasicLightTexture");
+            if (!temp_basic_light_map)
+            {
+                temp_basic_light_map = device.MakeTexture("DummyBasicLightTexture");
+                temp_basic_light_map->SetFlag(Texture::Flags::GarbageCollect, false);
+                temp_basic_light_map->SetFilter(Texture::MinFilter::Nearest);
+                temp_basic_light_map->SetFilter(Texture::MagFilter::Nearest);
+                temp_basic_light_map->SetWrapX(Texture::Wrapping::Clamp);
+                temp_basic_light_map->SetWrapY(Texture::Wrapping::Clamp);
+                temp_basic_light_map->Allocate(1, 1, Texture::Format::RGBA);
+                DEBUG("Initialized dummy basic lit material diffuse/specular/normal map texture.");
+            }
+            program.SetTexture(maps[i].texture_map_name, i, *temp_basic_light_map);
+            program.SetUniform(maps[i].texture_rect_name, 0.0f, 0.0f, 1.0f, 1.0f);
             continue;
+        }
 
         map_flags |= static_cast<unsigned>(maps[i].type);
 
