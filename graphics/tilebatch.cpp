@@ -16,6 +16,7 @@
 
 #include "config.h"
 
+#include "base/hash.h"
 #include "base/format.h"
 #include "graphics/tilebatch.h"
 #include "graphics/program.h"
@@ -78,33 +79,39 @@ ShaderSource TileBatch::GetShader(const Environment& env, const Device& device) 
     // a particle vertex shader. However, if a material shader refers to those
     // varyings we might get GLSL program build errors on some platforms.
 
-    const char* src = nullptr;
-
     const auto shape = ResolveTileShape();
-    if (shape == TileShape::Square)
-        src = glsl::vertex_2d_point_tile;
-    else if (shape == TileShape::Rectangle)
-        src = glsl::vertex_2d_quad_tile;
-    else BUG("Missing tile batch shader source.");
 
     ShaderSource source;
     source.SetType(ShaderSource::Type::Vertex);
     source.SetVersion(ShaderSource::Version::GLSL_300);
-    source.LoadRawSource(src);
-    source.AddShaderName("Tile Vertex Shader");
     source.AddDebugInfo("Tile shape", base::ToString(shape));
+    if (shape == TileShape::Square)
+    {
+        source.LoadRawSource(glsl::vertex_2d_point_tile);
+        source.AddShaderSourceUri("shaders/vertex_tilebatch_point_shader.glsl");
+    }
+    else if (shape == TileShape::Rectangle)
+    {
+        source.LoadRawSource(glsl::vertex_2d_quad_tile);
+        source.AddShaderSourceUri("shaders/vertex_tilebatch_quad_shader.glsl");
+    }
+    else BUG("Missing tile batch shader source.");
+
     return source;
 }
 
 std::string TileBatch::GetShaderId(const Environment& env) const
 {
+    std::size_t hash = 0;
+
     const auto shape = ResolveTileShape();
     if (shape == TileShape::Square)
-        return "square-tile-batch-program";
+        hash = base::hash_combine(hash, "point-tile-shader");
     else if (shape == TileShape::Rectangle)
-        return "rectangle-tile-batch-program";
+        hash = base::hash_combine(hash, "quad-tile-shader");
+    else BUG("Missing tile batch shader id.");
 
-    BUG("Missing tile batch shader id.");
+    return std::to_string(hash);
 }
 
 std::string TileBatch::GetShaderName(const Environment& env) const
@@ -112,9 +119,9 @@ std::string TileBatch::GetShaderName(const Environment& env) const
     const auto shape = ResolveTileShape();
 
     if (shape == TileShape::Square)
-        return "SquareTileBatchShader";
+        return "2D Point Tile Shader";
     else if (shape == TileShape::Rectangle)
-        return "RectangleTileBatchShader";
+        return "2D Quad Tile Shader";
 
     BUG("Missing tile batch shader name.");
 }

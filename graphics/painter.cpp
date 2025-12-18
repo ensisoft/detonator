@@ -299,7 +299,7 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             if (material_shader_source.IsEmpty())
                 return nullptr;
 
-            DEBUG("Compile shader: %1", material_shader_source.GetShaderName());
+            DEBUG("Compile shader");
             DEBUG(" GPU ID     = %1", material_gpu_id);
             for (size_t i=0; i<material_shader_source.GetDebugInfoCount(); ++i)
             {
@@ -348,7 +348,7 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             if (drawable_shader_source.IsEmpty())
                 return nullptr;
 
-            DEBUG("Compile shader: %1", drawable_shader_source.GetShaderName());
+            DEBUG("Compile shader");
             DEBUG(" GPU ID     = %1", drawable_gpu_id);
             for (size_t i=0; i<drawable_shader_source.GetDebugInfoCount(); ++i)
             {

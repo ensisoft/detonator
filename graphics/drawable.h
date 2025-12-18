@@ -18,13 +18,6 @@
 
 #include "config.h"
 
-#include "warnpush.h"
-#  include <glm/vec2.hpp>
-#  include <glm/glm.hpp>
-#  include <glm/gtc/type_ptr.hpp>
-#include "warnpop.h"
-
-
 #include <string>
 #include <vector>
 #include <variant>
@@ -182,6 +175,15 @@ namespace gfx
         { return GetSpatialMode() == SpatialMode::Flat2D; }
         bool IsPerceptual3D() const noexcept
         { return GetSpatialMode() == SpatialMode::Perceptual3D; }
+
+        enum class Shader {
+            Simple2D, Simple3D, Model3D, Perceptual3D
+        };
+
+        static ShaderSource CreateShader(const Environment& env, const Device& device, Shader shader);
+        static std::string GetShaderId(const Environment& env, Shader shader);
+        static std::string GetShaderName(const Environment& env, Shader shader);
+
     private:
     };
 

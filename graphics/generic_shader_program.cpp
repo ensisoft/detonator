@@ -38,61 +38,22 @@ namespace gfx
 
 std::string GenericShaderProgram::GetShaderId(const Material& material, const Material::Environment& env) const
 {
-    std::string id;
-    id += "Pass:";
-    id += base::ToString(env.render_pass);
-    if (env.render_pass == RenderPass::ColorPass)
-    {
-        id += "Lit";
-        id += TestFeature(ShadingFeatures::BasicLight) ? "yes": "no";
-        id += "Fog";
-        id += TestFeature(ShadingFeatures::BasicFog)   ? "yes" : "no";
-        id += "Bloom:";
-        id += TestFeature(OutputFeatures::WriteBloomTarget) ? "yes" : "no";
-        id += "Color:";
-        id += TestFeature(OutputFeatures::WriteColorTarget) ? "yes" : "no";
-    }
-    else if (env.render_pass == RenderPass::StencilPass)
-    {
-        // todo: see below do we need this??
-        id += "Color:";
-        id += TestFeature(OutputFeatures::WriteColorTarget) ? "yes" : "no";
-    }
-    id += "Material:";
-    id += material.GetShaderId(env);
-    return id;
+    std::size_t hash = 0;
+    hash = base::hash_combine(hash, env.render_pass);
+    hash = base::hash_combine(hash, mShadingFeatures);
+    hash = base::hash_combine(hash, material.GetShaderId(env));
+    return std::to_string(hash);
 }
 std::string GenericShaderProgram::GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const
 {
-    std::string id;
-    id += "Pass:";
-    id += base::ToString(env.render_pass);
-    if (env.render_pass == RenderPass::ColorPass)
-    {
-        id += "Lit:";
-        id += TestFeature(ShadingFeatures::BasicLight) ? "yes" : "no";
-        id += "Fog:";
-        id += TestFeature(ShadingFeatures::BasicFog)   ? "yes" : "no";
-    }
-    id += "Drawable:";
-    id += drawable.GetShaderId(env);
-    return id;
+    std::size_t hash = 0;
+    hash = base::hash_combine(hash, env.render_pass);
+    hash = base::hash_combine(hash, mShadingFeatures);
+    hash = base::hash_combine(hash, drawable.GetShaderId(env));
+    return std::to_string(hash);
 }
 ShaderSource GenericShaderProgram::GetShader(const Material& material, const Material::Environment& env, const Device& device) const
 {
-    static const char* fragment_main = {
-#include "shaders/generic_main_fragment_shader.glsl"
-    };
-    static const char* utility_func = {
-#include "shaders/srgb_functions.glsl"
-    };
-    static const char* basic_light = {
-#include "shaders/basic_light.glsl"
-    };
-    static const char* basic_fog = {
-#include "shaders/basic_fog.glsl"
-    };
-
     auto source = material.GetShader(env, device);
     if (source.GetType() != ShaderSource::Type::Fragment)
     {
@@ -165,9 +126,8 @@ ShaderSource GenericShaderProgram::GetShader(const Material& material, const Mat
     source.LoadRawSource(glsl::fragment_main_generic);
     source.AddShaderSourceUri("shaders/srgb_functions.glsl");
     source.AddShaderSourceUri("shaders/generic_main_fragment_shader.glsl");
-
+    source.AddShaderName(material.GetShaderName(env));
     AddDebugInfo(source, env.render_pass);
-    source.AddDebugInfo("Frag ID", material.GetShaderId(env));
     return source;
 }
 ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const
@@ -210,9 +170,8 @@ ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Dra
     source.AddPreprocessorDefinition("DRAWABLE_FLAGS_FLIP_UV_VERTICALLY", static_cast<unsigned>(DrawableFlags::Flip_UV_Vertically));
     source.AddPreprocessorDefinition("DRAWABLE_FLAGS_FLIP_UV_HORIZONTALLY", static_cast<unsigned>(DrawableFlags::Flip_UV_Horizontally));
     source.AddPreprocessorDefinition("DRAWABLE_FLAGS_ENABLE_PERCEPTUAL_3D", static_cast<unsigned>(DrawableFlags::EnablePerceptual3D));
-
+    source.AddShaderName(drawable.GetShaderName(env));
     AddDebugInfo(source, env.render_pass);
-    source.AddDebugInfo("Vertex ID", drawable.GetShaderId(env));
     return source;
 }
 

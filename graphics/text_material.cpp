@@ -16,6 +16,8 @@
 
 #include "config.h"
 
+#include "base/hash.h"
+#include "base/format.h"
 #include "graphics/device.h"
 #include "graphics/texture.h"
 #include "graphics/shader_code.h"
@@ -133,14 +135,12 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
     if (format == TextBuffer::RasterFormat::Bitmap)
     {
         source.LoadRawSource(glsl::fragment_bitmap_text_shader);
-        source.AddShaderName("Text Shader");
         source.AddShaderSourceUri("shaders/fragment_text_bitmap_shader.glsl");
         return source;
     }
     else if (format == TextBuffer::RasterFormat::Texture)
     {
         source.LoadRawSource(glsl::fragment_texture_text_shader);
-        source.AddShaderName("Text Shader");
         source.AddShaderSourceUri("shaders/fragment_text_texture_shader.glsl");
         return source;
     }
@@ -153,28 +153,17 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
 
 std::string TextMaterial::GetShaderId(const Environment& env) const
 {
-    size_t hash = 0;
-
     const auto format = mText.GetRasterFormat();
-    if (format == TextBuffer::RasterFormat::Bitmap)
-        hash = base::hash_combine(hash, "text-shader-bitmap");
-    else if (format == TextBuffer::RasterFormat::Texture)
-        hash = base::hash_combine(hash, "text-shader-texture");
-    else if (format == TextBuffer::RasterFormat::None)
-        hash = base::hash_combine(hash, "text-shader-none");
-    else BUG("Unhandled texture raster format.");
+    size_t hash = 0;
+    hash = base::hash_combine(hash, "text-shader");
+    hash = base::hash_combine(hash, format);
     return std::to_string(hash);
 }
 
 std::string TextMaterial::GetShaderName(const Environment&) const
 {
     const auto format = mText.GetRasterFormat();
-    if (format == TextBuffer::RasterFormat::Bitmap)
-        return "BitmapTextShader";
-    else if (format == TextBuffer::RasterFormat::Texture)
-        return "TextureTextShader";
-    else BUG("Unhandled texture raster format.");
-    return "";
+    return base::FormatString("%1 Text Shader", format);
 }
 
 void TextMaterial::ComputeTextMetrics(unsigned int* width, unsigned int* height) const

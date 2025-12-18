@@ -18,12 +18,15 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "base/utility.h"
 #include "data/json.h"
 #include "graphics/device.h"
 #include "graphics/texture.h"
 #include "graphics/drawable.h"
 #include "graphics/geometry.h"
 #include "graphics/drawcmd.h"
+#include "graphics/linebatch.h"
+#include "graphics/guidegrid.h"
 #include "graphics/polygon_mesh.h"
 #include "graphics/particle_engine.h"
 #include "graphics/simple_shape.h"
@@ -1093,6 +1096,247 @@ void unit_test_simple_shape_shard_mesh()
     }
 }
 
+void unit_test_shader_id()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // all 2D simple shapes should use the same shader.
+    {
+        gfx::Drawable::Environment env;
+        env.use_instancing = false;
+        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        std::vector<std::string> list;
+
+        list.push_back(gfx::Arrow().GetShaderId(env));
+        list.push_back(gfx::ArrowCursor().GetShaderId(env));
+        list.push_back(gfx::BlockCursor().GetShaderId(env));
+        list.push_back(gfx::Capsule().GetShaderId(env));
+        list.push_back(gfx::Circle().GetShaderId(env));
+        list.push_back(gfx::IsoscelesTriangle().GetShaderId(env));
+        list.push_back(gfx::Parallelogram().GetShaderId(env));
+        list.push_back(gfx::Rectangle().GetShaderId(env));
+        list.push_back(gfx::RightTriangle().GetShaderId(env));
+        list.push_back(gfx::RoundRectangle().GetShaderId(env));
+        list.push_back(gfx::Sector().GetShaderId(env));
+        list.push_back(gfx::SemiCircle().GetShaderId(env));
+        list.push_back(gfx::StaticLine().GetShaderId(env));
+        list.push_back(gfx::Trapezoid().GetShaderId(env));
+
+        list.push_back(gfx::SimpleShapeInstance(gfx::ArrowClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::ArrowCursorClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::BlockCursorClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::CapsuleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::CircleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::IsoscelesTriangleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::ParallelogramClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::RectangleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::RightTriangleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::RoundRectangleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::SectorClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::SemiCircleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::StaticLineClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::TrapezoidClass()).GetShaderId(env));
+        TEST_REQUIRE(base::EqualElements(list));
+    }
+
+    // all 2D simple shapes with instancing should use the same shader
+    {
+        gfx::Drawable::Environment env;
+        env.use_instancing = true;
+        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        std::vector<std::string> list;
+
+        list.push_back(gfx::Arrow().GetShaderId(env));
+        list.push_back(gfx::ArrowCursor().GetShaderId(env));
+        list.push_back(gfx::BlockCursor().GetShaderId(env));
+        list.push_back(gfx::Capsule().GetShaderId(env));
+        list.push_back(gfx::Circle().GetShaderId(env));
+        list.push_back(gfx::IsoscelesTriangle().GetShaderId(env));
+        list.push_back(gfx::Parallelogram().GetShaderId(env));
+        list.push_back(gfx::Rectangle().GetShaderId(env));
+        list.push_back(gfx::RightTriangle().GetShaderId(env));
+        list.push_back(gfx::RoundRectangle().GetShaderId(env));
+        list.push_back(gfx::Sector().GetShaderId(env));
+        list.push_back(gfx::SemiCircle().GetShaderId(env));
+        list.push_back(gfx::StaticLine().GetShaderId(env));
+        list.push_back(gfx::Trapezoid().GetShaderId(env));
+
+        list.push_back(gfx::SimpleShapeInstance(gfx::ArrowClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::ArrowCursorClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::BlockCursorClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::CapsuleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::CircleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::IsoscelesTriangleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::ParallelogramClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::RectangleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::RightTriangleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::RoundRectangleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::SectorClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::SemiCircleClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::StaticLineClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::TrapezoidClass()).GetShaderId(env));
+        TEST_REQUIRE(base::EqualElements(list));
+    }
+
+    // 2D simple shaders should change when instancing or mesh changes.
+    {
+        gfx::Drawable::Environment env0;
+        gfx::Drawable::Environment env1;
+
+        env0.use_instancing = false;
+        env1.use_instancing = false;
+        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        TEST_REQUIRE(gfx::Arrow().GetShaderId(env0) == gfx::Arrow().GetShaderId(env1));
+
+        env0.use_instancing = false;
+        env1.use_instancing = true;
+        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        TEST_REQUIRE(gfx::Arrow().GetShaderId(env0) != gfx::Arrow().GetShaderId(env1));
+
+        env0.use_instancing = false;
+        env1.use_instancing = false;
+        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        env1.mesh_type = gfx::Drawable::MeshType::ShardedEffectMesh;
+        TEST_REQUIRE(gfx::Arrow().GetShaderId(env0) != gfx::Arrow().GetShaderId(env1));
+    }
+
+    // other 2D "shapes" GuideGrid, and LineBatch should also use the same simple 2D shader
+    {
+        gfx::Drawable::Environment env0;
+        gfx::Drawable::Environment env1;
+
+        env0.use_instancing = false;
+        env1.use_instancing = false;
+        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        TEST_REQUIRE(gfx::Grid(10, 10).GetShaderId(env0) == gfx::Arrow().GetShaderId(env1));
+
+        env0.use_instancing = false;
+        env1.use_instancing = true;
+        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        TEST_REQUIRE(gfx::Grid(10, 10).GetShaderId(env0) != gfx::Arrow().GetShaderId(env1));
+    }
+
+    {
+        gfx::Drawable::Environment env0;
+        gfx::Drawable::Environment env1;
+
+        env0.use_instancing = false;
+        env1.use_instancing = false;
+        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        TEST_REQUIRE(gfx::LineBatch2D().GetShaderId(env0) == gfx::Arrow().GetShaderId(env1));
+
+        env0.use_instancing = false;
+        env1.use_instancing = true;
+        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        TEST_REQUIRE(gfx::LineBatch2D().GetShaderId(env0) != gfx::Arrow().GetShaderId(env1));
+    }
+    // all 3D shapes should use same shader
+    {
+        gfx::Drawable::Environment env;
+        env.use_instancing = false;
+        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        std::vector<std::string> list;
+
+        list.push_back(gfx::Cube().GetShaderId(env));
+        list.push_back(gfx::Cone().GetShaderId(env));
+        list.push_back(gfx::Cylinder().GetShaderId(env));
+        list.push_back(gfx::Pyramid().GetShaderId(env));
+        list.push_back(gfx::Sphere().GetShaderId(env));
+
+        list.push_back(gfx::SimpleShapeInstance(gfx::CubeClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::ConeClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::CylinderClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::PyramidClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::SphereClass()).GetShaderId(env));
+        TEST_REQUIRE(base::EqualElements(list));
+    }
+
+    // all 3D shapes with instancing should use same shader.
+    {
+
+        gfx::Drawable::Environment env;
+        env.use_instancing = true;
+        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        std::vector<std::string> list;
+
+        list.push_back(gfx::Cube().GetShaderId(env));
+        list.push_back(gfx::Cone().GetShaderId(env));
+        list.push_back(gfx::Cylinder().GetShaderId(env));
+        list.push_back(gfx::Pyramid().GetShaderId(env));
+        list.push_back(gfx::Sphere().GetShaderId(env));
+
+        list.push_back(gfx::SimpleShapeInstance(gfx::CubeClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::ConeClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::CylinderClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::PyramidClass()).GetShaderId(env));
+        list.push_back(gfx::SimpleShapeInstance(gfx::SphereClass()).GetShaderId(env));
+        TEST_REQUIRE(base::EqualElements(list));
+    }
+
+    // Wavefront should use the simple 3D non-instanced shader
+    // todo: we can't test this right now because of the build config
+    // and because of dependency to boost.spirit parser
+    {
+        //gfx::Drawable::Environment env;
+        //env.use_instancing = false;
+        //env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        //TEST_REQUIRE(gfx::WavefrontMesh("foo").GetShaderId(env) == gfx::Cube().GetShaderId(env));
+    }
+
+    // 3D line batch should use the non-instanced 3D simple shader
+    {
+        gfx::Drawable::Environment env0;
+        gfx::Drawable::Environment env1;
+
+        env0.use_instancing = false;
+        env1.use_instancing = false;
+        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        TEST_REQUIRE(gfx::LineBatch3D().GetShaderId(env0) == gfx::Cube().GetShaderId(env1));
+
+        env0.use_instancing = false;
+        env1.use_instancing = true;
+        env0.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        env1.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        TEST_REQUIRE(gfx::LineBatch3D().GetShaderId(env0) != gfx::Cube().GetShaderId(env1));
+    }
+
+    // check polygon mesh shader
+    {
+        gfx::PolygonMeshClass klass;
+        klass.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
+
+        gfx::Drawable::Environment env;
+        env.use_instancing = false;
+        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        TEST_REQUIRE(gfx::PolygonMeshInstance(klass).GetShaderId(env) == gfx::Arrow().GetShaderId(env));
+
+        env.use_instancing = true;
+        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        TEST_REQUIRE(gfx::PolygonMeshInstance(klass).GetShaderId(env) == gfx::Arrow().GetShaderId(env));
+
+        klass.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple3DRenderMesh);
+
+        env.use_instancing = false;
+        env.mesh_type = gfx::Drawable::MeshType::NormalRenderMesh;
+        TEST_REQUIRE(gfx::PolygonMeshInstance(klass).GetShaderId(env) == gfx::Cube().GetShaderId(env));
+
+        klass.SetMeshType(gfx::PolygonMeshClass::MeshType::Model3DRenderMesh);
+        TEST_REQUIRE(gfx::PolygonMeshInstance(klass).GetShaderId(env) != gfx::Cube().GetShaderId(env));
+
+        klass.SetMeshType(gfx::PolygonMeshClass::MeshType::Dimetric2DRenderMesh);
+        TEST_REQUIRE(gfx::PolygonMeshInstance(klass).GetShaderId(env) != gfx::Cube().GetShaderId(env));
+    }
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -1106,6 +1350,7 @@ int test_main(int argc, char* argv[])
     unit_test_particle_engine_data();
     unit_test_polygon_data();
     unit_test_simple_shape_shard_mesh();
+    unit_test_shader_id();
     return 0;
 }
 ) // TEST_MAIN
