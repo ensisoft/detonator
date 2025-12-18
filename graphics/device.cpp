@@ -439,9 +439,6 @@ void GraphicsDevice::Draw(const gfx::Program& program,
     if (myinst)
         myinst->SetFrameStamp(mFrameNumber);
 
-    // this will also call glUseProgram
-    TRACE_CALL("SetUniforms", myprog->ApplyUniformState(program_state));
-
     // this check is fine for any draw case because even when drawing with
     // indices there should be vertex data. if there isn't that means the
     // geometry is dummy, i.e. contains not vertex data.
@@ -449,54 +446,12 @@ void GraphicsDevice::Draw(const gfx::Program& program,
     if (mygeom->IsEmpty())
         return;
 
-    TRACE_CALL("SetRasterState", mDevice->SetRasterState(state));
-
-    // set program texture bindings
-    const auto num_textures = program_state.GetSamplerCount();
-
-    TRACE_BLOCK("BindTextures",
-        for (size_t i=0; i<num_textures; ++i)
-        {
-            const auto& sampler = program_state.GetSamplerSetting(i);
-
-            const auto* texture = static_cast<const gfx::DeviceTexture*>(sampler.texture);
-            // if the program sampler/texture setting is using a discontinuous set of
-            // texture units we might end up with "holes" in the program texture state
-            // and then the texture object is actually a nullptr.
-            if (texture == nullptr)
-                continue;
-
-            texture->SetFrameStamp(mFrameNumber);
-
-            auto texture_min_filter = texture->GetMinFilter();
-            auto texture_mag_filter = texture->GetMagFilter();
-            if (texture_min_filter == dev::TextureMinFilter::Default)
-                texture_min_filter = static_cast<dev::TextureMinFilter>(mDefaultMinTextureFilter);
-            if (texture_mag_filter == dev::TextureMagFilter::Default)
-                texture_mag_filter = static_cast<dev::TextureMagFilter>(mDefaultMagTextureFilter);
-
-            const auto texture_wrap_x = texture->GetWrapX();
-            const auto texture_wrap_y = texture->GetWrapY();
-            const auto texture_name = texture->GetName();
-            const auto texture_unit = i;
-
-            dev::GraphicsDevice::BindWarnings warnings;
-
-            mDevice->BindTexture2D(texture->GetTexture(), myprog->GetProgram(), sampler.name,
-                                   texture_unit, texture_wrap_x, texture_wrap_y,
-                                   texture_min_filter, texture_mag_filter, &warnings);
-
-            if (!texture->IsTransient() && texture->WarnOnce())
-            {
-                if (warnings.force_min_linear)
-                    WARN("Forcing GL_LINEAR on texture without mip maps. [texture='%1']", texture_name);
-                if (warnings.force_clamp_x)
-                    WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
-                if (warnings.force_clamp_y)
-                    WARN("Forcing GL_CLAMP_TO_EDGE on NPOT texture. [texture='%1']", texture_name);
-            }
-        }
+    TRACE_BLOCK("SetUniforms",
+        myprog->ApplyUniformState(program_state);
+        myprog->ApplyTextureState(program_state, mDefaultMinTextureFilter, mDefaultMagTextureFilter);
     );
+
+    TRACE_CALL("SetRasterState", mDevice->SetRasterState(state));
 
     // start drawing geometry.
 

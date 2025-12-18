@@ -167,4 +167,41 @@ namespace gfx
         LongestEdgeBisection
     };
 
+    // Texture minifying filter is used whenever the
+    // pixel being textured maps to an area greater than
+    // one texture element.
+    enum class TextureMinFilter {
+        // Use the texture element nearest to the
+        // center of the pixel (Manhattan distance)
+        Nearest,
+        // Use the weighted average of the four texture
+        // elements that are closest to the pixel.
+        Linear,
+        // Use mips (precomputed) minified textures.
+        // Use the nearest texture element from the nearest
+        // mipmap level
+        Mipmap,
+        // Use mips (precomputed) minified textures.
+        // Use the weighted average of the four texture
+        // elements that are sampled from the closest mipmap level.
+        Bilinear,
+        // Use mips (precomputed) minified textures.
+        // Use the weighted average of the four texture
+        // elements that are sampled from the two nearest mipmap levels.
+        Trilinear
+    };
+
+    // Texture magnifying filter is used whenever the
+    // pixel being textured maps to an area less than
+    // one texture element.
+    enum class TextureMagFilter {
+        // Use the texture element nearest to the center
+        // of the pixel. (Manhattan distance).
+        Nearest,
+        // Use the weighted average of the four texture
+        // elements that are closest to the pixel.
+        Linear
+    };
+
+
 } // namespace
