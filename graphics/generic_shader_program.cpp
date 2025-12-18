@@ -219,7 +219,7 @@ void GenericShaderProgram::InitializeResources(Device& device) const
     // create a temp/dummy shadow map array texture to make
     // sure the driver is happy with shadow sampler being
     // bound to something.
-    if (!mShadingFeatures.test(ShadingFeatures::BasicShadows))
+    if (!mShadingFeatures.test(ShadingFeatures::BasicShadows) && mShadingFeatures.test(ShadingFeatures::BasicLight))
     {
         auto* temp_shadow_map = device.FindTexture("DummyShadowMapArrayTexture");
         if (temp_shadow_map)
@@ -227,6 +227,7 @@ void GenericShaderProgram::InitializeResources(Device& device) const
 
         temp_shadow_map = device.MakeTexture("DummyShadowMapArrayTexture");
         temp_shadow_map->AllocateArray(1, 1, 1, dev::TextureFormat::DepthComponent32f);
+        DEBUG("Initialized dummy shadow map texture.");
     }
 }
 
