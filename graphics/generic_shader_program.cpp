@@ -166,6 +166,9 @@ ShaderSource GenericShaderProgram::GetShader(const Material& material, const Mat
     source.LoadRawSource(fragment_main);
     source.AddShaderSourceUri("shaders/srgb_functions.glsl");
     source.AddShaderSourceUri("shaders/generic_main_fragment_shader.glsl");
+
+    AddDebugInfo(source, env.render_pass);
+    source.AddDebugInfo("Frag ID", material.GetShaderId(env));
     return source;
 }
 ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const
@@ -211,6 +214,9 @@ ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Dra
     source.AddPreprocessorDefinition("DRAWABLE_FLAGS_FLIP_UV_VERTICALLY", static_cast<unsigned>(DrawableFlags::Flip_UV_Vertically));
     source.AddPreprocessorDefinition("DRAWABLE_FLAGS_FLIP_UV_HORIZONTALLY", static_cast<unsigned>(DrawableFlags::Flip_UV_Horizontally));
     source.AddPreprocessorDefinition("DRAWABLE_FLAGS_ENABLE_PERCEPTUAL_3D", static_cast<unsigned>(DrawableFlags::EnablePerceptual3D));
+
+    AddDebugInfo(source, env.render_pass);
+    source.AddDebugInfo("Vertex ID", drawable.GetShaderId(env));
     return source;
 }
 
@@ -458,5 +464,22 @@ float GenericShaderProgram::GetLightProjectionFarPlane(unsigned light_index) con
 {
     return mLights[light_index]->far_plane;
 }
+
+void GenericShaderProgram::AddDebugInfo(ShaderSource &source, RenderPass rp) const
+{
+    source.AddDebugInfo("Pass", base::ToString(rp));
+    if (rp == RenderPass::ColorPass)
+    {
+        source.AddDebugInfo("Lights",    TestFeature(ShadingFeatures::BasicLight) ? "yes" : "no");
+        source.AddDebugInfo("Fog",       TestFeature(ShadingFeatures::BasicFog) ? "yes" : "no");
+        source.AddDebugInfo("Bloom out", TestFeature(OutputFeatures::WriteBloomTarget) ? "yes" : "no");
+        source.AddDebugInfo("Color out", TestFeature(OutputFeatures::WriteColorTarget) ? "yes" : "no");
+    }
+    else if (rp == RenderPass::StencilPass)
+    {
+        source.AddDebugInfo("Color out", TestFeature(OutputFeatures::WriteColorTarget) ? "yes" : "no");
+    }
+}
+
 
 } // namespace
