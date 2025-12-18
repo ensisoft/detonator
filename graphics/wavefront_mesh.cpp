@@ -14,14 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
 #include <map>
 #include <vector>
 
 #include "base/assert.h"
 #include "base/logging.h"
+#include "base/hash.h"
 #include "base/wavefront.h"
 #include "graphics/loader.h"
 #include "graphics/utility.h"
+#include "graphics/shader_code.h"
+#include "graphics/shader_source.h"
 #include "graphics/wavefront_mesh.h"
 
 namespace
@@ -269,20 +274,20 @@ bool WavefrontMesh::Construct(const Environment& env, Device& device, Geometry::
 }
 ShaderSource WavefrontMesh::GetShader(const Environment& env, const Device& device) const
 {
-    return MakeSimple3DVertexShader(device, env.use_instancing);
+    // not supporting effect mesh
+    ASSERT(env.mesh_type == MeshType::NormalRenderMesh);
+    // not supporting instancing
+    ASSERT(env.use_instancing == false);
+
+    return Drawable::CreateShader(env, device, Shader::Simple3D);
 }
 std::string WavefrontMesh::GetShaderId(const Environment& env) const
 {
-    if (env.use_instancing)
-        return "Vertex3DShaderInstanced";
-
-    return "Vertex3DShader";
+    return Drawable::GetShaderId(env, Shader::Simple3D);
 }
 std::string WavefrontMesh::GetShaderName(const Environment& env) const
 {
-    if (env.use_instancing)
-        return "Instanced Vertex3D Shader";
-    return "Vertex3D Shader";
+    return Drawable::GetShaderName(env, Shader::Simple3D);
 }
 std::string WavefrontMesh::GetGeometryId(const Environment& env) const
 {

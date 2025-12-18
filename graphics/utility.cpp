@@ -31,8 +31,6 @@
 #include "graphics/geometry.h"
 #include "graphics/texture.h"
 #include "graphics/vertex.h"
-#include "graphics/shader_source.h"
-#include "graphics/shader_code.h"
 
 namespace gfx
 {
@@ -173,98 +171,6 @@ glm::mat4 MakePerspectiveProjection(FDegrees fov, float aspect, float znear, flo
 glm::mat4 MakePerspectiveProjection(FRadians fov, float aspect, float znear, float zfar)
 {
     return glm::perspective(fov.ToRadians(), aspect, znear, zfar);
-}
-
-ShaderSource MakeSimple2DVertexShader(const gfx::Device& device, bool use_instancing, bool enable_effect)
-{
-    // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
-    // are used to support per particle features.
-    // This shader doesn't provide that data but writes these varyings
-    // nevertheless so that it's possible to use a particle shader enabled
-    // material also with this shader.
-
-    // the vertex model space  is defined in the lower right quadrant in
-    // NDC (normalized device coordinates) (x grows right to 1.0 and
-    // y grows up to 1.0 to the top of the screen).
-
-    ShaderSource source;
-    source.SetType(gfx::ShaderSource::Type::Vertex);
-    if (use_instancing)
-    {
-        source.AddPreprocessorDefinition("INSTANCED_DRAW");
-    }
-    if (enable_effect)
-    {
-        source.LoadRawSource(glsl::vertex_2d_effect);
-        source.AddShaderSourceUri("shaders/vertex_2d_effect.glsl");
-        source.AddPreprocessorDefinition("VERTEX_HAS_SHARD_INDEX_ATTRIBUTE");
-        source.AddPreprocessorDefinition("APPLY_SHARD_MESH_EFFECT");
-        source.AddPreprocessorDefinition("MESH_EFFECT_TYPE_SHARD_EXPLOSION", static_cast<int>(MeshEffectType::ShardedMeshExplosion));
-    }
-
-    source.LoadRawSource(glsl::vertex_base);
-    source.LoadRawSource(glsl::vertex_2d_simple);
-    source.AddShaderName("2D Vertex Shader");
-    source.AddShaderSourceUri("shaders/vertex_base.glsl");
-    source.AddShaderSourceUri("shaders/vertex_2d_simple_shader.glsl");
-    source.AddDebugInfo("Instanced", use_instancing ? "YES" : "NO");
-    source.AddDebugInfo("Effects", enable_effect ? "YES" : "NO");
-    return source;
-}
-
-ShaderSource MakeSimple3DVertexShader(const gfx::Device& device, bool use_instancing)
-{
-    ShaderSource source;
-    source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
-    source.SetType(ShaderSource::Type::Vertex);
-    if (use_instancing)
-    {
-        source.AddPreprocessorDefinition("INSTANCED_DRAW");
-    }
-    source.LoadRawSource(glsl::vertex_base);
-    source.LoadRawSource(glsl::vertex_3d_simple);
-    source.AddShaderName("3D Vertex Shader");
-    source.AddShaderSourceUri("shaders/vertex_base.glsl");
-    source.AddShaderSourceUri("shaders/vertex_3d_simple_shader.glsl");
-    source.AddDebugInfo("Instanced", use_instancing ? "YES" : "NO");
-    return source;
-}
-
-ShaderSource MakeModel3DVertexShader(const gfx::Device& device, bool use_instancing)
-{
-    ShaderSource source;
-    source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
-    source.SetType(ShaderSource::Type::Vertex);
-    if (use_instancing)
-    {
-        source.AddPreprocessorDefinition("INSTANCED_DRAW");
-    }
-    source.LoadRawSource(glsl::vertex_base);
-    source.LoadRawSource(glsl::vertex_3d_model);
-    source.AddShaderName("3D Model Shader");
-    source.AddShaderSourceUri("shaders/vertex_base.glsl");
-    source.AddShaderSourceUri("shaders/vertex_3d_model_shader.glsl");
-    source.AddDebugInfo("Instanced", use_instancing ? "YES" : "NO");
-    return source;
-}
-
-ShaderSource MakePerceptual3DVertexShader(const gfx::Device& device, bool use_instancing)
-{
-    ShaderSource source;
-    source.SetVersion(gfx::ShaderSource::Version::GLSL_300);
-    source.SetType(ShaderSource::Type::Vertex);
-    if (use_instancing)
-    {
-        source.AddPreprocessorDefinition("INSTANCED_DRAW");
-    }
-    source.LoadRawSource(glsl::vertex_base);
-    source.LoadRawSource(glsl::vertex_3d_perceptual);
-    source.AddShaderName("Perceptual 3D Shader");
-    source.AddShaderSourceUri("shaders/vertex_base.glsl");
-    source.AddShaderSourceUri("shaders/vertex_perceptual_3d_shader.glsl");
-    source.AddDebugInfo("Instanced", use_instancing ? "YES" : "NO");
-    return source;
-
 }
 
 } // namespace

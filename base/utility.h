@@ -32,6 +32,7 @@
 #include <set>
 #include <optional>
 #include <tuple>
+#include <initializer_list>
 
 #include "base/assert.h"
 #include "base/platform.h"
@@ -82,6 +83,36 @@ void SwizzleBuffer(void* buffer, size_t bytes)
         }
         std::memcpy(&ptr[i], buffer, sizeof(T));
     }
+}
+
+template<typename T>
+bool EqualElements(const std::initializer_list<T>& elements)
+{
+    if (elements.size() == 0)
+        return true;
+
+    const auto& first_element = elements[0];
+    for (size_t i=1; i<elements.size(); ++i)
+    {
+        if (elements[i] != first_element)
+            return  false;
+    }
+    return true;
+}
+
+template<typename T>
+bool EqualElements(const std::vector<T>& elements)
+{
+    if (elements.empty())
+        return true;
+
+    const auto& first_element = elements[0];
+    for (size_t i=1; i<elements.size(); ++i)
+    {
+        if (elements[i] != first_element)
+            return false;
+    }
+    return true;
 }
 
 template<typename T> inline

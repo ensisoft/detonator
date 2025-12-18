@@ -87,7 +87,10 @@ namespace gfx
 
 std::string ParticleEngineClass::GetShaderId(const Environment& env) const
 {
-    return env.use_instancing ? "instanced-particle-shader" : "particle-shader";
+    std::size_t hash = 0;
+    hash = base::hash_combine(hash, "particle-shader");
+    hash = base::hash_combine(hash, env.use_instancing);
+    return std::to_string(hash);
 }
 
 std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
@@ -107,7 +110,6 @@ ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device
     }
     source.LoadRawSource(glsl::vertex_base);
     source.LoadRawSource(glsl::vertex_2d_particle);
-    source.AddShaderName("2D Particle Shader");
     source.AddShaderSourceUri("shaders/vertex_shader_base.glsl");
     source.AddShaderSourceUri("shaders/vertex_2d_particle_shader.glsl");
     source.AddDebugInfo("Instanced", env.use_instancing ? "YES" : "NO");
@@ -116,7 +118,7 @@ ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device
 
 std::string ParticleEngineClass::GetShaderName(const Environment& env) const
 {
-    return env.use_instancing ? "InstancedParticleShader" : "ParticleShader";
+    return "2D Particle Shader";
 }
 
 bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const InstanceState& state, Geometry::CreateArgs& create) const

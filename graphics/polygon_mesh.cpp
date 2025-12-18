@@ -184,11 +184,27 @@ std::string PolygonMeshClass::GetGeometryId(const Environment& env) const
 
 std::string PolygonMeshClass::GetShaderId(const Environment& env) const
 {
-    size_t hash = 0;
-    hash = base::hash_combine(hash, mMeshType);
+    std::string id;
+    if (mMeshType == MeshType::Simple2DRenderMesh)
+        id = Drawable::GetShaderId(env, Drawable::Shader::Simple2D);
+    else if (mMeshType == MeshType::Simple2DShardEffectMesh)
+        id = Drawable::GetShaderId(env, Drawable::Shader::Simple2D);
+    else if (mMeshType == MeshType::Simple3DRenderMesh)
+        id = Drawable::GetShaderId(env, Drawable::Shader::Simple3D);
+    else if (mMeshType == MeshType::Model3DRenderMesh)
+        id = Drawable::GetShaderId(env, Drawable::Shader::Model3D);
+    else if (mMeshType == MeshType::Dimetric2DRenderMesh)
+        id = Drawable::GetShaderId(env, Drawable::Shader::Perceptual3D);
+    else if (mMeshType == MeshType::Isometric2DRenderMesh)
+        id = Drawable::GetShaderId(env, Drawable::Shader::Perceptual3D);
+    else BUG("Bug on polygon mesh type.");
+
+    if (mShaderSrc.empty())
+        return id;
+
+    std::size_t hash = 0;
+    hash = base::hash_combine(hash, id);
     hash = base::hash_combine(hash, mShaderSrc);
-    hash = base::hash_combine(hash, env.use_instancing);
-    hash = base::hash_combine(hash, env.mesh_type);
     return std::to_string(hash);
 }
 
@@ -197,25 +213,38 @@ std::string PolygonMeshClass::GetShaderName(const Environment& env) const
     if (HasShaderSrc())
         return mName;
 
-    return base::FormatString("%1,%2",
-        env.use_instancing ? "Instanced" : "", mMeshType);
+    if (mMeshType == MeshType::Simple2DRenderMesh)
+        return Drawable::GetShaderName(env, Drawable::Shader::Simple2D);
+    else if (mMeshType == MeshType::Simple2DShardEffectMesh)
+       return Drawable::GetShaderName(env, Drawable::Shader::Simple2D);
+    else if (mMeshType == MeshType::Simple3DRenderMesh)
+        return Drawable::GetShaderName(env, Drawable::Shader::Simple3D);
+    else if (mMeshType == MeshType::Model3DRenderMesh)
+        return Drawable::GetShaderName(env, Drawable::Shader::Model3D);
+    else if (mMeshType == MeshType::Dimetric2DRenderMesh)
+        return Drawable::GetShaderName(env, Drawable::Shader::Perceptual3D);
+    else if (mMeshType == MeshType::Isometric2DRenderMesh)
+        return Drawable::GetShaderName(env, Drawable::Shader::Perceptual3D);
+
+    BUG("Bug on polygon mesh type.");
 }
 
 ShaderSource PolygonMeshClass::GetShader(const Environment& env, const Device& device) const
 {
     ShaderSource src;
-    const auto mesh = GetMeshType();
-    if (mesh == MeshType::Simple2DRenderMesh)
-        src = MakeSimple2DVertexShader(device, env.use_instancing, false);
-    else if (mesh == MeshType::Simple2DShardEffectMesh)
-        src = MakeSimple2DVertexShader(device, env.use_instancing, true);
-    else if (mesh == MeshType::Simple3DRenderMesh)
-        src = MakeSimple3DVertexShader(device, env.use_instancing);
-    else if (mesh == MeshType::Model3DRenderMesh)
-        src = MakeModel3DVertexShader(device, env.use_instancing); // todo:
-    else if (mesh == MeshType::Dimetric2DRenderMesh || mesh == MeshType::Isometric2DRenderMesh)
-        src = MakePerceptual3DVertexShader(device, env.use_instancing);
-    else BUG("No such vertex shader");
+    if (mMeshType == MeshType::Simple2DRenderMesh)
+        src = Drawable::CreateShader(env, device, Drawable::Shader::Simple2D);
+    else if (mMeshType == MeshType::Simple2DShardEffectMesh)
+        src = Drawable::CreateShader(env, device, Drawable::Shader::Simple2D);
+    else if (mMeshType == MeshType::Simple3DRenderMesh)
+        src = Drawable::CreateShader(env, device, Drawable::Shader::Simple3D);
+    else if (mMeshType == MeshType::Model3DRenderMesh)
+        src = Drawable::CreateShader(env, device, Drawable::Shader::Model3D);
+    else if (mMeshType == MeshType::Dimetric2DRenderMesh)
+        src = Drawable::CreateShader(env, device, Drawable::Shader::Perceptual3D);
+    else if (mMeshType == MeshType::Isometric2DRenderMesh)
+        src = Drawable::CreateShader(env, device, Drawable::Shader::Perceptual3D);
+    else BUG("Bug on polygon mesh type.");
 
     if (!mShaderSrc.empty())
     {

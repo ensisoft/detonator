@@ -16,6 +16,7 @@
 
 #include "config.h"
 
+#include "base/assert.h"
 #include "base/utility.h"
 #include "base/format.h"
 #include "base/hash.h"
@@ -36,20 +37,25 @@ bool Grid::ApplyDynamicState(const Environment& env, Device&, ProgramState& prog
     return true;
 }
 
-std::string Grid::GetShaderId(const Environment&) const
+std::string Grid::GetShaderId(const Environment& env) const
 {
-    return "simple-2D-vertex-shader";
+    return Drawable::GetShaderId(env, Shader::Simple2D);
 }
 
-ShaderSource Grid::GetShader(const Environment&, const Device& device) const
+ShaderSource Grid::GetShader(const Environment& env, const Device& device) const
 {
-    constexpr auto enable_effects = false;
-    return MakeSimple2DVertexShader(device, false, enable_effects);
+    // not supporting the effect mesh operation in this render path right now
+    // since it's not needed.
+    ASSERT(env.mesh_type == MeshType::NormalRenderMesh);
+    // we're not supporting instancing.
+    ASSERT(env.use_instancing == false);
+
+    return Drawable::CreateShader(env, device, Shader::Simple2D);
 }
 
 std::string Grid::GetShaderName(const Environment& env) const
 {
-    return "Simple2DVertexShader";
+    return Drawable::GetShaderName(env, Shader::Simple2D);
 }
 
 std::string Grid::GetGeometryId(const Environment& env) const

@@ -14,6 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
+#include "base/assert.h"
+#include "base/hash.h"
+#include "base/format.h"
 #include "graphics/linebatch.h"
 #include "graphics/utility.h"
 #include "graphics/shader_source.h"
@@ -30,20 +35,25 @@ bool LineBatch2D::ApplyDynamicState(const Environment &environment, Device&, Pro
     return true;
 }
 
-ShaderSource LineBatch2D::GetShader(const Environment& environment, const Device& device) const
+ShaderSource LineBatch2D::GetShader(const Environment& env, const Device& device) const
 {
-    constexpr auto enable_effects = false;
-    return MakeSimple2DVertexShader(device, false, enable_effects);
+    // not supporting the effect mesh operation in this render path right now
+    // since it's not needed.
+    ASSERT(env.mesh_type == MeshType::NormalRenderMesh);
+    // we're not supporting instancing.
+    ASSERT(env.use_instancing == false);
+
+    return Drawable::CreateShader(env, device, Shader::Simple2D);
 }
 
-std::string LineBatch2D::GetShaderId(const Environment& environment) const
+std::string LineBatch2D::GetShaderId(const Environment& env) const
 {
-    return "simple-2D-vertex-shader";
+    return Drawable::GetShaderId(env, Shader::Simple2D);
 }
 
-std::string LineBatch2D::GetShaderName(const Environment& environment) const
+std::string LineBatch2D::GetShaderName(const Environment& env) const
 {
-    return "Simple2DVertexShader";
+    return Drawable::GetShaderName(env, Shader::Simple2D);
 }
 
 std::string LineBatch2D::GetGeometryId(const Environment &environment) const
@@ -101,19 +111,25 @@ bool LineBatch3D::ApplyDynamicState(const Environment& environment, Device&, Pro
     return true;
 }
 
-ShaderSource LineBatch3D::GetShader(const Environment& environment, const Device& device) const
+ShaderSource LineBatch3D::GetShader(const Environment& env, const Device& device) const
 {
-    return MakeSimple3DVertexShader(device, false);
+    // not supporting the effect mesh operation in this render path right now
+    // since it's not needed.
+    ASSERT(env.mesh_type == MeshType::NormalRenderMesh);
+    // we're not supporting instancing.
+    ASSERT(env.use_instancing == false);
+
+    return Drawable::CreateShader(env, device, Shader::Simple3D);
 }
 
-std::string LineBatch3D::GetShaderId(const Environment& environment) const
+std::string LineBatch3D::GetShaderId(const Environment& env) const
 {
-    return "simple-3D-vertex-shader";
+    return Drawable::GetShaderId(env, Shader::Simple3D);
 }
 
-std::string LineBatch3D::GetShaderName(const Environment& environment) const
+std::string LineBatch3D::GetShaderName(const Environment& env) const
 {
-    return "Simple3DVertexShader";
+    return Drawable::GetShaderName(env, Shader::Simple3D);
 }
 
 std::string LineBatch3D::GetGeometryId(const Environment& environment) const

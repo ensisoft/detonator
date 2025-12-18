@@ -110,7 +110,7 @@ std::string MaterialClass::GetShaderName(const State& state) const noexcept
         return mName;
     if (IsStatic())
         return mName;
-    return base::FormatString("%1 Shader", mType);
+    return base::FormatString("%1 Material Shader", mType);
 }
 
 size_t MaterialClass::GetShaderHash() const
@@ -216,7 +216,8 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
     }
     hash = base::hash_combine(hash, state.draw_primitive);
     hash = base::hash_combine(hash, state.draw_category);
-    return base::FormatString("%1+%2", mType, hash);
+    hash = base::hash_combine(hash, mType);
+    return std::to_string(hash);
 }
 
 std::size_t MaterialClass::GetHash() const noexcept
@@ -1249,7 +1250,6 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         source.SetType(ShaderSource::Type::Fragment);
         source.LoadRawSource(std::string(beg, end));
         source.AddShaderSourceUri(mShaderUri);
-        source.AddShaderName(mName);
         return source;
     }
 
@@ -1257,13 +1257,8 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     src.SetType(gfx::ShaderSource::Type::Fragment);
     if (IsStatic() || !mShaderSrc.empty())
     {
-        src.AddDebugInfo("Shader", base::FormatString("%1 Shader", mType));
         src.AddDebugInfo("Material Name", mName);
         src.AddDebugInfo("Material ID", mClassId);
-    }
-    else
-    {
-        src.AddDebugInfo("Shader", base::FormatString("%1 Shader", mType));
     }
 
     if (mType == Type::Color)
