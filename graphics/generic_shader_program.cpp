@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "generic_shader_program.h"
-
 #include "config.h"
 
 #include <cstddef>
@@ -28,6 +26,7 @@
 #include "graphics/generic_shader_program.h"
 #include "graphics/renderpass.h"
 #include "graphics/texture.h"
+#include "graphics/shader_code.h"
 
 namespace {
     enum class LightingFlags : uint32_t {
@@ -131,13 +130,13 @@ ShaderSource GenericShaderProgram::GetShader(const Material& material, const Mat
         if (TestFeature(ShadingFeatures::BasicLight))
         {
             source.AddPreprocessorDefinition("ENABLE_BASIC_LIGHT");
-            source.LoadRawSource(basic_light);
+            source.LoadRawSource(glsl::fragment_basic_light);
             source.AddShaderSourceUri("shaders/basic_light.glsl");
         }
         if (TestFeature(ShadingFeatures::BasicFog))
         {
             source.AddPreprocessorDefinition("ENABLE_BASIC_FOG");
-            source.LoadRawSource(basic_fog);
+            source.LoadRawSource(glsl::fragment_basic_fog);
             source.AddShaderSourceUri("shaders/basic_fog.glsl");
         }
 
@@ -162,8 +161,8 @@ ShaderSource GenericShaderProgram::GetShader(const Material& material, const Mat
         source.AddPreprocessorDefinition("FRAGMENT_SHADER_SHADOW_MAP_RENDER_PASS");
     }
 
-    source.LoadRawSource(utility_func);
-    source.LoadRawSource(fragment_main);
+    source.LoadRawSource(glsl::srgb_funcs);
+    source.LoadRawSource(glsl::fragment_main_generic);
     source.AddShaderSourceUri("shaders/srgb_functions.glsl");
     source.AddShaderSourceUri("shaders/generic_main_fragment_shader.glsl");
 
@@ -175,9 +174,6 @@ ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Dra
 {
     // careful here, WebGL shits itself if the source is concatenated together
     // so that the vertex source (with varyings) comes after the main.
-    static const char* vertex_main = {
-#include "shaders/generic_main_vertex_shader.glsl"
-    };
 
     auto source = drawable.GetShader(env, device);
     if (source.GetType() != ShaderSource::Type::Vertex)
@@ -209,7 +205,7 @@ ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Dra
         source.AddPreprocessorDefinition("VERTEX_SHADER_STENCIL_MASK_RENDER_PASS");
     }
 
-    source.LoadRawSource(vertex_main);
+    source.LoadRawSource(glsl::vertex_main_generic);
     source.AddShaderSourceUri("shaders/generic_main_vertex_shader.glsl");
     source.AddPreprocessorDefinition("DRAWABLE_FLAGS_FLIP_UV_VERTICALLY", static_cast<unsigned>(DrawableFlags::Flip_UV_Vertically));
     source.AddPreprocessorDefinition("DRAWABLE_FLAGS_FLIP_UV_HORIZONTALLY", static_cast<unsigned>(DrawableFlags::Flip_UV_Horizontally));

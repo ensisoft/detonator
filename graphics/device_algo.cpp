@@ -31,6 +31,7 @@
 #include "graphics/texture.h"
 #include "graphics/framebuffer.h"
 #include "graphics/utility.h"
+#include "graphics/shader_code.h"
 
 namespace {
 std::unique_ptr<gfx::IBitmap> ReadDepthTexture(const gfx::Texture* depth_texture, gfx::Device* device, bool linear, float near, float far)
@@ -391,12 +392,9 @@ void main() {
     // but the problem with this is that the blurring results vary depending
     // on the size of input texture and a small texture will blur much more
     // on fewer iterations than a large texture.
-    static const char* fragment_src = {
-#include "shaders/fragment_blur_kernel.glsl"
-    };
     auto program = device->FindProgram("BlurProgram");
     if (!program)
-        program = MakeProgram(vertex_src, fragment_src, "BlurProgram", *device);
+        program = MakeProgram(vertex_src, glsl::fragment_blur_kernel, "BlurProgram", *device);
 
     auto quad = gfx::MakeFullscreenQuad(*device);
 

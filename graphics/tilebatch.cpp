@@ -14,9 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
 #include "base/format.h"
 #include "graphics/tilebatch.h"
 #include "graphics/program.h"
+#include "graphics/shader_code.h"
 #include "graphics/shader_source.h"
 #include "graphics/geometry.h"
 
@@ -75,20 +78,13 @@ ShaderSource TileBatch::GetShader(const Environment& env, const Device& device) 
     // a particle vertex shader. However, if a material shader refers to those
     // varyings we might get GLSL program build errors on some platforms.
 
-    const auto shape = ResolveTileShape();
-
-    static constexpr const char*  square_tile_source = {
-#include "shaders/vertex_tilebatch_point_shader.glsl"
-    };
-    static constexpr const char* rectangle_tile_source = {
-#include "shaders/vertex_tilebatch_quad_shader.glsl"
-    };
-
     const char* src = nullptr;
+
+    const auto shape = ResolveTileShape();
     if (shape == TileShape::Square)
-        src = square_tile_source;
+        src = glsl::vertex_2d_point_tile;
     else if (shape == TileShape::Rectangle)
-        src = rectangle_tile_source;
+        src = glsl::vertex_2d_quad_tile;
     else BUG("Missing tile batch shader source.");
 
     ShaderSource source;

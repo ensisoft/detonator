@@ -202,6 +202,8 @@ namespace gfx
             return std::make_shared<Light>(std::move(light));
         }
     private:
+        void AddDebugInfo(ShaderSource& source, RenderPass rp) const;
+    private:
         std::string mProgramName;
         std::string mRendererName;
         std::vector<std::shared_ptr<const Light>> mLights;

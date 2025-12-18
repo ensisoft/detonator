@@ -25,6 +25,7 @@
 #include "data/writer.h"
 #include "graphics/device.h"
 #include "graphics/program.h"
+#include "graphics/shader_code.h"
 #include "graphics/shader_source.h"
 #include "graphics/material_class.h"
 #include "graphics/texture_source.h"
@@ -1252,14 +1253,6 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         return source;
     }
 
-
-    static const char* texture_functions =  {
-#include "shaders/fragment_texture_functions.glsl"
-    };
-    static const char* base_shader = {
-#include "shaders/fragment_shader_base.glsl"
-    };
-
     ShaderSource src;
     src.SetType(gfx::ShaderSource::Type::Fragment);
     if (IsStatic() || !mShaderSrc.empty())
@@ -1275,79 +1268,52 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 
     if (mType == Type::Color)
     {
-        static const char* source = {
-#include "shaders/fragment_color_shader.glsl"
-        };
-
-        src.LoadRawSource(base_shader);
-        src.LoadRawSource(source);
+        src.LoadRawSource(glsl::fragment_base);
+        src.LoadRawSource(glsl::fragment_color_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_color_shader.glsl");
     }
     else if (mType == Type::Gradient)
     {
-        static const char* source = {
-#include "shaders/fragment_gradient_shader.glsl"
-        };
-
-        src.LoadRawSource(base_shader);
-        src.LoadRawSource(source);
+        src.LoadRawSource(glsl::fragment_base);
+        src.LoadRawSource(glsl::fragment_gradient_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_gradient_shader.glsl");
     }
     else if (mType == Type::Sprite)
     {
-        static const char* source = {
-#include "shaders/fragment_sprite_shader.glsl"
-        };
-
-        src.LoadRawSource(base_shader);
-        src.LoadRawSource(texture_functions);
-        src.LoadRawSource(source);
+        src.LoadRawSource(glsl::fragment_base);
+        src.LoadRawSource(glsl::fragment_texture_functions);
+        src.LoadRawSource(glsl::fragment_sprite_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_texture_functions.glsl");
         src.AddShaderSourceUri("shaders/fragment_sprite_shader.glsl");
     }
     else if (mType == Type::Texture)
     {
-        static const char* source =  {
-#include "shaders/fragment_texture_shader.glsl"
-        };
-
-        src.LoadRawSource(base_shader);
-        src.LoadRawSource(texture_functions);
-        src.LoadRawSource(source);
+        src.LoadRawSource(glsl::fragment_base);
+        src.LoadRawSource(glsl::fragment_texture_functions);
+        src.LoadRawSource(glsl::fragment_texture_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_texture_functions.glsl");
         src.AddShaderSourceUri("shaders/fragment_texture_shader.glsl");
     }
     else if (mType == Type::Tilemap)
     {
-        static const char* source = {
-#include "shaders/fragment_tilemap_shader.glsl"
-        };
-
-        src.LoadRawSource(base_shader);
-        src.LoadRawSource(source);
+        src.LoadRawSource(glsl::fragment_base);
+        src.LoadRawSource(glsl::fragment_tilemap_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_tilemap_shader.glsl");
     }
     else if (mType == Type::Particle2D)
     {
-        static const char* source = {
-#include "shaders/fragment_2d_particle_shader.glsl"
-        };
-
-        src.LoadRawSource(source);
+        src.LoadRawSource(glsl::fragment_particle_2d_shader);
         src.AddShaderSourceUri("shaders/fragment_2d_particle_shader.glsl");
     }
     else if (mType == Type::BasicLight)
     {
-        static const char* source = {
-#include "shaders/fragment_basic_light_material_shader.glsl"
-        };
-        src.LoadRawSource(base_shader);
-        src.LoadRawSource(source);
+        src.LoadRawSource(glsl::fragment_base);
+        src.LoadRawSource(glsl::fragment_basic_light_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_basic_light_material_shader.glsl");
     }
