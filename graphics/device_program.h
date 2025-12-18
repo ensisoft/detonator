@@ -23,6 +23,7 @@
 #include <cstddef>
 
 #include "device/graphics.h"
+#include "graphics/enum.h"
 #include "graphics/program.h"
 #include "graphics/device_shader.h"
 
@@ -57,8 +58,10 @@ namespace gfx
         inline void SetFrameStamp(size_t frame_number) const noexcept
         { mFrameNumber = frame_number; }
 
-        bool Build(const std::vector<gfx::ShaderPtr>& shaders);
-        void ApplyUniformState(const gfx::ProgramState& state) const;
+        bool Build(const std::vector<ShaderPtr>& shaders);
+        void ApplyTextureState(const ProgramState& state,
+            TextureMinFilter device_default_min_filter, TextureMagFilter device_default_mag_filter) const;
+        void ApplyUniformState(const ProgramState& state) const;
 
     private:
         dev::GraphicsDevice* mDevice = nullptr;
