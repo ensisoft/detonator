@@ -716,31 +716,25 @@ public:
 
         if (have_printed_info)
         {
-            DEBUG("GL %1 Vendor: %2, %3", driver_version, driver_vendor, driver_renderer);
-            DEBUG("Stencil bits: %1", stencil_bits);
-            DEBUG("Red bits: %1", red_bits);
-            DEBUG("Blue bits: %1", blue_bits);
-            DEBUG("Green bits: %1", green_bits);
-            DEBUG("Alpha bits: %1", alpha_bits);
-            DEBUG("Depth bits: %1", depth_bits);
+            DEBUG("OpenGL %1 Vendor: %2, %3", driver_version, driver_vendor, driver_renderer);
+            DEBUG("Stencil:%1 bits", stencil_bits);
+            DEBUG("Depth: %1 bits", depth_bits);
+            DEBUG("Color R:%1 G:%2 B:%3 A:%4 bits", red_bits, blue_bits, green_bits, alpha_bits);
             DEBUG("Point size: %1-%2", point_size[0], point_size[1]);
             DEBUG("Fragment shader texture units: %1", max_texture_units);
-            DEBUG("Maximum render buffer size %1x%2", max_rbo_size, max_rbo_size);
+            DEBUG("Maximum render buffer size: %1x%2", max_rbo_size, max_rbo_size);
             DEBUG("FBO MSAA samples: %1", max_samples);
             DEBUG("UBO offset alignment: %1", uniform_buffer_offset_alignment);
         }
         else
         {
-            INFO("GL %1 Vendor: %2, %3", driver_version, driver_vendor, driver_renderer);
-            INFO("Stencil bits: %1", stencil_bits);
-            INFO("Red bits: %1", red_bits);
-            INFO("Blue bits: %1", blue_bits);
-            INFO("Green bits: %1", green_bits);
-            INFO("Alpha bits: %1", alpha_bits);
-            INFO("Depth bits: %1", depth_bits);
+            INFO("OpenGL %1 Vendor: %2, %3", driver_version, driver_vendor, driver_renderer);
+            INFO("Stencil:%1 bits", stencil_bits);
+            INFO("Depth: %1 bits", depth_bits);
+            INFO("Color R:%1 G:%2 B:%3 A:%4 bits", red_bits, blue_bits, green_bits, alpha_bits);
             INFO("Point size: %1-%2", point_size[0], point_size[1]);
             INFO("Fragment shader texture units: %1", max_texture_units);
-            INFO("Maximum render buffer size %1x%2", max_rbo_size, max_rbo_size);
+            INFO("Maximum render buffer size: %1x%2", max_rbo_size, max_rbo_size);
             INFO("FBO MSAA samples: %1", max_samples);
             INFO("UBO offset alignment: %1", uniform_buffer_offset_alignment);
         }
