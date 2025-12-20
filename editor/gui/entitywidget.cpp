@@ -3678,20 +3678,6 @@ void EntityWidget::on_dsDepthTest_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
-void EntityWidget::on_dsProject3D_stateChanged(int)
-{
-    UpdateCurrentNodeProperties();
-    DisplayCurrentNodeProperties();
-
-    if (mTransformGizmo != TransformGizmo3D::None)
-    {
-        mTransformGizmo = TransformGizmo3D::None;
-        UpdateGizmos();
-        if (const auto* tool = dynamic_cast<const Transform3DTool*>(mCurrentTool.get()))
-            mCurrentTool.reset();
-    }
-}
-
 void EntityWidget::on_rbSimulation_currentIndexChanged(const QString&)
 {
     UpdateCurrentNodeProperties();
