@@ -129,7 +129,7 @@ namespace gfx
         std::string mName;
         std::shared_ptr<IBitmap> mBitmap;
         base::bitflag<Effect> mEffects;
-        ColorSpace mColorSpace = ColorSpace::Linear;
+        ColorSpace mColorSpace = ColorSpace::sRGB;
     };
 
     template<typename T> inline
