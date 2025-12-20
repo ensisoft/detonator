@@ -101,7 +101,6 @@ namespace gui
         void on_btnAddTextureMap_clicked();
         void on_btnResetTextureMap_clicked();
         void on_btnEditTexture_clicked();
-        void on_btnResetTextureRect_clicked();
         void on_btnSelectTextureRect_clicked();
         void on_textures_itemSelectionChanged();
         void on_textures_customContextMenuRequested(const QPoint&);
@@ -155,10 +154,6 @@ namespace gui
         void on_textureMagFilter_currentIndexChanged(int);
         void on_textureWrapX_currentIndexChanged(int);
         void on_textureWrapY_currentIndexChanged(int);
-        void on_rectX_valueChanged(double value);
-        void on_rectY_valueChanged(double value);
-        void on_rectW_valueChanged(double value);
-        void on_rectH_valueChanged(double value);
         void on_chkAllowPacking_stateChanged(int);
         void on_chkAllowResizing_stateChanged(int);
         void on_chkPreMulAlpha_stateChanged(int);
@@ -182,7 +177,6 @@ namespace gui
 
         void ClearCustomUniforms();
         void ApplyShaderDescription();
-        void SetTextureRect();
         void SetTextureFlags();
         void SetMaterialProperties();
         void ShowMaterialProperties();
