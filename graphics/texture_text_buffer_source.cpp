@@ -16,6 +16,7 @@
 
 #include "config.h"
 
+#include "base/hash.h"
 #include "base/logging.h"
 #include "data/reader.h"
 #include "data/writer.h"
@@ -28,7 +29,7 @@
 namespace gfx
 {
 
-std::shared_ptr<IBitmap> TextureTextBufferSource::GetData() const
+std::shared_ptr<const IBitmap> TextureTextBufferSource::GetData() const
 {
     // since this interface is returning a CPU side bitmap object
     // there's no way to use a texture based (bitmap) font here.

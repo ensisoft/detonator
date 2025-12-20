@@ -127,7 +127,7 @@ Texture* TextureFileSource::Upload(const Environment& env, Device& device) const
     return nullptr;
 }
 
-std::shared_ptr<IBitmap> TextureFileSource::GetData() const
+std::shared_ptr<const IBitmap> TextureFileSource::GetData() const
 {
     DEBUG("Loading texture file. [file='%1']", mFile);
     Image file(mFile);

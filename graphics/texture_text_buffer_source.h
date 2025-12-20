@@ -18,13 +18,16 @@
 
 #include "config.h"
 
-#include "base/hash.h"
+#include <string>
+#include <memory>
+
+#include "base/bitflag.h"
+#include "base/utility.h"
 #include "graphics/text_buffer.h"
 #include "graphics/texture_source.h"
 
 namespace gfx
 {
-
     // Rasterize text buffer and provide as a texture source.
     class TextureTextBufferSource : public TextureSource
     {
@@ -58,15 +61,15 @@ namespace gfx
         void SetEffect(Effect effect, bool on_off) override
         { mEffects.set(effect, on_off); }
 
-        std::shared_ptr<IBitmap> GetData() const override;
+        std::shared_ptr<const IBitmap> GetData() const override;
         std::size_t GetHash() const override;
         Texture* Upload(const Environment&env, Device& device) const override;
         void IntoJson(data::Writer& data) const override;
         bool FromJson(const data::Reader& data) override;
 
-        gfx::TextBuffer& GetTextBuffer()
+        TextBuffer& GetTextBuffer()
         { return mTextBuffer; }
-        const gfx::TextBuffer& GetTextBuffer() const
+        const TextBuffer& GetTextBuffer() const
         { return mTextBuffer; }
 
         void SetTextBuffer(const TextBuffer& text)
@@ -74,7 +77,7 @@ namespace gfx
         void SetTextBuffer(TextBuffer&& text)
         { mTextBuffer = std::move(text); }
     protected:
-        virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
+        std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
         {
             auto ret = std::make_unique<TextureTextBufferSource>(*this);
             ret->mId = std::move(id);

@@ -56,7 +56,7 @@ namespace gfx
         }
         void SetName(const std::string& name) override
         { mName = name; }
-        std::shared_ptr<IBitmap> GetData() const override
+        std::shared_ptr<const IBitmap> GetData() const override
         { return nullptr; }
         Texture* Upload(const Environment& env, Device& device) const override;
         void IntoJson(data::Writer& data) const override;
