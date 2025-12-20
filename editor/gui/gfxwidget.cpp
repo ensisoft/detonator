@@ -157,6 +157,13 @@ void GfxWindow::SetCursorColor(const gfx::Color4f& color, CursorShape shape)
 
 void GfxWindow::dispose()
 {
+    if (mContextMenu)
+    {
+        VERBOSE("GfxWidget dispose with context menu open");
+        mContextMenu.reset();
+        mContextMenuLoop.quit();
+    }
+
     if (!mContext)
         return;
 
@@ -271,6 +278,11 @@ void GfxWindow::paintGL()
         mCustomGraphicsPainter->SetViewport(0, 0, surface_width, surface_height);
         mCustomGraphicsPainter->SetSurfaceSize(surface_width, surface_height);
         mCustomGraphicsPainter->ResetViewMatrix();
+
+        if (mContextMenu)
+        {
+            mContextMenu->Render(*mCustomGraphicsPainter);
+        }
     }
 
     mTimeAccum += dt;
@@ -387,6 +399,31 @@ void GfxWindow::SetCursorShape(CursorShape shape)
     mCursorShape = shape;
 }
 
+void GfxWindow::SetContextMenu(std::unique_ptr<GfxMenu> menu)
+{
+    // if the event loop processing escapes and lets the user invoke an action
+    // that would result in opening a context menu while the menu is already
+    // open we're going to ignore that for now. (Better than foot gunning the
+    // whole foot off...)
+    if (mContextMenu)
+        return;
+
+    const auto surface_width = width();
+    const auto surface_height = height();
+
+    mContextMenu = std::move(menu);
+    mContextMenu->Initialize(QRect(0, 0, surface_width, surface_height));
+    mContextMenuLoop.exec();
+    if (!mContextMenu)
+        return;
+
+    if (auto* result = mContextMenu->GetResult())
+    {
+        result->trigger();
+    }
+    mContextMenu.reset();
+}
+
 void GfxWindow::doInit()
 {
     if (WindowMouseCursor == MouseCursor::Native)
@@ -466,19 +503,50 @@ void GfxWindow::doInit()
 
 void GfxWindow::mouseMoveEvent(QMouseEvent* mickey)
 {
-    onMouseMove(mickey);
+    if (mContextMenu)
+    {
+        mContextMenu->MouseMove(mickey);
+    }
+    else
+    {
+        onMouseMove(mickey);
+    }
 }
 void GfxWindow::mousePressEvent(QMouseEvent* mickey)
 {
-    onMousePress(mickey);
+    if (mContextMenu)
+    {
+        mContextMenu->MousePress(mickey);
+    }
+    else
+    {
+        onMousePress(mickey);
+    }
 }
 void GfxWindow::mouseReleaseEvent(QMouseEvent* mickey)
 {
-    onMouseRelease(mickey);
+    if (mContextMenu)
+    {
+        mContextMenu->MouseRelease(mickey);
+        mContextMenuLoop.exit();
+    }
+    else
+    {
+        onMouseRelease(mickey);
+    }
 }
 
 void GfxWindow::keyPressEvent(QKeyEvent* key)
 {
+    if (mContextMenu)
+    {
+        if (key->key() == Qt::Key_Escape)
+        {
+            mContextMenuLoop.exit();
+        }
+        return;
+    }
+
     // the Qt documents don't say anything regarding QWindow::keyPressEvent
     // whether the base class implementation should be called or not.
     // However, there seems to be some occasional hiccups with keyboard
@@ -493,13 +561,23 @@ void GfxWindow::keyPressEvent(QKeyEvent* key)
 
 void GfxWindow::keyReleaseEvent(QKeyEvent* key)
 {
+    if (mContextMenu)
+        return;
+
     if (onKeyRelease(key))
         QWindow::keyReleaseEvent(key);
 }
 
 void GfxWindow::wheelEvent(QWheelEvent* wheel)
 {
-    onMouseWheel(wheel);
+    if (mContextMenu)
+    {
+        mContextMenu->MouseWheel(wheel);
+    }
+    else
+    {
+        onMouseWheel(wheel);
+    }
 }
 
 void GfxWindow::focusInEvent(QFocusEvent* event)
@@ -510,6 +588,11 @@ void GfxWindow::focusInEvent(QFocusEvent* event)
 void GfxWindow::focusOutEvent(QFocusEvent* event)
 {
     //DEBUG("GfxWindow lost focus.");
+    if (mContextMenu)
+    {
+        mContextMenu.reset();
+        mContextMenuLoop.quit();
+    }
     mHasFocus = false;
 }
 
@@ -767,6 +850,13 @@ void GfxWidget::SetFocus()
         this->activateWindow();
         this->setFocus();
     });
+}
+
+void GfxWidget::OpenContextMenu(const QPoint& position, GfxMenu menu)
+{
+    auto m = std::make_unique<GfxMenu>(std::move(menu));
+    m->SetMenuPosition(position);
+    mWindow->SetContextMenu(std::move(m));
 }
 
 void GfxWidget::TranslateZoomInOut(QWheelEvent* wheel)

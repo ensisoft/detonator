@@ -26,6 +26,7 @@
 #  include <QPalette>
 #  include <QImage>
 #  include <QTimer>
+#  include <QEventLoop>
 #include "warnpop.h"
 
 #include <memory>
@@ -36,6 +37,7 @@
 #include "graphics/painter.h"
 #include "graphics/device.h"
 #include "graphics/color4f.h"
+#include "editor/gui/gfxmenu.h"
 
 namespace gui
 {
@@ -121,6 +123,8 @@ namespace gui
 
         void SetCursorShape(CursorShape shape);
 
+        void SetContextMenu(std::unique_ptr<GfxMenu> menu);
+
         CursorShape GetCursorShape() const
         { return mCursorShape; }
 
@@ -195,7 +199,8 @@ namespace gui
         double mTimeStamp = 0.0;
         double mTimeAccum = 0.0;
         CursorShape mCursorShape = CursorShape::ArrowCursor;
-
+        std::unique_ptr<GfxMenu> mContextMenu;
+        QEventLoop mContextMenuLoop;
     private:
         std::shared_ptr<QOpenGLContext> mContext;
     private:
@@ -288,6 +293,8 @@ namespace gui
         bool HasInputFocus() const;
 
         void SetFocus();
+
+        void OpenContextMenu(const QPoint& position, GfxMenu menu);
 
     public slots:
         void dispose();
