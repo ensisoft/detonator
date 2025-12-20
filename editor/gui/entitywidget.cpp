@@ -1781,7 +1781,7 @@ void EntityWidget::InitializeSettings(const UISettings& settings)
     // hack for a hack
     QTimer::singleShot(0, this, [this]() {
         QList<int> sizes;
-        sizes << mUI.leftLayout->sizeHint().width();
+        sizes << mUI.leftLayout->sizeHint().width() + 150;
         sizes << mUI.center->sizeHint().width();
         sizes << mUI.rightSplitter->sizeHint().width() + 150;
         mUI.mainSplitter->setSizes(sizes);
@@ -1793,7 +1793,6 @@ void EntityWidget::SetViewerMode()
     SetVisible(mUI.baseProperties,  false);
     SetVisible(mUI.scripting,       false);
     SetVisible(mUI.animator,        false);
-    SetVisible(mUI.entity,          false);
     SetVisible(mUI.scrollArea,      false);
     SetVisible(mUI.transform,       false);
     SetVisible(mUI.lblHelp,         false);
