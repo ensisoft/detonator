@@ -360,26 +360,34 @@ public:
                 const auto val = variant.toInt(&success);
                 if (!success)
                     return false;
-                var.SetValue(val);
+
+                auto& array = var.GetArray<int>();
+                array[0] = val;
             }
             else if (type == game::ScriptVar::Type::Float)
             {
                 const auto val = variant.toFloat(&success);
                 if (!success)
                     return false;
-                var.SetValue(val);
+
+                auto& array = var.GetArray<float>();
+                array[0] = val;
             }
             else if (type == game::ScriptVar::Type::Boolean)
             {
                 const auto val = variant.toBool();
-                var.SetValue(val);
+
+                auto& array = var.GetArray<bool>();
+                array[0] = val;
             }
             else if (type == game::ScriptVar::Type::String)
             {
                 const auto val = variant.toString();
                 if (val.isNull())
                     return false;
-                var.SetValue(app::ToUtf8(val));
+
+                auto& array = var.GetArray<std::string>();
+                array[0] = app::ToUtf8(val);
             }
             else return false;
         }
