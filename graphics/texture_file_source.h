@@ -65,7 +65,7 @@ namespace gfx
 
         std::string GetGpuId() const override;
         std::size_t GetHash() const override;
-        std::shared_ptr<IBitmap> GetData() const override;
+        std::shared_ptr<const IBitmap> GetData() const override;
         Texture* Upload(const Environment& env, Device& device) const override;
 
         void IntoJson(data::Writer& data) const override;
@@ -82,7 +82,7 @@ namespace gfx
         void SetFlag(Flags flag, bool on_off)
         { mFlags.set(flag, on_off); }
     protected:
-        virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
+        std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
         {
             auto ret = std::make_unique<TextureFileSource>(*this);
             ret->mId = std::move(id);

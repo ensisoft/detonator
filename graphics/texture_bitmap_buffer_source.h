@@ -70,7 +70,7 @@ namespace gfx
         { return mName; }
         void SetName(const std::string& name) override
         { mName = name; }
-        std::shared_ptr<IBitmap> GetData() const override
+        std::shared_ptr<const IBitmap> GetData() const override
         { return mBitmap; }
         void SetEffect(Effect effect, bool on_off) override
         { mEffects.set(effect, on_off); }

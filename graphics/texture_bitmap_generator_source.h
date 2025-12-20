@@ -67,7 +67,7 @@ namespace gfx
         { mName = name; }
         void SetEffect(Effect effect, bool on_off) override
         { mEffects.set(effect, on_off); }
-        std::shared_ptr<IBitmap> GetData() const override
+        std::shared_ptr<const IBitmap> GetData() const override
         { return mGenerator->Generate(); }
 
         Texture* Upload(const Environment& env, Device& device) const override;

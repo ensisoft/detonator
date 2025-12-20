@@ -93,7 +93,7 @@ namespace gfx
         // Generate or load the data as a bitmap. If there's a content
         // error this function should return empty shared pointer.
         // The returned bitmap can be potentially immutably shared.
-        virtual std::shared_ptr<IBitmap> GetData() const = 0;
+        virtual std::shared_ptr<const IBitmap> GetData() const = 0;
         // Create a texture out of the texture source on the device.
         // Returns a texture object on success of nullptr on error.
         virtual Texture* Upload(const Environment& env, Device& device) const = 0;
@@ -109,16 +109,16 @@ namespace gfx
         virtual void FinishPacking(const TexturePacker* packer) {}
 
         // Create a similar clone of this texture source but with a new unique ID.
-        inline std::unique_ptr<TextureSource> Clone() const
+        std::unique_ptr<TextureSource> Clone() const
         {
             return this->MakeCopy(base::RandomString(10));
         }
         // Create an exact bitwise copy of this texture source object.
-        inline std::unique_ptr<TextureSource> Copy() const
+        std::unique_ptr<TextureSource> Copy() const
         {
             return this->MakeCopy(GetId());
         }
-        inline bool TestEffect(Effect effect) const
+        bool TestEffect(Effect effect) const
         { return GetEffects().test(effect); }
 
     protected:
