@@ -720,6 +720,8 @@ if (BUILD_QT_STUFF)
         editor/gui/dlgmigrationlog.cpp
         editor/gui/gfxwidget.h
         editor/gui/gfxwidget.cpp
+        editor/gui/gfxmenu.h
+        editor/gui/gfxmenu.cpp
         editor/gui/mainwidget.h
         editor/gui/mainwindow.h
         editor/gui/mainwindow.cpp
@@ -980,6 +982,7 @@ if (BUILD_QT_STUFF)
             editor/app/utility.cpp
             editor/app/eventlog.cpp
             editor/gui/gfxwidget.cpp
+            editor/gui/gfxmenu.cpp
             editor/gui/settings.cpp
             editor/gui/unit_test/unit_test.cpp
             editor/gui/collapsible_widget.h
