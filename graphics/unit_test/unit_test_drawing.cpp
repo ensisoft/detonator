@@ -611,7 +611,7 @@ void unit_test_material_textures()
         const auto& texture = device.GetTexture(0);
         TEST_REQUIRE(texture.GetHeight() == 80);
         TEST_REQUIRE(texture.GetWidth() == 100);
-        TEST_REQUIRE(texture.GetFormat() == gfx::Texture::Format::RGB);
+        TEST_REQUIRE(texture.GetFormat() == gfx::Texture::Format::sRGB);
         TEST_REQUIRE(texture.GetMinFilter() == gfx::Texture::MinFilter::Trilinear);
         TEST_REQUIRE(texture.GetMagFilter() == gfx::Texture::MagFilter::Nearest);
         TEST_REQUIRE(texture.GetWrapX() == gfx::Texture::Wrapping::Clamp);
