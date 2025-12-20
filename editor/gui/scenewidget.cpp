@@ -1358,12 +1358,12 @@ void SceneWidget::on_fogDensity_valueChanged()
     SetSceneFog();
 }
 
-void SceneWidget::on_translateX_valueChanged()
+void SceneWidget::on_translateX_valueChanged(double)
 {
     const float value = GetValue(mUI.translateX);
     mState.camera_offset_x = -value;
 }
-void SceneWidget::on_translateY_valueChanged()
+void SceneWidget::on_translateY_valueChanged(double)
 {
     const float value = GetValue(mUI.translateY);
     mState.camera_offset_y = -value;

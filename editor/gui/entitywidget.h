@@ -225,7 +225,6 @@ namespace gui
         void on_dsFog3D_stateChanged(int);
         void on_dsDoubleSided_stateChanged(int);
         void on_dsDepthTest_stateChanged(int);
-        void on_dsProject3D_stateChanged(int);
         void on_rbSimulation_currentIndexChanged(const QString&);
         void on_rbShape_currentIndexChanged(const QString&);
         void on_rbPolygon_currentIndexChanged(const QString&);
