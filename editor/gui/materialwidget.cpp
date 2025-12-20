@@ -197,9 +197,6 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
 
     SetValue(mUI.zoom, 1.0f);
 
-    // hide this for now.
-    SetVisible(mUI.textureRect, false);
-
     mModelRotationTotal.x = glm::radians(-45.0f);
     mModelRotationTotal.y = glm::radians(15.0f);
 
@@ -290,7 +287,6 @@ void MaterialWidget::SetViewerMode()
     SetVisible(mUI.textureWrap,       false);
     SetVisible(mUI.textureMaps,       false);
     SetVisible(mUI.textureProp,       false);
-    SetVisible(mUI.textureRect,       false);
     SetVisible(mUI.textureMap,        false);
     SetVisible(mUI.scrollArea,        false);
 
@@ -1073,16 +1069,6 @@ void MaterialWidget::on_btnEditTexture_clicked()
     }
 }
 
-void MaterialWidget::on_btnResetTextureRect_clicked()
-{
-    if (auto* src = GetSelectedTextureSrc())
-    {
-        mMaterial->SetTextureRect(src->GetId(), gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
-
-        ShowTextureProperties();
-    }
-}
-
 void MaterialWidget::on_btnSelectTextureRect_clicked()
 {
     if (auto* src = GetSelectedTextureSrc())
@@ -1454,22 +1440,7 @@ void MaterialWidget::on_textureWrapY_currentIndexChanged(int)
 {
     SetMaterialProperties();
 }
-void MaterialWidget::on_rectX_valueChanged(double value)
-{
-    SetTextureRect();
-}
-void MaterialWidget::on_rectY_valueChanged(double value)
-{
-    SetTextureRect();
-}
-void MaterialWidget::on_rectW_valueChanged(double value)
-{
-    SetTextureRect();
-}
-void MaterialWidget::on_rectH_valueChanged(double value)
-{
-    SetTextureRect();
-}
+
 void MaterialWidget::on_chkAllowPacking_stateChanged(int)
 {
     SetTextureFlags();
@@ -2291,18 +2262,6 @@ void MaterialWidget::ApplyShaderDescription()
     INFO("Loaded shader description '%1'", uri);
 }
 
-void MaterialWidget::SetTextureRect()
-{
-    if (auto* src = GetSelectedTextureSrc())
-    {
-        const gfx::FRect rect(GetValue(mUI.rectX),
-                              GetValue(mUI.rectY),
-                              GetValue(mUI.rectW),
-                              GetValue(mUI.rectH));
-        mMaterial->SetTextureRect(src->GetId(), rect);
-    }
-}
-
 void MaterialWidget::SetTextureFlags()
 {
     if (auto* source = GetSelectedTextureSrc())
@@ -2535,7 +2494,6 @@ void MaterialWidget::ShowMaterialProperties()
     SetEnabled(mUI.textureMaps,        false);
     SetEnabled(mUI.textureMap,         false);
     SetEnabled(mUI.textureProp,        false);
-    SetEnabled(mUI.textureRect,        false);
     SetEnabled(mUI.btnAddShader,       false);
     SetEnabled(mUI.btnResetShader,     false);
 
@@ -2876,12 +2834,6 @@ void MaterialWidget::ShowTextureProperties()
     SetEnabled(mUI.chkDetectEdges,    false);
     SetEnabled(mUI.cmbColorSpace,     false);
 
-    SetEnabled(mUI.textureRect, false);
-    SetValue(mUI.rectX, 0.0f);
-    SetValue(mUI.rectY, 0.0f);
-    SetValue(mUI.rectW, 1.0f);
-    SetValue(mUI.rectH, 1.0f);
-
     mUI.sprite->SetSelectedTextureId("");
 
     const auto* source = GetSelectedTextureSrc();
@@ -2891,7 +2843,6 @@ void MaterialWidget::ShowTextureProperties()
     mUI.sprite->SetSelectedTextureId(source->GetId());
 
     SetEnabled(mUI.textureProp,    true);
-    SetEnabled(mUI.textureRect,    true);
 
     if (const auto bitmap = source->GetData())
     {
@@ -2906,10 +2857,6 @@ void MaterialWidget::ShowTextureProperties()
     } else WARN("Failed to load texture preview.");
 
     const auto& rect = mMaterial->FindTextureRect(source->GetId());
-    SetValue(mUI.rectX,             rect.GetX());
-    SetValue(mUI.rectY,             rect.GetY());
-    SetValue(mUI.rectW,             rect.GetWidth());
-    SetValue(mUI.rectH,             rect.GetHeight());
     SetValue(mUI.textureSourceID,   source->GetId());
     SetValue(mUI.textureSourceName, source->GetName());
     SetValue(mUI.textureSourceFile, QString("N/A"));
