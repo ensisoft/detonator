@@ -320,20 +320,20 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override
     {
         if (index.column() == 0)
-            return Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled;
+            return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
 
         const auto& var = mState.entity->GetScriptVar(index.row());
         if (var.IsArray())
-            return Qt::ItemIsEnabled;
+            return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
         const auto type = var.GetType();
         if (type == game::ScriptVar::Type::Integer ||
             type == game::ScriptVar::Type::String ||
             type == game::ScriptVar::Type::Float ||
             type == game::ScriptVar::Type::Boolean)
-            return Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled;
+            return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
 
-        return Qt::ItemIsEnabled;
+        return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     }
     bool setData(const QModelIndex& index, const QVariant& variant, int role) override
     {
@@ -465,19 +465,19 @@ private:
             case game::ScriptVar::Type::Boolean:
                 if (!var.IsArray())
                     return var.GetValue<bool>();
-                return QString("[0]=%1 ...").arg(var.GetArray<bool>()[0]);
+                return QString("%1 ...").arg(var.GetArray<bool>()[0]);
             case game::ScriptVar::Type::String:
                 if (!var.IsArray())
                     return app::FromUtf8(var.GetValue<std::string>());
-                return QString("[0]='%1' ...").arg(app::FromUtf8(var.GetArray<std::string>()[0]));
+                return QString("'%1' ...").arg(app::FromUtf8(var.GetArray<std::string>()[0]));
             case game::ScriptVar::Type::Float:
                 if (!var.IsArray())
                     return QString::number(var.GetValue<float>(), 'f', 2);
-                return QString("[0]=%1 ...").arg(QString::number(var.GetArray<float>()[0], 'f', 2));
+                return QString("%1 ...").arg(QString::number(var.GetArray<float>()[0], 'f', 2));
             case game::ScriptVar::Type::Integer:
                 if (!var.IsArray())
                     return var.GetValue<int>();
-                return QString("[0]=%1 ...").arg(var.GetArray<int>()[0]);
+                return QString("%1 ...").arg(var.GetArray<int>()[0]);
             case game::ScriptVar::Type::Color:
             {
                 if (!var.IsArray())
@@ -486,7 +486,7 @@ private:
                     return app::toString(base::ToHex(color));
                 }
                 const auto& color = var.GetArray<game::Color4f>()[0];
-                return app::toString("[0]=%1 ...", base::ToHex(color));
+                return app::toString("%1 ...", base::ToHex(color));
             }
             break;
 
@@ -498,7 +498,7 @@ private:
                             .arg(QString::number(val.y, 'f', 2));
                 } else {
                     const auto& val = var.GetArray<glm::vec2>()[0];
-                    return QString("[0]=[%1,%2] ...")
+                    return QString("[%1,%2] ...")
                             .arg(QString::number(val.x, 'f', 2))
                             .arg(QString::number(val.y, 'f', 2));
                 }
@@ -512,7 +512,7 @@ private:
                             .arg(QString::number(val.z, 'f', 2));
                 } else {
                     const auto& val = var.GetArray<glm::vec3>()[0];
-                    return QString("[0]=[%1,%2,%3] ...")
+                    return QString("[%1,%2,%3] ...")
                             .arg(QString::number(val.x, 'f', 2))
                             .arg(QString::number(val.y, 'f', 2))
                             .arg(QString::number(val.z, 'f', 2));
@@ -528,7 +528,7 @@ private:
                             .arg(QString::number(val.w, 'f', 2));
                 } else {
                     const auto& val = var.GetArray<glm::vec4>()[0];
-                    return QString("[0]=[%1,%2,%3,%4] ...")
+                    return QString("[%1,%2,%3,%4] ...")
                             .arg(QString::number(val.x, 'f', 2))
                             .arg(QString::number(val.y, 'f', 2))
                             .arg(QString::number(val.z, 'f', 2))
@@ -545,15 +545,15 @@ private:
                 } else {
                     const auto& val = var.GetArray<game::ScriptVar::EntityNodeReference>()[0];
                     if (const auto* node = mState.entity->FindNodeById(val.id))
-                        return QString("[0]=%1 ...").arg(app::FromUtf8(node->GetName()));
-                    return "[0]=Nil ...";
+                        return QString("%1 ...").arg(app::FromUtf8(node->GetName()));
+                    return "Nil ...";
                 }
                 break;
             case game::ScriptVar::Type::EntityReference:
                 if (!var.IsArray()) {
                     return "Nil";
                 } else {
-                    return "[0]=Nil ...";
+                    return "Nil ...";
                 }
                 break;
 
@@ -566,8 +566,8 @@ private:
                 } else {
                     const auto& val = var.GetArray<game::ScriptVar::MaterialReference>()[0];
                     if (const auto& material = mState.workspace->FindMaterialClassById(val.id))
-                        return toString("[0]=%1 ...", material->GetName());
-                    return "[0]=Nil ...";
+                        return toString("%1 ...", material->GetName());
+                    return "Nil ...";
                 }
                 break;
         }
@@ -4681,6 +4681,16 @@ void EntityWidget::on_scriptVarList_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionScriptVarEdit);
     menu.addAction(mUI.actionScriptVarDel);
     menu.exec(QCursor::pos());
+}
+
+void EntityWidget::on_scriptVarList_doubleClicked(const QModelIndex&)
+{
+    // warning, double click action can also be one of the edit
+    // triggers. the edit trigger is set in the UI designer.
+    // In fact the "click" and "double click" edit actions totally
+    // don't work with the idea of using double click to open
+    // the edit dialog.
+    on_btnEditScriptVar_clicked();
 }
 
 void EntityWidget::on_jointList_customContextMenuRequested(QPoint)

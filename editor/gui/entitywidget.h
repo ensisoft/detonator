@@ -346,6 +346,7 @@ namespace gui
         void on_animator_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);
         void on_scriptVarList_customContextMenuRequested(QPoint);
+        void on_scriptVarList_doubleClicked(const QModelIndex&);
         void on_jointList_customContextMenuRequested(QPoint);
         void on_trackList_customContextMenuRequested(QPoint);
 
