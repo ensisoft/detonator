@@ -23,6 +23,7 @@
 namespace gfx
 {
     class TextBuffer;
+    class IBitmap;
 
     // Material instance that represents an instance of some material class.
     class MaterialInstance : public Material
@@ -125,6 +126,10 @@ namespace gfx
     MaterialInstance CreateMaterialFromText(const TextBuffer& text);
     MaterialInstance CreateMaterialFromText(TextBuffer&& text);
     MaterialInstance CreateMaterialFromTexture(Texture* texture);
+    MaterialInstance CreateMaterialFromBitmap(std::unique_ptr<IBitmap> bitmap,
+        std::string bitmap_gpu_id, std::string bitmap_name = "");
+    MaterialInstance CreateMaterialFromBitmap(std::shared_ptr<const IBitmap> bitmap,
+        std::string bitmap_gpu_id, std::string bitmap_name = "");
 
     std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass);
     std::unique_ptr<Material> CreateMaterialInstance(MaterialClass&& klass);

@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include <string>
+#include <memory>
 
 #include "graphics/types.h"
 #include "graphics/color4f.h"
@@ -63,6 +64,7 @@ namespace gfx
 class Painter;
 class Material;
 class Drawable;
+class IBitmap;
 
 // Draw text inside the given rectangle.
 bool DrawTextRect(Painter& painter,
@@ -74,6 +76,13 @@ bool DrawTextRect(Painter& painter,
     unsigned alignment = TextAlign::AlignVCenter | TextAlign::AlignHCenter,
     unsigned properties = TextProp::None,
     float line_height = 1.0f);
+
+bool DrawHLine(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
+
+bool DrawBitmap(Painter& painter, const FRect& rect, std::unique_ptr<IBitmap> bitmap,
+    std::string bitmap_gpu_id, std::string bitmap_name = "");
+bool DrawBitmap(Painter& painter, const FRect& rect, std::shared_ptr<const IBitmap> bitmap,
+    std::string bitmap_gpu_id, std::string bitmap_name = "");
 
 // Draw a rectangle filled with the desired color or material.
 bool FillRect(Painter& painter, const FRect& rect, const Color4f& color);
