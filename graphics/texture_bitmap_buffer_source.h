@@ -52,7 +52,7 @@ namespace gfx
         TextureBitmapBufferSource(const TextureBitmapBufferSource& other)
           : mId(other.mId)
           , mName(other.mName)
-          , mBitmap(other.mBitmap->Clone())
+          , mBitmap(other.mBitmap)
           , mEffects(other.mEffects)
           , mColorSpace(other.mColorSpace)
         {}
@@ -127,7 +127,7 @@ namespace gfx
     private:
         std::string mId;
         std::string mName;
-        std::shared_ptr<IBitmap> mBitmap;
+        std::shared_ptr<const IBitmap> mBitmap;
         base::bitflag<Effect> mEffects;
         ColorSpace mColorSpace = ColorSpace::sRGB;
     };
