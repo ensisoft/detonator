@@ -105,18 +105,21 @@ void DarkStyle::polish(QPalette &palette)
     }
     else if (style == "DETONATOR")
     {
-        //palette.setColor(QPalette::Base, QColor(83, 83, 83));
+        palette.setColor(QPalette::Window, QColor("#3a3a3a"));
         palette.setColor(QPalette::Base, QColor("#232323"));
         palette.setColor(QPalette::Text, QColor(220, 220, 220));
+        palette.setColor(QPalette::Disabled, QPalette::Text, QColor("#555"));
         palette.setColor(QPalette::Highlight, QColor("#b78620"));
-        palette.setColor(QPalette::AlternateBase, QColor(183, 134, 32, 40));
+        palette.setColor(QPalette::AlternateBase, QColor(183, 134, 32, 51));
     }
     else if (style == "Cyber Punk")
     {
+        palette.setColor(QPalette::Window, QColor("#1e1e1e"));
         palette.setColor(QPalette::Base, QColor("#232323"));
         palette.setColor(QPalette::Text, QColor(220, 220, 220));
+        palette.setColor(QPalette::Disabled, QPalette::Text, QColor("#555"));
         palette.setColor(QPalette::Highlight, QColor("#00c8ff"));
-        palette.setColor(QPalette::AlternateBase, QColor(183, 134, 32, 40));
+        palette.setColor(QPalette::AlternateBase, QColor(0, 200, 255, 51));
     }
 }
 
