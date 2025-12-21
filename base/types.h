@@ -530,6 +530,37 @@ namespace base
             mX -= other.mX;
             mY -= other.mY;
         }
+
+        // Extract a sub-rect from the x,y coord. if the x,y
+        // is beyond the size of this rect the result is an empty
+        Rect SubRect(T x, T y) const noexcept
+        {
+            if (x > mWidth || y > mHeight)
+                return Rect();
+            if (x < 0 || y < 0)
+                return Rect();
+
+            // relative to the rect x,y
+            const auto rx = mX + x;
+            const auto ry = mY + y;
+            return {rx, ry, mWidth-x , mHeight-y};
+        }
+
+        Rect SubRect(T x, T y, T width, T height) const noexcept
+        {
+            if (x > mWidth || y > mHeight)
+                return Rect();
+            if (x < 0 || y < 0)
+                return Rect();
+
+            // relative to the rect x,y
+            const auto rx = mX + x;
+            const auto ry = mY + y;
+            const auto rw = mWidth - x;
+            const auto rh =  mHeight - y;
+            return {rx, ry, std::min(rw, width), std::min(rh, height) };
+        }
+
     private:
         T mX = 0;
         T mY = 0;
