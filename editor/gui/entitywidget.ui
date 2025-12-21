@@ -59,7 +59,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>427</width>
+            <width>439</width>
             <height>1659</height>
            </rect>
           </property>
@@ -6247,6 +6247,18 @@
    </property>
    <property name="toolTip">
     <string>Activate object select tool</string>
+   </property>
+  </action>
+  <action name="actionNodePaste">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/paste.png</normaloff>:/16x16_ico_png/paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste a node from the clipboard</string>
    </property>
   </action>
  </widget>
