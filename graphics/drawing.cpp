@@ -116,6 +116,28 @@ bool DrawTextRect(Painter& painter,
     return painter.Draw(Rectangle(), t, material);
 }
 
+bool DrawHLine(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
+{
+    const FPoint a(rect.GetX(), rect.GetY() + rect.GetHeight() * 0.5f);
+    const FPoint b(rect.GetX() + rect.GetWidth(),
+        rect.GetY() + rect.GetHeight() * 0.5f);
+    return DebugDrawLine(painter, a, b, color, line_width);
+}
+
+bool DrawBitmap(Painter& painter, const FRect& rect, std::unique_ptr<IBitmap> bitmap,
+    std::string bitmap_gpu_id, std::string bitmap_name)
+{
+    auto material = CreateMaterialFromBitmap(std::move(bitmap), std::move(bitmap_gpu_id), std::move(bitmap_name));
+    return FillRect(painter, rect, material);
+}
+
+bool DrawBitmap(Painter& painter, const FRect& rect, std::shared_ptr<const IBitmap> bitmap,
+    std::string bitmap_gpu_id, std::string bitmap_name)
+{
+    auto material = CreateMaterialFromBitmap(std::move(bitmap), std::move(bitmap_gpu_id), std::move(bitmap_name));
+    return FillRect(painter, rect, material);
+}
+
 bool FillRect(Painter& painter, const FRect& rect, const Color4f& color)
 {
     return FillRect(painter, rect, MakeMaterial(color));

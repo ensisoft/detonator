@@ -31,6 +31,10 @@ namespace gfx
         TextureBitmapBufferSource()
           : mId(base::RandomString(10))
         {}
+        explicit TextureBitmapBufferSource(std::shared_ptr<const IBitmap> bitmap, std::string id = base::RandomString(10))
+            : mId(std::move(id))
+            , mBitmap(std::move(bitmap))
+        {}
 
         explicit TextureBitmapBufferSource(std::unique_ptr<IBitmap>&& bitmap, std::string id = base::RandomString(10))
           : mId(std::move(id))
@@ -55,6 +59,8 @@ namespace gfx
           , mBitmap(other.mBitmap)
           , mEffects(other.mEffects)
           , mColorSpace(other.mColorSpace)
+          , mGarbageCollect(other.mGarbageCollect)
+          , mTransient(other.mTransient)
         {}
 
         base::bitflag<Effect> GetEffects() const override
@@ -97,6 +103,14 @@ namespace gfx
         {
             mColorSpace = colorspace;
         }
+        void SetGarbageCollect(bool on_off) noexcept
+        {
+            mGarbageCollect = on_off;
+        }
+        void SetTransient(bool on_off) noexcept
+        {
+            mTransient = on_off;
+        }
 
         template<typename Pixel>
         const Bitmap<Pixel>* GetBitmap() const
@@ -118,10 +132,10 @@ namespace gfx
             return false;
         }
     protected:
-        virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
+        std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
         {
             auto ret = std::make_unique<TextureBitmapBufferSource>(*this);
-            ret->mId = id;
+            ret->mId = std::move(id);
             return ret;
         }
     private:
@@ -130,6 +144,8 @@ namespace gfx
         std::shared_ptr<const IBitmap> mBitmap;
         base::bitflag<Effect> mEffects;
         ColorSpace mColorSpace = ColorSpace::sRGB;
+        bool mGarbageCollect = false;
+        bool mTransient = false;
     };
 
     template<typename T> inline
@@ -139,9 +155,18 @@ namespace gfx
     }
 
     template<typename T> inline
-    auto CreateTextureFromBitmap(Bitmap<T>&& bitmap, std::string id = base::RandomString(10))
+    auto CreateTextureFromBitmap(Bitmap<T>&& bitmap, std::string gpu_id = base::RandomString(10))
     {
-        return std::make_unique<TextureBitmapBufferSource>(std::forward<Bitmap<T>>(bitmap), std::move(id));
+        return std::make_unique<TextureBitmapBufferSource>(std::forward<Bitmap<T>>(bitmap), std::move(gpu_id));
+    }
+    inline auto CreateTextureFromBitmap(std::unique_ptr<IBitmap> bitmap, std::string gpu_id = base::RandomString(10))
+    {
+        return std::make_unique<TextureBitmapBufferSource>(std::move(bitmap), std::move(gpu_id));
+    }
+
+    inline auto CreateTextureFromBitmap(std::shared_ptr<const IBitmap> bitmap, std::string gpu_id = base::RandomString(10))
+    {
+        return std::make_unique<TextureBitmapBufferSource>(std::move(bitmap), std::move(gpu_id));
     }
 
 } // namespace

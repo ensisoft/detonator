@@ -19,6 +19,7 @@
 #include "base/logging.h"
 #include "graphics/material_class.h"
 #include "graphics/material_instance.h"
+#include "graphics/texture_bitmap_buffer_source.h"
 #include "graphics/texture_texture_source.h"
 
 namespace gfx
@@ -342,6 +343,50 @@ MaterialInstance CreateMaterialFromTexture(Texture* texture)
     material.SetTextureMap(0, std::move(map));
 
     return MaterialInstance(material);
+}
+
+MaterialInstance CreateMaterialFromBitmap(std::unique_ptr<IBitmap> bitmap,
+    std::string bitmap_gpu_id, std::string bitmap_name)
+{
+    auto foo = CreateTextureFromBitmap(std::move(bitmap), std::move(bitmap_gpu_id));
+    foo->SetGarbageCollect(true);
+    foo->SetTransient(true);
+    foo->SetName(std::move(bitmap_name));
+
+    auto map = std::make_unique<TextureMap>("");
+    map->SetType(TextureMap::Type::Texture2D);
+    map->SetName("Texture");
+    map->SetNumTextures(1);
+    map->SetTextureSource(0, std::move(foo));
+
+    MaterialClass material(MaterialClass::Type::Texture, std::string(""));
+    material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+    material.SetNumTextureMaps(1);
+    material.SetTextureMap(0, std::move(map));
+
+    return MaterialInstance(std::move(material));
+}
+
+ MaterialInstance CreateMaterialFromBitmap(std::shared_ptr<const IBitmap> bitmap,
+     std::string bitmap_gpu_id, std::string bitmap_name)
+{
+    auto foo = CreateTextureFromBitmap(std::move(bitmap), std::move(bitmap_gpu_id));
+    foo->SetGarbageCollect(true);
+    foo->SetTransient(true);
+    foo->SetName(std::move(bitmap_name));
+
+    auto map = std::make_unique<TextureMap>("");
+    map->SetType(TextureMap::Type::Texture2D);
+    map->SetName("Texture");
+    map->SetNumTextures(1);
+    map->SetTextureSource(0, std::move(foo));
+
+    MaterialClass material(MaterialClass::Type::Texture, std::string(""));
+    material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+    material.SetNumTextureMaps(1);
+    material.SetTextureMap(0, std::move(map));
+
+    return MaterialInstance(std::move(material));
 }
 
 std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass)

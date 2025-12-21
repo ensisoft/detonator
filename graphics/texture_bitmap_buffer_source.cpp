@@ -69,6 +69,8 @@ Texture* TextureBitmapBufferSource::Upload(const Environment& env, Device& devic
 
     texture->SetName(mName);
     texture->SetContentHash(content_hash);
+    texture->SetGarbageCollection(mGarbageCollect);
+    texture->SetTransient(mTransient);
     texture->Upload(mBitmap->GetDataPtr(), mBitmap->GetWidth(), mBitmap->GetHeight(),
         Texture::DepthToFormat(mBitmap->GetDepthBits(), sRGB));
     texture->GenerateMips();
