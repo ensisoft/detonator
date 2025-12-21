@@ -46,7 +46,7 @@ namespace gui
     public:
         // takes ownership of the widget.
         ChildWindow(MainWidget* widget, Clipboard* clipboard);
-       ~ChildWindow();
+       ~ChildWindow() override;
 
 #if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
         void SetWindow(FramelessWindow* window)
@@ -104,6 +104,8 @@ namespace gui
         bool LaunchScript(const QString& id);
 
         void UpdateProgressBar(const app::AnyString& message, int value);
+
+        void NotifyClipboardChange() const;
 
         // Take the mainwidget inside this child window.
         // The ownership is transferred to the caller!

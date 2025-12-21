@@ -21,6 +21,8 @@
 #include "warnpush.h"
 #  include <QtWidgets>
 #  include <QImage>
+
+#include "clipboard.h"
 #include "warnpop.h"
 
 #include "editor/app/types.h"
@@ -197,6 +199,9 @@ namespace gui
 
         // Paste the current object from the clipboard into the widget.
         virtual void Paste(const Clipboard& clipboard)
+        {}
+
+        virtual void OnClipboardChanged(const Clipboard& clipboard)
         {}
 
         // Undo the last action on the undo stack.
