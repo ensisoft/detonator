@@ -4168,6 +4168,8 @@ void MainWindow::ActOnWidget(const QString& action)
         widget->Cut(mClipboard);
     else if (action == "copy")
         widget->Copy(mClipboard);
+    else if (action == "paste")
+        widget->Paste(mClipboard);
     else BUG("Unhandled widget action");
 }
 

@@ -361,6 +361,7 @@ namespace gui
             mState.camera_offset_x -= world_delta.x;
             mState.camera_offset_y -= world_delta.y;
             mWorldPos = world_pos;
+            mDidMove = true;
         }
         void MousePress(const MouseEvent& mickey, gfx::Transform& ) override
         {
@@ -378,12 +379,17 @@ namespace gui
         {
             return ToolFunctionType::TransformCamera;
         }
+        bool DidApplyFunction() const
+        {
+            return mDidMove;
+        }
     private:
         glm::mat4 mViewToClip { 1.0f };
         glm::mat4 mWorldToView {1.0f};
         glm::vec2 mWindowSize  {0.0f, 0.0f};
         glm::vec4 mWorldPos {0.0f, 0.0f, 0.0f, 0.0f};
         CameraState& mState;
+        bool mDidMove = false;
     };
 
     template<typename TreeModel, typename TreeNode>

@@ -1655,17 +1655,14 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
         mAttachments->popup(mUI.btnAddNodeItem->mapToGlobal(point));
     });
 
-
+    mHamburger = new QMenu(this);
+    mHamburger->setIcon(QIcon("icons:hamburger.png"));
+    mHamburger->addAction(mUI.chkSnap);
+    mHamburger->addAction(mUI.chkShowViewport);
+    mHamburger->addAction(mUI.chkShowOrigin);
+    mHamburger->addAction(mUI.chkShowGrid);
+    mHamburger->addAction(mUI.chkShowComments);
     connect(mUI.btnHamburger, &QPushButton::clicked, this, [this]() {
-        if (mHamburger == nullptr)
-        {
-            mHamburger = new QMenu(this);
-            mHamburger->addAction(mUI.chkSnap);
-            mHamburger->addAction(mUI.chkShowViewport);
-            mHamburger->addAction(mUI.chkShowOrigin);
-            mHamburger->addAction(mUI.chkShowGrid);
-            mHamburger->addAction(mUI.chkShowComments);
-        }
         QPoint point;
         point.setX(0);
         point.setY(mUI.btnHamburger->width());
@@ -1677,6 +1674,9 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
         mUI.widget->setFocus();
     });
 
+    SetEnabled(mUI.actionNodePaste, false);
+    SetEnabled(mUI.actionNodeCopy, false);
+    SetEnabled(mUI.actionNodeCut, false);
 }
 
 EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -2785,6 +2785,11 @@ void EntityWidget::on_actionNodeCopy_triggered()
     {
         emit RequestAction("copy");
     }
+}
+
+void EntityWidget::on_actionNodePaste_triggered()
+{
+    emit RequestAction("paste");
 }
 
 void EntityWidget::on_actionNodeVarRef_triggered()
@@ -4711,6 +4716,161 @@ void EntityWidget::on_trackList_customContextMenuRequested(QPoint)
     menu.exec(QCursor::pos());
 }
 
+void EntityWidget::on_widget_customContextMenuRequested(QPoint point)
+{
+    if (const auto* node = GetCurrentNode())
+    {
+        const auto projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
+        const auto node_box_size = node->GetSize();
+        const auto& node_to_world = mState.entity->FindNodeTransform(node);
+        gfx::FRect box;
+        box.Resize(node_box_size.x, node_box_size.y);
+        box.Translate(-node_box_size.x*0.5f, -node_box_size.y*0.5f);
+
+        const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, point, projection);
+        if (hotspot != ToolHotspot::None)
+        {
+            const auto* item = node ? node->GetDrawable() : nullptr;
+            const auto* text = node ? node->GetTextItem() : nullptr;
+            const auto* light = node ? node->GetBasicLight() : nullptr;
+            const auto locked = node->TestFlag(game::EntityNodeClass::Flags::LockedInEditor);
+
+            SetEnabled(mUI.actionNodeMoveDownLayer, item != nullptr || text != nullptr || light != nullptr);
+            SetEnabled(mUI.actionNodeMoveUpLayer, item != nullptr || text != nullptr || light != nullptr);
+            SetEnabled(mUI.actionNodeDuplicate, item != nullptr);
+            SetEnabled(mUI.actionNodeDelete, node != nullptr);
+            SetEnabled(mUI.actionNodeCopy, node != nullptr);
+            SetEnabled(mUI.actionNodeCut, node != nullptr);
+
+            GfxMenu menu_transform;
+            menu_transform.SetText("Transform");
+            menu_transform.AddAction(mUI.actionRotateObject);
+            menu_transform.AddAction(mUI.actionTranslateObject);
+            menu_transform.AddSeparator();
+            menu_transform.AddAction("Reset", [this]() {
+                if (auto* node = GetCurrentNode())
+                {
+                    node->SetRotation(0.0f);
+                    if (auto* drawable = node->GetDrawable())
+                    {
+                        drawable->SetRenderTranslation({0.0f, 0.0f, 0.0f});
+                        drawable->SetRenderRotation(game::Rotator());
+                    }
+                    if (auto* text = node->GetTextItem())
+                    {
+                        text->SetRenderTranslation({0.0f, 0.0f, 0.0f});
+                        text->SetRenderRotation(game::Rotator());
+                    }
+                    if (auto* light = node->GetBasicLight())
+                    {
+                        light->SetTranslation({0.0f, 0.0f, 0.0f});
+                        light->SetDirection(glm::vec3 { 1.0f, 0.0f, 0.0f});
+                    }
+                    DisplayCurrentNodeProperties();
+                }
+            });
+
+            GfxMenu menu;
+            menu.AddAction("Select material...", QIcon("icons:material.png"),
+                [this]() { on_btnSelectMaterial_clicked(); })->setEnabled(item != nullptr);
+            menu.AddAction("Select font...", QIcon("icons:font.png"),
+                [this]() { on_btnSelectFont_clicked(); })->setEnabled(text != nullptr);
+            menu.AddSeparator();
+            menu.AddSubMenu(std::move(menu_transform));
+            menu.AddSeparator();
+            if (locked)
+            {
+                menu.AddAction("Unlock", [this]() {
+                        if (auto* node = GetCurrentNode()) {
+                            node->SetFlag(game::EntityNodeClass::Flags::LockedInEditor, false);
+                            mUI.tree->Rebuild();
+                        }
+                    });
+            }
+            else
+            {
+                menu.AddAction("Lock", QIcon("icons:lock.png"), [this]() {
+                        if (auto* node = GetCurrentNode()) {
+                            node->SetFlag(game::EntityNodeClass::Flags::LockedInEditor, true);
+                            mUI.tree->Rebuild();
+                        }
+                    });
+            }
+
+            menu.AddAction(mUI.actionNodeMoveUpLayer);
+            menu.AddAction(mUI.actionNodeMoveDownLayer);
+            menu.AddSeparator();
+            menu.AddAction(mUI.actionNodeDuplicate);
+            menu.AddSeparator();
+            menu.AddAction(mUI.actionNodeCut);
+            menu.AddAction(mUI.actionNodeCopy);
+            menu.AddSeparator();
+            menu.AddAction(mUI.actionNodeDelete);
+            mUI.widget->OpenContextMenu(point, std::move(menu));
+            return;
+        }
+    }
+
+    {
+        GfxMenu menu2d;
+        menu2d.SetText(mBasicShapes2D->title());
+        menu2d.SetIcon(mBasicShapes2D->icon());
+        menu2d.AddActions(mBasicShapes2D->actions());
+
+        GfxMenu menu3d;
+        menu3d.SetText(mBasicShapes3D->title());
+        menu3d.SetIcon(mBasicShapes3D->icon());
+        menu3d.AddActions(mBasicShapes3D->actions());
+
+        GfxMenu menu_custom;
+        menu_custom.SetText(mCustomShapes->title());
+        menu_custom.SetIcon(mCustomShapes->icon());
+        menu_custom.AddActions(mCustomShapes->actions());
+
+        GfxMenu menu_particles;
+        menu_particles.SetText(mParticleSystems->title());
+        menu_particles.SetIcon(mParticleSystems->icon());
+        menu_particles.AddActions(mParticleSystems->actions());
+
+        GfxMenu menu_lights;
+        menu_lights.SetText(mBasicLights->title());
+        menu_lights.SetIcon(mBasicLights->icon());
+        menu_lights.AddActions(mBasicLights->actions());
+
+        GfxMenu menu_text;
+        menu_text.SetText(mTextItems->title());
+        menu_text.SetIcon(mTextItems->icon());
+        menu_text.AddActions(mTextItems->actions());
+
+        GfxMenu view_menu;
+        view_menu.SetText("View");
+        view_menu.SetIcon(mHamburger->icon());
+        view_menu.AddActions(mHamburger->actions());
+
+        GfxMenu grid_menu;
+        grid_menu.SetText("Grid");
+        grid_menu.AddAction("10x10",   [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid10x10); });
+        grid_menu.AddAction("20x20",   [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid20x20); });
+        grid_menu.AddAction("50x50",   [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid50x50); });
+        grid_menu.AddAction("100x100", [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid100x100); });
+
+        GfxMenu menu;
+        menu.AddSubMenu(std::move(menu2d));
+        menu.AddSubMenu(std::move(menu3d));
+        menu.AddSubMenu(std::move(menu_custom));
+        menu.AddSubMenu(std::move(menu_particles));
+        menu.AddSubMenu(std::move(menu_lights));
+        menu.AddSubMenu(std::move(menu_text));
+        menu.AddSeparator();
+        menu.AddAction(mUI.actionNodePaste);
+        menu.AddSeparator();
+        menu.AddSubMenu(std::move(view_menu));
+        menu.AddSeparator();
+        menu.AddSubMenu(std::move(grid_menu));
+        mUI.widget->OpenContextMenu(point, std::move(menu));
+    }
+}
+
 void EntityWidget::ScrollEntityNodeArea()
 {
     QTimer::singleShot(100, this, [this]() {
@@ -4783,6 +4943,11 @@ void EntityWidget::OnUpdateResource(const app::Resource* resource)
     RebuildMenus();
     RealizeEntityChange(mState.entity);
     mState.renderer.ClearPaintState();
+}
+
+void EntityWidget::OnClipboardChanged(const Clipboard& clipboard)
+{
+    SetEnabled(mUI.actionNodePaste, CanTakeAction(Actions::CanPaste, &clipboard));
 }
 
 void EntityWidget::PlaceNewParticleSystem()
@@ -5257,8 +5422,18 @@ void EntityWidget::MousePress(QMouseEvent* event)
 }
 void EntityWidget::MouseRelease(QMouseEvent* event)
 {
-    if (!mCurrentTool)
+    if (mViewerMode)
         return;
+
+    using CameraTool = PerspectiveCorrectCameraTool<State>;
+
+    if (!mCurrentTool)
+    {
+        if (event->button() == Qt::RightButton)
+            on_widget_customContextMenuRequested(event->pos());
+
+        return;
+    }
 
     const auto projection = (game::SceneProjection)GetValue(mUI.cmbSceneProjection);
     const MouseEvent mickey(event, mUI, mState, projection);
@@ -5296,6 +5471,17 @@ void EntityWidget::MouseRelease(QMouseEvent* event)
                 mJointModel->UpdateJoint(index);
                 SetEnabled(mUI.btnEditJoint, true);
                 SetEnabled(mUI.btnDeleteJoint, true);
+            }
+        }
+        else if (const auto* camera_tool = dynamic_cast<const CameraTool*>(mCurrentTool.get()))
+        {
+            if (!camera_tool->DidApplyFunction())
+            {
+                mCurrentTool.reset();
+                if (event->button() == Qt::RightButton)
+                    on_widget_customContextMenuRequested(event->pos());
+
+                return;
             }
         }
 

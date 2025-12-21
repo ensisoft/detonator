@@ -93,7 +93,7 @@ namespace gui
             }
         }
 
-        void AddAction(QString text, std::function<void()> callback)
+        QAction* AddAction(QString text, std::function<void()> callback)
         {
             auto action = std::make_shared<QAction>();
             action->setText(text);
@@ -101,8 +101,22 @@ namespace gui
 
             Action a;
             a.action = action.get();
-            a.owning = std::move(action);
+            a.owning = action;
             mMenuItems.push_back(std::move(a));
+            return action.get();
+        }
+        QAction* AddAction(QString text, QIcon icon, std::function<void()> callback)
+        {
+            auto action = std::make_shared<QAction>();
+            action->setText(text);
+            action->setIcon(icon);
+            QObject::connect(action.get(), &QAction::triggered, callback);
+
+            Action a;
+            a.action = action.get();
+            a.owning = action;
+            mMenuItems.push_back(std::move(a));
+            return action.get();
         }
 
         void AddSeparator()

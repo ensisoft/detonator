@@ -90,6 +90,7 @@ namespace gui
         void OnAddResource(const app::Resource* resource) override;
         void OnRemoveResource(const app::Resource* resource) override;
         void OnUpdateResource(const app::Resource* resource) override;
+        void OnClipboardChanged(const Clipboard& clipboard) override;
 
         std::string GetEntityId() const
         { return mState.entity->GetId(); }
@@ -133,6 +134,7 @@ namespace gui
         void on_actionNodeDelete_triggered();
         void on_actionNodeCut_triggered();
         void on_actionNodeCopy_triggered();
+        void on_actionNodePaste_triggered();
         void on_actionNodeVarRef_triggered();
         void on_actionNodeMoveUpLayer_triggered();
         void on_actionNodeMoveDownLayer_triggered();
@@ -349,6 +351,7 @@ namespace gui
         void on_scriptVarList_doubleClicked(const QModelIndex&);
         void on_jointList_customContextMenuRequested(QPoint);
         void on_trackList_customContextMenuRequested(QPoint);
+        void on_widget_customContextMenuRequested(QPoint point);
 
         void TreeCurrentNodeChangedEvent();
         void TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
