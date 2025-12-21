@@ -68,6 +68,41 @@ void unit_test_rect()
     r.Translate(90, 80);
     TEST_REQUIRE(r.GetX() == T(100));
     TEST_REQUIRE(r.GetY() == T(100));
+
+    // sub-rect
+    {
+        R r, s;
+        r.Move(100, 100);
+        r.Resize(100, 100);
+
+        s = r.SubRect(100, 100);
+        TEST_REQUIRE(s.IsEmpty());
+
+        s = r.SubRect(101, 101);
+        TEST_REQUIRE(s.IsEmpty());
+
+        s = r.SubRect(99, 99);
+        TEST_REQUIRE(!s.IsEmpty());
+        TEST_REQUIRE(s.GetX() == 199);
+        TEST_REQUIRE(s.GetY() == 199);
+        TEST_REQUIRE(s.GetWidth() == 1);
+        TEST_REQUIRE(s.GetHeight() == 1);
+
+        s = r.SubRect(-1, -1);
+        TEST_REQUIRE(s.IsEmpty());
+
+        s = r.SubRect(0, 0);
+        TEST_REQUIRE(s.GetWidth() == 100);
+        TEST_REQUIRE(s.GetHeight() == 100);
+
+        s = r.SubRect(0, 0, 20, 20);
+        TEST_REQUIRE(s.GetWidth() == 20);
+        TEST_REQUIRE(s.GetHeight() == 20);
+
+        s = r.SubRect(0, 0, 120, 120);
+        TEST_REQUIRE(s.GetWidth() == 100);
+        TEST_REQUIRE(s.GetHeight() == 100);
+    }
 }
 
 void unit_test_rect_quadrants()
