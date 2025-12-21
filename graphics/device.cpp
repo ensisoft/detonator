@@ -34,10 +34,10 @@
 #include "graphics/device_instance.h"
 
 namespace {
-class GraphicsDevice : public gfx::Device {
+class GraphicsDevice final : public gfx::Device {
 public:
-    GraphicsDevice(std::shared_ptr<dev::GraphicsDevice> device) noexcept;
-    GraphicsDevice(dev::GraphicsDevice* device) noexcept;
+    explicit GraphicsDevice(std::shared_ptr<dev::GraphicsDevice> device) noexcept;
+    explicit GraphicsDevice(dev::GraphicsDevice* device) noexcept;
    ~GraphicsDevice() override;
 
     void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo, ColorAttachment attachment) const override;
@@ -631,7 +631,6 @@ void GraphicsDevice::CleanGarbage(size_t max_num_idle_frames, unsigned flags)
 
             if (is_expired && impl->GarbageCollect() && !IsTextureFBOTarget(impl))
             {
-
                 // delete the texture
                 it = mTextures.erase(it);
             } else ++it;
@@ -693,8 +692,6 @@ void GraphicsDevice::EndFrame(bool display)
 
         if (is_expired && impl->IsTransient() && !IsTextureFBOTarget(impl))
         {
-            size_t unit = 0;
-
             // delete the texture
             it = mTextures.erase(it);
         } else ++it;
