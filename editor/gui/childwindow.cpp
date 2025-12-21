@@ -96,6 +96,14 @@ void ChildWindow::UpdateProgressBar(const app::AnyString& message, int value)
     SetValue(mUI.worker, value);
 }
 
+void ChildWindow::NotifyClipboardChange() const
+{
+    if (!mWidget || mClosed)
+        return;
+
+    mWidget->OnClipboardChanged(*mClipboard);
+}
+
 bool ChildWindow::LaunchScript(const QString& id)
 {
     if (!mWidget || mClosed)

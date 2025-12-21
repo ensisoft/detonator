@@ -1264,6 +1264,8 @@ void MainWindow::on_actionCut_triggered()
         return;
 
     mCurrentWidget->Cut(mClipboard);
+    NotifyClipboardChanged();
+
 }
 void MainWindow::on_actionCopy_triggered()
 {
@@ -1271,6 +1273,7 @@ void MainWindow::on_actionCopy_triggered()
         return;
 
     mCurrentWidget->Copy(mClipboard);
+    NotifyClipboardChanged();
 }
 void MainWindow::on_actionPaste_triggered()
 {
@@ -1278,6 +1281,7 @@ void MainWindow::on_actionPaste_triggered()
         return;
 
     mCurrentWidget->Paste(mClipboard);
+    NotifyClipboardChanged();
 }
 
 void MainWindow::on_actionUndo_triggered()
@@ -4438,5 +4442,21 @@ void MainWindow::DrawResourcePreview(gfx::Painter& painter, double dt)
                         gfx::FRect(0.0f, 0.0f, width, height), painter, 16);
     }
 }
+
+void MainWindow::NotifyClipboardChanged() const
+{
+    for (int i=0; i<GetCount(mUI.mainTab); ++i)
+    {
+        auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(i));
+        widget->OnClipboardChanged(mClipboard);
+    }
+
+    for (auto& child : mChildWindows)
+    {
+        child->NotifyClipboardChange();
+    }
+
+}
+
 
 } // namespace
