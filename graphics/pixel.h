@@ -166,6 +166,25 @@ namespace gfx
     inline Pixel RasterOp_BitwiseOr(const Pixel& dst, const Pixel& src)
     { return dst | src; }
 
+    inline Pixel_RGBA Swizzle_BGRA_to_RGBA(const Pixel_RGBA& dst, const Pixel_RGBA& src)
+    {
+        Pixel_RGBA ret;
+        ret.r = src.b;
+        ret.g = src.g;
+        ret.b = src.r;
+        ret.a = src.a;
+        return ret;
+    }
+
+    inline Pixel_RGB Swizzle_BGR_to_RGB(const Pixel_RGB& dst, const Pixel_RGB& src)
+    {
+        Pixel_RGB ret;
+        ret.r = src.b;
+        ret.g = src.g;
+        ret.b = src.r;
+        return ret;
+    }
+
     namespace PixelEquality {
         struct PixelPrecision {
             template<typename Pixel>
