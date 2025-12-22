@@ -186,7 +186,7 @@ must be copied manually from `c:\Qt\5.15.2\msvc2019_64\`to `editor\dist`.
 ```
   $ cd editor\gui\qt
   $ mkdir build
-  $ cmake -G "Visual Studio 16 2019" -DCMAKE-BUILD_TYPE=Release
+  $ cmake -G "Visual Studio 17 2022" -DCMAKE-BUILD_TYPE=Release
   $ cmake --build . --config Release
   $ cmake --install . --config Release
 ```
