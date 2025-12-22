@@ -818,9 +818,9 @@ inline void SetList(QListWidget* list, const ResourceList& items)
         list->addItem(li);
         // ffs, the selection must be *done* after adding the
         // item to the list otherwise it doesn't work. lalalalaal!
-        if (item.selected)
+        if (item.selected == app::ResourceListItem::SelectionState::Selected)
             li->setSelected(true);
-        else if (!item.selected)
+        else if (item.selected == app::ResourceListItem::SelectionState::Unselected)
             li->setSelected(false);
         else  li->setSelected(selected.find(item.id) != selected.end());
     }
