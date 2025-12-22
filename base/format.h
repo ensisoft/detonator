@@ -19,7 +19,6 @@
 #include "config.h"
 
 #include "warnpush.h"
-#  include <boost/algorithm/string.hpp>
 #  if defined(BASE_FORMAT_SUPPORT_GLM)
 #    include <glm/glm.hpp>
 #  endif
@@ -155,18 +154,55 @@ namespace base
 #endif
         }
 
+        inline bool HasIndexKey(const std::string& fmt, size_t& string_index, size_t key_index)
+        {
+            if (fmt[string_index] != '%')
+                return false;
+
+            if (key_index < 10)
+            {
+                if (string_index + 1 >= fmt.size())
+                    return false;
+                const int digits[1] = { fmt[string_index+1] - 0x30 };
+                if (digits[0] == key_index)
+                {
+                    string_index += 1;
+                    return true;
+                }
+            }
+            if (key_index < 100)
+            {
+                if (string_index + 2 >= fmt.size())
+                    return false;
+                const int digits[2] = {
+                    fmt[string_index + 1] - 0x30,
+                    fmt[string_index + 2] - 0x30
+                };
+                if ((digits[0] == key_index / 10) &&
+                    (digits[1] == key_index % 10))
+                {
+                    string_index += 2;
+                    return true;
+                }
+            }
+            return false;
+        }
+
         template<typename T>
         std::string ReplaceIndex(std::size_t index, const std::string& fmt, const T& value)
         {
-            // generate the key to be replaced in the string
-            std::string key;
-            std::stringstream ss;
-            ss << "%" << index;
-            ss >> key;
             // ToString can be looked up through ADL
             // so any user defined type can define a ToString in the namespace of T
             // and this implementation can use that method for the T->string conversion
-            return boost::replace_all_copy(fmt, key, ToString(value));
+            const std::string value_string = ToString(value);
+            std::string ret;
+            for (size_t i=0; i<fmt.size(); ++i)
+            {
+                if (HasIndexKey(fmt, i, index))
+                    ret += value_string;
+                else ret.push_back(fmt[i]);
+            }
+            return ret;
         }
 
         template<typename T> inline
