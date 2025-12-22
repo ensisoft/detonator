@@ -600,7 +600,9 @@ void DlgAnimator::UpdateStateList()
             ResourceListItem li;
             li.id   = ptr->GetId();
             li.name = ptr->GetName();
-            li.selected = ptr->isSelected();
+            if (ptr->isSelected())
+                li.selected = app::ResourceListItem::SelectionState::Selected;
+            else li.selected = app::ResourceListItem::SelectionState::Unselected;
             all_items.push_back(li);
             states.push_back(li);
         }
@@ -612,7 +614,9 @@ void DlgAnimator::UpdateStateList()
             ResourceListItem li;
             li.id   = ptr->GetId();
             li.name = app::toString("%1 -> %2", src->GetName(), dst->GetName());
-            li.selected = ptr->isSelected();
+            if (ptr->isSelected())
+                li.selected = app::ResourceListItem::SelectionState::Selected;
+            else li.selected = app::ResourceListItem::SelectionState::Unselected;
             all_items.push_back(li);
         }
     }

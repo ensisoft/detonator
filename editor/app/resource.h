@@ -27,7 +27,6 @@
 #  include <QSet>
 #  include <QIcon>
 #  include <QAbstractTableModel>
-#  include <boost/logic/tribool.hpp>
 #include "warnpop.h"
 
 #include <memory>
@@ -812,7 +811,10 @@ namespace app
         AnyString tag;
         QIcon icon;
         const Resource* resource = nullptr;
-        boost::tribool selected = boost::indeterminate;
+        enum class SelectionState {
+            Selected, Unselected, Indeterminate
+        };
+        SelectionState selected = SelectionState::Indeterminate;
     };
 
     using ResourceList = std::vector<ResourceListItem>;

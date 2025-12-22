@@ -2371,7 +2371,9 @@ void AudioWidget::UpdateElementList()
         ResourceListItem li;
         li.id   = element->GetId();
         li.name = element->GetName();
-        li.selected = element->isSelected();
+        if (element->isSelected())
+            li.selected = app::ResourceListItem::SelectionState::Selected;
+        else li.selected = app::ResourceListItem::SelectionState::Unselected;
         items.push_back(li);
     }
     SetList(mUI.elements, items);
