@@ -13,8 +13,6 @@ find_package(Qt5Designer REQUIRED)
 # some Qt types.
 find_package(Qt5 REQUIRED COMPONENTS Core Network Svg OpenGL)
 
-find_package(Boost REQUIRED)
-
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
@@ -81,6 +79,7 @@ endif()
 add_library(DetonatorQtDesignerPlugin SHARED
     plugin.cpp
     plugin.h
+    ../../../base/assert.cpp
     ../vector3.cpp
     ../vector3.h
     ../vector3.ui
