@@ -26,6 +26,7 @@
 #include "base/assert.h"
 #include "base/math.h"
 #include "base/threadpool.h"
+#include "base/random.h"
 #include "data/json.h"
 #include "game/scene.h"
 #include "game/entity.h"
@@ -1135,8 +1136,8 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
             // edge values (i.e. edge of our world bounding box computation in the
             // scene) we're clipping values and the precision here by using initially
             // integers and then converting to float.
-            const float x = math::rand<5231211, int>(5, 995);
-            const float y = math::rand<8882239, int>(5, 995);
+            const float x = base::rand<5231211, int>(5, 995);
+            const float y = base::rand<8882239, int>(5, 995);
             game::EntityArgs args;
             args.position.x = x;
             args.position.y = y;

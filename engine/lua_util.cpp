@@ -28,6 +28,7 @@
 #include "base/utility.h"
 #include "base/format.h"
 #include "base/math.h"
+#include "base/random.h"
 #include "game/util.h"
 #include "game/entity.h"
 #include "engine/lua.h"
@@ -169,10 +170,10 @@ namespace engine
     };
     util["rand"] = sol::overload(
         [](float min, float max) {
-            return math::rand(min, max);
+            return base::rand(min, max);
         },
         [](int min, int max) {
-            return math::rand(min, max);
+            return base::rand(min, max);
         });
     util["DistanceIsLess"]        = &math::DistanceIsLess;
     util["DistanceIsLessOrEqual"] = &math::DistanceIsLessOrEqual;

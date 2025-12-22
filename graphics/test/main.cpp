@@ -27,6 +27,7 @@
 
 #include "base/logging.h"
 #include "base/format.h"
+#include "base/random.h"
 #include "data/json.h"
 #include "data/io.h"
 #include "device/device.h"
@@ -4519,7 +4520,7 @@ int main(int argc, char* argv[])
     painter->SetEditingMode(false);
     painter->SetDebugMode(debug_context);
 
-    using RandomGen = math::RandomGenerator<float, 0xdeadbeef>;
+    using RandomGen = base::RandomGenerator<float, 0xdeadbeef>;
     RandomGen rg;
 
     gfx::EffectDrawable::SetRandomGenerator([&rg](float min, float max) {

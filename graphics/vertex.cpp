@@ -16,6 +16,7 @@
 
 #include "config.h"
 
+#include "base/random.h"
 #include "graphics/vertex_algo.h"
 
 namespace gfx
@@ -222,8 +223,8 @@ void SubdivideTriangle(const void* v0_ptr, const void* v1_ptr, const void* v2_pt
         }
         else if (algo == TessellationAlgo::RandomizedSplit)
         {
-            const auto t0 = 0.1f + math::rand(0.0f, 0.8f);
-            const auto t1 = 0.1f + math::rand(0.0f, 0.8f);
+            const auto t0 = 0.1f + base::rand(0.0f, 0.8f);
+            const auto t1 = 0.1f + base::rand(0.0f, 0.8f);
 
             void* v0_v1 = InterpolateVertex(v0_ptr, v1_ptr, layout, temp, t0);
             void* v1_v2 = InterpolateVertex(v1_ptr, v2_ptr, layout, temp, t1);

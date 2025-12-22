@@ -29,6 +29,7 @@
 #include "base/utility.h"
 #include "base/allocator.h"
 #include "base/memory.h"
+#include "base/random.h"
 
 #if !defined(UNIT_TEST_BUNDLE)
 #  include "base/json.cpp"

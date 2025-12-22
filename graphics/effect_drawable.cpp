@@ -20,6 +20,7 @@
 #include "base/format.h"
 #include "base/logging.h"
 #include "base/hash.h"
+#include "base/random.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
 #include "graphics/geometry_algo.h"
@@ -39,7 +40,7 @@ EffectDrawable::EffectDrawable(std::shared_ptr<Drawable> drawable, std::string e
   , mEffectId(std::move(effectId))
 {
     if (!random_function)
-        random_function = math::rand<float>;
+        random_function = base::rand<float>;
 
     mSourceDrawable = mDrawable;
 }

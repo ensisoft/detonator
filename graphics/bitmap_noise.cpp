@@ -21,6 +21,7 @@
 #include "base/assert.h"
 #include "base/hash.h"
 #include "base/math.h"
+#include "base/random.h"
 #include "base/noise.h"
 #include "data/reader.h"
 #include "data/writer.h"
@@ -35,12 +36,12 @@ void NoiseBitmapGenerator::Randomize(unsigned min_prime_index, unsigned max_prim
     mLayers.clear();
     for (unsigned i=0; i<layers; ++i)
     {
-        const auto prime_index = math::rand(min_prime_index, max_prime_index);
+        const auto prime_index = base::rand(min_prime_index, max_prime_index);
         const auto prime = boost::math::prime(prime_index);
         Layer layer;
         layer.prime0 = prime;
-        layer.frequency = math::rand(1.0f, 100.0f);
-        layer.amplitude = math::rand(1.0f, 255.0f);
+        layer.frequency = base::rand(1.0f, 100.0f);
+        layer.amplitude = base::rand(1.0f, 255.0f);
         mLayers.push_back(layer);
     }
 }
