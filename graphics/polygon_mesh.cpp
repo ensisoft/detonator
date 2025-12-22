@@ -24,6 +24,7 @@
 #include "base/math.h"
 #include "base/logging.h"
 #include "base/hash.h"
+#include "base/random.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "data/json.h"
@@ -638,13 +639,13 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
 PolygonMeshInstance::PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass, std::string sub_mesh_key ) noexcept
     : mClass(std::move(klass))
     , mSubMeshKey(std::move(sub_mesh_key))
-    , mRandom(math::rand<0x12e4584>(0.0f, 1.0f))
+    , mRandom(base::rand<0x12e4584>(0.0f, 1.0f))
 {}
 
 PolygonMeshInstance::PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key)
     : mClass(std::make_shared<PolygonMeshClass>(klass))
     , mSubMeshKey(std::move(sub_mesh_key))
-    , mRandom(math::rand<0x12e4584>(0.0f, 1.0f))
+    , mRandom(base::rand<0x12e4584>(0.0f, 1.0f))
 {}
 
 bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const

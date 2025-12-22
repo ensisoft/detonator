@@ -27,7 +27,7 @@
 
 #include "base/logging.h"
 #include "base/utility.h"
-#include "base/math.h"
+#include "base/random.h"
 #include "editor/app/format.h"
 #include "editor/gui/dlgprogress.h"
 
@@ -110,7 +110,7 @@ QString DlgProgress::GetMessage(QString msg) const
     };
     const unsigned max = base::ArraySize(alternatives);
     const unsigned min = 0;
-    return alternatives[math::rand(min, max-1)];
+    return alternatives[base::rand(min, max-1)];
 }
 
 } // namespace

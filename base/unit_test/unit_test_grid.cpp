@@ -24,6 +24,7 @@
 #include "base/test_help.h"
 #include "base/grid.h"
 #include "base/math.h"
+#include "base/random.h"
 
 #if !defined(UNIT_TEST_BUNDLE)
 #  include "base/assert.cpp"
@@ -445,7 +446,7 @@ void measure_insert_query_perf()
     std::vector<Entity> entities;
     entities.resize(10000);
 
-    math::RandomGenerator<float, 0x55234> r;
+    base::RandomGenerator<float, 0x55234> r;
 
     const auto space_width  = 10000;
     const auto space_height = 10000;

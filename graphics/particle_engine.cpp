@@ -23,6 +23,7 @@
 #include "base/assert.h"
 #include "base/math.h"
 #include "base/hash.h"
+#include "base/random.h"
 #include "base/threadpool.h"
 #include "data/writer.h"
 #include "data/reader.h"
@@ -76,7 +77,7 @@ namespace  {
     auto GetRandomGenerator()
     {
         if (!random_function)
-            random_function = math::rand<float>;
+            random_function = base::rand<float>;
         return random_function;
     }
 

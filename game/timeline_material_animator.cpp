@@ -17,6 +17,7 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/hash.h"
+#include "base/random.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "game/timeline_material_animator.h"

@@ -19,6 +19,7 @@
 #include "base/test_minimal.h"
 #include "base/math.h"
 #include "base/types.h"
+#include "base/random.h"
 #include "graphics/bitmap.h"
 #include "editor/app/packing.h"
 
@@ -46,8 +47,8 @@ void unit_test_unbounded()
         for (int i=1; i<=static_cast<int>(gfx::Color::LightGray); ++i)
         {
             app::PackingRectangle img;
-            img.width  = math::rand(10, 150);
-            img.height = math::rand(10, 150);
+            img.width  = base::rand(10, 150);
+            img.height = base::rand(10, 150);
             img.index   = i;
             images.push_back(img);
         }

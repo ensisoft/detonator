@@ -29,6 +29,7 @@
 #include "base/test_help.h"
 #include "base/logging.h"
 #include "base/math.h"
+#include "base/random.h"
 #include "audio/source.h"
 #include "audio/player.h"
 #include "audio/device.h"
@@ -211,7 +212,7 @@ void unit_test_cancel()
     for (unsigned i=0; i<100; ++i)
     {
         const auto id = player.Play(std::make_unique<audio::SineTestSource>(300, 200));
-        std::this_thread::sleep_for(std::chrono::milliseconds(math::rand<423234>(0, 100)));
+        std::this_thread::sleep_for(std::chrono::milliseconds(base::rand<423234>(0, 100)));
         player.Cancel(id);
     }
 }
@@ -224,7 +225,7 @@ void unit_test_shutdown_with_active_streams()
     {
         audio::Player player(audio::Device::Create("audio_unit_test"));
         const auto id = player.Play(std::make_unique<audio::SineTestSource>(300, 200));
-        std::this_thread::sleep_for(std::chrono::milliseconds(math::rand<22323>(0, 100)));
+        std::this_thread::sleep_for(std::chrono::milliseconds(base::rand<22323>(0, 100)));
     }
 }
 

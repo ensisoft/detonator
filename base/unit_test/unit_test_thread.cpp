@@ -23,7 +23,7 @@
 #include "base/test_help.h"
 #include "base/threadpool.h"
 #include "base/logging.h"
-
+#include "base/random.h"
 
 void unit_test_pool()
 {
@@ -41,7 +41,7 @@ void unit_test_pool()
     protected:
         void DoTask() override
         {
-            static math::RandomGenerator<unsigned, 0x33abc33f> random_wait {1u, 2u};
+            static base::RandomGenerator<unsigned, 0x33abc33f> random_wait {1u, 2u};
             static std::mutex mutex;
 
             unsigned random_wait_time = 0;
