@@ -21,6 +21,7 @@
 #include "warnpush.h"
 #  include <nlohmann/json.hpp>
 #  include <boost/algorithm/string/erase.hpp>
+#  include <boost/algorithm/string.hpp>
 #include "warnpop.h"
 
 #include "base/math.h"

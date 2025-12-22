@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include "base/warnpush.h"
+#  include <boost/algorithm/string.hpp>
 #  include <locale>
 #include "base/warnpop.h"
 

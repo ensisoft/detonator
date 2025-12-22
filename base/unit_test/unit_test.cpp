@@ -595,6 +595,18 @@ void unit_test_string()
 {
     TEST_CASE(test::Type::Feature)
 
+    // format
+    {
+        auto ret = base::FormatString("jeesus ajaa");
+        TEST_REQUIRE(ret == "jeesus ajaa");
+        ret = base::FormatString("jeesus ajaa %1", "mopolla");
+        TEST_REQUIRE(ret == "jeesus ajaa mopolla");
+        ret = base::FormatString("jeesus ajaa %1 todella %2", "mopolla", "lujaa");
+        TEST_REQUIRE(ret == "jeesus ajaa mopolla todella lujaa");
+        ret = base::FormatString("%1 ajaa mopolla", "jeesus");
+        TEST_REQUIRE(ret == "jeesus ajaa mopolla");
+    }
+
     // split string on space
     {
         std::vector<std::string> ret;
