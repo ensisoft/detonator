@@ -24,6 +24,7 @@
 #include <queue>
 #include <memory>
 #include <variant>
+#include <list>
 
 #if defined(AUDIO_LOCK_FREE_QUEUE)
 #  include <boost/lockfree/queue.hpp>
