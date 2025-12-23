@@ -102,8 +102,8 @@ namespace gui
         void on_btnResetTextureMap_clicked();
         void on_btnEditTexture_clicked();
         void on_btnSelectTextureRect_clicked();
-        void on_textures_itemSelectionChanged();
-        void on_textures_customContextMenuRequested(const QPoint&);
+        void on_textureMapWidget_SelectionChanged();
+        void on_textureMapWidget_CustomContextMenuRequested(const QPoint&);
         void on_materialName_textChanged(const QString& text);
         void on_materialType_currentIndexChanged(int);
         void on_surfaceType_currentIndexChanged(int);
@@ -161,12 +161,13 @@ namespace gui
         void on_chkDetectEdges_stateChanged(int);
         void on_cmbColorSpace_currentIndexChanged(int);
         void on_textureMapName_textChanged(const QString& text);
+        void on_textureMapName_editingFinished();
         void on_textureSourceName_textChanged(const QString& text);
         void on_findMap_textChanged(const QString& text);
         void on_cmbModel_currentIndexChanged(int);
-        void AddNewTextureMapFromFile();
-        void AddNewTextureMapFromText();
-        void AddNewTextureMapFromBitmap();
+        void AddNewTextureSrcFromFile();
+        void AddNewTextureSrcFromText();
+        void AddNewTextureSrcFromBitmap();
         void UniformValueChanged(const Uniform* uniform);
         void ShaderFileChanged();
         void ResourceUpdated(const app::Resource* resource);
@@ -180,7 +181,7 @@ namespace gui
         void SetTextureFlags();
         void SetMaterialProperties();
         void ShowMaterialProperties();
-        void ShowTextureProperties();
+        void ShowTextureSrcProperties();
         void ShowTextureMapProperties();
         void PaintScene(gfx::Painter& painter, double sec);
         void MouseMove(QMouseEvent* mickey);

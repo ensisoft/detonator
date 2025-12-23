@@ -739,6 +739,9 @@ if (BUILD_QT_STUFF)
         editor/gui/materialwidget.h
         editor/gui/materialwidget.cpp
         editor/gui/materialwidget.ui
+        editor/gui/materialmapwidget.h
+        editor/gui/materialmapwidget.ui
+        editor/gui/materialmapwidget.cpp
         editor/gui/entitywidget.h
         editor/gui/entitywidget.ui
         editor/gui/entitywidget.cpp
