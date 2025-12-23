@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2051</width>
-    <height>1555</height>
+    <width>1672</width>
+    <height>1197</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -53,8 +53,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>310</width>
-            <height>1547</height>
+            <width>250</width>
+            <height>1193</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -335,7 +335,7 @@
                   </widget>
                  </item>
                  <item row="2" column="1" colspan="2">
-                  <widget class="color_widgets::ColorSelector" name="baseColor">
+                  <widget class="color_widgets::ColorSelector" name="baseColor" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -345,17 +345,14 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
-                   <property name="color">
+                   <property name="color" stdset="0">
                     <color>
                      <red>255</red>
                      <green>255</green>
                      <blue>255</blue>
                     </color>
                    </property>
-                   <property name="display_mode" stdset="0">
-                    <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                   </property>
-                   <property name="background">
+                   <property name="background" stdset="0">
                     <brush brushstyle="Dense3Pattern">
                      <color alpha="255">
                       <red>128</red>
@@ -421,7 +418,7 @@
                   <widget class="QComboBox" name="particleRotationMode"/>
                  </item>
                  <item row="8" column="1" colspan="2">
-                  <widget class="color_widgets::ColorSelector" name="particleStartColor">
+                  <widget class="color_widgets::ColorSelector" name="particleStartColor" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -431,17 +428,14 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
-                   <property name="color">
+                   <property name="color" stdset="0">
                     <color>
                      <red>255</red>
                      <green>255</green>
                      <blue>255</blue>
                     </color>
                    </property>
-                   <property name="display_mode" stdset="0">
-                    <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                   </property>
-                   <property name="background">
+                   <property name="background" stdset="0">
                     <brush brushstyle="Dense3Pattern">
                      <color alpha="255">
                       <red>128</red>
@@ -541,7 +535,7 @@
                   <widget class="QComboBox" name="particleAction"/>
                  </item>
                  <item row="13" column="1" colspan="2">
-                  <widget class="color_widgets::ColorSelector" name="ambientColor">
+                  <widget class="color_widgets::ColorSelector" name="ambientColor" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -551,17 +545,14 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
-                   <property name="color">
+                   <property name="color" stdset="0">
                     <color>
                      <red>255</red>
                      <green>255</green>
                      <blue>255</blue>
                     </color>
                    </property>
-                   <property name="display_mode" stdset="0">
-                    <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                   </property>
-                   <property name="background">
+                   <property name="background" stdset="0">
                     <brush brushstyle="Dense3Pattern">
                      <color alpha="255">
                       <red>128</red>
@@ -627,7 +618,7 @@
                   </widget>
                  </item>
                  <item row="15" column="1" colspan="2">
-                  <widget class="color_widgets::ColorSelector" name="specularColor">
+                  <widget class="color_widgets::ColorSelector" name="specularColor" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -637,17 +628,14 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
-                   <property name="color">
+                   <property name="color" stdset="0">
                     <color>
                      <red>255</red>
                      <green>255</green>
                      <blue>255</blue>
                     </color>
                    </property>
-                   <property name="display_mode" stdset="0">
-                    <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                   </property>
-                   <property name="background">
+                   <property name="background" stdset="0">
                     <brush brushstyle="Dense3Pattern">
                      <color alpha="255">
                       <red>128</red>
@@ -659,7 +647,7 @@
                   </widget>
                  </item>
                  <item row="9" column="1" colspan="2">
-                  <widget class="color_widgets::ColorSelector" name="particleMidColor">
+                  <widget class="color_widgets::ColorSelector" name="particleMidColor" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -669,17 +657,14 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
-                   <property name="color">
+                   <property name="color" stdset="0">
                     <color>
                      <red>255</red>
                      <green>255</green>
                      <blue>255</blue>
                     </color>
                    </property>
-                   <property name="display_mode" stdset="0">
-                    <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                   </property>
-                   <property name="background">
+                   <property name="background" stdset="0">
                     <brush brushstyle="Dense3Pattern">
                      <color alpha="255">
                       <red>128</red>
@@ -734,7 +719,7 @@
                   </widget>
                  </item>
                  <item row="14" column="1" colspan="2">
-                  <widget class="color_widgets::ColorSelector" name="diffuseColor">
+                  <widget class="color_widgets::ColorSelector" name="diffuseColor" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -744,17 +729,14 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
-                   <property name="color">
+                   <property name="color" stdset="0">
                     <color>
                      <red>255</red>
                      <green>255</green>
                      <blue>255</blue>
                     </color>
                    </property>
-                   <property name="display_mode" stdset="0">
-                    <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                   </property>
-                   <property name="background">
+                   <property name="background" stdset="0">
                     <brush brushstyle="Dense3Pattern">
                      <color alpha="255">
                       <red>128</red>
@@ -773,7 +755,7 @@
                   </widget>
                  </item>
                  <item row="10" column="1" colspan="2">
-                  <widget class="color_widgets::ColorSelector" name="particleEndColor">
+                  <widget class="color_widgets::ColorSelector" name="particleEndColor" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -783,17 +765,14 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
-                   <property name="color">
+                   <property name="color" stdset="0">
                     <color>
                      <red>255</red>
                      <green>255</green>
                      <blue>255</blue>
                     </color>
                    </property>
-                   <property name="display_mode" stdset="0">
-                    <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                   </property>
-                   <property name="background">
+                   <property name="background" stdset="0">
                     <brush brushstyle="Dense3Pattern">
                      <color alpha="255">
                       <red>128</red>
@@ -879,7 +858,7 @@
                   </widget>
                  </item>
                  <item row="1" column="3">
-                  <widget class="color_widgets::ColorSelector" name="colorMap1">
+                  <widget class="color_widgets::ColorSelector" name="colorMap1" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -889,17 +868,14 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
-                   <property name="color">
+                   <property name="color" stdset="0">
                     <color>
                      <red>255</red>
                      <green>255</green>
                      <blue>255</blue>
                     </color>
                    </property>
-                   <property name="display_mode" stdset="0">
-                    <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                   </property>
-                   <property name="background">
+                   <property name="background" stdset="0">
                     <brush brushstyle="Dense3Pattern">
                      <color alpha="255">
                       <red>128</red>
@@ -911,7 +887,7 @@
                   </widget>
                  </item>
                  <item row="2" column="3">
-                  <widget class="color_widgets::ColorSelector" name="colorMap3">
+                  <widget class="color_widgets::ColorSelector" name="colorMap3" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -921,17 +897,14 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
-                   <property name="color">
+                   <property name="color" stdset="0">
                     <color>
                      <red>255</red>
                      <green>255</green>
                      <blue>255</blue>
                     </color>
                    </property>
-                   <property name="display_mode" stdset="0">
-                    <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                   </property>
-                   <property name="background">
+                   <property name="background" stdset="0">
                     <brush brushstyle="Dense3Pattern">
                      <color alpha="255">
                       <red>128</red>
@@ -943,7 +916,7 @@
                   </widget>
                  </item>
                  <item row="2" column="2">
-                  <widget class="color_widgets::ColorSelector" name="colorMap2">
+                  <widget class="color_widgets::ColorSelector" name="colorMap2" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -953,17 +926,14 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
-                   <property name="color">
+                   <property name="color" stdset="0">
                     <color>
                      <red>255</red>
                      <green>255</green>
                      <blue>255</blue>
                     </color>
                    </property>
-                   <property name="display_mode" stdset="0">
-                    <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                   </property>
-                   <property name="background">
+                   <property name="background" stdset="0">
                     <brush brushstyle="Dense3Pattern">
                      <color alpha="255">
                       <red>128</red>
@@ -1004,7 +974,7 @@
                   </widget>
                  </item>
                  <item row="1" column="2">
-                  <widget class="color_widgets::ColorSelector" name="colorMap0">
+                  <widget class="color_widgets::ColorSelector" name="colorMap0" native="true">
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -1014,17 +984,14 @@
                    <property name="focusPolicy">
                     <enum>Qt::TabFocus</enum>
                    </property>
-                   <property name="color">
+                   <property name="color" stdset="0">
                     <color>
                      <red>255</red>
                      <green>255</green>
                      <blue>255</blue>
                     </color>
                    </property>
-                   <property name="display_mode" stdset="0">
-                    <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                   </property>
-                   <property name="background">
+                   <property name="background" stdset="0">
                     <brush brushstyle="Dense3Pattern">
                      <color alpha="255">
                       <red>128</red>
@@ -1639,7 +1606,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="color_widgets::ColorSelector" name="widgetColor">
+          <widget class="color_widgets::ColorSelector" name="widgetColor" native="true">
            <property name="minimumSize">
             <size>
              <width>30</width>
@@ -1700,31 +1667,12 @@
            </sizepolicy>
           </property>
           <property name="placeholderText">
-           <string>Find in maps</string>
+           <string>Find a texture</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="textures">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::CustomContextMenu</enum>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Plain</enum>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::ExtendedSelection</enum>
-          </property>
-         </widget>
+         <widget class="gui::MaterialMapWidget" name="textureMapWidget" native="true"/>
         </item>
        </layout>
       </widget>
@@ -1756,7 +1704,7 @@
           <x>0</x>
           <y>0</y>
           <width>440</width>
-          <height>1003</height>
+          <height>359</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -2586,16 +2534,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>color_widgets::ColorPreview</class>
-   <extends>QWidget</extends>
-   <header>color_preview.hpp</header>
-  </customwidget>
-  <customwidget>
-   <class>color_widgets::ColorSelector</class>
-   <extends>color_widgets::ColorPreview</extends>
-   <header>color_selector.hpp</header>
-  </customwidget>
-  <customwidget>
    <class>gui::CollapsibleWidget</class>
    <extends>QWidget</extends>
    <header>collapsible_widget.h</header>
@@ -2614,9 +2552,25 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>color_widgets::ColorPreview</class>
+   <extends>QWidget</extends>
+   <header>color_preview.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>color_widgets::ColorSelector</class>
+   <extends>color_widgets::ColorPreview</extends>
+   <header>color_selector.hpp</header>
+  </customwidget>
+  <customwidget>
    <class>gui::SpriteWidget</class>
    <extends>QWidget</extends>
    <header>spritewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>gui::MaterialMapWidget</class>
+   <extends>QWidget</extends>
+   <header>materialmapwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -2679,10 +2633,8 @@
   <tabstop>kTileIndex</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>findMap</tabstop>
-  <tabstop>textures</tabstop>
-  <tabstop>gradientOffsetX</tabstop>
-  <tabstop>scrollArea</tabstop>
   <tabstop>textureMap</tabstop>
+  <tabstop>scrollArea</tabstop>
   <tabstop>textureMapID</tabstop>
   <tabstop>textureMapName</tabstop>
   <tabstop>textureMapType</tabstop>
@@ -2715,6 +2667,7 @@
   <tabstop>colorMap3</tabstop>
   <tabstop>colorMap0</tabstop>
   <tabstop>gradientOffsetY</tabstop>
+  <tabstop>gradientOffsetX</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

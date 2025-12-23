@@ -28,6 +28,8 @@
 #include "engine/enum.h"
 #include "graphics/drawable.h"
 #include "graphics/material_class.h"
+#include "graphics/texture_map.h"
+#include "graphics/texture_source.h"
 #include "game/enum.h"
 #include "game/scene_class.h"
 #include "game/timeline_animator.h"
@@ -38,6 +40,10 @@
 #include "game/entity_node_spline_mover.h"
 #include "game/entity_node_spline_mover.h"
 #include "game/entity_node_text_item.h"
+#include "graphics/texture_map.h"
+#include "graphics/texture_source.h"
+#include "graphics/text_buffer.h"
+#include "graphics/text_buffer.h"
 
 // TranslateEnum overloads must be in the same namespace as the enum
 // types they overload on in order for the overload resolution to
@@ -84,6 +90,9 @@ namespace gfx {
     std::string TranslateEnum(gfx::ParticleEngineClass::Motion motion);
     std::string TranslateEnum(gfx::ParticleEngineClass::SpawnPolicy spawn);
     std::string TranslateEnum(gfx::MaterialClass::GradientType gradient);
+    std::string TranslateEnum(gfx::TextureMap::Type map);
+    std::string TranslateEnum(gfx::TextureSource::Source source);
+    std::string TranslateEnum(gfx::TextBuffer::RasterFormat format);
 }
 
 namespace audio {

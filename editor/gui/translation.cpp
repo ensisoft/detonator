@@ -17,6 +17,8 @@
 #include "base/assert.h"
 #include "editor/gui/translation.h"
 
+#include "graphics/texture_source.h"
+
 namespace app
 {
 std::string TranslateEnum(Workspace::ProjectSettings::CanvasPresentationMode mode)
@@ -545,6 +547,45 @@ std::string TranslateEnum(gfx::MaterialClass::GradientType gradient)
     else BUG("Missing translation");
     return "???";
 }
+
+std::string TranslateEnum(gfx::TextureMap::Type map)
+{
+    if (map == TextureMap::Type::Sprite)
+        return "Sprite Cycle";
+    else if (map == TextureMap::Type::Texture2D)
+        return "Static Texture";
+    else BUG("Missing translation");
+    return "???";
+}
+
+std::string TranslateEnum(gfx::TextureSource::Source type)
+{
+    using T = TextureSource::Source;
+    if (type == T::Filesystem)
+        return "File";
+    else if (type == T::TextBuffer)
+        return "Text";
+    else if (type == T::BitmapBuffer)
+        return "Bitmap Buffer";
+    else if (type == T::BitmapGenerator)
+        return "Bitmap Generator";
+    else if (type == T::Texture)
+        return "Texture Handle";
+    else BUG("Missing translation");
+    return "???";
+}
+
+std::string TranslateEnum(gfx::TextBuffer::RasterFormat format)
+{
+    using F = TextBuffer::RasterFormat;
+    if (format == F::Texture)
+        return "FreeType";
+    else if (format == F::Bitmap)
+        return "Bitmap";
+    else BUG("Missing translation");
+    return "???";
+}
+
 
 } // namespace
 
