@@ -37,10 +37,20 @@
 
 #include "audio/format.h"
 #include "base/format.h"
+#include "base/types.h"
 #include "graphics/vertex.h"
 
 namespace app
 {
+    namespace detail {
+        template<typename BaseType>
+        auto ToString(const BaseType& type)
+        {
+            const auto str = base::ToString(type);
+            return QString::fromUtf8(str.c_str());
+        }
+    }
+
     QString toString(QFile::FileError error);
     QString toString(QProcess::ProcessState state);
     QString toString(QProcess::ProcessError error);
@@ -52,7 +62,14 @@ namespace app
     QString toString(const gfx::Vec3& vec);
     QString toString(const gfx::Vec4& vec);
 #endif
-
+    inline QString toString(const base::FRect& rect)
+    { return detail::ToString(rect); }
+    inline QString toString(const base::FPoint& point)
+    { return detail::ToString(point); }
+    inline QString toString(const base::FDegrees& degrees)
+    { return detail::ToString(degrees); }
+    inline QString toString(const base::FRadians& radians)
+    { return detail::ToString(radians); }
     inline QString toString(const std::string& s)
     { return QString::fromUtf8(s.c_str());  }
     inline QString toString(const char* str)
