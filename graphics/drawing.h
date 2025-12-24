@@ -23,7 +23,6 @@
 
 #include "graphics/types.h"
 #include "graphics/color4f.h"
-#include "graphics/transform.h"
 
 // This is the simple drawing API that provides auxiliary drawing
 // functionality mostly useful for drawing stuff outside the actual
@@ -65,6 +64,8 @@ class Painter;
 class Material;
 class Drawable;
 class IBitmap;
+class MaterialClass;
+class TextureSource;
 
 // Draw text inside the given rectangle.
 bool DrawTextRect(Painter& painter,
@@ -77,7 +78,22 @@ bool DrawTextRect(Painter& painter,
     unsigned properties = TextProp::None,
     float line_height = 1.0f);
 
+enum class ButtonIcon {
+    ArrowUp, ArrowDown, ArrowLeft, ArrowRight
+};
+
+enum class BlendMode {
+    Opaque, Alpha
+};
+
+bool DrawButtonIcon(const Painter& painter, const FRect& rect, const Color4f& color, ButtonIcon btn);
+
 bool DrawHLine(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
+
+bool DrawImage(Painter& painter, const FRect& rect, const std::string& image_uri, BlendMode blending);
+
+bool DrawTextureSource(Painter& painter, const FRect& rect, const MaterialClass& material,
+    const TextureSource& texture_source, const FRect& texture_rect);
 
 bool DrawBitmap(Painter& painter, const FRect& rect, std::unique_ptr<IBitmap> bitmap,
     std::string bitmap_gpu_id, std::string bitmap_name = "");

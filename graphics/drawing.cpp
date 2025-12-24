@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include <cmath>
+#include <algorithm>
 
 #include "base/assert.h"
 #include "base/utility.h"
@@ -116,12 +117,62 @@ bool DrawTextRect(Painter& painter,
     return painter.Draw(Rectangle(), t, material);
 }
 
+bool DrawButtonIcon(const Painter& painter, const FRect& rect, const Color4f& color, const ButtonIcon btn)
+{
+    const auto btn_width  = rect.GetWidth();
+    const auto btn_height = rect.GetHeight();
+    const auto min_side = std::min(btn_width, btn_height);
+    const auto ico_size = min_side * 0.4f;
+
+    float rotation = 0.0f;
+    if (btn == ButtonIcon::ArrowDown)
+        rotation = math::Pi;
+    else if (btn == ButtonIcon::ArrowLeft)
+        rotation = math::Pi * 0.5 * -1.0;
+    else if (btn == ButtonIcon::ArrowRight)
+        rotation = math::Pi * 0.5;
+
+    Transform model;
+    model.Resize(ico_size, ico_size);
+    model.Translate(ico_size*-0.5, ico_size*-0.5);
+    model.RotateAroundZ(rotation);
+    model.Translate(ico_size*0.5, ico_size*0.5);
+    model.Translate(rect.GetPosition());
+    model.Translate(btn_width*0.5, btn_height*0.5);
+    model.Translate(ico_size*-0.5, ico_size*-0.5);
+
+    return painter.Draw(IsoscelesTriangle(), model, MakeMaterial(color));
+}
+
 bool DrawHLine(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
 {
     const FPoint a(rect.GetX(), rect.GetY() + rect.GetHeight() * 0.5f);
     const FPoint b(rect.GetX() + rect.GetWidth(),
         rect.GetY() + rect.GetHeight() * 0.5f);
     return DebugDrawLine(painter, a, b, color, line_width);
+}
+
+bool DrawImage(Painter& painter, const FRect& rect, const std::string& image_uri, BlendMode blend)
+{
+    auto material = CreateMaterialFromImage(image_uri, blend == BlendMode::Alpha
+        ? MaterialClass::SurfaceType::Transparent
+        : MaterialClass::SurfaceType::Opaque);
+    return FillRect(painter, rect, material);
+}
+
+bool DrawTextureSource(Painter& painter, const FRect& rect, const MaterialClass& material,
+    const TextureSource& texture_source, const FRect& texture_rect)
+{
+    MaterialClass temp(gfx::MaterialClass::Type::Texture);
+    temp.SetSurfaceType(material.GetSurfaceType());
+    temp.SetBaseColor(material.GetBaseColor());
+    temp.SetTextureMinFilter(material.GetTextureMinFilter());
+    temp.SetTextureMagFilter(material.GetTextureMagFilter());
+    temp.SetAlphaCutoff(material.GetAlphaCutoff());
+    temp.AddTexture(texture_source.Copy());
+    temp.SetTextureRect(texture_rect);
+
+    return FillRect(painter, rect, MaterialInstance(std::move(temp)));
 }
 
 bool DrawBitmap(Painter& painter, const FRect& rect, std::unique_ptr<IBitmap> bitmap,

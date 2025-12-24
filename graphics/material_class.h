@@ -613,7 +613,8 @@ namespace gfx
     // Create a material based on a single image file.
     MaterialClass CreateMaterialClassFromSprite(const std::string& uri);
     // Create a material based on a single image file.
-    MaterialClass CreateMaterialClassFromImage(const std::string& uri);
+    MaterialClass CreateMaterialClassFromImage(const std::string& uri,
+        MaterialClass::SurfaceType surface = MaterialClass::SurfaceType::Opaque);
     // Create a sprite from multiple images.
     MaterialClass CreateMaterialClassFromImages(const std::initializer_list<std::string>& uris);
     // Create a sprite from multiple images.

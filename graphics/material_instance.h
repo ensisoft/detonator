@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "graphics/material.h"
+#include "graphics/material_class.h"
 
 namespace gfx
 {
@@ -122,7 +123,8 @@ namespace gfx
                                              const Color4f& bottom_left,
                                              const Color4f& bottom_right);
     MaterialInstance CreateMaterialFromColor(const Color4f& color);
-    MaterialInstance CreateMaterialFromImage(const std::string& uri);
+    MaterialInstance CreateMaterialFromImage(const std::string& uri,
+        MaterialClass::SurfaceType surface = MaterialClass::SurfaceType::Opaque);
     MaterialInstance CreateMaterialFromSprite(const std::string& uri);
     MaterialInstance CreateMaterialFromImages(const std::initializer_list<std::string>& uris);
     MaterialInstance CreateMaterialFromImages(const std::vector<std::string>& uris);
