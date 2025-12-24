@@ -68,7 +68,7 @@ namespace app
         static EventLog& get();
 
         EventLog();
-       ~EventLog();
+       ~EventLog() override;
 
         // record a new event in the log
         void write(Event::Type type, const QString& msg, const QString& tag);
