@@ -561,6 +561,44 @@ namespace base
             return {rx, ry, std::min(rw, width), std::min(rh, height) };
         }
 
+        std::tuple<Rect, Rect> SplitHorizontally() const noexcept
+        {
+            const auto width = mWidth / 2;
+
+            Rect left;
+            left.Move(mX, mY);
+            left.Resize(width, mHeight);
+
+            Rect right;
+            right.Move(mX + width, mY);
+            right.Resize(width, mHeight);
+
+            return std::make_tuple(left, right);
+        }
+
+        std::tuple<Rect, Rect> SplitVertically() const noexcept
+        {
+            const auto height = mHeight / 2;
+
+            Rect top;
+            top.Move(mX, mY);
+            top.Resize(mWidth, height);
+
+            Rect bottom;
+            bottom.Move(mX, mY + height);
+            bottom.Resize(mWidth, height);
+
+            return std::make_tuple(top, bottom);
+        }
+
+        void Clear()
+        {
+            mX = 0;
+            mY = 0;
+            mWidth = 0;
+            mHeight = 0;
+        }
+
     private:
         T mX = 0;
         T mY = 0;
