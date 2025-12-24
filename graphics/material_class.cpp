@@ -1736,7 +1736,7 @@ bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, 
     return true;
 }
 
-GradientClass CreateMaterialClassFromColor(const Color4f& top_left,
+MaterialClass CreateMaterialClassFromColor(const Color4f& top_left,
                                            const Color4f& top_right,
                                            const Color4f& bottom_left,
                                            const Color4f& bottom_right)
@@ -1749,7 +1749,7 @@ GradientClass CreateMaterialClassFromColor(const Color4f& top_left,
     return material;
 }
 
-ColorClass CreateMaterialClassFromColor(const Color4f& color)
+MaterialClass CreateMaterialClassFromColor(const Color4f& color)
 {
     const auto alpha = color.Alpha();
 
@@ -1775,7 +1775,7 @@ MaterialClass CreateMaterialClassFromSprite(const std::string& uri)
     return material;
 }
 
-TextureMap2DClass CreateMaterialClassFromImage(const std::string& uri)
+MaterialClass CreateMaterialClassFromImage(const std::string& uri, MaterialClass::SurfaceType surface)
 {
     auto map = std::make_unique<TextureMap>("");
     map->SetName("Sprite");
@@ -1783,13 +1783,13 @@ TextureMap2DClass CreateMaterialClassFromImage(const std::string& uri)
     map->SetTextureSource(0, LoadTextureFromFile(uri, ""));
 
     MaterialClass material(MaterialClass::Type::Texture, std::string(""));
-    material.SetSurfaceType(MaterialClass::SurfaceType::Opaque);
+    material.SetSurfaceType(surface);
     material.SetNumTextureMaps(1);
     material.SetTextureMap(0, std::move(map));
     return material;
 }
 
-SpriteClass CreateMaterialClassFromImages(const std::initializer_list<std::string>& uris)
+MaterialClass CreateMaterialClassFromImages(const std::initializer_list<std::string>& uris)
 {
     const std::vector<std::string> tmp(uris);
 
