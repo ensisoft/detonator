@@ -111,6 +111,9 @@ namespace gui
         void SetClearColor(const gfx::Color4f& color)
         { mClearColor = color; }
 
+        void DrawFocusRect(bool on_off)
+        { mDrawFocusRect = on_off; }
+
         void SetCursorColor(const gfx::Color4f& color, CursorShape shape);
 
         void ResetClearColor()
@@ -193,6 +196,7 @@ namespace gui
         QElapsedTimer mClock;
         bool mHasFocus    = false;
         bool mInitDone    = false;
+        bool mDrawFocusRect = true;
     private:
         quint64 mNumFrames = 0;
         float mCurrentFps  = 0.0f;
@@ -293,6 +297,8 @@ namespace gui
         bool HasInputFocus() const;
 
         void SetFocus();
+
+        void DrawFocusRect(bool on_off);
 
         void OpenContextMenu(const QPoint& position, GfxMenu menu);
 

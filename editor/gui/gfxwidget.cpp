@@ -297,7 +297,7 @@ void GfxWindow::paintGL()
         mNumFrames  = 0;
         mClock.restart();
     }
-    if (mHasFocus)
+    if (mHasFocus && mDrawFocusRect)
     {
         static std::shared_ptr<gfx::ColorClass> material;
         if (!material)
@@ -850,6 +850,11 @@ void GfxWidget::SetFocus()
         this->activateWindow();
         this->setFocus();
     });
+}
+
+void GfxWidget::DrawFocusRect(bool on_off)
+{
+    mWindow->DrawFocusRect(on_off);
 }
 
 void GfxWidget::OpenContextMenu(const QPoint& position, GfxMenu menu)
