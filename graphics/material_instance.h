@@ -64,6 +64,10 @@ namespace gfx
         { mUniforms.clear(); }
         void SetUniforms(UniformMap uniforms) override
         { mUniforms = std::move(uniforms); }
+
+        void SetActiveTextureMap(std::string texture_map_id)
+        { SetUniform("active_texture_map", std::move(texture_map_id)); }
+
         double GetRuntime() const override
         { return mRuntime; }
         const MaterialClass* GetClass() const override
