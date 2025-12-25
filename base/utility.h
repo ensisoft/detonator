@@ -440,6 +440,8 @@ inline bool EndsWith(const std::wstring& str, const std::wstring& what)
 }
 
 std::vector<std::string> SplitString(const std::string& str, char separator = ' ');
+    // replace this with that
+std::string ReplaceAll(std::string str, char this_, char that_);
 
 std::string RandomString(size_t len);
 std::string JoinPath(const std::string& a, const std::string& b);

@@ -60,6 +60,16 @@ std::vector<std::string> SplitString(const std::string& str, char separator)
     return ret;
 }
 
+std::string ReplaceAll(std::string str, char this_, char that_)
+{
+    for (size_t i=0; i<str.size(); ++i)
+    {
+        if (str[i] == this_)
+            str[i] = that_;
+    }
+    return str;
+}
+
 std::string RandomString(size_t len)
 {
     static const char* alphabet =
