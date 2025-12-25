@@ -24,6 +24,8 @@
 #include <cstdio>
 #include <codecvt>
 #include <cctype>
+#include <sstream>
+#include <iomanip>
 
 #include "base/types.h"
 #include "base/format.h"
@@ -31,6 +33,28 @@
 #include "base/warnpush.h"
 
 namespace base {
+namespace fmt {
+std::string ToString(const FixedString& fixed_string)
+{
+    if (fixed_string.length == 0)
+        return "";
+
+    std::stringstream ss;
+    ss << std::setfill(' ') << std::left << std::setw(fixed_string.length);
+    ss << fixed_string.str;
+    return ss.str();
+}
+
+std::string ToString(const Float& value)
+{
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(value.precision);
+    ss << value.value;
+    return ss.str();
+}
+
+} // namespace fmt
+
 namespace detail {
 #if defined(BASE_FORMAT_SUPPORT_GLM)
 std::string ToString(const glm::mat4& m)

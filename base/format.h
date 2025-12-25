@@ -29,8 +29,6 @@
 
 #include <sstream>
 #include <string>
-#include <iomanip>
-#include <tuple>
 #include <type_traits>
 
 #include "base/bitflag.h"
@@ -50,17 +48,13 @@ namespace base
             std::string str;
             unsigned length;
         };
+        struct Float {
+            float value = 0.0f;
+            unsigned precision = 2;
+        };
 
-        inline std::string ToString(const FixedString& fixed_string)
-        {
-            if (fixed_string.length == 0)
-                return "";
-
-            std::stringstream ss;
-            ss << std::setfill(' ') << std::left << std::setw(fixed_string.length);
-            ss << fixed_string.str;
-            return ss.str();
-        }
+        std::string ToString(const FixedString& fixed_string);
+        std::string ToString(const Float& value);
     } //
 
     namespace detail {
