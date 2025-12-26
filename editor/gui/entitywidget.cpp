@@ -1771,7 +1771,7 @@ QString EntityWidget::GetId() const
 
 QImage EntityWidget::TakeScreenshot() const
 {
-    return mUI.widget->TakeSreenshot();
+    return mUI.widget->TakeScreenshot();
 }
 
 void EntityWidget::InitializeSettings(const UISettings& settings)
@@ -2228,11 +2228,11 @@ void EntityWidget::ZoomOut()
 }
 void EntityWidget::ReloadShaders()
 {
-    mUI.widget->reloadShaders();
+    mUI.widget->ReloadShaders();
 }
 void EntityWidget::ReloadTextures()
 {
-    mUI.widget->reloadTextures();
+    mUI.widget->ReloadTextures();
 }
 void EntityWidget::Shutdown()
 {
@@ -2243,7 +2243,7 @@ void EntityWidget::Shutdown()
         mPreview.reset();
     }
 
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 void EntityWidget::Update(double secs)
 {
@@ -2268,7 +2268,7 @@ void EntityWidget::Render()
 {
     // call for the widget to paint, it will set its own OpenGL context on this thread
     // and everything should be fine.
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 
 void EntityWidget::RunGameLoopOnce()
@@ -2339,8 +2339,8 @@ bool EntityWidget::GetStats(Stats* stats) const
 {
     stats->time  = mEntityTime;
     stats->graphics.valid = true;
-    stats->graphics.fps   = mUI.widget->getCurrentFPS();
-    const auto& dev_stats = mUI.widget->getDeviceResourceStats();
+    stats->graphics.fps   = mUI.widget->GetCurrentFPS();
+    const auto& dev_stats = mUI.widget->GetDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
     stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;
     stats->device.dynamic_vbo_mem_alloc   = dev_stats.dynamic_vbo_mem_alloc;
@@ -5512,7 +5512,7 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* event)
     if (!hitnode)
         return;
 
-    const bool did_have_focus = mUI.widget->hasFocus() || mUI.widget->hasInputFocus();
+    const bool did_have_focus = mUI.widget->HasInputFocus();
     mTransformGizmo = TransformGizmo3D::None;
     mTransformHandle = TransformHandle3D::None;
     UpdateGizmos();

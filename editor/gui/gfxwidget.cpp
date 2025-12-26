@@ -155,7 +155,7 @@ void GfxWindow::SetCursorColor(const gfx::Color4f& color, CursorShape shape)
     else BUG("Bug on cursor shape color setting.");
 }
 
-void GfxWindow::dispose()
+void GfxWindow::Dispose()
 {
     if (mContextMenu)
     {
@@ -192,12 +192,12 @@ void GfxWindow::dispose()
     DEBUG("Released GfxWindow device and painter.");
 }
 
-bool GfxWindow::hasInputFocus() const
+bool GfxWindow::HasInputFocus() const
 {
     return mHasFocus;
 }
 
-gfx::Color4f GfxWindow::GetCurrentClearColor()
+gfx::Color4f GfxWindow::GetCurrentClearColor() const
 {
     return mClearColor.value_or(GfxWindow::ClearColor);
 }
@@ -228,12 +228,12 @@ QImage GfxWindow::TakeScreenshot() const
     return ret;
 }
 
-void GfxWindow::initializeGL()
+void GfxWindow::InitializeGL()
 {
 
 }
 
-void GfxWindow::paintGL()
+void GfxWindow::PaintGL()
 {
     if (!mInitDone || !mContext || !isExposed())
     {
@@ -262,8 +262,8 @@ void GfxWindow::paintGL()
     mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMinFilter);
     if (onPaintScene)
     {
-        const auto surface_width  = (float)width();
-        const auto surface_height = (float)height();
+        const auto surface_width  = static_cast<float>(width());
+        const auto surface_height = static_cast<float>(height());
 
         // set to defaults, the paint can then change these if needed.
         mCustomGraphicsPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width, surface_height));
@@ -731,24 +731,24 @@ GfxWidget::~GfxWidget()
     DEBUG("Destroy GfxWidget");
 }
 
-void GfxWidget::dispose()
+void GfxWidget::Dispose()
 {
     // dispose of the graphics resources.
-    mWindow->dispose();
+    mWindow->Dispose();
     DEBUG("Disposed GfxWindow.");
 }
 
-void GfxWidget::reloadShaders()
+void GfxWidget::ReloadShaders() const
 {
-    mWindow->reloadShaders();
+    mWindow->ReloadShaders();
 }
-void GfxWidget::reloadTextures()
+void GfxWidget::ReloadTextures() const
 {
-    mWindow->reloadTextures();
+    mWindow->ReloadTextures();
 }
-void GfxWidget::triggerPaint()
+void GfxWidget::TriggerPaint() const
 {
-    mWindow->triggerPaint();
+    mWindow->TriggerPaint();
 }
 
 void GfxWidget::resizeEvent(QResizeEvent* resize)
@@ -833,14 +833,14 @@ void GfxWidget::SetCursorShape(CursorShape shape)
 
 void GfxWidget::StartPaintTimer()
 {
-    connect(&mTimer, &QTimer::timeout, this, &GfxWidget::triggerPaint);
+    connect(&mTimer, &QTimer::timeout, this, &GfxWidget::TriggerPaint);
     mTimer.setInterval(1000.0 / 60.0);
     mTimer.start();
 }
 
 bool GfxWidget::HasInputFocus() const
 {
-    return this->hasFocus() || this->hasInputFocus();
+    return this->hasFocus() || mWindow->HasInputFocus();
 }
 
 void GfxWidget::SetFocus()

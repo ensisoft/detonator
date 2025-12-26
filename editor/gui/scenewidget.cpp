@@ -1014,11 +1014,11 @@ void SceneWidget::ZoomOut()
 }
 void SceneWidget::ReloadShaders()
 {
-    mUI.widget->reloadShaders();
+    mUI.widget->ReloadShaders();
 }
 void SceneWidget::ReloadTextures()
 {
-    mUI.widget->reloadTextures();
+    mUI.widget->ReloadTextures();
 }
 void SceneWidget::Shutdown()
 {
@@ -1029,7 +1029,7 @@ void SceneWidget::Shutdown()
         mPreview.reset();
     }
 
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 void SceneWidget::Update(double dt)
 {
@@ -1067,7 +1067,7 @@ void SceneWidget::Render()
 {
     // call for the widget to paint, it will set its own OpenGL context on this thread
     // and everything should be fine.
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 
 void SceneWidget::RunGameLoopOnce()
@@ -1147,8 +1147,8 @@ bool SceneWidget::GetStats(Stats* stats) const
 {
     stats->time  = mSceneTime;
     stats->graphics.valid = true;
-    stats->graphics.fps   = mUI.widget->getCurrentFPS();
-    const auto& dev_stats = mUI.widget->getDeviceResourceStats();
+    stats->graphics.fps   = mUI.widget->GetCurrentFPS();
+    const auto& dev_stats = mUI.widget->GetDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
     stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;
     stats->device.dynamic_vbo_mem_alloc   = dev_stats.dynamic_vbo_mem_alloc;
@@ -1160,7 +1160,7 @@ bool SceneWidget::GetStats(Stats* stats) const
 
 QImage SceneWidget::TakeScreenshot() const
 {
-    return mUI.widget->TakeSreenshot();
+    return mUI.widget->TakeScreenshot();
 }
 
 void SceneWidget::on_name_textChanged(const QString&)

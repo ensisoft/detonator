@@ -245,12 +245,12 @@ void DlgFontMap::on_btnClose_clicked()
 void DlgFontMap::finished()
 {
     mClosed = true;
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 
 void DlgFontMap::timer()
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 
 void DlgFontMap::SelectTile()

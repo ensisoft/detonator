@@ -1054,11 +1054,11 @@ void DlgImgView::on_tagTemplate_returnPressed()
 void DlgImgView::finished()
 {
     mClosed = true;
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 void DlgImgView::timer()
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 
 void DlgImgView::keyPressEvent(QKeyEvent* event)

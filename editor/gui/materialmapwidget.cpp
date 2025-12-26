@@ -95,7 +95,7 @@ MaterialMapWidget::~MaterialMapWidget()
 {
     DEBUG("Destroy MaterialMapWidget");
 
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 
 void MaterialMapWidget::Update()
@@ -141,7 +141,7 @@ void MaterialMapWidget::ExpandAll()
 
 void MaterialMapWidget::Render() const
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 
 void MaterialMapWidget::on_verticalScrollBar_valueChanged(int)

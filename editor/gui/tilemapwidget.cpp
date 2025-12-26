@@ -1028,7 +1028,7 @@ QString TilemapWidget::GetId() const
 }
 QImage TilemapWidget::TakeScreenshot() const
 {
-    return mUI.widget->TakeSreenshot();
+    return mUI.widget->TakeScreenshot();
 }
 
 void TilemapWidget::InitializeSettings(const UISettings& settings)
@@ -1253,11 +1253,11 @@ void TilemapWidget::ZoomOut()
 }
 void TilemapWidget::ReloadShaders()
 {
-    mUI.widget->reloadShaders();
+    mUI.widget->ReloadShaders();
 }
 void TilemapWidget::ReloadTextures()
 {
-    mUI.widget->reloadTextures();
+    mUI.widget->ReloadTextures();
 }
 void TilemapWidget::Shutdown()
 {
@@ -1267,7 +1267,7 @@ void TilemapWidget::Shutdown()
         mDlgTileTool.reset();
     }
 
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 void TilemapWidget::Update(double dt)
 {
@@ -1278,7 +1278,7 @@ void TilemapWidget::Update(double dt)
 }
 void TilemapWidget::Render()
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 void TilemapWidget::Save()
 {
@@ -1353,8 +1353,8 @@ bool TilemapWidget::GetStats(Stats* stats) const
 {
     stats->time  = 0.0f;
     stats->graphics.valid = true;
-    stats->graphics.fps   = mUI.widget->getCurrentFPS();
-    const auto& dev_stats = mUI.widget->getDeviceResourceStats();
+    stats->graphics.fps   = mUI.widget->GetCurrentFPS();
+    const auto& dev_stats = mUI.widget->GetDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
     stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;
     stats->device.dynamic_vbo_mem_alloc   = dev_stats.dynamic_vbo_mem_alloc;

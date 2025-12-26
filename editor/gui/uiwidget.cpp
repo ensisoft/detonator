@@ -734,7 +734,7 @@ QString UIWidget::GetId() const
 
 QImage UIWidget::TakeScreenshot() const
 {
-    return mUI.viewport->TakeSreenshot();
+    return mUI.viewport->TakeScreenshot();
 }
 
 void UIWidget::InitializeSettings(const UISettings& settings)
@@ -1097,11 +1097,11 @@ void UIWidget::ZoomOut()
 }
 void UIWidget::ReloadShaders()
 {
-    mUI.viewport->reloadShaders();
+    mUI.viewport->ReloadShaders();
 }
 void UIWidget::ReloadTextures()
 {
-    mUI.viewport->reloadTextures();
+    mUI.viewport->ReloadTextures();
 
     // so actually what we want to do here is to make sure that
     // changes in packed textures are reflected as well. When an
@@ -1140,7 +1140,7 @@ void UIWidget::Shutdown()
         mPreview.reset();
     }
 
-    mUI.viewport->dispose();
+    mUI.viewport->Dispose();
 }
 void UIWidget::Update(double dt)
 {
@@ -1165,7 +1165,7 @@ void UIWidget::Update(double dt)
 }
 void UIWidget::Render()
 {
-    mUI.viewport->triggerPaint();
+    mUI.viewport->TriggerPaint();
 }
 void UIWidget::Save()
 {
@@ -1249,8 +1249,8 @@ bool UIWidget::GetStats(Stats* stats) const
 {
     stats->time  = mPlayTime;
     stats->graphics.valid = true;
-    stats->graphics.fps   = mUI.viewport->getCurrentFPS();
-    const auto& dev_stats = mUI.viewport->getDeviceResourceStats();
+    stats->graphics.fps   = mUI.viewport->GetCurrentFPS();
+    const auto& dev_stats = mUI.viewport->GetDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
     stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;
     stats->device.dynamic_vbo_mem_alloc   = dev_stats.dynamic_vbo_mem_alloc;

@@ -257,12 +257,12 @@ void DlgTilemap::on_btnClose_clicked()
 void DlgTilemap::finished()
 {
     mClosed = true;
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 
 void DlgTilemap::timer()
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 
 void DlgTilemap::OnPaintScene(gfx::Painter& painter, double secs)

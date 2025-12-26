@@ -53,9 +53,9 @@ DlgModelImport::DlgModelImport(QWidget* parent, app::Workspace* workspace)
     // do the graphics dispose in finished handler which is triggered
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
-    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
+    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::Dispose);
     // render on timer
-    connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::triggerPaint);
+    connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::TriggerPaint);
 
     mUI.widget->onInitScene = [&](unsigned, unsigned) {
         mTimer.setInterval(1000.0/60.0);

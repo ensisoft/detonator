@@ -712,11 +712,11 @@ void DlgTileImport::on_cmbMagFilter_currentIndexChanged(int)
 
 void DlgTileImport::finished()
 {
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 void DlgTileImport::timer()
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 
 void DlgTileImport::keyPressEvent(QKeyEvent* event)

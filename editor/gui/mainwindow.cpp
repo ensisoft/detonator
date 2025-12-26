@@ -255,7 +255,7 @@ MainWindow::MainWindow(QApplication& app, base::ThreadPool* threadpool)
 
 MainWindow::~MainWindow()
 {
-    mUI.preview->dispose();
+    mUI.preview->Dispose();
 }
 
 void MainWindow::LoadSettings()
@@ -1071,7 +1071,7 @@ void MainWindow::RunGameLoopOnce()
         mPlayWindow->RunGameLoopOnce();
     }
 
-    mUI.preview->triggerPaint();
+    mUI.preview->TriggerPaint();
 
     UpdateStats();
 

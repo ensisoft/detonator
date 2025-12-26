@@ -78,11 +78,11 @@ SpriteWidget::~SpriteWidget()
 {
     DEBUG("Destroy SpriteWidget");
 
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 void SpriteWidget::Render()
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 
 }
 void SpriteWidget::on_horizontalScrollBar_valueChanged(int)

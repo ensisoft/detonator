@@ -61,8 +61,8 @@ DlgTileTool::DlgTileTool(const app::Workspace* workspace, QWidget* parent, ToolB
     SetList(mUI.cmbToolMaterial, materials);
     SetRange(mUI.toolValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
 
-    connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::triggerPaint);
-    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
+    connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::TriggerPaint);
+    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::Dispose);
 
     mUI.widget->onPaintScene       = std::bind(&DlgTileTool::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onKeyPress         = std::bind(&DlgTileTool::KeyPress, this, std::placeholders::_1);
