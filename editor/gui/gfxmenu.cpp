@@ -78,32 +78,37 @@ void GfxMenu::AddSubMenu(GfxMenu menu)
 
 void GfxMenu::MouseMove(const QMouseEvent* mickey)
 {
+    if (mCurrentItem < mMenuItems.size())
+    {
+        if (auto* ptr = std::get_if<Submenu>(&mMenuItems[mCurrentItem]))
+        {
+            auto& menu = ptr->menu;
+            QRect menu_rect;
+            menu_rect.moveTopLeft(menu->mMenuPosition);
+            menu_rect.setWidth(menu->mMenuWidth);
+            menu_rect.setHeight(menu->mMenuHeight);
+            if (menu->mEnabled && menu_rect.contains(mickey->pos()))
+            {
+                menu->MouseMove(mickey);
+                return;
+            }
+            menu->mCurrentItem = 0xff;
+        }
+    }
 
+    // clear this menu's current item (nothing under mouse)
+    mCurrentItem = 0xff;
+
+    // translate mickeys position relative to this menu.
     const auto& p = mickey->pos() - mMenuPosition;
     const auto x = p.x();
     const auto y = p.y();
-
-    const QRect menu_rect(0, 0, mMenuWidth, mMenuHeight);
-    if (!menu_rect.contains(p))
-    {
-        if (mCurrentItem != 0xff)
-        {
-            if (auto* submenu = std::get_if<Submenu>(&mMenuItems[mCurrentItem]))
-            {
-                if (submenu->menu->IsEnabled())
-                    submenu->menu->MouseMove(mickey);
-                return;
-            }
-        }
-
-        mCurrentItem = 0xff;
+    // discard quickly if out of bounds.
+    if (x < 0 || x > mMenuWidth || y < 0 || y > mMenuHeight)
         return;
-    }
 
-    mCurrentItem = 0xff;
-
+    // map to menu item index
     unsigned start = 0;
-
     for (size_t i=0; i<mMenuItems.size(); ++i)
     {
         const auto& item = mMenuItems[i];
@@ -340,14 +345,23 @@ void GfxMenu::Render(gfx::Painter& painter) const
                 const auto icon_rect = base::CenterRectOnRect(icon_area, gfx::FRect(0.0f, 0.0f, 16.0f, 16.0f));
                 gfx::DrawBitmap(painter, icon_rect, ptr->icon, ptr->bitmap_gpu_id, ptr->bitmap_gpu_name);
             }
-
-            if (i == mCurrentItem && enabled)
-            {
-                menu->Render(painter);
-            }
+            // we used to recurse here and do the submenu paint here, but
+            // if the submenu overlaps *this* menu then we end up drawing
+            // rest of this menu over the submenu which should overlap
+            // any this menu item.
             item_point.Translate(0.0f, mMenuItemHeight);
         }
     }
+
+    if (mCurrentItem >= mMenuItems.size())
+        return;
+    // Recurse to sub-menu to paint.
+    if (const auto* ptr = std::get_if<Submenu>(&mMenuItems[mCurrentItem]))
+    {
+        if (ptr->menu->IsEnabled())
+            ptr->menu->Render(painter);
+    }
+
 }
 gfx::MaterialInstance GfxMenu::CreateMaterial(QPalette::ColorRole role, QPalette::ColorGroup group) const
 {
