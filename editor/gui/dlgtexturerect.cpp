@@ -72,7 +72,7 @@ DlgTextureRect::DlgTextureRect(QWidget* parent, const gfx::FRect& rect, std::uni
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
     this->FUDialog::finished = [this](int result) {
-        mUI.widget->dispose();
+        mUI.widget->Dispose();
     };
     // render on timer.
     connect(&mTimer, &QTimer::timeout, this, &DlgTextureRect::timer);
@@ -186,7 +186,7 @@ void DlgTextureRect::on_widgetColor_colorChanged(QColor color)
 
 void DlgTextureRect::timer()
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 
 void DlgTextureRect::UpdateRect()

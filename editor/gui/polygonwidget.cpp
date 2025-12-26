@@ -1037,19 +1037,19 @@ bool ShapeWidget::CanTakeAction(Actions action, const Clipboard* clipboard) cons
 
 void ShapeWidget::ReloadShaders()
 {
-    mUI.widget->reloadShaders();
+    mUI.widget->ReloadShaders();
 }
 void ShapeWidget::ReloadTextures()
 {
-    mUI.widget->reloadTextures();
+    mUI.widget->ReloadTextures();
 }
 void ShapeWidget::Shutdown()
 {
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 void ShapeWidget::Render()
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 
 void ShapeWidget::Update(double secs)
@@ -1088,8 +1088,8 @@ bool ShapeWidget::GetStats(Stats* stats) const
 {
     stats->time  = mTime;
     stats->graphics.valid = true;
-    stats->graphics.fps   = mUI.widget->getCurrentFPS();
-    const auto& dev_stats = mUI.widget->getDeviceResourceStats();
+    stats->graphics.fps   = mUI.widget->GetCurrentFPS();
+    const auto& dev_stats = mUI.widget->GetDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
     stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;
     stats->device.dynamic_vbo_mem_alloc   = dev_stats.dynamic_vbo_mem_alloc;

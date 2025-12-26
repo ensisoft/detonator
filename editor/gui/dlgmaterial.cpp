@@ -58,7 +58,7 @@ DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, bool 
     // do the graphics dispose in finished handler which is triggered
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
-    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
+    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::Dispose);
 
     mUI.widget->onPaintScene = std::bind(&DlgMaterial::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
@@ -470,7 +470,7 @@ DlgTileChooser::DlgTileChooser(QWidget* parent, std::shared_ptr<const gfx::Mater
     // do the graphics dispose in finished handler which is triggered
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
-    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
+    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::Dispose);
 
     mUI.widget->onPaintScene = std::bind(&DlgTileChooser::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onKeyPress   = std::bind(&DlgTileChooser::KeyPress, this, std::placeholders::_1);

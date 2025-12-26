@@ -62,9 +62,9 @@ namespace gui
         // Important to call dispose to cleanly dispose of all the graphics
         // resources while the Qt's OpenGL context is still valid,
         // I.e the window still exists and hasn't been closed or anything.
-        void dispose();
+        void Dispose();
 
-        void reloadShaders()
+        void ReloadShaders() const
         {
             // we simply just delete all program objects
             // which will trigger the rebuild of the needed
@@ -73,19 +73,19 @@ namespace gui
             mCustomGraphicsDevice->DeletePrograms();
             mCustomGraphicsDevice->DeleteShaders();
         }
-        void reloadTextures()
+        void ReloadTextures() const
         {
             mCustomGraphicsDevice->DeleteTextures();
         }
 
-        void triggerPaint()
+        void TriggerPaint()
         {
-            paintGL();
+            PaintGL();
         }
 
-        bool hasInputFocus() const;
+        bool HasInputFocus() const;
 
-        gfx::Color4f GetCurrentClearColor();
+        gfx::Color4f GetCurrentClearColor() const;
 
         const gfx::Color4f* GetClearColor() const
         {
@@ -119,7 +119,7 @@ namespace gui
         void ResetClearColor()
         { mClearColor.reset(); }
 
-        float getCurrentFPS() const
+        float GetCurrentFPS() const
         { return mCurrentFps; }
 
         void CreateRenderingSurface();
@@ -174,8 +174,8 @@ namespace gui
         void doInit();
 
     private:
-        void initializeGL();
-        void paintGL();
+        void InitializeGL();
+        void PaintGL();
         void mouseMoveEvent(QMouseEvent* mickey) override;
         void mousePressEvent(QMouseEvent* mickey) override;
         void mouseReleaseEvent(QMouseEvent* mickey) override;
@@ -228,11 +228,8 @@ namespace gui
         explicit GfxWidget(QWidget* parent);
        ~GfxWidget() override;
 
-        bool hasInputFocus() const
-        { return mWindow->hasInputFocus(); }
-
-        float getCurrentFPS() const
-        { return mWindow->getCurrentFPS(); }
+        float GetCurrentFPS() const
+        { return mWindow->GetCurrentFPS(); }
 
         double GetTime() const noexcept
         { return mWindow->GetTime(); }
@@ -246,7 +243,7 @@ namespace gui
         { return mWindow ? mWindow->GetDevice() : nullptr; }
         gfx::Painter* GetPainter() const
         { return mWindow ? mWindow->GetPainter() : nullptr; }
-        gfx::Device::ResourceStats getDeviceResourceStats() const
+        gfx::Device::ResourceStats GetDeviceResourceStats() const
         { return mWindow->getDeviceResourceStats(); }
 
         void SetClearColor(const QColor& color);
@@ -255,11 +252,11 @@ namespace gui
         void SetCursorColor(const  QColor& color, CursorShape  shape);
         void SetCursorColor(const gfx::Color4f& color, CursorShape shape);
 
-        void ResetClearColor()
+        void ResetClearColor() const
         {
             mWindow->ResetClearColor();
         }
-        QImage TakeSreenshot() const
+        QImage TakeScreenshot() const
         { return mWindow->TakeScreenshot(); }
         // callback to invoke when paint must be done.
         // secs is the seconds elapsed since last paint.
@@ -303,10 +300,10 @@ namespace gui
         void OpenContextMenu(const QPoint& position, GfxMenu menu);
 
     public slots:
-        void dispose();
-        void reloadShaders();
-        void reloadTextures();
-        void triggerPaint();
+        void Dispose();
+        void ReloadShaders() const;
+        void ReloadTextures() const;
+        void TriggerPaint() const;
     private:
         void TranslateZoomInOut(QWheelEvent* event);
         enum class WidgetFocus {

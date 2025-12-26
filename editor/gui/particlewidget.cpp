@@ -612,17 +612,17 @@ void ParticleEditorWidget::ZoomOut()
 
 void ParticleEditorWidget::ReloadShaders()
 {
-    mUI.widget->reloadShaders();
+    mUI.widget->ReloadShaders();
 }
 
 void ParticleEditorWidget::ReloadTextures()
 {
-    mUI.widget->reloadTextures();
+    mUI.widget->ReloadTextures();
 }
 
 void ParticleEditorWidget::Shutdown()
 {
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 
 void ParticleEditorWidget::Update(double secs)
@@ -672,7 +672,7 @@ void ParticleEditorWidget::Update(double secs)
 
 void ParticleEditorWidget::Render()
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 
 void ParticleEditorWidget::Save()
@@ -691,8 +691,8 @@ bool ParticleEditorWidget::GetStats(Stats* stats) const
 {
     stats->time  = mTime;
     stats->graphics.valid = true;
-    stats->graphics.fps   = mUI.widget->getCurrentFPS();
-    const auto& dev_stats = mUI.widget->getDeviceResourceStats();
+    stats->graphics.fps   = mUI.widget->GetCurrentFPS();
+    const auto& dev_stats = mUI.widget->GetDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
     stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;
     stats->device.dynamic_vbo_mem_alloc   = dev_stats.dynamic_vbo_mem_alloc;

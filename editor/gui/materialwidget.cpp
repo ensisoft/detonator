@@ -265,7 +265,7 @@ QString MaterialWidget::GetId() const
 
 QImage MaterialWidget::TakeScreenshot() const
 {
-    return mUI.widget->TakeSreenshot();
+    return mUI.widget->TakeScreenshot();
 }
 
 void MaterialWidget::InitializeSettings(const UISettings& settings)
@@ -452,7 +452,7 @@ void MaterialWidget::ZoomOut()
 
 void MaterialWidget::ReloadShaders()
 {
-    mUI.widget->reloadShaders();
+    mUI.widget->ReloadShaders();
 
     // reset material instance so that any one time error logging will take place.
     mMaterialInst.reset();
@@ -463,7 +463,7 @@ void MaterialWidget::ReloadShaders()
 }
 void MaterialWidget::ReloadTextures()
 {
-    mUI.widget->reloadTextures();
+    mUI.widget->ReloadTextures();
 
     // reset material instance so that any one time error logging will take place.
     mMaterialInst.reset();
@@ -475,7 +475,7 @@ void MaterialWidget::ReloadTextures()
 
 void MaterialWidget::Shutdown()
 {
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 
     if (mShaderEditor)
     {
@@ -521,8 +521,8 @@ bool MaterialWidget::GetStats(Stats* stats) const
 {
     stats->time  = mTime;
     stats->graphics.valid = true;
-    stats->graphics.fps   = mUI.widget->getCurrentFPS();
-    const auto& dev_stats = mUI.widget->getDeviceResourceStats();
+    stats->graphics.fps   = mUI.widget->GetCurrentFPS();
+    const auto& dev_stats = mUI.widget->GetDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
     stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;
     stats->device.dynamic_vbo_mem_alloc   = dev_stats.dynamic_vbo_mem_alloc;
@@ -534,7 +534,7 @@ bool MaterialWidget::GetStats(Stats* stats) const
 
 void MaterialWidget::Render()
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
     mUI.sprite->Render();
     mUI.textureMapWidget->Render();
 }

@@ -542,19 +542,19 @@ void AnimationTrackWidget::ZoomOut()
 
 void AnimationTrackWidget::ReloadShaders()
 {
-    mUI.widget->reloadShaders();
+    mUI.widget->ReloadShaders();
 }
 void AnimationTrackWidget::ReloadTextures()
 {
-    mUI.widget->reloadTextures();
+    mUI.widget->ReloadTextures();
 }
 void AnimationTrackWidget::Shutdown()
 {
-    mUI.widget->dispose();
+    mUI.widget->Dispose();
 }
 void AnimationTrackWidget::Render()
 {
-    mUI.widget->triggerPaint();
+    mUI.widget->TriggerPaint();
 }
 void AnimationTrackWidget::Update(double secs)
 {
@@ -679,8 +679,8 @@ bool AnimationTrackWidget::GetStats(Stats* stats) const
         stats->time = mAnimationTime;
     }
     stats->graphics.valid = true;
-    stats->graphics.fps   = mUI.widget->getCurrentFPS();
-    const auto& dev_stats = mUI.widget->getDeviceResourceStats();
+    stats->graphics.fps   = mUI.widget->GetCurrentFPS();
+    const auto& dev_stats = mUI.widget->GetDeviceResourceStats();
     stats->device.static_vbo_mem_alloc    = dev_stats.static_vbo_mem_alloc;
     stats->device.static_vbo_mem_use      = dev_stats.static_vbo_mem_use;
     stats->device.dynamic_vbo_mem_alloc   = dev_stats.dynamic_vbo_mem_alloc;

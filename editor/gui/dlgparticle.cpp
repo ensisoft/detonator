@@ -41,7 +41,7 @@ DlgParticle::DlgParticle(QWidget* parent, const app::Workspace* workspace)
     // do the graphics dispose in finished handler which is triggered
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
-    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
+    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::Dispose);
 
     mUI.widget->onPaintScene = std::bind(&DlgParticle::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onInitScene = [&](unsigned, unsigned) {
