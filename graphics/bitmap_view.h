@@ -34,21 +34,21 @@ namespace gfx
           , mHeight(height)
         {}
         BitmapReadView() = default;
-        virtual unsigned GetWidth() const override
+        unsigned GetWidth() const override
         { return mWidth; }
-        virtual unsigned GetHeight() const override
+        unsigned GetHeight() const override
         { return mHeight; }
-        virtual unsigned GetDepthBits() const override
+        unsigned GetDepthBits() const override
         { return sizeof(Pixel) * 8; }
-        virtual const void* GetReadPtr() const override
+        const void* GetReadPtr() const override
         { return mPixels; }
-        virtual bool IsValid() const override
+        bool IsValid() const override
         { return mPixels  && mWidth && mHeight; }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGBA* pixel) const override
+        void ReadPixel(unsigned row, unsigned col, Pixel_RGBA* pixel) const override
         { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGB* pixel) const override
+        void ReadPixel(unsigned row, unsigned col, Pixel_RGB* pixel) const override
         { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_A* pixel) const override
+        void ReadPixel(unsigned row, unsigned col, Pixel_A* pixel) const override
         { read_pixel(row, col, pixel); }
 
         using IBitmapReadView::ReadPixel;
@@ -79,21 +79,21 @@ namespace gfx
           , mHeight(height)
         {}
         BitmapWriteView() = default;
-        virtual unsigned GetWidth() const override
+        unsigned GetWidth() const override
         { return mWidth; }
-        virtual unsigned GetHeight() const override
+        unsigned GetHeight() const override
         { return mHeight; }
-        virtual unsigned GetDepthBits() const override
+        unsigned GetDepthBits() const override
         { return sizeof(Pixel) * 8; }
-        virtual void* GetWritePtr() const override
+        void* GetWritePtr() const override
         { return mPixels; }
-        virtual bool IsValid() const override
+        bool IsValid() const override
         { return mPixels  && mWidth && mHeight; }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGBA& pixel) const override
+        void WritePixel(unsigned row, unsigned col, const Pixel_RGBA& pixel) const override
         { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGB& pixel) const override
+        void WritePixel(unsigned row, unsigned col, const Pixel_RGB& pixel) const override
         { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_A& pixel) const override
+        void WritePixel(unsigned row, unsigned col, const Pixel_A& pixel) const override
         { write_pixel(row, col, pixel); }
 
         using IBitmapWriteView::WritePixel;
@@ -123,29 +123,29 @@ namespace gfx
             , mWidth(width)
             , mHeight(height)
         {}
-        virtual unsigned GetWidth() const override
+        unsigned GetWidth() const override
         { return mWidth; }
-        virtual unsigned GetHeight() const override
+        unsigned GetHeight() const override
         { return mHeight; }
-        virtual unsigned GetDepthBits() const override
+        unsigned GetDepthBits() const override
         { return sizeof(Pixel) * 8; }
-        virtual const void* GetReadPtr() const override
+        const void* GetReadPtr() const override
         { return mPixels; }
-        virtual void* GetWritePtr() const override
+        void* GetWritePtr() const override
         { return mPixels; }
-        virtual bool IsValid() const override
+        bool IsValid() const override
         { return mPixels  && mWidth && mHeight; }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGBA& pixel) const override
+        void WritePixel(unsigned row, unsigned col, const Pixel_RGBA& pixel) const override
         { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGB& pixel) const override
+        void WritePixel(unsigned row, unsigned col, const Pixel_RGB& pixel) const override
         { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const Pixel_A& pixel) const override
+        void WritePixel(unsigned row, unsigned col, const Pixel_A& pixel) const override
         { write_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGBA* pixel) const override
+        void ReadPixel(unsigned row, unsigned col, Pixel_RGBA* pixel) const override
         { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGB* pixel) const override
+        void ReadPixel(unsigned row, unsigned col, Pixel_RGB* pixel) const override
         { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Pixel_A* pixel) const override
+        void ReadPixel(unsigned row, unsigned col, Pixel_A* pixel) const override
         { read_pixel(row, col, pixel); }
 
         using IBitmapWriteView::WritePixel;

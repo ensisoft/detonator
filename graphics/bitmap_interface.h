@@ -18,6 +18,7 @@
 
 #include "config.h"
 
+#include "base/assert.h"
 #include "graphics/types.h"
 
 namespace gfx
@@ -49,14 +50,14 @@ namespace gfx
         virtual void ReadPixel(unsigned row, unsigned col, Pixel_A* pixel) const = 0;
 
         template<typename Pixel>
-        inline void ReadPixel(const UPoint& point, Pixel* pixel) const
+        void ReadPixel(const UPoint& point, Pixel* pixel) const
         {
             const auto row = point.GetY();
             const auto col = point.GetX();
             return ReadPixel(row, col, pixel);
         }
         template<typename Pixel>
-        inline void ReadPixel(const IPoint& point, Pixel* pixel) const
+        void ReadPixel(const IPoint& point, Pixel* pixel) const
         {
             const auto row = point.GetY();
             const auto col = point.GetX();
@@ -65,21 +66,21 @@ namespace gfx
         }
 
         template<typename Pixel>
-        inline Pixel ReadPixel(unsigned row, unsigned col) const
+        Pixel ReadPixel(unsigned row, unsigned col) const
         {
             Pixel p;
             ReadPixel(row, col, &p);
             return p;
         }
         template<typename Pixel>
-        inline Pixel ReadPixel(const UPoint& point) const
+        Pixel ReadPixel(const UPoint& point) const
         {
             const auto row = point.GetY();
             const auto col = point.GetX();
             return ReadPixel<Pixel>(row, col);
         }
         template<typename Pixel>
-        inline Pixel ReadPixel(const IPoint& point) const
+        Pixel ReadPixel(const IPoint& point) const
         {
             const auto row = point.GetY();
             const auto col = point.GetX();
@@ -119,14 +120,14 @@ namespace gfx
         virtual void WritePixel(unsigned row, unsigned col, const Pixel_A& pixel) const = 0;
 
         template<typename Pixel>
-        inline void WritePixel(const UPoint& point, const Pixel& pixel) const
+        void WritePixel(const UPoint& point, const Pixel& pixel) const
         {
             const auto row = point.GetY();
             const auto col = point.GetX();
             WritePixel(row, col, pixel);
         }
         template<typename Pixel>
-        inline void WritePixel(const IPoint& point, const Pixel& pixel) const
+        void WritePixel(const IPoint& point, const Pixel& pixel) const
         {
             const auto row = point.GetY();
             const auto col = point.GetX();
@@ -147,7 +148,7 @@ namespace gfx
                                  public virtual IBitmapWriteView
     {
     public:
-        virtual ~IBitmapReadWriteView() = default;
+        ~IBitmapReadWriteView() override = default;
     protected:
         // no public dynamic copying or assignment
         IBitmapReadWriteView() = default;
