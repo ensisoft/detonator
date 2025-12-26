@@ -240,26 +240,7 @@ inline void SetImage(QLabel* label, const QPixmap& pixmap)
     else label->setPixmap(pixmap.scaledToHeight(lbl_height));
 }
 
-inline bool SetImage(QLabel* label, const gfx::IBitmap& bitmap)
-{
-    if (!bitmap.IsValid())
-        return false;
-    const auto width  = bitmap.GetWidth();
-    const auto height = bitmap.GetHeight();
-    const auto depth  = bitmap.GetDepthBits();
-    QImage img;
-    if (depth == 8)
-        img = QImage((const uchar*)bitmap.GetDataPtr(), width, height, width, QImage::Format_Alpha8);
-    else if (depth == 24)
-        img = QImage((const uchar*)bitmap.GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
-    else if (depth == 32)
-        img = QImage((const uchar*)bitmap.GetDataPtr(), width, height, width * 4, QImage::Format_RGBA8888);
-    else return false;
-    QPixmap pix;
-    pix.convertFromImage(img);
-    SetImage(label, pix);
-    return true;
-}
+
 
 inline QList<QListWidgetItem*> GetSelection(const QListWidget* list)
 {
@@ -2009,7 +1990,7 @@ inline bool MustHaveNumber(QComboBox* box)
     return ok;
 }
 
-
+bool SetImage(QLabel* label, const gfx::IBitmap& bitmap);
 
 QPixmap ToGrayscale(QPixmap pixmap);
 
