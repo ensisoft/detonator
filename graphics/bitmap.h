@@ -88,13 +88,13 @@ namespace gfx
         virtual std::unique_ptr<IBitmap> CopyRect(const URect& src) const = 0;
 
         // convenience functions
-        inline URect GetRect() const
+        URect GetRect() const
         {
             const auto width = GetWidth();
             const auto height = GetHeight();
             return {0u, 0u, width, height};
         }
-        inline USize GetSize() const
+        USize GetSize() const
         {
             const auto width = GetWidth();
             const auto height = GetHeight();
