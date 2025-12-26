@@ -30,11 +30,52 @@
 #include "warnpop.h"
 
 #include "base/json.h"
+#include "graphics/bitmap_algo.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/gui/utility.h"
 
 namespace gui {
+
+bool SetImage(QLabel* label, const gfx::IBitmap& bitmap)
+{
+    if (!bitmap.IsValid())
+        return false;
+    const auto width  = bitmap.GetWidth();
+    const auto height = bitmap.GetHeight();
+    const auto depth  = bitmap.GetDepthBits();
+    QImage img;
+    if (depth == 8)
+    {
+        // convert 8bit alpha mask to a 32bit RGBA bitmap with white as
+        // color and alpha from the alpha mask. This improves the look
+        // of the bitmap in the QLabel. Otherwise, the non-transparent
+        // pixels will be black and this will be hard to see properly
+        // when using a dark theme.
+        const auto& src_bitmap = dynamic_cast<const gfx::AlphaMask&>(bitmap);
+        gfx::RgbaBitmap dst_bitmap;
+        dst_bitmap.Resize(bitmap.GetWidth(), bitmap.GetHeight());
+
+        const auto& src_view = src_bitmap.GetPixelReadView();
+        const auto& dst_view = dst_bitmap.GetPixelWriteView();
+        gfx::ConvertBitmap(dst_view, src_view, [](const gfx::Pixel_A& src, gfx::Pixel_RGBA* dst) {
+            dst->a = src.r;
+            dst->r = 255;
+            dst->g = 255;
+            dst->b = 255;
+        });
+        img = QImage((const uchar*)dst_bitmap.GetDataPtr(), width, height, width * 4, QImage::Format_RGBA8888);
+    }
+    else if (depth == 24)
+        img = QImage((const uchar*)bitmap.GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
+    else if (depth == 32)
+        img = QImage((const uchar*)bitmap.GetDataPtr(), width, height, width * 4, QImage::Format_RGBA8888);
+    else return false;
+    QPixmap pix;
+    pix.convertFromImage(img);
+    SetImage(label, pix);
+    return true;
+}
 
 
 void SetValue(QPlainTextEdit* edit, const app::AnyString& value, const app::AnyString& format)
