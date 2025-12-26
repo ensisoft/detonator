@@ -85,6 +85,7 @@ MaterialMapWidget::MaterialMapWidget(QWidget* parent)
     mUI.widget->onMousePress = std::bind(&MaterialMapWidget::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseRelease = std::bind(&MaterialMapWidget::MouseRelease, this, std::placeholders::_1);
     mUI.widget->onMouseMove = std::bind(&MaterialMapWidget::MouseMove, this, std::placeholders::_1);
+    mUI.widget->onKeyPress = std::bind(&MaterialMapWidget::KeyPress, this, std::placeholders::_1);
 
     mUI.widget->DrawFocusRect(false);
 
@@ -373,6 +374,91 @@ void MaterialMapWidget::MouseMove(const QMouseEvent* mickey)
     const auto y = mickey->pos().y();
     mCurrentMousePos = gfx::FPoint(x, y - mVerticalScroll);
 }
+
+bool MaterialMapWidget::KeyPress(const QKeyEvent* event)
+{
+    enum class ItemType {
+        TextureMap, TextureSrc
+    };
+
+    struct Item {
+        ItemType type;
+        std::string id;
+    };
+    std::vector<Item> items;
+    std::size_t current_index = 0xffffff;
+
+    for (unsigned i=0; i<mMaterial->GetNumTextureMaps(); ++i)
+    {
+        const auto* map = mMaterial->GetTextureMap(i);
+        if (mSelectedTextureMapId == map->GetId())
+            current_index = items.size();
+
+        Item map_item;
+        map_item.id = map->GetId();
+        map_item.type = ItemType::TextureMap;
+        items.push_back(map_item);
+
+        const auto& state = mMaterialMapStates[map->GetId()];
+        if (!state.expanded)
+            continue;
+
+        for (unsigned j=0; j<map->GetNumTextures(); ++j)
+        {
+            const auto* src = map->GetTextureSource(j);
+            if (mSelectedTextureSrcId == src->GetId())
+                current_index = items.size();
+            Item src_item;
+            src_item.id = src->GetId();
+            src_item.type = ItemType::TextureSrc;
+            items.push_back(src_item);
+        }
+    }
+    if (items.empty())
+        return false;
+
+    auto SelectItem = [this, items](size_t index) {
+        if (items[index].type == ItemType::TextureMap) {
+            mSelectedTextureMapId = items[index].id;
+            mSelectedTextureSrcId.clear();
+        } else if (items[index].type == ItemType::TextureSrc) {
+            mSelectedTextureMapId.clear();
+            mSelectedTextureSrcId = items[index].id;
+        }
+    };
+
+    if (current_index >= items.size())
+    {
+        SelectItem(0);
+        return true;
+    }
+
+    const auto key = event->key();
+    if (key == Qt::Key_Down)
+    {
+        SelectItem((current_index + 1) % items.size());
+        emit SelectionChanged();
+    }
+    else if (key == Qt::Key_Up)
+    {
+        SelectItem(current_index > 0 ? current_index - 1 : items.size()-1);
+        emit SelectionChanged();
+    }
+    else if (key == Qt::Key_Right)
+    {
+        if (items[current_index].type == ItemType::TextureMap)
+            mMaterialMapStates[items[current_index].id].expanded = true;
+    }
+    else if (key == Qt::Key_Left)
+    {
+        if (items[current_index].type == ItemType::TextureMap)
+            mMaterialMapStates[items[current_index].id].expanded = false;
+    }
+    else return false;
+
+    return true;
+}
+
 void MaterialMapWidget::ComputeScrollBars(unsigned render_width, unsigned render_height)
 {
     const auto widget_width  = mUI.widget->width();

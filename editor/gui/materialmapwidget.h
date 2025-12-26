@@ -99,6 +99,7 @@ namespace gui
         void MousePress(const QMouseEvent* mickey);
         void MouseRelease(const QMouseEvent* mickey);
         void MouseMove(const QMouseEvent* mickey);
+        bool KeyPress(const QKeyEvent* event);
         void ComputeScrollBars(unsigned render_width, unsigned render_height);
         bool UnderMouse() const;
         gfx::MaterialInstance CreateMaterial(QPalette::ColorRole role,
