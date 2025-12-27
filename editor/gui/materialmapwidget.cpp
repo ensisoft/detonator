@@ -18,7 +18,14 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <QKeyEvent>
+#  include <QWheelEvent>
+#  include <QKeyEvent>
+#include "warnpop.h"
+
 #include "base/format.h"
+#include "base/math.h"
 #include "base/utility.h"
 #include "graphics/drawing.h"
 #include "graphics/bitmap_generator.h"
@@ -85,11 +92,13 @@ MaterialMapWidget::MaterialMapWidget(QWidget* parent)
     mUI.widget->onMousePress = std::bind(&MaterialMapWidget::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseRelease = std::bind(&MaterialMapWidget::MouseRelease, this, std::placeholders::_1);
     mUI.widget->onMouseMove = std::bind(&MaterialMapWidget::MouseMove, this, std::placeholders::_1);
+    mUI.widget->onMouseWheel = std::bind(&MaterialMapWidget::MouseWheel, this, std::placeholders::_1);
     mUI.widget->onKeyPress = std::bind(&MaterialMapWidget::KeyPress, this, std::placeholders::_1);
 
     mUI.widget->DrawFocusRect(false);
 
     mTextureItemSize = 40.0f;
+    mScrollStepSize = 20;
 }
 
 MaterialMapWidget::~MaterialMapWidget()
@@ -147,8 +156,7 @@ void MaterialMapWidget::Render() const
 
 void MaterialMapWidget::on_verticalScrollBar_valueChanged(int)
 {
-    constexpr auto ScrollStepSize = 10;
-    mVerticalScroll = -1.0f * mUI.verticalScrollBar->value() * ScrollStepSize;
+    mVerticalScroll = mUI.verticalScrollBar->value() * mScrollStepSize;
 }
 
 void MaterialMapWidget::PaintScene(gfx::Painter& painter, double dt)
@@ -164,7 +172,7 @@ void MaterialMapWidget::PaintScene(gfx::Painter& painter, double dt)
     painter.ClearColor(CreateColor(QPalette::Window));
 
     gfx::Transform view;
-    view.Translate(0.0f, mVerticalScroll);
+    view.Translate(0.0f, -1.0f * mVerticalScroll);
     painter.SetViewMatrix(view);
 
     gfx::FPoint item_point;
@@ -260,7 +268,7 @@ void MaterialMapWidget::PaintScene(gfx::Painter& painter, double dt)
             state.button_rect = button_rect;
         }
 
-        item_point.Translate(0.0f, 60.0f);
+        item_point.Translate(0.0f, HeaderSize);
 
         if (!state.expanded)
             continue;
@@ -372,7 +380,23 @@ void MaterialMapWidget::MouseMove(const QMouseEvent* mickey)
 {
     const auto x = mickey->pos().x();
     const auto y = mickey->pos().y();
-    mCurrentMousePos = gfx::FPoint(x, y - mVerticalScroll);
+    mCurrentMousePos = gfx::FPoint(x, y + mVerticalScroll);
+}
+
+void MaterialMapWidget::MouseWheel(const QWheelEvent* wheel)
+{
+    const QPoint& num_degrees = wheel->angleDelta() / 8;
+    const QPoint& num_steps = num_degrees / 15;
+
+    const int current_scroll_step = mUI.verticalScrollBar->value();
+    const int maximal_scroll_step = mUI.verticalScrollBar->maximum();
+    const int next_scroll_step = math::clamp(0, maximal_scroll_step,
+        current_scroll_step - num_steps.y());
+
+    QSignalBlocker blocker(mUI.verticalScrollBar);
+    mUI.verticalScrollBar->setValue(next_scroll_step);
+
+    mVerticalScroll = next_scroll_step * mScrollStepSize;
 }
 
 bool MaterialMapWidget::KeyPress(const QKeyEvent* event)
@@ -471,18 +495,21 @@ void MaterialMapWidget::ComputeScrollBars(unsigned render_width, unsigned render
     //DEBUG("Recompute scrollbars. render_height=%1, widget_height=%2",
     //    render_height, widget_height);
 
-    constexpr auto ScrollStepSize = 10;
-
     QSignalBlocker s(mUI.verticalScrollBar);
     if (render_height > widget_height)
     {
         const auto vertical_excess = render_height - widget_height;
-        const float max_scroll_steps = vertical_excess / ScrollStepSize;
-        const auto scroll_step = std::min(-mVerticalScroll / ScrollStepSize, max_scroll_steps);
+        // add +1 step to make sure that if the vertical height that
+        // needs to be scrolled isn't an exact multiple of the of scroll
+        // step height we can still scroll enough to fully cover the
+        // last item and not have it it clipped.
+        const float max_scroll_steps = vertical_excess / mScrollStepSize + 1;
+        const auto scroll_step = std::min(mVerticalScroll / mScrollStepSize, max_scroll_steps);
         mUI.verticalScrollBar->setMaximum(max_scroll_steps);
         mUI.verticalScrollBar->setRange(0, max_scroll_steps);
         mUI.verticalScrollBar->setSingleStep(1);
         mUI.verticalScrollBar->setValue(scroll_step);
+        mVerticalScroll = scroll_step * mScrollStepSize;
     }
     else
     {
