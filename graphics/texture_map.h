@@ -19,6 +19,10 @@
 #include "config.h"
 
 #include <string>
+#include <memory>
+#include <vector>
+#include <optional>
+#include <cstddef>
 
 #include "base/utility.h"
 #include "data/fwd.h"
@@ -70,6 +74,14 @@ namespace gfx
             // as configured in the texture map.
             std::string rect_names[2];
         };
+
+        // Sprite sheet defines a sprite animation (a sprite cycle) where
+        // each frame has the same size and the frames are arranged into
+        // columns and rows. This is an alternative to having multiple
+        // mages (textures where each animation frame is a separate image.
+        // Note that a sprite sheet can contain multiple cycles so this
+        // cols/rows mapping pertains always to the area inside the texture
+        // source rectangle.
         struct SpriteSheet {
             unsigned cols = 0;
             unsigned rows = 0;
@@ -84,76 +96,134 @@ namespace gfx
         TextureMap(TextureMap&& other) noexcept;
 
         // Get the type of the texture map.
-        inline Type GetType() const noexcept
+        Type GetType() const noexcept
         { return mType; }
-        inline float GetSpriteFrameRate() const noexcept
-        { return mFps; }
-        inline bool IsSpriteLooping() const noexcept
-        { return mLooping; }
-        inline bool HasSpriteSheet() const noexcept
-        { return mSpriteSheet.has_value(); }
-        inline std::string GetId() const noexcept
-        { return mId; }
-        inline std::string GetName() const noexcept
-        { return mName; }
 
-        inline bool IsSpriteMap() const noexcept
+        // Get the sprite FPS setting.
+        float GetSpriteFrameRate() const noexcept
+        { return mFps; }
+
+        // Returns true if the sprite map is set to loop.
+        bool IsSpriteLooping() const noexcept
+        { return mLooping; }
+
+        // Returns true if the texture map has a sprite sheet setting.
+        bool HasSpriteSheet() const noexcept
+        { return mSpriteSheet.has_value(); }
+
+        // Returns true if the texture map is a sprite map.
+        bool IsSpriteMap() const noexcept
         { return mType == Type::Sprite; }
 
-        // Reset all texture objects. After this the texture map contains no textures.
-        inline void ResetTextures() noexcept
+        // Get the texture map ID.
+        auto GetId() const noexcept
+        { return mId; }
+
+        // Get the texture map human-readable name.
+        auto GetName() const noexcept
+        { return mName; }
+
+        // Reset and clear all texture settings.
+        // After this the texture map contains no textures.
+        void ResetTextures() noexcept
         { mTextures.clear(); }
-        inline void SetType(Type type) noexcept
+
+        // Set the texture map type.
+        void SetType(Type type) noexcept
         { mType = type; }
-        inline void SetName(std::string name) noexcept
+
+        // Set the texture map human-readable name.
+        void SetName(std::string name) noexcept
         { mName = std::move(name); }
-        inline void SetNumTextures(size_t num)
+
+        // Set the number of textures. This allocates space in the
+        // internal texture mapping array with the expectation that
+        // some texture mapping is assigned to that index later on.
+        void SetNumTextures(size_t num)
         { mTextures.resize(num); }
-        // Get the number of textures.
-        inline size_t GetNumTextures() const noexcept
+
+        // Get the number of allocated texture mappings.
+        size_t GetNumTextures() const noexcept
         { return mTextures.size(); }
 
-        inline void SetSpriteFrameRate(float fps) noexcept
+        // Set the sprite FPS that controls how fast (or slow)
+        // the frames of the sprite cycle play out.
+        void SetSpriteFrameRate(float fps) noexcept
         { mFps = fps; }
-        inline void SetSpriteLooping(bool looping) noexcept
+
+        // Set a flag controlling sprite cycle looping. When set to
+        // true the sprite cycle loops forever and interpolates between
+        // the last and the first frame when reaching the end.
+        // When set to false the sprite cycle never loops and stops
+        // at the end.
+        void SetSpriteLooping(bool looping) noexcept
         { mLooping = looping; }
-        inline void SetSpriteSheet(const SpriteSheet& sheet) noexcept
+
+        // Set the sprite sheet setting.
+        void SetSpriteSheet(const SpriteSheet& sheet) noexcept
         { mSpriteSheet = sheet; }
-        inline void ResetSpriteSheet() noexcept
+
+        // Reset and clear the current sprite sheet setting to nothing.
+        void ResetSpriteSheet() noexcept
         { mSpriteSheet.reset(); }
 
-        inline const SpriteSheet* GetSpriteSheet() const noexcept
+        // Get the current sprite sheet setting if any. If there's no
+        // sprite sheet setting returns a nullptr.
+        const SpriteSheet* GetSpriteSheet() const noexcept
         { return base::GetOpt(mSpriteSheet); }
-        inline void SetSamplerName(std::string name, size_t index = 0) noexcept
+
+        // Set the expected texture sampler name at the designed sampler index.
+        // The texture map has 2 designed sampler slots in order to support
+        // interpolating between sprite animation frames. The names will be
+        // used to identify the fragment shader texture samplers which will
+        // be used to sample the textures provided by the texture map.
+        void SetSamplerName(std::string name, size_t index = 0) noexcept
         { mSamplerName[index] = std::move(name); }
-        inline void SetRectUniformName(std::string name, size_t index = 0) noexcept
+
+        // todo:
+        void SetRectUniformName(std::string name, size_t index = 0) noexcept
         { mRectUniformName[index] = std::move(name); }
-        // Get the texture source object at the given index.
-        inline const TextureSource* GetTextureSource(size_t index) const noexcept
+
+        // Get the texture source object at the given index which must be valid.
+        // If the texture mapping slot has not texture source assigned to it
+        // nullptr will be returned.
+        const TextureSource* GetTextureSource(size_t index) const noexcept
         { return base::SafeIndex(mTextures, index).source.get(); }
-        // Get the texture source object at the given index.
-        inline TextureSource* GetTextureSource(size_t index) noexcept
+
+        // Get the texture source object at the given index which must valid.
+        // If the texture mapping slot has not texture source assigned to it
+        // nullptr will be returned.
+        TextureSource* GetTextureSource(size_t index) noexcept
         { return base::SafeIndex(mTextures, index).source.get(); }
+
         // Get the texture source rectangle at the given index.
-        inline FRect GetTextureRect(size_t index) const noexcept
+        FRect GetTextureRect(size_t index) const noexcept
         { return base::SafeIndex(mTextures, index).rect; }
+
         // Set a new texture source rectangle for using a sub-rect of a texture.
-        inline void SetTextureRect(size_t index, const FRect& rect) noexcept
+        void SetTextureRect(size_t index, const FRect& rect) noexcept
         { base::SafeIndex(mTextures, index).rect = rect; }
-        inline void ResetTextureSource(size_t index) noexcept
+
+        void ResetTextureSource(size_t index) noexcept
         { base::SafeIndex(mTextures, index).source.reset(); }
+
         // Set a new texture source object at the given index.
-        inline void SetTextureSource(size_t index, std::unique_ptr<TextureSource> source) noexcept
+        void SetTextureSource(size_t index, std::unique_ptr<TextureSource> source) noexcept
         { base::SafeIndex(mTextures, index).source = std::move(source); }
-        // Delete the texture source and the texture rect at the given index.
-        inline void DeleteTexture(size_t index) noexcept
+
+        // Delete the texture mapping slot at the given index which must valid.
+        void DeleteTexture(size_t index) noexcept
         { base::SafeErase(mTextures, index); }
-        inline std::string GetSamplerName(size_t index) const noexcept
+
+        std::string GetSamplerName(size_t index) const noexcept
         { return mSamplerName[index]; }
-        inline std::string GetRectUniformName(size_t index) const noexcept
+
+        std::string GetRectUniformName(size_t index) const noexcept
         { return mRectUniformName[index]; }
+
         // Get the hash value based on the current state of the material map.
         std::size_t GetHash() const noexcept;
+
         // Select texture objects for sampling based on the current binding state.
         // If the texture objects don't yet exist on the device they're created.
         // The resulting BoundState expresses which textures should currently be
@@ -161,8 +231,10 @@ namespace gfx
         // binding the textures to the program's state before drawing.
         // Returns true if successful, otherwise false on error.
         bool BindTextures(const BindingState& state, Device& device, BoundState& result) const;
+
         // Serialize into JSON object.
         void IntoJson(data::Writer& data) const;
+
         // Load state from JSON object. Returns true if successful.
         bool FromJson(const data::Reader& data);
         bool FromLegacyJsonTexture2D(const data::Reader& data);
@@ -175,32 +247,54 @@ namespace gfx
         // object is returned. Returns end index if no matching texture source was found.
         size_t FindTextureSourceIndexByName(const std::string& name) const;
 
+        // Swap texture sources at the given indices one and two.
+        // the indices must be valid indices.
+        void SwapSources(size_t one, size_t two);
+
+        // Move from texture mapping from one texture mapping slot
+        // to another slot. Both slots (indices) must be valid.
+        void ShuffleSource(size_t from_index, size_t to_index);
+
+        // Get the number of frames in a sprite cycle irrespective whether
+        // the sprite cycle uses separate images as frames or a sprite sheet
+        // with row/col based grid cells as frames.
+        // If the texture map is a not a sprite then returns zero. (no frames)
+        unsigned GetSpriteFrameCount() const;
+
+        // Compute the duration of the sprite cycle in seconds based on the
+        // number of frames and the playback speed (FPS) setting.
+        // If the texture map is not a sprite then duration will be 0.0f.
+        float GetSpriteCycleDuration() const;
+
+        // Set the new sprite FPS based on the target duration that needs to
+        // be a positive value greater than 0.0f. If the texture map is not
+        // a sprite then nothing is done.
+        void SetSpriteFrameRateFromDuration(float duration);
+
+        // Create an exact bitwise copy of this texture map including the ID.
         std::unique_ptr<TextureMap> Copy() const
         { return std::make_unique<TextureMap>(*this, true); }
+
+        // Create a clone of this texture map, i.e with same data and settings
+        // but with a different ID.
         std::unique_ptr<TextureMap> Clone() const
         { return std::make_unique<TextureMap>(*this, false); }
 
-        unsigned GetSpriteFrameCount() const;
-
-        float GetSpriteCycleDuration() const;
-        void SetSpriteFrameRateFromDuration(float duration);
-
         TextureMap& operator=(const TextureMap& other);
     private:
-        std::string mName;
-        std::string mId;
-
-        Type mType = Type::Texture2D;
-        float mFps = 0.0f;
-        struct MyTexture {
+        struct TextureMapping {
             FRect rect = FRect(0.0f, 0.0f, 1.0f, 1.0f);
             std::unique_ptr<TextureSource> source;
         };
-        std::vector<MyTexture> mTextures;
+        Type mType = Type::Texture2D;
+        std::string mName;
+        std::string mId;
+        std::vector<TextureMapping> mTextures;
         std::string mSamplerName[2];
         std::string mRectUniformName[2];
         std::optional<SpriteSheet> mSpriteSheet;
         bool mLooping = true;
+        float mFps = 0.0f;
     };
 
     using TextureMap2D = TextureMap;

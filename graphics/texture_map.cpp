@@ -16,6 +16,9 @@
 
 #include "config.h"
 
+#include <algorithm>  // for swap
+
+#include "base/assert.h"
 #include "base/utility.h"
 #include "base/hash.h"
 #include "data/writer.h"
@@ -45,7 +48,7 @@ TextureMap::TextureMap(const TextureMap& other, bool copy)
     mSpriteSheet        = other.mSpriteSheet;
     for (const auto& texture : other.mTextures)
     {
-        MyTexture dupe;
+        TextureMapping dupe;
         dupe.rect = texture.rect;
         if (texture.source)
             dupe.source = copy ? texture.source->Copy() : texture.source->Clone();
@@ -257,7 +260,7 @@ bool TextureMap::FromJson(const data::Reader& data)
                 source = std::make_unique<TextureTextureSource>();
             else BUG("Unhandled texture source type.");
 
-            MyTexture texture;
+            TextureMapping texture;
             ok &= source->FromJson(*chunk);
             ok &= chunk->Read("rect", &texture.rect);
             texture.source = std::move(source);
@@ -330,6 +333,28 @@ size_t TextureMap::FindTextureSourceIndexByName(const std::string& name) const
     return i;
 }
 
+void TextureMap::SwapSources(size_t one, size_t two)
+{
+    ASSERT(one < mTextures.size());
+    ASSERT(two < mTextures.size());
+    if (one == two)
+        return;
+
+    std::swap(mTextures[one], mTextures[two]);
+}
+
+void TextureMap::ShuffleSource(size_t from_index, size_t to_index)
+{
+    ASSERT(from_index < mTextures.size());
+    ASSERT(to_index < mTextures.size());
+    if (from_index == to_index)
+        return;
+
+    auto temp = std::move(mTextures[from_index]);
+    mTextures.erase(mTextures.begin() + from_index);
+    mTextures.insert(mTextures.begin() + to_index, std::move(temp));
+}
+
 unsigned TextureMap::GetSpriteFrameCount() const
 {
     if (!IsSpriteMap())
@@ -364,7 +389,6 @@ void TextureMap::SetSpriteFrameRateFromDuration(float duration)
     const auto target_fps = texture_count / duration;
     SetSpriteFrameRate(target_fps);
 }
-
 
 TextureMap& TextureMap::operator=(const TextureMap& other)
 {
