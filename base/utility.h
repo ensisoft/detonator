@@ -323,6 +323,13 @@ void SafeErase(std::vector<T>& vector, std::size_t index)
     vector.erase(vector.begin() + index);
 }
 
+template<typename T>
+void SafeInsert(std::vector<T>& vector, std::size_t index, T item)
+{
+    ASSERT(index < vector.size());
+    vector.insert(vector.begin() + index, std::move(item));
+}
+
 template<typename T, typename Predicate>
 T* SafeFind(std::vector<T>& vector, Predicate predicate)
 {
