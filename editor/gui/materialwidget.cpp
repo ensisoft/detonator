@@ -1128,9 +1128,40 @@ void MaterialWidget::on_textureMapWidget_CustomContextMenuRequested(const QPoint
     }
     else if (const auto* src = GetSelectedTextureSrc())
     {
+        bool can_move_up = true;
+        bool can_move_down = true;
+        unsigned texture_map_index = 0;
+        unsigned texture_src_index = 0;
+        for (unsigned i=0; i<mMaterial->GetNumTextureMaps(); ++i)
+        {
+            const auto* map = mMaterial->GetTextureMap(i);
+            for (unsigned j=0; j<map->GetNumTextures(); ++j)
+            {
+                const auto* tmp = map->GetTextureSource(j);
+                if (tmp == src)
+                {
+                    texture_map_index = i;
+                    texture_src_index = j;
+                }
+            }
+        }
+        auto* map = mMaterial->GetTextureMap(texture_map_index);
+        const auto texture_count = map->GetNumTextures();
+        if (texture_src_index == 0)
+            can_move_up = false;
+        if (texture_src_index == texture_count-1)
+            can_move_down = false;
+
         GfxMenu menu;
         menu.AddAction(mUI.actionEditTexture);
         menu.AddAction(mUI.actionRemoveTexture);
+        menu.AddAction(tr("Move up"), QIcon("icons:move_up.png"), [this, map, texture_src_index]() {
+            map->ShuffleSource(texture_src_index, texture_src_index-1);
+        })->setEnabled(can_move_up);
+        menu.AddAction(tr("Move down"), QIcon("icons:move_down.png"), [this, map, texture_src_index]() {
+            map->ShuffleSource(texture_src_index, texture_src_index+1);
+        })->setEnabled(can_move_down);
+
         menu.AddSeparator();
         menu.AddAction(tr("Collapse all"), [this]() {
             mUI.textureMapWidget->CollapseAll();
