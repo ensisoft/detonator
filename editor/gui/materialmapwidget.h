@@ -21,9 +21,12 @@
 #include "warnpush.h"
 #  include "ui_materialmapwidget.h"
 #  include <QWidget>
-#  include <QObject>
 #  include <QPalette>
 #include "warnpop.h"
+
+class QMouseEvent;
+class QKeyEvent;
+class QWheelEvent;
 
 #include <string>
 #include <unordered_map>
@@ -99,6 +102,7 @@ namespace gui
         void MousePress(const QMouseEvent* mickey);
         void MouseRelease(const QMouseEvent* mickey);
         void MouseMove(const QMouseEvent* mickey);
+        void MouseWheel(const QWheelEvent* wheel);
         bool KeyPress(const QKeyEvent* event);
         void ComputeScrollBars(unsigned render_width, unsigned render_height);
         bool UnderMouse() const;
@@ -124,7 +128,8 @@ namespace gui
         float mVerticalScroll = 0.0f;
         gfx::FPoint mCurrentMousePos;
 
-        float mTextureItemSize = 0.0f;
+        int mTextureItemSize = 0;
+        int mScrollStepSize = 0;
 
         unsigned mPreviousRenderWidth = 0;
         unsigned mPreviousRenderHeight = 0;
