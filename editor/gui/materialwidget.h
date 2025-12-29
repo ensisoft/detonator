@@ -190,6 +190,7 @@ namespace gui
         bool KeyPress(QKeyEvent* key);
         gfx::TextureMap* GetSelectedTextureMap();
         gfx::TextureSource* GetSelectedTextureSrc();
+        float GetMaterialRenderTime() const;
     private:
         Ui::MaterialWidget mUI;
     private:

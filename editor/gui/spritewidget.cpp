@@ -19,6 +19,7 @@
 #include <functional>
 #include <algorithm>
 
+#include "base/math.h"
 #include "graphics/drawing.h"
 #include "graphics/material_instance.h"
 #include "graphics/texture_file_source.h"
@@ -315,51 +316,77 @@ void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter&
         }
     }
 
-    if (mRenderTime)
+
+    // render the time indicator as a vertical line
     {
-        const auto duration = texture_map->GetSpriteCycleDuration();
-        if (duration > 0.0f)
+        const float pos = MapFromSpriteTimeToRender(duration, cycle_width, texture_map->IsSpriteLooping());
+
+        gfx::FPoint a;
+        a.Translate(10.0f, 20.0f);
+        a.Translate(-mTranslateX, 0.0f);
+        a.Translate(pos, 0.0f);
+
+        gfx::FPoint b;
+        b.Translate(10.0f, widget_height - 15.0f);
+        b.Translate(-mTranslateX, 0.0f);
+        b.Translate(pos, 0.0f);
+
+        if (std::abs(mMousePos.x() - pos) < 5)
         {
-            const float t = mTime;
-            const float phase = texture_map->IsSpriteLooping()
-                                ? std::fmod(t, duration) / duration
-                                : std::min(t / duration, 1.0f);
-            const auto pos = phase * cycle_width;
-
-            gfx::FPoint a;
-            a.Translate(10.0f, 20.0f);
-            a.Translate(-mTranslateX, 0.0f);
-            a.Translate(pos, 0.0f);
-
-            gfx::FPoint b;
-            b.Translate(10.0f, widget_height - 15.0f);
-            b.Translate(-mTranslateX, 0.0f);
-            b.Translate(pos, 0.0f);
-
-            gfx::DebugDrawLine(painter, a, b, gfx::Color::Silver, 2.0f);
+            mTimeBarUnderMouse = true;
+            gfx::DebugDrawLine(painter, a, b, gfx::Color::Green, 1.0f);
         }
+        else
+            gfx::DebugDrawLine(painter, a, b, gfx::Color::Silver, 1.0f);
     }
 
     const auto render_width = 10.0f + duration_width + 10.0f;
     ComputeScrollBars(render_width);
+
+    // store the "width" (in pixels) of the sprite cycle for later
+    // use, i.e. when mapping click points.
+    mPreviousDurationRenderWidth = static_cast<unsigned>(duration_width);
 }
 
-void SpriteWidget::MousePress(QMouseEvent* mickey)
+void SpriteWidget::MousePress(const QMouseEvent* mickey)
 {
-    if (mickey->button() == Qt::LeftButton)
-    {
-        mDragTime = true;
-    }
+    if (mickey->button() != Qt::LeftButton)
+        return;
+
+    if (!mCanDragTime || !mTimeBarUnderMouse)
+        return;
+
+    mDragTime = true;
 }
-void SpriteWidget::MouseRelease(QMouseEvent* mickey)
+
+void SpriteWidget::MouseRelease(const QMouseEvent* mickey)
 {
+    const auto btn = mickey->button();
+    if (btn != Qt::LeftButton)
+        return;
+
+    if (!mCanDragTime || !mPreviousDurationRenderWidth)
+        return;
+
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
+    {
+        MapFromSpriteRenderToTime();
+    }
+
     mDragTime = false;
 }
 
-void SpriteWidget::MouseMove(QMouseEvent* mickey)
+void SpriteWidget::MouseMove(const QMouseEvent* mickey)
 {
+    mMousePos = MapPoint(mickey->pos());
+
     if (!mDragTime)
         return;
+
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
+    {
+        MapFromSpriteRenderToTime();
+    }
 }
 
 void SpriteWidget::ComputeScrollBars(unsigned render_width)
@@ -387,6 +414,44 @@ void SpriteWidget::ComputeScrollBars(unsigned render_width)
     }
     mPreviousRenderWidth = render_width;
     mPreviousWidgetWidth = widget_width;
+}
+
+QPoint SpriteWidget::MapPoint(const QPoint& point) const
+{
+    return QPoint(mTranslateX, 0) + point - QPoint(10, 0);
+}
+
+float SpriteWidget::MapFromSpriteTimeToRender(float duration, float render_width, bool looping) const
+{
+    if (looping)
+    {
+        const auto t = mTime > duration ? std::fmod(mTime, duration) : mTime;
+        const auto p = t / duration;
+        return p * render_width;
+    }
+
+    const auto p = std::min(mTime / duration, 1.0);
+    return p * render_width;
+}
+
+void SpriteWidget::MapFromSpriteRenderToTime()
+{
+    const auto& texture_map_id = mMaterial->GetActiveTextureMap();
+    const auto* texture_map = mMaterial->FindTextureMapById(texture_map_id);
+    if (!texture_map || !texture_map->IsSpriteMap())
+        return;
+
+    const auto duration = texture_map->GetSpriteCycleDuration();
+    const auto duration_whole_seconds = std::ceil(duration);
+
+    const auto xpos = static_cast<float>(mMousePos.x());
+    const auto time = xpos / static_cast<float>(mPreviousDurationRenderWidth) * duration_whole_seconds;
+    const auto safe_time = math::clamp(0.0f, duration, time);
+    emit AdjustTime(safe_time);
+
+    //DEBUG("duration in pixels = %1, xpos = %2, time = %3s",
+    //    mPreviousDurationRenderWidth, xpos, time);
+
 }
 
 
