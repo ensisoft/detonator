@@ -62,14 +62,17 @@ namespace gui
         {
             mTime = time;
         }
-        void RenderTimeBar(bool on_off)
+        void CanDragTime(bool on_off)
         {
-            mRenderTime = on_off;
+            mCanDragTime = on_off;
         }
         void EnablePaint(bool enable)
         {
             mEnablePaint = enable;
         }
+
+    signals:
+        void AdjustTime(double time);
 
     private slots:
         void on_horizontalScrollBar_valueChanged(int);
@@ -78,10 +81,13 @@ namespace gui
         void PaintScene(gfx::Painter& painter, double dt);
         void PaintTexture(const gfx::MaterialClass* klass, gfx::Painter& painter, double dt);
         void PaintSprite(const gfx::MaterialClass* klass, gfx::Painter& painter, double dt);
-        void MousePress(QMouseEvent* mickey);
-        void MouseRelease(QMouseEvent* mickey);
-        void MouseMove(QMouseEvent* mickey);
+        void MousePress(const QMouseEvent* mickey);
+        void MouseRelease(const QMouseEvent* mickey);
+        void MouseMove(const QMouseEvent* mickey);
         void ComputeScrollBars(unsigned render_width);
+        QPoint MapPoint(const QPoint& point) const;
+        float MapFromSpriteTimeToRender(float duration, float render_width, bool looping) const;
+        void MapFromSpriteRenderToTime();
 
     private:
         Ui::SpriteWidget mUI;
@@ -91,9 +97,14 @@ namespace gui
         std::string mSelectedTextureMapId;
         float mTranslateX = 0.0f;
         double mTime = 0.0f;
-        bool mRenderTime = false;
         bool mDragTime = false;
         bool mEnablePaint = true;
+        bool mCanDragTime = false;
+        bool mTimeBarUnderMouse = false;
+
+        QPoint mMousePos;
+
+        unsigned mPreviousDurationRenderWidth = 0;
 
         unsigned mPreviousRenderWidth = 0;
         unsigned mPreviousWidgetWidth = 0;

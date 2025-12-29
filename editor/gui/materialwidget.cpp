@@ -168,6 +168,9 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
 
     connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, this, &MaterialWidget::ShaderFileChanged);
     connect(mWorkspace, &app::Workspace::ResourceUpdated, this, &MaterialWidget::ResourceUpdated);
+    connect(mUI.sprite, &SpriteWidget::AdjustTime, this, [this](double time) {
+        SetValue(mUI.kTime, time);
+    });
 
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.textureMinFilter);
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.textureMagFilter);
@@ -203,6 +206,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mModelRotationTotal.y = glm::radians(15.0f);
 
     mUI.sprite->SetMaterial(mMaterial);
+    mUI.sprite->CanDragTime(true);
     mUI.textureMapWidget->SetMaterial(mMaterial);
 }
 
@@ -552,9 +556,7 @@ void MaterialWidget::on_actionPlay_triggered()
     SetEnabled(mUI.actionPause, true);
     SetEnabled(mUI.actionStop, true);
     SetEnabled(mUI.kTime, false);
-
-    if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
-        mUI.sprite->RenderTimeBar(true);
+    mUI.sprite->CanDragTime(false);
 }
 
 void MaterialWidget::on_actionPause_triggered()
@@ -572,9 +574,8 @@ void MaterialWidget::on_actionStop_triggered()
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
     SetEnabled(mUI.kTime, true);
+    mUI.sprite->CanDragTime(true);
     mTime = 0.0f;
-
-    mUI.sprite->RenderTimeBar(false);
 }
 
 void MaterialWidget::on_actionSave_triggered()
@@ -2710,7 +2711,9 @@ void MaterialWidget::ShowMaterialProperties()
         mFileWatcher.addPath(file);
     }
 
-    if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
+    const auto type = mMaterial->GetType();
+
+    if (type == gfx::MaterialClass::Type::Custom)
     {
         SetPlaceholderText(mUI.shaderFile, "None Selected");
         SetEnabled(mUI.btnAddShader,       true);
@@ -2733,7 +2736,7 @@ void MaterialWidget::ShowMaterialProperties()
         SetEnabled(mUI.actionCustomizeShader, true);
         SetEnabled(mUI.btnResetShader, mMaterial->HasShaderSrc());
 
-        if (mMaterial->GetType() == gfx::MaterialClass::Type::BasicLight)
+        if (type == gfx::MaterialClass::Type::BasicLight)
         {
             SetVisible(mUI.builtInProperties,   true);
             SetVisible(mUI.lblDiffuseColor,     true);
@@ -2745,13 +2748,13 @@ void MaterialWidget::ShowMaterialProperties()
             SetVisible(mUI.specularColor,       true);
             SetVisible(mUI.specularExponent,    true);
         }
-        else if (mMaterial->GetType() == gfx::MaterialClass::Type::Color)
+        else if (type == gfx::MaterialClass::Type::Color)
         {
             SetVisible(mUI.builtInProperties,   true);
             SetVisible(mUI.baseColor,           true);
             SetVisible(mUI.lblBaseColor,        true);
         }
-        else if (mMaterial->GetType() == gfx::MaterialClass::Type::Gradient)
+        else if (type == gfx::MaterialClass::Type::Gradient)
         {
             SetVisible(mUI.builtInProperties, true);
             SetVisible(mUI.gradientMap,       true);
@@ -2760,8 +2763,7 @@ void MaterialWidget::ShowMaterialProperties()
             SetVisible(mUI.gradientGamma,     true);
             SetVisible(mUI.lblGradientGamma,  true);
         }
-        else if (mMaterial->GetType() == gfx::MaterialClass::Type::Texture ||
-                 mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
+        else if (type == gfx::MaterialClass::Type::Texture || type == gfx::MaterialClass::Type::Sprite)
         {
             SetVisible(mUI.builtInProperties,   true);
             SetVisible(mUI.lblBaseColor,        true);
@@ -2776,7 +2778,7 @@ void MaterialWidget::ShowMaterialProperties()
             SetVisible(mUI.textureFilters,      true);
             SetVisible(mUI.textureWrap,         true);
         }
-        else if (mMaterial->GetType() == gfx::MaterialClass::Type::Tilemap)
+        else if (type == gfx::MaterialClass::Type::Tilemap)
         {
             SetVisible(mUI.builtInProperties,   true);
             SetVisible(mUI.lblBaseColor,        true);
@@ -2799,7 +2801,7 @@ void MaterialWidget::ShowMaterialProperties()
             SetVisible(mUI.lblTileIndex,        true);
             SetVisible(mUI.kTileIndex,          true);
         }
-        else if (mMaterial->GetType() == gfx::MaterialClass::Type::Particle2D)
+        else if (type == gfx::MaterialClass::Type::Particle2D)
         {
             SetVisible(mUI.builtInProperties,       true);
             SetVisible(mUI.lblAlphaCutoff,          true);
@@ -3115,8 +3117,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
             aspect_ratio = float(tile_width) / float(tile_height);
     }
 
-    const auto time = mState == PlayState::Playing || mState == PlayState::Paused
-                      ? mTime : GetValue(mUI.kTime);
+    const auto time = GetMaterialRenderTime();
     const auto zoom = (float)GetValue(mUI.zoom);
 
     if (!mDrawable)
@@ -3465,6 +3466,13 @@ gfx::TextureSource* MaterialWidget::GetSelectedTextureSrc()
         return nullptr;
 
     return mMaterial->FindTextureSource(selected_texture_src_id);
+}
+
+float MaterialWidget::GetMaterialRenderTime() const
+{
+    if (mState == PlayState::Playing || mState == PlayState::Paused)
+        return mTime;
+    return GetValue(mUI.kTime);
 }
 
 } // namespace
