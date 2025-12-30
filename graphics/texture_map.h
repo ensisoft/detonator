@@ -51,6 +51,7 @@ namespace gfx
         };
         // The current state to be used when binding textures to samplers.
         struct BindingState {
+            bool blend_frames = false;
             bool dynamic_content = false;
             double current_time  = 0.0f;
             std::string group_tag;

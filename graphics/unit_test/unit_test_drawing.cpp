@@ -56,6 +56,7 @@
 #include "graphics/tool/polygon.h"
 
 #include "test_device.cpp"
+#include "audio/format.h"
 
 bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
 {
@@ -584,255 +585,321 @@ void unit_test_material_uniforms()
     }
 }
 
-void unit_test_material_textures()
+void unit_test_material_texture()
 {
     TEST_CASE(test::Type::Feature)
 
-    // test setting basic texture properties.
-    {
+    TestDevice device;
+    gfx::ProgramState program;
+
+    gfx::TextureMap2DClass test(gfx::MaterialClass::Type::Texture);
+    test.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
+    test.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
+    test.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+    test.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+
+    gfx::RgbBitmap bitmap;
+    bitmap.Resize(100, 80);
+    test.SetTexture(gfx::CreateTextureFromBitmap(bitmap));
+
+    gfx::FlatShadedColorProgram pass;
+    gfx::MaterialClass::State env;
+    env.material_time = 1.0;
+    test.ApplyDynamicState(env, device, program);
+
+    const auto& texture = device.GetTexture(0);
+    TEST_REQUIRE(texture.GetHeight() == 80);
+    TEST_REQUIRE(texture.GetWidth() == 100);
+    TEST_REQUIRE(texture.GetFormat() == gfx::Texture::Format::sRGB);
+    TEST_REQUIRE(texture.GetMinFilter() == gfx::Texture::MinFilter::Trilinear);
+    TEST_REQUIRE(texture.GetMagFilter() == gfx::Texture::MagFilter::Nearest);
+    TEST_REQUIRE(texture.GetWrapX() == gfx::Texture::Wrapping::Clamp);
+    TEST_REQUIRE(texture.GetWrapY() == gfx::Texture::Wrapping::Clamp);
+    TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+    TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
+}
+
+void unit_test_sprite_texture_blending()
+{
+    TEST_CASE(test::Type::Feature)
+
+    gfx::RgbBitmap bitmap;
+    bitmap.Resize(10, 10);
+
+    gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
+    test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
+    test.GetTextureMap(0)->SetSpriteFrameRate(1.0f);
+    test.SetBlendFrames(false);
+
+    auto GetBlendFactor = [&test](double time) {
         TestDevice device;
         gfx::ProgramState program;
-
-        gfx::TextureMap2DClass test(gfx::MaterialClass::Type::Texture);
-        test.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
-        test.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
-        test.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
-        test.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
-
-        gfx::RgbBitmap bitmap;
-        bitmap.Resize(100, 80);
-        test.SetTexture(gfx::CreateTextureFromBitmap(bitmap));
-
         gfx::FlatShadedColorProgram pass;
         gfx::MaterialClass::State env;
-        env.material_time = 1.0;
+        env.material_time = time;
         test.ApplyDynamicState(env, device, program);
+        float blend_factor = 0.0f;
+        program.GetUniform("kBlendCoeff", &blend_factor);
+        return blend_factor;
+    };
 
-        const auto& texture = device.GetTexture(0);
-        TEST_REQUIRE(texture.GetHeight() == 80);
-        TEST_REQUIRE(texture.GetWidth() == 100);
-        TEST_REQUIRE(texture.GetFormat() == gfx::Texture::Format::sRGB);
-        TEST_REQUIRE(texture.GetMinFilter() == gfx::Texture::MinFilter::Trilinear);
-        TEST_REQUIRE(texture.GetMagFilter() == gfx::Texture::MagFilter::Nearest);
-        TEST_REQUIRE(texture.GetWrapX() == gfx::Texture::Wrapping::Clamp);
-        TEST_REQUIRE(texture.GetWrapY() == gfx::Texture::Wrapping::Clamp);
-        TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
-        TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
-    }
+    // time in seconds.
+    TEST_REQUIRE(GetBlendFactor(0.00) == 0.0f);
+    TEST_REQUIRE(GetBlendFactor(0.50) == 0.0f);
+    TEST_REQUIRE(GetBlendFactor(0.98) == 0.0f);
+    TEST_REQUIRE(GetBlendFactor(1.25) == 0.0f);
+
+    test.SetBlendFrames(true);
+    TEST_REQUIRE(GetBlendFactor(0.00) == 0.5f);
+    TEST_REQUIRE(math::equals(GetBlendFactor(0.49), 1.0f, 0.01f));
+    TEST_REQUIRE(math::equals(GetBlendFactor(0.51), 0.0f, 0.01f));
+    TEST_REQUIRE(math::equals(GetBlendFactor(1.00), 0.5f, 0.01f));
+}
+
+void unit_test_sprite_texture_binding()
+{
+    TEST_CASE(test::Type::Feature)
+
+    TestDevice device;
+    gfx::ProgramState program;
+
+    auto BindTextures = [&device, &program](double time, gfx::MaterialClass& test) {
+        device.Clear();
+        program.Clear();
+        gfx::FlatShadedColorProgram pass;
+        gfx::MaterialClass::State env;
+        env.material_time = time;
+        test.ApplyDynamicState(env, device, program);
+    };
 
     // test cycling through sprite textures.
-
-    // one texture, both texture bindings are using the same texture.
     {
-        gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
-
         gfx::RgbBitmap bitmap;
         bitmap.Resize(10, 10);
+
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Sprite);
         test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
         test.GetTextureMap(0)->SetSpriteFrameRate(1.0f);
 
-        TestDevice device;
-        gfx::ProgramState program;
-        {
-            gfx::FlatShadedColorProgram pass;
-            gfx::MaterialClass::State env;
-            env.material_time = 0.0f;
-            test.ApplyDynamicState(env, device, program);
-            const auto &texture = device.GetTexture(0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
-            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture);
-            float blend_factor = 0.0f;
-            TEST_REQUIRE(program.GetUniform("kBlendCoeff", &blend_factor));
-            TEST_REQUIRE(blend_factor == 0.0f);
-        }
-        program.Clear();
-        {
-            gfx::FlatShadedColorProgram pass;
-            gfx::MaterialClass::State env;
-            env.material_time = 1.5f;
-            test.ApplyDynamicState(env, device, program);
-            const auto &texture = device.GetTexture(0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
-            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture);
-            float blend_factor = 0.0f;
-            TEST_REQUIRE(program.GetUniform("kBlendCoeff", &blend_factor));
-            TEST_REQUIRE(blend_factor == 0.5f);
-        }
-    }
-
-    // 2 textures.
-    {
-        gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
-
-        gfx::RgbBitmap one;
-        one.Resize(10, 10);
-        one.Fill(gfx::Color::Red);
-        gfx::RgbBitmap two;
-        two.Resize(10, 10);
-        two.Fill(gfx::Color::Green);
-
-        test.AddTexture(gfx::CreateTextureFromBitmap(one));
-        test.AddTexture(gfx::CreateTextureFromBitmap(two));
-        test.GetTextureMap(0)->SetSpriteFrameRate(1.0f); // 1 frame per second.
-
-        TestDevice device;
-        gfx::ProgramState program;
-        {
-            gfx::FlatShadedColorProgram pass;
-            gfx::MaterialClass::State env;
-            env.material_time = 0.0f;
-            test.ApplyDynamicState(env, device, program);
-            const auto& tex0 = device.GetTexture(0);
-            const auto& tex1 = device.GetTexture(1);
-            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex0);
-            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex1);
-        }
-        program.Clear();
-        {
-            gfx::FlatShadedColorProgram pass;
-            gfx::MaterialClass::State env;
-            env.material_time = 1.0f;
-            test.ApplyDynamicState(env, device, program);
-            const auto& tex0 = device.GetTexture(0);
-            const auto& tex1 = device.GetTexture(1);
-            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex0);
-        }
-    }
-
-    // 3 textures.
-    {
-        gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
-
-        gfx::RgbBitmap one;
-        one.Resize(10, 10);
-        one.Fill(gfx::Color::Red);
-        gfx::RgbBitmap two;
-        two.Resize(10, 10);
-        two.Fill(gfx::Color::Green);
-        gfx::RgbBitmap three;
-        two.Resize(10, 10);
-        two.Fill(gfx::Color::Yellow);
-
-        test.AddTexture(gfx::CreateTextureFromBitmap(one));
-        test.AddTexture(gfx::CreateTextureFromBitmap(two));
-        test.AddTexture(gfx::CreateTextureFromBitmap(three));
-        test.GetTextureMap(0)->SetSpriteFrameRate(1.0f); // 1 frame per second.
-
-        TestDevice device;
-        gfx::ProgramState program;
-        {
-            gfx::FlatShadedColorProgram pass;
-            gfx::MaterialClass::State env;
-            env.material_time = 0.0f;
-            test.ApplyDynamicState(env, device, program);
-            const auto& tex0 = device.GetTexture(0);
-            const auto& tex1 = device.GetTexture(1);
-            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex0);
-            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex1);
-        }
-        program.Clear();
-        {
-            gfx::FlatShadedColorProgram pass;
-            gfx::MaterialClass::State env;
-            env.material_time = 1.0f;
-            test.ApplyDynamicState(env, device, program);
-            const auto& tex0 = device.GetTexture(0);
-            const auto& tex1 = device.GetTexture(1);
-            const auto& tex2 = device.GetTexture(2);
-            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex2);
-        }
-        program.Clear();
-        {
-            gfx::FlatShadedColorProgram pass;
-            gfx::MaterialClass::State env;
-            env.material_time = 2.5f;
-            test.ApplyDynamicState(env, device, program);
-            const auto& tex0 = device.GetTexture(0);
-            const auto& tex1 = device.GetTexture(1);
-            const auto& tex2 = device.GetTexture(2);
-            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex2);
-            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex0);
-        }
-    }
-
-    // turn off looping.
-    {
-        gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
-
-        gfx::RgbBitmap one;
-        one.Resize(10, 10);
-        one.Fill(gfx::Color::Red);
-        gfx::RgbBitmap two;
-        two.Resize(10, 10);
-        two.Fill(gfx::Color::Green);
-        gfx::RgbBitmap three;
-        two.Resize(10, 10);
-        two.Fill(gfx::Color::Yellow);
-
-        test.AddTexture(gfx::CreateTextureFromBitmap(one));
-        test.AddTexture(gfx::CreateTextureFromBitmap(two));
-        test.AddTexture(gfx::CreateTextureFromBitmap(three));
-        test.GetTextureMap(0)->SetSpriteFrameRate(1.0f);
+        test.SetBlendFrames(false);
         test.GetTextureMap(0)->SetSpriteLooping(false);
 
-        TestDevice device;
-        gfx::ProgramState program;
+        // start
         {
-            gfx::FlatShadedColorProgram pass;
-            gfx::MaterialClass::State env;
-            env.material_time = 0.0f;
-            test.ApplyDynamicState(env, device, program);
-            const auto& tex0 = device.GetTexture(0);
-            const auto& tex1 = device.GetTexture(1);
+            BindTextures(0.0, test);
+            const auto& texture = device.GetTexture(0);
             TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
             TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture);
         }
 
-        program.Clear();
+        // middle
         {
-            gfx::FlatShadedColorProgram pass;
-            gfx::MaterialClass::State env;
-            env.material_time = 1.0f;
-            test.ApplyDynamicState(env, device, program);
-            const auto& tex0 = device.GetTexture(0);
-            const auto& tex1 = device.GetTexture(1);
-            const auto& tex2 = device.GetTexture(2);
+            BindTextures(0.5, test);
+            const auto& texture = device.GetTexture(0);
             TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex1);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
             TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex2);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture);
         }
-        program.Clear();
+
+        // middle
         {
-            gfx::FlatShadedColorProgram pass;
-            gfx::MaterialClass::State env;
-            env.material_time = 2.5f;
-            test.ApplyDynamicState(env, device, program);
-            const auto& tex0 = device.GetTexture(0);
-            const auto& tex1 = device.GetTexture(1);
-            const auto& tex2 = device.GetTexture(2);
+            BindTextures(1.5, test);
+            const auto& texture = device.GetTexture(0);
             TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
-            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex2);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
             TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
-            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex2);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture);
+        }
+
+        test.GetTextureMap(0)->SetSpriteLooping(true);
+
+        // start
+        {
+            BindTextures(0.0, test);
+            const auto& texture = device.GetTexture(0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture);
+        }
+
+        // middle
+        {
+            BindTextures(0.5, test);
+            const auto& texture = device.GetTexture(0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture);
+        }
+
+        // middle
+        {
+            BindTextures(1.5, test);
+            const auto& texture = device.GetTexture(0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture);
+        }
+    }
+
+    {
+        gfx::RgbBitmap bitmap0;
+        bitmap0.Resize(10, 10);
+
+        gfx::RgbBitmap bitmap1;
+        bitmap1.Resize(20, 20);
+
+        gfx::MaterialClass test(gfx::MaterialClass::Type::Sprite);
+        test.AddTexture(gfx::CreateTextureFromBitmap(bitmap0));
+        test.AddTexture(gfx::CreateTextureFromBitmap(bitmap1));
+        test.GetTextureMap(0)->SetSpriteFrameRate(1.0f);
+
+        test.SetBlendFrames(false);
+        test.GetTextureMap(0)->SetSpriteLooping(false);
+
+        // start
+        {
+            BindTextures(0.0, test);
+            const auto& texture0 = device.GetTexture(0);
+            const auto& texture1 = device.GetTexture(1);
+            TEST_REQUIRE(texture0.GetWidth() == 10);
+            TEST_REQUIRE(texture1.GetWidth() == 20);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture1);
+        }
+
+        // mid,
+        {
+            BindTextures(0.5, test);
+            const auto& texture0 = device.GetTexture(0);
+            const auto& texture1 = device.GetTexture(1);
+            TEST_REQUIRE(texture0.GetWidth() == 10);
+            TEST_REQUIRE(texture1.GetWidth() == 20);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture1);
+        }
+
+        // end
+        {
+            BindTextures(1.0, test);
+            const auto& texture0 = device.GetTexture(0);
+            TEST_REQUIRE(texture0.GetWidth() == 20);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture0);
+        }
+
+        // end, clamp
+        {
+            BindTextures(1.5, test);
+            const auto& texture0 = device.GetTexture(0);
+            TEST_REQUIRE(texture0.GetWidth() == 20);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture0);
+        }
+
+        test.GetTextureMap(0)->SetSpriteLooping(true);
+
+        // with sprite set to looping everything else should be the same
+        // as above, but when the time exceeds the duration of the sprite
+        // animation cycle we are going to wrap over.
+
+        // end
+        {
+            BindTextures(1.0, test);
+            const auto& texture0 = device.GetTexture(0);
+            const auto& texture1 = device.GetTexture(1);
+            TEST_REQUIRE(texture0.GetWidth() == 20);
+            TEST_REQUIRE(texture1.GetWidth() == 10);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture1);
+        }
+
+        // looping over
+        {
+            BindTextures(2.1, test);
+            const auto& texture0 = device.GetTexture(0);
+            const auto& texture1 = device.GetTexture(1);
+            TEST_REQUIRE(texture0.GetWidth() == 10);
+            TEST_REQUIRE(texture1.GetWidth() == 20);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture1);
+        }
+
+        test.GetTextureMap(0)->SetSpriteLooping(false);
+        test.SetBlendFrames(true);
+
+        // with blending when time is 0.0 we're actually blending
+        // between the last and the first frame. so the texture binding
+        // changes a little bit.
+        {
+            BindTextures(0.0, test);
+            const auto& texture0 = device.GetTexture(0);
+            const auto& texture1 = device.GetTexture(1);
+            TEST_REQUIRE(texture0.GetWidth() == 20);
+            TEST_REQUIRE(texture1.GetWidth() == 10);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture1);
+        }
+
+        //
+        {
+            BindTextures(0.5, test);
+            const auto& texture0 = device.GetTexture(0);
+            const auto& texture1 = device.GetTexture(1);
+            TEST_REQUIRE(texture0.GetWidth() == 10);
+            TEST_REQUIRE(texture1.GetWidth() == 20);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture1);
+        }
+
+        // end
+        {
+            BindTextures(1.0, test);
+            const auto& texture0 = device.GetTexture(0);
+            const auto& texture1 = device.GetTexture(1);
+            TEST_REQUIRE(texture0.GetWidth() == 10);
+            TEST_REQUIRE(texture1.GetWidth() == 20);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture1);
+        }
+
+        // wrap over
+        test.GetTextureMap(0)->SetSpriteLooping(true);
+
+        // end
+        {
+            BindTextures(2.0, test);
+            const auto& texture0 = device.GetTexture(0);
+            const auto& texture1 = device.GetTexture(1);
+            TEST_REQUIRE(texture0.GetWidth() == 20);
+            TEST_REQUIRE(texture1.GetWidth() == 10);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture1);
         }
     }
 }
@@ -1093,6 +1160,7 @@ void unit_test_custom_textures()
 
     gfx::CustomMaterialClass klass(gfx::MaterialClass::Type::Custom);
     klass.SetNumTextureMaps(2);
+    klass.SetBlendFrames(true);
 
     {
         gfx::RgbBitmap bitmap;
@@ -1119,6 +1187,7 @@ void unit_test_custom_textures()
         sprite.SetType(gfx::TextureMap::Type::Sprite);
         sprite.SetSpriteFrameRate(10.0f);
         sprite.SetNumTextures(2);
+        sprite.SetSpriteLooping(false);
         sprite.SetTextureSource(0, gfx::CreateTextureFromBitmap(frame0));
         sprite.SetTextureSource(1, gfx::CreateTextureFromBitmap(frame1));
         sprite.SetTextureRect(size_t(0), gfx::FRect(1.0f, 2.0f, 3.0f, 4.0f));
@@ -1135,14 +1204,15 @@ void unit_test_custom_textures()
 
     gfx::FlatShadedColorProgram pass;
     gfx::MaterialClass::State env;
+    env.material_time = 0.0;
     klass.ApplyDynamicState(env, device, program);
     // these textures should be bound to these samplers. check the textures based on their sizes.
     TEST_REQUIRE(program.FindTextureBinding("kFoobar")->texture->GetWidth() == 10);
     TEST_REQUIRE(program.FindTextureBinding("kFoobar")->texture->GetHeight() == 10);
-    TEST_REQUIRE(program.FindTextureBinding("kTexture0")->texture->GetWidth()  == 20);
-    TEST_REQUIRE(program.FindTextureBinding("kTexture0")->texture->GetHeight() == 20);
-    TEST_REQUIRE(program.FindTextureBinding("kTexture1")->texture->GetWidth()  == 30);
-    TEST_REQUIRE(program.FindTextureBinding("kTexture1")->texture->GetHeight() == 30);
+    TEST_REQUIRE(program.FindTextureBinding("kTexture0")->texture->GetWidth()  == 30);
+    TEST_REQUIRE(program.FindTextureBinding("kTexture0")->texture->GetHeight() == 30);
+    TEST_REQUIRE(program.FindTextureBinding("kTexture1")->texture->GetWidth()  == 20);
+    TEST_REQUIRE(program.FindTextureBinding("kTexture1")->texture->GetHeight() == 20);
 
     // check the texture rects.
     glm::vec4 kFoobarRect;
@@ -1153,8 +1223,8 @@ void unit_test_custom_textures()
     glm::vec4 kTextureRect1;
     TEST_REQUIRE(program.GetUniform("kTextureRect0", &kTextureRect0));
     TEST_REQUIRE(program.GetUniform("kTextureRect1", &kTextureRect1));
-    TEST_REQUIRE(kTextureRect0 == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
-    TEST_REQUIRE(kTextureRect1 == glm::vec4(4.0f, 3.0f, 2.0f, 1.0f));
+    TEST_REQUIRE(kTextureRect0 == glm::vec4(4.0f, 3.0f, 2.0f, 1.0f));
+    TEST_REQUIRE(kTextureRect1 == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
 }
 
 void unit_test_polygon_inline_data()
@@ -2061,7 +2131,9 @@ EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_material_uniforms();
-    unit_test_material_textures();
+    unit_test_material_texture();
+    unit_test_sprite_texture_blending();
+    unit_test_sprite_texture_binding();
     unit_test_material_textures_bind_fail();
     unit_test_material_uniform_folding();
     unit_test_custom_shader_source();

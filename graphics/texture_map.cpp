@@ -21,6 +21,7 @@
 #include "base/assert.h"
 #include "base/utility.h"
 #include "base/hash.h"
+#include "base/math.h"
 #include "data/writer.h"
 #include "data/reader.h"
 #include "graphics/texture_source.h"
@@ -100,22 +101,51 @@ bool TextureMap::BindTextures(const BindingState& state, Device& device, BoundSt
 
     if (mType == Type::Sprite)
     {
-        const auto frame_interval = 1.0f / std::max(mFps, 0.001f);
-        const auto frame_fraction = std::fmod(state.current_time, frame_interval);
-        const auto blend_coeff = frame_fraction/frame_interval;
-        const auto first_index = (unsigned)(state.current_time/frame_interval);
-        const auto frame_count =  GetSpriteFrameCount();
-        const auto max_index = frame_count - 1;
-        const auto texture_count = std::min(frame_count, 2u);
-        const auto first_frame  = mLooping
-                                  ? ((first_index + 0) % frame_count)
-                                  : math::clamp(0u, max_index, first_index+0);
-        const auto second_frame = mLooping
-                                  ? ((first_index + 1) % frame_count)
-                                  : math::clamp(0u, max_index, first_index+1);
-        const unsigned frame_index[2] = {
-                first_frame, second_frame
-        };
+        float blend_coefficient = 0.0f;
+        unsigned frame_index[2] = {0, 0};
+        if (mFps > 0.0f)
+        {
+            const unsigned frame_count = GetSpriteFrameCount();
+            const unsigned max_frame_index = frame_count - 1;
+            const double cycle_duration = GetSpriteCycleDuration();
+            const double frame_duration = cycle_duration / static_cast<double>(frame_count);
+            const double time_seconds = mLooping ? state.current_time : math::clamp(0.0, cycle_duration, state.current_time);
+
+            if (state.blend_frames)
+            {
+                const auto time_frames      =  static_cast<unsigned>((time_seconds+frame_duration*0.5)/ frame_duration);
+                const auto frames_elapsed   = mLooping ? time_frames : math::clamp(0u, frame_count, time_frames);
+                const auto start_frame      = max_frame_index;
+                const auto this_frame_index = (start_frame + frames_elapsed + 0) % frame_count;
+                const auto next_frame_index = (start_frame + frames_elapsed + 1) % frame_count;
+
+                const double x = time_seconds / frame_duration;
+                const double k = std::floor(x + 1e-9);
+                // reduce numerical instability in floating point modulo by
+                // removing the biased whole number part from the frame time
+                // quotient.
+                const auto frame_blend_factor = x-k; //std::fmod(time_seconds, frame_duration) / frame_duration;
+
+                // offset the blend factor by 0.5 so that when time is in the
+                // middle of the frames (the frame duration reminder is 0.0) our
+                // blend factor gives us "half-way between the two frames".
+                // Consider if we have frames [0][1][2] where each frame has duration
+                // 1.0s, when time is 1.0s we want the frames to be 0 and 1 and
+                // blend coefficient to be 0.5.
+                blend_coefficient = static_cast<float>(std::fmod(0.5+frame_blend_factor, 1.0));
+                frame_index[0] = this_frame_index;
+                frame_index[1] = next_frame_index;
+            }
+            else
+            {
+                const auto index = static_cast<unsigned>(time_seconds / frame_duration);
+                const auto this_frame_index = mLooping ? (index+0) % frame_count : math::clamp(0u, max_frame_index, index+0);
+                const auto next_frame_index = mLooping ? (index+1) % frame_count : math::clamp(0u, max_frame_index, index+1);
+                frame_index[0] = this_frame_index;
+                frame_index[1] = next_frame_index;
+                blend_coefficient = 0.0f; // 100% first frame.
+            }
+        }
 
         TextureSource::Environment texture_source_env;
         texture_source_env.dynamic_content = state.dynamic_content;
@@ -166,7 +196,7 @@ bool TextureMap::BindTextures(const BindingState& state, Device& device, BoundSt
                 } else return false;
             }
         }
-        result.blend_coefficient = blend_coeff;
+        result.blend_coefficient = blend_coefficient;
     }
     else if (mType == Type::Texture2D)
     {
@@ -371,8 +401,8 @@ float TextureMap::GetSpriteCycleDuration() const
     if (!IsSpriteMap())
         return 0.0f;
 
-    const auto sprite_frame_count = (float)GetSpriteFrameCount();
-    const auto sprite_fps = GetSpriteFrameRate();
+    const float sprite_frame_count = GetSpriteFrameCount();
+    const float sprite_fps = GetSpriteFrameRate();
     return sprite_frame_count  / sprite_fps;
 }
 
