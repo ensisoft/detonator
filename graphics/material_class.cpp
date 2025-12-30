@@ -1336,6 +1336,7 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     ts.dynamic_content = state.editing_mode || !IsStatic();
     ts.current_time    = state.material_time;
     ts.group_tag       = mClassId;
+    ts.blend_frames    = BlendFrames();
 
     TextureMap::BoundState binds;
     if (!map->BindTextures(ts, device,  binds))
@@ -1382,9 +1383,8 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
             need_software_wrap = false;
     }
 
-    const float kBlendCoeff  = BlendFrames() ? binds.blend_coefficient : 0.0f;
     program.SetTextureCount(2);
-    program.SetUniform("kBlendCoeff", kBlendCoeff);
+    program.SetUniform("kBlendCoeff", binds.blend_coefficient);
     program.SetUniform("kAlphaMask", alpha_mask);
 
     if (state.draw_category == DrawCategory::Particles)
@@ -1427,6 +1427,7 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     TextureMap::BindingState ts;
     ts.dynamic_content = state.editing_mode || !IsStatic();
     ts.current_time    = 0.0;
+    ts.blend_frames    = BlendFrames();
 
     TextureMap::BoundState binds;
     if (!map->BindTextures(ts, device, binds))
@@ -1504,6 +1505,7 @@ bool MaterialClass::ApplyTilemapDynamicState(const State& state, Device& device,
     TextureMap::BindingState ts;
     ts.dynamic_content = state.editing_mode || !IsStatic();
     ts.current_time    = 0.0;
+    ts.blend_frames    = BlendFrames();
 
     TextureMap::BoundState binds;
     if (!map->BindTextures(ts, device, binds))
@@ -1560,6 +1562,7 @@ bool MaterialClass::ApplyParticleDynamicState(const State& state, Device& device
     TextureMap::BindingState ts;
     ts.dynamic_content = state.editing_mode || !IsStatic();
     ts.current_time    = 0.0;
+    ts.blend_frames    = BlendFrames();
 
     TextureMap::BoundState binds;
     if (!texture_map->BindTextures(ts, device, binds))
@@ -1647,7 +1650,8 @@ bool MaterialClass::ApplyBasicLightDynamicState(const State& state, Device& devi
 
         TextureMap::BindingState ts;
         ts.dynamic_content = state.editing_mode || !IsStatic();
-        ts.current_time = state.material_time;
+        ts.current_time    = state.material_time;
+        ts.blend_frames    = BlendFrames();
 
         TextureMap::BoundState binds;
         if (!texture_map->BindTextures(ts, device, binds))
@@ -1707,6 +1711,8 @@ bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, 
         ts.dynamic_content = true; // todo: need static flag. for now use dynamic (which is slower) but always correct
         ts.current_time    = state.material_time;
         ts.group_tag       = mClassId;
+        ts.blend_frames    = BlendFrames();
+
         TextureMap::BoundState binds;
         if (!map->BindTextures(ts, device, binds))
             return false;
