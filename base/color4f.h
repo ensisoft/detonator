@@ -170,30 +170,39 @@ namespace base
             }
         }
 
-        inline float Red() const noexcept
+        float Red() const noexcept
         { return mRed; }
-        inline float Green() const noexcept
+        float Green() const noexcept
         { return mGreen; }
-        inline float Blue() const noexcept
+        float Blue() const noexcept
         { return mBlue; }
-        inline float Alpha() const noexcept
+        float Alpha() const noexcept
         { return mAlpha; }
-        inline void SetRed(float red) noexcept
+        void SetRed(float red) noexcept
         { mRed = math::clamp(0.0f, 1.0f, red); }
-        inline void SetRed(int red) noexcept
+        void SetRed(int red) noexcept
         { mRed = math::clamp(0, 255, red) / 255.0f; }
-        inline void SetBlue(float blue) noexcept
+        void SetBlue(float blue) noexcept
         { mBlue = math::clamp(0.0f, 1.0f, blue); }
-        inline void SetBlue(int blue) noexcept
+        void SetBlue(int blue) noexcept
         { mBlue = math::clamp(0, 255, blue) / 255.0f; }
-        inline void SetGreen(float green) noexcept
+        void SetGreen(float green) noexcept
         { mGreen = math::clamp(0.0f, 1.0f,  green); }
-        inline void SetGreen(int green) noexcept
+        void SetGreen(int green) noexcept
         { mGreen = math::clamp(0, 255, green) / 255.0f; }
-        inline void SetAlpha(float alpha) noexcept
+        void SetAlpha(float alpha) noexcept
         { mAlpha = math::clamp(0.0f, 1.0f, alpha); }
-        inline void SetAlpha(int alpha) noexcept
+        void SetAlpha(int alpha) noexcept
         { mAlpha = math::clamp(0, 255, alpha) / 255.0f; }
+
+        Color4f& operator+=(const Color4f& other) noexcept
+        {
+            mRed   = math::clamp(0.0f, 1.0f, mRed + other.mRed);
+            mGreen = math::clamp(0.0f, 1.0f, mGreen + other.mGreen);
+            mBlue  = math::clamp(0.0f, 1.0f, mBlue + other.mBlue);
+            mAlpha = math::clamp(0.0f, 1.0f, mAlpha + other.mAlpha);
+            return *this;
+        }
     private:
         float mRed   = 1.0f;
         float mGreen = 1.0f;
