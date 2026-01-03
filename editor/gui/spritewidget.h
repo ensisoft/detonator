@@ -81,13 +81,15 @@ namespace gui
         void PaintScene(gfx::Painter& painter, double dt);
         void PaintTexture(const gfx::MaterialClass* klass, gfx::Painter& painter, double dt);
         void PaintSprite(const gfx::MaterialClass* klass, gfx::Painter& painter, double dt);
+        void PaintParticle(gfx::Painter& painter, double dt);
         void MousePress(const QMouseEvent* mickey);
         void MouseRelease(const QMouseEvent* mickey);
         void MouseMove(const QMouseEvent* mickey);
         void ComputeScrollBars(unsigned render_width);
         QPoint MapPoint(const QPoint& point) const;
-        float MapFromSpriteTimeToRender(float duration, float render_width, bool looping) const;
-        void MapFromSpriteRenderToTime();
+        float MapFromTimeToRender(float duration, float render_width, bool looping) const;
+        void MapFromRenderToTime();
+        void DrawTime(gfx::Painter& painter, float duration, float cycle_width, bool looping);
 
     private:
         Ui::SpriteWidget mUI;
