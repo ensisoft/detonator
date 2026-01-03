@@ -106,6 +106,10 @@ void CodeAssistant::SetTheme(const QString& theme)
 {
     if (theme == "Monokai")
         mTheme.SetTheme(app::LuaTheme::Theme::Monokai);
+    else if (theme == "Engine Dark")
+        mTheme.SetTheme(app::LuaTheme::Theme::EngineDark);
+    else if (theme == "Slate Mono")
+        mTheme.SetTheme(app::LuaTheme::Theme::SlateMono);
     else if (theme == "Solar Flare")
         mTheme.SetTheme(app::LuaTheme::Theme::SolarFlare);
     else if (theme == "Pastel Dream")

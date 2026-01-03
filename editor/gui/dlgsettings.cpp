@@ -75,6 +75,8 @@ end
     PopulateQtStyles(mUI.cmbStyle);
 
     mUI.editorTheme->addItem("Monokai");
+    mUI.editorTheme->addItem("Engine Dark");
+    mUI.editorTheme->addItem("Slate Mono");
     mUI.editorTheme->addItem("Solar Flare");
     mUI.editorTheme->addItem("Pastel Dream");
     mUI.editorTheme->addItem("Dark Mirage");

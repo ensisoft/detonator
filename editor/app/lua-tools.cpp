@@ -81,7 +81,53 @@ namespace app {
 
 void LuaTheme::SetTheme(Theme theme)
 {
-    if (theme == Theme::Monokai)
+    if (theme == Theme::SlateMono)
+    {
+        // Core grayscale ladder
+        const QColor NearWhite ("#e6e8eb"); // primary readable text
+        const QColor LightGray ("#c9ccd1"); // keywords / structure
+        const QColor MidGray   ("#9aa1ab"); // calls / operators
+        const QColor DarkGray  ("#6f7680"); // comments
+        const QColor DeepGray  ("#525861"); // literals / secondary
+
+        // Slight temperature shifts (still gray)
+        const QColor CoolGray  ("#aeb6c2"); // brackets / grouping
+        const QColor WarmGray  ("#b4aea3"); // numbers / constants
+
+        mTable[Key::Keyword]      = LightGray; // structure
+        mTable[Key::Comment]      = DarkGray;  // non-executing
+        mTable[Key::BuiltIn]      = MidGray;   // stdlib
+        mTable[Key::FunctionBody] = MidGray;   // execution
+        mTable[Key::FunctionCall] = MidGray;
+        mTable[Key::MethodCall]   = MidGray;
+        mTable[Key::Property]     = NearWhite; // clarity
+        mTable[Key::Literal]      = DeepGray;  // data
+        mTable[Key::Operator]     = MidGray;   // logic
+        mTable[Key::Bracket]      = CoolGray;  // structure hint
+    }
+    else if (theme == Theme::EngineDark)
+    {
+        const QColor Keyword   ("#b39dfb");
+        const QColor Comment   ("#5f6b85");
+        const QColor BuiltIn   ("#55d6ff");
+        const QColor Call      ("#55d6ff");
+        const QColor Property  ("#e9eef7");
+        const QColor Literal   ("#59f0d6");
+        const QColor Operator  ("#a9b4c7");
+        const QColor Bracket   ("#7aa2f7");
+
+        mTable[Key::Keyword]      = Keyword;
+        mTable[Key::Comment]      = Comment;
+        mTable[Key::BuiltIn]      = BuiltIn;
+        mTable[Key::FunctionBody] = Call;
+        mTable[Key::FunctionCall] = Call;
+        mTable[Key::MethodCall]   = Call;
+        mTable[Key::Property]     = Property;
+        mTable[Key::Literal]      = Literal;
+        mTable[Key::Operator]     = Operator;
+        mTable[Key::Bracket]      = Bracket;
+    }
+    else if (theme == Theme::Monokai)
     {
         const QColor White("#d6d6d6");
         const QColor Yellow("#e5b567");
