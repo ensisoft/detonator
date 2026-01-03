@@ -100,6 +100,8 @@ void SpriteWidget::PaintScene(gfx::Painter& painter, double dt)
         PaintSprite(mMaterial.get(), painter, dt);
     else if (mMaterial && mMaterial->GetType() == gfx::MaterialClass::Type::Texture)
         PaintTexture(mMaterial.get(), painter, dt);
+    else if (mMaterial && mMaterial->GetType() == gfx::MaterialClass::Type::Particle2D)
+        PaintParticle(painter, dt);
     else
     {
         auto material = MakeDemoMaterial();
@@ -158,7 +160,10 @@ void SpriteWidget::PaintTexture(const gfx::MaterialClass *klass, gfx::Painter &p
         temp.SetAlphaCutoff(mMaterial->GetAlphaCutoff());
         temp.AddTexture(texture_src->Copy());
         temp.SetTextureRect(texture_rect);
-        gfx::FillRect(painter, rect, gfx::MaterialInstance(temp));
+
+        gfx::MaterialInstance instance(temp);
+        instance.SetFirstRender(false);
+        gfx::FillRect(painter, rect, instance);
 
         if (texture_map->GetId() == mSelectedTextureMapId)
         {
@@ -286,7 +291,10 @@ void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter&
                 rect.Translate(rect_width * index, 0.0);
                 rect.Translate(5.0f, 0.0f); // little padding around each rect
                 rect.Translate(-mTranslateX, 0.0); // scrolling
-                gfx::FillRect(painter, rect, gfx::MaterialInstance(temp));
+
+                gfx::MaterialInstance instance(temp);
+                instance.SetFirstRender(false);
+                gfx::FillRect(painter, rect, instance);
             }
         }
     }
@@ -312,33 +320,113 @@ void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter&
             rect.Translate(rect_width * texture_index, 0.0);
             rect.Translate(5.0f, 0.0f); // little padding around each rect
             rect.Translate(-mTranslateX, 0.0); // scrolling
-            gfx::FillRect(painter, rect, gfx::MaterialInstance(temp));
+
+            gfx::MaterialInstance instance(temp);
+            instance.SetFirstRender(false);
+            gfx::FillRect(painter, rect, instance);
         }
     }
 
+    DrawTime(painter, duration, cycle_width, texture_map->IsSpriteLooping());
 
-    // render the time indicator as a vertical line
+    const auto render_width = 10.0f + duration_width + 10.0f;
+    ComputeScrollBars(render_width);
+
+    // store the "width" (in pixels) of the sprite cycle for later
+    // use, i.e. when mapping click points.
+    mPreviousDurationRenderWidth = static_cast<unsigned>(duration_width);
+}
+
+void SpriteWidget::PaintParticle(gfx::Painter& painter, double dt)
+{
+    const auto widget_height = mUI.widget->height();
+    const auto widget_width = mUI.widget->width();
+
+    const auto& active_texture_map = mMaterial->GetActiveTextureMap();
+    const auto* texture_map = mMaterial->FindTextureMapById(active_texture_map);
+    if (texture_map == nullptr)
     {
-        const float pos = MapFromSpriteTimeToRender(duration, cycle_width, texture_map->IsSpriteLooping());
+        ShowInstruction("Active texture map is not selected.", Rect2Df(0.0f, 0.0f, widget_width, widget_height), painter);
+        return;
+    }
+    // the particle animation is simulated in 10 steps and the
+    // time is actually a normalized particle lifetime value from 0.0f to 1.0f
 
-        gfx::FPoint a;
+    const auto frame_count = 10;
+    const auto rect_height = widget_height - 30.0;
+    const auto rect_width = rect_height + 2.0f * 5.0f; // little bit of space between items
+    const auto cycle_width = frame_count * rect_width;
+    const auto duration_whole_seconds = 1.0f;
+    const auto duration_width = rect_width * frame_count;
+    const auto second_width = duration_width / duration_whole_seconds;
+    const auto deci_second_width = second_width / 10.0f;
+
+    {
+        gfx::FPoint a(0.0f, 0.0f);
         a.Translate(10.0f, 20.0f);
         a.Translate(-mTranslateX, 0.0f);
-        a.Translate(pos, 0.0f);
 
-        gfx::FPoint b;
-        b.Translate(10.0f, widget_height - 15.0f);
+        gfx::FPoint  b(0.0f, 0.0f);
+        b.Translate(10.0f, 20.0f);
         b.Translate(-mTranslateX, 0.0f);
-        b.Translate(pos, 0.0f);
+        b.Translate(duration_width, 0.0f);
+        gfx::DebugDrawLine(painter, a, b, gfx::Color::Silver);
 
-        if (std::abs(mMousePos.x() - pos) < 5)
+        auto VerticalLine = [&painter, this](float x, bool big) {
+            gfx::FPoint a;
+            a.Translate(10.0f, big ? 10.0f : 20.0f);
+            a.Translate(-mTranslateX, 0.0f);
+            a.Translate(x, 0.0f);
+
+            gfx::FPoint b;
+            b.Translate(10.0f, 30.0f);
+            b.Translate(-mTranslateX, 0.0f);
+            b.Translate(x, 0.0f);
+
+            gfx::DebugDrawLine(painter, a, b, gfx::Color::Silver);
+        };
+
+        auto PrintText = [&painter, this](const std::string& str, float x) {
+            gfx::FRect txt;
+            txt.Resize(20.0f, 15.0f);
+            txt.Translate(10.0f, 35.0f);
+            txt.Translate(-mTranslateX, 0.0f);
+            txt.Translate(x, 0.0f);
+            txt.Translate(-10.0f, 0.0f);
+            gfx::DrawTextRect(painter, str,"app://fonts/orbitron-light.otf", 12, txt,
+                              gfx::Color::Silver, gfx::TextAlign::AlignHCenter | gfx::TextAlign::AlignVCenter);
+        };
+
+        VerticalLine(0.0f*second_width, true);
+        VerticalLine(1.0f*second_width, true);
+        PrintText("0.0", 0.0f*second_width);
+        PrintText("1.0", 1.0f*second_width);
+
+        // draw deci-second ticks
+        for (unsigned deci=1; deci<10; ++deci)
         {
-            mTimeBarUnderMouse = true;
-            gfx::DebugDrawLine(painter, a, b, gfx::Color::Green, 1.0f);
+            const float x = deci * deci_second_width;
+            VerticalLine(x, false);
         }
-        else
-            gfx::DebugDrawLine(painter, a, b, gfx::Color::Silver, 1.0f);
     }
+
+    for (unsigned i=0; i<10; ++i)
+    {
+        gfx::FRect rect;
+        rect.Resize(rect_width, rect_height);
+        rect.Translate(10.0f, 15.0f); // left margin, top margin
+        rect.Translate(rect_width * i, 0.0f);
+        rect.Translate(5.0f, 0.0f); // little padding around each rect.
+        rect.Translate(-mTranslateX, 0.0f); // scrolling
+        const float time = i * 0.1f;
+
+        gfx::MaterialInstance instance(mMaterial);
+        instance.SetRuntime(time);
+        instance.SetFirstRender(false);
+        gfx::FillRect(painter, rect, instance);
+    }
+
+    DrawTime(painter, 1.0f, cycle_width, true);
 
     const auto render_width = 10.0f + duration_width + 10.0f;
     ComputeScrollBars(render_width);
@@ -368,9 +456,10 @@ void SpriteWidget::MouseRelease(const QMouseEvent* mickey)
     if (!mCanDragTime || !mPreviousDurationRenderWidth)
         return;
 
-    if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite ||
+        mMaterial->GetType() == gfx::MaterialClass::Type::Particle2D)
     {
-        MapFromSpriteRenderToTime();
+        MapFromRenderToTime();
     }
 
     mDragTime = false;
@@ -383,9 +472,10 @@ void SpriteWidget::MouseMove(const QMouseEvent* mickey)
     if (!mDragTime)
         return;
 
-    if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite ||
+        mMaterial->GetType() == gfx::MaterialClass::Type::Particle2D)
     {
-        MapFromSpriteRenderToTime();
+        MapFromRenderToTime();
     }
 }
 
@@ -421,7 +511,7 @@ QPoint SpriteWidget::MapPoint(const QPoint& point) const
     return QPoint(mTranslateX, 0) + point - QPoint(10, 0);
 }
 
-float SpriteWidget::MapFromSpriteTimeToRender(float duration, float render_width, bool looping) const
+float SpriteWidget::MapFromTimeToRender(float duration, float render_width, bool looping) const
 {
     if (looping)
     {
@@ -434,14 +524,21 @@ float SpriteWidget::MapFromSpriteTimeToRender(float duration, float render_width
     return p * render_width;
 }
 
-void SpriteWidget::MapFromSpriteRenderToTime()
+void SpriteWidget::MapFromRenderToTime()
 {
-    const auto& texture_map_id = mMaterial->GetActiveTextureMap();
-    const auto* texture_map = mMaterial->FindTextureMapById(texture_map_id);
-    if (!texture_map || !texture_map->IsSpriteMap())
-        return;
-
-    const auto duration = texture_map->GetSpriteCycleDuration();
+    float duration = 0.0f;
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
+    {
+        const auto& texture_map_id = mMaterial->GetActiveTextureMap();
+        const auto* texture_map = mMaterial->FindTextureMapById(texture_map_id);
+        if (!texture_map || !texture_map->IsSpriteMap())
+            return;
+        duration = texture_map->GetSpriteCycleDuration();
+    }
+    else if (mMaterial->GetType() == gfx::MaterialClass::Type::Particle2D)
+    {
+        duration = 1.0f;
+    }
     const auto duration_whole_seconds = std::ceil(duration);
 
     const auto xpos = static_cast<float>(mMousePos.x());
@@ -452,6 +549,33 @@ void SpriteWidget::MapFromSpriteRenderToTime()
     //DEBUG("duration in pixels = %1, xpos = %2, time = %3s",
     //    mPreviousDurationRenderWidth, xpos, time);
 
+}
+
+void SpriteWidget::DrawTime(gfx::Painter& painter, float duration, float cycle_width, bool looping)
+{
+    // render the time indicator as a vertical line
+
+    const auto widget_height = mUI.widget->height();
+
+    const float pos = MapFromTimeToRender(duration, cycle_width,looping);
+
+    gfx::FPoint a;
+    a.Translate(10.0f, 20.0f);
+    a.Translate(-mTranslateX, 0.0f);
+    a.Translate(pos, 0.0f);
+
+    gfx::FPoint b;
+    b.Translate(10.0f, widget_height - 15.0f);
+    b.Translate(-mTranslateX, 0.0f);
+    b.Translate(pos, 0.0f);
+
+    if (std::abs(mMousePos.x() - pos) < 5)
+    {
+        mTimeBarUnderMouse = true;
+        gfx::DebugDrawLine(painter, a, b, gfx::Color::Green, 1.0f);
+    }
+    else
+        gfx::DebugDrawLine(painter, a, b, gfx::Color::Silver, 1.0f);
 }
 
 
