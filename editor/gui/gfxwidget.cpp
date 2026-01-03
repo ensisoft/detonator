@@ -419,7 +419,8 @@ void GfxWindow::SetContextMenu(std::unique_ptr<GfxMenu> menu)
 
     if (auto* result = mContextMenu->GetResult())
     {
-        result->trigger();
+        if (result->isEnabled())
+            result->trigger();
     }
     mContextMenu.reset();
 }
