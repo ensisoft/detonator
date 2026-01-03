@@ -925,9 +925,13 @@ void ShowError(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& pai
 
 void ShowInstruction(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter, unsigned font_size_px)
 {
+    const auto seconds = base::GetTime(); // seconds
+    const auto t = std::sin(seconds * 2) * 0.5 + 0.5;
+    const auto color = math::interpolate(gfx::Color4f(gfx::Color::Silver),
+        gfx::Color4f(gfx::Color::HotPink), t, math::Interpolation::Linear);
     gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px,
                       rect,
-                      gfx::Color::Silver,
+                      color,
                       gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignHCenter,
                       gfx::TextProp::None,
                       2.0f);
