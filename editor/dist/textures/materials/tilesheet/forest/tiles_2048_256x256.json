@@ -1,0 +1,19 @@
+{
+  "color_space": "sRGB",
+  "image_file": "tiles_2048_256x256.png",
+  "image_height": 2048,
+  "image_type": "tilemap",
+  "image_width": 2048,
+  "json_version": 1,
+  "made_with_app": "DETONATOR 2D",
+  "made_with_ver": "rel-???",
+  "mag_filter": "Nearest",
+  "min_filter": "Nearest",
+  "padding": 0,
+  "premulalpha_blend": false,
+  "premultiply_alpha": false,
+  "tile_height": 256,
+  "tile_width": 256,
+  "xoffset": 0,
+  "yoffset": 0
+}
