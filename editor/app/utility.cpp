@@ -376,7 +376,8 @@ bool SetTheme(const QString& name)
 bool SetStyle(const QString& name)
 {
 #if defined(DETONATOR_EDITOR_BUILD) || defined(DETONATOR_GAMEHOST_BUILD)
-    if (name == "Fusion-Dark" || name == "DETONATOR" || name == "Cyber Punk")
+    if (name == "Fusion-Dark" || name == "DETONATOR" || name == "DETONATOR2" ||
+        name == "Cyber Punk")
     {
         auto* style = new DarkStyle();
         style->setProperty("style", name);
