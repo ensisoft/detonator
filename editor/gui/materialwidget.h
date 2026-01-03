@@ -77,6 +77,7 @@ namespace gui
         void Save() override;
         bool HasUnsavedChanges() const override;
         bool GetStats(Stats* stats) const override;
+        bool OnEscape() override;
     private slots:
         void on_widgetColor_colorChanged(QColor color);
         void on_actionPlay_triggered();
@@ -227,5 +228,7 @@ namespace gui
 
         DlgTextEdit* mShaderEditor = nullptr;
         std::string mCustomizedSource;
+        bool mShowHelp = true;
+        bool mDefaultsPossible = false;
     };
 } // namespace
