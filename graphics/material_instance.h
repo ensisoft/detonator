@@ -80,8 +80,10 @@ namespace gfx
         const MaterialClass* operator->() const
         { return mClass.get(); }
 
-        inline bool HasError() const noexcept
+        bool HasError() const noexcept
         { return mError; }
+        void SetFirstRender(bool first) noexcept
+        { mFirstRender = first; }
     private:
         void InitFlags() noexcept;
     private:
