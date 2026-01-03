@@ -58,6 +58,8 @@ namespace app
     public:
         enum class Theme {
             Monokai,
+            EngineDark,
+            SlateMono,
             SolarFlare,
             PastelDream,
             DarkMirage,
