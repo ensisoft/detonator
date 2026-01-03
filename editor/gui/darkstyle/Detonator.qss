@@ -377,31 +377,35 @@ QCheckBox {
 
 QGroupBox::indicator,
 QCheckBox::indicator {
+	width: 12px;
+	height: 12px;
+	border-radius: 3px;
     background-color: #323232;
     border: 1px solid darkgray;
-    width: 12px;
-    height: 12px;
 }
+
+QGroupBox::indicator:hover,
+QCheckBox::indicator:hover {
+	border: 1px solid #b78620;
+}
+
 QGroupBox::indicator:checked,
 QCheckBox::indicator:checked {
-	background-color: #b78620;
-    border: 1px solid #3a546e;
+	image:url(":/combinear/icons/check_check.png");
 }
+
 QGroupBox::indicator:disabled,
 QCheckBox::indicator:disabled {
 	background-color: #656565;
 	color: #656565;
     border: 1px solid #656565;
 }
-QGroupBox::indicator:unchecked:hover,
-QCheckBox::indicator:unchecked:hover {
-	border: 1px solid #b78620;
-}
+
 QGroupBox::indicator:indeterminate,
 QCheckBox::indicator:indeterminate {
 	image:url(":/combinear/icons/check_indeterminate.png");
-	border: 1px;
 }
+
 QCheckBox::disabled {
 	color: #656565;
 }
