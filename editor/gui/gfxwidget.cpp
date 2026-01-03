@@ -197,6 +197,11 @@ bool GfxWindow::HasInputFocus() const
     return mHasFocus;
 }
 
+bool GfxWindow::HaveContextMenuOpen() const
+{
+    return !!mContextMenu;
+}
+
 gfx::Color4f GfxWindow::GetCurrentClearColor() const
 {
     return mClearColor.value_or(GfxWindow::ClearColor);
@@ -842,6 +847,11 @@ void GfxWidget::StartPaintTimer()
 bool GfxWidget::HasInputFocus() const
 {
     return this->hasFocus() || mWindow->HasInputFocus();
+}
+
+bool GfxWidget::HaveContextMenuOpen() const
+{
+    return mWindow->HaveContextMenuOpen();
 }
 
 void GfxWidget::SetFocus()
