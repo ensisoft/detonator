@@ -85,6 +85,8 @@ namespace gui
 
         bool HasInputFocus() const;
 
+        bool HaveContextMenuOpen() const;
+
         gfx::Color4f GetCurrentClearColor() const;
 
         const gfx::Color4f* GetClearColor() const
@@ -292,6 +294,8 @@ namespace gui
         void StartPaintTimer();
 
         bool HasInputFocus() const;
+
+        bool HaveContextMenuOpen() const;
 
         void SetFocus();
 
