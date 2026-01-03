@@ -5192,18 +5192,20 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
     if (mState.entity->GetNumNodes() == 0)
     {
-        ShowInstruction(
-            "Create a new game play entity.\n\n"
-            "INSTRUCTIONS\n"
-            "1. Select a shape in the main tool bar above.\n"
-            "2. Click & hold left mouse button to draw.\n"
-            "3. Adjust the shape properties in the panel on the right.\n\n\n"
-            "Hit 'Play' to animate materials and shapes.\n"
-            "Hit 'Test Run' to test the entity.\n"
-            "Hit 'Save' to save the entity.",
-            gfx::FRect(0, 0, float(width), float(height)),
-            painter, 28
-        );
+        if (!mCurrentTool)
+        {
+            ShowInstruction(
+                "Create a new game play entity.\n\n"
+                "INSTRUCTIONS\n"
+                "1. Select a shape in the main tool bar above.\n"
+                "2. Click & hold left mouse button to draw.\n"
+                "3. Adjust the shape properties in the panel on the right.\n\n\n"
+                "Hit 'Play' to animate materials and shapes.\n"
+                "Hit 'Test Run' to test the entity.\n"
+                "Hit 'Save' to save the entity.",
+                gfx::FRect(0, 0, float(width), float(height)),
+                painter, 28);
+        }
         return;
     }
 
