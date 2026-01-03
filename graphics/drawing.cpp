@@ -172,7 +172,10 @@ bool DrawTextureSource(Painter& painter, const FRect& rect, const MaterialClass&
     temp.AddTexture(texture_source.Copy());
     temp.SetTextureRect(texture_rect);
 
-    return FillRect(painter, rect, MaterialInstance(std::move(temp)));
+    MaterialInstance instance(std::move(temp));
+    instance.SetFirstRender(false); // shut up logging
+
+    return FillRect(painter, rect, instance);
 }
 
 bool DrawBitmap(Painter& painter, const FRect& rect, std::unique_ptr<IBitmap> bitmap,
