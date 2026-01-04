@@ -27,6 +27,7 @@
 #include <set>
 #include <vector>
 
+#include "editor/app/types.h"
 #include "editor/app/resource.h"
 
 namespace app
@@ -36,7 +37,7 @@ namespace app
     public:
         ZipArchive();
 
-        bool Open(const QString& zip_file);
+        bool Open(const AnyString& zip_file);
 
         bool ReadFile(const QString& file, QByteArray* array) const;
         bool ReadFile(const QString& file, QString* text) const;

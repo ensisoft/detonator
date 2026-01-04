@@ -319,7 +319,8 @@ namespace {
             ASSERT(require.captureCount() == 1);
             // cap(0) is the whole regex
             QString module = match.captured(1);
-            if (module.startsWith("app://") ||
+            if (module.startsWith("zip://") ||
+                module.startsWith("app://") ||
                 module.startsWith("fs://")  ||
                 module.startsWith("ws://"))
             {

@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2025 Sami Väisänen
-// Copyright (C) 2020-2025 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2026 Sami Väisänen
+// Copyright (C) 2020-2026 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ ZipArchive::ZipArchive()
     mZip.setZip64Enabled(true);
 }
 
-bool ZipArchive::Open(const QString& zip_file)
+bool ZipArchive::Open(const AnyString& zip_file)
 {
     mFile.setFileName(zip_file);
     if (!mFile.open(QIODevice::ReadOnly))

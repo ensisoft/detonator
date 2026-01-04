@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2026 Sami Väisänen
+// Copyright (C) 2020-2026 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <filesystem>
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
@@ -51,6 +52,13 @@
 #include "graphics/image.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
+
+std::string GetTestFile(const std::string& name)
+{
+    auto p = std::filesystem::path(__FILE__).parent_path();
+    p /= name;
+    return p.string();
+}
 
 quint32 StringHash(const QString& str) {
     std::vector<char> chars;
@@ -2919,6 +2927,42 @@ void unit_test_resource_import_bug_ui_style()
     }
 }
 
+void unit_test_resource_import_bug_dependent_script()
+{
+    TEST_CASE(test::Type::Feature)
+
+    DeleteDir("TestWorkspace");
+
+    QDir d;
+    // setup dummy shaders and data.
+    TEST_REQUIRE(d.mkpath("TestWorkspace"));
+    TEST_REQUIRE(d.mkpath("TestWorkspace/lua"));
+
+    // import
+    {
+        app::Workspace workspace("TestWorkspace");
+        app::ZipArchive zip;
+        zip.SetImportSubFolderName("LPC");
+        TEST_REQUIRE(zip.Open(GetTestFile("data/export.zip")));
+        TEST_REQUIRE(workspace.ImportResourceArchive(zip));
+
+        TEST_REQUIRE(workspace.FindResourceByName("LPC/Character/Human/Walk", app::Resource::Type::Material));
+        TEST_REQUIRE(workspace.FindResourceByName("LPC/Clothing/Shirt+Pants/Walk", app::Resource::Type::Material));
+        TEST_REQUIRE(workspace.FindResourceByName("LPC/Weapon/Spear/Thrust", app::Resource::Type::Material));
+        TEST_REQUIRE(workspace.FindResourceByName("LPC/Health Bar", app::Resource::Type::Material));
+        TEST_REQUIRE(workspace.FindResourceByName("LPC/Character/Player", app::Resource::Type::Entity));
+        TEST_REQUIRE(workspace.FindResourceByName("LPC/Character/Player", app::Resource::Type::Script));
+        TEST_REQUIRE(workspace.FindResourceByName("LPC/Character/Animator", app::Resource::Type::Script));
+
+        TEST_REQUIRE(app::FileExists("TestWorkspace/LPC/lua/7lLEJ9i9vM.lua"));
+        TEST_REQUIRE(app::FileExists("TestWorkspace/LPC/lua/damage.lua"));
+        TEST_REQUIRE(app::FileExists("TestWorkspace/LPC/lua/J4xx3ThJjX.lua"));
+        TEST_REQUIRE(app::FileExists("TestWorkspace/LPC/lua/utility.lua"));
+        TEST_REQUIRE(app::FileExists("TestWorkspace/LPC/lua/walking.lua"));
+        TEST_REQUIRE(app::FileExists("TestWorkspace/LPC/lua/weapon.lua"));
+
+    }
+}
 
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
@@ -2965,6 +3009,7 @@ int test_main(int argc, char* argv[])
     unit_test_resource_cache();
     unit_test_resource_cache_delete_bug();
     unit_test_resource_import_bug_ui_style();
+    unit_test_resource_import_bug_dependent_script();
     return 0;
 }
 ) // TEST_MAIN

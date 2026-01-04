@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2026 Sami Väisänen
+// Copyright (C) 2020-2026 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -91,7 +91,6 @@ gfx::Color4f ToGfx(const QColor& color)
     return gfx::Color4f(r, g, b, a);
 }
 
-
 class GfxTexturePacker : public gfx::TexturePacker
 {
 public:
@@ -110,22 +109,22 @@ public:
         , kResizeLargeTextures(resize_large)
         , kPackSmallTextures(pack_small)
     {}
-   ~GfxTexturePacker()
+   virtual ~GfxTexturePacker()
     {
         for (const auto& temp : mTempFiles)
         {
             QFile::remove(temp);
         }
     }
-    virtual void PackTexture(ObjectHandle instance, const std::string& file) override
+    void PackTexture(ObjectHandle instance, const std::string& file) override
     {
         mTextureMap[instance].file = file;
     }
-    virtual void SetTextureBox(ObjectHandle instance, const gfx::FRect& box) override
+    void SetTextureBox(ObjectHandle instance, const gfx::FRect& box) override
     {
         mTextureMap[instance].rect = box;
     }
-    virtual void SetTextureFlag(ObjectHandle instance, gfx::TexturePacker::TextureFlags flags, bool on_off) override
+    void SetTextureFlag(ObjectHandle instance, gfx::TexturePacker::TextureFlags flags, bool on_off) override
     {
         if (flags == gfx::TexturePacker::TextureFlags::CanCombine)
             mTextureMap[instance].can_be_combined = on_off;
@@ -135,13 +134,13 @@ public:
             mTextureMap[instance].allowed_to_resize = on_off;
         else BUG("Unhandled texture packing flag.");
     }
-    virtual std::string GetPackedTextureId(ObjectHandle instance) const override
+    std::string GetPackedTextureId(ObjectHandle instance) const override
     {
         auto it = mTextureMap.find(instance);
         ASSERT(it != std::end(mTextureMap));
         return it->second.file;
     }
-    virtual gfx::FRect GetPackedTextureBox(ObjectHandle instance) const override
+    gfx::FRect GetPackedTextureBox(ObjectHandle instance) const override
     {
         auto it = mTextureMap.find(instance);
         ASSERT(it != std::end(mTextureMap));
@@ -554,12 +553,10 @@ private:
     std::vector<QString> mTempFiles;
 };
 
-
 } // namespace
 
 namespace app
 {
-
 
 // static
 bool Workspace::mEnableAppResourceCaching = true;
