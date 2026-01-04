@@ -31,7 +31,7 @@
 #  define APP_VERSION "rel-???"
 #endif
 
-#define APP_COPYRIGHT "Copyright (c) 2020-2025\n" \
+#define APP_COPYRIGHT "Copyright (c) 2020-2026\n" \
                       "Sami Väisänen"   \
 
 

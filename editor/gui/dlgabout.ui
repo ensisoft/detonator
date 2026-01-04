@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>586</width>
+    <width>588</width>
     <height>715</height>
    </rect>
   </property>
@@ -163,8 +163,8 @@
               <item>
                <widget class="QPlainTextEdit" name="plainTextEdit_22">
                 <property name="plainText">
-                 <string>Copyright (C) 2020-2025 Sami Väisänen
-Copyright (C) 2020-2025 Ensisoft http://www.ensisoft.com
+                 <string>Copyright (C) 2020-2026 Sami Väisänen
+Copyright (C) 2020-2026 Ensisoft http://www.ensisoft.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
