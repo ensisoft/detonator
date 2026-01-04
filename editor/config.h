@@ -25,7 +25,10 @@
 #  define APP_TITLE "DETONATOR 2D Debug"
 #endif
 // modify the app version before cranking out a release build
-#define APP_VERSION "rel-???"
+#ifndef APP_VERSION
+#  define APP_VERSION "rel-???"
+#endif
+
 #define APP_COPYRIGHT "Copyright (c) 2020-2025\n" \
                       "Sami Väisänen"   \
 

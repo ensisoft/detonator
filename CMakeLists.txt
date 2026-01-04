@@ -17,6 +17,10 @@ option(BUILD_QT_STUFF "Build the editor (and other Qt dependant components" ON)
 # mangled with the symbols from the libpng that we linked against (conan libs)
 option(PREFER_SYSTEM_PACKAGES "Use system packages instead of Conan packages on Linux" ON)
 
+# define this on the command line when building a release package.
+# cmake ...  -DAPP_VERSION="rel-xxx"
+set(APP_VERSION "rel-???" CACHE STRING "Application version")
+
 if (WIN32)
     set(PREFER_SYSTEM_PACKAGES OFF)
 endif()
@@ -825,6 +829,7 @@ if (BUILD_QT_STUFF)
         target_compile_options(Detonator PRIVATE -Wno-deprecated-declarations)
     endif()
 
+    target_compile_definitions(Detonator PRIVATE APP_VERSION="${APP_VERSION}")
     target_compile_definitions(Detonator PRIVATE DETONATOR_EDITOR_BUILD)
     target_compile_definitions(Detonator PRIVATE "QTCOLORWIDGETS_LIBRARY")
     target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
@@ -890,6 +895,7 @@ if (BUILD_QT_STUFF)
         editor/gui/darkstyle/stylecommon.cpp
         editor/gui/darkstyle/darkstyle.qrc
     )
+    target_compile_definitions(EditorGameHost PRIVATE APP_VERSION="${APP_VERSION}")
     target_compile_definitions(EditorGameHost PRIVATE DETONATOR_GAMEHOST_BUILD)
     target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
     target_include_directories(EditorGameHost PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/gui")
