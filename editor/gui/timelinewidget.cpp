@@ -255,7 +255,7 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
                 viewport_width, timeline_row_height);
 
         QPen pen;
-        pen.setColor(palette.color(color_group, QPalette::HighlightedText));
+        pen.setColor(palette.color(color_group, QPalette::Text));
         p.setPen(pen);
         p.drawText(timeline_box, Qt::AlignVCenter | Qt::AlignHCenter,
             mTimelines[timeline_index].GetName());
