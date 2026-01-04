@@ -116,6 +116,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -133,6 +134,7 @@
         {
           "class": "p46dK0RAxd",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -190,6 +192,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -213,11 +216,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -239,6 +242,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -260,6 +264,7 @@
         {
           "class": "Bft0bWhpnE",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Sharp Tip",
@@ -324,6 +329,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -347,11 +353,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -373,6 +379,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Layer0",
@@ -413,6 +420,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -430,6 +438,7 @@
         {
           "class": "xYSBrgLxKL",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -474,11 +483,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -500,6 +509,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Flying",
@@ -521,6 +531,7 @@
         {
           "class": "mmd8qzxl3w",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Text",
@@ -542,6 +553,8 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "DepthTest": false,
+              "EnableFog": true,
               "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
@@ -555,6 +568,16 @@
             "line_height": 1.0,
             "raster_height": 0,
             "raster_width": 0,
+            "render_rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "render_translation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "text": "Press space to fly me!",
             "text_color": {
               "a": 1.0,
@@ -700,6 +723,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -766,6 +790,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -1037,6 +1062,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -1103,6 +1129,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -1171,6 +1198,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -1184,6 +1212,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -1214,6 +1243,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -1227,6 +1257,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -1257,6 +1288,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -1270,6 +1302,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -1300,6 +1333,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -1313,6 +1347,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -1412,20 +1447,22 @@
               "index": 0,
               "name": "aPosition",
               "offset": 0,
-              "size": 2
+              "size": 2,
+              "type": "Float"
             },
             {
               "divisor": 0,
               "index": 0,
               "name": "aTexCoord",
               "offset": 8,
-              "size": 2
+              "size": 2,
+              "type": "Float"
             }
           ],
           "bytes": 16
         }
       },
-      "mesh": "Simple2D",
+      "mesh": "Simple2DRenderMesh",
       "name": "FlappyBird",
       "resource_id": "e1zlPY8HTm",
       "resource_name": "FlappyBird",
@@ -1459,6 +1496,7 @@
               "flags": {
                 "ClipChildren": true,
                 "Enabled": true,
+                "LockedInEditor": false,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
               },
@@ -1481,6 +1519,7 @@
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
+                    "LockedInEditor": false,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
                   },
@@ -1505,6 +1544,7 @@
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
+                    "LockedInEditor": false,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
                   },
@@ -1529,6 +1569,7 @@
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
+                    "LockedInEditor": false,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
                   },
@@ -1552,6 +1593,7 @@
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
+                    "LockedInEditor": false,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
                   },
@@ -1575,6 +1617,7 @@
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
+                    "LockedInEditor": false,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
                   },
@@ -1599,6 +1642,7 @@
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
+                    "LockedInEditor": false,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
                   },

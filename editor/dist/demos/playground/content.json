@@ -5,6 +5,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -255,11 +256,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -281,6 +282,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "text",
@@ -308,11 +310,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -334,6 +336,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "block",
@@ -355,6 +358,7 @@
         {
           "class": "Fogdqf6asE",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -399,11 +403,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -425,6 +429,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Chain",
@@ -469,11 +474,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -495,6 +500,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Link 0",
@@ -539,11 +545,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -565,6 +571,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Link1 ",
@@ -609,11 +616,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -635,6 +642,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Link 3",
@@ -679,11 +687,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -705,6 +713,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Link 4",
@@ -749,11 +758,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -775,6 +784,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Link 5",
@@ -819,11 +829,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -845,6 +855,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "LInk 6",
@@ -889,11 +900,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -915,6 +926,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Link 7",
@@ -959,11 +971,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -985,6 +997,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Link 8",
@@ -1029,11 +1042,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1066,6 +1079,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -1087,6 +1101,8 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "DepthTest": false,
+              "EnableFog": true,
               "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
@@ -1100,6 +1116,16 @@
             "line_height": 1.5,
             "raster_height": 0,
             "raster_width": 0,
+            "render_rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "render_translation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "text": "Welcome to the physics demo.\nSelect demo on the left!",
             "text_color": {
               "a": 1.0,
@@ -1243,6 +1269,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -1266,11 +1293,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1292,6 +1319,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -1336,11 +1364,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1362,6 +1390,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 1",
@@ -1406,11 +1435,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1432,6 +1461,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 2",
@@ -1476,11 +1506,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1502,6 +1532,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 3",
@@ -1546,11 +1577,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1572,6 +1603,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 4",
@@ -1616,11 +1648,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1642,6 +1674,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 5",
@@ -1686,11 +1719,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1712,6 +1745,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 6",
@@ -1756,11 +1790,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1782,6 +1816,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 7",
@@ -1826,11 +1861,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1852,6 +1887,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 8",
@@ -1896,11 +1932,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1922,6 +1958,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 9",
@@ -1966,11 +2003,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1992,6 +2029,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 10",
@@ -2036,11 +2074,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2062,6 +2100,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 11",
@@ -2106,11 +2145,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2132,6 +2171,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 12",
@@ -2176,11 +2216,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2202,6 +2242,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 13",
@@ -2246,11 +2287,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2272,6 +2313,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 14",
@@ -2316,11 +2358,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2342,6 +2384,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 15",
@@ -2386,11 +2429,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2412,6 +2455,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 16",
@@ -2456,11 +2500,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2482,6 +2526,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 17",
@@ -2526,11 +2571,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2552,6 +2597,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 18",
@@ -2596,11 +2642,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2622,6 +2668,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 19",
@@ -2666,11 +2713,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2692,6 +2739,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 20",
@@ -2736,11 +2784,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2762,6 +2810,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 21",
@@ -2806,11 +2855,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2832,6 +2881,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 22",
@@ -2876,11 +2926,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2902,6 +2952,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "special box",
@@ -2946,11 +2997,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2972,6 +3023,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 24",
@@ -3016,11 +3068,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3042,6 +3094,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 25",
@@ -3086,11 +3139,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3112,6 +3165,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 26",
@@ -3156,11 +3210,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3182,6 +3236,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 27",
@@ -3226,11 +3281,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3252,6 +3307,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 28",
@@ -3296,11 +3352,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3322,6 +3378,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 29",
@@ -3366,11 +3423,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3392,6 +3449,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 30",
@@ -3436,11 +3494,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3462,6 +3520,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 31",
@@ -3506,11 +3565,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3532,6 +3591,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 32",
@@ -3576,11 +3636,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3602,6 +3662,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 33",
@@ -3646,11 +3707,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3672,6 +3733,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 34",
@@ -3716,11 +3778,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3742,6 +3804,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 35",
@@ -3780,6 +3843,7 @@
         {
           "class": "gB2MfxbFGu",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 36",
@@ -3824,11 +3888,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3850,6 +3914,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 37",
@@ -3877,11 +3942,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3903,6 +3968,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 38",
@@ -3930,11 +3996,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3956,6 +4022,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 39",
@@ -3983,11 +4050,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4009,6 +4076,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 40",
@@ -4036,11 +4104,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4062,6 +4130,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 41",
@@ -4089,11 +4158,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4115,6 +4184,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 42",
@@ -4142,11 +4212,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4168,6 +4238,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 43",
@@ -4195,11 +4266,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4221,6 +4292,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 44",
@@ -4248,11 +4320,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4274,6 +4346,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 45",
@@ -4301,11 +4374,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4327,6 +4400,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 46",
@@ -4597,6 +4671,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -4614,6 +4689,7 @@
         {
           "class": "p1SOl5u50I",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 0",
@@ -4658,11 +4734,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4684,6 +4760,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -4728,11 +4805,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4754,6 +4831,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 0",
@@ -4798,11 +4876,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4824,6 +4902,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 0",
@@ -4868,11 +4947,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4894,6 +4973,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 0",
@@ -4938,11 +5018,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4964,6 +5044,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Copy of Node 0",
@@ -5008,11 +5089,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5034,6 +5115,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Copy of Node 0",
@@ -5061,11 +5143,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5087,6 +5169,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Copy of Node 0",
@@ -5114,11 +5197,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5140,6 +5223,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 0",
@@ -5167,11 +5251,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5193,6 +5277,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Copy of Copy of Node 0",
@@ -5220,11 +5305,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5246,6 +5331,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Copy of Copy of Node 0",
@@ -5273,11 +5359,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5299,6 +5385,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Copy of Copy of Copy of Node 0",
@@ -5394,6 +5481,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -5594,11 +5682,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5620,6 +5708,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -5664,11 +5753,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5690,6 +5779,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 1",
@@ -5734,11 +5824,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5760,6 +5850,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 2",
@@ -5804,11 +5895,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5830,6 +5921,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 3",
@@ -5874,11 +5966,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5900,6 +5992,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 4",
@@ -5944,11 +6037,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5970,6 +6063,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 5",
@@ -6014,11 +6108,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6040,6 +6134,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 6",
@@ -6067,11 +6162,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6093,6 +6188,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 8",
@@ -6120,11 +6216,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6146,6 +6242,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 9",
@@ -6167,6 +6264,7 @@
         {
           "class": "Y6lWYnbLFE",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -6194,11 +6292,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6220,6 +6318,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 10",
@@ -6264,11 +6363,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6290,6 +6389,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 10",
@@ -6334,11 +6434,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6360,6 +6460,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 8",
@@ -6387,11 +6488,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6413,6 +6514,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 8",
@@ -6440,11 +6542,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6466,6 +6568,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 20",
@@ -6510,11 +6613,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6536,6 +6639,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 20",
@@ -6580,11 +6684,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6606,6 +6710,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 20",
@@ -6650,11 +6755,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6676,6 +6781,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 20",
@@ -6720,11 +6826,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6746,6 +6852,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 20",
@@ -6895,6 +7002,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -6918,11 +7026,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6944,6 +7052,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "text",
@@ -6971,11 +7080,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -6997,6 +7106,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "block",
@@ -7018,6 +7128,7 @@
         {
           "class": "WEI61eiEOE",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -7117,6 +7228,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -7140,11 +7252,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -7166,6 +7278,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -7230,6 +7343,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -7276,11 +7390,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -7302,6 +7416,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body A",
@@ -7346,11 +7461,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -7372,6 +7487,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body B",
@@ -7450,6 +7566,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -7498,11 +7615,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -7532,6 +7649,7 @@
             "shape": "Box"
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body A",
@@ -7576,11 +7694,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -7602,6 +7720,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body B",
@@ -7680,6 +7799,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -7727,11 +7847,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -7753,6 +7873,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node A",
@@ -7797,11 +7918,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -7823,6 +7944,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node B",
@@ -7861,6 +7983,7 @@
         {
           "class": "P7XihnI23W",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Root",
@@ -7888,11 +8011,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -7914,6 +8037,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Anchor A",
@@ -7958,11 +8082,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -7984,6 +8108,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Anchor B",
@@ -8077,6 +8202,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -8127,11 +8253,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -8153,6 +8279,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body A",
@@ -8197,11 +8324,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -8223,6 +8350,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body B",
@@ -8267,11 +8395,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -8293,6 +8421,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -8320,11 +8449,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -8346,6 +8475,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 0",
@@ -8373,11 +8503,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -8399,6 +8529,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 0",
@@ -8475,6 +8606,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -8492,6 +8624,7 @@
         {
           "class": "fTLOPJMsQ3",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -8549,6 +8682,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -8572,11 +8706,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -8598,6 +8732,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -8662,6 +8797,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -8685,11 +8821,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -8711,6 +8847,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -8749,6 +8886,7 @@
         {
           "class": "xw2qQ4qDJe",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -8770,6 +8908,8 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "DepthTest": false,
+              "EnableFog": true,
               "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
@@ -8783,6 +8923,16 @@
             "line_height": 1.0,
             "raster_height": 0,
             "raster_width": 0,
+            "render_rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "render_translation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "text": "Click\nto \ndrag",
             "text_color": {
               "a": 1.0,
@@ -8836,6 +8986,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -8887,11 +9038,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -8913,6 +9064,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body A",
@@ -8957,11 +9109,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -8983,6 +9135,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body B",
@@ -9061,6 +9214,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -9084,11 +9238,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9110,6 +9264,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -9167,6 +9322,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -9184,6 +9340,7 @@
         {
           "class": "6w1qxl64Dk",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -9241,6 +9398,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -9258,6 +9416,7 @@
         {
           "class": "bQir4QCyZ8",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "ground",
@@ -9302,11 +9461,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9328,6 +9487,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 1",
@@ -9372,11 +9532,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9398,6 +9558,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 2",
@@ -9442,11 +9603,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9468,6 +9629,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 3",
@@ -9512,11 +9674,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9538,6 +9700,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 4",
@@ -9582,11 +9745,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9608,6 +9771,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 5",
@@ -9652,11 +9816,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9678,6 +9842,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 6",
@@ -9722,11 +9887,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9748,6 +9913,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 7",
@@ -9792,11 +9958,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9818,6 +9984,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 8",
@@ -9845,11 +10012,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9871,6 +10038,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 9",
@@ -9898,11 +10066,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9924,6 +10092,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 10",
@@ -9951,11 +10120,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -9977,6 +10146,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 11",
@@ -10004,11 +10174,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -10030,6 +10200,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 12",
@@ -10057,11 +10228,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -10083,6 +10254,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 13",
@@ -10110,11 +10282,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -10136,6 +10308,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 14",
@@ -10163,11 +10336,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -10189,6 +10362,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 15",
@@ -10216,11 +10390,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -10242,6 +10416,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 16",
@@ -10269,11 +10444,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -10295,6 +10470,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 17",
@@ -10420,6 +10596,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -10443,11 +10620,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -10469,6 +10646,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -10526,6 +10704,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -10574,11 +10753,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -10600,6 +10779,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 1",
@@ -10644,11 +10824,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -10670,6 +10850,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 2",
@@ -10708,6 +10889,7 @@
         {
           "class": "kMOWg6MbOn",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -10729,6 +10911,8 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "DepthTest": false,
+              "EnableFog": true,
               "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
@@ -10742,6 +10926,16 @@
             "line_height": 1.0,
             "raster_height": 0,
             "raster_width": 0,
+            "render_rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "render_translation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "text": "Distance\nJoint",
             "text_color": {
               "a": 1.0,
@@ -10786,6 +10980,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -10961,11 +11156,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -10987,6 +11182,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -11031,11 +11227,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11057,6 +11253,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 1",
@@ -11101,11 +11298,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11127,6 +11324,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 2",
@@ -11171,11 +11369,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11197,6 +11395,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 3",
@@ -11241,11 +11440,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11267,6 +11466,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 4",
@@ -11311,11 +11511,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11337,6 +11537,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 5",
@@ -11381,11 +11582,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11407,6 +11608,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 6",
@@ -11445,6 +11647,7 @@
         {
           "class": "GCZ4Uszvzn",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 7",
@@ -11489,11 +11692,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11515,6 +11718,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 8",
@@ -11542,11 +11746,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11568,6 +11772,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 9",
@@ -11595,11 +11800,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11621,6 +11826,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 10",
@@ -11648,11 +11854,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11674,6 +11880,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 11",
@@ -11701,11 +11908,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11727,6 +11934,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 12",
@@ -11754,11 +11962,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11780,6 +11988,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 13",
@@ -11807,11 +12016,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11833,6 +12042,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 14",
@@ -11860,11 +12070,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11886,6 +12096,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 15",
@@ -11913,11 +12124,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -11939,6 +12150,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 16",
@@ -12061,6 +12273,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": true,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -12084,11 +12297,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -12110,6 +12323,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -12150,6 +12364,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -12173,11 +12388,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -12199,6 +12414,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -12256,6 +12472,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -12302,11 +12519,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -12328,6 +12545,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body A",
@@ -12372,11 +12590,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -12398,6 +12616,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body B",
@@ -12476,6 +12695,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -12499,11 +12719,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -12525,6 +12745,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -12584,6 +12805,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12644,6 +12866,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12704,6 +12927,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12764,6 +12988,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12824,6 +13049,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12884,6 +13110,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12944,6 +13171,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13004,6 +13232,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13064,6 +13293,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13124,6 +13354,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13184,6 +13415,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13244,6 +13476,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13323,6 +13556,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13391,6 +13625,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13404,6 +13639,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13434,6 +13670,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13447,6 +13684,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13477,6 +13715,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13490,6 +13729,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13520,6 +13760,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13533,6 +13774,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13563,6 +13805,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13576,6 +13819,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13606,6 +13850,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13619,6 +13864,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13649,6 +13895,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13662,6 +13909,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13746,6 +13994,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13759,6 +14008,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13789,6 +14039,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13802,6 +14053,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13832,6 +14084,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13845,6 +14098,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13875,6 +14129,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13888,6 +14143,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13918,6 +14174,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13931,6 +14188,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13961,6 +14219,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -13974,6 +14233,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14004,6 +14264,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14017,6 +14278,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14047,6 +14309,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14060,6 +14323,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14090,6 +14354,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14103,6 +14368,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14197,6 +14463,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14210,6 +14477,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14240,6 +14508,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14253,6 +14522,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14312,6 +14582,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14325,6 +14596,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14355,6 +14627,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14368,6 +14641,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14427,6 +14701,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14440,6 +14715,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14470,6 +14746,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14483,6 +14760,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14513,6 +14791,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14526,6 +14805,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14556,6 +14836,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14569,6 +14850,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14599,6 +14881,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14612,6 +14895,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14642,6 +14926,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14655,6 +14940,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14685,6 +14971,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14698,6 +14985,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14728,6 +15016,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14741,6 +15030,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14771,6 +15061,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14784,6 +15075,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14814,6 +15106,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14827,6 +15120,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14857,6 +15151,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14870,6 +15165,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14900,6 +15196,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -14913,6 +15210,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15024,6 +15322,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15037,6 +15336,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15067,6 +15367,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15080,6 +15381,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15110,6 +15412,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15123,6 +15426,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15153,6 +15457,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15166,6 +15471,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15196,6 +15502,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15209,6 +15516,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15239,6 +15547,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15252,6 +15561,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15282,6 +15592,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15295,6 +15606,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15325,6 +15637,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15338,6 +15651,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15368,6 +15682,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15381,6 +15696,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15411,6 +15727,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15424,6 +15741,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15454,6 +15772,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15467,6 +15786,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15497,6 +15817,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15510,6 +15831,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15540,6 +15862,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15553,6 +15876,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15583,6 +15907,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15596,6 +15921,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15626,6 +15952,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15639,6 +15966,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15669,6 +15997,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15682,6 +16011,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15712,6 +16042,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15725,6 +16056,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15755,6 +16087,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15768,6 +16101,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15798,6 +16132,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15811,6 +16146,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15841,6 +16177,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15854,6 +16191,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15884,6 +16222,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15897,6 +16236,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15927,6 +16267,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15940,6 +16281,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15970,6 +16312,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15983,6 +16326,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16013,6 +16357,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16026,6 +16371,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16056,6 +16402,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16069,6 +16416,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16099,6 +16447,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16112,6 +16461,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16142,6 +16492,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16155,6 +16506,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16185,6 +16537,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16198,6 +16551,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16228,6 +16582,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16241,6 +16596,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16271,6 +16627,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16284,6 +16641,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16483,6 +16841,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16496,6 +16855,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16526,6 +16886,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16539,6 +16900,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16598,6 +16960,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16611,6 +16974,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16641,6 +17005,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16654,6 +17019,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16684,6 +17050,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16697,6 +17064,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16727,6 +17095,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16740,6 +17109,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16770,6 +17140,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16783,6 +17154,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16857,6 +17229,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16870,6 +17243,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16924,6 +17298,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16937,6 +17312,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16967,6 +17343,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16980,6 +17357,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17039,6 +17417,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17052,6 +17431,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17082,6 +17462,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17095,6 +17476,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17125,6 +17507,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17138,6 +17521,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17168,6 +17552,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17181,6 +17566,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17211,6 +17597,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17224,6 +17611,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17254,6 +17642,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17267,6 +17656,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17297,6 +17687,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17310,6 +17701,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17340,6 +17732,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17353,6 +17746,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17383,6 +17777,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17396,6 +17791,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17490,6 +17886,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17503,6 +17900,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17533,6 +17931,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17546,6 +17945,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17605,6 +18005,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17618,6 +18019,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17648,6 +18050,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17661,6 +18064,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17691,6 +18095,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17704,6 +18109,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17734,6 +18140,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17747,6 +18154,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17777,6 +18185,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17790,6 +18199,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17820,6 +18230,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17833,6 +18244,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17863,6 +18275,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17876,6 +18289,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17906,6 +18320,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17919,6 +18334,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17949,6 +18365,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17962,6 +18379,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17992,6 +18410,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18005,6 +18424,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18035,6 +18455,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18048,6 +18469,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18078,6 +18500,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18091,6 +18514,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18121,6 +18545,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18134,6 +18559,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18164,6 +18590,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18177,6 +18604,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18207,6 +18635,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18220,6 +18649,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18250,6 +18680,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18263,6 +18694,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18293,6 +18725,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18306,6 +18739,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18440,6 +18874,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18453,6 +18888,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18483,6 +18919,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18496,6 +18933,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18574,6 +19012,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": true,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18587,6 +19026,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18617,6 +19057,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18630,6 +19071,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18660,6 +19102,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18673,6 +19116,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18703,6 +19147,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18716,6 +19161,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18746,6 +19192,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18759,6 +19206,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18789,6 +19237,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18802,6 +19251,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18832,6 +19282,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18845,6 +19296,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18875,6 +19327,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18888,6 +19341,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18918,6 +19372,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18931,6 +19386,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18961,6 +19417,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18974,6 +19431,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -19004,6 +19462,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -19017,6 +19476,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -19140,6 +19600,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -19153,6 +19614,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -19183,6 +19645,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -19196,6 +19659,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -19255,6 +19719,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -19268,6 +19733,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -19298,6 +19764,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -19311,6 +19778,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -19476,6 +19944,7 @@
               "flags": {
                 "ClipChildren": true,
                 "Enabled": true,
+                "LockedInEditor": false,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
               },
@@ -19498,6 +19967,7 @@
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
+                    "LockedInEditor": false,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
                   },
@@ -19522,6 +19992,7 @@
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
+                    "LockedInEditor": false,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
                   },
