@@ -37,7 +37,7 @@ DlgAbout::DlgAbout(QWidget* parent) : QDialog(parent)
 {
     mUI.setupUi(this);
     setWindowTitle(APP_TITLE);
-    mUI.title->setText(APP_TITLE);
+    mUI.title->setText(APP_TITLE_LONG);
     mUI.title->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
     mUI.copyright->setText(APP_COPYRIGHT);
     mUI.copyright->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);

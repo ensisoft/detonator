@@ -21,8 +21,10 @@
 // Editor build time configuration file.
 #if defined(NDEBUG)
 #  define APP_TITLE "DETONATOR 2D"
+#  define APP_TITLE_LONG "DETONATOR 2D\n2.5D Game Engine"
 #else
 #  define APP_TITLE "DETONATOR 2D Debug"
+#  define APP_TITLE_LONG "DETONATOR 2D Debug\n2.5D Game Engine"
 #endif
 // modify the app version before cranking out a release build
 #ifndef APP_VERSION
