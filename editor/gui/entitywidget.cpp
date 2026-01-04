@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2026 Sami Väisänen
+// Copyright (C) 2020-2026 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -5192,7 +5192,8 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
     if (mState.entity->GetNumNodes() == 0)
     {
-        if (!mCurrentTool)
+        if (!mCurrentTool ||
+            mCurrentTool->GetToolFunction() == MouseTool::ToolFunctionType::TransformCamera)
         {
             ShowInstruction(
                 "Create a new game play entity.\n\n"
