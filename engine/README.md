@@ -9,13 +9,12 @@ various components and subsystems into a single component
 simply called the "engine".
 
 This includes the following engine subsystems<br>
-* Rendering system
-* Physics engine
-* Audio engine
-* Scripting system
-* Gameplay system
+* Rendering
+* Physics
+* Audio
+* Scripting
+* Gameplay
 * User interface
-
 
 ### Technical Notes
 
@@ -41,7 +40,7 @@ main application loop:<br>
 * Receiving user input from the application event queue
 * Propagating the user input to the engine
 * Calling update on the engine
-* Callilng render on the engine
+* Calling render on the engine
 * Doing other activities outside the engine itself
   * For example timing frames and detecting jank!
 
@@ -53,29 +52,33 @@ main application loop:<br>
 > builds. When the engine is built for WASM there are no libraries
 > but only a single WASM module.
 
-Because of the complications regarding transient dependencies the
+Because of the complications regarding transitive dependencies the
 engine is built into a shared library with a binary interface that
 hides the engine implementation details from the host application.
 In other words the host application doesn't need to depend on any
 of the internal details of the engine. However, there's a need to
 share some infrastructure level components such as the logging
-and threading systems.
+and threading systems between the host application and the engine.
 
 The way this is solved is that the engine library also provides
-an interface for accessing infrastructure components that are
-built into the same library. This has no bearing on the logical
-engine component it is only to facilitate sharing of infrastructure
-level components without needing to add more shared libraries.
+implementations for the infrastructure systems using pure virtual
+C++ interfaces. Using these pure C++ interfaces lets us isolate
+the host and library and decouples the host application from any
+implementation dependency. Note that this design has no bearing
+on the rest of the engine implementation and exists to facilitate
+sharing of infrastructure level components without needing to add
+more shared libraries. <br>
+
+In order to bootstrap the C++ object creation a C style interface
+is provided. The host application needs to use some runtime 
+entry point resolution (dlsym or GetProcAddress) to query these
+functions and then call the function to create a C++ runtime
+infrastructure object.
 
 ```
 extern "C" DETONATOR_API void Detonator_CreateRuntime(interop::IRuntime**);
 extern "C" DETONATOR_API void Detonator_CreateFileLoaders(Detonator_Loaders* out);
 ```
-
-The se C entry points can then be used by the host application
-to interact with the runtime infrastructure while maintaining a
-strict binary firewall that helps use isolate the dependencies.
-
 
 ### Audio Subsystem
 
