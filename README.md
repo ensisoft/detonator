@@ -5,7 +5,7 @@ DETONATOR 2D 💣💥
 ===================
 
 
-An OpenGL ES3 based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
+An OpenGL ES3 based 2.5D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
 as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time strategy and tactics 🗺️.
 
 ![Demos](screens/demos.gif "Animated demo content GIF")
@@ -13,27 +13,31 @@ as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time 
 ### CURRENT TOP FEATURES 🔥
 
 * <b>Run everything locally on your machine</b> 💻
-  * <i>No accounts, no tracking, no fuss. Just extract the binary and run!</i>  
+  * <i>No accounts, no tracking, no fuss. Just extract the binary and run!</i>
 * <b>Supports Windows, Linux and HTML5/WASM</b> 🪟🐧🌐
-  * <i>Game packages for all platforms built directly in the editor</i> 
+  * <i>Game packages for all platforms built directly in the editor</i>
 * <b>Fully featured editor for game development </b> 💯
-  * <i>Everything visual can be completed in the editor </i> 
+  * <i>Everything visual can be completed in the editor </i>
 * <b>Fully documented Lua API for game development</b> 💯
-  * <i>Over 1000 methods and over 100 tables !</i> 
+  * <i>Over 1000 methods and over 100 tables !</i>
 * <b>Simple object oriented APIs.</b> 🧱
   * <i>Main game object and game play APIs are Scene, Entity and EntityNode + Attachments</i>
 * <b>Demo content and examples. </b> 🪜
-  * <i>Multiple demo projects ready to run!</i>  
+  * <i>Multiple demo projects ready to run!</i>
 * <b>Support for scripting and native game development</b> 🍌
   * <i>Write your game logic in Lua or in C++</i>
-  
+
 
 <details><summary><strong>Click here for more features...</strong></summary>
 
+* Designed for 2D and 2.5D games using axis aligned or isometric perspective
 * Windows, Linux and HTML5/WASM support
-* Qt5 based WYSIWYG editor
-* Text rendering (vector and bitmap)
-* Various primitive shapes, custom polygon shapes
+* Fully featured native WYSIWYG editor (using Qt5)
+* Graphics system with
+  * Text rendering with vector (.ttf and .otf) and custom bitmap font support.
+  * Built-in various primitive shapes
+  * Support for custom polygon shapes
+  * Support for custom shaders (both fragment and vertex)
 * Material system with built-in materials and with custom shaders
 * Particle system with projectile and linear motion
 * Entity system with animation tracks
@@ -49,7 +53,6 @@ as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time 
   * Scripting support for integrating with the game
 * Tilemap builder for tile based worlds
   * Multiple render and data layers
-  * Isometric (dimetric) and axis aligned top down support
   * Combines with scene and its entities!
 * Physics engine based on Box2D
 * Demo content and starter content
@@ -65,7 +68,7 @@ as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time 
 * Debug printing, logging, pause/step, screenshot
 * Quick play and preview mode with hot content reloading (save your asset and changes will apply)
 * Customizable previews (with Lua scripts)
-* Several included fonts and particle textures 
+* Several included fonts and particle textures
 
 </details>
 
@@ -106,15 +109,15 @@ then follow the [Build Instructions](BUILDING.md)
 
 ## SCREENSHOTS
 
-![Demos](screens/detonator.png "Animated demo content GIF")
-<i>Scene editor with 'Steam Punk' editor skin</i> 
+![Demos](screens/detonator.png "screenshot")
+<i>Scene editor with dark editor skin</i>
 
 
 <details><summary><strong>Click here for more screenshots...</strong></summary>
 <br>
 
 ![Screenshot](screens/editor-tilemap.png "Map editor")
-<i>Create tile based maps using the tile editor. The map supports multiple layers and both isometric and axis aligned perspective.
+<i>Create tile based maps in the tile editor. The map supports multiple layers and both isometric and axis aligned perspective.
 The map can then be combined with the scene and the scene based entities in order to produce the final game world.</i><br><br>
 
 ![Screenshot](screens/editor-animation.png "Entity editor")
