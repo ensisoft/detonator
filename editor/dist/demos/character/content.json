@@ -289,6 +289,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -312,11 +313,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -338,6 +339,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -395,6 +397,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": true,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -418,11 +421,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -444,6 +447,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "linear_mover": {
@@ -520,6 +524,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -543,11 +548,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -569,6 +574,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Shadow",
@@ -596,11 +602,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -622,6 +628,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -649,11 +656,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -681,6 +688,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Health",
@@ -702,6 +710,7 @@
         {
           "class": "qH6wMtLDgr",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "HitBody",
@@ -780,6 +789,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -803,11 +813,11 @@
             "flags": {
               "DepthTest": true,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -829,6 +839,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Entity",
@@ -856,11 +867,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -882,6 +893,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -909,11 +921,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -935,6 +947,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Garb",
@@ -962,11 +975,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -988,6 +1001,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Weapon",
@@ -1015,11 +1029,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1052,6 +1066,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Hello",
@@ -1073,6 +1088,8 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "DepthTest": false,
+              "EnableFog": true,
               "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
@@ -1086,6 +1103,16 @@
             "line_height": 1.0,
             "raster_height": 0,
             "raster_width": 0,
+            "render_rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "render_translation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "text": "Hello,\nclick somewhere to walk\n",
             "text_color": {
               "a": 1.0,
@@ -1105,11 +1132,11 @@
             "flags": {
               "DepthTest": true,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1137,6 +1164,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Health",
@@ -1158,6 +1186,7 @@
         {
           "class": "EDSEr5TLWp",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "HitBody",
@@ -1435,6 +1464,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -1452,6 +1482,7 @@
         {
           "class": "IJurfMmihr",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -1509,6 +1540,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -1526,6 +1558,7 @@
         {
           "class": "lp3EsUUTsk",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -1553,11 +1586,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1579,6 +1612,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Arrow",
@@ -1606,11 +1640,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1632,6 +1666,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Shadow",
@@ -1653,6 +1688,7 @@
         {
           "class": "jmPXbaRGqI",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Tip",
@@ -1743,6 +1779,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": true,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -1766,11 +1803,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1792,6 +1829,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "linear_mover": {
@@ -1900,6 +1938,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -1923,11 +1962,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1949,6 +1988,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -2006,6 +2046,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -2029,11 +2070,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2055,6 +2096,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -2112,6 +2154,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": false,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -2135,11 +2178,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": false,
               "UpdateMaterial": false,
@@ -2161,6 +2204,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "linear_mover": {
@@ -2199,6 +2243,7 @@
         {
           "class": "l3P8GD3RWu",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "HitBox",
@@ -2233,11 +2278,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2259,6 +2304,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Weapon Flame",
@@ -2280,6 +2326,7 @@
         {
           "class": "wsfPWDJNlh",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Weapon Muzzle",
@@ -2307,11 +2354,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2339,6 +2386,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Health",
@@ -2450,6 +2498,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -2473,11 +2522,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2499,6 +2548,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -2526,11 +2576,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": true,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2552,6 +2602,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Node 0",
@@ -2579,11 +2630,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": true,
               "FlipVertically": true,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2605,6 +2656,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Copy of Node 0",
@@ -2632,11 +2684,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": true,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2658,6 +2710,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Copy of Copy of Node 0",
@@ -2713,6 +2766,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": false,
         "TickEntity": false,
         "UpdateEntity": true,
@@ -2730,6 +2784,7 @@
         {
           "class": "1RZ8lBNXjt",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -2774,11 +2829,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2800,6 +2855,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Skin",
@@ -2827,11 +2883,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2864,6 +2920,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Message",
@@ -2885,6 +2942,8 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "DepthTest": false,
+              "EnableFog": true,
               "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
@@ -2898,6 +2957,16 @@
             "line_height": 1.0,
             "raster_height": 0,
             "raster_width": 0,
+            "render_rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "render_translation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "text": "Press Arrow Left / Right to Walk\nPress Arrow Up to Jump\nPress Space to Attack",
             "text_color": {
               "a": 1.0,
@@ -3022,6 +3091,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -3045,11 +3115,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3071,6 +3141,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -3098,11 +3169,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3124,6 +3195,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 1",
@@ -3151,11 +3223,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3177,6 +3249,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 2",
@@ -3227,6 +3300,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -3250,11 +3324,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3276,6 +3350,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -3316,6 +3391,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": true,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -3339,11 +3415,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3365,6 +3441,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "linear_mover": {
@@ -3441,6 +3518,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -3464,11 +3542,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3490,6 +3568,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -3547,6 +3626,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -3570,11 +3650,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3596,6 +3676,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Entity",
@@ -3623,11 +3704,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3649,6 +3730,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -3676,11 +3758,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3708,6 +3790,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Health",
@@ -3729,6 +3812,7 @@
         {
           "class": "7Crfe3nh27",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "HitBody",
@@ -3763,11 +3847,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3789,6 +3873,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Weapon",
@@ -4049,6 +4134,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -4072,11 +4158,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4104,6 +4190,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Body",
@@ -4131,11 +4218,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4157,6 +4244,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Arrow",
@@ -4178,6 +4266,7 @@
         {
           "class": "SG6PkNuB9h",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Pointer",
@@ -4205,11 +4294,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4242,6 +4331,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Message",
@@ -4263,6 +4353,8 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "DepthTest": false,
+              "EnableFog": true,
               "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
@@ -4276,6 +4368,16 @@
             "line_height": 1.0,
             "raster_height": 0,
             "raster_width": 0,
+            "render_rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "render_translation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "text": "Press Arrow Left / Right \nUp and Down to run\nin 8 directions\n",
             "text_color": {
               "a": 1.0,
@@ -4364,6 +4466,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": true,
         "TickEntity": true,
         "UpdateEntity": true,
@@ -4381,6 +4484,7 @@
         {
           "class": "SWRHlHeoP4",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Node 0",
@@ -4402,6 +4506,8 @@
             "coordinate_space": "Scene",
             "flags": {
               "BlinkText": false,
+              "DepthTest": false,
+              "EnableFog": true,
               "EnableLight": true,
               "PP_EnableBloom": true,
               "StaticContent": false,
@@ -4415,6 +4521,16 @@
             "line_height": 1.100000023841858,
             "raster_height": 0,
             "raster_width": 0,
+            "render_rotation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "render_translation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "text": "F1  = LPC Demo\nF2 = Bandit Demo \nF3 = 8Dir demo\nF4 = Merc\nEsc = Quit",
             "text_color": {
               "a": 1.0,
@@ -4447,6 +4563,7 @@
         "KillAtBoundary": true,
         "KillAtLifetime": true,
         "LimitLifetime": false,
+        "LockedInEditor": false,
         "PostUpdate": false,
         "TickEntity": false,
         "UpdateEntity": true,
@@ -4470,11 +4587,11 @@
             "flags": {
               "DepthTest": false,
               "DoubleSided": false,
-              "Enable3DLight": false,
+              "EnableFog": true,
+              "EnableLight": true,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
-              "ProjectAs3D": false,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4496,6 +4613,7 @@
             "timescale": 1.0
           },
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "linear_mover": {
@@ -4534,6 +4652,7 @@
         {
           "class": "AqvX8Eaq7K",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Weapon",
@@ -4555,6 +4674,7 @@
         {
           "class": "hDTrsO1O2U",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Weapon/Barrel",
@@ -4576,6 +4696,7 @@
         {
           "class": "zGbj2nak5p",
           "flags": {
+            "LockedInEditor": false,
             "VisibleInEditor": true
           },
           "name": "Weapon/Muzzle",
@@ -4639,6 +4760,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -4699,6 +4821,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -4759,6 +4882,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -4819,6 +4943,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -4879,6 +5004,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -4939,6 +5065,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -4999,6 +5126,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5059,6 +5187,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5238,6 +5367,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5298,6 +5428,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5358,6 +5489,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5418,6 +5550,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5478,6 +5611,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5544,6 +5678,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5723,6 +5858,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5789,6 +5925,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5849,6 +5986,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5909,6 +6047,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -5969,6 +6108,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6029,6 +6169,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6089,6 +6230,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6416,6 +6558,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6486,6 +6629,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6546,6 +6690,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6606,6 +6751,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6666,6 +6812,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6726,6 +6873,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6786,6 +6934,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6846,6 +6995,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6906,6 +7056,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -6966,6 +7117,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7026,6 +7178,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7086,6 +7239,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7146,6 +7300,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7325,6 +7480,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7385,6 +7541,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7445,6 +7602,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7505,6 +7663,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7565,6 +7724,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7625,6 +7785,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7685,6 +7846,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7864,6 +8026,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -7924,6 +8087,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8103,6 +8267,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8163,6 +8328,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8223,6 +8389,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8283,6 +8450,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8345,6 +8513,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8524,6 +8693,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8592,6 +8762,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8660,6 +8831,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8720,6 +8892,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8780,6 +8953,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8840,6 +9014,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8900,6 +9075,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -8960,6 +9136,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9020,6 +9197,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9080,6 +9258,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9140,6 +9319,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9200,6 +9380,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9260,6 +9441,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9320,6 +9502,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9380,6 +9563,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9440,6 +9624,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9500,6 +9685,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9560,6 +9746,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9620,6 +9807,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9680,6 +9868,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9742,6 +9931,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9802,6 +9992,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -9981,6 +10172,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10041,6 +10233,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10101,6 +10294,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10161,6 +10355,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10221,6 +10416,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10281,6 +10477,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10341,6 +10538,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10401,6 +10599,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10461,6 +10660,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10521,6 +10721,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10694,6 +10895,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10754,6 +10956,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10814,6 +11017,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10874,6 +11078,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10934,6 +11139,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -10994,6 +11200,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11054,6 +11261,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11146,6 +11354,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11206,6 +11415,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11385,6 +11595,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11445,6 +11656,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11505,6 +11717,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11565,6 +11778,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11625,6 +11839,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11685,6 +11900,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11745,6 +11961,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11805,6 +12022,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11865,6 +12083,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11925,6 +12144,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -11985,6 +12205,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12045,6 +12266,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12105,6 +12327,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12284,6 +12507,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12331,6 +12555,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12510,6 +12735,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12570,6 +12796,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12630,6 +12857,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12690,6 +12918,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -12750,6 +12979,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13077,6 +13307,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13137,6 +13368,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13316,6 +13548,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13378,6 +13611,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13438,6 +13672,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13617,6 +13852,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13677,6 +13913,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13737,6 +13974,7 @@
       "flags": {
         "BlendFrames": false,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13805,6 +14043,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13871,6 +14110,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13931,6 +14171,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -13991,6 +14232,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -14051,6 +14293,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -14111,6 +14354,7 @@
       "flags": {
         "BlendFrames": true,
         "EnableBloom": true,
+        "EnableFog": true,
         "EnableLight": true,
         "PremultipliedAlpha": false,
         "Static": false
@@ -15372,6 +15616,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15385,6 +15630,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15415,6 +15661,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15428,6 +15675,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15487,6 +15735,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": true,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15500,6 +15749,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15530,6 +15780,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15543,6 +15794,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15573,6 +15825,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15586,6 +15839,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15616,6 +15870,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15629,6 +15884,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15659,6 +15915,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15672,6 +15929,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15702,6 +15960,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15715,6 +15974,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15796,6 +16056,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15809,6 +16070,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15839,6 +16101,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15852,6 +16115,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15882,6 +16146,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15895,6 +16160,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15925,6 +16191,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15938,6 +16205,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15968,6 +16236,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -15981,6 +16250,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16011,6 +16281,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16024,6 +16295,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16054,6 +16326,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16067,6 +16340,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16097,6 +16371,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16110,6 +16385,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16140,6 +16416,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16153,6 +16430,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16183,6 +16461,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16196,6 +16475,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16226,6 +16506,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16239,6 +16520,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16269,6 +16551,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16282,6 +16565,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16312,6 +16596,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16325,6 +16610,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16355,6 +16641,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16368,6 +16655,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16398,6 +16686,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16411,6 +16700,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16441,6 +16731,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16454,6 +16745,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16484,6 +16776,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16497,6 +16790,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16527,6 +16821,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16540,6 +16835,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16570,6 +16866,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16583,6 +16880,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16613,6 +16911,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16626,6 +16925,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16656,6 +16956,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16669,6 +16970,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16825,6 +17127,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16838,6 +17141,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16868,6 +17172,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16881,6 +17186,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16911,6 +17217,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16924,6 +17231,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16954,6 +17262,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16967,6 +17276,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -16997,6 +17307,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17010,6 +17321,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17040,6 +17352,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17053,6 +17366,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17083,6 +17397,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17096,6 +17411,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17126,6 +17442,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17139,6 +17456,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17228,6 +17546,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17241,6 +17560,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17271,6 +17591,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17284,6 +17605,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17314,6 +17636,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17327,6 +17650,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17357,6 +17681,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17370,6 +17695,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17400,6 +17726,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17413,6 +17740,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17443,6 +17771,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17456,6 +17785,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17486,6 +17816,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17499,6 +17830,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17529,6 +17861,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17542,6 +17875,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17572,6 +17906,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17585,6 +17920,7 @@
             "KillAtBoundary": false,
             "KillAtLifetime": false,
             "LimitLifetime": false,
+            "LockedInEditor": false,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -17859,20 +18195,22 @@
               "index": 0,
               "name": "aPosition",
               "offset": 0,
-              "size": 2
+              "size": 2,
+              "type": "Float"
             },
             {
               "divisor": 0,
               "index": 0,
               "name": "aTexCoord",
               "offset": 8,
-              "size": 2
+              "size": 2,
+              "type": "Float"
             }
           ],
           "bytes": 16
         }
       },
-      "mesh": "Simple2D",
+      "mesh": "Simple2DRenderMesh",
       "name": "Bandit/Bandit",
       "resource_id": "Y9mJKUQboN",
       "resource_name": "Bandit/Bandit",
@@ -17898,20 +18236,22 @@
               "index": 0,
               "name": "aPosition",
               "offset": 0,
-              "size": 2
+              "size": 2,
+              "type": "Float"
             },
             {
               "divisor": 0,
               "index": 0,
               "name": "aTexCoord",
               "offset": 8,
-              "size": 2
+              "size": 2,
+              "type": "Float"
             }
           ],
           "bytes": 16
         }
       },
-      "mesh": "Simple2D",
+      "mesh": "Simple2DRenderMesh",
       "name": "8-dir-char-template/Pointer",
       "resource_id": "ZOW84mNSWm",
       "resource_name": "8-dir-char-template/Pointer",
