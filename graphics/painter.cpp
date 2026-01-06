@@ -295,9 +295,23 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
         ShaderPtr material_shader = mDevice->FindShader(material_gpu_id);
         if (material_shader == nullptr)
         {
-            const auto& material_shader_source = program.GetShader(material, material_environment, *mDevice);
+            std::string fallback_info;
+            auto error = ShaderProgram::ShaderSourceError::Nada;
+            auto material_shader_source = program.GetShader(material, material_environment, *mDevice, &error);
             if (material_shader_source.IsEmpty())
-                return nullptr;
+            {
+                ERROR("Failed to create fragment shader. Using a placeholder that will not render.");
+                material_shader_source.AddDebugInfo("Fallback", "yes");
+                material_shader_source.SetVersion(ShaderSource::Version::GLSL_300);
+                material_shader_source.SetPrecision(ShaderSource::Precision::High);
+                material_shader_source.SetType(ShaderSource::Type::Fragment);
+                material_shader_source.LoadRawSource("layout (location=0) out vec4 fragOutColor0;\n"
+                                                     "void main() {}");
+                if (error == ShaderProgram::ShaderSourceError::ShaderType)
+                    fallback_info = "Incorrect shader type. Expected 'fragment' shader.";
+                else if (error == ShaderProgram::ShaderSourceError::ShaderVersion)
+                    fallback_info = "Incorrect shader version. Version must be '300 es'.";
+            }
 
             DEBUG("Compile shader");
             DEBUG(" GPU ID     = %1", material_gpu_id);
@@ -308,9 +322,11 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             }
 
             Shader::CreateArgs args;
-            args.name   = material_shader_source.GetShaderName();
-            args.source = material_shader_source.GetSource();
-            args.debug  = mDebugMode;
+            args.name     = material_shader_source.GetShaderName();
+            args.source   = material_shader_source.GetSource();
+            args.debug    = mDebugMode;
+            args.fallback = error != ShaderProgram::ShaderSourceError::Nada;
+            args.fallback_info = std::move(fallback_info);
 
             const auto& uniform_blocks = material_shader_source.ListUniformBlocks();
             for (const auto& uniform_block : uniform_blocks)
@@ -340,13 +356,33 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
                 mErrors.push_back(std::move(error));
             return nullptr;
         }
+        if (material_shader->IsFallback())
+        {
+            auto info = material_shader->GetFallbackInfo();
+            if (!info.empty())
+                mErrors.push_back(std::move(info));
+            return nullptr;
+        }
 
         ShaderPtr drawable_shader = mDevice->FindShader(drawable_gpu_id);
         if (drawable_shader == nullptr)
         {
-            const auto& drawable_shader_source = program.GetShader(drawable, drawable_environment, *mDevice);
+            std::string fallback_info;
+            auto error = ShaderProgram::ShaderSourceError::Nada;
+            auto drawable_shader_source = program.GetShader(drawable, drawable_environment, *mDevice, &error);
             if (drawable_shader_source.IsEmpty())
-                return nullptr;
+            {
+                ERROR("Failed to create vertex shader. Using a placeholder that will not render.");
+                drawable_shader_source.AddDebugInfo("Fallback", "yes");
+                drawable_shader_source.SetVersion(ShaderSource::Version::GLSL_300);
+                drawable_shader_source.SetPrecision(ShaderSource::Precision::NotSet);
+                drawable_shader_source.SetType(ShaderSource::Type::Vertex);
+                drawable_shader_source.LoadRawSource("void main() { gl_Position = vec4(1.0); }");
+                if (error == ShaderProgram::ShaderSourceError::ShaderType)
+                    fallback_info = "Incorrect shader type. Expected 'vertex' shader.";
+                else if (error == ShaderProgram::ShaderSourceError::ShaderVersion)
+                    fallback_info = "Incorrect shader version. Version must be '300 es'.";
+            }
 
             DEBUG("Compile shader");
             DEBUG(" GPU ID     = %1", drawable_gpu_id);
@@ -357,9 +393,11 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             }
 
             Shader::CreateArgs args;
-            args.name   = drawable_shader_source.GetShaderName();
-            args.source = drawable_shader_source.GetSource();
-            args.debug  = mDebugMode;
+            args.name     = drawable_shader_source.GetShaderName();
+            args.source   = drawable_shader_source.GetSource();
+            args.debug    = mDebugMode;
+            args.fallback = error != ShaderProgram::ShaderSourceError::Nada;
+            args.fallback_info = std::move(fallback_info);
 
             const auto& uniform_blocks = drawable_shader_source.ListUniformBlocks();
             for (const auto& uniform_block : uniform_blocks)
@@ -387,6 +425,13 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             auto error = drawable_shader->GetCompileInfo();
             if (!error.empty())
                 mErrors.push_back(std::move(error));
+            return nullptr;
+        }
+        if (drawable_shader->IsFallback())
+        {
+            auto info = drawable_shader->GetFallbackInfo();
+            if (!info.empty())
+                mErrors.push_back(std::move(info));
             return nullptr;
         }
 
