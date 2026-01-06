@@ -25,6 +25,7 @@
 #include "data/writer.h"
 #include "graphics/device.h"
 #include "graphics/program.h"
+#include "graphics/paint_log.h"
 #include "graphics/shader_code.h"
 #include "graphics/shader_source.h"
 #include "graphics/material_class.h"
@@ -1186,8 +1187,7 @@ TextureMap* MaterialClass::SelectTextureMap(const State& state) const noexcept
 {
     if (mTextureMaps.empty())
     {
-        if (state.first_render)
-            WARN("Material has no texture maps. [name='%1'", mName);
+        GFX_PAINT_ERROR("Material has no texture maps. [material='%1']", mName);
         return nullptr;
     }
 
@@ -1198,9 +1198,8 @@ TextureMap* MaterialClass::SelectTextureMap(const State& state) const noexcept
             if (map->GetId() == state.active_texture_map_id)
                 return map.get();
         }
-        if (state.first_render)
-            WARN("No such texture map found in material. Falling back on default. [name='%1', map=%2]", mName,
-                 state.active_texture_map_id);
+        GFX_PAINT_WARN("No such texture map found in material. Falling back on default. [material='%1', map=%2]",
+            mName, state.active_texture_map_id);
     }
 
     // keep previous semantics, so default to the first map for the
@@ -1213,9 +1212,9 @@ TextureMap* MaterialClass::SelectTextureMap(const State& state) const noexcept
         if (map->GetId() == mActiveTextureMap)
             return map.get();
     }
-    if (state.first_render)
-        WARN("No such texture map found in material. Using first map. [name='%1', map=%2]", mName, mActiveTextureMap);
 
+    GFX_PAINT_WARN("No such texture map found in material. Using first map. [material='%1', map=%2]",
+        mName, mActiveTextureMap);
     return mTextureMaps[0].get();
 }
 
@@ -1228,7 +1227,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 
         if (mShaderUri.empty())
         {
-            ERROR("Material has no shader source specified. [name='%1']", mName);
+            ERROR("Material has no shader source specified. [material='%1']", mName);
             return {};
         }
 
@@ -1239,12 +1238,12 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         const auto& buffer = gfx::LoadResource(desc);
         if (!buffer)
         {
-            ERROR("Failed to load custom material shader source file. [name='%1', uri='%2']", mName, mShaderUri);
+            ERROR("Failed to load custom material shader source file. [material='%1', uri='%2']", mName, mShaderUri);
             return {};
         }
         const char* beg = (const char*) buffer->GetData();
         const char* end = beg + buffer->GetByteSize();
-        DEBUG("Loading custom shader source. [uri=%1', material='%2']", mShaderUri, mName);
+        DEBUG("Loading custom shader source. [material='%1', uri='%2']", mName, mShaderUri);
 
         ShaderSource source;
         source.SetType(ShaderSource::Type::Fragment);
@@ -1327,8 +1326,7 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     auto* map = SelectTextureMap(state);
     if (map == nullptr)
     {
-        if (state.first_render)
-            WARN("Failed to select texture map. [material='%1']", mName);
+        GFX_PAINT_ERROR("Failed to select texture map. [material='%1']", mName);
         return false;
     }
 
@@ -1341,8 +1339,7 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     TextureMap::BoundState binds;
     if (!map->BindTextures(ts, device,  binds))
     {
-        if (state.first_render)
-            ERROR("Failed to bind sprite textures. [material='%1']", mName);
+        GFX_PAINT_ERROR("Failed to bind sprite textures. [material='%1']", mName);
         return false;
     }
 
@@ -1419,8 +1416,7 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     auto* map = SelectTextureMap(state);
     if (map == nullptr)
     {
-        if (state.first_render)
-            ERROR("Failed to select material texture map. [material='%1']", mName);
+        GFX_PAINT_ERROR("Failed to select material texture map. [material='%1']", mName);
         return false;
     }
 
@@ -1432,8 +1428,7 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     TextureMap::BoundState binds;
     if (!map->BindTextures(ts, device, binds))
     {
-        if (state.first_render)
-            ERROR("Failed to bind material texture. [material='%1']", mName);
+        GFX_PAINT_ERROR("Failed to bind material texture. [material='%1']", mName);
         return false;
     }
 
@@ -1497,8 +1492,7 @@ bool MaterialClass::ApplyTilemapDynamicState(const State& state, Device& device,
     auto* map = SelectTextureMap(state);
     if (map == nullptr)
     {
-        if (state.first_render)
-            ERROR("Failed to select material texture map. [material='%1']", mName);
+        GFX_PAINT_ERROR("Failed to select material texture map. [material='%1']", mName);
         return false;
     }
 
@@ -1510,8 +1504,7 @@ bool MaterialClass::ApplyTilemapDynamicState(const State& state, Device& device,
     TextureMap::BoundState binds;
     if (!map->BindTextures(ts, device, binds))
     {
-        if (state.first_render)
-            ERROR("Failed to bind material texture. [material='%1']", mName);
+        GFX_PAINT_ERROR("Failed to bind material texture. [material='%1']", mName);
         return false;
     }
 
@@ -1554,8 +1547,7 @@ bool MaterialClass::ApplyParticleDynamicState(const State& state, Device& device
     auto* texture_map = SelectTextureMap(state);
     if (texture_map == nullptr)
     {
-        if (state.first_render)
-            ERROR("Failed to select material texture map. [material='%1']", mName);
+        GFX_PAINT_ERROR("Failed to select material texture map. [material='%1']", mName);
         return false;
     }
 
@@ -1567,8 +1559,7 @@ bool MaterialClass::ApplyParticleDynamicState(const State& state, Device& device
     TextureMap::BoundState binds;
     if (!texture_map->BindTextures(ts, device, binds))
     {
-        if (state.first_render)
-            ERROR("Failed to bind material texture. [material='%1]", mName);
+        GFX_PAINT_ERROR("Failed to bind material texture. [material='%1]", mName);
         return false;
     }
     auto* texture = binds.textures[0];
@@ -1656,8 +1647,7 @@ bool MaterialClass::ApplyBasicLightDynamicState(const State& state, Device& devi
         TextureMap::BoundState binds;
         if (!texture_map->BindTextures(ts, device, binds))
         {
-            if (state.first_render)
-                ERROR("Failed to bind basic light material map. [material='%1', map=%2]", mName, maps[i].type);
+            GFX_PAINT_ERROR("Failed to bind basic light material map. [material='%1', map=%2]", mName, maps[i].type);
             return false;
         }
         auto* texture = binds.textures[0];

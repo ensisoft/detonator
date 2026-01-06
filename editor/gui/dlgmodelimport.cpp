@@ -28,6 +28,7 @@
 #include "editor/app/workspace.h"
 #include "graphics/shader_program.h"
 #include "graphics/painter.h"
+#include "graphics/paint_context.h"
 #include "graphics/utility.h"
 #include "graphics/simple_shape.h"
 #include "graphics/polygon_mesh.h"
@@ -35,6 +36,7 @@
 #include "graphics/material.h"
 #include "graphics/material_class.h"
 #include "graphics/material_instance.h"
+#include "graphics/paint_context.h"
 #include "graphics/shader_programs.h"
 
 namespace gui
@@ -250,8 +252,10 @@ void DlgModelImport::PaintScene(gfx::Painter& painter, double secs)
     {
         for (auto& draw : mDrawState)
         {
+            gfx::PaintContext pc;
+
             p.Draw(*draw.drawable, transform, *draw.material, state, program);
-            if (draw.material->HasError())
+            if (pc.HasErrors())
             {
                 // we likely have an issues such as textures not being found.
                 // replace the material with simpler material.

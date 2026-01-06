@@ -164,10 +164,7 @@ void SpriteWidget::PaintTexture(const gfx::MaterialClass *klass, gfx::Painter &p
         temp.SetAlphaCutoff(mMaterial->GetAlphaCutoff());
         temp.AddTexture(texture_src->Copy());
         temp.SetTextureRect(texture_rect);
-
-        gfx::MaterialInstance instance(temp);
-        instance.SetFirstRender(false);
-        gfx::FillRect(painter, rect, instance);
+        gfx::FillRect(painter, rect, gfx::MaterialInstance(std::move(temp)));
 
         if (texture_map->GetId() == mSelectedTextureMapId)
         {
@@ -298,9 +295,7 @@ void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter&
                 rect.Translate(5.0f, 0.0f); // little padding around each rect
                 rect.Translate(-mTranslateX, 0.0); // scrolling
 
-                gfx::MaterialInstance instance(temp);
-                instance.SetFirstRender(false);
-                gfx::FillRect(painter, rect, instance);
+                gfx::FillRect(painter, rect, gfx::MaterialInstance(std::move(temp)));
             }
         }
     }
@@ -327,9 +322,7 @@ void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter&
             rect.Translate(5.0f, 0.0f); // little padding around each rect
             rect.Translate(-mTranslateX, 0.0); // scrolling
 
-            gfx::MaterialInstance instance(temp);
-            instance.SetFirstRender(false);
-            gfx::FillRect(painter, rect, instance);
+            gfx::FillRect(painter, rect, gfx::MaterialInstance(std::move(temp)));
         }
     }
 
@@ -430,7 +423,6 @@ void SpriteWidget::PaintParticle(gfx::Painter& painter, double dt)
 
         gfx::MaterialInstance instance(mMaterial);
         instance.SetRuntime(time);
-        instance.SetFirstRender(false);
         gfx::FillRect(painter, rect, instance);
     }
 

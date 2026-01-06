@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include "base/logging.h"
+#include "graphics/paint_log.h"
 #include "graphics/material_class.h"
 #include "graphics/material_instance.h"
 #include "graphics/texture_bitmap_buffer_source.h"
@@ -54,7 +55,6 @@ bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device,
     state.render_pass    = env.render_pass;
     state.material_time  = mRuntime;
     state.uniforms       = &mUniforms;
-    state.first_render   = mFirstRender;
     state.flags          = mFlags;;
 
     if (mSpriteCycle.has_value())
@@ -73,27 +73,19 @@ bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device,
         {
             if (const auto* id = std::get_if<std::string>(active_texture))
                 state.active_texture_map_id = *id;
-            else if (mFirstRender)
-                WARN("Incorrect material parameter type set on 'active_texture_map'. String ID expected.");
-        }
-    }
-    if (!mStaticUniformWarning)
-    {
-        if (mClass->IsStatic() && !mUniforms.empty())
-        {
-            WARN("Trying to set material uniforms on a static material. [name='%1']", mClass->GetName());
-            mStaticUniformWarning = true;
+            else GFX_PAINT_WARN("Incorrect material parameter type set on 'active_texture_map'. String ID expected. [type='%1']",
+                                mClass->GetName());
         }
     }
 
-    mFirstRender = false;
+    if (mClass->IsStatic() && !mUniforms.empty())
+    {
+        GFX_PAINT_WARN("Trying to set material uniforms on a static material. [type='%1']",
+            mClass->GetName());
+    }
 
     if (!mClass->ApplyDynamicState(state, device, program))
-    {
-        mError = true;
         return false;
-    }
-    mError = false;
 
     const auto surface = mClass->GetSurfaceType();
     if (surface == MaterialClass::SurfaceType::Opaque)
@@ -276,9 +268,6 @@ void MaterialInstance::InitFlags() noexcept
 std::unique_ptr<Material> MaterialInstance::Clone() const
 {
     auto dolly = std::make_unique<MaterialInstance>(*this);
-    dolly->mFirstRender = false;
-    dolly->mError = false;
-    dolly->mStaticUniformWarning = false;
     return dolly;
 }
 

@@ -3384,12 +3384,6 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         }
     }
 
-    if (mMaterialInst->HasError())
-    {
-        ShowError("Error in material!", gfx::FPoint(10.0f, 10.0f), painter);
-        mUI.sprite->EnablePaint(false);
-    }
-
     // Print paint context
     {
         gfx::FPoint point;
@@ -3411,10 +3405,10 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         else mShaderEditor->ClearError();
     }
 
-    const auto have_errors = mMaterialInst->HasError() || paint_context.HasErrors();
+    const auto have_errors = paint_context.HasErrors();
     mUI.sprite->EnablePaint(!have_errors);
 
-    if (type == gfx::MaterialClass::Type::Sprite && mState == PlayState::Playing)
+    if (!have_errors && type == gfx::MaterialClass::Type::Sprite && mState == PlayState::Playing)
     {
         for (unsigned i=0; i<mMaterial->GetNumTextureMaps(); ++i)
         {
@@ -3426,7 +3420,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
                 gfx::FPoint(20.0f, 20.0f  + i * 20.0f), painter);
         }
     }
-    else if (type == gfx::MaterialClass::Type::BasicLight)
+    else if (!have_errors && type == gfx::MaterialClass::Type::BasicLight)
     {
         if (mShowHelp)
         {
