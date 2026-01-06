@@ -42,6 +42,7 @@
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/painter.h"
+#include "graphics/paint_context.h"
 #include "graphics/drawing.h"
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
@@ -251,6 +252,8 @@ public:
         std::vector<uik::Animation> animations;
         std::string font;
         std::unique_ptr<gfx::Material> logo;
+        bool preload_errors = false;
+        bool preload_warnings = false;
     };
     std::unique_ptr<Engine::LoadingScreen> CreateLoadingScreen(const LoadingScreenSettings& settings) override
     {
@@ -278,6 +281,8 @@ public:
 
     void PreloadClass(const Engine::ContentClass& klass, size_t index, size_t last, Engine::LoadingScreen* screen) override
     {
+        gfx::PaintContext pc;
+
         gfx::Painter dummy;
         dummy.SetEditingMode(mFlags.test(Flags::EditingMode));
         dummy.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
@@ -468,8 +473,12 @@ public:
             loader_rect_fill.Translate(0.0f, 10.0f);
             loader_rect_fill.Translate(2.0f, 2.0f);
             gfx::FillRect(painter, loader_rect_fill, gfx::Color::Silver);
-
         }
+        // todo: use this informatino somewhere
+        if (pc.HasErrors())
+            my_screen->preload_errors = true;
+        if (pc.HasWarnings())
+            my_screen->preload_warnings = true;
 
         // this is for debugging so we can see what happens...
         //std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -605,6 +614,14 @@ public:
         mDevice->ClearColor(mClearColor);
         mDevice->ClearDepth(1.0f);
 
+        gfx::PaintContext pc;
+
+        // for the time being, if we have no debug font set then turn off the
+        // paint context, which causes paint errors to go to the normal log.
+        // todo: should probably embed a small font in the engine itself.
+        if (mDebug.debug_font.empty())
+            pc.EndScope();
+
         // Do the main drawing here based on previously generated
         // draw packets that are stored in the renderer.
         // This method can run in parallel with the calls to update
@@ -661,6 +678,7 @@ public:
         TRACE_CALL("Engine::DrawDebugObjects",  DrawDebugObjects());
         TRACE_CALL("Engine::DrawDebugMessages", DrawDebugMessages());
         TRACE_CALL("Engine::DrawMousePointer",  DrawMousePointer(dt));
+        TRACE_CALL("Engine::DrawPaintMessages", DrawPaintMessages(pc));
         TRACE_CALL("Device::EndFrame", mDevice->EndFrame(true));
     }
 
@@ -1874,6 +1892,46 @@ private:
     {
         mUIEngine.SetSurfaceSize((float)mSurfaceWidth, (float)mSurfaceHeight);
         mUIEngine.Draw(*mDevice);
+    }
+
+    void DrawPaintMessages(gfx::PaintContext& pc) const
+    {
+        if (mDebug.debug_font.empty())
+            return;
+
+        gfx::PaintContext::MessageList msgs;
+        pc.TransferMessages(&msgs);
+        if (msgs.empty())
+            return;
+
+        const auto surf_width  = static_cast<float>(mSurfaceWidth);
+        const auto surf_height = static_cast<float>(mSurfaceHeight);
+
+        // this painter will be configured to draw directly in the window
+        // coordinates. Used to draw debug text and the mouse cursor.
+        gfx::Painter painter;
+        painter.SetDevice(mDevice);
+        painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+        painter.SetPixelRatio(glm::vec2(1.0f, 1.0f));
+        painter.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
+        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, surf_width, surf_height));
+        painter.SetEditingMode(mFlags.test(Flags::EditingMode));
+
+        gfx::FRect rect(10, 30, 500, 20);
+        for (const auto& msg : msgs)
+        {
+            gfx::Color color = gfx::Color::HotPink;
+            if (msg.type == gfx::PaintContext::LogEvent::Error)
+                color = gfx::Color::Red;
+            else if (msg.type == gfx::PaintContext::LogEvent::Warning)
+                color = gfx::Color::Yellow;
+            else continue;
+
+            gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.6f));
+            gfx::DrawTextRect(painter, msg.message, mDebug.debug_font, 18, rect,color,
+                              gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+            rect.Translate(0, 20.0f);
+        }
     }
 
     void DrawDebugMessages()
