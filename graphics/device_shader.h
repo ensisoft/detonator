@@ -41,12 +41,23 @@ namespace gfx {
                         const std::unordered_set<unsigned>* error_lines = nullptr) const;
         void ClearSource() const;
 
+        void SetAsFallback(const std::string& fallback_info)
+        {
+            mFallbackFlag = true;
+            mFallbackInfo = fallback_info;
+        }
+
         bool IsValid() const override
         { return mShader.IsValid(); }
+        bool IsFallback() const override
+        { return mFallbackFlag; }
+
         std::string GetName() const override
         { return mName; }
         std::string GetCompileInfo() const override
         { return mCompileInfo; }
+        std::string GetFallbackInfo() const override
+        { return mFallbackInfo; }
 
         void SetName(std::string name) noexcept
         { mName = std::move(name); }
@@ -63,8 +74,10 @@ namespace gfx {
         dev::GraphicsShader mShader;
         std::string mName;
         std::string mCompileInfo;
+        std::string mFallbackInfo;
         std::vector<UniformInfo> mUniformInfo;
         mutable std::string mSource;
+        bool mFallbackFlag = false;
     };
 
 } // namespace
