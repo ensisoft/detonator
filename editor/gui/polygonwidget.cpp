@@ -40,6 +40,8 @@
 #include "graphics/drawable.h"
 #include "graphics/drawing.h"
 #include "graphics/transform.h"
+#include "graphics/painter.h"
+#include "graphics/paint_context.h"
 #include "graphics/utility.h"
 #include "graphics/linebatch.h"
 #include "graphics/simple_shape.h"
@@ -56,7 +58,6 @@
 #include "editor/gui/settings.h"
 #include "editor/gui/dlgtextedit.h"
 #include "editor/gui/drawing.h"
-#include "graphics/linebatch.h"
 
 namespace {
 
@@ -1246,13 +1247,9 @@ void CustomVertexTransform(inout VertexData vs) {
 
         SetValue(mUI.shaderFile, mState.polygon->HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
         SetEnabled(mUI.btnResetShader, mState.polygon->HasShaderSrc());
-
-        mUI.widget->GetPainter()->ClearErrors();
     };
     mShaderEditor->applyFunction = [this]() {
         mState.polygon->SetShaderSrc(mShaderEditor->GetText());
-
-        mUI.widget->GetPainter()->ClearErrors();
     };
 }
 
@@ -1277,8 +1274,6 @@ void ShapeWidget::on_btnResetShader_clicked()
     mState.polygon->SetShaderSrc(std::string{});
     SetValue(mUI.shaderFile, "Built-In Shader");
     SetEnabled(mUI.btnResetShader, false);
-
-    mUI.widget->GetPainter()->ClearErrors();
 }
 
 void ShapeWidget::on_btnResetBlueprint_clicked()
@@ -1500,6 +1495,8 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
     const auto mesh_type = GetMeshType();
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
+    gfx::PaintContext paint_context;
+
     gfx::Painter painter;
     painter.SetDevice(device);
     painter.SetSurfaceSize(mUI.widget->width(), mUI.widget->height());
@@ -1672,13 +1669,14 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         mMouseTool->DrawTool(painter, view);
     }
 
-    if (painter.GetErrorCount())
+    if (paint_context.GetMessageCount())
     {
-        mMessages.push_back("Shader compile error:");
-        for (const auto& msg : painter.GetErrors())
-            mMessages.push_back(msg);
-
-        if (mShaderEditor)
+        for (size_t i=0; i<paint_context.GetMessageCount(); ++i)
+        {
+            const auto& msg = paint_context.GetMessage(i);
+            mMessages.push_back(msg.message);
+        }
+        if (mShaderEditor && paint_context.HasErrors())
             mShaderEditor->ShowError("Shader compile error");
     }
     else

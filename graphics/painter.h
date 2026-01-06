@@ -146,17 +146,6 @@ namespace gfx
         auto HasScissor() const noexcept
         { return !mScissor.IsEmpty(); }
 
-        void ClearErrors() const noexcept
-        { mErrors.clear(); }
-        auto GetErrors() const
-        { return mErrors; }
-        auto GetErrorCount() const noexcept
-        { return mErrors.size(); }
-        auto GetError(size_t index) const noexcept
-        { return mErrors[index]; }
-        auto HasErrors() const noexcept
-        { return !mErrors.empty(); }
-
         // Clear the current render target color buffer with the given clear color.
         void ClearColor(const Color4f& color) const;
         // Clear the current render target stencil buffer with the given stencil value.
@@ -356,7 +345,6 @@ namespace gfx
         glm::mat4 mProjMatrix {1.0f};
         glm::mat4 mViewMatrix {1.0f};
     private:
-        mutable std::vector<std::string> mErrors;
         bool mEditingMode = false;
         bool mDebugMode= false;
     };

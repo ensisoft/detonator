@@ -28,6 +28,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
 #include "graphics/painter.h"
+#include "graphics/paint_context.h"
 #include "graphics/material.h"
 #include "graphics/material_instance.h"
 #include "graphics/drawable.h"
@@ -209,13 +210,16 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double dt)
             {
                 mMaterials[index].material_instance = std::make_unique<gfx::MaterialInstance>(klass);
             }
+
+            gfx::PaintContext paint_context;
+
             auto& material_instance = mMaterials[index].material_instance;
             material_instance->SetRuntime(mUI.widget->GetTime());
             material_instance->SetUniform("kTileIndex", (float) GetValue(mUI.tileIndex));
             material_instance->SetUniform("active_texture_map", mMaterials[index].texture_map_id);
-
             gfx::FillRect(painter, rect, *material_instance);
-            if (material_instance->HasError())
+
+            if (paint_context.HasErrors())
             {
                 mFailedMaterials.insert(klass->GetId());
             }

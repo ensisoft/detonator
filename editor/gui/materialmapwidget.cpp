@@ -27,6 +27,8 @@
 #include "base/format.h"
 #include "base/math.h"
 #include "base/utility.h"
+#include "graphics/painter.h"
+#include "graphics/paint_context.h"
 #include "graphics/drawing.h"
 #include "graphics/bitmap_generator.h"
 #include "graphics/texture_file_source.h"
@@ -161,6 +163,11 @@ void MaterialMapWidget::on_verticalScrollBar_valueChanged(int)
 
 void MaterialMapWidget::PaintScene(gfx::Painter& painter, double dt)
 {
+    // we're going to use this paint context here to capture errors and
+    // simply discard them with the assumption that the material widget
+    // itself will report errors to the user.
+    gfx::PaintContext pc;
+
     const auto widget_width = mUI.widget->width();
     const auto widget_height = mUI.widget->height();
     const auto paint_width = widget_width; // - 4.0f;

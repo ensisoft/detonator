@@ -25,12 +25,16 @@
 #include "base/format.h"
 #include "base/logging.h"
 #include "base/trace.h"
+#include "base/utility.h"
 #include "graphics/drawcmd.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
 #include "graphics/painter.h"
+
+#include "material_class.h"
+#include "graphics/paint_log.h"
 #include "graphics/shader_program.h"
 #include "graphics/shader_programs.h"
 #include "graphics/shader_source.h"
@@ -351,16 +355,23 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
         }
         if (!material_shader->IsValid())
         {
-            auto error = material_shader->GetCompileInfo();
-            if (!error.empty())
-                mErrors.push_back(std::move(error));
+            const auto* material_class = material.GetClass();
+            GFX_PAINT_ERROR("Material shader compile error. [name='%1'].",
+                material_class ? material_class->GetName() : "");
+            const auto& info = material_shader->GetCompileInfo();
+            const auto& info_lines = base::SplitString(info, '\n');
+            for (const auto& info_line : info_lines)
+                GFX_PAINT_ERROR(info_line);
+
             return nullptr;
         }
         if (material_shader->IsFallback())
         {
-            auto info = material_shader->GetFallbackInfo();
-            if (!info.empty())
-                mErrors.push_back(std::move(info));
+            const auto* material_class = material.GetClass();
+            const auto& info = material_shader->GetFallbackInfo();
+            GFX_PAINT_ERROR("Material shader error. [name='%1'].",
+                material_class ? material_class->GetName() : "");
+            GFX_PAINT_ERROR(info);
             return nullptr;
         }
 
@@ -422,16 +433,23 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
         }
         if (!drawable_shader->IsValid())
         {
-            auto error = drawable_shader->GetCompileInfo();
-            if (!error.empty())
-                mErrors.push_back(std::move(error));
+            const auto* drawable_class = drawable.GetClass();
+            GFX_PAINT_ERROR("Drawable shader compile error [name='%1'].",
+                drawable_class ? drawable_class->GetName() : "");
+            const auto& info = drawable_shader->GetCompileInfo();
+            const auto& info_lines = base::SplitString(info, '\n');
+            for (const auto& info_line : info_lines)
+                GFX_PAINT_ERROR(info_line);
+
             return nullptr;
         }
         if (drawable_shader->IsFallback())
         {
-            auto info = drawable_shader->GetFallbackInfo();
-            if (!info.empty())
-                mErrors.push_back(std::move(info));
+            const auto* drawable_class = drawable.GetClass();
+            const auto& info = drawable_shader->GetFallbackInfo();
+            GFX_PAINT_ERROR("Drawable shader error. [name='%1']",
+                drawable_class ? drawable_class->GetName() : "");
+            GFX_PAINT_ERROR(info);
             return nullptr;
         }
 
