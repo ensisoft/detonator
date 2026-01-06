@@ -2341,7 +2341,8 @@ public:
             }
 
 
-            gfx::ShaderSource GetShader(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env, const gfx::Device& device) const override
+            gfx::ShaderSource GetShader(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env,
+                const gfx::Device& device, ShaderSourceError* error) const override
             {
                 gfx::ShaderSource source;
                 source.SetType(gfx::ShaderSource::Type::Vertex);
@@ -2383,7 +2384,8 @@ void main() {
                 return source;
             }
 
-            gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
+            gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env,
+                const gfx::Device& device, ShaderSourceError* error) const override
             {
                 auto source = material.GetShader(env, device);
                 source.SetType(gfx::ShaderSource::Type::Fragment);

@@ -175,8 +175,10 @@ namespace gfx
 
         std::string GetShaderId(const Material& material, const Material::Environment& env) const override;
         std::string GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const override;
-        ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device) const override;
-        ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const override;
+        ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device, ShaderSourceError* error) const override;
+        ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device, ShaderSourceError* error) const override;
+
+        using ShaderProgram::GetShader;
 
         void InitializeResources(Device &device) const override;
         void ApplyDynamicState(const Device& device, ProgramState& program) const override;
