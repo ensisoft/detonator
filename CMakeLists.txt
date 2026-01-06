@@ -315,6 +315,7 @@ add_library(GfxLib
     graphics/material_class.cpp
     graphics/material_instance.cpp
     graphics/painter.cpp
+    graphics/paint_context.cpp
     graphics/particle_engine.cpp
     graphics/pixel.cpp
     graphics/polygon_mesh.cpp
