@@ -372,6 +372,7 @@ set(ENGINE_SRC
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/material_class.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/material_instance.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/painter.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../graphics/paint_context.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/particle_engine.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/pixel.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../graphics/polygon_mesh.cpp
