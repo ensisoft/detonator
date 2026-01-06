@@ -24,14 +24,11 @@
 
 #include <string>
 #include <cstdint>
-#include <optional>
 
-#include "base/hash.h"
 #include "graphics/device.h"
 #include "graphics/types.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
-#include "graphics/types.h"
 #include "graphics/enum.h"
 
 namespace gfx
@@ -52,6 +49,13 @@ namespace gfx
             const glm::mat4* proj_matrix = nullptr;
             const glm::mat4* model_matrix = nullptr;
         };
+        enum class ShaderSourceError {
+            Nada,
+            // Invalid shader type vs. what is expected for the stage.
+            ShaderType,
+            // Invalid (unsupported) shader GLSL version.
+            ShaderVersion
+        };
 
         virtual ~ShaderProgram() = default;
 
@@ -66,10 +70,11 @@ namespace gfx
         // The default implementation will simply call the drawable in order to generate the ID.
         virtual std::string GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const = 0;
         // Get the device specific material (fragment) shader source.
-        virtual ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device) const = 0;
+        virtual ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device,
+            ShaderSourceError* error) const = 0;
         // Get the device specific drawable (vertex) shader source.
-        virtual ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const = 0;
-
+        virtual ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device,
+            ShaderSourceError* error) const = 0;
         // Get the human-readable name of the shader pass for debugging/logging purposes.
         virtual std::string GetName() const = 0;
 
@@ -92,6 +97,15 @@ namespace gfx
 
         // todo:
         virtual void ApplyStaticState(const Device& device, ProgramState& program) const {}
+
+        ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device) const
+        {
+            return GetShader(material, env, device, nullptr);
+        }
+        ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const
+        {
+            return GetShader(drawable, env, device, nullptr);
+        }
     private:
     };
 

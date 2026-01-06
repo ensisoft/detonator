@@ -52,17 +52,19 @@ std::string GenericShaderProgram::GetShaderId(const Drawable& drawable, const Dr
     hash = base::hash_combine(hash, drawable.GetShaderId(env));
     return std::to_string(hash);
 }
-ShaderSource GenericShaderProgram::GetShader(const Material& material, const Material::Environment& env, const Device& device) const
+ShaderSource GenericShaderProgram::GetShader(const Material& material, const Material::Environment& env, const Device& device, ShaderSourceError* error) const
 {
     auto source = material.GetShader(env, device);
     if (source.GetType() != ShaderSource::Type::Fragment)
     {
         ERROR("Non supported GLSL shader type. Type must be 'fragment'.  [shader='%1']", source.GetShaderName());
+        if (error) *error = ShaderSourceError::ShaderType;
         return {};
     }
     if (source.GetVersion() != ShaderSource::Version::GLSL_300)
     {
         ERROR("Non supported GLSL version. Version must be 300 es. [shader='%1']", source.GetShaderName());
+        if (error) *error = ShaderSourceError::ShaderVersion;
         return {};
     }
     if (source.GetPrecision() == ShaderSource::Precision::NotSet)
@@ -130,7 +132,7 @@ ShaderSource GenericShaderProgram::GetShader(const Material& material, const Mat
     AddDebugInfo(source, env.render_pass);
     return source;
 }
-ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const
+ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device, ShaderSourceError* error) const
 {
     // careful here, WebGL shits itself if the source is concatenated together
     // so that the vertex source (with varyings) comes after the main.
@@ -139,11 +141,13 @@ ShaderSource GenericShaderProgram::GetShader(const Drawable& drawable, const Dra
     if (source.GetType() != ShaderSource::Type::Vertex)
     {
         ERROR("Non supported GLSL shader type. Type must be 'vertex'. [shader='%1']", source.GetShaderName());
+        if (error) *error = ShaderSourceError::ShaderType;
         return {};
     }
     if (source.GetVersion() != ShaderSource::Version::GLSL_300)
     {
         ERROR("Non supported GLSL version. Version must be 300 es. [shader='%1']", source.GetShaderName());
+        if (error) *error = ShaderSourceError::ShaderVersion;
         return {};
     }
 

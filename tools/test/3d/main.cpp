@@ -394,17 +394,18 @@ private:
 class DepthTextureShader : public gfx::ShaderProgram
 {
 public:
-    std::string GetShaderId(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env) const
+    std::string GetShaderId(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env) const override
     {
         return drawable.GetShaderId(env);
     }
 
-    virtual std::string GetShaderId(const gfx::Material& material, const gfx::Material::Environment& env) const override
+    std::string GetShaderId(const gfx::Material& material, const gfx::Material::Environment& env) const override
     {
         return "DepthToColor";
     }
 
-    gfx::ShaderSource GetShader(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env, const gfx::Device& device) const
+    gfx::ShaderSource GetShader(const gfx::Drawable& drawable, const gfx::Drawable::Environment& env,
+        const gfx::Device& device, ShaderSourceError* error) const override
     {
         gfx::ShaderSource source;
         source.SetType(gfx::ShaderSource::Type::Vertex);
@@ -446,7 +447,8 @@ void main() {
     }
 
 
-    virtual gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
+    gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env,
+        const gfx::Device& device, ShaderSourceError* error) const override
     {
         gfx::ShaderSource source;
         source.SetType(gfx::ShaderSource::Type::Fragment);
@@ -469,7 +471,7 @@ void main() {
 )");
         return source;
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "DepthTextureShader"; }
 private:
 
@@ -478,7 +480,7 @@ private:
 class DepthTexturePass : public RenderPass
 {
 public:
-    virtual void Draw(const glm::mat4& model_to_world,
+    void Draw(const glm::mat4& model_to_world,
                       const gfx::Drawable& drawable,
                       const gfx::Material& material,
                       gfx::Painter& painter,
