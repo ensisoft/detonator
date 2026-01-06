@@ -40,6 +40,7 @@
 #include "graphics/simple_shape.h"
 #include "graphics/linebatch.h"
 #include "graphics/painter.h"
+#include "graphics/paint_context.h"
 #include "graphics/material.h"
 #include "graphics/material_instance.h"
 #include "graphics/transform.h"
@@ -471,8 +472,6 @@ void MaterialWidget::ReloadShaders()
 
     // reset material instance so that any one time error logging will take place.
     mMaterialInst.reset();
-
-    mUI.widget->GetPainter()->ClearErrors();
 
     NOTE("Reloaded shaders.");
 }
@@ -3194,11 +3193,11 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto time = GetMaterialRenderTime();
     const auto zoom = (float)GetValue(mUI.zoom);
 
-    if (!mDrawable)
-    {
-        mDrawable = mWorkspace->MakeDrawableById(GetItemId(mUI.cmbModel));
-    }
+    // this will capture errors from here on.
+    gfx::PaintContext paint_context;
 
+    if (!mDrawable)
+        mDrawable = mWorkspace->MakeDrawableById(GetItemId(mUI.cmbModel));
     if (!mMaterialInst)
         mMaterialInst = std::make_unique<gfx::MaterialInstance>(mMaterial);
 
@@ -3391,24 +3390,28 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         mUI.sprite->EnablePaint(false);
     }
 
-    if (painter.GetErrorCount())
+    // Print paint context
     {
-        ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
-        ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
-        if  (mShaderEditor)
+        gfx::FPoint point;
+        point.SetX(10.0f);
+        point.SetY(10.0f);
+        for (size_t i=0; i<paint_context.GetMessageCount(); ++i)
         {
-            mShaderEditor->ShowError("Shader compile error");
+            const auto& msg = paint_context.GetMessage(i);
+            if (msg.type == gfx::PaintContext::LogEvent::Error)
+                ShowError(msg.message, point, painter, 18);
+            else ShowMessage(msg.message, point, painter);
+            point.Translate(0.0f, 20.0f);
         }
     }
-    else
+    if (mShaderEditor)
     {
-        if (mShaderEditor)
-        {
-            mShaderEditor->ClearError();
-        }
+        if (paint_context.HasErrors())
+            mShaderEditor->ShowError("Shader compile error");
+        else mShaderEditor->ClearError();
     }
 
-    const auto have_errors = mMaterialInst->HasError() || painter.HasErrors();
+    const auto have_errors = mMaterialInst->HasError() || paint_context.HasErrors();
     mUI.sprite->EnablePaint(!have_errors);
 
     if (type == gfx::MaterialClass::Type::Sprite && mState == PlayState::Playing)

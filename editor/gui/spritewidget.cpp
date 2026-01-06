@@ -21,6 +21,8 @@
 
 #include "base/math.h"
 #include "graphics/drawing.h"
+#include "graphics/painter.h"
+#include "graphics/paint_context.h"
 #include "graphics/material_instance.h"
 #include "graphics/texture_file_source.h"
 #include "editor/app/eventlog.h"
@@ -115,6 +117,8 @@ void SpriteWidget::PaintScene(gfx::Painter& painter, double dt)
 
 void SpriteWidget::PaintTexture(const gfx::MaterialClass *klass, gfx::Painter &painter, double dt)
 {
+    gfx::PaintContext pc;
+
     const auto widget_height = mUI.widget->height();
     const auto widget_width = mUI.widget->width();
     const auto rect_height = widget_height - 30.0;
@@ -176,6 +180,8 @@ void SpriteWidget::PaintTexture(const gfx::MaterialClass *klass, gfx::Painter &p
 
 void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter& painter, double dt)
 {
+    gfx::PaintContext pc;
+
     const auto widget_height = mUI.widget->height();
     const auto widget_width = mUI.widget->width();
 
@@ -339,6 +345,8 @@ void SpriteWidget::PaintSprite(const gfx::MaterialClass* material, gfx::Painter&
 
 void SpriteWidget::PaintParticle(gfx::Painter& painter, double dt)
 {
+    gfx::PaintContext pc;
+
     const auto widget_height = mUI.widget->height();
     const auto widget_width = mUI.widget->width();
 
