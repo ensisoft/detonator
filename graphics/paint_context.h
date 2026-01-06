@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm> // for swap
 
 #include "base/logging.h"
 #include "base/format.h"
@@ -37,6 +38,7 @@ namespace gfx
             std::string message;
             unsigned line = 0;
         };
+        using MessageList = std::vector<LogMessage>;
 
         void WriteLogMessage(LogEvent type , const char* file, int line, std::string message)
         {
@@ -57,16 +59,23 @@ namespace gfx
        ~PaintContext();
         PaintContext(const PaintContext&) = delete;
 
+        void EndScope() noexcept;
+
         void ClearMessages() noexcept;
 
         auto HasErrors() const noexcept
         { return mErrorCount != 0; }
         bool HasWarnings() const noexcept
         { return mWarningCount != 0; }
-        auto GetMessageCount() const noexcept
-        { return mMessages.size(); }
-        const auto& GetMessage(size_t index) const noexcept
-        { return mMessages[index]; }
+
+        auto GetMessages() const
+        { return mMessages; }
+        void TransferMessages(MessageList* messages)
+        {
+            std::swap(*messages, mMessages);
+            mErrorCount   = 0;
+            mWarningCount = 0;
+        }
 
         static PaintContext* GetContext();
 
@@ -75,6 +84,7 @@ namespace gfx
         std::vector<LogMessage> mMessages;
         std::size_t mErrorCount   = 0;
         std::size_t mWarningCount = 0;
+        bool mActive = true;
     };
 
 } // namespace

@@ -282,6 +282,8 @@ void GfxWindow::PaintGL()
         mCustomGraphicsPainter->ResetViewMatrix();
         onPaintScene(*mCustomGraphicsPainter, dt);
 
+        pc.EndScope();
+
         // reset these for subsequent drawing (below) since the widget's paint function
         // might have changed these unexpectedly.
         mCustomGraphicsPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width, surface_height));
@@ -294,10 +296,12 @@ void GfxWindow::PaintGL()
         gfx::FRect rect;
         rect.Resize(800.0f, 30.0f);
         rect.Move(10.0f, 10.0f);
-        for (size_t i=0; i<pc.GetMessageCount(); ++i)
-        {
-            const auto& msg = pc.GetMessage(i);
 
+        gfx::PaintContext::MessageList msgs;
+        pc.TransferMessages(&msgs);
+
+        for (const auto& msg : msgs)
+        {
             gfx::FillRect(*mCustomGraphicsPainter, rect, gfx::Color4f(gfx::Color::Black, 0.3f));
 
             if (msg.type == gfx::PaintContext::LogEvent::Error)

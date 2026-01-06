@@ -31,8 +31,18 @@ PaintContext::PaintContext()
 }
 PaintContext::~PaintContext()
 {
+    if (mActive)
+    {
+        ASSERT(context_stack.top() == this);
+        context_stack.pop();
+    }
+}
+
+void PaintContext::EndScope() noexcept
+{
     ASSERT(context_stack.top() == this);
     context_stack.pop();
+    mActive = false;
 }
 
 void PaintContext::ClearMessages() noexcept

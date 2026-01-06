@@ -3389,20 +3389,18 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         gfx::FPoint point;
         point.SetX(10.0f);
         point.SetY(10.0f);
-        for (size_t i=0; i<paint_context.GetMessageCount(); ++i)
+
+        gfx::PaintContext::MessageList msgs;
+        paint_context.TransferMessages(&msgs);
+        for (const auto& msg : msgs)
         {
-            const auto& msg = paint_context.GetMessage(i);
             if (msg.type == gfx::PaintContext::LogEvent::Error)
                 ShowError(msg.message, point, painter, 18);
+            else if (msg.type == gfx::PaintContext::LogEvent::Warning)
+                ShowWarning(msg.message, point, painter, 18);
             else ShowMessage(msg.message, point, painter);
             point.Translate(0.0f, 20.0f);
         }
-    }
-    if (mShaderEditor)
-    {
-        if (paint_context.HasErrors())
-            mShaderEditor->ShowError("Shader compile error");
-        else mShaderEditor->ClearError();
     }
 
     const auto have_errors = paint_context.HasErrors();
