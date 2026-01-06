@@ -159,9 +159,6 @@ namespace gfx
         // instances of a single material type called they might still
         // have a different state.
         struct State {
-            // First render flag to indicate whether this is the first time
-            // this material instance renders.
-            bool first_render = false;
             // true if running in an "editing mode", which means that even
             // content marked static might have changed and should be checked
             // in case it has been modified and should be re-uploaded.

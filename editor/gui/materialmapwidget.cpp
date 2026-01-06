@@ -232,7 +232,6 @@ void MaterialMapWidget::PaintScene(gfx::Painter& painter, double dt)
                 gfx::MaterialInstance instance(mMaterial);
                 instance.SetActiveTextureMap(texture_map->GetId());
                 instance.SetRuntime(mCurrentTime);
-                instance.SetFirstRender(false);
                 gfx::FillRect(painter, icon_rect, instance);
             }
 

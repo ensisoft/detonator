@@ -80,10 +80,6 @@ namespace gfx
         const MaterialClass* operator->() const
         { return mClass.get(); }
 
-        bool HasError() const noexcept
-        { return mError; }
-        void SetFirstRender(bool first) noexcept
-        { mFirstRender = first; }
     private:
         void InitFlags() noexcept;
     private:
@@ -104,14 +100,6 @@ namespace gfx
             std::string name;
         };
         std::optional<SpriteCycleRun> mSpriteCycle;
-
-        // I don't like this flag but when trying to make it easier for the
-        // game developer to figure out what's wrong we need logging
-        // but it'd be nice if the problem was logged only once instead
-        // of spamming the log continuously.
-        mutable bool mFirstRender = true;
-        mutable bool mError = false;
-        mutable bool mStaticUniformWarning = false;
     };
 
     // These functions are intended to be used when you just need to draw
