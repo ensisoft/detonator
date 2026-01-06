@@ -39,7 +39,10 @@ namespace gfx
         };
 
         struct CreateArgs {
+            // HUman-readable name for the shader. Useful for debugging and
+            // error diagnostics.
             std::string name;
+            // The GLSL source for the shader.
             std::string source;
             // This is a debug feature to let the program know of
             // expected uniform blocks that need to be bound in the
@@ -47,18 +50,39 @@ namespace gfx
             // If these are not bound there will likely be a
             // GL_INVALID_OPERATION from a some draw call.
             std::vector<UniformInfo> uniform_info;
+            // Flag to control whether the shader related functions
+            // should produce debug logs or not. This flag also
+            // controls dumping the source to debug log on compile.
             bool debug = false;
+            // Flag that indicates the shader is a fallback shader
+            // that replaces a user defined shader when the user defined
+            // shader source has failed to load.
+            // A fallback shader is not really meant to be used, it
+            // only exists as a valid shader object to indicate the
+            // failure of some user defined shader.
+            bool fallback = false;
+            // Human-readable information related to why this shader is
+            // flagged as a fallback shader. This is optional and could
+            // be an empty string.
+            std::string fallback_info;
         };
 
         virtual ~Shader() = default;
         // Returns true if the shader has been compiled successfully.
         virtual bool IsValid() const = 0;
+        // Returns true if the shader is a fallback shader for some user
+        // defined shader that has failed to load.
+        virtual bool IsFallback() const { return false; }
         // Get the (human-readable) name for the shader object.
         // Used for improved debug/log messages.
         virtual std::string GetName() const { return ""; }
         // Get the (human-readable) shader (compile) error string if any.
         virtual std::string GetCompileInfo() const { return ""; };
-
+        // Get the (human-readable) shader fallback info (error) if any.
+        // The fallback info is passed in the CreateArgs during shader construction
+        // and is used to store the information about why some user defined
+        // shader could not be used.
+        virtual std::string GetFallbackInfo() const { return ""; }
     private:
     };
 

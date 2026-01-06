@@ -206,6 +206,8 @@ gfx::ShaderPtr GraphicsDevice::CreateShader(const std::string& id, const gfx::Sh
     shader->SetName(args.name);
     shader->CompileSource(args.source, args.debug);
     shader->SetUniformInfo(args.uniform_info);
+    if (args.fallback)
+        shader->SetAsFallback(args.fallback_info);
     mShaders[id] = shader;
     return shader;
 }
