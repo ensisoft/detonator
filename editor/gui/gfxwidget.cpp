@@ -27,6 +27,7 @@
 #include "warnpop.h"
 
 #include "device/device.h"
+#include "graphics/paint_context.h"
 #include "graphics/drawing.h"
 #include "graphics/transform.h"
 #include "graphics/utility.h"
@@ -36,6 +37,7 @@
 #include "editor/app/resource-uri.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/drawing.h"
 #include "editor/gui/gfxwidget.h"
 
 // Sync to VBLANK and multiple OpenGL Contexts:
@@ -270,6 +272,9 @@ void GfxWindow::PaintGL()
         const auto surface_width  = static_cast<float>(width());
         const auto surface_height = static_cast<float>(height());
 
+        // top level paint context to capture paint errors.
+        gfx::PaintContext pc;
+
         // set to defaults, the paint can then change these if needed.
         mCustomGraphicsPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width, surface_height));
         mCustomGraphicsPainter->SetViewport(0, 0, surface_width, surface_height);
@@ -283,6 +288,27 @@ void GfxWindow::PaintGL()
         mCustomGraphicsPainter->SetViewport(0, 0, surface_width, surface_height);
         mCustomGraphicsPainter->SetSurfaceSize(surface_width, surface_height);
         mCustomGraphicsPainter->ResetViewMatrix();
+
+        // a quick hack here to avoid build dependency propagation to some unit tests.
+#if defined(DETONATOR_EDITOR_BUILD)
+        gfx::FRect rect;
+        rect.Resize(800.0f, 30.0f);
+        rect.Move(10.0f, 10.0f);
+        for (size_t i=0; i<pc.GetMessageCount(); ++i)
+        {
+            const auto& msg = pc.GetMessage(i);
+
+            gfx::FillRect(*mCustomGraphicsPainter, rect, gfx::Color4f(gfx::Color::Black, 0.3f));
+
+            if (msg.type == gfx::PaintContext::LogEvent::Error)
+                ShowError(msg.message, rect, *mCustomGraphicsPainter, 18);
+            else if (msg.type == gfx::PaintContext::LogEvent::Warning)
+                ShowWarning(msg.message, rect, *mCustomGraphicsPainter, 18);
+            else ShowMessage(msg.message, rect, *mCustomGraphicsPainter, 18);
+
+            rect.Translate(0.0f, 30.0f);
+        }
+#endif
 
         if (mContextMenu)
         {
