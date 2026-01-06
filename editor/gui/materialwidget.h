@@ -228,7 +228,6 @@ namespace gui
 
         DlgTextEdit* mShaderEditor = nullptr;
         std::string mCustomizedSource;
-        bool mShowHelp = true;
         bool mDefaultsPossible = false;
     };
 } // namespace

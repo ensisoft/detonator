@@ -260,7 +260,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
 
     mUI.sprite->SetMaterial(mMaterial);
     mUI.textureMapWidget->SetMaterial(mMaterial);
-    mShowHelp = false;
+    mDefaultsPossible = false;
 }
 
 MaterialWidget::~MaterialWidget()
@@ -354,7 +354,7 @@ bool MaterialWidget::LoadState(const Settings& settings)
     settings.GetValue("Material", "hash", &mOriginalHash);
     settings.GetValue("Material", "model_rotation", &mModelRotationTotal);
     settings.GetValue("Material", "light_position", &mLightPositionTotal);
-    settings.GetValue("Material", "show_help", &mShowHelp);
+    settings.GetValue("Material", "defaults_possible", &mDefaultsPossible);
     settings.LoadWidget("Material", mUI.materialName);
     settings.LoadWidget("Material", mUI.zoom);
     settings.LoadWidget("Material", mUI.cmbModel);
@@ -408,7 +408,7 @@ bool MaterialWidget::SaveState(Settings& settings) const
     settings.SetValue("Material", "hash", mOriginalHash);
     settings.SetValue("Material", "model_rotation", mModelRotationTotal);
     settings.SetValue("Material", "light_position", mLightPositionTotal);
-    settings.SetValue("Material", "show_help", mShowHelp);
+    settings.SetValue("Material", "defaults_possible", mDefaultsPossible);
     settings.SaveWidget("Material", mUI.materialName);
     settings.SaveWidget("Material", mUI.zoom);
     settings.SaveWidget("Material", mUI.cmbModel);
@@ -533,9 +533,9 @@ bool MaterialWidget::HasUnsavedChanges() const
 
 bool MaterialWidget::OnEscape()
 {
-    if (mShowHelp)
+    if (mDefaultsPossible)
     {
-        mShowHelp = false;
+        mDefaultsPossible = false;
     }
     return true;
 }
@@ -800,6 +800,7 @@ void MaterialWidget::on_actionSelectShader_triggered()
     ApplyShaderDescription();
     ReloadShaders();
     ShowMaterialProperties();
+    mDefaultsPossible = false;
 }
 
 void MaterialWidget::on_actionCreateShader_triggered()
@@ -1243,6 +1244,7 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         other.SetActiveTextureMap(map->GetId());
         other.SetNumTextureMaps(1);
         other.SetTextureMap(0, std::move(map));
+        mDefaultsPossible = true;
     }
     else if (type == gfx::MaterialClass::Type::Tilemap)
     {
@@ -1254,6 +1256,7 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         other.SetTextureMap(0, std::move(map));
 
         SetValue(mUI.kTileIndex, 0);
+        mDefaultsPossible = true;
     }
     else if (type == gfx::MaterialClass::Type::Sprite)
     {
@@ -1264,6 +1267,7 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         other.SetActiveTextureMap(map->GetId());
         other.SetNumTextureMaps(1);
         other.SetTextureMap(0, std::move(map));
+        mDefaultsPossible = true;
     }
     else if (type == gfx::MaterialClass::Type::Particle2D)
     {
@@ -1274,6 +1278,7 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         other.SetActiveTextureMap(map->GetId());
         other.SetNumTextureMaps(1);
         other.SetTextureMap(0, std::move(map));
+        mDefaultsPossible = true;
     }
     else if (type == gfx::MaterialClass::Type::BasicLight)
     {
@@ -1303,7 +1308,6 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         mDefaultsPossible = true;
     }
     *mMaterial = other;
-    mShowHelp = true;
 
     mUI.textureMapWidget->ClearSelection();
     if (mMaterial->GetNumTextureMaps() == 1)
@@ -1753,6 +1757,8 @@ void MaterialWidget::AddNewTextureSrcFromFile()
     ShowMaterialProperties();
     ShowTextureMapProperties();
     ShowTextureSrcProperties();
+
+    mDefaultsPossible = false;
 }
 
 void MaterialWidget::AddNewTextureSrcFromText()
@@ -1828,6 +1834,8 @@ void MaterialWidget::AddNewTextureSrcFromText()
     ShowMaterialProperties();
     ShowTextureMapProperties();
     ShowTextureSrcProperties();
+
+    mDefaultsPossible = false;
 }
 
 void MaterialWidget::AddNewTextureSrcFromBitmap()
@@ -1866,6 +1874,8 @@ void MaterialWidget::AddNewTextureSrcFromBitmap()
     ShowMaterialProperties();
     ShowTextureMapProperties();
     ShowTextureSrcProperties();
+
+    mDefaultsPossible = false;
 }
 void MaterialWidget::UniformValueChanged(const Uniform* uniform)
 {
@@ -2123,6 +2133,8 @@ void MaterialWidget::CreateShaderStubFromSource(const char* source)
         return;
     }
     mMaterial->SetShaderUri(app::ToUtf8(glsl_uri));
+
+    mDefaultsPossible = false;
 }
 
 
@@ -3095,7 +3107,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
             {
                 ShowMessage(base::FormatString("Missing texture map '%1' texture", map->GetName()), painter);
                 mUI.sprite->EnablePaint(false);
-                if (mShowHelp)
+                if (mDefaultsPossible)
                 {
                     ShowInstruction(
                         "The material needs some textures in order to render.\n"
@@ -3104,7 +3116,6 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
                         gfx::FRect(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)),
                         painter, 29);
                 }
-                mDefaultsPossible = true;
                 return;
             }
         }
@@ -3118,7 +3129,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         {
             ShowMessage("No shader has been selected.", painter);
             mUI.sprite->EnablePaint(false);
-            if (mShowHelp)
+            if (mDefaultsPossible)
             {
                 ShowInstruction(
                     "Select your shader .GLSL and .JSON files.\n"
@@ -3127,7 +3138,6 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
                     gfx::FRect(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)),
                     painter, 29);
             }
-            mDefaultsPossible = true;
             return;
         }
     }
@@ -3420,7 +3430,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     }
     else if (!have_errors && type == gfx::MaterialClass::Type::BasicLight)
     {
-        if (mShowHelp)
+        if (mDefaultsPossible)
         {
             ShowInstruction(
                 "The material can use some optional textures.\n"
@@ -3454,7 +3464,7 @@ void MaterialWidget::MouseMove(QMouseEvent* mickey)
 
 void MaterialWidget::MousePress(QMouseEvent* mickey)
 {
-    if (mDefaultsPossible && mShowHelp)
+    if (mDefaultsPossible)
     {
         mMaterial->DeleteUniform("kAlphaCutoff");
         mMaterial->SetBaseColor(gfx::Color::White);
@@ -3595,9 +3605,7 @@ void MaterialWidget::MousePress(QMouseEvent* mickey)
 
         ShowMaterialProperties();
         ShowTextureMapProperties();
-
         mDefaultsPossible = false;
-        mShowHelp = false;
         return;
     }
 
@@ -3636,9 +3644,10 @@ void MaterialWidget::MouseRelease(QMouseEvent* mickey)
 
 bool MaterialWidget::KeyPress(QKeyEvent* key)
 {
-    if (mShowHelp && key->key() == Qt::Key_Escape)
+    if (mDefaultsPossible && key->key() == Qt::Key_Escape)
     {
-        mShowHelp = false;
+        mDefaultsPossible = false;
+        return true;
     }
 
     if (mMaterial->GetType() != gfx::MaterialClass::Type::Sprite)
