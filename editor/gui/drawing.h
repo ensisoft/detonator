@@ -134,10 +134,12 @@ void DrawViewport(gfx::Painter& painter, gfx::Transform& view,
     unsigned widget_height);
 
 void ShowMessage(const app::AnyString& msg, gfx::Painter& painter);
-void ShowMessage(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter);
-void ShowMessage(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& painter);
-void ShowError(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& painter);
+void ShowMessage(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter, unsigned font_size_px = 14);
+void ShowMessage(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& painter, unsigned font_size_px = 14);
+void ShowError(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& painter, unsigned font_size_px = 14);
 void ShowError(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter, unsigned font_size_px = 14);
+void ShowWarning(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& painter, unsigned font_size_px = 14);
+void ShowWarning(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter, unsigned font_size_px = 14);
 void ShowInstruction(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter, unsigned font_size_px = 20);
 
 void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* widget);
