@@ -1669,27 +1669,22 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         mMouseTool->DrawTool(painter, view);
     }
 
-    if (paint_context.GetMessageCount())
+    gfx::PaintContext::MessageList msgs;
+    paint_context.TransferMessages(&msgs);
+    for (const auto& msg : msgs)
     {
-        for (size_t i=0; i<paint_context.GetMessageCount(); ++i)
-        {
-            const auto& msg = paint_context.GetMessage(i);
-            mMessages.push_back(msg.message);
-        }
-        if (mShaderEditor && paint_context.HasErrors())
-            mShaderEditor->ShowError("Shader compile error");
+        mMessages.push_back(msg.message);
     }
-    else
+
+    if (mPixelDistance2Dand3D)
     {
-        if (mPixelDistance2Dand3D)
-        {
-            const auto px_diff = static_cast<int>(mPixelDistance2Dand3D.value());
-            mMessages.push_back("Use mouse wheel + keys 'x', 'y' and 'z' to adjust 3D point");
-            mMessages.push_back(base::FormatString("Point difference %1 px %2", px_diff, px_diff == 0 ? "POINT SET" : ""));
-        }
-        if (mShaderEditor)
-            mShaderEditor->ClearError();
+        const auto px_diff = static_cast<int>(mPixelDistance2Dand3D.value());
+        mMessages.push_back("Use mouse wheel + keys 'x', 'y' and 'z' to adjust 3D point");
+        mMessages.push_back(base::FormatString("Point difference %1 px %2", px_diff, px_diff == 0 ? "POINT SET" : ""));
     }
+    if (mShaderEditor)
+        mShaderEditor->ClearError();
+
 }
 
 void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClassHandle& poly, gfx::Device* device) const
