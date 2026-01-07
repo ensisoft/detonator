@@ -1401,6 +1401,12 @@ public:
             spatiality == gfx::SpatialMode::Perceptual3D)
             item.SetDepth(100.0f);
 
+        if (const auto* polygon = dynamic_cast<const gfx::PolygonMeshInstance*>(mDrawable.get()))
+        {
+            item.SetFlag(game::DrawableItemClass::Flags::DoubleSided,
+                polygon->IsDoubleSided());
+        }
+
         game::EntityNodeClass node;
         node.SetDrawable(item);
         node.SetName(name);

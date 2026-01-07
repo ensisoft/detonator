@@ -49,36 +49,10 @@
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="5" column="1">
-           <widget class="QCheckBox" name="staticInstance">
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_16">
             <property name="text">
-             <string>Geometry is static</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="ID">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="name">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+             <string>Shader</string>
             </property>
            </widget>
           </item>
@@ -92,6 +66,26 @@
             </property>
             <property name="text">
              <string>Name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_30">
+            <property name="text">
+             <string>ID</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="ID">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -149,17 +143,23 @@
             </item>
            </layout>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_30">
+          <item row="5" column="1">
+           <widget class="QCheckBox" name="chkStaticInstance">
             <property name="text">
-             <string>ID</string>
+             <string>Geometry is static</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_16">
-            <property name="text">
-             <string>Shader</string>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="name">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
            </widget>
           </item>
@@ -172,6 +172,13 @@
           </item>
           <item row="4" column="1">
            <widget class="QComboBox" name="cmbMeshType"/>
+          </item>
+          <item row="6" column="1">
+           <widget class="QCheckBox" name="chkDoubleSided">
+            <property name="text">
+             <string>Double sided</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -485,6 +492,9 @@
    <property name="text">
     <string>Triangle Fan</string>
    </property>
+   <property name="toolTip">
+    <string>Create new triangle fan</string>
+   </property>
   </action>
   <action name="actionSave">
    <property name="icon">
@@ -633,6 +643,18 @@
     <string>Show surfaces</string>
    </property>
   </action>
+  <action name="actionNewTriangleStrip">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/triangle_fan.png</normaloff>:/32x32_ico_png/triangle_fan.png</iconset>
+   </property>
+   <property name="text">
+    <string>Triangle Strip</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new triangle strip</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -659,7 +681,8 @@
   <tabstop>btnAddShader</tabstop>
   <tabstop>btnResetShader</tabstop>
   <tabstop>cmbMeshType</tabstop>
-  <tabstop>staticInstance</tabstop>
+  <tabstop>chkStaticInstance</tabstop>
+  <tabstop>chkDoubleSided</tabstop>
   <tabstop>widget</tabstop>
   <tabstop>tableView</tabstop>
   <tabstop>cmbGrid</tabstop>
@@ -667,6 +690,7 @@
   <tabstop>btnResetBlueprint</tabstop>
   <tabstop>kRandom</tabstop>
   <tabstop>widgetColor</tabstop>
+  <tabstop>btnHamburger</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

@@ -89,7 +89,8 @@ namespace gui
         void on_blueprints_currentIndexChanged(int);
         void on_btnResetShader_clicked();
         void on_btnResetBlueprint_clicked();
-        void on_staticInstance_stateChanged(int);
+        void on_chkStaticInstance_stateChanged(int);
+        void on_chkDoubleSided_stateChanged(int);
         void on_cmbMeshType_currentIndexChanged(int);
         void on_tableView_customContextMenuRequested(const QPoint& point);
 

@@ -87,7 +87,9 @@ namespace tool {
         virtual void* GetVertexPtr(size_t vertex_index) noexcept = 0;
 
         virtual bool IsStatic() const noexcept = 0;
+        virtual bool IsDoubleSided() const noexcept = 0;
         virtual void SetStatic(bool on_off) noexcept = 0;
+        virtual void SetDoubleSided(bool on_off) noexcept = 0;
 
         virtual void IntoJson(data::Writer& writer) const = 0;
         virtual bool FromJson(const data::Reader& reader) = 0;
@@ -163,8 +165,12 @@ namespace tool {
 
         bool IsStatic() const noexcept override
         { return mStatic; }
+        bool IsDoubleSided() const noexcept override
+        { return mDoubleSided; }
         void SetStatic(bool on_off) noexcept override
         { mStatic = on_off; }
+        void SetDoubleSided(bool on_off) noexcept override
+        { mDoubleSided = on_off; }
 
         void IntoJson(data::Writer& writer) const override;
         bool FromJson(const data::Reader& reader) override;
@@ -176,6 +182,7 @@ namespace tool {
         std::vector<Vertex> mVertices;
         std::vector<DrawCommand> mDrawCommands;
         bool mStatic = true;
+        bool mDoubleSided = false;
     };
 
     using PolygonBuilder2D = PolygonBuilder<Vertex2D>;

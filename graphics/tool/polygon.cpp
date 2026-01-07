@@ -196,6 +196,7 @@ void PolygonBuilder<Vertex>::IntoJson(data::Writer& writer) const
     command_stream.IntoJson(writer);
 
     writer.Write("static", mStatic);
+    writer.Write("double_sided", mDoubleSided);
 }
 
 template<typename Vertex>
@@ -210,6 +211,7 @@ bool PolygonBuilder<Vertex>::FromJson(const data::Reader& reader)
     ok &= vertex_buffer.FromJson(reader);
     ok &= command_buffer.FromJson(reader);
     ok &= reader.Read("static", &mStatic);
+    ok &= reader.Read("double_sided", &mDoubleSided);
 
     mVertices = vertex_buffer.CopyBuffer<Vertex>();
     return ok;
@@ -236,6 +238,7 @@ void PolygonBuilder<Vertex>::BuildPoly(PolygonMeshClass& polygon) const
     polygon.SetVertexLayout(gfx::GetVertexLayout<Vertex>());
     polygon.SetCommandBuffer(mDrawCommands);
     polygon.SetStatic(mStatic);
+    polygon.SetDoubleSided(mDoubleSided);
 }
 
 template<typename Vertex>
@@ -262,6 +265,7 @@ void PolygonBuilder<Vertex>::InitFrom(const PolygonMeshClass& polygon)
         }
     }
     mStatic = polygon.IsStatic();
+    mDoubleSided = polygon.IsDoubleSided();
 }
 
 template class PolygonBuilder<Vertex2D>;

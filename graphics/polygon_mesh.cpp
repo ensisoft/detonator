@@ -317,6 +317,7 @@ std::size_t PolygonMeshClass::GetHash() const
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mStatic);
+    hash = base::hash_combine(hash, mDoubleSided);
     hash = base::hash_combine(hash, mContentHash);
     hash = base::hash_combine(hash, mContentUri);
     hash = base::hash_combine(hash, mShaderSrc);
@@ -372,6 +373,7 @@ void PolygonMeshClass::IntoJson(data::Writer& writer) const
     writer.Write("uri",    mContentUri);
     writer.Write("src",    mShaderSrc);
     writer.Write("mesh",   mMeshType);
+    writer.Write("double_sided", mDoubleSided);
 
     if (mData.has_value())
     {
@@ -421,6 +423,8 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
     ok &= reader.Read("mesh",   &mMeshType);
     if (reader.HasValue("src"))
         ok &= reader.Read("src", &mShaderSrc);
+    if (reader.HasValue("double_sided"))
+        ok &= reader.Read("double_sided", &mDoubleSided);
 
     if (const auto& inline_chunk = reader.GetReadChunk("inline_data"))
     {
