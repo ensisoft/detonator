@@ -3205,6 +3205,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // this will capture errors from here on.
     gfx::PaintContext paint_context;
+    paint_context.PropagateUp(true);
 
     if (!mDrawable)
         mDrawable = mWorkspace->MakeDrawableById(GetItemId(mUI.cmbModel));
@@ -3391,25 +3392,6 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         else
         {
             painter.Draw(*mDrawable, transform, *mMaterialInst);
-        }
-    }
-
-    // Print paint context
-    {
-        gfx::FPoint point;
-        point.SetX(10.0f);
-        point.SetY(10.0f);
-
-        gfx::PaintContext::MessageList msgs;
-        paint_context.TransferMessages(&msgs);
-        for (const auto& msg : msgs)
-        {
-            if (msg.type == gfx::PaintContext::LogEvent::Error)
-                ShowError(msg.message, point, painter, 18);
-            else if (msg.type == gfx::PaintContext::LogEvent::Warning)
-                ShowWarning(msg.message, point, painter, 18);
-            else ShowMessage(msg.message, point, painter);
-            point.Translate(0.0f, 20.0f);
         }
     }
 

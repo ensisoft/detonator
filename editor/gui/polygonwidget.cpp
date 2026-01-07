@@ -1495,8 +1495,6 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
     const auto mesh_type = GetMeshType();
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    gfx::PaintContext paint_context;
-
     gfx::Painter painter;
     painter.SetDevice(device);
     painter.SetSurfaceSize(mUI.widget->width(), mUI.widget->height());
@@ -1667,13 +1665,6 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         view.snap = GetValue(mUI.chkSnap);
         view.grid = GetValue(mUI.cmbGrid);
         mMouseTool->DrawTool(painter, view);
-    }
-
-    gfx::PaintContext::MessageList msgs;
-    paint_context.TransferMessages(&msgs);
-    for (const auto& msg : msgs)
-    {
-        mMessages.push_back(msg.message);
     }
 
     if (mPixelDistance2Dand3D)

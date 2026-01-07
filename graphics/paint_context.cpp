@@ -18,6 +18,7 @@
 
 #include <stack>
 
+#include "base/utility.h"
 #include "graphics/paint_context.h"
 
 namespace {
@@ -31,18 +32,24 @@ PaintContext::PaintContext()
 }
 PaintContext::~PaintContext()
 {
-    if (mActive)
-    {
-        ASSERT(context_stack.top() == this);
-        context_stack.pop();
-    }
+    EndScope();
 }
 
 void PaintContext::EndScope() noexcept
 {
-    ASSERT(context_stack.top() == this);
-    context_stack.pop();
-    mActive = false;
+    if (mActive)
+    {
+        ASSERT(context_stack.top() == this);
+        context_stack.pop();
+        mActive = false;
+        if (mPropagateUp && !context_stack.empty())
+        {
+            auto* up = context_stack.top();
+            base::AppendVector(up->mMessages, mMessages);
+            up->mErrorCount += mErrorCount;
+            up->mWarningCount += mWarningCount;
+        }
+    }
 }
 
 void PaintContext::ClearMessages() noexcept
