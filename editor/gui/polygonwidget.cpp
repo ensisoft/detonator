@@ -817,7 +817,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     SetValue(mUI.chkShowSurfaces,  true);
     SetValue(mUI.name, QString("My Shape"));
     SetValue(mUI.ID, mState.polygon->GetId());
-    SetValue(mUI.staticInstance, mState.polygon->IsStatic());
+    SetValue(mUI.chkStaticInstance, mState.polygon->IsStatic());
+    SetValue(mUI.chkDoubleSided, mState.polygon->IsDoubleSided());
     SetValue(mUI.shaderFile, "Built-in Shader");
     setWindowTitle(GetValue(mUI.name));
     setFocusPolicy(Qt::StrongFocus);
@@ -828,7 +829,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     SetValue(mUI.cmbMeshType, MeshType::Simple2DRenderMesh);
 
     mState.polygon->SetName(GetValue(mUI.name));
-    mState.polygon->SetStatic(GetValue(mUI.staticInstance));
+    mState.polygon->SetStatic(GetValue(mUI.chkStaticInstance));
+    mState.polygon->SetDoubleSided(GetValue(mUI.chkDoubleSided));
     SetMeshType(MeshType::Simple2DRenderMesh);
     CreateMeshBuilder();
     mOriginalHash = mState.polygon->GetHash();
@@ -865,7 +867,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
 
     SetValue(mUI.name, resource.GetName());
     SetValue(mUI.ID, mState.polygon->GetId());
-    SetValue(mUI.staticInstance, mState.polygon->IsStatic());
+    SetValue(mUI.chkStaticInstance, mState.polygon->IsStatic());
+    SetValue(mUI.chkDoubleSided, mState.polygon->IsDoubleSided());
     SetValue(mUI.shaderFile, mState.polygon->HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
     SetValue(mUI.blueprints, ListItemId(material));
     SetValue(mUI.cmbMeshType, GetMeshType());
@@ -1002,7 +1005,8 @@ bool ShapeWidget::LoadState(const Settings& settings)
         WARN("Failed to restore polygon shape state.");
 
     SetValue(mUI.ID, mState.polygon->GetId());
-    SetValue(mUI.staticInstance, mState.polygon->IsStatic());
+    SetValue(mUI.chkStaticInstance, mState.polygon->IsStatic());
+    SetValue(mUI.chkDoubleSided, mState.polygon->IsDoubleSided());
     SetValue(mUI.blueprints, ListItemId(material));
     SetValue(mUI.shaderFile, mState.polygon->HasShaderSrc() ? "Customized Shader" : "Built-in Shader");
     SetValue(mUI.cmbMeshType, GetMeshType());
@@ -1077,7 +1081,8 @@ bool ShapeWidget::HasUnsavedChanges() const
     auto* poly = dynamic_cast<gfx::PolygonMeshClass*>(clone.get());
 
     mState.builder->BuildPoly(*poly);
-    poly->SetStatic(GetValue(mUI.staticInstance));
+    poly->SetStatic(GetValue(mUI.chkStaticInstance));
+    poly->SetDoubleSided(GetValue(mUI.chkDoubleSided));
     poly->SetName(GetValue(mUI.name));
 
     if (mOriginalHash == poly->GetHash())
@@ -1149,7 +1154,8 @@ void ShapeWidget::on_actionSave_triggered()
 
     mState.builder->BuildPoly(*mState.polygon);
     mState.polygon->SetName(GetValue(mUI.name));
-    mState.polygon->SetStatic(GetValue(mUI.staticInstance));
+    mState.polygon->SetStatic(GetValue(mUI.chkStaticInstance));
+    mState.polygon->SetDoubleSided(GetValue(mUI.chkDoubleSided));
 
     app::CustomShapeResource resource(mState.polygon, GetValue(mUI.name));
     SetProperty(resource, "material", (QString)GetItemId(mUI.blueprints));
@@ -1282,9 +1288,13 @@ void ShapeWidget::on_btnResetBlueprint_clicked()
     mBlueprint.reset();
 }
 
-void ShapeWidget::on_staticInstance_stateChanged(int)
+void ShapeWidget::on_chkStaticInstance_stateChanged(int)
 {
-    mState.builder->SetStatic(GetValue(mUI.staticInstance));
+    mState.builder->SetStatic(GetValue(mUI.chkStaticInstance));
+}
+void ShapeWidget::on_chkDoubleSided_stateChanged(int)
+{
+    mState.builder->SetDoubleSided(GetValue(mUI.chkDoubleSided));
 }
 
 void ShapeWidget::on_cmbMeshType_currentIndexChanged(int)
@@ -1423,6 +1433,8 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     // set to true since we're constructing this polygon on every frame
     // without this we'll eat all the static vertex/index buffers. argh!
     poly->SetDynamic(true);
+
+    poly->SetDoubleSided(GetValue(mUI.chkDoubleSided));
 
     const auto mesh_type = GetMeshType();
     if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
@@ -1641,7 +1653,13 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
 
         gfx::Transform view;
         view.Resize(width, height);
-        painter.Draw(mesh, view, gfx::MaterialInstance(color));
+
+        gfx::Painter::LegacyDrawState state;
+        state.line_width = 1.0f;
+        state.culling = gfx::Painter::Culling::Back;
+        if (mesh.IsDoubleSided())
+            state.culling = gfx::Painter::Culling::None;
+        painter.Draw(mesh, view, gfx::MaterialInstance(color), state);
     }
 
     // visualize the vertices.

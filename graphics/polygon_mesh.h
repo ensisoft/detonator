@@ -75,6 +75,10 @@ namespace gfx
         // for draw/discard type of use.
         bool IsStatic() const noexcept
         { return mStatic; }
+        bool IsDoubleSided() const noexcept
+        { return mDoubleSided; }
+        void SetDoubleSided(bool on_off) noexcept
+        { mDoubleSided = on_off; }
         // Set the polygon static or not. See comments in IsStatic.
         void SetStatic(bool on_off) noexcept
         { mStatic = on_off; }
@@ -177,6 +181,7 @@ namespace gfx
         MeshType mMeshType = MeshType::Simple2DRenderMesh;
         std::unordered_map<std::string, DrawCmd> mSubMeshes;
         bool mStatic = true;
+        bool mDoubleSided = false;
     };
 
     class PolygonMeshInstance : public Drawable
@@ -199,6 +204,10 @@ namespace gfx
                                      std::string sub_mesh_key = "") noexcept;
         explicit PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key = "");
 
+        auto IsStatic() const noexcept
+        { return mClass->IsStatic(); }
+        auto IsDoubleSided() const noexcept
+        { return mClass->IsDoubleSided(); }
         auto GetMeshType() const noexcept
         { return mClass->GetMeshType(); }
         std::string GetSubMeshKey() const
