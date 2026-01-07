@@ -59,6 +59,9 @@ namespace gfx
        ~PaintContext();
         PaintContext(const PaintContext&) = delete;
 
+        void PropagateUp(bool on_off)
+        { mPropagateUp = on_off; }
+
         void EndScope() noexcept;
 
         void ClearMessages() noexcept;
@@ -85,6 +88,7 @@ namespace gfx
         std::size_t mErrorCount   = 0;
         std::size_t mWarningCount = 0;
         bool mActive = true;
+        bool mPropagateUp = false;
     };
 
 } // namespace
