@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2026 Sami Väisänen
+// Copyright (C) 2020-2026 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -87,9 +87,6 @@ void RangeWidget::paintEvent(QPaintEvent* event)
     QRectF hi_handle(range_start + mHi * range_width - handle_half,
                            top, handle_size, handle_size);
 
-    const QRectF range(range_start + mLo * range_width - handle_half,
-                       top, range_width * (mHi - mLo), handle_size);
-
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
@@ -108,8 +105,14 @@ void RangeWidget::paintEvent(QPaintEvent* event)
                      range_start + mHi * range_width, height*0.5);
 
     // draw both handles, first drop shadow
-    painter.fillRect(lo_handle, palette.color(QPalette::Shadow));
-    painter.fillRect(hi_handle, palette.color(QPalette::Shadow));
+    if (lo_handle.contains(mMousePos))
+        painter.fillRect(lo_handle, palette.color(QPalette::Highlight));
+    else painter.fillRect(lo_handle, palette.color(QPalette::Shadow));
+
+    if (hi_handle.contains(mMousePos))
+        painter.fillRect(hi_handle, palette.color(QPalette::Highlight));
+    else painter.fillRect(hi_handle, palette.color(QPalette::Shadow));
+
     lo_handle.adjust(1.0f, 1.0f, -1.0f, -1.0f);
     hi_handle.adjust(1.0f, 1.0f, -1.0f, -1.0f);
     painter.fillRect(lo_handle, palette.color(QPalette::AlternateBase));
@@ -118,6 +121,10 @@ void RangeWidget::paintEvent(QPaintEvent* event)
 
 void RangeWidget::mouseMoveEvent(QMouseEvent* mickey)
 {
+    update();
+
+    mMousePos = mickey->pos();
+
     if (mDragging == Dragging::None)
         return;
 
@@ -156,8 +163,6 @@ void RangeWidget::mouseMoveEvent(QMouseEvent* mickey)
     }
 
     mDragStart = pos;
-
-    update();
 
     emit RangeChanged(GetLo(), GetHi());
 
