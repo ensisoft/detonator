@@ -564,7 +564,9 @@ void GfxWindow::mouseReleaseEvent(QMouseEvent* mickey)
     if (mContextMenu)
     {
         mContextMenu->MouseRelease(mickey);
-        mContextMenuLoop.exit();
+        const auto* action = mContextMenu->GetResult();
+        if (!action || action->isEnabled())
+            mContextMenuLoop.exit();
     }
     else
     {
