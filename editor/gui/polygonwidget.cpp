@@ -58,6 +58,8 @@
 #include "editor/gui/settings.h"
 #include "editor/gui/dlgtextedit.h"
 #include "editor/gui/drawing.h"
+#include "editor/gui/gfxmenu.h"
+#include "graphics/vertex_algo.h"
 
 namespace {
 
@@ -791,17 +793,16 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     menu->addAction(mUI.actionShowShader);
     mUI.btnAddShader->setMenu(menu);
 
+    mHamburger = new QMenu(this);
+    mHamburger->setIcon(QIcon("icons:hamburger.png"));
+    mHamburger->addAction(mUI.chkSnap);
+    mHamburger->addAction(mUI.chkShowGrid);
+    mHamburger->addAction(mUI.chkShowNormals);
+    mHamburger->addAction(mUI.chkShowVertices);
+    mHamburger->addAction(mUI.chkShowSurfaces);
+    mHamburger->addAction(mUI.chkShowBlueprint);
+
     connect(mUI.btnHamburger, &QPushButton::clicked, this, [this]() {
-        if (mHamburger == nullptr)
-        {
-            mHamburger = new QMenu(this);
-            mHamburger->addAction(mUI.chkSnap);
-            mHamburger->addAction(mUI.chkShowGrid);
-            mHamburger->addAction(mUI.chkShowNormals);
-            mHamburger->addAction(mUI.chkShowVertices);
-            mHamburger->addAction(mUI.chkShowSurfaces);
-            mHamburger->addAction(mUI.chkShowBlueprint);
-        }
         QPoint point;
         point.setX(0);
         point.setY(mUI.btnHamburger->width());
@@ -834,6 +835,9 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     SetMeshType(MeshType::Simple2DRenderMesh);
     CreateMeshBuilder();
     mOriginalHash = mState.polygon->GetHash();
+
+    SetEnabled(mUI.btnResetShader, mState.polygon->HasShaderSrc());
+    SetEnabled(mUI.actionClear, mState.polygon->HasInlineData());
 }
 
 ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resource) : ShapeWidget(workspace)
@@ -1261,8 +1265,19 @@ void CustomVertexTransform(inout VertexData vs) {
 
 void ShapeWidget::on_actionClear_triggered()
 {
+    if (mState.builder->GetVertexCount() == 0 &&
+        mState.builder->GetCommandCount() == 0)
+        return;
+
+    QMessageBox msg(this);
+    msg.setIcon(QMessageBox::Icon::Question);
+    msg.setText("Are you sure you want to clear all vertices?");
+    msg.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+    if (msg.exec() == QMessageBox::StandardButton::No)
+        return;
+
     mState.table->ClearAndReset();
-    mUI.actionClear->setEnabled(false);
+    SetEnabled(mUI.actionClear, false);
 }
 
 void ShapeWidget::on_blueprints_currentIndexChanged(int)
@@ -1318,6 +1333,8 @@ void ShapeWidget::on_cmbMeshType_currentIndexChanged(int)
     }
     SetMeshType(mesh_type);
     CreateMeshBuilder();
+    mMainView = ViewType::EditView;
+    mBlueprint.reset();
 }
 
 void ShapeWidget::on_tableView_customContextMenuRequested(const QPoint& point)
@@ -1872,6 +1889,7 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 
     const bool shift = mickey->modifiers() & Qt::ShiftModifier;
     const bool ctrl = mickey->modifiers() & Qt::ControlModifier;
+    const auto btn = mickey->button();
 
     if (rect.contains(mickey->pos()))
     {
@@ -1883,7 +1901,7 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 
         if (mMainView == ViewType::EditView)
         {
-            if (!mMouseTool)
+            if (btn == Qt::MouseButton::LeftButton && !mMouseTool)
             {
                 auto pick_mode = PickMode::Sticky;
                 if (shift)
@@ -1940,6 +1958,83 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
     const float width  = rect.width();
     const float height = rect.height();
     const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
+    const auto btn = mickey->button();
+
+    const auto mesh_type = GetMeshType();
+
+    if (!mMouseTool && btn == Qt::MouseButton::RightButton)
+    {
+        const auto have_selection = mSelectedVertex < mState.builder->GetVertexCount();
+
+        if (mMainView == ViewType::EditView)
+        {
+            GfxMenu menu;
+            menu.AddAction("Start New Triangle Fan", QIcon("icons32:triangle_fan.png"), [this]() {
+                QTimer::singleShot(0, this, &ShapeWidget::on_actionNewTriangleFan_triggered);
+            });
+            menu.AddSeparator();
+            if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+            {
+                GfxMenu orient_menu;
+                orient_menu.SetText("Orient Normal");
+                orient_menu.AddAction("Orient normal to +X", [this]() {
+                    SetSelectedVertexNormal({1.0f, 0.0f, 0.0f});
+                })->setEnabled(have_selection);
+                orient_menu.AddAction("Orient normal to -X", [this]() {
+                    SetSelectedVertexNormal({-1.0f, 0.0f, 0.0f});
+                })->setEnabled(have_selection);
+                orient_menu.AddAction("Orient normal to +Y", [this]() {
+                    SetSelectedVertexNormal({0.0f, 1.0f, 0.0f});
+                })->setEnabled(have_selection);
+                orient_menu.AddAction("Orient normal to -Y", [this]() {
+                    SetSelectedVertexNormal({0.0f, -1.0f, 0.0f});
+                })->setEnabled(have_selection);
+                orient_menu.AddAction("Orient normal to +Z", [this]() {
+                    SetSelectedVertexNormal({0.0f, 0.0f, -1.0f});
+                })->setEnabled(have_selection);
+                orient_menu.AddAction("Orient normal to -Z", [this]() {
+                    SetSelectedVertexNormal({0.0f, 0.0f, 1.0f});
+                })->setEnabled(have_selection);
+                menu.AddSubMenu(std::move(orient_menu));
+            }
+
+            menu.AddAction("Insert Vertex Before", [this]() {
+                InsertVertex(InsertionPoint::Before);
+            })->setEnabled(have_selection);
+            menu.AddAction("Insert Vertex After", [this]() {
+                InsertVertex(InsertionPoint::After);
+            })->setEnabled(have_selection);
+            menu.AddAction("Delete Vertex", QIcon("icons:delete.png"), [this]() {
+                mState.table->EraseVertex(mSelectedVertex);
+                mSelectedVertex = InvalidIndex;
+                ClearSelection(mUI.tableView);
+                if (mState.builder->GetVertexCount() == 0)
+                    SetEnabled(mUI.actionClear, false);
+            })->setEnabled(have_selection);
+
+            menu.AddSeparator();
+            menu.AddAction(mUI.actionClear);
+            menu.AddSeparator();
+
+            GfxMenu view_menu;
+            view_menu.SetText("View");
+            view_menu.SetIcon(mHamburger->icon());
+            view_menu.AddActions(mHamburger->actions());
+
+            GfxMenu grid_menu;
+            grid_menu.SetText("Grid");
+            grid_menu.SetIcon(QIcon("icons32:guidegrid.png"));
+            grid_menu.AddAction("10x10",   [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid10x10); });
+            grid_menu.AddAction("20x20",   [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid20x20); });
+            grid_menu.AddAction("50x50",   [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid50x50); });
+            grid_menu.AddAction("100x100", [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid100x100); });
+
+            menu.AddSubMenu(std::move(view_menu));
+            menu.AddSeparator();
+            menu.AddSubMenu(std::move(grid_menu));
+            mUI.widget->OpenContextMenu(mickey->pos(), std::move(menu));
+        }
+    }
 
     if (mMouseTool)
     {
@@ -1986,48 +2081,7 @@ void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
 
 void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
 {
-    // try to filter out double clicks that happen when clicking
-    // to pick a vertex.
-    if (!mPickingCandidates.empty())
-        return;
 
-    // find the vertex closes to the click point
-    // use polygon winding order to figure out whether
-    // the new vertex should come before or after the closest vertex
-    const auto& rect = GetMainRenderRect();
-    const float xoffset = rect.x();
-    const float yoffset = rect.y();
-    const float width  = rect.width();
-    const float height = rect.height();
-    const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
-
-    const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
-
-    QPoint point = pos;
-    bool snap = GetValue(mUI.chkSnap);
-    if (ctrl)
-        snap = !snap;
-
-    if (snap)
-    {
-        const GridDensity grid = GetValue(mUI.cmbGrid);
-        const auto num_cells = static_cast<float>(grid);
-
-        const auto cell_width = width / num_cells;
-        const auto cell_height = height / num_cells;
-        const auto x = std::round(pos.x() / cell_width) * cell_width;
-        const auto y = std::round(pos.y() / cell_height) * cell_height;
-        point = QPoint(x, y);
-    }
-
-    const auto mesh_type = GetMeshType();
-    if (mesh_type == MeshType::Simple2DRenderMesh)
-        InsertVertex2D<gfx::Vertex2D>(point, width, height);
-    else if (mesh_type == MeshType::Simple2DShardEffectMesh)
-        InsertVertex2D<gfx::ShardVertex2D>(point, width, height);
-    else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
-        InsertVertex2D<gfx::Perceptual3DVertex>(point, width, height);
-    else BUG("Missing mesh type handling.");
 }
 
 void ShapeWidget::OnMouseWheel(QWheelEvent* wheel)
@@ -2059,7 +2113,7 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
         if (mSelectedVertex < mState.builder->GetVertexCount())
         {
             mState.table->EraseVertex(mSelectedVertex);
-            mSelectedVertex = 0xffffff;
+            mSelectedVertex = InvalidIndex;
             ClearSelection(mUI.tableView);
         }
 
@@ -2329,69 +2383,74 @@ void ShapeWidget::HoverVertex2D(const QPoint& pick_point, float width, float hei
     });
 }
 
-template<typename VertexType>
-void ShapeWidget::InsertVertex2D(const QPoint& click_point, float width, float height)
+void ShapeWidget::InsertVertex(InsertionPoint where)
 {
-    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+    const auto mesh_type = GetMeshType();
+    if (mesh_type == MeshType::Simple2DRenderMesh)
+        InsertVertex2D<gfx::Vertex2D>(where);
+    else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+        InsertVertex2D<gfx::ShardVertex2D>(where);
+    else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+        InsertVertex2D<gfx::Perceptual3DVertex>(where);
+    else BUG("Missing mesh type handling.");
+}
 
-    const auto num_vertices = mState.builder->GetVertexCount();
-    const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
-
-    // find the vertex closest to the click point.
-    float distance = std::numeric_limits<float>::max();
-    size_t vertex_index = 0;
-    for (size_t i=0; i<num_vertices; ++i)
-    {
-        const auto vert = MapVertexToWidget2D(builder->GetVertex(i), width, height);
-        const auto len  = PointDist(click_point, vert);
-        if (len < distance)
-        {
-            vertex_index = i;
-            distance = len;
-        }
-    }
-
-    // not found ?
-    if (vertex_index == num_vertices)
+template<typename VertexType>
+void ShapeWidget::InsertVertex2D(InsertionPoint where)
+{
+    if (mSelectedVertex >= mState.builder->GetVertexCount())
         return;
+
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+    const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
+    const auto vertex_index = mSelectedVertex;
     const auto cmd_index = mState.builder->FindDrawCommand(vertex_index);
+
+    // junk vertex that doesn't belong anywhere
     if (cmd_index == std::numeric_limits<size_t>::max())
         return;
-
-    DEBUG("Closest vertex: index %1 draw cmd %2", vertex_index, cmd_index);
 
     // degenerate left over triangle ?
     const auto& cmd = mState.builder->GetDrawCommand(cmd_index);
     if (cmd.count < 3)
         return;
 
-    const auto cmd_vertex_index = vertex_index - cmd.offset;
+    const auto cmd_vertex_count = cmd.count;
+    const auto cmd_vertex_offset = cmd.offset;
 
-    VertexType vertex;
-    vertex.aPosition.x = click_point.x() / (float)width;
-    vertex.aPosition.y = click_point.y() / (float)height * -1.0f;
-    vertex.aTexCoord.x = vertex.aPosition.x;
-    vertex.aTexCoord.y = -vertex.aPosition.y;
+    // we're going to interpolate between one and two
+    // and index_new will be the insertion index
+    auto cmd_vertex_index_one = vertex_index - cmd.offset;
+    auto cmd_vertex_index_two = 0;
+    auto cmd_vertex_index_new = 0;
+    if (where == InsertionPoint::After)
+    {
+        cmd_vertex_index_two = (cmd_vertex_index_one + 1) % cmd_vertex_count;
+        cmd_vertex_index_new = cmd_vertex_index_one + 1;
+    }
+    else if (where == InsertionPoint::Before)
+    {
+        if (cmd_vertex_index_one == 0)
+        {
+            cmd_vertex_index_two = cmd_vertex_count - 1;
+            cmd_vertex_index_new = cmd_vertex_count;
+        }
+        else
+        {
+            cmd_vertex_index_two = cmd_vertex_index_one - 1;
+            cmd_vertex_index_new = cmd_vertex_index_one;
+        }
+    }
 
-    // currently back face culling is enabled and the winding
-    // order is set to CCW. That means that in order to
-    // determine where the new vertex should be placed within
-    // the draw command we can check the winding order.
-    // We have two options:
-    // root -> closest -> new vertex
-    // root -> new vertex -> closest
-    //
-    // One of the above should have a CCW winding order and
-    // give us the info where to place the new vertex.
-    // note that there's still a possibility for a degenerate
-    // case (such as when any of the two vertices are collinear)
-    // and this isn't properly handled yet.
-    const auto first = builder->GetVertex(cmd.offset);
-    const auto closest = builder->GetVertex(vertex_index);
-    const auto winding = math::FindTriangleWindingOrder(first.aPosition, closest.aPosition, vertex.aPosition);
-    if (winding == math::TriangleWindingOrder::CounterClockwise)
-        mState.table->InsertVertex(vertex, cmd_vertex_index + 1, cmd_index);
-    else mState.table->InsertVertex(vertex, cmd_vertex_index, cmd_index);
+    const auto& vertex_one = builder->GetVertex(cmd_vertex_offset + cmd_vertex_index_one);
+    const auto& vertex_two = builder->GetVertex(cmd_vertex_offset + cmd_vertex_index_two);
+    const auto& vertex_new = gfx::InterpolateVertex(vertex_one, vertex_two, 0.5f);
+    mState.table->InsertVertex(vertex_new, cmd_vertex_index_new, cmd_index);
+    if (where == InsertionPoint::After)
+    {
+        mSelectedVertex++;
+        SelectRow(mUI.tableView, mSelectedVertex);
+    }
 }
 
 template<typename VertexType>
