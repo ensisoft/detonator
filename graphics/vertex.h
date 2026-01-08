@@ -29,6 +29,7 @@
 #include <string>
 #include <type_traits>
 
+#include "base/math.h"
 #include "graphics/color4f.h"
 #include "device/vertex.h"
 #include "device/enum.h"
@@ -85,6 +86,23 @@ namespace gfx
     {
         const auto linear = gfx::sRGB_Decode(color);
         return {linear.Red(), linear.Green(), linear.Blue(), linear.Alpha() };
+    }
+
+    inline Vec2 Lerp(const Vec2& one, const Vec2& two, float t) noexcept
+    {
+        Vec2 ret;
+        ret.x = math::lerp(one.x, two.x, t);
+        ret.y = math::lerp(one.y, two.y, t);
+        return ret;
+    }
+
+    inline Vec3 Lerp(const Vec3& one, const Vec3 two, float t) noexcept
+    {
+        Vec3 ret;
+        ret.x = math::lerp(one.x, two.x, t);
+        ret.y = math::lerp(one.y, two.y, t);
+        ret.z = math::lerp(one.z, two.z, t);
+        return ret;
     }
 
     // About texture coordinates.

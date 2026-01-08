@@ -30,6 +30,10 @@
 
 namespace gfx
 {
+    Vertex2D InterpolateVertex(const Vertex2D& one, const Vertex2D& two, float t = 0.5f);
+    ShardVertex2D InterpolateVertex(const ShardVertex2D& one, const ShardVertex2D& two, float t = 0.5f);
+    Perceptual3DVertex InterpolateVertex(const Perceptual3DVertex& one, const Perceptual3DVertex& two, float t = 0.5f);
+
     // Interpolate between two vertices and push the interpolation
     // result into result buffer. Returns a pointer to the vertex.
     void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr,
