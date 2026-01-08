@@ -2889,6 +2889,9 @@ void EntityWidget::on_actionNodeDuplicate_triggered()
         // update the translation for the parent of the new hierarchy
         // so that it's possible to tell it apart from the source of the copy.
         dupe->SetTranslation(node->GetTranslation() * 1.2f);
+        // unlock (in case it was locked) it's 100% the user wants
+        // to move the object immediately after duplication.
+        dupe->SetFlag(game::EntityNode::Flags::LockedInEditor, false);
 
         mUI.tree->Rebuild();
         mUI.tree->SelectItemById(app::FromUtf8(dupe->GetId()));
@@ -4777,9 +4780,9 @@ void EntityWidget::on_widget_customContextMenuRequested(QPoint point)
             });
 
             GfxMenu menu;
-            menu.AddAction("Select material...", QIcon("icons:material.png"),
+            menu.AddAction("Select Material...", QIcon("icons:material.png"),
                 [this]() { on_btnSelectMaterial_clicked(); })->setEnabled(item != nullptr);
-            menu.AddAction("Select font...", QIcon("icons:font.png"),
+            menu.AddAction("Select Font...", QIcon("icons:font.png"),
                 [this]() { on_btnSelectFont_clicked(); })->setEnabled(text != nullptr);
             menu.AddSeparator();
             menu.AddSubMenu(std::move(menu_transform));
@@ -4854,6 +4857,7 @@ void EntityWidget::on_widget_customContextMenuRequested(QPoint point)
         view_menu.AddActions(mHamburger->actions());
 
         GfxMenu grid_menu;
+        grid_menu.SetIcon(QIcon("icons32:guidegrid.png"));
         grid_menu.SetText("Grid");
         grid_menu.AddAction("10x10",   [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid10x10); });
         grid_menu.AddAction("20x20",   [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid20x20); });
