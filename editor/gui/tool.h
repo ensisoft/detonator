@@ -305,6 +305,7 @@ namespace gui
             mState.camera_offset_x += x;
             mState.camera_offset_y += y;
             mMousePos = pos;
+            mDidMove = true;
         }
         void MousePress(const MouseEvent& mickey, gfx::Transform&) override
         {
@@ -319,9 +320,14 @@ namespace gui
         {
             return ToolFunctionType::TransformCamera;
         }
+        bool DidApplyFunction() const
+        {
+            return mDidMove;
+        }
     private:
         CameraState& mState;
         QPoint mMousePos;
+        bool mDidMove = false;
     };
 
     template<typename CameraState>
