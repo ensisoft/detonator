@@ -36,6 +36,14 @@
 #include "base/format.h"
 #include "base/utility.h"
 #include "data/json.h"
+#include "uikit/op.h"
+#include "uikit/state.h"
+#include "uikit/widget.h"
+#include "uikit/window.h"
+#include "graphics/drawing.h"
+#include "graphics/utility.h"
+#include "graphics/material_class.h"
+#include "graphics/texture_text_buffer_source.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
@@ -48,19 +56,12 @@
 #include "editor/gui/drawing.h"
 #include "editor/gui/scriptwidget.h"
 #include "editor/gui/settings.h"
+#include "editor/gui/gfxmenu.h"
 #include "editor/gui/tool.h"
 #include "editor/gui/main.h"
 #include "editor/gui/uiwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/playwindow.h"
-#include "graphics/drawing.h"
-#include "graphics/utility.h"
-#include "graphics/material_class.h"
-#include "graphics/texture_text_buffer_source.h"
-#include "uikit/op.h"
-#include "uikit/state.h"
-#include "uikit/widget.h"
-#include "uikit/window.h"
 
 namespace {
 std::vector<app::ResourceListItem> ListMaterials(const app::Workspace* workspace)
@@ -652,17 +653,15 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.windowKeyMap->lineEdit()->setReadOnly(true);
     mUI.windowStyleFile->lineEdit()->setReadOnly(true);
 
+    mHamburger = new QMenu(this);
+    mHamburger->setIcon(QIcon("icons:hamburger.png"));
+    mHamburger->addAction(mUI.chkSnap);
+    mHamburger->addAction(mUI.chkShowOrigin);
+    mHamburger->addAction(mUI.chkShowGrid);
+    mHamburger->addAction(mUI.chkShowBounds);
+    mHamburger->addAction(mUI.chkShowTabOrder);
+    mHamburger->addAction(mUI.chkClipWidgets);
     connect(mUI.btnHamburger, &QPushButton::clicked, this, [this]() {
-        if (mHamburger == nullptr)
-        {
-            mHamburger = new QMenu(this);
-            mHamburger->addAction(mUI.chkSnap);
-            mHamburger->addAction(mUI.chkShowOrigin);
-            mHamburger->addAction(mUI.chkShowGrid);
-            mHamburger->addAction(mUI.chkShowBounds);
-            mHamburger->addAction(mUI.chkShowTabOrder);
-            mHamburger->addAction(mUI.chkClipWidgets);
-        }
         QPoint point;
         point.setX(0);
         point.setY(mUI.btnHamburger->width());
@@ -1462,6 +1461,27 @@ void UIWidget::on_actionWidgetDelete_triggered()
         mUI.tree->ClearSelection();
     }
 }
+
+void UIWidget::on_actionWidgetCut_triggered()
+{
+    if (auto* widget = GetCurrentWidget())
+    {
+        emit RequestAction("cut");
+    }
+}
+void UIWidget::on_actionWidgetCopy_triggered()
+{
+    if (auto* widget = GetCurrentWidget())
+    {
+        emit RequestAction("copy");
+    }
+}
+
+void UIWidget::on_actionWidgetPaste_triggered()
+{
+    emit RequestAction("paste");
+}
+
 void UIWidget::on_actionWidgetDuplicate_triggered()
 {
     if (auto* widget = GetCurrentWidget())
@@ -1474,6 +1494,7 @@ void UIWidget::on_actionWidgetDuplicate_triggered()
         mState.window->VisitEach([](uik::Widget* widget) {
             const auto& name = widget->GetName();
             widget->SetName(base::FormatString("Copy of %1", name));
+            widget->SetFlag(uik::Widget::Flags::LockedInEditor, false);
         }, dupe);
 
         mUI.tree->Rebuild();
@@ -2271,6 +2292,10 @@ void UIWidget::OnUpdateResource(const app::Resource* resource)
     if (resource->IsAnyDrawableType())
         mState.painter->DeleteDrawableInstanceByClassId(resource->GetIdUtf8());
 }
+void UIWidget::OnClipboardChanged(const Clipboard& clipboard)
+{
+    SetEnabled(mUI.actionWidgetPaste, CanTakeAction(Actions::CanPaste, &clipboard));
+}
 
 void UIWidget::WidgetStyleEdited()
 {
@@ -2659,6 +2684,8 @@ void UIWidget::MouseRelease(QMouseEvent* mickey)
     view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
+    const auto btn = mickey->button();
+
     if (mPlayState == PlayState::Playing)
     {
         // todo: refactor the duplicated code
@@ -2685,8 +2712,22 @@ void UIWidget::MouseRelease(QMouseEvent* mickey)
     }
     else if (mCurrentTool && mCurrentTool->MouseRelease(mickey, view))
     {
+        bool open_context_menu = false;
+
+        using CameraToolType = MoveCameraTool<State>;
+        if (const auto* ptr = dynamic_cast<const CameraToolType*>(mCurrentTool.get()))
+        {
+            if (!ptr->DidApplyFunction())
+                open_context_menu = true;
+        }
         mCurrentTool.reset();
         UncheckPlacementActions();
+        if (open_context_menu)
+            OpenContextMenu(mickey->pos());
+    }
+    else if (btn == Qt::MouseButton::RightButton)
+    {
+        OpenContextMenu(mickey->pos());
     }
 }
 void UIWidget::MouseWheel(QWheelEvent* wheel)
@@ -3341,6 +3382,72 @@ bool UIWidget::LoadKeysQuiet(const std::string& uri)
 
 void UIWidget::UncheckPlacementActions()
 {
+}
+
+void UIWidget::OpenContextMenu(const QPoint& position)
+{
+    const auto* widget = GetCurrentWidget();
+    if (widget)
+    {
+        const auto locked = widget->TestFlag(uik::Widget::Flags::LockedInEditor);
+
+        GfxMenu menu;
+        if (locked)
+        {
+            menu.AddAction("Unlock", [this]() {
+                    if (auto* widget = GetCurrentWidget()) {
+                        widget->SetFlag(uik::Widget::Flags::LockedInEditor, false);
+                        mUI.tree->Rebuild();
+                    }
+                });
+        }
+        else
+        {
+            menu.AddAction("Lock", QIcon("icons:lock.png"), [this]() {
+                    if (auto* widget = GetCurrentWidget()) {
+                        widget->SetFlag(uik::Widget::Flags::LockedInEditor, true);
+                        mUI.tree->Rebuild();
+                    }
+                });
+        }
+        menu.AddAction(mUI.actionWidgetDuplicate);
+        menu.AddSeparator();
+        menu.AddAction(mUI.actionWidgetCut);
+        menu.AddAction(mUI.actionWidgetCopy);
+        menu.AddSeparator();
+        menu.AddAction(mUI.actionWidgetDelete);
+        mUI.viewport->OpenContextMenu(position, std::move(menu));
+    }
+    else
+    {
+        GfxMenu widgets_menu;
+        widgets_menu.SetText(mWidgets->title());
+        widgets_menu.SetIcon(mWidgets->icon());
+        widgets_menu.AddActions(mWidgets->actions());
+
+        GfxMenu view_menu;
+        view_menu.SetText("View");
+        view_menu.SetIcon(mHamburger->icon());
+        view_menu.AddActions(mHamburger->actions());
+
+        GfxMenu grid_menu;
+        grid_menu.SetText("Grid");
+        grid_menu.SetIcon(QIcon("icons32:guidegrid.png"));
+        grid_menu.AddAction("10x10",   [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid10x10); });
+        grid_menu.AddAction("20x20",   [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid20x20); });
+        grid_menu.AddAction("50x50",   [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid50x50); });
+        grid_menu.AddAction("100x100", [this]() { SetValue(mUI.cmbGrid, GridDensity::Grid100x100); });
+
+        GfxMenu menu;
+        menu.AddSubMenu(std::move(widgets_menu));
+        menu.AddSeparator();
+        menu.AddAction(mUI.actionWidgetPaste);
+        menu.AddSeparator();
+        menu.AddSubMenu(std::move(view_menu));
+        menu.AddSeparator();
+        menu.AddSubMenu(std::move(grid_menu));
+        mUI.viewport->OpenContextMenu(position, std::move(menu));
+    }
 }
 
 void UIWidget::UpdateDeletedResourceReferences()
