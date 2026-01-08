@@ -16,11 +16,37 @@
 
 #include "config.h"
 
+#include "base/assert.h"
 #include "base/random.h"
 #include "graphics/vertex_algo.h"
 
 namespace gfx
 {
+Vertex2D InterpolateVertex(const Vertex2D& one, const Vertex2D& two, float t)
+{
+    Vertex2D ret;
+    ret.aPosition = Lerp(one.aPosition, two.aPosition, t);
+    ret.aTexCoord = Lerp(one.aTexCoord, two.aTexCoord, t);
+    return ret;
+}
+ShardVertex2D InterpolateVertex(const ShardVertex2D& one, const ShardVertex2D& two, float t)
+{
+    ASSERT(one.aShardIndex == two.aShardIndex);
+    ShardVertex2D ret;
+    ret.aPosition = Lerp(one.aPosition, two.aPosition, t);
+    ret.aTexCoord = Lerp(one.aTexCoord, two.aTexCoord, t);
+    ret.aShardIndex = one.aShardIndex;
+    return ret;
+}
+Perceptual3DVertex InterpolateVertex(const Perceptual3DVertex& one, const Perceptual3DVertex& two, float t)
+{
+    Perceptual3DVertex ret;
+    ret.aPosition = Lerp(one.aPosition, two.aPosition, t);
+    ret.aTexCoord = Lerp(one.aTexCoord, two.aTexCoord, t);
+    ret.aLocalOffset = Lerp(one.aLocalOffset, two.aLocalOffset, t);
+    ret.aWorldNormal = Lerp(one.aWorldNormal, two.aWorldNormal, t);
+    return ret;
+}
 
 void* InterpolateVertex(const void* v0_ptr, const void* v1_ptr, const VertexLayout& layout, VertexBuffer& buffer, float t)
 {
