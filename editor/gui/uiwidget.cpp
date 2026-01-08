@@ -2641,8 +2641,9 @@ void UIWidget::MousePress(QMouseEvent* mickey)
 
     if (mCurrentTool)
     {
+        const auto* current_widget = GetCurrentWidget();
         if (mCurrentTool->GetToolFunction() == MouseTool::ToolFunctionType::TransformNode &&
-            GetCurrentWidget()->TestFlag(uik::Widget::Flags::LockedInEditor))
+            current_widget && current_widget->TestFlag(uik::Widget::Flags::LockedInEditor))
         {
             NOTE("Unlock widget to enable widget transformation.");
             mCurrentTool.reset();
