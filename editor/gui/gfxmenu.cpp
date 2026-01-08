@@ -337,9 +337,16 @@ void GfxMenu::Render(gfx::Painter& painter) const
             const auto& text = app::ToUtf8(menu->GetText());
             const bool enabled = menu->IsEnabled() && mEnabled;
 
+            const auto color = enabled ? CreateColor(QPalette::Text, QPalette::Active) : CreateColor(QPalette::Text, QPalette::Disabled);
+
             gfx::DrawTextRect(painter, text + " ...", "app://fonts/OpenSans-Regular.ttf", mFontSize, text_area,
-                              enabled ? CreateColor(QPalette::Text, QPalette::Active) : CreateColor(QPalette::Text, QPalette::Disabled),
-                              gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+                              color, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+
+            gfx::FRect button_rect;
+            button_rect.Resize(15.0f, mMenuItemHeight);
+            button_rect.Move(item_point);
+            button_rect.Translate(mMenuWidth-25.0f, 0.0f);
+            gfx::DrawButtonIcon(painter, button_rect, color, gfx::ButtonIcon::ArrowRight);
             if (ptr->icon)
             {
                 const auto icon_rect = base::CenterRectOnRect(icon_area, gfx::FRect(0.0f, 0.0f, 16.0f, 16.0f));
