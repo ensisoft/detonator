@@ -123,6 +123,7 @@ void DarkStyle::polish(QPalette &palette)
         // ===== Text =====
         palette.setColor(QPalette::WindowText, QColor(233, 238, 247)); // #e9eef7
         palette.setColor(QPalette::Text, QColor(220, 230, 245));       // #dce6f5
+        palette.setColor(QPalette::Disabled, QPalette::Text, QColor("#667084"));
         palette.setColor(QPalette::ToolTipText, QColor(233, 238, 247));
 
         // ===== Buttons =====
