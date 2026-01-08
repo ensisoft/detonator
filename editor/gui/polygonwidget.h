@@ -125,8 +125,13 @@ namespace gui
         template<typename Vertex>
         void HoverVertex2D(const QPoint& pick_point, float width, float height);
 
+        enum class InsertionPoint {
+            Before, After
+        };
+        void InsertVertex(InsertionPoint where);
+
         template<typename Vertex>
-        void InsertVertex2D(const QPoint& click_point, float width, float height);
+        void InsertVertex2D(InsertionPoint where);
 
         template<typename Vertex>
         void ScrollAxonometricVertex(const QWheelEvent* wheel);
