@@ -1,5 +1,5 @@
-// Copyright (C) 2020-2021 Sami Väisänen
-// Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
+// Copyright (C) 2020-2026 Sami Väisänen
+// Copyright (C) 2020-2026 Ensisoft http://www.ensisoft.com
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,9 +25,6 @@
 #  include <QIcon>
 #  include <QtUiPlugin/QDesignerExportWidget>
 #include "warnpop.h"
-
-#include <vector>
-#include <memory>
 
 class QPalette;
 class QPainter;
@@ -66,16 +63,16 @@ namespace gui
         void RangeChanged(float lo, float hi);
 
     protected:
-        virtual void paintEvent(QPaintEvent* event) override;
-        virtual void mouseMoveEvent(QMouseEvent* mickey) override;
-        virtual void mousePressEvent(QMouseEvent* mickey) override;
-        virtual void mouseReleaseEvent(QMouseEvent* mickey) override;
-        virtual void enterEvent(QEvent*) override;
-        virtual void leaveEvent(QEvent*) override;
-        virtual void keyPressEvent(QKeyEvent* key) override;
-        virtual void resizeEvent(QResizeEvent* resize) override;
-        virtual void focusInEvent(QFocusEvent* focus) override;
-        virtual void focusOutEvent(QFocusEvent* focus) override;
+        void paintEvent(QPaintEvent* event) override;
+        void mouseMoveEvent(QMouseEvent* mickey) override;
+        void mousePressEvent(QMouseEvent* mickey) override;
+        void mouseReleaseEvent(QMouseEvent* mickey) override;
+        void enterEvent(QEvent*) override;
+        void leaveEvent(QEvent*) override;
+        void keyPressEvent(QKeyEvent* key) override;
+        void resizeEvent(QResizeEvent* resize) override;
+        void focusInEvent(QFocusEvent* focus) override;
+        void focusOutEvent(QFocusEvent* focus) override;
 
     private:
         float mScale = 0.0f;
@@ -85,6 +82,7 @@ namespace gui
         enum class Dragging {
             None, Lo, Hi, Range, NotSure
         };
+        QPoint mMousePos;
         QPoint mDragStart;
         Dragging mDragging = Dragging::None;
         bool mHovered = false;
