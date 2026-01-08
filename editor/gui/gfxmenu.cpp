@@ -189,7 +189,7 @@ void GfxMenu::Initialize(const QRect& rect)
     }
 
     // todo: actual font metrics
-    mMenuWidth = longest_text.length() * 10;
+    mMenuWidth = std::max(20, longest_text.length()) * 10;
     mMenuWidth += mIconAreaWidth;
 
     for (auto& item : mMenuItems)
