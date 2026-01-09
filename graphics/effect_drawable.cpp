@@ -28,6 +28,7 @@
 #include "graphics/effect_drawable.h"
 #include "graphics/texture.h"
 #include "graphics/utility.h"
+#include "graphics/paint_log.h"
 
 namespace {
 std::function<float (float min, float max)> random_function;
@@ -149,7 +150,7 @@ bool EffectDrawable::Construct(const Environment& env, Device& device, Geometry:
     const auto source_draw_primitive = mDrawable->GetDrawPrimitive();
     if (source_draw_primitive != DrawPrimitive::Triangles)
     {
-        ERROR("Effects mesh can only be constructed with triangle mesh topology. [top='%1']",
+        GFX_PAINT_ERROR("Effects mesh can only be constructed with triangle mesh topology. [top='%1']",
             source_draw_primitive);
         return false;
     }
@@ -293,7 +294,7 @@ bool EffectDrawable::ConstructShardMesh(const Environment& env, Device& device, 
     Geometry::CreateArgs args;
     if (!mDrawable->Construct(e, device, args))
     {
-        ERROR("Failed to construct mesh.");
+        GFX_PAINT_ERROR("Failed to construct effect mesh.");
         return false;
     }
     ASSERT(args.buffer.GetLayout() == GetVertexLayout<ShardVertex2D>());
@@ -305,7 +306,7 @@ bool EffectDrawable::ConstructShardMesh(const Environment& env, Device& device, 
     glm::vec3 maximums = {0.0f, 0.0f, 0.0f};
     if (!FindGeometryMinMax(args.buffer, &minimums, &maximums))
     {
-        ERROR("Failed to compute mesh bounds.");
+        GFX_PAINT_ERROR("Failed to compute mesh bounds.");
         return false;
     }
     const auto shape_bounds_dimensions = maximums - minimums;
@@ -365,7 +366,7 @@ bool EffectDrawable::ConstructShardMesh(const Environment& env, Device& device, 
     // Emscripten either.
     if (!PackDataTexture(mEffectId, "Shard data texture", &shard_data_buffer[0], shard_data_buffer.size(), device))
     {
-        ERROR("Shard data exceeds available data texture size. [shards=%1]", shard_data_buffer.size());
+        GFX_PAINT_ERROR("Shard data exceeds available data texture size. [shards=%1]", shard_data_buffer.size());
         return false;
     }
 
