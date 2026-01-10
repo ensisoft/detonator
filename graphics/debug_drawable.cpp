@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include "base/format.h"
+#include "base/logging.h"
 #include "graphics/debug_drawable.h"
 #include "graphics/shader_source.h"
 #include "graphics/program.h"
@@ -67,19 +68,37 @@ bool DebugDrawableBase::Construct(const Environment& env, Device& device, Geomet
 
     Geometry::CreateArgs temp;
     if (!mDrawable->Construct(env, device, temp))
+    {
+        ERROR("Failed to construct debug drawable source mesh. [src='%1']", mDrawable->GetName());
         return false;
+    }
 
+    // it's not an error to not have any vertex data. if there
+    // was an error it should have been indicated by the construct
+    // return value instead.
     if (!temp.buffer.HasVertexData())
-        return false;
+    {
+        create.content_name = "DebugDrawable/" + temp.content_name;
+        create.content_hash = temp.content_hash;
+        create.usage = temp.usage;
+        DEBUG("Created empty debug drawable on source drawable. [src='%1']", mDrawable->GetName());
+        return true;
+    }
 
     if (mFeature == Feature::Wireframe)
     {
         GeometryBuffer wireframe;
         CreateWireframe(temp.buffer, wireframe);
 
+        create.usage  = temp.usage;
         create.buffer = std::move(wireframe);
         create.content_name = "Wireframe/" + temp.content_name;
         create.content_hash = temp.content_hash;
+        if (mDrawable->IsStaticGeometry())
+        {
+            DEBUG("Created wireframe mesh on source drawable. [src='%1']", mDrawable->GetName());
+        }
+        return true;
     }
     else if (mFeature == Feature::NormalMesh)
     {
@@ -94,17 +113,29 @@ bool DebugDrawableBase::Construct(const Environment& env, Device& device, Geomet
 
         GeometryBuffer buffer;
         if (!CreateNormalMesh(temp.buffer, buffer, flags))
+        {
+            ERROR("Failed to create debug drawable normal mesh on drawable. [src='%1']",
+                mDrawable->GetName());
             return false;
+        }
 
+        create.usage  = temp.usage;
         create.buffer = std::move(buffer);
-        create.content_name = base::FormatString("%1%2%3Mesh/%4",
-                normals ? "Normal" : "",
-                tangents ? "Tangent" : "",
-                bitangents ? "Bitangent" : "",
-                temp.content_name);
+        create.content_name = "NormalMesh/" + temp.content_name;
         create.content_hash = temp.content_hash;
+        if (mDrawable->IsStaticGeometry())
+        {
+            DEBUG("Created normal mesh on source drawable. [src='%1', normals=%2, tangents=%3, bitangents=%3]",
+                mDrawable->GetName(),
+                normals ? "yes" : "no",
+                tangents ? "yes" : "no",
+                bitangents ? "yes" : "no");
+        }
+        return true;
     }
-    return true;
+
+    BUG("Missing debug drawable feature.");
+    return false;
 }
 
 Drawable::Usage DebugDrawableBase::GetGeometryUsage() const

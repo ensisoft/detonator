@@ -167,6 +167,13 @@ namespace gfx
         // drawable objects that aren't based on any drawable class!
         virtual const DrawableClass* GetClass() const { return nullptr; }
 
+        virtual std::string GetName() const
+        {
+            if (const auto* klass = GetClass())
+                return klass->GetName();
+            return "";
+        }
+
         auto GetDrawCategory() const noexcept
         { return DrawableClass::MapDrawableCategory(GetType()); }
         bool IsTrue3D() const noexcept
@@ -175,6 +182,9 @@ namespace gfx
         { return GetSpatialMode() == SpatialMode::Flat2D; }
         bool IsPerceptual3D() const noexcept
         { return GetSpatialMode() == SpatialMode::Perceptual3D; }
+
+        bool IsStaticGeometry() const noexcept
+        { return GetGeometryUsage() == Usage::Static; }
 
         enum class Shader {
             Simple2D, Simple3D, Model3D, Perceptual3D
