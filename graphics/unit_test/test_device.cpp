@@ -5,17 +5,40 @@ public:
       : mSource(std::move(source))
     {}
 
-    virtual bool IsValid() const override
-    { return true; }
+    bool IsValid() const override
+    {
+        if (base::Contains(mSource, "junk shader"))
+            return false;
+        return true;
+    }
+    bool IsFallback() const override
+    {
+        return mFallbackShader;
+    }
+    std::string GetName() const override
+    {
+        return mName;
+    }
 
     std::string GetFilename() const
     { return mFilename; }
 
     std::string GetSource() const
     { return mSource; }
+
+    void SetFallback(bool fallback)
+    {
+        mFallbackShader = fallback;
+    }
+    void SetName(std::string name)
+    {
+        mName = std::move(name);
+    }
 private:
+    std::string mName;
     std::string mFilename;
     std::string mSource;
+    bool mFallbackShader = false;
 };
 
 class TestTexture : public gfx::Texture
@@ -161,6 +184,7 @@ public:
         const size_t index = mShaders.size();
         mShaders.emplace_back(new TestShader(args.source));
         mShaderIndexMap[id] = index;
+        mShaders.back()->SetFallback(args.fallback);
         return mShaders.back();
     }
     gfx::ProgramPtr FindProgram(const std::string& id) override
@@ -305,6 +329,11 @@ public:
     }
 
     const TestShader& GetShader(size_t index) const
+    {
+        TEST_REQUIRE(index < mShaders.size());
+        return *mShaders[index].get();
+    }
+    TestShader& GetShader(size_t index)
     {
         TEST_REQUIRE(index < mShaders.size());
         return *mShaders[index].get();
