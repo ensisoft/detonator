@@ -155,6 +155,8 @@ namespace gfx
         std::unique_ptr<DrawableClass> Copy() const override;
         void IntoJson(data::Writer& data) const override;
         bool FromJson(const data::Reader& data) override;
+    private:
+        bool ConstructInternal(Geometry::CreateArgs& create) const;
 
     private:
         std::string mId;
