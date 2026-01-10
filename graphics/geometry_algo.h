@@ -40,6 +40,9 @@ namespace gfx
     bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals,
                       unsigned flags = NormalMeshFlags::Normals, float line_length = 0.2f);
 
+    bool CreateShardEffectMesh(const GeometryBuffer& original_geometry_buffer,
+                               GeometryBuffer* shard_geometry_buffer, unsigned mesh_subdivision_count);
+
     bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
                         TessellationAlgo algo, unsigned sub_div_count);
 

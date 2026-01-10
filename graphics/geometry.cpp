@@ -321,6 +321,47 @@ bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, u
     return true;
 }
 
+bool CreateShardEffectMesh(const GeometryBuffer& original_geometry_buffer,
+                               GeometryBuffer* shard_geometry_buffer, unsigned mesh_subdivision_count)
+{
+    // the triangle mesh computation produces a  mesh that  has the same
+    // vertex layout as the original drawables geometry  buffer.
+    if (!TessellateMesh(original_geometry_buffer, *shard_geometry_buffer, TessellationAlgo::LongestEdgeBisection, mesh_subdivision_count))
+    {
+        return false;
+    }
+
+    ASSERT(shard_geometry_buffer->GetLayout() == GetVertexLayout<Vertex2D>());
+    ASSERT(shard_geometry_buffer->HasIndexData() == false);
+
+    const VertexStream vertex_stream(shard_geometry_buffer->GetLayout(),
+                                      shard_geometry_buffer->GetVertexBuffer());
+    const auto vertex_count = vertex_stream.GetCount();
+
+    // change the vertex format to ShardVertex2D and compute shard indices
+    // for each vertex using this vertex buffer.
+    VertexBuffer vertex_buffer;
+    vertex_buffer.SetVertexLayout(GetVertexLayout<ShardVertex2D>());
+    vertex_buffer.Resize(vertex_count);
+
+    for (size_t vertex_index = 0; vertex_index < vertex_count; ++vertex_index)
+    {
+        const auto triangle_index = vertex_index / 3;
+        const auto* src_vertex = vertex_stream.GetVertex<Vertex2D>(vertex_index);
+
+        ShardVertex2D vertex;
+        vertex.aPosition   = src_vertex->aPosition;
+        vertex.aTexCoord   = src_vertex->aTexCoord;
+        vertex.aShardIndex = triangle_index;
+        vertex_buffer.SetVertex(vertex, vertex_index);
+    }
+    // change the layout and the vertex data.
+    // the draw commands remain unchanged.
+    shard_geometry_buffer->SetVertexLayout(GetVertexLayout<ShardVertex2D>());
+    shard_geometry_buffer->SetVertexBuffer(vertex_buffer.TransferBuffer());
+    return true;
+}
+
 bool ComputeTangents(GeometryBuffer& geometry)
 {
     // allow read+write access to the data.
