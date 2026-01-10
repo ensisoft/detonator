@@ -23,11 +23,40 @@
 
 #include "base/hash.h"
 #include "base/math.h"
+#include "base/logging.h"
 #include "graphics/geometry_buffer.h"
 #include "graphics/geometry_algo.h"
 #include "graphics/vertex_algo.h"
 
 #include "base/snafu.h"
+
+namespace {
+bool ValidateDrawCommand(gfx::DrawType cmd, size_t primitive_count)
+{
+    if (cmd == gfx::DrawType::Triangles)
+    {
+        if (primitive_count % 3)
+        {
+            WARN("Invalid draw command primitive count for Triangles");
+            return false;
+        }
+    }
+    else if (cmd == gfx::DrawType::TriangleStrip || cmd == gfx::DrawType::TriangleFan)
+    {
+        if (primitive_count < 3)
+        {
+            WARN("Invalid draw command primitive count for %1", cmd);
+            return false;
+        }
+    }
+    else if (cmd == gfx::DrawType::LineLoop || cmd == gfx::DrawType::Lines || cmd == gfx::DrawType::Points)
+    {
+        WARN("Unexpected draw command type %1", cmd);
+        return false;
+    }
+    return true;
+}
+} // namespace
 
 namespace gfx
 {
@@ -71,6 +100,10 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
         const auto primitive_count = cmd.count != std::numeric_limits<uint32_t>::max()
                            ? (cmd.count)
                            : (has_index ? index_count : vertex_count);
+
+        // runtime validation for unexpected data.
+        if (!ValidateDrawCommand(cmd.type, primitive_count))
+            continue;
 
         if (cmd.type == GeometryBuffer::DrawType::Triangles)
         {
@@ -183,6 +216,10 @@ bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer, Tess
         const auto primitive_count = cmd.count != std::numeric_limits<uint32_t>::max()
                            ? (cmd.count)
                            : (has_index ? index_count : vertex_count);
+
+        // runtime validation for unexpected data.
+        if (!ValidateDrawCommand(cmd.type, primitive_count))
+            continue;
 
         if (cmd.type == GeometryBuffer::DrawType::Triangles)
         {
@@ -512,6 +549,10 @@ bool ComputeTangents(GeometryBuffer& geometry)
         const auto primitive_count = cmd.count != std::numeric_limits<uint32_t>::max()
                                      ? (cmd.count)
                                      : (has_index ? index_count : vertex_count);
+
+        // runtime validation for unexpected data.
+        if (!ValidateDrawCommand(cmd.type, primitive_count))
+            continue;
 
         if (cmd.type == GeometryBuffer::DrawType::Triangles)
         {
