@@ -37,11 +37,11 @@ namespace gfx
     // the idea is that we can easily capture the errors and store
     // them in the context (if any). Anything that is in the render
     // loop should use these macros instead of the base macros.
-#define GFX_PAINT_VERBOSE(fmt, ...) WritePaintContextLog(PaintContext::LogEvent::Verbose, __FILE__, __LINE__, fmt, ## __VA_ARGS__)
-#define GFX_PAINT_DEBUG(fmt, ...)   WritePaintContextLog(PaintContext::LogEvent::Debug,   __FILE__, __LINE__, fmt, ## __VA_ARGS__)
-#define GFX_PAINT_WARN(fmt, ...)    WritePaintContextLog(PaintContext::LogEvent::Warning, __FILE__, __LINE__, fmt, ## __VA_ARGS__)
-#define GFX_PAINT_INFO(fmt, ...)    WritePaintContextLog(PaintContext::LogEvent::Info,    __FILE__, __LINE__, fmt, ## __VA_ARGS__)
-#define GFX_PAINT_ERROR(fmt, ...)   WritePaintContextLog(PaintContext::LogEvent::Error,   __FILE__, __LINE__, fmt, ## __VA_ARGS__)
+#define GFX_PAINT_VERBOSE(fmt, ...) gfx::WritePaintContextLog(gfx::PaintContext::LogEvent::Verbose, __FILE__, __LINE__, fmt, ## __VA_ARGS__)
+#define GFX_PAINT_DEBUG(fmt, ...)   gfx::WritePaintContextLog(gfx::PaintContext::LogEvent::Debug,   __FILE__, __LINE__, fmt, ## __VA_ARGS__)
+#define GFX_PAINT_WARN(fmt, ...)    gfx::WritePaintContextLog(gfx::PaintContext::LogEvent::Warning, __FILE__, __LINE__, fmt, ## __VA_ARGS__)
+#define GFX_PAINT_INFO(fmt, ...)    gfx::WritePaintContextLog(gfx::PaintContext::LogEvent::Info,    __FILE__, __LINE__, fmt, ## __VA_ARGS__)
+#define GFX_PAINT_ERROR(fmt, ...)   gfx::WritePaintContextLog(gfx::PaintContext::LogEvent::Error,   __FILE__, __LINE__, fmt, ## __VA_ARGS__)
 
 #define GFX_PAINT_ERROR_RETURN(ret, fmt, ...) \
     do { \
