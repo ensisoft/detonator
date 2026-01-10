@@ -191,7 +191,7 @@ namespace gfx
         auto& GetVertexBuffer() noexcept
         { return mVertexData; }
 
-        size_t GetHash() noexcept;
+        size_t GetHash() const noexcept;
 
     private:
         GeometryDataLayout mVertexLayout;

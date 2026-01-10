@@ -58,6 +58,10 @@ namespace dev
         // Draw a series of triangles all connected to the
         // first vertex
         TriangleFan,
+        // Draw a series of triangles where each additional
+        // vertex after the first 3 vertices produces a new
+        // triangle with the previous 2 vertices.
+        TriangleStrip,
         // Draw the vertices as a series of connected lines
         // where each pair of adjacent vertices are connected
         // by a line.

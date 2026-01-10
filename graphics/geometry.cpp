@@ -32,7 +32,7 @@
 namespace gfx
 {
 
-size_t GeometryBuffer::GetHash() noexcept
+size_t GeometryBuffer::GetHash() const noexcept
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mVertexLayout.GetHash());
@@ -121,6 +121,36 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
                 AddLine(vertex_writer, vCurr, v0);
             }
         }
+        else if (cmd.type == GeometryBuffer::DrawType::TriangleStrip)
+        {
+            ASSERT(primitive_count >= 3);
+            // the first 3 vertices form a triangle and then every subsequent
+            // vertex creates another triangle with the previous two vertices.
+
+            const uint32_t i0 = has_index ? indices.GetIndex(cmd.offset+0) : cmd.offset+0;
+            const uint32_t i1 = has_index ? indices.GetIndex(cmd.offset+1) : cmd.offset+1;
+            const uint32_t i2 = has_index ? indices.GetIndex(cmd.offset+2) : cmd.offset+2;
+            const void* v0 = vertices.GetVertexPtr(i0);
+            const void* v1 = vertices.GetVertexPtr(i1);
+            const void* v2 = vertices.GetVertexPtr(i2);
+
+            AddLine(vertex_writer, v0, v1);
+            AddLine(vertex_writer, v1, v2);
+            AddLine(vertex_writer, v2, v0);
+
+            for (size_t j=3; j<primitive_count; ++j)
+            {
+                const auto start = cmd.offset + j;
+                const uint32_t vi0 = has_index ? indices.GetIndex(start-1) : start-1;
+                const uint32_t vi1 = has_index ? indices.GetIndex(start-2) : start-2;
+                const void* v0 = vertices.GetVertexPtr(start);
+                const void* v1 = vertices.GetVertexPtr(vi0);
+                const void* v2 = vertices.GetVertexPtr(vi1);
+
+                AddLine(vertex_writer, v0, v1);
+                AddLine(vertex_writer, v0, v2);
+            }
+        }
     }
 
     wireframe.SetVertexBuffer(std::move(vertex_data));
@@ -204,6 +234,47 @@ bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
                 gfx::VertexBuffer temp(vertex_layout);
                 SubdivideTriangle(v0, vPrev, vCurr, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
             }
+        }
+        else if (cmd.type == GeometryBuffer::DrawType::TriangleStrip)
+        {
+            ASSERT(primitive_count >= 3);
+            // the first 3 vertices form a triangle and then every subsequent
+            // vertex creates another triangle with the previous two vertices.
+            // the order between the last two vertices flip-flops based on the
+            // index being odd or even.
+            const uint32_t i0 = has_index ? indices.GetIndex(cmd.offset+0) : cmd.offset+0;
+            const uint32_t i1 = has_index ? indices.GetIndex(cmd.offset+1) : cmd.offset+1;
+            const uint32_t i2 = has_index ? indices.GetIndex(cmd.offset+2) : cmd.offset+2;
+            const void* v0 = vertices.GetVertexPtr(i0);
+            const void* v1 = vertices.GetVertexPtr(i1);
+            const void* v2 = vertices.GetVertexPtr(i2);
+
+            // first triangle v0, v1, v2
+            VertexBuffer temp(vertex_layout);
+            SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
+
+            for (size_t j=3; j<primitive_count; ++j)
+            {
+                const auto start = cmd.offset + j;
+                const uint32_t vi0 = has_index ? indices.GetIndex(start-1) : start-1;
+                const uint32_t vi1 = has_index ? indices.GetIndex(start-2) : start-2;
+                const void* v0 = vertices.GetVertexPtr(start);
+                const void* v1 = vertices.GetVertexPtr(vi0);
+                const void* v2 = vertices.GetVertexPtr(vi1);
+
+                const bool is_odd = (j & 0x1) == 0x1;
+                if (is_odd)
+                {
+                    VertexBuffer temp(vertex_layout);
+                    SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
+                }
+                else
+                {
+                    VertexBuffer temp(vertex_layout);
+                    SubdivideTriangle(v0, v2, v1, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
+                }
+            }
+
         }
     }
     buffer.SetVertexBuffer(std::move(vertex_data));
@@ -483,6 +554,37 @@ bool ComputeTangents(GeometryBuffer& geometry)
                 ASSERT(iPrev < vertex_count);
                 ASSERT(iCurr < vertex_count);
                 CalcTangents(i0, iPrev, iCurr);
+            }
+        }
+        else if (cmd.type == GeometryBuffer::DrawType::TriangleStrip)
+        {
+            ASSERT(primitive_count >= 3);
+            // the first 3 vertices form a triangle and then every subsequent
+            // vertex creates another triangle with the previous two vertices.
+            // the order between the last two vertices flip-flops based on the
+            // index being odd or even.
+            const uint32_t i0 = has_index ? indices.GetIndex(cmd.offset+0) : cmd.offset+0;
+            const uint32_t i1 = has_index ? indices.GetIndex(cmd.offset+1) : cmd.offset+1;
+            const uint32_t i2 = has_index ? indices.GetIndex(cmd.offset+2) : cmd.offset+2;
+
+            CalcTangents(i0, i1, i2);
+
+            for (size_t j=3; j<primitive_count; ++j)
+            {
+                const auto start = cmd.offset + j;
+                const uint32_t i0 = has_index ? indices.GetIndex(start-0) : start-0;
+                const uint32_t i1 = has_index ? indices.GetIndex(start-1) : start-1;
+                const uint32_t i2 = has_index ? indices.GetIndex(start-2) : start-2;
+
+                const bool is_odd = (j & 0x1) == 0x1;
+                if (is_odd)
+                {
+                    CalcTangents(i0, i1, i2);
+                }
+                else
+                {
+                    CalcTangents(i0, i2, i1);
+                }
             }
         }
     }
