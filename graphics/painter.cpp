@@ -483,56 +483,124 @@ GeometryPtr Painter::GetGpuGeometry(const Drawable& drawable, const Drawable::En
     const auto& id = drawable.GetGeometryId(env);
 
     const auto usage = drawable.GetGeometryUsage();
+
+    // STREAM
+    // - the underlying device VBO gets "orphaned" (i.e. discarded) after every frame.
+    // - the stream data must be re-uploaded one very draw.
+    // - the expectation is that a single stream Drawable is not drawn multiple
+    //   times within a frame. For example if you were to draw a single particle
+    //   engine instance multiple times this would end up producing redundant
+    //   GPU geometry data on every draw. Don't do that.
+    //
+    // DYNAMIC
+    // - this geometry is drawn often and updated only occasionally, i.e
+    //   less often than every frame. every frame would be STREAM.
+    // - geometry hash value is used to determine whether the underlying
+    //   device VBO (geometry) needs to be updated or not.
+    //
+    // STATIC
+    // - this geometry is drawn often and never changes EXCEPT if
+    //   we're actually running in the editor (in edit/design) mode
+    //   in which case it can change.
+    // - conditional check for changes in the content based on the
+    //   edit mode flag.
+
     if (usage == Drawable::Usage::Stream)
     {
+        // with STREAM geometry we assume there's no IO taking place
+        // (that would be terrible), but the geometry data is generated
+        // on the CPU on the fly by computation. (See particles)
+        // So with this in mind, even if the geometry generation fails
+        // let's just keep trying and not generate any fallback geometry.
         Geometry::CreateArgs args;
         if (!drawable.Construct(env, *mDevice, args))
+        {
+            const auto* drawable_class = drawable.GetClass();
+            GFX_PAINT_ERROR("Failed to construct drawable stream geometry. [name='%1']",
+                drawable_class ? drawable_class->GetName() : "");
             return nullptr;
+        }
 
         return mDevice->CreateGeometry(id, std::move(args));
     }
     else if (usage == Drawable::Usage::Dynamic)
     {
         auto geom = mDevice->FindGeometry(id);
-        if (geom == nullptr)
+        const auto content_hash  = geom ? geom->GetContentHash() : 0;
+        const auto drawable_hash = drawable.GetGeometryHash();
+
+        // construct geometry if it doesn't exist or the hash has changed
+        // indicating a dynamic change in the geometry data.
+        if (geom == nullptr || (content_hash != drawable_hash))
         {
             Geometry::CreateArgs args;
             if (!drawable.Construct(env, *mDevice, args))
-                return nullptr;
-
-            return mDevice->CreateGeometry(id, std::move(args));
+            {
+                const auto* drawable_class = drawable.GetClass();
+                args.fallback = true;
+                args.buffer.ClearData();
+                args.buffer_ptr.reset();
+                ERROR("Failed to construct drawable geometry. [name='%1']",
+                    drawable_class ? drawable_class->GetName() : "");
+            }
+            geom = mDevice->CreateGeometry(id, std::move(args));
         }
-        if (geom->GetContentHash() == drawable.GetGeometryHash())
-            return geom;
+        if (geom->IsFallback())
+        {
+            const auto* drawable_class = drawable.GetClass();
+            GFX_PAINT_ERROR("Failed to construct drawable geometry. [name='%1']",
+                drawable_class ? drawable_class->GetName() : "");
+            const auto& info = geom->GetErrorLog();
+            const auto& info_lines = base::SplitString(info, '\n');
+            for (const auto& info_line : info_lines)
+                GFX_PAINT_ERROR(info_line);
 
-        Geometry::CreateArgs args;
-        if (!drawable.Construct(env, *mDevice, args))
             return nullptr;
-
-        return mDevice->CreateGeometry(id, std::move(args));
+        }
+        return geom;
     }
     else if (usage == Drawable::Usage::Static)
     {
         auto geom = mDevice->FindGeometry(id);
-        if (geom == nullptr)
+        size_t content_hash = 0;
+        size_t drawable_hash = 0;
+
+        // evaluate hash only if in editing mode since it could be
+        // expensive computation.
+        if (mEditingMode)
+        {
+            content_hash  = geom ? geom->GetContentHash() : 0;
+            drawable_hash = drawable.GetGeometryHash();
+        }
+        // construct geometry if it doesn't exist or the hash changed
+        // and we're in editing mode.
+        if (geom == nullptr || (mEditingMode && (content_hash != drawable_hash)))
         {
             Geometry::CreateArgs args;
             if (!drawable.Construct(env, *mDevice, args))
-                return nullptr;
-
-            return mDevice->CreateGeometry(id, std::move(args));
+            {
+                const auto* drawable_class = drawable.GetClass();
+                args.fallback = true;
+                args.buffer.ClearData();
+                args.buffer_ptr.reset();
+                ERROR("Failed to construct drawable geometry. [name='%1']",
+                      drawable_class ? drawable_class->GetName() : "");
+            }
+            geom = mDevice->CreateGeometry(id, std::move(args));
         }
-        if (!mEditingMode)
-            return geom;
+        if (geom->IsFallback())
+        {
+            const auto* drawable_class = drawable.GetClass();
+            GFX_PAINT_ERROR("Failed to construct drawable geometry. [name='%1']",
+                drawable_class ? drawable_class->GetName() : "");
+            const auto& info = geom->GetErrorLog();
+            const auto& info_lines = base::SplitString(info, '\n');
+            for (const auto& info_line : info_lines)
+                GFX_PAINT_ERROR(info_line);
 
-        if (geom->GetContentHash() == drawable.GetGeometryHash())
-            return geom;
-
-        Geometry::CreateArgs args;
-        if (!drawable.Construct(env, *mDevice, args))
             return nullptr;
-
-        return mDevice->CreateGeometry(id, std::move(args));
+        }
+        return geom;
 
     } else BUG("Missing geometry usage handling.");
 }

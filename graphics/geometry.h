@@ -53,10 +53,18 @@ namespace gfx
             std::string content_name;
             // Get the hash value based on the buffer contents.
             std::size_t content_hash = 0;
+            // Human-readable error log (if any) why the geometry is empty/fallback.
+            std::string error_log;
+            // flag to indicate that the geometry is a fallback geometry
+            // not the real geometry, because the real geometry failed
+            // to load or could not be generated.
+            bool fallback = false;
         };
 
         virtual ~Geometry() = default;
 
+        // Get the error log (if any) why the geometry failed.
+        virtual std::string GetErrorLog() const { return ""; }
         // Get the human-readable geometry name.
         virtual std::string GetName() const = 0;
         // Get the current usage set on the geometry.
@@ -67,6 +75,8 @@ namespace gfx
         virtual std::size_t GetNumDrawCmds() const = 0;
         // Get the draw command at the specified index.
         virtual DrawCommand GetDrawCmd(size_t index) const = 0;
+        // Check whether the geometry is designated as a fallback geometry.
+        virtual bool IsFallback() const { return false; }
     private:
     };
 

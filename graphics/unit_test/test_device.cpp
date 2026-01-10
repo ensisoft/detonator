@@ -140,7 +140,7 @@ class TestGeometry : public gfx::Geometry
 {
 public:
     std::string GetName() const override
-    { return ""; }
+    { return mName; }
     Usage GetUsage() const override
     { return Usage::Static; }
     size_t GetNumDrawCmds() const override
@@ -149,7 +149,18 @@ public:
     { return 0; }
     DrawCommand GetDrawCmd(size_t index) const override
     { return {}; }
+    bool IsFallback() const override
+    {
+        return mFallback;
+    }
+
+    void SetName(std::string name)
+    { mName = std::move(name); }
+    void SetAsFallback(bool fallback)
+    { mFallback = fallback; }
 private:
+    std::string mName;
+    bool mFallback = false;
 };
 
 class TestDevice : public gfx::Device
@@ -213,6 +224,7 @@ public:
         const size_t index = mGeoms.size();
         mGeoms.emplace_back(new TestGeometry);
         mGeomIndexMap[id] = index;
+        mGeoms.back()->SetAsFallback(args.fallback);
         return mGeoms.back();
     }
     gfx::Texture* FindTexture(const std::string& name) override
@@ -339,12 +351,22 @@ public:
         return *mShaders[index].get();
     }
 
+    TestGeometry& GetGeometry(size_t index)
+    {
+        TEST_REQUIRE(index < mGeoms.size());
+        return *mGeoms[index].get();
+    }
+
     void Clear()
     {
         mTextureIndexMap.clear();
         mTextures.clear();
         mShaderIndexMap.clear();
         mShaders.clear();
+        mGeomIndexMap.clear();
+        mGeoms.clear();
+        mProgramIndexMap.clear();
+        mPrograms.clear();
     }
     size_t GetNumTextures() const
     { return mTextures.size(); }
@@ -352,6 +374,8 @@ public:
     { return mShaders.size(); }
     size_t GetNumPrograms() const
     { return mPrograms.size(); }
+    size_t GetNumGeometries() const
+    { return mGeoms.size(); }
 
 private:
     std::unordered_map<std::string, std::size_t> mTextureIndexMap;

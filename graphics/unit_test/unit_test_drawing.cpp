@@ -55,6 +55,7 @@
 #include "graphics/shader_source.h"
 #include "graphics/tool/polygon.h"
 
+#include "test_drawable.h"
 #include "test_device.cpp"
 
 bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
@@ -2090,6 +2091,86 @@ asdgljsaglsja
     // doesn't exist.
 }
 
+void unit_test_painter_fallback_geometry()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // stream fail, will try to reconstct on every draw
+    {
+        test::TestDrawable d;
+        d.usage = gfx::Drawable::Usage::Stream;
+        d.content_hash = 123;
+        d.fail_construct = true;
+
+        TestDevice device;
+        gfx::Painter painter(&device);
+
+        {
+            painter.Draw(d, gfx::Transform(), gfx::CreateMaterialFromColor(gfx::Color::Red));
+            TEST_REQUIRE(device.GetNumGeometries() == 0);
+        }
+
+        {
+            painter.Draw(d, gfx::Transform(), gfx::CreateMaterialFromColor(gfx::Color::Red));
+            TEST_REQUIRE(device.GetNumGeometries() == 0);
+        }
+    }
+
+    // dynamic fail
+    {
+        test::TestDrawable d;
+        d.usage = gfx::Drawable::Usage::Dynamic;
+        d.content_hash = 123;
+        d.fail_construct = true;
+
+        TestDevice device;
+        gfx::Painter painter(&device);
+
+        {
+            painter.Draw(d, gfx::Transform(), gfx::CreateMaterialFromColor(gfx::Color::Red));
+            TEST_REQUIRE(device.GetNumGeometries() == 1);
+            auto& geom = device.GetGeometry(0);
+            TEST_REQUIRE(geom.IsFallback() == true);
+            geom.SetName("fallback");
+        }
+
+        {
+            painter.Draw(d, gfx::Transform(), gfx::CreateMaterialFromColor(gfx::Color::Red));
+            TEST_REQUIRE(device.GetNumGeometries() == 1);
+            auto& geom = device.GetGeometry(0);
+            TEST_REQUIRE(geom.IsFallback() == true);
+            TEST_REQUIRE(geom.GetName() == "fallback");
+        }
+    }
+
+    // static fail
+    {
+        test::TestDrawable d;
+        d.usage = gfx::Drawable::Usage::Static;
+        d.content_hash = 123;
+        d.fail_construct = true;
+
+        TestDevice device;
+        gfx::Painter painter(&device);
+
+        {
+            painter.Draw(d, gfx::Transform(), gfx::CreateMaterialFromColor(gfx::Color::Red));
+            TEST_REQUIRE(device.GetNumGeometries() == 1);
+            auto& geom = device.GetGeometry(0);
+            TEST_REQUIRE(geom.IsFallback() == true);
+            geom.SetName("fallback");
+        }
+
+        {
+            painter.Draw(d, gfx::Transform(), gfx::CreateMaterialFromColor(gfx::Color::Red));
+            TEST_REQUIRE(device.GetNumGeometries() == 1);
+            auto& geom = device.GetGeometry(0);
+            TEST_REQUIRE(geom.IsFallback() == true);
+            TEST_REQUIRE(geom.GetName() == "fallback");
+        }
+    }
+}
+
 // multiple materials with textures should only load the
 // same texture object once onto the device.
 void unit_test_packed_texture_bug()
@@ -2272,6 +2353,7 @@ int test_main(int argc, char* argv[])
     unit_test_painter_shape_material_pairing();
     unit_test_painter_fallback_material_shader();
     unit_test_painter_fallback_drawable_shader();
+    unit_test_painter_fallback_geometry();
 
     unit_test_packed_texture_bug();
     unit_test_gpu_id_bug();

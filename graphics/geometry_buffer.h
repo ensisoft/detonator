@@ -75,6 +75,13 @@ namespace gfx
             mIndexType  = type;
         }
 
+        void ClearData() noexcept
+        {
+            mVertexData.clear();
+            mIndexData.clear();
+            mDrawCmds.clear();
+        }
+
         void ClearDraws() noexcept
         { mDrawCmds.clear(); }
         void AddDrawCmd(const DrawCommand& cmd)
