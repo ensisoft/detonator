@@ -56,7 +56,6 @@
 #include "graphics/tool/polygon.h"
 
 #include "test_device.cpp"
-#include "audio/format.h"
 
 bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
 {
@@ -1966,6 +1965,131 @@ void unit_test_painter_shape_material_pairing()
 
 }
 
+// Test that when a shader fails to load or compile the painter produces
+// a fallback shader and stops trying to recreate the shader on every paint.
+void unit_test_painter_fallback_material_shader()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // shader fails with compile error.
+    {
+        TestDevice device;
+
+        auto painter = gfx::Painter::Create(&device);
+
+        gfx::MaterialClass material_class(gfx::MaterialClass::Type::Color);
+        // add junk source
+        material_class.SetShaderSrc(R"(
+// junk shader
+asdgljsaglsja
+        )");
+
+        {
+            painter->Draw(gfx::Circle(), gfx::Transform(), gfx::MaterialInstance(material_class));
+            TEST_REQUIRE(device.GetNumShaders() == 1);
+            auto& shader = device.GetShader(0);
+            TEST_REQUIRE(shader.IsFallback() == false);
+            TEST_REQUIRE(shader.IsValid() == false);
+            shader.SetName("junk shader");
+        }
+
+        // draw again, the previous shader should still
+        // exist and not get overwritten
+        {
+            painter->Draw(gfx::Circle(), gfx::Transform(), gfx::MaterialInstance(material_class));
+            TEST_REQUIRE(device.GetNumShaders() == 1);
+            auto& shader = device.GetShader(0);
+            TEST_REQUIRE(shader.IsFallback() == false);
+            TEST_REQUIRE(shader.IsValid() == false);
+            TEST_REQUIRE(shader.GetName() == "junk shader");
+        }
+    }
+
+    // shader fails to load (shader source version error)
+    {
+        TestDevice device;
+
+        auto painter = gfx::Painter::Create(&device);
+
+        gfx::MaterialClass material_class(gfx::MaterialClass::Type::Custom);
+        // unsupported version
+        material_class.SetShaderSrc(R"(
+#version 100
+int main() { gl_FragColor = vec4(1.0); }
+            )");
+
+
+        // fallback gets created as a valid shader object
+        {
+            painter->Draw(gfx::Circle(), gfx::Transform(), gfx::MaterialInstance(material_class));
+            TEST_REQUIRE(device.GetNumShaders() == 1);
+            auto& shader = device.GetShader(0);
+            TEST_REQUIRE(shader.IsFallback() == true);
+            TEST_REQUIRE(shader.IsValid() == true);
+            shader.SetName("fallback shader");
+        }
+
+        // draw again, the previous shader should still
+        // exist and not get ovewrwritten
+        {
+            painter->Draw(gfx::Circle(), gfx::Transform(), gfx::MaterialInstance(material_class));
+            TEST_REQUIRE(device.GetNumShaders() == 1);
+            auto& shader = device.GetShader(0);
+            TEST_REQUIRE(shader.IsFallback() == true);
+            TEST_REQUIRE(shader.IsValid() == true);
+            TEST_REQUIRE(shader.GetName() == "fallback shader");
+        }
+    }
+}
+
+void unit_test_painter_fallback_drawable_shader()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // shader fails with compile error
+    {
+        TestDevice device;
+
+        auto painter = gfx::Painter::Create(&device);
+
+        gfx::PolygonMeshClass drawable_class;
+        drawable_class.SetMeshType(gfx::PolygonMeshClass::MeshType::Simple2DRenderMesh);
+        drawable_class.SetShaderSrc(R"(
+// junk shader
+asdgljsaglsja
+        )");
+
+        {
+            painter->Draw(gfx::PolygonMeshInstance(drawable_class), gfx::Transform(),
+                gfx::CreateMaterialFromColor(gfx::Color::Red));
+            // index 0 is the material (fragment) shader, index 1 is the drawable (vertex) shader
+            TEST_REQUIRE(device.GetNumShaders() == 2);
+            auto& shader = device.GetShader(1);
+            TEST_REQUIRE(shader.IsFallback() == false);
+            TEST_REQUIRE(shader.IsValid() == false);
+            shader.SetName("junk shader");
+        }
+
+        // draw again, the previous shader should still
+        // exist and not get overwritten
+        {
+            painter->Draw(gfx::PolygonMeshInstance(drawable_class), gfx::Transform(),
+                gfx::CreateMaterialFromColor(gfx::Color::Red));
+            // index 0 is the material (fragment) shader, index 1 is the drawable (vertex) shader
+            TEST_REQUIRE(device.GetNumShaders() == 2);
+            auto& shader = device.GetShader(1);
+            TEST_REQUIRE(shader.IsFallback() == false);
+            TEST_REQUIRE(shader.IsValid() == false);
+            TEST_REQUIRE(shader.GetName() == "junk shader");
+        }
+    }
+
+    // currently there's no way for the user to write their own
+    // vertex shaders, only customize them. this means loading
+    // cannot really fail, so this test (see material)
+    // doesn't exist.
+}
+
 // multiple materials with textures should only load the
 // same texture object once onto the device.
 void unit_test_packed_texture_bug()
@@ -2146,6 +2270,8 @@ int test_main(int argc, char* argv[])
     unit_test_global_particles();
     unit_test_particles();
     unit_test_painter_shape_material_pairing();
+    unit_test_painter_fallback_material_shader();
+    unit_test_painter_fallback_drawable_shader();
 
     unit_test_packed_texture_bug();
     unit_test_gpu_id_bug();
