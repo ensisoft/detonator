@@ -83,6 +83,7 @@ namespace gui
         void on_actionStop_triggered();
         void on_actionSave_triggered();
         void on_actionNewTriangleFan_triggered();
+        void on_actionNewTriangleStrip_triggered();
         void on_actionClear_triggered();
         void on_actionShowShader_triggered();
         void on_actionCustomizeShader_triggered();
@@ -110,6 +111,11 @@ namespace gui
         bool OnKeyPressEvent(QKeyEvent* key);
         bool OnKeyReleaseEvent(QKeyEvent* key);
 
+        enum class TriangleMode {
+            TriangleFan, TriangleStrip
+        };
+        void StartTriangleTool(TriangleMode mode);
+
         template<typename Vertex>
         void PaintVertices2D(gfx::Painter& painter) const;
 
@@ -129,6 +135,7 @@ namespace gui
             Before, After
         };
         void InsertVertex(InsertionPoint where);
+        bool CanInsertVertex() const;
 
         template<typename Vertex>
         void InsertVertex2D(InsertionPoint where);
@@ -163,7 +170,7 @@ namespace gui
     private:
         class VertexDataTable;
         class MouseTool;
-        template<typename T> class AddVertex2DTriangleFanTool;
+        template<typename T> class AddVertex2DTriangleTool;
         template<typename T> class MoveVertex2DTool;
 
         enum class Hotkey {

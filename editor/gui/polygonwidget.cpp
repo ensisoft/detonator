@@ -649,14 +649,15 @@ private:
 };
 
 template<typename VertexType>
-class ShapeWidget::AddVertex2DTriangleFanTool : public MouseTool {
+class ShapeWidget::AddVertex2DTriangleTool : public MouseTool {
 public:
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+    using TriangleMode = ShapeWidget::TriangleMode;
 
-    explicit AddVertex2DTriangleFanTool(State& state)
-        : mState(state)
+    explicit AddVertex2DTriangleTool(State& state, TriangleMode mode)
+        : mMode(mode)
+        , mState(state)
     {}
-
     void CompleteTool(const ViewState& view) override
     {
         auto vertices = MakeVerts2D<VertexType>(mPoints, view.width, view.height);
@@ -682,7 +683,7 @@ public:
         }
 
         gfx::Geometry::DrawCommand cmd;
-        cmd.type   = gfx::Geometry::DrawType::TriangleFan;
+        cmd.type   = GetTriangleMode();
         cmd.count  = mPoints.size();
         cmd.offset = mState.builder->GetVertexCount();
 
@@ -736,7 +737,7 @@ public:
         transform.Resize(view.width, view.height);
 
         gfx::Geometry::DrawCommand cmd;
-        cmd.type   = gfx::Geometry::DrawType::TriangleFan;
+        cmd.type   = GetTriangleMode();
         cmd.offset = 0;
         cmd.count  = points.size();
 
@@ -763,6 +764,16 @@ public:
         else ShowMessage("Move mouse and click to place a vertex", gfx::FPoint(10.0f, 10.0f), painter);
     }
 private:
+    gfx::Geometry::DrawType GetTriangleMode() const
+    {
+        if (mMode == TriangleMode::TriangleFan)
+            return gfx::Geometry::DrawType::TriangleFan;
+        else if (mMode == TriangleMode::TriangleStrip)
+            return gfx::Geometry::DrawType::TriangleStrip;
+        BUG("Bug on triangle mode.");
+    }
+private:
+    const TriangleMode mMode;
     ShapeWidget::State& mState;
     std::vector<QPoint> mPoints;
     QPoint mCurrentPoint;
@@ -925,13 +936,13 @@ void ShapeWidget::InitializeContent()
 
 void ShapeWidget::SetViewerMode()
 {
-    SetVisible(mUI.baseProperties, false);
-    SetVisible(mUI.lblHelp,        false);
-    SetVisible(mUI.blueprints,     false);
-    SetVisible(mUI.btnHamburger,   false);
+    SetVisible(mUI.baseProperties,    false);
+    SetVisible(mUI.lblHelp,           false);
+    SetVisible(mUI.blueprints,        false);
+    SetVisible(mUI.btnHamburger,      false);
     SetVisible(mUI.btnResetBlueprint, false);
-    SetVisible(mUI.lblRandom, false);
-    SetVisible(mUI.kRandom, false);
+    SetVisible(mUI.lblRandom,         false);
+    SetVisible(mUI.kRandom,           false);
 }
 
 void ShapeWidget::AddActions(QToolBar& bar)
@@ -944,6 +955,7 @@ void ShapeWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
     bar.addAction(mUI.actionNewTriangleFan);
+    bar.addAction(mUI.actionNewTriangleStrip);
     bar.addSeparator();
     bar.addAction(mUI.actionClear);
 }
@@ -957,6 +969,7 @@ void ShapeWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
     menu.addAction(mUI.actionNewTriangleFan);
+    menu.addAction(mUI.actionNewTriangleStrip);
     menu.addSeparator();
     menu.addAction(mUI.actionClear);
 }
@@ -1181,24 +1194,16 @@ void ShapeWidget::on_actionSave_triggered()
 
 void ShapeWidget::on_actionNewTriangleFan_triggered()
 {
-    const auto mesh_type = GetMeshType();
-    if (mesh_type == MeshType::Simple2DRenderMesh)
-    {
-        using ToolType = AddVertex2DTriangleFanTool<gfx::Vertex2D>;
-        mMouseTool = std::make_unique<ToolType>(mState);
-    }
-    else if (mesh_type == MeshType::Simple2DShardEffectMesh)
-    {
-        using ToolType = AddVertex2DTriangleFanTool<gfx::ShardVertex2D>;
-        mMouseTool = std::make_unique<ToolType>(mState);
-    }
-    else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
-    {
-        using ToolType = AddVertex2DTriangleFanTool<gfx::Perceptual3DVertex>;
-        mMouseTool = std::make_unique<ToolType>(mState);
-    } else BUG("Missing mesh type handling.");
-
+    StartTriangleTool(TriangleMode::TriangleFan);
     SetValue(mUI.actionNewTriangleFan, true);
+    SetValue(mUI.actionNewTriangleStrip, false);
+}
+
+void ShapeWidget::on_actionNewTriangleStrip_triggered()
+{
+    StartTriangleTool(TriangleMode::TriangleStrip);
+    SetValue(mUI.actionNewTriangleFan, false);
+    SetValue(mUI.actionNewTriangleStrip, true);
 }
 
 void ShapeWidget::on_actionShowShader_triggered()
@@ -1414,6 +1419,7 @@ bool ShapeWidget::OnEscape()
         mMouseTool.reset();
 
         mUI.actionNewTriangleFan->setChecked(false);
+        mUI.actionNewTriangleStrip->setChecked(false);
         mUI.actionClear->setEnabled(true);
     }
     else if (mSelectedVertex < mState.builder->GetVertexCount())
@@ -1715,6 +1721,8 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
 
 void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClassHandle& poly, gfx::Device* device) const
 {
+    gfx::PaintContext pc;
+
     const auto widget_width  = mUI.widget->width();
     const auto widget_height = mUI.widget->height();
     const auto view_width = static_cast<float>(rect.width());
@@ -1801,6 +1809,8 @@ void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClass
 
 void ShapeWidget::Paint3DAxonometricScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device) const
 {
+    gfx::PaintContext pc;
+
     const auto widget_width  = mUI.widget->width();
     const auto widget_height = mUI.widget->height();
     const auto view_width = static_cast<float>(rect.width());
@@ -1972,6 +1982,9 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
             menu.AddAction("Start New Triangle Fan", QIcon("icons32:triangle_fan.png"), [this]() {
                 QTimer::singleShot(0, this, &ShapeWidget::on_actionNewTriangleFan_triggered);
             });
+            menu.AddAction("Start New Triangle Strip", QIcon("icons32:triangle_fan.png"), [this]() {
+                QTimer::singleShot(0, this, &ShapeWidget::on_actionNewTriangleStrip_triggered);
+            });
             menu.AddSeparator();
             if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
             {
@@ -2000,10 +2013,10 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
 
             menu.AddAction("Insert Vertex Before", [this]() {
                 InsertVertex(InsertionPoint::Before);
-            })->setEnabled(have_selection);
+            })->setEnabled(have_selection && CanInsertVertex());
             menu.AddAction("Insert Vertex After", [this]() {
                 InsertVertex(InsertionPoint::After);
-            })->setEnabled(have_selection);
+            })->setEnabled(have_selection && CanInsertVertex());
             menu.AddAction("Delete Vertex", QIcon("icons:delete.png"), [this]() {
                 mState.table->EraseVertex(mSelectedVertex);
                 mSelectedVertex = InvalidIndex;
@@ -2152,6 +2165,26 @@ bool ShapeWidget::OnKeyReleaseEvent(QKeyEvent* key)
     else return false;
 
     return true;
+}
+
+void ShapeWidget::StartTriangleTool(TriangleMode mode)
+{
+    const auto mesh_type = GetMeshType();
+    if (mesh_type == MeshType::Simple2DRenderMesh)
+    {
+        using ToolType = AddVertex2DTriangleTool<gfx::Vertex2D>;
+        mMouseTool = std::make_unique<ToolType>(mState, mode);
+    }
+    else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+    {
+        using ToolType = AddVertex2DTriangleTool<gfx::ShardVertex2D>;
+        mMouseTool = std::make_unique<ToolType>(mState, mode);
+    }
+    else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+    {
+        using ToolType = AddVertex2DTriangleTool<gfx::Perceptual3DVertex>;
+        mMouseTool = std::make_unique<ToolType>(mState, mode);
+    } else BUG("Missing mesh type handling.");
 }
 
 template<typename VertexType>
@@ -2393,6 +2426,25 @@ void ShapeWidget::InsertVertex(InsertionPoint where)
     else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
         InsertVertex2D<gfx::Perceptual3DVertex>(where);
     else BUG("Missing mesh type handling.");
+}
+
+bool ShapeWidget::CanInsertVertex() const
+{
+    if (mSelectedVertex >= mState.builder->GetVertexCount())
+        return false;
+    const auto cmd_index = mState.builder->FindDrawCommand(mSelectedVertex);
+    // junk vertex that doesn't belong anywhere
+    if (cmd_index == std::numeric_limits<size_t>::max())
+        return false;
+
+    // degenerate left over triangle ?
+    const auto& cmd = mState.builder->GetDrawCommand(cmd_index);
+    if (cmd.count < 3)
+        return false;
+    if (cmd.type != gfx::DrawType::TriangleFan)
+        return false;
+
+    return true;
 }
 
 template<typename VertexType>
