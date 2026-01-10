@@ -158,8 +158,8 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
     wireframe.AddDrawCmd(GeometryBuffer::DrawType::Lines);
 }
 
-bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
-    TessellationAlgo algo, unsigned sub_div_count)
+bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer, TessellationAlgo algo,
+    unsigned sub_div_count, bool discard_skinny_slivers)
 {
     const VertexStream vertices(geometry.GetLayout(),
                             geometry.GetVertexDataPtr(),
@@ -201,8 +201,8 @@ bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
                 const auto* v2 = vertices.GetVertexPtr(i2);
 
                 // triangle v0, v1, v2
-                gfx::VertexBuffer temp(vertex_layout);
-                SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
+                VertexBuffer temp(vertex_layout);
+                SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count, discard_skinny_slivers);
             }
         }
         else if (cmd.type == GeometryBuffer::DrawType::TriangleFan)
@@ -219,8 +219,8 @@ bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
             const void* v2 = vertices.GetVertexPtr(i2);
 
             // first triangle v0, v1, v2
-            gfx::VertexBuffer temp(vertex_layout);
-            SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
+            VertexBuffer temp(vertex_layout);
+            SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count, discard_skinny_slivers);
 
             for (size_t j=3; j<primitive_count; ++j)
             {
@@ -231,8 +231,8 @@ bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
                 const void* vCurr = vertices.GetVertexPtr(iCurr);
 
                 // triangle v0, vPrev, vCurr
-                gfx::VertexBuffer temp(vertex_layout);
-                SubdivideTriangle(v0, vPrev, vCurr, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
+                VertexBuffer temp(vertex_layout);
+                SubdivideTriangle(v0, vPrev, vCurr, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count, discard_skinny_slivers);
             }
         }
         else if (cmd.type == GeometryBuffer::DrawType::TriangleStrip)
@@ -251,7 +251,7 @@ bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
 
             // first triangle v0, v1, v2
             VertexBuffer temp(vertex_layout);
-            SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
+            SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count, discard_skinny_slivers);
 
             for (size_t j=3; j<primitive_count; ++j)
             {
@@ -266,12 +266,12 @@ bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
                 if (is_odd)
                 {
                     VertexBuffer temp(vertex_layout);
-                    SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
+                    SubdivideTriangle(v0, v1, v2, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count, discard_skinny_slivers);
                 }
                 else
                 {
                     VertexBuffer temp(vertex_layout);
-                    SubdivideTriangle(v0, v2, v1, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count);
+                    SubdivideTriangle(v0, v2, v1, vertex_layout, vertex_buffer, temp, algo, 0, sub_div_count, discard_skinny_slivers);
                 }
             }
 
@@ -392,12 +392,13 @@ bool CreateNormalMesh(const GeometryBuffer& geometry, GeometryBuffer& normals, u
     return true;
 }
 
-bool CreateShardEffectMesh(const GeometryBuffer& original_geometry_buffer,
-                               GeometryBuffer* shard_geometry_buffer, unsigned mesh_subdivision_count)
+bool CreateShardEffectMesh(const GeometryBuffer& original_geometry_buffer, GeometryBuffer* shard_geometry_buffer,
+    unsigned mesh_subdivision_count, bool discard_skinny_slivers)
 {
     // the triangle mesh computation produces a  mesh that  has the same
     // vertex layout as the original drawables geometry  buffer.
-    if (!TessellateMesh(original_geometry_buffer, *shard_geometry_buffer, TessellationAlgo::LongestEdgeBisection, mesh_subdivision_count))
+    if (!TessellateMesh(original_geometry_buffer, *shard_geometry_buffer, TessellationAlgo::LongestEdgeBisection,
+        mesh_subdivision_count, discard_skinny_slivers))
     {
         return false;
     }

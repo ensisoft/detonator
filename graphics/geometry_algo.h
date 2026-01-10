@@ -41,10 +41,11 @@ namespace gfx
                       unsigned flags = NormalMeshFlags::Normals, float line_length = 0.2f);
 
     bool CreateShardEffectMesh(const GeometryBuffer& original_geometry_buffer,
-                               GeometryBuffer* shard_geometry_buffer, unsigned mesh_subdivision_count);
+                               GeometryBuffer* shard_geometry_buffer,
+                               unsigned mesh_subdivision_count, bool discard_skinny_slivers);
 
     bool TessellateMesh(const GeometryBuffer& geometry, GeometryBuffer& buffer,
-                        TessellationAlgo algo, unsigned sub_div_count);
+                        TessellationAlgo algo, unsigned sub_div_count, bool discard_skinny_slivers = true);
 
     bool ComputeTangents(GeometryBuffer& geometry);
 

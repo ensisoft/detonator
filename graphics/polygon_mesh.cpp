@@ -556,8 +556,13 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
 
             const auto& args = std::get<ShardedEffectMeshArgs>(env.mesh_args);
 
+            // if the sub-division count is set to 0 we're going to keep each
+            // triangle that is in the original mesh.
+            const auto discard_skinny_slivers = args.mesh_subdivision_count != 0;
+
             GeometryBuffer shard_geometry_buffer;
-            if (!CreateShardEffectMesh(temp.buffer, &shard_geometry_buffer, args.mesh_subdivision_count))
+            if (!CreateShardEffectMesh(temp.buffer, &shard_geometry_buffer,
+                                       args.mesh_subdivision_count, discard_skinny_slivers))
                 return false;
 
             const auto vertex_count = shard_geometry_buffer.GetVertexCount();

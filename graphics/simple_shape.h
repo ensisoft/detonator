@@ -335,7 +335,7 @@ namespace gfx
         { mStyle = style; }
     private:
         bool ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
-            unsigned mesh_subdivision_count) const;
+            unsigned mesh_subdivision_count, bool discard_skinny_slivers) const;
     private:
         std::shared_ptr<const Class> mClass;
         Style mStyle = Style::Solid;

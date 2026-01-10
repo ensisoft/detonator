@@ -1343,8 +1343,9 @@ bool SimpleShapeInstance::Construct(const Environment& env, Device& device, Geom
         if (mStyle != Style::Solid)
             return false;
 
+        constexpr auto discard_skinny_slivers = true;
         const auto& args = std::get<ShardedEffectMeshArgs>(env.mesh_args);
-        return ConstructShardMesh(env, device, geometry, args.mesh_subdivision_count);
+        return ConstructShardMesh(env, device, geometry,args.mesh_subdivision_count, discard_skinny_slivers);
     }
 
     detail::ConstructSimpleShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), geometry);
@@ -1429,7 +1430,7 @@ SpatialMode SimpleShapeInstance::GetSpatialMode() const
 }
 
 bool SimpleShapeInstance::ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
-    unsigned mesh_subdivision_count) const
+    unsigned mesh_subdivision_count, bool discard_skinny_slivers) const
 {
     Geometry::CreateArgs temp;
     detail::ConstructSimpleShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), temp);
@@ -1437,7 +1438,7 @@ bool SimpleShapeInstance::ConstructShardMesh(const Environment& env, Device& dev
     // the triangle mesh computation produces a  mesh that  has the same
     // vertex layout as the original drawables geometry  buffer.
     GeometryBuffer shard_geometry_buffer;
-    if (!CreateShardEffectMesh(temp.buffer, &shard_geometry_buffer, mesh_subdivision_count))
+    if (!CreateShardEffectMesh(temp.buffer, &shard_geometry_buffer, mesh_subdivision_count, discard_skinny_slivers))
         return false;
 
     const auto vertex_count = shard_geometry_buffer.GetVertexCount();
