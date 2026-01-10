@@ -552,7 +552,8 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
         if (mMeshType == MeshType::Simple2DRenderMesh)
         {
             Geometry::CreateArgs temp;
-            ConstructInternal(temp);
+            if (!ConstructInternal(temp))
+                return false;
 
             const auto& args = std::get<ShardedEffectMeshArgs>(env.mesh_args);
 
@@ -576,10 +577,20 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
                     mName, triangle_count);
             return true;
         }
-        else if (mMeshType != MeshType::Simple2DShardEffectMesh)
+        if (mMeshType != MeshType::Simple2DShardEffectMesh)
             return false;
+
+        return ConstructInternal(create);
     }
-    return ConstructInternal(create);
+    else if (env.mesh_type == DrawableClass::MeshType::NormalRenderMesh)
+    {
+        if (mMeshType == MeshType::Simple2DShardEffectMesh)
+            return false;
+
+        return ConstructInternal(create);
+    }
+
+    BUG("Bug on mesh type.");
 }
 bool PolygonMeshClass::ConstructInternal(Geometry::CreateArgs& create) const
 {
@@ -619,7 +630,9 @@ bool PolygonMeshClass::ConstructInternal(Geometry::CreateArgs& create) const
     const auto& data_buffer = LoadResource(desc);
     if (!data_buffer)
     {
-        ERROR("Failed to load polygon mesh. [uri='%1']", mContentUri);
+        create.error_log = base::FormatString("Failed to load polygon mesh data. [shape='%1, uri='%2]",
+            mName, mContentUri);
+        ERROR(create.error_log);
         return false;
     }
 
@@ -628,7 +641,9 @@ bool PolygonMeshClass::ConstructInternal(Geometry::CreateArgs& create) const
     auto [success, json, error] = base::JsonParse(beg, end);
     if (!success)
     {
-        ERROR("Failed to parse geometry buffer. [uri='%1', error='%2'].", mContentUri, error);
+        create.error_log = base::FormatString("Failed to parse polygon mesh geometry buffer. [shape='%1', uri='%2', error='%3]",
+            mName, mContentUri, error);
+        ERROR(create.error_log);
         return false;
     }
 
@@ -637,26 +652,34 @@ bool PolygonMeshClass::ConstructInternal(Geometry::CreateArgs& create) const
     VertexBuffer vertex_buffer;
     if (!vertex_buffer.FromJson(reader))
     {
-        ERROR("Failed to load polygon mesh vertex buffer. [uri='%1']", mContentUri);
+        create.error_log = base::FormatString("Failed to load polygon mesh vertex buffer. [shape='%1', uri='%2']",
+            mName, mContentUri);
+        ERROR(create.error_log);
         return false;
     }
     if (!vertex_buffer.Validate())
     {
-        ERROR("Polygon mesh vertex buffer is not valid. [uri='%1']", mContentUri);
+        create.error_log = base::FormatString("Invalid polygon mesh vertex buffer. [shape='%1', uri='%2']",
+            mName, mContentUri);
+        ERROR(create.error_log);
         return false;
     }
 
     CommandBuffer command_buffer;
     if (!command_buffer.FromJson(reader))
     {
-        ERROR("Failed to load polygon mesh command buffer. [uri='%1']", mContentUri);
+        create.error_log = base::FormatString("Failed to load polygon mesh command buffer. [shape='%1', uri='%2']",
+            mName, mContentUri);
+        ERROR(create.error_log);
         return false;
     }
 
     IndexBuffer index_buffer;
     if (!index_buffer.FromJson(reader))
     {
-        ERROR("Failed to load polygon mesh index buffer. [uri='%1']", mContentUri);
+        create.error_log = base::FormatString("Failed to load polygon mesh index buffer. [shape='%1', uri='%2']",
+            mName, mContentUri);
+        ERROR(create.error_log);
         return false;
     }
 
@@ -668,6 +691,7 @@ bool PolygonMeshClass::ConstructInternal(Geometry::CreateArgs& create) const
     geometry_buffer.UploadVertices(vertex_buffer.GetBufferPtr(), vertex_buffer.GetBufferSize());
     geometry_buffer.UploadIndices(index_buffer.GetBufferPtr(), index_buffer.GetBufferSize(), index_buffer.GetType());
     geometry_buffer.SetDrawCommands(command_buffer.GetCommandBuffer());
+    DEBUG("Loaded polygon mesh geometry buffer(s). [shape='%1', uri='%2']", mName, mContentUri);
     return true;
 }
 

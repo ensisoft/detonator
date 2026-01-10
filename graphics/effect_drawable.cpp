@@ -28,7 +28,6 @@
 #include "graphics/effect_drawable.h"
 #include "graphics/texture.h"
 #include "graphics/utility.h"
-#include "graphics/paint_log.h"
 
 namespace {
 std::function<float (float min, float max)> random_function;
@@ -134,7 +133,7 @@ std::string EffectDrawable::GetGeometryId(const Environment& env) const
     // each effect maps to a different GPU geometry.
 
     Environment e = env;
-    e.mesh_type = mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
+    e.mesh_type = MeshType::ShardedEffectMesh;
 
     std::string id;
     id += mDrawable->GetGeometryId(e);
@@ -150,8 +149,8 @@ bool EffectDrawable::Construct(const Environment& env, Device& device, Geometry:
     const auto source_draw_primitive = mDrawable->GetDrawPrimitive();
     if (source_draw_primitive != DrawPrimitive::Triangles)
     {
-        GFX_PAINT_ERROR("Effects mesh can only be constructed with triangle mesh topology. [top='%1']",
-            source_draw_primitive);
+        ERROR("Effect mesh can only be constructed with triangle mesh topology. [src='%1', primitive=%2]",
+            mDrawable->GetName(), source_draw_primitive);
         return false;
     }
 
@@ -291,30 +290,36 @@ bool EffectDrawable::ConstructShardMesh(const Environment& env, Device& device, 
     e.mesh_type = MeshType::ShardedEffectMesh;
     e.mesh_args = ShardedEffectMeshArgs { mesh_subdivision_count };
 
-    Geometry::CreateArgs args;
-    if (!mDrawable->Construct(e, device, args))
+    Geometry::CreateArgs temp;
+    if (!mDrawable->Construct(e, device, temp))
     {
-        GFX_PAINT_ERROR("Failed to construct effect mesh.");
+        ERROR("Failed to construct effect drawable source mesh. [src='%1']", mDrawable->GetName());
         return false;
     }
-    ASSERT(args.buffer.GetLayout() == GetVertexLayout<ShardVertex2D>());
-    const VertexStream vertex_stream(args.buffer.GetLayout(),
-                                 args.buffer.GetVertexBuffer());
+    ASSERT(temp.buffer.GetLayout() == GetVertexLayout<ShardVertex2D>());
+    const VertexStream vertex_stream(temp.buffer.GetLayout(),
+                                     temp.buffer.GetVertexBuffer());
     const auto vertex_count = vertex_stream.GetCount();
+
+    // hmm, is this adequate?
+    if (vertex_count == 0)
+    {
+        create.usage  = temp.usage;
+        create.content_hash = temp.content_hash;
+        create.content_name = "ShardEffect/" + temp.content_name;
+        DEBUG("Created empty shard effect mesh on drawable. [src='%1']", mDrawable->GetName());
+        return true;
+    }
 
     glm::vec3 minimums = {0.0f, 0.0f, 0.0f};
     glm::vec3 maximums = {0.0f, 0.0f, 0.0f};
-    if (!FindGeometryMinMax(args.buffer, &minimums, &maximums))
+    if (!FindGeometryMinMax(temp.buffer, &minimums, &maximums))
     {
-        GFX_PAINT_ERROR("Failed to compute mesh bounds.");
+        ERROR("Failed to compute shard effect mesh bounds.");
         return false;
     }
     const auto shape_bounds_dimensions = maximums - minimums;
     mShapeCenter = minimums + shape_bounds_dimensions * 0.5f;
-
-    // hmm, is this adequate?
-    if (vertex_count == 0)
-        return true;
 
     struct ShardTempData {
         glm::vec2 aPosition = {0.0f, 0.0f};
@@ -366,14 +371,18 @@ bool EffectDrawable::ConstructShardMesh(const Environment& env, Device& device, 
     // Emscripten either.
     if (!PackDataTexture(mEffectId, "Shard data texture", &shard_data_buffer[0], shard_data_buffer.size(), device))
     {
-        GFX_PAINT_ERROR("Shard data exceeds available data texture size. [shards=%1]", shard_data_buffer.size());
+        ERROR("Shard data exceeds available data texture size. [shards=%1]", shard_data_buffer.size());
         return false;
     }
 
-    create.buffer = std::move(args.buffer);
-    create.usage  = args.usage;
-    create.content_hash = args.content_hash;
-    create.content_name = args.content_name;
+    create.buffer = std::move(temp.buffer);
+    create.usage  = temp.usage;
+    create.content_hash = temp.content_hash;
+    create.content_name = "ShardEffect/" + temp.content_name;
+    if (mDrawable->IsStaticGeometry())
+    {
+        DEBUG("Created shard effect mesh on source drawable. [src='%1']", mDrawable->GetName());
+    }
     return true;
 }
 
