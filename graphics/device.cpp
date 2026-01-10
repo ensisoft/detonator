@@ -254,7 +254,9 @@ gfx::GeometryPtr GraphicsDevice::CreateGeometry(const std::string& id, gfx::Geom
 {
     auto geometry = std::make_shared<gfx::DeviceGeometry>(mDevice);
     geometry->SetFrameStamp(mFrameNumber);
-    geometry->SetName(args.content_name);
+    geometry->SetName(std::move(args.content_name));
+    geometry->SetErrorLog(std::move(args.error_log));
+    geometry->SetAsFallback(args.fallback);
     geometry->SetDataHash(args.content_hash);
     geometry->SetUsage(args.usage);
     if (args.buffer_ptr)

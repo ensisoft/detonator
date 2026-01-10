@@ -48,6 +48,10 @@ namespace gfx
         { return mUsage; }
         std::string GetName() const override
         { return mName; }
+        std::string GetErrorLog() const override
+        { return mErrorLog; }
+        bool IsFallback() const override
+        { return mFallback; }
 
         void SetBuffer(std::shared_ptr<const GeometryBuffer> buffer) noexcept
         { mPendingUpload = std::move(buffer); }
@@ -55,10 +59,14 @@ namespace gfx
         { mUsage = usage; }
         void SetDataHash(size_t hash) noexcept
         { mHash = hash; }
-        void SetName(const std::string& name) noexcept
-        { mName = name; }
+        void SetName(std::string name) noexcept
+        { mName = std::move(name); }
+        void SetErrorLog(std::string log) noexcept
+        { mErrorLog = std::move(log); }
         void SetFrameStamp(size_t frame_number) const noexcept
         { mFrameNumber = frame_number; }
+        void SetAsFallback(bool fallback)
+        { mFallback = fallback; }
         size_t GetFrameStamp() const noexcept
         { return mFrameNumber; }
 
@@ -105,6 +113,8 @@ namespace gfx
         dev::BufferUsage mUsage = BufferUsage::Static;
         std::size_t mHash = 0;
         std::string mName;
+        std::string mErrorLog;
+        bool mFallback = false;
 
         mutable std::size_t mFrameNumber = 0;
         mutable std::shared_ptr<const GeometryBuffer> mPendingUpload;
