@@ -930,6 +930,8 @@ public:
             return GL_POINTS;
         else if (draw == dev::DrawType::TriangleFan)
             return GL_TRIANGLE_FAN;
+        else if (draw == dev::DrawType::TriangleStrip)
+            return GL_TRIANGLE_STRIP;
         else if (draw == dev::DrawType::Lines)
             return GL_LINES;
         else if (draw == dev::DrawType::LineLoop)
