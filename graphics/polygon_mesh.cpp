@@ -30,6 +30,7 @@
 #include "data/json.h"
 #include "base/json.h"
 #include "graphics/polygon_mesh.h"
+#include "geometry_algo.h"
 #include "graphics/drawcmd.h"
 #include "graphics/loader.h"
 #include "graphics/utility.h"
@@ -548,10 +549,35 @@ bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& c
 {
     if (env.mesh_type == DrawableClass::MeshType::ShardedEffectMesh)
     {
-        if (mMeshType != MeshType::Simple2DShardEffectMesh)
+        if (mMeshType == MeshType::Simple2DRenderMesh)
+        {
+            Geometry::CreateArgs temp;
+            ConstructInternal(temp);
+
+            const auto& args = std::get<ShardedEffectMeshArgs>(env.mesh_args);
+
+            GeometryBuffer shard_geometry_buffer;
+            if (!CreateShardEffectMesh(temp.buffer, &shard_geometry_buffer, args.mesh_subdivision_count))
+                return false;
+
+            const auto vertex_count = shard_geometry_buffer.GetVertexCount();
+            const auto triangle_count = vertex_count / 3;
+
+            create.buffer = std::move(shard_geometry_buffer);
+            create.usage  = temp.usage;
+            create.content_hash = temp.content_hash;
+            create.content_name = temp.content_name;
+            DEBUG("Successfully constructed polygon mesh shard mesh. [shape='%1', triangles=%2]",
+                    mName, triangle_count);
+            return true;
+        }
+        else if (mMeshType != MeshType::Simple2DShardEffectMesh)
             return false;
     }
-
+    return ConstructInternal(create);
+}
+bool PolygonMeshClass::ConstructInternal(Geometry::CreateArgs& create) const
+{
     const auto usage = mStatic ? Geometry::Usage::Static
                                : Geometry::Usage::Dynamic;
 
