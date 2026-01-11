@@ -20,6 +20,7 @@
 
 #include "base/logging.h"
 #include "base/math.h"
+#include "base/geometry.h"
 #include "graphics/transform.h"
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
@@ -266,7 +267,7 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classl
         // will behave when the number of vertices exceeds b2_maxPolygonVertices.
         // Finding the convex hull here can at least help us discard some
         // irrelevant vertices already.
-        verts = math::FindConvexHull(verts);
+        verts = base::FindConvexHull(verts);
         // still too many?
         if (verts.size() > b2_maxPolygonVertices)
         {
