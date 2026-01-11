@@ -61,7 +61,7 @@ void unit_test_triangle_winding_order()
 
     TEST_REQUIRE(base::FindTriangleWindingOrder(a, b, c) == base::TriangleWindingOrder::Clockwise);
     TEST_REQUIRE(base::FindTriangleWindingOrder(c, b, a) == base::TriangleWindingOrder::CounterClockwise);
-    TEST_REQUIRE(base::FindTriangleWindingOrder(a, a, a) == base::TriangleWindingOrder::Undetermined);
+    TEST_REQUIRE(base::FindTriangleWindingOrder(a, a, a) == base::TriangleWindingOrder::Indeterminate);
 }
 
 void unit_test_convex_hull()

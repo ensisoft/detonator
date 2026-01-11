@@ -27,28 +27,68 @@
 
 namespace base
 {
-    enum class TriangleWindingOrder {
-        Undetermined,
+    enum class TriangleWindingOrder : uint8_t {
         Clockwise,
         CounterClockwise,
+        Indeterminate
     };
 
     // Given 3 vertices find the polygon winding order.
-    template<typename Vec2>
-    TriangleWindingOrder FindTriangleWindingOrder(const Vec2& a, const Vec2& b, const Vec2& c) noexcept
+    template<typename Point2>
+    TriangleWindingOrder FindTriangleWindingOrder(const Point2& a, const Point2& b, const Point2& c) noexcept
     {
         // https://stackoverflow.com/questions/9120032/determine-winding-of-a-2d-triangles-after-triangulation
         // https://www.element84.com/blog/determining-the-winding-of-a-polygon-given-as-a-set-of-ordered-points
 
-        // positive area indicates clockwise winding.
-        // negative area indicates counter-clockwise winding.
-        // zero area is degenerate case and the vertices are collinear (not linearly independent)
-        const float ret = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
-        if (ret > 0.0f)
+        // assuming Y growing down we'd have:
+        //   positive area indicates clockwise winding.
+        //   negative area indicates counter-clockwise winding.
+        //   zero area is degenerate case and the vertices are collinear (not linearly independent)
+        // if your coordinate space is more math like (instead of 2D computer graphics)
+        // where Y grows up the orientation is flipped.
+        const auto ret = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
+        using ValueType = decltype(ret);
+        constexpr auto Zero = ValueType { 0 };
+        if (ret > Zero)
             return TriangleWindingOrder::Clockwise;
-        else if (ret < 0.0f)
+        else if (ret < Zero)
             return TriangleWindingOrder::CounterClockwise;
-        return TriangleWindingOrder::Undetermined;
+        return TriangleWindingOrder::Indeterminate;
+    }
+
+    template<typename Point2>
+    bool TestPointTriangle(const Point2& pt, const Point2& p0, const Point2& p1, const Point2& p2) noexcept
+    {
+        // A point P is inside a triangle ABC if and only if:
+        // P lies on the same side of every triangle edge as the triangle interior
+
+        // If you have a triangle with points A, B and C and edges
+        // AB, BC and CA then point is inside the triangle if the
+        // point is on the same side (half plane, as determined by sign)
+        // when tested against each triangle edge.
+        // Using the triangle winding order primitive the test can be
+        // performed by checking that the new triangles formed by each
+        // edge and the point have the same winding order as the triangle
+        // itself.
+
+        const auto triangle_winding_order = FindTriangleWindingOrder(p0, p1, p2);
+        if (triangle_winding_order == TriangleWindingOrder::Indeterminate)
+            return false;
+
+        const TriangleWindingOrder winding_orders[3] = {
+            FindTriangleWindingOrder(p0, p1, pt),
+            FindTriangleWindingOrder(p1, p2, pt),
+            FindTriangleWindingOrder(p2, p0, pt)
+        };
+        for (const auto& wo : winding_orders) {
+            // either the winding order is the same or indeterminate which
+            // means that the tested point is on the edge.
+            if (wo == triangle_winding_order || wo == TriangleWindingOrder::Indeterminate)
+                continue;
+
+            return false;
+        }
+        return true;
     }
 
     template<typename Vertex>
