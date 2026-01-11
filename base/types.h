@@ -29,6 +29,7 @@
 #include <cmath>
 
 #include "base/math.h"
+#include "base/geometry.h"
 
 namespace base
 {
@@ -903,7 +904,7 @@ namespace base
     template<typename T>
     bool DoesIntersect(const Rect<T>& rect, const Circle<T>& circle) noexcept
     {
-        return math::CheckRectCircleIntersection(
+        return TestRectCircleIntersection(
                 rect.GetMinX(), rect.GetMaxX(),
                 rect.GetMinY(), rect.GetMaxY(),
                 circle.GetX(), circle.GetY(), circle.GetRadius());
@@ -917,7 +918,7 @@ namespace base
     {
         const auto& a = line.GetPointA();
         const auto& b = line.GetPointB();
-        return math::CheckRectLineIntersection(
+        return TestRectLineIntersection(
                 rect.GetMinX(), rect.GetMaxX(),
                 rect.GetMinY(), rect.GetMaxY(),
                 a.GetX(), a.GetY(), b.GetX(), b.GetY());

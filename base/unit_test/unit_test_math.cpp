@@ -22,6 +22,7 @@
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "base/math.h"
+#include "base/geometry.h"
 
 #if !defined(UNIT_TEST_BUNDLE)
 #  include "base/assert.cpp"
@@ -58,9 +59,9 @@ void unit_test_triangle_winding_order()
     const Point2D b = {2.0f,  1.0f};
     const Point2D c = {2.0f, -1.0f};
 
-    TEST_REQUIRE(math::FindTriangleWindingOrder(a, b, c) == math::TriangleWindingOrder::Clockwise);
-    TEST_REQUIRE(math::FindTriangleWindingOrder(c, b, a) == math::TriangleWindingOrder::CounterClockwise);
-    TEST_REQUIRE(math::FindTriangleWindingOrder(a, a, a) == math::TriangleWindingOrder::Undetermined);
+    TEST_REQUIRE(base::FindTriangleWindingOrder(a, b, c) == base::TriangleWindingOrder::Clockwise);
+    TEST_REQUIRE(base::FindTriangleWindingOrder(c, b, a) == base::TriangleWindingOrder::CounterClockwise);
+    TEST_REQUIRE(base::FindTriangleWindingOrder(a, a, a) == base::TriangleWindingOrder::Undetermined);
 }
 
 void unit_test_convex_hull()
@@ -85,7 +86,7 @@ void unit_test_convex_hull()
 
     for (size_t i=0; i<points.size(); ++i)
     {
-        auto ret = math::FindConvexHull(points);
+        auto ret = base::FindConvexHull(points);
         for (const auto& p : ret)
             std::cout << "(" << p.x << "," << p.y << ") ";
         std::cout << std::endl;
@@ -103,26 +104,26 @@ void unit_test_rect_circle_intersection()
     TEST_CASE(test::Type::Feature)
 
     // outside any edge
-    TEST_REQUIRE(!math::CheckRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f, 110.0f, 50.0f, 10.0f));
-    TEST_REQUIRE(!math::CheckRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f, -10.0f, 50.0f, 10.0f));
-    TEST_REQUIRE(!math::CheckRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f,  50.0f, 110.0f, 10.0f));
-    TEST_REQUIRE(!math::CheckRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f,  50.0f, -10.0f, 10.0f));
+    TEST_REQUIRE(!base::TestRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f, 110.0f, 50.0f, 10.0f));
+    TEST_REQUIRE(!base::TestRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f, -10.0f, 50.0f, 10.0f));
+    TEST_REQUIRE(!base::TestRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f,  50.0f, 110.0f, 10.0f));
+    TEST_REQUIRE(!base::TestRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f,  50.0f, -10.0f, 10.0f));
 
     // intersecting any edge
-    TEST_REQUIRE(math::CheckRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f, 110.0f, 50.0f, 15.0f));
-    TEST_REQUIRE(math::CheckRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f, -10.0f, 50.0f, 15.0f));
-    TEST_REQUIRE(math::CheckRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f,  50.0f, 110.0f, 15.0f));
-    TEST_REQUIRE(math::CheckRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f,  50.0f, -10.0f, 15.0f));
+    TEST_REQUIRE(base::TestRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f, 110.0f, 50.0f, 15.0f));
+    TEST_REQUIRE(base::TestRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f, -10.0f, 50.0f, 15.0f));
+    TEST_REQUIRE(base::TestRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f,  50.0f, 110.0f, 15.0f));
+    TEST_REQUIRE(base::TestRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f,  50.0f, -10.0f, 15.0f));
 
     // inside the rect
-    TEST_REQUIRE(math::CheckRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f, 50.0f, 50.0f, 10.0f));
+    TEST_REQUIRE(base::TestRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f, 50.0f, 50.0f, 10.0f));
 }
 
 void unit_test_rect_line_intersection()
 {
     // testing rectangle is 100x50 units, centered around the origin.
     auto test = [](float x1, float y1, float x2, float y2) {
-        return math::CheckRectLineIntersection(-50.0f, // left
+        return base::TestRectLineIntersection(-50.0f, // left
                                                 50.0f, // right
                                                -25.0f, // top
                                                 25.0f, // bottom
