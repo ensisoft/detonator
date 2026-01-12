@@ -30,7 +30,6 @@
 
 #include "base/assert.h"
 #include "base/types.h"
-#include "base/math.h"
 #include "graphics/enum.h"
 #include "graphics/color4f.h"
 
@@ -50,6 +49,17 @@ namespace gfx
     using FCircle = base::FCircle;
     using FRadians = base::FRadians;
     using FDegrees = base::FDegrees;
+
+    // the structure is packed for more compact and simpler
+    // serialization purposes
+#pragma pack(push, 1)
+    struct DrawCommand {
+        DrawType type = DrawType::Triangles;
+        uint32_t count  = 0;
+        uint32_t offset = 0;
+    };
+#pragma pack(pop)
+
 
     struct BasicLight {
         BasicLightType type = BasicLightType::Ambient;

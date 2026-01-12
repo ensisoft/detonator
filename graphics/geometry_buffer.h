@@ -27,6 +27,7 @@
 #include "graphics/vertex.h"
 #include "graphics/vertex_buffer.h"
 #include "graphics/enum.h"
+#include "graphics/types.h"
 
 namespace gfx
 {
@@ -45,19 +46,10 @@ namespace gfx
     class GeometryBuffer
     {
     public:
-        using IndexType = gfx::IndexType;
-        using DrawType  = gfx::DrawType;
-        using Usage     = gfx::BufferUsage;
-
-        // the structure is packed for more compact and simpler
-        // serialization purposes
-#pragma pack(push, 1)
-        struct DrawCommand {
-            DrawType type = DrawType::Triangles;
-            uint32_t count  = 0;
-            uint32_t offset = 0;
-        };
-#pragma pack(pop)
+        using IndexType   = gfx::IndexType;
+        using DrawType    = gfx::DrawType;
+        using Usage       = gfx::BufferUsage;
+        using DrawCommand = gfx::DrawCommand;
 
         void UploadVertices(const void* data, size_t bytes)
         {
