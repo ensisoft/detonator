@@ -27,6 +27,9 @@ namespace gfx
     using BufferUsage = dev::BufferUsage;
     using Culling = dev::Culling;
 
+    using DrawType = dev::DrawType;
+    using IndexType = dev::IndexType;
+
     enum class MeshEffectType : uint32_t {
         ShardedMeshExplosion = 1
     };

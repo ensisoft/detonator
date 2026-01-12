@@ -31,8 +31,8 @@
 
 #include "base/math.h"
 #include "graphics/color4f.h"
+#include "graphics/enum.h"
 #include "device/vertex.h"
-#include "device/enum.h"
 
 namespace gfx
 {
@@ -40,9 +40,6 @@ namespace gfx
     using Index16 = std::uint16_t;
     // 32bit vertex index for indexed drawing.
     using Index32 = std::uint32_t;
-
-    using DrawType = dev::DrawType;
-    using IndexType = dev::IndexType;
 
 #pragma pack(push, 1)
     struct Vec1 {
