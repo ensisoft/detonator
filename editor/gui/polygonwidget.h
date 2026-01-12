@@ -131,6 +131,9 @@ namespace gui
         template<typename Vertex>
         void HoverVertex2D(const QPoint& pick_point, float width, float height);
 
+        template<typename Vertex>
+        void PickSurface2D(const QPoint& pick_point, float width, float height);
+
         enum class InsertionPoint {
             Before, After
         };
@@ -148,6 +151,7 @@ namespace gui
         void SetMeshType(MeshType mesh);
         void CreateMeshBuilder();
         void SetSelectedVertexNormal(const glm::vec3& normal);
+        void SetSelectedSurfaceNormal(const glm::vec3& normal);
         void ConfigureTilePainter(gfx::Painter& painter) const;
 
         enum class ViewType {
@@ -172,6 +176,7 @@ namespace gui
         class MouseTool;
         template<typename T> class AddVertex2DTriangleTool;
         template<typename T> class MoveVertex2DTool;
+        template<typename T> class MoveSurface2DTool;
 
         enum class Hotkey {
             None, KeyX, KeyY, KeyZ
@@ -210,6 +215,7 @@ namespace gui
         static constexpr auto InvalidIndex = 0xffffffff;
         // Index of the currently selected vertex.
         std::size_t mSelectedVertex = InvalidIndex;
+        std::size_t mSelectedCommand = InvalidIndex;
 
         struct PickCandidate {
             float tangent = 0.0f;

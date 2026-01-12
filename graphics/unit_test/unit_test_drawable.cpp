@@ -901,6 +901,67 @@ void unit_test_polygon_builder_build()
         TEST_REQUIRE(real::equals(poly.GetVertex(4).aPosition.x, 4.0f));
         TEST_REQUIRE(real::equals(poly.GetVertex(5).aPosition.x, 5.0f));
     }
+
+    // erase whole command from the beginning
+    {
+        gfx::tool::PolygonBuilder2D poly;
+        poly.AddVertices(verts);
+
+        gfx::Geometry::DrawCommand cmd0;
+        cmd0.offset = 0;
+        cmd0.count  = 3;
+
+        gfx::Geometry::DrawCommand cmd1;
+        cmd1.offset = 3;
+        cmd1.count  = 4; // fake number,
+
+        poly.AddDrawCommand(cmd0);
+        poly.AddDrawCommand(cmd1);
+
+        poly.EraseCommand(0);
+        TEST_REQUIRE(poly.GetCommandCount() == 1);
+        TEST_REQUIRE(poly.GetVertexCount() == 3);
+        const auto& cmd = poly.GetDrawCommand(0);
+        TEST_REQUIRE(cmd.count == 4);
+        TEST_REQUIRE(cmd.offset == 0);
+    }
+
+    // erase whole command from the beginning
+    {
+        gfx::tool::PolygonBuilder2D poly;
+        poly.AddVertices(verts);
+
+        gfx::Geometry::DrawCommand cmd0;
+        cmd0.offset = 0;
+        cmd0.count  = 3;
+
+        gfx::Geometry::DrawCommand cmd1;
+        cmd1.offset = 3;
+        cmd1.count  = 4; // fake number,
+
+        gfx::Geometry::DrawCommand cmd2;
+        cmd2.offset = 7;
+        cmd2.count  = 5; // fake number,
+
+        poly.AddDrawCommand(cmd0);
+        poly.AddDrawCommand(cmd1);
+        poly.AddDrawCommand(cmd2);
+
+        poly.EraseCommand(1);
+        TEST_REQUIRE(poly.GetCommandCount() == 2);
+        TEST_REQUIRE(poly.GetVertexCount() == 2);
+        {
+            const auto& cmd = poly.GetDrawCommand(0);
+            TEST_REQUIRE(cmd.count == 3);
+            TEST_REQUIRE(cmd.offset == 0);
+        }
+        {
+            const auto& cmd = poly.GetDrawCommand(1);
+            TEST_REQUIRE(cmd.count == 5);
+            TEST_REQUIRE(cmd.offset == 3);
+        }
+    }
+
 }
 
 void unit_test_particle_engine_data()

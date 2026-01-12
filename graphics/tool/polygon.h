@@ -16,7 +16,10 @@
 
 #pragma once
 
+#include "config.h"
+
 #include <cstring> // for memcpy
+#include <vector>
 
 #include "graphics/geometry.h"
 #include "graphics/vertex.h"
@@ -35,6 +38,7 @@ namespace tool {
     {
     public:
         using DrawCommand = gfx::Geometry::DrawCommand;
+        using DrawCommandBuffer = std::vector<DrawCommand>;
 
         virtual ~IPolygonBuilder() = default;
         virtual void ClearAll() noexcept = 0;
@@ -43,6 +47,9 @@ namespace tool {
 
         // Erase the vertex at the given index.
         virtual void EraseVertex(size_t index) = 0;
+
+        // Erase a draw command and all the vertices.
+        virtual void EraseCommand(size_t index) = 0;
 
         // Update the vertex at the given index.
         virtual void UpdateVertex(const void* vertex, size_t index) = 0;
@@ -80,7 +87,12 @@ namespace tool {
 
         virtual const DrawCommand& GetDrawCommand(size_t index ) const = 0;
 
+        virtual const DrawCommandBuffer& GetDrawCommandBuffer() const = 0;
+
         virtual void GetVertex(void* vertex, size_t index) const noexcept = 0;
+
+        virtual const void* GetVertexBufferPtr() const noexcept = 0;
+        virtual size_t GetVertexBufferSize() const noexcept = 0;
 
         virtual const void* GetVertexPtr(size_t vertex_index) const noexcept = 0;
 
@@ -119,6 +131,8 @@ namespace tool {
 
         void EraseVertex(size_t index) override;
 
+        void EraseCommand(size_t index) override;
+
         void InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index);
         void InsertVertex(const void* vertex, size_t cmd_index, size_t index) override;
 
@@ -136,8 +150,15 @@ namespace tool {
         { return mVertices.size(); }
         size_t GetCommandCount() const noexcept override
         { return mDrawCommands.size(); }
+
         const DrawCommand& GetDrawCommand(size_t index) const noexcept override
-        { return mDrawCommands[index]; }
+        {
+            return mDrawCommands[index];
+        }
+        const DrawCommandBuffer& GetDrawCommandBuffer() const override
+        {
+            return mDrawCommands;
+        }
 
         void GetVertex(void* vertex, size_t vertex_index) const noexcept override
         {
@@ -156,6 +177,16 @@ namespace tool {
             ASSERT(vertex_index < mVertices.size());
             auto* vert =  &mVertices[vertex_index];
             return vert;
+        }
+
+        const void* GetVertexBufferPtr() const noexcept override
+        {
+            return mVertices.data();
+        }
+
+        size_t GetVertexBufferSize() const noexcept override
+        {
+            return mVertices.size() * sizeof(Vertex);
         }
 
         const Vertex& GetVertex(size_t index) const noexcept

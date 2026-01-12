@@ -29,6 +29,7 @@
 #include <algorithm>
 
 #include "base/math.h"
+#include "base/geometry.h"
 #include "base/utility.h"
 #include "data/json.h"
 #include "engine/camera.h"
@@ -50,6 +51,8 @@
 #include "graphics/guidegrid.h"
 #include "graphics/texture.h"
 #include "graphics/device.h"
+#include "graphics/vertex_algo.h"
+#include "graphics/triangle_iterator.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/format.h"
 #include "editor/app/resource-uri.h"
@@ -59,7 +62,6 @@
 #include "editor/gui/dlgtextedit.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/gfxmenu.h"
-#include "graphics/vertex_algo.h"
 
 namespace {
 
@@ -543,6 +545,15 @@ public:
         mBuilder.EraseVertex(index);
         endRemoveRows();
     }
+    void EraseSurface(size_t index)
+    {
+        const auto cmd = mBuilder.GetDrawCommand(index);
+        const auto vertex_start_index = cmd.offset;
+        const auto vertex_end_index = cmd.offset + cmd.count - 1;
+        beginRemoveRows(QModelIndex(), static_cast<int>(vertex_start_index), static_cast<int>(vertex_end_index));
+        mBuilder.EraseCommand(index);
+        endRemoveRows();
+    }
 
     void Reset()
     {
@@ -649,6 +660,66 @@ private:
 };
 
 template<typename VertexType>
+class ShapeWidget::MoveSurface2DTool : public MouseTool {
+public:
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+
+    explicit MoveSurface2DTool(State& state, size_t cmd_index)
+        : mState(state)
+        , mCmdIndex(cmd_index)
+    {}
+    void MousePress(const QMouseEvent* mickey, const QPoint& pos, const ViewState&) override
+    {
+        mCurrentPoint = pos;
+    }
+    void MouseMove(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) override
+    {
+        auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
+
+        const auto& cmd = builder->GetDrawCommand(mCmdIndex);
+
+        const auto dx = static_cast<float>(mCurrentPoint.x() - pos.x());
+        const auto dy = static_cast<float>(mCurrentPoint.y() - pos.y());
+        const auto ddx = dx / view.width;
+        const auto ddy = dy / view.height;
+
+        mCurrentPoint = pos;
+
+        for (size_t i=0; i<cmd.count; ++i)
+        {
+            const auto vertex_index = cmd.offset + i;
+            auto vertex = builder->GetVertex(vertex_index);
+            vertex.aPosition.x -= ddx;
+            vertex.aPosition.y += ddy;
+            if (vertex.aPosition.x > 1.0f || vertex.aPosition.x < 0.0f)
+                return;
+            if (vertex.aPosition.y < -1.0f || vertex.aPosition.y > 0.0f)
+                return;
+        }
+
+        for (size_t i=0; i<cmd.count; ++i)
+        {
+            const auto vertex_index = cmd.offset + i;
+            auto vertex = builder->GetVertex(vertex_index);
+            vertex.aPosition.x -= ddx;
+            vertex.aPosition.y += ddy;
+            vertex.aTexCoord.x =  vertex.aPosition.x;
+            vertex.aTexCoord.y = -vertex.aPosition.y;
+            mState.table->UpdateVertex(vertex, vertex_index);
+        }
+    }
+    bool MouseRelease(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) override
+    {
+        return true;
+    }
+
+private:
+    ShapeWidget::State& mState;
+    const size_t mCmdIndex = 0;
+    QPoint mCurrentPoint;
+};
+
+template<typename VertexType>
 class ShapeWidget::AddVertex2DTriangleTool : public MouseTool {
 public:
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
@@ -748,14 +819,21 @@ public:
         gfx::PolygonMeshClass current(mState.polygon->GetId() + "_2");
         builder.BuildPoly(current);
         current.SetStatic(false);
+        current.SetDoubleSided(mState.builder->IsDoubleSided());
 
         const auto alpha = 0.87f;
         static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
         color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
         color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
+        gfx::Painter::LegacyDrawState state;
+        state.line_width = 1.0f;
+        state.culling = gfx::Painter::Culling::Back;
+        if (current.IsDoubleSided())
+            state.culling = gfx::Painter::Culling::None;
+
         painter.Draw(gfx::PolygonMeshInstance(current), transform,
-            gfx::MaterialInstance(color));
+            gfx::MaterialInstance(color), state);
     }
     void DrawHelp(gfx::Painter& painter) const  override
     {
@@ -1283,6 +1361,8 @@ void ShapeWidget::on_actionClear_triggered()
 
     mState.table->ClearAndReset();
     SetEnabled(mUI.actionClear, false);
+    mSelectedCommand = InvalidIndex;
+    mSelectedVertex = InvalidIndex;
 }
 
 void ShapeWidget::on_blueprints_currentIndexChanged(int)
@@ -1339,7 +1419,6 @@ void ShapeWidget::on_cmbMeshType_currentIndexChanged(int)
     SetMeshType(mesh_type);
     CreateMeshBuilder();
     mMainView = ViewType::EditView;
-    mBlueprint.reset();
 }
 
 void ShapeWidget::on_tableView_customContextMenuRequested(const QPoint& point)
@@ -1422,9 +1501,13 @@ bool ShapeWidget::OnEscape()
         mUI.actionNewTriangleStrip->setChecked(false);
         mUI.actionClear->setEnabled(true);
     }
-    else if (mSelectedVertex < mState.builder->GetVertexCount())
+    else if (mSelectedCommand != InvalidIndex)
     {
-        mSelectedVertex = 0xfffffff;
+        mSelectedCommand = InvalidIndex;
+    }
+    else if (mSelectedVertex != InvalidIndex)
+    {
+        mSelectedVertex = InvalidIndex;
         ClearSelection(mUI.tableView);
     }
     else return false;
@@ -1596,7 +1679,7 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
 
         // putting this computation here since conveniently we have the matrices
         // available here for doing the mathy stuff.
-        if (mSelectedVertex < mState.builder->GetVertexCount())
+        if (mSelectedVertex != InvalidIndex)
         {
             using BuilderType = gfx::tool::PolygonBuilder<gfx::Perceptual3DVertex>;
             const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
@@ -1682,7 +1765,15 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         state.culling = gfx::Painter::Culling::Back;
         if (mesh.IsDoubleSided())
             state.culling = gfx::Painter::Culling::None;
+
         painter.Draw(mesh, view, gfx::MaterialInstance(color), state);
+
+        if (mSelectedCommand != InvalidIndex)
+        {
+            mesh.SetSubMeshIndex(mSelectedCommand);
+            color.SetBaseColor(gfx::Color4f(gfx::Color::DarkGreen, 0.3f));
+            painter.Draw(mesh, view, gfx::MaterialInstance(color), state);
+        }
     }
 
     // visualize the vertices.
@@ -1913,18 +2004,29 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
         {
             if (btn == Qt::MouseButton::LeftButton && !mMouseTool)
             {
-                auto pick_mode = PickMode::Sticky;
-                if (shift)
-                    pick_mode = PickMode::Cycling;
-
                 const auto mesh_type = GetMeshType();
                 if (mesh_type == MeshType::Simple2DRenderMesh)
-                    PickVertex2D<gfx::Vertex2D>(point, width, height, pick_mode);
+                    PickSurface2D<gfx::Vertex2D>(point, width, height);
                 else if (mesh_type == MeshType::Simple2DShardEffectMesh)
-                    PickVertex2D<gfx::ShardVertex2D>(point, width, height, pick_mode);
+                    PickSurface2D<gfx::ShardVertex2D>(point, width, height);
                 else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
-                    PickVertex2D<gfx::Perceptual3DVertex>(point, width, height, pick_mode);
+                    PickSurface2D<gfx::Perceptual3DVertex>(point, width, height);
                 else BUG("Unhandled mesh type.");
+
+                if (mSelectedCommand == InvalidIndex)
+                {
+                    auto pick_mode = PickMode::Sticky;
+                    if (shift)
+                        pick_mode = PickMode::Cycling;
+
+                    if (mesh_type == MeshType::Simple2DRenderMesh)
+                        PickVertex2D<gfx::Vertex2D>(point, width, height, pick_mode);
+                    else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+                        PickVertex2D<gfx::ShardVertex2D>(point, width, height, pick_mode);
+                    else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+                        PickVertex2D<gfx::Perceptual3DVertex>(point, width, height, pick_mode);
+                    else BUG("Unhandled mesh type.");
+                }
             }
         }
         if (mMouseTool)
@@ -1974,7 +2076,8 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
 
     if (!mMouseTool && btn == Qt::MouseButton::RightButton)
     {
-        const auto have_selection = mSelectedVertex < mState.builder->GetVertexCount();
+        const auto have_selected_vertex = mSelectedVertex != InvalidIndex;
+        const auto have_selected_surface = mSelectedCommand != InvalidIndex;
 
         if (mMainView == ViewType::EditView)
         {
@@ -1988,42 +2091,86 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
             menu.AddSeparator();
             if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
             {
-                GfxMenu orient_menu;
-                orient_menu.SetText("Orient Normal");
-                orient_menu.AddAction("Orient normal to +X", [this]() {
+                GfxMenu orient_vertex_menu;
+                orient_vertex_menu.SetEnabled(have_selected_vertex);
+                orient_vertex_menu.SetText("Orient Vertex Normal");
+                orient_vertex_menu.AddAction("Orient normal to +X", [this]() {
                     SetSelectedVertexNormal({1.0f, 0.0f, 0.0f});
-                })->setEnabled(have_selection);
-                orient_menu.AddAction("Orient normal to -X", [this]() {
+                })->setEnabled(have_selected_vertex);
+                orient_vertex_menu.AddAction("Orient normal to -X", [this]() {
                     SetSelectedVertexNormal({-1.0f, 0.0f, 0.0f});
-                })->setEnabled(have_selection);
-                orient_menu.AddAction("Orient normal to +Y", [this]() {
+                })->setEnabled(have_selected_vertex);
+                orient_vertex_menu.AddAction("Orient normal to +Y", [this]() {
                     SetSelectedVertexNormal({0.0f, 1.0f, 0.0f});
-                })->setEnabled(have_selection);
-                orient_menu.AddAction("Orient normal to -Y", [this]() {
+                })->setEnabled(have_selected_vertex);
+                orient_vertex_menu.AddAction("Orient normal to -Y", [this]() {
                     SetSelectedVertexNormal({0.0f, -1.0f, 0.0f});
-                })->setEnabled(have_selection);
-                orient_menu.AddAction("Orient normal to +Z", [this]() {
+                })->setEnabled(have_selected_vertex);
+                orient_vertex_menu.AddAction("Orient normal to +Z", [this]() {
                     SetSelectedVertexNormal({0.0f, 0.0f, -1.0f});
-                })->setEnabled(have_selection);
-                orient_menu.AddAction("Orient normal to -Z", [this]() {
+                })->setEnabled(have_selected_vertex);
+                orient_vertex_menu.AddAction("Orient normal to -Z", [this]() {
                     SetSelectedVertexNormal({0.0f, 0.0f, 1.0f});
-                })->setEnabled(have_selection);
-                menu.AddSubMenu(std::move(orient_menu));
+                })->setEnabled(have_selected_vertex);
+                menu.AddSubMenu(std::move(orient_vertex_menu));
+
+                GfxMenu orient_surface_menu;
+                orient_surface_menu.SetEnabled(have_selected_surface);
+                orient_surface_menu.SetText("Orient Surface Normal");
+                orient_surface_menu.AddAction("Orient normal to +X", [this]() {
+                    SetSelectedSurfaceNormal({1.0f, 0.0f, 0.0f});
+                })->setEnabled(have_selected_surface);
+                orient_surface_menu.AddAction("Orient normal to -X", [this]() {
+                    SetSelectedSurfaceNormal({-1.0f, 0.0f, 0.0f});
+                })->setEnabled(have_selected_surface);
+                orient_surface_menu.AddAction("Orient normal to +Y", [this]() {
+                    SetSelectedSurfaceNormal({0.0f, 1.0f, 0.0f});
+                })->setEnabled(have_selected_surface);
+                orient_surface_menu.AddAction("Orient normal to -Y", [this]() {
+                    SetSelectedSurfaceNormal({0.0f, -1.0f, 0.0f});
+                })->setEnabled(have_selected_surface);
+                orient_surface_menu.AddAction("Orient normal to +Z", [this]() {
+                    SetSelectedSurfaceNormal({0.0f, 0.0f, -1.0f});
+                })->setEnabled(have_selected_surface);
+                orient_surface_menu.AddAction("Orient normal to -Z", [this]() {
+                    SetSelectedSurfaceNormal({0.0f, 0.0f, 1.0f});
+                })->setEnabled(have_selected_surface);
+                menu.AddSubMenu(std::move(orient_surface_menu));
             }
 
             menu.AddAction("Insert Vertex Before", [this]() {
                 InsertVertex(InsertionPoint::Before);
-            })->setEnabled(have_selection && CanInsertVertex());
+            })->setEnabled(have_selected_vertex && CanInsertVertex());
             menu.AddAction("Insert Vertex After", [this]() {
                 InsertVertex(InsertionPoint::After);
-            })->setEnabled(have_selection && CanInsertVertex());
+            })->setEnabled(have_selected_vertex && CanInsertVertex());
             menu.AddAction("Delete Vertex", QIcon("icons:delete.png"), [this]() {
                 mState.table->EraseVertex(mSelectedVertex);
                 mSelectedVertex = InvalidIndex;
                 ClearSelection(mUI.tableView);
                 if (mState.builder->GetVertexCount() == 0)
                     SetEnabled(mUI.actionClear, false);
-            })->setEnabled(have_selection);
+            })->setEnabled(have_selected_vertex);
+
+            menu.AddAction("Delete Surface", QIcon("icons:delete.png"), [this]() {
+                const auto cmd = mState.builder->GetDrawCommand(mSelectedCommand);
+                mState.table->EraseSurface(mSelectedCommand);
+                mSelectedCommand = InvalidIndex;
+                if (mSelectedVertex >= cmd.offset && mSelectedVertex < cmd.offset + cmd.count)
+                {
+                    mSelectedVertex = InvalidIndex;
+                    ClearSelection(mUI.tableView);
+                }
+                else if (mSelectedVertex >= cmd.offset + cmd.count)
+                {
+                    ASSERT(mSelectedVertex >= cmd.count);
+                    mSelectedVertex -= cmd.count;
+                    SelectRow(mUI.tableView, mSelectedVertex);
+                }
+                if (mState.builder->GetVertexCount() == 0)
+                    SetEnabled(mUI.actionClear, false);
+
+            })->setEnabled(have_selected_surface);
 
             menu.AddSeparator();
             menu.AddAction(mUI.actionClear);
@@ -2342,7 +2489,10 @@ void ShapeWidget::PickVertex2D(const QPoint& pick_point, float width, float heig
 
     mSelectedVertex = InvalidIndex;
     if (mPickingCandidates.empty())
+    {
+        ClearSelection(mUI.tableView);
         return;
+    }
 
     if (mode == PickMode::Normal || mode == PickMode::Sticky)
     {
@@ -2414,6 +2564,52 @@ void ShapeWidget::HoverVertex2D(const QPoint& pick_point, float width, float hei
     std::sort(mPickingCandidates.begin(), mPickingCandidates.end(), [](const auto& a, const auto& b) {
         return a.tangent < b.tangent;
     });
+}
+
+template<typename VertexType>
+void ShapeWidget::PickSurface2D(const QPoint& pick_point, float width, float height)
+{
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+
+    const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
+
+    const auto& commands = mState.builder->GetDrawCommandBuffer();
+    const gfx::VertexStream vertices(*mState.polygon->GetVertexLayout(),
+        mState.builder->GetVertexBufferPtr(),
+        mState.builder->GetVertexBufferSize());
+
+    struct Point {
+        float x, y;
+    };
+    const Point pt {
+        static_cast<float>(pick_point.x()),
+        static_cast<float>(pick_point.y()) };
+
+    mSelectedCommand = InvalidIndex;
+
+    const gfx::TriangleIterator triangles(commands, vertices);
+    for (size_t i=0; i<triangles.GetCount(); ++i)
+    {
+        const auto& triangle = triangles.GetTriangle(i);
+        const auto& vertex0 = builder->GetVertex(triangle.i0);
+        const auto& vertex1 = builder->GetVertex(triangle.i1);
+        const auto& vertex2 = builder->GetVertex(triangle.i2);
+
+        const Point p0 { width * vertex0.aPosition.x, height * -vertex0.aPosition.y };
+        const Point p1 { width * vertex1.aPosition.x, height * -vertex1.aPosition.y };
+        const Point p2 { width * vertex2.aPosition.x, height * -vertex2.aPosition.y };
+
+        if (base::TestPointTriangle(pt, p0, p1, p2))
+        {
+            mSelectedCommand = triangle.cmd_index;
+            break;
+        }
+    }
+    if (mSelectedCommand != InvalidIndex)
+    {
+        DEBUG("Picked surface cmd %1", mSelectedCommand);
+        mMouseTool = std::make_unique<MoveSurface2DTool<VertexType>>(mState, mSelectedCommand);
+    }
 }
 
 void ShapeWidget::InsertVertex(InsertionPoint where)
@@ -2647,7 +2843,7 @@ void ShapeWidget::CreateMeshBuilder()
 
 void ShapeWidget::SetSelectedVertexNormal(const glm::vec3& normal)
 {
-    if (mSelectedVertex >= mState.builder->GetVertexCount())
+    if (mSelectedVertex == InvalidIndex)
         return;
 
     const auto mesh_type = GetMeshType();
@@ -2659,6 +2855,28 @@ void ShapeWidget::SetSelectedVertexNormal(const glm::vec3& normal)
         vertex.aWorldNormal = gfx::ToVec(normal);
 
         mState.table->RefreshVertex(mSelectedVertex);
+    }
+}
+
+void ShapeWidget::SetSelectedSurfaceNormal(const glm::vec3& normal)
+{
+    if (mSelectedCommand == InvalidIndex)
+        return;
+
+    const auto mesh_type = GetMeshType();
+    if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+    {
+        using BuilderType = gfx::tool::PolygonBuilder<gfx::Perceptual3DVertex>;
+        auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
+
+        const auto& cmd = builder->GetDrawCommand(mSelectedCommand);
+        for (size_t i=0; i<cmd.count; ++i)
+        {
+            const auto vertex_index = cmd.offset + i;
+            auto& vertex = builder->GetVertex(vertex_index);
+            vertex.aWorldNormal = gfx::ToVec(normal);
+            mState.table->RefreshVertex(vertex_index);
+        }
     }
 }
 
