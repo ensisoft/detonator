@@ -32,6 +32,7 @@
 #include "base/utility.h"
 #include "graphics/drawable.h"
 #include "graphics/vertex.h"
+#include "graphics/types.h"
 
 namespace gfx
 {
@@ -120,16 +121,16 @@ namespace gfx
         void SetVertexBuffer(const std::vector<uint8_t>& buffer);
 
         void SetCommandBuffer(CommandBuffer&& buffer) noexcept;
-        void SetCommandBuffer(std::vector<Geometry::DrawCommand>&& buffer) noexcept;
+        void SetCommandBuffer(std::vector<DrawCommand>&& buffer) noexcept;
         void SetCommandBuffer(const CommandBuffer& buffer);
-        void SetCommandBuffer(const std::vector<Geometry::DrawCommand>& buffer);
+        void SetCommandBuffer(const std::vector<DrawCommand>& buffer);
 
         const VertexLayout* GetVertexLayout() const noexcept;
         const void* GetVertexBufferPtr() const noexcept;
         size_t GetVertexBufferSize() const noexcept;
         size_t GetVertexCount() const noexcept;
         size_t GetDrawCmdCount() const noexcept;
-        const Geometry::DrawCommand* GetDrawCmd(size_t index) const noexcept;
+        const DrawCommand* GetDrawCmd(size_t index) const noexcept;
 
         std::string GetGeometryId(const Environment& env) const;
         std::string GetShaderId(const Environment& env) const;
@@ -140,6 +141,7 @@ namespace gfx
 
         void SetSubMeshDrawCmd(const std::string& key, const DrawCmd& cmd);
 
+        // Get a sub-mesh draw command based on the sub-mesh key (name).
         const DrawCmd* GetSubMeshDrawCmd(const std::string& key) const noexcept;
 
         void ClearContent();
@@ -170,7 +172,7 @@ namespace gfx
         // only a few vertices. Could be migrated to use
         // a separate file but this is simply just so much
         // simpler for the time being even though it wastes
-        // a bit of space since the data is kep around all
+        // a bit of space since the data is kept around all
         // the time.
         struct InlineData {
             std::vector<uint8_t> vertices;
@@ -202,9 +204,15 @@ namespace gfx
             bool enable_perceptual_3D = false;
         };
 
-        explicit PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass,
-                                     std::string sub_mesh_key = "") noexcept;
-        explicit PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key = "");
+        explicit PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass) noexcept;
+        explicit PolygonMeshInstance(const PolygonMeshClass& klass);
+        explicit PolygonMeshInstance(PolygonMeshClass&& klass);
+        PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass, std::string sub_mesh_key);
+        PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass, std::size_t sub_mesh_index);
+        PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key);
+        PolygonMeshInstance(const PolygonMeshClass& klass, std::size_t sub_mesh_index);
+        PolygonMeshInstance(PolygonMeshClass&& klass, std::string sub_mesh_key);
+        PolygonMeshInstance(PolygonMeshClass&& klass, std::size_t sub_mesh_index);
 
         auto IsStatic() const noexcept
         { return mClass->IsStatic(); }
@@ -212,10 +220,14 @@ namespace gfx
         { return mClass->IsDoubleSided(); }
         auto GetMeshType() const noexcept
         { return mClass->GetMeshType(); }
-        std::string GetSubMeshKey() const
-        { return mSubMeshKey; }
+
+        std::string GetSubMeshKey() const;
+        std::size_t GetSubMeshIndex() const noexcept;
+
         void SetSubMeshKey(std::string key) noexcept
         { mSubMeshKey = std::move(key); }
+        void SetSubMeshIndex(std::size_t index) noexcept
+        { mSubMeshKey = index; }
         void SetTime(double time) noexcept
         { mTime = time; }
         void SetRandomValue(float value) noexcept
@@ -245,11 +257,9 @@ namespace gfx
     private:
         std::shared_ptr<const PolygonMeshClass> mClass;
         std::optional<Perceptual3DGeometry> mPerceptualGeometry;
-        std::string mSubMeshKey;
+        std::variant<std::monostate, std::string, std::size_t> mSubMeshKey;
         double mTime = 0.0;
         float mRandom = 0.0f;
-        mutable bool mError = false;
     };
-
 
 } // namespace
