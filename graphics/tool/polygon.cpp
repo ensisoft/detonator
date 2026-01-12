@@ -88,27 +88,57 @@ void PolygonBuilder<Vertex>::UpdateVertex(const void* vertex, size_t index)
 template<typename Vertex>
 void PolygonBuilder<Vertex>::EraseVertex(size_t index)
 {
-    ASSERT(index < mVertices.size());
-    auto it = mVertices.begin();
-    std::advance(it, index);
-    mVertices.erase(it);
+    base::SafeErase(mVertices, index);
+
     // remove the vertex from the draw commands.
     for (size_t i=0; i<mDrawCommands.size();)
     {
         auto& cmd = mDrawCommands[i];
-        if (index >= cmd.offset && index < cmd.offset + cmd.count) {
+
+        // if this is the command that contains the vertex being
+        // erased then reduce the primitive count by one vertex.
+        if (index >= cmd.offset && index < cmd.offset + cmd.count)
+        {
+            ASSERT(cmd.count > 0);
+            // if the last vertex got erased then delete the whole command
             if (--cmd.count == 0)
             {
-                auto it = mDrawCommands.begin();
-                std::advance(it, i);
-                mDrawCommands.erase(it);
+                base::SafeErase(mDrawCommands, i);
                 continue;
             }
         }
         else if (index < cmd.offset)
+        {
+            // adjust the command offset of a command that
+            // draws vertices later in the vertex array. they must all be
+            // shifted down a notch now.
             cmd.offset--;
+        }
         ++i;
     }
+}
+
+template<typename Vertex>
+void PolygonBuilder<Vertex>::EraseCommand(size_t index)
+{
+    ASSERT(index < mDrawCommands.size());
+
+    const auto cmd = mDrawCommands[index];
+    const auto vertex_it_beg = mVertices.begin() + cmd.offset;
+    const auto vertex_it_end = mVertices.begin() + cmd.offset + cmd.count;
+    const auto vertex_count = cmd.count;
+
+    mVertices.erase(vertex_it_beg, vertex_it_end);
+
+    for (auto& other_cmd : mDrawCommands)
+    {
+        if (other_cmd.offset > cmd.offset)
+        {
+            ASSERT(other_cmd.offset >= vertex_count);
+            other_cmd.offset -= vertex_count;
+        }
+    }
+    base::SafeErase(mDrawCommands, index);
 }
 
 template<typename Vertex>
