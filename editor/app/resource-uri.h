@@ -20,6 +20,7 @@ namespace res {
 
     constexpr const char* Checkerboard = "app://textures/editor/Checkerboard.png";
     constexpr const char* AcceptIcon   = "app://textures/editor/accept_icon.png";
+    constexpr const char* CheckIcon    = "app://textures/editor/check_icon.png";
     constexpr const char* CrosshairCursor = "app://textures/editor/crosshair009.png";
     constexpr const char* LightIcon = "app://textures/editor/light.png";
     constexpr const char* TranslateGizmo = "app://models/editor/translate_gizmo.obj";

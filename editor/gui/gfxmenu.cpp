@@ -37,6 +37,7 @@
 #include "graphics/material_instance.h"
 #include "graphics/simple_shape.h"
 #include "editor/app/utility.h"
+#include "editor/app/resource-uri.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxmenu.h"
 
@@ -78,9 +79,9 @@ void GfxMenu::AddSubMenu(GfxMenu menu)
 
 void GfxMenu::MouseMove(const QMouseEvent* mickey)
 {
-    if (mCurrentItem < mMenuItems.size())
+    if (mCurrentMenu < mMenuItems.size())
     {
-        if (auto* ptr = std::get_if<Submenu>(&mMenuItems[mCurrentItem]))
+        if (auto* ptr = std::get_if<Submenu>(&mMenuItems[mCurrentMenu]))
         {
             auto& menu = ptr->menu;
             QRect menu_rect;
@@ -89,6 +90,8 @@ void GfxMenu::MouseMove(const QMouseEvent* mickey)
             menu_rect.setHeight(menu->mMenuHeight);
             if (menu->mEnabled && menu_rect.contains(mickey->pos()))
             {
+                mCurrentItem = mCurrentMenu;
+                mMenuEventQueue.clear();
                 menu->MouseMove(mickey);
                 return;
             }
@@ -115,19 +118,31 @@ void GfxMenu::MouseMove(const QMouseEvent* mickey)
         if (const auto* ptr = std::get_if<Action>(&item))
         {
             if (y >= start && y <= start + mMenuItemHeight)
+            {
                 mCurrentItem = i;
+                QueueSubmenuUpdate(0xff, MenuEvent::CloseMenu);
+            }
             start += mMenuItemHeight;
         }
         else if (const auto* ptr = std::get_if<Separator>(&item))
         {
             if (y >= start && y <= start + mSeparatorHeight)
+            {
                 mCurrentItem = 0xff;
+                QueueSubmenuUpdate(0xff, MenuEvent::CloseMenu);
+            }
             start += mSeparatorHeight;
         }
         else if (const auto* ptr = std::get_if<Submenu>(&item))
         {
             if (y >= start && y <= start + mMenuItemHeight)
+            {
+                if (ptr->menu->mEnabled)
+                    QueueSubmenuUpdate(i, MenuEvent::OpenMenu);
+                else QueueSubmenuUpdate(0xff, MenuEvent::CloseMenu);
+
                 mCurrentItem = i;
+            }
             start += mMenuItemHeight;
         }
     }
@@ -156,6 +171,26 @@ QAction* GfxMenu::GetResult() const
             return submenu->menu->GetResult();
     }
     return nullptr;
+}
+
+bool GfxMenu::ShouldExitMenu() const
+{
+    if (mCurrentItem == 0xff)
+        return true;
+
+    if (const auto* action_item = std::get_if<Action>(&mMenuItems[mCurrentItem]))
+    {
+        const auto* action = action_item->action;
+        if (action && action->isEnabled() && !action->isCheckable())
+            return true;
+    }
+    else if (const auto* submenu = std::get_if<Submenu>(&mMenuItems[mCurrentItem]))
+    {
+        const auto* action = submenu->menu->GetResult();
+        if (action && action->isEnabled() && !action->isCheckable())
+            return true;
+    }
+    return false;
 }
 
 void GfxMenu::Initialize(const QRect& rect)
@@ -245,6 +280,20 @@ void GfxMenu::Initialize(const QRect& rect)
 
 }
 
+void GfxMenu::Update(float dt)
+{
+    if (mMenuEventQueue.empty())
+        return;
+
+    auto& first = mMenuEventQueue.front();
+    first.time -= dt;
+    if (first.time < 0.0f)
+    {
+        mCurrentMenu = first.index;
+        mMenuEventQueue.pop_front();
+    }
+}
+
 void GfxMenu::Render(gfx::Painter& painter) const
 {
     // draw menu background
@@ -304,13 +353,15 @@ void GfxMenu::Render(gfx::Painter& painter) const
                 enabled ? CreateColor(QPalette::Text, QPalette::Active) : CreateColor(QPalette::Text, QPalette::Disabled),
                 gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 
-            if (ptr->icon)
+            if (action->isCheckable())
+            {
+                gfx::FillRect(painter, icon_rect, CreateColor(QPalette::AlternateBase));
+                if (action->isChecked())
+                    gfx::DrawImage(painter, icon_rect, res::CheckIcon, CreateColor(QPalette::Text), gfx::BlendMode::Alpha);
+            }
+            else if (ptr->icon)
             {
                 gfx::DrawBitmap(painter, icon_rect, ptr->icon, ptr->bitmap_gpu_id, ptr->bitmap_gpu_name);
-            }
-            if (checked)
-            {
-                gfx::DrawRectOutline(painter, icon_rect, CreateColor(QPalette::Highlight));
             }
 
             item_point.Translate(0.0f, mMenuItemHeight);
@@ -360,16 +411,41 @@ void GfxMenu::Render(gfx::Painter& painter) const
         }
     }
 
-    if (mCurrentItem >= mMenuItems.size())
+    if (mCurrentMenu >= mMenuItems.size())
         return;
+
     // Recurse to sub-menu to paint.
-    if (const auto* ptr = std::get_if<Submenu>(&mMenuItems[mCurrentItem]))
+    if (const auto* ptr = std::get_if<Submenu>(&mMenuItems[mCurrentMenu]))
     {
         if (ptr->menu->IsEnabled())
             ptr->menu->Render(painter);
     }
-
 }
+
+void GfxMenu::QueueSubmenuUpdate(size_t index, MenuEvent event)
+{
+    if (mMenuEventQueue.empty() && mCurrentMenu == index)
+        return;
+
+    SubmenuEvent e;
+    e.event = event;
+    e.time  = 0.16f;
+    e.index = index;
+
+    if (mMenuEventQueue.empty())
+    {
+        mMenuEventQueue.push_back(e);
+    }
+    else
+    {
+        const auto& back = mMenuEventQueue.back();
+        if (back.event == event)
+            return;
+
+        mMenuEventQueue[0] = e;
+    }
+}
+
 gfx::MaterialInstance GfxMenu::CreateMaterial(QPalette::ColorRole role, QPalette::ColorGroup group) const
 {
     return gfx::CreateMaterialFromColor(ToGfx(mPalette.color(group, role)));

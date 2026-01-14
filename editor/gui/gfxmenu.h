@@ -34,6 +34,7 @@ class QAction;
 #include <variant>
 #include <vector>
 #include <functional>
+#include <deque>
 
 #include "graphics/bitmap.h"
 #include "graphics/device.h"
@@ -139,10 +140,20 @@ namespace gui
 
         QAction* GetResult() const;
 
+        bool ShouldExitMenu() const;
+
+        void Update(float dt);
+
         // called by the gfx widget. Position is in the top left
         // menu position expressed in painter's render target's size units
         // (normally window surface pixels)
         void Render(gfx::Painter& painter) const;
+
+    private:
+        enum class MenuEvent {
+            CloseMenu, OpenMenu
+        };
+        void QueueSubmenuUpdate(size_t index, MenuEvent event);
 
     private:
         struct Submenu {
@@ -174,6 +185,14 @@ namespace gui
         QString mMenuText;
         QIcon mMenuIcon;
         bool mEnabled = true;
+
+        struct SubmenuEvent {
+            MenuEvent event;
+            float time = 0.0f;
+            size_t index = 0;
+        };
+        std::deque<SubmenuEvent> mMenuEventQueue;
+        std::size_t mCurrentMenu = 0xff;
     private:
         gfx::MaterialInstance CreateMaterial(QPalette::ColorRole role,
             QPalette::ColorGroup group = QPalette::ColorGroup::Active) const;
