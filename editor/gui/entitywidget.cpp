@@ -2361,7 +2361,7 @@ bool EntityWidget::OnEscape()
     if (mCurrentTool)
     {
         mCurrentTool.reset();
-        UncheckPlacementActions();
+        mUI.widget->SetCursorShape(GfxWidget::CursorShape::ArrowCursor);
     }
     else if (const auto* node = GetCurrentNode())
     {
@@ -2578,113 +2578,70 @@ void EntityWidget::on_actionPreview_triggered()
 void EntityWidget::on_actionNewJoint_triggered()
 {
     mCurrentTool.reset(new JointTool(mState, MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewJoint->setChecked(true);
-
     mUI.widget->SetCursorShape(GfxWidget::CursorShape::CrossHair);
 }
 
 void EntityWidget::on_actionNewRect_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_rect", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewRect->setChecked(true);
 }
 void EntityWidget::on_actionNewCircle_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_circle", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewCircle->setChecked(true);
 }
 
 void EntityWidget::on_actionNewSemiCircle_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_semi_circle", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewSemiCircle->setChecked(true);
 }
 
 void EntityWidget::on_actionNewIsoscelesTriangle_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_isosceles_triangle", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewIsoscelesTriangle->setChecked(true);
 }
 void EntityWidget::on_actionNewRightTriangle_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_right_triangle", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewRightTriangle->setChecked(true);
 }
 void EntityWidget::on_actionNewRoundRect_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_round_rect", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewRoundRect->setChecked(true);
 }
 void EntityWidget::on_actionNewTrapezoid_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_trapezoid", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewTrapezoid->setChecked(true);
 }
 void EntityWidget::on_actionNewCapsule_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_capsule", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewCapsule->setChecked(true);
 }
+
 void EntityWidget::on_actionNewParallelogram_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_parallelogram", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewParallelogram->setChecked(true);
 }
 
 void EntityWidget::on_actionNewCone_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_cone", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewCone->setCheckable(true);
 }
 void EntityWidget::on_actionNewCube_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_cube", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewCube->setChecked(true);
 }
+
 void EntityWidget::on_actionNewCylinder_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_cylinder", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewCylinder->setChecked(true);
 }
+
 void EntityWidget::on_actionNewPyramid_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_pyramid", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewPyramid->setChecked(true);
 }
 void EntityWidget::on_actionNewSphere_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_sphere", MapMouseCursorToWorld()));
-
-    UncheckPlacementActions();
-    mUI.actionNewSphere->setChecked(true);
 }
 
 void EntityWidget::on_actionSelectObject_triggered()
@@ -5499,7 +5456,7 @@ void EntityWidget::MouseRelease(QMouseEvent* event)
         }
 
         mCurrentTool.reset();
-        UncheckPlacementActions();
+        mUI.widget->SetCursorShape(GfxWidget::CursorShape::ArrowCursor);
         DisplayCurrentNodeProperties();
         RealizeEntityChange(mState.entity);
     }
@@ -5519,7 +5476,7 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* event)
     // than to set a timer (which adds latency).
     // Going to simply discard any tool selection here on double click.
     mCurrentTool.reset();
-    UncheckPlacementActions();
+    mUI.widget->SetCursorShape(GfxWidget::CursorShape::ArrowCursor);
 
     auto [hitnode, hitpos] = SelectNode(mickey.MapToPlane(), *mState.entity, GetCurrentNode());
     if (!hitnode)
@@ -6101,31 +6058,6 @@ void EntityWidget::DisplayCurrentCameraLocation()
 {
     SetValue(mUI.translateX, -mState.camera_offset_x);
     SetValue(mUI.translateY, -mState.camera_offset_y);
-}
-
-void EntityWidget::UncheckPlacementActions()
-{
-    mUI.actionNewRect->setChecked(false);
-    mUI.actionNewCircle->setChecked(false);
-    mUI.actionNewIsoscelesTriangle->setChecked(false);
-    mUI.actionNewRightTriangle->setChecked(false);
-    mUI.actionNewRoundRect->setChecked(false);
-    mUI.actionNewTrapezoid->setChecked(false);
-    mUI.actionNewParallelogram->setChecked(false);
-    mUI.actionNewCapsule->setChecked(false);
-    mUI.actionNewSemiCircle->setChecked(false);
-    mParticleSystems->menuAction()->setChecked(false);
-    mCustomShapes->menuAction()->setChecked(false);
-    mUI.actionNewJoint->setChecked(false);
-
-    mUI.actionNewCube->setChecked(false);
-    mUI.actionNewCone->setChecked(false);
-    mUI.actionNewCylinder->setChecked(false);
-    mUI.actionNewPyramid->setChecked(false);
-    mUI.actionNewSphere->setChecked(false);
-
-    // this is the wrong place but.. it's convenient
-    mUI.widget->SetCursorShape(GfxWidget::CursorShape::ArrowCursor);
 }
 
 void EntityWidget::TranslateCamera(float dx, float dy)

@@ -384,7 +384,6 @@ namespace gui
         void DisplayEntityProperties();
         void DisplayCurrentCameraLocation();
         void DisplayCurrentNodeProperties();
-        void UncheckPlacementActions();
         void TranslateCamera(float dx, float dy);
         void TranslateCurrentNode(float dx, float dy);
         void UpdateCurrentNodeProperties();
