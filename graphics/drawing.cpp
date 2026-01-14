@@ -160,6 +160,16 @@ bool DrawImage(Painter& painter, const FRect& rect, const std::string& image_uri
     return FillRect(painter, rect, material);
 }
 
+bool DrawImage(Painter& painter, const FRect& rect, const std::string& image_uri,
+                   const Color4f& base_color, BlendMode blending)
+{
+    auto material = CreateMaterialFromImage(image_uri, blending == BlendMode::Alpha
+        ? MaterialClass::SurfaceType::Transparent
+        : MaterialClass::SurfaceType::Opaque);
+    material.SetUniform("kBaseColor", base_color);
+    return FillRect(painter, rect, material);
+}
+
 bool DrawTextureSource(Painter& painter, const FRect& rect, const MaterialClass& material,
     const TextureSource& texture_source, const FRect& texture_rect)
 {

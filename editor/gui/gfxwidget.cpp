@@ -316,6 +316,7 @@ void GfxWindow::PaintGL()
 
         if (mContextMenu)
         {
+            mContextMenu->Update(dt);
             mContextMenu->Render(*mCustomGraphicsPainter);
         }
     }
@@ -449,15 +450,21 @@ void GfxWindow::SetContextMenu(std::unique_ptr<GfxMenu> menu)
     mContextMenu = std::move(menu);
     mContextMenu->Initialize(QRect(0, 0, surface_width, surface_height));
     mContextMenuLoop.exec();
-    if (!mContextMenu)
-        return;
 
-    if (auto* result = mContextMenu->GetResult())
+    // make sure the context menu as a member doesn't exist anymore
+    // and doesn't render anymore if the action it triggers has its
+    // own event loop and blocks. For example if a file dialog is
+    // opened then leaving mContextMenu alive would still render
+    // the context menu while the file dialog interaction is taking
+    // place. this would look a bit ugly.
+    auto context_menu = std::move(mContextMenu);
+
+    // trigger the final result.
+    if (auto* action = context_menu->GetResult())
     {
-        if (result->isEnabled())
-            result->trigger();
+        if (action->isEnabled() && !action->isCheckable())
+            action->trigger();
     }
-    mContextMenu.reset();
 }
 
 void GfxWindow::doInit()
@@ -564,9 +571,21 @@ void GfxWindow::mouseReleaseEvent(QMouseEvent* mickey)
     if (mContextMenu)
     {
         mContextMenu->MouseRelease(mickey);
-        const auto* action = mContextMenu->GetResult();
-        if (!action || action->isEnabled())
-            mContextMenuLoop.exit();
+        if (mContextMenu)
+        {
+            if (mContextMenu->ShouldExitMenu())
+            {
+                mContextMenuLoop.exit();
+            }
+            else if (auto* action = mContextMenu->GetResult())
+            {
+                // trigger an action that does not produce the end of the
+                // context menu. i.e. toggling checkable actions does not
+                // finish the context menu interaction.
+                if (action->isEnabled() && action->isCheckable())
+                    action->trigger();
+            }
+        }
     }
     else
     {
@@ -628,7 +647,6 @@ void GfxWindow::focusOutEvent(QFocusEvent* event)
     //DEBUG("GfxWindow lost focus.");
     if (mContextMenu)
     {
-        mContextMenu.reset();
         mContextMenuLoop.quit();
     }
     mHasFocus = false;

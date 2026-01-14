@@ -91,6 +91,8 @@ bool DrawButtonIcon(const Painter& painter, const FRect& rect, const Color4f& co
 bool DrawHLine(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
 
 bool DrawImage(Painter& painter, const FRect& rect, const std::string& image_uri, BlendMode blending);
+bool DrawImage(Painter& painter, const FRect& rect, const std::string& image_uri,
+               const Color4f& base_color, BlendMode blending);
 
 bool DrawTextureSource(Painter& painter, const FRect& rect, const MaterialClass& material,
     const TextureSource& texture_source, const FRect& texture_rect);
