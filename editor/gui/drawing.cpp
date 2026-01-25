@@ -19,6 +19,8 @@
 #include "warnpush.h"
 #  include <glm/glm.hpp>
 #  include <QWidget>
+#  include <QPalette>
+#  include <QApplication>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -49,6 +51,15 @@
 
 namespace {
     gfx::Color4f DefaultGridColor = gfx::Color::LightGray;
+
+    base::FRect MakeDefaultTextRect(const gui::Point2Df& pos)
+    {
+        base::FRect ret;
+        ret.Move(pos);
+        ret.Resize(500.0f, 30.0f);
+        return ret;
+    }
+
 } // namespace
 
 namespace gui
@@ -879,64 +890,46 @@ void DrawViewport(gfx::Painter& painter,
 
 void ShowMessage(const app::AnyString& msg, gfx::Painter& painter)
 {
-    const gfx::FRect rect(10.0f, 10.0f, 500.0f, 20.0f);
-    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 14, rect,
-                      gfx::Color::HotPink,
-                      gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+    ShowMessage(msg, MakeDefaultTextRect(gfx::FPoint(10.0f, 10.0f)), painter, 14);
 }
 
 void ShowMessage(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter, unsigned font_size_px)
 {
-    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf",font_size_px, rect,
-                      gfx::Color::HotPink,
+    const auto palette = QApplication::palette();
+
+    auto background_color = ToGfx(palette.color(QPalette::Window));
+    background_color.SetAlpha(0.7f);
+
+    gfx::FillShape(painter, rect, gfx::RoundRectangle(), background_color);
+    gfx::DrawTextRect(painter, msg, "app://fonts/OpenSans-Regular.ttf",font_size_px, rect,
+                      ToGfx(palette.color(QPalette::Text)),
                       gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
 void ShowMessage(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& painter, unsigned font_size_px)
 {
-    // using 0 for rect width and height, this will create a raster buffer
-    // with dimensions derived from the rasterized text extents.
-    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px,
-                      gfx::FRect(pos, 0.0f, 0.0f),
-                      gfx::Color::HotPink,
-                      gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+    ShowMessage(msg, MakeDefaultTextRect(pos), painter, font_size_px);
 }
 
 void ShowError(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& painter, unsigned font_size_px)
 {
-    // using 0 for rect width and height, this will create a raster buffer
-    // with dimensions derived from the rasterized text extents.
-    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px,
-                      gfx::FRect(pos, 0.0f, 0.0f),
-                      gfx::Color::Red,
-                      gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+    ShowError(msg, MakeDefaultTextRect(pos), painter, font_size_px);
 }
 
 void ShowError(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter, unsigned font_size_px)
 {
-    // using 0 for rect width and height, this will create a raster buffer
-    // with dimensions derived from the rasterized text extents.
-    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px,
-                      rect,
+    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px, rect,
                       gfx::Color::Red,
                       gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
 
 void ShowWarning(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& painter, unsigned font_size_px)
 {
-    // using 0 for rect width and height, this will create a raster buffer
-    // with dimensions derived from the rasterized text extents.
-    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px,
-                      gfx::FRect(pos, 0.0f, 0.0f),
-                      gfx::Color::Yellow,
-                      gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+    ShowWarning(msg, MakeDefaultTextRect(pos), painter, font_size_px);
 }
 
 void ShowWarning(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter, unsigned font_size_px)
 {
-    // using 0 for rect width and height, this will create a raster buffer
-    // with dimensions derived from the rasterized text extents.
-    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px,
-                      rect,
+    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px, rect,
                       gfx::Color::Yellow,
                       gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }

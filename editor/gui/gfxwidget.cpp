@@ -293,6 +293,13 @@ void GfxWindow::PaintGL()
 
         // a quick hack here to avoid build dependency propagation to some unit tests.
 #if defined(DETONATOR_EDITOR_BUILD)
+        auto DrawMessage = [this](const std::string& message, const gfx::FRect& rect,
+                                  gfx::Color color, unsigned font_size_px) {
+            gfx::FillRect(*mCustomGraphicsPainter, rect, gfx::Color4f(gfx::Color::Black, 1.0f));
+            gfx::DrawTextRect(*mCustomGraphicsPainter, message, "app://fonts/OpenSans-Regular.ttf",font_size_px, rect,
+                              color, gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
+        };
+
         gfx::FRect rect;
         rect.Resize(800.0f, 30.0f);
         rect.Move(10.0f, 10.0f);
@@ -302,13 +309,11 @@ void GfxWindow::PaintGL()
 
         for (const auto& msg : msgs)
         {
-            gfx::FillRect(*mCustomGraphicsPainter, rect, gfx::Color4f(gfx::Color::Black, 0.3f));
-
             if (msg.type == gfx::PaintContext::LogEvent::Error)
-                ShowError(msg.message, rect, *mCustomGraphicsPainter, 18);
+                DrawMessage(msg.message, rect, gfx::Color::Red, 18);
             else if (msg.type == gfx::PaintContext::LogEvent::Warning)
-                ShowWarning(msg.message, rect, *mCustomGraphicsPainter, 18);
-            else ShowMessage(msg.message, rect, *mCustomGraphicsPainter, 18);
+                DrawMessage(msg.message, rect, gfx::Color::Yellow, 18);
+            else DrawMessage(msg.message, rect, gfx::Color::Gray, 18);
 
             rect.Translate(0.0f, 30.0f);
         }
