@@ -5101,7 +5101,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             {
                 const auto& size = node->GetSize();
                 const auto& pos = mState.entity->MapCoordsFromNodeBox({0.0f, size.y}, node);
-                ShowMessage(comment, gfx::FPoint(pos.x + 10, pos.y + 10), entity_painter);
+                ShowMessage(comment, gfx::FPoint(pos.x, pos.y + 10), entity_painter);
             }
         }
     }
