@@ -464,7 +464,7 @@
         </widget>
        </item>
        <item>
-        <widget class="color_widgets::ColorSelector" name="widgetColor">
+        <widget class="color_widgets::ColorSelector" name="widgetColor" native="true">
          <property name="minimumSize">
           <size>
            <width>30</width>
@@ -655,8 +655,25 @@
     <string>Create new triangle strip</string>
    </property>
   </action>
+  <action name="chkIsometricGuide">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show isometric guide</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle isometric guide on/off</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>gui::GfxWidget</class>
+   <extends>QWidget</extends>
+   <header>gfxwidget.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>color_widgets::ColorPreview</class>
    <extends>QWidget</extends>
@@ -666,12 +683,6 @@
    <class>color_widgets::ColorSelector</class>
    <extends>color_widgets::ColorPreview</extends>
    <header>color_selector.hpp</header>
-  </customwidget>
-  <customwidget>
-   <class>gui::GfxWidget</class>
-   <extends>QWidget</extends>
-   <header>gfxwidget.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -29,11 +29,12 @@
 #include <unordered_set>
 #include <optional>
 
-#include "editor/gui/mainwidget.h"
-#include "editor/app/workspace.h"
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
 #include "graphics/tool/polygon.h"
+#include "editor/gui/mainwidget.h"
+#include "editor/gui/types.h"
+#include "editor/app/workspace.h"
 
 namespace gui
 {
@@ -177,6 +178,7 @@ namespace gui
         template<typename T> class AddVertex2DTriangleTool;
         template<typename T> class MoveVertex2DTool;
         template<typename T> class MoveSurface2DTool;
+        template<typename T> class MapAxonometric25DVertexTool;
 
         enum class Hotkey {
             None, KeyX, KeyY, KeyZ
@@ -191,6 +193,19 @@ namespace gui
         };
         GridDensity mGrid = GridDensity::Grid20x20;
 
+        struct AxonometricPixelData {
+            float pixel_distance = 0.0f;
+            QPoint pixel_position;
+            // tile base (floor) corners in 2D projection
+            Point2Df tile_point_left_pixel_position;
+            Point2Df tile_point_top_pixel_position;
+            Point2Df tile_point_right_pixel_position;
+            Point2Df tile_point_bottom_pixel_position;
+
+            Point2Df tile_point_top_up_pixel_position;
+            Point2Df tile_point_top_floor_pixel_position;
+        };
+
         struct State {
             // the current workspace.
             app::Workspace* workspace = nullptr;
@@ -200,6 +215,8 @@ namespace gui
             std::unique_ptr<gfx::tool::IPolygonBuilder> builder;
             // the data table.
             std::unique_ptr<VertexDataTable> table;
+
+            std::optional<AxonometricPixelData> axonometric_vertex_pixel_data;
         } mState;
         std::unique_ptr<MouseTool> mMouseTool;
 
@@ -225,8 +242,6 @@ namespace gui
         };
         std::vector<PickCandidate> mPickingCandidates;
         std::size_t mPickingIndex = 0;
-
-        std::optional<float> mPixelDistance2Dand3D;
 
         unsigned mAxonometricTextureWidth  = 0;
         unsigned mAxonometricTextureHeight = 0;
