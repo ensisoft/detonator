@@ -720,6 +720,121 @@ private:
 };
 
 template<typename VertexType>
+class ShapeWidget::MapAxonometric25DVertexTool : public MouseTool {
+public:
+    using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
+
+    MapAxonometric25DVertexTool(State& state, size_t vertex_index)
+        : mState(state)
+        , mVertexIndex(vertex_index)
+    {}
+    void MousePress(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) override
+    {
+        mHeightMapping = MapToTileHeight(ToVec2(pos));
+        mBaseMapping = MapToTileBase(ToVec2(pos));
+    }
+
+    void MouseMove(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) override
+    {
+        auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
+
+        auto vertex = builder->GetVertex(mVertexIndex);
+
+        if (mickey->modifiers() & Qt::ShiftModifier)
+        {
+            const auto height = MapToTileHeight(ToVec2(pos));
+            const auto height_delta = height - mHeightMapping;
+            vertex.aLocalOffset.z += height_delta;
+            if (vertex.aLocalOffset.z > 0.0f)
+                vertex.aLocalOffset.z = 0.0f;
+            if (vertex.aLocalOffset.z < -2.0f)
+                vertex.aLocalOffset.z = -2.0f;
+            mHeightMapping = height;
+        }
+        else
+        {
+            const auto tile_position = MapToTileBase(ToVec2(pos));
+            const auto position_delta = tile_position - mBaseMapping;
+            vertex.aLocalOffset.x = tile_position.x;
+            vertex.aLocalOffset.y = tile_position.y;
+            mBaseMapping = tile_position;
+        }
+        mState.table->UpdateVertex(vertex, mVertexIndex);
+    }
+
+    bool MouseRelease(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) override
+    {
+        return true;
+    }
+    void DrawTool(gfx::Painter& painter, const ViewState&) const override
+    {
+        const auto& data = mState.axonometric_vertex_pixel_data.value();
+        gfx::DebugDrawLine(painter, data.tile_point_top_floor_pixel_position,
+            data.tile_point_top_up_pixel_position, gfx::Color::Blue, 2.0f);
+    }
+private:
+    float MapToTileHeight(const glm::vec2& screen_pos) const
+    {
+        const auto& value = mState.axonometric_vertex_pixel_data.value();
+        const auto vertical_height = value.tile_point_top_floor_pixel_position.y() -
+                value.tile_point_top_up_pixel_position.y();
+        const auto ypos = screen_pos.y - value.tile_point_top_up_pixel_position.y();
+
+        return (ypos / vertical_height) * 2.0;
+    }
+
+    glm::vec2 MapToTileBase(const glm::vec2& screen_pos) const
+    {
+        // essentially we take our screen space edge vectors and
+        // create a 2x2 matrix M(which is invertible, determinant is not zero)
+        // and multiply the screen space position (relative to the
+        // tile origin) by the inverse of M
+        const auto& data = mState.axonometric_vertex_pixel_data.value();
+
+        // Screen-space positions of three tile corners
+        const glm::vec2 P00 = data.tile_point_top_pixel_position;   // tile (0,0)
+        const glm::vec2 P10 = data.tile_point_right_pixel_position; // tile (1,0)
+        const glm::vec2 P01 = data.tile_point_left_pixel_position;  // tile (0,1)
+
+        // Edge vectors in screen space
+        const glm::vec2 E1 = P10 - P00; // direction of tile's +x axis
+        const glm::vec2 E2 = P01 - P00; // direction of tile's +y axis
+
+        // Components
+        const float e1x = E1.x;
+        const float e1y = E1.y;
+        const float e2x = E2.x;
+        const float e2y = E2.y;
+
+        // screen point
+        const auto P = screen_pos;
+        const glm::vec2 d = P - P00;
+        float dx = d.x;
+        float dy = d.y;
+
+        // Determinant is the signed area of the parallelogram spanned by E1 and E2
+        // det = 0 → the vectors are collinear → the tile has no area → no unique solution
+        // |det| large → well-conditioned (good numerics)
+        // Sign just tells you orientation (clockwise vs counter-clockwise)
+        const float det = e1x * e2y - e1y * e2x;
+
+        const float x = (dx * e2y - dy * e2x) / det;
+        const float y = (dy * e1x - dx * e1y) / det;
+        return glm::vec2 {
+            math::clamp(0.0f, 1.0f, x),
+            math::clamp(0.0f, 1.0f, y)
+        };
+    }
+
+private:
+    ShapeWidget::State& mState;
+    const size_t mVertexIndex = 0;
+    float mHeightMapping = 0.0f;
+    glm::vec2 mBaseMapping = {0.0f, 0.0f};
+private:
+};
+
+template<typename VertexType>
 class ShapeWidget::AddVertex2DTriangleTool : public MouseTool {
 public:
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
@@ -890,6 +1005,7 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     mHamburger->addAction(mUI.chkShowVertices);
     mHamburger->addAction(mUI.chkShowSurfaces);
     mHamburger->addAction(mUI.chkShowBlueprint);
+    mHamburger->addAction(mUI.chkIsometricGuide);
 
     connect(mUI.btnHamburger, &QPushButton::clicked, this, [this]() {
         QPoint point;
@@ -917,6 +1033,7 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     PopulateFromEnum<MeshType>(mUI.cmbMeshType);
     SetValue(mUI.cmbGrid, GridDensity::Grid20x20);
     SetValue(mUI.cmbMeshType, MeshType::Simple2DRenderMesh);
+    SetValue(mUI.chkIsometricGuide, true);
 
     mState.polygon->SetName(GetValue(mUI.name));
     mState.polygon->SetStatic(GetValue(mUI.chkStaticInstance));
@@ -948,6 +1065,7 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "show_vertices",  mUI.chkShowVertices);
     GetUserProperty(resource, "show_surfaces",  mUI.chkShowSurfaces);
     GetUserProperty(resource, "show_blueprint", mUI.chkShowBlueprint);
+    GetUserProperty(resource, "show_isometric_guide", mUI.chkIsometricGuide);
     GetUserProperty(resource, "widget",         mUI.widget);
     GetUserProperty(resource, "splitter",       mUI.splitter);
     GetUserProperty(resource, "kRandom",        mUI.kRandom);
@@ -1002,7 +1120,8 @@ void ShapeWidget::InitializeSettings(const UISettings& settings)
     SetValue(mUI.chkShowBlueprint, true);
     SetValue(mUI.chkShowVertices,  true);
     SetValue(mUI.chkShowSurfaces,  true);
-}
+    SetValue(mUI.chkIsometricGuide, true);
+ }
 
 void ShapeWidget::InitializeContent()
 {
@@ -1070,6 +1189,7 @@ bool ShapeWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Polygon", mUI.chkShowVertices);
     settings.SaveWidget("Polygon", mUI.chkShowSurfaces);
     settings.SaveWidget("Polygon", mUI.chkShowBlueprint);
+    settings.SaveWidget("Polygon", mUI.chkIsometricGuide);
     settings.SaveWidget("Polygon", mUI.cmbGrid);
     settings.SaveWidget("Polygon", mUI.widget);
     settings.SaveWidget("Polygon", mUI.splitter);
@@ -1091,6 +1211,7 @@ bool ShapeWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Polygon", mUI.chkShowVertices);
     settings.LoadWidget("Polygon", mUI.chkShowSurfaces);
     settings.LoadWidget("Polygon", mUI.chkShowBlueprint);
+    settings.LoadWidget("Polygon", mUI.chkIsometricGuide);
     settings.LoadWidget("Polygon", mUI.cmbGrid);
     settings.LoadWidget("Polygon", mUI.widget);
     settings.LoadWidget("Polygon", mUI.splitter);
@@ -1261,6 +1382,7 @@ void ShapeWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_vertices",  mUI.chkShowVertices);
     SetUserProperty(resource, "show_surfaces",  mUI.chkShowSurfaces);
     SetUserProperty(resource, "show_blueprint", mUI.chkShowBlueprint);
+    SetUserProperty(resource, "show_isometric_guide", mUI.chkIsometricGuide);
     SetUserProperty(resource, "widget",         mUI.widget);
     SetUserProperty(resource, "splitter",       mUI.splitter);
     SetUserProperty(resource, "kRandom",        mUI.kRandom);
@@ -1399,11 +1521,26 @@ void ShapeWidget::on_chkDoubleSided_stateChanged(int)
 
 void ShapeWidget::on_cmbMeshType_currentIndexChanged(int)
 {
-    const MeshType mesh_type = GetValue(mUI.cmbMeshType);
-    if (mesh_type == GetMeshType())
+    const MeshType new_mesh_type = GetValue(mUI.cmbMeshType);
+    const MeshType mesh_type = GetMeshType();
+    if (new_mesh_type == mesh_type)
         return;
 
-    if (mState.polygon->GetVertexCount())
+    // these are vertex layout compatible so we can
+    // just change the type without having to delete
+    // any of the actual data.
+    if ((mesh_type == MeshType::Dimetric2DRenderMesh && new_mesh_type == MeshType::Isometric2DRenderMesh) ||
+        (mesh_type == MeshType::Isometric2DRenderMesh && new_mesh_type == MeshType::Dimetric2DRenderMesh))
+    {
+        if (new_mesh_type == MeshType::Dimetric2DRenderMesh)
+            mState.polygon->SetMeshType(gfx::PolygonMeshClass::MeshType::Dimetric2DRenderMesh);
+        else if (new_mesh_type == MeshType::Isometric2DRenderMesh)
+            mState.polygon->SetMeshType(gfx::PolygonMeshClass::MeshType::Isometric2DRenderMesh);
+        else BUG("Bug on mesh type change.");
+        return;
+    }
+
+    if (mState.polygon->GetVertexCount() || mState.builder->GetVertexCount())
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Icon::Question);
@@ -1416,9 +1553,11 @@ void ShapeWidget::on_cmbMeshType_currentIndexChanged(int)
             return;
         }
     }
-    SetMeshType(mesh_type);
+    SetMeshType(new_mesh_type);
     CreateMeshBuilder();
     mMainView = ViewType::EditView;
+    mSelectedVertex = InvalidIndex;
+    mSelectedCommand = InvalidIndex;
 }
 
 void ShapeWidget::on_tableView_customContextMenuRequested(const QPoint& point)
@@ -1619,7 +1758,7 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
     painter.SetViewport(xoffset, yoffset, width, height);
     painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(width, height));
 
-    mPixelDistance2Dand3D.reset();
+    mState.axonometric_vertex_pixel_data.reset();
 
     if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
     {
@@ -1630,11 +1769,13 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         ConfigureTilePainter(tile_painter);
 
         auto checkerboard = gfx::CreateMaterialFromImage(res::Checkerboard);
-
         const auto tile_base_size = mAxonometricTileBaseSize;
         const auto tile_size = tile_base_size.x;
 
+        const bool show_guide = GetValue(mUI.chkIsometricGuide);
+
         // ground reference
+        if (show_guide)
         {
             gfx::Transform tile;
             tile.Resize(tile_base_size);
@@ -1643,6 +1784,7 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         }
 
         // right back reference
+        if (show_guide)
         {
             gfx::Transform tile;
             tile.Resize(tile_base_size);
@@ -1655,6 +1797,7 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         }
 
         // left back reference
+        if (show_guide)
         {
             gfx::Transform tile;
             tile.Resize(tile_base_size);
@@ -1689,20 +1832,38 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
             const auto& projection_matrix_3d = tile_painter.GetProjMatrix();
             const auto& view_matrix_3d = tile_painter.GetViewMatrix();
 
+            auto FromTileToClip = [&projection_matrix_3d, &view_matrix_3d, &tile_base_size](float x, float y, float z) {
+                return projection_matrix_3d * view_matrix_3d * glm::vec4 {
+                -tile_base_size.x + x * tile_base_size.x,
+                -tile_base_size.y + y * tile_base_size.y,
+                                    z * tile_base_size.z, 1.0f };
+            };
+            auto FromClipToWindow = [width, height](const glm::vec4& point) {
+                return QPoint((point.x + 1.0) * width * 0.5,
+                                height - ((point.y + 1.0) * height * 0.5));
+            };
+
             const auto vertex_2d_clip_space = projection_matrix_2d * glm::vec4 {
                 width * vertex.aPosition.x, height * -vertex.aPosition.y, 0.0f, 1.0f };
 
-            const auto vertex_3d_clip_space = projection_matrix_3d * view_matrix_3d * glm::vec4 {
-                -tile_base_size.x + vertex.aLocalOffset.x * tile_base_size.x,
-                -tile_base_size.y + vertex.aLocalOffset.y * tile_base_size.y,
-                                    vertex.aLocalOffset.z * tile_base_size.z, 1.0f };
+            const auto vertex_3d_clip_space = FromTileToClip(vertex.aLocalOffset.x, vertex.aLocalOffset.y, vertex.aLocalOffset.z);
+
             //DEBUG("%1 vs %2", vertex_2d_clip_space, vertex_3d_clip_space);
             // now both vertices are in clip space, map to pixel distances.
             const auto horizontal_distance_pixels = std::abs(vertex_2d_clip_space.x - vertex_3d_clip_space.x) * width * 0.5;
             const auto vertical_distance_pixels = std::abs(vertex_2d_clip_space.y - vertex_3d_clip_space.y) * width * 0.5;
             const auto pixel_distance = std::sqrt(horizontal_distance_pixels*horizontal_distance_pixels +
                                                   vertical_distance_pixels*vertical_distance_pixels);
-            mPixelDistance2Dand3D = pixel_distance;
+            AxonometricPixelData data;
+            data.pixel_distance = pixel_distance;
+            data.pixel_position = FromClipToWindow(vertex_3d_clip_space);
+            data.tile_point_left_pixel_position   = FromClipToWindow(FromTileToClip(0.0f, 1.0f, vertex.aLocalOffset.z));
+            data.tile_point_top_pixel_position    = FromClipToWindow(FromTileToClip(0.0f, 0.0f, vertex.aLocalOffset.z));
+            data.tile_point_right_pixel_position  = FromClipToWindow(FromTileToClip(1.0f, 0.0f, vertex.aLocalOffset.z));
+            data.tile_point_bottom_pixel_position = FromClipToWindow(FromTileToClip(1.0f, 1.0f, vertex.aLocalOffset.z));
+            data.tile_point_top_floor_pixel_position = FromClipToWindow(FromTileToClip(vertex.aLocalOffset.x, vertex.aLocalOffset.y,  0.0f));
+            data.tile_point_top_up_pixel_position    = FromClipToWindow(FromTileToClip(vertex.aLocalOffset.x, vertex.aLocalOffset.y, -2.0f));
+            mState.axonometric_vertex_pixel_data = data;
             //DEBUG("Pixel distance between points = %1", static_cast<int>(pixel_distance));
         }
     }
@@ -1729,7 +1890,8 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
     else
     {
         gfx::Transform view;
-        view.Resize(width, height);
+        view.Resize(width-2.0f, height-2.0f);
+        view.Translate(1.0f, 1.0f);
         painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), view,
                      gfx::CreateMaterialFromColor(gfx::Color::LightGray));
     }
@@ -1799,9 +1961,10 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         mMouseTool->DrawTool(painter, view);
     }
 
-    if (mPixelDistance2Dand3D)
+    if (mState.axonometric_vertex_pixel_data)
     {
-        const auto px_diff = static_cast<int>(mPixelDistance2Dand3D.value());
+        const auto& data = mState.axonometric_vertex_pixel_data.value();
+        const auto px_diff = static_cast<int>(data.pixel_distance);
         mMessages.push_back("Use mouse wheel + keys 'x', 'y' and 'z' to adjust 3D point");
         mMessages.push_back(base::FormatString("Point difference %1 px %2", px_diff, px_diff == 0 ? "POINT SET" : ""));
     }
@@ -2005,16 +2168,29 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
             if (btn == Qt::MouseButton::LeftButton && !mMouseTool)
             {
                 const auto mesh_type = GetMeshType();
-                if (mesh_type == MeshType::Simple2DRenderMesh)
-                    PickSurface2D<gfx::Vertex2D>(point, width, height);
-                else if (mesh_type == MeshType::Simple2DShardEffectMesh)
-                    PickSurface2D<gfx::ShardVertex2D>(point, width, height);
-                else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
-                    PickSurface2D<gfx::Perceptual3DVertex>(point, width, height);
-                else BUG("Unhandled mesh type.");
-
-                if (mSelectedCommand == InvalidIndex)
+                // try to pick the vertex 3D mapping point. if we hit that  picking point
+                // then start the mapping tool.
+                if (mSelectedVertex != InvalidIndex)
                 {
+                    if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+                    {
+                        const auto& pixel_data = mState.axonometric_vertex_pixel_data.value();
+                        const auto point_diff = point - pixel_data.pixel_position;
+                        const auto point_dist = std::sqrt(point_diff.x()*point_diff.x() + point_diff.y()*point_diff.y());
+                        if (point_dist < 10.0f)
+                        {
+                            using VertexMappingTool = MapAxonometric25DVertexTool<gfx::Perceptual3DVertex>;
+                            mMouseTool = std::make_unique<VertexMappingTool>(mState, mSelectedVertex);
+                        }
+                    }
+                }
+
+                // try secondary picking.
+                if (!mMouseTool)
+                {
+                    const auto selected_vertex = mSelectedVertex;
+
+                    // first pick vertex.
                     auto pick_mode = PickMode::Sticky;
                     if (shift)
                         pick_mode = PickMode::Cycling;
@@ -2026,6 +2202,18 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
                     else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
                         PickVertex2D<gfx::Perceptual3DVertex>(point, width, height, pick_mode);
                     else BUG("Unhandled mesh type.");
+
+                    // if we didn't pick any vertex then try picking a surface.
+                    if (mSelectedVertex == InvalidIndex)
+                    {
+                        if (mesh_type == MeshType::Simple2DRenderMesh)
+                            PickSurface2D<gfx::Vertex2D>(point, width, height);
+                        else if (mesh_type == MeshType::Simple2DShardEffectMesh)
+                            PickSurface2D<gfx::ShardVertex2D>(point, width, height);
+                        else if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+                            PickSurface2D<gfx::Perceptual3DVertex>(point, width, height);
+                        else BUG("Unhandled mesh type.");
+                    }
                 }
             }
         }
@@ -2408,7 +2596,7 @@ void ShapeWidget::PaintVertices25D(gfx::Painter& painter) const
         const auto y = height * -vertex.aPosition.y;
 
         gfx::Transform model;
-        model.Resize(15, 15);
+        model.Resize(15.0f, 15.0f);
         model.MoveTo(x, y);
         model.Translate(-7.5, -7.5);
 
@@ -2439,7 +2627,6 @@ void ShapeWidget::PaintVertices25D(gfx::Painter& painter) const
                 { tile_base_size.x, local_offset.y * tile_base_size.y, local_offset.z * tile_base_size.z }), line,
                 gfx::CreateMaterialFromColor(gfx::Color::Red), 2.0f);
 
-
             if (!mMouseTool)
             {
                 const auto time = fmod(base::GetTime(), 1.5) / 1.5;
@@ -2449,6 +2636,23 @@ void ShapeWidget::PaintVertices25D(gfx::Painter& painter) const
                 model.MoveTo(x, y);
                 model.Translate(-size*0.5f, -size*0.5f);
                 painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+            }
+
+            if (mState.axonometric_vertex_pixel_data)
+            {
+                const auto& value = mState.axonometric_vertex_pixel_data.value();
+                gfx::Transform model;
+                model.Resize(15.0f, 15.0f);
+                model.MoveTo(value.pixel_position.x(), value.pixel_position.y());
+                model.Translate(-7.5f, -7.5f);
+                painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+
+#if 0
+                // debug drawing to check whether the edge lines
+                // are lining up in the right place
+                gfx::DebugDrawLine(painter, ToGfx(value.right_edge_start), ToGfx(value.right_edge_end), gfx::Color::Green);
+                gfx::DebugDrawLine(painter, ToGfx(value.left_edge_start), ToGfx(value.left_edge_end), gfx::Color::Red);
+#endif
             }
         }
         else if (IsHovered(i))
@@ -2717,9 +2921,10 @@ void ShapeWidget::ScrollAxonometricVertex(const QWheelEvent* wheel)
     const auto mods = wheel->modifiers();
 
     float step = 0.1f;
-    if (mPixelDistance2Dand3D.has_value())
+    if (mState.axonometric_vertex_pixel_data)
     {
-        const auto px_diff = static_cast<int>(mPixelDistance2Dand3D.value());
+        const auto& value = mState.axonometric_vertex_pixel_data.value();
+        const auto px_diff = static_cast<int>(value.pixel_distance);
         if (px_diff < 50)
             step = 0.05f;
         if (px_diff < 20)
@@ -2837,7 +3042,7 @@ void ShapeWidget::CreateMeshBuilder()
     QObject::connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
         [this](const QItemSelection&, const QItemSelection&) {
             const auto row = GetSelectedRow(mUI.tableView);
-            mSelectedVertex = row;
+            mSelectedVertex = row == -1 ? InvalidIndex : row;
         });
 }
 
