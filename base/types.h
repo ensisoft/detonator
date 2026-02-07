@@ -1193,89 +1193,80 @@ namespace base
         T y = T();
     };
 
-
-    template<typename T>
-    inline Vector2D<T> operator * (const Vector2D<T>& vector, T scalar) noexcept
+    template<typename T> Vector2D<T> operator * (const Vector2D<T>& vector, T scalar) noexcept
     {
         return { vector.x * scalar, vector.y * scalar };
     }
-    template<typename T>
-    inline Vector2D<T> operator * (T scalar, const Vector2D<T>& vector) noexcept
+    template<typename T> Vector2D<T> operator * (T scalar, const Vector2D<T>& vector) noexcept
     {
         return { vector.x * scalar, vector.y * scalar };
     }
-    template<typename T>
-    inline Vector2D<T> operator / (const Vector2D<T>& vector, T scalar) noexcept
+    template<typename T> Vector2D<T> operator / (const Vector2D<T>& vector, T scalar) noexcept
     {
         return { vector.x / scalar, vector.y / scalar };
     }
 
-    template<typename T>
-    inline Vector2D<T> operator + (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    template<typename T> Vector2D<T> operator + (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
     {
         return { lhs.x + rhs.x, lhs.y + rhs.y };
     }
-    template<typename T>
-    inline Vector2D<T> operator - (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    template<typename T> Vector2D<T> operator - (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
     {
         return { lhs.x - rhs.x, lhs.y - rhs.y };
     }
-    template<typename T>
-    inline Vector2D<T> operator * (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    template<typename T> Vector2D<T> operator * (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
     {
         return { lhs.x * rhs.x, lhs.y * rhs.y };
     }
-    template<typename T>
-    inline Vector2D<T> operator / (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    template<typename T> Vector2D<T> operator / (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
     {
         return { lhs.x / rhs.x, lhs.y / rhs.y };
     }
 
-    template<typename T>
-    inline bool operator == (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    template<typename T> bool operator == (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
     {
         return (lhs.x == rhs.x) && (lhs.y == rhs.y);
     }
-    template<typename T>
-    inline bool operator != (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    template<typename T> bool operator != (const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
     {
         return (lhs.x != rhs.x) || (lhs.y != rhs.y);
     }
 
-    template<typename T>
-    inline T Dot(const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    template<typename T> T Dot(const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
     {
         return (lhs.x * rhs.x) + (lhs.y * rhs.y);
     }
 
-    template<typename  T>
-    inline T Distance(const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    template<typename  T> T Distance(const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
     {
         return Vector2D(lhs - rhs).Length();
     }
-    template<typename T>
-    inline T SquareDistance(const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
+    template<typename T> T SquareDistance(const Vector2D<T>& lhs, const Vector2D<T>& rhs) noexcept
     {
         return Vector2D(lhs - rhs).SquareDistance();
     }
 
-    template<typename T>
-    inline Vector2D<T> SwizzleXY(const Vector2D<T>& vector) noexcept
+    template<typename T> Vector2D<T> SwizzleXY(const Vector2D<T>& vector) noexcept
     {
         return { vector.y, vector. x };
     }
 
-    template<typename T>
-    inline Vector2D<T> Normalize(const Vector2D<T>& vector) noexcept
+    template<typename T> Vector2D<T> Normalize(const Vector2D<T>& vector) noexcept
     {
         Vector2D ret(vector);
         ret.Normalize();
         return ret;
     }
-    template<typename T>
-    inline Vector2D<T> Perpendicular(const Vector2D<T>& vector) noexcept
+
+    // Compute a vector that is perpendicular to the given vector counter clock-wise.
+    template<typename T> Vector2D<T> Perpendicular(const Vector2D<T>& vector) noexcept
     {
-        return { -vector.x, vector.x };
+        return { -vector.y, vector.x };
+    }
+    // Compute a vector that is perpendicular to the given vector clock-wise
+    template<typename T> Vector2D<T> PerpendicularCW(const Vector2D<T>& vector) noexcept
+    {
+        return { vector.y, -vector.x };
     }
 
     using FVector2D = Vector2D<float>;
