@@ -30,6 +30,8 @@
 #include "engine/library/library.h"
 #include "base/logging.h"
 #include "base/format.h"
+#include "base/types.h"
+#include "base/math.h"
 #include "audio/audio_graph_source.h"
 #include "audio/elements/graph.h"
 #include "audio/elements/graph_class.h"
@@ -88,7 +90,7 @@ class AudioMusicTest : public TestCase,
                        public audio::Loader
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::FRect rect(20, 20, 700, 800);
         gfx::DrawTextRect(painter,
@@ -100,7 +102,7 @@ public:
             gfx::Color::HotPink,
             gfx::TextAlign::AlignLeft | gfx::AlignTop);
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         std::vector<engine::AudioEvent> events;
         mEngine->Update(&events);
@@ -109,17 +111,17 @@ public:
             DEBUG("AudioEvent (%1) on track '%2'", event.type, event.track);
         }
     }
-    virtual void Start(engine::ClassLibrary* loader) override
+    void Start(engine::ClassLibrary* loader) override
     {
         mEngine = std::make_unique<engine::AudioEngine>("TestApp");
         mEngine->SetLoader(this);
         mEngine->Start();
         mEngine->SetMusicGain(mMusicGain);
     }
-    virtual void End() override
+    void End() override
     { mEngine.reset(); }
 
-    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
+    void OnKeydown(const wdk::WindowEventKeyDown& key) override
     {
         std::string track;
         if (key.symbol == wdk::Keysym::Key1)
@@ -138,10 +140,10 @@ public:
         mEngine->SetMusicEffect(name, 2.0f*1000u, engine::AudioEngine::Effect::FadeIn);
         mEngine->ResumeMusic(name);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "AudioMusicTest"; }
 
-    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
+    audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
         AudioIOStrategy strategy, bool enable_file_caching) const override
     { return audio::OpenFileStream(uri, strategy, enable_file_caching); }
 private:
@@ -201,7 +203,7 @@ class AudioEffectTest : public TestCase,
                         public audio::Loader
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::FRect rect(20, 20, 700, 800);
         gfx::DrawTextRect(painter,
@@ -216,11 +218,11 @@ public:
             gfx::Color::HotPink,
             gfx::TextAlign::AlignLeft | gfx::AlignTop);
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         mEngine->Update(nullptr);
     }
-    virtual void Start(engine::ClassLibrary* loader) override
+    void Start(engine::ClassLibrary* loader) override
     {
         mEngine = std::make_unique<engine::AudioEngine>("TestApp");
         mEngine->SetLoader(this);
@@ -230,10 +232,10 @@ public:
         // audio buffers are likely going to cause stutter
         mEngine->SetBufferSize(40);
     }
-    virtual void End() override
+    void End() override
     { mEngine.reset(); }
 
-    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
+    void OnKeydown(const wdk::WindowEventKeyDown& key) override
     {
         const auto millisec = unsigned(mDelay * 1000u);
         if (key.symbol == wdk::Keysym::Key1)
@@ -254,9 +256,9 @@ public:
             mDelay = math::clamp(0.0f, 10.0f, mDelay - 0.5f);
         mEngine->SetSoundEffectGain(mEffectGain);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "AudioEffectTest"; }
-    virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
+    audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
         AudioIOStrategy strategy, bool enable_file_caching) const override
     { return audio::OpenFileStream(uri); }
 private:
@@ -317,7 +319,7 @@ private:
 class PhysicsTest : public TestCase
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         auto* device = painter.GetDevice();
         engine::Renderer::Surface surface;
@@ -337,7 +339,7 @@ public:
 
         mPhysics.DebugDrawObjects(painter);
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         if (mPhysics.HaveWorld())
         {
@@ -346,7 +348,7 @@ public:
         }
         mRenderer.UpdateRendererState(*mScene, nullptr);
     }
-    virtual void Start(engine::ClassLibrary* loader) override
+    void Start(engine::ClassLibrary* loader) override
     {
         auto klass = std::make_shared<game::SceneClass>();
         // create ground.
@@ -402,7 +404,7 @@ public:
         mPhysics.DeleteAll();
         mPhysics.CreateWorld(*mScene);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "PhysicsTest"; }
 private:
     std::unique_ptr<game::Scene>  mScene;
@@ -414,7 +416,7 @@ private:
 class ViewportTest : public TestCase
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         // visualize the logical viewport.
         painter.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
@@ -458,7 +460,7 @@ public:
         mRenderer.CreateFrame(*mScene, nullptr);
         mRenderer.DrawFrame(*device);
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         if (mScene)
         {
@@ -466,7 +468,7 @@ public:
             mRenderer.UpdateRendererState(*mScene, nullptr);
         }
     }
-    virtual void Start(engine::ClassLibrary* loader) override
+    void Start(engine::ClassLibrary* loader) override
     {
         auto klass = std::make_shared<game::SceneClass>();
         {
@@ -508,12 +510,12 @@ public:
 
         mViewport = gfx::FRect(0.0f, 0.0f, 200.0f, 200.0f);
     }
-    virtual void SetSurfaceSize(unsigned width, unsigned height) override
+    void SetSurfaceSize(unsigned width, unsigned height) override
     {
         mSurfaceWidth  = width;
         mSurfaceHeight = height;
     }
-    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
+    void OnKeydown(const wdk::WindowEventKeyDown& key) override
     {
         if (key.symbol == wdk::Keysym::Key1)
             mViewport.Grow(0.0f, -10.0f);
@@ -534,7 +536,7 @@ public:
 
         DEBUG("viewport: %1", mViewport);
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "ViewportTest"; }
 private:
     std::unique_ptr<game::Scene> mScene;
@@ -547,7 +549,7 @@ private:
 class SceneTest : public TestCase
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::Transform transform;
         transform.Translate(300.0f, 400.0f);
@@ -602,7 +604,7 @@ public:
             }
         }
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         if (mScene)
         {
@@ -610,7 +612,7 @@ public:
             mRenderer.UpdateRendererState(*mScene, nullptr);
         }
     }
-    virtual void Start(engine::ClassLibrary* loader) override
+    void Start(engine::ClassLibrary* loader) override
     {
         auto klass = std::make_shared<game::SceneClass>();
 
@@ -640,7 +642,7 @@ public:
         mRenderer.SetClassLibrary(loader);
         mRenderer.CreateRendererState(*mScene, nullptr);
     }
-    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
+    void OnKeydown(const wdk::WindowEventKeyDown& key) override
     {
         if (key.symbol == wdk::Keysym::Key1)
             mDrawEntityBoundingRects = !mDrawEntityBoundingRects;
@@ -650,7 +652,7 @@ public:
             mDrawEntityNodeBoundingBoxes = !mDrawEntityNodeBoundingBoxes;
     }
 
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "SceneTest"; }
 private:
     std::unique_ptr<game::Scene> mScene;
@@ -664,7 +666,7 @@ private:
 class EntityTest : public TestCase
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::Transform transform;
         transform.MoveTo(400, 400);
@@ -706,7 +708,7 @@ public:
             }
         }
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         if (!mEntity)
             return;
@@ -718,21 +720,21 @@ public:
 
         mTime += dt;
     }
-    virtual void Start(engine::ClassLibrary* loader) override
+    void Start(engine::ClassLibrary* loader) override
     {
         auto klass = loader->FindEntityClassByName("robot");
         mEntity = game::CreateEntityInstance(klass);
         mEntity->PlayAnimationByName("idle");
         mRenderer.SetClassLibrary(loader);
     }
-    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
+    void OnKeydown(const wdk::WindowEventKeyDown& key) override
     {
         if (key.symbol == wdk::Keysym::Key1)
             mDrawBoundingBoxes = !mDrawBoundingBoxes;
         else if (key.symbol == wdk::Keysym::Key2)
             mDrawBoundingRects = !mDrawBoundingRects;
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "EntityTest"; }
 private:
     std::unique_ptr<game::Entity> mEntity;
@@ -749,7 +751,7 @@ public:
     UITest() : mMessageQueue(20)
     {}
 
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         gfx::Transform view;
         view.Translate(mOffsetX, mOffsetY);
@@ -769,7 +771,7 @@ public:
             rect.Translate(0, 20);
         }
     }
-    virtual void Update(float dt) override
+    void Update(float dt) override
     {
         mPainter.Update(mTime, dt);
         const auto& actions = mWindow.PollAction(mState, mTime, dt);
@@ -779,7 +781,7 @@ public:
         }
         mTime += dt;
     }
-    virtual void Start(engine::ClassLibrary* loader) override
+    void Start(engine::ClassLibrary* loader) override
     {
         mWindow.ClearWidgets();
         mStyle.SetClassLibrary(loader);
@@ -917,12 +919,12 @@ public:
         mState.Clear();
         mTime = 0.0;
     }
-    virtual void Tick() override
+    void Tick() override
     {
         if (!mMessageQueue.empty())
             mMessageQueue.pop_front();
     }
-    virtual void OnMousePress(const wdk::WindowEventMousePress& mickey) override
+    void OnMousePress(const wdk::WindowEventMousePress& mickey) override
     {
         uik::Window::MouseEvent event;
         event.window_mouse_pos = uik::FPoint(mickey.window_x-mOffsetX, mickey.window_y-mOffsetY);
@@ -935,7 +937,7 @@ public:
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
         }
     }
-    virtual void OnMouseRelease(const wdk::WindowEventMouseRelease& mickey) override
+    void OnMouseRelease(const wdk::WindowEventMouseRelease& mickey) override
     {
         uik::Window::MouseEvent event;
         event.window_mouse_pos = uik::FPoint(mickey.window_x-mOffsetX, mickey.window_y-mOffsetY);
@@ -948,7 +950,7 @@ public:
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
         }
     }
-    virtual void OnMouseMove(const wdk::WindowEventMouseMove& mickey) override
+    void OnMouseMove(const wdk::WindowEventMouseMove& mickey) override
     {
         uik::Window::MouseEvent event;
         event.window_mouse_pos = uik::FPoint(mickey.window_x-mOffsetX, mickey.window_y-mOffsetY);
@@ -968,7 +970,7 @@ public:
             }
         }
     }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "UITest"; }
 private:
     uik::MouseButton MapMouseButton(const wdk::MouseButton btn) const
@@ -999,7 +1001,7 @@ private:
 class TileCoordinateMappingTest : public TestCase
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         const auto cells = 5;
         const auto lines = cells -1;
@@ -1089,12 +1091,12 @@ public:
             gfx::TextAlign::AlignLeft | gfx::AlignTop);
 
     }
-    virtual void OnMouseMove(const wdk::WindowEventMouseMove& mickey) override
+    void OnMouseMove(const wdk::WindowEventMouseMove& mickey) override
     {
         mMickey = glm::vec2{ mickey.window_x, mickey.window_y };
     }
 
-    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
+    void OnKeydown(const wdk::WindowEventKeyDown& key) override
     {
         if (key.symbol == wdk::Keysym::KeyA)
             mPlane = engine::GameView::AxisAligned;
@@ -1102,7 +1104,7 @@ public:
             mPlane = engine::GameView::Dimetric;
     }
 
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "TileCoordinateMappingTest"; }
 private:
     glm::vec2 mMickey = {0.0f, 0.0f};
@@ -1112,7 +1114,7 @@ private:
 class TileGridTest : public TestCase
 {
 public:
-    virtual void Render(gfx::Painter& painter) override
+    void Render(gfx::Painter& painter) override
     {
         const auto cells = 5;
         const auto lines = cells - 1;
@@ -1204,22 +1206,68 @@ public:
             //scene.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
 
         }
-
     }
 
-
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return "TileGridTest"; }
 private:
-
-
 };
 
+class VectorProjectionTest : public TestCase
+{
+public:
+    void Render(gfx::Painter& painter) override
+    {
+        // visualize projecting mouse pointer from the current mouse
+        // position onto the vector.
+        const auto beg = base::Float2{ 500.0f, 300.0f };
+        const auto end = base::Float2{ 750.0f, 600.0f };
+        gfx::DebugDrawLine(painter, beg, end, gfx::Color::HotPink);
+
+        const auto vector = end.ToVec2() - beg.ToVec2();
+        const auto vector_dir = glm::normalize(vector);
+        const auto vector_len = glm::length(vector);
+
+        const auto mouse_pos = mMousePos.ToVec2() - beg.ToVec2();
+        const auto mouse_dir = glm::normalize(mouse_pos);
+        const auto mouse_len = glm::length(mouse_pos);
+        gfx::DebugDrawLine(painter, beg,
+            ToPoint(beg.ToVec2() + mouse_dir * mouse_len), gfx::Color::Green);
+
+        const auto angle_cos = glm::dot(vector_dir, mouse_dir);
+
+        const auto vector_dist = angle_cos * mouse_len;
+        const auto vector_pos = beg.ToVec2() + vector_dir * vector_dist;
+
+        gfx::FRect rect;
+        rect.Move(vector_pos);
+        rect.Resize(10.0f, 10.0f);
+        rect.Translate(-5.0f, -5.0f);
+        gfx::FillShape(painter, rect, gfx::Circle(), gfx::Color::Yellow);
+
+        const auto perpendicular_vector = math::ComputePerpendicularVector(vector_dir);
+        gfx::DebugDrawLine(painter, ToPoint(vector_pos),
+            ToPoint(vector_pos + perpendicular_vector * 100.0f), gfx::Color::Red);
+        gfx::DebugDrawLine(painter, ToPoint(vector_pos),
+            ToPoint(vector_pos + perpendicular_vector * -100.0f), gfx::Color::Red);
+    }
+    std::string GetName() const override
+    {
+        return "VectorProjectionTest";
+    }
+    void OnMouseMove(const wdk::WindowEventMouseMove& mickey) override
+    {
+        mMousePos.x = mickey.window_x;
+        mMousePos.y = mickey.window_y;
+    }
+private:
+    base::Float2 mMousePos;
+};
 
 class MyApp : public engine::Engine, public wdk::WindowListener
 {
 public:
-    virtual bool ParseArgs(int argc, const char* argv[]) override
+    bool ParseArgs(int argc, const char* argv[]) override
     {
         bool debug = false;
         for (int i = 1; i < argc; ++i)
@@ -1230,13 +1278,13 @@ public:
         base::EnableDebugLog(debug);
         return true;
     }
-    virtual bool GetNextRequest(Request* out) override
+    bool GetNextRequest(Request* out) override
     {
         return mRequests.GetNext(out);
     }
 
     // Application implementation
-    virtual void Start() override
+    void Start() override
     {
 #if !defined(__EMSCRIPTEN__)
         mTestList.emplace_back(new ViewportTest);
@@ -1249,6 +1297,7 @@ public:
         mTestList.emplace_back(new UITest);
         mTestList.emplace_back(new TileCoordinateMappingTest);
         mTestList.emplace_back(new TileGridTest);
+        mTestList.emplace_back(new VectorProjectionTest);
         mTestList[mTestIndex]->Start(&mClassLib);
         INFO("Test case: '%1'", mTestList[mTestIndex]->GetName());
     }
