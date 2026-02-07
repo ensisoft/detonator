@@ -537,6 +537,18 @@ namespace math
         return ComputeNormal(a, b);
     }
 
+    // Compute a vector that is perpendicular to the given vector counter clock-wise.
+    inline glm::vec2 ComputePerpendicularVector(const glm::vec2& vector) noexcept
+    {
+        return { -vector.y, vector.x };
+    }
+
+    // Compute a vector that is perpendicular to the given vector clock-wise
+    inline glm::vec2 ComputePerpendicularVectorCW(const glm::vec2& vector) noexcept
+    {
+        return { vector.y, -vector.x };
+    }
+
 #endif
 
 } // namespace
