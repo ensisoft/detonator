@@ -345,7 +345,8 @@ inline void SelectLastRow(QTableView* view)
 }
 inline void ClearSelection(QTableView* view)
 {
-    QSignalBlocker s(view);
+    QSignalBlocker f(view);
+    QSignalBlocker u(view->selectionModel());
     view->clearSelection();
 }
 inline int GetCurrentRow(QTableView* view)
