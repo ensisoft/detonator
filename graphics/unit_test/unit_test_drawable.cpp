@@ -928,8 +928,22 @@ void unit_test_polygon_builder_build()
 
     // erase whole command from the beginning
     {
-        gfx::tool::PolygonBuilder2D poly;
-        poly.AddVertices(verts);
+        std::vector<gfx::Vertex2D> verts;
+        verts.resize(12);
+        verts[0].aPosition.x = 1.0f;
+        verts[1].aPosition.x = 1.0f;
+        verts[2].aPosition.x = 1.0f;
+
+        verts[3].aPosition.x = 2.0f;
+        verts[4].aPosition.x = 2.0f;
+        verts[5].aPosition.x = 2.0f;
+        verts[6].aPosition.x = 2.0f;
+
+        verts[7].aPosition.x = 3.0f;
+        verts[8].aPosition.x = 3.0f;
+        verts[9].aPosition.x = 3.0f;
+        verts[10].aPosition.x = 3.0f;
+        verts[11].aPosition.x = 3.0f;
 
         gfx::Geometry::DrawCommand cmd0;
         cmd0.offset = 0;
@@ -943,22 +957,32 @@ void unit_test_polygon_builder_build()
         cmd2.offset = 7;
         cmd2.count  = 5; // fake number,
 
+        gfx::tool::PolygonBuilder2D poly;
+        poly.AddVertices(verts);
         poly.AddDrawCommand(cmd0);
         poly.AddDrawCommand(cmd1);
         poly.AddDrawCommand(cmd2);
 
         poly.EraseCommand(1);
         TEST_REQUIRE(poly.GetCommandCount() == 2);
-        TEST_REQUIRE(poly.GetVertexCount() == 2);
+        TEST_REQUIRE(poly.GetVertexCount() == 8);
         {
             const auto& cmd = poly.GetDrawCommand(0);
             TEST_REQUIRE(cmd.count == 3);
             TEST_REQUIRE(cmd.offset == 0);
+            TEST_REQUIRE(poly.GetVertex(0).aPosition.x == 1.0f);
+            TEST_REQUIRE(poly.GetVertex(1).aPosition.x == 1.0f);
+            TEST_REQUIRE(poly.GetVertex(2).aPosition.x == 1.0f);
         }
         {
             const auto& cmd = poly.GetDrawCommand(1);
             TEST_REQUIRE(cmd.count == 5);
             TEST_REQUIRE(cmd.offset == 3);
+            TEST_REQUIRE(poly.GetVertex(3).aPosition.x == 3.0f);
+            TEST_REQUIRE(poly.GetVertex(4).aPosition.x == 3.0f);
+            TEST_REQUIRE(poly.GetVertex(5).aPosition.x == 3.0f);
+            TEST_REQUIRE(poly.GetVertex(6).aPosition.x == 3.0f);
+            TEST_REQUIRE(poly.GetVertex(7).aPosition.x == 3.0f);
         }
     }
 
