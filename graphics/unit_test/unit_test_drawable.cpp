@@ -1099,11 +1099,18 @@ void unit_test_polygon_data()
     buffer.PushBack(&verts[1]);
     buffer.PushBack(&verts[2]);
 
+    std::vector<uint8_t> vertex_flags;
+    vertex_flags.resize(3);
+    vertex_flags[0] = 0x1;
+    vertex_flags[1] = 0x2;
+    vertex_flags[2] = 0x3;
+
     gfx::PolygonMeshClass klass;
     klass.SetName("foo");
     klass.SetContentHash(0xffaabbee001177ff);
     klass.SetStatic(false);
     klass.SetVertexBuffer(std::move(buffer));
+    klass.SetVertexFlagBuffer(std::move(vertex_flags));
 
     std::vector<gfx::Geometry::DrawCommand> cmds;
     cmds.resize(1);
@@ -1148,6 +1155,11 @@ void unit_test_polygon_data()
         TEST_REQUIRE(ret.GetSubMeshDrawCmd("bar")->draw_cmd_start == 10);
         TEST_REQUIRE(ret.GetSubMeshDrawCmd("bar")->draw_cmd_count == 1);
 
+        const auto* flags = ret.GetVertexFlagBufferPtr();
+        TEST_REQUIRE(flags);
+        TEST_REQUIRE(flags[0] == 0x1);
+        TEST_REQUIRE(flags[1] == 0x2);
+        TEST_REQUIRE(flags[2] == 0x3);
     }
 }
 

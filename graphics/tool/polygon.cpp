@@ -17,6 +17,7 @@
 #include <cstring> // for memcpy
 
 #include "base/assert.h"
+#include "base/logging.h"
 #include "base/hash.h"
 #include "data/writer.h"
 #include "data/reader.h"
@@ -50,20 +51,43 @@ void PolygonBuilder<Vertex>::ClearVertices() noexcept
 template<typename Vertex>
 void PolygonBuilder<Vertex>::AddVertices(const std::vector<Vertex>& vertices)
 {
-    std::copy(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
+    std::vector<EditVertex> tmp;
+    for (const auto& vertex : vertices)
+    {
+        EditVertex edit_vertex;
+        edit_vertex.vertex = vertex;
+        edit_vertex.flags  = 0;
+        tmp.push_back(edit_vertex);
+    }
+
+    std::copy(std::begin(tmp), std::end(tmp), std::back_inserter(mVertices));
 }
 
 template<typename Vertex>
 void PolygonBuilder<Vertex>::AddVertices(std::vector<Vertex>&& vertices)
 {
-    std::move(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
+    std::vector<EditVertex> tmp;
+    for (const auto& vertex : vertices)
+    {
+        EditVertex edit_vertex;
+        edit_vertex.vertex = vertex;
+        edit_vertex.flags  = 0;
+        tmp.push_back(edit_vertex);
+    }
+
+    std::move(std::begin(tmp), std::end(tmp), std::back_inserter(mVertices));
 }
 
 template<typename Vertex>
 void PolygonBuilder<Vertex>::AddVertices(const Vertex* vertices, size_t num_vertices)
 {
     for (size_t i=0; i<num_vertices; ++i)
-        mVertices.push_back(vertices[i]);
+    {
+        EditVertex edit_vertex;
+        edit_vertex.vertex = vertices[i];
+        edit_vertex.flags  = 0;
+        mVertices.push_back(edit_vertex);
+    }
 }
 
 template<typename Vertex>
@@ -73,16 +97,17 @@ void PolygonBuilder<Vertex>::AddDrawCommand(const DrawCommand& cmd)
 }
 
 template<typename Vertex>
-void PolygonBuilder<Vertex>::UpdateVertex(const Vertex& vert, size_t index)
+void PolygonBuilder<Vertex>::UpdateVertex(const Vertex& vertex, size_t index)
 {
     ASSERT(index < mVertices.size());
-    mVertices[index] = vert;
+    mVertices[index].vertex = vertex;
 }
 
 template<typename Vertex>
 void PolygonBuilder<Vertex>::UpdateVertex(const void* vertex, size_t index)
 {
-    UpdateVertex(*static_cast<const Vertex*>(vertex), index);
+    ASSERT(index < mVertices.size());
+    mVertices[index].vertex = *static_cast<const Vertex*>(vertex);
 }
 
 template<typename Vertex>
@@ -119,7 +144,7 @@ void PolygonBuilder<Vertex>::EraseVertex(size_t index)
 }
 
 template<typename Vertex>
-void PolygonBuilder<Vertex>::EraseCommand(size_t index)
+void PolygonBuilder<Vertex>::EraseCommand(const size_t index)
 {
     ASSERT(index < mDrawCommands.size());
 
@@ -142,7 +167,7 @@ void PolygonBuilder<Vertex>::EraseCommand(size_t index)
 }
 
 template<typename Vertex>
-void PolygonBuilder<Vertex>::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index)
+void PolygonBuilder<Vertex>::InsertVertex(const Vertex& vertex, const size_t cmd_index, const size_t index)
 {
     ASSERT(cmd_index < mDrawCommands.size());
     ASSERT(index <= mDrawCommands[cmd_index].count);
@@ -153,7 +178,11 @@ void PolygonBuilder<Vertex>::InsertVertex(const Vertex& vertex, size_t cmd_index
     cmd.count = cmd.count + 1;
 
     const auto vertex_index = cmd.offset + index;
-    mVertices.insert(mVertices.begin() + vertex_index, vertex);
+
+    EditVertex edit_vertex;
+    edit_vertex.vertex = vertex;
+    edit_vertex.flags  = 0;
+    mVertices.insert(mVertices.begin() + vertex_index, edit_vertex);
 
     for (size_t i=0; i<mDrawCommands.size(); ++i)
     {
@@ -174,7 +203,10 @@ void PolygonBuilder<Vertex>::InsertVertex(const void* vertex, size_t cmd_index, 
 template<typename Vertex>
 void PolygonBuilder<Vertex>::AppendVertex(const void* vertex)
 {
-    mVertices.push_back(*static_cast<const Vertex*>(vertex));
+    EditVertex edit_vertex;
+    edit_vertex.vertex = *static_cast<const Vertex*>(vertex);
+    edit_vertex.flags  = 0;
+    mVertices.push_back(edit_vertex);
 }
 
 template<typename Vertex>
@@ -215,18 +247,31 @@ size_t PolygonBuilder<Vertex>::GetContentHash() const noexcept
     return hash;
 }
 
+template<typename Vertex>
+VertexLayout PolygonBuilder<Vertex>::GetEditVertexLayout() const noexcept
+{
+    auto layout = GetVertexLayout<Vertex>();
+    VertexLayout::Attribute flags_attribute;
+    flags_attribute.num_vector_components = 1;
+    flags_attribute.name   = "flags";
+    flags_attribute.type   = VertexLayout::Attribute::DataType::UnsignedInt;
+    flags_attribute.offset = layout.vertex_struct_size;
+    layout.AppendAttribute(flags_attribute);
+    return layout;
+}
 
 template<typename Vertex>
 void PolygonBuilder<Vertex>::IntoJson(data::Writer& writer) const
 {
-    const VertexStream  vertex_stream(gfx::GetVertexLayout<Vertex>(), mVertices);
-    const CommandStream command_stream(mDrawCommands);
-
+    const VertexStream  vertex_stream(GetEditVertexLayout(), mVertices);
     vertex_stream.IntoJson(writer);
+
+    const CommandStream command_stream(mDrawCommands);
     command_stream.IntoJson(writer);
 
     writer.Write("static", mStatic);
     writer.Write("double_sided", mDoubleSided);
+    writer.Write("version", 1u);
 }
 
 template<typename Vertex>
@@ -234,16 +279,47 @@ bool PolygonBuilder<Vertex>::FromJson(const data::Reader& reader)
 {
     bool ok = true;
 
-    VertexBuffer vertex_buffer;
+    unsigned version = 0;
+    reader.Read("version", &version);
+    if (version == 0)
+    {
+        VertexBuffer vertex_buffer;
+        ok &= vertex_buffer.FromJson(reader);
+
+        const VertexStream vertex_stream(vertex_buffer.GetLayout(),
+            vertex_buffer.GetBufferPtr(),
+            vertex_buffer.GetBufferSize());
+
+        if (vertex_buffer.GetLayout() == GetVertexLayout<Vertex>())
+        {
+            INFO("Migrating polygon builder vertex data.");
+            const auto vertex_count = vertex_buffer.GetCount();
+            for (size_t i=0; i<vertex_count; ++i)
+            {
+                EditVertex edit_vertex;
+                edit_vertex.vertex = *vertex_stream.GetVertex<Vertex>(i);
+                edit_vertex.flags  = 0;
+                mVertices.push_back(edit_vertex);
+            }
+        }
+        else
+        {
+            ERROR("Polugon builder vertex layout mismatch.");
+            ok = false;
+        }
+    }
+    else if (version == 1)
+    {
+        VertexBuffer vertex_buffer;
+        ok &= vertex_buffer.FromJson(reader);
+        mVertices = vertex_buffer.CopyBuffer<EditVertex>();
+    }
 
     CommandBuffer command_buffer(&mDrawCommands);
-
-    ok &= vertex_buffer.FromJson(reader);
     ok &= command_buffer.FromJson(reader);
+
     ok &= reader.Read("static", &mStatic);
     ok &= reader.Read("double_sided", &mDoubleSided);
-
-    mVertices = vertex_buffer.CopyBuffer<Vertex>();
     return ok;
 }
 
@@ -252,16 +328,20 @@ void PolygonBuilder<Vertex>::BuildPoly(PolygonMeshClass& polygon) const
 {
     polygon.ClearContent();
 
-    const auto count = mVertices.size();
-    const auto bytes = count * sizeof(Vertex);
-
-    if (count)
+    if (!mVertices.empty())
     {
-        std::vector<uint8_t> buffer;
-        buffer.resize(bytes);
-        std::memcpy(buffer.data(), mVertices.data(), bytes);
+        std::vector<uint8_t> byte_buffer;
+        std::vector<uint8_t> flags_buffer;
+        VertexBuffer vertex_buffer(GetVertexLayout<Vertex>(), &byte_buffer);
 
-        polygon.SetVertexBuffer(std::move(buffer));
+        for (const auto& edit_vertex : mVertices)
+        {
+            vertex_buffer.PushBack(&edit_vertex.vertex);
+            flags_buffer.push_back(edit_vertex.flags);
+        }
+
+        polygon.SetVertexBuffer(std::move(byte_buffer));
+        polygon.SetVertexFlagBuffer(std::move(flags_buffer));
     }
 
     polygon.SetContentHash(GetContentHash());
@@ -281,18 +361,33 @@ void PolygonBuilder<Vertex>::InitFrom(const PolygonMeshClass& polygon)
     {
         ASSERT(*polygon.GetVertexLayout() == gfx::GetVertexLayout<Vertex>());
 
-        const void* ptr = polygon.GetVertexBufferPtr();
-        const auto bytes = polygon.GetVertexBufferSize();
-        const auto count = bytes / sizeof(Vertex);
+        const void* vertex_buffer_ptr = polygon.GetVertexBufferPtr();
+        const auto vertex_buffer_size = polygon.GetVertexBufferSize();
+        const auto vertex_count = vertex_buffer_size / sizeof(Vertex);
+        const auto* vertex_flags = polygon.GetVertexFlagBufferPtr();
 
-        mVertices.resize(count);
-        if (count)
-            std::memcpy(mVertices.data(), ptr, bytes);
+        if (vertex_count)
+        {
+            const VertexStream vertex_stream(GetVertexLayout<Vertex>(),
+                vertex_buffer_ptr, vertex_buffer_size);
+
+            mVertices.resize(vertex_count);
+            for (size_t i=0; i<vertex_count; ++i)
+            {
+                mVertices[i].vertex = *vertex_stream.GetVertex<Vertex>(i);
+                mVertices[i].flags  = vertex_flags ? vertex_flags[i] : 0;
+            }
+
+        }
 
         for (size_t i=0; i<polygon.GetDrawCmdCount(); ++i)
         {
             mDrawCommands.push_back(*polygon.GetDrawCmd(i));
         }
+
+        // post condition sanity.
+        ASSERT(mVertices.size() == polygon.GetVertexCount());
+        ASSERT(mDrawCommands.size() == polygon.GetDrawCmdCount());
     }
     mStatic = polygon.IsStatic();
     mDoubleSided = polygon.IsDoubleSided();

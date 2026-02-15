@@ -120,11 +120,15 @@ namespace gfx
         void SetVertexBuffer(const VertexBuffer& buffer);
         void SetVertexBuffer(const std::vector<uint8_t>& buffer);
 
+        void SetVertexFlagBuffer(std::vector<uint8_t>&& vertex_flags);
+        void SetVertexFlagBuffer(const std::vector<uint8_t>& vertex_flags);
+
         void SetCommandBuffer(CommandBuffer&& buffer) noexcept;
         void SetCommandBuffer(std::vector<DrawCommand>&& buffer) noexcept;
         void SetCommandBuffer(const CommandBuffer& buffer);
         void SetCommandBuffer(const std::vector<DrawCommand>& buffer);
 
+        const uint8_t* GetVertexFlagBufferPtr() const noexcept;
         const VertexLayout* GetVertexLayout() const noexcept;
         const void* GetVertexBufferPtr() const noexcept;
         size_t GetVertexBufferSize() const noexcept;
@@ -177,6 +181,7 @@ namespace gfx
         struct InlineData {
             std::vector<uint8_t> vertices;
             std::vector<uint8_t> indices;
+            std::vector<uint8_t> vertex_flags;
             std::vector<Geometry::DrawCommand> cmds;
             VertexLayout layout;
             Geometry::IndexType index_type = Geometry::IndexType::Index16;

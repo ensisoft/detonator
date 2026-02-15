@@ -18,6 +18,7 @@
 
 #include "warnpush.h"
 #  include <nlohmann/json.hpp>
+#  include <base64/base64.h>
 #include "warnpop.h"
 
 #include "base/assert.h"
@@ -125,6 +126,34 @@ void PolygonMeshClass::SetVertexBuffer(const std::vector<uint8_t>& buffer)
 
     auto& data = mData.value();
     data.vertices = buffer;
+}
+
+void PolygonMeshClass::SetVertexFlagBuffer(std::vector<uint8_t>&& vertex_flags)
+{
+    if (!mData.has_value())
+        mData = InlineData {};
+
+    auto& data = mData.value();
+    data.vertex_flags = std::move(vertex_flags);
+}
+void PolygonMeshClass::SetVertexFlagBuffer(const std::vector<uint8_t>& vertex_flags)
+{
+    if (!mData.has_value())
+        mData = InlineData {};
+
+    auto& data = mData.value();
+    data.vertex_flags = vertex_flags;
+}
+
+const uint8_t *PolygonMeshClass::GetVertexFlagBufferPtr() const noexcept
+{
+    if (mData.has_value())
+    {
+        if (!mData.value().vertex_flags.empty())
+            return mData.value().vertex_flags.data();
+    }
+
+    return nullptr;
 }
 
 const VertexLayout* PolygonMeshClass::GetVertexLayout() const noexcept
@@ -342,6 +371,7 @@ std::size_t PolygonMeshClass::GetHash() const
         const auto& data = mData.value();
         hash = base::hash_combine(hash, data.layout.GetHash());
         hash = base::hash_combine(hash, data.vertices);
+        hash = base::hash_combine(hash, data.vertex_flags);
 
         // BE-AWARE, padding might make this non-deterministic!
         //hash = base::hash_combine(hash, data.cmds);
@@ -393,6 +423,13 @@ void PolygonMeshClass::IntoJson(data::Writer& writer) const
         const IndexStream index_stream(data.indices, data.index_type);
         index_stream.IntoJson(*inline_chunk);
 
+        if (!data.vertex_flags.empty())
+        {
+            const auto& vertex_flags = base64::Encode((const unsigned char*)&data.vertex_flags[0],
+                    data.vertex_flags.size());
+            inline_chunk->Write("vertex_flags", vertex_flags);
+        }
+
         writer.Write("inline_data", std::move(inline_chunk));
     }
 
@@ -443,6 +480,22 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
         ok &= index_buffer.FromJson(*inline_chunk);
         data.index_type = index_buffer.GetType();
 
+        if (inline_chunk->HasValue("vertex_flags"))
+        {
+            std::string vertex_flags;
+            if (inline_chunk->Read("vertex_flags", &vertex_flags))
+            {
+                const auto& temp = base64::Decode(vertex_flags);
+                std::vector<uint8_t> flags;
+                if (temp.size())
+                {
+                    flags.resize(temp.size());
+                    std::memcpy(flags.data(), temp.data(), temp.size());
+                    data.vertex_flags = std::move(flags);
+                }
+            }
+        }
+
         mData = std::move(data);
 
         MeshType expected_mesh_type;
@@ -467,6 +520,7 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
             if (mMeshType == MeshType::Dimetric2DRenderMesh || mMeshType == MeshType::Isometric2DRenderMesh)
                 expected_mesh_type = mMeshType;
         } else BUG("Missing inline data vertex layout handling.");
+
         if (expected_mesh_type != mMeshType)
         {
             WARN("Unexpected polygon mesh type vs. inline vertex data layout. [name='%1', type=%2]",
@@ -541,6 +595,16 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
         cmd.draw_cmd_count = count;
         cmd.draw_cmd_start = start;
         mSubMeshes[key] = cmd;
+    }
+
+    if (mData.has_value())
+    {
+        if (mData->vertex_flags.empty())
+        {
+            const auto count = GetVertexCount();
+            mData->vertex_flags.resize(count);
+            INFO("Initialized default vertex flags on polygon inline data. [name='%1']", mName);
+        }
     }
 
     return ok;
