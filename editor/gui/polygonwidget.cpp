@@ -2778,9 +2778,9 @@ void ShapeWidget::PickSurface2D(const QPoint& pick_point, float width, float hei
     const auto* builder = dynamic_cast<const BuilderType*>(mState.builder.get());
 
     const auto& commands = mState.builder->GetDrawCommandBuffer();
-    const gfx::VertexStream vertices(*mState.polygon->GetVertexLayout(),
-        mState.builder->GetVertexBufferPtr(),
-        mState.builder->GetVertexBufferSize());
+    const gfx::VertexStream vertices(mState.builder->GetEditVertexLayout(),
+        mState.builder->GetEditVertexBufferPtr(),
+        mState.builder->GetEditVertexBufferSize());
 
     struct Point {
         float x, y;

@@ -20,12 +20,13 @@
 
 #include <cstring> // for memcpy
 #include <vector>
+#include <cstdint>
 
 #include "graphics/geometry.h"
 #include "graphics/vertex.h"
 
 // the stuff here is *NOT NEEDED* at runtime. The builder could
-// be placed somwhere else for example under the editor itself but
+// be placed somewhere else for example under the editor itself but
 // because the graphics test app also needs this type of functionality
 // the builder is here.
 
@@ -33,6 +34,14 @@ namespace gfx {
     class PolygonMeshClass;
 
 namespace tool {
+
+#pragma pack(push, 1)
+    template<typename T>
+    struct EditVertexHolder {
+        T vertex;
+        uint32_t flags = 0;
+    };
+#pragma pack(pop)
 
     class IPolygonBuilder
     {
@@ -91,8 +100,9 @@ namespace tool {
 
         virtual void GetVertex(void* vertex, size_t index) const noexcept = 0;
 
-        virtual const void* GetVertexBufferPtr() const noexcept = 0;
-        virtual size_t GetVertexBufferSize() const noexcept = 0;
+        virtual VertexLayout GetEditVertexLayout() const noexcept = 0;
+        virtual const void* GetEditVertexBufferPtr() const noexcept = 0;
+        virtual size_t GetEditVertexBufferSize() const noexcept = 0;
 
         virtual const void* GetVertexPtr(size_t vertex_index) const noexcept = 0;
 
@@ -126,7 +136,7 @@ namespace tool {
         void AddVertices(std::vector<Vertex>&& vertices);
         void AddVertices(const Vertex* vertices, size_t num_vertices);
 
-        void UpdateVertex(const Vertex& vert, size_t index);
+        void UpdateVertex(const Vertex& vertex, size_t index);
         void UpdateVertex(const void* vertex, size_t index) override;
 
         void EraseVertex(size_t index) override;
@@ -163,36 +173,38 @@ namespace tool {
         void GetVertex(void* vertex, size_t vertex_index) const noexcept override
         {
             ASSERT(vertex_index < mVertices.size());
-            const auto& vert = mVertices[vertex_index];
-            std::memcpy(vertex, &vert, sizeof(vert));
+            const auto& vert = mVertices[vertex_index].vertex;
+            std::memcpy(vertex, &vert, sizeof(Vertex));
         }
         const void* GetVertexPtr(size_t vertex_index) const noexcept override
         {
             ASSERT(vertex_index < mVertices.size());
-            const auto* vert = &mVertices[vertex_index];
-            return vert;
+            const auto& vert = mVertices[vertex_index];
+            return &vert.vertex;
         }
         void* GetVertexPtr(size_t vertex_index) noexcept override
         {
             ASSERT(vertex_index < mVertices.size());
-            auto* vert =  &mVertices[vertex_index];
-            return vert;
+            auto& vert =  mVertices[vertex_index];
+            return &vert.vertex;
         }
 
-        const void* GetVertexBufferPtr() const noexcept override
+        VertexLayout GetEditVertexLayout() const noexcept override;
+
+        const void* GetEditVertexBufferPtr() const noexcept override
         {
             return mVertices.data();
         }
 
-        size_t GetVertexBufferSize() const noexcept override
+        size_t GetEditVertexBufferSize() const noexcept override
         {
-            return mVertices.size() * sizeof(Vertex);
+            return mVertices.size() * sizeof(EditVertex);
         }
 
         const Vertex& GetVertex(size_t index) const noexcept
-        { return mVertices[index]; }
+        { return mVertices[index].vertex; }
         Vertex& GetVertex(size_t index) noexcept
-        { return mVertices[index]; }
+        { return mVertices[index].vertex; }
 
         bool IsStatic() const noexcept override
         { return mStatic; }
@@ -210,7 +222,9 @@ namespace tool {
         void InitFrom(const PolygonMeshClass& polygon) override;
 
     private:
-        std::vector<Vertex> mVertices;
+        using EditVertex = EditVertexHolder<Vertex>;
+
+        std::vector<EditVertex> mVertices;
         std::vector<DrawCommand> mDrawCommands;
         bool mStatic = true;
         bool mDoubleSided = false;
