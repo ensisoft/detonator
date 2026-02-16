@@ -41,6 +41,13 @@ namespace gfx
     // 32bit vertex index for indexed drawing.
     using Index32 = std::uint32_t;
 
+    // These are only used during the design time in
+    // the editor.
+    enum class VertexFlags : uint8_t {
+        // Vertex is locked in the editor and cannot be moved.
+        Locked = 0x1
+    };
+
 #pragma pack(push, 1)
     struct Vec1 {
         float x = 0.0f;

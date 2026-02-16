@@ -238,7 +238,11 @@ public:
         const auto row = static_cast<unsigned>(index.row());
         const auto col = static_cast<unsigned>(index.column());
 
-        const auto& field = headerData(col, Qt::Orientation::Horizontal, Qt::DisplayRole);
+        if (col == 0)
+            return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+
+        const auto attribute_column = col - 1;
+        const auto& field = headerData(attribute_column, Qt::Orientation::Horizontal, Qt::DisplayRole);
         if (field.toString() == "aShardIndex")
             return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
@@ -327,9 +331,20 @@ public:
         const auto row = static_cast<unsigned>(index.row());
         const auto col = static_cast<unsigned>(index.column());
 
+        if (col == 0)
+            return false;
+
+        const auto attribute_column = col - 1;
+
         const auto* layout = mPolygon.GetVertexLayout();
         if (!layout)
             return false;
+
+        if (mBuilder.TestVertexFlag(row, gfx::VertexFlags::Locked))
+        {
+            NOTE("Unlock vertex to modify data.");
+            return false;
+        }
 
         void* vertex = mBuilder.GetVertexPtr(row);
 
@@ -338,7 +353,7 @@ public:
         {
             for (unsigned i=0; i<attr.num_vector_components; ++i)
             {
-                if (count == col)
+                if (count == attribute_column)
                 {
                     if (SetVertexData(*layout, attr, variant, vertex, i))
                     {
@@ -411,10 +426,24 @@ public:
 
     QVariant data(const QModelIndex& index, int role) const override
     {
-        const auto row = static_cast<unsigned>(index.row());
-        const auto col = static_cast<unsigned>(index.column());
         if (role != Qt::DisplayRole)
             return {};
+
+        const auto row = static_cast<unsigned>(index.row());
+        const auto col = static_cast<unsigned>(index.column());
+        if (col == 0)
+        {
+            QString bit_string;
+            bit_string += "       "; // 7 spaces for 7 bits
+
+            if (mBuilder.TestVertexFlag(row, gfx::VertexFlags::Locked))
+                return bit_string += "L";
+            else bit_string += "-";
+
+            return bit_string;
+        }
+
+        const auto attribute_column = col - 1;
 
         const auto* layout = mPolygon.GetVertexLayout();
         if (layout == nullptr)
@@ -427,7 +456,7 @@ public:
         {
             for (unsigned i=0; i<attr.num_vector_components; ++i)
             {
-                if (count == col)
+                if (count == attribute_column)
                     return GetVertexData(*layout, attr, vertex, i);
                 ++count;
             }
@@ -438,6 +467,11 @@ public:
     {
         if ((role != Qt::DisplayRole) || (orientation != Qt::Horizontal))
             return {};
+
+        if (section == 0)
+            return "Flags";
+
+        const auto attribute_column = --section;
 
         const auto* layout = mPolygon.GetVertexLayout();
         if (layout == nullptr)
@@ -452,7 +486,7 @@ public:
         {
             if (attr.num_vector_components == 1)
             {
-                if (index == section)
+                if (index == attribute_column)
                     return app::FromLatin(attr.name);
                 ++index;
             }
@@ -460,7 +494,7 @@ public:
             {
                 for (unsigned i=0; i<attr.num_vector_components; ++i)
                 {
-                    if (index == section)
+                    if (index == attribute_column)
                         return app::FromLatin(attr.name + " " + vector_suffix[i]);
                     ++index;
                 }
@@ -484,7 +518,7 @@ public:
         {
             count += attr.num_vector_components;
         }
-        return static_cast<int>(count);
+        return static_cast<int>(count) + 1; // +1 for flags
     }
 
     void RefreshVertex(size_t vertex_index)
@@ -607,13 +641,18 @@ public:
     }
     void MouseMove(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) override
     {
+        auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
+        if (builder->TestVertexFlag(mVertexIndex, gfx::VertexFlags::Locked))
+        {
+            NOTE("Unlock vertex to move vertex.");
+            return;
+        }
+
         const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
 
         bool snap = view.snap;
         if (ctrl)
             snap = !snap;
-
-        auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
 
         auto vertex = builder->GetVertex(mVertexIndex);
         if (snap)
@@ -688,6 +727,9 @@ public:
         for (size_t i=0; i<cmd.count; ++i)
         {
             const auto vertex_index = cmd.offset + i;
+            if (builder->TestVertexFlag(vertex_index, gfx::VertexFlags::Locked))
+                continue;
+
             auto vertex = builder->GetVertex(vertex_index);
             vertex.aPosition.x -= ddx;
             vertex.aPosition.y += ddy;
@@ -700,6 +742,9 @@ public:
         for (size_t i=0; i<cmd.count; ++i)
         {
             const auto vertex_index = cmd.offset + i;
+            if (builder->TestVertexFlag(vertex_index, gfx::VertexFlags::Locked))
+                continue;
+
             auto vertex = builder->GetVertex(vertex_index);
             vertex.aPosition.x -= ddx;
             vertex.aPosition.y += ddy;
@@ -737,6 +782,11 @@ public:
     void MouseMove(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) override
     {
         auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
+        if (builder->TestVertexFlag(mVertexIndex, gfx::VertexFlags::Locked))
+        {
+            NOTE("Unlock vertex to change axonometric 3D mapping.");
+            return;
+        }
 
         auto vertex = builder->GetVertex(mVertexIndex);
 
@@ -1563,17 +1613,19 @@ void ShapeWidget::on_cmbMeshType_currentIndexChanged(int)
 void ShapeWidget::on_tableView_customContextMenuRequested(const QPoint& point)
 {
     QMenu menu(this);
+    QMenu orient_normal("Orient Vertex Normal");
 
+    const bool have_selection = mSelectedVertex != InvalidIndex;
     const auto mesh_type = GetMeshType();
+
     if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
     {
-        const bool have_selection = mSelectedVertex < mState.builder->GetVertexCount();
-        auto* set_normal_positive_x = menu.addAction("Orient normal to +X");
-        auto* set_normal_negative_x = menu.addAction("Orient normal to -X");
-        auto* set_normal_positive_y = menu.addAction("Orient normal to +Y");
-        auto* set_normal_negative_y = menu.addAction("Orient normal to -Y");
-        auto* set_normal_positive_z = menu.addAction("Orient normal to +Z");
-        auto* set_normal_negative_z = menu.addAction("Orient normal to -Z");
+        auto* set_normal_positive_x = orient_normal.addAction("Orient normal to +X");
+        auto* set_normal_negative_x = orient_normal.addAction("Orient normal to -X");
+        auto* set_normal_positive_y = orient_normal.addAction("Orient normal to +Y");
+        auto* set_normal_negative_y = orient_normal.addAction("Orient normal to -Y");
+        auto* set_normal_positive_z = orient_normal.addAction("Orient normal to +Z");
+        auto* set_normal_negative_z = orient_normal.addAction("Orient normal to -Z");
         SetEnabled(set_normal_positive_x, have_selection);
         SetEnabled(set_normal_negative_x, have_selection);
         SetEnabled(set_normal_positive_y, have_selection);
@@ -1600,7 +1652,40 @@ void ShapeWidget::on_tableView_customContextMenuRequested(const QPoint& point)
         connect(set_normal_negative_z, &QAction::triggered, this, [this]() {
             SetSelectedVertexNormal({0.0f, 0.0f, 1.0f});
         });
+        menu.addMenu(&orient_normal);
     }
+    if (have_selection)
+    {
+        const auto locked = mState.builder->TestVertexFlag(mSelectedVertex, gfx::VertexFlags::Locked);
+        if (locked)
+        {
+            auto* unlock = menu.addAction("Unlock Vertex");
+            connect(unlock, &QAction::triggered, this, [this]() {
+                mState.builder->SetVertexFlag(mSelectedVertex, gfx::VertexFlags::Locked, false);
+                mState.table->RefreshVertex(mSelectedVertex);
+                NOTE("Unlock vertex %1", mSelectedVertex);
+            });
+        }
+        else
+        {
+            auto* lock = menu.addAction("Lock Vertex");
+            lock->setIcon(QIcon("icons:lock.png"));
+            connect(lock, &QAction::triggered, this, [this]() {
+                mState.builder->SetVertexFlag(mSelectedVertex, gfx::VertexFlags::Locked, true);
+                mState.table->RefreshVertex(mSelectedVertex);
+                NOTE("Lock vertex %1", mSelectedVertex);
+            });
+        }
+    }
+    auto* delete_vertex = menu.addAction("Delete Vertex");
+    delete_vertex->setIcon(QIcon("icons:delete.png"));
+    delete_vertex->setEnabled(have_selection);
+    connect(delete_vertex, &QAction::triggered, this, [this]() {
+        mSelectedVertex = InvalidIndex;
+        ClearSelection(mUI.tableView);
+        if (mState.builder->GetVertexCount() == 0)
+            SetEnabled(mUI.actionClear, false);
+    });
 
     menu.exec(QCursor::pos());
 }
@@ -2332,6 +2417,29 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
             menu.AddAction("Insert Vertex After", [this]() {
                 InsertVertex(InsertionPoint::After);
             })->setEnabled(have_selected_vertex && CanInsertVertex());
+
+            menu.AddSeparator();
+            if (have_selected_vertex)
+            {
+                const auto locked = mState.builder->TestVertexFlag(mSelectedVertex, gfx::VertexFlags::Locked);
+                if (locked)
+                {
+                    menu.AddAction("Unlock Vertex", [this]() {
+                        mState.builder->SetVertexFlag(mSelectedVertex, gfx::VertexFlags::Locked, false);
+                        mState.table->RefreshVertex(mSelectedVertex);
+                        NOTE("Unlock vertex %1", mSelectedVertex);
+                    });
+                }
+                else
+                {
+                    menu.AddAction("Lock Vertex", QIcon("icons:lock.png"), [this]() {
+                        mState.builder->SetVertexFlag(mSelectedVertex, gfx::VertexFlags::Locked, true);
+                        mState.table->RefreshVertex(mSelectedVertex);
+                        NOTE("Lock vertex %1", mSelectedVertex);
+                    });
+                }
+            }
+
             menu.AddAction("Delete Vertex", QIcon("icons:delete.png"), [this]() {
                 mState.table->EraseVertex(mSelectedVertex);
                 mSelectedVertex = InvalidIndex;
@@ -2908,12 +3016,17 @@ void ShapeWidget::InsertVertex2D(InsertionPoint where)
 template<typename VertexType>
 void ShapeWidget::ScrollAxonometricVertex(const QWheelEvent* wheel)
 {
-    if (mSelectedVertex >= mState.builder->GetVertexCount())
+    if (mSelectedVertex == InvalidIndex)
         return;
 
     using BuilderType = gfx::tool::PolygonBuilder<VertexType>;
 
     auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
+    if (builder->TestVertexFlag(mSelectedVertex, gfx::VertexFlags::Locked))
+    {
+        NOTE("Unlock vertex to change axonometric 3D mapping.");
+        return;
+    }
 
     const QPoint& num_degrees = wheel->angleDelta() / 8;
     const QPoint& num_steps = num_degrees / 15;

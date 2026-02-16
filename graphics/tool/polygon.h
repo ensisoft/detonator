@@ -106,6 +106,9 @@ namespace tool {
 
         virtual const void* GetVertexPtr(size_t vertex_index) const noexcept = 0;
 
+        virtual uint32_t GetVertexFlags(size_t vertex_index) const noexcept = 0;
+        virtual void SetVertexFlags(uint32_t flags, size_t vertex_index) noexcept = 0;
+
         virtual void* GetVertexPtr(size_t vertex_index) noexcept = 0;
 
         virtual bool IsStatic() const noexcept = 0;
@@ -118,6 +121,22 @@ namespace tool {
 
         virtual void BuildPoly(PolygonMeshClass& polygon) const = 0;
         virtual void InitFrom(const PolygonMeshClass& polygon) = 0;
+
+        void SetVertexFlag(size_t vertex_index, VertexFlags flag, bool on_off)
+        {
+            auto flag_bits = GetVertexFlags(vertex_index);
+            if (on_off)
+                flag_bits |= static_cast<uint32_t>(flag);
+            else flag_bits &= ~static_cast<uint32_t>(flag);
+
+            SetVertexFlags(flag_bits, vertex_index);
+        }
+
+        bool TestVertexFlag(size_t vertex_index, VertexFlags flag) const noexcept
+        {
+            const auto flag_bits = GetVertexFlags(vertex_index);
+            return flag_bits & static_cast<uint32_t>(flag);
+        }
     };
 
     template<typename Vertex>
@@ -187,6 +206,19 @@ namespace tool {
             ASSERT(vertex_index < mVertices.size());
             auto& vert =  mVertices[vertex_index];
             return &vert.vertex;
+        }
+
+        uint32_t GetVertexFlags(size_t vertex_index) const noexcept override
+        {
+            ASSERT(vertex_index < mVertices.size());
+            const auto& vertex = mVertices[vertex_index];
+            return vertex.flags;
+        }
+
+        void SetVertexFlags(uint32_t flags, size_t vertex_index) noexcept override
+        {
+            ASSERT(vertex_index < mVertices.size());
+            mVertices[vertex_index].flags = flags;
         }
 
         VertexLayout GetEditVertexLayout() const noexcept override;
