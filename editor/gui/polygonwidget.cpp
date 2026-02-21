@@ -1615,7 +1615,8 @@ void ShapeWidget::on_tableView_customContextMenuRequested(const QPoint& point)
     QMenu menu(this);
     QMenu orient_normal("Orient Vertex Normal");
 
-    const bool have_selection = mSelectedVertex != InvalidIndex;
+    const bool have_vertex_selection = mSelectedVertex != InvalidIndex;
+    const bool have_surface_selection = mSelectedCommand != InvalidIndex;
     const auto mesh_type = GetMeshType();
 
     if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
@@ -1626,12 +1627,12 @@ void ShapeWidget::on_tableView_customContextMenuRequested(const QPoint& point)
         auto* set_normal_negative_y = orient_normal.addAction("Orient normal to -Y");
         auto* set_normal_positive_z = orient_normal.addAction("Orient normal to +Z");
         auto* set_normal_negative_z = orient_normal.addAction("Orient normal to -Z");
-        SetEnabled(set_normal_positive_x, have_selection);
-        SetEnabled(set_normal_negative_x, have_selection);
-        SetEnabled(set_normal_positive_y, have_selection);
-        SetEnabled(set_normal_negative_y, have_selection);
-        SetEnabled(set_normal_positive_z, have_selection);
-        SetEnabled(set_normal_negative_z, have_selection);
+        SetEnabled(set_normal_positive_x, have_vertex_selection);
+        SetEnabled(set_normal_negative_x, have_vertex_selection);
+        SetEnabled(set_normal_positive_y, have_vertex_selection);
+        SetEnabled(set_normal_negative_y, have_vertex_selection);
+        SetEnabled(set_normal_positive_z, have_vertex_selection);
+        SetEnabled(set_normal_negative_z, have_vertex_selection);
 
         connect(set_normal_positive_x, &QAction::triggered, this, [this]() {
             SetSelectedVertexNormal({1.0f, 0.0f, 0.0f});
@@ -1654,7 +1655,7 @@ void ShapeWidget::on_tableView_customContextMenuRequested(const QPoint& point)
         });
         menu.addMenu(&orient_normal);
     }
-    if (have_selection)
+    if (have_vertex_selection)
     {
         const auto locked = mState.builder->TestVertexFlag(mSelectedVertex, gfx::VertexFlags::Locked);
         if (locked)
@@ -1679,7 +1680,7 @@ void ShapeWidget::on_tableView_customContextMenuRequested(const QPoint& point)
     }
     auto* delete_vertex = menu.addAction("Delete Vertex");
     delete_vertex->setIcon(QIcon("icons:delete.png"));
-    delete_vertex->setEnabled(have_selection);
+    delete_vertex->setEnabled(have_vertex_selection);
     connect(delete_vertex, &QAction::triggered, this, [this]() {
         mSelectedVertex = InvalidIndex;
         ClearSelection(mUI.tableView);
@@ -2355,72 +2356,100 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
         if (mMainView == ViewType::EditView)
         {
             GfxMenu menu;
-            menu.AddAction("Start New Triangle Fan", QIcon("icons32:triangle_fan.png"), [this]() {
-                QTimer::singleShot(0, this, &ShapeWidget::on_actionNewTriangleFan_triggered);
-            });
-            menu.AddAction("Start New Triangle Strip", QIcon("icons32:triangle_fan.png"), [this]() {
-                QTimer::singleShot(0, this, &ShapeWidget::on_actionNewTriangleStrip_triggered);
-            });
-            menu.AddSeparator();
-            if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
-            {
-                GfxMenu orient_vertex_menu;
-                orient_vertex_menu.SetEnabled(have_selected_vertex);
-                orient_vertex_menu.SetText("Orient Vertex Normal");
-                orient_vertex_menu.AddAction("Orient normal to +X", [this]() {
-                    SetSelectedVertexNormal({1.0f, 0.0f, 0.0f});
-                })->setEnabled(have_selected_vertex);
-                orient_vertex_menu.AddAction("Orient normal to -X", [this]() {
-                    SetSelectedVertexNormal({-1.0f, 0.0f, 0.0f});
-                })->setEnabled(have_selected_vertex);
-                orient_vertex_menu.AddAction("Orient normal to +Y", [this]() {
-                    SetSelectedVertexNormal({0.0f, 1.0f, 0.0f});
-                })->setEnabled(have_selected_vertex);
-                orient_vertex_menu.AddAction("Orient normal to -Y", [this]() {
-                    SetSelectedVertexNormal({0.0f, -1.0f, 0.0f});
-                })->setEnabled(have_selected_vertex);
-                orient_vertex_menu.AddAction("Orient normal to +Z", [this]() {
-                    SetSelectedVertexNormal({0.0f, 0.0f, -1.0f});
-                })->setEnabled(have_selected_vertex);
-                orient_vertex_menu.AddAction("Orient normal to -Z", [this]() {
-                    SetSelectedVertexNormal({0.0f, 0.0f, 1.0f});
-                })->setEnabled(have_selected_vertex);
-                menu.AddSubMenu(std::move(orient_vertex_menu));
 
-                GfxMenu orient_surface_menu;
-                orient_surface_menu.SetEnabled(have_selected_surface);
-                orient_surface_menu.SetText("Orient Surface Normal");
-                orient_surface_menu.AddAction("Orient normal to +X", [this]() {
-                    SetSelectedSurfaceNormal({1.0f, 0.0f, 0.0f});
-                })->setEnabled(have_selected_surface);
-                orient_surface_menu.AddAction("Orient normal to -X", [this]() {
-                    SetSelectedSurfaceNormal({-1.0f, 0.0f, 0.0f});
-                })->setEnabled(have_selected_surface);
-                orient_surface_menu.AddAction("Orient normal to +Y", [this]() {
-                    SetSelectedSurfaceNormal({0.0f, 1.0f, 0.0f});
-                })->setEnabled(have_selected_surface);
-                orient_surface_menu.AddAction("Orient normal to -Y", [this]() {
-                    SetSelectedSurfaceNormal({0.0f, -1.0f, 0.0f});
-                })->setEnabled(have_selected_surface);
-                orient_surface_menu.AddAction("Orient normal to +Z", [this]() {
-                    SetSelectedSurfaceNormal({0.0f, 0.0f, -1.0f});
-                })->setEnabled(have_selected_surface);
-                orient_surface_menu.AddAction("Orient normal to -Z", [this]() {
-                    SetSelectedSurfaceNormal({0.0f, 0.0f, 1.0f});
-                })->setEnabled(have_selected_surface);
-                menu.AddSubMenu(std::move(orient_surface_menu));
+            if (have_selected_surface)
+            {
+                if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+                {
+                    GfxMenu orient_surface_menu;
+                    orient_surface_menu.SetEnabled(have_selected_surface);
+                    orient_surface_menu.SetText("Orient Surface Normal");
+                    orient_surface_menu.AddAction("Orient normal to +X", [this]() {
+                        SetSelectedSurfaceNormal({1.0f, 0.0f, 0.0f});
+                    })->setEnabled(have_selected_surface);
+                    orient_surface_menu.AddAction("Orient normal to -X", [this]() {
+                        SetSelectedSurfaceNormal({-1.0f, 0.0f, 0.0f});
+                    })->setEnabled(have_selected_surface);
+                    orient_surface_menu.AddAction("Orient normal to +Y", [this]() {
+                        SetSelectedSurfaceNormal({0.0f, 1.0f, 0.0f});
+                    })->setEnabled(have_selected_surface);
+                    orient_surface_menu.AddAction("Orient normal to -Y", [this]() {
+                        SetSelectedSurfaceNormal({0.0f, -1.0f, 0.0f});
+                    })->setEnabled(have_selected_surface);
+                    orient_surface_menu.AddAction("Orient normal to +Z", [this]() {
+                        SetSelectedSurfaceNormal({0.0f, 0.0f, -1.0f});
+                    })->setEnabled(have_selected_surface);
+                    orient_surface_menu.AddAction("Orient normal to -Z", [this]() {
+                        SetSelectedSurfaceNormal({0.0f, 0.0f, 1.0f});
+                    })->setEnabled(have_selected_surface);
+                    menu.AddSubMenu(std::move(orient_surface_menu));
+
+                } // axonometric mesh
+
+                menu.AddAction("Lock Surface Vertices", [this]() {
+                    const auto cmd = mState.builder->GetDrawCommand(mSelectedCommand);
+                    for (size_t i=0; i<cmd.count; ++i) {
+                        const auto vertex_index = cmd.offset + i;
+                        mState.builder->SetVertexFlag(vertex_index, gfx::VertexFlags::Locked, true);
+                        mState.table->RefreshVertex(vertex_index);
+                    }
+                });
+
+                menu.AddAction("Unlock Surface Vertices", [this]() {
+                    const auto cmd = mState.builder->GetDrawCommand(mSelectedCommand);
+                    for (size_t i=0; i<cmd.count; ++i) {
+                        const auto vertex_index = cmd.offset + i;
+                        mState.builder->SetVertexFlag(vertex_index, gfx::VertexFlags::Locked, false);
+                        mState.table->RefreshVertex(vertex_index);
+                    }
+                });
+
+                menu.AddAction("Delete Surface", QIcon("icons:delete.png"), [this]() {
+                    const auto cmd = mState.builder->GetDrawCommand(mSelectedCommand);
+                    mState.table->EraseSurface(mSelectedCommand);
+                    mSelectedCommand = InvalidIndex;
+                    mSelectedVertex = InvalidIndex;
+                    ClearSelection(mUI.tableView);
+                                        
+                    if (mState.builder->GetVertexCount() == 0)
+                        SetEnabled(mUI.actionClear, false);
+                });
             }
-
-            menu.AddAction("Insert Vertex Before", [this]() {
-                InsertVertex(InsertionPoint::Before);
-            })->setEnabled(have_selected_vertex && CanInsertVertex());
-            menu.AddAction("Insert Vertex After", [this]() {
-                InsertVertex(InsertionPoint::After);
-            })->setEnabled(have_selected_vertex && CanInsertVertex());
-
-            menu.AddSeparator();
-            if (have_selected_vertex)
+            else if (have_selected_vertex)
             {
+                if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
+                {
+                    GfxMenu orient_vertex_menu;
+                    orient_vertex_menu.SetEnabled(have_selected_vertex);
+                    orient_vertex_menu.SetText("Orient Vertex Normal");
+                    orient_vertex_menu.AddAction("Orient normal to +X", [this]() {
+                        SetSelectedVertexNormal({1.0f, 0.0f, 0.0f});
+                    })->setEnabled(have_selected_vertex);
+                    orient_vertex_menu.AddAction("Orient normal to -X", [this]() {
+                        SetSelectedVertexNormal({-1.0f, 0.0f, 0.0f});
+                    })->setEnabled(have_selected_vertex);
+                    orient_vertex_menu.AddAction("Orient normal to +Y", [this]() {
+                        SetSelectedVertexNormal({0.0f, 1.0f, 0.0f});
+                    })->setEnabled(have_selected_vertex);
+                    orient_vertex_menu.AddAction("Orient normal to -Y", [this]() {
+                        SetSelectedVertexNormal({0.0f, -1.0f, 0.0f});
+                    })->setEnabled(have_selected_vertex);
+                    orient_vertex_menu.AddAction("Orient normal to +Z", [this]() {
+                        SetSelectedVertexNormal({0.0f, 0.0f, -1.0f});
+                    })->setEnabled(have_selected_vertex);
+                    orient_vertex_menu.AddAction("Orient normal to -Z", [this]() {
+                        SetSelectedVertexNormal({0.0f, 0.0f, 1.0f});
+                    })->setEnabled(have_selected_vertex);
+                    menu.AddSubMenu(std::move(orient_vertex_menu));
+                }
+
+                menu.AddAction("Insert Vertex Before", [this]() {
+                    InsertVertex(InsertionPoint::Before);
+                })->setEnabled(CanInsertVertex());
+                menu.AddAction("Insert Vertex After", [this]() {
+                    InsertVertex(InsertionPoint::After);
+                })->setEnabled(CanInsertVertex());
+
                 const auto locked = mState.builder->TestVertexFlag(mSelectedVertex, gfx::VertexFlags::Locked);
                 if (locked)
                 {
@@ -2438,38 +2467,29 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
                         NOTE("Lock vertex %1", mSelectedVertex);
                     });
                 }
-            }
 
-            menu.AddAction("Delete Vertex", QIcon("icons:delete.png"), [this]() {
-                mState.table->EraseVertex(mSelectedVertex);
-                mSelectedVertex = InvalidIndex;
-                ClearSelection(mUI.tableView);
-                if (mState.builder->GetVertexCount() == 0)
-                    SetEnabled(mUI.actionClear, false);
-            })->setEnabled(have_selected_vertex);
-
-            menu.AddAction("Delete Surface", QIcon("icons:delete.png"), [this]() {
-                const auto cmd = mState.builder->GetDrawCommand(mSelectedCommand);
-                mState.table->EraseSurface(mSelectedCommand);
-                mSelectedCommand = InvalidIndex;
-                if (mSelectedVertex >= cmd.offset && mSelectedVertex < cmd.offset + cmd.count)
-                {
+                menu.AddAction("Delete Vertex", QIcon("icons:delete.png"), [this]() {
+                    mState.table->EraseVertex(mSelectedVertex);
                     mSelectedVertex = InvalidIndex;
                     ClearSelection(mUI.tableView);
-                }
-                else if (mSelectedVertex >= cmd.offset + cmd.count)
-                {
-                    ASSERT(mSelectedVertex >= cmd.count);
-                    mSelectedVertex -= cmd.count;
-                    SelectRow(mUI.tableView, mSelectedVertex);
-                }
-                if (mState.builder->GetVertexCount() == 0)
-                    SetEnabled(mUI.actionClear, false);
+                    if (mState.builder->GetVertexCount() == 0)
+                        SetEnabled(mUI.actionClear, false);
+                });
+            }
+            else
+            {
+                menu.AddAction("Start New Triangle Fan", QIcon("icons32:triangle_fan.png"), [this]() {
+                    QTimer::singleShot(0, this, &ShapeWidget::on_actionNewTriangleFan_triggered);
+                });
+                menu.AddAction("Start New Triangle Strip", QIcon("icons32:triangle_fan.png"), [this]() {
+                    QTimer::singleShot(0, this, &ShapeWidget::on_actionNewTriangleStrip_triggered);
+                });
+                menu.AddSeparator();
+                menu.AddAction("Clear Vertices", QIcon("icons:clear.png"), [this]() {
+                    on_actionClear_triggered();
+                });
+            }
 
-            })->setEnabled(have_selected_surface);
-
-            menu.AddSeparator();
-            menu.AddAction(mUI.actionClear);
             menu.AddSeparator();
 
             GfxMenu view_menu;
