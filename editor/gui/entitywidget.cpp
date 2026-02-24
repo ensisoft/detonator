@@ -1337,7 +1337,7 @@ public:
                 mesh_type == gfx::PolygonMeshClass::MeshType::Isometric2DRenderMesh)
             {
                 gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
-                geometry.enable_perceptual_3D = true;
+                geometry.enable_perceptual_3D_override= true;
                 polygon->SetPerceptualGeometry(geometry);
             }
         }

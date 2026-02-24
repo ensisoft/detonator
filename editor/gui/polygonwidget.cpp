@@ -2171,7 +2171,7 @@ void ShapeWidget::Paint3DAxonometricScene(const QRect& rect, const PolygonClassH
     gfx::PolygonMeshInstance instance(polygon);
     gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
     geometry.axonometric_model_view = axonometric_model_to_view;
-    geometry.enable_perceptual_3D   = true;
+    geometry.enable_perceptual_3D_override = true;
     instance.SetPerceptualGeometry(geometry);
 
     gfx::Painter::DrawState state;

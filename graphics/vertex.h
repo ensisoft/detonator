@@ -157,7 +157,7 @@ namespace gfx
     // mapped into a 3D world.
     // The intended use case is "isometric tile rendering" where each tile
     // is rendered as a 2D billboard that is aligned to face the camera
-    // but the contents of each tile ae perceptually 3D. In order to compute
+    // but the contents of each tile are perceptually 3D. In order to compute
     // effects such as lights better we cannot rely on the 2D objects geometry
     // but rather the lights must be computed in the "perceptual 3D space".
     struct Perceptual3DVertex {

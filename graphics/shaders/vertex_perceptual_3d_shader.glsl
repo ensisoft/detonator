@@ -74,8 +74,14 @@ void VertexShaderMain() {
 
     vTexCoord = vs.texcoord;
 
-
-    if ((kDrawableFlags & DRAWABLE_FLAGS_ENABLE_PERCEPTUAL_3D) == DRAWABLE_FLAGS_ENABLE_PERCEPTUAL_3D) {
+    // when the override flag is set the vertex shader will output 
+    // data that is coming from the 3D part of the perceptual 3D vertex
+    // and the 2D part is ignored. This mode is useful for visualizing 
+    // the actual perceptual 3D part in the editor.
+    // In the normal (non design) rendering we'd normally render the 
+    // perceptual vertex as a 2D billboard and use the 3D data only 
+    // for the light computation.
+    if ((kDrawableFlags & DRAWABLE_FLAGS_ENABLE_PERCEPTUAL_3D_OVERRIDE) == DRAWABLE_FLAGS_ENABLE_PERCEPTUAL_3D_OVERRIDE) {
       mat3 normal_matrix = mat3(transpose(inverse(kModelViewMatrix)));
       vec4 view_position = kModelViewMatrix * vec4(aLocalOffset, 1.0);
       vec3 view_normal   = normal_matrix * aWorldNormal;

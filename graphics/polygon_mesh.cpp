@@ -825,16 +825,16 @@ bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, Device& devi
 
     if (const auto* geom = base::GetOpt(mPerceptualGeometry))
     {
-        if (geom->enable_perceptual_3D)
-            flags |= static_cast<unsigned>(DrawableFlags::EnablePerceptual3D);
+        if (geom->enable_perceptual_3D_override)
+            flags |= static_cast<unsigned>(DrawableFlags::EnablePerceptual3DOverride);
     }
 
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
-    program.SetUniform("kTime", (float)mTime);
-    program.SetUniform("kRandom",(float)mRandom);
+    program.SetUniform("kTime", static_cast<float>(mTime));
+    program.SetUniform("kRandom", mRandom);
     program.SetUniform("kDrawableFlags", flags);
 
     const auto type = GetMeshType();
@@ -842,7 +842,9 @@ bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, Device& devi
     {
         ASSERT(mPerceptualGeometry.has_value());
         const auto& geometry = mPerceptualGeometry.value();
-        program.SetUniform("kAxonometricModelViewMatrix", geometry.axonometric_model_view);
+
+        if (!geometry.enable_perceptual_3D_override)
+            program.SetUniform("kAxonometricModelViewMatrix", geometry.axonometric_model_view);
     }
     return true;
 }
