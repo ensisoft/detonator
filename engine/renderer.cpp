@@ -1421,7 +1421,7 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
                     mesh_type == gfx::PolygonMeshInstance::MeshType::Isometric2DRenderMesh)
                 {
                     gfx::PolygonMeshInstance::Perceptual3DGeometry geometry;
-                    geometry.enable_perceptual_3D = true;
+                    geometry.enable_perceptual_3D_override = true;
                     polygon->SetPerceptualGeometry(geometry);
                 }
             }

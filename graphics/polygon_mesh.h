@@ -202,11 +202,22 @@ namespace gfx
         // This is only used / required when the mesh type is
         // Perceptual3DTile
         struct Perceptual3DGeometry{
-            // The axonometric view transformation that applies.
+            // When set to true this flag tells the vertex shader to use 3D
+            // data associated with a PerceptualVertex3D as the output from the
+            // vertex shader. The vertex transformation that applies is the normal
+            // model transformation passed in the draw call and the axonometric_model_view
+            // transformation is ignored.
+            //
+            // When set to to false the PerceptualVertex3D 2D data is used as the output
+            // from the vertex shader and the 3D data is only used for the light computation.
+            // The 3D data is then transformed by the special axonometric_model_view
+            // matrix while the 2D data is transformed by the normal model matrix given
+            // in the draw call.
+            bool enable_perceptual_3D_override = false;
+
+            // The axonometric view transformation that applies to the "perceptual 3D" part
+            // of the axonometric PerceptualVertex3D vertex when there's no 3D override.
             glm::mat4 axonometric_model_view;
-            // use the 3D data as the output from the perceptual vertex shader
-            // instead of the 2D data.
-            bool enable_perceptual_3D = false;
         };
 
         explicit PolygonMeshInstance(std::shared_ptr<const PolygonMeshClass> klass) noexcept;

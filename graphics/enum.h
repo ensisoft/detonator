@@ -43,9 +43,9 @@ namespace gfx
     enum class DrawableFlags : uint32_t {
         Flip_UV_Vertically = 0x1,
         Flip_UV_Horizontally = 0x2,
-        // use the 3D data as the output from the perceptual vertex shader
-        // instead of the 2D data.
-        EnablePerceptual3D = 0x4
+        // use the 3D data as the output from the perceptually 3D (axonometric)
+        // vertex shader instead of the 2D data.
+        EnablePerceptual3DOverride = 0x4
     };
 
     enum class BasicLightType : int32_t {
