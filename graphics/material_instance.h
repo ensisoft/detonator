@@ -113,6 +113,7 @@ namespace gfx
                                              const Color4f& bottom_left,
                                              const Color4f& bottom_right);
     MaterialInstance CreateMaterialFromColor(const Color4f& color);
+    MaterialInstance CreateMaterialFromColor(Color color, float alpha);
     MaterialInstance CreateMaterialFromImage(const std::string& uri,
         MaterialClass::SurfaceType surface = MaterialClass::SurfaceType::Opaque);
     MaterialInstance CreateMaterialFromSprite(const std::string& uri);

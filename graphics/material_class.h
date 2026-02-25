@@ -607,6 +607,7 @@ namespace gfx
 
     // Create material based on a simple color only.
     MaterialClass CreateMaterialClassFromColor(const Color4f& color);
+    MaterialClass CreateMaterialClassFromColor(const Color color, float alpha);
     // Create a material based on a single image file.
     MaterialClass CreateMaterialClassFromSprite(const std::string& uri);
     // Create a material based on a single image file.

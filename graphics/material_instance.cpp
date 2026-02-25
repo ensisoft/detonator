@@ -284,6 +284,11 @@ MaterialInstance CreateMaterialFromColor(const Color4f& color)
     return MaterialInstance(CreateMaterialClassFromColor(color));
 }
 
+MaterialInstance CreateMaterialFromColor(Color color, float alpha)
+{
+    return CreateMaterialFromColor(Color4f(color, alpha));
+}
+
 MaterialInstance CreateMaterialFromImage(const std::string& uri, MaterialClass::SurfaceType surface)
 {
     return MaterialInstance(CreateMaterialClassFromImage(uri, surface));
