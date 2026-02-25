@@ -1757,6 +1757,11 @@ MaterialClass CreateMaterialClassFromColor(const Color4f& color)
     return material;
 }
 
+MaterialClass CreateMaterialClassFromColor(Color color, float alpha)
+{
+    return CreateMaterialClassFromColor(Color4f(color, alpha));
+}
+
 MaterialClass CreateMaterialClassFromSprite(const std::string& uri)
 {
     auto map = std::make_unique<TextureMap>("");

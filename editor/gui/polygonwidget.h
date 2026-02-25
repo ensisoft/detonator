@@ -101,7 +101,7 @@ namespace gui
 
         void PaintScene(gfx::Painter& painter, double secs);
         void PaintEditScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device);
-        void PaintLitAxonometricScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device) const;
+        void PaintLitAxonometricScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device);
         void Paint3DAxonometricScene(const QRect& rect, const PolygonClassHandle& polygon, gfx::Device* device) const;
         void PaintViewRect(const QRect& rect, const app::AnyString& name, gfx::Device* device) const;
         void OnMousePress(QMouseEvent* mickey);
@@ -175,6 +175,7 @@ namespace gui
     private:
         class VertexDataTable;
         class MouseTool;
+        class MoveAxonometricLightTool;
         template<typename T> class AddVertex2DTriangleTool;
         template<typename T> class MoveVertex2DTool;
         template<typename T> class MoveSurface2DTool;
@@ -193,7 +194,7 @@ namespace gui
         };
         GridDensity mGrid = GridDensity::Grid20x20;
 
-        struct AxonometricPixelData {
+        struct AxonometricVertexPixelData {
             float pixel_distance = 0.0f;
             QPoint pixel_position;
             // tile base (floor) corners in 2D projection
@@ -202,6 +203,15 @@ namespace gui
             Point2Df tile_point_right_pixel_position;
             Point2Df tile_point_bottom_pixel_position;
 
+            Point2Df tile_point_top_up_pixel_position;
+            Point2Df tile_point_top_floor_pixel_position;
+        };
+
+        struct AxonometricLightPixelData {
+            Point2Df tile_point_left_pixel_position;
+            Point2Df tile_point_top_pixel_position;
+            Point2Df tile_point_right_pixel_position;
+            Point2Df tile_point_bottom_pixel_position;
             Point2Df tile_point_top_up_pixel_position;
             Point2Df tile_point_top_floor_pixel_position;
         };
@@ -216,7 +226,14 @@ namespace gui
             // the data table.
             std::unique_ptr<VertexDataTable> table;
 
-            std::optional<AxonometricPixelData> axonometric_vertex_pixel_data;
+            std::optional<AxonometricVertexPixelData> axonometric_vertex_pixel_data;
+
+            std::optional<AxonometricLightPixelData> axonometric_light_pixel_data;
+
+            glm::vec3 axonometric_light_position = {0.5f, 0.5f, -0.5f};
+            glm::vec3 axonometric_light_direction = {0.0f, 0.0f, 1.0f};
+
+            float vertex_alpha = 1.0f;
         } mState;
         std::unique_ptr<MouseTool> mMouseTool;
 
@@ -246,7 +263,7 @@ namespace gui
         unsigned mAxonometricTextureWidth  = 0;
         unsigned mAxonometricTextureHeight = 0;
         glm::vec3 mAxonometricTileBaseSize = {0.0f, 0.0f, 0.0f};
-        glm::vec3 mAxonometricLightPosition = {0.0f, 0.0f, 0.0f};
+
         ViewType mMainView = ViewType::EditView;
 
         enum class LightType {
@@ -255,6 +272,8 @@ namespace gui
         LightType mLightType = LightType::Point;
 
         mutable std::vector<std::string> mMessages;
+
+        bool mWireframe = true;
     private:
         // the original hash value that is used to
         // check against if there are unsaved changes.

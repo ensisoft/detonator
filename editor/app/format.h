@@ -86,6 +86,8 @@ namespace app
     { return (value ? "True" : "False"); }
     inline QString toString(const glm::vec2& vec)
     { return QString("%1,%2").arg(vec.x).arg(vec.y); }
+    inline QString toString(const glm::vec3& vec)
+    { return QString("%1,%2,%3").arg(vec.x).arg(vec.y).arg(vec.z); }
     inline QString toString(const glm::vec4& vec)
     { return QString("%1,%2,%3,%4").arg(vec.x).arg(vec.y).arg(vec.z).arg(vec.w); }
 

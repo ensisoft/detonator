@@ -169,6 +169,25 @@ namespace gfx
         T mObject;
     };
 
+    class WireframePtr : public DebugDrawableBase
+    {
+    public:
+        WireframePtr(const Drawable* drawable)
+        {
+            mDrawable = drawable;
+            mFeature  = Feature::Wireframe;
+        }
+        Type GetType() const override
+        {
+            return Type::DebugDrawable;
+        }
+        DrawPrimitive GetDrawPrimitive() const override
+        {
+            return DrawPrimitive::Lines;
+        }
+    private:
+    };
+
     template<typename T>
     class NormalMesh : public DebugDrawableBase
     {
