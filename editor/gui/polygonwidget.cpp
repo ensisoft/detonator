@@ -20,7 +20,6 @@
 
 #include "warnpush.h"
 #  include <QMessageBox>
-#  include <QVector2D>
 #  include <QAbstractTableModel>
 #  include <base64/base64.h>
 #include "warnpop.h"
@@ -195,19 +194,6 @@ gfx::Texture* RenderDimetricGuide(const std::string& gpu_id, gfx::Device& device
 
     result->GenerateMips();
     return result;
-}
-
-// Map vertex to widget space.
-template<typename VertexType>
-QPoint MapVertexToWidget2D(const VertexType& vertex, float width, float height)
-{
-    return QPoint(vertex.aPosition.x * width, vertex.aPosition.y * height * -1.0f);
-}
-
-float PointDist(const QPoint& a, const QPoint& b)
-{
-    const auto& diff = a - b;
-    return std::sqrt(diff.x()*diff.x() + diff.y()*diff.y());
 }
 
 } // namespace
@@ -612,7 +598,7 @@ class ShapeWidget::MouseTool
 {
 public:
     struct ViewState {
-        GridDensity grid;
+        GridDensity grid = GridDensity::Grid10x10;
         bool snap = false;
         float width  = 0;
         float height = 0;
@@ -668,8 +654,8 @@ public:
     }
     void PrintHelp(std::vector<std::string>& msg) const override
     {
-        msg.push_back("Drag to move light in the X,Y plane. Press 'Shift' to adjust height.");
-        msg.push_back("Or use mouse wheel and 'x', 'y' and 'z' keys to adjust light x,y,z coordinate.");
+        msg.emplace_back("Drag to move light in the X,Y plane. Press 'Shift' to adjust height.");
+        msg.emplace_back("Or use mouse wheel and 'x', 'y' and 'z' keys to adjust light x,y,z coordinate.");
     }
 private:
     float MapToTileHeight(const glm::vec2& screen_pos) const
@@ -795,7 +781,7 @@ public:
     }
     void PrintHelp(std::vector<std::string>& msg) const override
     {
-        msg.push_back("Drag to move vertex in the 2D render plane. Press 'Ctrl' to toggle grid snap.");
+        msg.emplace_back("Drag to move vertex in the 2D render plane. Press 'Ctrl' to toggle grid snap.");
     }
     void Update(float dt) override
     {
@@ -894,7 +880,6 @@ public:
     void MousePress(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) override
     {
         mHeightMapping = MapToTileHeight(ToVec2(pos));
-        mBaseMapping = MapToTileBase(ToVec2(pos));
     }
 
     void MouseMove(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) override
@@ -922,10 +907,8 @@ public:
         else
         {
             const auto tile_position = MapToTileBase(ToVec2(pos));
-            const auto position_delta = tile_position - mBaseMapping;
             vertex.aLocalOffset.x = tile_position.x;
             vertex.aLocalOffset.y = tile_position.y;
-            mBaseMapping = tile_position;
         }
         mState.table->UpdateVertex(vertex, mVertexIndex);
     }
@@ -1025,7 +1008,6 @@ private:
     ShapeWidget::State& mState;
     const size_t mVertexIndex = 0;
     float mHeightMapping = 0.0f;
-    glm::vec2 mBaseMapping = {0.0f, 0.0f};
 private:
 };
 
@@ -1095,7 +1077,7 @@ public:
             const auto cell_height = view.height / num_cells;
             const auto x = std::round(pos.x() / cell_width) * cell_width;
             const auto y = std::round(pos.y() / cell_height) * cell_height;
-            mPoints.emplace_back(QPoint(x, y));
+            mPoints.emplace_back(x, y);
         }
         else
         {
@@ -1322,7 +1304,7 @@ void ShapeWidget::InitializeSettings(const UISettings& settings)
 
 void ShapeWidget::InitializeContent()
 {
-    QTimer::singleShot(10, this, [this]() {
+    QTimer::singleShot(10, this, []() {
         QList<int> sizes {98, 100};
         //mUI.splitter->setSizes(sizes);
     });
@@ -2220,22 +2202,22 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         {
             if (mSelectedVertex != InvalidIndex)
             {
-                mMessages.push_back("Click and drag vertex to adjust 2D position.");
+                mMessages.emplace_back("Click and drag vertex to adjust 2D position.");
 
                 if (mState.axonometric_vertex_pixel_data)
                 {
-                    mMessages.push_back("Click and drag pink point to adjust the perceptual 3D coordinate.");
-                    mMessages.push_back("Scroll mouse wheel and press 'x', 'y' and 'z' keys to adjust perceptual 3D coordinate.");
+                    mMessages.emplace_back("Click and drag pink point to adjust the perceptual 3D coordinate.");
+                    mMessages.emplace_back("Scroll mouse wheel and press 'x', 'y' and 'z' keys to adjust perceptual 3D coordinate.");
                 }
             }
             else if (mSelectedCommand != InvalidIndex)
             {
-                mMessages.push_back("Click and drag to move selected surface.");
+                mMessages.emplace_back("Click and drag to move selected surface.");
             }
             else
             {
-                mMessages.push_back("Click on a vertex to select a vertex.");
-                mMessages.push_back("Click on a surface to select a surface.");
+                mMessages.emplace_back("Click on a vertex to select a vertex.");
+                mMessages.emplace_back("Click on a surface to select a surface.");
             }
         }
 
@@ -2243,7 +2225,7 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         {
             const auto& data = mState.axonometric_vertex_pixel_data.value();
             const auto px_diff = static_cast<int>(data.pixel_distance);
-            mMessages.push_back(base::FormatString("Point difference %1 px %2", px_diff, px_diff == 0 ? "POINT SET" : ""));
+            mMessages.emplace_back(base::FormatString("Point difference %1 px %2", px_diff, px_diff == 0 ? "POINT SET" : ""));
         }
     }
 
@@ -2274,8 +2256,7 @@ void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClass
     painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, view_width, 0.0f, view_height, -1000.0f, 1000.0f));
 
     const auto tile_base_size = mAxonometricTileBaseSize;
-    const auto light_position = mState.axonometric_light_position * tile_base_size;
-    const auto light_direction = mState.axonometric_light_direction;
+
 
     if (true)
     {
@@ -2299,7 +2280,6 @@ void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClass
         instance.SetPerceptualGeometry(geometry);
         //tile_painter.Draw(instance, floor, checkerboard);
 
-        const auto& projection_matrix_2d = painter.GetProjMatrix();
         const auto& projection_matrix_3d = tile_painter.GetProjMatrix();
         const auto& view_matrix_3d = tile_painter.GetViewMatrix();
 
@@ -2345,8 +2325,8 @@ void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClass
             light.type = gfx::BasicLightProgram::LightType::Directional;
         else BUG("Missing light type.");
 
-        light.view_position = light_position;
-        light.view_direction = light_direction;
+        light.view_position  = mState.axonometric_light_position * tile_base_size;
+        light.view_direction = mState.axonometric_light_direction;
         light.ambient_color = gfx::Color4f(gfx::Color::White) * 0.5f;
         light.diffuse_color = gfx::Color4f(gfx::Color::White) * 1.0f;
         light.specular_color = gfx::Color4f(gfx::Color::White) * 1.0f;
@@ -2380,6 +2360,8 @@ void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClass
 
         if (mLightType == LightType::Point || mLightType == LightType::Spot)
         {
+            const auto light_position = mState.axonometric_light_position * tile_base_size;
+
             gfx::FlatShadedColorProgram flat_program;
             gfx::Transform transform;
             transform.Resize(40.0f, 40.0f, 40.0f);
@@ -2389,9 +2371,9 @@ void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClass
         }
         if (!mMouseTool)
         {
-            mMessages.push_back("Click and drag to adjust the perceptual light 3D position.");
-            mMessages.push_back("Press 'p' for point light, 's' for spot light and 'd' for directional light.");
-            mMessages.push_back(base::FormatString("Current light = %1", mLightType));
+            mMessages.emplace_back("Click and drag to adjust the perceptual light 3D position.");
+            mMessages.emplace_back("Press 'p' for point light, 's' for spot light and 'd' for directional light.");
+            mMessages.emplace_back(base::FormatString("Current light = %1", mLightType));
         }
     }
 
@@ -2413,10 +2395,6 @@ void ShapeWidget::Paint3DAxonometricScene(const QRect& rect, const PolygonClassH
 {
     gfx::PaintContext pc;
 
-    const auto widget_width  = mUI.widget->width();
-    const auto widget_height = mUI.widget->height();
-    const auto view_width = static_cast<float>(rect.width());
-    const auto view_height = static_cast<float>(rect.height());
     const auto xoffset = static_cast<float>(rect.x());
     const auto yoffset = static_cast<float>(rect.y());
     const auto width = static_cast<float>(rect.width());
@@ -2461,7 +2439,7 @@ void ShapeWidget::Paint3DAxonometricScene(const QRect& rect, const PolygonClassH
 
     if (mMainView == ViewType::Axo3DView)
     {
-        mMessages.push_back("Press 'w' to toggle wireframe.");
+        mMessages.emplace_back("Press 'w' to toggle wireframe.");
 
         if (mMouseTool)
         {
@@ -2550,8 +2528,6 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
                 // try secondary picking.
                 if (!mMouseTool)
                 {
-                    const auto selected_vertex = mSelectedVertex;
-
                     // first pick vertex.
                     auto pick_mode = PickMode::Sticky;
                     if (shift)
@@ -2600,7 +2576,6 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
     }
     else
     {
-        const auto mesh_type = GetMeshType();
         if (mesh_type == MeshType::Dimetric2DRenderMesh || mesh_type == MeshType::Isometric2DRenderMesh)
         {
             const auto& lit = GetLitRenderRect();
@@ -2728,7 +2703,6 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
                 });
 
                 menu.AddAction("Delete Surface", QIcon("icons:delete.png"), [this]() {
-                    const auto cmd = mState.builder->GetDrawCommand(mSelectedCommand);
                     mState.table->EraseSurface(mSelectedCommand);
                     mSelectedCommand = InvalidIndex;
                     mSelectedVertex = InvalidIndex;
