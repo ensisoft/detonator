@@ -464,7 +464,7 @@
         </widget>
        </item>
        <item>
-        <widget class="color_widgets::ColorSelector" name="widgetColor" native="true">
+        <widget class="color_widgets::ColorSelector" name="widgetColor">
          <property name="minimumSize">
           <size>
            <width>30</width>
@@ -597,7 +597,7 @@
     <string>Toggle show reference grid</string>
    </property>
   </action>
-  <action name="chkSnap">
+  <action name="chkSnapToGrid">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -666,14 +666,19 @@
     <string>Toggle isometric guide on/off</string>
    </property>
   </action>
+  <action name="chkSnapToVertex">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Snap to vertex</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle whether to snap vertices to nearby other vertices or not</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>gui::GfxWidget</class>
-   <extends>QWidget</extends>
-   <header>gfxwidget.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>color_widgets::ColorPreview</class>
    <extends>QWidget</extends>
@@ -683,6 +688,12 @@
    <class>color_widgets::ColorSelector</class>
    <extends>color_widgets::ColorPreview</extends>
    <header>color_selector.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>gui::GfxWidget</class>
+   <extends>QWidget</extends>
+   <header>gfxwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>
