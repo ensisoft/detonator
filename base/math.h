@@ -365,6 +365,59 @@ namespace math
         return std::abs(goal - value) <= epsilon;
     }
 
+    template<typename PointType>
+    float Distance(const PointType& a, const PointType& b) noexcept
+    {
+        const auto delta = a - b;
+        const auto x = delta.x();
+        const auto y = delta.y();
+        return std::sqrt(x*x + y*y);
+    }
+
+    template<typename PointType>
+    float SquareDistance(const PointType& a, const PointType& b) noexcept
+    {
+        const auto delta = a - b;
+        const auto x = delta.x();
+        const auto y = delta.y();
+        return x*x + y*y;
+    }
+
+    template<typename PointType>
+    bool DistanceIsLess(const PointType& target, const PointType& current, const float maximum) noexcept
+    {
+        const auto& diff = target - current;
+        const auto x = diff.x();
+        const auto y= diff.y();
+        return x*x + y*y < maximum*maximum;
+    }
+
+    template<typename PointType>
+    bool DistanceIsLessOrEqual(const PointType& target, const PointType& current, const float maximum) noexcept
+    {
+        const auto& diff = target - current;
+        const auto x = diff.x();
+        const auto y = diff.y();
+        return x*x + y*y <= maximum*maximum;
+    }
+
+    template<typename PointType>
+    bool DistanceIsMore(const PointType& target, const PointType& current, const float minimum) noexcept
+    {
+        const auto& diff = target - current;
+        const auto x = diff.x();
+        const auto y = diff.y();
+        return x*x + y*y > minimum*minimum;
+    }
+    template<typename PointType>
+    bool DistanceIsMoreOrEqual(const PointType& target, const PointType& current, const float minimum) noexcept
+    {
+        const auto& diff = target - current;
+        const auto x = diff.x();
+        const auto y = diff.y();
+        return x*x + y*y >= minimum*minimum;
+    }
+
 #if defined(MATH_SUPPORT_GLM)
     inline glm::vec2 RunningAvg(const glm::vec2& current_value, const unsigned count, const glm::vec2& next_value) noexcept
     {
@@ -391,6 +444,17 @@ namespace math
         ret.z = RunningAvg(current_value.z, count, next_value.z);
         ret.w = RunningAvg(current_value.w, count, next_value.w);
         return ret;
+    }
+
+    inline float Distance(const glm::vec2& target, const glm::vec2& current) noexcept
+    {
+        return glm::length(target - current);
+    }
+
+    inline float SquareDistance(const glm::vec2& target, const glm::vec2& current) noexcept
+    {
+        const auto delta = target - current;
+        return delta.x*delta.x + delta.y*delta.y;
     }
 
     inline bool DistanceIsLess(const glm::vec2& target, const glm::vec2& current, const float maximum) noexcept
