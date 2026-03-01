@@ -108,6 +108,7 @@ QMenu::item {
 	background-color: transparent;
 	padding: 6px 26px 6px 26px;
 	border-radius: 3px;
+	border: 1px solid transparent;
 }
 QMenu::item:disabled {
 	color: #667084;
