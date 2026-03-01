@@ -175,10 +175,35 @@ namespace engine
         [](int min, int max) {
             return base::rand(min, max);
         });
-    util["DistanceIsLess"]        = &math::DistanceIsLess;
-    util["DistanceIsLessOrEqual"] = &math::DistanceIsLessOrEqual;
-    util["DistanceIsMore"]        = &math::DistanceIsMore;
-    util["DistanceIsMoreOrEqual"] = &math::DistanceIsMoreOrEqual;
+
+    util["DistanceIsLess"] = sol::overload(
+        [](const glm::vec2& target, const glm::vec2& current, float maximum) {
+           return math::DistanceIsLess(target, current, maximum);
+        },
+        [](const base::FPoint& target, const FPoint& current, float maximum) {
+            return base::DistanceIsLess(target, current, maximum);
+        });
+    util["DistanceIsLessOrEqual"] = sol::overload(
+        [](const glm::vec2& target, const glm::vec2& current, float maximum) {
+            return math::DistanceIsLessOrEqual(target, current, maximum);
+        },
+        [](const base::FPoint& target, const FPoint& current, float maximum) {
+            return base::DistanceIsLessOrEqual(target, current, maximum);
+        });
+     util["DistanceIsMore"] = sol::overload(
+         [](const glm::vec2& target, const glm::vec2& current, float maximum) {
+            return math::DistanceIsMore(target, current, maximum);
+         },
+         [](const base::FPoint& target, const FPoint& current, float maximum) {
+             return base::DistanceIsMore(target, current, maximum);
+         });
+     util["DistanceIsMoreOrEqual"] = sol::overload(
+         [](const glm::vec2& target, const glm::vec2& current, float maximum) {
+             return math::DistanceIsMoreOrEqual(target, current, maximum);
+         },
+         [](const base::FPoint& target, const FPoint& current, float maximum) {
+             return base::DistanceIsMoreOrEqual(target, current, maximum);
+         });
 
     util["FindImpulse"] = [](const glm::vec2& current_velocity,
                              const glm::vec2& target_velocity, float mass) {

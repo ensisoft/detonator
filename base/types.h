@@ -294,6 +294,38 @@ namespace base
         return x*x + y*y;
     }
 
+    inline bool DistanceIsLess(const FPoint& target, const FPoint& current, const float maximum) noexcept
+    {
+        const auto& diff = target - current;
+        const auto x = diff.GetX();
+        const auto y= diff.GetY();
+        return x*x + y*y < maximum*maximum;
+    }
+
+    inline bool DistanceIsLessOrEqual(const FPoint& target, const FPoint& current, const float maximum) noexcept
+    {
+        const auto& diff = target - current;
+        const auto x = diff.GetX();
+        const auto y = diff.GetY();
+        return x*x + y*y <= maximum*maximum;
+    }
+
+    inline bool DistanceIsMore(const FPoint& target, const FPoint& current, const float minimum) noexcept
+    {
+        const auto& diff = target - current;
+        const auto x = diff.GetX();
+        const auto y = diff.GetY();
+        return x*x + y*y > minimum*minimum;
+    }
+
+    inline bool DistanceIsMoreOrEqual(const FPoint& target, const FPoint& current, const float minimum) noexcept
+    {
+        const auto& diff = target - current;
+        const auto x = diff.GetX();
+        const auto y = diff.GetY();
+        return x*x + y*y >= minimum*minimum;
+    }
+
     // simple rectangle definition
     template<typename T>
     class Rect
