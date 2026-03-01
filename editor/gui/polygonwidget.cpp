@@ -2863,6 +2863,41 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
 void ShapeWidget::OnMouseWheel(QWheelEvent* wheel)
 {
     const auto mesh_type = GetMeshType();
+
+    if (mMainView == ViewType::EditView)
+    {
+        const auto ctrl = wheel->modifiers() & Qt::ControlModifier;
+        if (ctrl)
+        {
+            constexpr GridDensity grid_density_index[] = {
+                GridDensity::Grid10x10,
+                GridDensity::Grid20x20,
+                GridDensity::Grid50x50,
+                GridDensity::Grid100x100
+            };
+            const GridDensity grid_density = GetValue(mUI.cmbGrid);
+
+            int grid_index = 0;
+            for (grid_index=0; grid_index<4; ++grid_index)
+            {
+                if (grid_density_index[grid_index] == grid_density)
+                    break;
+            }
+
+            const QPoint& num_degrees = wheel->angleDelta() / 8;
+            const QPoint& num_steps = num_degrees / 15;
+
+            const auto step = num_steps.y() < 0 ? 1 : -1;
+            grid_index = grid_index + step;
+            if (grid_index < 0)
+                grid_index = 3;
+            else if (grid_index == 4)
+                grid_index = 0;
+
+            SetValue(mUI.cmbGrid, grid_density_index[grid_index]);
+        }
+    }
+
     if (mesh_type == MeshType::Isometric2DRenderMesh || mesh_type == MeshType::Dimetric2DRenderMesh)
     {
         if (mMainView == ViewType::EditView)
