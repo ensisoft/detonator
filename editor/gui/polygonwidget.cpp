@@ -67,6 +67,15 @@ namespace {
 
 constexpr auto Margin = 20; // pixels
 
+QPoint ClosestPoint(const QPoint& point, const QPoint& a, const QPoint& b)
+{
+    const auto distance_to_a = math::Distance(point, a);
+    const auto distance_to_b = math::Distance(point, b);
+    if (distance_to_a <= distance_to_b)
+        return a;
+    return b;
+}
+
 template<typename VertexType>
 std::vector<VertexType> MakeVerts2D(const std::vector<QPoint>& points, float width, float height)
 {
@@ -599,7 +608,8 @@ class ShapeWidget::MouseTool
 public:
     struct ViewState {
         GridDensity grid = GridDensity::Grid10x10;
-        bool snap = false;
+        bool snap_to_grid = false;
+        bool snap_to_vertex = false;
         float width  = 0;
         float height = 0;
     };
@@ -740,36 +750,79 @@ public:
         }
 
         const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
+        const auto shift = mickey->modifiers() & Qt::ShiftModifier;
 
-        bool snap = view.snap;
+        bool snap_to_grid = view.snap_to_grid;
+        bool snap_to_vertex = view.snap_to_vertex;
         if (ctrl)
-            snap = !snap;
+            snap_to_grid = !snap_to_grid;
+        if (shift)
+            snap_to_vertex = !snap_to_vertex;
 
         auto vertex = builder->GetVertex(mVertexIndex);
-        if (snap)
-        {
-            const auto num_cells = static_cast<float>(view.grid);
-            const auto cell_width = view.width / num_cells;
-            const auto cell_height = view.height / num_cells;
-            const auto new_x = std::round(pos.x() / cell_width) * cell_width;
-            const auto new_y = std::round(pos.y() / cell_height) * cell_height;
-            const auto old_x = std::round((vertex.aPosition.x * view.width) / cell_width) * cell_width;
-            const auto old_y = std::round((vertex.aPosition.y * -view.height) / cell_height) * cell_height;
-            vertex.aPosition.x = new_x / view.width;
-            vertex.aPosition.y = new_y / -view.height;
-            if (new_x != old_x || new_y != old_y)
-            {
-                mCurrentPoint = QPoint(static_cast<int>(new_x),
-                                       static_cast<int>(new_y));
-            }
-        }
-        else
-        {
+
+        auto SetMotionDelta = [&vertex, &pos, this, &view]() {
             const auto dx = static_cast<float>(mCurrentPoint.x() - pos.x());
             const auto dy = static_cast<float>(mCurrentPoint.y() - pos.y());
             vertex.aPosition.x -= (dx / view.width);
             vertex.aPosition.y += (dy / view.height);
             mCurrentPoint = pos;
+        };
+        auto SetSnapPoint = [&vertex, this, &view](const QPoint& point) {
+            const float x = static_cast<float>(point.x());
+            const float y = static_cast<float>(point.y());
+            vertex.aPosition.x = x / view.width;
+            vertex.aPosition.y = y / -view.height;
+            mCurrentPoint = point;
+        };
+
+        if (snap_to_grid && snap_to_vertex)
+        {
+            const auto vertex_snap_point = SnapToVertex(pos, view);
+            const auto grid_snap_point = SnapToGrid(pos, view);
+            if (grid_snap_point && vertex_snap_point)
+            {
+                const auto closest_snap_point = ClosestPoint(pos, grid_snap_point.value(), vertex_snap_point.value());
+                SetSnapPoint(closest_snap_point);
+            }
+            else if (grid_snap_point)
+            {
+                SetSnapPoint(grid_snap_point.value());
+            }
+            else if (vertex_snap_point)
+            {
+                SetSnapPoint(vertex_snap_point.value());
+            }
+            else
+            {
+                SetMotionDelta();
+            }
+        }
+        else if (snap_to_grid)
+        {
+            if (const auto grid_snap_point = SnapToGrid(pos, view))
+            {
+                SetSnapPoint(grid_snap_point.value());
+            }
+            else
+            {
+                SetMotionDelta();
+            }
+        }
+        else if (snap_to_vertex)
+        {
+            if (const auto vertex_snap_point = SnapToVertex(pos, view))
+            {
+                SetSnapPoint(vertex_snap_point.value());
+            }
+            else
+            {
+                SetMotionDelta();
+            }
+        }
+        else
+        {
+            SetMotionDelta();
         }
         vertex.aTexCoord.x =  vertex.aPosition.x;
         vertex.aTexCoord.y = -vertex.aPosition.y;
@@ -787,8 +840,67 @@ public:
     {
         const auto accumulation = 3.0f * dt;
         mState.vertex_alpha -= accumulation;
-        if (mState.vertex_alpha < 0.0f)
-            mState.vertex_alpha = 0.0f;
+        if (mState.vertex_alpha < 0.2f)
+            mState.vertex_alpha = 0.2f;
+    }
+private:
+    std::optional<QPoint> SnapToVertex(const QPoint& pos, const ViewState& view) const noexcept
+    {
+        const auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
+        const auto vertex_count = builder->GetVertexCount();
+        if (!vertex_count)
+            return std::nullopt;
+
+        auto distance_threshold = 10.0f;
+
+        constexpr size_t invalid_index = 0xffffffff;
+        const auto draw_cmd_index = builder->FindDrawCommand(mVertexIndex);
+
+        size_t index = invalid_index;
+        for (size_t i=0; i<vertex_count; ++i)
+        {
+            // never consider snapping vertex to itself.
+            if (i == mVertexIndex)
+                continue;
+            // never consider snapping the vertex to other vertices
+            // in the same surface, i.e. to any vertex that is in the same
+            // draw command
+            const auto cmd_index = builder->FindDrawCommand(i);
+            if (cmd_index == draw_cmd_index)
+                continue;
+
+            const auto& vertex = builder->GetVertex(i);
+            const auto vertex_xpos = vertex.aPosition.x * view.width;
+            const auto vertex_ypos = vertex.aPosition.y * view.height * -1.0f;
+            const auto distance_to_point = math::Distance(pos, QPoint(vertex_xpos, vertex_ypos));
+            if (distance_to_point < distance_threshold)
+            {
+                index = i;
+                distance_threshold = distance_to_point;
+            }
+        }
+        if (index == invalid_index)
+            return std::nullopt;
+
+        const auto& vertex = builder->GetVertex(index);
+        const auto xpos = vertex.aPosition.x * view.width;
+        const auto ypos = vertex.aPosition.y * view.height * -1.0f;
+        return QPoint(xpos, ypos);
+    }
+
+    std::optional<QPoint> SnapToGrid(const QPoint& pos, const ViewState& view) const noexcept
+    {
+        const auto num_cells = static_cast<float>(view.grid);
+        const auto cell_width = view.width / num_cells;
+        const auto cell_height = view.height / num_cells;
+        const auto x = std::round(pos.x() / cell_width) * cell_width;
+        const auto y = std::round(pos.y() / cell_height) * cell_height;
+
+        const QPoint snap_point(x, y);
+        if (math::DistanceIsLessOrEqual(snap_point, pos, 10.0f))
+            return snap_point;
+
+        return std::nullopt;
     }
 private:
     ShapeWidget::State& mState;
@@ -859,8 +971,8 @@ public:
     {
         const auto accumulation = 3.0f * dt;
         mState.vertex_alpha -= accumulation;
-        if (mState.vertex_alpha < 0.0f)
-            mState.vertex_alpha = 0.0f;
+        if (mState.vertex_alpha < 0.2f)
+            mState.vertex_alpha = 0.2f;
     }
 private:
     ShapeWidget::State& mState;
@@ -946,8 +1058,8 @@ public:
     {
         const auto accumulation = 3.0f * dt;
         mState.vertex_alpha -= accumulation;
-        if (mState.vertex_alpha < 0.0f)
-            mState.vertex_alpha = 0.0f;
+        if (mState.vertex_alpha < 0.2f)
+            mState.vertex_alpha = 0.2f;
     }
 
 private:
@@ -1021,7 +1133,7 @@ public:
         : mMode(mode)
         , mState(state)
     {
-        mState.vertex_alpha = 0.0f;
+        mState.vertex_alpha = 0.2f;
     }
     void CompleteTool(const ViewState& view) override
     {
@@ -1061,23 +1173,48 @@ public:
     {
         mCurrentPoint = pos;
     }
-    bool MouseRelease(const QMouseEvent *mickey, const QPoint &pos, const ViewState &view) override
+    bool MouseRelease(const QMouseEvent* mickey, const QPoint& pos, const ViewState& view) override
     {
         const auto ctrl = mickey->modifiers() & Qt::ControlModifier;
+        const auto shift = mickey->modifiers() & Qt::ShiftModifier;
 
-        bool snap = view.snap;
+        bool snap_to_grid = view.snap_to_grid;
+        bool snap_to_vertex = view.snap_to_vertex;
         if (ctrl)
-            snap = !snap;
+            snap_to_grid = !snap_to_grid;
+        if (shift)
+            snap_to_vertex = !snap_to_vertex;
 
-        if (snap)
+        if (snap_to_grid && snap_to_vertex)
         {
-            const auto num_cells = static_cast<float>(view.grid);
-
-            const auto cell_width = view.width / num_cells;
-            const auto cell_height = view.height / num_cells;
-            const auto x = std::round(pos.x() / cell_width) * cell_width;
-            const auto y = std::round(pos.y() / cell_height) * cell_height;
-            mPoints.emplace_back(x, y);
+            const auto grid_snap_point = SnapToGrid(pos, view);
+            const auto vertex_snap_point = SnapToVertex(pos, view);
+            if (grid_snap_point && vertex_snap_point)
+            {
+                mPoints.push_back(ClosestPoint(pos, grid_snap_point.value(), vertex_snap_point.value()));
+            }
+            else if (grid_snap_point)
+            {
+                mPoints.push_back(grid_snap_point.value());
+            }
+            else if (vertex_snap_point)
+            {
+                mPoints.push_back(vertex_snap_point.value());
+            }
+            else
+            {
+                mPoints.push_back(pos);
+            }
+        }
+        else if (snap_to_grid)
+        {
+            const auto snap_point = SnapToGrid(pos, view);
+            mPoints.push_back(snap_point.value_or(pos));
+        }
+        else if (snap_to_vertex)
+        {
+            const auto& snap_point = SnapToVertex(pos, view);
+            mPoints.push_back(snap_point.value_or(pos));
         }
         else
         {
@@ -1129,13 +1266,61 @@ public:
         painter.Draw(gfx::PolygonMeshInstance(current), transform,
             gfx::MaterialInstance(color), state);
     }
-    void DrawHelp(gfx::Painter& painter) const  override
+
+    void PrintHelp(std::vector<std::string>& msg) const override
     {
         if (mPoints.empty())
-            ShowMessage("Click to place first vertex", gfx::FPoint(10.0f, 10.0f), painter);
-        else ShowMessage("Move mouse and click to place a vertex", gfx::FPoint(10.0f, 10.0f), painter);
+            msg.emplace_back("Click to place first vertex.");
+        else msg.emplace_back("Move mouse and click to place a vertex.");
     }
 private:
+    std::optional<QPoint> SnapToGrid(const QPoint& pos, const ViewState& view) const
+    {
+        const auto num_cells = static_cast<float>(view.grid);
+        const auto cell_width = view.width / num_cells;
+        const auto cell_height = view.height / num_cells;
+        const auto x = std::round(pos.x() / cell_width) * cell_width;
+        const auto y = std::round(pos.y() / cell_height) * cell_height;
+
+        const QPoint snap_point(x, y);
+        if (math::DistanceIsLessOrEqual(snap_point, pos, 10.0f))
+            return snap_point;
+
+        return std::nullopt;
+    }
+    std::optional<QPoint> SnapToVertex(const QPoint& pos, const ViewState& view) const
+    {
+        const auto* builder = dynamic_cast<BuilderType*>(mState.builder.get());
+        const auto vertex_count = builder->GetVertexCount();
+        if (!vertex_count)
+            return std::nullopt;
+
+        auto distance_threshold = 10.0f;
+
+        constexpr size_t invalid_index = 0xffffffff;
+
+        size_t index = invalid_index;
+        for (size_t i=0; i<vertex_count; ++i)
+        {
+            const auto& vertex = builder->GetVertex(i);
+            const auto vertex_xpos = vertex.aPosition.x * view.width;
+            const auto vertex_ypos = vertex.aPosition.y * view.height * -1.0f;
+            const auto distance_to_point = math::Distance(pos, QPoint(vertex_xpos, vertex_ypos));
+            if (distance_to_point < distance_threshold)
+            {
+                index = i;
+                distance_threshold = distance_to_point;
+            }
+        }
+        if (index == invalid_index)
+            return std::nullopt;
+
+        const auto& vertex = builder->GetVertex(index);
+        const auto xpos = vertex.aPosition.x * view.width;
+        const auto ypos = vertex.aPosition.y * view.height * -1.0f;
+        return QPoint(xpos, ypos);
+    }
+
     gfx::Geometry::DrawType GetTriangleMode() const
     {
         if (mMode == TriangleMode::TriangleFan)
@@ -1178,7 +1363,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
 
     mHamburger = new QMenu(this);
     mHamburger->setIcon(QIcon("icons:hamburger.png"));
-    mHamburger->addAction(mUI.chkSnap);
+    mHamburger->addAction(mUI.chkSnapToGrid);
+    mHamburger->addAction(mUI.chkSnapToVertex);
     mHamburger->addAction(mUI.chkShowGrid);
     mHamburger->addAction(mUI.chkShowNormals);
     mHamburger->addAction(mUI.chkShowVertices);
@@ -1213,6 +1399,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace)
     SetValue(mUI.cmbGrid, GridDensity::Grid20x20);
     SetValue(mUI.cmbMeshType, MeshType::Simple2DRenderMesh);
     SetValue(mUI.chkIsometricGuide, true);
+    SetValue(mUI.chkSnapToVertex, true);
+    SetValue(mUI.chkSnapToGrid, true);
 
     mState.polygon->SetName(GetValue(mUI.name));
     mState.polygon->SetStatic(GetValue(mUI.chkStaticInstance));
@@ -1238,7 +1426,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
     QString material;
     GetProperty(resource, "material", &material);
     GetUserProperty(resource, "grid",           mUI.cmbGrid);
-    GetUserProperty(resource, "snap_to_grid",   mUI.chkSnap);
+    GetUserProperty(resource, "snap_to_grid",   mUI.chkSnapToGrid);
+    GetUserProperty(resource, "snap_to_vertex", mUI.chkSnapToVertex);
     GetUserProperty(resource, "show_grid",      mUI.chkShowGrid);
     GetUserProperty(resource, "show_normals",   mUI.chkShowNormals);
     GetUserProperty(resource, "show_vertices",  mUI.chkShowVertices);
@@ -1292,13 +1481,14 @@ QString ShapeWidget::GetId() const
 
 void ShapeWidget::InitializeSettings(const UISettings& settings)
 {
-    SetValue(mUI.cmbGrid,     settings.grid);
-    SetValue(mUI.chkSnap,     settings.snap_to_grid);
-    SetValue(mUI.chkShowGrid, settings.show_grid);
-    SetValue(mUI.chkShowNormals,   true);
-    SetValue(mUI.chkShowBlueprint, true);
-    SetValue(mUI.chkShowVertices,  true);
-    SetValue(mUI.chkShowSurfaces,  true);
+    SetValue(mUI.cmbGrid,          settings.grid);
+    SetValue(mUI.chkSnapToGrid,    settings.snap_to_grid);
+    SetValue(mUI.chkShowGrid,      settings.show_grid);
+    SetValue(mUI.chkSnapToVertex,  true);
+    SetValue(mUI.chkShowNormals,    true);
+    SetValue(mUI.chkShowBlueprint,  true);
+    SetValue(mUI.chkShowVertices,   true);
+    SetValue(mUI.chkShowSurfaces,   true);
     SetValue(mUI.chkIsometricGuide, true);
  }
 
@@ -1363,7 +1553,8 @@ bool ShapeWidget::SaveState(Settings& settings) const
     settings.SetValue("Polygon", "main_view", mMainView);
     settings.SaveWidget("Polygon", mUI.name);
     settings.SaveWidget("Polygon", mUI.chkShowGrid);
-    settings.SaveWidget("Polygon", mUI.chkSnap);
+    settings.SaveWidget("Polygon", mUI.chkSnapToGrid);
+    settings.SaveWidget("Polygon", mUI.chkSnapToVertex);
     settings.SaveWidget("Polygon", mUI.chkShowNormals);
     settings.SaveWidget("Polygon", mUI.chkShowVertices);
     settings.SaveWidget("Polygon", mUI.chkShowSurfaces);
@@ -1385,7 +1576,8 @@ bool ShapeWidget::LoadState(const Settings& settings)
     settings.GetValue("Polygon", "main_view", &mMainView);
     settings.LoadWidget("Polygon", mUI.name);
     settings.LoadWidget("Polygon", mUI.chkShowGrid);
-    settings.LoadWidget("Polygon", mUI.chkSnap);
+    settings.LoadWidget("Polygon", mUI.chkSnapToGrid);
+    settings.LoadWidget("Polygon", mUI.chkSnapToVertex);
     settings.LoadWidget("Polygon", mUI.chkShowNormals);
     settings.LoadWidget("Polygon", mUI.chkShowVertices);
     settings.LoadWidget("Polygon", mUI.chkShowSurfaces);
@@ -1555,7 +1747,8 @@ void ShapeWidget::on_actionSave_triggered()
     app::CustomShapeResource resource(mState.polygon, GetValue(mUI.name));
     SetProperty(resource, "material", (QString)GetItemId(mUI.blueprints));
     SetUserProperty(resource, "grid",           mUI.cmbGrid);
-    SetUserProperty(resource, "snap_to_grid",   mUI.chkSnap);
+    SetUserProperty(resource, "snap_to_grid",   mUI.chkSnapToGrid);
+    SetUserProperty(resource, "snap_to_vertex", mUI.chkSnapToVertex);
     SetUserProperty(resource, "show_grid",      mUI.chkShowGrid);
     SetUserProperty(resource, "show_normals",   mUI.chkShowNormals);
     SetUserProperty(resource, "show_vertices",  mUI.chkShowVertices);
@@ -1846,7 +2039,8 @@ bool ShapeWidget::OnEscape()
         MouseTool::ViewState view;
         view.width = rect.width();
         view.height = rect.height();
-        view.snap = GetValue(mUI.chkSnap);
+        view.snap_to_grid = GetValue(mUI.chkSnapToGrid);
+        view.snap_to_vertex = GetValue(mUI.chkSnapToVertex);
         view.grid = GetValue(mUI.cmbGrid);
         mMouseTool->CompleteTool(view);
         mMouseTool.reset();
@@ -2192,7 +2386,8 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
             MouseTool::ViewState view;
             view.width = width;
             view.height = height;
-            view.snap = GetValue(mUI.chkSnap);
+            view.snap_to_grid = GetValue(mUI.chkSnapToGrid);
+            view.snap_to_vertex = GetValue(mUI.chkSnapToVertex);
             view.grid = GetValue(mUI.cmbGrid);
             mMouseTool->DrawTool(painter, view);
             mMouseTool->PrintHelp(mMessages);
@@ -2381,7 +2576,8 @@ void ShapeWidget::PaintLitAxonometricScene(const QRect& rect, const PolygonClass
     {
         MouseTool::ViewState view;
         view.grid   = GetValue(mUI.cmbGrid);
-        view.snap   = GetValue(mUI.chkSnap);
+        view.snap_to_grid   = GetValue(mUI.chkSnapToGrid);
+        view.snap_to_vertex = GetValue(mUI.chkSnapToVertex);
         view.width  = width;
         view.height = height;
         mMouseTool->DrawTool(painter, view);
@@ -2445,7 +2641,8 @@ void ShapeWidget::Paint3DAxonometricScene(const QRect& rect, const PolygonClassH
         {
             MouseTool::ViewState view;
             view.grid   = GetValue(mUI.cmbGrid);
-            view.snap   = GetValue(mUI.chkSnap);
+            view.snap_to_grid   = GetValue(mUI.chkSnapToGrid);
+            view.snap_to_vertex = GetValue(mUI.chkSnapToVertex);
             view.width  = width;
             view.height = height;
             //mMouseTool->DrawTool(painter, view);
@@ -2568,7 +2765,8 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
         {
             MouseTool::ViewState view;
             view.grid   = GetValue(mUI.cmbGrid);
-            view.snap   = GetValue(mUI.chkSnap);
+            view.snap_to_grid   = GetValue(mUI.chkSnapToGrid);
+            view.snap_to_vertex = GetValue(mUI.chkSnapToVertex);
             view.width  = width;
             view.height = height;
             mMouseTool->MousePress(mickey, point, view);
@@ -2813,7 +3011,8 @@ void ShapeWidget::OnMouseRelease(QMouseEvent* mickey)
     {
         MouseTool::ViewState view;
         view.grid   = GetValue(mUI.cmbGrid);
-        view.snap   = GetValue(mUI.chkSnap);
+        view.snap_to_grid   = GetValue(mUI.chkSnapToGrid);
+        view.snap_to_vertex = GetValue(mUI.chkSnapToVertex);
         view.width  = width;
         view.height = height;
         if (mMouseTool->MouseRelease(mickey, point, view))
@@ -2837,7 +3036,8 @@ void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
     {
         MouseTool::ViewState view;
         view.grid   = GetValue(mUI.cmbGrid);
-        view.snap   = GetValue(mUI.chkSnap);
+        view.snap_to_grid   = GetValue(mUI.chkSnapToGrid);
+        view.snap_to_vertex = GetValue(mUI.chkSnapToVertex);
         view.width  = width;
         view.height = height;
         mMouseTool->MouseMove(mickey, point, view);
