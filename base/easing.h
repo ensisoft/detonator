@@ -180,7 +180,7 @@ namespace easing {
     }
 
     enum class Curve {
-        // No interpolation, a discrete jump fro y0 to y1 then t > 0.0
+        // No interpolation, a discrete jump from y0 to y1 when t > 0.0
         StepStart,
         // No interpolation, a discrete jump from y0 to y1 when t is >= 0.5.
         Step,
@@ -197,24 +197,41 @@ namespace easing {
         Acceleration,
         // Decelerate increase in y1 value when t approaches 1.0f
         Deceleration,
-
+        // Gentle ease in using a sine curve. Starts slow, finishes at full speed.
         EaseInSine,
+        // Gentle ease out using a sine curve. Starts at full speed, finishes slow.
         EaseOutSine,
+        // Gentle ease in-out using a sine curve. Slow at both ends, fastest in the middle.
         EaseInOutSine,
+        // Ease in using a quadratic (t²) curve. Starts slow, accelerates.
         EaseInQuadratic,
+        // Ease out using a quadratic curve. Decelerates into the end value.
         EaseOutQuadratic,
+        // Ease in-out using a quadratic curve. Slow at both ends, faster than sine in the middle.
         EaseInOutQuadratic,
+        // Ease in using a cubic (t³) curve. Stronger acceleration than quadratic.
         EaseInCubic,
+        // Ease out using a cubic curve. Stronger deceleration than quadratic.
         EaseOutCubic,
+        // Ease in-out using a cubic curve. More pronounced slow/fast contrast than quadratic.
         EaseInOutCubic,
+        // Ease in with a brief backward pull before accelerating forward (anticipation).
         EaseInBack,
+        // Ease out with a slight overshoot past the target before settling (follow-through).
         EaseOutBack,
+        // Ease in-out with backward pull at the start and overshoot at the end.
         EaseInOutBack,
+        // Spring-like oscillation at the beginning before moving toward the target.
         EaseInElastic,
+        // Spring-like oscillation around the target value at the end.
         EaseOutElastic,
+        // Spring-like oscillation at both the start and end of the transition.
         EaseInOutElastic,
+        // Bouncing motion at the start, as if the value bounces off the origin.
         EaseInBounce,
+        // Bouncing motion at the end, like a ball landing and bouncing to rest.
         EaseOutBounce,
+        // Bouncing motion at both the start and end of the transition.
         EaseInOutBounce
     };
 
@@ -273,7 +290,7 @@ namespace easing {
         if (curve == Curve::EaseInOutBounce)
             return ease_in_out_bounce(t);
 
-        BUG("Missing interpolation curve.");
+        BUG("No such easing curve.");
         return t;
     }
 
