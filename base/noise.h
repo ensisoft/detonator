@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <cstring> // for memcpy
 
+#include "base/easing.h"
 #include "base/math.h"
 
 namespace base
@@ -45,7 +46,7 @@ namespace base
             const auto y0 = Random(x0);
             const auto y1 = Random(x1);
             const float t = (x - x0) / period;
-            return interpolate(y0, y1, t, math::Interpolation::Cosine);
+            return easing::Lerp(y0, y1, t, easing::Curve::Cosine);
         }
 
         // 2 dimensional noise
@@ -64,9 +65,9 @@ namespace base
                     Random(x1, y1)
             };
             const auto t = (x - x0) / period;
-            const float xbot = interpolate(samples[0], samples[1], t, math::Interpolation::Cosine);
-            const float xtop = interpolate(samples[2], samples[3], t, math::Interpolation::Cosine);
-            return interpolate(xbot, xtop, (y-y0) / period, math::Interpolation::Cosine);
+            const float xbot = easing::Lerp(samples[0], samples[1], t, easing::Curve::Cosine);
+            const float xtop = easing::Lerp(samples[2], samples[3], t, easing::Curve::Cosine);
+            return easing::Lerp(xbot, xtop, (y-y0) / period, easing::Curve::Cosine);
         }
     private:
         float Random(float x) const

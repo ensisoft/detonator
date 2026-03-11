@@ -21,6 +21,7 @@
 #include <string>
 
 #include "base/math.h"
+#include "base/easing.h"
 #include "audio/format.h"
 #include "audio/loader.h"
 #include "editor/app/workspace.h"
@@ -81,8 +82,8 @@ namespace game {
     std::string TranslateEnum(TextItemClass::HorizontalTextAlign align);
 } // namespace
 
-namespace math {
-    std::string TranslateEnum(Interpolation);
+namespace easing {
+    std::string TranslateEnum(Curve);
 }
 
 namespace gfx {

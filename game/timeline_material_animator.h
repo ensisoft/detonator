@@ -20,6 +20,7 @@
 
 #include <variant>
 
+#include "base/easing.h"
 #include "game/color.h"
 #include "game/types.h"
 #include "game/timeline_animator_base.h"
@@ -31,7 +32,7 @@ namespace game
     class MaterialAnimatorClass : public detail::AnimatorClassBase<MaterialAnimatorClass>
     {
     public:
-        using Interpolation = math::Interpolation;
+        using Interpolation = easing::Curve;
         using MaterialParam = std::variant<float, int,
                 std::string,
                 Color4f,
@@ -125,7 +126,7 @@ namespace game
             const auto method = mClass->GetInterpolation();
             ASSERT(std::holds_alternative<T>(end));
             ASSERT(std::holds_alternative<T>(start));
-            return math::interpolate(std::get<T>(start), std::get<T>(end), t, method);
+            return easing::Lerp(std::get<T>(start), std::get<T>(end), t, method);
         }
     private:
         std::shared_ptr<const MaterialAnimatorClass> mClass;

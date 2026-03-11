@@ -43,25 +43,28 @@ CurveWidget::CurveWidget(QWidget* parent)
   : QFrame(parent)
 {}
 
-int CurveWidget::GetInterpolation() const noexcept
+int CurveWidget::GetCurve() const noexcept
 {
     if (mFunction)
     {
-        if (auto* ptr = dynamic_cast<MathInterpolationFunction*>(mFunction.get()))
-            return static_cast<int>(ptr->GetInterpolation());
+        if (auto* ptr = dynamic_cast<EasingFunction*>(mFunction.get()))
+            return static_cast<int>(ptr->GetCurve());
     }
     return -1;
 }
-void CurveWidget::SetInterpolation(int method)
+void CurveWidget::SetCurve(int curve)
 {
-    if (method == -1)
+    if (curve == -1)
+    {
         ClearFunction();
-    SetFunction(static_cast<math::Interpolation>(method));
+        return;
+    }
+    SetFunction(static_cast<easing::Curve>(curve));
 }
 
-void CurveWidget::SetFunction(math::Interpolation method)
+void CurveWidget::SetFunction(easing::Curve curve)
 {
-    mFunction = std::make_unique<MathInterpolationFunction>(method);
+    mFunction = std::make_unique<EasingFunction>(curve);
     update();
 }
 

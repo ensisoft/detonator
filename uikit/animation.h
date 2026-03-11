@@ -22,9 +22,12 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <memory>
 #include <unordered_map>
 
 #include "base/math.h"
+#include "base/easing.h"
+#include "uikit/widget.h"
 #include "uikit/types.h"
 
 namespace uik
@@ -61,7 +64,7 @@ namespace uik
         enum class State {
             Active, Inactive
         };
-        using Interp = math::Interpolation;
+        using Interp = easing::Curve;
 
         // note that float values are handled in style property.
         using ActionValue = std::variant<std::monostate, StyleProperty, FSize, FPoint, bool>;
@@ -167,7 +170,7 @@ namespace uik
 
     private:
         Trigger mTrigger = Trigger::Open;
-        Interp mInterpolation = math::Interpolation::Linear;
+        Interp mInterpolation = easing::Curve::Linear;
         double   mDuration = 1.0f;
         double   mDelay    = 0.0f;
         double   mIdleFor  = 0.0f;

@@ -28,6 +28,7 @@
 #include <map>
 
 #include "base/assert.h"
+#include "base/easing.h"
 #include "base/logging.h"
 #include "base/color4f.h"
 #include "base/format.h"
@@ -497,12 +498,12 @@ void InitLuaDoc()
                    "float|int", "min", "float|int", "max", "float|int", "value");
 
     DOC_TABLE("easing");
-    DOC_METHOD_2("float", "adjust", "Adjust the value of t based on the easing curve.",
+    DOC_METHOD_2("float", "ease", "Adjust the value of t based on the easing curve.",
                                     "float", "t", "easing.Curves", "curve");
-    DOC_METHOD_2("float", "adjust", "Adjust the value of t based on the easing curve.",
+    DOC_METHOD_2("float", "ease", "Adjust the value of t based on the easing curve.",
                  "float", "t", "string", "curve");
     DOC_TABLE("easing.Curves");
-    for (const auto& value : magic_enum::enum_values<math::Interpolation>())
+    for (const auto& value : magic_enum::enum_values<easing::Curve>())
     {
         const std::string name(magic_enum::enum_name(value));
         DOC_TABLE_PROPERTY("int", QString::fromStdString(name), app::toString("Easing curve value for '%1'.", name));
@@ -2305,7 +2306,7 @@ void InitLuaDoc()
                                              "float", "min", "float", "max");
     DOC_FUNCTION_3("...", "lerp", "Linearly interpolate between two values y0 and y1.",
                    "...", "y0", "...", "y1", "float", "t");
-    DOC_FUNCTION_4("...", "interpolate", "Interpolate between two values y0 and y1 with an easing curve to adjust t.",
+    DOC_FUNCTION_4("...", "ease", "Interpolate/ease between two values y0 and y1 with an easing curve to adjust t.",
                    "...", "y0", "...", "y1", "float", "t", "easing.Curves", "curve");
 
     DOC_TABLE2("Camera", "Camera (and viewport) handling routines. The camera can be used to manipulate and change the viewport (FRect) over time "

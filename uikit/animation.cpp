@@ -408,7 +408,7 @@ bool Animation::Parse(std::deque<std::string>& lines)
         }
         else if (directive == "interpolation")
         {
-            math::Interpolation interpolation = math::Interpolation::Linear;
+            auto interpolation = easing::Curve::Linear;
             if (const auto* ptr = ToEnum(argument, &interpolation))
                 mInterpolation = *ptr;
             else WARN("Failed to parse UI widget animation value 'interpolation'.");
@@ -538,7 +538,7 @@ void Animation::Update(double game_time, float dt)
     // apply interpolation state update
     const float t = math::clamp(0.0, mDuration, mTime) / mDuration;
 
-    const float key_frame_t = math::interpolate(t, mInterpolation);
+    const float key_frame_t = easing::Ease(t, mInterpolation);
 
     for (auto& key_frame_state : mKeyFrameState)
     {
@@ -594,22 +594,22 @@ void Animation::Update(double game_time, float dt)
 
             if (std::holds_alternative<FSize>(beg) && std::holds_alternative<FSize>(end))
             {
-                auto size = math::interpolate(std::get<FSize>(beg), std::get<FSize>(end), segment_t,
-                                              math::Interpolation::Linear);
+                auto size = easing::Lerp(std::get<FSize>(beg), std::get<FSize>(end), segment_t,
+                                              easing::Curve::Linear);
                 if (key == "size")
                     mWidget->SetSize(size);
             }
             else if (std::holds_alternative<FPoint>(beg) && std::holds_alternative<FPoint>(end))
             {
-                auto pos = math::interpolate(std::get<FPoint>(beg), std::get<FPoint>(end), segment_t,
-                                             math::Interpolation::Linear);
+                auto pos = easing::Lerp(std::get<FPoint>(beg), std::get<FPoint>(end), segment_t,
+                                             easing::Curve::Linear);
                 if (key == "position")
                     mWidget->SetPosition(pos);
             }
             else if (std::holds_alternative<uik::Color4f>(beg) && std::holds_alternative<uik::Color4f>(end))
             {
-                auto color = math::interpolate(std::get<uik::Color4f>(beg), std::get<uik::Color4f>(end), segment_t,
-                                               math::Interpolation::Linear);
+                auto color = easing::Lerp(std::get<uik::Color4f>(beg), std::get<uik::Color4f>(end), segment_t,
+                                               easing::Curve::Linear);
 
                 // a hack exists in the engine's UI styling system to support defining color
                 // values through properties (instead of materials) for the simple cases.
@@ -628,7 +628,7 @@ void Animation::Update(double game_time, float dt)
 
             const auto start_value = std::get<uik::FSize>(action.start);
             const auto end_value = std::get<uik::FSize>(action.end);
-            const auto value = math::interpolate(start_value, end_value, t, mInterpolation);
+            const auto value = easing::Lerp(start_value, end_value, t, mInterpolation);
             mWidget->SetSize(value);
         }
         else if (action.type == Animation::Action::Type::Move || action.type == Animation::Action::Type::Translate)
@@ -638,7 +638,7 @@ void Animation::Update(double game_time, float dt)
 
             const auto start_value = std::get<uik::FPoint>(action.start);
             const auto end_value = std::get<uik::FPoint>(action.end);
-            const auto value = math::interpolate(start_value, end_value, t, mInterpolation);
+            const auto value = easing::Lerp(start_value, end_value, t, mInterpolation);
             mWidget->SetPosition(value);
         } else BUG("Unhandled widget animation action.");
     }

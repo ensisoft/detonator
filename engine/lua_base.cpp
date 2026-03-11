@@ -22,6 +22,7 @@
 
 #include "engine/lua.h"
 #include "base/math.h"
+#include "base/easing.h"
 #include "base/logging.h"
 #include "base/trace.h"
 #include "game/types.h"
@@ -71,24 +72,27 @@ void BindBase(sol::state& L)
         });
 
     auto easing = L.create_named_table("easing");
-    for (const auto& value : magic_enum::enum_values<math::Interpolation>())
+    for (const auto& value : magic_enum::enum_values<easing::Curve>())
     {
         const std::string name(magic_enum::enum_name(value));
         easing[sol::create_if_nil]["Curves"][name] = magic_enum::enum_integer(value);
     }
-    easing["adjust"] = sol::overload(
+    easing["ease"] = sol::overload(
       [](float t, const std::string& method) {
-          const auto value = magic_enum::enum_cast<math::Interpolation>(method);
-          if (!value.has_value())
+          const auto curve = magic_enum::enum_cast<easing::Curve>(method);
+          if (!curve.has_value())
               throw GameError("No such easing curve: " + method);
-          return math::interpolate(t, value.value());
+          return easing::Ease(t, curve.value());
       },
       [](float t, int method) {
-          const auto value = magic_enum::enum_cast<math::Interpolation>(method);
-          if (!value.has_value())
+          const auto curve = magic_enum::enum_cast<easing::Curve>(method);
+          if (!curve.has_value())
               throw GameError("No such easing curve: " + std::to_string(method));
-          return math::interpolate(t, value.value());
+          return easing::Ease(t, curve.value());
       });
+    // we don't add the lerp here because the combinations of
+    // various types for interpolant and curve would cause a Cambrian
+    // explosion in the API surface.
 
     auto trace = L.create_named_table("trace");
     trace["marker"] = sol::overload(

@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
 #include "base/utility.h"
 #include "base/hash.h"
 #include "base/logging.h"
@@ -694,11 +696,11 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
     }
     else if (param == PropertyName::TextItem_Text)
     {
-        if (method == math::Interpolation::StepStart)
+        if (method == easing::Curve::StepStart)
             text->SetText(std::get<std::string>(mClass->GetEndValue()));
-        else if (method == math::Interpolation::Step && t >= 0.5f)
+        else if (method == easing::Curve::Step && t >= 0.5f)
             text->SetText(std::get<std::string>(mClass->GetEndValue()));
-        else if (method == math::Interpolation::StepEnd && t >= 1.0f)
+        else if (method == easing::Curve::StepEnd && t >= 1.0f)
             text->SetText(std::get<std::string>(mClass->GetEndValue()));
         else if (t >= 1.0f)
             text->SetText(std::get<std::string>(mClass->GetEndValue()));
@@ -804,9 +806,9 @@ bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
         if (text)
         {
             const auto interpolation = mClass->GetInterpolation();
-            const auto step_change = interpolation == math::Interpolation::Step ||
-                                     interpolation == math::Interpolation::StepEnd ||
-                                     interpolation == math::Interpolation::StepStart;
+            const auto step_change = interpolation == easing::Curve::Step ||
+                                     interpolation == easing::Curve::StepEnd ||
+                                     interpolation == easing::Curve::StepStart;
             if (!step_change && verbose && param == PropertyName ::TextItem_Text)
             {
                 WARN("Property animator can't apply interpolation on text. [animator='%1', node='%2', interpolation=%3]",

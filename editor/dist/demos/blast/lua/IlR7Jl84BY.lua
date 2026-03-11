@@ -133,7 +133,7 @@ end
 
 function ElasticCircleMotion(demo, game_time, dt)
     local t = math.fmod(game_time, 20.0) / 20.0
-    t = easing.adjust(t, easing.Curves.Acceleration)
+    t = easing.ease(t, easing.Curves.Acceleration)
 
     local x = math.sin(t * math.pi * 2.0)
     dt = dt * x

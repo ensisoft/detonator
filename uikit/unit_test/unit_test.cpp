@@ -1207,7 +1207,7 @@ del prop foo
             const auto& animation = animations[0];
             TEST_REQUIRE(animation.GetDelay()         == 1.0f);
             TEST_REQUIRE(animation.GetDuration()      == 2.0f);
-            TEST_REQUIRE(animation.GetInterpolation() == math::Interpolation::Cosine);
+            TEST_REQUIRE(animation.GetInterpolation() == uik::Animation::Interp::Cosine);
             TEST_REQUIRE(animation.GetTrigger()       == uik::Animation::Trigger::Click);
             TEST_REQUIRE(animation.GetLoops()         == 5);
             TEST_REQUIRE(animation.GetActionCount()   == 2);
@@ -1222,7 +1222,7 @@ del prop foo
             TEST_REQUIRE(animation.GetLoops()         == 1);
             TEST_REQUIRE(animation.GetDelay()         == 0.0f);
             TEST_REQUIRE(animation.GetDuration()      == 1.0f);
-            TEST_REQUIRE(animation.GetInterpolation() == math::Interpolation::Linear);
+            TEST_REQUIRE(animation.GetInterpolation() == uik::Animation::Interp::Linear);
             TEST_REQUIRE(animation.GetActionCount()   == 6);
             TEST_REQUIRE(animation.GetAction(0).type  == uik::Animation::Action::Type::Move);
             TEST_REQUIRE(animation.GetAction(1).type  == uik::Animation::Action::Type::SetProp);
