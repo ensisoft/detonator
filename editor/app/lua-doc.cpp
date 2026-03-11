@@ -40,6 +40,42 @@
 #include "wdk/keys.h"
 
 namespace {
+
+const char* DescribeCurve(easing::Curve curve) noexcept
+{
+    switch (curve)
+    {
+        case easing::Curve::StepStart:          return "No interpolation, a discrete jump from y0 to y1 when t > 0.0";
+        case easing::Curve::Step:               return "No interpolation, a discrete jump from y0 to y1 when t is >= 0.5.";
+        case easing::Curve::StepEnd:            return "No interpolation, a discrete jump from y0 to y1 when t is >= 1.0";
+        case easing::Curve::Linear:             return "Linear interpolation also known as 'lerp'. Take a linear mix of y0 and y1 in exact proportions per t.";
+        case easing::Curve::Cosine:             return "Use cosine function to smooth t before doing linear interpolation.";
+        case easing::Curve::SmoothStep:         return "Use a polynomial function to smooth t before doing linear interpolation.";
+        case easing::Curve::Acceleration:       return "Accelerate increase in y1 value when t approaches 1.0";
+        case easing::Curve::Deceleration:       return "Decelerate increase in y1 value when t approaches 1.0";
+        case easing::Curve::EaseInSine:         return "Gentle ease in using a sine curve. Starts slow, finishes at full speed.";
+        case easing::Curve::EaseOutSine:        return "Gentle ease out using a sine curve. Starts at full speed, finishes slow.";
+        case easing::Curve::EaseInOutSine:      return "Gentle ease in-out using a sine curve. Slow at both ends, fastest in the middle.";
+        case easing::Curve::EaseInQuadratic:    return "Ease in using a quadratic (t^2) curve. Starts slow, accelerates.";
+        case easing::Curve::EaseOutQuadratic:   return "Ease out using a quadratic curve. Decelerates into the end value.";
+        case easing::Curve::EaseInOutQuadratic: return "Ease in-out using a quadratic curve. Slow at both ends, faster than sine in the middle.";
+        case easing::Curve::EaseInCubic:        return "Ease in using a cubic (t^3) curve. Stronger acceleration than quadratic.";
+        case easing::Curve::EaseOutCubic:       return "Ease out using a cubic curve. Stronger deceleration than quadratic.";
+        case easing::Curve::EaseInOutCubic:     return "Ease in-out using a cubic curve. More pronounced slow/fast contrast than quadratic.";
+        case easing::Curve::EaseInBack:         return "Ease in with a brief backward pull before accelerating forward (anticipation).";
+        case easing::Curve::EaseOutBack:        return "Ease out with a slight overshoot past the target before settling (follow-through).";
+        case easing::Curve::EaseInOutBack:      return "Ease in-out with backward pull at the start and overshoot at the end.";
+        case easing::Curve::EaseInElastic:      return "Spring-like oscillation at the beginning before moving toward the target.";
+        case easing::Curve::EaseOutElastic:     return "Spring-like oscillation around the target value at the end.";
+        case easing::Curve::EaseInOutElastic:   return "Spring-like oscillation at both the start and end of the transition.";
+        case easing::Curve::EaseInBounce:       return "Bouncing motion at the start, as if the value bounces off the origin.";
+        case easing::Curve::EaseOutBounce:      return "Bouncing motion at the end, like a ball landing and bouncing to rest.";
+        case easing::Curve::EaseInOutBounce:    return "Bouncing motion at both the start and end of the transition.";
+    }
+    BUG("No such easing curve");
+    return "";
+}
+
 using namespace app;
 QString table_name;
 std::vector<LuaMemberDoc> g_method_docs;
@@ -506,7 +542,7 @@ void InitLuaDoc()
     for (const auto& value : magic_enum::enum_values<easing::Curve>())
     {
         const std::string name(magic_enum::enum_name(value));
-        DOC_TABLE_PROPERTY("int", QString::fromStdString(name), app::toString("Easing curve value for '%1'.", name));
+        DOC_TABLE_PROPERTY("int", QString::fromStdString(name), DescribeCurve(value));
     }
 
     DOC_TABLE("trace");
