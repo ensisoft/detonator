@@ -836,10 +836,10 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             packet.transform    = from_map_to_scene;
             packet.map_row      = batch.row;
             packet.map_col      = batch.col;
-            packet.map_sort_key = batch.sort_key;
             packet.map_layer    = batch.layer_index;
             packet.render_layer = batch.render_layer;
             packet.packet_index = 0;
+            packet.map_occlusion_sort_key = batch.occlusion_sort_key;
             packets.push_back(std::move(packet));
         }
         else if (batch.type == TileBatch::Type::Data && mEditingMode)
@@ -860,10 +860,10 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             packet.transform    = glm::mat4(1.0f);
             packet.map_row      = batch.row;
             packet.map_col      = batch.col;
-            packet.map_sort_key = batch.sort_key;
             packet.map_layer    = batch.layer_index;
             packet.render_layer = batch.render_layer;
             packet.packet_index = 0;
+            packet.map_occlusion_sort_key = batch.occlusion_sort_key;
             packets.push_back(std::move(packet));
         } else BUG("Unhandled tile batch type.");
     }
@@ -1558,12 +1558,12 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
     {
         auto map_sort_point  = glm::vec2 {0.5f, 1.0f};
         auto map_layer       = uint16_t(0);
-        auto map_sort_key    = static_cast<uint8_t>(game::TileOcclusion::None);
+        auto map_occlusion_sort_key = static_cast<uint8_t>(game::TileOcclusion::None);
         if (const auto* map = entity_node.GetMapNode())
         {
             map_sort_point = map->GetSortPoint();
             map_layer      = map->GetMapLayer();
-            map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
+            map_occlusion_sort_key  = static_cast<uint8_t>(map->GetTileOcclusion());
         }
 
         {
@@ -1649,11 +1649,11 @@ void Renderer::CreateDrawableDrawPackets(const EntityType& entity,
         packet.transform        = transform;
         packet.sort_point       = map_sort_point;
         packet.map_layer        = map_layer;
-        packet.map_sort_key     = map_sort_key;
         packet.render_layer     = entity.GetRenderLayer();
         packet.pass             = drawable->GetRenderPass();
         packet.packet_index     = drawable->GetLayer();
         packet.coordinate_space = drawable->GetCoordinateSpace();
+        packet.map_occlusion_sort_key = map_occlusion_sort_key;
 
         if (projection == SceneProjection::AxisAlignedPerspective)
             packet.projection = DrawPacket::Projection::Perspective;
@@ -1729,12 +1729,12 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
         {
             auto map_sort_point = glm::vec2 {0.5f, 1.0f};
             auto map_layer      = uint16_t(0);
-            auto map_sort_key   = static_cast<uint8_t>(game::TileOcclusion::None);
+            auto map_occlusion_sort_key = static_cast<uint8_t>(game::TileOcclusion::None);
             if (const auto* map = entity_node.GetMapNode())
             {
                 map_sort_point = map->GetSortPoint();
                 map_layer      = map->GetMapLayer();
-                map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
+                map_occlusion_sort_key = static_cast<uint8_t>(map->GetTileOcclusion());
             }
 
             {
@@ -1777,10 +1777,10 @@ void Renderer::CreateTextDrawPackets(const EntityType& entity,
             packet.transform        = transform;
             packet.sort_point       = map_sort_point;
             packet.map_layer        = map_layer;
-            packet.map_sort_key     = map_sort_key;
             packet.packet_index     = text->GetLayer();
             packet.render_layer     = entity.GetRenderLayer();
             packet.coordinate_space = text->GetCoordinateSpace();
+            packet.map_occlusion_sort_key = map_occlusion_sort_key;
 
             if (text->TestFlag(TextItemClass::Flags::DepthTest))
                 packet.depth_test = DrawPacket::DepthTest::LessOrEQual;
@@ -1843,12 +1843,12 @@ void Renderer::CreateLights(const EntityType& entity,
 
     auto map_sort_point = glm::vec2 {0.5f, 1.0f};
     auto map_layer      = std::uint16_t(0);
-    auto map_sort_key   = static_cast<uint8_t>(game::TileOcclusion::None);
+    auto map_occlusion_sort_key = static_cast<uint8_t>(game::TileOcclusion::None);
     if (const auto* map = entity_node.GetMapNode())
     {
         map_sort_point = map->GetSortPoint();
         map_layer      = map->GetMapLayer();
-        map_sort_key   = static_cast<uint8_t>(map->GetTileOcclusion());
+        map_occlusion_sort_key = static_cast<uint8_t>(map->GetTileOcclusion());
     }
 
     {
@@ -1972,7 +1972,7 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
                 batches.emplace_back();
                 auto& batch = batches.back();
                 batch.material     = GetTileMaterial(map, layer_index, palette_index);
-                batch.sort_key     = static_cast<uint8_t>(klass.GetPaletteOcclusion(palette_index));
+                batch.occlusion_sort_key = static_cast<uint8_t>(klass.GetPaletteOcclusion(palette_index));
                 batch.layer_index  = klass.GetLayer();
                 batch.depth        = klass.GetDepth();
                 batch.render_layer = map.GetRenderLayer();
@@ -2092,9 +2092,9 @@ void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
                     return true;
                 else if (lhs.map_col == rhs.map_col)
                 {
-                    if (lhs.map_sort_key < rhs.map_sort_key)
+                    if (lhs.map_occlusion_sort_key < rhs.map_occlusion_sort_key)
                         return true;
-                    else if (lhs.map_sort_key == rhs.map_sort_key)
+                    else if (lhs.map_occlusion_sort_key == rhs.map_occlusion_sort_key)
                     {
                         if (static_cast<int>(lhs.source) < static_cast<int>(rhs.source))
                             return true;

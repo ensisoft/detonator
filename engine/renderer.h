@@ -247,7 +247,7 @@ namespace engine
             std::shared_ptr<const gfx::Material> material;
             // the index of the layer in the map
             std::uint8_t padding_;
-            std::uint8_t sort_key = 0;
+            std::uint8_t occlusion_sort_key = 0;
             std::uint16_t layer_index = 0;
             std::int16_t render_layer = 0;
             std::int16_t depth  = 0;
