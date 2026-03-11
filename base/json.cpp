@@ -293,6 +293,20 @@ bool JsonReadSafe(const nlohmann::json& json, const char* name, Rotator* rotator
     return false;
 }
 
+bool JsonReadSafe(const nlohmann::json& json, const char* name, std::vector<std::string>* out)
+{
+    if (!json.contains(name) || !json[name].is_array())
+        return false;
+    const auto& array = json[name];
+    for (const auto& item : array)
+    {
+        if (!item.is_string())
+            return false;
+        out->push_back(item);
+    }
+    return true;
+}
+
 bool JsonReadSafe(const nlohmann::json& json, const char* name, FVector2D* out)
 {
     if (!json.contains(name) || !json[name].is_object())
@@ -524,6 +538,14 @@ void JsonWrite(nlohmann::json& json, const char* name, const FVector2D& vec)
     JsonWrite(object, "x", vec.x);
     JsonWrite(object, "y", vec.y);
     json[name] = std::move(object);
+}
+
+void JsonWrite(nlohmann::json& json, const char* name, const std::vector<std::string>& value)
+{
+    nlohmann::json array = nlohmann::json::array();
+    for (const auto& str : value)
+        array.push_back(str);
+    json[name] = std::move(array);
 }
 
 void JsonWrite(nlohmann::json& json, const char* name, const nlohmann::json& js)
