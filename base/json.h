@@ -30,6 +30,7 @@
 #include <type_traits>
 #include <variant>
 #include <memory>
+#include <vector>
 
 #include "base/bitflag.h"
 #include "base/types.h"
@@ -97,6 +98,7 @@ bool JsonReadSafe(const nlohmann::json& json, const char* name, FSize* point);
 bool JsonReadSafe(const nlohmann::json& json, const char* name, Color4f* color);
 bool JsonReadSafe(const nlohmann::json& json, const char* name, Rotator* rotator);
 bool JsonReadSafe(const nlohmann::json& json, const char* name, FVector2D* vector);
+bool JsonReadSafe(const nlohmann::json& json, const char* name, std::vector<std::string>* out);
 
 void JsonWrite(nlohmann::json& object, const char* name, int value);
 void JsonWrite(nlohmann::json& object, const char* name, unsigned value);
@@ -116,7 +118,7 @@ void JsonWrite(nlohmann::json& json, const char* name, const FSize& point);
 void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color);
 void JsonWrite(nlohmann::json& json, const char* name, const Rotator& rotator);
 void JsonWrite(nlohmann::json& json, const char* name, const FVector2D& vector);
-
+void JsonWrite(nlohmann::json& json, const char* name, const std::vector<std::string>& value);
 
 template<typename... Types>
 void JsonWrite(nlohmann::json& json, const char* name, const std::variant<Types...>& variant)
