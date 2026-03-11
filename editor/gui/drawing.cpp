@@ -27,6 +27,7 @@
 #include <cstdio>
 
 #include "base/assert.h"
+#include "base/easing.h"
 #include "base/math.h"
 #include "base/logging.h"
 #include "engine/camera.h"
@@ -938,8 +939,8 @@ void ShowInstruction(const app::AnyString& msg, const Rect2Df& rect, gfx::Painte
 {
     const auto seconds = base::GetTime(); // seconds
     const auto t = std::sin(seconds * 2) * 0.5 + 0.5;
-    const auto color = math::interpolate(gfx::Color4f(gfx::Color::Silver),
-        gfx::Color4f(gfx::Color::HotPink), t, math::Interpolation::Linear);
+    const auto color = easing::Lerp(gfx::Color4f(gfx::Color::Silver),
+        gfx::Color4f(gfx::Color::HotPink), t, easing::Curve::Linear);
     gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px,
                       rect,
                       color,

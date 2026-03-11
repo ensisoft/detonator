@@ -30,6 +30,7 @@
 #include <tuple>
 #include <cmath>
 
+#include "base/easing.h"
 #include "base/math.h"
 #include "base/utility.h"
 #include "game/enum.h"
@@ -102,10 +103,10 @@ namespace gui
             const auto time = base::GetTime();
             const auto time_diff = time - mViewTransformStartTime;
             const auto view_transform_time = math::clamp(0.0, 1.0, time_diff);
-            const auto view_rotation_angle = math::interpolate(mViewTransformRotationStart, mViewTransformRotationStop,
-                                                               view_transform_time, math::Interpolation::Cosine);
-            const auto view_translation = math::interpolate(mViewTransformTranslateStart, mViewTransformTranslateStop,
-                                                            view_transform_time, math::Interpolation::Cosine);
+            const auto view_rotation_angle = easing::Lerp(mViewTransformRotationStart, mViewTransformRotationStop,
+                                                               view_transform_time, easing::Curve::Cosine);
+            const auto view_translation = easing::Lerp(mViewTransformTranslateStart, mViewTransformTranslateStop,
+                                                            view_transform_time, easing::Curve::Cosine);
 
             state.camera_offset_x = view_translation.x;
             state.camera_offset_y = view_translation.y;

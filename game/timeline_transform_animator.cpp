@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/hash.h"
@@ -120,25 +122,25 @@ void TransformAnimator::Apply(EntityNode& node, float t)
 
     if (bits.test(Transformations::Translate))
     {
-        const auto& p = math::interpolate(mStartPosition, inst.end_position, t, method);
+        const auto& p = easing::Lerp(mStartPosition, inst.end_position, t, method);
         node.SetTranslation(p);
     }
 
     if (bits.test(Transformations::Resize))
     {
-        const auto& s = math::interpolate(mStartSize, inst.end_size, t, method);
+        const auto& s = easing::Lerp(mStartSize, inst.end_size, t, method);
         node.SetSize(s);
     }
 
     if (bits.test(Transformations::Rotate))
     {
-        const auto& r = math::interpolate(mStartRotation, inst.end_rotation, t, method);
+        const auto& r = easing::Lerp(mStartRotation, inst.end_rotation, t, method);
         node.SetRotation(r);
     }
 
     if (bits.test(Transformations::Scale))
     {
-        const auto& f = math::interpolate(mStartScale, inst.end_scale, t, method);
+        const auto& f = easing::Lerp(mStartScale, inst.end_scale, t, method);
         node.SetScale(f);
     }
 

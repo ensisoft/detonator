@@ -22,6 +22,7 @@
 #  include <glm/vec2.hpp>
 #include "warnpop.h"
 
+#include "base/easing.h"
 #include "game/timeline_animator_base.h"
 
 #include "base/snafu.h"
@@ -39,7 +40,7 @@ namespace game
             LinearMover
         };
         // The interpolation method.
-        using Interpolation = math::Interpolation;
+        using Interpolation = easing::Curve;
 
         inline Target GetTarget() const noexcept
         { return mTarget; }

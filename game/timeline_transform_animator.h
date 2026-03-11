@@ -23,6 +23,7 @@
 #include "warnpop.h"
 
 #include "base/bitflag.h"
+#include "base/easing.h"
 #include "game/timeline_animator_base.h"
 
 #include "base/snafu.h"
@@ -39,7 +40,7 @@ namespace game
         };
 
         // The interpolation method.
-        using Interpolation = math::Interpolation;
+        using Interpolation = easing::Curve;
 
         TransformAnimatorClass();
 

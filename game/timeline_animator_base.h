@@ -20,7 +20,6 @@
 
 #include "base/bitflag.h"
 #include "base/utility.h"
-#include "base/math.h"
 #include "game/timeline_animator.h"
 
 namespace game::detail

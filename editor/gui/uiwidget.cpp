@@ -33,6 +33,7 @@
 #include <cmath>
 
 #include "base/assert.h"
+#include "base/easing.h"
 #include "base/format.h"
 #include "base/utility.h"
 #include "data/json.h"
@@ -2316,8 +2317,8 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
     SetValue(mUI.widgetColor, mUI.viewport->GetCurrentClearColor());
 
     const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
-    const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
-        view_rotation_time, math::Interpolation::Cosine);
+    const auto view_rotation_angle = easing::Lerp(mViewTransformRotation, (float)mUI.rotation->value(),
+        view_rotation_time, easing::Curve::Cosine);
 
     gfx::Transform view;
     view.Scale(xs, ys);

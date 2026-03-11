@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "config.h"
+
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/hash.h"
@@ -125,9 +127,9 @@ void KinematicAnimator::Apply(EntityNode& node, float t)
         if (auto* body = node.GetRigidBody())
         {
             const auto method = mClass->GetInterpolation();
-            const auto linear_velocity = math::interpolate(mStartLinearVelocity,
+            const auto linear_velocity = easing::Lerp(mStartLinearVelocity,
                                                            mClass->GetEndLinearVelocity(), t, method);
-            const auto angular_velocity = math::interpolate(mStartAngularVelocity,
+            const auto angular_velocity = easing::Lerp(mStartAngularVelocity,
                                                             mClass->GetEndAngularVelocity(), t, method);
             // don't set any adjustment on the rigid body if we still have a
             // pending  adjustment. currently this causes a warning which is
@@ -149,13 +151,13 @@ void KinematicAnimator::Apply(EntityNode& node, float t)
         if (auto* mover = node.GetLinearMover())
         {
             const auto method = mClass->GetInterpolation();
-            const auto linear_velocity = math::interpolate(mStartLinearVelocity,
+            const auto linear_velocity = easing::Lerp(mStartLinearVelocity,
                                                            mClass->GetEndLinearVelocity(), t, method);
-            const auto linear_acceleration = math::interpolate(mStartLinearAcceleration,
+            const auto linear_acceleration = easing::Lerp(mStartLinearAcceleration,
                                                                mClass->GetEndLinearAcceleration(), t, method);
-            const auto angular_velocity = math::interpolate(mStartAngularVelocity,
+            const auto angular_velocity = easing::Lerp(mStartAngularVelocity,
                                                             mClass->GetEndAngularVelocity(), t, method);
-            const auto angular_acceleration = math::interpolate(mStartAngularAcceleration,
+            const auto angular_acceleration = easing::Lerp(mStartAngularAcceleration,
                                                                 mClass->GetEndAngularAcceleration(), t, method);
 
             mover->SetLinearVelocity(linear_velocity);

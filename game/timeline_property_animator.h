@@ -21,6 +21,7 @@
 #include <variant>
 #include <string>
 
+#include "base/easing.h"
 #include "game/color.h"
 #include "game/timeline_animator_base.h"
 
@@ -78,7 +79,7 @@ namespace game
                 std::string, glm::vec2, glm::vec3, Color4f>;
 
         // The interpolation method.
-        using Interpolation = math::Interpolation;
+        using Interpolation = easing::Curve;
 
         Interpolation GetInterpolation() const
         { return mInterpolation; }
@@ -212,7 +213,7 @@ namespace game
     public:
         using PropertyName  = PropertyAnimatorClass::PropertyName;
         using PropertyValue = PropertyAnimatorClass::PropertyValue;
-        using Inteprolation = PropertyAnimatorClass::Interpolation;
+        using Interpolation = PropertyAnimatorClass::Interpolation;
         explicit PropertyAnimator(std::shared_ptr<const PropertyAnimatorClass> klass) noexcept
            : mClass(std::move(klass))
         {}
@@ -254,7 +255,7 @@ namespace game
 
             ASSERT(std::holds_alternative<T>(end));
             ASSERT(std::holds_alternative<T>(start));
-            return math::interpolate(std::get<T>(start), std::get<T>(end), t, method);
+            return easing::Lerp(std::get<T>(start), std::get<T>(end), t, method);
         }
         Color4f Interpolate(float t, bool interpolate) const
         {
@@ -266,7 +267,7 @@ namespace game
 
             ASSERT(std::holds_alternative<Color4f>(end));
             ASSERT(std::holds_alternative<Color4f>(start));
-            auto ret = math::interpolate(sRGB_Decode(std::get<Color4f>(start)),
+            auto ret = easing::Lerp(sRGB_Decode(std::get<Color4f>(start)),
                                          sRGB_Decode(std::get<Color4f>(end)), t, method);
             return sRGB_Encode(ret);
         }

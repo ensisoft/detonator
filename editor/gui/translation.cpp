@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "base/assert.h"
-#include "editor/gui/translation.h"
+#include "config.h"
 
+#include "base/assert.h"
 #include "graphics/texture_source.h"
+#include "editor/gui/translation.h"
 
 namespace app
 {
@@ -434,11 +435,11 @@ std::string TranslateEnum(TextItemClass::HorizontalTextAlign align)
 
 } // namespace
 
-namespace math
+namespace easing
 {
-std::string TranslateEnum(Interpolation i)
+std::string TranslateEnum(Curve i)
 {
-    using I = Interpolation;
+    using I = Curve;
 
     if (i == I::StepStart)
         return "Step at Start";

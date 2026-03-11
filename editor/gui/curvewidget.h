@@ -31,11 +31,12 @@
 #include <memory>
 
 #include "base/math.h"
+#include "base/easing.h"
 #include "base/format.h"
 
-namespace math {
+namespace easing {
     Q_NAMESPACE
-    Q_ENUM_NS(Interpolation)
+    Q_ENUM_NS(Curve)
 }
 
 namespace gui
@@ -43,7 +44,7 @@ namespace gui
     class DESIGNER_PLUGIN_EXPORT CurveWidget : public QFrame
     {
         Q_OBJECT
-        Q_PROPERTY(int method READ GetInterpolation WRITE SetInterpolation DESIGNABLE true)
+        Q_PROPERTY(int method READ GetCurve WRITE SetCurve DESIGNABLE true)
 
     public:
         class Function {
@@ -57,38 +58,38 @@ namespace gui
 
         explicit CurveWidget(QWidget* parent);
 
-        int GetInterpolation() const noexcept;
-        void SetInterpolation(int);
+        int GetCurve() const noexcept;
+        void SetCurve(int);
 
-        void SetFunction(math::Interpolation);
+        void SetFunction(easing::Curve);
 
-        inline void ClearFunction() noexcept
+        void ClearFunction() noexcept
         { mFunction.reset(); }
-        inline void SetFunction(std::unique_ptr<Function> function) noexcept
+        void SetFunction(std::unique_ptr<Function> function) noexcept
         { mFunction = std::move(function); }
     private:
-        virtual void paintEvent(QPaintEvent* paint) override;
+        void paintEvent(QPaintEvent* paint) override;
 
     private:
-        class MathInterpolationFunction : public Function {
+        class EasingFunction : public Function {
         public:
-            explicit MathInterpolationFunction(math::Interpolation method) noexcept
-              : mMethod(method)
+            explicit EasingFunction(easing::Curve curve) noexcept
+              : mCurve(curve)
             {}
-            virtual float SampleFunction(float x) const override
+            float SampleFunction(float x) const override
             {
-                return math::interpolate(x, mMethod);
+                return easing::Ease(x, mCurve);
             }
-            virtual float SampleDerivative(float x) const override
+            float SampleDerivative(float x) const override
             { return 0.0f; }
-            virtual std::string GetName() const override
-            { return base::ToString(mMethod); }
+            std::string GetName() const override
+            { return base::ToString(mCurve); }
 
-            inline math::Interpolation GetInterpolation() const noexcept
-            { return mMethod; }
+            auto GetCurve() const noexcept
+            { return mCurve; }
 
         private:
-            const math::Interpolation mMethod;
+            const easing::Curve mCurve;
         };
         std::unique_ptr<Function> mFunction;
     };
