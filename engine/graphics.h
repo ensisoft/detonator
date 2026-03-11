@@ -107,7 +107,10 @@ namespace engine
         // map layer.
         std::uint16_t map_layer = 0;
 
-        std::uint8_t map_sort_key = 0;
+        // the occlusion sort key to help render objects that
+        // occlude other objects in the right order. The data is provided
+        // by each tilemap palette entry and by entity tilemap node attachment.
+        std::uint8_t map_occlusion_sort_key = 0;
 
         float line_width = 1.0f;
     };
