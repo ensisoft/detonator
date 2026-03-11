@@ -61,6 +61,26 @@ bool ReadColor(const nlohmann::json& json, const std::string& name, gfx::Color4f
     return true;
 }
 
+bool ReadColor(const nlohmann::json& json, const std::string& name,
+    const engine::UIColorPalette& palette,  gfx::Color4f* out)
+{
+    if (ReadColor(json, name, out))
+        return true;
+
+    std::string palette_color_key;
+    if (!base::JsonReadSafe(json, "color", &palette_color_key))
+        return false;
+
+    // see if it's a palette entry by some palette symbolic name
+    // such as "shadow"
+    if (const auto* color = palette.FindColor(palette_color_key))
+    {
+        *out = *color;
+        return true;
+    }
+    return false;
+}
+
 struct PropertyPair {
     std::string key;
     engine::UIProperty::ValueType value;
@@ -105,6 +125,12 @@ bool ParseMaterials(const nlohmann::json& json, std::vector<MaterialPair>& mater
     if (!json.contains("materials"))
         return true;
 
+    engine::UIColorPalette palette;
+    if (!palette.FromJson(json))
+    {
+        WARN("Failed to parse UI color palette from theme file.");
+    }
+
     using namespace engine;
 
     auto success = true;
@@ -140,7 +166,7 @@ bool ParseMaterials(const nlohmann::json& json, std::vector<MaterialPair>& mater
         else if (type == UIMaterial::Type::ClassObject)
             material.reset(new detail::UIMaterialClassObject);
         else BUG("Unhandled material type.");
-        if (!material->FromJson(json))
+        if (!material->FromJson(json, palette))
         {
             success = false;
             WARN("Failed to parse UI material. [key='%1']", key);
@@ -159,6 +185,48 @@ bool ParseMaterials(const nlohmann::json& json, std::vector<MaterialPair>& mater
 
 namespace engine
 {
+
+bool UIColorPalette::HasColor(const std::string& key) const
+{
+    return base::Contains(mPalette, key);
+}
+
+const base::Color4f* UIColorPalette::FindColor(const std::string& key) const
+{
+    if (const auto* ptr = base::SafeFind(mPalette, key))
+        return ptr;
+    return nullptr;
+}
+
+bool UIColorPalette::FromJson(const nlohmann::json& json)
+{
+    if (!json.contains("color-palette"))
+        return true;
+
+    bool ok = true;
+
+    for (const auto& item : json["color-palette"].items())
+    {
+        const auto& json = item.value();
+        base::Color4f color;
+        std::string key;
+        if (!base::JsonReadSafe(json, "key", &key))
+        {
+            WARN("Ignored JSON UI style color palette entry. [key='%1']", key);
+            ok = false;
+            continue;
+        }
+        if (!ReadColor(json, "color", &color))
+        {
+            WARN("Failed to read JSON UI style color palette color value. [key='%1']", key);
+            ok = false;
+            continue;
+        }
+        mPalette["palette." + key] = color;
+    }
+    return ok;
+}
+
 namespace detail {
 
 UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary*, const Loader*) const
@@ -174,13 +242,13 @@ UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary*, const Loader
     material->SetGradientGamma(mGamma);
     return material;
 }
-bool UIGradient::FromJson(const nlohmann::json& json)
+bool UIGradient::FromJson(const nlohmann::json& json, const UIColorPalette& palette)
 {
     bool ok = true;
-    ok &= ReadColor(json, "color0", &mColorMap[0]);
-    ok &= ReadColor(json, "color1", &mColorMap[1]);
-    ok &= ReadColor(json, "color2", &mColorMap[2]);
-    ok &= ReadColor(json, "color3", &mColorMap[3]);
+    ok &= ReadColor(json, "color0", palette, &mColorMap[0]);
+    ok &= ReadColor(json, "color1", palette, &mColorMap[1]);
+    ok &= ReadColor(json, "color2", palette, &mColorMap[2]);
+    ok &= ReadColor(json, "color3", palette, &mColorMap[3]);
     ok &= base::JsonReadSafe(json, "gradient", &mGradient);
     if (!base::JsonReadSafe(json, "gamma", &mGamma))
         mGamma = 2.2f;
@@ -208,9 +276,9 @@ UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary*, const Loader*) 
     return material;
 }
 
-bool UIColor::FromJson(const nlohmann::json& json)
+bool UIColor::FromJson(const nlohmann::json& json, const UIColorPalette& palette)
 {
-    return ReadColor(json, "color", &mColor);
+    return ReadColor(json, "color", palette, &mColor);
 }
 
 void UIColor::IntoJson(nlohmann::json& json) const
@@ -230,7 +298,7 @@ UIMaterial::MaterialClass UIMaterialReference::GetClass(const ClassLibrary* clas
     return klass;
 }
 
-bool UIMaterialReference::FromJson(const nlohmann::json& json)
+bool UIMaterialReference::FromJson(const nlohmann::json& json, const UIColorPalette& palette)
 {
     if (!base::JsonReadSafe(json, "material", &mMaterialId))
         return false;
@@ -321,7 +389,7 @@ UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary*, const Loader*
     return material;
 }
 
-bool UITexture::FromJson(const nlohmann::json& json)
+bool UITexture::FromJson(const nlohmann::json& json, const UIColorPalette& palette)
 {
     base::JsonReadSafe(json, "texture", &mTextureUri);
     base::JsonReadSafe(json, "metafile", &mMetafileUri);
@@ -337,7 +405,7 @@ void UITexture::IntoJson(nlohmann::json& json) const
 }
 
 
-bool UIMaterialClassObject::FromJson(const nlohmann::json& json)
+bool UIMaterialClassObject::FromJson(const nlohmann::json& json, const UIColorPalette& palette)
 {
     std::string class_definition;
     if (!base::JsonReadSafe(json, "class", &class_definition))
@@ -445,7 +513,10 @@ UIStyle::MaterialClass UIStyle::MakeMaterial(const std::string& str) const
         factory.reset(new detail::UITexture);
     else BUG("Unhandled material type.");
 
-    if (!factory->FromJson(json))
+    // not used.
+    UIColorPalette palette;
+
+    if (!factory->FromJson(json, palette))
     {
         WARN("Failed to parse UI style material string.");
         return nullptr;

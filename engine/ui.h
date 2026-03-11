@@ -52,6 +52,17 @@ namespace engine
     class EngineData;
     class Loader;
 
+    class UIColorPalette
+    {
+    public:
+        bool HasColor(const std::string& key) const;
+        const base::Color4f* FindColor(const std::string& key) const;
+
+        bool FromJson(const nlohmann::json& json);
+    private:
+        std::unordered_map<std::string, base::Color4f> mPalette;
+    };
+
     // Interface for abstracting away how UI materials are sourced
     // or created.
     class UIMaterial
@@ -80,7 +91,7 @@ namespace engine
         // Get the type of the UI material.
         virtual Type GetType() const = 0;
         // Load state from JSON. Returns true if successful.
-        virtual bool FromJson(const nlohmann::json& json) = 0;
+        virtual bool FromJson(const nlohmann::json& json, const UIColorPalette& palette) = 0;
         // Save the state into the given JSON object.
         virtual void IntoJson(nlohmann::json& json) const = 0;
         // Returns true if the material can still be resolved to a
@@ -98,13 +109,13 @@ namespace engine
         class UINullMaterial : public UIMaterial
         {
         public:
-            virtual MaterialClass GetClass(const ClassLibrary*, const Loader*) const override
+            MaterialClass GetClass(const ClassLibrary*, const Loader*) const override
             { return nullptr; }
-            virtual Type GetType() const override
+            Type GetType() const override
             { return Type::Null; }
-            virtual bool FromJson(const nlohmann::json&) override
+            bool FromJson(const nlohmann::json&, const UIColorPalette& palette) override
             { return true; }
-            virtual void IntoJson(nlohmann::json&) const override
+            void IntoJson(nlohmann::json&) const override
             {}
         private:
         };
@@ -113,14 +124,14 @@ namespace engine
         {
         public:
             UITexture() = default;
-            UITexture(std::string uri)
+            explicit UITexture(std::string uri)
               : mTextureUri(std::move(uri))
             {}
-            virtual MaterialClass GetClass(const ClassLibrary*, const Loader* loader) const override;
-            virtual Type GetType() const override
+            MaterialClass GetClass(const ClassLibrary*, const Loader* loader) const override;
+            Type GetType() const override
             { return Type::Texture; }
-            virtual bool FromJson(const nlohmann::json&) override;
-            virtual void IntoJson(nlohmann::json& json) const override;
+            bool FromJson(const nlohmann::json&, const UIColorPalette& palette) override;
+            void IntoJson(nlohmann::json& json) const override;
             std::string GetTextureUri() const
             { return mTextureUri; }
             std::string GetMetafileUri() const
@@ -158,7 +169,7 @@ namespace engine
             }
 
             MaterialClass GetClass(const ClassLibrary*, const Loader* ) const override;
-            bool FromJson(const nlohmann::json& json) override;
+            bool FromJson(const nlohmann::json& json, const UIColorPalette& palette) override;
             void IntoJson(nlohmann::json& json) const override;
 
             Type GetType() const override
@@ -223,13 +234,13 @@ namespace engine
         {
         public:
             UIColor() = default;
-            UIColor(const gfx::Color4f& color) : mColor(color)
+            explicit UIColor(const gfx::Color4f& color) : mColor(color)
             {}
-            virtual MaterialClass GetClass(const ClassLibrary*, const Loader*) const override;
-            virtual Type GetType() const override
+            MaterialClass GetClass(const ClassLibrary*, const Loader*) const override;
+            Type GetType() const override
             { return Type::Color; }
-            virtual bool FromJson(const nlohmann::json& json) override;
-            virtual void IntoJson(nlohmann::json& json) const override;
+            bool FromJson(const nlohmann::json& json, const UIColorPalette& palette) override;
+            void IntoJson(nlohmann::json& json) const override;
             void SetColor(const gfx::Color4f& color)
             { mColor = color; }
             gfx::Color4f GetColor() const
@@ -242,16 +253,16 @@ namespace engine
         class UIMaterialReference : public UIMaterial
         {
         public:
-            UIMaterialReference(std::string id)
+            explicit UIMaterialReference(std::string id)
               : mMaterialId(std::move(id))
             {}
             UIMaterialReference() = default;
-            virtual MaterialClass GetClass(const ClassLibrary* classlib, const Loader*) const override;
-            virtual bool FromJson(const nlohmann::json& json) override;
-            virtual void IntoJson(nlohmann::json& json) const override;
-            virtual Type GetType() const override
+            MaterialClass GetClass(const ClassLibrary* classlib, const Loader*) const override;
+            bool FromJson(const nlohmann::json& json, const UIColorPalette& palette) override;
+            void IntoJson(nlohmann::json& json) const override;
+            Type GetType() const override
             { return Type::Reference; }
-            virtual bool IsAvailable(const ClassLibrary& loader) const override;
+            bool IsAvailable(const ClassLibrary& loader) const override;
 
             std::string GetMaterialId() const
             { return mMaterialId; }
@@ -268,13 +279,13 @@ namespace engine
               : mClass(klass)
             {}
             UIMaterialClassObject() = default;
-            virtual MaterialClass GetClass(const ClassLibrary*, const Loader*) const override
+            MaterialClass GetClass(const ClassLibrary*, const Loader*) const override
             { return mClass; }
-            virtual bool FromJson(const nlohmann::json&) override;
-            virtual void IntoJson(nlohmann::json& json) const override;
-            virtual Type GetType() const override
+            bool FromJson(const nlohmann::json&, const UIColorPalette& palette) override;
+            void IntoJson(nlohmann::json& json) const override;
+            Type GetType() const override
             { return Type::ClassObject;  }
-            virtual bool IsAvailable(const ClassLibrary&) const override
+            bool IsAvailable(const ClassLibrary&) const override
             { return true; }
         private:
             std::shared_ptr<const gfx::MaterialClass> mClass;
@@ -557,12 +568,12 @@ namespace engine
         void ListMaterials(std::vector<MaterialEntry>* materials) const;
         void GatherMaterials(const std::string& filter, std::vector<MaterialEntry>* materials) const;
 
-        inline void ClearProperties() noexcept
+        void ClearProperties() noexcept
         { mProperties.clear(); }
-        inline void ClearMaterials() noexcept
+        void ClearMaterials() noexcept
         { mMaterials.clear(); }
 
-        inline void SetStyleFile(std::shared_ptr<const UIStyleFile> file) noexcept
+        void SetStyleFile(std::shared_ptr<const UIStyleFile> file) noexcept
         { mStyleFile = file; }
 
         bool PurgeUnavailableMaterialReferences();
@@ -592,28 +603,28 @@ namespace engine
         };
 
         // uik::Painter implementation.
-        virtual void BeginDrawWidgets() override;
-        virtual void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const override;
-        virtual void DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) const override;
-        virtual void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const override;
-        virtual void DrawStaticText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override;
-        virtual void DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const override;
-        virtual void DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const override;
-        virtual void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const override;
-        virtual void DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool selected) const override;
-        virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override;
-        virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override;
-        virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override;
-        virtual void DrawScrollBar(const WidgetId& id, const PaintStruct& ps, const uik::FRect& handle) const override;
-        virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const override;
-        virtual void DrawShape(const WidgetId& id, const PaintStruct& ps, const Shape& shape) const override;
-        virtual void EndDrawWidgets() override;
-        virtual bool ParseStyle(const std::string& tag, const std::string& style) override;
-        virtual bool QueryStyle(const WidgetStyleKey& key, const std::string& attr, WidgetStyleProperty* property) const override;
+        void BeginDrawWidgets() override;
+        void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const override;
+        void DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) const override;
+        void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const override;
+        void DrawStaticText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override;
+        void DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const override;
+        void DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const override;
+        void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const override;
+        void DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool selected) const override;
+        void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override;
+        void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override;
+        void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override;
+        void DrawScrollBar(const WidgetId& id, const PaintStruct& ps, const uik::FRect& handle) const override;
+        void DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const override;
+        void DrawShape(const WidgetId& id, const PaintStruct& ps, const Shape& shape) const override;
+        void EndDrawWidgets() override;
+        bool ParseStyle(const std::string& tag, const std::string& style) override;
+        bool QueryStyle(const WidgetStyleKey& key, const std::string& attr, WidgetStyleProperty* property) const override;
 
-        virtual void PushMask(const MaskStruct& mask) override;
-        virtual void PopMask() override;
-        virtual void RealizeMask() override;
+        void PushMask(const MaskStruct& mask) override;
+        void PopMask() override;
+        void RealizeMask() override;
 
         // About deleting material instances.
         // This is mostly useful when designing the UI in the editor and changes
@@ -637,22 +648,22 @@ namespace engine
         void Update(double time, float dt);
 
         // Set the style reference for accessing styling properties.
-        inline void SetStyle(UIStyle* style) noexcept
+        void SetStyle(UIStyle* style) noexcept
         { mStyle = style; }
         // Set the actual gfx painter object used to perform the
         // painting operations.
-        inline void SetPainter(gfx::Painter* painter) noexcept
+        void SetPainter(gfx::Painter* painter) noexcept
         { mPainter = painter; }
-        inline void SetClassLib(const ClassLibrary* classlib) noexcept
+        void SetClassLib(const ClassLibrary* classlib) noexcept
         { mClassLib = classlib; }
 
-        inline gfx::Painter* GetPainter() noexcept
+        gfx::Painter* GetPainter() noexcept
         { return mPainter; }
-        inline const gfx::Painter* GetPainter() const noexcept
+        const gfx::Painter* GetPainter() const noexcept
         { return mPainter; }
-        inline bool TestFlag(Flags flag) const noexcept
+        bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        inline void SetFlag(Flags flag, bool on_off) noexcept
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
     private:
         uint8_t StencilPass() const;
@@ -771,24 +782,24 @@ namespace engine
     public:
         UIEngine();
 
-        inline void SetEditingMode(bool on_off) noexcept
+        void SetEditingMode(bool on_off) noexcept
         { mEditingMode = on_off; }
-        inline void SetClassLibrary(const ClassLibrary* classlib) noexcept
+        void SetClassLibrary(const ClassLibrary* classlib) noexcept
         { mClassLib = classlib; }
-        inline void SetLoader(const Loader* loader) noexcept
+        void SetLoader(const Loader* loader) noexcept
         { mLoader = loader; }
-        inline void SetSurfaceSize(float width, float height) noexcept
+        void SetSurfaceSize(float width, float height) noexcept
         {
             mSurfaceWidth = width;
             mSurfaceHeight = height;
         }
-        inline uik::Window* GetUI() noexcept
+        uik::Window* GetUI() noexcept
         {
             if (mStack.empty())
                 return nullptr;
             return mStack.back().window.get();
         }
-        inline const uik::Window* GetUI() const noexcept
+        const uik::Window* GetUI() const noexcept
         {
             if (mStack.empty())
                 return nullptr;
