@@ -139,44 +139,52 @@ bool ParseMaterials(const nlohmann::json& json, std::vector<MaterialPair>& mater
         const auto& json = item.value();
         UIMaterial::Type type;
         std::string key;
+        std::vector<std::string> keys;
         if (!base::JsonReadSafe(json, "type", &type))
         {
             WARN("Ignored JSON UI style material property with unrecognized type.");
             success = false;
             continue;
         }
-        else if (!base::JsonReadSafe(json, "key", &key))
+        if (!base::JsonReadSafe(json, "key", &key) &&
+            !base::JsonReadSafe(json, "keys", &keys))
         {
             WARN("Ignored JSON UI style material property without material key.");
             success = false;
             continue;
         }
+        if (keys.empty())
+            keys.push_back(key);
 
-        std::unique_ptr<UIMaterial> material;
-        if (type == UIMaterial::Type::Null)
-            material.reset(new detail::UINullMaterial());
-        else if (type == UIMaterial::Type::Color)
-            material.reset(new detail::UIColor);
-        else if (type == UIMaterial::Type::Gradient)
-            material.reset(new detail::UIGradient);
-        else if (type == UIMaterial::Type::Reference)
-            material.reset(new detail::UIMaterialReference);
-        else if (type == UIMaterial::Type::Texture)
-            material.reset(new detail::UITexture);
-        else if (type == UIMaterial::Type::ClassObject)
-            material.reset(new detail::UIMaterialClassObject);
-        else BUG("Unhandled material type.");
-        if (!material->FromJson(json, palette))
+        for (const auto& key: keys)
         {
-            success = false;
-            WARN("Failed to parse UI material. [key='%1']", key);
-            continue;
-        }
+            std::unique_ptr<UIMaterial> material;
+            if (type == UIMaterial::Type::Null)
+                material.reset(new detail::UINullMaterial());
+            else if (type == UIMaterial::Type::Color)
+                material.reset(new detail::UIColor);
+            else if (type == UIMaterial::Type::Gradient)
+                material.reset(new detail::UIGradient);
+            else if (type == UIMaterial::Type::Reference)
+                material.reset(new detail::UIMaterialReference);
+            else if (type == UIMaterial::Type::Texture)
+                material.reset(new detail::UITexture);
+            else if (type == UIMaterial::Type::ClassObject)
+                material.reset(new detail::UIMaterialClassObject);
+            else BUG("Unhandled material type.");
 
-        MaterialPair p;
-        p.key = std::move(key);
-        p.material = std::move(material);
-        materials.push_back(std::move(p));
+            if (!material->FromJson(json, palette))
+            {
+                success = false;
+                WARN("Failed to parse UI material. [key='%1']", key);
+                continue;
+            }
+
+            MaterialPair p;
+            p.key      = key;
+            p.material = std::move(material);
+            materials.push_back(std::move(p));
+        }
     }
     return success;
 }
