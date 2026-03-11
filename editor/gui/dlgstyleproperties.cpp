@@ -423,6 +423,8 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
         {"text-size",                     "label", PropertyType::FontSize},
         {"text-vertical-align",           "label", PropertyType::VertTextAlign},
         {"text-horizontal-align",         "label", PropertyType::HortTextAlign},
+        {"text-x-offset",                 "label", PropertyType::Float},
+        {"text-y-offset",                 "label", PropertyType::Float},
         // this is commented out because the label widget has the line height
         // in the widget data section.
         //{"text-line-height",              "label", PropertyType::Float},
@@ -434,6 +436,8 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
         {"text-vertical-align",           "progress-bar", PropertyType::VertTextAlign},
         {"text-horizontal-align",         "progress-bar", PropertyType::HortTextAlign},
         {"text-line-height",              "progress-bar", PropertyType::Float},
+        {"text-x-offset",                 "progress-bar", PropertyType::Float},
+        {"text-y-offset",                 "progress-bar", PropertyType::Float},
         {"text-color",                    "push-button", PropertyType::Color},
         {"text-blink",                    "push-button", PropertyType::Bool},
         {"text-underline",                "push-button", PropertyType::Bool},
@@ -442,6 +446,8 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
         {"text-vertical-align",           "push-button", PropertyType::VertTextAlign},
         {"text-horizontal-align",         "push-button", PropertyType::HortTextAlign},
         {"text-line-height",              "push-button", PropertyType::Float},
+        {"text-x-offset",                 "push-button", PropertyType::Float},
+        {"text-y-offset",                 "push-button", PropertyType::Float},
         {"text-color",                    "checkbox", PropertyType::Color},
         {"text-blink",                    "checkbox", PropertyType::Bool},
         {"text-underline",                "checkbox", PropertyType::Bool},
@@ -450,6 +456,8 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
         {"text-vertical-align",           "checkbox", PropertyType::VertTextAlign},
         {"text-horizontal-align",         "checkbox", PropertyType::HortTextAlign},
         {"text-line-height",              "checkbox", PropertyType::Float},
+        {"text-x-offset",                 "checkbox", PropertyType::Float},
+        {"text-y-offset",                 "checkbox", PropertyType::Float},
         {"text-color",                    "radiobutton", PropertyType::Color},
         {"text-blink",                    "radiobutton", PropertyType::Bool},
         {"text-underline",                "radiobutton", PropertyType::Bool},
@@ -458,6 +466,9 @@ DlgWidgetStyleProperties::DlgWidgetStyleProperties(QWidget* parent, engine::UISt
         {"text-vertical-align",           "radiobutton", PropertyType::VertTextAlign},
         {"text-horizontal-align",         "radiobutton", PropertyType::HortTextAlign},
         {"text-line-height",              "radiobutton", PropertyType::Float},
+        {"text-x-offset",                 "radiobutton", PropertyType::Float},
+        {"text-y-offset",                 "radiobutton", PropertyType::Float},
+
         // DrawEditableText
         {"edit-text-color",               "spinbox", PropertyType::Color},
         {"edit-text-font",                "spinbox", PropertyType::FontString},

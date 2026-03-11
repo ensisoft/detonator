@@ -902,6 +902,8 @@ void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps, const 
     const auto  font_size = GetWidgetProperty(id, ps, "text-size",16);
     const auto va = GetWidgetProperty(id, ps, "text-vertical-align", UIStyle::VerticalTextAlign::Center);
     const auto ha = GetWidgetProperty(id, ps, "text-horizontal-align", UIStyle::HorizontalTextAlign::Center);
+    const auto xoffset = GetWidgetProperty(id, ps, "text-x-offset", 0.0f);
+    const auto yoffset = GetWidgetProperty(id, ps, "text-y-offset", 0.0f);
     line_height = GetWidgetProperty(id, ps, "text-line-height", line_height);
 
     unsigned alignment  = 0;
@@ -927,7 +929,10 @@ void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps, const 
         alignment |= gfx::TextAlign::AlignBottom;
     else BUG("Unknown vertical text alignment.");
 
-    DrawText(text, font_name, font_size, ps.rect, text_color, alignment, properties, line_height);
+    auto rect = ps.rect;
+    rect.Translate(xoffset, yoffset);
+
+    DrawText(text, font_name, font_size, rect, text_color, alignment, properties, line_height);
 }
 
 void UIPainter::DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const
