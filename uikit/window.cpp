@@ -510,7 +510,7 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
             {
                 //mPainter.RealizeMask();
 
-                Widget::PaintEvent paint;
+                PaintEvent paint;
                 paint.clip    = state.clip;
                 paint.rect    = widget_area_rect;
                 paint.focused = (widget == mFocusedWidget);
@@ -1201,7 +1201,7 @@ std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mou
         FRect widget_rect;
         state.GetValue(mId + "/mouse-grab-rect", &widget_rect);
 
-        Widget::MouseEvent widget_mouse_event;
+        uik::MouseEvent widget_mouse_event;
         widget_mouse_event.window_mouse_pos   = mouse.window_mouse_pos;
         widget_mouse_event.native_mouse_pos   = mouse.native_mouse_pos;
         widget_mouse_event.widget_window_rect = widget_rect;
@@ -1288,7 +1288,7 @@ std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mou
     if (new_widget_under_mouse == nullptr)
         return ret;
 
-    Widget::MouseEvent widget_mouse_event;
+    uik::MouseEvent widget_mouse_event;
     widget_mouse_event.widget_mouse_pos = widget_pos;
     widget_mouse_event.window_mouse_pos = mouse.window_mouse_pos;
     widget_mouse_event.native_mouse_pos = mouse.native_mouse_pos;
