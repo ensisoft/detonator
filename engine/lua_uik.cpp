@@ -23,6 +23,7 @@
 #include "base/format.h"
 #include "engine/lua.h"
 #include "uikit/widget.h"
+#include "uikit/widget_def.h"
 #include "uikit/window.h"
 
 using namespace engine::lua;

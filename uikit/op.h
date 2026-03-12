@@ -31,6 +31,7 @@
 #include "data/reader.h"
 #include "uikit/types.h"
 #include "uikit/widget.h"
+#include "uikit/widget_def.h"
 
 // functions that operate on a widget hierarchy.
 
@@ -39,8 +40,7 @@ namespace uik
 
 using RenderTree = base::RenderTree<Widget>;
 
-static
-void RenderTreeIntoJson(const RenderTree& tree, data::Writer& data, const Widget* widget = nullptr)
+static void RenderTreeIntoJson(const RenderTree& tree, data::Writer& data, const Widget* widget = nullptr)
 {
     auto chunk = data.NewWriteChunk();
     if (widget) {
@@ -53,8 +53,7 @@ void RenderTreeIntoJson(const RenderTree& tree, data::Writer& data, const Widget
     data.AppendChunk("widgets", std::move(chunk));
 }
 
-static
-bool RenderTreeFromJson(const data::Reader& data, RenderTree& tree,
+static bool RenderTreeFromJson(const data::Reader& data, RenderTree& tree,
     std::vector<std::unique_ptr<Widget>>& container,
     uik::Widget* parent = nullptr)
 {
@@ -84,8 +83,7 @@ bool RenderTreeFromJson(const data::Reader& data, RenderTree& tree,
     return ok;
 }
 
-static
-Widget* DuplicateWidget(RenderTree& tree, const Widget* widget, std::vector<std::unique_ptr<Widget>>* clones)
+static Widget* DuplicateWidget(RenderTree& tree, const Widget* widget, std::vector<std::unique_ptr<Widget>>* clones)
 {
     // mark the index of the item that will be the first dupe we create
     // we'll return this later since it's the root of the new hierarchy.
@@ -103,7 +101,7 @@ Widget* DuplicateWidget(RenderTree& tree, const Widget* widget, std::vector<std:
             {
                 mParents.push(parent);
             }
-            virtual void EnterNode(const Widget* node) override
+            void EnterNode(const Widget* node) override
             {
                 const auto* parent = mParents.top();
 
@@ -112,11 +110,11 @@ Widget* DuplicateWidget(RenderTree& tree, const Widget* widget, std::vector<std:
                 mLinks[clone.get()] = parent;
                 mClones.push_back(std::move(clone));
             }
-            virtual void LeaveNode(const Widget* node) override
+            void LeaveNode(const Widget* node) override
             {
                 mParents.pop();
             }
-            void LinkChildren(RenderTree& tree)
+            void LinkChildren(RenderTree& tree) const
             {
                 for (const auto& p : mLinks)
                 {
