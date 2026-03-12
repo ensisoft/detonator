@@ -901,6 +901,33 @@ std::unique_ptr<data::Chunk> MigrateResourceDataChunk<game::EntityClass>(std::un
 
 void MigrateResource(uik::Window& window, app::ResourceMigrationLog* log, unsigned old_version, unsigned  new_version)
 {
+    {
+        bool mouse_over_to_hovered_migration = false;
+        for (size_t i=0; i<window.GetNumWidgets(); ++i)
+        {
+            auto& widget = window.GetWidget(i);
+            auto style_string = widget.GetStyleString();
+            if (!base::Contains(style_string, "mouse-over"))
+                continue;
+
+            style_string = base::ReplaceAllSubstrings(style_string, "mouse-over", "hovered");
+            widget.SetStyleString(std::move(style_string));
+            mouse_over_to_hovered_migration = true;
+        }
+
+        auto style_string = window.GetStyleString();
+        if (base::Contains(style_string, "mouse-over"))
+        {
+            style_string = base::ReplaceAllSubstrings(style_string, "mouse-over", "hovered");
+            window.SetStyleString(std::move(style_string));
+            mouse_over_to_hovered_migration = true;
+        }
+        if (mouse_over_to_hovered_migration && log)
+        {
+            log->WriteLog(window, "UI", "Replaced 'mouse-over' UI style state key with 'hovered'.");
+        }
+    }
+
     // migration path for old data which doesn't yet have tab order values.
     const auto& keymap_uri = window.GetKeyMapFile();
     if (keymap_uri.empty())
