@@ -833,7 +833,7 @@ WidgetAction CheckBoxModel::MouseRelease(const MouseEvent& mouse, const MouseStr
 {
     FRect text, check;
     ComputeLayout(mouse.widget_window_rect, &text, &check);
-    if (!check.TestPoint(mouse.window_mouse_pos))
+    if (!check.TestPoint(mouse.window_mouse_pos) && !text.TestPoint(mouse.window_mouse_pos))
         return WidgetAction {};
 
     mChecked = !mChecked;
@@ -1115,7 +1115,7 @@ WidgetAction RadioButtonModel::MouseRelease(const MouseEvent& mouse, const Mouse
 {
     FRect text, check;
     ComputeLayout(mouse.widget_window_rect, &text, &check);
-    if (!check.TestPoint(mouse.window_mouse_pos))
+    if (!check.TestPoint(mouse.window_mouse_pos) && !text.TestPoint(mouse.window_mouse_pos))
         return WidgetAction {};
 
     if (!mSelected)
