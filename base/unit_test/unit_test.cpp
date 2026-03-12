@@ -642,6 +642,67 @@ void unit_test_string()
         TEST_REQUIRE(ret[0] == "foo");
         TEST_REQUIRE(ret[1] == " bar");
     }
+
+    // erase substring
+    {
+        auto str = base::EraseSubstring("jeesus ajaa mopolla", "keke");
+        TEST_REQUIRE(str == "jeesus ajaa mopolla");
+        str = base::EraseSubstring("jeesus ajaa mopolla", "");
+        TEST_REQUIRE(str == "jeesus ajaa mopolla");
+        str = base::EraseSubstring("", "jeesus");
+        TEST_REQUIRE(str == "");
+        str = base::EraseSubstring("jeesus ajaa mopolla", "jeesus ajaa mopolla lujaa");
+        TEST_REQUIRE(str == "jeesus ajaa mopolla");
+
+        str = base::EraseSubstring("jeesus ajaa mopolla", "jeesus");
+        TEST_REQUIRE(str == " ajaa mopolla");
+        str = base::EraseSubstring("jeesus ajaa mopolla", "mopolla");
+        TEST_REQUIRE(str == "jeesus ajaa ");
+    }
+
+    // replace substring
+    {
+        auto str = base::ReplaceSubstring("jeesus ajaa mopolla", "", "kelkalla");
+        TEST_REQUIRE(str == "jeesus ajaa mopolla");
+
+        str = base::ReplaceSubstring("jeesus ajaa mopolla", "kekek", "kelkalla");
+        TEST_REQUIRE(str == "jeesus ajaa mopolla");
+
+        str = base::ReplaceSubstring("", "mopolla", "kelkalla");
+        TEST_REQUIRE(str == "");
+
+        str = base::ReplaceSubstring("jeesus ajaa mopolla", "jeesus ajaa mopolla lujaa", "jojoo");
+        TEST_REQUIRE(str == "jeesus ajaa mopolla");
+
+        str = base::ReplaceSubstring("jeesus ajaa mopolla", "jeesus ajaa mopolla", "mohammad ajaa autolla");
+        TEST_REQUIRE(str == "mohammad ajaa autolla");
+
+        str = base::ReplaceSubstring("jeesus ajaa mopolla", "jeesus", "jesse");
+        TEST_REQUIRE(str == "jesse ajaa mopolla");
+        str = base::ReplaceSubstring("jeesus ajaa mopolla", "mopolla", "kelkalla");
+        TEST_REQUIRE(str == "jeesus ajaa kelkalla");
+
+        str = base::ReplaceSubstring("jeesus ajaa mopolla", "mopolla", "");
+        TEST_REQUIRE(str == "jeesus ajaa ");
+    }
+
+    // replace all
+    {
+        auto str = base::ReplaceAllSubstrings("jeesus ajaa mopolla", "", "");
+        TEST_REQUIRE(str == "jeesus ajaa mopolla");
+
+        str = base::ReplaceAllSubstrings("", "", "");
+        TEST_REQUIRE(str == "");
+
+        str = base::ReplaceAllSubstrings("jeesus ajaa mopolla", "jeesus", "");
+        TEST_REQUIRE(str == " ajaa mopolla");
+
+        str = base::ReplaceAllSubstrings("jeesus ajaa mopolla ja mikki ajaa mopolla kans", "mopo", "kelka");
+        TEST_REQUIRE(str == "jeesus ajaa kelkalla ja mikki ajaa kelkalla kans");
+
+        str = base::ReplaceAllSubstrings("jeesus ajaa mopolla ja mikki ajaa mopolla kans", "mopolla", "");
+        TEST_REQUIRE(str == "jeesus ajaa  ja mikki ajaa  kans");
+    }
 }
 
 void unit_test_color()
