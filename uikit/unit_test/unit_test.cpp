@@ -86,7 +86,7 @@ public:
     {}
     void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override
     {}
-    virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override
+    void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override
     {}
     void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override
     {}
@@ -94,25 +94,25 @@ public:
     {
 
     }
-    virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const override
+    void DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const override
     {
 
     }
-    virtual void DrawShape(const WidgetId& id, const PaintStruct& ps, const Shape& shape) const override
+    void DrawShape(const WidgetId& id, const PaintStruct& ps, const Shape& shape) const override
     {
 
     }
 
-    virtual void PushMask(const MaskStruct& mask) override
+    void PushMask(const MaskStruct& mask) override
     {
         mClipMaskStack.push(mask);
     }
-    virtual void PopMask() override
+    void PopMask() override
     {
         TEST_REQUIRE(!mClipMaskStack.empty());
     }
 
-    virtual bool ParseStyle(const WidgetId& id, const std::string& style) override
+    bool ParseStyle(const WidgetId& id, const std::string& style) override
     {
         StyleInfo s;
         s.widget = id;
@@ -142,57 +142,57 @@ public:
         flags.set(uik::Widget::Flags::VisibleInGame, true);
     }
 
-    virtual std::string GetId() const override
+    std::string GetId() const override
     { return "1234id"; }
-    virtual std::string GetName() const override
+    std::string GetName() const override
     { return this->name; }
-    virtual std::size_t GetHash() const override
+    std::size_t GetHash() const override
     { return 0x12345; }
-    virtual std::string GetStyleString() const override
+    std::string GetStyleString() const override
     { return ""; }
-    virtual std::string GetAnimationString() const override
+    std::string GetAnimationString() const override
     { return ""; }
-    virtual uik::FSize GetSize() const override
+    uik::FSize GetSize() const override
     { return size; }
-    virtual uik::FPoint GetPosition() const override
+    uik::FPoint GetPosition() const override
     { return point; }
-    virtual Type GetType() const override
+    Type GetType() const override
     { return TestWidget::Type::Label; }
-    virtual bool TestFlag(Flags flag) const override
+    bool TestFlag(Flags flag) const override
     { return this->flags.test(flag); }
-    virtual unsigned GetTabIndex() const override
+    unsigned GetTabIndex() const override
     { return 0; }
-    virtual void SetId(const std::string& id) override
+    void SetId(const std::string& id) override
     {}
-    virtual void SetName(const std::string& name) override
+    void SetName(const std::string& name) override
     { this->name = name; }
-    virtual void SetSize(const uik::FSize& size) override
+    void SetSize(const uik::FSize& size) override
     { this->size = size; }
-    virtual void SetPosition(const uik::FPoint& pos) override
+    void SetPosition(const uik::FPoint& pos) override
     { this->point = pos; }
-    virtual void SetStyleString(const std::string& style) override
+    void SetStyleString(const std::string& style) override
     {}
-    virtual void SetAnimationString(const std::string&) override
+    void SetAnimationString(const std::string&) override
     {}
-    virtual void SetFlag(Flags flag, bool on_off) override
+    void SetFlag(Flags flag, bool on_off) override
     { this->flags.set(flag, on_off); }
-    virtual void SetTabIndex(unsigned index) override
+    void SetTabIndex(unsigned index) override
     { }
-    virtual void IntoJson(data::Writer& json) const override
+    void IntoJson(data::Writer& json) const override
     {}
-    virtual bool FromJson(const data::Reader& json) override
+    bool FromJson(const data::Reader& json) override
     { return true; }
 
-    virtual void Paint(const PaintEvent& paint, const uik::TransientState& state, uik::Painter& painter) const override
+    void Paint(const PaintEvent& paint, const uik::TransientState& state, uik::Painter& painter) const override
     {}
-    virtual Action MouseEnter(uik::TransientState& state) override
+    Action MouseEnter(uik::TransientState& state) override
     {
         MouseData m;
         m.name = "enter";
         mouse.push_back(m);
         return Action{};
     }
-    virtual Action MousePress(const MouseEvent& mouse, uik::TransientState& state) override
+    Action MousePress(const MouseEvent& mouse, uik::TransientState& state) override
     {
         MouseData m;
         m.name = "press";
@@ -200,7 +200,7 @@ public:
         this->mouse.push_back(m);
         return Action{};
     }
-    virtual Action MouseRelease(const MouseEvent& mouse, uik::TransientState& state) override
+    Action MouseRelease(const MouseEvent& mouse, uik::TransientState& state) override
     {
         MouseData m;
         m.name = "release";
@@ -208,7 +208,7 @@ public:
         this->mouse.push_back(m);
         return Action{};
     }
-    virtual Action MouseMove(const MouseEvent& mouse, uik::TransientState& state) override
+    Action MouseMove(const MouseEvent& mouse, uik::TransientState& state) override
     {
         MouseData m;
         m.name = "move";
@@ -216,47 +216,47 @@ public:
         this->mouse.push_back(m);
         return Action{};
     }
-    virtual Action MouseLeave(uik::TransientState& state) override
+    Action MouseLeave(uik::TransientState& state) override
     {
         MouseData m;
         m.name = "leave";
         mouse.push_back(m);
         return Action{};
     }
-    virtual Action KeyDown(const KeyEvent& key, uik::TransientState& state) override
+    Action KeyDown(const KeyEvent& key, uik::TransientState& state) override
     {
         return {};
     }
-    virtual Action KeyUp(const KeyEvent& key, uik::TransientState& state) override
+    Action KeyUp(const KeyEvent& key, uik::TransientState& state) override
     {
         return {};
     }
 
-    virtual std::unique_ptr<Widget> Copy() const override
+    std::unique_ptr<Widget> Copy() const override
     { return std::make_unique<TestWidget>(); }
-    virtual std::unique_ptr<Widget> Clone() const override
+    std::unique_ptr<Widget> Clone() const override
     { return std::make_unique<TestWidget>(); }
-    virtual void SetStyleProperty(const std::string& key, const uik::StyleProperty& prop) override
+    void SetStyleProperty(const std::string& key, const uik::StyleProperty& prop) override
     {}
-    virtual const uik::StyleProperty* GetStyleProperty(const std::string& key) const override
+    const uik::StyleProperty* GetStyleProperty(const std::string& key) const override
     {
         return nullptr;
     }
-    virtual void DeleteStyleProperty(const std::string& key) override
+    void DeleteStyleProperty(const std::string& key) override
     {}
-    virtual void SetStyleMaterial(const std::string& key, const std::string& material) override
+    void SetStyleMaterial(const std::string& key, const std::string& material) override
     {
 
     }
-    virtual const std::string* GetStyleMaterial(const std::string& key) const override
+    const std::string* GetStyleMaterial(const std::string& key) const override
     {
         return nullptr;
     }
-    virtual void DeleteStyleMaterial(const std::string& key) override
+    void DeleteStyleMaterial(const std::string& key) override
     {
 
     }
-    virtual void CopyStateFrom(const Widget* other) override
+    void CopyStateFrom(const Widget* other) override
     {
 
     }

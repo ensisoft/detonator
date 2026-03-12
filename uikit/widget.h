@@ -77,6 +77,12 @@ namespace uik
             ClipChildren
         };
 
+        using ActionType = uik::WidgetActionType;
+        using Action     = detail::WidgetAction;
+        using PaintEvent = uik::PaintEvent;
+        using MouseEvent = uik::MouseEvent;
+        using KeyEvent   = uik::KeyEvent;
+
         // dtor.
         virtual ~Widget() = default;
         // Get the unique Widget ID.
@@ -144,68 +150,11 @@ namespace uik
         // not only stylistic but also functional.
         virtual void QueryStyle(const Painter& painter) {}
 
-        // The current transient state of the widget for painting operations.
-        struct PaintEvent {
-            // The widget has the current keyboard focus.
-            bool focused = false;
-            // The mouse is currently on top of the widget.
-            bool hovered = false;
-            // The widget is enabled.
-            bool enabled = true;
-            // The current time. The starting point is unspecified
-            // so one should only use this to measure elapsed times
-            // between timed events and not presume any other semantics.
-            double time = 0.0f;
-            // The rectangle in which the widget should be painted
-            // in window coordinates.
-            FRect rect;
-            // The clip rect against which the painting should be clipped
-            // in window coordinates.
-            FRect clip;
-        };
         // Paint the widget.
         virtual void Paint(const PaintEvent& paint, const TransientState& state, Painter& painter) const = 0;
 
         virtual void Update(TransientState& state, double time, float dt)
         {}
-
-        struct MouseEvent {
-            // Mouse pointer position in the native actual window
-            // that reported the mouse event.
-            FPoint native_mouse_pos;
-            // Mouse pointer position in the uik::Window, relative to the
-            // uiK::Window coordinate system. (Top left being 0,0)
-            FPoint window_mouse_pos;
-            // Mouse pointer position relative to the widget's top left
-            // corner. This position is always within the widget's width
-            // and height or otherwise the widget would not be receiving
-            // the event.
-            FPoint widget_mouse_pos;
-            // The widget's rectangle in the uik::Window.
-            FRect  widget_window_rect;
-            // The mouse button that is pressed if any.
-            MouseButton button = MouseButton::None;
-            // The current time. The starting point is unspecified
-            // so one should only use this to measure elapsed times
-            // between timed events and not presume any other semantics.
-            double time = 0.0f;
-        };
-
-        struct KeyEvent {
-            // The virtual key that was pressed/released.
-            VirtualKey key = VirtualKey::None;
-            // The current time. The starting point is unspecified
-            // so one should only use this to measure elapsed times
-            // between timed events and not presume any other semantics.
-            double time = 0.0;
-        };
-
-        using ActionType = WidgetActionType;
-
-        struct Action {
-            WidgetActionType type = WidgetActionType::None;
-            WidgetActionValue value;
-        };
 
         // Poll the widget for an action. The widget might generate
         // actions when for example a button is being held.
@@ -349,10 +298,10 @@ namespace uik
     namespace detail {
         using Widget  = uik::Widget;
         using Painter = uik::Painter;
-        using MouseEvent = uik::Widget::MouseEvent;
-        using PaintEvent = uik::Widget::PaintEvent;
-        using KeyEvent   = uik::Widget::KeyEvent;
-        using WidgetAction = uik::Widget::Action;
+        using MouseEvent = uik::MouseEvent;
+        using PaintEvent = uik::PaintEvent;
+        using KeyEvent   = uik::KeyEvent;
+        using WidgetAction = WidgetAction;
         struct PaintStruct {
             std::string widgetId;
             std::string widgetName;

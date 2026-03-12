@@ -44,7 +44,7 @@ namespace uik
     {
     public:
         virtual ~PaintHook() = default;
-        using PaintEvent = Widget::PaintEvent;
+        using PaintEvent = uik::PaintEvent;
 
         // Inspect the paint event that will take place for the given widget.
         // Should return true if the painting is to proceed or false to omit
@@ -262,9 +262,7 @@ namespace uik
             // Time of the event.
             double time = 0.0;
         };
-
-        using KeyEvent = Widget::KeyEvent;
-
+        using KeyEvent     = uik::KeyEvent;
         using WidgetAction = uik::WidgetAction;
 
         // Notes about event dispatching. In general there will
@@ -396,7 +394,7 @@ namespace uik
         enum class MouseEventType {
             ButtonPress, ButtonRelease, MouseMove
         };
-        using MouseHandler = Widget::Action (Widget::*)(const Widget::MouseEvent&, TransientState&);
+        using MouseHandler = Widget::Action (Widget::*)(const uik::MouseEvent&, TransientState&);
         std::vector<WidgetAction> send_mouse_event(const MouseEvent& mouse, MouseHandler which, TransientState& state, bool mouse_press);
 
         Widget* AddWidgetPtr(std::unique_ptr<Widget> widget);
