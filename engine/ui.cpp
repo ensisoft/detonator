@@ -2043,25 +2043,16 @@ void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material,
     transform.Resize(rect);
     transform.Translate(rect);
 
-    if (direction == ShapeDirection::Vertical)
-    {
-        const auto width  = rect.GetWidth();
-        const auto height = rect.GetHeight();
-        transform.Push();
-        transform.Translate(-0.5f, -0.5f);
-        transform.RotateAroundZ(math::Pi*0.5);
-        transform.Translate(0.5f, 0.5f);
-    }
-
-
     if (shape == UIStyle::WidgetShape::Rectangle)
         pass.Draw(gfx::Rectangle(), transform, material);
     else if (shape == UIStyle::WidgetShape::RoundRect)
         pass.Draw(gfx::RoundRectangle(), transform, material);
     else if (shape == UIStyle::WidgetShape::Circle)
         pass.Draw(gfx::Circle(), transform, material);
-    else if (shape == UIStyle::WidgetShape::Capsule)
-        pass.Draw(gfx::Capsule(), transform, material);
+    else if (shape == UIStyle::WidgetShape::Capsule && direction == ShapeDirection::Horizontal)
+        pass.Draw(gfx::Capsule(gfx::Capsule::Style::Solid, gfx::Capsule::Direction::Horizontal), transform, material);
+    else if (shape == UIStyle::WidgetShape::Capsule && direction == ShapeDirection::Vertical)
+        pass.Draw(gfx::Capsule(gfx::Capsule::Style::Solid, gfx::Capsule::Direction::Vertical), transform, material);
     else if (shape == UIStyle::WidgetShape::Parallelogram)
         pass.Draw(gfx::Parallelogram(), transform, material);
     else BUG("Missing mask shape case.");
