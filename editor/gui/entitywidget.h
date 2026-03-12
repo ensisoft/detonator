@@ -114,7 +114,8 @@ namespace gui
         void on_actionNewRightTriangle_triggered();
         void on_actionNewRoundRect_triggered();
         void on_actionNewTrapezoid_triggered();
-        void on_actionNewCapsule_triggered();
+        void on_actionNewHorizontalCapsule_triggered();
+        void on_actionNewVerticalCapsule_triggered();
         void on_actionNewParallelogram_triggered();
         void on_actionNewAmbientLight_triggered();
         void on_actionNewDirectionalLight_triggered();
