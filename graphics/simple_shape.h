@@ -72,10 +72,37 @@ namespace gfx
 
         struct RightTriangleArgs {
             enum class Corner {
-                BottomLeft, BottomRight,
-                TopLeft, TopRight
+                BottomLeft,
+                BottomRight,
+                TopLeft,
+                TopRight
             };
             Corner corner = Corner::BottomLeft;
+        };
+
+        struct CapsuleArgs {
+            enum class Direction {
+                Horizontal, Vertical
+            };
+            unsigned slices = 50;
+            float radius = 0.25f;
+            Direction direction = Direction::Horizontal;
+        };
+
+        struct SectorShapeArgs {
+            float fill_percentage = 0.25f;
+        };
+        struct RoundRectShapeArgs {
+            float corner_radius = 0.05f;
+        };
+        struct CylinderShapeArgs {
+            unsigned slices = 100;
+        };
+        struct ConeShapeArgs {
+            unsigned slices = 100;
+        };
+        struct SphereShapeArgs {
+            unsigned slices = 100;
         };
 
         struct ArrowGeometry {
@@ -85,7 +112,9 @@ namespace gfx
             static void Generate(const Environment& env, Style style, GeometryBuffer& geometry);
         };
         struct CapsuleGeometry {
-            static void Generate(const Environment& env, Style style, GeometryBuffer& geometry);
+            static void Generate(const Environment& env, Style style, GeometryBuffer& geometry, const CapsuleArgs& args);
+            static void GenerateVertical(const Environment& env, Style style, GeometryBuffer& geometry, const CapsuleArgs& args);
+            static void GenerateHorizontal(const Environment& env, Style style, GeometryBuffer& geometry, const CapsuleArgs& args);
         };
         struct SemiCircleGeometry {
             static void Generate(const Environment& env, Style style, GeometryBuffer& geometry);
@@ -141,24 +170,9 @@ namespace gfx
             static void Generate(const Environment& env, Style style, GeometryBuffer& geometry, unsigned slices);
         };
 
-        struct SectorShapeArgs {
-            float fill_percentage = 0.25f;
-        };
-        struct RoundRectShapeArgs {
-            float corner_radius = 0.05f;
-        };
-        struct CylinderShapeArgs {
-            unsigned slices = 100;
-        };
-        struct ConeShapeArgs {
-            unsigned slices = 100;
-        };
-        struct SphereShapeArgs {
-            unsigned slices = 100;
-        };
-
         using SimpleShapeArgs = std::variant<std::monostate, SectorShapeArgs, RoundRectShapeArgs,
-                CylinderShapeArgs, ConeShapeArgs, SphereShapeArgs, RightTriangleArgs>;
+                CylinderShapeArgs, ConeShapeArgs, SphereShapeArgs, RightTriangleArgs,
+                CapsuleArgs>;
         using SimpleShapeEnvironment = DrawableClass::Environment;
 
         void ConstructSimpleShape(const SimpleShapeArgs& args,
@@ -229,6 +243,17 @@ namespace gfx
             explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
                                      std::string name = "") noexcept
               : SimpleShapeClass(type, std::monostate(), std::move(id), std::move(name))
+            {}
+        };
+
+        template<>
+        struct SimpleShapeClassTypeShim<SimpleShapeType::Capsule> : public SimpleShapeClass {
+            explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+                                              std::string name = "",
+                                              CapsuleArgs::Direction direction = CapsuleArgs::Direction::Horizontal,
+                                              unsigned slices = 50,
+                                              float radius = 0.25f) noexcept
+            : SimpleShapeClass(SimpleShapeType::Capsule, CapsuleArgs { slices, radius, direction }, std::move(id), std::move(name))
             {}
         };
 
@@ -391,6 +416,16 @@ namespace gfx
         {
             explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid) noexcept
               : SimpleShape(type, style)
+            {}
+        };
+
+        template<>
+        struct SimpleShapeInstanceTypeShim<SimpleShapeType::Capsule> : public SimpleShape
+        {
+            using Direction = CapsuleArgs::Direction;
+            explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid,
+                CapsuleArgs::Direction direction = CapsuleArgs::Direction::Horizontal, unsigned slices = 50, float radius = 0.25f) noexcept
+            : SimpleShape(SimpleShapeType::Capsule, CapsuleArgs { slices, radius, direction }, style)
             {}
         };
 

@@ -129,11 +129,27 @@ void StaticLineGeometry::Generate(const Environment& env, Style style, GeometryB
 }
 
 // static
-void CapsuleGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
+void CapsuleGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry, const CapsuleArgs& args)
+{
+    if (args.direction == CapsuleArgs::Direction::Horizontal)
+        GenerateHorizontal(env, style, geometry, args);
+    else if (args.direction == CapsuleArgs::Direction::Vertical)
+        GenerateVertical(env, style, geometry, args);
+    else BUG("Unhandled capsule direction.");
+}
+
+// static
+void CapsuleGeometry::GenerateVertical(const Environment& env, Style style, GeometryBuffer& geometry, const CapsuleArgs& args)
+{
+
+}
+
+// static
+void CapsuleGeometry::GenerateHorizontal(const Environment& env, Style style, GeometryBuffer& geometry, const CapsuleArgs& args)
 {
     // todo LOD information
-    const auto slices = 50;
-    const auto radius = 0.25f;
+    const auto slices = args.slices;
+    const auto radius = args.radius;
     const auto max_slice = style == Style::Solid ? slices + 1 : slices;
     const auto angle_increment = math::Pi / slices;
 
@@ -1197,7 +1213,7 @@ void ConstructSimpleShape(const SimpleShapeArgs& args,
     else if (type == SimpleShapeType::BlockCursor)
         detail::BlockCursorGeometry::Generate(environment, style, geometry);
     else if (type == SimpleShapeType::Capsule)
-        detail::CapsuleGeometry::Generate(environment, style, geometry);
+        detail::CapsuleGeometry::Generate(environment, style, geometry, std::get<CapsuleArgs>(args));
     else if (type == SimpleShapeType::Circle)
         detail::CircleGeometry::Generate(environment, style, geometry);
     else if (type == SimpleShapeType::Cube)
