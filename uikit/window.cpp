@@ -28,6 +28,7 @@
 #include "data/writer.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
+#include "uikit/widget_def.h"
 #include "uikit/painter.h"
 #include "uikit/state.h"
 

@@ -29,7 +29,9 @@
 #include "base/logging.h"
 #include "data/reader.h"
 #include "data/writer.h"
-#include "uikit/widget.h"
+#include "uikit/widget_model.h"
+#include "uikit/widget_base.h"
+#include "uikit/widget_def.h"
 #include "uikit/painter.h"
 #include "uikit/state.h"
 
