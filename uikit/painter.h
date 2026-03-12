@@ -60,9 +60,9 @@ namespace uik
             // Indicates whether the widget/item is currently focused, i.e.
             // has the *keyboard* focus or not.
             bool focused = false;
-            // Indicates whether the widget/item is currently being "moused" i.e.
+            // Indicates whether the widget/item is currently being hovered i.e.
             // the mouse is over it or interacting with it.
-            bool moused  = false;
+            bool hovered  = false;
             // Current time of the paint operation. todo: is this useful, remove?
             double time  = 0.0;
             // The widget's/item's rectangle relative to the window. The painter impls

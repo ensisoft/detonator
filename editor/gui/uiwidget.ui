@@ -2381,7 +2381,7 @@
                       <bool>true</bool>
                      </property>
                      <property name="text" stdset="0">
-                      <string>mouse-over</string>
+                      <string>hovered</string>
                      </property>
                      <widget class="QWidget" name="page_3">
                       <layout class="QVBoxLayout" name="verticalLayout_12">

@@ -149,7 +149,7 @@ namespace uik
             // The widget has the current keyboard focus.
             bool focused = false;
             // The mouse is currently on top of the widget.
-            bool moused = false;
+            bool hovered = false;
             // The widget is enabled.
             bool enabled = true;
             // The current time. The starting point is unspecified

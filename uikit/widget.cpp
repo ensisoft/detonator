@@ -203,7 +203,7 @@ void FormModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     Painter::PaintStruct p;
     p.enabled = paint.enabled;
     p.focused = paint.focused;
-    p.moused  = paint.moused;
+    p.hovered = paint.hovered;
     p.time    = paint.time;
     p.clip    = paint.clip;
     p.rect    = paint.rect;
@@ -228,7 +228,7 @@ void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     Painter::PaintStruct p;
     p.enabled = paint.enabled;
     p.focused = paint.focused;
-    p.moused  = paint.moused;
+    p.hovered = paint.hovered;
     p.time    = paint.time;
     p.clip    = paint.clip;
     p.rect    = paint.rect;
@@ -237,7 +237,7 @@ void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
-    p.moused = false;
+    p.hovered = false;
     p.pressed = false;
     ps.painter->DrawProgressBar(ps.widgetId, p, mValue);
 
@@ -250,7 +250,7 @@ void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     }
     ps.painter->DrawStaticText(ps.widgetId, p, text, 1.0f);
 
-    p.moused = paint.moused;
+    p.hovered = paint.hovered;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
@@ -277,7 +277,7 @@ void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     Painter::PaintStruct p;
     p.enabled = paint.enabled;
     p.focused = paint.focused;
-    p.moused  = paint.moused;
+    p.hovered = paint.hovered;
     p.time    = paint.time;
     p.clip    = paint.clip;
     p.rect    = paint.rect;
@@ -291,7 +291,7 @@ void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     FRect knob;
     ComputeLayout(paint.rect, &slider, &knob);
     p.pressed = ps.state->GetValue(ps.widgetId + "/slider-knob-down", false);
-    p.moused  = ps.state->GetValue(ps.widgetId + "/slider-knob-under-mouse", false);
+    p.hovered = ps.state->GetValue(ps.widgetId + "/slider-knob-under-mouse", false);
     ps.painter->DrawSlider(ps.widgetId, p, knob);
 
     // drawing the focus rect has been baked in the DrawSlider since that
@@ -299,7 +299,7 @@ void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     // rendering and composition of widget components.
 
     p.pressed = false;
-    p.moused  = false;
+    p.hovered = false;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
@@ -431,7 +431,7 @@ void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     Painter::PaintStruct p;
     p.enabled = paint.enabled;
     p.focused = paint.focused;
-    p.moused  = paint.moused;
+    p.hovered = paint.hovered;
     p.time    = paint.time;
     p.clip    = paint.clip;
     p.rect    = paint.rect;
@@ -461,21 +461,21 @@ void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     ps.painter->DrawEditableText(ps.widgetId, p, text);
 
     p.rect    = btn_inc;
-    p.moused  = ps.state->GetValue(ps.widgetId + "/btn-inc-mouse-over", false);
+    p.hovered = ps.state->GetValue(ps.widgetId + "/btn-inc-mouse-over", false);
     p.pressed = ps.state->GetValue(ps.widgetId + "/btn-inc-pressed", false) ||
                 ps.state->GetValue(ps.widgetId + "/key-inc-pressed", false);
     p.enabled = paint.enabled && mValue < mMaxVal;
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowUp);
 
     p.rect    = btn_dec;
-    p.moused  = ps.state->GetValue(ps.widgetId + "/btn-dec-mouse-over", false);
+    p.hovered = ps.state->GetValue(ps.widgetId + "/btn-dec-mouse-over", false);
     p.pressed = ps.state->GetValue(ps.widgetId + "/btn-dec-pressed", false) ||
                 ps.state->GetValue(ps.widgetId + "/key-dec-pressed", false);
     p.enabled = paint.enabled && mValue > mMinVal;
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowDown);
 
     p.rect    = paint.rect;
-    p.moused  = paint.moused;
+    p.hovered = paint.hovered;
     p.enabled = paint.enabled;
     p.pressed = false;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
@@ -654,7 +654,7 @@ void LabelModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     Painter::PaintStruct p;
     p.enabled = paint.enabled;
     p.focused = paint.focused;
-    p.moused  = paint.moused;
+    p.hovered = paint.hovered;
     p.time    = paint.time;
     p.rect    = paint.rect;
     p.clip    = paint.clip;
@@ -689,7 +689,7 @@ void PushButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
 {
     Painter::PaintStruct p;
     p.focused = paint.focused;
-    p.moused  = paint.moused;
+    p.hovered = paint.hovered;
     p.enabled = paint.enabled;
     p.rect    = paint.rect;
     p.time    = paint.time;
@@ -779,7 +779,7 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
 {
     Painter::PaintStruct p;
     p.focused = paint.focused;
-    p.moused  = paint.moused;
+    p.hovered = paint.hovered;
     p.enabled = paint.enabled;
     p.rect    = paint.rect;
     p.clip    = paint.clip;
@@ -794,7 +794,7 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     ComputeLayout(paint.rect, &text, &check);
 
     p.rect   = check;
-    p.moused = ps.state->GetValue(ps.widgetId + "/mouse-over-check", false);
+    p.hovered= ps.state->GetValue(ps.widgetId + "/mouse-over-check", false);
     ps.painter->DrawCheckBox(ps.widgetId, p, mChecked);
 
     p.rect = text;
@@ -929,7 +929,7 @@ void ToggleBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
 {
     Painter::PaintStruct p;
     p.focused = paint.focused;
-    p.moused  = paint.moused;
+    p.hovered = paint.hovered;
     p.enabled = paint.enabled;
     p.rect    = paint.rect;
     p.clip    = paint.clip;
@@ -1048,7 +1048,7 @@ void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
 {
     Painter::PaintStruct p;
     p.focused = paint.focused;
-    p.moused  = paint.moused;
+    p.hovered = paint.hovered;
     p.enabled = paint.enabled;
     p.rect    = paint.rect;
     p.clip    = paint.clip;
@@ -1063,7 +1063,7 @@ void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     ComputeLayout(paint.rect, &text, &check);
 
     p.rect   = check;
-    p.moused = ps.state->GetValue(ps.widgetId + "/mouse-over-check", false);
+    p.hovered= ps.state->GetValue(ps.widgetId + "/mouse-over-check", false);
     ps.painter->DrawRadioButton(ps.widgetId, p, mSelected);
 
     p.rect = text;
@@ -1190,7 +1190,7 @@ void GroupBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     Painter::PaintStruct p;
     p.focused = paint.focused;
     p.pressed = paint.focused;
-    p.moused  = paint.moused;
+    p.hovered = paint.hovered;
     p.enabled = paint.enabled;
     p.rect    = paint.rect;
     p.clip    = paint.clip;
@@ -1297,7 +1297,7 @@ void ScrollAreaModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
     Painter::PaintStruct p;
     p.focused = false;
     p.pressed = false;
-    p.moused  = false;
+    p.hovered = false;
     p.enabled = paint.enabled;
     p.rect    = paint.rect;
     p.clip    = paint.clip;
@@ -1345,19 +1345,19 @@ void ScrollAreaModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
     if (draw_vertical_scrollbar)
     {
         p.rect = vertical_scroll_bar_up_button;
-        p.moused = ps.state->GetValue(ps.widgetId + "/btn-up-mouse-over", false);
+        p.hovered = ps.state->GetValue(ps.widgetId + "/btn-up-mouse-over", false);
         p.pressed = ps.state->GetValue(ps.widgetId + "/btn-up-pressed", false) ||
                     ps.state->GetValue(ps.widgetId + "/key-up-pressed", false);
         painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowUp);
 
         p.rect = vertical_scroll_bar_down_button;
-        p.moused = ps.state->GetValue(ps.widgetId + "/btn-down-mouse-over", false);
+        p.hovered = ps.state->GetValue(ps.widgetId + "/btn-down-mouse-over", false);
         p.pressed = ps.state->GetValue(ps.widgetId + "/btn-down-pressed", false) ||
                     ps.state->GetValue(ps.widgetId + "/key-down-pressed", false);
         painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowDown);
 
         p.rect = vertical_scroll_bar_rect;
-        p.moused = ps.state->GetValue(ps.widgetId + "/vertical-scrollbar-handle-mouse-over", false);
+        p.hovered = ps.state->GetValue(ps.widgetId + "/vertical-scrollbar-handle-mouse-over", false);
         p.pressed = ps.state->GetValue(ps.widgetId + "/vertical-scrollbar-handle-pressed", false);
         painter->DrawScrollBar(ps.widgetId, p, vertical_scroll_bar_handle);
     }
@@ -1365,19 +1365,19 @@ void ScrollAreaModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
     if (draw_horizontal_scrollbar)
     {
         p.rect = horizontal_scroll_bar_left_button;
-        p.moused = ps.state->GetValue(ps.widgetId + "/btn-left-mouse-over", false);
+        p.hovered = ps.state->GetValue(ps.widgetId + "/btn-left-mouse-over", false);
         p.pressed = ps.state->GetValue(ps.widgetId + "/btn-left-pressed", false) ||
                     ps.state->GetValue(ps.widgetId + "/key-left-pressed", false);
         painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowLeft);
 
         p.rect = horizontal_scroll_bar_right_button;
-        p.moused = ps.state->GetValue(ps.widgetId + "/btn-right-mouse-over", false);
+        p.hovered = ps.state->GetValue(ps.widgetId + "/btn-right-mouse-over", false);
         p.pressed = ps.state->GetValue(ps.widgetId + "/btn-right-pressed", false) ||
                     ps.state->GetValue(ps.widgetId + "/key-right-pressed", false);
         painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowRight);
 
         p.rect = horizontal_scroll_bar_rect;
-        p.moused = ps.state->GetValue(ps.widgetId + "/horizontal-scrollbar-handle-mouse-over", false);
+        p.hovered = ps.state->GetValue(ps.widgetId + "/horizontal-scrollbar-handle-mouse-over", false);
         p.pressed = ps.state->GetValue(ps.widgetId + "/horizontal-scrollbar-handle-pressed", false);
         painter->DrawScrollBar(ps.widgetId, p, horizontal_scroll_bar_handle);
     }
@@ -1880,7 +1880,7 @@ void ShapeModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     Painter::PaintStruct p;
     p.focused = false;
     p.pressed = false;
-    p.moused  = false;
+    p.hovered = false;
     p.enabled = paint.enabled;
     p.rect    = paint.rect;
     p.clip    = paint.clip;

@@ -322,7 +322,7 @@ public:
         state.SetValue("design-mode", true);
         uik::Widget::PaintEvent paint;
         paint.focused = false;
-        paint.moused  = false;
+        paint.hovered = false;
         paint.rect    = mWidget->GetRect();
         paint.rect.Translate(mWidgetPos.x, mWidgetPos.y);
         mWidget->Paint(paint, state, *mState.painter);
@@ -548,7 +548,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.widgetNormal->SetPropertySelector("");
     mUI.widgetDisabled->SetPropertySelector("/disabled");
     mUI.widgetFocused->SetPropertySelector("/focused");
-    mUI.widgetMoused->SetPropertySelector("/mouse-over");
+    mUI.widgetMoused->SetPropertySelector("/hovered");
     mUI.widgetPressed->SetPropertySelector("/pressed");
 
     mUI.viewport->onMouseMove    = std::bind(&UIWidget::MouseMove, this, std::placeholders::_1);

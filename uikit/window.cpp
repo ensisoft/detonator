@@ -514,7 +514,7 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
                 paint.clip    = state.clip;
                 paint.rect    = widget_area_rect;
                 paint.focused = (widget == mFocusedWidget);
-                paint.moused  = (widget == mWidgetUnderMouse);
+                paint.hovered = (widget == mWidgetUnderMouse);
                 paint.enabled = enabled;
                 paint.time    = mCurrentTime;
                 if (mPaintHook)

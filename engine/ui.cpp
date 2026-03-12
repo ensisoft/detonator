@@ -116,6 +116,8 @@ bool ParseProperties(const nlohmann::json& json, std::vector<PropertyPair>& prop
             WARN("Ignoring unexpected UI style property. [key='%1']", prop.key);
             continue;
         }
+        prop.key = base::ReplaceSubstring(prop.key, "mouse-over", "hovered");
+
         props.push_back(std::move(prop));
     }
     return success;
@@ -179,6 +181,7 @@ bool ParseMaterials(const nlohmann::json& json, std::vector<MaterialPair>& mater
                 WARN("Failed to parse UI material. [key='%1']", key);
                 continue;
             }
+            auto k = base::ReplaceSubstring(key, "mouse-over", "hovered");
 
             MaterialPair p;
             p.key      = key;
@@ -1779,8 +1782,8 @@ gfx::Material* UIPainter::GetWidgetMaterial(const std::string& id, const PaintSt
         state_prefix = "pressed/";
     else if (ps.focused)
         state_prefix = "focused/";
-    else if (ps.moused)
-        state_prefix = "mouse-over/";
+    else if (ps.hovered)
+        state_prefix = "hovered/";
 
     // if the paint operation has associated material definitions these take
     // precedence over any other styling information
@@ -1939,8 +1942,8 @@ UIProperty UIPainter::GetWidgetProperty(const std::string& id,
         state_prefix = "pressed/";
     else if (ps.focused)
         state_prefix = "focused/";
-    else if (ps.moused)
-        state_prefix = "mouse-over/";
+    else if (ps.hovered)
+        state_prefix = "hovered/";
 
     // if the paint operation has an associated property map with
     // a specific property value then  that takes precedence over

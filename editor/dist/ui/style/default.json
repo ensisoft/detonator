@@ -170,7 +170,7 @@
     },
 
     {
-      "key": "push-button/mouse-over/button-background",
+      "key": "push-button/hovered/button-background",
       "type": "Gradient",
       "color0": "#2a2a2a",
       "color1": "#282828",
@@ -178,7 +178,7 @@
       "color3": "#1a1a1a"
     },
     {
-      "key": "push-button/mouse-over/button-border",
+      "key": "push-button/hovered/button-border",
       "type": "Gradient",
       "color0":  "#343434",
       "color1":  "#2a2a2a",
@@ -236,9 +236,9 @@
       "color3": "#161616"
     },
     {
-      "keys": ["slider/mouse-over/slider-knob",
-        "widget/mouse-over/horizontal-scrollbar-handle",
-        "widget/mouse-over/vertical-scrollbar-handle"],
+      "keys": ["slider/hovered/slider-knob",
+        "widget/hovered/horizontal-scrollbar-handle",
+        "widget/hovered/vertical-scrollbar-handle"],
       "type": "Gradient",
       "color0": "#4a4a4a",
       "color1": "#3a3a3a",
@@ -246,9 +246,9 @@
       "color3": "#202020"
     },
     {
-      "keys": ["slider/mouse-over/slider-knob-border",
-        "widget/mouse-over/horizontal-scrollbar-handle-border",
-        "widget/mouse-over/vertical-scrollbar-handle-border"],
+      "keys": ["slider/hovered/slider-knob-border",
+        "widget/hovered/horizontal-scrollbar-handle-border",
+        "widget/hovered/vertical-scrollbar-handle-border"],
       "type": "Gradient",
       "color0": "#6a6a6a",
       "color1": "#4a4a4a",

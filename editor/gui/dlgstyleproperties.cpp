@@ -69,7 +69,7 @@ std::string GetSelectorString(PropertySelector selector)
     else if (selector == PropertySelector::Focused)
         return "/focused";
     else if (selector == PropertySelector::Moused)
-        return "/mouse-over";
+        return "/hovered";
     else if (selector == PropertySelector::Pressed)
         return "/pressed";
     return "";
@@ -117,7 +117,7 @@ public:
             else if (col == 3) return PropString(row, "");
             else if (col == 4) return PropString(row, "/disabled");
             else if (col == 5) return PropString(row, "/focused");
-            else if (col == 6) return PropString(row, "/mouse-over");
+            else if (col == 6) return PropString(row, "/hovered");
             else if (col == 7) return PropString(row, "/pressed");
             else BUG("Unknown property table column index.");
         }
@@ -133,7 +133,7 @@ public:
             else if (section == 3) return "Normal";
             else if (section == 4) return "Disabled";
             else if (section == 5) return "Focused";
-            else if (section == 6) return "Moused";
+            else if (section == 6) return "Hovered";
             else if (section == 7) return "Pressed";
             else BUG("Unknown property table column index.");
         }
