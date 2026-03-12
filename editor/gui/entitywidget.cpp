@@ -1545,7 +1545,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mBasicShapes2D->addAction(mUI.actionNewRightTriangle);
     mBasicShapes2D->addAction(mUI.actionNewTrapezoid);
     mBasicShapes2D->addAction(mUI.actionNewParallelogram);
-    mBasicShapes2D->addAction(mUI.actionNewCapsule);
+    mBasicShapes2D->addAction(mUI.actionNewHorizontalCapsule);
+    mBasicShapes2D->addAction(mUI.actionNewVerticalCapsule);
 
     mBasicShapes3D = new QMenu(this);
     mBasicShapes3D->menuAction()->setIcon(QIcon("icons32:cube.png"));
@@ -2611,9 +2612,14 @@ void EntityWidget::on_actionNewTrapezoid_triggered()
 {
     mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_trapezoid", MapMouseCursorToWorld()));
 }
-void EntityWidget::on_actionNewCapsule_triggered()
+void EntityWidget::on_actionNewHorizontalCapsule_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_capsule", MapMouseCursorToWorld()));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_horizontal_capsule", MapMouseCursorToWorld()));
+}
+
+void EntityWidget::on_actionNewVerticalCapsule_triggered()
+{
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_vertical_capsule", MapMouseCursorToWorld()));
 }
 
 void EntityWidget::on_actionNewParallelogram_triggered()

@@ -140,6 +140,11 @@ bool DrawableItemClass::FromJson(const data::Reader& data)
 
         ok &= chunk_ok;
     }
+
+    // this migration should technically really be in the editor
+    // but feeling a bit lazy, so here it is.
+    if (mDrawableId == "_capsule")
+        mDrawableId = "_horizontal_capsule";
     return ok;
 }
 

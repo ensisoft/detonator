@@ -79,6 +79,7 @@
 
 // hack
 #include "editor/app/resource_tracker.cpp"
+#include "graphics/simple_shape.h"
 
 namespace {
 
@@ -598,7 +599,11 @@ Workspace::Workspace(const QString& dir)
     // setup primitive drawables with known/fixed class IDs
     // these IDs are also hardcoded in the engine/loader.cpp which uses
     // these same IDs to create primitive resources.
-    mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>(gfx::CapsuleClass("_capsule"), "2D Capsule"));
+    mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>(gfx::CapsuleClass("_horizontal_capsule", "",
+        gfx::detail::CapsuleArgs::Direction::Horizontal, 50, 0.25f), "2D Horizontal Capsule"));
+    mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>(gfx::CapsuleClass("_vertical_capsule", "",
+        gfx::detail::CapsuleArgs::Direction::Vertical, 50, 0.25f), "2D Vertical Capsule"));
+
     mResources.emplace_back(new DrawableResource<gfx::RectangleClass>(gfx::RectangleClass("_rect"), "2D Rectangle"));
     mResources.emplace_back(new DrawableResource<gfx::IsoscelesTriangleClass>(gfx::IsoscelesTriangleClass("_isosceles_triangle"), "2D Isosceles Triangle"));
     mResources.emplace_back(new DrawableResource<gfx::RightTriangleClass>(gfx::RightTriangleClass("_right_triangle"), "2D Right Triangle"));

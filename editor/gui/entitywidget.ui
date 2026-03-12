@@ -5599,16 +5599,16 @@
     <string>Ctrl+8</string>
    </property>
   </action>
-  <action name="actionNewCapsule">
+  <action name="actionNewHorizontalCapsule">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/capsule.png</normaloff>:/32x32_ico_png/capsule.png</iconset>
+     <normaloff>:/32x32_ico_png/horizontal_capsule.png</normaloff>:/32x32_ico_png/horizontal_capsule.png</iconset>
    </property>
    <property name="text">
-    <string>Capsule</string>
+    <string>Horizontal Capsule</string>
    </property>
    <property name="toolTip">
-    <string>Place new capsule</string>
+    <string>Place new horizontal capsule</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+9</string>
@@ -6211,6 +6211,18 @@
    </property>
    <property name="toolTip">
     <string>Paste a node from the clipboard</string>
+   </property>
+  </action>
+  <action name="actionNewVerticalCapsule">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/vertical_capsule.png</normaloff>:/32x32_ico_png/vertical_capsule.png</iconset>
+   </property>
+   <property name="text">
+    <string>Vertical  Capsule</string>
+   </property>
+   <property name="toolTip">
+    <string>Place new vertical capsule</string>
    </property>
   </action>
  </widget>
