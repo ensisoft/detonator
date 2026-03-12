@@ -433,17 +433,67 @@ inline bool StartsWith(const std::string& str, const std::string& what)
 { return str.find(what) == 0; }
 inline bool StartsWith(const std::wstring& str, const std::wstring& what)
 { return str.find(what) == 0; }
+
 inline bool EndsWith(const std::string& str, const std::string& what)
 {
     // SO saves the day..
     if (what.size() > str.size()) return false;
     return std::equal(what.rbegin(), what.rend(), str.rbegin());
 }
+
 inline bool EndsWith(const std::wstring& str, const std::wstring& what)
 {
     // SO saves the day...
     if (what.size() > str.size()) return false;
     return std::equal(what.rbegin(), what.rend(), str.rbegin());
+}
+
+inline std::string EraseSubstring(std::string str, const std::string& key)
+{
+    if (str.empty() || key.empty())
+        return str;
+
+    const auto pos = str.find(key);
+    if (pos != std::string::npos)
+        str.erase(pos, key.size());
+    return str;
+}
+
+inline std::string ReplaceSubstring(std::string str, const std::string& key, const std::string& replacement)
+{
+    if (str.empty() || key.empty())
+        return str;
+
+    const auto pos = str.find(key);
+    if (pos != std::string::npos)
+        str.replace(pos, key.size(), replacement);
+    return str;
+}
+inline std::string EraseAllSubstrings(std::string str, const std::string& key)
+{
+    if (str.empty() || key.empty())
+        return str;
+
+    auto pos = str.find(key);
+    while (pos != std::string::npos)
+    {
+        str.erase(pos, key.size());
+        pos = str.find(key, pos);
+    }
+    return str;
+}
+inline std::string ReplaceAllSubstrings(std::string str, const std::string& key, const std::string& replacement)
+{
+    if (str.empty() || key.empty())
+        return str;
+
+    auto pos = str.find(key);
+    while (pos != std::string::npos)
+    {
+        str.replace(pos, key.size(), replacement);
+        pos = str.find(key, pos + replacement.size());
+    }
+    return str;
 }
 
 std::vector<std::string> SplitString(const std::string& str, char separator = ' ');
