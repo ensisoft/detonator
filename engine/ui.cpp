@@ -1233,31 +1233,26 @@ void UIPainter::DrawScrollBar(const WidgetId& id, const PaintStruct& ps, const u
     const auto& rect = ps.rect;
     const auto direction = rect.GetHeight() > rect.GetWidth() ? ShapeDirection::Vertical : ShapeDirection::Horizontal;
 
-    const auto& Key = [direction](std::string key) {
-        return direction == ShapeDirection::Vertical ? "vertical-" + key
-                                                     : "horizontal-" + key;
-    };
-
-    if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-background")))
+    if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-background"))
     {
-        const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-shape"), UIStyle::WidgetShape::RoundRect);
+        const auto shape = GetWidgetProperty(id, ps, "scrollbar-shape", UIStyle::WidgetShape::RoundRect);
         FillShape(ps.rect, *material, shape, direction);
     }
-    if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-handle")))
+    if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-handle"))
     {
-        const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-handle-shape"), UIStyle::WidgetShape::RoundRect);
+        const auto shape = GetWidgetProperty(id, ps, "scrollbar-handle-shape", UIStyle::WidgetShape::RoundRect);
         FillShape(handle, *material, shape, direction);
     }
-    if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-handle-border")))
+    if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-handle-border"))
     {
-        const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-handle-shape"), UIStyle::WidgetShape::RoundRect);
-        const auto width = GetWidgetProperty(id, ps, Key("scrollbar-handle-border-width"), 1.0f);
+        const auto shape = GetWidgetProperty(id, ps, "scrollbar-handle-shape", UIStyle::WidgetShape::RoundRect);
+        const auto width = GetWidgetProperty(id, ps, "scrollbar-handle-border-width", 1.0f);
         OutlineShape(handle, *material, shape, width, direction);
     }
-    if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-border")))
+    if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-border"))
     {
-        const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-shape"), UIStyle::WidgetShape::RoundRect);
-        const auto width = GetWidgetProperty(id, ps, Key("scrollbar-border-width"), 1.0f);
+        const auto shape = GetWidgetProperty(id, ps, "scrollbar-shape", UIStyle::WidgetShape::RoundRect);
+        const auto width = GetWidgetProperty(id, ps, "scrollbar-border-width", 1.0f);
         OutlineShape(ps.rect, *material, shape, width, direction);
     }
 }

@@ -197,8 +197,7 @@
 
     {
       "keys": ["slider/slider-background",
-        "widget/horizontal-scrollbar-background",
-        "widget/vertical-scrollbar-background"],
+        "widget/scrollbar-background"],
       "type": "Gradient",
       "color0": "#202020",
       "color1": "#1c1c1c",
@@ -207,8 +206,7 @@
     },
     {
       "keys": ["slider/slider-border",
-        "widget/horizontal-scrollbar-border",
-        "widget/vertical-scrollbar-border"],
+        "widget/scrollbar-border"],
       "type": "Gradient",
       "color0": "#3a3a3a",
       "color1": "#2c2c2c",
@@ -217,8 +215,7 @@
     },
     {
       "keys": ["slider/slider-knob",
-        "widget/horizontal-scrollbar-handle",
-        "widget/vertical-scrollbar-handle"],
+        "widget/scrollbar-handle"],
       "type": "Gradient",
       "color0": "#3a3a3a",
       "color1": "#2f2f2f",
@@ -227,8 +224,7 @@
     },
     {
       "keys": ["slider/slider-knob-border",
-        "widget/horizontal-scrollbar-handle-border",
-        "widget/vertical-scrollbar-handle-border"],
+        "widget/scrollbar-handle-border"],
       "type": "Gradient",
       "color0": "#555555",
       "color1": "#404040",
@@ -237,8 +233,7 @@
     },
     {
       "keys": ["slider/hovered/slider-knob",
-        "widget/hovered/horizontal-scrollbar-handle",
-        "widget/hovered/vertical-scrollbar-handle"],
+        "widget/hovered/scrollbar-handle"],
       "type": "Gradient",
       "color0": "#4a4a4a",
       "color1": "#3a3a3a",
@@ -247,8 +242,7 @@
     },
     {
       "keys": ["slider/hovered/slider-knob-border",
-        "widget/hovered/horizontal-scrollbar-handle-border",
-        "widget/hovered/vertical-scrollbar-handle-border"],
+        "widget/hovered/scrollbar-handle-border"],
       "type": "Gradient",
       "color0": "#6a6a6a",
       "color1": "#4a4a4a",
@@ -257,8 +251,7 @@
     },
     {
       "keys": ["slider/pressed/slider-knob",
-        "widget/pressed/horizontal-scrollbar-handle",
-        "widget/pressed/vertical-scrollbar-handle"],
+        "widget/pressed/scrollbar-handle"],
       "type": "Gradient",
       "color0": "#1a1a1a",
       "color1": "#232323",
@@ -267,8 +260,7 @@
     },
     {
       "keys": ["slider/pressed/slider-knob-border",
-        "widget/pressed/horizontal-scrollbar-handle-border",
-        "widget/pressed/vertical-scrollbar-handle-border"],
+        "widget/pressed/scrollbar-handle-border"],
       "type": "Gradient",
       "color0": "#161616",
       "color1": "#202020",
