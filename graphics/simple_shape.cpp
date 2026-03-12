@@ -141,7 +141,115 @@ void CapsuleGeometry::Generate(const Environment& env, Style style, GeometryBuff
 // static
 void CapsuleGeometry::GenerateVertical(const Environment& env, Style style, GeometryBuffer& geometry, const CapsuleArgs& args)
 {
+    // todo LOD information
+    const auto slices = args.slices;
+    const auto radius = args.radius;
+    const auto max_slice = style == Style::Solid ? slices + 1 : slices;
+    const auto angle_increment = math::Pi / slices;
 
+    // try to figure out if the model matrix will distort the
+    // round rectangle out of it's square shape which would then
+    // distort the rounded corners out of the shape too.
+    const auto& model_matrix = *env.model_matrix;
+    const auto rect_width  = glm::length(model_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+    const auto rect_height = glm::length(model_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+    float w = radius;
+    float h = radius;
+    if (rect_width > rect_height)
+        w = h / (rect_width/rect_height);
+    else h = w / (rect_height/rect_width);
+
+    std::vector<Vertex2D> vs;
+    auto offset = 0;
+
+    // semi-circle at the top end.
+    Vertex2D top_center;
+    top_center.aPosition.x =  0.5f;
+    top_center.aPosition.y = -h;
+    top_center.aTexCoord.x =  0.5f;
+    top_center.aTexCoord.y =  h;
+    if (style == Style::Solid)
+        vs.push_back(top_center);
+
+    float top_angle = 0.0f;
+    for (unsigned i=0; i<max_slice; ++i)
+    {
+        const auto x = std::cos(top_angle) * w;
+        const auto y = std::sin(top_angle) * h;
+        Vertex2D v;
+        v.aPosition.x =  0.5f + x;
+        v.aPosition.y = -h + y;
+        v.aTexCoord.x =  0.5f + x;
+        v.aTexCoord.y =  h - y;
+        vs.push_back(v);
+
+        top_angle += angle_increment;
+    }
+    if (style == Style::Solid)
+        geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
+
+    if (style != Style::Outline)
+    {
+        // center box.
+        const Vertex2D box[6] = {
+            {{0.5f+w,      -h}, {0.5f+w,       h}},
+            {{0.5f-w,      -h}, {0.5f-w,       h}},
+            {{0.5f-w, -(1.0f-h)}, {0.5f-w, 1.0f-h}},
+
+            {{0.5f+w,      -h}, {0.5f+w,       h}},
+            {{0.5f-w, -(1.0f-h)}, {0.5f-w, 1.0f-h}},
+            {{0.5f+w, -(1.0f-h)}, {0.5f+w, 1.0f-h}}
+        };
+        offset = vs.size();
+        vs.push_back(box[0]);
+        vs.push_back(box[1]);
+        vs.push_back(box[2]);
+        vs.push_back(box[3]);
+        vs.push_back(box[4]);
+        vs.push_back(box[5]);
+        if (style == Style::Solid)
+        {
+            geometry.AddDrawCmd(Geometry::DrawType::Triangles, offset, 6);
+        }
+        else
+        {
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, offset + 0, 3);
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, offset + 3, 3);
+        }
+    }
+
+    offset = vs.size();
+
+    // semi-circle at the bottom end.
+    Vertex2D bottom_center;
+    bottom_center.aPosition.x =  0.5f;
+    bottom_center.aPosition.y = -(1.0f - h);
+    bottom_center.aTexCoord.x =  0.5f;
+    bottom_center.aTexCoord.y =  1.0f - h;
+    if (style == Style::Solid)
+        vs.push_back(bottom_center);
+
+    float bottom_angle = math::Pi;
+    for (unsigned i=0; i<max_slice; ++i)
+    {
+        const auto x = std::cos(bottom_angle) * w;
+        const auto y = std::sin(bottom_angle) * h;
+        Vertex2D v;
+        v.aPosition.x =  0.5f + x;
+        v.aPosition.y = -(1.0f - h) + y;
+        v.aTexCoord.x =  0.5f + x;
+        v.aTexCoord.y =  1.0f - h - y;
+        vs.push_back(v);
+
+        bottom_angle += angle_increment;
+    }
+    if (style == Style::Solid)
+        geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
+    else if (style == Style::Outline)
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
+
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
+    geometry.SetVertexBuffer(std::move(vs));
 }
 
 // static
@@ -1188,9 +1296,15 @@ std::string GetSimpleShapeGeometryId(const SimpleShapeArgs& args,
         const auto rect_height   = glm::length(model_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
         const auto aspect_ratio  = rect_width / rect_height;
         if (type == SimpleShapeType::Capsule)
+        {
+            const auto& capsule_args = std::get<detail::CapsuleArgs>(args);
             id += NameAspectRatio(rect_width, rect_height, HalfRound, "%1.1f:%1.1f");
+            id += base::ToString(capsule_args.direction);
+        }
         else if (type == SimpleShapeType::RoundRect)
+        {
             id += NameAspectRatio(rect_width, rect_height, Truncate, "%d:%d");
+        }
     }
     return id;
 }
