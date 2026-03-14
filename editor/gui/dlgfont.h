@@ -52,6 +52,7 @@ namespace gui
         app::AnyString GetSelectedFontURI() const
         { return mSelectedFontURI; }
     private slots:
+        void on_btnSlideshow_clicked();
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_vScroll_valueChanged();
@@ -74,6 +75,8 @@ namespace gui
         std::vector<QString> mFonts;
         std::vector<QString> mAllFonts;
         std::unordered_set<QString> mFailedFonts;
-        QString mSelectedFontURI;
+        app::AnyString mSelectedFontURI;
+        unsigned mSlideshowFontIndex = 0xffff;
+        float mSlideshowTimer = 2.0f;
     };
 }

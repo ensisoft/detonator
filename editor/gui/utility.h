@@ -447,6 +447,12 @@ inline void SetValue(QAction* action, bool on_off)
     action->setChecked(on_off);
 }
 
+inline void SetText(QPushButton* btn, const QString& text)
+{
+    QSignalBlocker s(btn);
+    btn->setText(text);
+}
+
 inline void SetValue(QPushButton* btn, bool checked)
 {
     QSignalBlocker s(btn);
