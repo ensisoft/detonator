@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QImage>
 #include "warnpop.h"
 
 #include "editor/app/workspace.h"
@@ -26,6 +27,7 @@
 #include "editor/gui/dlgfont.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
+#include "editor/gui/main.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
@@ -52,7 +54,7 @@ DlgFont::DlgFont(QWidget* parent, const app::Workspace* workspace, const app::An
     base::AppendVector(mFonts, ListWSFonts(workspace->GetDir()));
     base::AppendVector(mFonts, ListAppFonts());
 
-    if (!mSelectedFontURI.isEmpty())
+    if (!mSelectedFontURI.IsEmpty())
     {
         bool found_font = false;
         for (const auto& font : mFonts)
@@ -105,6 +107,29 @@ DlgFont::DlgFont(QWidget* parent, const app::Workspace* workspace, const app::An
     mUI.widget->onMouseDoubleClick = std::bind(&DlgFont::MouseDoubleClick, this, std::placeholders::_1);
 
     SetValue(mUI.zoom, 1.0f);
+    SetVisible(mUI.slideshow, false);
+}
+
+void DlgFont::on_btnSlideshow_clicked()
+{
+    if (mSlideshowFontIndex != 0xffff)
+    {
+        mSelectedFontURI = mAllFonts[mSlideshowFontIndex];
+        mSlideshowFontIndex = 0xffff;
+        SetText(mUI.btnSlideshow, "Click to run font slideshow");
+        SetVisible(mUI.slideshow, false);
+    }
+    else
+    {
+        SetValue(mUI.filter, "");
+        SetText(mUI.btnSlideshow, "Click to stop font slideshow");
+        SetVisible(mUI.slideshow, true);
+        SetRange(mUI.slideshow, 0, mAllFonts.size());
+        SetValue(mUI.slideshow, 0);
+        on_filter_textChanged("");
+        mSlideshowFontIndex = 0;
+        mSlideshowTimer = 0.0f;
+    }
 }
 
 void DlgFont::on_btnAccept_clicked()
@@ -147,6 +172,73 @@ void DlgFont::PaintScene(gfx::Painter& painter, double secs)
     const auto height = mUI.widget->height();
     const float zoom = GetValue(mUI.zoom);
 
+    if (mSlideshowFontIndex != 0xffff)
+    {
+        const auto font_uri = mFonts[mSlideshowFontIndex];
+
+        gfx::FRect rect;
+        rect.Resize(width, height);
+        rect.Move(0.0f, 0.0f);
+
+        if (!base::Contains(mFailedFonts, font_uri))
+        {
+            gfx::TextBuffer::Text text_and_style;
+            text_and_style.text = "Quick brown fox\njumps over\nthe lazy dog.";
+            text_and_style.font = app::ToUtf8(font_uri);
+            text_and_style.fontsize = 72; //mDisplay.font_size;
+            text_and_style.underline = mDisplay.underline;
+            text_and_style.lineheight = 1.0f;
+
+            gfx::TextBuffer text;
+            text.SetBufferSize(width, height);
+            text.SetText(std::move(text_and_style));
+
+            gfx::TextMaterial material(std::move(text));
+            material.SetRuntime(mUI.widget->GetTime());
+            material.SetPointSampling(true);
+            material.SetColor(ToGfx(mDisplay.text_color));
+
+            if (!gfx::FillRect(painter, rect, material))
+                mFailedFonts.insert(font_uri);
+        }
+        else
+        {
+            ShowError("Limited font\nor font raster error.", rect, painter, mDisplay.font_size);
+        }
+
+        mSlideshowTimer -= secs;
+        if (mSlideshowTimer < 0.0f)
+        {
+            if (Editor::DevEditor())
+            {
+                const auto screenshot = mUI.widget->TakeScreenshot();
+                if (!screenshot.isNull())
+                {
+                    const auto png_uri = font_uri + ".png";
+                    const auto png_file = mWorkspace->MapFileToFilesystem(png_uri);
+                    QImageWriter writer;
+                    writer.setFormat("PNG");
+                    writer.setQuality(100);
+                    writer.setFileName(png_file);
+                    if (writer.write(screenshot))
+                        DEBUG("Wrote font raster preview file '%1'", png_file);
+                    else ERROR("Failed to write rasterized font preview file. [file='%1']", png_file);
+                }
+            }
+
+            mSlideshowTimer = 0.25f;
+            mSlideshowFontIndex++;
+            if (mSlideshowFontIndex == mAllFonts.size())
+            {
+                mSlideshowFontIndex = 0xffff;
+                SetText(mUI.btnSlideshow, "Click to run font slideshow");
+                SetVisible(mUI.slideshow, false);
+            }
+            Increment(mUI.slideshow);
+        }
+        return;
+    }
+
     const unsigned box_width = mBoxWidth * zoom;
     const unsigned box_height = mBoxHeight * zoom;
 
@@ -161,7 +253,7 @@ void DlgFont::PaintScene(gfx::Painter& painter, double secs)
     unsigned index = 0;
 
     //mMaterialIds.clear();
-    if (mSelectedFontURI.isEmpty())
+    if (mSelectedFontURI.IsEmpty())
         SetValue(mUI.groupBox, "Font Library");
     else SetValue(mUI.groupBox, tr("Font Library - %1").arg(mSelectedFontURI));
 
@@ -293,7 +385,7 @@ bool DlgFont::KeyPress(QKeyEvent* key)
     }
     else if (sym == Qt::Key_Return)
     {
-        if (mSelectedFontURI.isEmpty())
+        if (mSelectedFontURI.IsEmpty())
             return false;
         accept();
         return true;
