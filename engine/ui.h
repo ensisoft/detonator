@@ -229,6 +229,7 @@ namespace engine
             }
         private:
             gfx::Color4f mColorMap[4];
+            glm::vec2 mWeight = {0.5, 0.5f};
             float mGamma = 1.0f;
             GradientType mGradient = GradientType::Bilinear;
         };

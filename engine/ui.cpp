@@ -277,6 +277,7 @@ UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary*, const Loader
     material->SetColor(mColorMap[3], ColorIndex::GradientColor3);
     material->SetGradientType(mGradient);
     material->SetGradientGamma(mGamma);
+    material->SetGradientWeight(mWeight);
     return material;
 }
 bool UIGradient::FromJson(const nlohmann::json& json, const UIColorPalette& palette)
@@ -290,6 +291,7 @@ bool UIGradient::FromJson(const nlohmann::json& json, const UIColorPalette& pale
     if (!base::JsonReadSafe(json, "gamma", &mGamma))
         mGamma = 2.2f;
     ok &= base::JsonReadSafe(json, "gamma", &mGamma);
+    ok &= base::JsonReadSafe(json, "weight", &mWeight);
     if (!ok)
         VERBOSE("Failed to fully parse UI gradient value.");
     return true;
@@ -302,6 +304,7 @@ void UIGradient::IntoJson(nlohmann::json& json) const
     base::JsonWrite(json, "color3", mColorMap[3]);
     base::JsonWrite(json, "gradient", mGradient);
     base::JsonWrite(json, "gamma", mGamma);
+    base::JsonWrite(json, "weight", mWeight);
 }
 
 UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary*, const Loader*) const
