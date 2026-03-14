@@ -67,12 +67,13 @@ bool ReadColor(const nlohmann::json& json, const std::string& name,
     if (ReadColor(json, name, out))
         return true;
 
+    // see if the color value is a string key into the palette color table.
+    // first read the value as string key.
     std::string palette_color_key;
-    if (!base::JsonReadSafe(json, "color", &palette_color_key))
+    if (!base::JsonReadSafe(json, name.c_str(), &palette_color_key))
         return false;
 
-    // see if it's a palette entry by some palette symbolic name
-    // such as "shadow"
+    // then see if that key is actually a color key in the color palette.
     if (const auto* color = palette.FindColor(palette_color_key))
     {
         *out = *color;
