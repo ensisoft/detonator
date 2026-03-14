@@ -678,9 +678,9 @@ namespace engine
                       const gfx::FRect& rect, const gfx::Color4f & color, unsigned alignment, unsigned properties,
                       float line_height, Orientation orientation = Orientation::Horizontal) const;
         void FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                       Orientation orientation = Orientation::Horizontal) const;
+                       float corner_radius, Orientation orientation = Orientation::Horizontal) const;
         void OutlineShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                          float width, Orientation orientation = Orientation::Horizontal) const;
+                          float thickness, float corner_radius, Orientation orientation = Orientation::Horizontal) const;
 
         bool GetMaterial(const std::string& key, gfx::Material** material) const;
         gfx::Material* GetWidgetMaterial(const std::string& id,
@@ -707,9 +707,14 @@ namespace engine
                             const std::string& key,
                             const T& value) const;
 
+        float GetCornerRadius(const std::string& id,
+                              const PaintStruct& ps,
+                              const std::string& key,
+                              UIStyle::WidgetShape shape) const;
+
         template<typename RenderPass>
         static void DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass, UIStyle::WidgetShape shape,
-                       Orientation orientation);
+                       Orientation orientation, float corner_radius);
         template<typename RenderPass>
         static void DrawText(const gfx::FRect& rect, const gfx::Material& material,
                       const RenderPass& pass, Orientation orientation);
@@ -722,6 +727,7 @@ namespace engine
         struct ClippingMask {
             std::string name;
             gfx::FRect rect;
+            float corner_radius = 0.05f;
             UIStyle::WidgetShape shape = UIStyle::WidgetShape::Rectangle;
         };
         std::vector<ClippingMask> mClippingMaskStack;
