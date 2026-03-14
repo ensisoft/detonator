@@ -937,6 +937,8 @@ void DlgWidgetStyleProperties::SetWidgetColor()
     color_widgets::ColorDialog dlg(this);
     dlg.setAlphaEnabled(true);
     dlg.setButtonMode(color_widgets::ColorDialog::ButtonMode::OkCancel);
+    dlg.setColor(QColor(0x80, 0x80, 0x80, 0xff));
+    
     if (const auto* material = mStyle->GetMaterialType(property_key))
     {
         if (const auto* p = dynamic_cast<const engine::detail::UIColor*>(material))
