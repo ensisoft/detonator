@@ -123,6 +123,7 @@ namespace gui
         void on_sliderVal_valueChanged(double);
         void on_progText_textChanged();
         void on_progVal_valueChanged(int);
+        void on_progOrientation_currentIndexChanged(int);
         void on_btnResetProgVal_clicked();
         void on_btnReloadKeyMap_clicked();
         void on_btnSelectKeyMap_clicked();

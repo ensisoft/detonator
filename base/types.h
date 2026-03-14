@@ -110,6 +110,10 @@ namespace base
         inline Vec2Type ToVector() const noexcept
         { return {mWidth, mHeight }; }
 #endif
+        Size Transpose() const noexcept
+        {
+            return { mHeight, mWidth };
+        }
 
     private:
         T mWidth  = T();
@@ -223,6 +227,11 @@ namespace base
             mX -= other.mX;
             mY -= other.mY;
             return *this;
+        }
+
+        Point Transpose() const noexcept
+        {
+            return { mY, mX };
         }
     private:
         T mX = T();

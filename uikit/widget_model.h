@@ -91,20 +91,33 @@ namespace uik
         class ProgressBarModel
         {
         public:
-            void SetText(const std::string& text)
-            { mText = text; }
-            void SetValue(float value)
+            void SetText(std::string text) noexcept
+            { mText = std::move(text); }
+
+            void SetValue(float value) noexcept
             { mValue = value; }
-            void ClearValue()
+
+            void ClearValue() noexcept
             { mValue.reset(); }
-            bool HasValue() const
+
+            auto HasValue() const noexcept
             { return mValue.has_value(); }
-            std::optional<float> GetValue() const
+
+            auto GetValue() const noexcept
             { return mValue; }
-            float GetValue(float backup) const
+
+            float GetValue(float backup) const noexcept
             { return mValue.value_or(backup); }
-            std::string GetText() const
+
+            auto GetText() const
             { return mText; }
+
+            auto GetOrientation() const noexcept
+            { return mOrientation; }
+
+            void SetOrientation(WidgetOrientation orientation) noexcept
+            { mOrientation = orientation; }
+
             std::size_t GetHash(size_t hash) const;
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
             void IntoJson(data::Writer& data) const;
@@ -112,6 +125,7 @@ namespace uik
         private:
             std::optional<float> mValue;
             std::string mText;
+            WidgetOrientation mOrientation = WidgetOrientation::Horizontal;
         };
 
         class SliderModel

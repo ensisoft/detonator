@@ -223,6 +223,7 @@ std::size_t ProgressBarModel::GetHash(size_t hash) const
         hash = base::hash_combine(hash, mValue.value());
     hash  =base::hash_combine(hash, mValue.has_value());
     hash = base::hash_combine(hash, mText);
+    hash = base::hash_combine(hash, mOrientation);
     return hash;
 }
 void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
@@ -241,7 +242,7 @@ void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     p.hovered = false;
     p.pressed = false;
-    ps.painter->DrawProgressBar(ps.widgetId, p, mValue);
+    ps.painter->DrawProgressBar(ps.widgetId, p, mValue, mOrientation);
 
     auto text = mText;
     if (mValue.has_value())
@@ -250,7 +251,7 @@ void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
         const int percent = 100 * val;
         text = base::FormatString(mText, percent);
     }
-    ps.painter->DrawStaticText(ps.widgetId, p, text, 1.0f);
+    ps.painter->DrawStaticText(ps.widgetId, p, text, 1.0f, mOrientation);
 
     p.hovered = paint.hovered;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
@@ -260,6 +261,7 @@ void ProgressBarModel::IntoJson(data::Writer& data) const
 {
     if (mValue.has_value())
         data.Write("value", mValue.value());
+    data.Write("orientation", mOrientation);
     data.Write("text", mText);
 }
 bool ProgressBarModel::FromJson(const data::Reader& data)
@@ -267,7 +269,10 @@ bool ProgressBarModel::FromJson(const data::Reader& data)
     float value;
     if (data.Read("value", &value))
         mValue = value;
-    return data.Read("text", &mText);
+    bool ok = true;
+    ok &= data.Read("text", &mText);
+    ok &= data.Read("orientation", &mOrientation);
+    return ok;
 }
 
 std::size_t SliderModel::GetHash(size_t hash) const
@@ -665,7 +670,7 @@ void LabelModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
-    ps.painter->DrawStaticText(ps.widgetId, p, mText, mLineHeight);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, mLineHeight, WidgetOrientation::Horizontal);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
@@ -703,7 +708,7 @@ void PushButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
 
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::None);
-    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f, WidgetOrientation::Horizontal);
     if (p.focused)
         ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 
@@ -800,7 +805,7 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     ps.painter->DrawCheckBox(ps.widgetId, p, mChecked);
 
     p.rect = text;
-    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f, WidgetOrientation::Horizontal);
     if (paint.focused)
         ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 
@@ -1069,7 +1074,7 @@ void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     ps.painter->DrawRadioButton(ps.widgetId, p, mSelected);
 
     p.rect = text;
-    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f, WidgetOrientation::Horizontal);
     if (p.focused)
         ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 
