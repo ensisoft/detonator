@@ -917,7 +917,8 @@ void UIPainter::DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) 
     if (const auto* material = GetWidgetMaterial(id, ps, "background"))
     {
         const auto shape = GetWidgetProperty(id, ps, "shape", UIStyle::WidgetShape::Rectangle);
-        FillShape(ps.rect, *material, shape);
+        const auto radius = GetCornerRadius(id, ps, "shape-corner-radius", shape);
+        FillShape(ps.rect, *material, shape, radius);
     }
 }
 void UIPainter::DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) const
@@ -926,7 +927,9 @@ void UIPainter::DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) cons
     {
         const auto width = GetWidgetProperty(id, ps, "border-width", 1.0f);
         const auto shape = GetWidgetProperty(id, ps, "shape", UIStyle::WidgetShape::Rectangle);
-        OutlineShape(ps.rect, *material, shape, width);
+        const auto radius = GetCornerRadius(id, ps, "shape-corner-radius", shape);
+
+        OutlineShape(ps.rect, *material, shape, width, radius);
     }
 }
 
@@ -994,13 +997,15 @@ void UIPainter::DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const
     if (const auto* material = GetWidgetMaterial(id, ps, "text-edit-background"))
     {
         const auto shape = GetWidgetProperty(id, ps, "text-edit-shape", UIStyle::WidgetShape::RoundRect);
-        FillShape(ps.rect, *material, shape);
+        const auto radius = GetCornerRadius(id, ps, "text-edit-shape-corner-radius", shape);
+        FillShape(ps.rect, *material, shape, radius);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "text-edit-border"))
     {
         const auto width = GetWidgetProperty(id, ps, "text-edit-border-width", 1.0f);
         const auto shape = GetWidgetProperty(id, ps, "text-edit-shape", UIStyle::WidgetShape::RoundRect);
-        OutlineShape(ps.rect, *material, shape, width);
+        const auto radius = GetCornerRadius(id, ps, "text-edit-shape-corner-radius", shape);
+        OutlineShape(ps.rect, *material, shape, width, radius);
     }
 }
 
@@ -1009,13 +1014,14 @@ void UIPainter::DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) c
     if (const auto* material = GetWidgetMaterial(id, ps, "focus-rect"))
     {
         const auto button_shape = GetWidgetProperty(id, ps, "button-shape", UIStyle::WidgetShape::RoundRect);
+        const auto rect_radius = GetCornerRadius(id, ps, "focus-rect-corner-radius", button_shape);
         const auto rect_shape = GetWidgetProperty(id, ps, "focus-rect-shape", button_shape);
         const auto rect_width = GetWidgetProperty(id, ps, "focus-rect-width", 1.0f);
 
         gfx::FRect rect = ps.rect;
         rect.Grow(-4.0f, -4.0f);
         rect.Translate(2.0f, 2.0f);
-        OutlineShape(rect, *material, rect_shape, rect_width);
+        OutlineShape(rect, *material, rect_shape, rect_width, rect_radius);
     }
 }
 
@@ -1024,24 +1030,27 @@ void UIPainter::DrawCheckBox(const WidgetId& id, const PaintStruct& ps , bool ch
     if (const auto* material = GetWidgetMaterial(id, ps, "check-background"))
     {
         const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Rectangle);
-        FillShape(ps.rect, *material, shape);
+        const auto radius = GetCornerRadius(id, ps, "check-shape-corner-radius", shape);
+        FillShape(ps.rect, *material, shape, radius);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "check-border"))
     {
         const auto width = GetWidgetProperty(id, ps, "check-border-width", 1.0f);
         const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Rectangle);
-        OutlineShape(ps.rect, *material, shape, width);
+        const auto radius = GetCornerRadius(id, ps, "check-shape-corner-radius", shape);
+        OutlineShape(ps.rect, *material, shape, width, radius);
     }
 
     if (const auto* material = GetWidgetMaterial(id, ps, checked ? "check-mark-checked" : "check-mark-unchecked"))
     {
         const auto shape = GetWidgetProperty(id, ps, "check-mark-shape", UIStyle::WidgetShape::RoundRect);
+        const auto radius = GetCornerRadius(id, ps, "check-mark-shape-corner-radius", shape);
         gfx::FRect mark;
         mark.Move(ps.rect.GetPosition());
         mark.Resize(ps.rect.GetSize());
         mark.Grow(-6.0f, -6.0f);
         mark.Translate(3.0f, 3.0f);
-        FillShape(mark, *material, shape);
+        FillShape(mark, *material, shape, radius);
     }
 }
 
@@ -1050,25 +1059,28 @@ void UIPainter::DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool 
     if (const auto* material = GetWidgetMaterial(id, ps, "check-background"))
     {
         const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Circle);
-        FillShape(ps.rect, *material, shape);
+        const auto radius = GetCornerRadius(id, ps, "check-shape-corner-radius", shape);
+        FillShape(ps.rect, *material, shape, radius);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "check-border"))
     {
         const auto width = GetWidgetProperty(id, ps, "check-border-width", 1.0f);
         const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Circle);
-        OutlineShape(ps.rect, *material, shape, width);
+        const auto radius = GetCornerRadius(id, ps, "check-shape-corner-radius", shape);
+        OutlineShape(ps.rect, *material, shape, width, radius);
     }
     const auto* check_mark_name = selected ? "check-mark-checked" : "check-mark-unchecked";
 
     if (const auto* material = GetWidgetMaterial(id, ps, check_mark_name))
     {
         const auto shape = GetWidgetProperty(id, ps, "check-mark-shape", UIStyle::WidgetShape::Circle);
+        const auto radius = GetCornerRadius(id, ps, "check-mark-shape-corner-radius", shape);
         gfx::FRect mark;
         mark.Move(ps.rect.GetPosition());
         mark.Resize(ps.rect.GetSize());
         mark.Grow(-6.0f, -6.0f);
         mark.Translate(3.0f, 3.0f);
-        FillShape(mark, *material, shape);
+        FillShape(mark, *material, shape, radius);
     }
 }
 
@@ -1077,13 +1089,15 @@ void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon
     if  (const auto* material = GetWidgetMaterial(id, ps, "button-background"))
     {
         const auto shape = GetWidgetProperty(id, ps, "button-shape", UIStyle::WidgetShape::RoundRect);
-        FillShape(ps.rect, *material, shape);
+        const auto radius = GetCornerRadius(id, ps, "button-shape-corner-radius", shape);
+        FillShape(ps.rect, *material, shape, radius);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "button-border"))
     {
         const auto width = GetWidgetProperty(id, ps, "button-border-width", 1.0f);
         const auto shape = GetWidgetProperty(id, ps, "button-shape", UIStyle::WidgetShape::RoundRect);
-        OutlineShape(ps.rect, *material, shape, width);
+        const auto radius = GetCornerRadius(id, ps, "button-shape-corner-radius", shape);
+        OutlineShape(ps.rect, *material, shape, width, radius);
     }
     if (btn == ButtonIcon::None)
         return;
@@ -1173,40 +1187,45 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps,
     if (const auto* material = GetWidgetMaterial(id, ps, "slider-background"))
     {
         const auto shape = GetWidgetProperty(id, ps, "slider-shape", UIStyle::WidgetShape::RoundRect);
-        FillShape(ps.rect, *material, shape);
+        const auto radius = GetCornerRadius(id, ps, "slider-shape-corner-radius", shape);
+        FillShape(ps.rect, *material, shape, radius);
     }
     if (ps.focused)
     {
         if (const auto* material = GetWidgetMaterial(id, ps, "focus-rect"))
         {
             const auto slider_shape = GetWidgetProperty(id, ps, "slider-shape", UIStyle::WidgetShape::RoundRect);
+            const auto slider_radius = GetCornerRadius(id, ps, "slider-shape-corner-radius", slider_shape);
             const auto rect_shape = GetWidgetProperty(id, ps, "focus-rect-shape", slider_shape);
             const auto rect_width = GetWidgetProperty(id, ps, "focus-rect-width", 1.0f);
 
             gfx::FRect rect = ps.rect;
             rect.Grow(-4.0f, -4.0f);
             rect.Translate(2.0f, 2.0f);
-            OutlineShape(rect, *material, rect_shape, rect_width);
+            OutlineShape(rect, *material, rect_shape, rect_width, slider_radius);
         }
     }
 
     if (const auto* material = GetWidgetMaterial(id, ps, "slider-knob"))
     {
         const auto shape = GetWidgetProperty(id, ps, "slider-knob-shape", UIStyle::WidgetShape::RoundRect);
-        FillShape(knob, *material, shape);
+        const auto radius = GetCornerRadius(id, ps, "slider-knob-shape-corner-radius", shape);
+        FillShape(knob, *material, shape, radius);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "slider-knob-border"))
     {
         const auto shape = GetWidgetProperty(id, ps, "slider-knob-shape", UIStyle::WidgetShape::RoundRect);
+        const auto radius = GetCornerRadius(id, ps, "slider-knob-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "slider-knob-border-width", 1.0f);
-        OutlineShape(knob, *material, shape, width);
+        OutlineShape(knob, *material, shape, width, radius);
     }
 
     if (const auto* material = GetWidgetMaterial(id, ps, "slider-border"))
     {
         const auto shape = GetWidgetProperty(id, ps, "slider-shape", UIStyle::WidgetShape::RoundRect);
+        const auto radius = GetCornerRadius(id, ps, "slider-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "slider-border-width", 1.0f);
-        OutlineShape(ps.rect, *material, shape, width);
+        OutlineShape(ps.rect, *material, shape, width, radius);
     }
 }
 
@@ -1216,12 +1235,14 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
     if (const auto* material = GetWidgetMaterial(id, ps, "progress-bar-background"))
     {
         const auto shape = GetWidgetProperty(id, ps, "progress-bar-shape", UIStyle::WidgetShape::RoundRect);
-        FillShape(ps.rect, *material, shape);
+        const auto radius = GetCornerRadius(id, ps, "progress-bar-shape-corner-radius", shape);
+        FillShape(ps.rect, *material, shape, radius);
     }
 
     if (const auto* material = GetWidgetMaterial(id, ps, "progress-bar-fill"))
     {
         const auto shape = GetWidgetProperty(id, ps, "progress-bar-fill-shape", UIStyle::WidgetShape::RoundRect);
+        const auto radius = GetCornerRadius(id, ps, "progress-bar-fill-shape-corner-radius", shape);
         if (percentage.has_value())
         {
             const auto value = percentage.value();
@@ -1231,7 +1252,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
             else if (orientation == Orientation::Vertical)
                 fill.SetHeight(ps.rect.GetHeight() * value);
 
-            FillShape(fill, *material, shape);
+            FillShape(fill, *material, shape, radius);
         }
         else
         {
@@ -1255,7 +1276,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
                 indicator.Translate(progress_width*0.5f, 0.0f);
                 indicator.Translate(-indicator_width*0.5f, 0.0f);
                 indicator.Translate(value * 0.8f * 0.5 * progress_width, 0.0f);
-                FillShape(indicator, *material, shape);
+                FillShape(indicator, *material, shape, radius);
             }
             else if (orientation == Orientation::Vertical)
             {
@@ -1270,7 +1291,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
                 indicator.Translate(0.0f, progress_height*0.5f);
                 indicator.Translate(0.0f, -indicator_height*0.5f);
                 indicator.Translate(0.0f, value * 0.8f * 0.5f * progress_height);
-                FillShape(indicator, *material, shape);
+                FillShape(indicator, *material, shape, radius);
             }
         }
     }
@@ -1278,8 +1299,9 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
     if (const auto* material = GetWidgetMaterial(id, ps, "progress-bar-border"))
     {
         const auto shape = GetWidgetProperty(id, ps, "progress-bar-shape", UIStyle::WidgetShape::RoundRect);
+        const auto radius = GetCornerRadius(id, ps, "progress-bar-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "progress-bar-border-width", 1.0f);
-        OutlineShape(ps.rect, *material, shape, width);
+        OutlineShape(ps.rect, *material, shape, width, radius);
     }
 }
 
@@ -1291,24 +1313,28 @@ void UIPainter::DrawScrollBar(const WidgetId& id, const PaintStruct& ps, const u
     if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-background"))
     {
         const auto shape = GetWidgetProperty(id, ps, "scrollbar-shape", UIStyle::WidgetShape::RoundRect);
-        FillShape(ps.rect, *material, shape, direction);
+        const auto radius = GetCornerRadius(id, ps, "scrollbar-shape-corner-radius", shape);
+        FillShape(ps.rect, *material, shape, radius, direction);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-handle"))
     {
         const auto shape = GetWidgetProperty(id, ps, "scrollbar-handle-shape", UIStyle::WidgetShape::RoundRect);
-        FillShape(handle, *material, shape, direction);
+        const auto radius = GetCornerRadius(id, ps, "scrollbar-handle-shape-corner-radius", shape);
+        FillShape(handle, *material, shape, radius, direction);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-handle-border"))
     {
         const auto shape = GetWidgetProperty(id, ps, "scrollbar-handle-shape", UIStyle::WidgetShape::RoundRect);
+        const auto radius = GetCornerRadius(id, ps, "scrollbar-handle-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "scrollbar-handle-border-width", 1.0f);
-        OutlineShape(handle, *material, shape, width, direction);
+        OutlineShape(handle, *material, shape, width, radius, direction);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-border"))
     {
         const auto shape = GetWidgetProperty(id, ps, "scrollbar-shape", UIStyle::WidgetShape::RoundRect);
+        const auto radius = GetCornerRadius(id, ps, "scrollbar-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "scrollbar-border-width", 1.0f);
-        OutlineShape(ps.rect, *material, shape, width, direction);
+        OutlineShape(ps.rect, *material, shape, width, radius, direction);
     }
 }
 
@@ -1317,41 +1343,46 @@ void UIPainter::DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik:
     if (const auto* material = GetWidgetMaterial(id, ps, on_off ? "toggle-background-on" : "toggle-background-off"))
     {
         const auto shape = GetWidgetProperty(id, ps, "toggle-shape", UIStyle::WidgetShape::RoundRect);
-        FillShape(ps.rect, *material, shape);
+        const auto radius = GetCornerRadius(id, ps, "toggle-shape-corner-radius", shape);
+        FillShape(ps.rect, *material, shape, radius);
     }
     if (ps.focused)
     {
         if (const auto* material = GetWidgetMaterial(id, ps, "focus-rect"))
         {
             const auto slider_shape = GetWidgetProperty(id, ps, "toggle-shape", UIStyle::WidgetShape::RoundRect);
+            const auto slider_radius = GetCornerRadius(id, ps, "toggle-shape-corner-radius", slider_shape);
             const auto rect_shape = GetWidgetProperty(id, ps, "focus-rect-shape", slider_shape);
             const auto rect_width = GetWidgetProperty(id, ps, "focus-rect-width", 1.0f);
 
             gfx::FRect rect = ps.rect;
             rect.Grow(-4.0f, -4.0f);
             rect.Translate(2.0f, 2.0f);
-            OutlineShape(rect, *material, rect_shape, rect_width);
+            OutlineShape(rect, *material, rect_shape, rect_width, slider_radius);
         }
     }
 
     if (const auto* material = GetWidgetMaterial(id, ps, on_off ? "toggle-knob-on" : "toggle-knob-off"))
     {
         const auto shape = GetWidgetProperty(id, ps, "toggle-knob-shape", UIStyle::WidgetShape::RoundRect);
-        FillShape(knob, *material, shape);
+        const auto radius = GetCornerRadius(id, ps, "toggle-knob-shape-corner-radius", shape);
+        FillShape(knob, *material, shape, radius);
     }
 
     if (const auto* material = GetWidgetMaterial(id, ps, on_off ? "toggle-knob-border-on" : "toggle-knob-border-off"))
     {
         const auto shape = GetWidgetProperty(id, ps, "toggle-knob-shape", UIStyle::WidgetShape::RoundRect);
+        const auto radius = GetCornerRadius(id, ps, "toggle-knob-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "toggle-knob-border-width", 1.0f);
-        OutlineShape(knob, *material, shape, width);
+        OutlineShape(knob, *material, shape, width, radius);
     }
 
     if (const auto* material = GetWidgetMaterial(id, ps, on_off ? "toggle-border-on" : "toggle-border-off"))
     {
         const auto shape = GetWidgetProperty(id, ps, "toggle-shape", UIStyle::WidgetShape::RoundRect);
+        const auto radius = GetCornerRadius(id, ps, "toggle-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "toggle-border-width", 1.0f);
-        OutlineShape(ps.rect, *material, shape, width);
+        OutlineShape(ps.rect, *material, shape, width, radius);
     }
 }
 
@@ -1532,6 +1563,7 @@ void UIPainter::PushMask(const MaskStruct& mask)
         clip.name  = mask.name;
         clip.rect  = mask.rect;
         clip.shape = GetWidgetProperty(mask.id, mask.klass, "shape", UIStyle::WidgetShape::Rectangle);
+        clip.corner_radius = GetWidgetProperty(mask.id, mask.klass, "shape-corner-radius", 0.05f);
 
         // offset the masking area by the thickness of the border
         const auto border_thickness = GetWidgetProperty(mask.id, mask.klass, "border-width", 1.0f);
@@ -1694,7 +1726,8 @@ uint8_t UIPainter::StencilPass() const
     {
         gfx::StencilMaskPass overlap(gfx::StencilWriteValue(stencil_val), *mPainter,
                                      gfx::StencilMaskPass::StencilFunc::OverlapIncrement);
-        DrawShape(mask.rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, mask.shape, Orientation::Horizontal);
+        DrawShape(mask.rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, mask.shape,
+            Orientation::Horizontal, mask.corner_radius);
         ++stencil_val;
     }
     mClippingStencilMaskValue = stencil_val;
@@ -1743,22 +1776,22 @@ void UIPainter::DrawText(const std::string& text, const std::string& font_name, 
 }
 
 void UIPainter::FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                          Orientation orientation ) const
+                          float corner_radius, Orientation orientation) const
 {
     if (const auto value = StencilPass())
     {
         gfx::StencilTestColorWritePass pass(gfx::StencilPassValue(value), *mPainter);
-        DrawShape(rect, material, pass, shape, orientation);
+        DrawShape(rect, material, pass, shape, orientation, corner_radius);
     }
     else
     {
         gfx::GenericRenderPass pass(*mPainter);
-        DrawShape(rect, material, pass, shape, orientation);
+        DrawShape(rect, material, pass, shape, orientation, corner_radius);
     }
 }
 
 void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                             float thickness, Orientation orientation) const
+                             float thickness, float corner_radius, Orientation orientation) const
 {
     const auto width  = shape_rect.GetWidth();
     const auto height = shape_rect.GetHeight();
@@ -1779,10 +1812,10 @@ void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& 
 
         const gfx::StencilMaskPass mask(gfx::StencilWriteValue(0), *mPainter,
                                      gfx::StencilMaskPass::StencilFunc::Overwrite);
-        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), mask, shape, orientation);
+        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), mask, shape, orientation, corner_radius);
 
         const gfx::StencilTestColorWritePass cover(stencil_value, *mPainter);
-        DrawShape(shape_rect, material, cover, shape, orientation);
+        DrawShape(shape_rect, material, cover, shape, orientation, corner_radius);
     }
     else
     {
@@ -1793,10 +1826,10 @@ void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& 
         const gfx::StencilMaskPass overlap(gfx::StencilClearValue(1),
                                            gfx::StencilWriteValue(0), *mPainter,
                                            gfx::StencilMaskPass::StencilFunc::Overwrite);
-        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, shape, orientation);
+        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, shape, orientation, corner_radius);
 
         const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), *mPainter);
-        DrawShape(shape_rect, material, cover, shape, orientation);
+        DrawShape(shape_rect, material, cover, shape, orientation, corner_radius);
     }
 }
 
@@ -2090,10 +2123,21 @@ T UIPainter::GetWidgetProperty(const std::string& id,
     return p.GetValue(value);
 }
 
+float UIPainter::GetCornerRadius(const std::string& id,
+                                 const PaintStruct& ps,
+                                 const std::string& key,
+                                 UIStyle::WidgetShape shape) const
+{
+    if (shape != UIStyle::WidgetShape::RoundRect)
+        return 0.0f;
+
+    return GetWidgetProperty(id, ps, key, 0.05f);
+}
+
 // static
 template<typename RenderPass>
 void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass,
-                          UIStyle::WidgetShape shape, Orientation orientation)
+                          UIStyle::WidgetShape shape, Orientation orientation, float corner_radius)
 {
     gfx::Transform transform;
     transform.Resize(rect);
@@ -2102,7 +2146,7 @@ void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material,
     if (shape == UIStyle::WidgetShape::Rectangle)
         pass.Draw(gfx::Rectangle(), transform, material);
     else if (shape == UIStyle::WidgetShape::RoundRect)
-        pass.Draw(gfx::RoundRectangle(), transform, material);
+        pass.Draw(gfx::RoundRectangle(gfx::RoundRectangle::Style::Solid, corner_radius), transform, material);
     else if (shape == UIStyle::WidgetShape::Circle)
         pass.Draw(gfx::Circle(), transform, material);
     else if (shape == UIStyle::WidgetShape::Capsule && orientation == Orientation::Horizontal)
