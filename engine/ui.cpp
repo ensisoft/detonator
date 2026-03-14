@@ -1138,7 +1138,8 @@ void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon
     }
 }
 
-void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const
+void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps,
+                           const uik::FRect& knob, Orientation orientation) const
 {
     if (const auto* material = GetWidgetMaterial(id, ps, "slider-background"))
     {

@@ -157,7 +157,8 @@ namespace uik
 
         virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const = 0;
 
-        virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const FRect& knob) const = 0;
+        virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps,
+                                const FRect& knob, Orientation orientation) const = 0;
 
         virtual void DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
             std::optional<float> percentage, Orientation orientation) const = 0;

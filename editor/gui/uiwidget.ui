@@ -1291,7 +1291,7 @@
                       </size>
                      </property>
                      <property name="currentIndex">
-                      <number>2</number>
+                      <number>1</number>
                      </property>
                      <widget class="QWidget" name="spinPage">
                       <layout class="QGridLayout" name="gridLayout_4">
@@ -1413,18 +1413,18 @@
                        <property name="bottomMargin">
                         <number>0</number>
                        </property>
-                       <item row="0" column="0">
-                        <widget class="QLabel" name="label_7">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
+                       <item row="2" column="1">
+                        <spacer name="verticalSpacer_4">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
                          </property>
-                         <property name="text">
-                          <string>Value</string>
+                         <property name="sizeHint" stdset="0">
+                          <size>
+                           <width>20</width>
+                           <height>40</height>
+                          </size>
                          </property>
-                        </widget>
+                        </spacer>
                        </item>
                        <item row="0" column="1">
                         <widget class="QDoubleSpinBox" name="sliderVal">
@@ -1448,18 +1448,28 @@
                          </property>
                         </widget>
                        </item>
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="label_7">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="text">
+                          <string>Value</string>
+                         </property>
+                        </widget>
+                       </item>
                        <item row="1" column="1">
-                        <spacer name="verticalSpacer_4">
-                         <property name="orientation">
-                          <enum>Qt::Vertical</enum>
+                        <widget class="QComboBox" name="sliderOrientation"/>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="label_17">
+                         <property name="text">
+                          <string>Orientation</string>
                          </property>
-                         <property name="sizeHint" stdset="0">
-                          <size>
-                           <width>20</width>
-                           <height>40</height>
-                          </size>
-                         </property>
-                        </spacer>
+                        </widget>
                        </item>
                       </layout>
                      </widget>
@@ -2979,6 +2989,7 @@
   <tabstop>spinMin</tabstop>
   <tabstop>spinMax</tabstop>
   <tabstop>sliderVal</tabstop>
+  <tabstop>sliderOrientation</tabstop>
   <tabstop>progVal</tabstop>
   <tabstop>btnResetProgVal</tabstop>
   <tabstop>progText</tabstop>

@@ -121,6 +121,7 @@ namespace gui
         void on_spinMax_valueChanged(int);
         void on_spinVal_valueChanged(int);
         void on_sliderVal_valueChanged(double);
+        void on_sliderOrientation_currentIndexChanged(int);
         void on_progText_textChanged();
         void on_progVal_valueChanged(int);
         void on_progOrientation_currentIndexChanged(int);
