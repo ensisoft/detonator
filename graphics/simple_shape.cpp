@@ -1303,7 +1303,10 @@ std::string GetSimpleShapeGeometryId(const SimpleShapeArgs& args,
         }
         else if (type == SimpleShapeType::RoundRect)
         {
+            const auto rect_args = std::get<detail::RoundRectShapeArgs>(args);
+            const auto radius = static_cast<int>(rect_args.corner_radius * 100);
             id += NameAspectRatio(rect_width, rect_height, Truncate, "%d:%d");
+            id += base::ToChars(radius);
         }
     }
     return id;
