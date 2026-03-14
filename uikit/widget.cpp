@@ -277,7 +277,9 @@ bool ProgressBarModel::FromJson(const data::Reader& data)
 
 std::size_t SliderModel::GetHash(size_t hash) const
 {
-    return base::hash_combine(hash, mValue);
+    hash = base::hash_combine(hash, mValue);
+    hash = base::hash_combine(hash, mOrientation);
+    return hash;
 }
 void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
 {
@@ -299,7 +301,7 @@ void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     ComputeLayout(paint.rect, &slider, &knob);
     p.pressed = ps.state->GetValue(ps.widgetId + "/slider-knob-down", false);
     p.hovered = ps.state->GetValue(ps.widgetId + "/slider-knob-under-mouse", false);
-    ps.painter->DrawSlider(ps.widgetId, p, knob);
+    ps.painter->DrawSlider(ps.widgetId, p, knob, mOrientation);
 
     // drawing the focus rect has been baked in the DrawSlider since that
     // is simply the easiest and most pragmatic way to get a nicer
@@ -313,10 +315,14 @@ void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
 void SliderModel::IntoJson(data::Writer& data) const
 {
     data.Write("value", mValue);
+    data.Write("orientation", mOrientation);
 }
 bool SliderModel::FromJson(const data::Reader& data)
 {
-    return data.Read("value", &mValue);
+    bool ok = true;
+    ok &= data.Read("value", &mValue);
+    ok &= data.Read("orientation", &mOrientation);
+    return ok;
 }
 WidgetAction SliderModel::MouseEnter(const MouseStruct&)
 {
@@ -342,12 +348,21 @@ WidgetAction SliderModel::MouseMove(const MouseEvent& mouse, const MouseStruct& 
     if (!slider_down)
         return WidgetAction {};
 
-    const auto slider_distance = slider.GetWidth() - knob.GetWidth();
+    const auto horizontal_slide_distance = slider.GetWidth() - knob.GetWidth();
+    const auto vertical_slide_distance = slider.GetHeight() - knob.GetHeight();
+
     const auto& mouse_before = ms.state->GetValue(ms.widgetId + "/mouse-pos", mouse.widget_mouse_pos);
     const auto& mouse_delta  = mouse.widget_mouse_pos - mouse_before;
-    const auto delta = mouse_delta.GetX();
-    const auto dx = delta / slider_distance;
-    mValue = math::clamp(0.0f, 1.0f, mValue + dx);
+    const auto mouse_dx = mouse_delta.GetX();
+    const auto mouse_dy = mouse_delta.GetY();
+
+    const auto dx = mouse_dx / horizontal_slide_distance;
+    const auto dy = mouse_dy / vertical_slide_distance;
+
+    if (mOrientation == WidgetOrientation::Horizontal)
+        mValue = math::clamp(0.0f, 1.0f, mValue + dx);
+    else if (mOrientation == WidgetOrientation::Vertical)
+        mValue = math::clamp(0.0f, 1.0f, mValue + dy);
 
     ms.state->SetValue(ms.widgetId + "/mouse-pos", mouse.widget_mouse_pos);
 
@@ -372,28 +387,38 @@ WidgetAction SliderModel::MouseLeave(const MouseStruct& ms)
 WidgetAction SliderModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
 {
     // todo: maybe use non-constant delta step when moving slider by keys
-    if (key.key == VirtualKey::MoveUp || key.key == VirtualKey::MoveRight)
+
+    float step = 0.0f;
+
+    if (mOrientation == WidgetOrientation::Horizontal)
     {
-        if (mValue < 1.0f)
-        {
-            mValue = math::clamp(0.0f, 1.0f, mValue + 0.05f);
-            WidgetAction action;
-            action.type = WidgetActionType::ValueChange;
-            action.value = mValue;
-            return action;
-        }
+        if (key.key == VirtualKey::MoveLeft)
+            step = -KeyStepSize;
+        else if (key.key == VirtualKey::MoveRight)
+            step = KeyStepSize;
+        else return WidgetAction {};
     }
-    else if (key.key == VirtualKey::MoveDown || key.key == VirtualKey::MoveLeft)
+    else if (mOrientation == WidgetOrientation::Vertical)
     {
-        if (mValue > 0.0f)
-        {
-            mValue = math::clamp(0.0f, 1.0f, mValue - 0.05f);
-            WidgetAction action;
-            action.type = WidgetActionType::ValueChange;
-            action.value = mValue;
-            return action;
-        }
+        if (key.key == VirtualKey::MoveUp)
+            step = -KeyStepSize;
+        else if (key.key == VirtualKey::MoveDown)
+            step = KeyStepSize;
+        else return WidgetAction {};
+
+    } else BUG("Unhandled widget orientation");
+
+    const auto can_increment = step < 0.0f && mValue > 0.0f;
+    const auto can_decrement = step > 0.0f && mValue < 1.0f;
+    if (can_increment || can_decrement)
+    {
+        mValue = math::clamp(0.0f, 1.0f, mValue + step);
+        WidgetAction action;
+        action.type = WidgetActionType::ValueChange;
+        action.value = mValue;
+        return action;
     }
+
     return WidgetAction {};
 }
 
@@ -408,14 +433,18 @@ void SliderModel::ComputeLayout(const FRect& rect, FRect* slider, FRect* knob) c
     const auto height = rect.GetHeight();
     const auto min_side = std::min(width, height);
     const auto knob_size = min_side;
+    const auto knob_pos = math::clamp(0.0f, 1.0f, mValue);
 
-    const auto slide_distance = width - knob_size;
-    const auto slide_pos = math::clamp(0.0f, 1.0f, mValue);
-
+    const auto slide_distance = mOrientation == WidgetOrientation::Horizontal
+                                    ? width - knob_size
+                                    : height - knob_size;
     knob->SetWidth(min_side);
     knob->SetHeight(min_side);
     knob->Move(rect.GetPosition());
-    knob->Translate(slide_distance * slide_pos, 0.0f);
+    if (mOrientation == WidgetOrientation::Horizontal)
+        knob->Translate(slide_distance * knob_pos, 0.0f);
+    else if (mOrientation == WidgetOrientation::Vertical)
+        knob->Translate(0.0f, slide_distance * knob_pos);
     *slider = rect;
 }
 

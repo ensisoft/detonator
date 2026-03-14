@@ -131,14 +131,25 @@ namespace uik
         class SliderModel
         {
         public:
-            void SetValue(float value)
+            static constexpr auto KeyStepSize = 0.05f;
+
+            void SetOrientation(WidgetOrientation orientation) noexcept
+            { mOrientation = orientation; }
+
+            void SetValue(float value) noexcept
             { mValue = value; }
-            float GetValue() const
+
+            auto GetValue() const noexcept
             { return mValue; }
+
+            auto GetOrientation() const noexcept
+            { return mOrientation; }
+
             std::size_t GetHash(size_t hash) const;
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
             void IntoJson(data::Writer& data) const;
             bool FromJson(const data::Reader& data);
+
             WidgetAction MouseEnter(const MouseStruct&);
             WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&);
             WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct& ms);
@@ -150,6 +161,7 @@ namespace uik
             void ComputeLayout(const FRect& rect, FRect* slider, FRect* knob) const;
         private:
             float mValue = 0.5f;
+            WidgetOrientation mOrientation = WidgetOrientation::Horizontal;
         };
 
         class SpinBoxModel

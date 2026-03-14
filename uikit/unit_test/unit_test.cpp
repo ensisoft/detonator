@@ -88,7 +88,8 @@ public:
     {}
     void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override
     {}
-    void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override
+    void DrawSlider(const WidgetId& id, const PaintStruct& ps,
+                    const uik::FRect& knob, Orientation orientation) const override
     {}
     void DrawProgressBar(const WidgetId&, const PaintStruct& ps,
         std::optional<float> percentage, Orientation orientation) const override

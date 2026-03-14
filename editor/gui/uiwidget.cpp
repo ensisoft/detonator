@@ -627,6 +627,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<uik::ScrollArea::ScrollBarMode>(mUI.cmbScrollAreaVerticalScrollbarMode);
     PopulateFromEnum<uik::ScrollArea::ScrollBarMode>(mUI.cmbScrollAreaHorizontalScrollbarMode);
     PopulateFromEnum<uik::WidgetOrientation>(mUI.progOrientation);
+    PopulateFromEnum<uik::WidgetOrientation>(mUI.sliderOrientation);
     PopulateFromEnum<uik::CheckBox::Check>(mUI.chkPlacement);
     PopulateFromEnum<uik::RadioButton::Check>(mUI.rbPlacement);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
@@ -1658,6 +1659,11 @@ void UIWidget::on_spinVal_valueChanged(int)
 }
 
 void UIWidget::on_sliderVal_valueChanged(double)
+{
+    UpdateCurrentWidgetProperties();
+}
+
+void UIWidget::on_sliderOrientation_currentIndexChanged(int)
 {
     UpdateCurrentWidgetProperties();
 }
@@ -2904,7 +2910,16 @@ void UIWidget::UpdateCurrentWidgetProperties()
         }
         else if (auto* slider = uik::WidgetCast<uik::Slider>(widget))
         {
+            const auto orientation = slider->GetOrientation();
+
             slider->SetValue(GetValue(mUI.sliderVal));
+            slider->SetOrientation(GetValue(mUI.sliderOrientation));
+
+            if (slider->GetOrientation() != orientation)
+            {
+                const auto size = slider->GetSize();
+                slider->SetSize(size.Transpose());
+            }
         }
         else if (auto* spin = uik::WidgetCast<uik::SpinBox>(widget))
         {
@@ -3059,6 +3074,7 @@ void UIWidget::DisplayCurrentWidgetProperties()
         {
             mUI.stackedWidget->setCurrentWidget(mUI.sliderPage);
             SetValue(mUI.sliderVal, slider->GetValue());
+            SetValue(mUI.sliderOrientation, slider->GetOrientation());
         }
         else if (const auto* prog = uik::WidgetCast<uik::ProgressBar>(widget))
         {
