@@ -19,31 +19,20 @@
 #include "config.h"
 
 #include <cmath>
+#include <tuple>
 
+#include "base/color.h"
 #include "base/math.h"
 
 namespace base
 {
-    // Predefined color enum.
-    enum class Color {
-        Black,   White,
-        Red,     DarkRed,
-        Green,   DarkGreen,
-        Blue,    DarkBlue,
-        Cyan,    DarkCyan,
-        Magenta, DarkMagenta,
-        Yellow,  DarkYellow,
-        Gray,    DarkGray, LightGray,
-        // some special colors
-        HotPink, Transparent,
-        Gold,
-        Silver,
-        Bronze
-    };
-
-
-    // Linear floating point color representation
-    // All values are clamped to 0-1 range.
+    // normalized floating point color using RGBA color model
+    // The color space is left undefined since that really depends
+    // on the context but most likely it's sRGB. For example when
+    // initializing the color with "DarkGray" all RGB channels are
+    // set to 0.5, which will appear to be "perceptually mid dark gray"
+    // to the human eyeball iff the display system assumes that the
+    // value is sRGB encoded and decodes it.
     class Color4f
     {
     public:
@@ -51,7 +40,7 @@ namespace base
 
         // construct a Color4f object from floating point
         // channel values in the range of [0.0f, 1.0f]
-        Color4f(float red, float green, float blue, float alpha = 1.0f) noexcept
+        Color4f(const float red, const float green, const float blue, const float alpha = 1.0f) noexcept
         {
             mRed   = math::clamp(0.0f, 1.0f, red);
             mGreen = math::clamp(0.0f, 1.0f, green);
@@ -61,7 +50,7 @@ namespace base
 
         // construct a new color object from integers
         // each integer gets clamped to [0, 255] range
-        Color4f(int red, int green, int blue, int alpha = 255) noexcept
+        Color4f(const int red, const int green, const int blue, const int alpha = 255) noexcept
         {
             // note: we take integers (as opposed to some
             // type unsigned) so that the simple syntax of
@@ -74,100 +63,23 @@ namespace base
             mAlpha = math::clamp(0, 255, alpha) / 255.0f;
         }
 
-        explicit Color4f(int rgb, int alpha = 255)  noexcept
+        explicit Color4f(const int rgb, const int alpha = 255)  noexcept
            : Color4f(rgb, rgb , rgb, alpha)
         {}
 
-        explicit Color4f(float rgb, float alpha = 1.0f) noexcept
+        explicit Color4f(const float rgb, const float alpha = 1.0f) noexcept
           : Color4f(rgb, rgb, rgb, alpha)
         {}
 
         // not explicit on purpose to allow for implicit
         // conversion from Color enum.
-        Color4f(Color c, float alpha = 1.0f) noexcept
-          : mRed(0.0f)
-          , mGreen(0.0f)
-          , mBlue(0.0f)
+        Color4f(const Color c, const float alpha = 1.0f) noexcept
         {
-            mAlpha = math::clamp(0.0f, 1.0f, alpha);
-            switch (c)
-            {
-                case Color::White:
-                    mRed = mGreen = mBlue = 1.0f;
-                    break;
-                case Color::Black:
-                    break;
-                case Color::Red:
-                    mRed = 1.0f;
-                    break;
-                case Color::DarkRed:
-                    mRed = 0.5f;
-                    break;
-                case Color::Green:
-                    mGreen = 1.0f;
-                    break;
-                case Color::DarkGreen:
-                    mGreen = 0.5f;
-                    break;
-                case Color::Blue:
-                    mBlue = 1.0f;
-                    break;
-                case Color::DarkBlue:
-                    mBlue = 0.5f;
-                    break;
-                case Color::Cyan:
-                    mGreen = mBlue = 1.0f;
-                    break;
-                case Color::DarkCyan:
-                    mGreen = mBlue = 0.5f;
-                    break;
-                case Color::Magenta:
-                    mRed = mBlue = 1.0f;
-                    break;
-                case Color::DarkMagenta:
-                    mRed = mBlue = 0.5f;
-                    break;
-                case Color::Yellow:
-                    mRed = mGreen = 1.0f;
-                    break;
-                case Color::DarkYellow:
-                    mRed = mGreen = 0.5f;
-                    break;
-                case Color::Gray:
-                    mRed = mGreen = mBlue = 0.62f;
-                    break;
-                case Color::DarkGray:
-                    mRed = mGreen = mBlue = 0.5f;
-                    break;
-                case Color::LightGray:
-                    mRed = mGreen = mBlue = 0.75f;
-                    break;
-                case Color::HotPink:
-                    mRed   = 1.0f;
-                    mGreen = 0.4117f;
-                    mBlue  = 0.705f;
-                    break;
-                case Color::Gold:
-                    mRed = 1.0f;
-                    mGreen = 0.84313f;
-                    mBlue  = 0.0f;
-                    break;
-                case Color::Silver:
-                    mRed   = 0.752941f;
-                    mGreen = 0.752941f;
-                    mBlue  = 0.752941f;
-                    break;
-                case Color::Bronze:
-                    mRed   = 0.804f;
-                    mGreen = 0.498f;
-                    mBlue  = 0.196f;
-                    break;
-                case Color::Transparent:
-                    mRed   = 0.0f;
-                    mGreen = 0.0f;
-                    mBlue  = 0.0f;
-                    mAlpha = 0.0f;
-            }
+            const auto weights = detail::RGBColorWeights(c);
+            mRed   = weights.r;
+            mGreen = weights.g;
+            mBlue  = weights.b;
+            mAlpha = c == Color::Transparent ? 0.0f : math::clamp(0.0f, 1.0f, alpha);
         }
 
         float Red() const noexcept
@@ -178,21 +90,21 @@ namespace base
         { return mBlue; }
         float Alpha() const noexcept
         { return mAlpha; }
-        void SetRed(float red) noexcept
+        void SetRed(const float red) noexcept
         { mRed = math::clamp(0.0f, 1.0f, red); }
-        void SetRed(int red) noexcept
+        void SetRed(const int red) noexcept
         { mRed = math::clamp(0, 255, red) / 255.0f; }
-        void SetBlue(float blue) noexcept
+        void SetBlue(const float blue) noexcept
         { mBlue = math::clamp(0.0f, 1.0f, blue); }
-        void SetBlue(int blue) noexcept
+        void SetBlue(const int blue) noexcept
         { mBlue = math::clamp(0, 255, blue) / 255.0f; }
-        void SetGreen(float green) noexcept
+        void SetGreen(const float green) noexcept
         { mGreen = math::clamp(0.0f, 1.0f,  green); }
-        void SetGreen(int green) noexcept
+        void SetGreen(const int green) noexcept
         { mGreen = math::clamp(0, 255, green) / 255.0f; }
-        void SetAlpha(float alpha) noexcept
+        void SetAlpha(const float alpha) noexcept
         { mAlpha = math::clamp(0.0f, 1.0f, alpha); }
-        void SetAlpha(int alpha) noexcept
+        void SetAlpha(const int alpha) noexcept
         { mAlpha = math::clamp(0, 255, alpha) / 255.0f; }
 
         Color4f& operator+=(const Color4f& other) noexcept
@@ -203,6 +115,16 @@ namespace base
             mAlpha = math::clamp(0.0f, 1.0f, mAlpha + other.mAlpha);
             return *this;
         }
+
+        auto GetRGB() const noexcept
+        {
+            return std::make_tuple(mRed, mGreen, mBlue);
+        }
+        auto GetRGBA() const noexcept
+        {
+            return std::make_tuple(mRed, mGreen, mBlue, mAlpha);
+        }
+
     private:
         float mRed   = 1.0f;
         float mGreen = 1.0f;
