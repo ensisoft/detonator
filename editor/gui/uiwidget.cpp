@@ -948,6 +948,7 @@ bool UIWidget::CanTakeAction(Actions action, const Clipboard* clipboard) const
             return CanZoomOut(mUI.zoom);
         case Actions::CanReloadShaders:
         case Actions::CanReloadTextures:
+        case Actions::CanScreenshot:
             return true;
     }
     return false;
