@@ -65,7 +65,8 @@ public:
         cmd.ps     = ps;
         cmds.push_back(std::move(cmd));
     }
-    void DrawStaticText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override
+    void DrawStaticText(const WidgetId& id, const PaintStruct& ps,
+        const std::string& text, float line_height, Orientation orientation) const override
     {
         Command cmd;
         cmd.name   = "draw-widget-text";
@@ -89,7 +90,8 @@ public:
     {}
     void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override
     {}
-    void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override
+    void DrawProgressBar(const WidgetId&, const PaintStruct& ps,
+        std::optional<float> percentage, Orientation orientation) const override
     {}
     void DrawScrollBar(const WidgetId&, const PaintStruct& ps, const uik::FRect& handle) const override
     {

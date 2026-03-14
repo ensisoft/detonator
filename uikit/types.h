@@ -44,6 +44,10 @@ namespace uik
     template<typename Unit>
     using FAngle = base::Angle<float, Unit>;
 
+    enum class WidgetOrientation {
+        Vertical, Horizontal
+    };
+
     enum class MouseButton {
         None,
         Left,

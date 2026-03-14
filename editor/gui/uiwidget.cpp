@@ -626,6 +626,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateUIKeyMaps(mUI.windowKeyMap);
     PopulateFromEnum<uik::ScrollArea::ScrollBarMode>(mUI.cmbScrollAreaVerticalScrollbarMode);
     PopulateFromEnum<uik::ScrollArea::ScrollBarMode>(mUI.cmbScrollAreaHorizontalScrollbarMode);
+    PopulateFromEnum<uik::WidgetOrientation>(mUI.progOrientation);
     PopulateFromEnum<uik::CheckBox::Check>(mUI.chkPlacement);
     PopulateFromEnum<uik::RadioButton::Check>(mUI.rbPlacement);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
@@ -1666,6 +1667,11 @@ void UIWidget::on_progVal_valueChanged(int)
     UpdateCurrentWidgetProperties();
 }
 void UIWidget::on_progText_textChanged()
+{
+    UpdateCurrentWidgetProperties();
+}
+
+void UIWidget::on_progOrientation_currentIndexChanged(int)
 {
     UpdateCurrentWidgetProperties();
 }
@@ -2908,11 +2914,20 @@ void UIWidget::UpdateCurrentWidgetProperties()
         }
         else if (auto* prog = uik::WidgetCast<uik::ProgressBar>(widget))
         {
+            const auto orientation = prog->GetOrientation();
+
             const int val = GetValue(mUI.progVal);
             if (val == -1)
                 prog->ClearValue();
             else prog->SetValue(val / 100.0f);
             prog->SetText(GetValue(mUI.progText));
+            prog->SetOrientation(GetValue(mUI.progOrientation));
+
+            if (orientation != prog->GetOrientation())
+            {
+                const auto size = prog->GetSize();
+                prog->SetSize(size.Transpose());
+            }
         }
         else if (auto* radio = uik::WidgetCast<uik::RadioButton>(widget))
         {
@@ -3053,6 +3068,7 @@ void UIWidget::DisplayCurrentWidgetProperties()
                 SetValue(mUI.progVal, 100 * val.value());
             else SetValue(mUI.progVal, -1);
             SetValue(mUI.progText, prog->GetText());
+            SetValue(mUI.progOrientation, prog->GetOrientation());
         }
         else if (const auto* radio = uik::WidgetCast<uik::RadioButton>(widget))
         {

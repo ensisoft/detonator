@@ -901,7 +901,8 @@ void UIPainter::DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) cons
     }
 }
 
-void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const
+void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps,
+    const std::string& text, float line_height, Orientation orientation) const
 {
     if (text.empty())
         return;
@@ -943,7 +944,7 @@ void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps, const 
     auto rect = ps.rect;
     rect.Translate(xoffset, yoffset);
 
-    DrawText(text, font_name, font_size, rect, text_color, alignment, properties, line_height);
+    DrawText(text, font_name, font_size, rect, text_color, alignment, properties, line_height, orientation);
 }
 
 void UIPainter::DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const
@@ -1179,7 +1180,8 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik:
     }
 }
 
-void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::optional<float> percentage) const
+void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
+                                std::optional<float> percentage, Orientation orientation) const
 {
     if (const auto* material = GetWidgetMaterial(id, ps, "progress-bar-background"))
     {
@@ -1194,29 +1196,52 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::
         {
             const auto value = percentage.value();
             auto fill = ps.rect;
-            fill.SetWidth(ps.rect.GetWidth() * value);
+            if (orientation == Orientation::Horizontal)
+                fill.SetWidth(ps.rect.GetWidth() * value);
+            else if (orientation == Orientation::Vertical)
+                fill.SetHeight(ps.rect.GetHeight() * value);
+
             FillShape(fill, *material, shape);
         }
         else
         {
-            const auto width  = ps.rect.GetWidth();
-            const auto height = ps.rect.GetHeight();
-            const auto progress_width   = ps.rect.GetWidth();
-            const auto indicator_width  = progress_width * 0.2;
-            const auto indicator_height = height;
-
             const auto duration = 2.0;
             const auto reminder = fmodf(ps.time, duration);
             const auto value = std::sin(reminder/duration * math::Pi*2.0);
 
-            gfx::FRect indicator;
-            indicator.SetWidth(indicator_width);
-            indicator.SetHeight(indicator_height);
-            indicator.Move(ps.rect.GetPosition());
-            indicator.Translate(progress_width*0.5, 0.0f);
-            indicator.Translate(-indicator_width*0.5, 0.0f);
-            indicator.Translate(value * 0.8 * 0.5 * progress_width, 0.0f);
-            FillShape(indicator, *material, shape);
+            const auto width  = ps.rect.GetWidth();
+            const auto height = ps.rect.GetHeight();
+
+            if (orientation == Orientation::Horizontal)
+            {
+                const auto progress_width   = ps.rect.GetWidth();
+                const auto indicator_width  = progress_width * 0.2f;
+                const auto indicator_height = height;
+
+                gfx::FRect indicator;
+                indicator.SetWidth(indicator_width);
+                indicator.SetHeight(indicator_height);
+                indicator.Move(ps.rect.GetPosition());
+                indicator.Translate(progress_width*0.5f, 0.0f);
+                indicator.Translate(-indicator_width*0.5f, 0.0f);
+                indicator.Translate(value * 0.8f * 0.5 * progress_width, 0.0f);
+                FillShape(indicator, *material, shape);
+            }
+            else if (orientation == Orientation::Vertical)
+            {
+                const auto progress_height  = ps.rect.GetHeight();
+                const auto indicator_height = progress_height * 0.2f;
+                const auto indicator_width  = width;
+
+                gfx::FRect indicator;
+                indicator.SetWidth(indicator_width);
+                indicator.SetHeight(indicator_height);
+                indicator.Move(ps.rect.GetPosition());
+                indicator.Translate(0.0f, progress_height*0.5f);
+                indicator.Translate(0.0f, -indicator_height*0.5f);
+                indicator.Translate(0.0f, value * 0.8f * 0.5f * progress_height);
+                FillShape(indicator, *material, shape);
+            }
         }
     }
 
@@ -1231,7 +1256,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::
 void UIPainter::DrawScrollBar(const WidgetId& id, const PaintStruct& ps, const uik::FRect& handle) const
 {
     const auto& rect = ps.rect;
-    const auto direction = rect.GetHeight() > rect.GetWidth() ? ShapeDirection::Vertical : ShapeDirection::Horizontal;
+    const auto direction = rect.GetHeight() > rect.GetWidth() ? Orientation::Vertical : Orientation::Horizontal;
 
     if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-background"))
     {
@@ -1639,8 +1664,7 @@ uint8_t UIPainter::StencilPass() const
     {
         gfx::StencilMaskPass overlap(gfx::StencilWriteValue(stencil_val), *mPainter,
                                      gfx::StencilMaskPass::StencilFunc::OverlapIncrement);
-        DrawShape(mask.rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, mask.shape,
-                  ShapeDirection::Horizontal);
+        DrawShape(mask.rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, mask.shape, Orientation::Horizontal);
         ++stencil_val;
     }
     mClippingStencilMaskValue = stencil_val;
@@ -1649,12 +1673,15 @@ uint8_t UIPainter::StencilPass() const
 
 void UIPainter::DrawText(const std::string& text, const std::string& font_name, int font_size,
                          const gfx::FRect& rect, const gfx::Color4f & color, unsigned alignment, unsigned properties,
-                         float line_height) const
+                         float line_height, Orientation orientation) const
 {
     auto raster_width  =  (unsigned)math::clamp(0.0f, 2048.0f, rect.GetWidth());
     auto raster_height =  (unsigned)math::clamp(0.0f, 2048.0f, rect.GetHeight());
     const bool underline = properties & gfx::TextProp::Underline;
     const bool blinking  = properties & gfx::TextProp::Blinking;
+
+    if (orientation == Orientation::Vertical)
+        std::swap(raster_height, raster_width);
 
     // if the text is set to be blinking do a sharp cut off
     // and when we have the "off" interval then simply don't
@@ -1676,34 +1703,32 @@ void UIPainter::DrawText(const std::string& text, const std::string& font_name, 
     if (const auto value = StencilPass())
     {
         gfx::StencilTestColorWritePass pass(gfx::StencilPassValue(value), *mPainter);
-        DrawShape(rect, material, pass, UIStyle::WidgetShape::Rectangle, ShapeDirection::Horizontal);
+        DrawText(rect, material, pass, orientation);
     }
     else
     {
         gfx::GenericRenderPass pass(*mPainter);
-        DrawShape(rect, material, pass, UIStyle::WidgetShape::Rectangle, ShapeDirection::Horizontal);
+        DrawText(rect, material, pass, orientation);
     }
-
-    //gfx::DrawTextRect(*mPainter, text, font_name, font_size, rect, color, alignment, properties, line_height);
 }
 
 void UIPainter::FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                          ShapeDirection direction ) const
+                          Orientation orientation ) const
 {
     if (const auto value = StencilPass())
     {
         gfx::StencilTestColorWritePass pass(gfx::StencilPassValue(value), *mPainter);
-        DrawShape(rect, material, pass, shape, direction);
+        DrawShape(rect, material, pass, shape, orientation);
     }
     else
     {
         gfx::GenericRenderPass pass(*mPainter);
-        DrawShape(rect, material, pass, shape, direction);
+        DrawShape(rect, material, pass, shape, orientation);
     }
 }
 
 void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                             float thickness, ShapeDirection direction) const
+                             float thickness, Orientation orientation) const
 {
     const auto width  = shape_rect.GetWidth();
     const auto height = shape_rect.GetHeight();
@@ -1724,10 +1749,10 @@ void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& 
 
         const gfx::StencilMaskPass mask(gfx::StencilWriteValue(0), *mPainter,
                                      gfx::StencilMaskPass::StencilFunc::Overwrite);
-        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), mask, shape, direction);
+        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), mask, shape, orientation);
 
         const gfx::StencilTestColorWritePass cover(stencil_value, *mPainter);
-        DrawShape(shape_rect, material, cover, shape, direction);
+        DrawShape(shape_rect, material, cover, shape, orientation);
     }
     else
     {
@@ -1738,10 +1763,10 @@ void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& 
         const gfx::StencilMaskPass overlap(gfx::StencilClearValue(1),
                                            gfx::StencilWriteValue(0), *mPainter,
                                            gfx::StencilMaskPass::StencilFunc::Overwrite);
-        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, shape, direction);
+        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, shape, orientation);
 
         const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), *mPainter);
-        DrawShape(shape_rect, material, cover, shape, direction);
+        DrawShape(shape_rect, material, cover, shape, orientation);
     }
 }
 
@@ -2035,9 +2060,10 @@ T UIPainter::GetWidgetProperty(const std::string& id,
     return p.GetValue(value);
 }
 
+// static
 template<typename RenderPass>
 void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass,
-                          UIStyle::WidgetShape shape, ShapeDirection direction) const
+                          UIStyle::WidgetShape shape, Orientation orientation)
 {
     gfx::Transform transform;
     transform.Resize(rect);
@@ -2049,13 +2075,32 @@ void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material,
         pass.Draw(gfx::RoundRectangle(), transform, material);
     else if (shape == UIStyle::WidgetShape::Circle)
         pass.Draw(gfx::Circle(), transform, material);
-    else if (shape == UIStyle::WidgetShape::Capsule && direction == ShapeDirection::Horizontal)
+    else if (shape == UIStyle::WidgetShape::Capsule && orientation == Orientation::Horizontal)
         pass.Draw(gfx::Capsule(gfx::Capsule::Style::Solid, gfx::Capsule::Direction::Horizontal), transform, material);
-    else if (shape == UIStyle::WidgetShape::Capsule && direction == ShapeDirection::Vertical)
+    else if (shape == UIStyle::WidgetShape::Capsule && orientation == Orientation::Vertical)
         pass.Draw(gfx::Capsule(gfx::Capsule::Style::Solid, gfx::Capsule::Direction::Vertical), transform, material);
     else if (shape == UIStyle::WidgetShape::Parallelogram)
         pass.Draw(gfx::Parallelogram(), transform, material);
     else BUG("Missing mask shape case.");
+}
+
+// static
+template<typename RenderPass>
+void UIPainter::DrawText(const gfx::FRect& rect, const gfx::Material& material,
+                         const RenderPass& pass, Orientation orientation)
+{
+    gfx::Transform transform;
+    transform.Resize(rect);
+    transform.Translate(rect);
+
+    if (orientation == Orientation::Vertical)
+    {
+        transform.Push();
+            transform.Translate(-0.5f, -0.5f);
+            transform.RotateAroundZ(math::Pi*0.5);
+            transform.Translate(0.5f, 0.5f);
+    }
+    pass.Draw(gfx::Rectangle(), transform, material);
 }
 
 

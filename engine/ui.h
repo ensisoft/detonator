@@ -607,14 +607,16 @@ namespace engine
         void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const override;
         void DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) const override;
         void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const override;
-        void DrawStaticText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const override;
+        void DrawStaticText(const WidgetId& id, const PaintStruct& ps,
+            const std::string& text, float line_height, Orientation orientation) const override;
         void DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const override;
         void DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const override;
         void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const override;
         void DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool selected) const override;
         void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const override;
         void DrawSlider(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob) const override;
-        void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override;
+        void DrawProgressBar(const WidgetId&, const PaintStruct& ps,
+            std::optional<float> percentage, Orientation orientation) const override;
         void DrawScrollBar(const WidgetId& id, const PaintStruct& ps, const uik::FRect& handle) const override;
         void DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const override;
         void DrawShape(const WidgetId& id, const PaintStruct& ps, const Shape& shape) const override;
@@ -669,15 +671,11 @@ namespace engine
         uint8_t StencilPass() const;
         void DrawText(const std::string& text, const std::string& font_name, int font_size,
                       const gfx::FRect& rect, const gfx::Color4f & color, unsigned alignment, unsigned properties,
-                      float line_height) const;
-        enum class ShapeDirection {
-            Horizontal,
-            Vertical
-        };
+                      float line_height, Orientation orientation = Orientation::Horizontal) const;
         void FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                       ShapeDirection direction = ShapeDirection::Horizontal) const;
+                       Orientation orientation = Orientation::Horizontal) const;
         void OutlineShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                          float width, ShapeDirection direction = ShapeDirection::Horizontal) const;
+                          float width, Orientation orientation = Orientation::Horizontal) const;
 
         bool GetMaterial(const std::string& key, gfx::Material** material) const;
         gfx::Material* GetWidgetMaterial(const std::string& id,
@@ -705,8 +703,11 @@ namespace engine
                             const T& value) const;
 
         template<typename RenderPass>
-        void DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass, UIStyle::WidgetShape shape,
-                       ShapeDirection direction) const;
+        static void DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass, UIStyle::WidgetShape shape,
+                       Orientation orientation);
+        template<typename RenderPass>
+        static void DrawText(const gfx::FRect& rect, const gfx::Material& material,
+                      const RenderPass& pass, Orientation orientation);
 
     private:
         UIStyle* mStyle = nullptr;

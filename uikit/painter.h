@@ -81,6 +81,41 @@ namespace uik
             // Optional set of style materials associated with the paint operation.
             const StyleMaterialMap* style_materials = nullptr;
         };
+        struct EditableText {
+            std::string text;
+        };
+
+        struct Shape {
+            std::string drawableId;
+            std::string materialId;
+            uik::FPoint rotation_point;
+            float rotation = 0.0f; // radians
+            bool clipping = false;
+        };
+
+        struct MaskStruct {
+            std::string id;
+            std::string klass;
+            std::string name; // debug significance only
+            uik::FRect rect;
+            // todo: more properties if needed
+        };
+
+        struct WidgetStyleKey {
+            std::string id;
+            std::string klass;
+            std::string state;
+        };
+
+        using WidgetStyleProperty = std::variant<int, float, unsigned, bool>;
+
+        enum class ButtonIcon {
+            None, ArrowUp, ArrowDown, ArrowLeft, ArrowRight
+        };
+
+        using Orientation = WidgetOrientation;
+
+        // dtor
         virtual ~Painter() = default;
 
         // Each of the painting operations take the ID of the widget/window
@@ -108,11 +143,9 @@ namespace uik
         // Draw the static text. This is used for texts such as labels, button texts, or
         // texts that are part of the widget's "static" interface. Widget items such as
         // combobox dropdown items or list box items are drawn using separate functionality.
-        virtual void DrawStaticText(const WidgetId& id, const PaintStruct& ps, const std::string& text, float line_height) const = 0;
+        virtual void DrawStaticText(const WidgetId& id, const PaintStruct& ps,
+            const std::string& text, float line_height, Orientation orientation) const = 0;
 
-        struct EditableText {
-            std::string text;
-        };
         virtual void DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const = 0;
 
         virtual void DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const = 0;
@@ -122,38 +155,20 @@ namespace uik
 
         virtual void DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool selected) const = 0;
 
-        enum class ButtonIcon {
-            None, ArrowUp, ArrowDown, ArrowLeft, ArrowRight
-        };
         virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const = 0;
 
         virtual void DrawSlider(const WidgetId& id, const PaintStruct& ps, const FRect& knob) const = 0;
 
-        virtual void DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::optional<float> percentage) const = 0;
+        virtual void DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
+            std::optional<float> percentage, Orientation orientation) const = 0;
 
         virtual void DrawScrollBar(const WidgetId& id, const PaintStruct& ps, const FRect& handle) const = 0;
 
         virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const FRect& knob, bool on_off) const = 0;
 
-        struct Shape {
-            std::string drawableId;
-            std::string materialId;
-            uik::FPoint rotation_point;
-            float rotation = 0.0f; // radians
-            bool clipping = false;
-        };
-
         virtual void DrawShape(const WidgetId& id, const PaintStruct& ps, const Shape& shape) const = 0;
 
         virtual void EndDrawWidgets() {}
-
-        struct MaskStruct {
-            std::string id;
-            std::string klass;
-            std::string name; // debug significance only
-            uik::FRect rect;
-            // todo: more properties if needed
-        };
 
         // Add a clipping mask to the current clip stack that applies on the
         // subsequent draw operations.
@@ -175,19 +190,11 @@ namespace uik
         // false to indicate an error.
         virtual bool ParseStyle(const std::string& tag, const std::string& style) = 0;
 
-        using WidgetStyleProperty = std::variant<int, float, unsigned, bool>;
-
-        struct WidgetStyleKey {
-            std::string id;
-            std::string klass;
-            std::string state;
-        };
-
         virtual bool QueryStyle(const WidgetStyleKey& key,  const std::string& attr, WidgetStyleProperty* prop) const
         { return false; }
 
         template<typename T>
-        inline bool QueryStyle(const WidgetStyleKey& key, const std::string& attr, T* value) const
+        bool QueryStyle(const WidgetStyleKey& key, const std::string& attr, T* value) const
         {
             WidgetStyleProperty  prop;
             if (!QueryStyle(key, attr, &prop))

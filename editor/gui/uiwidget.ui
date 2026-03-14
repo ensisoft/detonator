@@ -1291,7 +1291,7 @@
                       </size>
                      </property>
                      <property name="currentIndex">
-                      <number>9</number>
+                      <number>2</number>
                      </property>
                      <widget class="QWidget" name="spinPage">
                       <layout class="QGridLayout" name="gridLayout_4">
@@ -1477,6 +1477,45 @@
                        <property name="bottomMargin">
                         <number>0</number>
                        </property>
+                       <item row="1" column="1">
+                        <widget class="QLineEdit" name="progText">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="text">
+                          <string>%1%</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="label_10">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="text">
+                          <string>Text</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="1">
+                        <spacer name="verticalSpacer_5">
+                         <property name="orientation">
+                          <enum>Qt::Vertical</enum>
+                         </property>
+                         <property name="sizeHint" stdset="0">
+                          <size>
+                           <width>20</width>
+                           <height>40</height>
+                          </size>
+                         </property>
+                        </spacer>
+                       </item>
                        <item row="0" column="1">
                         <widget class="QSpinBox" name="progVal">
                          <property name="sizePolicy">
@@ -1505,32 +1544,6 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="0" column="0">
-                        <widget class="QLabel" name="label_9">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="text">
-                          <string>Value</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="1">
-                        <widget class="QLineEdit" name="progText">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="text">
-                          <string>%1%</string>
-                         </property>
-                        </widget>
-                       </item>
                        <item row="0" column="2">
                         <widget class="QToolButton" name="btnResetProgVal">
                          <property name="toolTip">
@@ -1551,8 +1564,8 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="1" column="0">
-                        <widget class="QLabel" name="label_10">
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="label_9">
                          <property name="sizePolicy">
                           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                            <horstretch>0</horstretch>
@@ -1560,22 +1573,19 @@
                           </sizepolicy>
                          </property>
                          <property name="text">
-                          <string>Text</string>
+                          <string>Value</string>
                          </property>
                         </widget>
                        </item>
                        <item row="2" column="1">
-                        <spacer name="verticalSpacer_5">
-                         <property name="orientation">
-                          <enum>Qt::Vertical</enum>
+                        <widget class="QComboBox" name="progOrientation"/>
+                       </item>
+                       <item row="2" column="0">
+                        <widget class="QLabel" name="label_12">
+                         <property name="text">
+                          <string>Orientation</string>
                          </property>
-                         <property name="sizeHint" stdset="0">
-                          <size>
-                           <width>20</width>
-                           <height>40</height>
-                          </size>
-                         </property>
-                        </spacer>
+                        </widget>
                        </item>
                       </layout>
                      </widget>
@@ -2972,6 +2982,7 @@
   <tabstop>progVal</tabstop>
   <tabstop>btnResetProgVal</tabstop>
   <tabstop>progText</tabstop>
+  <tabstop>progOrientation</tabstop>
   <tabstop>btnText</tabstop>
   <tabstop>lblText</tabstop>
   <tabstop>lblLineHeight</tabstop>
