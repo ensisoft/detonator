@@ -59,8 +59,11 @@ namespace engine
         const base::Color4f* FindColor(const std::string& key) const;
 
         bool FromJson(const nlohmann::json& json);
+
+        base::Color4f AdjustColor(const base::Color4f& color) const;
     private:
         std::unordered_map<std::string, base::Color4f> mPalette;
+        std::optional<float> mBrightness;
     };
 
     // Interface for abstracting away how UI materials are sourced
