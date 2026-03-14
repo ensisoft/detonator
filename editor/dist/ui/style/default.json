@@ -97,28 +97,31 @@
     }
   ],
 
-  "color-palette": [
-    { "key": "void",     "color": "#0d0d0dff" },
-    { "key": "pitch",    "color": "#121212ff" },
-    { "key": "coal",     "color": "#141414ff" },
-    { "key": "soot",     "color": "#161616ff" },
-    { "key": "obsidian", "color": "#181818ff" },
-    { "key": "slate",    "color": "#1a1a1aff" },
-    { "key": "basalt",   "color": "#1c1c1cff" },
-    { "key": "onyx",     "color": "#1e1e1eff" },
-    { "key": "shale",    "color": "#202020ff" },
-    { "key": "graphite", "color": "#222222ff" },
-    { "key": "carbon",   "color": "#232323ff" },
-    { "key": "flint",    "color": "#242424ff" },
-    { "key": "ash",      "color": "#2a2a2aff" },
-    { "key": "iron",     "color": "#2f2f2fff" },
-    { "key": "lead",     "color": "#303030ff" },
-    { "key": "pewter",   "color": "#3a3a3aff" },
-    { "key": "steel",    "color": "#404040ff" },
-    { "key": "tin",      "color": "#4a4a4aff" },
-    { "key": "silver",   "color": "#555555ff" },
-    { "key": "chrome",   "color": "#5a5a5aff" }
-  ],
+  "color-palette": {
+     "colors": [
+        { "key": "void",     "color": "#0d0d0dff" },
+        { "key": "pitch",    "color": "#121212ff" },
+        { "key": "coal",     "color": "#141414ff" },
+        { "key": "soot",     "color": "#161616ff" },
+        { "key": "obsidian", "color": "#181818ff" },
+        { "key": "slate",    "color": "#1a1a1aff" },
+        { "key": "basalt",   "color": "#1c1c1cff" },
+        { "key": "onyx",     "color": "#1e1e1eff" },
+        { "key": "shale",    "color": "#202020ff" },
+        { "key": "graphite", "color": "#222222ff" },
+        { "key": "carbon",   "color": "#232323ff" },
+        { "key": "flint",    "color": "#242424ff" },
+        { "key": "ash",      "color": "#2a2a2aff" },
+        { "key": "iron",     "color": "#2f2f2fff" },
+        { "key": "lead",     "color": "#303030ff" },
+        { "key": "pewter",   "color": "#3a3a3aff" },
+        { "key": "steel",    "color": "#404040ff" },
+        { "key": "tin",      "color": "#4a4a4aff" },
+        { "key": "silver",   "color": "#555555ff" },
+        { "key": "chrome",   "color": "#5a5a5aff" }
+     ],
+    "brightness": 1.1
+  },
 
   "materials": [
     {

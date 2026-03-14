@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include "base/assert.h"
+#include "base/color_util.h"
 #include "base/box.h"
 #include "base/logging.h"
 #include "base/utility.h"
@@ -65,7 +66,10 @@ bool ReadColor(const nlohmann::json& json, const std::string& name,
     const engine::UIColorPalette& palette,  gfx::Color4f* out)
 {
     if (ReadColor(json, name, out))
+    {
+        *out = palette.AdjustColor(*out);
         return true;
+    }
 
     // see if the color value is a string key into the palette color table.
     // first read the value as string key.
@@ -215,28 +219,49 @@ bool UIColorPalette::FromJson(const nlohmann::json& json)
     if (!json.contains("color-palette"))
         return true;
 
+    const auto& palette_json = json["color-palette"];
     bool ok = true;
 
-    for (const auto& item : json["color-palette"].items())
+    if (palette_json.contains("brightness"))
     {
-        const auto& json = item.value();
-        base::Color4f color;
-        std::string key;
-        if (!base::JsonReadSafe(json, "key", &key))
+        float brightness_coefficient = 1.0f;
+        if (base::JsonReadSafe(palette_json, "brightness", &brightness_coefficient))
+            mBrightness = brightness_coefficient;
+    }
+
+    if (palette_json.contains("colors"))
+    {
+        for (const auto& item : palette_json["colors"].items())
         {
-            WARN("Ignored JSON UI style color palette entry. [key='%1']", key);
-            ok = false;
-            continue;
+            const auto& json = item.value();
+            base::Color4f color;
+            std::string key;
+            if (!base::JsonReadSafe(json, "key", &key))
+            {
+                WARN("Ignored JSON UI style color palette entry. [key='%1']", key);
+                ok = false;
+                continue;
+            }
+            if (!ReadColor(json, "color", &color))
+            {
+                WARN("Failed to read JSON UI style color palette color value. [key='%1']", key);
+                ok = false;
+                continue;
+            }
+            if (mBrightness.has_value())
+                mPalette["palette." + key] = base::MultiplyBrightness(color, mBrightness.value());
+            else mPalette["palette." + key] = color;
         }
-        if (!ReadColor(json, "color", &color))
-        {
-            WARN("Failed to read JSON UI style color palette color value. [key='%1']", key);
-            ok = false;
-            continue;
-        }
-        mPalette["palette." + key] = color;
     }
     return ok;
+}
+
+base::Color4f UIColorPalette::AdjustColor(const base::Color4f& color) const
+{
+    if (!mBrightness.has_value())
+        return color;
+
+    return base::MultiplyBrightness(color, mBrightness.value());
 }
 
 namespace detail {
