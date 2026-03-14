@@ -1232,14 +1232,23 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps,
 void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
                                 std::optional<float> percentage, Orientation orientation) const
 {
-    if (const auto* material = GetWidgetMaterial(id, ps, "progress-bar-background"))
+    if ( auto* material = GetWidgetMaterial(id, ps, "progress-bar-background"))
     {
         const auto shape = GetWidgetProperty(id, ps, "progress-bar-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "progress-bar-shape-corner-radius", shape);
         FillShape(ps.rect, *material, shape, radius);
     }
 
-    if (const auto* material = GetWidgetMaterial(id, ps, "progress-bar-fill"))
+    gfx::Material* fill_material = nullptr;
+    if (orientation == Orientation::Vertical)
+        fill_material = GetWidgetMaterial(id, ps, "vertical-progress-bar-fill");
+    else if (orientation == Orientation::Horizontal)
+        fill_material = GetWidgetMaterial(id, ps, "horizontal-progress-bar-fill");
+
+    if (!fill_material)
+        fill_material = GetWidgetMaterial(id, ps, "progress-bar-fill");
+
+    if (fill_material)
     {
         const auto shape = GetWidgetProperty(id, ps, "progress-bar-fill-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "progress-bar-fill-shape-corner-radius", shape);
@@ -1252,7 +1261,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
             else if (orientation == Orientation::Vertical)
                 fill.SetHeight(ps.rect.GetHeight() * value);
 
-            FillShape(fill, *material, shape, radius);
+            FillShape(fill, *fill_material, shape, radius);
         }
         else
         {
@@ -1276,7 +1285,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
                 indicator.Translate(progress_width*0.5f, 0.0f);
                 indicator.Translate(-indicator_width*0.5f, 0.0f);
                 indicator.Translate(value * 0.8f * 0.5 * progress_width, 0.0f);
-                FillShape(indicator, *material, shape, radius);
+                FillShape(indicator, *fill_material, shape, radius);
             }
             else if (orientation == Orientation::Vertical)
             {
@@ -1291,7 +1300,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
                 indicator.Translate(0.0f, progress_height*0.5f);
                 indicator.Translate(0.0f, -indicator_height*0.5f);
                 indicator.Translate(0.0f, value * 0.8f * 0.5f * progress_height);
-                FillShape(indicator, *material, shape, radius);
+                FillShape(indicator, *fill_material, shape, radius);
             }
         }
     }
