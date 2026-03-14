@@ -94,31 +94,58 @@
     {
       "key": "push-button/pressed/text-y-offset",
       "value": 1.0
+    },
+
+    {
+      "key": "widget/shape-corner-radius",
+      "value": 0.1
+    },
+    {
+      "key": "widget/scrollbar-shape-corner-radius",
+      "value": 0.1
+    },
+    {
+      "key": "widget/scrollbar-handle-shape-corner-radius",
+      "value": 0.1
+    },
+    {
+      "key": "togglebox/toggle-shape-corner-radius",
+      "value": 0.5
+    },
+    {
+      "key": "togglebox/toggle-knob-shape-corner-radius",
+      "value": 0.5
     }
   ],
 
   "color-palette": {
      "colors": [
-        { "key": "void",     "color": "#0d0d0dff" },
-        { "key": "pitch",    "color": "#121212ff" },
-        { "key": "coal",     "color": "#141414ff" },
-        { "key": "soot",     "color": "#161616ff" },
-        { "key": "obsidian", "color": "#181818ff" },
-        { "key": "slate",    "color": "#1a1a1aff" },
-        { "key": "basalt",   "color": "#1c1c1cff" },
-        { "key": "onyx",     "color": "#1e1e1eff" },
-        { "key": "shale",    "color": "#202020ff" },
-        { "key": "graphite", "color": "#222222ff" },
-        { "key": "carbon",   "color": "#232323ff" },
-        { "key": "flint",    "color": "#242424ff" },
-        { "key": "ash",      "color": "#2a2a2aff" },
-        { "key": "iron",     "color": "#2f2f2fff" },
-        { "key": "lead",     "color": "#303030ff" },
-        { "key": "pewter",   "color": "#3a3a3aff" },
-        { "key": "steel",    "color": "#404040ff" },
-        { "key": "tin",      "color": "#4a4a4aff" },
-        { "key": "silver",   "color": "#555555ff" },
-        { "key": "chrome",   "color": "#5a5a5aff" }
+        { "key": "void",      "color": "#0d0d0dff" },
+        { "key": "pitch",     "color": "#121212ff" },
+        { "key": "coal",      "color": "#141414ff" },
+        { "key": "soot",      "color": "#161616ff" },
+        { "key": "obsidian",  "color": "#181818ff" },
+        { "key": "slate",     "color": "#1a1a1aff" },
+        { "key": "basalt",    "color": "#1c1c1cff" },
+        { "key": "onyx",      "color": "#1e1e1eff" },
+        { "key": "shale",     "color": "#202020ff" },
+        { "key": "graphite",  "color": "#222222ff" },
+        { "key": "carbon",    "color": "#232323ff" },
+        { "key": "flint",     "color": "#242424ff" },
+        { "key": "ash",       "color": "#2a2a2aff" },
+        { "key": "iron",      "color": "#2f2f2fff" },
+        { "key": "lead",      "color": "#303030ff" },
+        { "key": "gunmetal",  "color": "#343434ff" },
+        { "key": "pewter",    "color": "#3a3a3aff" },
+        { "key": "steel",     "color": "#404040ff" },
+        { "key": "tin",       "color": "#4a4a4aff" },
+        { "key": "silver",    "color": "#555555ff" },
+        { "key": "chrome",    "color": "#5a5a5aff" },
+        { "key": "nickel",    "color": "#5e5e5eff" },
+        { "key": "dust",      "color": "#6a6a6aff" },
+        { "key": "zinc",      "color": "#707070ff" },
+        { "key": "aluminum",  "color": "#8c8c8cff" },
+        { "key": "quartz",    "color": "#9a9a9aff" }
      ],
     "brightness": 1.1
   },
@@ -191,14 +218,14 @@
       "key": "push-button/hovered/button-background",
       "type": "Gradient",
       "color0": "palette.ash",
-      "color1": "#282828",
+      "color1": "palette.ash",
       "color2": "palette.onyx",
       "color3": "palette.slate"
     },
     {
       "key": "push-button/hovered/button-border",
       "type": "Gradient",
-      "color0": "#343434",
+      "color0": "palette.gunmetal",
       "color1": "palette.ash",
       "color2": "palette.pitch",
       "color3": "palette.void"
@@ -208,7 +235,7 @@
       "key": "togglebox/toggle-knob-off",
       "type": "Gradient",
       "color0": "palette.chrome",
-      "color1": "#4c4c4c",
+      "color1": "palette.tin",
       "color2": "palette.lead",
       "color3": "palette.onyx"
     },
@@ -219,7 +246,7 @@
       "type": "Gradient",
       "color0": "palette.shale",
       "color1": "palette.basalt",
-      "color2": "#151515",
+      "color2": "palette.coal",
       "color3": "palette.pitch"
     },
     {
@@ -227,7 +254,7 @@
         "widget/scrollbar-border"],
       "type": "Gradient",
       "color0": "palette.pewter",
-      "color1": "#2c2c2c",
+      "color1": "palette.ash",
       "color2": "palette.obsidian",
       "color3": "palette.pitch"
     },
@@ -262,7 +289,7 @@
       "keys": ["slider/hovered/slider-knob-border",
         "widget/hovered/scrollbar-handle-border"],
       "type": "Gradient",
-      "color0": "#6a6a6a",
+      "color0": "palette.dust",
       "color1": "palette.tin",
       "color2": "palette.flint",
       "color3": "palette.slate"
@@ -289,7 +316,7 @@
     {
       "key": "form/background",
       "type": "Color",
-      "color": "palette.slate"
+      "color": "palette.pitch"
     },
     {
       "key": "form/border",
@@ -300,9 +327,9 @@
     {
       "key": "widget/check-background",
       "type": "Gradient",
-      "color0": "#1f1f1f",
+      "color0": "palette.onyx",
       "color1": "palette.basalt",
-      "color2": "#171717",
+      "color2": "palette.soot",
       "color3": "palette.coal"
     },
     {
@@ -313,10 +340,10 @@
         "togglebox/toggle-border-off",
         "progress-bar/progress-bar-border"],
       "type": "Gradient",
-      "color0": "palette.chrome",
-      "color1": "#484848",
+      "color0": "palette.zinc",
+      "color1": "palette.chrome",
       "color2": "palette.lead",
-      "color3": "#262626"
+      "color3": "palette.flint"
     },
     {
       "keys": [
@@ -325,16 +352,16 @@
         "togglebox/toggle-knob-on",
         "progress-bar/progress-bar-fill"],
       "type": "Gradient",
-      "color0": "#9a9a9a",
-      "color1": "#8c8c8c",
-      "color2": "#707070",
-      "color3": "#5e5e5e"
+      "color0": "palette.quartz",
+      "color1": "palette.aluminum",
+      "color2": "palette.zinc",
+      "color3": "palette.nickel"
     },
 
     {
       "key": "groupbox/background",
       "type": "Color",
-      "color": "palette.slate"
+      "color": "palette.obsidian"
     }
   ]
 }
