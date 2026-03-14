@@ -469,6 +469,7 @@ void WidgetStyleWidget::SetMaterialColor(const char* key)
         color_widgets::ColorDialog dlg(this);
         dlg.setAlphaEnabled(true);
         dlg.setButtonMode(color_widgets::ColorDialog::ButtonMode::OkCancel);
+        dlg.setColor(QColor(0x80, 0x80, 0x80, 0xff));
 
         connect(&dlg, &color_widgets::ColorDialog::colorChanged, [this, &key](QColor color) {
             mStyle->SetMaterial(MapProperty(key), engine::detail::UIColor(ToGfx(color)));
