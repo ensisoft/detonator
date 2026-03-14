@@ -137,7 +137,7 @@ namespace uik
     namespace detail {
         // for internal action propagation
         struct WidgetAction {
-            WidgetActionType type;
+            WidgetActionType type = WidgetActionType::None;
             WidgetActionValue value;
         };
     }
