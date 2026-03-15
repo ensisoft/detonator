@@ -820,7 +820,8 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.rect    = paint.rect;
     p.clip    = paint.clip;
     p.time    = paint.time;
-    p.pressed = false;
+    p.pressed = ps.state->GetValue(ps.widgetId + "/pressed", false);
+    p.hovered = ps.state->GetValue(ps.widgetId + "/mouse-over", false);
     p.klass   = "checkbox";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
@@ -828,8 +829,6 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
 
     FRect text, check;
     ComputeLayout(paint.rect, &text, &check);
-
-    p.hovered= ps.state->GetValue(ps.widgetId + "/mouse-over", false);
 
     p.rect = check;
     ps.painter->DrawCheckBox(ps.widgetId, p, mChecked);
@@ -867,8 +866,20 @@ WidgetAction CheckBoxModel::MouseMove(const MouseEvent& mouse, const MouseStruct
     return WidgetAction{};
 }
 
+WidgetAction CheckBoxModel::MousePress(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    FRect text, check;
+    ComputeLayout(mouse.widget_window_rect, &text, &check);
+    if (check.TestPoint(mouse.window_mouse_pos) || text.TestPoint(mouse.window_mouse_pos))
+        ms.state->SetValue(ms.widgetId + "/pressed", true);
+
+    return WidgetAction {};
+}
+
 WidgetAction CheckBoxModel::MouseRelease(const MouseEvent& mouse, const MouseStruct& ms)
 {
+    ms.state->DeleteValue(ms.widgetId + "/pressed");
+
     FRect text, check;
     ComputeLayout(mouse.widget_window_rect, &text, &check);
     if (!check.TestPoint(mouse.window_mouse_pos) && !text.TestPoint(mouse.window_mouse_pos))
@@ -889,10 +900,20 @@ WidgetAction CheckBoxModel::MouseLeave(const MouseStruct& ms)
 
 WidgetAction CheckBoxModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
 {
+    if  (key.key == VirtualKey::Select)
+    {
+        ks.state->SetValue(ks.widgetId + "/pressed", true);
+    }
+
+    return WidgetAction {};
+}
+WidgetAction CheckBoxModel::KeyUp(const KeyEvent& key, const KeyStruct& ks)
+{
     const auto state = mChecked;
     if (key.key == VirtualKey::Select)
     {
         mChecked = !mChecked;
+        ks.state->DeleteValue(ks.widgetId + "/pressed");
     }
     if (state != mChecked)
     {
@@ -902,10 +923,6 @@ WidgetAction CheckBoxModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
         return action;
     }
     return {};
-}
-WidgetAction CheckBoxModel::KeyUp(const KeyEvent& key, const KeyStruct& ks)
-{
-    return WidgetAction {};
 }
 
 void CheckBoxModel::ComputeLayout(const FRect& rect, FRect* text, FRect* check) const
@@ -1091,7 +1108,8 @@ void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     p.rect    = paint.rect;
     p.clip    = paint.clip;
     p.time    = paint.time;
-    p.pressed = false;
+    p.pressed = ps.state->GetValue(ps.widgetId + "/pressed", false);
+    p.hovered = ps.state->GetValue(ps.widgetId + "/mouse-over", false);
     p.klass   = "radiobutton";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
@@ -1099,8 +1117,6 @@ void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
 
     FRect text, check;
     ComputeLayout(paint.rect, &text, &check);
-
-    p.hovered = ps.state->GetValue(ps.widgetId + "/mouse-over", false);
 
     p.rect = check;
     ps.painter->DrawRadioButton(ps.widgetId, p, mSelected);
@@ -1151,8 +1167,21 @@ WidgetAction RadioButtonModel::MouseMove(const MouseEvent& mouse, const MouseStr
         check.TestPoint(mouse.window_mouse_pos) || text.TestPoint(mouse.window_mouse_pos));
     return WidgetAction{};
 }
+
+WidgetAction RadioButtonModel::MousePress(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    FRect text, check;
+    ComputeLayout(mouse.widget_window_rect, &text, &check);
+    if (check.TestPoint(mouse.window_mouse_pos) || text.TestPoint(mouse.window_mouse_pos))
+        ms.state->SetValue(ms.widgetId + "/pressed", true);
+
+    return WidgetAction{};
+}
+
 WidgetAction RadioButtonModel::MouseRelease(const MouseEvent& mouse, const MouseStruct& ms)
 {
+    ms.state->DeleteValue(ms.widgetId + "/pressed");
+
     FRect text, check;
     ComputeLayout(mouse.widget_window_rect, &text, &check);
     if (!check.TestPoint(mouse.window_mouse_pos) && !text.TestPoint(mouse.window_mouse_pos))
@@ -1174,12 +1203,24 @@ WidgetAction RadioButtonModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
     if (key.key == VirtualKey::Select)
     {
         if (!mSelected)
-            mRequestSelection = true;
+        {
+            ks.state->SetValue(ks.widgetId + "/pressed", true);
+        }
     }
+
     return WidgetAction {};
 }
 WidgetAction RadioButtonModel::KeyUp(const KeyEvent& key, const KeyStruct& ks)
 {
+    if (key.key == VirtualKey::Select)
+    {
+        if (!mSelected)
+        {
+            ks.state->DeleteValue(ks.widgetId + "/pressed");
+            mRequestSelection = true;
+        }
+    }
+
     return WidgetAction {};
 }
 
