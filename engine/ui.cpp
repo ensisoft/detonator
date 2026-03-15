@@ -363,6 +363,8 @@ UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary*, const Loader*
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetTexture(gfx::LoadTextureFromFile(mTextureUri));
     material->SetName("UITexture");
+    material->SetTextureWrapX(mTextureWrapX);
+    material->SetTextureWrapY(mTextureWrapY);
     material->GetTextureMap(0)->GetTextureSource(0)->SetName("UITexture/" + mTextureName);
 
     // if there's no associated image meta file we assume that the image file is a non-packed
@@ -434,6 +436,8 @@ bool UITexture::FromJson(const nlohmann::json& json, const UIColorPalette& palet
     base::JsonReadSafe(json, "texture", &mTextureUri);
     base::JsonReadSafe(json, "metafile", &mMetafileUri);
     base::JsonReadSafe(json, "name", &mTextureName);
+    base::JsonReadSafe(json, "wrap-x", &mTextureWrapX);
+    base::JsonReadSafe(json, "wrap-y", &mTextureWrapY);
     return true;
 }
 
@@ -442,8 +446,14 @@ void UITexture::IntoJson(nlohmann::json& json) const
     base::JsonWrite(json, "texture", mTextureUri);
     base::JsonWrite(json, "metafile", mMetafileUri);
     base::JsonWrite(json, "name", mTextureName);
-}
 
+    // don't write these if they're the defaults, i.e. clamp
+    // this is done just to avoid breaking the unit tests excessively.
+    if (mTextureWrapX != Wrapping::Clamp)
+        base::JsonWrite(json, "wrap-x", mTextureWrapX);
+    if (mTextureWrapY != Wrapping::Clamp)
+        base::JsonWrite(json, "wrap-y", mTextureWrapY);
+}
 
 bool UIMaterialClassObject::FromJson(const nlohmann::json& json, const UIColorPalette& palette)
 {
@@ -914,8 +924,11 @@ bool UIStyle::PurgeUnavailableMaterialReferences()
 
 void UIPainter::DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const
 {
-    if (const auto* material = GetWidgetMaterial(id, ps, "background"))
+    if (auto* material = GetWidgetMaterial(id, ps, "background"))
     {
+        ConfigureMaterial(ps, material);
+        ConfigureMaterial(ps, material);
+
         const auto shape = GetWidgetProperty(id, ps, "shape", UIStyle::WidgetShape::Rectangle);
         const auto radius = GetCornerRadius(id, ps, "shape-corner-radius", shape);
         FillShape(ps.rect, *material, shape, radius);
@@ -1839,6 +1852,46 @@ void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& 
 
         const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), *mPainter);
         DrawShape(shape_rect, material, cover, shape, orientation, corner_radius);
+    }
+}
+
+void UIPainter::ConfigureMaterial(const PaintStruct& ps, gfx::Material* material) const
+{
+    if (const auto* klass = material->GetClass())
+    {
+        if (klass->GetType() != gfx::MaterialClass::Type::Texture)
+            return;
+
+        using Wrapping = gfx::MaterialClass::TextureWrapping;
+
+        const auto wrap_x = klass->GetTextureWrapX();
+        const auto wrap_y = klass->GetTextureWrapY();
+        if (wrap_x == gfx::MaterialClass::TextureWrapping::Clamp &&
+            wrap_y == gfx::MaterialClass::TextureWrapping::Clamp)
+            return;
+
+        if (klass->GetNumTextureMaps() == 0)
+            return;
+        const auto* texture_map = klass->GetTextureMap(0);
+        if (texture_map->GetNumTextures() == 0)
+            return;
+        const auto* texture_src = texture_map->GetTextureSource(0);
+        const auto& content_hint = texture_src->GetContentHint();
+        if (!content_hint.has_value())
+            return;
+
+        // todo: scaling ??
+
+        const auto width = ps.rect.GetWidth();
+        const auto height = ps.rect.GetHeight();
+
+        const float texture_width  = content_hint.value().width;
+        const float texture_height = content_hint.value().height;
+        const float texture_aspect_ratio = texture_width / texture_height;
+
+        const auto texture_scale_x = wrap_x == Wrapping::Clamp ? 1.0f : width / texture_width;
+        const auto texture_scale_y = wrap_y == Wrapping::Clamp ? 1.0f : height / texture_height;
+        material->SetUniform("kTextureScale", glm::vec2 { texture_scale_x, texture_scale_y });
     }
 }
 

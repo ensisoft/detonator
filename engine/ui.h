@@ -126,6 +126,8 @@ namespace engine
         class UITexture : public UIMaterial
         {
         public:
+            using Wrapping = gfx::MaterialClass::TextureWrapping;
+
             UITexture() = default;
             explicit UITexture(std::string uri)
               : mTextureUri(std::move(uri))
@@ -151,6 +153,8 @@ namespace engine
             std::string mTextureUri;
             std::string mTextureName;
             std::string mMetafileUri;
+            Wrapping mTextureWrapX = Wrapping::Clamp;
+            Wrapping mTextureWrapY = Wrapping::Clamp;
         };
         // Create material from a gradient spec.
         class UIGradient : public UIMaterial
@@ -681,6 +685,8 @@ namespace engine
                        float corner_radius, Orientation orientation = Orientation::Horizontal) const;
         void OutlineShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
                           float thickness, float corner_radius, Orientation orientation = Orientation::Horizontal) const;
+
+        void ConfigureMaterial(const PaintStruct& ps, gfx::Material* material) const;
 
         bool GetMaterial(const std::string& key, gfx::Material** material) const;
         gfx::Material* GetWidgetMaterial(const std::string& id,
