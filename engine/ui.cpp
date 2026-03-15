@@ -113,7 +113,21 @@ bool ParseProperties(const nlohmann::json& json, std::vector<PropertyPair>& prop
             success = false;
             continue;
         }
-        if (!base::JsonReadSafe(json, "value", &prop.value))
+        if (base::Contains(prop.key, "color"))
+        {
+            // uh, oh we already had issues with the variant order. now the issue is
+            // that a color property that is encoded as a hex string will also parse
+            // as a string!.
+            base::Color4f color;
+            if (!base::JsonReadSafe(json, "value", &color))
+            {
+                success = false;
+                WARN("Ignoring unexpected UI style property. [key='%1']", prop.key);
+                continue;
+            }
+            prop.value = color;
+        }
+        else if (!base::JsonReadSafe(json, "value", &prop.value))
         {
             // this is not necessarily a BUG because currently the style json files are
             // hand written. thus we have to be prepared to handle unexpected cases.
