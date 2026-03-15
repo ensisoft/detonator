@@ -289,11 +289,11 @@ namespace uik
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
             void IntoJson(data::Writer& data) const;
             bool FromJson(const data::Reader& data);
-            inline WidgetAction MouseEnter(const MouseStruct&)
+            WidgetAction MouseEnter(const MouseStruct&)
             { return WidgetAction{}; }
-            inline WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&)
-            { return WidgetAction{}; }
+
             WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct&);
+            WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&);
             WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
             WidgetAction MouseLeave(const MouseStruct&);
             WidgetAction KeyDown(const KeyEvent& key, const KeyStruct& ks);
@@ -369,12 +369,12 @@ namespace uik
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
             void IntoJson(data::Writer& data) const;
             bool FromJson(const data::Reader& data);
-            inline WidgetAction MouseEnter(const MouseStruct&)
+            WidgetAction MouseEnter(const MouseStruct&)
             { return WidgetAction{}; }
-            inline WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&)
-            { return WidgetAction{}; }
+
             WidgetAction PollAction(const PollStruct& poll);
             WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct&);
+            WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&);
             WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
             WidgetAction MouseLeave(const MouseStruct&);
             WidgetAction KeyDown(const KeyEvent& key, const KeyStruct& ks);
