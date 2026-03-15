@@ -27,6 +27,7 @@
 
 #include "base/types.h"
 #include "base/color4f.h"
+#include "base/transform.h"
 
 namespace uik
 {
@@ -40,6 +41,7 @@ namespace uik
     using Color   = base::Color;
     using FRadians = base::FRadians;
     using FDegrees = base::FDegrees;
+    using Transform = base::Transform;
 
     template<typename Unit>
     using FAngle = base::Angle<float, Unit>;

@@ -213,6 +213,7 @@ void FormModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.klass   = "form";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+    ps.painter->ApplyTransform(ps.widgetId, p);
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
@@ -239,6 +240,7 @@ void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     p.klass   = "progress-bar";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+    ps.painter->ApplyTransform(ps.widgetId, p);
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     p.hovered = false;
     p.pressed = false;
@@ -294,6 +296,7 @@ void SliderModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.klass   = "slider";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+    ps.painter->ApplyTransform(ps.widgetId, p);
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
     FRect slider;
@@ -475,6 +478,7 @@ void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.klass   = "spinbox";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+    ps.painter->ApplyTransform(ps.widgetId, p);
 
     FRect edt, btn_inc, btn_dec;
     ComputeBoxes(paint.rect, &btn_inc, &btn_dec, &edt);
@@ -698,6 +702,7 @@ void LabelModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.klass   = "label";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+    ps.painter->ApplyTransform(ps.widgetId, p);
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawStaticText(ps.widgetId, p, mText, mLineHeight, WidgetOrientation::Horizontal);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
@@ -734,6 +739,7 @@ void PushButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
     p.klass   = "push-button";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+    ps.painter->ApplyTransform(ps.widgetId, p);
 
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::None);
@@ -825,6 +831,7 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.klass   = "checkbox";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+    ps.painter->ApplyTransform(ps.widgetId, p);
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
     FRect text, check;
@@ -993,6 +1000,7 @@ void ToggleBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.klass   = "togglebox";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+    ps.painter->ApplyTransform(ps.widgetId, p);
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
     float knob_pos = mChecked ? 1.0f : 0.0f;
@@ -1113,6 +1121,7 @@ void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     p.klass   = "radiobutton";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+    ps.painter->ApplyTransform(ps.widgetId, p);
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
 
     FRect text, check;
@@ -1280,6 +1289,7 @@ void GroupBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.klass   = "groupbox";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+    ps.painter->ApplyTransform(ps.widgetId, p);
 
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
@@ -1386,6 +1396,7 @@ void ScrollAreaModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
     p.klass   = "scroll-area";
     p.style_properties = ps.style_properties;
     p.style_materials  = ps.style_materials;
+    ps.painter->ApplyTransform(ps.widgetId, p);
 
     if (design_mode)
     {
@@ -1967,6 +1978,7 @@ void ShapeModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.clip    = paint.clip;
     p.time    = paint.time;
     p.klass   = "shape-widget";
+    ps.painter->ApplyTransform(ps.widgetId, p);
 
     if (mDrawableId.empty())
     {

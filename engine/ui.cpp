@@ -211,10 +211,95 @@ bool ParseMaterials(const nlohmann::json& json, std::vector<MaterialPair>& mater
     return success;
 }
 
+bool ParseAnimations(const nlohmann::json& json,
+    std::unordered_map<std::string, std::vector<engine::UIStyleAnimation>>& map)
+{
+    if (json.contains("animations"))
+    {
+        const auto& animations = json["animations"];
+        for (const auto& item : animations.items())
+        {
+            const auto& json = item.value();
+            std::string key;
+            if (!base::JsonReadSafe(json, "key", &key))
+            {
+                WARN("UI style contains missing animation key.");
+                continue;
+            }
+            engine::UIStyleAnimation animation;
+            if (!animation.FromJson(json))
+            {
+                WARN("Failed to parse UI animation. [key='%1']", key);
+                continue;
+            }
+            map[key].push_back(std::move(animation));
+        }
+    }
+    return true;
+}
+
 } // namespace
 
 namespace engine
 {
+
+bool UIStyleAnimation::FromJson(const nlohmann::json& json)
+{
+    bool ok = true;
+    ok &= base::JsonReadSafe(json, "type",      &mType);
+    ok &= base::JsonReadSafe(json, "speed",     &mSpeed);
+    ok &= base::JsonReadSafe(json, "magnitude", &mMagnitude);
+    return ok;
+}
+
+void UIStyleAnimation::IntoJson(nlohmann::json& json) const
+{
+    base::JsonWrite(json, "type",  mType);
+    base::JsonWrite(json, "speed", mSpeed);
+    base::JsonWrite(json, "magnitude", mMagnitude);
+}
+
+void UIStyleAnimation::Apply(const gfx::FRect& widget_rect, gfx::Transform* transform, const double time) const
+{
+    if (mType == Type::Shake)
+    {
+        const auto offset_x = std::sin(time * mSpeed) * mMagnitude;
+        const auto offset_y = std::cos(time * mSpeed) * mMagnitude;
+        transform->Translate(offset_x, offset_y);
+    }
+    else if (mType == Type::Bob)
+    {
+        const auto offset_y = std::sin(time * mSpeed) * mMagnitude;
+        transform->Translate(0.0f, offset_y);
+    }
+    else if (mType == Type::Hinge)
+    {
+        const auto angle = std::sin(time * mSpeed) * mMagnitude;
+        transform->RotateAroundZ(angle);
+    }
+    else if (mType == Type::Rotate)
+    {
+        const auto width = widget_rect.GetWidth();
+        const auto height = widget_rect.GetHeight();
+        const auto angle = std::sin(time * mSpeed) * mMagnitude;
+        transform->Translate(-width*0.5f, -height*0.5f);
+        transform->RotateAroundZ(angle);
+        transform->Translate(width*0.5f, height*0.5f);
+    }
+    else if (mType == Type::Chaos)
+    {
+        const auto width  = widget_rect.GetWidth();
+        const auto height = widget_rect.GetHeight();
+        const auto t = time * mSpeed;
+        const auto offset_x = (std::sin(t * 1.0) + std::sin(t * 2.7) * 0.4 + std::sin(t * 5.3) * 0.15) * mMagnitude;
+        const auto offset_y = (std::cos(t * 1.3) + std::cos(t * 3.1) * 0.4 + std::cos(t * 7.1) * 0.15) * mMagnitude;
+        const auto angle    = (std::sin(t * 0.9) + std::sin(t * 4.3) * 0.3) * mMagnitude * 0.05f;
+        transform->Translate(offset_x, offset_y);
+        transform->Translate(-width*0.5f, -height*0.5f);
+        transform->RotateAroundZ(angle);
+        transform->Translate(width*0.5f, height*0.5f);
+    }
+}
 
 bool UIColorPalette::HasColor(const std::string& key) const
 {
@@ -506,6 +591,9 @@ bool UIStyleFile::LoadStyle(const nlohmann::json& json)
     if (!ParseMaterials(json, materials))
         return false;
 
+    if (!ParseAnimations(json, mAnimations))
+        return false;
+
     for (auto& p : props)
     {
         mProperties[p.key] = std::move(p.value);
@@ -532,6 +620,17 @@ bool UIStyleFile::LoadStyle(const EngineData& data)
 
 void UIStyleFile::SaveStyle(nlohmann::json& json) const
 {
+    for (const auto& [key, val] : mAnimations)
+    {
+        for (const auto& animation : val)
+        {
+            nlohmann::json j;
+            base::JsonWrite(j, "key", key);
+            animation.IntoJson(j);
+            json["animations"].push_back(std::move(j));
+        }
+    }
+
     for (const auto& [key, val] : mProperties)
     {
         nlohmann::json prop;
@@ -763,6 +862,9 @@ bool UIStyle::LoadStyle(const nlohmann::json& json)
     if (!ParseMaterials(json, materials))
         return false;
 
+    if (!ParseAnimations(json, mAnimations))
+        return false;
+
     for (auto& p : props)
     {
         mProperties[p.key] = std::move(p.value);
@@ -788,6 +890,17 @@ bool UIStyle::LoadStyle(const EngineData& data)
 
 void UIStyle::SaveStyle(nlohmann::json& json) const
 {
+    for (const auto& [key, val] : mAnimations)
+    {
+        for (const auto& animation : val)
+        {
+            nlohmann::json j;
+            base::JsonWrite(j, "key", key);
+            animation.IntoJson(j);
+            json["animations"].push_back(std::move(j));
+        }
+    }
+
     for (const auto& [key, val] : mProperties)
     {
         nlohmann::json prop;
@@ -936,6 +1049,29 @@ bool UIStyle::PurgeUnavailableMaterialReferences()
     return purged;
 }
 
+void UIStyle::ApplyStyleAnimation(const std::string& key, const gfx::FRect& widget_rect,
+                                  gfx::Transform* transform, const double time) const
+{
+    if (const auto* ptr = base::SafeFind(mAnimations, key))
+    {
+        for (const auto& anim : *ptr)
+        {
+            anim.Apply(widget_rect, transform, time);
+        }
+    }
+
+    if (!mStyleFile)
+        return;
+
+    if (const auto* ptr = base::SafeFind(mStyleFile->mAnimations, key))
+    {
+        for (const auto& anim : *ptr)
+        {
+            anim.Apply(widget_rect, transform, time);
+        }
+    }
+}
+
 void UIPainter::DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const
 {
     if (auto* material = GetWidgetMaterial(id, ps, "background"))
@@ -945,7 +1081,7 @@ void UIPainter::DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) 
 
         const auto shape = GetWidgetProperty(id, ps, "shape", UIStyle::WidgetShape::Rectangle);
         const auto radius = GetCornerRadius(id, ps, "shape-corner-radius", shape);
-        FillShape(ps.rect, *material, shape, radius);
+        DrawShape(ps.rect, *material, shape, radius, Orientation::Horizontal, &ps.transform);
     }
 }
 void UIPainter::DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) const
@@ -956,7 +1092,7 @@ void UIPainter::DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) cons
         const auto shape = GetWidgetProperty(id, ps, "shape", UIStyle::WidgetShape::Rectangle);
         const auto radius = GetCornerRadius(id, ps, "shape-corner-radius", shape);
 
-        OutlineShape(ps.rect, *material, shape, width, radius);
+        DrawBorder(ps.rect, *material, shape, width, radius, Orientation::Horizontal, &ps.transform);
     }
 }
 
@@ -1003,7 +1139,7 @@ void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps,
     auto rect = ps.rect;
     rect.Translate(xoffset, yoffset);
 
-    DrawText(text, font_name, font_size, rect, text_color, alignment, properties, line_height, orientation);
+    DrawText(text, font_name, font_size, rect, text_color, alignment, properties, line_height, orientation, &ps.transform);
 }
 
 void UIPainter::DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const
@@ -1016,7 +1152,7 @@ void UIPainter::DrawEditableText(const WidgetId& id, const PaintStruct& ps, cons
     const auto  font_size  = GetWidgetProperty(id, ps, "edit-text-size",16);
     const unsigned alignment  = gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignLeft;
     const unsigned properties = 0;
-    DrawText(text.text, font_name, font_size, ps.rect, text_color, alignment, properties, 1.0f);
+    DrawText(text.text, font_name, font_size, ps.rect, text_color, alignment, properties, 1.0f, Orientation::Horizontal, &ps.transform);
 }
 
 void UIPainter::DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const
@@ -1025,14 +1161,14 @@ void UIPainter::DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const
     {
         const auto shape = GetWidgetProperty(id, ps, "text-edit-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "text-edit-shape-corner-radius", shape);
-        FillShape(ps.rect, *material, shape, radius);
+        DrawShape(ps.rect, *material, shape, radius, Orientation::Horizontal, &ps.transform);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "text-edit-border"))
     {
         const auto width = GetWidgetProperty(id, ps, "text-edit-border-width", 1.0f);
         const auto shape = GetWidgetProperty(id, ps, "text-edit-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "text-edit-shape-corner-radius", shape);
-        OutlineShape(ps.rect, *material, shape, width, radius);
+        DrawBorder(ps.rect, *material, shape, width, radius, Orientation::Horizontal, &ps.transform);
     }
 }
 
@@ -1048,7 +1184,7 @@ void UIPainter::DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) c
         gfx::FRect rect = ps.rect;
         rect.Grow(-4.0f, -4.0f);
         rect.Translate(2.0f, 2.0f);
-        OutlineShape(rect, *material, rect_shape, rect_width, rect_radius);
+        DrawBorder(rect, *material, rect_shape, rect_width, rect_radius, Orientation::Horizontal, &ps.transform);
     }
 }
 
@@ -1058,14 +1194,14 @@ void UIPainter::DrawCheckBox(const WidgetId& id, const PaintStruct& ps , bool ch
     {
         const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Rectangle);
         const auto radius = GetCornerRadius(id, ps, "check-shape-corner-radius", shape);
-        FillShape(ps.rect, *material, shape, radius);
+        DrawShape(ps.rect, *material, shape, radius, Orientation::Horizontal, &ps.transform);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "check-border"))
     {
         const auto width = GetWidgetProperty(id, ps, "check-border-width", 1.0f);
         const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Rectangle);
         const auto radius = GetCornerRadius(id, ps, "check-shape-corner-radius", shape);
-        OutlineShape(ps.rect, *material, shape, width, radius);
+        DrawBorder(ps.rect, *material, shape, width, radius, Orientation::Horizontal, &ps.transform);
     }
 
     if (const auto* material = GetWidgetMaterial(id, ps, checked ? "check-mark-checked" : "check-mark-unchecked"))
@@ -1077,7 +1213,7 @@ void UIPainter::DrawCheckBox(const WidgetId& id, const PaintStruct& ps , bool ch
         mark.Resize(ps.rect.GetSize());
         mark.Grow(-6.0f, -6.0f);
         mark.Translate(3.0f, 3.0f);
-        FillShape(mark, *material, shape, radius);
+        DrawShape(mark, *material, shape, radius, Orientation::Horizontal, &ps.transform);
     }
 }
 
@@ -1087,14 +1223,14 @@ void UIPainter::DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool 
     {
         const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Circle);
         const auto radius = GetCornerRadius(id, ps, "check-shape-corner-radius", shape);
-        FillShape(ps.rect, *material, shape, radius);
+        DrawShape(ps.rect, *material, shape, radius, Orientation::Horizontal, &ps.transform);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "check-border"))
     {
         const auto width = GetWidgetProperty(id, ps, "check-border-width", 1.0f);
         const auto shape = GetWidgetProperty(id, ps, "check-shape", UIStyle::WidgetShape::Circle);
         const auto radius = GetCornerRadius(id, ps, "check-shape-corner-radius", shape);
-        OutlineShape(ps.rect, *material, shape, width, radius);
+        DrawBorder(ps.rect, *material, shape, width, radius, Orientation::Horizontal, &ps.transform);
     }
     const auto* check_mark_name = selected ? "check-mark-checked" : "check-mark-unchecked";
 
@@ -1107,7 +1243,7 @@ void UIPainter::DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool 
         mark.Resize(ps.rect.GetSize());
         mark.Grow(-6.0f, -6.0f);
         mark.Translate(3.0f, 3.0f);
-        FillShape(mark, *material, shape, radius);
+        DrawShape(mark, *material, shape, radius, Orientation::Horizontal, &ps.transform);
     }
 }
 
@@ -1117,14 +1253,14 @@ void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon
     {
         const auto shape = GetWidgetProperty(id, ps, "button-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "button-shape-corner-radius", shape);
-        FillShape(ps.rect, *material, shape, radius);
+        DrawShape(ps.rect, *material, shape, radius, Orientation::Horizontal, &ps.transform);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "button-border"))
     {
         const auto width = GetWidgetProperty(id, ps, "button-border-width", 1.0f);
         const auto shape = GetWidgetProperty(id, ps, "button-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "button-shape-corner-radius", shape);
-        OutlineShape(ps.rect, *material, shape, width, radius);
+        DrawBorder(ps.rect, *material, shape, width, radius, Orientation::Horizontal, &ps.transform);
     }
     if (btn == ButtonIcon::None)
         return;
@@ -1142,9 +1278,9 @@ void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon
     // specific material is found then we render the button icon the built-in (old) way.
     if (btn == ButtonIcon::ArrowUp)
     {
-        gfx::Transform icon;
+        gfx::Transform icon(ps.transform.GetAsMatrix());
         icon.Resize(ico_size, ico_size);
-        icon.MoveTo(ps.rect.GetPosition());
+        icon.Translate(ps.rect.GetPosition());
         icon.Translate(btn_width*0.5, btn_height*0.5);
         icon.Translate(ico_size*-0.5, ico_size*-0.5);
 
@@ -1180,14 +1316,15 @@ void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon
                 rotation = math::Pi * 0.5;
         }
 
-        gfx::Transform icon;
+        gfx::Transform icon(ps.transform.GetAsMatrix());
         icon.Resize(ico_size, ico_size);
-        icon.Translate(ico_size*-0.5, ico_size*-0.5);
-        icon.RotateAroundZ(rotation);
-        icon.Translate(ico_size*0.5, ico_size*0.5);
         icon.Translate(ps.rect.GetPosition());
         icon.Translate(btn_width*0.5, btn_height*0.5);
         icon.Translate(ico_size*-0.5, ico_size*-0.5);
+        icon.Push();
+            icon.Translate(-0.5f, -0.5f);
+            icon.RotateAroundZ(rotation);
+            icon.Translate(0.5f, 0.5f);
 
         if (const auto value = StencilPass())
         {
@@ -1215,7 +1352,7 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps,
     {
         const auto shape = GetWidgetProperty(id, ps, "slider-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "slider-shape-corner-radius", shape);
-        FillShape(ps.rect, *material, shape, radius);
+        DrawShape(ps.rect, *material, shape, radius, orientation, &ps.transform);
     }
     if (ps.focused)
     {
@@ -1229,7 +1366,7 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps,
             gfx::FRect rect = ps.rect;
             rect.Grow(-4.0f, -4.0f);
             rect.Translate(2.0f, 2.0f);
-            OutlineShape(rect, *material, rect_shape, rect_width, slider_radius);
+            DrawBorder(rect, *material, rect_shape, rect_width, slider_radius, orientation, &ps.transform);
         }
     }
 
@@ -1237,14 +1374,14 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps,
     {
         const auto shape = GetWidgetProperty(id, ps, "slider-knob-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "slider-knob-shape-corner-radius", shape);
-        FillShape(knob, *material, shape, radius);
+        DrawShape(knob, *material, shape, radius, orientation, &ps.transform);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "slider-knob-border"))
     {
         const auto shape = GetWidgetProperty(id, ps, "slider-knob-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "slider-knob-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "slider-knob-border-width", 1.0f);
-        OutlineShape(knob, *material, shape, width, radius);
+        DrawBorder(knob, *material, shape, width, radius, orientation, &ps.transform);
     }
 
     if (const auto* material = GetWidgetMaterial(id, ps, "slider-border"))
@@ -1252,7 +1389,7 @@ void UIPainter::DrawSlider(const WidgetId& id, const PaintStruct& ps,
         const auto shape = GetWidgetProperty(id, ps, "slider-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "slider-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "slider-border-width", 1.0f);
-        OutlineShape(ps.rect, *material, shape, width, radius);
+        DrawBorder(ps.rect, *material, shape, width, radius, orientation, &ps.transform);
     }
 }
 
@@ -1263,7 +1400,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
     {
         const auto shape = GetWidgetProperty(id, ps, "progress-bar-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "progress-bar-shape-corner-radius", shape);
-        FillShape(ps.rect, *material, shape, radius);
+        DrawShape(ps.rect, *material, shape, radius, orientation, &ps.transform);
     }
 
     gfx::Material* fill_material = nullptr;
@@ -1288,7 +1425,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
             else if (orientation == Orientation::Vertical)
                 fill.SetHeight(ps.rect.GetHeight() * value);
 
-            FillShape(fill, *fill_material, shape, radius);
+            DrawShape(fill, *fill_material, shape, radius, orientation, &ps.transform);
         }
         else
         {
@@ -1312,7 +1449,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
                 indicator.Translate(progress_width*0.5f, 0.0f);
                 indicator.Translate(-indicator_width*0.5f, 0.0f);
                 indicator.Translate(value * 0.8f * 0.5 * progress_width, 0.0f);
-                FillShape(indicator, *fill_material, shape, radius);
+                DrawShape(indicator, *fill_material, shape, radius, orientation, &ps.transform);
             }
             else if (orientation == Orientation::Vertical)
             {
@@ -1327,7 +1464,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
                 indicator.Translate(0.0f, progress_height*0.5f);
                 indicator.Translate(0.0f, -indicator_height*0.5f);
                 indicator.Translate(0.0f, value * 0.8f * 0.5f * progress_height);
-                FillShape(indicator, *fill_material, shape, radius);
+                DrawShape(indicator, *fill_material, shape, radius, orientation, &ps.transform);
             }
         }
     }
@@ -1337,7 +1474,7 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps,
         const auto shape = GetWidgetProperty(id, ps, "progress-bar-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "progress-bar-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "progress-bar-border-width", 1.0f);
-        OutlineShape(ps.rect, *material, shape, width, radius);
+        DrawBorder(ps.rect, *material, shape, width, radius, orientation, &ps.transform);
     }
 }
 
@@ -1350,27 +1487,27 @@ void UIPainter::DrawScrollBar(const WidgetId& id, const PaintStruct& ps, const u
     {
         const auto shape = GetWidgetProperty(id, ps, "scrollbar-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "scrollbar-shape-corner-radius", shape);
-        FillShape(ps.rect, *material, shape, radius, direction);
+        DrawShape(ps.rect, *material, shape, radius, direction, &ps.transform);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-handle"))
     {
         const auto shape = GetWidgetProperty(id, ps, "scrollbar-handle-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "scrollbar-handle-shape-corner-radius", shape);
-        FillShape(handle, *material, shape, radius, direction);
+        DrawShape(handle, *material, shape, radius, direction, &ps.transform);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-handle-border"))
     {
         const auto shape = GetWidgetProperty(id, ps, "scrollbar-handle-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "scrollbar-handle-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "scrollbar-handle-border-width", 1.0f);
-        OutlineShape(handle, *material, shape, width, radius, direction);
+        DrawBorder(handle, *material, shape, width, radius, direction, &ps.transform);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, "scrollbar-border"))
     {
         const auto shape = GetWidgetProperty(id, ps, "scrollbar-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "scrollbar-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "scrollbar-border-width", 1.0f);
-        OutlineShape(ps.rect, *material, shape, width, radius, direction);
+        DrawBorder(ps.rect, *material, shape, width, radius, direction, &ps.transform);
     }
 }
 
@@ -1380,7 +1517,7 @@ void UIPainter::DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik:
     {
         const auto shape = GetWidgetProperty(id, ps, "toggle-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "toggle-shape-corner-radius", shape);
-        FillShape(ps.rect, *material, shape, radius);
+        DrawShape(ps.rect, *material, shape, radius, Orientation::Horizontal, &ps.transform);
     }
     if (ps.focused)
     {
@@ -1394,7 +1531,7 @@ void UIPainter::DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik:
             gfx::FRect rect = ps.rect;
             rect.Grow(-4.0f, -4.0f);
             rect.Translate(2.0f, 2.0f);
-            OutlineShape(rect, *material, rect_shape, rect_width, slider_radius);
+            DrawBorder(rect, *material, rect_shape, rect_width, slider_radius, Orientation::Horizontal, &ps.transform);
         }
     }
 
@@ -1402,7 +1539,7 @@ void UIPainter::DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik:
     {
         const auto shape = GetWidgetProperty(id, ps, "toggle-knob-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "toggle-knob-shape-corner-radius", shape);
-        FillShape(knob, *material, shape, radius);
+        DrawShape(knob, *material, shape, radius, Orientation::Horizontal, &ps.transform);
     }
 
     if (const auto* material = GetWidgetMaterial(id, ps, on_off ? "toggle-knob-border-on" : "toggle-knob-border-off"))
@@ -1410,7 +1547,7 @@ void UIPainter::DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik:
         const auto shape = GetWidgetProperty(id, ps, "toggle-knob-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "toggle-knob-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "toggle-knob-border-width", 1.0f);
-        OutlineShape(knob, *material, shape, width, radius);
+        DrawBorder(knob, *material, shape, width, radius, Orientation::Horizontal, &ps.transform);
     }
 
     if (const auto* material = GetWidgetMaterial(id, ps, on_off ? "toggle-border-on" : "toggle-border-off"))
@@ -1418,7 +1555,7 @@ void UIPainter::DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik:
         const auto shape = GetWidgetProperty(id, ps, "toggle-shape", UIStyle::WidgetShape::RoundRect);
         const auto radius = GetCornerRadius(id, ps, "toggle-shape-corner-radius", shape);
         const auto width = GetWidgetProperty(id, ps, "toggle-border-width", 1.0f);
-        OutlineShape(ps.rect, *material, shape, width, radius);
+        DrawBorder(ps.rect, *material, shape, width, radius, Orientation::Horizontal, &ps.transform);
     }
 }
 
@@ -1525,6 +1662,29 @@ void UIPainter::DrawShape(const WidgetId& widgetId, const PaintStruct& ps, const
     material->used = true;
     drawable->used = true;
     drawable->rect = ps.rect;
+}
+
+void UIPainter::ApplyTransform(const WidgetId& id, PaintStruct& ps) const
+{
+    if (!mStyle)
+        return;
+
+    std::string state;
+    if (ps.enabled == false)
+        state = "/disabled";
+    else if (ps.pressed)
+        state = "/pressed";
+    else if (ps.focused)
+        state = "/focused";
+    else if (ps.hovered)
+        state = "/hovered";
+    else state = "/idle";
+
+    // excessive?
+    mStyle->ApplyStyleAnimation("widget",         ps.rect, &ps.transform, ps.time);
+    mStyle->ApplyStyleAnimation("widget" + state, ps.rect, &ps.transform, ps.time);
+    mStyle->ApplyStyleAnimation(ps.klass,         ps.rect, &ps.transform, ps.time);
+    mStyle->ApplyStyleAnimation(ps.klass + state, ps.rect, &ps.transform, ps.time);
 }
 
 void UIPainter::BeginDrawWidgets()
@@ -1772,7 +1932,7 @@ uint8_t UIPainter::StencilPass() const
 
 void UIPainter::DrawText(const std::string& text, const std::string& font_name, int font_size,
                          const gfx::FRect& rect, const gfx::Color4f & color, unsigned alignment, unsigned properties,
-                         float line_height, Orientation orientation) const
+                         float line_height, Orientation orientation, const gfx::Transform* transform) const
 {
     auto raster_width  =  (unsigned)math::clamp(0.0f, 2048.0f, rect.GetWidth());
     auto raster_height =  (unsigned)math::clamp(0.0f, 2048.0f, rect.GetHeight());
@@ -1802,32 +1962,33 @@ void UIPainter::DrawText(const std::string& text, const std::string& font_name, 
     if (const auto value = StencilPass())
     {
         gfx::StencilTestColorWritePass pass(gfx::StencilPassValue(value), *mPainter);
-        DrawText(rect, material, pass, orientation);
+        DrawText(rect, material, pass, orientation, transform);
     }
     else
     {
         gfx::GenericRenderPass pass(*mPainter);
-        DrawText(rect, material, pass, orientation);
+        DrawText(rect, material, pass, orientation, transform);
     }
 }
 
-void UIPainter::FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                          float corner_radius, Orientation orientation) const
+void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
+                          float corner_radius, Orientation orientation, const gfx::Transform* transform) const
 {
     if (const auto value = StencilPass())
     {
         gfx::StencilTestColorWritePass pass(gfx::StencilPassValue(value), *mPainter);
-        DrawShape(rect, material, pass, shape, orientation, corner_radius);
+        DrawShape(rect, material, pass, shape, orientation, corner_radius, transform);
     }
     else
     {
         gfx::GenericRenderPass pass(*mPainter);
-        DrawShape(rect, material, pass, shape, orientation, corner_radius);
+        DrawShape(rect, material, pass, shape, orientation, corner_radius, transform);
     }
 }
 
-void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                             float thickness, float corner_radius, Orientation orientation) const
+void UIPainter::DrawBorder(const gfx::FRect& shape_rect, const gfx::Material& material, UIStyle::WidgetShape shape,
+                           float thickness, float corner_radius, Orientation orientation,
+                           const gfx::Transform* transform) const
 {
     const auto width  = shape_rect.GetWidth();
     const auto height = shape_rect.GetHeight();
@@ -1848,10 +2009,10 @@ void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& 
 
         const gfx::StencilMaskPass mask(gfx::StencilWriteValue(0), *mPainter,
                                      gfx::StencilMaskPass::StencilFunc::Overwrite);
-        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), mask, shape, orientation, corner_radius);
+        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), mask, shape, orientation, corner_radius, transform);
 
         const gfx::StencilTestColorWritePass cover(stencil_value, *mPainter);
-        DrawShape(shape_rect, material, cover, shape, orientation, corner_radius);
+        DrawShape(shape_rect, material, cover, shape, orientation, corner_radius, transform);
     }
     else
     {
@@ -1862,10 +2023,10 @@ void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& 
         const gfx::StencilMaskPass overlap(gfx::StencilClearValue(1),
                                            gfx::StencilWriteValue(0), *mPainter,
                                            gfx::StencilMaskPass::StencilFunc::Overwrite);
-        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, shape, orientation, corner_radius);
+        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, shape, orientation, corner_radius, transform);
 
         const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), *mPainter);
-        DrawShape(shape_rect, material, cover, shape, orientation, corner_radius);
+        DrawShape(shape_rect, material, cover, shape, orientation, corner_radius, transform);
     }
 }
 
@@ -2213,9 +2374,10 @@ float UIPainter::GetCornerRadius(const std::string& id,
 // static
 template<typename RenderPass>
 void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass,
-                          UIStyle::WidgetShape shape, Orientation orientation, float corner_radius)
+                          UIStyle::WidgetShape shape, Orientation orientation, float corner_radius,
+                          const gfx::Transform* effect)
 {
-    gfx::Transform transform;
+    gfx::Transform transform(effect ? effect->GetAsMatrix() : glm::mat4(1.0f));
     transform.Resize(rect);
     transform.Translate(rect);
 
@@ -2237,9 +2399,10 @@ void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material,
 // static
 template<typename RenderPass>
 void UIPainter::DrawText(const gfx::FRect& rect, const gfx::Material& material,
-                         const RenderPass& pass, Orientation orientation)
+                         const RenderPass& pass, Orientation orientation,
+                         const gfx::Transform* effect)
 {
-    gfx::Transform transform;
+    gfx::Transform transform(effect ? effect->GetAsMatrix() : glm::mat4(1.0f));
     transform.Resize(rect);
     transform.Translate(rect);
 

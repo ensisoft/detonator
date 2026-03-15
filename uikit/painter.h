@@ -43,6 +43,9 @@ namespace uik
         // in some way, by for example applying different
         // styling to the widget.
         struct PaintStruct {
+            // Transform that applies to the paint operations. The transform
+            // with come for example from the effect system in the UI style.
+            Transform transform;
             // The widget "klass" name specific to each type of widget.
             // For example "pushbutton" or "label". See widgets.cpp for
             // the actual widget type names.
@@ -130,6 +133,10 @@ namespace uik
         // which the widget implementations can then use to compose the widget.
 
         virtual void BeginDrawWidgets() {}
+
+        // Apply a stylistic transform on the paint structure. This might be something
+        // like a subtle shake or transformation to make the widgets feel more alive.
+        virtual void ApplyTransform(const WidgetId& id, PaintStruct& ps) const {}
 
         // Draw the widget background if any.
         virtual void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const = 0;
