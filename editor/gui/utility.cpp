@@ -35,6 +35,24 @@
 #include "editor/app/utility.h"
 #include "editor/gui/utility.h"
 
+namespace {
+void PopulateUIStyles(const QString& dir, const QString& uri, QComboBox* cmb)
+{
+    QStringList filters;
+    filters << "*.json";
+
+    QDir d;
+    d.setPath(dir);
+    d.setNameFilters(filters);
+    const auto& style_files = d.entryList();
+    for (const auto& style_file : style_files)
+    {
+        const QFileInfo info(style_file);
+        cmb->addItem(uri + info.fileName());
+    }
+}
+}//namespace
+
 namespace gui {
 
 bool SetImage(QLabel* label, const gfx::IBitmap& bitmap)
@@ -294,15 +312,17 @@ void PopulateUIStyles(QComboBox* cmb)
     QStringList filters;
     filters << "*.json";
     const auto& appdir = QCoreApplication::applicationDirPath();
-    const auto& styledir = app::JoinPath(appdir, "ui/style");
+    const auto& style_dir = app::JoinPath(appdir, "ui/style");
+
+    ::PopulateUIStyles(style_dir, "app://ui/style/", cmb);
+
     QDir dir;
-    dir.setPath(styledir);
-    dir.setNameFilters(filters);
-    const QStringList& style_files = dir.entryList();
-    for (const auto& style_file : style_files)
+    dir.setPath(style_dir);
+    const auto style_dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const auto& dir_name : style_dirs)
     {
-        const QFileInfo info(style_file);
-        cmb->addItem("app://ui/style/" + info.fileName());
+        const auto& style_dir = app::JoinPath(appdir, "ui/style/" + dir_name);
+        ::PopulateUIStyles(style_dir, "app://ui/style/" + dir_name + "/", cmb);
     }
     if (cmb->isEditable())
         cmb->lineEdit()->setCursorPosition(0);
