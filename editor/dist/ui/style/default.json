@@ -23,11 +23,11 @@
     },
     {
       "key": "widget/text-font",
-      "value": "app://fonts/orbitron-medium.otf"
+      "value": "app://fonts/nulshock_bd.otf"
     },
     {
       "key": "widget/text-size",
-      "value": 16
+      "value": 14
     },
     {
       "key": "widget/text-vertical-align",
@@ -41,11 +41,11 @@
 
     {
       "key": "widget/edit-text-font",
-      "value": "app://fonts/orbitron-medium.otf"
+      "value": "app://fonts/nulshock_bd.otf"
     },
     {
       "key": "widget/edit-text-size",
-      "value": 16
+      "value": 14
     },
     {
       "key": "widget/edit-text-color",
@@ -93,6 +93,22 @@
     },
     {
       "key": "push-button/pressed/text-y-offset",
+      "value": 1.0
+    },
+    {
+      "key": "checkbox/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "checkbox/pressed/text-y-offset",
+      "value": 1.0
+    },
+    {
+      "key": "radiobutton/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "radiobutton/pressed/text-y-offset",
       "value": 1.0
     },
 
@@ -315,8 +331,12 @@
 
     {
       "key": "form/background",
-      "type": "Color",
-      "color": "palette.pitch"
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.onyx",
+      "color1": "palette.shale",
+      "color2": "palette.void",
+      "color3": "palette.pitch"
     },
     {
       "key": "form/border",
