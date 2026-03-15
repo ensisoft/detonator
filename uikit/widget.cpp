@@ -829,8 +829,9 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     FRect text, check;
     ComputeLayout(paint.rect, &text, &check);
 
-    p.rect   = check;
-    p.hovered= ps.state->GetValue(ps.widgetId + "/mouse-over-check", false);
+    p.hovered= ps.state->GetValue(ps.widgetId + "/mouse-over", false);
+
+    p.rect = check;
     ps.painter->DrawCheckBox(ps.widgetId, p, mChecked);
 
     p.rect = text;
@@ -861,7 +862,8 @@ WidgetAction CheckBoxModel::MouseMove(const MouseEvent& mouse, const MouseStruct
 {
     FRect text, check;
     ComputeLayout(mouse.widget_window_rect, &text, &check);
-    ms.state->SetValue(ms.widgetId + "/mouse-over-check", check.TestPoint(mouse.window_mouse_pos));
+    ms.state->SetValue(ms.widgetId + "/mouse-over",
+        check.TestPoint(mouse.window_mouse_pos) || text.TestPoint(mouse.window_mouse_pos));
     return WidgetAction{};
 }
 
@@ -881,7 +883,7 @@ WidgetAction CheckBoxModel::MouseRelease(const MouseEvent& mouse, const MouseStr
 
 WidgetAction CheckBoxModel::MouseLeave(const MouseStruct& ms)
 {
-    ms.state->SetValue(ms.widgetId + "/mouse-over-check", false);
+    ms.state->SetValue(ms.widgetId + "/mouse-over", false);
     return WidgetAction {};
 }
 
@@ -1098,8 +1100,9 @@ void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     FRect text, check;
     ComputeLayout(paint.rect, &text, &check);
 
-    p.rect   = check;
-    p.hovered= ps.state->GetValue(ps.widgetId + "/mouse-over-check", false);
+    p.hovered = ps.state->GetValue(ps.widgetId + "/mouse-over", false);
+
+    p.rect = check;
     ps.painter->DrawRadioButton(ps.widgetId, p, mSelected);
 
     p.rect = text;
@@ -1144,7 +1147,8 @@ WidgetAction RadioButtonModel::MouseMove(const MouseEvent& mouse, const MouseStr
 {
     FRect text, check;
     ComputeLayout(mouse.widget_window_rect, &text, &check);
-    ms.state->SetValue(ms.widgetId + "/mouse-over-check", check.TestPoint(mouse.window_mouse_pos));
+    ms.state->SetValue(ms.widgetId + "/mouse-over",
+        check.TestPoint(mouse.window_mouse_pos) || text.TestPoint(mouse.window_mouse_pos));
     return WidgetAction{};
 }
 WidgetAction RadioButtonModel::MouseRelease(const MouseEvent& mouse, const MouseStruct& ms)
@@ -1161,7 +1165,7 @@ WidgetAction RadioButtonModel::MouseRelease(const MouseEvent& mouse, const Mouse
 }
 WidgetAction RadioButtonModel::MouseLeave(const MouseStruct& ms)
 {
-    ms.state->SetValue(ms.widgetId + "/mouse-over-check", false);
+    ms.state->SetValue(ms.widgetId + "/mouse-over", false);
     return WidgetAction {};
 }
 
