@@ -42,6 +42,7 @@
 #include "graphics/drawable.h"
 #include "graphics/fwd.h"
 #include "graphics/material_class.h"
+#include "graphics/transform.h"
 #include "wdk/keys.h"
 #include "wdk/bitflag.h"
 #include "wdk/events.h"
@@ -105,6 +106,22 @@ namespace engine
         virtual bool IsAvailable(const ClassLibrary& loader) const
         { return true; }
     private:
+    };
+
+    class UIStyleAnimation
+    {
+    public:
+        enum class Type {
+            Shake, Bob, Hinge, Rotate, Chaos
+        };
+
+        bool FromJson(const nlohmann::json& json);
+        void IntoJson(nlohmann::json& json) const;
+        void Apply(const gfx::FRect& widget_rect, gfx::Transform* transform, const double time) const;
+    private:
+        float mSpeed = 0.0f;
+        float mMagnitude = 0.0f;
+        Type mType = Type::Shake;
     };
 
     namespace detail {
@@ -472,6 +489,7 @@ namespace engine
     private:
         std::unordered_map<std::string, UIProperty::ValueType> mProperties;
         std::unordered_map<std::string, std::unique_ptr<UIMaterial>> mMaterials;
+        std::unordered_map<std::string, std::vector<UIStyleAnimation>> mAnimations;
         friend class UIStyle;
     };
 
@@ -586,12 +604,16 @@ namespace engine
 
         bool PurgeUnavailableMaterialReferences();
 
+        void ApplyStyleAnimation(const std::string& key, const gfx::FRect& widget_rect,
+                                 gfx::Transform* transform, const double time) const;
+
     private:
         const ClassLibrary* mClassLib = nullptr;
         const Loader* mLoader = nullptr;
         std::shared_ptr<const UIStyleFile> mStyleFile;
         std::unordered_map<std::string, UIProperty::ValueType> mProperties;
         std::unordered_map<std::string, std::unique_ptr<UIMaterial>> mMaterials;
+        std::unordered_map<std::string, std::vector<UIStyleAnimation>> mAnimations;
     };
 
     // Implementation of ui kit painter that uses the graphics/
@@ -612,6 +634,7 @@ namespace engine
 
         // uik::Painter implementation.
         void BeginDrawWidgets() override;
+        void ApplyTransform(const WidgetId& id, PaintStruct& ps) const override;
         void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const override;
         void DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) const override;
         void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const override;
@@ -680,11 +703,14 @@ namespace engine
         uint8_t StencilPass() const;
         void DrawText(const std::string& text, const std::string& font_name, int font_size,
                       const gfx::FRect& rect, const gfx::Color4f & color, unsigned alignment, unsigned properties,
-                      float line_height, Orientation orientation = Orientation::Horizontal) const;
-        void FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                       float corner_radius, Orientation orientation = Orientation::Horizontal) const;
-        void OutlineShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
-                          float thickness, float corner_radius, Orientation orientation = Orientation::Horizontal) const;
+                      float line_height, Orientation orientation = Orientation::Horizontal,
+                      const gfx::Transform* transform = nullptr) const;
+        void DrawShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
+                       float corner_radius, Orientation orientation = Orientation::Horizontal,
+                       const gfx::Transform* transform = nullptr) const;
+        void DrawBorder(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
+                        float thickness, float corner_radius, Orientation orientation = Orientation::Horizontal,
+                        const gfx::Transform* transform = nullptr) const;
 
         void ConfigureMaterial(const PaintStruct& ps, gfx::Material* material) const;
 
@@ -719,11 +745,13 @@ namespace engine
                               UIStyle::WidgetShape shape) const;
 
         template<typename RenderPass>
-        static void DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass, UIStyle::WidgetShape shape,
-                       Orientation orientation, float corner_radius);
+        static void DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass,
+                       UIStyle::WidgetShape shape, Orientation orientation, float corner_radius,
+                       const gfx::Transform* transform = nullptr);
         template<typename RenderPass>
         static void DrawText(const gfx::FRect& rect, const gfx::Material& material,
-                      const RenderPass& pass, Orientation orientation);
+                      const RenderPass& pass, Orientation orientation,
+                      const gfx::Transform* transform = nullptr);
 
     private:
         UIStyle* mStyle = nullptr;
