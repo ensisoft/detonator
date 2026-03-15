@@ -36,15 +36,8 @@ namespace gfx
           : mId(base::RandomString(10))
         {}
 
-        explicit TextureTextBufferSource(const TextBuffer& text, std::string id = base::RandomString(10))
-          : mId(std::move(id))
-          , mTextBuffer(text)
-        {}
-
-        explicit TextureTextBufferSource(TextBuffer&& text, std::string id = base::RandomString(10)) noexcept
-          : mId(std::move(id))
-          , mTextBuffer(std::move(text))
-        {}
+        explicit TextureTextBufferSource(const TextBuffer& text, std::string id = base::RandomString(10));
+        explicit TextureTextBufferSource(TextBuffer&& text, std::string id = base::RandomString(10)) noexcept;
 
         base::bitflag<Effect> GetEffects() const override
         {return mEffects; }
@@ -67,15 +60,16 @@ namespace gfx
         void IntoJson(data::Writer& data) const override;
         bool FromJson(const data::Reader& data) override;
 
+        std::optional<ContentHint> GetContentHint() const override
+        { return mContentHint; }
+
         TextBuffer& GetTextBuffer()
         { return mTextBuffer; }
         const TextBuffer& GetTextBuffer() const
         { return mTextBuffer; }
 
-        void SetTextBuffer(const TextBuffer& text)
-        { mTextBuffer = text; }
-        void SetTextBuffer(TextBuffer&& text)
-        { mTextBuffer = std::move(text); }
+        void SetTextBuffer(const TextBuffer& text);
+        void SetTextBuffer(TextBuffer&& text);
     protected:
         std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
         {
@@ -83,12 +77,16 @@ namespace gfx
             ret->mId = std::move(id);
             return ret;
         }
+    private:
+        void UpdateContentHint();
 
     private:
         std::string mId;
         std::string mName;
         TextBuffer mTextBuffer;
         base::bitflag<Effect> mEffects;
+    private:
+        mutable std::optional<ContentHint> mContentHint;
     };
 
     inline auto CreateTextureFromText(const TextBuffer& text, std::string id = base::RandomString(10))

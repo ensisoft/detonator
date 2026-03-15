@@ -59,6 +59,15 @@ Texture* TextureFileSource::Upload(const Environment& env, Device& device) const
 {
     const auto& gpu_id = GetGpuId();
     auto* texture = device.FindTexture(gpu_id);
+
+    if (texture && !mContentHint)
+    {
+        ContentHint hint;
+        hint.width = texture->GetWidth();
+        hint.height = texture->GetHeight();
+        mContentHint = hint;
+    }
+
     if (texture && !env.dynamic_content)
         return texture;
 
@@ -121,6 +130,12 @@ Texture* TextureFileSource::Upload(const Environment& env, Device& device) const
         }
 
         texture->GenerateMips();
+
+        ContentHint hint;
+        hint.width = texture->GetWidth();
+        hint.height = texture->GetHeight();
+        mContentHint = hint;
+
         DEBUG("Uploaded texture file source texture. [name='%1', file='%2', effects=%3]", mName, mFile, mEffects);
         return texture;
     } else ERROR("Failed to upload texture file source texture. [name='%1', file='%2']", mName, mFile);

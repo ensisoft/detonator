@@ -107,4 +107,16 @@ bool TextureBitmapGeneratorSource::FromJson(const data::Reader& data)
     return ok;
 }
 
+std::optional<TextureSource::ContentHint> TextureBitmapGeneratorSource::GetContentHint() const
+{
+    if (!mGenerator)
+        return std::nullopt;
+
+    ContentHint hint;
+    hint.width = mGenerator->GetWidth();
+    hint.height = mGenerator->GetHeight();
+    return hint;
+}
+
+
 } // namespace

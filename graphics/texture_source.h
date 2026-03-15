@@ -35,8 +35,7 @@ namespace gfx
 
     // Interface for acquiring texture data. Possible implementations
     // might load the data from a file or generate it on the fly.
-    class TextureSource
-    {
+    class TextureSource {
     public:
         // Enum to specify what is the underlying data source for the texture data.
         enum class Source {
@@ -62,6 +61,11 @@ namespace gfx
         };
         struct Environment {
             bool dynamic_content = false;
+        };
+
+        struct ContentHint {
+            unsigned width = 0;
+            unsigned height;
         };
 
         virtual ~TextureSource() = default;
@@ -107,6 +111,13 @@ namespace gfx
         // Finish packing the texture source into the packer.
         // Update the state with the details from the packer.
         virtual void FinishPacking(const TexturePacker* packer) {}
+
+        // Provide information (size) hint about the texture contents.
+        // This information may not be available until the texture
+        // has actually been generated/loaded by the texture source.
+        // Typically this happens when a call to Upload is done at
+        // the latest.
+        virtual std::optional<ContentHint> GetContentHint() const { return std::nullopt; }
 
         // Create a similar clone of this texture source but with a new unique ID.
         std::unique_ptr<TextureSource> Clone() const
