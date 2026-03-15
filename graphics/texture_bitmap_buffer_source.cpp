@@ -121,5 +121,15 @@ bool TextureBitmapBufferSource::FromJson(const data::Reader& data)
     return ok;
 }
 
+std::optional<TextureSource::ContentHint> TextureBitmapBufferSource::GetContentHint() const
+{
+    if (!mBitmap)
+        return std::nullopt;
+
+    ContentHint hint;
+    hint.width = mBitmap->GetWidth();
+    hint.height = mBitmap->GetHeight();
+    return hint;
+}
 
 } // namespace

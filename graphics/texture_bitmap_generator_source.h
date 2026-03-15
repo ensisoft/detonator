@@ -73,6 +73,7 @@ namespace gfx
         Texture* Upload(const Environment& env, Device& device) const override;
         void IntoJson(data::Writer& data) const override;
         bool FromJson(const data::Reader& data) override;
+        std::optional<ContentHint> GetContentHint() const override;
 
         IBitmapGenerator& GetGenerator()
         { return *mGenerator; }

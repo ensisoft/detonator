@@ -29,6 +29,20 @@
 namespace gfx
 {
 
+TextureTextBufferSource::TextureTextBufferSource(const TextBuffer& text, std::string id)
+  : mId(std::move(id))
+  , mTextBuffer(text)
+{
+    UpdateContentHint();
+}
+
+TextureTextBufferSource::TextureTextBufferSource(TextBuffer&& text, std::string id) noexcept
+  : mId(std::move(id))
+  , mTextBuffer(std::move(text))
+{
+    UpdateContentHint();
+}
+
 std::shared_ptr<const IBitmap> TextureTextBufferSource::GetData() const
 {
     // since this interface is returning a CPU side bitmap object
@@ -41,6 +55,15 @@ std::shared_ptr<const IBitmap> TextureTextBufferSource::GetData() const
 Texture* TextureTextBufferSource::Upload(const Environment& env, Device& device) const
 {
     auto* texture = device.FindTexture(GetGpuId());
+
+    if (texture && !mContentHint)
+    {
+        ContentHint hint;
+        hint.width = texture->GetWidth();
+        hint.height = texture->GetHeight();
+        mContentHint = hint;
+    }
+
     if (texture && !env.dynamic_content)
         return texture;
 
@@ -112,6 +135,10 @@ Texture* TextureTextBufferSource::Upload(const Environment& env, Device& device)
     }
     if (texture)
     {
+        ContentHint hint;
+        hint.width = texture->GetWidth();
+        hint.height = texture->GetHeight();
+        mContentHint = hint;
         DEBUG("Uploaded new text texture. [name='%1', effects=%2]", mName, mEffects);
         return texture;
     }
@@ -152,4 +179,31 @@ bool TextureTextBufferSource::FromJson(const data::Reader& data)
     ok &= mTextBuffer.FromJson(*chunk);
     return ok;
 }
+
+void TextureTextBufferSource::SetTextBuffer(const TextBuffer& text)
+{
+    mTextBuffer = text;
+    UpdateContentHint();
+}
+
+void TextureTextBufferSource::SetTextBuffer(TextBuffer&& text)
+{
+    mTextBuffer = std::move(text);
+    UpdateContentHint();
+}
+
+void TextureTextBufferSource::UpdateContentHint()
+{
+    const auto width = mTextBuffer.GetBufferWidth();
+    const auto height = mTextBuffer.GetBufferHeight();
+    mContentHint.reset();
+    if (width && height)
+    {
+        ContentHint hint;
+        hint.width = width;
+        hint.height = height;
+        mContentHint = hint;
+    }
+}
+
 } // namespace

@@ -87,6 +87,7 @@ namespace gfx
         Texture* Upload(const Environment& env, Device& device) const override;
         void IntoJson(data::Writer& data) const override;
         bool FromJson(const data::Reader& data) override;
+        std::optional<ContentHint> GetContentHint() const override;
 
         void SetBitmap(std::unique_ptr<IBitmap> bitmap)
         { mBitmap = std::move(bitmap); }

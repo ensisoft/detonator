@@ -73,8 +73,17 @@ namespace gfx
         void BeginPacking(TexturePacker* packer) const override;
         void FinishPacking(const TexturePacker* packer) override;
 
-        void SetFileName(const std::string& file)
-        { mFile = file; }
+        std::optional<ContentHint> GetContentHint() const override
+        {
+            return mContentHint;
+        }
+
+        void SetFileName(std::string file) noexcept
+        {
+            mFile = std::move(file);
+            mContentHint.reset();
+        }
+
         const std::string& GetFilename() const
         { return mFile; }
         bool TestFlag(Flags flag) const
@@ -96,8 +105,8 @@ namespace gfx
         base::bitflag<Effect> mEffects;
         ColorSpace mColorSpace = ColorSpace::sRGB;
     private:
+        mutable std::optional<ContentHint> mContentHint;
     };
-
 
     inline auto LoadTextureFromFile(std::string uri, std::string id = base::RandomString(10))
     {
