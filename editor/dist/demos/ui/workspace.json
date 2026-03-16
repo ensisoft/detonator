@@ -35,14 +35,12 @@
         "__tag_list": [
         ],
         "__version": 6,
-        "checked_for_packing": true,
         "is-valid": true
     },
     "2xdUYgjtvl": {
         "__tag_list": [
         ],
         "__version": 1,
-        "checked_for_packing": true,
         "is-valid": true
     },
     "3vHBKZi4PZ": {
@@ -94,7 +92,6 @@
         "__tag_list": [
         ],
         "__version": 6,
-        "checked_for_packing": true,
         "is-valid": true
     },
     "Hee8rxTCrr": {
@@ -129,6 +126,12 @@
         ],
         "__version": 6,
         "checked_for_packing": true,
+        "is-valid": true
+    },
+    "ShowcaseUI01": {
+        "__tag_list": [
+        ],
+        "__version": 1,
         "is-valid": true
     },
     "Uy6jWgursh": {
@@ -205,7 +208,7 @@
         "application_library_lin": "app://libGameEngine.so",
         "application_library_wasm": "app://html5/GameEngine.wasm",
         "application_library_win": "app://GameEngine.dll",
-        "application_name": "",
+        "application_name": "ui",
         "application_version": "",
         "audio_buffer_size": 40,
         "audio_channels": "Stereo",
@@ -282,8 +285,7 @@
         "__tag_list": [
         ],
         "__version": 1,
-        "is-valid": false,
-        "problem": "Missing dependency 'XFp2yP7TDj'"
+        "is-valid": true
     },
     "uI5i13YzFU": {
         "__tag_list": [

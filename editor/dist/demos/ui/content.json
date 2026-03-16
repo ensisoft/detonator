@@ -1414,7 +1414,7 @@
       "resource_name": "Wyrmheart",
       "resource_ver": 1,
       "script_file": "uI5i13YzFU",
-      "style_file": "app://ui/style/default.json",
+      "style_file": "app://ui/style/gothic/gothic.json",
       "style_string": "",
       "widgets": [
         {
@@ -1484,7 +1484,7 @@
                     "h": 600.0,
                     "w": 450.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"QmmO5gXYjv\",\"type\":\"Reference\"}]}",
+                  "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"}]}",
                   "tab_index": 0,
                   "text": "GroupBox",
                   "type": "GroupBox",
@@ -1659,9 +1659,9 @@
                         "h": 350.0,
                         "w": 400.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.6334782838821411,\"g\":0.6334782838821411,\"r\":0.6552071571350098}},{\"key\":\"text-font\",\"value\":\"app://fonts/Germanica_Plain.ttf\"},{\"key\":\"text-size\",\"value\":28}]}",
+                      "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":28},{\"key\":\"text-font\",\"value\":\"app://fonts/Germanica_Plain.ttf\"}]}",
                       "tab_index": 0,
-                      "text": "Lorem ipsum dolor sit amen\nThe shadows are growing\n\nChapter 1\n\n",
+                      "text": "Lorem ipsum dolor sit amet\nThe shadows are growing\n\nChapter 1\n\n",
                       "type": "Label"
                     },
                     {
@@ -1713,9 +1713,9 @@
                         "h": 50.0,
                         "w": 100.0
                       },
-                      "style": "",
+                      "style": "{\"properties\": [{\"key\": \"text-font\", \"value\": \"app://fonts/Germanica_Plain.ttf\"}, {\"key\": \"text-size\", \"value\": 20}, {\"key\": \"button-shape\", \"value\": \"RoundRect\"}, {\"key\": \"pressed/button-shape\", \"value\": \"RoundRect\"}]}",
                       "tab_index": 7,
-                      "text": "prev",
+                      "text": "Prev",
                       "type": "PushButton"
                     },
                     {
@@ -1737,12 +1737,1909 @@
                         "h": 50.0,
                         "w": 100.0
                       },
-                      "style": "",
+                      "style": "{\"properties\": [{\"key\": \"text-font\", \"value\": \"app://fonts/Germanica_Plain.ttf\"}, {\"key\": \"text-size\", \"value\": 20}, {\"key\": \"button-shape\", \"value\": \"RoundRect\"}, {\"key\": \"pressed/button-shape\", \"value\": \"RoundRect\"}]}",
                       "tab_index": 6,
-                      "text": "next",
+                      "text": "Next",
                       "type": "PushButton"
                     }
                   ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "flags": {
+        "EnableVirtualKeys": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "ShowcaseUI01",
+      "keymap_file": "app://ui/keymap/default.json",
+      "name": "Showcase",
+      "resource_id": "ShowcaseUI01",
+      "resource_name": "Showcase",
+      "resource_ver": 1,
+      "script_file": "hz6w2tG1gv",
+      "style_file": "app://ui/style/grove.json",
+      "style_string": "",
+      "widgets": [
+        {
+          "widgets": [
+            {
+              "animation": "",
+              "flags": {
+                "ClipChildren": true,
+                "Enabled": true,
+                "LockedInEditor": false,
+                "VisibleInEditor": true,
+                "VisibleInGame": true
+              },
+              "id": "form_showcase",
+              "name": "ShowcaseForm",
+              "position": {
+                "x": 0.0,
+                "y": 0.0
+              },
+              "size": {
+                "h": 768.0,
+                "w": 1024.0
+              },
+              "style": "",
+              "tab_index": 0,
+              "type": "Form",
+              "widgets": [
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "lbl_title",
+                  "line_height": 1.0,
+                  "name": "Title",
+                  "position": {
+                    "x": 15.0,
+                    "y": 8.0
+                  },
+                  "size": {
+                    "h": 44.0,
+                    "w": 984.0
+                  },
+                  "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 26}, {\"key\": \"text-horizontal-align\", \"value\": \"Center\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                  "tab_index": 0,
+                  "text": "WIDGET SHOWCASE",
+                  "type": "Label"
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "gb_buttons",
+                  "name": "PushButtonsGroup",
+                  "position": {
+                    "x": 15.0,
+                    "y": 60.0
+                  },
+                  "size": {
+                    "h": 260.0,
+                    "w": 295.0
+                  },
+                  "style": "",
+                  "tab_index": 0,
+                  "text": "Push Buttons",
+                  "type": "GroupBox",
+                  "widgets": [
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "pb_default",
+                      "name": "btn_default",
+                      "position": {
+                        "x": 15.0,
+                        "y": 25.0
+                      },
+                      "size": {
+                        "h": 35.0,
+                        "w": 120.0
+                      },
+                      "style": "",
+                      "tab_index": 1,
+                      "text": "Default",
+                      "type": "PushButton"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "pb_capsule",
+                      "name": "btn_capsule",
+                      "position": {
+                        "x": 155.0,
+                        "y": 25.0
+                      },
+                      "size": {
+                        "h": 35.0,
+                        "w": 120.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"button-shape\", \"value\": \"Capsule\"}, {\"key\": \"pressed/button-shape\", \"value\": \"Capsule\"}]}",
+                      "tab_index": 2,
+                      "text": "Capsule",
+                      "type": "PushButton"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "pb_circle",
+                      "name": "btn_circle",
+                      "position": {
+                        "x": 15.0,
+                        "y": 72.0
+                      },
+                      "size": {
+                        "h": 80.0,
+                        "w": 80.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"button-shape\", \"value\": \"Circle\"}, {\"key\": \"pressed/button-shape\", \"value\": \"Circle\"}]}",
+                      "tab_index": 3,
+                      "text": "Go!",
+                      "type": "PushButton"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": false,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "pb_disabled",
+                      "name": "btn_disabled",
+                      "position": {
+                        "x": 155.0,
+                        "y": 72.0
+                      },
+                      "size": {
+                        "h": 35.0,
+                        "w": 120.0
+                      },
+                      "style": "",
+                      "tab_index": 0,
+                      "text": "Disabled",
+                      "type": "PushButton"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "pb_roundrect",
+                      "name": "btn_roundrect",
+                      "position": {
+                        "x": 155.0,
+                        "y": 120.0
+                      },
+                      "size": {
+                        "h": 35.0,
+                        "w": 120.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"button-shape\", \"value\": \"RoundRect\"}, {\"key\": \"pressed/button-shape\", \"value\": \"RoundRect\"}]}",
+                      "tab_index": 4,
+                      "text": "RoundRect",
+                      "type": "PushButton"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "pb_para",
+                      "name": "btn_para",
+                      "position": {
+                        "x": 15.0,
+                        "y": 170.0
+                      },
+                      "size": {
+                        "h": 38.0,
+                        "w": 260.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"button-shape\", \"value\": \"Parallelogram\"}, {\"key\": \"pressed/button-shape\", \"value\": \"Parallelogram\"}, {\"key\": \"text-size\", \"value\": 18}]}",
+                      "tab_index": 5,
+                      "text": "Parallelogram",
+                      "type": "PushButton"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "pb_ok",
+                      "name": "btn_ok",
+                      "position": {
+                        "x": 15.0,
+                        "y": 218.0
+                      },
+                      "size": {
+                        "h": 32.0,
+                        "w": 100.0
+                      },
+                      "style": "",
+                      "tab_index": 6,
+                      "text": "OK",
+                      "type": "PushButton"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "pb_cancel",
+                      "name": "btn_cancel",
+                      "position": {
+                        "x": 145.0,
+                        "y": 218.0
+                      },
+                      "size": {
+                        "h": 32.0,
+                        "w": 100.0
+                      },
+                      "style": "",
+                      "tab_index": 7,
+                      "text": "Cancel",
+                      "type": "PushButton"
+                    }
+                  ]
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "gb_selection",
+                  "name": "SelectionGroup",
+                  "position": {
+                    "x": 15.0,
+                    "y": 333.0
+                  },
+                  "size": {
+                    "h": 115.0,
+                    "w": 295.0
+                  },
+                  "style": "",
+                  "tab_index": 0,
+                  "text": "Selection Controls",
+                  "type": "GroupBox",
+                  "widgets": [
+                    {
+                      "animation": "",
+                      "check": "Left",
+                      "checked": false,
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "cb_sound",
+                      "name": "cb_sound",
+                      "position": {
+                        "x": 10.0,
+                        "y": 18.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 145.0
+                      },
+                      "style": "",
+                      "tab_index": 8,
+                      "text": "Enable Sound",
+                      "type": "CheckBox"
+                    },
+                    {
+                      "animation": "",
+                      "check": "Left",
+                      "checked": true,
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "cb_full",
+                      "name": "cb_full",
+                      "position": {
+                        "x": 10.0,
+                        "y": 56.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 145.0
+                      },
+                      "style": "",
+                      "tab_index": 9,
+                      "text": "Fullscreen",
+                      "type": "CheckBox"
+                    },
+                    {
+                      "animation": "",
+                      "checked": false,
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "tb_music",
+                      "name": "tb_music",
+                      "position": {
+                        "x": 168.0,
+                        "y": 18.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 110.0
+                      },
+                      "style": "",
+                      "tab_index": 10,
+                      "type": "ToggleBox"
+                    },
+                    {
+                      "animation": "",
+                      "checked": true,
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "tb_vsync",
+                      "name": "tb_vsync",
+                      "position": {
+                        "x": 168.0,
+                        "y": 56.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 110.0
+                      },
+                      "style": "",
+                      "tab_index": 11,
+                      "type": "ToggleBox"
+                    }
+                  ]
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "gb_radio",
+                  "name": "DifficultyGroup",
+                  "position": {
+                    "x": 15.0,
+                    "y": 461.0
+                  },
+                  "size": {
+                    "h": 80.0,
+                    "w": 295.0
+                  },
+                  "style": "",
+                  "tab_index": 0,
+                  "text": "Difficulty",
+                  "type": "GroupBox",
+                  "widgets": [
+                    {
+                      "animation": "",
+                      "check": "Left",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "rb_easy",
+                      "name": "rb_easy",
+                      "position": {
+                        "x": 10.0,
+                        "y": 25.0
+                      },
+                      "selected": true,
+                      "size": {
+                        "h": 30.0,
+                        "w": 80.0
+                      },
+                      "style": "",
+                      "tab_index": 12,
+                      "text": "Easy",
+                      "type": "RadioButton"
+                    },
+                    {
+                      "animation": "",
+                      "check": "Left",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "rb_normal",
+                      "name": "rb_normal",
+                      "position": {
+                        "x": 108.0,
+                        "y": 25.0
+                      },
+                      "selected": false,
+                      "size": {
+                        "h": 30.0,
+                        "w": 80.0
+                      },
+                      "style": "",
+                      "tab_index": 13,
+                      "text": "Normal",
+                      "type": "RadioButton"
+                    },
+                    {
+                      "animation": "",
+                      "check": "Left",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "rb_hard",
+                      "name": "rb_hard",
+                      "position": {
+                        "x": 205.0,
+                        "y": 25.0
+                      },
+                      "selected": false,
+                      "size": {
+                        "h": 30.0,
+                        "w": 80.0
+                      },
+                      "style": "",
+                      "tab_index": 14,
+                      "text": "Hard",
+                      "type": "RadioButton"
+                    }
+                  ]
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "lbl_info1",
+                  "line_height": 1.0,
+                  "name": "InfoLabel1",
+                  "position": {
+                    "x": 15.0,
+                    "y": 558.0
+                  },
+                  "size": {
+                    "h": 70.0,
+                    "w": 295.0
+                  },
+                  "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Left\"}, {\"key\": \"text-vertical-align\", \"value\": \"Top\"}]}",
+                  "tab_index": 0,
+                  "text": "Tab key: change focus\nSpace/Enter: activate\nArrow keys: change values",
+                  "type": "Label"
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "lbl_blink",
+                  "line_height": 1.0,
+                  "name": "BlinkLabel",
+                  "position": {
+                    "x": 15.0,
+                    "y": 638.0
+                  },
+                  "size": {
+                    "h": 28.0,
+                    "w": 145.0
+                  },
+                  "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 14}, {\"key\": \"text-blink\", \"value\": true}]}",
+                  "tab_index": 0,
+                  "text": "Blinking Text",
+                  "type": "Label"
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "lbl_underline",
+                  "line_height": 1.0,
+                  "name": "UnderlineLabel",
+                  "position": {
+                    "x": 165.0,
+                    "y": 638.0
+                  },
+                  "size": {
+                    "h": 28.0,
+                    "w": 145.0
+                  },
+                  "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 14}, {\"key\": \"text-underline\", \"value\": true}]}",
+                  "tab_index": 0,
+                  "text": "Underlined Text",
+                  "type": "Label"
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "gb_sliders",
+                  "name": "SlidersGroup",
+                  "position": {
+                    "x": 325.0,
+                    "y": 60.0
+                  },
+                  "size": {
+                    "h": 185.0,
+                    "w": 295.0
+                  },
+                  "style": "",
+                  "tab_index": 0,
+                  "text": "Sliders",
+                  "type": "GroupBox",
+                  "widgets": [
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sl_lbl1",
+                      "line_height": 1.0,
+                      "name": "VolumeLabel",
+                      "position": {
+                        "x": 10.0,
+                        "y": 22.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 65.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                      "tab_index": 0,
+                      "text": "Volume",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sl_vol",
+                      "name": "VolumeSlider",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 80.0,
+                        "y": 22.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 200.0
+                      },
+                      "style": "",
+                      "tab_index": 20,
+                      "type": "Slider",
+                      "value": 0.699999988079071
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sl_lbl2",
+                      "line_height": 1.0,
+                      "name": "MusicLabel",
+                      "position": {
+                        "x": 10.0,
+                        "y": 60.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 65.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                      "tab_index": 0,
+                      "text": "Music",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sl_mus",
+                      "name": "MusicSlider",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 80.0,
+                        "y": 60.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 200.0
+                      },
+                      "style": "",
+                      "tab_index": 21,
+                      "type": "Slider",
+                      "value": 0.4000000059604645
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sl_lbl3",
+                      "line_height": 1.0,
+                      "name": "GammaLabel",
+                      "position": {
+                        "x": 10.0,
+                        "y": 98.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 65.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                      "tab_index": 0,
+                      "text": "Gamma",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sl_gam",
+                      "name": "GammaSlider",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 80.0,
+                        "y": 98.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 200.0
+                      },
+                      "style": "",
+                      "tab_index": 22,
+                      "type": "Slider",
+                      "value": 0.6000000238418579
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sl_lbl4",
+                      "line_height": 1.0,
+                      "name": "SpeedLabel",
+                      "position": {
+                        "x": 10.0,
+                        "y": 136.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 65.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                      "tab_index": 0,
+                      "text": "Speed",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sl_spd",
+                      "name": "SpeedSlider",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 80.0,
+                        "y": 136.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 200.0
+                      },
+                      "style": "",
+                      "tab_index": 23,
+                      "type": "Slider",
+                      "value": 0.8500000238418579
+                    }
+                  ]
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "gb_progress",
+                  "name": "ProgressGroup",
+                  "position": {
+                    "x": 325.0,
+                    "y": 258.0
+                  },
+                  "size": {
+                    "h": 150.0,
+                    "w": 295.0
+                  },
+                  "style": "",
+                  "tab_index": 0,
+                  "text": "Progress Bars",
+                  "type": "GroupBox",
+                  "widgets": [
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "pb_25",
+                      "name": "Prog25",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 10.0,
+                        "y": 22.0
+                      },
+                      "size": {
+                        "h": 28.0,
+                        "w": 270.0
+                      },
+                      "style": "",
+                      "tab_index": 0,
+                      "text": "%1%",
+                      "type": "ProgressBar",
+                      "value": 0.25
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "pb_60",
+                      "name": "Prog60",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 10.0,
+                        "y": 62.0
+                      },
+                      "size": {
+                        "h": 28.0,
+                        "w": 270.0
+                      },
+                      "style": "",
+                      "tab_index": 0,
+                      "text": "Loading...",
+                      "type": "ProgressBar",
+                      "value": 0.6000000238418579
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "pb_100",
+                      "name": "Prog100",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 10.0,
+                        "y": 102.0
+                      },
+                      "size": {
+                        "h": 28.0,
+                        "w": 270.0
+                      },
+                      "style": "",
+                      "tab_index": 0,
+                      "text": "Complete!",
+                      "type": "ProgressBar",
+                      "value": 1.0
+                    }
+                  ]
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "gb_spinbox",
+                  "name": "SpinboxGroup",
+                  "position": {
+                    "x": 325.0,
+                    "y": 421.0
+                  },
+                  "size": {
+                    "h": 120.0,
+                    "w": 295.0
+                  },
+                  "style": "",
+                  "tab_index": 0,
+                  "text": "Integer Values",
+                  "type": "GroupBox",
+                  "widgets": [
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sp_lbl1",
+                      "line_height": 1.0,
+                      "name": "ScoreLabel",
+                      "position": {
+                        "x": 10.0,
+                        "y": 18.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 65.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                      "tab_index": 0,
+                      "text": "Score:",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sp_score",
+                      "max": 9999,
+                      "min": 0,
+                      "name": "ScoreSpinBox",
+                      "position": {
+                        "x": 82.0,
+                        "y": 18.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 100.0
+                      },
+                      "style": "",
+                      "tab_index": 30,
+                      "type": "SpinBox",
+                      "value": 1337
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sp_lbl2",
+                      "line_height": 1.0,
+                      "name": "LivesLabel",
+                      "position": {
+                        "x": 10.0,
+                        "y": 62.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 65.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                      "tab_index": 0,
+                      "text": "Lives:",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sp_lives",
+                      "max": 9,
+                      "min": 0,
+                      "name": "LivesSpinBox",
+                      "position": {
+                        "x": 82.0,
+                        "y": 62.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 100.0
+                      },
+                      "style": "",
+                      "tab_index": 31,
+                      "type": "SpinBox",
+                      "value": 3
+                    }
+                  ]
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "lbl_mid_bot",
+                  "line_height": 1.0,
+                  "name": "MidBottomLabel",
+                  "position": {
+                    "x": 325.0,
+                    "y": 558.0
+                  },
+                  "size": {
+                    "h": 80.0,
+                    "w": 295.0
+                  },
+                  "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Center\"}, {\"key\": \"text-vertical-align\", \"value\": \"Top\"}]}",
+                  "tab_index": 0,
+                  "text": "All widgets support hover,\npressed, focused and disabled\nvisual states via the style.",
+                  "type": "Label"
+                },
+                {
+                  "animation": "",
+                  "content_rect": {
+                    "h": 728.0,
+                    "w": 510.0,
+                    "x": 0.0,
+                    "y": 0.0
+                  },
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "horizontal_scroll_bar_height": 12.0,
+                  "horizontal_scroll_bar_mode": "AlwaysOn",
+                  "id": "sa_main",
+                  "name": "MainScrollArea",
+                  "position": {
+                    "x": 635.0,
+                    "y": 60.0
+                  },
+                  "scroll_area_flags": {
+                    "ShowHorizontalScrollButtons": true,
+                    "ShowVerticalScrollButtons": true
+                  },
+                  "size": {
+                    "h": 648.0,
+                    "w": 374.0
+                  },
+                  "style": "",
+                  "tab_index": 0,
+                  "type": "ScrollArea",
+                  "vertical_scroll_bar_mode": "AlwaysOn",
+                  "vertical_scroll_bar_width": 12.0,
+                  "widgets": [
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_lbl1",
+                      "line_height": 1.0,
+                      "name": "ScrollInfo",
+                      "position": {
+                        "x": 10.0,
+                        "y": 10.0
+                      },
+                      "size": {
+                        "h": 120.0,
+                        "w": 500.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 14}, {\"key\": \"text-horizontal-align\", \"value\": \"Left\"}, {\"key\": \"text-vertical-align\", \"value\": \"Top\"}]}",
+                      "tab_index": 0,
+                      "text": "Scroll Area\n\nThis area contains more content than fits\non screen. Scroll vertically and horizontally\nto see all widgets inside.",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_pb1",
+                      "name": "ScrollBtn1",
+                      "position": {
+                        "x": 10.0,
+                        "y": 140.0
+                      },
+                      "size": {
+                        "h": 36.0,
+                        "w": 150.0
+                      },
+                      "style": "",
+                      "tab_index": 40,
+                      "text": "Action A",
+                      "type": "PushButton"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_pb2",
+                      "name": "ScrollBtn2",
+                      "position": {
+                        "x": 175.0,
+                        "y": 140.0
+                      },
+                      "size": {
+                        "h": 36.0,
+                        "w": 150.0
+                      },
+                      "style": "",
+                      "tab_index": 41,
+                      "text": "Action B",
+                      "type": "PushButton"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_pb3",
+                      "name": "ScrollBtn3",
+                      "position": {
+                        "x": 340.0,
+                        "y": 140.0
+                      },
+                      "size": {
+                        "h": 36.0,
+                        "w": 150.0
+                      },
+                      "style": "",
+                      "tab_index": 42,
+                      "text": "Action C",
+                      "type": "PushButton"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_prog1",
+                      "name": "ScrollProg1",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 10.0,
+                        "y": 195.0
+                      },
+                      "size": {
+                        "h": 28.0,
+                        "w": 480.0
+                      },
+                      "style": "",
+                      "tab_index": 0,
+                      "text": "45%",
+                      "type": "ProgressBar",
+                      "value": 0.44999998807907104
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_prog2",
+                      "name": "ScrollProg2",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 10.0,
+                        "y": 235.0
+                      },
+                      "size": {
+                        "h": 28.0,
+                        "w": 480.0
+                      },
+                      "style": "",
+                      "tab_index": 0,
+                      "text": "80%",
+                      "type": "ProgressBar",
+                      "value": 0.800000011920929
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_lbl2",
+                      "line_height": 1.0,
+                      "name": "ScrollLabel2",
+                      "position": {
+                        "x": 10.0,
+                        "y": 280.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 480.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 14}, {\"key\": \"text-horizontal-align\", \"value\": \"Left\"}, {\"key\": \"text-vertical-align\", \"value\": \"Top\"}]}",
+                      "tab_index": 0,
+                      "text": "Checkbox and ToggleBox controls:",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "check": "Left",
+                      "checked": true,
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_cb1",
+                      "name": "ScrollCheck1",
+                      "position": {
+                        "x": 10.0,
+                        "y": 318.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 140.0
+                      },
+                      "style": "",
+                      "tab_index": 43,
+                      "text": "Option 1",
+                      "type": "CheckBox"
+                    },
+                    {
+                      "animation": "",
+                      "check": "Left",
+                      "checked": false,
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_cb2",
+                      "name": "ScrollCheck2",
+                      "position": {
+                        "x": 160.0,
+                        "y": 318.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 140.0
+                      },
+                      "style": "",
+                      "tab_index": 44,
+                      "text": "Option 2",
+                      "type": "CheckBox"
+                    },
+                    {
+                      "animation": "",
+                      "check": "Left",
+                      "checked": true,
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_cb3",
+                      "name": "ScrollCheck3",
+                      "position": {
+                        "x": 310.0,
+                        "y": 318.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 140.0
+                      },
+                      "style": "",
+                      "tab_index": 45,
+                      "text": "Option 3",
+                      "type": "CheckBox"
+                    },
+                    {
+                      "animation": "",
+                      "checked": true,
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_tb1",
+                      "name": "ScrollToggle1",
+                      "position": {
+                        "x": 10.0,
+                        "y": 360.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 110.0
+                      },
+                      "style": "",
+                      "tab_index": 46,
+                      "type": "ToggleBox"
+                    },
+                    {
+                      "animation": "",
+                      "checked": false,
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_tb2",
+                      "name": "ScrollToggle2",
+                      "position": {
+                        "x": 135.0,
+                        "y": 360.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 110.0
+                      },
+                      "style": "",
+                      "tab_index": 47,
+                      "type": "ToggleBox"
+                    },
+                    {
+                      "animation": "",
+                      "checked": true,
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_tb3",
+                      "name": "ScrollToggle3",
+                      "position": {
+                        "x": 260.0,
+                        "y": 360.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 110.0
+                      },
+                      "style": "",
+                      "tab_index": 48,
+                      "type": "ToggleBox"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_gb1",
+                      "name": "ScrollRadioGroup",
+                      "position": {
+                        "x": 10.0,
+                        "y": 405.0
+                      },
+                      "size": {
+                        "h": 80.0,
+                        "w": 480.0
+                      },
+                      "style": "",
+                      "tab_index": 0,
+                      "text": "Radio Group",
+                      "type": "GroupBox",
+                      "widgets": [
+                        {
+                          "animation": "",
+                          "check": "Left",
+                          "flags": {
+                            "ClipChildren": true,
+                            "Enabled": true,
+                            "LockedInEditor": false,
+                            "VisibleInEditor": true,
+                            "VisibleInGame": true
+                          },
+                          "id": "sc_rb1",
+                          "name": "ScrollRadio1",
+                          "position": {
+                            "x": 10.0,
+                            "y": 25.0
+                          },
+                          "selected": true,
+                          "size": {
+                            "h": 30.0,
+                            "w": 110.0
+                          },
+                          "style": "",
+                          "tab_index": 49,
+                          "text": "Choice A",
+                          "type": "RadioButton"
+                        },
+                        {
+                          "animation": "",
+                          "check": "Left",
+                          "flags": {
+                            "ClipChildren": true,
+                            "Enabled": true,
+                            "LockedInEditor": false,
+                            "VisibleInEditor": true,
+                            "VisibleInGame": true
+                          },
+                          "id": "sc_rb2",
+                          "name": "ScrollRadio2",
+                          "position": {
+                            "x": 135.0,
+                            "y": 25.0
+                          },
+                          "selected": false,
+                          "size": {
+                            "h": 30.0,
+                            "w": 110.0
+                          },
+                          "style": "",
+                          "tab_index": 50,
+                          "text": "Choice B",
+                          "type": "RadioButton"
+                        },
+                        {
+                          "animation": "",
+                          "check": "Left",
+                          "flags": {
+                            "ClipChildren": true,
+                            "Enabled": true,
+                            "LockedInEditor": false,
+                            "VisibleInEditor": true,
+                            "VisibleInGame": true
+                          },
+                          "id": "sc_rb3",
+                          "name": "ScrollRadio3",
+                          "position": {
+                            "x": 260.0,
+                            "y": 25.0
+                          },
+                          "selected": false,
+                          "size": {
+                            "h": 30.0,
+                            "w": 110.0
+                          },
+                          "style": "",
+                          "tab_index": 51,
+                          "text": "Choice C",
+                          "type": "RadioButton"
+                        },
+                        {
+                          "animation": "",
+                          "check": "Left",
+                          "flags": {
+                            "ClipChildren": true,
+                            "Enabled": true,
+                            "LockedInEditor": false,
+                            "VisibleInEditor": true,
+                            "VisibleInGame": true
+                          },
+                          "id": "sc_rb4",
+                          "name": "ScrollRadio4",
+                          "position": {
+                            "x": 380.0,
+                            "y": 25.0
+                          },
+                          "selected": false,
+                          "size": {
+                            "h": 30.0,
+                            "w": 90.0
+                          },
+                          "style": "",
+                          "tab_index": 52,
+                          "text": "Choice D",
+                          "type": "RadioButton"
+                        }
+                      ]
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_lbl3",
+                      "line_height": 1.0,
+                      "name": "ScrollLabel3",
+                      "position": {
+                        "x": 10.0,
+                        "y": 502.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 480.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 14}, {\"key\": \"text-horizontal-align\", \"value\": \"Left\"}, {\"key\": \"text-vertical-align\", \"value\": \"Top\"}]}",
+                      "tab_index": 0,
+                      "text": "SpinBox controls:",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_sp_lbl1",
+                      "line_height": 1.0,
+                      "name": "ScSpLbl1",
+                      "position": {
+                        "x": 10.0,
+                        "y": 540.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 70.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                      "tab_index": 0,
+                      "text": "Width:",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_sp1",
+                      "max": 100,
+                      "min": 0,
+                      "name": "ScrollSpin1",
+                      "position": {
+                        "x": 88.0,
+                        "y": 540.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 100.0
+                      },
+                      "style": "",
+                      "tab_index": 53,
+                      "type": "SpinBox",
+                      "value": 80
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_sp_lbl2",
+                      "line_height": 1.0,
+                      "name": "ScSpLbl2",
+                      "position": {
+                        "x": 200.0,
+                        "y": 540.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 70.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                      "tab_index": 0,
+                      "text": "Height:",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_sp2",
+                      "max": 100,
+                      "min": 0,
+                      "name": "ScrollSpin2",
+                      "position": {
+                        "x": 278.0,
+                        "y": 540.0
+                      },
+                      "size": {
+                        "h": 30.0,
+                        "w": 100.0
+                      },
+                      "style": "",
+                      "tab_index": 54,
+                      "type": "SpinBox",
+                      "value": 60
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_lbl4",
+                      "line_height": 1.0,
+                      "name": "ScrollLabel4",
+                      "position": {
+                        "x": 10.0,
+                        "y": 590.0
+                      },
+                      "size": {
+                        "h": 28.0,
+                        "w": 480.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 14}, {\"key\": \"text-horizontal-align\", \"value\": \"Left\"}, {\"key\": \"text-vertical-align\", \"value\": \"Top\"}]}",
+                      "tab_index": 0,
+                      "text": "Additional slider examples:",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_sl_lbl1",
+                      "line_height": 1.0,
+                      "name": "ScSlLbl1",
+                      "position": {
+                        "x": 10.0,
+                        "y": 626.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 65.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                      "tab_index": 0,
+                      "text": "Red:",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_sl1",
+                      "name": "ScrollSlider1",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 80.0,
+                        "y": 626.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 400.0
+                      },
+                      "style": "",
+                      "tab_index": 55,
+                      "type": "Slider",
+                      "value": 0.800000011920929
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_sl_lbl2",
+                      "line_height": 1.0,
+                      "name": "ScSlLbl2",
+                      "position": {
+                        "x": 10.0,
+                        "y": 664.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 65.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                      "tab_index": 0,
+                      "text": "Green:",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_sl2",
+                      "name": "ScrollSlider2",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 80.0,
+                        "y": 664.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 400.0
+                      },
+                      "style": "",
+                      "tab_index": 56,
+                      "type": "Slider",
+                      "value": 0.44999998807907104
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_sl_lbl3",
+                      "line_height": 1.0,
+                      "name": "ScSlLbl3",
+                      "position": {
+                        "x": 10.0,
+                        "y": 702.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 65.0
+                      },
+                      "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
+                      "tab_index": 0,
+                      "text": "Blue:",
+                      "type": "Label"
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "sc_sl3",
+                      "name": "ScrollSlider3",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 80.0,
+                        "y": 702.0
+                      },
+                      "size": {
+                        "h": 26.0,
+                        "w": 400.0
+                      },
+                      "style": "",
+                      "tab_index": 57,
+                      "type": "Slider",
+                      "value": 0.20000000298023224
+                    }
+                  ]
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "LockedInEditor": false,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "vxI709bTn8",
+                  "name": "prev",
+                  "position": {
+                    "x": 500.0,
+                    "y": 650.0
+                  },
+                  "size": {
+                    "h": 100.0,
+                    "w": 100.0
+                  },
+                  "style": "",
+                  "tab_index": 58,
+                  "text": "PREV",
+                  "type": "PushButton"
                 }
               ]
             },
@@ -1755,21 +3652,20 @@
                 "VisibleInEditor": true,
                 "VisibleInGame": true
               },
-              "id": "nQpyjxzgrH",
-              "line_height": 1.0,
-              "name": "Label_2",
+              "id": "i2xkwKGxNe",
+              "name": "next",
               "position": {
-                "x": 450.0,
-                "y": 500.0
+                "x": 350.0,
+                "y": 650.0
               },
               "size": {
-                "h": 30.0,
+                "h": 100.0,
                 "w": 100.0
               },
               "style": "",
-              "tab_index": 0,
-              "text": "WIP WIP",
-              "type": "Label"
+              "tab_index": 59,
+              "text": "NEXT",
+              "type": "PushButton"
             }
           ]
         }
@@ -1789,7 +3685,7 @@
       "resource_ver": 1,
       "script_file": "4pCEHuZXY0",
       "style_file": "app://ui/style/default.json",
-      "style_string": "{\"materials\":[{\"key\":\"push-button/pressed/button-border\",\"type\":\"Null\"},{\"key\":\"push-button/pressed/button-background\",\"material\":\"SNExgliw9W\",\"type\":\"Reference\"},{\"key\":\"push-button/mouse-over/button-background\",\"material\":\"Uy6jWgursh\",\"type\":\"Reference\"},{\"key\":\"push-button/button-background\",\"material\":\"26yFL7iuTt\",\"type\":\"Reference\"},{\"key\":\"push-button/mouse-over/button-border\",\"type\":\"Null\"}]}",
+      "style_string": "{\"materials\":[{\"key\":\"push-button/pressed/button-border\",\"type\":\"Null\"},{\"key\":\"push-button/pressed/button-background\",\"material\":\"SNExgliw9W\",\"type\":\"Reference\"},{\"key\":\"push-button/hovered/button-background\",\"material\":\"Uy6jWgursh\",\"type\":\"Reference\"},{\"key\":\"push-button/button-background\",\"material\":\"26yFL7iuTt\",\"type\":\"Reference\"},{\"key\":\"push-button/hovered/button-border\",\"type\":\"Null\"}]}",
       "widgets": [
         {
           "widgets": [
@@ -2251,7 +4147,7 @@
       "resource_ver": 1,
       "script_file": "PJjQktY8ud",
       "style_file": "app://ui/style/default.json",
-      "style_string": "{\"materials\":[{\"key\":\"push-button/mouse-over/button-background\",\"type\":\"Null\"},{\"key\":\"togglebox/toggle-knob-off\",\"type\":\"Null\"},{\"key\":\"push-button/button-background\",\"type\":\"Null\"},{\"key\":\"togglebox/toggle-knob-on\",\"type\":\"Null\"},{\"key\":\"push-button/background\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"btn_green.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"togglebox/toggle-background-off\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"toggle_off.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"togglebox/toggle-background-on\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"toggle_on.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/pressed/button-border\",\"type\":\"Null\"},{\"key\":\"push-button/pressed/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"label/text-horizontal-align\",\"value\":\"Left\"},{\"key\":\"label/text-color\",\"value\":{\"a\":1.0,\"b\":0.3773708641529083,\"g\":0.3773708641529083,\"r\":0.3773708641529083}},{\"key\":\"label/text-size\",\"value\":28},{\"key\":\"label/text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"}]}",
+      "style_string": "{\"materials\":[{\"key\":\"push-button/hovered/button-background\",\"type\":\"Null\"},{\"key\":\"togglebox/toggle-knob-off\",\"type\":\"Null\"},{\"key\":\"push-button/button-background\",\"type\":\"Null\"},{\"key\":\"togglebox/toggle-knob-on\",\"type\":\"Null\"},{\"key\":\"push-button/background\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"btn_green.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"togglebox/toggle-background-off\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"toggle_off.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"togglebox/toggle-background-on\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"toggle_on.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/pressed/button-border\",\"type\":\"Null\"},{\"key\":\"push-button/pressed/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"label/text-horizontal-align\",\"value\":\"Left\"},{\"key\":\"label/text-color\",\"value\":{\"a\":1.0,\"b\":0.3773708641529083,\"g\":0.3773708641529083,\"r\":0.3773708641529083}},{\"key\":\"label/text-size\",\"value\":28},{\"key\":\"label/text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"}]}",
       "widgets": [
         {
           "widgets": [
@@ -2756,6 +4652,7 @@
                       },
                       "id": "q5yy3Sbeg5",
                       "name": "graphics",
+                      "orientation": "Horizontal",
                       "position": {
                         "x": 80.0,
                         "y": 260.0
@@ -3229,6 +5126,7 @@
                   },
                   "id": "hKLMfL7R4K",
                   "name": "graphics",
+                  "orientation": "Horizontal",
                   "position": {
                     "x": 40.0,
                     "y": 20.0
@@ -3399,7 +5297,7 @@
     },
     {
       "flags": {
-        "EnableVirtualKeys": false,
+        "EnableVirtualKeys": true,
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
@@ -3411,7 +5309,7 @@
       "resource_ver": 1,
       "script_file": "hz6w2tG1gv",
       "style_file": "app://ui/style/default.json",
-      "style_string": "{\"materials\":[{\"color0\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.7137255072593689,\"r\":0.1921568661928177},\"color1\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.7137255072593689,\"r\":0.1921568661928177},\"color2\":{\"a\":1.0,\"b\":0.8901960849761963,\"g\":0.6627146005630493,\"r\":0.12941177189350128},\"color3\":{\"a\":1.0,\"b\":0.8901960849761963,\"g\":0.6627146005630493,\"r\":0.12941177189350128},\"key\":\"progress-bar/progress-bar-fill\",\"type\":\"Gradient\"},{\"key\":\"checkbox/check-mark\",\"material\":\"XFp2yP7TDj\",\"type\":\"Reference\"},{\"key\":\"spinbox/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button04.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button04.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"spinbox/pressed/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button05.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"spinbox/button-icon-arrow-down\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_arrowDownWhite.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/mouse-over/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button04.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/mouse-over/button-border\",\"type\":\"Null\"},{\"key\":\"slider/slider-knob-border\",\"type\":\"Null\"},{\"key\":\"spinbox/mouse-over/button-background\",\"type\":\"Null\"},{\"key\":\"push-button/pressed/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button05.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"slider/slider-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_sliderHorizontal.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"spinbox/text-edit-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_sliderHorizontal.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"radiobutton/check-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_box.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"radiobutton/check-border\",\"type\":\"Null\"},{\"key\":\"checkbox/check-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_box.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"slider/slider-knob\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_sliderUp.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"checkbox/check-border\",\"type\":\"Null\"},{\"key\":\"radiobutton/check-mark\",\"material\":\"fQLKKyNYYt\",\"type\":\"Reference\"},{\"key\":\"progress-bar/progress-bar-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_sliderHorizontal.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"checkbox/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_checkmark.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/button-border\",\"type\":\"Null\"},{\"key\":\"radiobutton/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_tick.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/pressed/button-border\",\"type\":\"Null\"},{\"key\":\"spinbox/button-icon-arrow-up\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_arrowUpWhite.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"slider/mouse-over/slider-knob\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_sliderUp.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"slider/pressed/slider-knob\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_sliderUp.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"slider/slider-knob-shape\",\"value\":\"Rectangle\"},{\"key\":\"spinbox/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.009048599749803543,\"g\":0.009048599749803543,\"r\":0.14763103425502777}},{\"key\":\"widget/text-color\",\"value\":{\"a\":1.0,\"b\":0.48627451062202454,\"g\":0.48627451062202454,\"r\":0.48627451062202454}},{\"key\":\"widget/text-font\",\"value\":\"ws://textures/KenneyUI/font/kenvector_future.ttf\"},{\"key\":\"spinbox/edit-text-font\",\"value\":\"ws://textures/KenneyUI/font/kenvector_future.ttf\"},{\"key\":\"spinbox/edit-text-size\",\"value\":28},{\"key\":\"slider/slider-background-shape\",\"value\":\"RoundRect\"},{\"key\":\"widget/text-size\",\"value\":22},{\"key\":\"radiobutton/check-background-shape\",\"value\":\"RoundRect\"}]}",
+      "style_string": "{\"materials\":[{\"key\":\"checkbox/check-mark-checked\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/KenneyUI/blue_boxCheckmark.png\",\"type\":\"Texture\"},{\"key\":\"slider/pressed/slider-knob\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_sliderUp.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/pressed/button-border\",\"type\":\"Null\"},{\"key\":\"push-button/button-border\",\"type\":\"Null\"},{\"key\":\"slider/slider-knob\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_sliderUp.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"checkbox/check-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_box.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"spinbox/button-icon-arrow-down\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_arrowDownWhite.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"spinbox/text-edit-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_sliderHorizontal.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/pressed/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button05.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"progress-bar/progress-bar-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_sliderHorizontal.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"checkbox/check-border\",\"type\":\"Null\"},{\"key\":\"spinbox/pressed/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button05.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"slider/hovered/slider-knob\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_sliderUp.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"spinbox/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button04.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"spinbox/button-icon-arrow-up\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_arrowUpWhite.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"slider/slider-knob-border\",\"type\":\"Null\"},{\"color0\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.7137255072593689,\"r\":0.1921568661928177},\"color1\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.7137255072593689,\"r\":0.1921568661928177},\"color2\":{\"a\":1.0,\"b\":0.8901960849761963,\"g\":0.6627146005630493,\"r\":0.12941177189350128},\"color3\":{\"a\":1.0,\"b\":0.8901960849761963,\"g\":0.6627146005630493,\"r\":0.12941177189350128},\"gamma\":2.200000047683716,\"gradient\":\"Bilinear\",\"key\":\"progress-bar/progress-bar-fill\",\"type\":\"Gradient\",\"weight\":{\"x\":0.5,\"y\":0.5}},{\"key\":\"push-button/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button04.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/hovered/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button04.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/hovered/button-border\",\"type\":\"Null\"},{\"key\":\"spinbox/hovered/button-background\",\"type\":\"Null\"},{\"key\":\"radiobutton/check-border\",\"type\":\"Null\"},{\"key\":\"slider/slider-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_sliderHorizontal.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"radiobutton/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_tick.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"radiobutton/check-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_box.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"widget/text-size\",\"value\":22},{\"key\":\"slider/slider-background-shape\",\"value\":\"RoundRect\"},{\"key\":\"spinbox/edit-text-size\",\"value\":28},{\"key\":\"spinbox/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.009048599749803543,\"g\":0.009048599749803543,\"r\":0.14763103425502777}},{\"key\":\"slider/slider-knob-shape\",\"value\":\"Rectangle\"},{\"key\":\"spinbox/edit-text-font\",\"value\":\"ws://textures/KenneyUI/font/kenvector_future.ttf\"},{\"key\":\"widget/text-color\",\"value\":{\"a\":1.0,\"b\":0.48627451062202454,\"g\":0.48627451062202454,\"r\":0.48627451062202454}},{\"key\":\"radiobutton/check-background-shape\",\"value\":\"RoundRect\"},{\"key\":\"widget/text-font\",\"value\":\"ws://textures/KenneyUI/font/kenvector_future.ttf\"}]}",
       "widgets": [
         {
           "widgets": [
@@ -3458,8 +5356,8 @@
                     "h": 50.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"f3pExwKO8T/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"f3pExwKO8T/mouse-over/button-background\",\"type\":\"Null\"},{\"key\":\"f3pExwKO8T/pressed/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"f3pExwKO8T/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
-                  "tab_index": 0,
+                  "style": "{\"materials\":[{\"key\":\"f3pExwKO8T/pressed/button-background\",\"type\":\"Null\"},{\"key\":\"f3pExwKO8T/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"f3pExwKO8T/hovered/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"f3pExwKO8T/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
+                  "tab_index": 7,
                   "text": "next",
                   "type": "PushButton"
                 },
@@ -3482,8 +5380,8 @@
                     "h": 50.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"WdZs5kkUvt/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"WdZs5kkUvt/pressed/button-background\",\"type\":\"Null\"},{\"key\":\"WdZs5kkUvt/mouse-over/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"WdZs5kkUvt/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
-                  "tab_index": 1,
+                  "style": "{\"materials\":[{\"key\":\"WdZs5kkUvt/hovered/button-background\",\"type\":\"Null\"},{\"key\":\"WdZs5kkUvt/pressed/button-background\",\"type\":\"Null\"},{\"key\":\"WdZs5kkUvt/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"WdZs5kkUvt/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
+                  "tab_index": 8,
                   "text": "årev",
                   "type": "PushButton"
                 },
@@ -3599,7 +5497,7 @@
                         "VisibleInGame": true
                       },
                       "id": "b6uiNuwOYp",
-                      "name": "CheckBox_3",
+                      "name": "engine",
                       "position": {
                         "x": 20.0,
                         "y": 20.0
@@ -3608,7 +5506,7 @@
                         "h": 40.0,
                         "w": 340.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"b6uiNuwOYp/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"b6uiNuwOYp/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"b6uiNuwOYp/check-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"b6uiNuwOYp/text-horizontal-align\",\"value\":\"Right\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"b6uiNuwOYp/check-background\",\"type\":\"Null\"},{\"key\":\"b6uiNuwOYp/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"b6uiNuwOYp/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"b6uiNuwOYp/text-horizontal-align\",\"value\":\"Right\"}]}",
                       "tab_index": 2,
                       "text": "engine",
                       "type": "CheckBox"
@@ -3625,7 +5523,7 @@
                         "VisibleInGame": true
                       },
                       "id": "buX5tpdoln",
-                      "name": "CheckBox_3",
+                      "name": "spare_tire",
                       "position": {
                         "x": 20.0,
                         "y": 80.0
@@ -3634,7 +5532,7 @@
                         "h": 40.0,
                         "w": 340.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"buX5tpdoln/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"buX5tpdoln/check-background\",\"type\":\"Null\"},{\"key\":\"buX5tpdoln/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"buX5tpdoln/text-horizontal-align\",\"value\":\"Right\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"buX5tpdoln/check-background\",\"type\":\"Null\"},{\"key\":\"buX5tpdoln/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"buX5tpdoln/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"buX5tpdoln/text-horizontal-align\",\"value\":\"Right\"}]}",
                       "tab_index": 3,
                       "text": "Spare tire",
                       "type": "CheckBox"
@@ -3651,7 +5549,7 @@
                         "VisibleInGame": true
                       },
                       "id": "aUfAqhyOsT",
-                      "name": "CheckBox_3",
+                      "name": "flux_capacitor",
                       "position": {
                         "x": 20.0,
                         "y": 140.0
@@ -3660,7 +5558,7 @@
                         "h": 40.0,
                         "w": 340.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"aUfAqhyOsT/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"aUfAqhyOsT/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"aUfAqhyOsT/check-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"aUfAqhyOsT/text-horizontal-align\",\"value\":\"Right\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"aUfAqhyOsT/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"aUfAqhyOsT/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"aUfAqhyOsT/check-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"aUfAqhyOsT/text-horizontal-align\",\"value\":\"Right\"}]}",
                       "tab_index": 4,
                       "text": "flux capacitor",
                       "type": "CheckBox"
@@ -3868,7 +5766,7 @@
                         "w": 120.0
                       },
                       "style": "",
-                      "tab_index": 7,
+                      "tab_index": 0,
                       "type": "SpinBox",
                       "value": 0
                     },
@@ -3908,6 +5806,7 @@
                       },
                       "id": "eUHJSBgfot",
                       "name": "ProgressBar_1",
+                      "orientation": "Horizontal",
                       "position": {
                         "x": 40.0,
                         "y": 80.0
@@ -3933,6 +5832,7 @@
                       },
                       "id": "h5fQk4Cyqk",
                       "name": "Slider_1",
+                      "orientation": "Horizontal",
                       "position": {
                         "x": 40.0,
                         "y": 140.0
@@ -3942,7 +5842,7 @@
                         "w": 300.0
                       },
                       "style": "",
-                      "tab_index": 8,
+                      "tab_index": 1,
                       "type": "Slider",
                       "value": 0.5
                     }
@@ -4057,6 +5957,7 @@
                   },
                   "id": "hmTDuy1gSj",
                   "name": "Slider_1",
+                  "orientation": "Horizontal",
                   "position": {
                     "x": 50.0,
                     "y": 50.0
@@ -4081,6 +5982,7 @@
                   },
                   "id": "Lj0IasPSu1",
                   "name": "ProgressBar_1",
+                  "orientation": "Horizontal",
                   "position": {
                     "x": 50.0,
                     "y": 100.0
@@ -4132,6 +6034,7 @@
                   },
                   "id": "JILHgLkuHI",
                   "name": "ProgressBar_2",
+                  "orientation": "Horizontal",
                   "position": {
                     "x": 50.0,
                     "y": 150.0
@@ -4256,6 +6159,7 @@
                   },
                   "id": "FKB6JMX6el",
                   "name": "ProgressBar_1",
+                  "orientation": "Horizontal",
                   "position": {
                     "x": 50.0,
                     "y": 200.0
