@@ -2494,6 +2494,8 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
                                     const ContentPackingOptions& options, WorkspaceAsyncWorkObserver* observer,
                                     std::vector<ReleaseArtifact>* artifacts)
 {
+    DEBUG(" ** Start release package build! **");
+
     const QString& outdir = JoinPath(options.directory, options.package_name);
     if (!MakePath(outdir))
     {
@@ -2601,17 +2603,22 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         }
     }
 
+    AnyString debug_font_mapping;
+    AnyString loading_font_mapping;
+
     if (!mSettings.debug_font.isEmpty())
     {
         // todo: should change the font URI.
         // but right now this still also works since there's a hack for this
         // in the loader in engine/ (Also same app:// thing applies to the UI style files)
-        file_packer.CopyFile(app::ToUtf8(mSettings.debug_font), "fonts/");
+        file_packer.CopyFile(mSettings.debug_font, "fonts/");
+        debug_font_mapping = file_packer.MapUri(mSettings.debug_font);
     }
 
     if (!mSettings.loading_font.isEmpty())
     {
-        file_packer.CopyFile(app::ToUtf8(mSettings.loading_font), "fonts/");
+        file_packer.CopyFile(mSettings.loading_font, "fonts/");
+        loading_font_mapping = file_packer.MapUri(mSettings.loading_font);
     }
 
     // write content file ?
@@ -2714,8 +2721,8 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         base::JsonWrite(json["application"], "content", ToUtf8(options.package_name));
         base::JsonWrite(json["application"], "game_script", ToUtf8(mSettings.game_script));
         base::JsonWrite(json["desktop"], "audio_io_strategy", mSettings.desktop_audio_io_strategy);
-        base::JsonWrite(json["loading_screen"], "font", ToUtf8(mSettings.loading_font));
-        base::JsonWrite(json["debug"], "font", ToUtf8(mSettings.debug_font));
+        base::JsonWrite(json["loading_screen"], "font", loading_font_mapping);
+        base::JsonWrite(json["debug"], "font", debug_font_mapping);
         base::JsonWrite(json["debug"], "show_msg", mSettings.debug_show_msg);
         base::JsonWrite(json["debug"], "show_fps", mSettings.debug_show_fps);
         base::JsonWrite(json["debug"], "draw", mSettings.debug_draw);
@@ -2974,6 +2981,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
     }
 
     INFO("Packed %1 resource(s) into '%2' successfully.", resources.size(), options.directory);
+    DEBUG(" ** End release package build! **");
     return true;
 }
 
