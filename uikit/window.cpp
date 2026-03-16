@@ -1362,7 +1362,7 @@ void Window::InitScrollAreaWidgets(TransientState& state, bool design_time)
             else if (scroll_area_content.GetY() < 0.0f)
             {
                 dy = -scroll_area_content.GetY();
-                scroll_area_content.SetX(0.0f);
+                scroll_area_content.SetY(0.0f);
             }
 
             scroll_area->UpdateContentRect(scroll_area_content,

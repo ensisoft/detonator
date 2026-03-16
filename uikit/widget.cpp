@@ -1891,8 +1891,7 @@ bool ScrollAreaModel::ComputeHorizontalScrollBar(const FRect& widget_rect,
     if (widget_width <= (horizontal_scrollbar_buttons_width + vertical_scrollbar_width))
         return false;
 
-    //const auto viewport_width = widget_width - vertical_scrollbar_width;
-    const auto viewport_width = viewport_rect.GetHeight();
+    const auto viewport_width = viewport_rect.GetWidth();
     const auto content_width = ComputeContentWidth(content_rect);
 
     // the available width for the scroll bar is the width of the widget
