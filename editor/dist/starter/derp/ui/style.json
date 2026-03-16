@@ -1,4 +1,13 @@
 {
+  "animations": [
+    {
+      "key": "label",
+      "type": "Bob",
+      "speed": 3.0,
+      "magnitude": 20.0
+    }
+  ],
+
   "properties": [
     {
       "key": "widget/shape",
@@ -11,7 +20,7 @@
 
     {
       "key": "widget/text-color",
-      "value": "LightGray"
+      "value": "#f05a28ff"
     },
     {
       "key": "widget/text-blink",
@@ -23,11 +32,11 @@
     },
     {
       "key": "widget/text-font",
-      "value": "app://fonts/orbitron-medium.otf"
+      "value": "app://fonts/KomikaTitle-Paint.ttf"
     },
     {
       "key": "widget/text-size",
-      "value": 16
+      "value": 36
     },
     {
       "key": "widget/text-vertical-align",
@@ -41,23 +50,48 @@
 
     {
       "key": "widget/edit-text-font",
-      "value": "app://fonts/orbitron-medium.otf"
+      "value": "app://fonts/KomikaTitle-Paint.ttf"
     },
     {
       "key": "widget/edit-text-size",
-      "value": 16
+      "value": 36
     },
     {
       "key": "widget/edit-text-color",
-      "value": "LightGray"
+      "value": "#f05a28ff"
     },
 
     {
       "key": "form/shape",
       "value": "Rect"
+    },
+
+    {
+      "key": "push-button/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "push-button/pressed/text-y-offset",
+      "value": 1.0
+    },
+
+    {
+      "key": "push-button/hovered/text-color",
+      "value": "#7adc55ff"
     }
 
   ],
+
+  "color-palette": {
+    "colors": [
+      { "key": "void",   "color": "#000000ff" },
+      { "key": "dark",   "color": "#1a1a1aff" },
+      { "key": "steel",  "color": "#808080ff" },
+      { "key": "silver", "color": "#d3d3d3ff" },
+      { "key": "white",  "color": "#ffffffff" }
+    ],
+    "brightness": 1.0
+  },
 
   "materials": [
     {
@@ -72,164 +106,148 @@
     {
       "key": "widget/button-icon",
       "type": "Color",
-      "color": "LightGray"
+      "color": "palette.silver"
     },
     {
       "key": "widget/button-background",
       "type": "Gradient",
-      "color0": "Gray",
-      "color1": "Gray",
-      "color2": "Black",
-      "color3": "Black",
-      "gamma": 2.2
+      "color0": "palette.steel",
+      "color1": "palette.steel",
+      "color2": "palette.void",
+      "color3": "palette.void"
     },
     {
       "key": "widget/pressed/button-background",
       "type": "Gradient",
-      "color0": "LightGray",
-      "color1": "LightGray",
-      "color2": "Black",
-      "color3": "Black",
-      "gamma": 2.2
+      "color0": "palette.silver",
+      "color1": "palette.silver",
+      "color2": "palette.void",
+      "color3": "palette.void"
     },
     {
       "key": "widget/mouse-over/button-background",
       "type": "Gradient",
-      "color0": "LightGray",
-      "color1": "LightGray",
-      "color2": "Black",
-      "color3": "Black",
-      "gamma": 2.2
+      "color0": "palette.silver",
+      "color1": "palette.silver",
+      "color2": "palette.void",
+      "color3": "palette.void"
     },
     {
       "key": "widget/pressed/button-border",
       "type": "Gradient",
-      "color0": "LightGray",
-      "color1": "LightGray",
-      "color2": "Gray",
-      "color3": "Gray",
-      "gamma": 2.2
+      "color0": "palette.silver",
+      "color1": "palette.silver",
+      "color2": "palette.steel",
+      "color3": "palette.steel"
     },
-
 
     {
       "key": "widget/text-edit-background",
       "type": "Gradient",
-      "color0": "Black",
-      "color1": "Black",
-      "color2": "LightGray",
-      "color3": "LightGray",
-      "gamma": 2.2
+      "color0": "palette.void",
+      "color1": "palette.void",
+      "color2": "palette.silver",
+      "color3": "palette.silver"
     },
 
     {
       "key": "slider/slider-background",
       "type": "Gradient",
-      "color0": "Black",
-      "color1": "Black",
-      "color2": "LightGray",
-      "color3": "LightGray",
-      "gamma": 2.2
+      "color0": "palette.void",
+      "color1": "palette.void",
+      "color2": "palette.silver",
+      "color3": "palette.silver"
     },
 
     {
       "key": "slider/slider-knob",
       "type": "Gradient",
-      "color0": "Gray",
-      "color1": "Gray",
-      "color2": "Black",
-      "color3": "Black",
-      "gamma": 2.2
+      "color0": "palette.steel",
+      "color1": "palette.steel",
+      "color2": "palette.void",
+      "color3": "palette.void"
     },
     {
       "key": "slider/mouse-over/slider-knob",
       "type": "Gradient",
-      "color0": "LightGray",
-      "color1": "LightGray",
-      "color2": "Black",
-      "color3": "Black",
-      "gamma": 2.2
+      "color0": "palette.silver",
+      "color1": "palette.silver",
+      "color2": "palette.void",
+      "color3": "palette.void"
     },
     {
       "key": "slider/pressed/slider-knob",
       "type": "Gradient",
-      "color0": "LightGray",
-      "color1": "LightGray",
-      "color2": "Black",
-      "color3": "Black",
-      "gamma": 2.2
-
+      "color0": "palette.silver",
+      "color1": "palette.silver",
+      "color2": "palette.void",
+      "color3": "palette.void"
     },
     {
       "key": "slider/pressed/slider-knob-border",
       "type": "Gradient",
-      "color0": "LightGray",
-      "color1": "LightGray",
-      "color2": "Gray",
-      "color3": "Gray",
-      "gamma": 2.0
+      "color0": "palette.silver",
+      "color1": "palette.silver",
+      "color2": "palette.steel",
+      "color3": "palette.steel"
     },
 
     {
       "key": "form/background",
       "type": "Color",
-      "color":  {"r": 0.1, "g": 0.1, "b": 0.1,"a": 1.0}
+      "color": "palette.dark"
     },
     {
       "key": "form/border",
       "type": "Color",
-      "color": "Gray"
+      "color": "palette.steel"
     },
 
     {
       "key": "checkbox/check-background",
       "type": "Gradient",
-      "color0": "Black",
-      "color1": "Black",
-      "color2": "LightGray",
-      "color3": "LightGray",
-      "gamma": 2.2
+      "color0": "palette.void",
+      "color1": "palette.void",
+      "color2": "palette.silver",
+      "color3": "palette.silver"
     },
     {
       "key": "checkbox/check-border",
       "type": "Color",
-      "color": "Gray"
+      "color": "palette.steel"
     },
     {
       "key": "checkbox/check-mark",
       "type": "Color",
-      "color": "LightGray"
+      "color": "palette.silver"
     },
 
     {
       "key": "progress-bar/progress-bar-background",
       "type": "Gradient",
-      "color0": "Black",
-      "color1": "Black",
-      "color2": "LightGray",
-      "color3": "LightGray",
-      "gamma": 2.2
+      "color0": "palette.void",
+      "color1": "palette.void",
+      "color2": "palette.silver",
+      "color3": "palette.silver"
     },
     {
       "key": "progress-bar/progress-bar-fill",
       "type": "Gradient",
-      "color0": "LightGray",
-      "color1": "LightGray",
-      "color2": "Black",
-      "color3": "Black",
-      "gamma": 2.2
+      "color0": "palette.silver",
+      "color1": "palette.silver",
+      "color2": "palette.void",
+      "color3": "palette.void"
     },
-
 
     {
       "key": "groupbox/background",
       "type": "Color",
-      "color":  {"r": 0.1, "g": 0.1, "b": 0.1,"a": 1.0}
+      "color": "palette.dark"
     },
     {
       "key": "groupbox/border",
       "type": "Color",
-      "color": "White"
+      "color": "palette.white"
     },
 
     {
@@ -238,6 +256,14 @@
     },
     {
       "key": "push-button/mouse-over/button-background",
+      "type": "Null"
+    },
+    {
+      "key": "push-button/hovered/button-background",
+      "type": "Null"
+    },
+    {
+      "key": "push-button/hovered/button-border",
       "type": "Null"
     },
     {
