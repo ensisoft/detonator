@@ -1,0 +1,488 @@
+{
+  "animations": [
+    {
+      "key": "widget/idle",
+      "type": "Bob",
+      "speed": 0.4,
+      "magnitude": 2.0
+    },
+    {
+      "key": "push-button/hovered",
+      "type": "Hinge",
+      "speed": 2.0,
+      "magnitude": 0.06
+    },
+    {
+      "key": "push-button/pressed",
+      "type": "Shake",
+      "speed": 15.0,
+      "magnitude": 3.0
+    }
+  ],
+
+  "properties": [
+    {
+      "key": "widget/shape",
+      "value": "RoundRect"
+    },
+    {
+      "key": "widget/border-width",
+      "value": 1.0
+    },
+
+    {
+      "key": "widget/text-color",
+      "value": "White"
+    },
+    {
+      "key": "widget/text-blink",
+      "value": false
+    },
+    {
+      "key": "widget/text-underline",
+      "value": false
+    },
+    {
+      "key": "widget/text-font",
+      "value": "app://fonts/CloisterBlack.ttf"
+    },
+    {
+      "key": "widget/text-size",
+      "value": 17
+    },
+    {
+      "key": "widget/text-vertical-align",
+      "value": "Center"
+    },
+    {
+      "key": "widget/text-horizontal-align",
+      "value": "Center"
+    },
+
+    {
+      "key": "widget/edit-text-font",
+      "value": "app://fonts/CloisterBlack.ttf"
+    },
+    {
+      "key": "widget/edit-text-size",
+      "value": 17
+    },
+    {
+      "key": "widget/edit-text-color",
+      "value": "White"
+    },
+
+    {
+      "key": "form/shape",
+      "value": "Rect"
+    },
+    {
+      "key": "scroll-area/shape",
+      "value": "Rect"
+    },
+
+    {
+      "key": "widget/disabled/text-color",
+      "value": "DarkGray"
+    },
+    {
+      "key": "widget/disabled/text-font",
+      "value": "app://fonts/CloisterBlack.ttf"
+    },
+
+    {
+      "key": "widget/vertical-scrollbar-width",
+      "value": 12.0
+    },
+    {
+      "key": "widget/horizontal-scrollbar-height",
+      "value": 12.0
+    },
+    {
+      "key": "widget/horizontal-scrollbar-buttons-visible",
+      "value": true
+    },
+    {
+      "key": "widget/vertical-scrollbar-buttons-visible",
+      "value": true
+    },
+
+    {
+      "key": "push-button/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "push-button/pressed/text-y-offset",
+      "value": 1.0
+    },
+    {
+      "key": "checkbox/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "checkbox/pressed/text-y-offset",
+      "value": 1.0
+    },
+    {
+      "key": "radiobutton/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "radiobutton/pressed/text-y-offset",
+      "value": 1.0
+    },
+
+    {
+      "key": "push-button/hovered/text-color",
+      "value": "Red"
+    },
+    {
+      "key": "push-button/pressed/text-color",
+      "value": "DarkRed"
+    },
+    {
+      "key": "checkbox/hovered/text-color",
+      "value": "Red"
+    },
+    {
+      "key": "radiobutton/hovered/text-color",
+      "value": "Red"
+    },
+    {
+      "key": "togglebox/hovered/text-color",
+      "value": "Red"
+    },
+    {
+      "key": "slider/hovered/text-color",
+      "value": "Red"
+    },
+
+    {
+      "key": "widget/shape-corner-radius",
+      "value": 0.08
+    },
+    {
+      "key": "widget/scrollbar-shape-corner-radius",
+      "value": 0.08
+    },
+    {
+      "key": "togglebox/toggle-shape-corner-radius",
+      "value": 0.5
+    },
+    {
+      "key": "togglebox/toggle-knob-shape-corner-radius",
+      "value": 0.5
+    }
+  ],
+
+  "color-palette": {
+    "colors": [
+      { "key": "crypt",    "color": "#060408ff" },
+      { "key": "tomb",     "color": "#0c0810ff" },
+      { "key": "shade",    "color": "#140e1aff" },
+      { "key": "grave",    "color": "#1c1224ff" },
+      { "key": "dusk",     "color": "#26162eff" },
+      { "key": "twilight", "color": "#30183aff" },
+      { "key": "gloom",    "color": "#3c1e46ff" },
+      { "key": "void",     "color": "#481e52ff" },
+      { "key": "blood",    "color": "#660808ff" },
+      { "key": "crimson",  "color": "#991010ff" },
+      { "key": "scarlet",  "color": "#cc1818ff" },
+      { "key": "bone",     "color": "#c8b890ff" },
+      { "key": "silver",   "color": "#9898aaff" },
+      { "key": "mist",     "color": "#6a6a7aff" }
+    ],
+    "brightness": 1.0
+  },
+
+  "materials": [
+    {
+      "key": "widget/background",
+      "type": "Null"
+    },
+    {
+      "key": "widget/border",
+      "type": "Null"
+    },
+    {
+      "key": "widget/focus-rect",
+      "type": "Color",
+      "color": "palette.scarlet"
+    },
+    {
+      "key": "widget/button-icon",
+      "type": "Color",
+      "color": "palette.bone"
+    },
+
+    {
+      "keys": [
+        "push-button/button-background",
+        "spinbox/text-edit-background"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#2a1630ee",
+      "color1": "#200e28ee",
+      "color2": "#160818ee",
+      "color3": "#100410ee",
+      "weight": {"x": 0.45, "y": 0.4}
+    },
+    {
+      "keys": [
+        "push-button/button-border",
+        "spinbox/text-edit-border"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.scarlet",
+      "color1": "palette.crimson",
+      "color2": "palette.blood",
+      "color3": "palette.crimson"
+    },
+
+    {
+      "key": "push-button/pressed/button-background",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.crypt",
+      "color1": "palette.tomb",
+      "color2": "palette.dusk",
+      "color3": "palette.gloom",
+      "weight": {"x": 0.55, "y": 0.6}
+    },
+    {
+      "key": "push-button/pressed/button-border",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.blood",
+      "color1": "palette.crimson",
+      "color2": "palette.scarlet",
+      "color3": "palette.crimson"
+    },
+
+    {
+      "key": "push-button/hovered/button-background",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#361a3ecc",
+      "color1": "#2a1232cc",
+      "color2": "#1e0a24cc",
+      "color3": "#14061acc",
+      "weight": {"x": 0.45, "y": 0.4}
+    },
+    {
+      "key": "push-button/hovered/button-border",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.bone",
+      "color1": "palette.scarlet",
+      "color2": "palette.crimson",
+      "color3": "palette.blood"
+    },
+
+    {
+      "keys": [
+        "togglebox/toggle-background-on",
+        "togglebox/toggle-background-off"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#200e28cc",
+      "color1": "#180a1ecc",
+      "color2": "#100614cc",
+      "color3": "#0c040ecc",
+      "weight": {"x": 0.45, "y": 0.4}
+    },
+    {
+      "key": "togglebox/toggle-knob-on",
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.scarlet",
+      "color1": "palette.blood"
+    },
+    {
+      "key": "togglebox/toggle-knob-off",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.mist",
+      "color1": "palette.silver",
+      "color2": "palette.shade",
+      "color3": "palette.grave"
+    },
+    {
+      "keys": [
+        "togglebox/toggle-border-on",
+        "togglebox/toggle-border-off"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.scarlet",
+      "color1": "palette.crimson",
+      "color2": "palette.blood",
+      "color3": "palette.crimson"
+    },
+    {
+      "key": "togglebox/toggle-knob-border-on",
+      "type": "Color",
+      "color": "palette.bone"
+    },
+    {
+      "key": "togglebox/toggle-knob-border-off",
+      "type": "Color",
+      "color": "palette.mist"
+    },
+
+    {
+      "keys": ["slider/slider-background",
+        "widget/scrollbar-background"],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#2a1232bb",
+      "color1": "#200e28bb",
+      "color2": "#160a1ebb",
+      "color3": "#100614bb"
+    },
+    {
+      "keys": ["slider/slider-border",
+        "widget/scrollbar-border"],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.crimson",
+      "color1": "palette.blood",
+      "color2": "palette.shade",
+      "color3": "palette.grave"
+    },
+    {
+      "keys": ["slider/slider-knob",
+        "widget/scrollbar-handle"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.crimson",
+      "color1": "palette.blood"
+    },
+    {
+      "keys": ["slider/slider-knob-border",
+        "widget/scrollbar-handle-border"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.bone",
+      "color1": "palette.scarlet"
+    },
+    {
+      "keys": ["slider/hovered/slider-knob",
+        "widget/hovered/scrollbar-handle"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.scarlet",
+      "color1": "palette.crimson"
+    },
+    {
+      "keys": ["slider/hovered/slider-knob-border",
+        "widget/hovered/scrollbar-handle-border"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.bone",
+      "color1": "palette.silver"
+    },
+    {
+      "keys": ["slider/pressed/slider-knob",
+        "widget/pressed/scrollbar-handle"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.gloom",
+      "color1": "palette.scarlet"
+    },
+    {
+      "keys": ["slider/pressed/slider-knob-border",
+        "widget/pressed/scrollbar-handle-border"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.crimson",
+      "color1": "palette.bone"
+    },
+
+    {
+      "key": "form/background",
+      "type": "Texture",
+      "texture": "app://ui/style/gothic/bg.png",
+      "wrap-x": "Repeat",
+      "wrap-y": "Repeat"
+    },
+    {
+      "key": "form/border",
+      "type": "Color",
+      "color": "palette.blood"
+    },
+
+    {
+      "key": "widget/check-background",
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "#1c122488",
+      "color1": "#06040888"
+    },
+    {
+      "keys": [
+        "widget/check-border",
+        "groupbox/border",
+        "progress-bar/progress-bar-border"],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.bone",
+      "color1": "palette.scarlet",
+      "color2": "palette.crimson",
+      "color3": "palette.blood"
+    },
+
+    {
+      "key": "checkbox/check-mark-checked",
+      "type": "Texture",
+      "texture": "app://ui/style/gothic/radio.png"
+    },
+    {
+      "key": "radiobutton/check-mark-checked",
+      "type": "Texture",
+      "texture": "app://ui/style/gothic/radio.png"
+    },
+    {
+      "keys": [
+        "checkbox/check-mark-unchecked",
+        "radiobutton/check-mark-unchecked"],
+      "type": "Color",
+      "color": "#00000000"
+    },
+
+    {
+      "key": "progress-bar/progress-bar-background",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#1c1224aa",
+      "color1": "#140e1aaa",
+      "color2": "#0e0810aa",
+      "color3": "#060408aa"
+    },
+    {
+      "key": "progress-bar/progress-bar-fill",
+      "type": "Gradient",
+      "gradient": "Conical",
+      "color0": "palette.scarlet",
+      "color1": "palette.blood"
+    },
+    {
+      "key": "progress-bar/vertical-progress-bar-fill",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.bone",
+      "color1": "palette.scarlet",
+      "color2": "palette.crimson",
+      "color3": "palette.blood"
+    },
+
+    {
+      "key": "groupbox/background",
+      "type": "Color",
+      "color": "palette.tomb"
+    }
+  ]
+}
