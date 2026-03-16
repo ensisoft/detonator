@@ -1,7 +1,7 @@
 -- Top level game callbacks.
 -- You're free to delete functions that you don't need.
 local _index = 0
-local _max_index = 4
+local _max_index = 3
 
 local _TestTable = {}
 
@@ -9,11 +9,10 @@ local _TestTable = {}
 -- This is the place where you might want to load some 
 -- previous/initial game state. 
 function LoadGame()
-    _TestTable[0] = 'Fantasy'
-    _TestTable[1] = 'Jungle'
-    _TestTable[2] = 'Kenney'
-    _TestTable[3] = 'Wyrmheart'
-    _TestTable[4] = 'Demo'
+    _TestTable[0] = 'Showcase'
+    _TestTable[1] = 'Fantasy'
+    _TestTable[2] = 'Jungle'
+    _TestTable[3] = 'Kenney'
     Game:OpenUI(_TestTable[0])
     Game:SetViewport(0, 0, 1024, 768)
     return true
