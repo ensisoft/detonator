@@ -1,0 +1,490 @@
+{
+  "animations": [
+    {
+      "key": "push-button/idle",
+      "type": "Rotate",
+      "speed": 0.8,
+      "magnitude": 0.12
+    },
+    {
+      "key": "push-button/hovered",
+      "type": "Rotate",
+      "speed": 2.5,
+      "magnitude": 0.1
+    },
+    {
+      "key": "push-button/pressed",
+      "type": "Chaos",
+      "speed": 8.0,
+      "magnitude": 2.0
+    }
+  ],
+
+  "properties": [
+    {
+      "key": "widget/shape",
+      "value": "RoundRect"
+    },
+    {
+      "key": "widget/border-width",
+      "value": 1.0
+    },
+
+    {
+      "key": "widget/text-color",
+      "value": "White"
+    },
+    {
+      "key": "widget/text-blink",
+      "value": false
+    },
+    {
+      "key": "widget/text-underline",
+      "value": false
+    },
+    {
+      "key": "widget/text-font",
+      "value": "app://fonts/orbitron-medium.otf"
+    },
+    {
+      "key": "widget/text-size",
+      "value": 16
+    },
+    {
+      "key": "widget/text-vertical-align",
+      "value": "Center"
+    },
+    {
+      "key": "widget/text-horizontal-align",
+      "value": "Center"
+    },
+
+    {
+      "key": "widget/edit-text-font",
+      "value": "app://fonts/orbitron-medium.otf"
+    },
+    {
+      "key": "widget/edit-text-size",
+      "value": 16
+    },
+    {
+      "key": "widget/edit-text-color",
+      "value": "White"
+    },
+
+    {
+      "key": "form/shape",
+      "value": "Rect"
+    },
+
+    {
+      "key": "scroll-area/shape",
+      "value": "Rect"
+    },
+
+    {
+      "key": "widget/disabled/text-color",
+      "value": "DarkMagenta"
+    },
+    {
+      "key": "widget/disabled/text-font",
+      "value": "app://fonts/orbitron-light.otf"
+    },
+    {
+      "key": "widget/vertical-scrollbar-width",
+      "value": 12.0
+    },
+    {
+      "key": "widget/horizontal-scrollbar-height",
+      "value": 12.0
+    },
+    {
+      "key": "widget/horizontal-scrollbar-buttons-visible",
+      "value": true
+    },
+    {
+      "key": "widget/vertical-scrollbar-buttons-visible",
+      "value": true
+    },
+
+    {
+      "key": "push-button/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "push-button/pressed/text-y-offset",
+      "value": 1.0
+    },
+    {
+      "key": "checkbox/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "checkbox/pressed/text-y-offset",
+      "value": 1.0
+    },
+    {
+      "key": "radiobutton/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "radiobutton/pressed/text-y-offset",
+      "value": 1.0
+    },
+
+    {
+      "key": "push-button/hovered/text-color",
+      "value": "Magenta"
+    },
+    {
+      "key": "push-button/pressed/text-color",
+      "value": "DarkMagenta"
+    },
+    {
+      "key": "checkbox/hovered/text-color",
+      "value": "Magenta"
+    },
+    {
+      "key": "radiobutton/hovered/text-color",
+      "value": "Magenta"
+    },
+    {
+      "key": "togglebox/hovered/text-color",
+      "value": "Magenta"
+    },
+    {
+      "key": "slider/hovered/text-color",
+      "value": "Magenta"
+    },
+
+    {
+      "key": "widget/shape-corner-radius",
+      "value": 0.15
+    },
+    {
+      "key": "widget/scrollbar-shape-corner-radius",
+      "value": 0.15
+    },
+    {
+      "key": "widget/scrollbar-handle-shape-corner-radius",
+      "value": 0.15
+    },
+    {
+      "key": "togglebox/toggle-shape-corner-radius",
+      "value": 0.5
+    },
+    {
+      "key": "togglebox/toggle-knob-shape-corner-radius",
+      "value": 0.5
+    }
+  ],
+
+  "color-palette": {
+    "colors": [
+      { "key": "void",      "color": "#080408ff" },
+      { "key": "abyss",     "color": "#100810ff" },
+      { "key": "midnight",  "color": "#180c1aff" },
+      { "key": "shadow",    "color": "#200e22ff" },
+      { "key": "plum",      "color": "#2c1030ff" },
+      { "key": "grape",     "color": "#38143cff" },
+      { "key": "dusk",      "color": "#441848ff" },
+      { "key": "twilight",  "color": "#521e54ff" },
+      { "key": "berry",     "color": "#6a1060ff" },
+      { "key": "fuchsia",   "color": "#991178ff" },
+      { "key": "hot",       "color": "#cc2299ff" },
+      { "key": "pink",      "color": "#ee55bbff" },
+      { "key": "rose",      "color": "#ff88ddff" },
+      { "key": "blush",     "color": "#ffaaeeff" }
+    ],
+    "brightness": 1.0
+  },
+
+  "materials": [
+    {
+      "key": "widget/background",
+      "type": "Null"
+    },
+    {
+      "key": "widget/border",
+      "type": "Null"
+    },
+    {
+      "key": "widget/focus-rect",
+      "type": "Color",
+      "color": "palette.rose"
+    },
+    {
+      "key": "widget/button-icon",
+      "type": "Color",
+      "color": "palette.pink"
+    },
+
+    {
+      "keys": [
+        "push-button/button-background",
+        "spinbox/text-edit-background"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#401428ee",
+      "color1": "#301020ee",
+      "color2": "#200c1aee",
+      "color3": "#180a14ee",
+      "weight": {"x": 0.45, "y": 0.4}
+    },
+    {
+      "keys": [
+        "push-button/button-border",
+        "spinbox/text-edit-border"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.rose",
+      "color1": "palette.pink",
+      "color2": "palette.hot",
+      "color3": "palette.fuchsia"
+    },
+
+    {
+      "key": "push-button/pressed/button-background",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.void",
+      "color1": "palette.abyss",
+      "color2": "palette.dusk",
+      "color3": "palette.twilight",
+      "weight": {"x": 0.55, "y": 0.6}
+    },
+    {
+      "key": "push-button/pressed/button-border",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.fuchsia",
+      "color1": "palette.hot",
+      "color2": "palette.pink",
+      "color3": "palette.rose"
+    },
+
+    {
+      "key": "push-button/hovered/button-background",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#4a1a30cc",
+      "color1": "#38122acc",
+      "color2": "#280e22cc",
+      "color3": "#200c1ccc",
+      "weight": {"x": 0.45, "y": 0.4}
+    },
+    {
+      "key": "push-button/hovered/button-border",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.blush",
+      "color1": "palette.rose",
+      "color2": "palette.hot",
+      "color3": "palette.fuchsia"
+    },
+
+    {
+      "keys": [
+        "togglebox/toggle-background-on",
+        "togglebox/toggle-background-off"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#361228cc",
+      "color1": "#280e20cc",
+      "color2": "#1c0a18cc",
+      "color3": "#140812cc",
+      "weight": {"x": 0.45, "y": 0.4}
+    },
+    {
+      "key": "togglebox/toggle-knob-on",
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.rose",
+      "color1": "palette.berry"
+    },
+    {
+      "key": "togglebox/toggle-knob-off",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.twilight",
+      "color1": "palette.dusk",
+      "color2": "palette.plum",
+      "color3": "palette.midnight"
+    },
+    {
+      "keys": [
+        "togglebox/toggle-border-on",
+        "togglebox/toggle-border-off"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.pink",
+      "color1": "palette.hot",
+      "color2": "palette.fuchsia",
+      "color3": "palette.berry"
+    },
+    {
+      "key": "togglebox/toggle-knob-border-on",
+      "type": "Color",
+      "color": "palette.blush"
+    },
+    {
+      "key": "togglebox/toggle-knob-border-off",
+      "type": "Color",
+      "color": "palette.twilight"
+    },
+
+    {
+      "keys": ["slider/slider-background",
+        "widget/scrollbar-background"],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#4a1e40bb",
+      "color1": "#3c1834bb",
+      "color2": "#2e1228bb",
+      "color3": "#220c1ebb"
+    },
+    {
+      "keys": ["slider/slider-border",
+        "widget/scrollbar-border"],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#553344ff",
+      "color1": "#442233ff",
+      "color2": "#331122ff",
+      "color3": "#220011ff"
+    },
+    {
+      "keys": ["slider/slider-knob",
+        "widget/scrollbar-handle"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.pink",
+      "color1": "palette.berry"
+    },
+    {
+      "keys": ["slider/slider-knob-border",
+        "widget/scrollbar-handle-border"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.blush",
+      "color1": "palette.hot"
+    },
+    {
+      "keys": ["slider/hovered/slider-knob",
+        "widget/hovered/scrollbar-handle"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.blush",
+      "color1": "palette.fuchsia"
+    },
+    {
+      "keys": ["slider/hovered/slider-knob-border",
+        "widget/hovered/scrollbar-handle-border"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "#ffffffff",
+      "color1": "palette.rose"
+    },
+    {
+      "keys": ["slider/pressed/slider-knob",
+        "widget/pressed/scrollbar-handle"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.plum",
+      "color1": "palette.pink"
+    },
+    {
+      "keys": ["slider/pressed/slider-knob-border",
+        "widget/pressed/scrollbar-handle-border"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.twilight",
+      "color1": "palette.rose"
+    },
+
+    {
+      "key": "form/background",
+      "type": "Texture",
+      "texture": "app://ui/style/hex_bg.png",
+      "wrap-x": "Repeat",
+      "wrap-y": "Repeat"
+    },
+    {
+      "key": "form/border",
+      "type": "Color",
+      "color": "palette.fuchsia"
+    },
+
+    {
+      "key": "widget/check-background",
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "#2c103088",
+      "color1": "#08040888"
+    },
+    {
+      "keys": [
+        "widget/check-border",
+        "groupbox/border",
+        "progress-bar/progress-bar-border"],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.blush",
+      "color1": "palette.rose",
+      "color2": "palette.hot",
+      "color3": "palette.fuchsia"
+    },
+    {
+      "keys": [
+        "checkbox/check-mark-checked",
+        "radiobutton/check-mark-checked"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.rose",
+      "color1": "palette.berry"
+    },
+    {
+      "keys": [
+        "checkbox/check-mark-unchecked",
+        "radiobutton/check-mark-unchecked"],
+      "type": "Color",
+      "color": "#6a106022"
+    },
+
+    {
+      "key": "progress-bar/progress-bar-background",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#200e22aa",
+      "color1": "#180c1aaa",
+      "color2": "#100810aa",
+      "color3": "#080408aa"
+    },
+    {
+      "key": "progress-bar/progress-bar-fill",
+      "type": "Gradient",
+      "gradient": "Conical",
+      "color0": "palette.rose",
+      "color1": "palette.fuchsia"
+    },
+    {
+      "key": "progress-bar/vertical-progress-bar-fill",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.blush",
+      "color1": "palette.rose",
+      "color2": "palette.hot",
+      "color3": "palette.fuchsia"
+    },
+
+    {
+      "key": "groupbox/background",
+      "type": "Color",
+      "color": "palette.abyss"
+    }
+  ]
+}

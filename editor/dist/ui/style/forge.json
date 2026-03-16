@@ -1,0 +1,490 @@
+{
+  "animations": [
+    {
+      "key": "widget/idle",
+      "type": "Shake",
+      "speed": 3.0,
+      "magnitude": 1.0
+    },
+    {
+      "key": "push-button/hovered",
+      "type": "Shake",
+      "speed": 10.0,
+      "magnitude": 2.0
+    },
+    {
+      "key": "push-button/pressed",
+      "type": "Hinge",
+      "speed": 10.0,
+      "magnitude": 0.1
+    }
+  ],
+
+  "properties": [
+    {
+      "key": "widget/shape",
+      "value": "RoundRect"
+    },
+    {
+      "key": "widget/border-width",
+      "value": 1.0
+    },
+
+    {
+      "key": "widget/text-color",
+      "value": "White"
+    },
+    {
+      "key": "widget/text-blink",
+      "value": false
+    },
+    {
+      "key": "widget/text-underline",
+      "value": false
+    },
+    {
+      "key": "widget/text-font",
+      "value": "app://fonts/ethnocentric rg.otf"
+    },
+    {
+      "key": "widget/text-size",
+      "value": 16
+    },
+    {
+      "key": "widget/text-vertical-align",
+      "value": "Center"
+    },
+    {
+      "key": "widget/text-horizontal-align",
+      "value": "Center"
+    },
+
+    {
+      "key": "widget/edit-text-font",
+      "value": "app://fonts/ethnocentric rg.otf"
+    },
+    {
+      "key": "widget/edit-text-size",
+      "value": 16
+    },
+    {
+      "key": "widget/edit-text-color",
+      "value": "White"
+    },
+
+    {
+      "key": "form/shape",
+      "value": "Rect"
+    },
+
+    {
+      "key": "scroll-area/shape",
+      "value": "Rect"
+    },
+
+    {
+      "key": "widget/disabled/text-color",
+      "value": "DarkYellow"
+    },
+    {
+      "key": "widget/disabled/text-font",
+      "value": "app://fonts/orbitron-light.otf"
+    },
+    {
+      "key": "widget/vertical-scrollbar-width",
+      "value": 12.0
+    },
+    {
+      "key": "widget/horizontal-scrollbar-height",
+      "value": 12.0
+    },
+    {
+      "key": "widget/horizontal-scrollbar-buttons-visible",
+      "value": true
+    },
+    {
+      "key": "widget/vertical-scrollbar-buttons-visible",
+      "value": true
+    },
+
+    {
+      "key": "push-button/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "push-button/pressed/text-y-offset",
+      "value": 1.0
+    },
+    {
+      "key": "checkbox/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "checkbox/pressed/text-y-offset",
+      "value": 1.0
+    },
+    {
+      "key": "radiobutton/pressed/text-x-offset",
+      "value": 1.0
+    },
+    {
+      "key": "radiobutton/pressed/text-y-offset",
+      "value": 1.0
+    },
+
+    {
+      "key": "push-button/hovered/text-color",
+      "value": "Yellow"
+    },
+    {
+      "key": "push-button/pressed/text-color",
+      "value": "DarkYellow"
+    },
+    {
+      "key": "checkbox/hovered/text-color",
+      "value": "Yellow"
+    },
+    {
+      "key": "radiobutton/hovered/text-color",
+      "value": "Yellow"
+    },
+    {
+      "key": "togglebox/hovered/text-color",
+      "value": "Yellow"
+    },
+    {
+      "key": "slider/hovered/text-color",
+      "value": "Yellow"
+    },
+
+    {
+      "key": "widget/shape-corner-radius",
+      "value": 0.15
+    },
+    {
+      "key": "widget/scrollbar-shape-corner-radius",
+      "value": 0.15
+    },
+    {
+      "key": "widget/scrollbar-handle-shape-corner-radius",
+      "value": 0.15
+    },
+    {
+      "key": "togglebox/toggle-shape-corner-radius",
+      "value": 0.5
+    },
+    {
+      "key": "togglebox/toggle-knob-shape-corner-radius",
+      "value": 0.5
+    }
+  ],
+
+  "color-palette": {
+    "colors": [
+      { "key": "forge",   "color": "#0c0804ff" },
+      { "key": "cinder",  "color": "#14100aff" },
+      { "key": "soot",    "color": "#1e180eff" },
+      { "key": "ash",     "color": "#2a2016ff" },
+      { "key": "ember",   "color": "#441a00ff" },
+      { "key": "rust",    "color": "#553300ff" },
+      { "key": "ochre",   "color": "#775500ff" },
+      { "key": "char",    "color": "#884400ff" },
+      { "key": "bronze",  "color": "#885522ff" },
+      { "key": "amber",   "color": "#aa7711ff" },
+      { "key": "gold",    "color": "#cc9922ff" },
+      { "key": "bright",  "color": "#ffcc44ff" },
+      { "key": "flame",   "color": "#ff6600ff" },
+      { "key": "hot",     "color": "#ff3300ff" }
+    ],
+    "brightness": 1.0
+  },
+
+  "materials": [
+    {
+      "key": "widget/background",
+      "type": "Null"
+    },
+    {
+      "key": "widget/border",
+      "type": "Null"
+    },
+    {
+      "key": "widget/focus-rect",
+      "type": "Color",
+      "color": "palette.bright"
+    },
+    {
+      "key": "widget/button-icon",
+      "type": "Color",
+      "color": "palette.bright"
+    },
+
+    {
+      "keys": [
+        "push-button/button-background",
+        "spinbox/text-edit-background"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#604020ee",
+      "color1": "#4a3012ee",
+      "color2": "#362008ee",
+      "color3": "#241408ee",
+      "weight": {"x": 0.45, "y": 0.4}
+    },
+    {
+      "keys": [
+        "push-button/button-border",
+        "spinbox/text-edit-border"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.gold",
+      "color1": "palette.amber",
+      "color2": "palette.ochre",
+      "color3": "palette.rust"
+    },
+
+    {
+      "key": "push-button/pressed/button-background",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.forge",
+      "color1": "palette.cinder",
+      "color2": "palette.soot",
+      "color3": "palette.ash",
+      "weight": {"x": 0.55, "y": 0.6}
+    },
+    {
+      "key": "push-button/pressed/button-border",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.rust",
+      "color1": "palette.ochre",
+      "color2": "palette.amber",
+      "color3": "palette.gold"
+    },
+
+    {
+      "key": "push-button/hovered/button-background",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#583818cc",
+      "color1": "#442c0ecc",
+      "color2": "#32200acc",
+      "color3": "#241806cc",
+      "weight": {"x": 0.45, "y": 0.4}
+    },
+    {
+      "key": "push-button/hovered/button-border",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#ffee66ff",
+      "color1": "#ddcc44ff",
+      "color2": "#aa8800ff",
+      "color3": "#886600ff"
+    },
+
+    {
+      "keys": [
+        "togglebox/toggle-background-on",
+        "togglebox/toggle-background-off"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#402810cc",
+      "color1": "#301e08cc",
+      "color2": "#241408cc",
+      "color3": "#180c04cc",
+      "weight": {"x": 0.45, "y": 0.4}
+    },
+    {
+      "key": "togglebox/toggle-knob-on",
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "#ffcc00ff",
+      "color1": "palette.char"
+    },
+    {
+      "key": "togglebox/toggle-knob-off",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.ochre",
+      "color1": "palette.char",
+      "color2": "palette.ember",
+      "color3": "palette.soot"
+    },
+    {
+      "keys": [
+        "togglebox/toggle-border-on",
+        "togglebox/toggle-border-off"
+      ],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#cc8800ff",
+      "color1": "#aa6600ff",
+      "color2": "palette.char",
+      "color3": "#662200ff"
+    },
+    {
+      "key": "togglebox/toggle-knob-border-on",
+      "type": "Color",
+      "color": "palette.bright"
+    },
+    {
+      "key": "togglebox/toggle-knob-border-off",
+      "type": "Color",
+      "color": "palette.ochre"
+    },
+
+    {
+      "keys": ["slider/slider-background",
+        "widget/scrollbar-background"],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#3a200ebb",
+      "color1": "#2e180abb",
+      "color2": "#221208bb",
+      "color3": "#180e06bb"
+    },
+    {
+      "keys": ["slider/slider-border",
+        "widget/scrollbar-border"],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#775533ff",
+      "color1": "#553322ff",
+      "color2": "#442211ff",
+      "color3": "#221100ff"
+    },
+    {
+      "keys": ["slider/slider-knob",
+        "widget/scrollbar-handle"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.bright",
+      "color1": "#663300ff"
+    },
+    {
+      "keys": ["slider/slider-knob-border",
+        "widget/scrollbar-handle-border"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "#ffee88ff",
+      "color1": "#996600ff"
+    },
+    {
+      "keys": ["slider/hovered/slider-knob",
+        "widget/hovered/scrollbar-handle"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "#ffee66ff",
+      "color1": "palette.char"
+    },
+    {
+      "keys": ["slider/hovered/slider-knob-border",
+        "widget/hovered/scrollbar-handle-border"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "#ffffffff",
+      "color1": "palette.bright"
+    },
+    {
+      "keys": ["slider/pressed/slider-knob",
+        "widget/pressed/scrollbar-handle"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.ember",
+      "color1": "palette.gold"
+    },
+    {
+      "keys": ["slider/pressed/slider-knob-border",
+        "widget/pressed/scrollbar-handle-border"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "palette.char",
+      "color1": "palette.bright"
+    },
+
+    {
+      "key": "form/background",
+      "type": "Texture",
+      "texture": "app://ui/style/forge_bg.png",
+      "wrap-x": "Repeat",
+      "wrap-y": "Repeat"
+    },
+    {
+      "key": "form/border",
+      "type": "Color",
+      "color": "palette.bronze"
+    },
+
+    {
+      "key": "widget/check-background",
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "#2a180888",
+      "color1": "#0c060288"
+    },
+    {
+      "keys": [
+        "widget/check-border",
+        "groupbox/border",
+        "progress-bar/progress-bar-border"],
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.bright",
+      "color1": "palette.gold",
+      "color2": "palette.amber",
+      "color3": "palette.ochre"
+    },
+    {
+      "keys": [
+        "checkbox/check-mark-checked",
+        "radiobutton/check-mark-checked"],
+      "type": "Gradient",
+      "gradient": "Radial",
+      "color0": "#ffee44ff",
+      "color1": "#886600ff"
+    },
+    {
+      "keys": [
+        "checkbox/check-mark-unchecked",
+        "radiobutton/check-mark-unchecked"],
+      "type": "Color",
+      "color": "#44220022"
+    },
+
+    {
+      "key": "progress-bar/progress-bar-background",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "#141008aa",
+      "color1": "#100c06aa",
+      "color2": "#0c0804aa",
+      "color3": "#080602aa"
+    },
+    {
+      "key": "progress-bar/progress-bar-fill",
+      "type": "Gradient",
+      "gradient": "Conical",
+      "color0": "palette.bright",
+      "color1": "palette.flame"
+    },
+    {
+      "key": "progress-bar/vertical-progress-bar-fill",
+      "type": "Gradient",
+      "gradient": "Bilinear",
+      "color0": "palette.bright",
+      "color1": "palette.bright",
+      "color2": "palette.flame",
+      "color3": "palette.ember"
+    },
+
+    {
+      "key": "groupbox/background",
+      "type": "Color",
+      "color": "#16100866"
+    }
+  ]
+}
