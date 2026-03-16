@@ -1,6 +1,11 @@
 DETONATOR 2D 💥💣
 ===================
 
+### LIVE DEMO
+
+https://games123.net/games/uploads/ui/game.html
+
+
 ## UI Library (UIK)
 UIK is a system to create  in-game user interfaces using a retained mode widget model. 
 The widgets can be arranged in a hierarchy where container widgets contain other widgets. 
@@ -19,6 +24,9 @@ Current features:
   styled inside the UI editor by adjusting widget specific style properties.
   The styling has complete integration with the material system so that it's possible to use any material
   definition as widget material for things such as backgrounds, borders etc.
+* Widget styling supports little gimmicks and effects such as text offsets in order to create a little 
+  "3D click" effects. Its also possible to add some visual animations such as shakes and bobs that apply 
+  to widgets based on widget type and state.
 * Widget animation through a set of declarative animation rules. It's possible to create simple animations
   such as widget slides, bounces etc. with simple rule based animation system that defines a trigger event
   and any number of animation actions to be taken. The system is inspired by CSS keyframe animation and 
@@ -68,6 +76,8 @@ TODO widgets:
 * ListWidget 
 * Main menu
 * Context menu
+* Improve the outline rendering
+* Add some more mouse handling
 
 ## Widget Styling
 
@@ -297,10 +307,6 @@ will only start running after the delay time which co-incides with the duration 
 </details>
 
 
-
-
-
-
 ## Software Design
 
 The UI system is completely abstract and doesn't do any rendering directly.
@@ -317,13 +323,28 @@ to virtual keys recognized by the uikit.
 
 Below are some screenshots demonstrating the capabilities of the skinning system.
 
-![HUD](screens/screenshot.png "Widgets with default styling.")  
-Widgets with (mostly) default styling.
+![HUD](screens/forge.png "Widgets with default styling.")  
+Forge
 
-![Custom Style](screens/jungle.png "UI system screenshot with custom style")  
+![HUD](screens/gothic.png "Widgets with default styling.")  
+Gothic
+
+![HUD](screens/grove.png "Widgets with default styling.")  
+Grove
+
+![HUD](screens/hex.png "Widgets with default styling.")  
+Hex
+
+![HUD](screens/pulse.png "Widgets with default styling.")  
+Pulse
+
+![HUD](screens/fantasy.png "Fantasy UI with custom styling.")
+Fantasy UI with assets from opengameart.org
+
+![Custom Style](screens/jungle.png "Jungle UI with custom style")  
 https://opengameart.org/content/jungle-cartoon-gui
 
-![Custom Style](screens/kenney.png "UI system screenshot with custom style")
+![Custom Style](screens/kenney.png "Kenney UI with custom style")
 
 https://opengameart.org/content/ui-pack  
 https://opengameart.org/content/ui-pack-space-extension
