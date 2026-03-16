@@ -3477,6 +3477,8 @@ void UIWidget::OpenContextMenu(const QPoint& position)
         menu.AddSeparator();
         menu.AddAction(mUI.actionWidgetPaste);
         menu.AddSeparator();
+        menu.AddAction(mUI.actionWidgetOrder);
+        menu.AddSeparator();
         menu.AddSubMenu(std::move(view_menu));
         menu.AddSeparator();
         menu.AddSubMenu(std::move(grid_menu));
