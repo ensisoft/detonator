@@ -42,6 +42,8 @@ void TestValue(const char* key, const data::Reader& reader, const T& expected)
 
 void unit_test_basic()
 {
+    TEST_CASE(test::Type::Feature)
+
     data::JsonObject json;
     TEST_REQUIRE(json.IsEmpty());
 
@@ -100,6 +102,8 @@ void unit_test_basic()
 
 void unit_test_bitflag()
 {
+    TEST_CASE(test::Type::Feature)
+
     enum class Fruits {
         Apple, Banana, Kiwi, Quava
     };
@@ -115,10 +119,34 @@ void unit_test_bitflag()
     TEST_REQUIRE(f.test(Fruits::Apple));
     TEST_REQUIRE(f.test(Fruits::Kiwi));
     TEST_REQUIRE(f.test(Fruits::Quava) == false);
+
+    // alias to help migration
+    {
+        // banana -> melon
+        enum class Fruits2 {
+            Apple, Melon, Grapefruit
+        };
+
+        base::bitflag<Fruits> old;
+        old.set(Fruits::Apple, true);
+        old.set(Fruits::Banana, true);
+        old.set(Fruits::Kiwi, false);
+
+        data::JsonObject json;
+        json.Write("fruits", old);
+
+        base::bitflag<Fruits2> n;
+        json.Read("fruits", &n, {{Fruits2::Melon, "Banana"}, {Fruits2::Grapefruit, "Kiwi"}});
+        TEST_REQUIRE(n.test(Fruits2::Apple));
+        TEST_REQUIRE(n.test(Fruits2::Melon));
+        TEST_REQUIRE(n.test(Fruits2::Grapefruit) == false);
+    }
 }
 
 void unit_test_variant()
 {
+    TEST_CASE(test::Type::Feature)
+
     using Variant = std::variant<float, glm::vec2, glm::vec3, std::string>;
     Variant f = 123.0f;
     Variant x = glm::vec2(1.0f, 2.0f);
@@ -147,6 +175,8 @@ void unit_test_variant()
 
 void unit_test_optional()
 {
+    TEST_CASE(test::Type::Feature)
+
     {
         std::optional<float> opt_f = 123.0f;
         std::optional<std::string> opt_s = "keke";
@@ -188,12 +218,14 @@ void unit_test_optional()
 template<typename T>
 void unit_test_array(const T* array, size_t size)
 {
+    TEST_CASE(test::Type::Feature)
+
     std::string str;
     {
         data::JsonObject json;
         json.Write("foobar", array, size);
         str = json.ToString();
-        std::cout << str << std::endl;
+        //std::cout << str << std::endl;
     }
     {
         data::JsonObject json;

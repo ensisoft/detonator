@@ -21,6 +21,7 @@
 #include "warnpush.h"
 #  include <glm/fwd.hpp>
 #  include <neargye/magic_enum.hpp>
+#  include <vector>
 #include "warnpop.h"
 
 #include <memory>
@@ -103,15 +104,42 @@ namespace data
             } else return Deserialize(*this, name, out);
         }
 
+        template<typename Enum>
+        struct EnumAlias{
+            Enum value;
+            std::string name;
+        };
+
         template<typename Enum, typename Bits>
-        bool Read(const char* name, base::bitflag<Enum, Bits>* bitflag) const
+        bool Read(const char* name, base::bitflag<Enum, Bits>* bitflag,
+                  const std::vector<EnumAlias<Enum>>& enum_aliases = {}) const
         {
             auto chunk = GetReadChunk(name);
             if (!chunk)
                 return false;
 
+            auto TryEnumAlias = [&enum_aliases, &chunk, &bitflag](Enum flag) {
+                for (const auto& alias : enum_aliases)
+                {
+                    if (alias.value != flag)
+                        continue;
+
+                    if (!chunk->HasValue(alias.name.c_str()))
+                        continue;
+                    bool on_off = false;
+                    if (!chunk->Read(alias.name.c_str(), &on_off))
+                        continue;
+                    bitflag->set(flag, on_off);
+                    return true;
+                }
+                return false;
+            };
+
             for (const auto& flag : magic_enum::enum_values<Enum>())
             {
+                if (TryEnumAlias(flag))
+                    continue;
+
                 // for easy versioning of bits in the flag don't require
                 // that all the flags exist in the object
                 const std::string flag_name(magic_enum::enum_name(flag));
