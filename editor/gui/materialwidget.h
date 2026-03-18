@@ -132,6 +132,7 @@ namespace gui
         void on_chkBlendPreMulAlpha_stateChanged(int);
         void on_chkStaticInstance_stateChanged(int);
         void on_chkEnableBloom_stateChanged(int);
+        void on_chkEnableSDF_stateChanged(int);
         void on_chkBlendFrames_stateChanged(int);
         void on_chkLooping_stateChanged(int);
         void on_spriteCols_valueChanged(int);

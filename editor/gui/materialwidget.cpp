@@ -1430,6 +1430,11 @@ void MaterialWidget::on_chkEnableBloom_stateChanged(int)
 {
     SetMaterialProperties();
 }
+void MaterialWidget::on_chkEnableSDF_stateChanged(int)
+{
+    SetMaterialProperties();
+}
+
 void MaterialWidget::on_chkBlendFrames_stateChanged(int)
 {
     SetMaterialProperties();
@@ -2423,9 +2428,10 @@ void MaterialWidget::SetTextureFlags()
 
 void MaterialWidget::SetMaterialProperties()
 {
-    mMaterial->SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, GetValue(mUI.chkBlendPreMulAlpha));
     mMaterial->SetStatic(GetValue(mUI.chkStaticInstance));
-    mMaterial->SetFlag(gfx::MaterialClass::Flags::EnableBloom, GetValue(mUI.chkEnableBloom));
+    mMaterial->SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, GetValue(mUI.chkBlendPreMulAlpha));
+    mMaterial->SetFlag(gfx::MaterialClass::Flags::Bloom, GetValue(mUI.chkEnableBloom));
+    mMaterial->SetFlag(gfx::MaterialClass::Flags::EnableSDF, GetValue(mUI.chkEnableSDF));
     mMaterial->SetSurfaceType(GetValue(mUI.surfaceType));
     mMaterial->SetParticleEffect(GetValue(mUI.particleAction));
     mMaterial->SetTextureMinFilter(GetValue(mUI.textureMinFilter));
@@ -2704,7 +2710,8 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.surfaceType,          mMaterial->GetSurfaceType());
     SetValue(mUI.shaderFile,           mMaterial->GetShaderUri());
     SetValue(mUI.chkStaticInstance,    mMaterial->IsStatic());
-    SetValue(mUI.chkEnableBloom, mMaterial->TestFlag(gfx::MaterialClass::Flags::EnableBloom));
+    SetValue(mUI.chkEnableBloom,       mMaterial->TestFlag(gfx::MaterialClass::Flags::Bloom));
+    SetValue(mUI.chkEnableSDF,         mMaterial->TestFlag(gfx::MaterialClass::Flags::EnableSDF));
     SetValue(mUI.chkBlendPreMulAlpha,  mMaterial->PremultipliedAlpha());
     SetValue(mUI.chkBlendFrames,       mMaterial->BlendFrames());
 

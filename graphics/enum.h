@@ -37,7 +37,11 @@ namespace gfx
     enum class MaterialFlags : uint32_t {
         EnableBloom = 0x1,
         EnableLight = 0x2,
-        EnableFog   = 0x4
+        EnableFog   = 0x4,
+        // This flag indicates that the material should use the built-in
+        // SDF shape rendering. The actual shape rendering parameters
+        // are in the SDF uniforms, kSdfShape, kSdfFillMode etc.
+        EnableSDF   = 0x8
     };
 
     enum class DrawableFlags : uint32_t {

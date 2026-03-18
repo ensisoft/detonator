@@ -52,6 +52,9 @@ gfx::MaterialInstance MakeMaterial(const gfx::Color4f& color)
                        : gfx::MaterialClass::SurfaceType::Transparent);
     return gfx::MaterialInstance(klass);
 }
+
+
+
 } // namespace
 
 namespace gfx
@@ -210,7 +213,6 @@ bool FillRect(Painter& painter, const FRect& rect, const Material& material)
 
 bool FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Color4f& color)
 {
-    const float alpha = color.Alpha();
     return FillShape(painter, rect, shape, MakeMaterial(color));
 }
 bool FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const Material& material)
@@ -228,7 +230,7 @@ bool FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const
 
 bool DrawRectOutline(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
 {
-    return DrawRectOutline(painter, rect, MakeMaterial(color));
+    return DrawSDFShapeOutline(painter, rect, color, MaterialClass::SDFShape::Rect, line_width, 0.05f);
 }
 
 bool DrawRectOutline(Painter& painter, const FRect& rect, const Material& material, float line_width)
@@ -236,38 +238,165 @@ bool DrawRectOutline(Painter& painter, const FRect& rect, const Material& materi
     return DrawShapeOutline(painter, rect, gfx::Rectangle(), material, line_width);
 }
 
-bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
-                      const Color4f& color, float line_width)
+SDFShape PerformOutlineSDFShaping(const FRect& rect, MaterialClass::SDFShape shape, float line_width, float corner_radius)
 {
+    const auto width = rect.GetWidth();
+    const auto height = rect.GetHeight();
+    const auto max_size = std::max(width, height);
+    const auto min_size = std::min(width, height);
+
+    float aspect_ratio  = 1.0f;
+    float outline_width = line_width / max_size;
+
+    auto sdf_rect = rect;
+
+    // so let's say I have an outline with outline width at 10 (logical pixels).
+    // for the SDF functions the outline width must be a normalized value.
+    // so we create a normalized valued by dividing the outline width with the
+    // shape width. so for example if shape is 100x100 and outline is 10
+    // then outline is 0.1 in SDF units, but when the shape covers the pixels
+    // 0.1 will map back to 10 pixels.
+
+    // but here's the first problem.
+    // What if the shape isn't a square. but has elongated shape for example
+    // 100x200 or 200x100. what should be the normalized outline width then?
+
+    // here's the second problem, applying a non-uniform scale on the shape
+    // will cause different axis to map to different rasterized pixel amounts.
+    // for example 0.1 of 100 is 10 but 0.1 of 200 is 20.
+    // therefore a rectangle that has size 100x200 and outline width 0.1 will
+    // have outline that is much thicker on the left and right edges than
+    // what it is at the top.
+
+    // It turns out that this issue can be solved for some shapes by
+    // messing with the aspect ratio, i.e. by replacing the incoming rect
+    // with a square rect and by baking the aspect ratio in the SDF shape
+    // itself.
+
+    if (shape == MaterialClass::SDFShape::HorizontalCapsule ||
+        shape == MaterialClass::SDFShape::VerticalCapsule)
+    {
+        // we know that the simple shape capsule wants keep the rendered
+        // shape isotropic to the expected capsule shape regardless how
+        // the shape's bounding box is dimensioned.
+        // we'll implement the same thing here by first computing the
+        // capsule properties based on the end cap radius
+
+        // original corner radius in uv units based on the incoming (normalized)
+        // corner radius and the minium size
+        const auto corner_radius_uv_units = corner_radius * min_size;
+
+        const auto width_delta  = max_size - width;
+        const auto height_delta = max_size - height;
+        sdf_rect.Resize(max_size, max_size);
+        sdf_rect.Translate(-width_delta*0.5f, -height_delta*0.5f);
+
+        corner_radius = corner_radius_uv_units / max_size;
+
+        // (ab) using the aspect ratio to reduce the width of the capsule
+        // to match the expected size
+        if (shape == gfx::MaterialClass::SDFShape::HorizontalCapsule && height > width)
+            aspect_ratio = width / height;
+        else if (shape == gfx::MaterialClass::SDFShape::VerticalCapsule && width > height)
+            aspect_ratio = height / width;
+    }
+    else if (shape == MaterialClass::SDFShape::Rect ||  shape == MaterialClass::SDFShape::RoundRect)
+    {
+        aspect_ratio = rect.GetAspectRatio();
+
+        const auto width_delta  = max_size - width;
+        const auto height_delta = max_size - height;
+
+        sdf_rect.Resize(max_size, max_size);
+        sdf_rect.Translate(-width_delta * 0.5f, -height_delta*0.5f);
+
+        corner_radius = corner_radius * (min_size / max_size);
+    }
+
+    SDFShape ret;
+    ret.outline_width = outline_width;
+    ret.aspect_ratio  = aspect_ratio;
+    ret.corner_radius = corner_radius;
+    ret.rect = sdf_rect;
+    return ret;
+}
+
+bool DrawSDFShapeOutline(const Painter& painter, const FRect& rect,
+                         const Color4f& color, const MaterialClass::SDFShape shape,
+                         float line_width, float corner_radius)
+
+{
+    static std::shared_ptr<gfx::ColorClass> klass;
+    if (!klass)
+        klass = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
+
+    klass->SetBaseColor(color);
+    klass->SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+    klass->SetFlag(MaterialClass::Flags::EnableSDF, true); // enable SDF shader support
+
+    const auto& shaping_result = PerformOutlineSDFShaping(rect, shape, line_width, corner_radius);
+
+    MaterialInstance material(klass);
+    material.SetFlag(MaterialFlags::EnableSDF, true); // request to render in SDF mode
+    material.SetSDFShape(shape);
+    material.SetSDFShapeFillMode(MaterialInstance::SDFShapeFillMode::Outline);
+    material.SetSDFShapeOutlineWidth(shaping_result.outline_width);
+    material.SetSDShapeCornerRadius(shaping_result.corner_radius);
+    material.SetSDFShapeAspectRatio(shaping_result.aspect_ratio);
+
+    Transform transform;
+    transform.MoveTo(shaping_result.rect);
+    transform.Resize(shaping_result.rect);
+    return painter.Draw(gfx::Rectangle(), transform, material);
+}
+
+
+bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape, const Color4f& color,
+    float line_width, OutlineMethod method)
+{
+    // see if we can replace the shape with a built-in SDF material shape
+    // for improved smoothness.
+    if (shape.GetType() == Drawable::Type::SimpleShape &&
+        (method == OutlineMethod::SDF || method == OutlineMethod::Automatic))
+    {
+        const auto simple_shape = GetSimpleShapeType(shape);
+        if (simple_shape == SimpleShapeType::Rectangle)
+        {
+            return DrawSDFShapeOutline(painter, rect, color, MaterialClass::SDFShape::Rect, line_width, 0.05f);
+        }
+        else if (simple_shape == SimpleShapeType::RoundRect)
+        {
+            const float corner_radius = GetSimpleShapeAttribute(shape, SimpleShapeAttribute::CornerRadius);
+            return DrawSDFShapeOutline(painter, rect, color, MaterialClass::SDFShape::RoundRect, line_width, corner_radius);
+        }
+        else if (simple_shape == SimpleShapeType::Parallelogram)
+        {
+            return DrawSDFShapeOutline(painter, rect, color, MaterialClass::SDFShape::Parallelogram, line_width, 0.05f);
+        }
+        else if (simple_shape == SimpleShapeType::Circle)
+        {
+            return DrawSDFShapeOutline(painter, rect, color, MaterialClass::SDFShape::Circle, line_width, 0.05f);
+        }
+        else if (simple_shape == SimpleShapeType::Capsule)
+        {
+            const auto orientation = static_cast<SimpleShapeOrientation>(GetSimpleShapeAttribute(shape, SimpleShapeAttribute::Orientation));
+            const float radius = GetSimpleShapeAttribute(shape, SimpleShapeAttribute::CornerRadius);
+
+            if (orientation == SimpleShapeOrientation::Horizontal)
+                return DrawSDFShapeOutline(painter, rect, color, MaterialClass::SDFShape::HorizontalCapsule, line_width, radius);
+            else if (orientation == SimpleShapeOrientation::Vertical)
+                return DrawSDFShapeOutline(painter, rect, color, MaterialClass::SDFShape::VerticalCapsule, line_width, radius);
+        }
+    }
+
     return DrawShapeOutline(painter, rect, shape, MakeMaterial(color), line_width);
 }
-bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
-                      const Material& material, float line_width)
+bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape, const Material& material, float line_width)
 {
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
     const auto x = rect.GetX();
     const auto y = rect.GetY();
-
-    if (shape.GetType() == Drawable::Type::SimpleShape && line_width < 10.0f)
-    {
-        if (GetSimpleShapeType(shape) == SimpleShapeType::Rectangle)
-        {
-            const auto lw50  = line_width * 0.5f;
-            const auto lw100 = line_width;
-
-            LineBatch2D batch;
-            batch.AddLine(x, y+lw50, x+width, y+lw50);
-            batch.AddLine(x, y+height-lw50, x+width, y+height-lw50);
-
-            batch.AddLine(x+lw50, y+lw50, x+lw50, y+height);
-            batch.AddLine(x+width-lw50, y+lw50, x+width-lw50, y+height);
-
-            gfx::Transform transform;
-            return painter.Draw(batch, transform, material,
-                                Painter::LegacyDrawState(line_width));
-        }
-    }
 
     // todo: this algorithm produces crappy results with diagonal lines
     // for example when drawing right angled triangle even with line widths > 1.0f

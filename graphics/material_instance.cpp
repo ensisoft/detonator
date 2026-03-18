@@ -248,6 +248,35 @@ bool MaterialInstance::GetValue(const std::string& key, RuntimeValue* value) con
     return false;
 }
 
+void MaterialInstance::SetSDFShape(SDFShape shape)
+{
+    ASSERT(mClass->TestFlag(MaterialClass::Flags::EnableSDF));
+    mUniforms["kSdfShape"] = static_cast<int>(shape);
+}
+void MaterialInstance::SetSDFShapeFillMode(SDFShapeFillMode fill_mode)
+{
+    ASSERT(mClass->TestFlag(MaterialClass::Flags::EnableSDF));
+    mUniforms["kSdfFillMode"] = static_cast<int>(fill_mode);
+}
+
+void MaterialInstance::SetSDFShapeOutlineWidth(float outline_width)
+{
+    ASSERT(mClass->TestFlag(MaterialClass::Flags::EnableSDF));
+    mUniforms["kSdfOutlineWidth"] = outline_width;
+}
+
+void MaterialInstance::SetSDShapeCornerRadius(float corner_radius)
+{
+    ASSERT(mClass->TestFlag(MaterialClass::Flags::EnableSDF));
+    mUniforms["kSdfCornerRadius"] = corner_radius;
+}
+
+void MaterialInstance::SetSDFShapeAspectRatio(float aspect_ratio)
+{
+    ASSERT(mClass->TestFlag(MaterialClass::Flags::EnableSDF));
+    mUniforms["kSdfAspectRatio"] = aspect_ratio;
+}
+
 ShaderSource MaterialInstance::GetShader(const Environment& env, const Device& device) const
 {
     MaterialClass::State state;
@@ -261,8 +290,8 @@ ShaderSource MaterialInstance::GetShader(const Environment& env, const Device& d
 
 void MaterialInstance::InitFlags() noexcept
 {
-    SetFlag(Flags::EnableBloom, mClass->TestFlag(MaterialClass::Flags::EnableBloom));
-    SetFlag(Flags::EnableLight, mClass->TestFlag(MaterialClass::Flags::EnableLight));
+    SetFlag(Flags::EnableBloom, mClass->TestFlag(MaterialClass::Flags::Bloom));
+    SetFlag(Flags::EnableLight, mClass->TestFlag(MaterialClass::Flags::Lighting));
 }
 
 std::unique_ptr<Material> MaterialInstance::Clone() const

@@ -21,6 +21,9 @@
 #include <string>
 #include <memory>
 
+#include "material.h"
+#include "material_class.h"
+#include "material_class.h"
 #include "graphics/types.h"
 #include "graphics/color4f.h"
 
@@ -65,6 +68,7 @@ class Material;
 class Drawable;
 class IBitmap;
 class MaterialClass;
+class MaterialInstance;
 class TextureSource;
 
 // Draw text inside the given rectangle.
@@ -84,6 +88,10 @@ enum class ButtonIcon {
 
 enum class BlendMode {
     Opaque, Alpha
+};
+
+enum class OutlineMethod {
+    Automatic, StencilBuffer, SDF
 };
 
 bool DrawButtonIcon(const Painter& painter, const FRect& rect, const Color4f& color, ButtonIcon btn);
@@ -116,10 +124,22 @@ bool FillShape(Painter& painter, const FRect& rect, const Drawable& shape, const
 bool DrawRectOutline(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
 bool DrawRectOutline(Painter& painter, const FRect& rect, const Material& material, float line_width = 1.0f);
 
-bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
-                      const Color4f& color, float line_width = 1.0f);
-bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
-                      const Material& material, float line_width = 1.0f);
+struct SDFShape {
+    float outline_width;
+    float corner_radius;
+    float aspect_ratio;
+    FRect rect;
+};
+
+SDFShape PerformOutlineSDFShaping(const FRect& rect, MaterialClass::SDFShape shape, float outline_width, float corner_radius);
+
+bool DrawSDFShapeOutline(const Painter& painter, const FRect& rect,
+                         const Color4f& color, const MaterialClass::SDFShape shape,
+                         float line_width, float corner_radius);
+
+bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape, const Color4f& color, float line_width = 1.0f,
+    OutlineMethod method = OutlineMethod::Automatic);
+bool DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape, const Material& material, float line_width = 1.0f);
 
 // Draw a line from the center of point A to the center of point B
 // using the given line width (if possible) and with the given color.

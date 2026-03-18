@@ -51,6 +51,9 @@ extern const char* fragment_texture_text_shader;
 // fragment utility
 extern const char* fragment_texture_functions;
 
+// fragment sdf
+extern const char* fragment_2d_sdf_shader;
+
 // fragment kernels
 extern const char* fragment_blur_kernel;
 

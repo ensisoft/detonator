@@ -272,6 +272,13 @@
                     </property>
                    </widget>
                   </item>
+                  <item>
+                   <widget class="QCheckBox" name="chkEnableSDF">
+                    <property name="text">
+                     <string>Enable SDF shader support</string>
+                    </property>
+                   </widget>
+                  </item>
                  </layout>
                 </widget>
                </item>
@@ -2588,6 +2595,7 @@
   <tabstop>chkBlendFrames</tabstop>
   <tabstop>chkStaticInstance</tabstop>
   <tabstop>chkEnableBloom</tabstop>
+  <tabstop>chkEnableSDF</tabstop>
   <tabstop>builtInProperties</tabstop>
   <tabstop>alphaCutoff</tabstop>
   <tabstop>baseColor</tabstop>
