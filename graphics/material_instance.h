@@ -30,6 +30,9 @@ namespace gfx
     class MaterialInstance : public Material
     {
     public:
+        using SDFShape = MaterialClass::SDFShape;
+        using SDFShapeFillMode = MaterialClass::SDFShapeFillMode;
+
         // Create new material instance based on the given material class.
         explicit MaterialInstance(std::shared_ptr<const MaterialClass> klass, double time = 0.0);
         explicit MaterialInstance(const MaterialClass& klass, double time = 0.0);
@@ -65,6 +68,12 @@ namespace gfx
         { mUniforms.clear(); }
         void SetUniforms(UniformMap uniforms) override
         { mUniforms = std::move(uniforms); }
+
+        void SetSDFShape(SDFShape shape);
+        void SetSDFShapeFillMode(SDFShapeFillMode fill_mode);
+        void SetSDFShapeOutlineWidth(float outline_width);
+        void SetSDShapeCornerRadius(float corner_radius);
+        void SetSDFShapeAspectRatio(float aspect_ratio);
 
         void SetActiveTextureMap(std::string texture_map_id)
         { SetUniform("active_texture_map", std::move(texture_map_id)); }

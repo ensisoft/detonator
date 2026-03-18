@@ -21,6 +21,7 @@
 #include "base/logging.h"
 #include "base/format.h"
 #include "base/hash.h"
+#include "base/utility.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "graphics/device.h"
@@ -53,9 +54,9 @@ MaterialClass::MaterialClass(Type type, std::string id)
   , mType(type)
 {
     mFlags.set(Flags::BlendFrames, true);
-    mFlags.set(Flags::EnableBloom, true);
-    mFlags.set(Flags::EnableLight, true);
-    mFlags.set(Flags::EnableFog,   true);
+    mFlags.set(Flags::Bloom,    true);
+    mFlags.set(Flags::Lighting, true);
+    mFlags.set(Flags::Fog,      true);
 }
 
 MaterialClass::MaterialClass(const MaterialClass& other, bool copy)
@@ -120,6 +121,7 @@ size_t MaterialClass::GetShaderHash() const
     hash = base::hash_combine(hash, mType);
     hash = base::hash_combine(hash, mShaderSrc);
     hash = base::hash_combine(hash, mShaderUri);
+    hash = base::hash_combine(hash, mFlags.test(Flags::EnableSDF));
 
     if (mType == Type::Color)
     {
@@ -303,6 +305,20 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_BLOOM", static_cast<unsigned>(MaterialFlags::EnableBloom));
     source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_LIGHT", static_cast<unsigned>(MaterialFlags::EnableLight));
     source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_FOG",   static_cast<unsigned>(MaterialFlags::EnableFog));
+    source.AddPreprocessorDefinition("MATERIAL_FLAGS_ENABLE_SDF",   static_cast<unsigned>(MaterialFlags::EnableSDF));
+
+    if (TestFlag(Flags::EnableSDF))
+    {
+        source.AddPreprocessorDefinition("ENABLE_SDF_SUPPORT");
+        source.AddPreprocessorDefinition("SDF_SHAPE_CIRCLE", static_cast<unsigned>(SDFShape::Circle));
+        source.AddPreprocessorDefinition("SDF_SHAPE_RECT",   static_cast<unsigned>(SDFShape::Rect));
+        source.AddPreprocessorDefinition("SDF_SHAPE_ROUND_RECT", static_cast<unsigned>(SDFShape::RoundRect));
+        source.AddPreprocessorDefinition("SDF_SHAPE_PARALLELOGRAM", static_cast<unsigned>(SDFShape::Parallelogram));
+        source.AddPreprocessorDefinition("SDF_SHAPE_HORIZONTAL_CAPSULE", static_cast<unsigned>(SDFShape::HorizontalCapsule));
+        source.AddPreprocessorDefinition("SDF_SHAPE_VERTICAL_CAPSULE", static_cast<unsigned>(SDFShape::VerticalCapsule));
+        source.AddPreprocessorDefinition("SDF_FILL_MODE_SOLID", static_cast<unsigned>(SDFShapeFillMode::Solid));
+        source.AddPreprocessorDefinition("SDF_FILL_MODE_OUTLINE", static_cast<unsigned>(SDFShapeFillMode::Outline));
+    }
 
     if (IsBuiltIn())
     {
@@ -345,7 +361,6 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
     else if (state.draw_category == DrawCategory::Basic)
         source.AddPreprocessorDefinition("GEOMETRY_IS_BASIC");
     else BUG("Bug on draw category");
-
 
     if (IsStatic())
     {
@@ -411,6 +426,35 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     // either the single shader implements the different render pass
     // functionality or then there are different shaders for different passes
     // program.SetUniform("kRenderPass", (int)state.renderpass);
+
+    // don't confuse this flag with the other EnableSDF flag in the class.
+    // That flag only controls whether the built-in SDF shape support is
+    // compiled in the the shader or not).
+    const auto enable_sdf_rendering = state.flags & static_cast<uint32_t>(MaterialFlags::EnableSDF);
+    const auto enable_sdf_shader_support = TestFlag(Flags::EnableSDF);
+
+    if (enable_sdf_shader_support)
+    {
+        if (enable_sdf_rendering)
+        {
+            SetSDFUniform("kSdfShape", *state.uniforms, static_cast<int>(SDFShape::Circle), program);
+            SetSDFUniform("kSdfFillMode", *state.uniforms, static_cast<int>(SDFShapeFillMode::Solid), program);
+            SetSDFUniform("kSdfOutlineWidth", *state.uniforms, 0.01f, program);
+            SetSDFUniform("kSdfCornerRadius", *state.uniforms, 0.05f, program);
+            SetSDFUniform("kSdfAspectRatio", *state.uniforms, 1.0f, program);
+        }
+        // not necessarily correct since the user might have a customized the shader source.
+        //if (mSurfaceType != SurfaceType::Transparent)
+        //    GFX_PAINT_WARN("SDF material expects transparent surface.");
+    }
+    else
+    {
+        // this is a case where the dynamic material state wishes to invoke some SDF shape
+        // rendering but the SDF support has not been turned on in the material class,
+        // which means that the SDF shader code is not built into the shader.
+        if (enable_sdf_rendering)
+            GFX_PAINT_WARN("Material class has no SDF support compiled in the shader. [name='%1']", mName);
+    }
 
     if (mType == Type::Color)
     {
@@ -581,6 +625,17 @@ bool MaterialClass::SetUniform(const char* name, const UniformMap* uniforms, con
     return false;
 }
 
+template<typename T> // static
+void MaterialClass::SetSDFUniform(const char* name, const UniformMap& uniforms, const T& backup, ProgramState& program)
+{
+    if (const auto* sdf_shape_uniform = base::SafeFind(uniforms, name))
+    {
+        if (const auto* value_ptr = std::get_if<T>(sdf_shape_uniform))
+            program.SetUniform(name, *value_ptr);
+        else GFX_PAINT_ERROR("SDF shape uniform has wrong type. [name='%1']", name);
+    } else GFX_PAINT_WARN("No such SDF uniform set. [name='%1']", name);
+}
+
 // static
 bool MaterialClass::SetUniform(const char* name, const UniformMap* uniforms, unsigned backup, ProgramState& program)
 {
@@ -640,7 +695,11 @@ bool MaterialClass::FromJson(const data::Reader& data, unsigned flags)
     ok &= data.Read("texture_mag_filter", &mTextureMagFilter);
     ok &= data.Read("texture_wrap_x",     &mTextureWrapX);
     ok &= data.Read("texture_wrap_y",     &mTextureWrapY);
-    ok &= data.Read("flags",              &mFlags);
+    ok &= data.Read("flags",              &mFlags, {
+        {Flags::Bloom,    "EnableBloom"},
+        {Flags::Lighting, "EnableLight"},
+        {Flags::Fog,      "EnableFog"}}
+    );
 
     // these member variables have been folded into the generic uniform map.
     // this is the old way they were written out and this code migrates the
@@ -1220,6 +1279,8 @@ TextureMap* MaterialClass::SelectTextureMap(const State& state) const noexcept
 
 ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& device) const
 {
+    const bool enable_sdf = TestFlag(Flags::EnableSDF);
+
     if (mType == Type::Custom)
     {
         if (!mShaderSrc.empty())
@@ -1247,8 +1308,12 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 
         ShaderSource source;
         source.SetType(ShaderSource::Type::Fragment);
+        if (enable_sdf)
+            source.LoadRawSource(glsl::fragment_2d_sdf_shader);
         source.LoadRawSource(std::string(beg, end));
         source.AddShaderSourceUri(mShaderUri);
+        if (enable_sdf)
+            source.AddShaderSourceUri("shaders/fragment_2d_sdf_shader.glsl");
         return source;
     }
 
@@ -1263,54 +1328,83 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     if (mType == Type::Color)
     {
         src.LoadRawSource(glsl::fragment_base);
+        if (enable_sdf)
+            src.LoadRawSource(glsl::fragment_2d_sdf_shader);
         src.LoadRawSource(glsl::fragment_color_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_color_shader.glsl");
+        if (enable_sdf)
+            src.AddShaderSourceUri("shaders/fragment_2d_sdf_shader.glsl");
     }
     else if (mType == Type::Gradient)
     {
         src.LoadRawSource(glsl::fragment_base);
+        if (enable_sdf)
+            src.LoadRawSource(glsl::fragment_2d_sdf_shader);
         src.LoadRawSource(glsl::fragment_gradient_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_gradient_shader.glsl");
+        if (enable_sdf)
+            src.AddShaderSourceUri("shaders/fragment_2d_sdf_shader.glsl");
     }
     else if (mType == Type::Sprite)
     {
         src.LoadRawSource(glsl::fragment_base);
         src.LoadRawSource(glsl::fragment_texture_functions);
+        if  (enable_sdf)
+            src.LoadRawSource(glsl::fragment_2d_sdf_shader);
         src.LoadRawSource(glsl::fragment_sprite_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_texture_functions.glsl");
         src.AddShaderSourceUri("shaders/fragment_sprite_shader.glsl");
+        if (enable_sdf)
+            src.AddShaderSourceUri("shaders/fragment_2d_sdf_shader.glsl");
     }
     else if (mType == Type::Texture)
     {
         src.LoadRawSource(glsl::fragment_base);
         src.LoadRawSource(glsl::fragment_texture_functions);
+        if  (enable_sdf)
+            src.LoadRawSource(glsl::fragment_2d_sdf_shader);
         src.LoadRawSource(glsl::fragment_texture_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_texture_functions.glsl");
         src.AddShaderSourceUri("shaders/fragment_texture_shader.glsl");
+        if (enable_sdf)
+            src.AddShaderSourceUri("shaders/fragment_2d_sdf_shader.glsl");
     }
     else if (mType == Type::Tilemap)
     {
         src.LoadRawSource(glsl::fragment_base);
         src.LoadRawSource(glsl::fragment_tilemap_shader);
+        if  (enable_sdf)
+            src.LoadRawSource(glsl::fragment_2d_sdf_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_tilemap_shader.glsl");
+        if (enable_sdf)
+            src.AddShaderSourceUri("shaders/fragment_2d_sdf_shader.glsl");
     }
     else if (mType == Type::Particle2D)
     {
         src.LoadRawSource(glsl::fragment_particle_2d_shader);
+        if  (enable_sdf)
+            src.LoadRawSource(glsl::fragment_2d_sdf_shader);
         src.AddShaderSourceUri("shaders/fragment_2d_particle_shader.glsl");
+        if (enable_sdf)
+            src.AddShaderSourceUri("shaders/fragment_2d_sdf_shader.glsl");
     }
     else if (mType == Type::BasicLight)
     {
         src.LoadRawSource(glsl::fragment_base);
+        if  (enable_sdf)
+            src.LoadRawSource(glsl::fragment_2d_sdf_shader);
         src.LoadRawSource(glsl::fragment_basic_light_shader);
         src.AddShaderSourceUri("shaders/fragment_shader_base.glsl");
         src.AddShaderSourceUri("shaders/fragment_basic_light_material_shader.glsl");
+        if (enable_sdf)
+            src.AddShaderSourceUri("shaders/fragment_2d_sdf_shader.glsl");
     }
+
     else BUG("Unknown material type.");
 
     if (!mShaderSrc.empty())

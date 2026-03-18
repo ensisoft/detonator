@@ -116,6 +116,10 @@ namespace gfx::glsl {
 #include "shaders/fragment_texture_functions.glsl"
     };
 
+    const char* fragment_2d_sdf_shader = {
+#include "shaders/fragment_2d_sdf_shader.glsl"
+    };
+
     const char* fragment_blur_kernel = {
 #include "shaders/fragment_blur_kernel.glsl"
     };

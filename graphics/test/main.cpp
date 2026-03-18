@@ -86,6 +86,8 @@ public:
     virtual std::string GetName() const = 0;
     virtual bool IsFeatureTest() const
     { return true; }
+    virtual bool DoesUpdate() const
+    { return true; }
     virtual void KeyDown(const wdk::WindowEventKeyDown& key)
     {}
 private:
@@ -2255,45 +2257,94 @@ private:
 class DrawShapeOutlineTest : public GraphicsTest
 {
 public:
+    DrawShapeOutlineTest(gfx::OutlineMethod method) : mMethod(method)
+    {}
     void Render(gfx::Painter& painter) override
     {
-        gfx::FRect rect(10, 10, 100, 140);
-        gfx::DrawShapeOutline(painter, rect,  gfx::Rectangle(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::RoundRectangle(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::Trapezoid(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::Parallelogram(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::RightTriangle(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::IsoscelesTriangle(), gfx::Color::DarkGreen);
-        rect.Move(10, 200);
-        gfx::DrawShapeOutline(painter, rect, gfx::Capsule(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::Circle(), gfx::Color::DarkGreen);
+        // aspect ratio 1:1
+        DrawShapeOutline(painter, gfx::FRect(10.0f, 10.0f, 100.0f, 100.0f), gfx::Rectangle());
+        DrawShapeOutline(painter, gfx::FRect(10.0f, 135.0f, 100.0f, 100.0f), gfx::RoundRectangle(0.25));
+        DrawShapeOutline(painter, gfx::FRect(10.0f, 260.0f, 100.0f, 100.0f), gfx::Circle());
+        DrawShapeOutline(painter, gfx::FRect(10.0f, 385.0f, 100.0f, 100.0f), gfx::Capsule(gfx::Capsule::Orientation::Horizontal));
+        DrawShapeOutline(painter, gfx::FRect(10.0f, 510.0f, 100.0f, 100.0f), gfx::Capsule(gfx::Capsule::Orientation::Vertical));
+        DrawShapeOutline(painter, gfx::FRect(10.0f, 635.0f, 100.0f, 100.0f), gfx::Parallelogram());
 
-        rect.Move(10, 400);
-        gfx::DrawShapeOutline(painter, rect,  gfx::Rectangle(), gfx::Color::DarkGreen, 3.0f);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::RoundRectangle(), gfx::Color::DarkGreen, 3.0f);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::Trapezoid(), gfx::Color::DarkGreen, 3.0f);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::Parallelogram(), gfx::Color::DarkGreen, 3.0f);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::RightTriangle(), gfx::Color::DarkGreen, 3.0f);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::IsoscelesTriangle(), gfx::Color::DarkGreen, 3.0f);
-        rect.Move(10, 600);
-        gfx::DrawShapeOutline(painter, rect, gfx::Capsule(), gfx::Color::DarkGreen, 3.0f);
-        rect.Translate(150, 0);
-        gfx::DrawShapeOutline(painter, rect, gfx::Circle(), gfx::Color::DarkGreen);
+        // aspect ratio 2:1
+        DrawShapeOutline(painter, gfx::FRect(135.0f, 10.0f, 200.0f, 100.0f), gfx::Rectangle());
+        DrawShapeOutline(painter, gfx::FRect(135.0f, 135.0f, 200.0f, 100.0f), gfx::RoundRectangle(0.25f));
+        DrawShapeOutline(painter, gfx::FRect(135.0f, 260.0f, 200.0f, 100.0f), gfx::Circle());
+        DrawShapeOutline(painter, gfx::FRect(135.0f, 385.0f, 200.0f, 100.0f), gfx::Capsule(gfx::Capsule::Orientation::Horizontal));
+        DrawShapeOutline(painter, gfx::FRect(135.0f, 510.0f, 200.0f, 100.0f), gfx::Capsule(gfx::Capsule::Orientation::Vertical));
+        DrawShapeOutline(painter, gfx::FRect(135.0f, 635.0f, 200.0f, 100.0f), gfx::Parallelogram());
+
+        // aspect ratio 1:2
+        DrawShapeOutline(painter, gfx::FRect(360.0f, 10.0f, 100.0f, 200.0f), gfx::Rectangle());
+        DrawShapeOutline(painter, gfx::FRect(510.0f, 10.0f, 100.0f, 200.0f), gfx::RoundRectangle(0.25f));
+        DrawShapeOutline(painter, gfx::FRect(360.0f, 250.0f, 100.0f, 200.0f), gfx::Circle());
+        DrawShapeOutline(painter, gfx::FRect(510.0f, 250.0f, 100.0f, 200.0f), gfx::Capsule(gfx::Capsule::Orientation::Horizontal));
+        DrawShapeOutline(painter, gfx::FRect(660.0f, 10.0f, 100.0f, 200.0f), gfx::Capsule(gfx::Capsule::Orientation::Vertical));
+        DrawShapeOutline(painter, gfx::FRect(800.0f, 10.0f, 100.0f, 200.0f), gfx::Parallelogram());
     }
+    void DrawShapeOutline(gfx::Painter& painter, gfx::FRect rect, const gfx::Drawable& shape) const
+    {
+        // offset a little
+        rect.Translate(20.0f,2.0f);
+
+        if (mMotion)
+        {
+            const auto t = base::GetTime();
+            const auto s = static_cast<float>(std::sin(t));
+            const auto c = static_cast<float>(std::cos(t));
+            rect.Translate(20.0f * c, 20.0f*s);
+        }
+
+        gfx::DrawShapeOutline(painter, rect, shape, gfx::Color::HotPink, mOutlineWidth, mMethod);
+        if (mBoundingBox)
+            gfx::DebugDrawRect(painter, rect, gfx::Color::Gray, 1.0f);
+    }
+
     std::string GetName() const override
-    { return "DrawShapeOutline"; }
+    {
+        if (mMethod == gfx::OutlineMethod::StencilBuffer)
+            return "StencilOutlineTest";
+        else if (mMethod == gfx::OutlineMethod::SDF)
+            return "SDFOutlineTest";
+        return "DrawShapeOutline";
+    }
+
+    void KeyDown(const wdk::WindowEventKeyDown& key) override
+    {
+        if (key.symbol == wdk::Keysym::Key1)
+            mMethod = gfx::OutlineMethod::SDF;
+        else if (key.symbol == wdk::Keysym::Key2)
+            mMethod = gfx::OutlineMethod::StencilBuffer;
+        else if (key.symbol == wdk::Keysym::Key3)
+            mMethod = gfx::OutlineMethod::Automatic;
+        else if (key.symbol == wdk::Keysym::ArrowUp)
+            mOutlineWidth += 0.5f;
+        else if (key.symbol == wdk::Keysym::ArrowDown)
+        {
+            mOutlineWidth -= 0.5f;
+            if (mOutlineWidth < 0.0f)
+                mOutlineWidth = 0.5f;
+        }
+        else if (key.symbol == wdk::Keysym::KeyB)
+            mBoundingBox = !mBoundingBox;
+        else if (key.symbol == wdk::Keysym::KeyM)
+            mMotion = !mMotion;
+
+        DEBUG("Outline hint set to %1", mMethod);
+        DEBUG("Outline width set to %1", mOutlineWidth);
+    }
+    bool DoesUpdate() const override
+    {
+        return false;
+    }
 private:
+    gfx::OutlineMethod mMethod = gfx::OutlineMethod::StencilBuffer;
+    float mOutlineWidth = 1.0f;
+    bool mBoundingBox = false;
+    bool mMotion = false;
 };
 
 class sRGBWindowTest : public GraphicsTest
@@ -4535,7 +4586,8 @@ int main(int argc, char* argv[])
     std::size_t test_index = 0;
     std::vector<std::unique_ptr<GraphicsTest>> tests;
     tests.emplace_back(new FillShapeTest);
-    tests.emplace_back(new DrawShapeOutlineTest);
+    tests.emplace_back(new DrawShapeOutlineTest(gfx::OutlineMethod::StencilBuffer));
+    tests.emplace_back(new DrawShapeOutlineTest(gfx::OutlineMethod::SDF));
     tests.emplace_back(new TransformTest);
     tests.emplace_back(new RenderTextTest);
     tests.emplace_back(new TextAlignTest("TextAlignTest", "fonts/AtariFontFullVersion.ttf", gfx::Color::DarkGray, 14));
@@ -4687,12 +4739,17 @@ int main(int argc, char* argv[])
             INFO("Running test case: '%1'", test->GetName());
             test->Start();
 
-            for (int i=0; i<3; ++i)
+            const auto loops = test->DoesUpdate() ? 3 : 1;
+
+            for (int i=0; i<loops; ++i)
             {
                 // update test in small time steps trying to avoid
                 // any simulation from becoming unstable.
-                for (int step=0; step<534; ++step)
-                    test->Update(dt);
+                if (test->DoesUpdate())
+                {
+                    for (int step=0; step<534; ++step)
+                        test->Update(dt);
+                }
 
                 gfx_device->BeginFrame();
                 gfx_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));

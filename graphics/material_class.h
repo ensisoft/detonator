@@ -123,11 +123,15 @@ namespace gfx
             // RGB values.
             PremultipliedAlpha,
             // Enable bloom output
-            EnableBloom,
+            Bloom,
             // Enable light on this material class.
-            EnableLight,
+            Lighting,
             // Enable fog on this material class.
-            EnableFog
+            Fog,
+            // Enable built-in SDF shape computation in the material shader.
+            // Which shape and how is then controlled by the SDFShape and
+            // SDFShapeFillMode uniforms.
+            EnableSDF
         };
 
         // Action to take on per particle random value. This can
@@ -149,6 +153,19 @@ namespace gfx
 
         enum class GradientType : int {
             Bilinear, Radial, Conical
+        };
+
+        enum class SDFShape : int {
+            None,
+            Circle,
+            Rect, RoundRect,
+            Parallelogram,
+            HorizontalCapsule, VerticalCapsule
+        };
+
+        enum class SDFShapeFillMode {
+            Solid,
+            Outline
         };
 
         // The current material state to apply when applying the
@@ -193,213 +210,213 @@ namespace gfx
         MaterialClass(MaterialClass&& other) noexcept;
        ~MaterialClass();
 
-        inline bool IsBuiltIn() const noexcept
+        bool IsBuiltIn() const noexcept
         { return mType != Type::Custom; }
 
         // Set the surface type of the material.
-        inline void SetSurfaceType(SurfaceType surface) noexcept
+        void SetSurfaceType(SurfaceType surface) noexcept
         { mSurfaceType = surface; }
 
         // Unsafe, but helpful for migration.
-        inline void SetType(Type type) noexcept
+        void SetType(Type type) noexcept
         { mType = type; }
 
-        inline void SetActiveTextureMap(std::string id) noexcept
+        void SetActiveTextureMap(std::string id) noexcept
         { mActiveTextureMap = std::move(id); }
         // Set the human-readable material class name.
-        inline void SetName(std::string name) noexcept
+        void SetName(std::string name) noexcept
         { mName = std::move(name); }
-        inline void SetStatic(bool on_off) noexcept
+        void SetStatic(bool on_off) noexcept
         { mFlags.set(Flags::Static, on_off); }
-        inline void SetBlendFrames(bool on_off) noexcept
+        void SetBlendFrames(bool on_off) noexcept
         { mFlags.set(Flags::BlendFrames, on_off); }
-        inline void SetTextureMinFilter(MinTextureFilter filter) noexcept
+        void SetTextureMinFilter(MinTextureFilter filter) noexcept
         { mTextureMinFilter = filter; }
-        inline void SetTextureMagFilter(MagTextureFilter filter) noexcept
+        void SetTextureMagFilter(MagTextureFilter filter) noexcept
         { mTextureMagFilter = filter; }
-        inline void SetTextureWrapX(TextureWrapping wrap) noexcept
+        void SetTextureWrapX(TextureWrapping wrap) noexcept
         { mTextureWrapX = wrap; }
-        inline void SetTextureWrapY(TextureWrapping wrap) noexcept
+        void SetTextureWrapY(TextureWrapping wrap) noexcept
         { mTextureWrapY = wrap; }
         // Set a material flag to on or off.
-        inline void SetFlag(Flags flag, bool on_off) noexcept
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
-        inline void SetShaderUri(std::string uri) noexcept
+        void SetShaderUri(std::string uri) noexcept
         { mShaderUri = std::move(uri); }
-        inline void SetShaderSrc(std::string src) noexcept
+        void SetShaderSrc(std::string src) noexcept
         { mShaderSrc = std::move(src); }
-        inline bool HasShaderUri() const noexcept
+        bool HasShaderUri() const noexcept
         { return !mShaderUri.empty(); }
-        inline bool HasShaderSrc() const noexcept
+        bool HasShaderSrc() const noexcept
         { return !mShaderSrc.empty(); }
-        inline void ClearShaderSrc() noexcept
+        void ClearShaderSrc() noexcept
         { mShaderSrc.clear(); }
-        inline void ClearShaderUri() noexcept
+        void ClearShaderUri() noexcept
         { mShaderUri.clear(); }
-        inline std::string GetActiveTextureMap() const noexcept
+        std::string GetActiveTextureMap() const noexcept
         { return mActiveTextureMap; }
         // Get the material class id.
-        inline std::string GetId() const noexcept
+        std::string GetId() const noexcept
         { return mClassId; }
         // Get the human readable material class name.
-        inline std::string GetName() const noexcept
+        std::string GetName() const noexcept
         { return mName; }
-        inline std::string GetShaderUri() const noexcept
+        std::string GetShaderUri() const noexcept
         { return mShaderUri; }
-        inline std::string GetShaderSrc() const noexcept
+        std::string GetShaderSrc() const noexcept
         { return mShaderSrc; }
         // Get the actual implementation type of the material.
-        inline Type GetType() const noexcept
+        Type GetType() const noexcept
         { return mType; }
         // Get the surface type of the material.
-        inline SurfaceType GetSurfaceType() const noexcept
+        SurfaceType GetSurfaceType() const noexcept
         { return mSurfaceType; }
         // Test a material flag. Returns true if the flag is set, otherwise false.
-        inline bool TestFlag(Flags flag) const noexcept
+        bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        inline bool PremultipliedAlpha() const noexcept
+        bool PremultipliedAlpha() const noexcept
         { return TestFlag(Flags::PremultipliedAlpha); }
-        inline bool IsStatic() const noexcept
+        bool IsStatic() const noexcept
         { return TestFlag(Flags::Static); }
-        inline bool BlendFrames() const noexcept
+        bool BlendFrames() const noexcept
         { return TestFlag(Flags::BlendFrames); }
-        inline bool HasCustomShader() const noexcept
+        bool HasCustomShader() const noexcept
         { return !mShaderSrc.empty() || !mShaderUri.empty(); }
 
-        inline bool IsSprite() const noexcept
+        bool IsSprite() const noexcept
         { return GetType() == Type::Sprite; }
 
         // Material uniform API for setting/getting "Known" uniforms.
-        inline void SetParticleRotation(ParticleRotation rotation) noexcept
+        void SetParticleRotation(ParticleRotation rotation) noexcept
         { SetUniform("kParticleRotation", static_cast<int>(rotation)); }
-        inline void SetParticleStartColor(const Color4f& color) noexcept
+        void SetParticleStartColor(const Color4f& color) noexcept
         { SetUniform("kParticleStartColor", color); }
-        inline void SetParticleEndColor(const Color4f& color) noexcept
+        void SetParticleEndColor(const Color4f& color) noexcept
         { SetUniform("kParticleEndColor", color); }
-        inline void SetParticleMidColor(const Color4f& color) noexcept
+        void SetParticleMidColor(const Color4f& color) noexcept
         { SetUniform("kParticleMidColor", color); }
-        inline void SetParticleBaseRotation(float rotation_angle) noexcept
+        void SetParticleBaseRotation(float rotation_angle) noexcept
         { SetUniform("kParticleBaseRotation", rotation_angle); }
 
-        inline void SetAmbientColor(const Color4f& color) noexcept
+        void SetAmbientColor(const Color4f& color) noexcept
         { SetUniform("kAmbientColor", color); }
-        inline void SetDiffuseColor(const Color4f& color) noexcept
+        void SetDiffuseColor(const Color4f& color) noexcept
         { SetUniform("kDiffuseColor", color); }
-        inline void SetSpecularColor(const Color4f& color) noexcept
+        void SetSpecularColor(const Color4f& color) noexcept
         { SetUniform("kSpecularColor", color); }
-        inline void SetSpecularExponent(float exponent) noexcept
+        void SetSpecularExponent(float exponent) noexcept
         { SetUniform("kSpecularExponent", exponent); }
 
-        inline void SetGradientType(GradientType gradient) noexcept
+        void SetGradientType(GradientType gradient) noexcept
         { SetUniform("kGradientType", static_cast<int>(gradient)); }
 
-        inline void SetParticleEffect(ParticleEffect action) noexcept
+        void SetParticleEffect(ParticleEffect action) noexcept
         { action == ParticleEffect::None ? DeleteUniform("kParticleEffect")
                                          : SetUniform("kParticleEffect", static_cast<int>(action)); }
-        inline void SetAlphaCutoff(float cutoff) noexcept
+        void SetAlphaCutoff(float cutoff) noexcept
         { SetUniform("kAlphaCutoff", cutoff); }
-        inline void SetGradientWeight(glm::vec2 weight) noexcept
+        void SetGradientWeight(glm::vec2 weight) noexcept
         { SetUniform("kGradientWeight", weight); }
-        inline void SetGradientGamma(float gamma) noexcept
+        void SetGradientGamma(float gamma) noexcept
         { SetUniform("kGradientGamma", gamma); }
-        inline void SetBaseColor(const Color4f& color) noexcept
+        void SetBaseColor(const Color4f& color) noexcept
         { SetColor(color, ColorIndex::BaseColor); }
-        inline void SetColor(const Color4f& color, ColorIndex index) noexcept
+        void SetColor(const Color4f& color, ColorIndex index) noexcept
         { SetUniform(GetColorUniformName(index), color); }
-        inline void SetTextureScaleX(float scale) noexcept
+        void SetTextureScaleX(float scale) noexcept
         { GetUniformValue<glm::vec2>("kTextureScale", {1.0f, 1.0f}).x = scale; }
-        inline void SetTextureScaleY(float scale) noexcept
+        void SetTextureScaleY(float scale) noexcept
         { GetUniformValue<glm::vec2>("kTextureScale", {1.0f, 1.0f}).y = scale; }
-        inline void SetTextureScale(const glm::vec2& scale) noexcept
+        void SetTextureScale(const glm::vec2& scale) noexcept
         { GetUniformValue<glm::vec2>("kTextureScale", {1.0f, 1.0f}) = scale; }
-        inline void SetTextureVelocityX(float x) noexcept
+        void SetTextureVelocityX(float x) noexcept
         { GetUniformValue<glm::vec3>("kTextureVelocity", {0.0f, 0.0f, 0.0f}).x = x; }
-        inline void SetTextureVelocityY(float y) noexcept
+        void SetTextureVelocityY(float y) noexcept
         { GetUniformValue<glm::vec3>("kTextureVelocity", {0.0f, 0.0f, 0.0f}).y = y; }
-        inline void SetTextureVelocityZ(float angle_radians) noexcept
+        void SetTextureVelocityZ(float angle_radians) noexcept
         { GetUniformValue<glm::vec3>("kTextureVelocity", {0.0f, 0.0f, 0.0f}).z = angle_radians; }
-        inline void SetTextureRotation(float angle_radians) noexcept
+        void SetTextureRotation(float angle_radians) noexcept
         { GetUniformValue<float>("kTextureRotation", 0.0f) = angle_radians; }
-        inline void SetTextureVelocity(const glm::vec2& linear, float angular) noexcept
+        void SetTextureVelocity(const glm::vec2& linear, float angular) noexcept
         { GetUniformValue<glm::vec3>("kTextureVelocity", {0.0f, 0.0f, 0.0f}) = glm::vec3(linear, angular); }
-        inline void SetTileSize(const glm::vec2& size) noexcept
+        void SetTileSize(const glm::vec2& size) noexcept
         { GetUniformValue<glm::vec2>("kTileSize", {0.0f, 0.0f}) = size; }
-        inline void SetTileOffset(const glm::vec2& offset) noexcept
+        void SetTileOffset(const glm::vec2& offset) noexcept
         { GetUniformValue<glm::vec2>("kTileOffset", {0.0, 0.0f}) = offset; }
-        inline void SetTilePadding(const glm::vec2& padding) noexcept
+        void SetTilePadding(const glm::vec2& padding) noexcept
         { GetUniformValue<glm::vec2>("kTilePadding", {0.0f, 0.0f}) = padding; }
 
-        inline GradientType GetGradientType() const noexcept
+        GradientType GetGradientType() const noexcept
         { return static_cast<GradientType>(GetUniformValue("kGradientType", static_cast<int>(GradientType::Bilinear))); }
 
-        inline Color4f GetParticleStartColor() const noexcept
+        Color4f GetParticleStartColor() const noexcept
         { return GetUniformValue<Color4f>("kParticleStartColor", Color::White); }
-        inline Color4f GetParticleEndColor() const noexcept
+        Color4f GetParticleEndColor() const noexcept
         { return GetUniformValue<Color4f>("kParticleEndColor", Color::White); }
-        inline Color4f GetParticleMidColor() const noexcept
+        Color4f GetParticleMidColor() const noexcept
         { return GetUniformValue<Color4f>("kParticleMidColor", Color::White); }
 
-        inline ParticleRotation GetParticleRotation() const noexcept
+        ParticleRotation GetParticleRotation() const noexcept
         { return static_cast<ParticleRotation>(GetUniformValue("kParticleRotation", static_cast<int>(ParticleRotation::None))); }
-        inline float GetParticleBaseRotation() const noexcept
+        float GetParticleBaseRotation() const noexcept
         { return GetUniformValue<float>("kParticleBaseRotation", 0.0f); }
 
-        inline float GetGradientGamma() const noexcept
+        float GetGradientGamma() const noexcept
         { return GetUniformValue<float>("kGradientGamma", 1.0); }
 
-        inline float GetAlphaCutoff() const noexcept
+        float GetAlphaCutoff() const noexcept
         { return GetUniformValue<float>("kAlphaCutoff", -1.0f); }
-        inline Color4f GetColor(ColorIndex index) const noexcept
+        Color4f GetColor(ColorIndex index) const noexcept
         { return GetUniformValue<Color4f>(GetColorUniformName(index), Color::White); }
-        inline Color4f GetBaseColor() const noexcept
+        Color4f GetBaseColor() const noexcept
         { return GetColor(ColorIndex::BaseColor); }
-        inline glm::vec2 GetGradientWeight() const noexcept
+        glm::vec2 GetGradientWeight() const noexcept
         { return GetUniformValue<glm::vec2>("kGradientWeight", {0.5f, 0.5f}); }
-        inline float GetTextureScaleX() const noexcept
+        float GetTextureScaleX() const noexcept
         { return GetTextureScale().x; }
-        inline float GetTextureScaleY() const noexcept
+        float GetTextureScaleY() const noexcept
         { return GetTextureScale().y; }
-        inline glm::vec2 GetTextureScale() const noexcept
+        glm::vec2 GetTextureScale() const noexcept
         { return GetUniformValue<glm::vec2>("kTextureScale", {1.0f, 1.0f}); }
-        inline float GetTextureVelocityX() const noexcept
+        float GetTextureVelocityX() const noexcept
         { return GetTextureVelocity().x; }
-        inline float GetTextureVelocityY() const noexcept
+        float GetTextureVelocityY() const noexcept
         { return GetTextureVelocity().y; }
-        inline float GetTextureVelocityZ() const noexcept
+        float GetTextureVelocityZ() const noexcept
         { return GetTextureVelocity().z; }
-        inline glm::vec3 GetTextureVelocity() const noexcept
+        glm::vec3 GetTextureVelocity() const noexcept
         { return GetUniformValue<glm::vec3>("kTextureVelocity", {0.0f, 0.0f, 0.0f}); }
-        inline float GetTextureRotation() const noexcept
+        float GetTextureRotation() const noexcept
         { return GetUniformValue<float>("kTextureRotation", 0.0f); }
-        inline glm::vec2 GetTileSize() const noexcept
+        glm::vec2 GetTileSize() const noexcept
         { return GetUniformValue<glm::vec2>("kTileSize", {0.0f, 0.0f}); }
-        inline glm::vec2 GetTileOffset() const noexcept
+        glm::vec2 GetTileOffset() const noexcept
         { return GetUniformValue<glm::vec2>("kTileOffset", {0.0f, 0.0f}); }
-        inline glm::vec2 GetTilePadding() const noexcept
+        glm::vec2 GetTilePadding() const noexcept
         { return GetUniformValue<glm::vec2>("kTilePadding", {0.0f, 0.0f}); }
-        inline ParticleEffect GetParticleEffect() const noexcept
+        ParticleEffect GetParticleEffect() const noexcept
         { return static_cast<ParticleEffect>(GetUniformValue("kParticleEffect", 0)); }
 
-        inline Color4f GetAmbientColor() const noexcept
+        Color4f GetAmbientColor() const noexcept
         { return GetUniformValue<Color4f>("kAmbientColor", gfx::Color::Gray); }
-        inline Color4f GetDiffuseColor() const noexcept
+        Color4f GetDiffuseColor() const noexcept
         { return GetUniformValue<Color4f>("kDiffuseColor", gfx::Color::Gray); }
-        inline Color4f GetSpecularColor() const noexcept
+        Color4f GetSpecularColor() const noexcept
         { return GetUniformValue<Color4f>("kSpecularColor", gfx::Color::White); }
-        inline float GetSpecularExponent() const noexcept
+        float GetSpecularExponent() const noexcept
         { return GetUniformValue<float>("kSpecularExponent", 4.0f); }
 
 
-        inline MinTextureFilter GetTextureMinFilter() const noexcept
+        MinTextureFilter GetTextureMinFilter() const noexcept
         { return mTextureMinFilter; }
-        inline MagTextureFilter GetTextureMagFilter() const noexcept
+        MagTextureFilter GetTextureMagFilter() const noexcept
         { return mTextureMagFilter; }
-        inline TextureWrapping  GetTextureWrapX() const noexcept
+        TextureWrapping  GetTextureWrapX() const noexcept
         { return mTextureWrapX; }
-        inline TextureWrapping GetTextureWrapY() const noexcept
+        TextureWrapping GetTextureWrapY() const noexcept
         { return mTextureWrapY; }
 
-        inline void SetUniform(const std::string& name, const Uniform& value) noexcept
+        void SetUniform(const std::string& name, const Uniform& value) noexcept
         { mUniforms[name] = value; }
         template<typename T>
         T* FindUniformValue(const std::string& name) noexcept
@@ -434,7 +451,7 @@ namespace gfx
             return init;
         }
         template<typename T>
-        inline bool CheckUniformType(const std::string& name) const noexcept
+        bool CheckUniformType(const std::string& name) const noexcept
         {
             if (const auto* ptr = base::SafeFind(mUniforms, name)) {
                 return std::holds_alternative<T>(*ptr);
@@ -442,11 +459,11 @@ namespace gfx
             return false;
         }
 
-        inline void DeleteUniforms() noexcept
+        void DeleteUniforms() noexcept
         { mUniforms.clear(); }
-        inline void DeleteUniform(const std::string& name) noexcept
+        void DeleteUniform(const std::string& name) noexcept
         { mUniforms.erase(name); }
-        inline bool HasUniform(const std::string& name) const noexcept
+        bool HasUniform(const std::string& name) const noexcept
         { return base::SafeFind(mUniforms, name) != nullptr; }
         template<typename T>
         bool HasUniform(const std::string& name) const noexcept
@@ -459,7 +476,7 @@ namespace gfx
         { return mUniforms; }
 
         // Get the number of material maps in the material class.
-        inline unsigned GetNumTextureMaps() const  noexcept
+        unsigned GetNumTextureMaps() const  noexcept
         { return mTextureMaps.size(); }
         // Get a texture map at the given index.
         const TextureMap* GetTextureMap(unsigned index) const noexcept
@@ -468,13 +485,13 @@ namespace gfx
         inline TextureMap* GetTextureMap(unsigned index) noexcept
         { return base::SafeIndex(mTextureMaps, index).get(); }
         // Delete the texture map at the given index.
-        inline void DeleteTextureMap(unsigned index) noexcept
+        void DeleteTextureMap(unsigned index) noexcept
         { base::SafeErase(mTextureMaps, index); }
-        inline void SetNumTextureMaps(unsigned count)
+        void SetNumTextureMaps(unsigned count)
         { mTextureMaps.resize(count); }
-        inline void SetTextureMap(unsigned index, std::unique_ptr<TextureMap> map) noexcept
+        void SetTextureMap(unsigned index, std::unique_ptr<TextureMap> map) noexcept
         { base::SafeIndex(mTextureMaps, index) = std::move(map); }
-        inline void SetTextureMap(unsigned index, TextureMap map) noexcept
+        void SetTextureMap(unsigned index, TextureMap map) noexcept
         { base::SafeIndex(mTextureMaps, index) = std::make_unique<TextureMap>(std::move(map)); }
 
         std::string GetShaderName(const State& state) const noexcept;
@@ -547,6 +564,9 @@ namespace gfx
     private:
         template<typename T>
         static bool SetUniform(const char* name, const UniformMap* uniforms, const T& backup, ProgramState& program);
+
+        template<typename T>
+        static void SetSDFUniform(const char* name, const UniformMap& uniforms, const T& backup, ProgramState& program);
 
         static bool SetUniform(const char* name, const UniformMap* uniforms, unsigned backup, ProgramState& program);
 
