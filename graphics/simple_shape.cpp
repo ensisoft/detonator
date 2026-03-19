@@ -1437,6 +1437,25 @@ bool SimpleShapeClass::FromJson(const data::Reader& data)
     return ok;
 }
 
+float SimpleShapeClass::GetShapeAttribute(ShapeAttribute attribute) const noexcept
+{
+    if (attribute == ShapeAttribute::CornerRadius)
+    {
+        if (const auto* p = std::get_if<detail::RoundRectShapeArgs>(&mArgs))
+            return p->corner_radius;
+        else if (const auto* p = std::get_if<detail::CapsuleArgs>(&mArgs))
+            return p->radius;
+
+        BUG("No such simple shape attribute");
+    }
+    else if (attribute == ShapeAttribute::Orientation)
+    {
+        ASSERT(std::holds_alternative<detail::CapsuleArgs>(mArgs));
+        return static_cast<float>(std::get<detail::CapsuleArgs>(mArgs).direction);
+    }
+    return 0.0f;
+}
+
 bool SimpleShapeInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
 {
     unsigned flags = 0;
@@ -1699,6 +1718,25 @@ Drawable::Usage SimpleShape::GetGeometryUsage() const
 SpatialMode SimpleShape::GetSpatialMode() const
 {
     return GetSimpleShapeSpatialMode(mShape);
+}
+
+float SimpleShape::GetShapeAttribute(ShapeAttribute attribute) const noexcept
+{
+    if (attribute == ShapeAttribute::CornerRadius)
+    {
+        if (const auto* p = std::get_if<detail::RoundRectShapeArgs>(&mArgs))
+            return p->corner_radius;
+        else if (const auto* p = std::get_if<detail::CapsuleArgs>(&mArgs))
+            return p->radius;
+
+        BUG("No such simple shape attribute");
+    }
+    else if (attribute == ShapeAttribute::Orientation)
+    {
+        ASSERT(std::holds_alternative<detail::CapsuleArgs>(mArgs));
+        return static_cast<float>(std::get<detail::CapsuleArgs>(mArgs).direction);
+    }
+    return 0.0f;
 }
 
 

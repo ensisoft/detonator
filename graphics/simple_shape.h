@@ -64,6 +64,16 @@ namespace gfx
         Triangle
     };
 
+    enum class SimpleShapeAttribute {
+        // applicable to round rect and capsule
+        CornerRadius,
+        Orientation
+    };
+
+    enum class SimpleShapeOrientation {
+        Horizontal, Vertical
+    };
+
     SpatialMode GetSimpleShapeSpatialMode(SimpleShapeType shape);
 
     namespace detail {
@@ -81,9 +91,7 @@ namespace gfx
         };
 
         struct CapsuleArgs {
-            enum class Direction {
-                Horizontal, Vertical
-            };
+            using Direction = SimpleShapeOrientation;
             unsigned slices = 50;
             float radius = 0.25f;
             Direction direction = Direction::Horizontal;
@@ -193,6 +201,7 @@ namespace gfx
     public:
         using Style = SimpleShapeStyle;
         using Shape = SimpleShapeType;
+        using ShapeAttribute = SimpleShapeAttribute;
 
         SimpleShapeClass() = default;
         explicit SimpleShapeClass(SimpleShapeType shape, detail::SimpleShapeArgs args, std::string id, std::string name) noexcept
@@ -230,6 +239,7 @@ namespace gfx
         SpatialMode GetSpatialMode() const override;;
         void IntoJson(data::Writer& data) const override;
         bool FromJson(const data::Reader& data) override;
+        float GetShapeAttribute(ShapeAttribute attribute) const noexcept;
     private:
         std::string mId;
         std::string mName;
@@ -324,6 +334,7 @@ namespace gfx
         using Class = SimpleShapeClass;
         using Shape = SimpleShapeClass::Shape;
         using Style = SimpleShapeClass::Style;
+        using ShapeAttribute = SimpleShapeClass::ShapeAttribute;
 
         explicit SimpleShapeInstance(std::shared_ptr<const Class> klass, Style style = Style::Solid) noexcept
           : mClass(std::move(klass))
@@ -358,6 +369,8 @@ namespace gfx
         { return mStyle; }
         void SetStyle(Style style) noexcept
         { mStyle = style; }
+        float GetShapeAttribute(ShapeAttribute attribute) const noexcept
+        { return mClass->GetShapeAttribute(attribute); }
     private:
         bool ConstructShardMesh(const Environment& env, Device& device, Geometry::CreateArgs& create,
             unsigned mesh_subdivision_count, bool discard_skinny_slivers) const;
@@ -374,6 +387,8 @@ namespace gfx
     public:
         using Shape = SimpleShapeType;
         using Style = SimpleShapeStyle;
+        using ShapeAttribute = SimpleShapeAttribute;
+
         explicit SimpleShape(SimpleShapeType shape, Style style = Style::Solid) noexcept
           : mShape(shape)
           , mStyle(style)
@@ -401,6 +416,8 @@ namespace gfx
         { return mStyle; }
         void SetStyle(Style style) noexcept
         { mStyle = style; }
+
+        float GetShapeAttribute(ShapeAttribute attribute) const noexcept;
     private:
         SimpleShapeType mShape;
         detail::SimpleShapeArgs mArgs;
@@ -556,7 +573,6 @@ namespace gfx
     using SectorInstance = SimpleShapeInstance;
     using Sector         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Sector>;
 
-
     inline bool Is3DShape(const SimpleShapeType shape) noexcept
     {
         return GetSimpleShapeSpatialMode(shape) == SpatialMode::True3D;
@@ -573,7 +589,15 @@ namespace gfx
         if (const auto* ptr = dynamic_cast<const SimpleShape*>(&drawable))
             return ptr->GetShape();
         BUG("Not a simple shape!");
-        return SimpleShapeType::Rectangle;
+    }
+
+    inline float GetSimpleShapeAttribute(const Drawable& drawable, SimpleShapeAttribute attribute) noexcept
+    {
+        if (const auto* ptr = dynamic_cast<const SimpleShapeInstance*>(&drawable))
+            return ptr->GetShapeAttribute(attribute);
+        else if (const auto* ptr = dynamic_cast<const SimpleShape*>(&drawable))
+            return ptr->GetShapeAttribute(attribute);
+        BUG("Not a simple shape.");
     }
 
 } // namespace
