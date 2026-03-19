@@ -340,6 +340,23 @@ namespace base
     class Rect
     {
     public:
+        struct AspectRatio {
+            T width = T();
+            T height = T();
+            AspectRatio(T width, T height) : width(width), height(height)
+            {}
+            float GetAspectRatio() const noexcept
+            { return static_cast<float>(width) / static_cast<float>(height); }
+            operator float() const noexcept
+            { return GetAspectRatio(); }
+            bool IsLandscape() const noexcept
+            { return width > height; }
+            bool IsPortrait() const noexcept
+            { return width < height; }
+            bool IsSQuare() const noexcept
+            { return !IsLandscape() && !IsPortrait(); }
+        };
+
         using PointT = Point<T>;
         using SizeT  = Size<T>;
 
@@ -382,34 +399,43 @@ namespace base
           , mHeight(max.GetY() -min.GetY())
         {}
 
-        inline T GetHeight() const noexcept
+        AspectRatio GetAspectRatio() const noexcept
+        { return { mWidth, mHeight }; }
+        T GetHeight() const noexcept
         { return mHeight; }
-        inline T GetWidth() const noexcept
+        T GetWidth() const noexcept
         { return mWidth; }
-        inline T GetX() const noexcept
+        T GetX() const noexcept
         { return mX; }
-        inline T GetY() const noexcept
+        T GetY() const noexcept
         { return mY; }
-        inline T GetMinX() const noexcept
+        T GetMinX() const noexcept
         { return mX; }
-        inline T GetMaxX() const noexcept
+        T GetMaxX() const noexcept
         { return mX + mWidth; }
-        inline T GetMinY() const noexcept
+        T GetMinY() const noexcept
         { return mY; }
-        inline T GetMaxY() const noexcept
+        T GetMaxY() const noexcept
         { return mY + mHeight; }
-        inline Point<T> GetPosition() const noexcept
+        Point<T> GetPosition() const noexcept
         { return {mX, mY}; }
-        inline Size<T> GetSize() const noexcept
+        Size<T> GetSize() const noexcept
         { return {mWidth, mHeight}; }
-        inline void SetX(T value) noexcept
+        void SetX(T value) noexcept
         { mX = value; }
-        inline void SetY(T value) noexcept
+        void SetY(T value) noexcept
         { mY = value; }
-        inline void SetWidth(T width) noexcept
+        void SetWidth(T width) noexcept
         { mWidth = width; }
-        inline void SetHeight(T height) noexcept
+        void SetHeight(T height) noexcept
         { mHeight = height; }
+
+        void Reshape(T height, AspectRatio aspect_ratio) noexcept
+        {
+            mHeight = height;
+            mWidth = height * aspect_ratio.GetAspectRatio();
+        }
+
         void Resize(T width, T height) noexcept
         {
             mWidth = width;
