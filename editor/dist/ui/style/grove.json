@@ -1,4 +1,8 @@
 {
+  "config": {
+    "outline-method": "Automatic"
+  },
+
   "animations": [
     {
       "key": "push-button/idle",

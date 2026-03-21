@@ -125,6 +125,10 @@ namespace engine
     };
 
     namespace detail {
+        enum class UIOutlineMethod {
+            Automatic, SDF, Stencil
+        };
+
         // Null material is used to indicate the *intended* absence of a material.
         class UINullMaterial : public UIMaterial
         {
@@ -483,6 +487,8 @@ namespace engine
     class UIStyleFile
     {
     public:
+        using OutlineMethod = detail::UIOutlineMethod;
+
         bool LoadStyle(const nlohmann::json& json);
         bool LoadStyle(const EngineData& data);
         void SaveStyle(nlohmann::json& json) const;
@@ -490,9 +496,9 @@ namespace engine
         std::unordered_map<std::string, UIProperty::ValueType> mProperties;
         std::unordered_map<std::string, std::unique_ptr<UIMaterial>> mMaterials;
         std::unordered_map<std::string, std::vector<UIStyleAnimation>> mAnimations;
+        OutlineMethod mOutlineMethod = OutlineMethod::Automatic;
         friend class UIStyle;
     };
-
 
     // Style resolves generic and widget specific material references
     // as well as generic and widget specific properties to actual
@@ -500,6 +506,8 @@ namespace engine
     class UIStyle
     {
     public:
+        using OutlineMethod = detail::UIOutlineMethod;
+
         using WidgetId = uik::Painter::WidgetId;
         using MaterialClass = std::shared_ptr<const gfx::MaterialClass>;
 
@@ -607,6 +615,13 @@ namespace engine
         void ApplyStyleAnimation(const std::string& key, const gfx::FRect& widget_rect,
                                  gfx::Transform* transform, const double time) const;
 
+        auto GetOutlineMethod() const noexcept
+        {
+            if (mStyleFile)
+                return mStyleFile->mOutlineMethod;
+            return mOutlineMethod;
+        }
+
     private:
         const ClassLibrary* mClassLib = nullptr;
         const Loader* mLoader = nullptr;
@@ -614,6 +629,7 @@ namespace engine
         std::unordered_map<std::string, UIProperty::ValueType> mProperties;
         std::unordered_map<std::string, std::unique_ptr<UIMaterial>> mMaterials;
         std::unordered_map<std::string, std::vector<UIStyleAnimation>> mAnimations;
+        OutlineMethod mOutlineMethod = OutlineMethod::Automatic;
     };
 
     // Implementation of ui kit painter that uses the graphics/
@@ -622,6 +638,9 @@ namespace engine
     class UIPainter : public uik::Painter
     {
     public:
+        using OutlineMethod = UIStyle::OutlineMethod;
+        using WidgetShape   = UIStyle::WidgetShape;
+
         UIPainter() = default;
         UIPainter(UIStyle* style, gfx::Painter* painter)
                 : mStyle(style)
@@ -708,9 +727,13 @@ namespace engine
         void DrawShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
                        float corner_radius, Orientation orientation = Orientation::Horizontal,
                        const gfx::Transform* transform = nullptr) const;
-        void DrawBorder(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
+        void DrawBorder(const gfx::FRect& rect, gfx::Material& material, UIStyle::WidgetShape shape,
                         float thickness, float corner_radius, Orientation orientation = Orientation::Horizontal,
                         const gfx::Transform* transform = nullptr) const;
+        OutlineMethod ChooseBorderOutlineMethod(const gfx::FRect& rect, const gfx::Material& material,
+                                                WidgetShape shape, Orientation orientation,
+                                                float corner_radius, float outline_thickness,
+                                                const gfx::Transform* transform = nullptr) const;
 
         void ConfigureMaterial(const PaintStruct& ps, gfx::Material* material) const;
 
