@@ -91,10 +91,10 @@ namespace gfx
         };
 
         struct CapsuleArgs {
-            using Direction = SimpleShapeOrientation;
+            using Orientation = SimpleShapeOrientation;
             unsigned slices = 50;
             float radius = 0.25f;
-            Direction direction = Direction::Horizontal;
+            Orientation orientation = Orientation::Horizontal;
         };
 
         struct SectorShapeArgs {
@@ -251,7 +251,7 @@ namespace gfx
         template<SimpleShapeType type>
         struct SimpleShapeClassTypeShim : public SimpleShapeClass {
             explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
-                                     std::string name = "") noexcept
+                                              std::string name = "") noexcept
               : SimpleShapeClass(type, std::monostate(), std::move(id), std::move(name))
             {}
         };
@@ -260,10 +260,10 @@ namespace gfx
         struct SimpleShapeClassTypeShim<SimpleShapeType::Capsule> : public SimpleShapeClass {
             explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
                                               std::string name = "",
-                                              CapsuleArgs::Direction direction = CapsuleArgs::Direction::Horizontal,
+                                              CapsuleArgs::Orientation orientation = CapsuleArgs::Orientation::Horizontal,
                                               unsigned slices = 50,
                                               float radius = 0.25f) noexcept
-            : SimpleShapeClass(SimpleShapeType::Capsule, CapsuleArgs { slices, radius, direction }, std::move(id), std::move(name))
+            : SimpleShapeClass(SimpleShapeType::Capsule, CapsuleArgs { slices, radius, orientation }, std::move(id), std::move(name))
             {}
         };
 
@@ -279,8 +279,8 @@ namespace gfx
         template<>
         struct SimpleShapeClassTypeShim<SimpleShapeType::Sector> : public SimpleShapeClass {
             explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
-                                     std::string name = "",
-                                     float fill_percentage = 0.25f) noexcept
+                                              std::string name = "",
+                                              float fill_percentage = 0.25f) noexcept
               : SimpleShapeClass(SimpleShapeType::Sector, SectorShapeArgs{fill_percentage}, std::move(id), std::move(name))
             {}
         };
@@ -288,8 +288,8 @@ namespace gfx
         template<>
         struct SimpleShapeClassTypeShim<SimpleShapeType::RoundRect> : public SimpleShapeClass {
             explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
-                                     std::string name = "",
-                                     float corner_radius = 0.05f) noexcept
+                                              std::string name = "",
+                                              float corner_radius = 0.05f) noexcept
               : SimpleShapeClass(SimpleShapeType::RoundRect, RoundRectShapeArgs{corner_radius}, std::move(id), std::move(name))
             {}
         };
@@ -297,8 +297,8 @@ namespace gfx
         template<>
         struct SimpleShapeClassTypeShim<SimpleShapeType::Cylinder> : public SimpleShapeClass {
             explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
-                                     std::string name = "",
-                                     unsigned  slices = 100) noexcept
+                                              std::string name = "",
+                                              unsigned  slices = 100) noexcept
               : SimpleShapeClass(SimpleShapeType::Cylinder, CylinderShapeArgs{slices}, std::move(id), std::move(name))
             {}
         };
@@ -306,8 +306,8 @@ namespace gfx
         template<>
         struct SimpleShapeClassTypeShim<SimpleShapeType::Cone> : public SimpleShapeClass {
             explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
-                                     std::string name = "",
-                                     unsigned  slices = 100) noexcept
+                                              std::string name = "",
+                                              unsigned  slices = 100) noexcept
                     : SimpleShapeClass(SimpleShapeType::Cone, ConeShapeArgs{slices}, std::move(id), std::move(name))
             {}
         };
@@ -315,8 +315,8 @@ namespace gfx
         template<>
         struct SimpleShapeClassTypeShim<SimpleShapeType::Sphere> : public SimpleShapeClass {
             explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
-                                     std::string name = "",
-                                     unsigned  slices = 100) noexcept
+                                              std::string name = "",
+                                              unsigned  slices = 100) noexcept
                     : SimpleShapeClass(SimpleShapeType::Sphere, SphereShapeArgs{slices}, std::move(id), std::move(name))
             {}
         };
@@ -439,10 +439,13 @@ namespace gfx
         template<>
         struct SimpleShapeInstanceTypeShim<SimpleShapeType::Capsule> : public SimpleShape
         {
-            using Direction = CapsuleArgs::Direction;
+            using Orientation = CapsuleArgs::Orientation;
             explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid,
-                CapsuleArgs::Direction direction = CapsuleArgs::Direction::Horizontal, unsigned slices = 50, float radius = 0.25f) noexcept
-            : SimpleShape(SimpleShapeType::Capsule, CapsuleArgs { slices, radius, direction }, style)
+                Orientation orientation = Orientation::Horizontal, unsigned slices = 50, float radius = 0.25f) noexcept
+            : SimpleShape(SimpleShapeType::Capsule, CapsuleArgs { slices, radius, orientation }, style)
+            {}
+            explicit SimpleShapeInstanceTypeShim(Orientation orientation, float radius = 0.25f, unsigned slices = 50, Style style = Style::Solid) noexcept
+            : SimpleShape(SimpleShapeType::Capsule, CapsuleArgs { slices, radius, orientation}, style)
             {}
         };
 
@@ -468,6 +471,9 @@ namespace gfx
         {
             explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid, float corner_radius = 0.05f) noexcept
               : SimpleShape(SimpleShapeType::RoundRect, RoundRectShapeArgs{corner_radius}, style)
+            {}
+            explicit SimpleShapeInstanceTypeShim(float corner_radius, Style style = Style::Solid) noexcept
+            : SimpleShape(SimpleShapeType::RoundRect, RoundRectShapeArgs{corner_radius}, style)
             {}
         };
 

@@ -2384,13 +2384,13 @@ void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material,
     if (shape == UIStyle::WidgetShape::Rectangle)
         pass.Draw(gfx::Rectangle(), transform, material);
     else if (shape == UIStyle::WidgetShape::RoundRect)
-        pass.Draw(gfx::RoundRectangle(gfx::RoundRectangle::Style::Solid, corner_radius), transform, material);
+        pass.Draw(gfx::RoundRectangle(corner_radius), transform, material);
     else if (shape == UIStyle::WidgetShape::Circle)
         pass.Draw(gfx::Circle(), transform, material);
     else if (shape == UIStyle::WidgetShape::Capsule && orientation == Orientation::Horizontal)
-        pass.Draw(gfx::Capsule(gfx::Capsule::Style::Solid, gfx::Capsule::Direction::Horizontal), transform, material);
+        pass.Draw(gfx::Capsule(gfx::Capsule::Orientation::Horizontal), transform, material);
     else if (shape == UIStyle::WidgetShape::Capsule && orientation == Orientation::Vertical)
-        pass.Draw(gfx::Capsule(gfx::Capsule::Style::Solid, gfx::Capsule::Direction::Vertical), transform, material);
+        pass.Draw(gfx::Capsule(gfx::Capsule::Orientation::Vertical), transform, material);
     else if (shape == UIStyle::WidgetShape::Parallelogram)
         pass.Draw(gfx::Parallelogram(), transform, material);
     else BUG("Missing mask shape case.");

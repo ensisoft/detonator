@@ -600,9 +600,9 @@ Workspace::Workspace(const QString& dir)
     // these IDs are also hardcoded in the engine/loader.cpp which uses
     // these same IDs to create primitive resources.
     mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>(gfx::CapsuleClass("_horizontal_capsule", "",
-        gfx::detail::CapsuleArgs::Direction::Horizontal, 50, 0.25f), "2D Horizontal Capsule"));
+        gfx::detail::CapsuleArgs::Orientation::Horizontal, 50, 0.25f), "2D Horizontal Capsule"));
     mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>(gfx::CapsuleClass("_vertical_capsule", "",
-        gfx::detail::CapsuleArgs::Direction::Vertical, 50, 0.25f), "2D Vertical Capsule"));
+        gfx::detail::CapsuleArgs::Orientation::Vertical, 50, 0.25f), "2D Vertical Capsule"));
 
     mResources.emplace_back(new DrawableResource<gfx::RectangleClass>(gfx::RectangleClass("_rect"), "2D Rectangle"));
     mResources.emplace_back(new DrawableResource<gfx::IsoscelesTriangleClass>(gfx::IsoscelesTriangleClass("_isosceles_triangle"), "2D Isosceles Triangle"));
