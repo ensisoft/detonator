@@ -2273,22 +2273,33 @@ class FillShapeTest : public GraphicsTest
 public:
     void Render(gfx::Painter& painter) override
     {
-        gfx::FRect rect(10, 10, 100, 140);
-        gfx::FillShape(painter, rect,  gfx::Rectangle(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::FillShape(painter, rect, gfx::RoundRectangle(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::FillShape(painter, rect, gfx::Trapezoid(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::FillShape(painter, rect, gfx::Parallelogram(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::FillShape(painter, rect, gfx::RightTriangle(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::FillShape(painter, rect, gfx::IsoscelesTriangle(), gfx::Color::DarkGreen);
-        rect.Move(10, 200);
-        gfx::FillShape(painter, rect, gfx::Capsule(), gfx::Color::DarkGreen);
-        rect.Translate(150, 0);
-        gfx::FillShape(painter, rect, gfx::Circle(), gfx::Color::DarkGreen);
+        // aspect ratio 1:1
+        FillShape(painter, gfx::FRect(10.0f,  10.0f,  100.0f, 100.0f), gfx::Rectangle());
+        FillShape(painter, gfx::FRect(10.0f, 135.0f,  100.0f, 100.0f), gfx::RoundRectangle(0.25f));
+        FillShape(painter, gfx::FRect(10.0f, 260.0f,  100.0f, 100.0f), gfx::Circle());
+        FillShape(painter, gfx::FRect(10.0f, 385.0f,  100.0f, 100.0f), gfx::Capsule(gfx::Capsule::Orientation::Horizontal));
+        FillShape(painter, gfx::FRect(10.0f, 510.0f,  100.0f, 100.0f), gfx::Capsule(gfx::Capsule::Orientation::Vertical));
+        FillShape(painter, gfx::FRect(10.0f, 635.0f,  100.0f, 100.0f), gfx::Parallelogram());
+
+        // aspect ratio 2:1
+        FillShape(painter, gfx::FRect(135.0f,  10.0f, 200.0f, 100.0f), gfx::Rectangle());
+        FillShape(painter, gfx::FRect(135.0f, 135.0f, 200.0f, 100.0f), gfx::RoundRectangle(0.25f));
+        FillShape(painter, gfx::FRect(135.0f, 260.0f, 200.0f, 100.0f), gfx::Circle());
+        FillShape(painter, gfx::FRect(135.0f, 385.0f, 200.0f, 100.0f), gfx::Capsule(gfx::Capsule::Orientation::Horizontal));
+        FillShape(painter, gfx::FRect(135.0f, 510.0f, 200.0f, 100.0f), gfx::Capsule(gfx::Capsule::Orientation::Vertical));
+        FillShape(painter, gfx::FRect(135.0f, 635.0f, 200.0f, 100.0f), gfx::Parallelogram());
+
+        // aspect ratio 1:2
+        FillShape(painter, gfx::FRect(360.0f,  10.0f, 100.0f, 200.0f), gfx::Rectangle());
+        FillShape(painter, gfx::FRect(510.0f,  10.0f, 100.0f, 200.0f), gfx::RoundRectangle(0.25f));
+        FillShape(painter, gfx::FRect(360.0f, 250.0f, 100.0f, 200.0f), gfx::Circle());
+        FillShape(painter, gfx::FRect(510.0f, 250.0f, 100.0f, 200.0f), gfx::Capsule(gfx::Capsule::Orientation::Horizontal));
+        FillShape(painter, gfx::FRect(660.0f,  10.0f, 100.0f, 200.0f), gfx::Capsule(gfx::Capsule::Orientation::Vertical));
+        FillShape(painter, gfx::FRect(800.0f,  10.0f, 100.0f, 200.0f), gfx::Parallelogram());
+    }
+    void FillShape(gfx::Painter& painter, const gfx::FRect& rect, const gfx::Drawable& shape) const
+    {
+        gfx::FillShape(painter, rect, shape, gfx::Color::DarkGreen);
     }
     std::string GetName() const override
     { return "FillShapeTest"; }
