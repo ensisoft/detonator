@@ -131,9 +131,9 @@ void StaticLineGeometry::Generate(const Environment& env, Style style, GeometryB
 // static
 void CapsuleGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry, const CapsuleArgs& args)
 {
-    if (args.direction == CapsuleArgs::Direction::Horizontal)
+    if (args.orientation == CapsuleArgs::Orientation::Horizontal)
         GenerateHorizontal(env, style, geometry, args);
-    else if (args.direction == CapsuleArgs::Direction::Vertical)
+    else if (args.orientation == CapsuleArgs::Orientation::Vertical)
         GenerateVertical(env, style, geometry, args);
     else BUG("Unhandled capsule direction.");
 }
@@ -1299,7 +1299,7 @@ std::string GetSimpleShapeGeometryId(const SimpleShapeArgs& args,
         {
             const auto& capsule_args = std::get<detail::CapsuleArgs>(args);
             id += NameAspectRatio(rect_width, rect_height, HalfRound, "%1.1f:%1.1f");
-            id += base::ToString(capsule_args.direction);
+            id += base::ToString(capsule_args.orientation);
         }
         else if (type == SimpleShapeType::RoundRect)
         {
@@ -1451,7 +1451,7 @@ float SimpleShapeClass::GetShapeAttribute(ShapeAttribute attribute) const noexce
     else if (attribute == ShapeAttribute::Orientation)
     {
         ASSERT(std::holds_alternative<detail::CapsuleArgs>(mArgs));
-        return static_cast<float>(std::get<detail::CapsuleArgs>(mArgs).direction);
+        return static_cast<float>(std::get<detail::CapsuleArgs>(mArgs).orientation);
     }
     return 0.0f;
 }
@@ -1734,7 +1734,7 @@ float SimpleShape::GetShapeAttribute(ShapeAttribute attribute) const noexcept
     else if (attribute == ShapeAttribute::Orientation)
     {
         ASSERT(std::holds_alternative<detail::CapsuleArgs>(mArgs));
-        return static_cast<float>(std::get<detail::CapsuleArgs>(mArgs).direction);
+        return static_cast<float>(std::get<detail::CapsuleArgs>(mArgs).orientation);
     }
     return 0.0f;
 }

@@ -794,9 +794,9 @@ ContentLoaderImpl::ContentLoaderImpl()
     mDrawables["_isosceles_triangle"] = std::make_shared<gfx::IsoscelesTriangleClass>("_isosceles_triangle");
     mDrawables["_right_triangle"]     = std::make_shared<gfx::RightTriangleClass>("_right_triangle");
     mDrawables["_horizontal_capsule"] = std::make_shared<gfx::CapsuleClass>("_horizontal_capsule", "",
-        gfx::detail::CapsuleArgs::Direction::Horizontal, 50, 0.25f);
+        gfx::detail::CapsuleArgs::Orientation::Horizontal, 50, 0.25f);
     mDrawables["_vertical_capsule"] = std::make_shared<gfx::CapsuleClass>("_vertical_capsule", "",
-        gfx::detail::CapsuleArgs::Direction::Vertical, 50, 0.25f);
+        gfx::detail::CapsuleArgs::Orientation::Vertical, 50, 0.25f);
     mDrawables["_circle"]             = std::make_shared<gfx::CircleClass>("_circle");
     mDrawables["_semi_circle"]        = std::make_shared<gfx::SemiCircleClass>("_semi_circle");
     mDrawables["_round_rect"]         = std::make_shared<gfx::RoundRectangleClass>("_round_rect", "", 0.05f);
