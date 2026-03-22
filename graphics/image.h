@@ -122,6 +122,9 @@ namespace gfx
         const void* GetData() const
         { return mData; }
 
+        std::string GetFileUri() const
+        { return mURI; }
+
         Image& operator=(const Image&) = delete;
     private:
         std::string mURI;

@@ -506,6 +506,10 @@ public:
     {
         return "TileOverdrawTest";
     }
+    bool DoesUpdate() const override
+    {
+        return false;
+    }
 
 private:
     std::unique_ptr<gfx::Material> mTileset;
@@ -713,6 +717,11 @@ public:
     }
     std::string GetName() const override
     { return "TileBatchTest"; }
+
+    bool DoesUpdate() const override
+    {
+        return false;
+    }
 private:
     std::unique_ptr<gfx::Material> mTileset64x46;
     std::unique_ptr<gfx::Material> mTileset64x46Offset32x32;
@@ -773,6 +782,11 @@ public:
     }
     std::string GetName() const override
     { return "StencilCoverTest"; }
+
+    bool DoesUpdate() const override
+    {
+        return false;
+    }
 private:
 };
 
@@ -829,6 +843,11 @@ public:
     }
     std::string GetName() const override
     { return "StencilExposeTest"; }
+
+    bool DoesUpdate() const override
+    {
+        return false;
+    }
 private:
 };
 
@@ -902,6 +921,11 @@ public:
     }
     std::string GetName() const override
     { return "TextureBlurTest"; }
+
+    bool DoesUpdate() const override
+    {
+        return false;
+    }
 private:
     std::unique_ptr<gfx::Material> mBlur1024x1024;
     std::unique_ptr<gfx::Material> mBlur512x512;
@@ -944,6 +968,11 @@ public:
     }
     std::string GetName() const override
     { return "TextureEdgeTest"; }
+
+    bool DoesUpdate() const override
+    {
+        return false;
+    }
 private:
     std::unique_ptr<gfx::Material> mEdge512x512;
     std::unique_ptr<gfx::Material> mClear512x512;
@@ -990,6 +1019,10 @@ public:
     std::string GetName() const override
     {
         return "TextureColorExtractTest";
+    }
+    bool DoesUpdate() const override
+    {
+        return false;
     }
 
 private:
@@ -1057,6 +1090,11 @@ public:
     }
     std::string GetName() const override
     { return "GradientTest"; }
+
+    bool DoesUpdate() const override
+    {
+        return false;
+    }
 private:
 };
 
@@ -1754,8 +1792,11 @@ public:
         transform.Translate(250.0f, 0.0f);
         painter.Draw(Shape(gfx::SimpleShapeStyle::Solid), transform, material);
     }
-    void Update(float dt) override
-    {}
+    bool DoesUpdate() const override
+    {
+        return false;
+    }
+
     std::string GetName() const override
     { return mName; }
 private:
@@ -2251,6 +2292,10 @@ public:
     }
     std::string GetName() const override
     { return "FillShapeTest"; }
+    bool DoesUpdate() const override
+    {
+        return false;
+    }
 private:
 };
 
@@ -4450,6 +4495,7 @@ int main(int argc, char* argv[])
     bool testing  = false;
     bool issue_gold = false;
     bool fullscreen = false;
+    bool accept_result = false;
     bool user_interaction = true;
     bool srgb = true;
     bool debug_context = false;
@@ -4476,6 +4522,8 @@ int main(int argc, char* argv[])
             casename = argv[++i];
         else if (!std::strcmp(argv[i], "--issue-gold"))
             issue_gold = true;
+        else if (!std::strcmp(argv[i], "--accept-result"))
+            accept_result = true;
         else if (!std::strcmp(argv[i], "--vsync"))
             swap_interval = 1;
         else if (!std::strcmp(argv[i], "--fullscreen"))
@@ -4667,8 +4715,6 @@ int main(int argc, char* argv[])
         tests.emplace_back(new BasicMultiLightShadowMapTest());
     }
 
-    bool stop_for_input = false;
-
     wdk::Window window;
     unsigned surface_width  = 1024;
     unsigned surface_height = 768;
@@ -4713,7 +4759,6 @@ int main(int argc, char* argv[])
         {
             tests[current_test_index]->KeyDown(key);
         }
-        stop_for_input = false;
     };
 
     // render in the window
@@ -4722,9 +4767,24 @@ int main(int argc, char* argv[])
 
     if (testing)
     {
+        auto RenderTestFrame = [&gfx_device, &painter, surface_width, surface_height](GraphicsTest* test) {
+            gfx_device->BeginFrame();
+            gfx_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
+            gfx_device->ClearDepth(1.0f);
+            painter->SetViewport(0, 0, surface_width, surface_height);
+            painter->SetSurfaceSize(surface_width, surface_height);
+            painter->SetProjectionMatrix(gfx::MakeOrthographicProjection((float)surface_width , (float)surface_height));
+            // render the test.
+            test->Render(*painter);
+        };
+
         const float dt = 1.0f/60.0f;
 
         std::filesystem::create_directory("test-results");
+        std::filesystem::create_directory("test-results/es2");
+        std::filesystem::create_directory("test-results/es3");
+        std::filesystem::create_directory("gold/es2");
+        std::filesystem::create_directory("gold/es3");
 
         for (auto& test : tests)
         {
@@ -4737,6 +4797,7 @@ int main(int argc, char* argv[])
                     continue;
             }
             INFO("Running test case: '%1'", test->GetName());
+            window.SetTitle(test->GetName());
             test->Start();
 
             const auto loops = test->DoesUpdate() ? 3 : 1;
@@ -4747,49 +4808,55 @@ int main(int argc, char* argv[])
                 // any simulation from becoming unstable.
                 if (test->DoesUpdate())
                 {
-                    for (int step=0; step<534; ++step)
+                    for (int step=0; step<4; ++step)
                         test->Update(dt);
                 }
 
-                gfx_device->BeginFrame();
-                gfx_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
-                gfx_device->ClearDepth(1.0f);
-                painter->SetViewport(0, 0, surface_width, surface_height);
-                painter->SetSurfaceSize(surface_width, surface_height);
-                painter->SetProjectionMatrix(gfx::MakeOrthographicProjection((float)surface_width , (float)surface_height));
-                // render the test.
-                test->Render(*painter);
+                RenderTestFrame(test.get());
 
                 gfx::Bitmap<gfx::Pixel_RGBA> result = gfx_device->ReadColorBuffer(surface_width, surface_height);
                 gfx::SetAlphaToOne(result);
 
-                const auto& result_file_name    = base::FormatString("test-results/%1_%2_%3_Result.png", test->GetName(), i, sampling);
-                const auto& reference_file_name = base::FormatString("test-results/%1_%2_%3_Reference.png", test->GetName(), i, sampling);
-                const auto& delta_file_name     = base::FormatString("test-results/%1_%2_%3_Delta.png", test->GetName(), i, sampling);
+                gfx_device->EndFrame(true /* display and swap */);
+
+                const std::string es = version == 2 ? "es2" : "es3";
+                const auto& result_file_name    = base::FormatString("test-results/%1/%2_%3_%4_Result.png",    es, test->GetName(), i, sampling);
+                const auto& reference_file_name = base::FormatString("test-results/%1/%2_%3_%4_Reference.png", es, test->GetName(), i, sampling);
+                const auto& delta_file_name     = base::FormatString("test-results/%1/%2_%3_%4_Delta.png",     es, test->GetName(), i, sampling);
+                const auto& gold_file_name      = base::FormatString("gold/%1/%2_%3_%4_Gold.png",              es, test->GetName(), i, sampling);
+
                 if (issue_gold)
                 {
-                    const auto& gold_file_name  = base::FormatString("gold/%1_%2_%3_Gold.png", test->GetName(), i, sampling);
                     gfx::WritePNG(result, gold_file_name);
                     INFO("Wrote new gold image. '%1'", gold_file_name);
                 }
 
-                if (!base::FileExists(reference_file_name))
+                // if we have a local reference image then compare against the local reference.
+                // if we don't have a local reference then compare against gold image.
+                // if there are differences offer to accept as new local reference unless
+                // running in silent mode.
+                gfx::Image reference_image;
+                if (base::FileExists(reference_file_name))
                 {
-                    gfx_device->EndFrame(true /*display*/);
-                    gfx_device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
-                    // the result is the new gold image. should be eye-balled and verified.
-                    gfx::WritePNG(result, reference_file_name);
-                    INFO("Wrote new local reference image. '%1'", reference_file_name);
+                    reference_image.Load(reference_file_name);
+                    DEBUG("Loading image reference (LOCAL) '%1'", reference_file_name);
+                }
+                else if (base::FileExists(gold_file_name))
+                {
+                    reference_image.Load(gold_file_name);
+                    DEBUG("Loading image reference (GOLD) '%1'", gold_file_name);
+                }
+                else
+                {
+                    ERROR("Reference image failure on test '%1'", test->GetName());
+                    ERROR("No reference image found. Gold image is also missing.");
+                    ERROR("You must issue gold image for this test.");
+                    test_result = EXIT_FAILURE;
                     continue;
                 }
 
-                stop_for_input = true;
-
-                // load gold image
-                gfx::Image img(reference_file_name);
-
-                const auto& gold = img.AsBitmap<gfx::Pixel_RGBA>();
-                const auto& gold_view = gold.GetPixelReadView();
+                const auto& reference_bmp  = reference_image.AsBitmap<gfx::Pixel_RGBA>();
+                const auto& reference_view = reference_bmp.GetPixelReadView();
                 const auto& result_view = result.GetPixelReadView();
 
                 // for some threshold value listing see the unit_test_bitmap which can produce/print
@@ -4797,26 +4864,27 @@ int main(int argc, char* argv[])
                 const gfx::PixelEquality::ThresholdPrecision mse_comparator(1000.0);
                 const gfx::USize mse_block_size(8, 8);
 
-                if (!gfx::PixelBlockCompareBitmaps(gold_view, result_view, mse_block_size, mse_comparator))
+                if (!gfx::PixelBlockCompareBitmaps(reference_view, result_view, mse_block_size, mse_comparator))
                 {
-                    ERROR("'%1' vs '%2' FAILED.", reference_file_name, result_file_name);
-                    if (gold.GetWidth() != result.GetWidth() || gold.GetHeight() != result.GetHeight())
+                    ERROR("'%1' vs '%2' FAILED.", result_file_name, reference_image.GetFileUri());
+                    if (reference_bmp.GetWidth() != result.GetWidth() || reference_bmp.GetHeight() != result.GetHeight())
                     {
-                        ERROR("Image dimensions mismatch: Gold = %1x%1 vs. Result = %2x%3",
-                            gold.GetWidth(), gold.GetHeight(),
+                        ERROR("Image dimensions mismatch: Reference = %1x%1 vs. Result = %2x%3",
+                            reference_bmp.GetWidth(), reference_bmp.GetHeight(),
                             result.GetWidth(), result.GetHeight());
+                        test_result = EXIT_FAILURE;
                     }
                     else
                     {
                         // generate difference visualization file.
                         gfx::Bitmap<gfx::Pixel_RGBA> diff;
-                        diff.Resize(gold.GetWidth(), gold.GetHeight());
+                        diff.Resize(reference_bmp.GetWidth(), reference_bmp.GetHeight());
                         diff.Fill(gfx::Color::White);
-                        for (size_t y=0; y<gold.GetHeight(); ++y)
+                        for (size_t y=0; y<reference_bmp.GetHeight(); ++y)
                         {
-                            for (size_t x=0; x<gold.GetWidth(); ++x)
+                            for (size_t x=0; x<reference_bmp.GetWidth(); ++x)
                             {
-                                const auto& src = gold.GetPixel(y, x);
+                                const auto& src = reference_bmp.GetPixel(y, x);
                                 const auto& ret = result.GetPixel(y, x);
                                 if (src != ret)
                                 {
@@ -4827,33 +4895,65 @@ int main(int argc, char* argv[])
                         gfx::WritePNG(diff, delta_file_name);
                     }
                     gfx::WritePNG(result, result_file_name);
-                    test_result = EXIT_FAILURE;
+                    if (accept_result)
+                    {
+                        gfx::WritePNG(result, reference_file_name);
+                        INFO("Wrote new local reference image. '%1'", reference_file_name);
+                        INFO("'%1' vs '%2' OK.", reference_file_name, result_file_name);
+                    }
+                    else if (user_interaction)
+                    {
+                        INFO("Accept new image as testing result? Y/N");
+                        bool accept = false;
+                        while (true)
+                        {
+                            wdk::native_event_t event;
+                            wdk::WaitEvent(event);
+                            if (event.identity() == wdk::native_event_t::type::window_keydown)
+                            {
+                                const auto [mod, sym] = wdk::TranslateKeydownEvent(event);
+                                if (sym == wdk::Keysym::KeyY)
+                                {
+                                    accept = true;
+                                    break;
+                                }
+                                else if (sym == wdk::Keysym::KeyN)
+                                {
+                                    break;
+                                }
+                            }
+                            window.ProcessEvent(event);
+
+                            RenderTestFrame(test.get());
+                            gfx_device->EndFrame(true /* display and swap */);
+                        }
+                        if (accept)
+                        {
+                            // the result is the new local reference image. should be eye-balled and verified.
+                            gfx::WritePNG(result, reference_file_name);
+                            INFO("Wrote new local reference image. '%1'", reference_file_name);
+                        }
+                        else test_result = EXIT_FAILURE;
+
+                    }
+                    else test_result = EXIT_FAILURE;
                 }
                 else
                 {
-                    INFO("'%1' vs '%2' OK.", reference_file_name, result_file_name);
-                    stop_for_input = false;
-                }
-
-                gfx_device->EndFrame(true /* display */);
-                gfx_device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
-
-                if (stop_for_input && user_interaction)
-                {
-                    while (stop_for_input)
+                    INFO("'%1' vs '%2' OK.", result_file_name, reference_image.GetFileUri());
+                    if (!base::FileExists(reference_file_name))
                     {
-                        wdk::native_event_t event;
-                        wdk::WaitEvent(event);
-                        window.ProcessEvent(event);
+                        // the result is the new local reference image. should be eye-balled and verified.
+                        gfx::WritePNG(result, reference_file_name);
+                        INFO("Wrote new local reference image. '%1'", reference_file_name);
                     }
                 }
-                else
-                {
-                    wdk::native_event_t event;
-                    while (wdk::PeekEvent(event))
-                        window.ProcessEvent(event);
-                }
-                stop_for_input = false;
+
+                wdk::native_event_t event;
+                while (wdk::PeekEvent(event))
+                    window.ProcessEvent(event);
+
+                gfx_device->CleanGarbage(120, gfx::Device::GCFlags::Textures);
             }
             test->End();
         }
