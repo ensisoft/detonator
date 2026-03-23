@@ -518,12 +518,22 @@ namespace base
         {
             return { x - mX, y - mY };
         }
+        Point<T> MapToLocalNormalize(T x, T y) const noexcept
+        {
+            return { (x - mX) / mWidth, (y - mY) / mHeight };
+        }
         // Map a global point relative to the origin of the
         // coordinate system to a local point relative to the
         // origin of the rect.
         Point<T> MapToLocal(const Point<T>& p) const noexcept
         {
             return { p.GetX() - mX, p.GetY() - mY };
+        }
+        Point<T> MapToLocalNormalize(const Point<T>& p) const noexcept
+        {
+            const auto x = p.GetX() - mX;
+            const auto y = p.GetY() - mY;
+            return { x / mWidth, y / mHeight };
         }
 
         // Normalize the rectangle with respect to the given

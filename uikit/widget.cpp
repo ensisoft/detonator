@@ -335,11 +335,28 @@ WidgetAction SliderModel::MousePress(const MouseEvent& mouse, const MouseStruct&
 {
     FRect slider, knob;
     ComputeLayout(mouse.widget_window_rect, &slider, &knob);
-    ms.state->SetValue(ms.widgetId + "/slider-knob-down", knob.TestPoint(mouse.window_mouse_pos));
-    ms.state->SetValue(ms.widgetId + "/mouse-pos", mouse.widget_mouse_pos);
-    return WidgetAction {
-        WidgetActionType::MouseGrabBegin
-    };
+    if (const auto knob_pressed = knob.TestPoint(mouse.window_mouse_pos))
+    {
+        ms.state->SetValue(ms.widgetId + "/slider-knob-down", knob_pressed);
+        ms.state->SetValue(ms.widgetId + "/mouse-pos", mouse.widget_mouse_pos);
+        return WidgetAction {
+            WidgetActionType::MouseGrabBegin
+        };
+    }
+    else if (const auto slider_pressed = slider.TestPoint(mouse.window_mouse_pos))
+    {
+        const auto slider_pos = slider.MapToLocalNormalize(mouse.window_mouse_pos);
+        if (mOrientation == WidgetOrientation::Horizontal)
+            mValue = math::clamp(0.0f, 1.0f, slider_pos.GetX());
+        else if (mOrientation == WidgetOrientation::Vertical)
+            mValue = math::clamp(0.0f, 1.0f, slider_pos.GetY());
+
+        WidgetAction action;
+        action.type = WidgetActionType::ValueChange;
+        action.value = mValue;
+        return action;
+    }
+    return {};
 }
 WidgetAction SliderModel::MouseMove(const MouseEvent& mouse, const MouseStruct& ms)
 {
