@@ -253,7 +253,7 @@ void ProgressBarModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
         const int percent = 100 * val;
         text = base::FormatString(mText, percent);
     }
-    ps.painter->DrawStaticText(ps.widgetId, p, text, 1.0f, mOrientation);
+    ps.painter->DrawStaticText(ps.widgetId, p, text, 1.0f, mOrientation, WidgetTextPosition::Left);
 
     p.hovered = paint.hovered;
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
@@ -721,7 +721,7 @@ void LabelModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     p.style_materials  = ps.style_materials;
     ps.painter->ApplyTransform(ps.widgetId, p);
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
-    ps.painter->DrawStaticText(ps.widgetId, p, mText, mLineHeight, WidgetOrientation::Horizontal);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, mLineHeight, WidgetOrientation::Horizontal, WidgetTextPosition::Left);
     ps.painter->DrawWidgetBorder(ps.widgetId, p);
 }
 
@@ -760,7 +760,7 @@ void PushButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) cons
 
     ps.painter->DrawWidgetBackground(ps.widgetId, p);
     ps.painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::None);
-    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f, WidgetOrientation::Horizontal);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f, WidgetOrientation::Horizontal, WidgetTextPosition::Left);
     if (p.focused)
         ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 
@@ -858,7 +858,8 @@ void CheckBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
     ps.painter->DrawCheckBox(ps.widgetId, p, mChecked);
 
     p.rect = text;
-    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f, WidgetOrientation::Horizontal);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f, WidgetOrientation::Horizontal,
+        mCheck == Check::Right ? WidgetTextPosition::Left : WidgetTextPosition::Right);
     if (paint.focused)
         ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 
@@ -962,28 +963,30 @@ void CheckBoxModel::ComputeLayout(const FRect& rect, FRect* text, FRect* check) 
         check->Move(rect.GetPosition());
         check->Translate(check_x, 0.0f);
 
-        text->SetWidth(width-check_size);
+        text->SetWidth(width-check_size-2.0f);
         text->SetHeight(height);
         text->Move(rect.GetPosition());
+
     }
     else if (width > height && mCheck == Check::Left)
     {
         const auto check_size = height;
-        const auto check_x = 0.0f;
-        const auto text_x  = check_size;
         check->SetWidth(check_size);
         check->SetHeight(check_size);
         check->Move(rect.GetPosition());
 
-        text->SetWidth(width-check_size);
+        text->SetWidth(width-check_size-2.0f);
         text->SetHeight(height);
         text->Move(rect.GetPosition());
-        text->Translate(text_x, 0.0f);
+        text->Translate(check_size, 0.0f);
+        text->Translate(2.0f, 0.0f);
     }
     else
     {
         *check = rect;
     }
+    check->Sanitize();
+    text->Sanitize();
 }
 
 size_t ToggleBoxModel::GetHash(size_t hash) const
@@ -1148,7 +1151,8 @@ void RadioButtonModel::Paint(const PaintEvent& paint, const PaintStruct& ps) con
     ps.painter->DrawRadioButton(ps.widgetId, p, mSelected);
 
     p.rect = text;
-    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f, WidgetOrientation::Horizontal);
+    ps.painter->DrawStaticText(ps.widgetId, p, mText, 1.0f, WidgetOrientation::Horizontal,
+        mCheck == Check::Right ? WidgetTextPosition::Left : WidgetTextPosition::Right);
     if (p.focused)
         ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 
@@ -1263,28 +1267,30 @@ void RadioButtonModel::ComputeLayout(const FRect& rect, FRect* text, FRect* chec
         check->Move(rect.GetPosition());
         check->Translate(check_x, 0.0f);
 
-        text->SetWidth(width-check_size);
+        text->SetWidth(width-check_size-2.0f);
         text->SetHeight(height);
         text->Move(rect.GetPosition());
     }
     else if (width > height && mCheck == Check::Left)
     {
         const auto check_size = height;
-        const auto check_x = 0.0f;
-        const auto text_x  = check_size;
         check->SetWidth(check_size);
         check->SetHeight(check_size);
         check->Move(rect.GetPosition());
 
-        text->SetWidth(width-check_size);
+        text->SetWidth(width-check_size-2.0f);
         text->SetHeight(height);
         text->Move(rect.GetPosition());
-        text->Translate(text_x, 0.0f);
+        text->Translate(check_size, 0.0f);
+        text->Translate(2.0f, 0.0f);
     }
     else
     {
         *check = rect;
     }
+
+    check->Sanitize();
+    text->Sanitize();
 }
 
 std::size_t GroupBoxModel::GetHash(size_t hash) const

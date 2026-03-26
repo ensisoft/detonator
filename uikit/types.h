@@ -50,6 +50,12 @@ namespace uik
         Vertical, Horizontal
     };
 
+    enum class WidgetTextPosition {
+        // the position of widget (such as check-box, ratio button) text relative
+        // to other widget components
+        Left, Right
+    };
+
     enum class MouseButton {
         None,
         Left,
