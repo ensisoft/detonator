@@ -1111,7 +1111,7 @@ void UIPainter::DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) cons
 }
 
 void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps,
-    const std::string& text, float line_height, Orientation orientation) const
+    const std::string& text, float line_height, Orientation orientation, TextPosition position) const
 {
     if (text.empty())
         return;
@@ -1135,11 +1135,11 @@ void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps,
         properties |= gfx::TextProp::Underline;
 
     if (ha == UIStyle::HorizontalTextAlign::Left)
-        alignment |= gfx::TextAlign::AlignLeft;
+        alignment |= (position == TextPosition::Right ? gfx::TextAlign::AlignLeft : gfx::TextAlign::AlignRight);
     else if (ha == UIStyle::HorizontalTextAlign::Center)
         alignment |= gfx::TextAlign::AlignHCenter;
     else if (ha == UIStyle::HorizontalTextAlign::Right)
-        alignment |= gfx::TextAlign::AlignRight;
+        alignment |= (position == TextPosition::Right ? gfx::TextAlign::AlignRight : gfx::TextAlign::AlignLeft);
     else BUG("Unknown horizontal text alignment.");
 
     if (va == UIStyle::VerticalTextAlign::Top)

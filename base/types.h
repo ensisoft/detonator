@@ -676,7 +676,13 @@ namespace base
             mWidth = 0;
             mHeight = 0;
         }
-
+        void Sanitize()
+        {
+            if (mWidth < T(0))
+                mWidth = T(0);
+            if (mHeight < T(0))
+                mHeight = T(0);
+        }
     private:
         T mX = 0;
         T mY = 0;
@@ -747,6 +753,16 @@ namespace base
         Rect ret(target_rect);
         ret.MakeRelativeTo(reference_rect);
         return ret;
+    }
+
+    template<typename T>
+    Rect<T> SanitizeRect(const Rect<T> rect) noexcept
+    {
+        const auto width = rect.GetWidth();
+        const auto height = rect.GetHeight();
+        const auto x = rect.GetX();
+        const auto y = rect.GetY();
+        return { x, y, width < T(0) ? T(0) : width, height < T(0) ? T(0) : height };
     }
 
     template<typename T>

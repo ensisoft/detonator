@@ -658,7 +658,7 @@ namespace engine
         void DrawWidgetBorder(const WidgetId& id, const PaintStruct& ps) const override;
         void DrawWidgetFocusRect(const WidgetId& id, const PaintStruct& ps) const override;
         void DrawStaticText(const WidgetId& id, const PaintStruct& ps,
-            const std::string& text, float line_height, Orientation orientation) const override;
+            const std::string& text, float line_height, Orientation orientation, TextPosition text_position) const override;
         void DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const override;
         void DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const override;
         void DrawCheckBox(const WidgetId& id, const PaintStruct& ps, bool checked) const override;

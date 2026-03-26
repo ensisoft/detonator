@@ -66,7 +66,7 @@ public:
         cmds.push_back(std::move(cmd));
     }
     void DrawStaticText(const WidgetId& id, const PaintStruct& ps,
-        const std::string& text, float line_height, Orientation orientation) const override
+        const std::string& text, float line_height, Orientation orientation, TextPosition tp) const override
     {
         Command cmd;
         cmd.name   = "draw-widget-text";

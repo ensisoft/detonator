@@ -117,6 +117,7 @@ namespace uik
         };
 
         using Orientation = WidgetOrientation;
+        using TextPosition = WidgetTextPosition;
 
         // dtor
         virtual ~Painter() = default;
@@ -151,7 +152,7 @@ namespace uik
         // texts that are part of the widget's "static" interface. Widget items such as
         // combobox dropdown items or list box items are drawn using separate functionality.
         virtual void DrawStaticText(const WidgetId& id, const PaintStruct& ps,
-            const std::string& text, float line_height, Orientation orientation) const = 0;
+            const std::string& text, float line_height, Orientation orientation, TextPosition text_position) const = 0;
 
         virtual void DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const = 0;
 
