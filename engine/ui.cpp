@@ -2057,11 +2057,9 @@ void UIPainter::DrawBorder(const gfx::FRect& shape_rect, gfx::Material& material
         if (shape == WidgetShape::Parallelogram)
         {
             const auto aspect_ratio = shape_rect.GetAspectRatio();
-            if (aspect_ratio.IsLandscape())
-            {
-                stencil_mask_rect.Grow(-2.0f, 0.0f);
-                stencil_mask_rect.Translate(1.0f, 0.0f);
-            }
+            stencil_mask_rect.Grow(-2.0f, -1.0f);
+            stencil_mask_rect.Translate(1.0f, 0.5f);
+
         }
         material.SetFlag(gfx::MaterialFlags::EnableSDF, false);
     }
@@ -2189,14 +2187,8 @@ UIPainter::OutlineMethod UIPainter::ChooseBorderOutlineMethod(const gfx::FRect& 
         // no caveat that excludes the use of SDF
 
         if (method == OutlineMethod::Automatic)
-        {
-            if (has_rotation)
-                return OutlineMethod::SDF;
-
             return OutlineMethod::Stencil;
-        }
     }
-
 
     if (shape == WidgetShape::Rectangle || shape == WidgetShape::RoundRect)
     {
