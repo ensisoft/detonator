@@ -386,6 +386,15 @@ void JsonObject::Write(const char* name, const glm::vec2* array, size_t size)
     (*mJson)[name] = std::move(json_array);
 }
 
+void JsonObject::Write(const char* name, const JsonObject& object)
+{
+    base::detail::JsonWriteJson(*mJson, name, *object.mJson);
+}
+void JsonObject::Write(const char* name, JsonObject&& object)
+{
+    base::detail::JsonWriteJson(*mJson, name, *object.mJson);
+}
+
 void JsonObject::AppendChunk(const char* name, const Writer& chunk)
 {
     const auto* json = dynamic_cast<const JsonObject*>(&chunk);

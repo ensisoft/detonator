@@ -18,10 +18,12 @@
 
 #include "config.h"
 
-#include <string>
 #include <cstddef>
+#include <cstring>
+#include <string>
 #include <tuple>
 #include <fstream>
+#include <vector>
 
 namespace data
 {
@@ -39,10 +41,32 @@ namespace data
         bool Open(const std::string& file);
         void Close();
 
-        virtual bool WriteBytes(const void* data, size_t bytes) override;
+        bool WriteBytes(const void* data, size_t bytes) override;
 
     private:
         std::ofstream mFile;
+    };
+
+    class BufferDevice : public IODevice
+    {
+    public:
+        bool WriteBytes(const void* data, size_t bytes) override
+        {
+            const auto size = mData.size();
+            mData.resize(size + bytes);
+            std::memcpy(&mData[size], data, bytes);
+            return true;
+        }
+        const char* GetDataPtr() const noexcept
+        {
+            return mData.data();
+        }
+        const auto GetByteCount() const noexcept
+        {
+            return mData.size();
+        }
+    private:
+        std::vector<char> mData;
     };
 
 

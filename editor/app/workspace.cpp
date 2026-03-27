@@ -78,6 +78,7 @@
 #include "editor/app/workspace_resource_packer.h"
 
 // hack
+#include "data/io.h"
 #include "editor/app/resource_tracker.cpp"
 #include "graphics/simple_shape.h"
 
@@ -2255,11 +2256,15 @@ bool Workspace::ExportResourceJson(const ModelIndexList& indices, const QString&
         QJsonObject props;
         resource.SaveProperties(props);
         QJsonDocument docu(props);
-        QByteArray bytes = docu.toJson().toBase64();
+        const QByteArray& bytes = docu.toJson(); //.toBase64();
 
-        const auto& prop_key = resource.GetIdUtf8();
-        const auto& prop_val = std::string(bytes.constData(), bytes.size());
-        json.Write(prop_key.c_str(), prop_val);
+        std::string property_key;
+        property_key += "properties_";
+        property_key += resource.GetIdUtf8();
+
+        data::JsonObject temp;
+        temp.ParseString(bytes.constData(), bytes.size());
+        json.Write(property_key.c_str(), temp);
     }
 
     data::JsonFile file;
@@ -2299,20 +2304,22 @@ bool Workspace::ImportResourcesFromJson(const QString& filename, std::vector<std
     // restore the properties.
     for (auto& resource : resources)
     {
-        const auto& prop_key = resource->GetIdUtf8();
-        std::string prop_val;
-        if (!root.Read(prop_key.c_str(), &prop_val)) {
-            WARN("No properties found for resource '%1'.", prop_key);
-            continue;
-        }
-        if (prop_val.empty())
+        std::string property_key;
+        property_key += "properties_";
+        property_key += resource->GetIdUtf8();
+        const auto& properties = root.GetChunk(property_key.c_str());
+        if (!properties)
             continue;
 
-        const auto& bytes = QByteArray::fromBase64(QByteArray(prop_val.c_str(), prop_val.size()));
-        QJsonParseError error;
-        const auto& docu = QJsonDocument::fromJson(bytes, &error);
-        if (docu.isNull()) {
-            WARN("Json parse error when parsing resource '%1' properties.", prop_key);
+        data::BufferDevice buffer;
+        properties->Dump(buffer);
+
+        QByteArray byte_array(buffer.GetDataPtr(), buffer.GetByteCount());
+        QJsonParseError json_parse_error;
+        const auto& docu = QJsonDocument::fromJson(byte_array, &json_parse_error);
+        if (docu.isNull())
+        {
+            WARN("Json parse error when parsing resource '%1' properties.", resource->GetName());
             continue;
         }
         resource->LoadProperties(docu.object());
