@@ -190,6 +190,8 @@ void BindUIK(sol::state& L)
     spinbox["GetMin"]   = &uik::SpinBox::GetMin;
     spinbox["GetMax"]   = &uik::SpinBox::GetMax;
     spinbox["GetValue"] = &uik::SpinBox::GetValue;
+    spinbox["GetSingleStep"] = &uik::SpinBox::GetSingleStep;
+    spinbox["GetPrecision"]  = &uik::SpinBox::GetPrecision;
 
     auto slider = table.new_usertype<uik::Slider>("Slider");
     BindWidgetInterface(slider);

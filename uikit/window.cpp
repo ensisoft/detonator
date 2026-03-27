@@ -602,6 +602,11 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
 
 void Window::Open(TransientState& state, AnimationStateArray* animations)
 {
+    for (auto& w : mWidgets)
+    {
+        w->Initialize(state);
+    }
+
     if (animations)
     {
         animations->clear();
