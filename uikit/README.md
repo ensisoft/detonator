@@ -57,9 +57,9 @@ Currently, the following widgets have been implemented.
   * <i>Has automatic single selection (exclusion) between radio buttons inside the same groupbox</i>  
 * CheckBox
   * <i>Used to let the user indicate a desired selection</i>
-* SpinBox (integer)
+* SpinBox (integer or float)
   * <i>Used to let the user increment or decrement a value</i>
-  * <i>Supports min, max value limit(s)</i>
+  * <i>Supports min, max value limits, step size and format precision</i>
 * ToggleBox
   * <i>Similar to checkbox except animated toggle between on and off states</i> 
 * ScrollArea
@@ -70,7 +70,6 @@ Currently, the following widgets have been implemented.
   * <i> Used to add visual elements to the UI, for example particles</i>
   
 TODO widgets:
-* Spinbox (float)
 * Dropdown and/or ComboBox
 * LineEdit (for text input)
 * ListWidget 

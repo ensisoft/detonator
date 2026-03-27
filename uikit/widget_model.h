@@ -40,6 +40,13 @@ namespace uik
         using PaintEvent = uik::PaintEvent;
         using KeyEvent   = uik::KeyEvent;
         using WidgetAction = WidgetAction;
+
+        struct InitStruct {
+            std::string widgetId;
+            std::string widgetName;
+            TransientState* state = nullptr;
+        };
+
         struct PaintStruct {
             std::string widgetId;
             std::string widgetName;
@@ -168,19 +175,30 @@ namespace uik
         {
         public:
             SpinBoxModel();
-            void SetMin(int min)
+
+            void SetMin(float min)
             { mMinVal = min; }
-            void SetMax(int max)
+            void SetMax(float max)
             { mMaxVal = max; }
-            void SetValue(int value)
-            { mValue = value; }
-            int GetValue() const
-            { return mValue; }
-            int GetMin() const
+
+            float GetMin() const
             { return mMinVal; }
-            int GetMax() const
+            void SetSingleStep(float step)
+            { mSingleStep = step; }
+            void SetPrecision(unsigned precision)
+            { mPrecision = precision; }
+            float GetMax() const
             { return mMaxVal; }
+            float GetSingleStep() const
+            { return mSingleStep; }
+            unsigned GetPrecision() const
+            { return mPrecision; }
+
+            void SetValue(float value);
+            float GetValue() const;
+
             std::size_t GetHash(size_t hash) const;
+            void Initialize(const InitStruct& init);
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
             void IntoJson(data::Writer& data) const;
             bool FromJson(const data::Reader& data);
@@ -196,9 +214,11 @@ namespace uik
             void ComputeBoxes(const FRect& rect, FRect* btn_inc, FRect* btn_dec, FRect* edit =nullptr) const;
             WidgetAction UpdateValue(const std::string& id, TransientState& state);
         private:
-            int mValue  = 0;
-            int mMinVal = 0;
-            int mMaxVal = 0;
+            float mValue  = 0;
+            float mMinVal = 0;
+            float mMaxVal = 0;
+            float mSingleStep = 1.0f;
+            unsigned mPrecision = 0;
         };
 
         class LabelModel

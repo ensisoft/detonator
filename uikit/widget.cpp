@@ -20,6 +20,7 @@
 #  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
+#include <cmath>
 #include <set>
 
 #include "base/assert.h"
@@ -470,8 +471,8 @@ void SliderModel::ComputeLayout(const FRect& rect, FRect* slider, FRect* knob) c
 
 SpinBoxModel::SpinBoxModel()
 {
-    mMinVal = std::numeric_limits<int>::min();
-    mMaxVal = std::numeric_limits<int>::max();
+    mMinVal = std::numeric_limits<float>::lowest();
+    mMaxVal = std::numeric_limits<float>::max();
 }
 
 std::size_t SpinBoxModel::GetHash(size_t hash) const
@@ -479,7 +480,25 @@ std::size_t SpinBoxModel::GetHash(size_t hash) const
     hash = base::hash_combine(hash, mValue);
     hash = base::hash_combine(hash, mMinVal);
     hash = base::hash_combine(hash, mMaxVal);
+    hash = base::hash_combine(hash, mSingleStep);
+    hash = base::hash_combine(hash, mPrecision);
     return hash;
+}
+
+void SpinBoxModel::Initialize(const InitStruct& init)
+{
+    if (mMinVal > mMaxVal)
+        WARN("Spinbox widget min value exceeds max value.[name='%1', min=%2, max=%3]",
+            init.widgetName, mMinVal, mMaxVal);
+
+    mMinVal = std::min(mMinVal, mMaxVal);
+    mMaxVal = std::max(mMinVal, mMaxVal);
+
+    if (mValue < mMinVal || mValue > mMaxVal)
+        WARN("Spinbox widget value exceeds min/max range. [name='%1', min=%2, max=%3, value=%4]",
+            init.widgetName, mMinVal, mMaxVal, mValue);
+
+    mValue = math::clamp(mMinVal, mMaxVal, mValue);
 }
 
 void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
@@ -511,7 +530,7 @@ void SpinBoxModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
         ps.painter->DrawWidgetFocusRect(ps.widgetId, p);
 
     Painter::EditableText text;
-    text.text = std::to_string(mValue);
+    text.text = base::fmt::ToString(base::fmt::Float { mValue, mPrecision });
     edt.Grow(-4, -4);
     edt.Translate(2, 2);
     p.rect = edt;
@@ -543,6 +562,8 @@ void SpinBoxModel::IntoJson(data::Writer& data) const
     data.Write("value", mValue);
     data.Write("min", mMinVal);
     data.Write("max", mMaxVal);
+    data.Write("single_step", mSingleStep);
+    data.Write("precision", mPrecision);
 }
 bool SpinBoxModel::FromJson(const data::Reader& data)
 {
@@ -550,6 +571,8 @@ bool SpinBoxModel::FromJson(const data::Reader& data)
     ok &= data.Read("value", &mValue);
     ok &= data.Read("min", &mMinVal);
     ok &= data.Read("max", &mMaxVal);
+    ok &= data.Read("single_step", &mSingleStep);
+    ok &= data.Read("precision", &mPrecision);
     return ok;
 }
 
@@ -621,12 +644,12 @@ WidgetAction SpinBoxModel::KeyDown(const KeyEvent& key, const KeyStruct& ks)
 
     if (key.key == VirtualKey::MoveUp)
     {
-        mValue = math::clamp(mMinVal, mMaxVal, mValue+1);
+        mValue = math::clamp(mMinVal, mMaxVal, mValue+mSingleStep);
         ks.state->SetValue(ks.widgetId + "/key-inc-pressed", true);
     }
     else if (key.key == VirtualKey::MoveDown)
     {
-        mValue = math::clamp(mMinVal, mMaxVal, mValue-1);
+        mValue = math::clamp(mMinVal, mMaxVal, mValue-mSingleStep);
         ks.state->SetValue(ks.widgetId + "/key-dec-pressed", true);
     }
     if (last_value != mValue)
@@ -684,9 +707,9 @@ WidgetAction SpinBoxModel::UpdateValue(const std::string& id, TransientState& st
     const auto dec_down = state.GetValue(id + "/btn-dec-pressed", false);
     auto value = mValue;
     if (inc_down)
-        value = math::clamp(mMinVal, mMaxVal, value + 1);
+        value = math::clamp(mMinVal, mMaxVal, value + mSingleStep);
     else if (dec_down)
-        value = math::clamp(mMinVal, mMaxVal, value - 1);
+        value = math::clamp(mMinVal, mMaxVal, value - mSingleStep);
 
     if (mValue != value)
     {
@@ -699,6 +722,19 @@ WidgetAction SpinBoxModel::UpdateValue(const std::string& id, TransientState& st
     return WidgetAction {};
 }
 
+void SpinBoxModel::SetValue(float value)
+{
+    mValue = math::clamp(mMinVal, mMaxVal, value);
+}
+
+float SpinBoxModel::GetValue() const
+{
+    if (mPrecision == 0)
+        return std::floor(mValue);
+
+    const float magnitude = std::pow(10.0f, static_cast<float>(mPrecision));
+    return std::round(mValue * magnitude) / magnitude;
+}
 
 std::size_t LabelModel::GetHash(size_t hash) const
 {

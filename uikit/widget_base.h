@@ -131,6 +131,18 @@ namespace uik {
                 }
             }
 
+            void Initialize(TransientState& state) override
+            {
+                if constexpr (Traits::WantsInitialize)
+                {
+                    InitStruct init;
+                    init.widgetId = mId;
+                    init.widgetName = mName;
+                    init.state = &state;
+                    WidgetModel::Initialize(init);
+                }
+            }
+
             void Paint(const PaintEvent& paint, const TransientState& state, Painter& painter) const override
             {
                 PaintStruct ps;

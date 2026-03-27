@@ -1646,15 +1646,23 @@ void UIWidget::on_chkCheck_stateChanged(int)
 {
     UpdateCurrentWidgetProperties();
 }
-void UIWidget::on_spinMin_valueChanged(int)
+void UIWidget::on_spinMin_valueChanged(double)
 {
     UpdateCurrentWidgetProperties();
 }
-void UIWidget::on_spinMax_valueChanged(int)
+void UIWidget::on_spinMax_valueChanged(double)
 {
     UpdateCurrentWidgetProperties();
 }
-void UIWidget::on_spinVal_valueChanged(int)
+void UIWidget::on_spinVal_valueChanged(double)
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_spinStep_valueChanged(double)
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_spinPrecision_valueChanged(int)
 {
     UpdateCurrentWidgetProperties();
 }
@@ -2927,6 +2935,8 @@ void UIWidget::UpdateCurrentWidgetProperties()
             spin->SetMin(GetValue(mUI.spinMin));
             spin->SetMax(GetValue(mUI.spinMax));
             spin->SetValue(GetValue(mUI.spinVal));
+            spin->SetSingleStep(GetValue(mUI.spinStep));
+            spin->SetPrecision(GetValue(mUI.spinPrecision));
         }
         else if (auto* prog = uik::WidgetCast<uik::ProgressBar>(widget))
         {
@@ -3070,6 +3080,8 @@ void UIWidget::DisplayCurrentWidgetProperties()
             SetValue(mUI.spinMin, spin->GetMin());
             SetValue(mUI.spinMax, spin->GetMax());
             SetValue(mUI.spinVal, spin->GetValue());
+            SetValue(mUI.spinStep, spin->GetSingleStep());
+            SetValue(mUI.spinPrecision, spin->GetPrecision());
         }
         else if (const auto* slider = uik::WidgetCast<uik::Slider>(widget))
         {

@@ -27,6 +27,7 @@ namespace uik
         struct WidgetTraits {
             static constexpr auto InitialWidth      = 100;
             static constexpr auto InitialHeight     = 30;
+            static constexpr auto WantsInitialize   = false;
             static constexpr auto WantsMouseEvents  = false;
             static constexpr auto WantsKeyEvents    = false;
             static constexpr auto WantsUpdate       = false;
@@ -121,6 +122,7 @@ namespace uik
             static constexpr auto WantsMouseEvents = true;
             static constexpr auto WantsKeyEvents   = true;
             static constexpr auto WantsPoll = true;
+            static constexpr auto WantsInitialize = true;
         };
         template<>
         struct WidgetModelTraits<SliderModel> : public WidgetTraits

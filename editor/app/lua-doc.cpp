@@ -969,13 +969,17 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "SetValue", "Set the normalized progress bar progress value.", "float", "value");
     DOC_METHOD_0("bool", "HasValue", "Check whether progress bar currently has a progress value or not.");
     DOC_METHOD_0("float", "GetValue", "Get the current progress bar value if any. If no progress value is set then 0.0 is returned.");
+
     DOC_TABLE("uik.SpinBox");
-    DOC_METHOD_1("void", "SetMin", "Set the minimum value allowed by the spin box.", "int", "min");
-    DOC_METHOD_1("void", "SetMax", "Set the maximum value allowed by the spin box.", "int", "max");
-    DOC_METHOD_1("void", "SetValue", "Set the current spin box value.", "int", "value");
-    DOC_METHOD_0("int", "GetMin", "Get the minimum value allowed by the spin box.");
-    DOC_METHOD_0("int", "GetMax", "Get the maximum value allowed by the spin box.");
-    DOC_METHOD_0("int", "GetValue", "Get the current spin box value.");
+    DOC_METHOD_1("void", "SetMin", "Set the minimum value allowed by the spin box.", "float", "min");
+    DOC_METHOD_1("void", "SetMax", "Set the maximum value allowed by the spin box.", "float", "max");
+    DOC_METHOD_1("void", "SetValue", "Set the current spin box value.", "float", "value");
+    DOC_METHOD_0("float", "GetMin", "Get the minimum value allowed by the spin box.");
+    DOC_METHOD_0("float", "GetMax", "Get the maximum value allowed by the spin box.");
+    DOC_METHOD_0("float", "GetValue", "Get the current spin box value.");
+    DOC_METHOD_0("float", "GetSingleStep", "Get the single step increment/decrement value.");
+    DOC_METHOD_0("unsigned", "GetPrecision", "Get the precision value, i.e. how many decimals are shown.");
+
     DOC_TABLE("uik.Slider");
     DOC_METHOD_1("void", "SetValue", "Set the current (normalized) slider value.", "float", "value");
     DOC_METHOD_0("float", "GetValue", "Get the current (normalized) slider value.");

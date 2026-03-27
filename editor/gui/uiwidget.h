@@ -117,9 +117,11 @@ namespace gui
         void on_chkText_textChanged();
         void on_chkPlacement_currentIndexChanged(int);
         void on_chkCheck_stateChanged(int);
-        void on_spinMin_valueChanged(int);
-        void on_spinMax_valueChanged(int);
-        void on_spinVal_valueChanged(int);
+        void on_spinMin_valueChanged(double);
+        void on_spinMax_valueChanged(double);
+        void on_spinVal_valueChanged(double);
+        void on_spinStep_valueChanged(double);
+        void on_spinPrecision_valueChanged(int);
         void on_sliderVal_valueChanged(double);
         void on_sliderOrientation_currentIndexChanged(int);
         void on_progText_textChanged();

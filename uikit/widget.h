@@ -145,6 +145,11 @@ namespace uik
         // not only stylistic but also functional.
         virtual void QueryStyle(const Painter& painter) {}
 
+        // Initialize the widget when the widget is about to start it's logical
+        // lifetime on UI/window open. This can be used to perform for example
+        // sanity checking and logging to make sure the state is rational
+        virtual void Initialize(TransientState& state) {}
+
         // Paint the widget.
         virtual void Paint(const PaintEvent& paint, const TransientState& state, Painter& painter) const = 0;
 
