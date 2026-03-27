@@ -51,6 +51,7 @@ namespace gui
        ~ParticleEditorWidget() override;;
 
         QString GetId() const override;
+        QImage TakeScreenshot() const override;
         void InitializeSettings(const UISettings& settings) override;
         void SetViewerMode() override;
         void AddActions(QToolBar& bar) override;
@@ -68,6 +69,7 @@ namespace gui
         void Save() override;
         bool HasUnsavedChanges() const override;
         bool GetStats(Stats* stats) const override;
+        void SetState(State state) override;
         void OnAddResource(const app::Resource* resource) override;
         void OnRemoveResource(const app::Resource* resource) override;
         void OnUpdateResource(const app::Resource* resource) override;

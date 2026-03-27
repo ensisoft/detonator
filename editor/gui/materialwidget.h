@@ -77,6 +77,7 @@ namespace gui
         void Save() override;
         bool HasUnsavedChanges() const override;
         bool GetStats(Stats* stats) const override;
+        void SetState(State state) override;
         bool OnEscape() override;
     private slots:
         void on_widgetColor_colorChanged(QColor color);

@@ -98,6 +98,8 @@ namespace gui
 
         void Shutdown();
 
+        void CloseWindow(bool ask_for_save);
+
         // Show a note in the status bar.
         void ShowNote(const QString& note) const;
 

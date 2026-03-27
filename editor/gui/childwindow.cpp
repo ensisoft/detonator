@@ -184,6 +184,37 @@ void ChildWindow::SetSharedWorkspaceMenu(QMenu* menu)
     mUI.menubar->insertMenu(mUI.menuEdit->menuAction(), menu);
 }
 
+void ChildWindow::CloseWindow(bool ask_for_save)
+{
+    if (mWidget->HasUnsavedChanges())
+    {
+        if (ask_for_save)
+        {
+            QMessageBox msg(this);
+            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+            msg.setIcon(QMessageBox::Question);
+            msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
+            const auto ret = msg.exec();
+            if (ret == QMessageBox::Cancel)
+                return;
+            else if (ret == QMessageBox::Yes)
+                mWidget->Save();
+        }
+        else
+        {
+            mWidget->Save();
+        }
+    }
+
+    // Make sure to cleanup first while the window
+    // (and the X11 surface) still exists
+    Shutdown();
+
+    mClosed = true;
+    hide();
+}
+
+
 void ChildWindow::Shutdown()
 {
     if (mWidget)
@@ -252,24 +283,7 @@ void ChildWindow::on_menuEdit_aboutToShow()
 
 void ChildWindow::on_actionClose_triggered()
 {
-    if (mWidget->HasUnsavedChanges())
-    {
-        QMessageBox msg(this);
-        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-        msg.setIcon(QMessageBox::Question);
-        msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
-        const auto ret = msg.exec();
-        if (ret == QMessageBox::Cancel)
-            return;
-        else if (ret == QMessageBox::Yes)
-            mWidget->Save();
-    }
-    // Make sure to cleanup first while the window
-    // (and the X11 surface) still exists
-    Shutdown();
-
-    mClosed = true;
-    hide();
+    CloseWindow(true);
 }
 void ChildWindow::on_actionPopIn_triggered()
 {

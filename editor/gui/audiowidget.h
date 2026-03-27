@@ -105,6 +105,7 @@ namespace gui
         void Paste(const Clipboard& clipboard) override;
         bool HasUnsavedChanges() const override;
         bool GetStats(Stats* stats) const override;
+        void SetState(State state) override;
     private:
         void ShowSelectedElementProperties();
         void SetSelectedElementProperties();

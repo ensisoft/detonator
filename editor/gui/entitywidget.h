@@ -85,6 +85,7 @@ namespace gui
         bool HasUnsavedChanges() const override;
         void Refresh() override;
         bool GetStats(Stats* stats) const override;
+        void SetState(State state) override;
         bool OnEscape() override;
         bool LaunchScript(const app::AnyString& id) override;
         void OnAddResource(const app::Resource* resource) override;

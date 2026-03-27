@@ -209,6 +209,11 @@ MainWindow::MainWindow(QApplication& app, base::ThreadPool* threadpool)
     mRefreshTimer.setInterval(500);
     mRefreshTimer.start();
 
+    QObject::connect(&mClaudeTimer, &QTimer::timeout, this, [this]() {
+       ExecuteClaudeScript(1.0/60.0f);
+    });
+    mClaudeTimer.setInterval(1000/60);
+
     auto& events = app::EventLog::get();
     QObject::connect(&events, &app::EventLog::newEvent, this, &MainWindow::ShowNote);
 
@@ -901,43 +906,7 @@ void MainWindow::CloseWorkspace()
     // note that here we don't care about saving any state.
     // this is only for closing everything, closing the tabs
     // and the child windows if any are open.
-
-    // make sure we're not getting nasty unwanted recursion
-    QSignalBlocker blocker(mUI.mainTab);
-
-    // delete widget objects in the main tab.
-    while (mUI.mainTab->count())
-    {
-        auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(0));
-        widget->Shutdown();
-        //               !!!!! WARNING !!!!!
-        // setParent(nullptr) will cause an OpenGL memory leak
-        //
-        // https://forum.qt.io/topic/92179/xorg-vram-leak-because-of-qt-opengl-application/12
-        // https://community.khronos.org/t/xorg-vram-leak-because-of-qt-opengl-application/76910/2
-        // https://bugreports.qt.io/browse/QTBUG-69429
-        //
-        // widget->setParent(nullptr);
-
-        // cleverly enough this will remove the tab. so the loop
-        // here must be carefully done to access the tab at index 0
-        delete widget;
-    }
-    mUI.mainTab->clear();
-
-    // delete child windows
-    for (auto* child : mChildWindows)
-    {
-        child->Shutdown();
-        child->close();
-#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
-        delete child->GetWindow();
-#endif
-
-    }
-    mChildWindows.clear();
-
-    mCurrentWidget = nullptr;
+    CloseWorkspaceWindows();
 
     if (mGameProcess.IsRunning())
     {
@@ -1004,6 +973,45 @@ void MainWindow::CloseWorkspace()
     SetVisible(mUI.eventlogDock,  false);
     SetVisible(mUI.previewDock,   false);
     SetEnabled(mUI.statusBarFrame, false);
+}
+
+void MainWindow::CloseWorkspaceWindows()
+{
+    // make sure we're not getting nasty unwanted recursion
+    QSignalBlocker blocker(mUI.mainTab);
+
+    // delete widget objects in the main tab.
+    while (mUI.mainTab->count())
+    {
+        auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(0));
+        widget->Shutdown();
+        //               !!!!! WARNING !!!!!
+        // setParent(nullptr) will cause an OpenGL memory leak
+        //
+        // https://forum.qt.io/topic/92179/xorg-vram-leak-because-of-qt-opengl-application/12
+        // https://community.khronos.org/t/xorg-vram-leak-because-of-qt-opengl-application/76910/2
+        // https://bugreports.qt.io/browse/QTBUG-69429
+        //
+        // widget->setParent(nullptr);
+
+        // cleverly enough this will remove the tab. so the loop
+        // here must be carefully done to access the tab at index 0
+        delete widget;
+    }
+    mUI.mainTab->clear();
+
+    // delete child windows
+    for (auto* child : mChildWindows)
+    {
+        child->Shutdown();
+        child->close();
+#if defined(DETONATOR_EDITOR_FRAMELESS_WINDOW)
+        delete child->GetWindow();
+#endif
+    }
+
+    mChildWindows.clear();
+    mCurrentWidget = nullptr;
 }
 
 void MainWindow::showWindow()
@@ -1166,7 +1174,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
 
 void MainWindow::on_mainTab_tabCloseRequested(int index)
 {
-    if (CloseTab(index))
+    if (CloseTab(index, true))
     {
         UpdateWindowMenu();
         FocusPreviousTab();
@@ -1247,7 +1255,7 @@ void MainWindow::on_actionTabClose_triggered()
     const auto* action = qobject_cast<QAction*>(sender());
     const auto tabIndex = action->property("index").toInt();
 
-    CloseTab(tabIndex);
+    CloseTab(tabIndex, true);
 
 }
 void MainWindow::on_actionTabPopOut_triggered()
@@ -2581,6 +2589,11 @@ void MainWindow::on_btnTilemap_clicked()
 
 void MainWindow::RefreshUI()
 {
+    if (Editor::DevEditor())
+    {
+        LoadClaudeScript();
+    }
+
     if (mPlayWindow)
     {
         if (mPlayWindow->IsClosed())
@@ -3013,14 +3026,19 @@ void MainWindow::LaunchScript(const QString& id)
     NOTE("No current preview available for this script.");
 }
 
-void MainWindow::OpenResource(const QString& id)
+bool MainWindow::OpenResource(const QString& id)
 {
     if (id.isEmpty())
-        return;
+        return false;
+
     if (auto* resource = mWorkspace->FindResourceById(id))
     {
         if (resource->IsPrimitive())
-            return;
+        {
+            WARN("Resource is primitive and cannot be edited. [id='%1']", id);
+            return false;
+        }
+
         const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
 
         if (!FocusWidget(id))
@@ -3034,7 +3052,40 @@ void MainWindow::OpenResource(const QString& id)
                 this->activateWindow();
             }
         }
-    } else ERROR("No such resource could be opened. [id='%1']", id);
+        return true;
+    }
+
+    WARN("No such resource could be found in workspace. [id='%1']", id);
+    return false;
+}
+
+bool MainWindow::CloseResource(const QString& id)
+{
+    for (int i=0; i<GetCount((mUI.mainTab)); ++i)
+    {
+        auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(i));
+        if (widget->GetId() != id)
+            continue;
+
+        CloseTab(i, false);
+        return true;
+    }
+
+    for (auto* child : mChildWindows)
+    {
+        auto* widget = child->GetWidget();
+        if (!widget)
+            continue;
+
+        if (widget->GetId() != id)
+            continue;
+
+        child->CloseWindow(false);
+        return true;
+    }
+
+    WARN("No such resource is open for editing. [id='%1']", id);
+    return false;
 }
 
 void MainWindow::OpenRecentWorkspace()
@@ -3527,20 +3578,27 @@ void MainWindow::DeployGameFile(const QString& filepath)
 
 }
 
-bool MainWindow::CloseTab(int index)
+bool MainWindow::CloseTab(int index, bool ask_for_save)
 {
     auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(index));
     if (widget->HasUnsavedChanges())
     {
-        QMessageBox msg(this);
-        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-        msg.setIcon(QMessageBox::Question);
-        msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
-        const auto ret = msg.exec();
-        if (ret == QMessageBox::Cancel)
-            return false;
-        else if (ret == QMessageBox::Yes)
+        if (ask_for_save)
+        {
+            QMessageBox msg(this);
+            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+            msg.setIcon(QMessageBox::Question);
+            msg.setText(tr("Looks like you have unsaved changes. Would you like to save them?"));
+            const auto ret = msg.exec();
+            if (ret == QMessageBox::Cancel)
+                return false;
+            else if (ret == QMessageBox::Yes)
+                widget->Save();
+        }
+        else
+        {
             widget->Save();
+        }
     }
     if (widget == mCurrentWidget)
         mCurrentWidget = nullptr;
@@ -4005,6 +4063,30 @@ MainWidget* MainWindow::MakeWidget(app::Resource::Type type, const app::Resource
     return widget;
 }
 
+MainWidget *MainWindow::FindWidget(const app::AnyString& id)
+{
+    for (int i=0; i<GetCount((mUI.mainTab)); ++i)
+    {
+        auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(i));
+        if (widget->GetId() == id)
+            return widget;
+    }
+
+    for (auto* child : mChildWindows)
+    {
+        auto* widget = child->GetWidget();
+        // if the window is being closed but has not yet been removed
+        // the widget can be nullptr, in which case skip the check.
+        if (!widget)
+            continue;
+
+        if (widget->GetId() == id)
+            return widget;
+    }
+    return nullptr;
+}
+
+
 void MainWindow::GenerateNewScript(const QString& script_name, const QString& arg_name, ScriptGen generator)
 {
     if (!mWorkspace)
@@ -4460,5 +4542,237 @@ void MainWindow::NotifyClipboardChanged() const
 
 }
 
+void MainWindow::LoadClaudeScript()
+{
+    if (!mWorkspace)
+        return;
+
+    // already have a runner for this script
+    if (mScriptRunner)
+        return;
+
+    const auto& file = app::GetAppFile("claude-script.txt");
+    if (!QFileInfo::exists(file))
+        return;
+
+    app::ClaudeScript script;
+    if (!script.ReadScript(file))
+    {
+        ERROR("Failed to read claude script file. [file='%1']", file);
+        return;
+    }
+
+    mScriptRunner = std::make_unique<app::ClaudeScriptRunner>(std::move(script));
+    mClaudeTimer.start();
+    DEBUG("Loaded claude-script. [file='%1']", file);
+}
+
+void MainWindow::ExecuteClaudeScript(float dt)
+{
+    if (!mScriptRunner)
+        return;
+
+    mScriptRunner->Update(dt);
+
+    using Status = app::ClaudeScriptRunner::CommandStatus;
+
+    while (!mScriptRunner->IsDone())
+    {
+        auto* command = mScriptRunner->GetNextCommand();
+        if (!command)
+            break;
+
+        command->status = Status::Success;
+
+        const auto* cmd = &command->command;
+        if (const auto* p = std::get_if<app::ClaudeScript::ImportResource>(cmd))
+        {
+            std::vector<std::unique_ptr<app::Resource>> resources;
+            if (!app::Workspace::ImportResourcesFromJson(p->file, resources))
+            {
+                command->status  = Status::Error;
+                command->message = "Resource import failed";
+                continue;
+            }
+            for (const auto& resource : resources)
+            {
+                mWorkspace->SaveResource(*resource);
+            }
+        }
+        else if (const auto* p = std::get_if<app::ClaudeScript::EditResource>(cmd))
+        {
+            if (!OpenResource(p->id))
+            {
+                command->status = Status::Error;
+                command->message = "Invalid resource ID";
+            }
+        }
+        else if (const auto* p = std::get_if<app::ClaudeScript::FocusResource>(cmd))
+        {
+            if (!FocusWidget(p->id))
+            {
+                command->status = Status::Error;
+                command->message = "Invalid resource ID";
+            }
+        }
+        else if (const auto* p = std::get_if<app::ClaudeScript::CloseResource>(cmd))
+        {
+            if (!CloseResource(p->id))
+            {
+                command->status = Status::Error;
+                command->message = "Invalid resource ID";
+            }
+        }
+        else if (const auto* p = std::get_if<app::ClaudeScript::CloseAllResources>(cmd))
+        {
+            CloseWorkspaceWindows();
+        }
+        else if (std::get_if<app::ClaudeScript::Play>(cmd))
+        {
+            if (mCurrentWidget)
+            {
+                mCurrentWidget->SetState(MainWidget::State::Play);
+            }
+            else
+            {
+                command->status = Status::Error;
+                command->message = "No current widget";
+            }
+        }
+        else if (std::get_if<app::ClaudeScript::Pause>(cmd))
+        {
+            if (mCurrentWidget)
+            {
+                mCurrentWidget->SetState(MainWidget::State::Pause);
+            }
+            else
+            {
+                command->status = Status::Error;
+                command->message = "No current widget";
+            }
+        }
+        else if (std::get_if<app::ClaudeScript::Stop>(cmd))
+        {
+            if (mCurrentWidget)
+            {
+                mCurrentWidget->SetState(MainWidget::State::Stop);
+            }
+            else
+            {
+                command->status = Status::Error;
+                command->message = "No current widget";
+            }
+        }
+        else if (const auto* p = std::get_if<app::ClaudeScript::TakeScreenshot>(cmd))
+        {
+            if (const auto* widget = FindWidget(p->id))
+            {
+                const auto& screenshot = widget->TakeScreenshot();
+                if (screenshot.isNull())
+                {
+                    command->status = Status::Error;
+                    command->message = "Screenshot failed";
+                }
+                else
+                {
+                    QImageWriter writer;
+                    writer.setFormat("PNG");
+                    writer.setQuality(100);
+                    writer.setFileName(p->file);
+                    if (!writer.write(screenshot))
+                    {
+                        command->status = Status::Error;
+                        command->message = "Screenshot write failed";
+                    }
+                }
+            }
+            else
+            {
+                command->status = Status::Error;
+                command->message = "Invalid resource ID";
+            }
+        }
+        else if (const auto* p = std::get_if<app::ClaudeScript::ExportResource>(cmd))
+        {
+            const auto* resource = mWorkspace->FindResourceById(p->id);
+            if (resource)
+            {
+                if (!mWorkspace->ExportResourceJson(*resource, p->file))
+                {
+                    command->status = Status::Error;
+                    command->message = "JSON export failed";
+                }
+            }
+            else
+            {
+                command->status = Status::Error;
+                command->message = "Invalid resource ID";
+            }
+        }
+        else if (const auto* p = std::get_if<app::ClaudeScript::ZoomIn>(cmd))
+        {
+            if (mCurrentWidget)
+            {
+                for (unsigned i=0; i<p->steps; ++i)
+                    mCurrentWidget->ZoomIn();
+            }
+            else
+            {
+                command->status = Status::Error;
+                command->message = "No current widget";
+            }
+        }
+        else if (const auto* p = std::get_if<app::ClaudeScript::ZoomOut>(cmd))
+        {
+            if (mCurrentWidget)
+            {
+                for (unsigned i=0; i<p->steps; ++i)
+                    mCurrentWidget->ZoomOut();
+            }
+            else
+            {
+                command->status = Status::Error;
+                command->message = "No current widget";
+            }
+        }
+        else if (std::get_if<app::ClaudeScript::SaveWorkspace>(cmd))
+        {
+            SaveWorkspace();
+        }
+        else if (const auto* p = std::get_if<app::ClaudeScript::ListResources>(cmd))
+        {
+            if (!mWorkspace->ExportResourceList(p->file))
+            {
+                command->status = Status::Error;
+                command->message = "JSON export failed";
+            }
+        }
+        else if (const auto* ptr = std::get_if<app::ClaudeScript::Delay>(cmd))
+        {
+            command->status = Status::Success;
+        }
+        else BUG("Unhandled claude script command.");
+    }
+
+    if (mScriptRunner->IsDone())
+    {
+        const auto command_file = mScriptRunner->GetFileName();
+        const auto result_file  = app::GetAppFile("claude-script-result.txt");
+        QFile result(result_file);
+        if (result.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            mScriptRunner->WriteResult(result);
+            result.flush();
+            result.close();
+            DEBUG("Claude-script result written. [file='%1']", result_file);
+        }
+        else ERROR("Failed to write claude-script result file. [file='%1']", result_file);
+
+        mScriptRunner.reset();
+        mClaudeTimer.stop();
+        QFile::remove(command_file);
+        DEBUG("Claude-script done, deleted file. [file='%1']", command_file);
+    }
+}
 
 } // namespace

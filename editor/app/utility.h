@@ -64,6 +64,7 @@ QString FindImageJsonFile(const QString& image_file);
 // Find the image file associated with a json file (if any)
 QString FindJsonImageFile(const QString& json_file);
 
+QString GetAppFile(const QString& file);
 QString GetAppDir();
 QString FixWorkspacePath(QString path);
 
