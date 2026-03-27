@@ -104,9 +104,10 @@
       "active_texture_map": "WreQpCgdOO",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -175,9 +176,10 @@
       "active_texture_map": "mWEdoromIQ",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -236,9 +238,10 @@
       "active_texture_map": "Zerwf41HkW",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -297,9 +300,10 @@
       "active_texture_map": "6BPPmnpuYH",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -369,9 +373,10 @@
       "active_texture_map": "vuXDGEagXU",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -430,9 +435,10 @@
       "active_texture_map": "822PyEL4oL",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -510,9 +516,10 @@
       "active_texture_map": "qrEtp4aGOu",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -577,9 +584,10 @@
       "active_texture_map": "Szj2bdLqZt",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -638,9 +646,10 @@
       "active_texture_map": "r8Ps659HGa",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -710,9 +719,10 @@
       "active_texture_map": "GnoKHPYuzr",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -780,9 +790,10 @@
       "active_texture_map": "J5KbiR1edX",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -841,9 +852,10 @@
       "active_texture_map": "IMXztgauJY",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -902,9 +914,10 @@
       "active_texture_map": "Rwxj3GdYuH",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -963,9 +976,10 @@
       "active_texture_map": "elOaxxICB9",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -1024,9 +1038,10 @@
       "active_texture_map": "TfN0sCJjmg",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": true,
         "Static": false
       },
@@ -1085,9 +1100,10 @@
       "active_texture_map": "pzCEni9BoP",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -1157,9 +1173,10 @@
       "active_texture_map": "dEypHsJ5Ft",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -1218,9 +1235,10 @@
       "active_texture_map": "HTWzGoXXey",
       "flags": {
         "BlendFrames": true,
-        "EnableBloom": true,
-        "EnableFog": true,
-        "EnableLight": true,
+        "Bloom": true,
+        "EnableSDF": false,
+        "Fog": true,
+        "Lighting": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
@@ -2581,7 +2599,7 @@
                     "y": 258.0
                   },
                   "size": {
-                    "h": 150.0,
+                    "h": 180.0,
                     "w": 295.0
                   },
                   "style": "",
@@ -2666,6 +2684,31 @@
                       "text": "Complete!",
                       "type": "ProgressBar",
                       "value": 1.0
+                    },
+                    {
+                      "animation": "",
+                      "flags": {
+                        "ClipChildren": true,
+                        "Enabled": true,
+                        "LockedInEditor": false,
+                        "VisibleInEditor": true,
+                        "VisibleInGame": true
+                      },
+                      "id": "ErHdBBkshy",
+                      "name": "Prog25",
+                      "orientation": "Horizontal",
+                      "position": {
+                        "x": 10.0,
+                        "y": 141.0
+                      },
+                      "size": {
+                        "h": 28.0,
+                        "w": 270.0
+                      },
+                      "style": "",
+                      "tab_index": 0,
+                      "text": "",
+                      "type": "ProgressBar"
                     }
                   ]
                 },
@@ -2682,7 +2725,7 @@
                   "name": "SpinboxGroup",
                   "position": {
                     "x": 325.0,
-                    "y": 421.0
+                    "y": 461.0
                   },
                   "size": {
                     "h": 120.0,
@@ -2728,13 +2771,15 @@
                         "VisibleInGame": true
                       },
                       "id": "sp_score",
-                      "max": 9999,
-                      "min": 0,
+                      "max": 3.4028234663852886e+38,
+                      "min": -3.4028234663852886e+38,
                       "name": "ScoreSpinBox",
                       "position": {
                         "x": 82.0,
                         "y": 18.0
                       },
+                      "precision": 0,
+                      "single_step": 1.0,
                       "size": {
                         "h": 30.0,
                         "w": 100.0
@@ -2742,7 +2787,7 @@
                       "style": "",
                       "tab_index": 30,
                       "type": "SpinBox",
-                      "value": 1337
+                      "value": 0.0
                     },
                     {
                       "animation": "",
@@ -2779,13 +2824,15 @@
                         "VisibleInGame": true
                       },
                       "id": "sp_lives",
-                      "max": 9,
-                      "min": 0,
+                      "max": 3.4028234663852886e+38,
+                      "min": -3.4028234663852886e+38,
                       "name": "LivesSpinBox",
                       "position": {
                         "x": 82.0,
                         "y": 62.0
                       },
+                      "precision": 0,
+                      "single_step": 1.0,
                       "size": {
                         "h": 30.0,
                         "w": 100.0
@@ -2793,7 +2840,7 @@
                       "style": "",
                       "tab_index": 31,
                       "type": "SpinBox",
-                      "value": 3
+                      "value": 0.0
                     }
                   ]
                 },
@@ -2810,8 +2857,8 @@
                   "line_height": 1.0,
                   "name": "MidBottomLabel",
                   "position": {
-                    "x": 325.0,
-                    "y": 558.0
+                    "x": 333.0,
+                    "y": 593.0
                   },
                   "size": {
                     "h": 80.0,
@@ -3360,7 +3407,7 @@
                       },
                       "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
                       "tab_index": 0,
-                      "text": "Width:",
+                      "text": "Int:",
                       "type": "Label"
                     },
                     {
@@ -3373,13 +3420,15 @@
                         "VisibleInGame": true
                       },
                       "id": "sc_sp1",
-                      "max": 100,
-                      "min": 0,
+                      "max": 3.4028234663852886e+38,
+                      "min": -3.4028234663852886e+38,
                       "name": "ScrollSpin1",
                       "position": {
                         "x": 88.0,
                         "y": 540.0
                       },
+                      "precision": 0,
+                      "single_step": 1.0,
                       "size": {
                         "h": 30.0,
                         "w": 100.0
@@ -3387,7 +3436,7 @@
                       "style": "",
                       "tab_index": 53,
                       "type": "SpinBox",
-                      "value": 80
+                      "value": 0.0
                     },
                     {
                       "animation": "",
@@ -3411,7 +3460,7 @@
                       },
                       "style": "{\"properties\": [{\"key\": \"text-size\", \"value\": 13}, {\"key\": \"text-horizontal-align\", \"value\": \"Right\"}, {\"key\": \"text-vertical-align\", \"value\": \"Center\"}]}",
                       "tab_index": 0,
-                      "text": "Height:",
+                      "text": "Float:",
                       "type": "Label"
                     },
                     {
@@ -3424,13 +3473,15 @@
                         "VisibleInGame": true
                       },
                       "id": "sc_sp2",
-                      "max": 100,
-                      "min": 0,
+                      "max": 1000.0,
+                      "min": -1000.0,
                       "name": "ScrollSpin2",
                       "position": {
                         "x": 278.0,
                         "y": 540.0
                       },
+                      "precision": 1,
+                      "single_step": 0.10000000149011612,
                       "size": {
                         "h": 30.0,
                         "w": 100.0
@@ -3438,7 +3489,7 @@
                       "style": "",
                       "tab_index": 54,
                       "type": "SpinBox",
-                      "value": 60
+                      "value": 0.0
                     },
                     {
                       "animation": "",
@@ -5754,13 +5805,15 @@
                         "VisibleInGame": true
                       },
                       "id": "6HjqNbQkBs",
-                      "max": 100,
-                      "min": 0,
+                      "max": 3.4028234663852886e+38,
+                      "min": -3.4028234663852886e+38,
                       "name": "SpinBox_1",
                       "position": {
                         "x": 220.0,
                         "y": 20.0
                       },
+                      "precision": 0,
+                      "single_step": 1.0,
                       "size": {
                         "h": 40.0,
                         "w": 120.0
@@ -5768,7 +5821,7 @@
                       "style": "",
                       "tab_index": 0,
                       "type": "SpinBox",
-                      "value": 0
+                      "value": 0.0
                     },
                     {
                       "animation": "",
@@ -6384,13 +6437,15 @@
                     "VisibleInGame": true
                   },
                   "id": "7TjOr6LdsD",
-                  "max": 100,
-                  "min": 0,
+                  "max": 3.4028234663852886e+38,
+                  "min": -3.4028234663852886e+38,
                   "name": "SpinBox_1",
                   "position": {
                     "x": 400.0,
                     "y": 150.0
                   },
+                  "precision": 0,
+                  "single_step": 1.0,
                   "size": {
                     "h": 30.0,
                     "w": 100.0
@@ -6398,7 +6453,7 @@
                   "style": "",
                   "tab_index": 3,
                   "type": "SpinBox",
-                  "value": 0
+                  "value": 0.0
                 },
                 {
                   "animation": "",
