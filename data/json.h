@@ -115,6 +115,9 @@ namespace data
         void AppendChunk(const char* name, std::unique_ptr<Writer> chunk) override;
         void AppendChunk(const char* name, std::unique_ptr<Chunk> chunk) override;
 
+        void Write(const char* name, const JsonObject& object);
+        void Write(const char* name, JsonObject&& object);
+
         // bring the template helpers into scope when using this type.
         using Writer::Write;
         using Reader::Read;
