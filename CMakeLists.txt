@@ -586,6 +586,7 @@ if (BUILD_QT_STUFF)
         editor/app/process.h
         editor/app/process.cpp
         editor/app/ipc.cpp
+        editor/app/claude-script.cpp
         editor/app/resource.cpp
         editor/app/resource_cache.cpp
         editor/app/lua-tools.cpp
@@ -879,6 +880,8 @@ if (BUILD_QT_STUFF)
         editor/app/window-eventlog.cpp
         editor/app/ipc.h
         editor/app/ipc.cpp
+        editor/app/claude-script.h
+        editor/app/claude-script.cpp
         editor/app/process.cpp
         editor/gui/host.cpp
         editor/gui/utility.h

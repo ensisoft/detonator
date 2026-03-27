@@ -1506,6 +1506,17 @@ bool AudioWidget::GetStats(Stats* stats) const
     return true;
 }
 
+void AudioWidget::SetState(State state)
+{
+    if (state == State::Play)
+        on_actionPlay_triggered();
+    else if (state == State::Pause)
+        on_actionPause_triggered();
+    else if (state == State::Stop)
+        on_actionStop_triggered();
+    else BUG("Missing state handling.");
+}
+
 void AudioWidget::on_btnSelectFile_clicked()
 {
     const auto& file = QFileDialog::getOpenFileName((QWidget*)this,

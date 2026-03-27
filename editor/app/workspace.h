@@ -307,7 +307,10 @@ namespace app
         void DuplicateResources(const ModelIndexList& list, QModelIndexList* result = nullptr);
 
         // Export the raw JSON of the the selected resources.
-        bool ExportResourceJson(const ModelIndexList& list, const QString& filename) const;
+        bool ExportResourceJson(const ModelIndexList& list, const AnyString& filename) const;
+        bool ExportResourceJson(const Resource& resource, const AnyString& filename) const;
+
+        bool ExportResourceList(const QString& filename) const;
 
         static
         bool ImportResourcesFromJson(const QString& filename, std::vector<std::unique_ptr<Resource>>& resources);

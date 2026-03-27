@@ -2245,7 +2245,7 @@ void Workspace::DuplicateResources(const ModelIndexList& list, QModelIndexList* 
     }
 }
 
-bool Workspace::ExportResourceJson(const ModelIndexList& indices, const QString& filename) const
+bool Workspace::ExportResourceJson(const ModelIndexList& indices, const AnyString& filename) const
 {
     data::JsonObject json;
     for (size_t index : indices)
@@ -2269,10 +2269,68 @@ bool Workspace::ExportResourceJson(const ModelIndexList& indices, const QString&
 
     data::JsonFile file;
     file.SetRootObject(json);
+
+    const auto [success, error] = file.Save(filename);
+    if (!success)
+    {
+        ERROR("Failed to export resource JSON. [file='%1', error='%2']", filename, error);
+        return false;
+    }
+
+    INFO("Exported %1 resource(s) into '%2'", indices.size(), filename);
+    return true;
+}
+
+bool Workspace::ExportResourceJson(const Resource& resource, const AnyString& filename) const
+{
+    data::JsonObject json;
+    resource.Serialize(json);
+
+    QJsonObject props;
+    resource.SaveProperties(props);
+    QJsonDocument docu(props);
+    const QByteArray& bytes = docu.toJson(); //.toBase64();
+
+    std::string property_key;
+    property_key += "properties_";
+    property_key += resource.GetIdUtf8();
+
+    data::JsonObject temp;
+    temp.ParseString(bytes.constData(), bytes.size());
+    json.Write(property_key.c_str(), temp);
+
+    data::JsonFile file;
+    file.SetRootObject(json);
+
+    const auto [success, error] = file.Save(filename);
+    if (!success)
+    {
+        ERROR("Failed to export resource JSON. [file='%1', error='%2']", filename, error);
+        return false;
+    }
+
+    INFO("Exported %1 resource(s) into '%2'", 1, filename);
+    return true;
+}
+
+bool Workspace::ExportResourceList(const QString& filename) const
+{
+    data::JsonObject json;
+    for (size_t i=0; i<mUserResourceCount; ++i)
+    {
+        const auto& resource = GetResource(i);
+        auto chunk = json.NewWriteChunk();
+        chunk->Write("id", resource.GetIdUtf8());
+        chunk->Write("type", resource.GetType());
+        chunk->Write("name", resource.GetNameUtf8());
+        json.AppendChunk("resources", std::move(chunk));
+    }
+    data::JsonFile file;
+    file.SetRootObject(json);
     const auto [success, error] = file.Save(app::ToUtf8(filename));
     if (!success)
-        ERROR("Export resource as JSON error '%1'.", error);
-    else INFO("Exported %1 resource(s) into '%2'", indices.size(), filename);
+        ERROR("Failed to export resource list to a file. [file='%1']", filename);
+    else INFO("Exported resource list file '%1'", filename);
     return success;
 }
 

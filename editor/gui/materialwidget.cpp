@@ -555,6 +555,17 @@ bool MaterialWidget::GetStats(Stats* stats) const
     return true;
 }
 
+void MaterialWidget::SetState(State state)
+{
+    if (state == State::Play)
+        on_actionPlay_triggered();
+    else if (state == State::Pause)
+        on_actionPause_triggered();
+    else if (state == State::Stop)
+        on_actionStop_triggered();
+    else BUG("Missing state handling.");
+}
+
 void MaterialWidget::Render()
 {
     mUI.widget->TriggerPaint();

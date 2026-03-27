@@ -1692,6 +1692,17 @@ bool ShapeWidget::GetStats(Stats* stats) const
     return true;
 }
 
+void ShapeWidget::SetState(MainWidget::State state)
+{
+    if (state == MainWidget::State::Play)
+        on_actionPlay_triggered();
+    else if (state == MainWidget::State::Pause)
+        on_actionPause_triggered();
+    else if (state == MainWidget::State::Stop)
+        on_actionStop_triggered();
+    else BUG("Missing state handling.");
+}
+
 void ShapeWidget::on_widgetColor_colorChanged(const QColor& color)
 {
     mUI.widget->SetClearColor(ToGfx(color));

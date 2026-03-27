@@ -224,6 +224,14 @@ namespace gui
         virtual bool LaunchScript(const app::AnyString& id)
         { return false; }
 
+        enum class State {
+            Play,
+            Pause,
+            Stop
+        };
+        virtual void SetState(State state)
+        {}
+
         // Returns true if the widget wants to close itself. The caller should
         // not call "ConfirmClose" or anything else on the widget other than shutdown
         // since the widget has made the decision to want to close already.

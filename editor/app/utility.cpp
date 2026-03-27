@@ -177,6 +177,11 @@ QString FindJsonImageFile(const QString& json_file)
     return "";
 }
 
+QString GetAppFile(const QString& file)
+{
+    return app::JoinPath(GetAppDir(), file);
+}
+
 QString GetAppDir()
 {
     static const auto& dir = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());

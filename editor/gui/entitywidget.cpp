@@ -2357,6 +2357,17 @@ bool EntityWidget::GetStats(Stats* stats) const
     return true;
 }
 
+void EntityWidget::SetState(MainWidget::State state)
+{
+    if (state == MainWidget::State::Play)
+        on_actionPlay_triggered();
+    else if (state == MainWidget::State::Pause)
+        on_actionPause_triggered();
+    else if (state == MainWidget::State::Stop)
+        on_actionStop_triggered();
+    else BUG("Missing state handling.");
+}
+
 bool EntityWidget::OnEscape()
 {
     if (mCurrentTool)

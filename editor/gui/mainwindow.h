@@ -42,6 +42,7 @@
 #include "editor/app/process.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/ipc.h"
+#include "editor/app/claude-script.h"
 #include "editor/gui/appsettings.h"
 #include "editor/gui/clipboard.h"
 #include "editor/gui/mainwidget.h"
@@ -215,7 +216,8 @@ namespace gui
         void RefreshWidget();
         void RefreshWidgetActions();
         void LaunchScript(const QString& id);
-        void OpenResource(const QString& id);
+        bool OpenResource(const QString& id);
+        bool CloseResource(const QString& id);
         void OpenRecentWorkspace();
         void ToggleShowResource();
         void CleanGarbage();
@@ -227,7 +229,7 @@ namespace gui
 
     private:
         void DeployGameFile(const QString& file);
-        bool CloseTab(int index);
+        bool CloseTab(int index, bool ask_for_save);
         void FloatTab(int index);
         void LaunchGame(bool clean);
         void BuildRecentWorkspacesMenu();
@@ -237,6 +239,7 @@ namespace gui
         bool LoadWorkspace(const QString& dir);
         bool SaveWorkspace();
         void CloseWorkspace();
+        void CloseWorkspaceWindows();
         void EditResources(bool open_new_window);
         void ShowHelpWidget();
         void ImportFiles(const QStringList& files);
@@ -246,11 +249,14 @@ namespace gui
         void UpdateMainToolbar();
         ChildWindow* ShowWidget(MainWidget* widget, bool new_window);
         MainWidget* MakeWidget(app::Resource::Type type, const app::Resource* resource = nullptr);
+        MainWidget* FindWidget(const app::AnyString& id);
 
         using ScriptGen = QString(*)(QString);
         void GenerateNewScript(const QString& script_name, const QString& arg_name, ScriptGen gen);
         void DrawResourcePreview(gfx::Painter& painter, double secs);
         void NotifyClipboardChanged() const;
+        void LoadClaudeScript();
+        void ExecuteClaudeScript(float dt);
 
     private:
         bool event(QEvent* event)  override;
@@ -270,6 +276,8 @@ namespace gui
         QApplication& mApplication;
         // the refresh timer to do low frequency UI updates.
         QTimer mRefreshTimer;
+        // timer to execute claude script.
+        QTimer mClaudeTimer;
         // current application settings that are not part of any
         // other state. Loaded on startup and saved on exit.
         AppSettings mSettings;
@@ -326,6 +334,7 @@ namespace gui
         std::unique_ptr<GfxResourceLoader> mLoader;
 
         std::unique_ptr<app::ResourceCache> mResourceCache;
+        std::unique_ptr<app::ClaudeScriptRunner> mScriptRunner;
 
         base::ThreadPool* mThreadPool = nullptr;
 
