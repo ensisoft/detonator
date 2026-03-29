@@ -742,24 +742,24 @@ public:
 
         // write the mask shape to the stencil buffer by writing
         // zeroes to the stencil buffer to the fragments that are NOT to be modified
-        gfx::Painter::RenderPassState mask_cover_state;
+        gfx::Painter::DrawState mask_cover_state;
         mask_cover_state.render_pass = gfx::RenderPass::StencilPass;
-        mask_cover_state.cds.bWriteColor   = false;
-        mask_cover_state.cds.stencil_ref   = 0;
-        mask_cover_state.cds.stencil_mask  = 0xff;
-        mask_cover_state.cds.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
-        mask_cover_state.cds.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
-        mask_cover_state.cds.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+        mask_cover_state.write_color   = false;
+        mask_cover_state.stencil_ref   = 0;
+        mask_cover_state.stencil_mask  = 0xff;
+        mask_cover_state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+        mask_cover_state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+        mask_cover_state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
 
         // Set the state so that we modify fragments only when the stencil value is 1.
-        gfx::Painter::RenderPassState mask_draw_color_state;
+        gfx::Painter::DrawState mask_draw_color_state;
         mask_draw_color_state.render_pass = gfx::RenderPass::ColorPass;
-        mask_draw_color_state.cds.bWriteColor   = true;
-        mask_draw_color_state.cds.stencil_ref   = 1;
-        mask_draw_color_state.cds.stencil_mask  = 0xff;
-        mask_draw_color_state.cds.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
-        mask_draw_color_state.cds.stencil_dpass = gfx::Painter::StencilOp::DontModify;
-        mask_draw_color_state.cds.stencil_dfail = gfx::Painter::StencilOp::DontModify;
+        mask_draw_color_state.write_color  = true;
+        mask_draw_color_state.stencil_ref   = 1;
+        mask_draw_color_state.stencil_mask  = 0xff;
+        mask_draw_color_state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
+        mask_draw_color_state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
+        mask_draw_color_state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
 
         gfx::Transform mask_transform;
         mask_transform.Resize(200.0f, 200.0f);
@@ -769,16 +769,14 @@ public:
         shape_transform.Resize(200.0f, 200.0f);
         shape_transform.MoveTo(300.0f, 300.0f);
 
-        gfx::Painter::DrawCommandState cmd_state;
-
         gfx::StencilShaderProgram stencil_program;
         gfx::GenericShaderProgram color_program;
 
-        painter.Draw(gfx::Circle(),gfx::CreateMaterialFromColor(gfx::Color::White), mask_transform,
-            stencil_program, mask_cover_state, cmd_state);
+        painter.Draw(gfx::Circle(), mask_transform, gfx::CreateMaterialFromColor(gfx::Color::White),
+            mask_cover_state, stencil_program);
 
-        painter.Draw(gfx::Rectangle(), gfx::CreateMaterialFromColor(gfx::Color::HotPink), shape_transform,
-             color_program, mask_draw_color_state, cmd_state);
+        painter.Draw(gfx::Rectangle(), shape_transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+             mask_draw_color_state, color_program);
     }
     std::string GetName() const override
     { return "StencilCoverTest"; }
@@ -803,24 +801,24 @@ public:
 
         // write the mask shape to the stencil buffer by writing
         // ones to the stencil buffer to the fragments that are to be *modified*
-        gfx::Painter::RenderPassState mask_expose_state;
+        gfx::Painter::DrawState mask_expose_state;
         mask_expose_state.render_pass = gfx::RenderPass::StencilPass;
-        mask_expose_state.cds.bWriteColor   = false;
-        mask_expose_state.cds.stencil_ref   = 1;
-        mask_expose_state.cds.stencil_mask  = 0xff;
-        mask_expose_state.cds.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
-        mask_expose_state.cds.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
-        mask_expose_state.cds.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+        mask_expose_state.write_color   = false;
+        mask_expose_state.stencil_ref   = 1;
+        mask_expose_state.stencil_mask  = 0xff;
+        mask_expose_state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+        mask_expose_state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+        mask_expose_state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
 
         // Set the state so that we modify fragments only when the stencil value is 1.
-        gfx::Painter::RenderPassState mask_draw_color_state;
+        gfx::Painter::DrawState mask_draw_color_state;
         mask_draw_color_state.render_pass = gfx::RenderPass::ColorPass;
-        mask_draw_color_state.cds.bWriteColor   = true;
-        mask_draw_color_state.cds.stencil_ref   = 1;
-        mask_draw_color_state.cds.stencil_mask  = 0xff;
-        mask_draw_color_state.cds.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
-        mask_draw_color_state.cds.stencil_dpass = gfx::Painter::StencilOp::DontModify;
-        mask_draw_color_state.cds.stencil_dfail = gfx::Painter::StencilOp::DontModify;
+        mask_draw_color_state.write_color   = true;
+        mask_draw_color_state.stencil_ref   = 1;
+        mask_draw_color_state.stencil_mask  = 0xff;
+        mask_draw_color_state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
+        mask_draw_color_state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
+        mask_draw_color_state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
 
         gfx::Transform mask_transform;
         mask_transform.Resize(200.0f, 200.0f);
@@ -830,16 +828,14 @@ public:
         shape_transform.Resize(200.0f, 200.0f);
         shape_transform.MoveTo(300.0f, 300.0f);
 
-        gfx::Painter::DrawCommandState cmd_state;
-
         gfx::StencilShaderProgram stencil_program;
         gfx::GenericShaderProgram color_program;
 
-        painter.Draw(gfx::Circle(),gfx::CreateMaterialFromColor(gfx::Color::White), mask_transform,
-            stencil_program, mask_expose_state, cmd_state);
+        painter.Draw(gfx::Circle(), mask_transform, gfx::CreateMaterialFromColor(gfx::Color::White),
+            mask_expose_state, stencil_program);
 
-        painter.Draw(gfx::Rectangle(), gfx::CreateMaterialFromColor(gfx::Color::HotPink), shape_transform,
-             color_program, mask_draw_color_state, cmd_state);
+        painter.Draw(gfx::Rectangle(), shape_transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
+             mask_draw_color_state, color_program);
     }
     std::string GetName() const override
     { return "StencilExposeTest"; }
@@ -2542,11 +2538,12 @@ void main() {
         state.write_color  = true;
         state.stencil_func = gfx::Painter::StencilFunc::Disabled;
         state.depth_test   = gfx::Painter::DepthTest ::Disabled;
+        state.culling      = gfx::Painter::Culling::Back;
 
-        painter.Draw(gfx::Rectangle(), model_to_world, gfx::MaterialInstance(srgb_out), state, program, gfx::Painter::LegacyDrawState());
+        painter.Draw(gfx::Rectangle(), model_to_world, gfx::MaterialInstance(srgb_out), state, program);
         model_to_world.Translate(256.0f, 0.0f);
         model_to_world.Translate(20.0f, 0.0f);
-        painter.Draw(gfx::Rectangle(), model_to_world, gfx::MaterialInstance(linear_out), state, program, gfx::Painter::LegacyDrawState());
+        painter.Draw(gfx::Rectangle(), model_to_world, gfx::MaterialInstance(linear_out), state, program);
     }
     std::string GetName() const override
     { return "sRGBWindowTest"; }
@@ -2807,14 +2804,8 @@ public:
 
         gfx::FlatShadedColorProgram program;
 
-        gfx::Painter::DrawState state;
-        state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
-        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
-        state.write_color  = true;
-
         {
             gfx::Transform transform;
-
             transform.Resize(2.0f, -2.0f, 2.0f);
             transform.RotateAroundY(std::sin(mTime));
             transform.RotateAroundX(std::cos(mTime));
@@ -2822,31 +2813,29 @@ public:
             transform.Push();
                transform.Translate(-0.5f, -0.5f, 0.0f);
 
-            p.Draw(gfx::Rectangle(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-                   state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::None));
+            gfx::Painter::DrawState state;
+            state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
+            state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+            state.culling      = gfx::Painter::Culling::None;
+            state.write_color  = true;
 
-            /*
-            gfx::TextBuffer::Text text;
-            text.font = "fonts/nuskool_krome_64x64.json";
-            text.fontsize = 32;
-            text.text = "hello\n";
-            text.lineheight = 1.0f;
-            gfx::TextBuffer buffer(100, 100);
-            buffer.SetText(std::move(text));
-            p.Draw(gfx::Rectangle(), transform, gfx::CreateMaterialFromText(std::move(buffer)),
-                   state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::None));
-                   */
+            p.Draw(gfx::Rectangle(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"), state, program);
         }
 
         // cube reference
         {
+            gfx::Painter::DrawState state;
+            state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
+            state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+            state.culling      = gfx::Painter::Culling::Back;
+            state.write_color  = true;
+
             gfx::Transform transform;
             transform.Resize(2.0f, 2.0f, 2.0f);
             transform.RotateAroundY(std::sin(mTime));
             transform.RotateAroundX(std::cos(mTime));
             transform.MoveTo(-2.5f, 0.0f, -10.0f);
-            p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-                   state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+            p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"), state, program);
         }
     }
     void Update(float dts) override
@@ -2892,9 +2881,12 @@ public:
         gfx::Painter::DrawState state;
         state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
         state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.culling      = gfx::Painter::Culling::Back;
         state.write_color  = true;
 
         const auto t = mTime;
+
+        const auto& material = gfx::CreateMaterialFromImage("textures/uv_test_512.png");
 
         gfx::Transform transform;
         transform.Resize(100.0f, 100.0f, 100.0f);
@@ -2903,83 +2895,64 @@ public:
         transform.Translate(-half_width, half_height);
 
         transform.Translate(100.0f, -100.0f);
-        p.Draw(gfx::Pyramid(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Pyramid(), transform, material, state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Cube(), transform, material,  state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Cylinder(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::None));
+        p.Draw(gfx::Cylinder(), transform, material, state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Cone(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Cone(), transform, material, state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Sphere(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Sphere(), transform, material, state, program);
 
         // wireframes
 
         transform.MoveTo(-half_width, half_height);
         transform.Translate(100.0f, -300.0f);
-        p.Draw(gfx::Wireframe<gfx::Pyramid>(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Wireframe<gfx::Pyramid>(), transform, material, state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Wireframe<gfx::Cube>(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Wireframe<gfx::Cube>(), transform, material, state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Wireframe<gfx::Cylinder>(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::None));
+        p.Draw(gfx::Wireframe<gfx::Cylinder>(), transform, material, state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Wireframe<gfx::Cone>(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Wireframe<gfx::Cone>(), transform, material, state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Wireframe<gfx::Sphere>(),transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Wireframe<gfx::Sphere>(),transform, material, state, program);
 
         // normals, tangents and bitangents
 
         transform.MoveTo(-half_width, half_height);
         transform.Translate(100.0f, -500.0f);
-        p.Draw(gfx::Pyramid(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
-        p.Draw(gfx::NormalMesh<gfx::Pyramid>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Pyramid(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, program);
+        p.Draw(gfx::NormalMesh<gfx::Pyramid>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink), state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
-        p.Draw(gfx::NormalMesh<gfx::Cube>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, program);
+        p.Draw(gfx::NormalMesh<gfx::Cube>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink), state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Cylinder(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
-        p.Draw(gfx::NormalMesh<gfx::Cylinder>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Cylinder(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, program);
+        p.Draw(gfx::NormalMesh<gfx::Cylinder>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink), state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Cone(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
-        p.Draw(gfx::NormalMesh<gfx::Cone>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Cone(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, program);
+        p.Draw(gfx::NormalMesh<gfx::Cone>(mFlags), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink), state, program);
 
         transform.Translate(200.0f, 0.0f);
-        p.Draw(gfx::Sphere(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::Sphere(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGray), state, program);
 
         // reduce the level of detail (the number of slices) in the sphere when visualizing
         // the normals to make it visually less crowded.
-        p.Draw(gfx::NormalMesh<gfx::Sphere>(mFlags, gfx::Sphere::Style::Solid, 15), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::NormalMesh<gfx::Sphere>(mFlags, gfx::Sphere::Style::Solid, 15), transform,
+            gfx::CreateMaterialFromColor(gfx::Color::HotPink), state, program);
 
     }
     std::string GetName() const override
@@ -3327,8 +3300,6 @@ public:
                 transform.Translate(-half_width, half_height);
                 transform.Translate(xpos, ypos);
 
-                //p.Draw(drawable, transform, material, state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
-
                 gfx::Drawable::DrawInstance inst;
                 inst.model_to_world = transform;
                 instanced.instances.push_back(inst);
@@ -3338,7 +3309,7 @@ public:
         gfx::Painter::DrawCommand cmd;
         cmd.drawable = &drawable;
         cmd.material = &material;
-        cmd.state.culling  = gfx::Painter::Culling::Back;
+        cmd.culling  = gfx::Painter::Culling::Back;
         cmd.instanced_draw = instanced;
 
         gfx::Painter::DrawCommandList draw_list;
@@ -3633,6 +3604,7 @@ public:
         gfx::Painter::DrawState state;
         state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
         state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.culling      = gfx::Painter::Culling::Back;
         state.write_color  = true;
 
         gfx::Transform transform;
@@ -3641,8 +3613,8 @@ public:
         transform.RotateAroundY(std::sin(mTime));
         transform.RotateAroundX(std::cos(mTime));
         transform.MoveTo(0.0f, 0.0f, -10.0f);
-        p.Draw(gfx::WavefrontMesh("models/bear3.obj"), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen),
-               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        p.Draw(gfx::WavefrontMesh("models/bear3.obj"), transform,
+            gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), state, program);
     }
     void Update(float dt) override
     {
