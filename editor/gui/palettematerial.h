@@ -58,7 +58,11 @@ namespace gui
         void SetMaterial(const app::AnyString& id);
         void SetTileIndex(unsigned tile_index);
 
+        void ResetDrawable();
+        void SetDrawable(const app::AnyString& id);
+
         bool HasSelectedMaterial() const;
+        bool HasSelectedDrawable() const;
 
         void SetOcclusion(game::TileOcclusion sort)
         {
@@ -68,6 +72,10 @@ namespace gui
         app::AnyString GetMaterialId() const
         {
             return GetItemId(mUI.cmbMaterial);
+        }
+        app::AnyString GetDrawableId() const
+        {
+            return GetItemId(mUI.cmbDrawable);
         }
 
         std::size_t GetPaletteIndex() const
@@ -86,6 +94,7 @@ namespace gui
         void UpdateMaterialPreview(const app::AnyString& id);
 
         void UpdateMaterialList(const ResourceList& list);
+        void UpdateDrawableList(const ResourceList& list);
     private:
         void UpdatePreview(const app::AnyString& id);
 
@@ -96,7 +105,9 @@ namespace gui
         void on_btnSelectMaterial_clicked();
         void on_btnSetMaterialParams_clicked();
         void on_btnResetMaterial_clicked();
+        void on_btnResetDrawable_clicked();
         void on_cmbMaterial_currentIndexChanged(int);
+        void on_cmbDrawable_currentIndexChanged(int);
         void on_tileIndex_valueChanged(int);
         void on_cmbOcclusion_currentIndexChanged(int);
     private:

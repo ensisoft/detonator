@@ -30,29 +30,29 @@
 class TestVectorData : public game::TilemapData
 {
 public:
-    virtual void Write(const void* ptr, size_t bytes, size_t offset) override
+    void Write(const void* ptr, size_t bytes, size_t offset) override
     {
         TEST_REQUIRE(offset + bytes <= mBytes.size());
 
         std::memcpy(&mBytes[offset], ptr, bytes);
     }
-    virtual void Read(void* ptr, size_t bytes, size_t offset) const override
+    void Read(void* ptr, size_t bytes, size_t offset) const override
     {
         TEST_REQUIRE(offset + bytes <= mBytes.size());
 
         std::memcpy(ptr, &mBytes[offset], bytes);
     }
-    virtual size_t AppendChunk(size_t bytes) override
+    size_t AppendChunk(size_t bytes) override
     {
         const auto offset = mBytes.size();
         mBytes.resize(offset + bytes);
         return offset;
     }
-    virtual void Resize(size_t bytes) override
+    void Resize(size_t bytes) override
     {
         mBytes.resize(bytes);
     }
-    virtual void ClearChunk(const void* value, size_t value_size, size_t offset, size_t num_values) override
+    void ClearChunk(const void* value, size_t value_size, size_t offset, size_t num_values) override
     {
         TEST_REQUIRE(offset + value_size * num_values <= mBytes.size());
 
@@ -63,7 +63,7 @@ public:
             std::memcpy(&mBytes[buffer_offset], value, value_size);
         }
     }
-    virtual size_t GetByteCount() const override
+    size_t GetByteCount() const override
     {
         return mBytes.size();
     }
@@ -314,6 +314,8 @@ void test_tilemap_layer()
     klass.SetDataUri("pck://foobar/data.bin");
     klass.SetPaletteMaterialId("some_material", 0);
     klass.SetPaletteMaterialId("other_material", 1);
+    klass.SetPaletteDrawableId("some_drawable", 0);
+    klass.SetPaletteDrawableId("other_drawable", 1);
     klass.SetDepth(-2);
     klass.SetLayer(3);
 
@@ -336,6 +338,8 @@ void test_tilemap_layer()
         TEST_REQUIRE(ret.GetDataUri() == "pck://foobar/data.bin");
         TEST_REQUIRE(ret.GetPaletteMaterialId(0) == "some_material");
         TEST_REQUIRE(ret.GetPaletteMaterialId(1) == "other_material");
+        TEST_REQUIRE(ret.GetPaletteDrawableId(0) == "some_drawable");
+        TEST_REQUIRE(ret.GetPaletteDrawableId(1) == "other_drawable");
         TEST_REQUIRE(ret.GetDepth() == -2);
         TEST_REQUIRE(ret.GetLayer() == 3);
     }

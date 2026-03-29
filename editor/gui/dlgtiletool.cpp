@@ -58,7 +58,9 @@ DlgTileTool::DlgTileTool(const app::Workspace* workspace, QWidget* parent, ToolB
     PopulateFromEnum<TileToolShape>(mUI.cmbToolShape);
 
     const auto& materials = mWorkspace->ListAllMaterials();
+    const auto& shapes    = mWorkspace->ListTileShapes();
     SetList(mUI.cmbToolMaterial, materials);
+    SetList(mUI.cmbToolDrawable, shapes);
     SetRange(mUI.toolValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
 
     connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::TriggerPaint);
@@ -125,7 +127,7 @@ void DlgTileTool::on_toolName_editingFinished()
 void DlgTileTool::on_btnAddTool_clicked()
 {
     auto tool = std::make_shared<TileTool>();
-    tool->name          = "My Tool";
+    tool->name          = "My Brush";
     tool->id            = app::RandomString();
     tool->tool          = TileToolFunction::TileBrush;
     tool->shape         = TileToolShape::Rectangle;
@@ -199,6 +201,13 @@ void DlgTileTool::on_btnEditToolMaterial_clicked()
     ActionEvent::Post(open);
 }
 
+void DlgTileTool::on_btnEditToolShape_clicked()
+{
+    ActionEvent::OpenResource open;
+    open.id =GetItemId(mUI.cmbToolDrawable);
+    ActionEvent::Post(open);
+}
+
 void DlgTileTool::on_btnResetPaletteIndex_clicked()
 {
     SetValue(mUI.toolPaletteIndex, -1);
@@ -224,6 +233,11 @@ void DlgTileTool::on_toolHeight_valueChanged(int)
 }
 
 void DlgTileTool::on_cmbToolMaterial_currentIndexChanged(int)
+{
+    ModifyCurrentTile();
+}
+
+void DlgTileTool::on_cmbToolDrawable_currentIndexChanged(int)
 {
     ModifyCurrentTile();
 }
@@ -286,6 +300,11 @@ void DlgTileTool::ResourceAdded(const app::Resource* resource)
         const auto& materials = mWorkspace->ListAllMaterials();
         SetList(mUI.cmbToolMaterial, materials);
     }
+    else if (resource->IsCustomShape())
+    {
+        const auto& shapes = mWorkspace->ListTileShapes();
+        SetList(mUI.cmbToolDrawable, shapes);
+    }
 }
 void DlgTileTool::ResourceRemoved(const app::Resource* resource)
 {
@@ -302,7 +321,21 @@ void DlgTileTool::ResourceRemoved(const app::Resource* resource)
                     tile.material = "_checkerboard";
             }
         }
+        ShowCurrentTile();
+    }
+    else if (resource->IsCustomShape())
+    {
+        const auto& shapes = mWorkspace->ListTileShapes();
+        SetList(mUI.cmbToolDrawable, shapes);
 
+        if (auto* tool = GetCurrentTool())
+        {
+            for (auto& tile : tool->tiles)
+            {
+                if (tile.drawable == resource->GetId())
+                    tile.drawable.clear();
+            }
+        }
         ShowCurrentTile();
     }
 }
@@ -323,6 +356,11 @@ void DlgTileTool::ResourceUpdated(const app::Resource* resource)
         }
 
         ShowCurrentTile();
+    }
+    else if (resource->IsCustomShape())
+    {
+        const auto& shapes = mWorkspace->ListTileShapes();
+        SetList(mUI.cmbToolDrawable, shapes);
     }
 }
 
@@ -548,6 +586,7 @@ void DlgTileTool::ShowCurrentTool()
         SetEnabled(mUI.toolWidth,                true);
         SetEnabled(mUI.toolHeight,               true);
         SetEnabled(mUI.cmbToolMaterial,          true);
+        SetEnabled(mUI.cmbToolDrawable,          true);
         SetEnabled(mUI.btnSelectToolMaterial,    true);
         SetEnabled(mUI.btnSetToolMaterialParams, false);
         SetEnabled(mUI.btnEditToolMaterial,      true);
@@ -570,6 +609,7 @@ void DlgTileTool::ShowCurrentTool()
         SetEnabled(mUI.toolWidth,                false);
         SetEnabled(mUI.toolHeight,               false);
         SetEnabled(mUI.cmbToolMaterial,          false);
+        SetEnabled(mUI.cmbToolDrawable,          false);
         SetEnabled(mUI.btnSelectToolMaterial,    false);
         SetEnabled(mUI.btnSetToolMaterialParams, false);
         SetEnabled(mUI.btnEditToolMaterial,      false);
@@ -583,6 +623,7 @@ void DlgTileTool::ShowCurrentTool()
         SetValue(mUI.toolWidth,        0);
         SetValue(mUI.toolHeight,       0);
         SetValue(mUI.cmbToolMaterial, -1);
+        SetValue(mUI.cmbToolDrawable, -1);
         SetValue(mUI.toolValue,        0);
     }
 }
@@ -592,6 +633,7 @@ void DlgTileTool::ShowCurrentTile()
     if (const auto* tile = GetCurrentTile())
     {
         SetValue(mUI.cmbToolMaterial,  ListItemId(tile->material));
+        SetValue(mUI.cmbToolDrawable,  ListItemId(tile->drawable));
         SetValue(mUI.toolPaletteIndex, tile->palette_index);
         SetValue(mUI.toolValue,        tile->value);
         SetValue(mUI.material,         tile->apply_material);
@@ -606,6 +648,7 @@ void DlgTileTool::ShowCurrentTile()
     else
     {
         SetValue(mUI.cmbToolMaterial, -1);
+        SetValue(mUI.cmbToolDrawable, -1);
         SetValue(mUI.toolPaletteIndex, 0);
         SetValue(mUI.toolValue,        0);
         SetValue(mUI.material,         false);
@@ -743,6 +786,7 @@ void DlgTileTool::ModifyCurrentTile()
     if (auto* tile = GetCurrentTile())
     {
         tile->material       = GetItemId(mUI.cmbToolMaterial);
+        tile->drawable       = GetItemId(mUI.cmbToolDrawable);
         tile->palette_index  = GetValue(mUI.toolPaletteIndex);
         tile->value          = GetValue(mUI.toolValue);
         tile->apply_material = GetValue(mUI.material);
@@ -753,6 +797,8 @@ void DlgTileTool::ModifyCurrentTile()
         {
             if (!mWorkspace->IsValidMaterial(tile->material))
                 tile->material = "_checkerboard";
+            if (!mWorkspace->IsValidDrawable(tile->drawable))
+                tile->drawable.clear();
         }
     }
 }

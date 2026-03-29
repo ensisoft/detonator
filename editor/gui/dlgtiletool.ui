@@ -226,7 +226,7 @@
         <item>
          <widget class="QGroupBox" name="material">
           <property name="title">
-           <string>Apply this material on Render Layer</string>
+           <string>Apply this material and shape on Render Layer</string>
           </property>
           <property name="flat">
            <bool>true</bool>
@@ -236,8 +236,8 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="0" column="0">
               <widget class="QComboBox" name="cmbToolMaterial">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -245,12 +245,15 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>The material that applies to this tile</string>
+               </property>
                <property name="placeholderText">
                 <string/>
                </property>
               </widget>
              </item>
-             <item>
+             <item row="0" column="1">
               <widget class="QSpinBox" name="tileIndex">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -258,9 +261,12 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>TIlemap material tile index</string>
+               </property>
               </widget>
              </item>
-             <item>
+             <item row="0" column="2">
               <widget class="QToolButton" name="btnSelectToolMaterial">
                <property name="toolTip">
                 <string>Select tool material</string>
@@ -277,7 +283,7 @@
                </property>
               </widget>
              </item>
-             <item>
+             <item row="0" column="3">
               <widget class="QToolButton" name="btnSetToolMaterialParams">
                <property name="toolTip">
                 <string>Set tool material parameters</string>
@@ -291,7 +297,7 @@
                </property>
               </widget>
              </item>
-             <item>
+             <item row="0" column="4">
               <widget class="QToolButton" name="btnEditToolMaterial">
                <property name="toolTip">
                 <string>Edit tool material</string>
@@ -302,6 +308,33 @@
                <property name="icon">
                 <iconset resource="../resource/resource.qrc">
                  <normaloff>:/16x16_ico_png/material_go.png</normaloff>:/16x16_ico_png/material_go.png</iconset>
+               </property>
+               <property name="arrowType">
+                <enum>Qt::NoArrow</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QComboBox" name="cmbToolDrawable">
+               <property name="toolTip">
+                <string>The shape that applies to this tile</string>
+               </property>
+               <property name="placeholderText">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4">
+              <widget class="QToolButton" name="btnEditToolShape">
+               <property name="toolTip">
+                <string>Edit tool material</string>
+               </property>
+               <property name="text">
+                <string>...</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../resource/resource.qrc">
+                 <normaloff>:/16x16_ico_png/polygon.png</normaloff>:/16x16_ico_png/polygon.png</iconset>
                </property>
                <property name="arrowType">
                 <enum>Qt::NoArrow</enum>
@@ -429,7 +462,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
-       <widget class="gui::GfxWidget" name="widget" native="true">
+       <widget class="gui::GfxWidget" name="widget">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
           <horstretch>0</horstretch>
@@ -749,6 +782,8 @@
   <tabstop>btnSelectToolMaterial</tabstop>
   <tabstop>btnSetToolMaterialParams</tabstop>
   <tabstop>btnEditToolMaterial</tabstop>
+  <tabstop>cmbToolDrawable</tabstop>
+  <tabstop>btnEditToolShape</tabstop>
   <tabstop>toolPaletteIndex</tabstop>
   <tabstop>btnResetPaletteIndex</tabstop>
   <tabstop>data</tabstop>

@@ -612,6 +612,7 @@ QStringList ListResourceDependencies(const game::TilemapClass& map, const QVaria
         for (size_t j=0; j<layer.GetMaxPaletteIndex(); ++j)
         {
             PushBack(ret, layer.GetPaletteMaterialId(j));
+            PushBack(ret, layer.GetPaletteDrawableId(j));
         }
     }
     return ret;

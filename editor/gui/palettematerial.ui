@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>425</width>
-    <height>108</height>
+    <width>583</width>
+    <height>110</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -60,6 +60,66 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>#1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="cmbDrawable">
+       <property name="toolTip">
+        <string>Drawable shape that is set on the tile</string>
+       </property>
+       <property name="placeholderText">
+        <string>Nothing</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QToolButton" name="btnSelectMaterial">
+       <property name="toolTip">
+        <string>Select material at palette index</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resource/resource.qrc">
+         <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
+       </property>
+       <property name="arrowType">
+        <enum>Qt::NoArrow</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="cmbOcclusion"/>
+     </item>
+     <item row="0" column="4">
+      <widget class="QToolButton" name="btnSetMaterialParams">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Set material parameters</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resource/resource.qrc">
+         <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="cmbMaterial">
        <property name="sizePolicy">
@@ -68,13 +128,13 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Material that is set on the tile</string>
+       </property>
        <property name="placeholderText">
         <string>Nothing</string>
        </property>
       </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="cmbOcclusion"/>
      </item>
      <item row="0" column="2">
       <widget class="QSpinBox" name="tileIndex">
@@ -89,79 +149,45 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+     <item row="0" column="5">
+      <widget class="QToolButton" name="btnResetMaterial">
+       <property name="toolTip">
+        <string>Reset material to nothing at palette index</string>
        </property>
        <property name="text">
-        <string>#1</string>
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resource/resource.qrc">
+         <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>false</bool>
+       </property>
+       <property name="arrowType">
+        <enum>Qt::NoArrow</enum>
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <property name="spacing">
-        <number>0</number>
+     <item row="1" column="5">
+      <widget class="QToolButton" name="btnResetDrawable">
+       <property name="toolTip">
+        <string>Reset material to nothing at palette index</string>
        </property>
-       <item>
-        <widget class="QToolButton" name="btnSelectMaterial">
-         <property name="toolTip">
-          <string>Select material at palette index</string>
-         </property>
-         <property name="text">
-          <string>...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
-         </property>
-         <property name="arrowType">
-          <enum>Qt::NoArrow</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="btnSetMaterialParams">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="toolTip">
-          <string>Set material parameters</string>
-         </property>
-         <property name="text">
-          <string>...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="btnResetMaterial">
-         <property name="toolTip">
-          <string>Reset material to nothing at palette index</string>
-         </property>
-         <property name="text">
-          <string>...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-         </property>
-         <property name="autoRaise">
-          <bool>false</bool>
-         </property>
-         <property name="arrowType">
-          <enum>Qt::NoArrow</enum>
-         </property>
-        </widget>
-       </item>
-      </layout>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resource/resource.qrc">
+         <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>false</bool>
+       </property>
+       <property name="arrowType">
+        <enum>Qt::NoArrow</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -173,6 +199,8 @@
   <tabstop>btnSelectMaterial</tabstop>
   <tabstop>btnSetMaterialParams</tabstop>
   <tabstop>btnResetMaterial</tabstop>
+  <tabstop>cmbDrawable</tabstop>
+  <tabstop>btnResetDrawable</tabstop>
   <tabstop>cmbOcclusion</tabstop>
  </tabstops>
  <resources>

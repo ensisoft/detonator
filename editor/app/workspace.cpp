@@ -1489,6 +1489,34 @@ void Workspace::LoadUserSettings(const QString& filename)
     INFO("Loaded private workspace data: '%1'", filename);
 }
 
+ResourceList Workspace::ListTileShapes() const
+{
+    ResourceList list;
+    for (const auto& resource : mResources)
+    {
+        if (resource->GetType() != Resource::Type::Shape)
+            continue;
+
+        const gfx::PolygonMeshClass* mesh_class = nullptr;
+        resource->GetContent(&mesh_class);
+
+        const auto mesh_type = mesh_class->GetMeshType();
+        if (mesh_type == gfx::PolygonMeshClass::MeshType::Dimetric2DRenderMesh ||
+            mesh_type == gfx::PolygonMeshClass::MeshType::Isometric2DRenderMesh)
+        {
+            ResourceListItem item;
+            item.name = resource->GetName();
+            item.id   = resource->GetId();
+            item.resource = resource.get();
+            list.push_back(item);
+        }
+    }
+    std::sort(list.begin(), list.end(), [](const auto& a, const auto& b) {
+        return a.name < b.name;
+    });
+    return list;
+}
+
 Workspace::ResourceList Workspace::ListAllMaterials() const
 {
     ResourceList list;
@@ -1535,6 +1563,19 @@ Workspace::ResourceList Workspace::ListAllDrawables() const
     return list;
 }
 
+ResourceList Workspace::ListPrimitiveShapes() const
+{
+    return ListResources(Resource::Type::Shape, true, true);
+}
+
+Workspace::ResourceList Workspace::ListAllShapes() const
+{
+    ResourceList list;
+    base::AppendVector(list, ListPrimitiveShapes());
+    base::AppendVector(list, ListUserDefinedShapes());
+    return list;
+}
+
 Workspace::ResourceList Workspace::ListPrimitiveDrawables() const
 {
     ResourceList list;
@@ -1559,6 +1600,11 @@ Workspace::ResourceList Workspace::ListUserDefinedDrawables() const
         return a.name < b.name;
     });
     return list;
+}
+
+ResourceList Workspace::ListUserDefinedShapes() const
+{
+    return ListResources(Resource::Type::Shape, false, true);
 }
 
 Workspace::ResourceList Workspace::ListUserDefinedEntities() const

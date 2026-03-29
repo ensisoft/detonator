@@ -553,6 +553,7 @@ std::size_t TilemapLayerClass::GetHash() const noexcept
     {
         const auto* entry = base::SafeFind(mPalette, key);
         hash = base::hash_combine(hash, entry->materialId);
+        hash = base::hash_combine(hash, entry->drawableId);
         hash = base::hash_combine(hash, entry->tile_index);
         hash = base::hash_combine(hash, entry->flags);
         hash = base::hash_combine(hash, entry->occlusion);
@@ -575,6 +576,15 @@ std::string TilemapLayerClass::GetPaletteMaterialId(std::size_t index) const
 
     return "";
 }
+
+std::string TilemapLayerClass::GetPaletteDrawableId(std::size_t index) const
+{
+    if (const auto* entry = base::SafeFind(mPalette, index))
+        return entry->drawableId;
+
+    return "";
+}
+
 std::uint8_t TilemapLayerClass::GetPaletteMaterialTileIndex(std::size_t index) const
 {
     if (const auto* entry = base::SafeFind(mPalette, index))
@@ -591,6 +601,16 @@ std::uint8_t TilemapLayerClass::GetPaletteFlags(std::size_t index) const
     return 0;
 }
 
+std::size_t TilemapLayerClass::FindDrawableIndexInPalette(const std::string& drawableId) const
+{
+    for (const auto& [index, val] : mPalette)
+    {
+        if (val.drawableId == drawableId)
+            return index;
+    }
+    return InvalidPaletteIndex;
+}
+
 std::size_t TilemapLayerClass::FindMaterialIndexInPalette(const std::string& material) const
 {
     for (const auto& [index, val] : mPalette)
@@ -598,7 +618,7 @@ std::size_t TilemapLayerClass::FindMaterialIndexInPalette(const std::string& mat
         if (val.materialId == material)
             return index;
     }
-    return 0xff;
+    return InvalidPaletteIndex;
 }
 std::size_t TilemapLayerClass::FindMaterialIndexInPalette(const std::string& materialId, std::uint8_t tile_index) const
 {
@@ -607,7 +627,7 @@ std::size_t TilemapLayerClass::FindMaterialIndexInPalette(const std::string& mat
         if (val.materialId == materialId && val.tile_index == tile_index)
             return index;
     }
-    return 0xff;
+    return InvalidPaletteIndex;
 }
 
 std::size_t TilemapLayerClass::FindNextAvailablePaletteIndex() const
@@ -617,7 +637,7 @@ std::size_t TilemapLayerClass::FindNextAvailablePaletteIndex() const
         if (mPalette.find(i) == mPalette.end())
             return i;
     }
-    return 0xff;
+    return InvalidPaletteIndex;
 }
 
 void TilemapLayerClass::SetDefaultTilePaletteMaterialIndex(uint8_t index)
@@ -786,7 +806,8 @@ void TilemapLayerClass::IntoJson(data::Writer& data) const
 
         auto chunk = data.NewWriteChunk();
         chunk->Write("index", (unsigned)key);
-        chunk->Write("value", entry->materialId);
+        chunk->Write("material", entry->materialId);
+        chunk->Write("drawable", entry->drawableId);
         chunk->Write("tile_index", (unsigned)entry->tile_index);
         chunk->Write("flags", (unsigned)entry->flags);
         chunk->Write("occlusion", entry->occlusion);
@@ -824,18 +845,28 @@ bool TilemapLayerClass::FromJson(const data::Reader& data)
     {
         TileOcclusion occlusion = TileOcclusion::None;
         std::string material;
+        std::string drawable;
         unsigned tile_index;
         unsigned key = 0;
         unsigned flags = 0;
         const auto& chunk = data.GetReadChunk("palette", i);
         ok &= chunk->Read("index", &key);
-        ok &= chunk->Read("value", &material);
+        if (chunk->HasValue("material") && chunk->HasValue("drawable"))
+        {
+            ok &= chunk->Read("material", &material);
+            ok &= chunk->Read("drawable", &drawable);
+        }
+        else
+        {
+            ok &= chunk->Read("value", &material);
+        }
         ok &= chunk->Read("flags", &flags);
         ok &= chunk->Read("tile_index", &tile_index);
         ok &= chunk->Read("occlusion", &occlusion);
 
         PaletteEntry entry;
         entry.materialId  = std::move(material);
+        entry.drawableId =  std::move(drawable);
         entry.tile_index  = tile_index;
         entry.flags       = flags;
         entry.occlusion   = occlusion;
