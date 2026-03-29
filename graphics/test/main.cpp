@@ -2812,14 +2812,12 @@ public:
         state.stencil_func = gfx::Painter::StencilFunc::Disabled;
         state.write_color  = true;
 
-        const auto t = base::GetTime();
-
         {
             gfx::Transform transform;
 
             transform.Resize(2.0f, -2.0f, 2.0f);
-            transform.RotateAroundY(std::sin(t));
-            transform.RotateAroundX(std::cos(t));
+            transform.RotateAroundY(std::sin(mTime));
+            transform.RotateAroundX(std::cos(mTime));
             transform.MoveTo(2.5f, 0.0f, -10.0f);
             transform.Push();
                transform.Translate(-0.5f, -0.5f, 0.0f);
@@ -2844,17 +2842,26 @@ public:
         {
             gfx::Transform transform;
             transform.Resize(2.0f, 2.0f, 2.0f);
-            transform.RotateAroundY(std::sin(t));
-            transform.RotateAroundX(std::cos(t));
+            transform.RotateAroundY(std::sin(mTime));
+            transform.RotateAroundX(std::cos(mTime));
             transform.MoveTo(-2.5f, 0.0f, -10.0f);
             p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
                    state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
         }
     }
+    void Update(float dts) override
+    {
+        mTime += dts;
+    }
+
     std::string GetName() const override
     { return "Draw3DTest"; }
     bool IsFeatureTest() const override
+    { return true; }
+    bool DoesUpdate() const override
     { return false; }
+private:
+    float mTime = 0.0f;
 };
 
 
@@ -2978,6 +2985,8 @@ public:
     std::string GetName() const override
     { return "Shape3DTest"; }
     bool IsFeatureTest() const override
+    { return true; }
+    bool DoesUpdate() const override
     { return false; }
 
     void KeyDown(const wdk::WindowEventKeyDown& key) override
@@ -4505,6 +4514,7 @@ int main(int argc, char* argv[])
     auto sampling = wdk::Config::Multisampling::None;
     bool testing  = false;
     bool issue_gold = false;
+    bool issue_missing_gold = false;
     bool fullscreen = false;
     bool accept_result = false;
     bool user_interaction = true;
@@ -4533,6 +4543,8 @@ int main(int argc, char* argv[])
             casename = argv[++i];
         else if (!std::strcmp(argv[i], "--issue-gold"))
             issue_gold = true;
+        else if (!std::strcmp(argv[i], "--issue-missing-gold"))
+            issue_missing_gold = true;
         else if (!std::strcmp(argv[i], "--accept-result"))
             accept_result = true;
         else if (!std::strcmp(argv[i], "--vsync"))
@@ -4545,6 +4557,12 @@ int main(int argc, char* argv[])
             srgb = false;
         else if (!std::strcmp(argv[i], "--es3"))
             version = 3;
+        else
+        {
+            ERROR("%1 Say what?", argv[i]);
+            return EXIT_FAILURE;
+        }
+
     }
 
     // context integration glue code that puts together
@@ -4837,6 +4855,11 @@ int main(int argc, char* argv[])
                 const auto& gold_file_name      = base::FormatString("gold/%1/%2_%3_%4_Gold.png",              es, test->GetName(), i, sampling);
 
                 if (issue_gold)
+                {
+                    gfx::WritePNG(result, gold_file_name);
+                    INFO("Wrote new gold image. '%1'", gold_file_name);
+                }
+                else if (issue_missing_gold && !base::FileExists(gold_file_name))
                 {
                     gfx::WritePNG(result, gold_file_name);
                     INFO("Wrote new gold image. '%1'", gold_file_name);
