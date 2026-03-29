@@ -993,6 +993,11 @@ inline void SetSuffix(QSpinBox* spin, const app::AnyString& suffix)
     spin->setSuffix(suffix);
 }
 
+inline void SetMin(QProgressBar* prog, int min)
+{
+    QSignalBlocker s(prog);
+    prog->setMinimum(min);
+}
 
 inline void SetMin(QDoubleSpinBox* spin, double min)
 {
@@ -1009,6 +1014,13 @@ inline void SetMinMax(QDoubleSpinBox* spin, double min, double max)
     QSignalBlocker s(spin);
     spin->setMinimum(min);
     spin->setMaximum(max);
+}
+
+inline void SetMinMax(QProgressBar* prog, int min, int max)
+{
+    QSignalBlocker s(prog);
+    prog->setMinimum(min);
+    prog->setMaximum(max);
 }
 
 inline void SetValue(gui::DoubleSlider* slider, double value)

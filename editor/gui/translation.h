@@ -72,6 +72,7 @@ namespace game {
     std::string TranslateEnum(EntityStateControllerClass::StateTransitionMode mode);
     std::string TranslateEnum(BasicLightClass::LightType light);
     std::string TranslateEnum(RenderPass pass);
+    std::string TranslateEnum(RenderView view);
     std::string TranslateEnum(CoordinateSpace space);
     std::string TranslateEnum(TileOcclusion occlusion);
     std::string TranslateEnum(SplineMoverClass::PathCoordinateSpace mode);
@@ -87,20 +88,20 @@ namespace easing {
 }
 
 namespace gfx {
-    std::string TranslateEnum(gfx::ParticleEngineClass::CoordinateSpace space);
-    std::string TranslateEnum(gfx::ParticleEngineClass::Motion motion);
-    std::string TranslateEnum(gfx::ParticleEngineClass::SpawnPolicy spawn);
-    std::string TranslateEnum(gfx::MaterialClass::GradientType gradient);
-    std::string TranslateEnum(gfx::TextureMap::Type map);
-    std::string TranslateEnum(gfx::TextureSource::Source source);
-    std::string TranslateEnum(gfx::TextBuffer::RasterFormat format);
+    std::string TranslateEnum(ParticleEngineClass::CoordinateSpace space);
+    std::string TranslateEnum(ParticleEngineClass::Motion motion);
+    std::string TranslateEnum(ParticleEngineClass::SpawnPolicy spawn);
+    std::string TranslateEnum(MaterialClass::GradientType gradient);
+    std::string TranslateEnum(TextureMap::Type map);
+    std::string TranslateEnum(TextureSource::Source source);
+    std::string TranslateEnum(TextBuffer::RasterFormat format);
 }
 
 namespace audio {
-    std::string TranslateEnum(audio::SampleType sampletype);
-    std::string TranslateEnum(audio::IOStrategy io);
+    std::string TranslateEnum(SampleType sampletype);
+    std::string TranslateEnum(IOStrategy io);
 }
 
 namespace engine {
-    std::string TranslateEnum(engine::RenderingStyle style);
+    std::string TranslateEnum(RenderingStyle style);
 }

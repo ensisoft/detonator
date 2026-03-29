@@ -44,6 +44,8 @@ namespace game
         using TileOcclusion = game::TileOcclusion;
         using Type = detail::TilemapLayerType;
 
+        static constexpr size_t InvalidPaletteIndex = 0xff;
+
         enum class PaletteFlags : int8_t {
         };
 
@@ -93,76 +95,81 @@ namespace game
 
         TilemapLayerClass();
 
-        inline std::string GetId() const
+        std::string GetId() const
         { return mId; }
-        inline std::string GetName() const
+        std::string GetName() const
         { return mName; }
-        inline std::string GetDataUri() const
+        std::string GetDataUri() const
         { return mDataUri; }
-        inline std::string GetDataId() const
+        std::string GetDataId() const
         { return mDataId; }
-        inline base::bitflag<Flags> GetFlags() const noexcept
+        base::bitflag<Flags> GetFlags() const noexcept
         { return mFlags; }
-        inline bool IsReadOnly() const noexcept
+        bool IsReadOnly() const noexcept
         { return mFlags.test(Flags::ReadOnly); }
-        inline bool IsVisible() const noexcept
+        bool IsVisible() const noexcept
         { return mFlags.test(Flags::Visible); }
-        inline bool IsEnabled() const noexcept
+        bool IsEnabled() const noexcept
         { return mFlags.test(Flags::Enabled); }
-        inline bool TestFlag(Flags flag) const noexcept
+        bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        inline Cache GetCache() const noexcept
+        Cache GetCache() const noexcept
         { return mCache; }
-        inline Resolution GetResolution() const noexcept
+        Resolution GetResolution() const noexcept
         { return mResolution; }
-        inline Storage GetStorage() const noexcept
+        Storage GetStorage() const noexcept
         { return mStorage; }
-        inline int GetDepth() const noexcept
+        int GetDepth() const noexcept
         { return mDepth; }
-        inline unsigned GetLayer() const noexcept
+        unsigned GetLayer() const noexcept
         { return mLayer; }
-        inline void SetId(std::string id) noexcept
+        void SetId(std::string id) noexcept
         { mId = std::move(id); }
-        inline void SetName(std::string name) noexcept
+        void SetName(std::string name) noexcept
         { mName = std::move(name); }
-        inline void SetDataUri(std::string uri) noexcept
+        void SetDataUri(std::string uri) noexcept
         { mDataUri = std::move(uri); }
-        inline void SetDataId(std::string id) noexcept
+        void SetDataId(std::string id) noexcept
         { mDataId = std::move(id); }
-        inline void ResetDataId() noexcept
+        void ResetDataId() noexcept
         { mDataId.clear(); }
-        inline void ResetDataUri() noexcept
+        void ResetDataUri() noexcept
         { mDataUri.clear(); }
-        inline void SetStorage(Storage storage) noexcept
+        void SetStorage(Storage storage) noexcept
         { mStorage = storage; }
-        inline void SetCache(Cache cache) noexcept
+        void SetCache(Cache cache) noexcept
         { mCache = cache; }
-        inline void SetResolution(Resolution res) noexcept
+        void SetResolution(Resolution res) noexcept
         { mResolution = res; }
-        inline void SetFlag(Flags flag, bool on_off) noexcept
+        void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
-        inline void SetVisible(bool on_off) noexcept
+        void SetVisible(bool on_off) noexcept
         { mFlags.set(Flags::Visible, on_off); }
-        inline void SetEnabled(bool on_off) noexcept
+        void SetEnabled(bool on_off) noexcept
         { mFlags.set(Flags::Enabled, on_off); }
-        inline void SetReadOnly(bool on_off) noexcept
+        void SetReadOnly(bool on_off) noexcept
         { mFlags.set(Flags::ReadOnly, on_off); }
-        inline void SetFlags(base::bitflag<Flags> flags) noexcept
+        void SetFlags(base::bitflag<Flags> flags) noexcept
         { mFlags = flags; }
-        inline void SetDepth(int depth) noexcept
+        void SetDepth(int depth) noexcept
         { mDepth = depth; }
-        inline void SetLayer(unsigned layer) noexcept
+        void SetLayer(unsigned layer) noexcept
         { mLayer = layer; }
-        inline size_t GetCacheSize() const noexcept
+        size_t GetCacheSize() const noexcept
         { return GetCacheSize(mCache); }
-        inline void SetPaletteMaterialId(std::string material, std::size_t palette_index)
+
+        void SetPaletteMaterialId(std::string material, std::size_t palette_index) noexcept
         { mPalette[palette_index].materialId = std::move(material); }
-        inline void SetPaletteMaterialTileIndex(std::uint8_t tile_index, std::size_t palette_index)
+        void SetPaletteDrawableId(std::string drawable, std::size_t palette_index) noexcept
+        { mPalette[palette_index].drawableId = std::move(drawable); }
+        void SetPaletteMaterialTileIndex(std::uint8_t tile_index, std::size_t palette_index)
         { mPalette[palette_index].tile_index = tile_index; }
-        inline void ClearPalette() noexcept
+        void ClearPalette() noexcept
         { mPalette.clear(); }
-        inline void ClearPaletteIndex(std::size_t index) noexcept
-        { mPalette.erase(index); }
+        bool DeletePaletteIndex(std::size_t index) noexcept
+        { return mPalette.erase(index) != 0; }
+        auto GetCurrentPaletteSize() const noexcept
+        { return mPalette.size(); }
 
         void SetPaletteFlag(PaletteFlags flag, bool on_off, std::size_t palette_index);
         void SetPaletteOcclusion(TileOcclusion occlusion, std::size_t palette_index);
@@ -175,8 +182,10 @@ namespace game
 
         std::size_t GetHash() const noexcept;
         std::string GetPaletteMaterialId(std::size_t index) const;
+        std::string GetPaletteDrawableId(std::size_t index) const;
         std::uint8_t GetPaletteMaterialTileIndex(std::size_t index) const;
         std::uint8_t GetPaletteFlags(std::size_t index) const;
+        std::size_t FindDrawableIndexInPalette(const std::string& drawableId) const;
         std::size_t FindMaterialIndexInPalette(const std::string& materialId) const;
         std::size_t FindMaterialIndexInPalette(const std::string& materialId, std::uint8_t tile_index) const;
         std::size_t FindNextAvailablePaletteIndex() const;
@@ -209,17 +218,17 @@ namespace game
         uint8_t GetDefaultTilePaletteMaterialIndex() const;
         int32_t GetDefaultTileDataValue() const;
 
-        inline bool HasRenderComponent() const
+        bool HasRenderComponent() const
         { return HasRenderComponent(GetType()); }
-        inline bool HasDataComponent() const
+        bool HasDataComponent() const
         { return HasDataComponent(GetType()); }
-        inline unsigned MapDimension(unsigned map_width) const
+        unsigned MapDimension(unsigned map_width) const
         { return MapDimension(GetResolution(), map_width); }
-        inline size_t GetTileDataSize() const
+        size_t GetTileDataSize() const
         { return GetTileDataSize(GetType()); }
-        inline float GetTileSizeScaler() const
+        float GetTileSizeScaler() const
         { return GetTileSizeScaler(GetResolution()); }
-        inline unsigned GetMaxPaletteIndex() const
+        unsigned GetMaxPaletteIndex() const
         { return GetMaxPaletteIndex(GetType()); }
 
         void Initialize(unsigned map_width, unsigned map_height, TilemapData& data) const ;
@@ -257,6 +266,7 @@ namespace game
 
         struct PaletteEntry {
             std::string materialId;
+            std::string drawableId;
             std::uint8_t tile_index = 0;
             std::uint8_t flags = 0;
             TileOcclusion occlusion = TileOcclusion::None;

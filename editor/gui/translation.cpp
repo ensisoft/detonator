@@ -334,6 +334,19 @@ std::string TranslateEnum(RenderPass pass)
     else BUG("Missing translation");
     return "???";
 }
+
+std::string TranslateEnum(RenderView view)
+{
+    if (view == RenderView::AxisAligned)
+        return "2D Axis Aligned";
+    else if (view == RenderView::Dimetric)
+        return "2.5D Dimetric";
+    else if (view == RenderView::Isometric)
+        return "2.5D Isometric";
+    else BUG("Missing translation");
+    return "???";
+}
+
 std::string TranslateEnum(CoordinateSpace space)
 {
     using S = CoordinateSpace;
@@ -500,9 +513,9 @@ std::string TranslateEnum(Curve i)
 
 namespace gfx
 {
-std::string TranslateEnum(gfx::ParticleEngineClass::CoordinateSpace space)
+std::string TranslateEnum(ParticleEngineClass::CoordinateSpace space)
 {
-    using S = gfx::ParticleEngineClass::CoordinateSpace;
+    using S = ParticleEngineClass::CoordinateSpace;
     if (space == S::Global)
         return "Global Coordinate Space";
     else if (space == S::Local)
@@ -510,9 +523,9 @@ std::string TranslateEnum(gfx::ParticleEngineClass::CoordinateSpace space)
     else BUG("Missing translation");
     return "???";
 }
-std::string TranslateEnum(gfx::ParticleEngineClass::Motion motion)
+std::string TranslateEnum(ParticleEngineClass::Motion motion)
 {
-    using M = gfx::ParticleEngineClass::Motion;
+    using M = ParticleEngineClass::Motion;
     if (motion == M::Linear)
         return "Kinematic Motion";
     else if (motion == M::Projectile)
@@ -521,9 +534,9 @@ std::string TranslateEnum(gfx::ParticleEngineClass::Motion motion)
     return "???";
 }
 
-std::string TranslateEnum(gfx::ParticleEngineClass::SpawnPolicy spawn)
+std::string TranslateEnum(ParticleEngineClass::SpawnPolicy spawn)
 {
-    using S = gfx::ParticleEngineClass::SpawnPolicy;
+    using S = ParticleEngineClass::SpawnPolicy;
     if (spawn == S::Once)
         return "Spawn Once";
     else if (spawn == S::Continuous)
@@ -536,9 +549,9 @@ std::string TranslateEnum(gfx::ParticleEngineClass::SpawnPolicy spawn)
     return "???";
 }
 
-std::string TranslateEnum(gfx::MaterialClass::GradientType gradient)
+std::string TranslateEnum(MaterialClass::GradientType gradient)
 {
-    using T = gfx::MaterialClass::GradientType;
+    using T = MaterialClass::GradientType;
     if (gradient == T::Bilinear)
         return "Bilinear Gradient";
     else if (gradient == T::Radial)
@@ -549,7 +562,7 @@ std::string TranslateEnum(gfx::MaterialClass::GradientType gradient)
     return "???";
 }
 
-std::string TranslateEnum(gfx::TextureMap::Type map)
+std::string TranslateEnum(TextureMap::Type map)
 {
     if (map == TextureMap::Type::Sprite)
         return "Sprite Cycle";
@@ -559,7 +572,7 @@ std::string TranslateEnum(gfx::TextureMap::Type map)
     return "???";
 }
 
-std::string TranslateEnum(gfx::TextureSource::Source type)
+std::string TranslateEnum(TextureSource::Source type)
 {
     using T = TextureSource::Source;
     if (type == T::Filesystem)
@@ -576,7 +589,7 @@ std::string TranslateEnum(gfx::TextureSource::Source type)
     return "???";
 }
 
-std::string TranslateEnum(gfx::TextBuffer::RasterFormat format)
+std::string TranslateEnum(TextBuffer::RasterFormat format)
 {
     using F = TextBuffer::RasterFormat;
     if (format == F::Texture)
@@ -592,7 +605,7 @@ std::string TranslateEnum(gfx::TextBuffer::RasterFormat format)
 
 namespace audio
 {
-std::string TranslateEnum(audio::SampleType sampletype)
+std::string TranslateEnum(SampleType sampletype)
 {
     if (sampletype == audio::SampleType::Float32)
         return "Float 32bits";
@@ -603,7 +616,7 @@ std::string TranslateEnum(audio::SampleType sampletype)
     else BUG("Missing translation");
     return "???";
 }
-std::string TranslateEnum(audio::IOStrategy io)
+std::string TranslateEnum(IOStrategy io)
 {
     if (io == audio::IOStrategy::Stream)
         return "File Stream";
@@ -625,7 +638,7 @@ std::string TranslateEnum(audio::IOStrategy io)
 namespace engine
 {
 
-std::string TranslateEnum(engine::RenderingStyle style)
+std::string TranslateEnum(RenderingStyle style)
 {
     if (style == engine::RenderingStyle::FlatColor)
         return "Flat Color";

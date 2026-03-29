@@ -51,6 +51,7 @@ namespace gui
 
         struct Tile {
             std::string material;
+            std::string drawable;
             // tile index in the material (when material is tilemap)
             unsigned tile_index = 0;
             std::int32_t value  = 0;
@@ -99,12 +100,14 @@ namespace gui
         void on_btnSelectToolMaterial_clicked();
         void on_btnSetToolMaterialParams_clicked();
         void on_btnEditToolMaterial_clicked();
+        void on_btnEditToolShape_clicked();
         void on_btnResetPaletteIndex_clicked();
         void on_cmbToolFunction_currentIndexChanged(int index);
         void on_cmbToolShape_currentIndexChanged(int index);
         void on_toolWidth_valueChanged(int);
         void on_toolHeight_valueChanged(int);
         void on_cmbToolMaterial_currentIndexChanged(int);
+        void on_cmbToolDrawable_currentIndexChanged(int);
         void on_toolPaletteIndex_valueChanged(int);
         void on_toolValue_valueChanged(int);
         void on_material_toggled();

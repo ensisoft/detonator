@@ -16,7 +16,9 @@
 
 #include "config.h"
 
-#include <QPixmap>
+#include "warnpush.h"
+  #include <QPixmap>
+#include "warnpop.h"
 
 #include "game/enum.h"
 #include "graphics/material_class.h"
@@ -76,9 +78,39 @@ void PaletteMaterial::SetTileIndex(unsigned tile_index)
     // todo: preview update
 }
 
+void PaletteMaterial::ResetDrawable()
+{
+    SetValue(mUI.cmbDrawable, -1);
+    SetEnabled(mUI.btnResetDrawable, false);
+}
+void PaletteMaterial::SetDrawable(const app::AnyString& id)
+{
+    const QString& current = GetItemId(mUI.cmbDrawable);
+    if (current == id)
+        return;
+
+    if (SetValue(mUI.cmbDrawable, ListItemId(id)))
+    {
+        SetEnabled(mUI.btnResetDrawable, true);
+    }
+    else
+    {
+        SetEnabled(mUI.btnResetDrawable, false);
+    }
+}
+
 bool PaletteMaterial::HasSelectedMaterial() const
 {
     const auto current = mUI.cmbMaterial->currentIndex();
+    if (current == -1)
+        return false;
+
+    return true;
+}
+
+bool PaletteMaterial::HasSelectedDrawable() const
+{
+    const auto current = mUI.cmbDrawable->currentIndex();
     if (current == -1)
         return false;
 
@@ -89,6 +121,11 @@ void PaletteMaterial::UpdateMaterialList(const ResourceList& list)
 {
     SetList(mUI.cmbMaterial, list);
     UpdatePreview(GetItemId(mUI.cmbMaterial));
+}
+
+void PaletteMaterial::UpdateDrawableList(const ResourceList& list)
+{
+    SetList(mUI.cmbDrawable, list);
 }
 
 void PaletteMaterial::UpdateMaterialPreview(const app::AnyString& id)
@@ -172,10 +209,24 @@ void PaletteMaterial::on_btnResetMaterial_clicked()
     emit ValueChanged(this);
 }
 
+void PaletteMaterial::on_btnResetDrawable_clicked()
+{
+    SetValue(mUI.cmbDrawable, -1);
+    SetEnabled(mUI.btnResetDrawable, false);
+    emit ValueChanged(this);
+}
+
 void PaletteMaterial::on_cmbMaterial_currentIndexChanged(int)
 {
     SetEnabled(mUI.btnResetMaterial, true);
     UpdatePreview(GetItemId(mUI.cmbMaterial));
+
+    emit ValueChanged(this);
+}
+
+void PaletteMaterial::on_cmbDrawable_currentIndexChanged(int)
+{
+    SetEnabled(mUI.btnResetDrawable, true);
 
     emit ValueChanged(this);
 }

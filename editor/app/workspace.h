@@ -187,6 +187,10 @@ namespace app
         using ResourceList = app::ResourceList;
         ResourceList ListAudioGraphs() const;
 
+        // Get a list of all user defines shapes that are applicable to
+        // a tilemap..
+        ResourceList ListTileShapes() const;
+
         ResourceList ListUserDefinedUIs() const;
         // Get a list of user defined tile map resources.
         ResourceList ListUserDefinedMaps() const;
@@ -202,10 +206,16 @@ namespace app
         // Get a list of all drawable names in the workspace
         // including the user defined drawables and the "primitive" ones.
         ResourceList ListAllDrawables() const;
+        // Get a list of all primitive shapes (subtype od drawable)
+        ResourceList ListPrimitiveShapes() const;
+        // Get a list of all shapes (subtype od drawable)
+        ResourceList ListAllShapes() const;
         // Get a list of primitive (build-in) drawables.
         ResourceList ListPrimitiveDrawables() const;
         // Get a list of user defined drawables.
         ResourceList ListUserDefinedDrawables() const;
+        // Get a list of user defined shapes. (subtype of drawables)
+        ResourceList ListUserDefinedShapes() const;
         // Get a list of user defined entities.
         ResourceList ListUserDefinedEntities() const;
         // Get a list of user defined entity ids

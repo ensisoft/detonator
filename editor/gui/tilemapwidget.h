@@ -120,6 +120,7 @@ namespace gui
         void PaletteMaterialChanged(const PaletteMaterial* material);
     private:
         void StartTool(const QString& id);
+        void StopTool();
         void DisplayCurrentCameraLocation();
         void SetMapProperties();
         void SetLayerProperties();
