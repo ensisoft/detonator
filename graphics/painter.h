@@ -51,6 +51,8 @@ namespace gfx
     class Painter
     {
     public:
+        using Matrix4x4 = glm::mat4;
+
         Painter() = default;
         explicit Painter(std::shared_ptr<Device> device) noexcept
           : mDeviceInst(std::move(device))
@@ -171,6 +173,10 @@ namespace gfx
             RenderPass render_pass = RenderPass::ColorPass;
 
             bool write_color = true;
+            bool premultiply_alpha = false;
+            bool flip_uv_vertically = false;
+            bool flip_uv_horizontally = false;
+
             // the stencil test function.
             StencilFunc  stencil_func  = StencilFunc::Disabled;
             // what to do when the stencil test fails.
@@ -196,21 +202,7 @@ namespace gfx
 
         using InstancedDraw = Drawable::InstancedDraw;
 
-        // State aggregate for the device state for depth testing
-        // stencil testing etc.
-        struct DrawCommandState {
-            DepthTest depth_test = DepthTest::LessOrEQual;
-            Culling culling = Culling::Back;
-            WindigOrder winding = WindigOrder::CounterClockWise;
-            BlendOp blending = BlendOp::None;
-            float line_width = 1.0f;
-            bool premulalpha = false;
-            bool flip_uv_vertically = false;
-            bool flip_uv_horizontally = false;
-        };
-
         struct DrawCommand {
-            using State = DrawCommandState;
             // Optional projection matrix that will override the painter's projection matrix.
             const glm::mat4* projection = nullptr;
             // Optional view matrix that will override the painter's view matrix.
@@ -226,8 +218,32 @@ namespace gfx
             // ShaderProgram::FilterDraw for doing low level shape/draw filtering.
             // Using dodgy/Unsafe void* here for performance reasons. vs. std::any
             void* user = nullptr;
-
-            DrawCommandState state;
+            // Control the depth testing.
+            // this is currently repeated here because depth testing
+            // can be controlled per packet. so ultimately this decides
+            // what is the depth testing state and not the state that is
+            // set in the render pass.
+            DepthTest depth_test = DepthTest::LessOrEQual;
+            // Control which sides of the polygon are culled or not.
+            Culling culling = Culling::Back;
+            // Control the shape triangle winding order which controls
+            // which side of the triangle is considered back/front at
+            // any given moment.
+            WindigOrder winding = WindigOrder::CounterClockWise;
+            // The line width setting for the rasterizer when drawing lines
+            // i.e. some shape that uses GL_LINES. Note that this setting
+            // is mostly useful for debug drawing since the line width is
+            // in pixels and typically has a limit around 10px AND there's
+            // no scaling to go from logical units to pixels.
+            float line_width = 1.0f;
+            // Control whether the shape should flip UV (texture) coordinates
+            // vertically in the vertex shader. The flip takes place around the
+            // horizonal axis, i.e. top becomes bottom and bottom becomes top.
+            bool flip_uv_vertically = false;
+            // Control whether the shape should flip UV (texture) coordinates
+            // horizontally in the vertex shader. The flip takes place around
+            // the vertical axis, i.e. left becomes right and right becomes left.
+            bool flip_uv_horizontally = false;
 
             std::optional<InstancedDraw> instanced_draw;
 
@@ -244,63 +260,37 @@ namespace gfx
         // and finally a transform which defines the model-to-world transform.
         bool Draw(const DrawCommandList& list, const ShaderProgram& program, const RenderPassState& render_pass_state) const;
 
-        bool Draw(const gfx::Drawable& drawable,
-                  const gfx::Material& material,
-                  const glm::mat4& model,
-                  const gfx::ShaderProgram& program,
-                  const RenderPassState& render_pass_state,
-                  const DrawCommandState& state) const
-        {
-            DrawCommand cmd;
-            cmd.model = &model;
-            cmd.drawable = &drawable;
-            cmd.material = &material;
-            cmd.state = state;
+        // Similar to the legacy draw except that allows the device state to be
+        // changed through state and shader pass objects.
+        bool Draw(const Drawable& shape,
+                  const Matrix4x4& model,
+                  const Material& material,
+                  const DrawState& state,
+                  const ShaderProgram& program) const;
 
-            DrawCommandList list;
-            list.push_back(cmd);
-            return Draw(list, program, render_pass_state);
-        }
-
-        // legacy draw functions.
-
-        struct LegacyDrawState
+        struct MinimalDrawState
         {
             float line_width = 1.0f;
             Culling culling = Culling::Back;
 
-            LegacyDrawState() {}
+            MinimalDrawState() {}
 
-            LegacyDrawState(float line_width)
+            MinimalDrawState(float line_width)
               : line_width(line_width)
             {}
-            LegacyDrawState(Culling culling)
+            MinimalDrawState(Culling culling)
               : culling(culling)
             {}
-            LegacyDrawState(float line_width, Culling culling)
+            MinimalDrawState(float line_width, Culling culling)
               : line_width(line_width)
               , culling(culling)
             {}
-            LegacyDrawState(Culling culling, float line_width)
+            MinimalDrawState(Culling culling, float line_width)
               : line_width(line_width)
               , culling(culling)
             {}
         };
 
-        // Similar to the legacy draw except that allows the device state to be
-        // changed through state and shader pass objects.
-        bool Draw(const Drawable& shape,
-                  const glm::mat4& model,
-                  const Material& material,
-                  const DrawState& state,
-                  const ShaderProgram& program) const;
-        bool Draw(const Drawable& shape,
-                  const glm::mat4& model,
-                  const Material& material,
-                  const DrawState& state,
-                  const ShaderProgram& program,
-                  const LegacyDrawState& legacy_draw_state) const;
-        // Legacy immediate mode draw function.
         // Draw the shape with the material and transformation immediately in the
         // current render target. The following default render target state is used:
         // - writes color buffer, all channels
@@ -312,9 +302,9 @@ namespace gfx
         // to the required state. If possible prefer the vector format which allows
         // to draw multiple objects at once.
         bool Draw(const Drawable& drawable,
-                  const glm::mat4& model,
+                  const Matrix4x4& model,
                   const Material& material,
-                  const LegacyDrawState& draw_state = LegacyDrawState()) const;
+                  const MinimalDrawState& state = {}) const;
 
         // Create new painter implementation using the given graphics device.
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);

@@ -1257,7 +1257,7 @@ public:
         color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
         color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
-        gfx::Painter::LegacyDrawState state;
+        gfx::Painter::MinimalDrawState state;
         state.line_width = 1.0f;
         state.culling = gfx::Painter::Culling::Back;
         if (current.IsDoubleSided())
@@ -2349,7 +2349,7 @@ void ShapeWidget::PaintEditScene(const QRect& rect, const PolygonClassHandle& po
         gfx::Transform view;
         view.Resize(width, height);
 
-        gfx::Painter::LegacyDrawState state;
+        gfx::Painter::MinimalDrawState state;
         state.line_width = 1.0f;
         state.culling = gfx::Painter::Culling::Back;
         if (instance.IsDoubleSided())

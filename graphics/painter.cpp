@@ -106,8 +106,8 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
         drawable_env.view_matrix    = draw.view       ? draw.view       : &mViewMatrix;
         drawable_env.proj_matrix    = draw.projection ? draw.projection : &mProjMatrix;
         drawable_env.model_matrix   = draw.model      ? draw.model      : &Identity;
-        drawable_env.flip_uv_horizontally = draw.state.flip_uv_horizontally;
-        drawable_env.flip_uv_vertically   = draw.state.flip_uv_vertically;
+        drawable_env.flip_uv_horizontally = draw.flip_uv_horizontally;
+        drawable_env.flip_uv_vertically   = draw.flip_uv_vertically;
 
         auto geometry = draw.geometry_gpu_ptr;
         if (geometry == nullptr)
@@ -145,15 +145,15 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
             state_ok &= draw.material->ApplyDynamicState(material_env, *mDevice, gpu_program_state, material_raster_state);
 
             Drawable::RasterState drawable_raster_state;
-            drawable_raster_state.culling    = draw.state.culling;
-            drawable_raster_state.line_width = draw.state.line_width;
+            drawable_raster_state.culling    = draw.culling;
+            drawable_raster_state.line_width = draw.line_width;
             state_ok &= draw.drawable->ApplyDynamicState(drawable_env, *mDevice, gpu_program_state, drawable_raster_state);
 
             device_state.blending      = material_raster_state.blending;
             device_state.premulalpha   = material_raster_state.premultiplied_alpha;
             device_state.line_width    = drawable_raster_state.line_width;
             device_state.culling       = drawable_raster_state.culling;
-            device_state.winding_order = draw.state.winding;
+            device_state.winding_order = draw.winding;
 
             // apply shader program state dynamically once on the GPU program object
             // if the GPU program object changes.
@@ -177,7 +177,7 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
         const auto& cmd_params = draw.drawable->GetDrawCmd();
 
         // modify the depth testing state since this is per draw right now.
-        mDevice->ModifyState(draw.state.depth_test, Device::StateName::DepthTest);
+        mDevice->ModifyState(draw.depth_test, Device::StateName::DepthTest);
 
         TRACE_CALL("DeviceDraw", mDevice->Draw(*gpu_program,
                       gpu_program_state,
@@ -194,7 +194,7 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
 }
 
 bool Painter::Draw(const Drawable& shape,
-                   const glm::mat4& model,
+                   const Matrix4x4& model,
                    const Material& material,
                    const DrawState& state,
                    const ShaderProgram& program) const
@@ -204,41 +204,12 @@ bool Painter::Draw(const Drawable& shape,
     list[0].drawable   = &shape;
     list[0].material   = &material;
     list[0].model      = &model;
-    list[0].state.line_width = state.line_width;
-    list[0].state.culling    = state.culling;
-    list[0].state.depth_test = state.depth_test;
-
-    RenderPassState render_pass_state;
-    render_pass_state.render_pass       = state.render_pass;
-    render_pass_state.cds.depth_test    = state.depth_test;
-    render_pass_state.cds.stencil_func  = state.stencil_func;
-    render_pass_state.cds.stencil_fail  = state.stencil_fail;
-    render_pass_state.cds.stencil_dpass = state.stencil_dpass;
-    render_pass_state.cds.stencil_dfail = state.stencil_dfail;
-    render_pass_state.cds.stencil_mask  = state.stencil_mask;
-    render_pass_state.cds.stencil_ref   = state.stencil_ref;
-    render_pass_state.cds.bWriteColor   = state.write_color;
-
-    return Draw(list, program, render_pass_state);
-}
-
-bool Painter::Draw(const Drawable& shape,
-                   const glm::mat4& model,
-                   const Material& material,
-                   const DrawState& state,
-                   const ShaderProgram& program,
-                   const LegacyDrawState& legacy_draw_state) const
-{
-    std::vector<DrawCommand> list;
-    list.resize(1);
-    list[0].drawable   = &shape;
-    list[0].material   = &material;
-    list[0].model      = &model;
-    list[0].state.culling    = state.culling;
-    list[0].state.winding    = state.winding;
-    list[0].state.depth_test = state.depth_test;
-    list[0].state.line_width = legacy_draw_state.line_width;
-    list[0].state.culling    = legacy_draw_state.culling;
+    list[0].depth_test = state.depth_test;
+    list[0].culling    = state.culling;
+    list[0].winding    = state.winding;
+    list[0].line_width = state.line_width;
+    list[0].flip_uv_horizontally = state.flip_uv_horizontally;
+    list[0].flip_uv_vertically   = state.flip_uv_vertically;
 
     RenderPassState render_pass_state;
     render_pass_state.render_pass       = state.render_pass;
@@ -255,21 +226,24 @@ bool Painter::Draw(const Drawable& shape,
 }
 
 bool Painter::Draw(const Drawable& drawable,
-                   const glm::mat4& model,
+                   const Matrix4x4& model,
                    const Material& material,
-                   const LegacyDrawState& draw_state) const
+                   const MinimalDrawState& state) const
 {
-    DrawState state;
-    state.render_pass  = RenderPass::ColorPass;
-    state.write_color  = true;
-    state.stencil_func = StencilFunc::Disabled;
-    state.depth_test   = DepthTest::Disabled;
-    state.winding      = WindigOrder::CounterClockWise;
-    state.culling      = draw_state.culling;
-    state.line_width   = draw_state.line_width;
+    DrawState full_state;
+    full_state.render_pass          = RenderPass::ColorPass;
+    full_state.write_color          = true;
+    full_state.premultiply_alpha    = false;
+    full_state.flip_uv_horizontally = false;
+    full_state.flip_uv_vertically   = false;
+    full_state.stencil_func         = StencilFunc::Disabled;
+    full_state.depth_test           = DepthTest::Disabled;
+    full_state.winding              = WindigOrder::CounterClockWise;
+    full_state.culling              = state.culling;
+    full_state.line_width           = state.line_width;
 
     FlatShadedColorProgram program;
-    return Draw(drawable, model, material, state, program, draw_state);
+    return Draw(drawable, model, material, full_state, program);
 }
 
 // static
