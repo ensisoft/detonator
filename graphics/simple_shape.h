@@ -348,6 +348,15 @@ namespace gfx
           : mClass(std::make_shared<Class>(std::move(klass)))
           , mStyle(style)
         {}
+        void SetFlag(Flags flag, bool on_off) noexcept override
+        {
+            mFlags = base::SetFlag(mFlags, flag, on_off);
+        }
+        bool TestFlag(Flags flag) const noexcept override
+        {
+            return base::TestFlag(mFlags, flag);
+        }
+
         bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
@@ -377,6 +386,7 @@ namespace gfx
     private:
         std::shared_ptr<const Class> mClass;
         Style mStyle = Style::Solid;
+        std::uint32_t mFlags = 0;
     };
 
     // Instance of a simple shape without class object.
@@ -398,6 +408,15 @@ namespace gfx
           , mArgs(args)
           , mStyle(style)
         {}
+        void SetFlag(Flags flag, bool on_off) noexcept override
+        {
+            mFlags = base::SetFlag(mFlags, flag, on_off);
+        }
+        bool TestFlag(Flags flag) const noexcept override
+        {
+            return base::TestFlag(mFlags, flag);
+        }
+
         bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
@@ -422,6 +441,7 @@ namespace gfx
         SimpleShapeType mShape;
         detail::SimpleShapeArgs mArgs;
         Style mStyle = Style::Solid;
+        std::uint32_t mFlags = 0;
     };
 
     namespace detail {

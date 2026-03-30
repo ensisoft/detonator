@@ -1458,17 +1458,11 @@ float SimpleShapeClass::GetShapeAttribute(ShapeAttribute attribute) const noexce
 
 bool SimpleShapeInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
 {
-    unsigned flags = 0;
-    if (env.flip_uv_horizontally)
-        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Horizontally);
-    if (env.flip_uv_vertically)
-        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Vertically);
-
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
-    program.SetUniform("kDrawableFlags", flags);
+    program.SetUniform("kDrawableFlags", mFlags);
     return true;
 }
 ShaderSource SimpleShapeInstance::GetShader(const Environment& env, const Device& device) const
@@ -1607,17 +1601,11 @@ bool SimpleShapeInstance::ConstructShardMesh(const Environment& env, Device& dev
 
 bool SimpleShape::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
 {
-    unsigned flags = 0;
-    if (env.flip_uv_horizontally)
-        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Horizontally);
-    if (env.flip_uv_vertically)
-        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Vertically);
-
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
-    program.SetUniform("kDrawableFlags", flags);
+    program.SetUniform("kDrawableFlags", mFlags);
     return true;
 }
 ShaderSource SimpleShape::GetShader(const Environment& env, const Device& device) const

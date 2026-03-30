@@ -45,7 +45,13 @@ namespace gfx
     };
 
     enum class DrawableFlags : uint32_t {
+        // Control whether the shape should flip UV (texture) coordinates
+        // vertically in the vertex shader. The flip takes place around the
+        // horizonal axis, i.e. top becomes bottom and bottom becomes top.
         Flip_UV_Vertically = 0x1,
+        // Control whether the shape should flip UV (texture) coordinates
+        // horizontally in the vertex shader. The flip takes place around
+        // the vertical axis, i.e. left becomes right and right becomes left.
         Flip_UV_Horizontally = 0x2,
         // use the 3D data as the output from the perceptually 3D (axonometric)
         // vertex shader instead of the 2D data.

@@ -106,8 +106,6 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
         drawable_env.view_matrix    = draw.view       ? draw.view       : &mViewMatrix;
         drawable_env.proj_matrix    = draw.projection ? draw.projection : &mProjMatrix;
         drawable_env.model_matrix   = draw.model      ? draw.model      : &Identity;
-        drawable_env.flip_uv_horizontally = draw.flip_uv_horizontally;
-        drawable_env.flip_uv_vertically   = draw.flip_uv_vertically;
 
         auto geometry = draw.geometry_gpu_ptr;
         if (geometry == nullptr)
@@ -208,8 +206,6 @@ bool Painter::Draw(const Drawable& shape,
     list[0].culling    = state.culling;
     list[0].winding    = state.winding;
     list[0].line_width = state.line_width;
-    list[0].flip_uv_horizontally = state.flip_uv_horizontally;
-    list[0].flip_uv_vertically   = state.flip_uv_vertically;
 
     RenderPassState render_pass_state;
     render_pass_state.render_pass       = state.render_pass;
@@ -234,8 +230,6 @@ bool Painter::Draw(const Drawable& drawable,
     full_state.render_pass          = RenderPass::ColorPass;
     full_state.write_color          = true;
     full_state.premultiply_alpha    = false;
-    full_state.flip_uv_horizontally = false;
-    full_state.flip_uv_vertically   = false;
     full_state.stencil_func         = StencilFunc::Disabled;
     full_state.depth_test           = DepthTest::Disabled;
     full_state.winding              = WindigOrder::CounterClockWise;

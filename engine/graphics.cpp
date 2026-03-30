@@ -291,8 +291,6 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
         draw.culling              = packet.culling;
         draw.line_width           = packet.line_width;
         draw.depth_test           = packet.depth_test;
-        draw.flip_uv_horizontally = packet.flags.test(DrawPacket::Flags::Flip_UV_Horizontally);
-        draw.flip_uv_vertically   = packet.flags.test(DrawPacket::Flags::Flip_UV_Vertically);
         draw.view                 = view;
         draw.projection           = projection;
         scene_painter.Prime(draw);

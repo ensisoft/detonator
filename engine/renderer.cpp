@@ -1127,9 +1127,10 @@ void Renderer::UpdateDrawableResources(const EntityType& entity, const EntityNod
         gfx::Drawable::Environment env;
         env.model_matrix = &model_transform_matrix;
         env.world_matrix = &world_transform_matrix;
-        env.flip_uv_horizontally = horizontal_flip;
-        env.flip_uv_vertically   = vertical_flip;
         // todo: other env matrices?
+
+        paint_node.drawable->SetFlag(gfx::DrawableFlags::Flip_UV_Horizontally, horizontal_flip);
+        paint_node.drawable->SetFlag(gfx::DrawableFlags::Flip_UV_Vertically, vertical_flip);
 
         const auto time_scale = item->GetTimeScale();
         if (item->TestFlag(DrawableItemType::Flags::UpdateDrawable))
@@ -1425,6 +1426,11 @@ void Renderer::CreateDrawableResources(const EntityType& entity, const EntityNod
                     polygon->SetPerceptualGeometry(geometry);
                 }
             }
+
+            const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
+            const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
+            paint_node.drawable->SetFlag(gfx::DrawableFlags::Flip_UV_Horizontally, horizontal_flip);
+            paint_node.drawable->SetFlag(gfx::DrawableFlags::Flip_UV_Vertically, vertical_flip);
         }
 
         if (paint_node.drawable && paint_node.material)

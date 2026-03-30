@@ -40,6 +40,21 @@
 namespace base
 {
 
+template<typename Flag>
+uint32_t SetFlag(uint32_t bits, Flag bit, bool on_off) noexcept
+{
+    if (on_off)
+        return bits | static_cast<uint32_t>(bit);
+
+    return bits & ~static_cast<uint32_t>(bit);
+}
+
+template<typename Flag>
+bool TestFlag(uint32_t bits, Flag bit) noexcept
+{
+    return (bits & static_cast<uint32_t>(bit)) != 0;
+}
+
 enum class ByteOrder {
     LE, BE
 };

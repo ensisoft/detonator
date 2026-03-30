@@ -251,6 +251,15 @@ namespace gfx
         void SetPerceptualGeometry(const Perceptual3DGeometry& geometry) noexcept
         { mPerceptualGeometry = geometry; }
 
+        void SetFlag(Flags flag, bool on_off) noexcept override
+        {
+            mFlags = base::SetFlag(mFlags, flag, on_off);
+        }
+        bool TestFlag(Flags flag) const noexcept override
+        {
+            return base::TestFlag(mFlags, flag);
+        }
+
         bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& env, const Device& device) const override;
         std::string GetShaderId(const Environment& env) const override;
@@ -274,6 +283,7 @@ namespace gfx
         std::shared_ptr<const PolygonMeshClass> mClass;
         std::optional<Perceptual3DGeometry> mPerceptualGeometry;
         std::variant<std::monostate, std::string, std::size_t> mSubMeshKey;
+        std::uint32_t mFlags = 0;
         double mTime = 0.0;
         float mRandom = 0.0f;
     };

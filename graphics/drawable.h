@@ -51,6 +51,7 @@ namespace gfx
     class Drawable
     {
     public:
+        using Flags                 = DrawableFlags;
         using SpatialMode           = DrawableClass::SpatialMode;
         using Culling               = DrawableClass::Culling;
         using Environment           = DrawableClass::Environment;
@@ -83,6 +84,10 @@ namespace gfx
         using CommandList = std::vector<Command>;
 
         virtual ~Drawable() = default;
+
+        virtual void SetFlag(Flags flag, bool on_off) noexcept { }
+        virtual bool TestFlag(Flags flag) const noexcept { return false; }
+
         // Apply the drawable's state (if any) on the program and set the rasterizer state.
         virtual bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const = 0;
         // Get the device specific shader source applicable for this drawable, its state

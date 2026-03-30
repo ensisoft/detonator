@@ -89,8 +89,6 @@ namespace gfx
             MeshType mesh_type = MeshType::NormalRenderMesh;
             MeshArgs mesh_args;
 
-            bool flip_uv_vertically = false;
-            bool flip_uv_horizontally = false;
             // true to indicate that we're going to do instanced draw.
             bool use_instancing = false;
             // true if running in an "editor mode", which means that even
