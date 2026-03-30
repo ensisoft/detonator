@@ -57,20 +57,32 @@ void Painter::ClearDepth(float depth) const
     mDevice->ClearDepth(depth, mFrameBuffer);
 }
 
-void Painter::Prime(DrawCommand& draw) const
+void Painter::Prime(DrawCommandList& cmds) const
 {
     static const glm::mat4 Identity(1.0f);
 
-    Drawable::Environment drawable_env;
-    drawable_env.editing_mode   = mEditingMode;
-    drawable_env.pixel_ratio    = mPixelRatio;
-    drawable_env.use_instancing = draw.instanced_draw.has_value();
-    drawable_env.view_matrix    = draw.view       ? draw.view       : &mViewMatrix;
-    drawable_env.proj_matrix    = draw.projection ? draw.projection : &mProjMatrix;
-    drawable_env.model_matrix   = draw.model      ? draw.model      : &Identity;
-    draw.geometry_gpu_ptr = GetGpuGeometry(*draw.drawable, drawable_env);
-    if (draw.instanced_draw.has_value())
-        draw.instance_draw_ptr = GetGpuInstancedDraw(draw.instanced_draw.value(), *draw.drawable, drawable_env);
+    if (cmds.mCommands.empty())
+        return;
+
+    cmds.mStateList.resize(cmds.mCommands.size());
+
+    for (size_t i=0; i<cmds.mCommands.size(); ++i)
+    {
+        const auto& cmd = cmds.mCommands[i];
+
+        Drawable::Environment drawable_env;
+        drawable_env.editing_mode   = mEditingMode;
+        drawable_env.pixel_ratio    = mPixelRatio;
+        drawable_env.use_instancing = cmd.instanced_draw.has_value();
+        drawable_env.view_matrix    = cmd.view       ? cmd.view       : &mViewMatrix;
+        drawable_env.proj_matrix    = cmd.projection ? cmd.projection : &mProjMatrix;
+        drawable_env.model_matrix   = cmd.model      ? cmd.model      : &Identity;
+
+        cmds.mStateList[i].geometry_gpu_ptr = GetGpuGeometry(*cmd.drawable, drawable_env);
+
+        if (cmd.instanced_draw.has_value())
+            cmds.mStateList[i].instanced_draw_gpu_ptr = GetGpuInstancedDraw(cmd.instanced_draw.value(), *cmd.drawable, drawable_env);
+    }
 }
 
 bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, const RenderPassState& render_pass_state) const
@@ -92,8 +104,10 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
 
     bool success = false;
 
-    for (const auto& draw : list)
+    for (size_t i=0; i<list.mCommands.size(); ++i)
     {
+        const auto& draw = list.mCommands[i];
+
         // Low level draw filtering.
         if (!program.FilterDraw(draw.user))
             continue;
@@ -107,7 +121,7 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
         drawable_env.proj_matrix    = draw.projection ? draw.projection : &mProjMatrix;
         drawable_env.model_matrix   = draw.model      ? draw.model      : &Identity;
 
-        auto geometry = draw.geometry_gpu_ptr;
+        auto geometry = list.GetGeometryPtr(i);
         if (geometry == nullptr)
             TRACE_CALL("GetGpuGeometry", geometry = GetGpuGeometry(*draw.drawable, drawable_env));
 
@@ -117,7 +131,7 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
         InstancedDrawPtr instanced_draw;
         if (draw.instanced_draw.has_value())
         {
-            instanced_draw = draw.instance_draw_ptr;
+            instanced_draw = list.GetInstancedDrawPtr(i);
             if (instanced_draw == nullptr)
                 instanced_draw = GetGpuInstancedDraw(draw.instanced_draw.value(), *draw.drawable, drawable_env);
         }

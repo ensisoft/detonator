@@ -236,13 +236,64 @@ namespace gfx
             float line_width = 1.0f;
 
             std::optional<InstancedDraw> instanced_draw;
-
-            InstancedDrawPtr instance_draw_ptr;
-            GeometryPtr geometry_gpu_ptr;
         };
-        using DrawCommandList = std::vector<DrawCommand>;
 
-        void Prime(DrawCommand& cmd) const;
+        class DrawCommandList {
+        public:
+            DrawCommandList(std::vector<DrawCommand>&& commands)
+                : mCommands(std::move(commands))
+            {}
+            DrawCommandList(const std::vector<DrawCommand>& commands)
+                : mCommands(commands)
+            {}
+            DrawCommandList() = default;
+
+            void push_back(DrawCommand&& cmd)
+            {
+                mCommands.push_back(std::move(cmd));
+            }
+            void push_back(const DrawCommand& cmd)
+            {
+                mCommands.push_back(cmd);
+            }
+            bool empty() const noexcept
+            {
+                return mCommands.empty();
+            }
+            auto size() const noexcept
+            {
+                return mCommands.size();
+            }
+            const auto&  operator[] (size_t index) const noexcept
+            {
+                return mCommands[index];
+            }
+
+        private:
+            GeometryPtr GetGeometryPtr(size_t i) const noexcept
+            {
+                if (i >= mStateList.size())
+                    return nullptr;
+                return mStateList[i].geometry_gpu_ptr;
+            }
+            InstancedDrawPtr GetInstancedDrawPtr(size_t i) const noexcept
+            {
+                if (i >= mStateList.size())
+                    return nullptr;
+
+                return mStateList[i].instanced_draw_gpu_ptr;
+            }
+
+            struct CommandGpuState {
+                InstancedDrawPtr instanced_draw_gpu_ptr;
+                GeometryPtr geometry_gpu_ptr;
+            };
+            std::vector<DrawCommand> mCommands;
+            std::vector<CommandGpuState> mStateList;
+            friend class Painter;
+        };
+
+        void Prime(DrawCommandList& cmds) const;
 
         // Draw multiple objects inside a render pass. Each object has a drawable shape,
         // which provides the geometrical information of the object to be drawn, a material,

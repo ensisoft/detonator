@@ -293,7 +293,6 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
         draw.depth_test           = packet.depth_test;
         draw.view                 = view;
         draw.projection           = projection;
-        scene_painter.Prime(draw);
 
         const auto render_layer_index = packet.render_layer;
         ASSERT(render_layer_index >= 0);
@@ -317,6 +316,18 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
         else BUG("Missing packet render pass mapping.");
     }
     TRACE_LEAVE(CreateDrawCmd);
+
+    TRACE_BLOCK("PrimeCommands",
+        for (auto& layer : layers)
+        {
+            for (auto& render_layer : layer)
+            {
+                scene_painter.Prime(render_layer.draw_color_list);
+                scene_painter.Prime(render_layer.mask_cover_list);
+                scene_painter.Prime(render_layer.mask_expose_list);
+            }
+        }
+    );
 
     gfx::Painter::RenderPassState mask_cover_state;
     mask_cover_state.render_pass = gfx::RenderPass::StencilPass;
@@ -396,8 +407,9 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
                 resources.device      = &mDevice;
                 resources.framebuffer = fbo;
                 resources.main_image  = nullptr;
-                for (const auto& draw_cmd : entity_layer.draw_color_list)
+                for (size_t i=0; i<entity_layer.draw_color_list.size(); ++i)
                 {
+                    const auto& draw_cmd = entity_layer.draw_color_list[i];
                     const auto* draw_packet = static_cast<const DrawPacket*>(draw_cmd.user);
                     mRenderHook->EndDrawPacket(mSettings, resources, *draw_packet, scene_painter);
                 }
