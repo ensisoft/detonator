@@ -817,11 +817,7 @@ std::size_t PolygonMeshInstance::GetSubMeshIndex() const noexcept
 
 bool PolygonMeshInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
 {
-    unsigned flags = 0;
-    if (env.flip_uv_horizontally)
-        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Horizontally);
-    if (env.flip_uv_vertically)
-        flags |= static_cast<unsigned>(DrawableFlags::Flip_UV_Vertically);
+    unsigned flags = mFlags;
 
     if (const auto* geom = base::GetOpt(mPerceptualGeometry))
     {

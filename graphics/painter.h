@@ -174,8 +174,6 @@ namespace gfx
 
             bool write_color = true;
             bool premultiply_alpha = false;
-            bool flip_uv_vertically = false;
-            bool flip_uv_horizontally = false;
 
             // the stencil test function.
             StencilFunc  stencil_func  = StencilFunc::Disabled;
@@ -236,14 +234,6 @@ namespace gfx
             // in pixels and typically has a limit around 10px AND there's
             // no scaling to go from logical units to pixels.
             float line_width = 1.0f;
-            // Control whether the shape should flip UV (texture) coordinates
-            // vertically in the vertex shader. The flip takes place around the
-            // horizonal axis, i.e. top becomes bottom and bottom becomes top.
-            bool flip_uv_vertically = false;
-            // Control whether the shape should flip UV (texture) coordinates
-            // horizontally in the vertex shader. The flip takes place around
-            // the vertical axis, i.e. left becomes right and right becomes left.
-            bool flip_uv_horizontally = false;
 
             std::optional<InstancedDraw> instanced_draw;
 

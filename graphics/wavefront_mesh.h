@@ -23,6 +23,7 @@
 
 #include <string>
 
+#include "base/utility.h"
 #include "graphics/drawable.h"
 #include "graphics/vertex.h"
 
@@ -42,6 +43,15 @@ namespace gfx
         void SetFileUri(std::string file_uri) noexcept
         { mFileUri = std::move(file_uri); }
 
+        void SetFlag(Flags flag, bool on_off) noexcept override
+        {
+            mFlags = base::SetFlag(mFlags, flag, on_off);
+        }
+        bool TestFlag(Flags flag) const noexcept override
+        {
+            return base::TestFlag(mFlags, flag);
+        }
+
         bool ApplyDynamicState(const Environment &env, Device &device, ProgramState &program, RasterState &state) const override;
         bool Construct(const Environment &env, Device &device, Geometry::CreateArgs &geometry) const override;
         ShaderSource GetShader(const Environment &env, const Device &device) const override;
@@ -54,5 +64,6 @@ namespace gfx
         Type GetType() const override;
     private:
         std::string mFileUri;
+        std::uint32_t mFlags = 0;
     };
 } // namespace
