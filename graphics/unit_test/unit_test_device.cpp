@@ -33,7 +33,7 @@
 #include "graphics/geometry.h"
 #include "graphics/framebuffer.h"
 #include "graphics/drawcmd.h"
-#include "graphics/instance.h"
+#include "graphics/instance_data.h"
 #include "graphics/utility.h"
 
 // We need this to create the rendering context.
@@ -2383,11 +2383,11 @@ void main() {
     instances[3].iaSize     = gfx::Vec2 {  0.1f,  0.1f };
     instances[3].iaPosition = gfx::Vec2 { -0.5f, -0.5f };
 
-    gfx::InstancedDraw::CreateArgs instance_args;
-    instance_args.usage = gfx::InstancedDrawBuffer::Usage::Static;
+    gfx::InstanceData::CreateArgs instance_args;
+    instance_args.usage = gfx::InstanceBuffer::Usage::Static;
     instance_args.buffer.SetInstanceDataLayout(layout);
     instance_args.buffer.SetInstanceBuffer(instances);
-    auto inst = dev->CreateInstancedDraw("inst", std::move(instance_args));
+    auto inst = dev->CreateInstanceData("inst", std::move(instance_args));
 
     // instanced draw arrays
     {

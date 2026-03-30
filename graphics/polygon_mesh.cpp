@@ -860,9 +860,9 @@ bool PolygonMeshInstance::Construct(const Environment& env, Device&, Geometry::C
     return mClass->Construct(env, create);
 }
 
-bool PolygonMeshInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+bool PolygonMeshInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
 {
-    InstancedDrawBuffer buffer;
+    InstanceBuffer buffer;
     buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
     buffer.Resize(draw.instances.size());
 

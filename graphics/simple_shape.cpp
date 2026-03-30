@@ -1501,9 +1501,9 @@ bool SimpleShapeInstance::Construct(const Environment& env, Device& device, Geom
     return true;
 }
 
-bool SimpleShapeInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+bool SimpleShapeInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
 {
-    InstancedDrawBuffer buffer;
+    InstanceBuffer buffer;
     buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
     buffer.Resize(draw.instances.size());
 
@@ -1656,9 +1656,9 @@ bool SimpleShape::Construct(const Environment& env, Device& device, Geometry::Cr
     return true;
 }
 
-bool SimpleShape::Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+bool SimpleShape::Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
 {
-    InstancedDrawBuffer buffer;
+    InstanceBuffer buffer;
     buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
     buffer.Resize(draw.instances.size());
 

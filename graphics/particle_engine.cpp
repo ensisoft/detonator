@@ -290,9 +290,9 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const Ins
     return true;
 }
 
-bool ParticleEngineClass::Construct(const Environment& env, const InstanceState& state, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+bool ParticleEngineClass::Construct(const Environment& env, const InstanceState& state, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
 {
-    InstancedDrawBuffer buffer;
+    InstanceBuffer buffer;
     buffer.SetInstanceDataLayout(GetInstanceDataLayout<InstanceAttribute>());
     buffer.Resize(draw.instances.size());
 
@@ -1234,7 +1234,7 @@ bool ParticleEngineInstance::Construct(const Environment& env, Device&, Geometry
     return mClass->Construct(env, *mState, create);
 }
 
-bool ParticleEngineInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+bool ParticleEngineInstance::Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
 {
     return mClass->Construct(env, *mState, draw, args);
 }

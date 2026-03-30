@@ -363,7 +363,7 @@ namespace gfx
         std::string GetShaderName(const Environment& env) const override;
         std::string GetGeometryId(const Environment& env) const override;
         bool Construct(const Environment& env, Device&, Geometry::CreateArgs& geometry) const override;
-        bool Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
+        bool Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const override;
         Type GetType() const override;
         DrawPrimitive GetDrawPrimitive() const override;
         Usage GetGeometryUsage() const override;
@@ -423,7 +423,7 @@ namespace gfx
         std::string GetShaderName(const Environment& env) const override;
         std::string GetGeometryId(const Environment& env) const override;
         bool Construct(const Environment& env, Device& device, Geometry::CreateArgs& geometry) const override;
-        bool Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
+        bool Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const override;
         Type GetType() const override;
         DrawPrimitive GetDrawPrimitive() const override;
         Usage GetGeometryUsage() const override;

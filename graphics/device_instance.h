@@ -24,17 +24,17 @@
 
 #include "device/enum.h"
 #include "device/graphics.h"
-#include "graphics/instance.h"
+#include "graphics/instance_data.h"
 
 namespace gfx
 {
-    class DeviceDrawInstanceBuffer : public gfx::InstancedDraw
+    class DeviceInstanceData : public gfx::InstanceData
     {
     public:
-        explicit DeviceDrawInstanceBuffer(dev::GraphicsDevice* device) noexcept
+        explicit DeviceInstanceData(dev::GraphicsDevice* device) noexcept
           : mDevice(device)
         {}
-       ~DeviceDrawInstanceBuffer() override;
+       ~DeviceInstanceData() override;
 
         std::size_t GetContentHash() const override
         { return mContentHash; }
@@ -45,7 +45,7 @@ namespace gfx
         void SetContentName(std::string name) override
         { mContentName = std::move(name); }
 
-        inline void SetBuffer(gfx::InstancedDrawBuffer&& buffer) noexcept
+        inline void SetBuffer(gfx::InstanceBuffer&& buffer) noexcept
         { mPendingUpload = std::move(buffer); }
         inline void SetUsage(Usage usage) noexcept
         { mUsage = usage; }
@@ -72,7 +72,7 @@ namespace gfx
         std::string mContentName;
         dev::BufferUsage mUsage = gfx::BufferUsage::Static;
         mutable std::size_t mFrameNumber = 0;
-        mutable std::optional<gfx::InstancedDrawBuffer> mPendingUpload;
+        mutable std::optional<gfx::InstanceBuffer> mPendingUpload;
         mutable gfx::InstanceDataLayout mLayout;
         mutable dev::GraphicsBuffer  mBuffer;
     };

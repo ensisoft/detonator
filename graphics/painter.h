@@ -33,7 +33,7 @@
 #include "graphics/device.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
-#include "graphics/instance.h"
+#include "graphics/instance_data.h"
 #include "graphics/enum.h"
 
 #include "base/snafu.h"
@@ -276,7 +276,7 @@ namespace gfx
                     return nullptr;
                 return mStateList[i].geometry_gpu_ptr;
             }
-            InstancedDrawPtr GetInstancedDrawPtr(size_t i) const noexcept
+            InstanceDataPtr GetInstanceDataPtr(size_t i) const noexcept
             {
                 if (i >= mStateList.size())
                     return nullptr;
@@ -285,7 +285,7 @@ namespace gfx
             }
 
             struct CommandGpuState {
-                InstancedDrawPtr instanced_draw_gpu_ptr;
+                InstanceDataPtr instanced_draw_gpu_ptr;
                 GeometryPtr geometry_gpu_ptr;
             };
             std::vector<DrawCommand> mCommands;
@@ -361,7 +361,7 @@ namespace gfx
                               const Material::Environment& material_environment) const;
 
         GeometryPtr GetGpuGeometry(const Drawable& drawable, const Drawable::Environment& env) const;
-        InstancedDrawPtr GetGpuInstancedDraw(const InstancedDraw& inst,
+        InstanceDataPtr GetGpuInstanceData(const InstancedDraw& inst,
                 const Drawable& drawable, const Drawable::Environment& env) const;
 
     private:

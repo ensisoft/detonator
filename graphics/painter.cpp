@@ -81,7 +81,7 @@ void Painter::Prime(DrawCommandList& cmds) const
         cmds.mStateList[i].geometry_gpu_ptr = GetGpuGeometry(*cmd.drawable, drawable_env);
 
         if (cmd.instanced_draw.has_value())
-            cmds.mStateList[i].instanced_draw_gpu_ptr = GetGpuInstancedDraw(cmd.instanced_draw.value(), *cmd.drawable, drawable_env);
+            cmds.mStateList[i].instanced_draw_gpu_ptr = GetGpuInstanceData(cmd.instanced_draw.value(), *cmd.drawable, drawable_env);
     }
 }
 
@@ -128,12 +128,12 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
         if (!geometry)
             continue;
 
-        InstancedDrawPtr instanced_draw;
+        InstanceDataPtr instanced_draw;
         if (draw.instanced_draw.has_value())
         {
-            instanced_draw = list.GetInstancedDrawPtr(i);
+            instanced_draw = list.GetInstanceDataPtr(i);
             if (instanced_draw == nullptr)
-                instanced_draw = GetGpuInstancedDraw(draw.instanced_draw.value(), *draw.drawable, drawable_env);
+                instanced_draw = GetGpuInstanceData(draw.instanced_draw.value(), *draw.drawable, drawable_env);
         }
 
         Material::Environment material_env;
@@ -587,49 +587,49 @@ GeometryPtr Painter::GetGpuGeometry(const Drawable& drawable, const Drawable::En
     } else BUG("Missing geometry usage handling.");
 }
 
-InstancedDrawPtr Painter::GetGpuInstancedDraw(const InstancedDraw& draw, const gfx::Drawable& drawable, const Drawable::Environment& env) const
+InstanceDataPtr Painter::GetGpuInstanceData(const InstancedDraw& draw, const gfx::Drawable& drawable, const Drawable::Environment& env) const
 {
     const auto& id = drawable.GetInstanceId(env, draw);
     const auto usage = drawable.GetInstanceUsage(draw);
 
     if (usage == BufferUsage::Stream)
     {
-        gfx::InstancedDraw::CreateArgs args;
+        gfx::InstanceData::CreateArgs args;
         if (!drawable.Construct(env, *mDevice, draw, args))
             return nullptr;
 
-        return mDevice->CreateInstancedDraw(id, std::move(args));
+        return mDevice->CreateInstanceData(id, std::move(args));
     }
     else if (usage == BufferUsage::Dynamic)
     {
-        auto foo = mDevice->FindInstancedDraw(id);
+        auto foo = mDevice->FindInstanceData(id);
         if (foo == nullptr)
         {
-            gfx::InstancedDraw::CreateArgs args;
+            gfx::InstanceData::CreateArgs args;
             if (!drawable.Construct(env, *mDevice, draw, args))
                 return nullptr;
 
-            return mDevice->CreateInstancedDraw(draw.gpu_id, std::move(args));
+            return mDevice->CreateInstanceData(draw.gpu_id, std::move(args));
         }
         if (foo->GetContentHash() == drawable.GetInstanceHash(draw))
             return foo;
 
-        gfx::InstancedDraw::CreateArgs args;
+        gfx::InstanceData::CreateArgs args;
         if (!drawable.Construct(env, *mDevice, draw, args))
             return nullptr;
 
-        return mDevice->CreateInstancedDraw(id, std::move(args));
+        return mDevice->CreateInstanceData(id, std::move(args));
     }
     else if (usage == BufferUsage::Static)
     {
-        auto foo = mDevice->FindInstancedDraw(id);
+        auto foo = mDevice->FindInstanceData(id);
         if (foo == nullptr)
         {
-            gfx::InstancedDraw::CreateArgs args;
+            gfx::InstanceData::CreateArgs args;
             if (!drawable.Construct(env, *mDevice, draw, args))
                 return nullptr;
 
-            return mDevice->CreateInstancedDraw(id, std::move(args));
+            return mDevice->CreateInstanceData(id, std::move(args));
         }
 
         if (!mEditingMode)
@@ -638,11 +638,11 @@ InstancedDrawPtr Painter::GetGpuInstancedDraw(const InstancedDraw& draw, const g
         if (foo->GetContentHash() == drawable.GetInstanceHash(draw))
             return foo;
 
-        gfx::InstancedDraw::CreateArgs args;
+        gfx::InstanceData::CreateArgs args;
         if (!drawable.Construct(env, *mDevice, draw, args))
             return nullptr;
 
-        return mDevice->CreateInstancedDraw(id, std::move(args));
+        return mDevice->CreateInstanceData(id, std::move(args));
     }
 
 

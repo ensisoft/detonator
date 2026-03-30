@@ -21,7 +21,7 @@
 
 namespace gfx {
 
-DeviceDrawInstanceBuffer::~DeviceDrawInstanceBuffer()
+DeviceInstanceData::~DeviceInstanceData()
 {
     if (mBuffer.IsValid())
     {
@@ -31,7 +31,7 @@ DeviceDrawInstanceBuffer::~DeviceDrawInstanceBuffer()
         DEBUG("Deleted instanced draw object. [name='%1']", mContentName);
 }
 
-void DeviceDrawInstanceBuffer::Upload() const
+void DeviceInstanceData::Upload() const
 {
     if (!mPendingUpload.has_value())
         return;

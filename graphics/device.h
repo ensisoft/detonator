@@ -30,7 +30,7 @@
 #include "graphics/shader.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
-#include "graphics/instance.h"
+#include "graphics/instance_data.h"
 #include "graphics/framebuffer.h"
 
 namespace gfx
@@ -101,8 +101,8 @@ namespace gfx
         virtual ProgramPtr CreateProgram(const std::string& id, const Program::CreateArgs& args) = 0;
         virtual GeometryPtr FindGeometry(const std::string& id) = 0;
         virtual GeometryPtr CreateGeometry(const std::string& id, Geometry::CreateArgs args) = 0;
-        virtual InstancedDrawPtr FindInstancedDraw(const std::string& id) = 0;
-        virtual InstancedDrawPtr CreateInstancedDraw(const std::string& id, InstancedDraw::CreateArgs args) = 0;
+        virtual InstanceDataPtr FindInstanceData(const std::string& id) = 0;
+        virtual InstanceDataPtr CreateInstanceData(const std::string& id, InstanceData::CreateArgs args) = 0;
         virtual Texture* FindTexture(const std::string& name) = 0;
         virtual const Texture* FindTexture(const std::string& name) const = 0;
         virtual Texture* MakeTexture(const std::string& name) = 0;

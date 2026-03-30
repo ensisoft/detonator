@@ -289,7 +289,7 @@ namespace gfx
 
         bool Construct(const Environment& env, const InstanceState& state, Geometry::CreateArgs& create) const;
         bool Construct(const Environment& env, const InstanceState& state, const InstancedDraw& draw,
-                       gfx::InstancedDraw::CreateArgs& args) const;
+                       gfx::InstanceData::CreateArgs& args) const;
         ShaderSource GetShader(const Environment& env, const Device& device) const;
         std::string GetShaderId(const Environment& env) const;
         std::string GetShaderName(const Environment& env) const;
@@ -395,7 +395,7 @@ namespace gfx
         std::string GetShaderName(const Environment& env) const override;
         std::string GetGeometryId(const Environment& env) const override;
         bool Construct(const Environment& env, Device&, Geometry::CreateArgs& create) const override;
-        bool Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const override;
+        bool Construct(const Environment& env, Device&, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const override;
         void Update(const Environment& env, float dt) override;
         bool IsAlive() const override;
         void Restart(const Environment& env) override;
