@@ -250,12 +250,12 @@ public:
         return nullptr;
     }
 
-    gfx::InstancedDrawPtr FindInstancedDraw(const std::string& id) override
+    gfx::InstanceDataPtr FindInstanceData(const std::string& id) override
     {
         return nullptr;
     }
 
-    gfx::InstancedDrawPtr CreateInstancedDraw(const std::string& id, gfx::InstancedDraw::CreateArgs args) override
+    gfx::InstanceDataPtr CreateInstanceData(const std::string& id, gfx::InstanceData::CreateArgs args) override
     {
         return nullptr;
     }

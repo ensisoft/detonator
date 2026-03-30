@@ -62,8 +62,8 @@ public:
     gfx::ProgramPtr CreateProgram(const std::string& id, const gfx::Program::CreateArgs& args) override;
     gfx::GeometryPtr FindGeometry(const std::string& id) override;
     gfx::GeometryPtr CreateGeometry(const std::string& id, gfx::Geometry::CreateArgs args) override;
-    gfx::InstancedDrawPtr FindInstancedDraw(const std::string& id) override;
-    gfx::InstancedDrawPtr CreateInstancedDraw(const std::string& id, gfx::InstancedDraw::CreateArgs args) override;
+    gfx::InstanceDataPtr FindInstanceData(const std::string& id) override;
+    gfx::InstanceDataPtr CreateInstanceData(const std::string& id, gfx::InstanceData::CreateArgs args) override;
     gfx::Texture* FindTexture(const std::string& name) override;
     gfx::Texture* MakeTexture(const std::string& name) override;
     gfx::Framebuffer* FindFramebuffer(const std::string& name) override;
@@ -108,7 +108,7 @@ private:
     MinFilter mDefaultMinTextureFilter = MinFilter::Nearest;
     MagFilter mDefaultMagTextureFilter = MagFilter::Nearest;
 
-    std::unordered_map<std::string, std::shared_ptr<gfx::InstancedDraw>> mInstances;
+    std::unordered_map<std::string, std::shared_ptr<gfx::InstanceData>> mInstances;
     std::unordered_map<std::string, std::shared_ptr<gfx::Geometry>> mGeoms;
     std::unordered_map<std::string, std::shared_ptr<gfx::Shader>> mShaders;
     std::unordered_map<std::string, std::shared_ptr<gfx::Program>> mPrograms;
@@ -268,7 +268,7 @@ gfx::GeometryPtr GraphicsDevice::CreateGeometry(const std::string& id, gfx::Geom
     return geometry;
 }
 
-gfx::InstancedDrawPtr GraphicsDevice::FindInstancedDraw(const std::string& id)
+gfx::InstanceDataPtr GraphicsDevice::FindInstanceData(const std::string& id)
 {
     auto it = mInstances.find(id);
     if (it == std::end(mInstances))
@@ -276,9 +276,9 @@ gfx::InstancedDrawPtr GraphicsDevice::FindInstancedDraw(const std::string& id)
     return it->second;
 }
 
-gfx::InstancedDrawPtr GraphicsDevice::CreateInstancedDraw(const std::string& id, gfx::InstancedDraw::CreateArgs args)
+gfx::InstanceDataPtr GraphicsDevice::CreateInstanceData(const std::string& id, gfx::InstanceData::CreateArgs args)
 {
-    auto instance = std::make_shared<gfx::DeviceDrawInstanceBuffer>(mDevice);
+    auto instance = std::make_shared<gfx::DeviceInstanceData>(mDevice);
     instance->SetFrameStamp(mFrameNumber);
     instance->SetContentName(args.content_name);
     instance->SetContentHash(args.content_hash);
@@ -438,7 +438,7 @@ void GraphicsDevice::Draw(const gfx::Program& program,
 
     const auto* myprog = static_cast<const gfx::DeviceProgram*>(&program);
     const auto* mygeom = static_cast<const gfx::DeviceGeometry*>(geometry.GetGeometry());
-    const auto* myinst = static_cast<const gfx::DeviceDrawInstanceBuffer*>(geometry.GetInstance());
+    const auto* myinst = static_cast<const gfx::DeviceInstanceData*>(geometry.GetInstance());
     myprog->SetFrameStamp(mFrameNumber);
     mygeom->SetFrameStamp(mFrameNumber);
     if (myinst)
@@ -660,7 +660,7 @@ void GraphicsDevice::CleanGarbage(size_t max_num_idle_frames, unsigned flags)
 
         for (auto it = mInstances.begin(); it != mInstances.end(); )
         {
-            auto* impl = static_cast<gfx::DeviceDrawInstanceBuffer*>(it->second.get());
+            auto* impl = static_cast<gfx::DeviceInstanceData*>(it->second.get());
             const auto last_used_frame_number = impl->GetFrameStamp();
             if (mFrameNumber - last_used_frame_number >= max_num_idle_frames)
                 it = mInstances.erase(it);

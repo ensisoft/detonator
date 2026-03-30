@@ -164,7 +164,7 @@ bool EffectDrawable::Construct(const Environment& env, Device& device, Geometry:
 
     return false;
 }
-bool EffectDrawable::Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstancedDraw::CreateArgs& args) const
+bool EffectDrawable::Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
 {
     return mDrawable->Construct(env, device, draw, args);
 }

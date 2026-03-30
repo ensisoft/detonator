@@ -31,8 +31,8 @@
 namespace gfx
 {
     // A CPU buffer for (geometry) instance data, containing InstanceDataLayout
-    // and per geometry instance
-    class InstancedDrawBuffer
+    // and per geometry instance data.
+    class InstanceBuffer
     {
     public:
         // Define how the contents of the instance buffer are used
@@ -128,31 +128,5 @@ namespace gfx
         InstanceDataLayout mLayout;
         std::vector<uint8_t> mVertexData;
     };
-
-    // Per geometry instance vertex data.
-    class InstancedDraw
-    {
-    public:
-        using Usage = InstancedDrawBuffer::Usage;
-        struct CreateArgs {
-            InstancedDrawBuffer buffer;
-            // The expected usage of the geometry instance data.
-            Usage usage = Usage::Stream;
-            // Set the (human-readable) name of the instance geometry.
-            // This has debug significance only.
-            std::string content_name;
-            // Set the hash value based on the contents of the buffer.
-            std::size_t content_hash = 0;
-        };
-        virtual ~InstancedDraw() = default;
-
-        virtual std::size_t GetContentHash() const = 0;
-        virtual std::string GetContentName() const = 0;
-        virtual void SetContentHash(std::size_t hash) = 0;
-        virtual void SetContentName(std::string name) = 0;
-    private:
-    };
-
-    using InstancedDrawPtr = std::shared_ptr<const InstancedDraw>;
 
 } // namespace
