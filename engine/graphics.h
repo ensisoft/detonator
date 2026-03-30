@@ -140,9 +140,9 @@ namespace engine
     };
 
     struct RenderLayer {
-        std::vector<gfx::Painter::DrawCommand> draw_color_list;
-        std::vector<gfx::Painter::DrawCommand> mask_cover_list;
-        std::vector<gfx::Painter::DrawCommand> mask_expose_list;
+        gfx::Painter::DrawCommandList draw_color_list;
+        gfx::Painter::DrawCommandList mask_cover_list;
+        gfx::Painter::DrawCommandList mask_expose_list;
         std::vector<const Light*> layer_lights;
     };
 
