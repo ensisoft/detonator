@@ -283,7 +283,7 @@ void LowLevelRenderer::Draw(DrawPacketList& packets, LightList& lights,
         if (packet.flags.test(DrawPacket::Flags::CullPacket))
             continue;
 
-        gfx::Painter::DrawCommand draw;
+        gfx::Painter::DrawItem draw;
         draw.user                 = (void*)&packet;
         draw.model                = &packet.transform;
         draw.drawable             = packet.drawable.get();

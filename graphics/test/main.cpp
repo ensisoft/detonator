@@ -3213,12 +3213,12 @@ public:
             }
         }
 
-        gfx::Painter::DrawCommand cmd;
+        gfx::Painter::DrawItem cmd;
         cmd.drawable = &drawable;
         cmd.material = &material;
         cmd.instanced_draw = instanced;
 
-        gfx::Painter::DrawCommandList draw_list;
+        gfx::Painter::DrawItemList draw_list;
         draw_list.push_back(cmd);
 
         gfx::FlatShadedColorProgram program;
@@ -3306,13 +3306,13 @@ public:
             }
         }
 
-        gfx::Painter::DrawCommand cmd;
+        gfx::Painter::DrawItem cmd;
         cmd.drawable = &drawable;
         cmd.material = &material;
         cmd.culling  = gfx::Painter::Culling::Back;
         cmd.instanced_draw = instanced;
 
-        gfx::Painter::DrawCommandList draw_list;
+        gfx::Painter::DrawItemList draw_list;
         draw_list.push_back(cmd);
 
         gfx::Painter::RenderPassState render_pass_state;
@@ -3371,12 +3371,12 @@ public:
         gfx::PolygonMeshInstance drawable(mPolygon);
         gfx::MaterialInstance material(gfx::CreateMaterialClassFromColor(gfx::Color::DarkYellow));
 
-        gfx::Painter::DrawCommand cmd;
+        gfx::Painter::DrawItem cmd;
         cmd.drawable = &drawable;
         cmd.material = &material;
         cmd.instanced_draw = instanced;
 
-        gfx::Painter::DrawCommandList draw_list;
+        gfx::Painter::DrawItemList draw_list;
         draw_list.push_back(cmd);
 
         gfx::Painter::RenderPassState render_pass_state;
@@ -3446,12 +3446,12 @@ public:
 
         gfx::MaterialInstance material(gfx::CreateMaterialClassFromColor(gfx::Color::DarkYellow));
 
-        gfx::Painter::DrawCommand cmd;
+        gfx::Painter::DrawItem cmd;
         cmd.drawable = mInstance.get();
         cmd.material = &material;
         cmd.instanced_draw = instanced;
 
-        gfx::Painter::DrawCommandList draw_list;
+        gfx::Painter::DrawItemList draw_list;
         draw_list.push_back(cmd);
 
         gfx::Painter::RenderPassState render_pass_state;

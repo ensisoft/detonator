@@ -45,7 +45,7 @@ void ShadowMapRenderPass::InitState() const
     }
 }
 
-bool ShadowMapRenderPass::Draw(const DrawCommandList& draw_cmd_list) const
+bool ShadowMapRenderPass::Draw(const DrawItemList& draw_item_list) const
 {
     bool ok = true;
 
@@ -84,7 +84,7 @@ bool ShadowMapRenderPass::Draw(const DrawCommandList& draw_cmd_list) const
         shadow_painter.SetViewMatrix(world_to_light);
         shadow_painter.SetProjectionMatrix(light_projection);
 
-        ok &= shadow_painter.Draw(draw_cmd_list, mProgram, render_pass_state);
+        ok &= shadow_painter.Draw(draw_item_list, mProgram, render_pass_state);
     }
     return ok;
 }

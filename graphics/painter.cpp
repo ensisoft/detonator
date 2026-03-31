@@ -57,18 +57,18 @@ void Painter::ClearDepth(float depth) const
     mDevice->ClearDepth(depth, mFrameBuffer);
 }
 
-void Painter::Prime(DrawCommandList& cmds) const
+void Painter::Prime(DrawItemList& cmds) const
 {
     static const glm::mat4 Identity(1.0f);
 
-    if (cmds.mCommands.empty())
+    if (cmds.mItems.empty())
         return;
 
-    cmds.mStateList.resize(cmds.mCommands.size());
+    cmds.mStateList.resize(cmds.mItems.size());
 
-    for (size_t i=0; i<cmds.mCommands.size(); ++i)
+    for (size_t i=0; i<cmds.mItems.size(); ++i)
     {
-        const auto& cmd = cmds.mCommands[i];
+        const auto& cmd = cmds.mItems[i];
 
         Drawable::Environment drawable_env;
         drawable_env.editing_mode   = mEditingMode;
@@ -85,7 +85,7 @@ void Painter::Prime(DrawCommandList& cmds) const
     }
 }
 
-bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, const RenderPassState& render_pass_state) const
+bool Painter::Draw(const DrawItemList& list, const ShaderProgram& program, const RenderPassState& render_pass_state) const
 {
     static const glm::mat4 Identity(1.0f);
 
@@ -104,9 +104,9 @@ bool Painter::Draw(const DrawCommandList& list, const ShaderProgram& program, co
 
     bool success = false;
 
-    for (size_t i=0; i<list.mCommands.size(); ++i)
+    for (size_t i=0; i<list.mItems.size(); ++i)
     {
-        const auto& draw = list.mCommands[i];
+        const auto& draw = list.mItems[i];
 
         // Low level draw filtering.
         if (!program.FilterDraw(draw.user))
@@ -211,7 +211,7 @@ bool Painter::Draw(const Drawable& shape,
                    const DrawState& state,
                    const ShaderProgram& program) const
 {
-    std::vector<DrawCommand> list;
+    std::vector<DrawItem> list;
     list.resize(1);
     list[0].drawable   = &shape;
     list[0].material   = &material;
