@@ -200,7 +200,7 @@ namespace gfx
 
         using InstancedDraw = Drawable::InstancedDraw;
 
-        struct DrawCommand {
+        struct DrawItem {
             // Optional projection matrix that will override the painter's projection matrix.
             const glm::mat4* projection = nullptr;
             // Optional view matrix that will override the painter's view matrix.
@@ -238,35 +238,35 @@ namespace gfx
             std::optional<InstancedDraw> instanced_draw;
         };
 
-        class DrawCommandList {
+        class DrawItemList {
         public:
-            DrawCommandList(std::vector<DrawCommand>&& commands)
-                : mCommands(std::move(commands))
+            DrawItemList(std::vector<DrawItem>&& items)
+                : mItems(std::move(items))
             {}
-            DrawCommandList(const std::vector<DrawCommand>& commands)
-                : mCommands(commands)
+            DrawItemList(const std::vector<DrawItem>& items)
+                : mItems(items)
             {}
-            DrawCommandList() = default;
+            DrawItemList() = default;
 
-            void push_back(DrawCommand&& cmd)
+            void push_back(DrawItem&& cmd)
             {
-                mCommands.push_back(std::move(cmd));
+                mItems.push_back(std::move(cmd));
             }
-            void push_back(const DrawCommand& cmd)
+            void push_back(const DrawItem& cmd)
             {
-                mCommands.push_back(cmd);
+                mItems.push_back(cmd);
             }
             bool empty() const noexcept
             {
-                return mCommands.empty();
+                return mItems.empty();
             }
             auto size() const noexcept
             {
-                return mCommands.size();
+                return mItems.size();
             }
             const auto&  operator[] (size_t index) const noexcept
             {
-                return mCommands[index];
+                return mItems[index];
             }
 
         private:
@@ -284,22 +284,22 @@ namespace gfx
                 return mStateList[i].instanced_draw_gpu_ptr;
             }
 
-            struct CommandGpuState {
+            struct ItemState {
                 InstanceDataPtr instanced_draw_gpu_ptr;
                 GeometryPtr geometry_gpu_ptr;
             };
-            std::vector<DrawCommand> mCommands;
-            std::vector<CommandGpuState> mStateList;
+            std::vector<DrawItem> mItems;
+            std::vector<ItemState> mStateList;
             friend class Painter;
         };
 
-        void Prime(DrawCommandList& cmds) const;
+        void Prime(DrawItemList& items) const;
 
         // Draw multiple objects inside a render pass. Each object has a drawable shape,
         // which provides the geometrical information of the object to be drawn, a material,
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
-        bool Draw(const DrawCommandList& list, const ShaderProgram& program, const RenderPassState& render_pass_state) const;
+        bool Draw(const DrawItemList& items, const ShaderProgram& program, const RenderPassState& render_pass_state) const;
 
         // Similar to the legacy draw except that allows the device state to be
         // changed through state and shader pass objects.

@@ -145,24 +145,24 @@ namespace gfx
           , mDevice(device)
         {}
 
-        using DrawCommand     = Painter::DrawCommand;
-        using DrawCommandList = Painter::DrawCommandList;
+        using DrawItem     = Painter::DrawItem;
+        using DrawItemList = Painter::DrawItemList;
         using LightProjectionType = BasicLightProgram::LightProjectionType;
 
         void InitState() const;
 
-        bool Draw(const DrawCommandList& draw_cmd_list) const;
+        bool Draw(const DrawItemList& draw_item_list) const;
 
         bool Draw(const Drawable& drawable,
                   const Material& material,
                   const Transform& transform) const
         {
             const glm::mat4& model_to_world = transform.GetAsMatrix();
-            DrawCommand cmd;
+            DrawItem cmd;
             cmd.drawable = &drawable;
             cmd.material = &material;
             cmd.model    = &model_to_world;
-            DrawCommandList cmd_list;
+            DrawItemList cmd_list;
             cmd_list.push_back(cmd);
             return Draw(cmd_list);
         }
