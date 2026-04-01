@@ -65,7 +65,7 @@ namespace gfx
             mLines.push_back(line);
         }
 
-        bool ApplyDynamicState(const Environment& environment, Device& device, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& environment, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& environment, const Device& device) const override;
         std::string GetShaderId(const Environment& environment) const override;
         std::string GetShaderName(const Environment& environment) const override;
@@ -105,7 +105,7 @@ namespace gfx
         inline void AddLine(glm::vec3 start, glm::vec3 end)
         { mLines.push_back({ start, end }); }
 
-        bool ApplyDynamicState(const Environment& environment, Device& device, ProgramState& program, RasterState& state) const override;
+        bool ApplyDynamicState(const Environment& environment, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const override;
         ShaderSource GetShader(const Environment& environment, const Device& device) const override;
         std::string GetShaderId(const Environment& environment) const override;
         std::string GetShaderName(const Environment& environment) const override;

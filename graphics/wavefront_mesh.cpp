@@ -216,7 +216,7 @@ private:
 namespace gfx
 {
 
-bool WavefrontMesh::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& state) const
+bool WavefrontMesh::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = (*env.proj_matrix);

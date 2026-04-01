@@ -31,6 +31,7 @@
 #include "data/json.h"
 #include "data/io.h"
 #include "device/device.h"
+#include "graphics/drawcall.h"
 #include "graphics/device_algo.h"
 #include "graphics/image.h"
 #include "graphics/device.h"
@@ -3195,11 +3196,8 @@ public:
         gfx::Rectangle drawable;
         gfx::MaterialInstance material(gfx::CreateMaterialClassFromColor(gfx::Color::DarkGreen));
 
-        gfx::Drawable::InstancedDraw instanced;
-        instanced.gpu_id = "simple-2d-instance-test";
-        instanced.usage = gfx::BufferUsage::Static;
-        instanced.content_name = "simple-2d-instance-test";
-        instanced.content_hash = 0; // irrelevant since we use static data and are not in editing mode.
+        gfx::GenericInstancedDraw draw("simple-2d-instance-test");
+        draw.SetContentName("simple-2d-instance-test");
 
         for (unsigned i=0; i<10; ++i)
         {
@@ -3207,16 +3205,16 @@ public:
             {
                 const auto xpos = 20.0f + j * 100.0f;
                 const auto ypos = 20.0f + i * 45.0f;
-                gfx::Drawable::DrawInstance inst;
+                gfx::GenericInstancedDraw::Instance inst;
                 inst.model_to_world = MakeTransform(glm::vec2{xpos, ypos}, glm::vec2{80.0f, 38.0f});
-                instanced.instances.push_back(inst);
+                draw.AddInstance(inst);
             }
         }
 
         gfx::Painter::DrawItem cmd;
-        cmd.drawable = &drawable;
-        cmd.material = &material;
-        cmd.instanced_draw = instanced;
+        cmd.drawable  = &drawable;
+        cmd.material  = &material;
+        cmd.draw_call = draw;
 
         gfx::Painter::DrawItemList draw_list;
         draw_list.push_back(cmd);
@@ -3270,11 +3268,8 @@ public:
         gfx::Cube drawable;
         gfx::MaterialInstance material(gfx::CreateMaterialClassFromImage("textures/uv_test_512.png"));
 
-        gfx::Drawable::InstancedDraw instanced;
-        instanced.gpu_id = "simple-3d-instance-test";
-        instanced.usage = gfx::BufferUsage::Stream;
-        instanced.content_name = "simple-3d-instance-test";
-        instanced.content_hash = 0; // irrelevant since we're doing stream (i.e. every render updates the VBO)
+        gfx::GenericInstancedDraw draw("simple-3d-instance-test");
+        draw.SetContentName("simple-3d-instance-test");
 
         gfx::Painter::DrawState state;
         state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
@@ -3300,9 +3295,9 @@ public:
                 transform.Translate(-half_width, half_height);
                 transform.Translate(xpos, ypos);
 
-                gfx::Drawable::DrawInstance inst;
+                gfx::GenericInstancedDraw::Instance inst;
                 inst.model_to_world = transform;
-                instanced.instances.push_back(inst);
+                draw.AddInstance(inst);
             }
         }
 
@@ -3310,7 +3305,7 @@ public:
         cmd.drawable = &drawable;
         cmd.material = &material;
         cmd.culling  = gfx::Painter::Culling::Back;
-        cmd.instanced_draw = instanced;
+        cmd.draw_call = draw;
 
         gfx::Painter::DrawItemList draw_list;
         draw_list.push_back(cmd);
@@ -3350,11 +3345,8 @@ public:
         PacmanPolygon pacman;
         PacmanPolygon::Build(&mPolygon, mTime);
 
-        gfx::Drawable::InstancedDraw instanced;
-        instanced.gpu_id = "polygon-2d-instance-test";
-        instanced.usage = gfx::BufferUsage::Static;
-        instanced.content_name = "polygon-2d-instance-test";
-        instanced.content_hash = 0; // irrelevant since we use static data and are not in editing mode.
+        gfx::GenericInstancedDraw draw("polygon-2d-instance-test");
+        draw.SetContentName("polygon-2d-instance-test");
 
         for (unsigned i=0; i<7; ++i)
         {
@@ -3362,9 +3354,9 @@ public:
             {
                 const auto xpos = 20.0f + j * 100.0f;
                 const auto ypos = 20.0f + i * 100.0f;
-                gfx::Drawable::DrawInstance inst;
+                gfx::GenericInstancedDraw::Instance inst;
                 inst.model_to_world = MakeTransform(glm::vec2{xpos, ypos}, glm::vec2{80.0f, 80.0f});
-                instanced.instances.push_back(inst);
+                draw.AddInstance(inst);
             }
         }
 
@@ -3374,7 +3366,7 @@ public:
         gfx::Painter::DrawItem cmd;
         cmd.drawable = &drawable;
         cmd.material = &material;
-        cmd.instanced_draw = instanced;
+        cmd.draw_call = draw;
 
         gfx::Painter::DrawItemList draw_list;
         draw_list.push_back(cmd);
@@ -3426,11 +3418,8 @@ public:
 
     void Render(gfx::Painter& painter) override
     {
-        gfx::Drawable::InstancedDraw instanced;
-        instanced.gpu_id = "particle-instance-test";
-        instanced.usage = gfx::BufferUsage::Static;
-        instanced.content_name = "particle-instance-test";
-        instanced.content_hash = 0; // irrelevant since we use static data and are not in editing mode.
+        gfx::GenericInstancedDraw draw("particle-instance-test");
+        draw.SetContentName("particle-instance-test");
 
         for (unsigned i=0; i<7; ++i)
         {
@@ -3438,9 +3427,9 @@ public:
             {
                 const auto xpos = 20.0f + j * 100.0f;
                 const auto ypos = 20.0f + i * 100.0f;
-                gfx::Drawable::DrawInstance inst;
+                gfx::GenericInstancedDraw::Instance inst;
                 inst.model_to_world = MakeTransform(glm::vec2{xpos, ypos}, glm::vec2{80.0f, 80.0f});
-                instanced.instances.push_back(inst);
+                draw.AddInstance(inst);
             }
         }
 
@@ -3449,7 +3438,7 @@ public:
         gfx::Painter::DrawItem cmd;
         cmd.drawable = mInstance.get();
         cmd.material = &material;
-        cmd.instanced_draw = instanced;
+        cmd.draw_call =draw;
 
         gfx::Painter::DrawItemList draw_list;
         draw_list.push_back(cmd);

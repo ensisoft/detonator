@@ -59,12 +59,12 @@ void EffectDrawable::DisableEffect()
     mEnabled = false;
 }
 
-bool EffectDrawable::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState&  state) const
+bool EffectDrawable::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device& device, ProgramState& program, RasterState&  state) const
 {
     Environment e = env;
     e.mesh_type =  mEnabled ? MeshType::ShardedEffectMesh : MeshType::NormalRenderMesh;
 
-    if (!mDrawable->ApplyDynamicState(e, device, program, state))
+    if (!mDrawable->ApplyDynamicState(e, draw, device, program, state))
         return false;
 
     if (mEnabled)
@@ -164,10 +164,6 @@ bool EffectDrawable::Construct(const Environment& env, Device& device, Geometry:
 
     return false;
 }
-bool EffectDrawable::Construct(const Environment& env, Device& device, const InstancedDraw& draw, gfx::InstanceData::CreateArgs& args) const
-{
-    return mDrawable->Construct(env, device, draw, args);
-}
 
 void EffectDrawable::Update(const Environment &env, float dt)
 {
@@ -226,18 +222,6 @@ Drawable::Type EffectDrawable::GetType() const
     return Type::EffectsDrawable;
 }
 
-Drawable::Usage EffectDrawable::GetInstanceUsage(const InstancedDraw& draw) const
-{
-    return mDrawable->GetInstanceUsage(draw);
-}
-size_t EffectDrawable::GetInstanceHash(const InstancedDraw& draw) const
-{
-    return mDrawable->GetInstanceHash(draw);
-}
-std::string EffectDrawable::GetInstanceId(const Environment& env, const InstancedDraw& draw) const
-{
-    return mDrawable->GetInstanceId(env, draw);
-}
 void EffectDrawable::Execute(const Environment& env, const Command& command)
 {
     if (command.name == "EnableMeshEffect")

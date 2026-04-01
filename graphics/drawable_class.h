@@ -117,19 +117,6 @@ namespace gfx
             size_t draw_cmd_count = std::numeric_limits<size_t>::max();
         };
 
-        struct DrawInstance {
-            glm::mat4 model_to_world;
-        };
-        using DrawInstanceArray = std::vector<DrawInstance>;
-
-        struct InstancedDraw {
-            std::string gpu_id;
-            std::string content_name;
-            std::size_t content_hash;
-            DrawInstanceArray instances;
-            Usage usage = Usage::Dynamic;
-        };
-
         virtual ~DrawableClass() = default;
         // Get the drawable spatial mode.
         virtual SpatialMode GetSpatialMode() const = 0;

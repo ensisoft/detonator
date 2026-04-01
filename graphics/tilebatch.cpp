@@ -27,7 +27,7 @@
 namespace gfx
 {
 
-bool TileBatch::ApplyDynamicState(const Environment& env, Device&, ProgramState& program, RasterState& raster) const
+bool TileBatch::ApplyDynamicState(const Environment& env, const DrawCall& draw, Device&, ProgramState& program, RasterState& raster) const
 {
     const auto pixel_scale = std::min(env.pixel_ratio.x, env.pixel_ratio.y);
 

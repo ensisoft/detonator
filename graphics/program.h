@@ -36,6 +36,7 @@
 #include "device/uniform.h"
 #include "graphics/color4f.h"
 #include "graphics/uniform.h"
+#include "graphics/instance_data.h"
 
 namespace gfx
 {
@@ -51,6 +52,15 @@ namespace gfx
             const Texture* texture = nullptr;
         };
         using Uniform = dev::Uniform;
+
+        void SetInstanceData(InstanceDataPtr ptr)
+        {
+            mInstanceData = std::move(ptr);
+        }
+        const auto* GetInstanceData() const
+        {
+            return mInstanceData.get();
+        }
 
         template<typename T>
         inline void SetUniformBlock(std::string name, UniformBlockData<T>&& uniform_data)
@@ -310,6 +320,7 @@ namespace gfx
         std::vector<Sampler> mSamplers;
         std::vector<Uniform> mUniforms;
         std::vector<UniformBlock> mUniformBlocks;
+        InstanceDataPtr mInstanceData;
     };
 
 

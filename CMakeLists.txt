@@ -302,6 +302,7 @@ add_library(GfxLib
     graphics/device_program.cpp
     graphics/device_shader.cpp
     graphics/device_texture.cpp
+    graphics/drawcall.cpp
     graphics/drawable.cpp
     graphics/drawcmd.cpp
     graphics/drawing.cpp
